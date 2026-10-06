@@ -3,11 +3,10 @@ import {fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {genConfigItemMainHtml, genSwitchRow} from "./render/fragments";
-import {genButtonRowHtml} from "./render/render";
+import {genButtonRowHtml, genNumberInputHtml} from "./render/render";
 import {showMessage} from "../dialog/message";
 import {OCR_CHANGED_EVENT} from "./ocrRuntime";
 import {objEquals} from "../util/functions";
-import {openOCRThresholds} from "./ocrThresholds";
 import {AI_CONFIG_CHANGED_EVENT} from "./tabs/ai/aiRuntime";
 import type {SettingTabBuilder} from "./setting/builder";
 import {trackSettingSave} from "./setting/pending";
@@ -36,6 +35,12 @@ const getModelFiles = () => [
     {id: "recognizerConfig", title: `${window.siyuan.languages.ocrRecognizer} - YAML`, suffix: "yml,yaml"},
 ];
 
+const getThresholdFields = () => [
+    {key: "detection", title: window.siyuan.languages.ocrDetectionThreshold, placeholder: window.siyuan.languages.ocrModelDefault},
+    {key: "box", title: window.siyuan.languages.ocrBoxThreshold, placeholder: window.siyuan.languages.ocrModelDefault},
+    {key: "recognition", title: window.siyuan.languages.ocrRecognitionThreshold, placeholder: "0.5"},
+] as const;
+
 export const registerOCRTab = (tab: SettingTabBuilder) => {
     const languages = window.siyuan.languages;
     tab.group("general", "OCR").slot({
@@ -59,10 +64,14 @@ export const registerOCRTab = (tab: SettingTabBuilder) => {
         keywords: [languages.reasoningEffortTooltip, languages.ocrReasoningEffortTip],
         html: () => selectRow("ocrReasoningEffort", languages.reasoningEffortTooltip, languages.ocrReasoningEffortTip),
     });
-    tab.group("advanced", languages.configGroupAdvanced).slot({
-        key: "ocrAdvanced",
-        keywords: [languages.ocrThresholdSettings, languages.ocrDetectionThreshold, languages.ocrBoxThreshold, languages.ocrRecognitionThreshold],
-        html: () => genButtonRowHtml("ocrAdvanced", languages.ocrThresholdSettings, undefined, languages.config, "iconSettings"),
+    const thresholds = tab.group("advanced", languages.ocrThresholdSettings);
+    getThresholdFields().forEach(field => {
+        thresholds.slot({
+            key: `ocrThreshold_${field.key}`,
+            keywords: [field.title, languages.ocrThresholdsTip],
+            html: () => `<label class="fn__flex b3-label config-item">${genConfigItemMainHtml(field.title, field.key === "detection" ? languages.ocrThresholdsTip : undefined)}
+<span class="fn__space"></span>${genNumberInputHtml(`ocrThreshold_${field.key}`, "", 0, 1, "any")}</label>`,
+        });
     });
     tab.group("models", languages.ocrImportModels).slot({
         key: "ocrImportModels",
@@ -83,16 +92,32 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     let busy = false;
     let pendingSaves = 0;
     let saveQueue = Promise.resolve(false);
-    let thresholdDialog: ReturnType<typeof openOCRThresholds>;
     let refreshPending = false;
     let refreshTask: Promise<void>;
     let writeRevision = 0;
     const languages = window.siyuan.languages;
     const files = getModelFiles();
+    const thresholdFields = getThresholdFields();
+    const dirtyThresholds = new Set<keyof OCRThresholds>();
+    let thresholdValues: OCRThresholds;
+    const updateThresholdInputs = () => {
+        thresholdValues = {
+            detection: data.config.thresholds?.detection ?? null,
+            box: data.config.thresholds?.box ?? null,
+            recognition: data.config.thresholds?.recognition ?? null,
+        };
+        thresholdFields.forEach(field => {
+            if (!dirtyThresholds.has(field.key)) {
+                const input = root.querySelector<HTMLInputElement>(`#ocrThreshold_${field.key}`);
+                input.value = `${thresholdValues[field.key] ?? ""}`;
+                input.setCustomValidity("");
+            }
+        });
+    };
     const updateControls = () => {
         const isPaddleOCR = root.querySelector<HTMLSelectElement>("#ocrProvider").value === "paddleocr";
         const isAI = root.querySelector<HTMLSelectElement>("#ocrProvider").value === "ai";
-        ["ocrModel", "ocrImportModels", "ocrImport", "ocrAdvanced"].forEach(id => {
+        ["ocrModel", "ocrImportModels", "ocrImport"].forEach(id => {
             root.querySelector(`#${id}`).closest(".config-item").classList.toggle("fn__none", !isPaddleOCR);
         });
         root.querySelector("#ocrAIModel").closest(".config-item").classList.toggle("fn__none", !isAI);
@@ -100,13 +125,15 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         ["advanced", "models"].forEach(group => {
             root.querySelector(`[data-config-group-id="${group}"]`)?.classList.toggle("fn__none", !isPaddleOCR);
         });
-        if (!isPaddleOCR) thresholdDialog?.destroy();
         root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
             element.disabled = busy || (element.tagName === "BUTTON" && pendingSaves > 0);
         });
         root.querySelector<HTMLSelectElement>("#ocrModel").disabled = busy || !isPaddleOCR;
         root.querySelector<HTMLSelectElement>("#ocrAIModel").disabled = busy || !isAI;
         root.querySelector<HTMLSelectElement>("#ocrReasoningEffort").disabled = busy || !isAI;
+        thresholdFields.forEach(field => {
+            root.querySelector<HTMLInputElement>(`#ocrThreshold_${field.key}`).disabled = busy || !isPaddleOCR;
+        });
         root.querySelector<HTMLButtonElement>("#ocrImport").disabled = busy || pendingSaves > 0 || !isPaddleOCR || files.some(file => !root.querySelector<HTMLInputElement>(`#${file.id}`).files?.length);
     };
     const providerOptions = () => {
@@ -152,6 +179,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         root.querySelector<HTMLSelectElement>("#ocrAIModel").value = data.config.aiModelId || "";
         root.querySelector<HTMLSelectElement>("#ocrReasoningEffort").value = data.config.reasoningEffort || "";
         root.querySelector<HTMLInputElement>("#ocrAuto").checked = data.config.auto;
+        updateThresholdInputs();
         updateControls();
     };
     const render = () => {
@@ -204,6 +232,9 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
         element.disabled = true;
     });
+    thresholdFields.forEach(field => {
+        root.querySelector<HTMLInputElement>(`#ocrThreshold_${field.key}`).placeholder = field.placeholder;
+    });
     window.addEventListener(OCR_CHANGED_EVENT, () => { void load().catch(handleError); }, {signal: controller.signal});
     window.addEventListener(AI_CONFIG_CHANGED_EVENT, () => { void load().catch(handleError); }, {signal: controller.signal});
     const saveConfig = async (thresholds?: OCRThresholds): Promise<boolean> => {
@@ -245,6 +276,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
                     root.querySelector<HTMLSelectElement>("#ocrAIModel").innerHTML = aiModelOptions();
                     root.querySelector<HTMLSelectElement>("#ocrAIModel").value = data.config.aiModelId || "";
                     root.querySelector<HTMLSelectElement>("#ocrReasoningEffort").value = data.config.reasoningEffort || "";
+                    updateThresholdInputs();
                     updateControls();
                     if (refreshPending) void load().catch(handleError);
                 }
@@ -254,6 +286,18 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         saveQueue = saveQueue.then(save, save);
         return trackSettingSave(saveQueue);
     };
+    root.addEventListener("input", event => {
+        const input = event.target as HTMLInputElement;
+        const field = thresholdFields.find(field => input.id === `ocrThreshold_${field.key}`);
+        if (field) {
+            if (input.validity.badInput || input.value !== `${thresholdValues?.[field.key] ?? ""}`) {
+                dirtyThresholds.add(field.key);
+            } else {
+                dirtyThresholds.delete(field.key);
+            }
+            input.setCustomValidity("");
+        }
+    }, {signal: controller.signal});
     root.addEventListener("change", async event => {
         event.stopPropagation();
         const target = event.target as HTMLInputElement | HTMLSelectElement;
@@ -262,6 +306,22 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
             return;
         }
         if (!data) return;
+        const field = thresholdFields.find(field => target.id === `ocrThreshold_${field.key}`);
+        if (field) {
+            const input = target as HTMLInputElement;
+            const value = input.value === "" ? null : Number(input.value);
+            const invalid = input.validity.badInput || value !== null && (!Number.isFinite(value) ||
+                (field.key === "recognition" ? value < 0 || value > 1 : value <= 0 || value >= 1));
+            input.setCustomValidity(invalid ? languages.ocrThresholdRange : "");
+            if (!input.reportValidity()) {
+                dirtyThresholds.add(field.key);
+                return;
+            }
+            dirtyThresholds.delete(field.key);
+            thresholdValues = {...thresholdValues, [field.key]: value};
+            await saveConfig({...thresholdValues});
+            return;
+        }
         if (target.id === "ocrProvider" && target.value === "ai" && data.config.provider !== "ai") {
             root.querySelector<HTMLInputElement>("#ocrAuto").checked = false;
             if (!data.config.aiModelId && data.aiModels?.length) {
@@ -275,11 +335,6 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         event.stopPropagation();
         const button = (event.target as HTMLElement).closest("button");
         if (!button || busy || pendingSaves > 0 || !data) {
-            return;
-        }
-        if (button.id === "ocrAdvanced") {
-            thresholdDialog?.destroy();
-            thresholdDialog = openOCRThresholds(data.config.thresholds, saveConfig, () => { thresholdDialog = undefined; });
             return;
         }
         if (button.id === "ocrImport") {
@@ -314,7 +369,6 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     });
     return () => {
         closed = true;
-        thresholdDialog?.destroy();
         controller.abort();
     };
 };

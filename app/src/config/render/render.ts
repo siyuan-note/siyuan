@@ -15,7 +15,7 @@ import {genConfigItemMainHtml, genConfigItemName, genSwitchRow} from "./fragment
 
 export const genNumberInputHtml = (
     id: string,
-    value: number,
+    value: number | "",
     min?: number,
     max?: number,
     step?: string,

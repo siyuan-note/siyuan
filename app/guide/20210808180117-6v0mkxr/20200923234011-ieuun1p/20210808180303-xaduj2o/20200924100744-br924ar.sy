@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261006112319"
+		"updated": "20261006114009"
 	},
 	"Children": [
 		{
@@ -967,7 +967,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003636-epvk98g",
-				"updated": "20261006112319"
+				"updated": "20261006114009"
 			},
 			"Children": [
 				{
@@ -1027,12 +1027,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261003073646-xagh51u",
-				"updated": "20261006112319"
+				"updated": "20261006114009"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "With PaddleOCR selected, click the settings button beside Recognition thresholds in the Advanced group to adjust the detection, text box confidence, and recognition confidence thresholds. Detection and box thresholds must be greater than 0 and less than 1; recognition accepts 0 through 1. Leave fields blank or reset them, then confirm to use the current model’s detection parameters and a recognition threshold of 0.5. Higher thresholds can reduce icons mistaken for text, but may miss blurry or faint text. Thresholds are saved per device and apply to manual and automatic recognition. Existing results remain unchanged; rerun recognition from the image menu when needed."
+					"Data": "With PaddleOCR selected, edit the detection, text box confidence, and recognition confidence thresholds directly in the Recognition thresholds group. Changes are saved automatically when you finish editing a field. Detection and box thresholds must be greater than 0 and less than 1; recognition accepts 0 through 1. Leave a field blank to use the current model’s detection parameters or the default recognition threshold of 0.5. Invalid input stays editable and is not saved. Higher thresholds can reduce icons mistaken for text, but may miss blurry or faint text. Thresholds are saved per device and apply to manual and automatic recognition. Existing results remain unchanged; rerun recognition from the image menu when needed."
 				}
 			]
 		},

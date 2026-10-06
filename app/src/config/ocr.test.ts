@@ -16,11 +16,13 @@ test("OCR settings register separate searchable rows in shared desktop and mobil
         genConfigItemMainHtml: (title: string, desc: string) => `${title} ${desc}`,
         genSwitchRow: (id: string) => `<label><input id="${id}"></label>`,
         genButtonRowHtml: (id: string) => `<label><button id="${id}"></button></label>`,
+        genNumberInputHtml: (id: string) => `<input class="b3-text-field" id="${id}" type="number">`,
     })});
     let group = "";
+    const groupTitles = new Map<string, string>();
     const rows: Array<{group: string; key: string; keywords: string[]; html: () => string}> = [];
     const tab = {
-        group: (id: string) => { group = id; return tab; },
+        group: (id: string, title: string) => { group = id; groupTitles.set(id, title); return tab; },
         slot: (spec: Omit<typeof rows[number], "group">) => { rows.push({...spec, group}); return tab; },
     };
     exports.registerOCRTab(tab);
@@ -30,6 +32,11 @@ test("OCR settings register separate searchable rows in shared desktop and mobil
     assert.ok(aiRow.keywords.includes("ocrAIModelTip"));
     assert.match(aiRow.html(), /class="b3-select/);
     assert.deepEqual(rows.filter(row => row.group === "models").map(row => row.key), ["ocrImportModels", "ocrImport"]);
+    const thresholds = rows.filter(row => row.group === "advanced");
+    assert.equal(groupTitles.get("advanced"), "ocrThresholdSettings");
+    assert.deepEqual(thresholds.map(row => row.key), ["ocrThreshold_detection", "ocrThreshold_box", "ocrThreshold_recognition"]);
+    thresholds.forEach(row => assert.match(row.html(), /type="number"/));
+    assert.doesNotMatch(readFileSync("src/config/ocr.ts", "utf8"), /openOCRThresholds/);
     const tabs = readFileSync("src/config/setting/tabs.ts", "utf8");
     assert.match(tabs, /ocr: setting\.tab\([\s\S]*?afterMount: mountOCRTab,[\s\S]*?registerOCRTab/);
     assert.match(tabs, /ocr: setting\.tab\([\s\S]*?icon: "iconOCR"/);
@@ -56,11 +63,14 @@ const createOCRPanel = async () => {
     const controls = Object.fromEntries([
         "ocrProvider", "ocrModel", "ocrAIModel", "ocrReasoningEffort", "ocrAuto", "ocrImportModels", "ocrImport",
         "detector", "detectorConfig", "recognizer", "recognizerConfig",
-        "ocrAdvanced",
+        "ocrThreshold_detection", "ocrThreshold_box", "ocrThreshold_recognition",
     ].map(id => [id, {
         id, value: id === "ocrProvider" ? "paddleocr" : id === "ocrAIModel" || id === "ocrReasoningEffort" ? "" : "tiny", checked: false, disabled: false, innerHTML: "",
         files: [{name: `${id}.onnx`}],
-        tagName: id === "ocrImport" || id === "ocrAdvanced" ? "BUTTON" : "INPUT",
+        tagName: id === "ocrImport" ? "BUTTON" : "INPUT",
+        validationMessage: "", validity: {badInput: false},
+        setCustomValidity(message: string) { this.validationMessage = message; },
+        reportValidity() { return !this.validationMessage; },
         closest: () => ({classList: {toggle() {}}}),
     }]));
     const listeners = new Map<string, (event: unknown) => Promise<void>>();
@@ -78,8 +88,6 @@ const createOCRPanel = async () => {
     }> = [];
     const errors: string[] = [];
     const notifications = new Map<string, () => void>();
-    let advanced: {initial: OCRThresholds; save: (value: OCRThresholds) => Promise<boolean>; destroy: () => void};
-    let dialogCloses = 0;
     const exports = {} as {mountOCRSettings: (element: unknown) => () => void};
     runInNewContext(compiled, {exports, AbortController, window: {siyuan: {config, languages: {ocrThresholdRange: "invalid threshold"}},
         addEventListener: (name: string, callback: () => void, options: {signal: AbortSignal}) => {
@@ -91,10 +99,6 @@ const createOCRPanel = async () => {
         AI_CONFIG_CHANGED_EVENT: "ai-test",
         trackSettingSave: (task: Promise<boolean>) => task,
         getReasoningEffortOptions,
-        openOCRThresholds: (initial: OCRThresholds, save: (value: OCRThresholds) => Promise<boolean>, onClose: () => void) => {
-            advanced = {initial, save, destroy: () => { dialogCloses++; onClose(); }};
-            return advanced;
-        },
         objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
         fetchSyncPost: (url: string, value: typeof config.ocr) => {
             if (url === "/api/asset/getOCRConfig") {
@@ -114,10 +118,19 @@ const createOCRPanel = async () => {
     })});
     const close = exports.mountOCRSettings(root);
     await new Promise(setImmediate);
+    const inputThreshold = (key: keyof OCRThresholds, value: string, badInput = false) => {
+        const control = controls[`ocrThreshold_${key}`];
+        control.value = value;
+        control.validity.badInput = badInput;
+        listeners.get("input")({target: control});
+    };
     return {
         controls, config, requests, errors, close, renders: () => renders,
-        openAdvanced: () => listeners.get("click")({target: {closest: () => controls.ocrAdvanced}, stopPropagation() {}}),
-        advanced: () => advanced, dialogCloses: () => dialogCloses,
+        inputThreshold,
+        changeThreshold: (key: keyof OCRThresholds, value: string, badInput = false) => {
+            inputThreshold(key, value, badInput);
+            return listeners.get("change")({target: controls[`ocrThreshold_${key}`], stopPropagation() {}});
+        },
         reads: () => reads, snapshot, readRequests,
         notify: () => notifications.get("ocr-test")?.(),
         notifyAI: () => notifications.get("ai-test")?.(),
@@ -155,6 +168,7 @@ test("selecting AI uses a separate model and requires opting into automatic reco
     assert.equal(panel.requests[0].config.auto, false);
     assert.equal(panel.controls.ocrModel.disabled, true);
     assert.equal(panel.controls.ocrAIModel.disabled, false);
+    assert.equal(panel.controls.ocrThreshold_detection.disabled, true);
     panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
     await saving;
     assert.doesNotMatch(panel.controls.ocrAIModel.innerHTML, /value=""/);
@@ -270,29 +284,99 @@ for (const networkFailure of [false, true]) {
     });
 }
 
-test("advanced OCR settings receive the latest thresholds and use the panel save queue", async () => {
+test("inline thresholds receive notifications and save consecutive edits in order", async () => {
     const panel = await createOCRPanel();
     panel.updateServer({provider: "paddleocr", model: "tiny", auto: false,
         thresholds: {detection: 0.4, box: 0.7, recognition: 0.8}});
     panel.notify();
     await new Promise(setImmediate);
     const renders = panel.renders();
-    await panel.openAdvanced();
-    assert.equal(panel.advanced().initial.box, 0.7);
-    const saving = panel.advanced().save({detection: 0.5, box: 0.8, recognition: 0.9});
+    assert.equal(panel.controls.ocrThreshold_box.value, "0.7");
+    const saving = panel.changeThreshold("detection", "0.5");
     await new Promise(setImmediate);
+    const second = panel.changeThreshold("box", "0.8");
     panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
-    assert.equal(await saving, true);
-    assert.equal(panel.config.ocr.thresholds.recognition, 0.9);
+    await saving;
+    await new Promise(setImmediate);
+    assert.deepEqual({...panel.requests[1].config.thresholds}, {detection: 0.5, box: 0.8, recognition: 0.8});
+    panel.requests[1].resolve({code: 0, data: panel.requests[1].config});
+    await second;
     const toggle = panel.changeAuto(true);
     await new Promise(setImmediate);
-    assert.equal(panel.requests[1].config.thresholds, undefined);
-    panel.requests[1].resolve({code: 0, data: {...panel.requests[1].config, thresholds: panel.config.ocr.thresholds}});
+    assert.equal(panel.requests[2].config.thresholds, undefined);
+    panel.requests[2].resolve({code: 0, data: {...panel.requests[2].config, thresholds: panel.config.ocr.thresholds}});
     await toggle;
-    assert.equal(panel.config.ocr.thresholds.recognition, 0.9);
+    assert.equal(panel.config.ocr.thresholds.box, 0.8);
     assert.equal(panel.renders(), renders);
     panel.close();
-    assert.equal(panel.dialogCloses(), 1);
+});
+
+test("inline thresholds reject invalid ranges and partial numbers, retain edits and accept zero confidence", async () => {
+    const panel = await createOCRPanel();
+    for (const [key, value, badInput] of [
+        ["detection", "0", false], ["box", "1", false], ["recognition", "-0.1", false],
+        ["recognition", "1.1", false], ["detection", "Infinity", false], ["detection", "", true],
+    ] as const) {
+        await panel.changeThreshold(key, value, badInput);
+        assert.equal(panel.requests.length, 0);
+        assert.equal(panel.controls[`ocrThreshold_${key}`].validationMessage, "invalid threshold");
+        panel.notify();
+        await new Promise(setImmediate);
+        assert.equal(panel.controls[`ocrThreshold_${key}`].value, value);
+    }
+    const zero = panel.changeThreshold("recognition", "0");
+    await new Promise(setImmediate);
+    assert.equal(panel.requests[0].config.thresholds.recognition, 0);
+    panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
+    await zero;
+    assert.equal(panel.controls.ocrThreshold_recognition.value, "0");
+    const defaults = panel.changeThreshold("recognition", "");
+    await new Promise(setImmediate);
+    assert.equal(panel.requests[1].config.thresholds.recognition, null);
+    panel.requests[1].resolve({code: 0, data: panel.requests[1].config});
+    await defaults;
+    assert.equal(panel.controls.ocrThreshold_recognition.value, "");
+    panel.close();
+});
+
+test("failed inline saves restore confirmed values while preserving new input during an in-flight save", async () => {
+    const panel = await createOCRPanel();
+    panel.updateServer({provider: "paddleocr", model: "tiny", auto: false,
+        thresholds: {detection: 0.4, box: 0.7, recognition: 0.8}});
+    panel.notify();
+    await new Promise(setImmediate);
+    const saving = panel.changeThreshold("box", "0.9");
+    await new Promise(setImmediate);
+    panel.inputThreshold("detection", "0.6");
+    panel.requests[0].resolve({code: -1});
+    await saving;
+    assert.equal(panel.controls.ocrThreshold_box.value, "0.7");
+    assert.equal(panel.controls.ocrThreshold_detection.value, "0.6");
+    panel.updateServer({...panel.config.ocr, thresholds: {detection: 0.3, box: 0.5, recognition: 0.9}});
+    panel.notify();
+    await new Promise(setImmediate);
+    assert.equal(panel.controls.ocrThreshold_detection.value, "0.6");
+    assert.equal(panel.controls.ocrThreshold_box.value, "0.5");
+    const next = panel.changeThreshold("box", "0.8");
+    await new Promise(setImmediate);
+    assert.deepEqual({...panel.requests[1].config.thresholds}, {detection: 0.3, box: 0.8, recognition: 0.9});
+    panel.requests[1].resolve({code: 0, data: panel.requests[1].config});
+    await next;
+    assert.equal(panel.controls.ocrThreshold_detection.value, "0.6");
+    panel.close();
+});
+
+test("undoing an uncommitted threshold edit resumes updates from another window", async () => {
+    const panel = await createOCRPanel();
+    panel.inputThreshold("detection", "0.6");
+    panel.inputThreshold("detection", "");
+    panel.updateServer({provider: "paddleocr", model: "tiny", auto: false,
+        thresholds: {detection: 0.4, box: 0.7, recognition: 0.8}});
+    panel.notify();
+    await new Promise(setImmediate);
+    assert.equal(panel.controls.ocrThreshold_detection.value, "0.4");
+    assert.equal(panel.requests.length, 0);
+    panel.close();
 });
 
 test("closing the OCR panel cancels queued saves and ignores a late response", async () => {

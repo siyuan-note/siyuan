@@ -31,6 +31,9 @@ type BatchParentBlockRequest struct {
 	Blocks []PrependBlockRequest `json:"blocks"`
 }
 
+// InsertBlockRequest 按 nextID、previousID、parentID 的顺序选择插入位置。
+// 生效的 nextID 或 previousID 必须指向非文档块，未使用的定位参数不参与节点类型校验。
+// parentID 指向文档时插入到文档开头；成功返回已落盘的操作，目标非法时返回 code=-1、data=null。
 type InsertBlockRequest struct {
 	Data       string `json:"data"`
 	DataType   string `json:"dataType" api:"trim"`

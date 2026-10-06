@@ -1143,7 +1143,7 @@ type="checkbox">
                     ${resourceStats}
                     <span class="item__resource fn__flex">
                         <svg class="svg ft__on-surface" aria-hidden="true"><use xlink:href="#iconGitHubI"></use></svg>
-                        <a class="item__resource-feedback" href="${escapeAttr(resourceData.repoURL)}/issues" target="_blank" title="${escapeAttr(window.siyuan.languages.bazaarFeedbackTip)}" data-type="feedback">${window.siyuan.languages.feedback}${available ? ` (${formatCount(resourceData.openIssues)})` : ""}</a>
+                        <a href="${escapeAttr(resourceData.repoURL)}/issues" target="_blank" title="${escapeAttr(window.siyuan.languages.bazaarFeedbackTip)}" data-type="feedback">${window.siyuan.languages.feedback}${available ? ` (${formatCount(resourceData.openIssues)})` : ""}</a>
                     </span>
                 </div>
             </section>

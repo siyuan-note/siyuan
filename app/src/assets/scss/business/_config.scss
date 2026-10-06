@@ -1221,11 +1221,8 @@
 
         &__resource {
           gap: 4px;
-
-          &-feedback:lang(zh) {
-            // 中文与西文混排时，按字号微调反馈文字的视觉中心。
-            transform: translateY(-0.08em);
-          }
+          // 显式行高保持文字行框一致，大字号时随字号增大。
+          line-height: max(16px, 1em);
 
           &-list {
             gap: 8px 16px;

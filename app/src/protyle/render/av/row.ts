@@ -559,11 +559,14 @@ const addFixedRow = (item: HTMLElement, fixedClass: string, placeholderClass: st
     item.insertAdjacentElement("afterend", placeholder);
 };
 
-const addFixedViews = (item: HTMLElement, height: number) => {
+const addFixedViews = (item: HTMLElement, height: number, width: number) => {
     item.classList.add("av__views--fixed");
     const placeholder = document.createElement("div");
     placeholder.className = "av__views-placeholder";
     placeholder.style.height = height + "px";
+    // 保留工具栏对容器宽度的支撑，并允许占位随可用空间收缩。
+    placeholder.style.width = width + "px";
+    placeholder.style.maxWidth = "100%";
     item.insertAdjacentElement("afterend", placeholder);
 };
 
@@ -731,7 +734,7 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
     if (viewsTask) {
         if (viewsTask.shouldFix) {
             if (!viewsTask.element.classList.contains("av__views--fixed")) {
-                addFixedViews(viewsTask.element, viewsTask.height);
+                addFixedViews(viewsTask.element, viewsTask.height, viewsTask.width);
             }
             viewsTask.element.style.left = viewsTask.left + "px";
             viewsTask.element.style.top = viewsTask.top + "px";

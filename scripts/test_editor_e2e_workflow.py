@@ -27,19 +27,36 @@ def snapshot_command():
 
 
 class EditorWorkflowTests(unittest.TestCase):
-    def test_release_waits_for_editor_but_ignores_test_failure(self):
+    def test_builds_run_in_parallel_with_frontend_checks(self):
+        for name in ["build", "build_macos_arm64", "build_android"]:
+            dependencies = re.search(r"needs: \[(.*?)\]", job(name)).group(1).split(", ")
+            self.assertEqual(dependencies, ["prepare", "languages", "contracts"], name)
+        frontend = job("frontend-tests")
+        self.assertIn("needs: prepare", frontend)
+        for name, command in [
+            ("Test frontend, Electron and packaging scripts", "pnpm test"),
+            ("Test editor group selection", "node --test scripts/test-prepare-editor-e2e-groups.mjs"),
+        ]:
+            step = frontend.split(f"- name: {name}\n", 1)[1].split("      - ", 1)[0]
+            self.assertIn("continue-on-error: true", step)
+            self.assertIn(f"run: {command}", step)
+        ocr = frontend.split("- name: Test OCR build and resource scripts\n", 1)[1].split("      - ", 1)[0]
+        self.assertNotIn("continue-on-error", ocr)
+        self.assertIn('run: python -m unittest discover -s scripts -p "test_*ocr*.py"', ocr)
+
+    def test_release_waits_for_frontend_and_editor_with_existing_failure_rules(self):
         release = job("create_release")
-        self.assertIn("needs: [prepare, build, build_macos_arm64, build_android, editor_e2e]", release)
+        self.assertIn("needs: [prepare, frontend-tests, build, build_macos_arm64, build_android, editor_e2e]", release)
         expression = re.search(r"if: >-\s*\$\{\{(.*?)\}\}", release, re.S).group(1)
         expression = expression.replace("always()", "True").replace("!cancelled()", "not cancelled")
         expression = expression.replace("&&", " and ")
-        expression = re.sub(r"needs\.(\w+)\.result", r'results["\1"]', expression)
+        expression = re.sub(r"needs\.([\w-]+)\.result", r'results["\1"]', expression)
         expression = " ".join(expression.split())
         states = ["success", "failure", "skipped", "cancelled"]
-        for values in itertools.product(states, repeat=5):
-            results = dict(zip(["prepare", "build", "build_macos_arm64", "build_android", "editor_e2e"], values))
+        for values in itertools.product(states, repeat=6):
+            results = dict(zip(["prepare", "frontend-tests", "build", "build_macos_arm64", "build_android", "editor_e2e"], values))
             for cancelled in [False, True]:
-                expected = not cancelled and all(value == "success" for value in values[:4]) and values[4] != "cancelled"
+                expected = not cancelled and all(value == "success" for value in values[:5]) and values[5] != "cancelled"
                 actual = eval(expression, {"__builtins__": {}}, {"results": results, "cancelled": cancelled})
                 self.assertEqual(actual, expected, (results, cancelled))
 

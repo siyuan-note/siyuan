@@ -224,7 +224,8 @@ jobs:
 
   build:
     name: ${{ matrix.config.name }}
-    needs: [prepare, languages, contracts, frontend-tests]
+    # 前端测试与构建并行，发布汇总仍等待前端检查完成。
+    needs: [prepare, languages, contracts]
     strategy:
       matrix:
         config:
@@ -268,7 +269,7 @@ jobs:
   build_macos_arm64:
     name: macos build mac-arm64.dmg
     # ARM 独立完成构建和打包后启动 editor，避免等待其他桌面平台的整个矩阵。
-    needs: [prepare, languages, contracts, frontend-tests]
+    needs: [prepare, languages, contracts]
     uses: ./.github/workflows/desktop-build.yml
     with:
       config: >-
@@ -459,8 +460,8 @@ jobs:
   build_android:
     runs-on: ubuntu-24.04
     name: ubuntu build android.apk
-    # 测试通过后并行执行 Android 和桌面构建，全部成功后汇总产物并创建发布。
-    needs: [prepare, languages, contracts, frontend-tests]
+    # Android 与桌面构建并行，前端检查由发布汇总等待。
+    needs: [prepare, languages, contracts]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -626,10 +627,12 @@ jobs:
   create_release:
     name: Create Release
     runs-on: ubuntu-24.04
-    needs: [prepare, build, build_macos_arm64, build_android, editor_e2e]
-    # 等待两组测试结束；测试失败不阻塞发布，但构建失败或取消仍会阻止发布。
+    needs: [prepare, frontend-tests, build, build_macos_arm64, build_android, editor_e2e]
+    # 等待前端检查和两组编辑器测试结束；前端测试的软失败不阻塞发布。
+    # 前端检查的硬失败、构建失败或取消仍会阻止发布，编辑器测试失败只记录结果。
     if: >-
       ${{ always() && !cancelled() && needs.prepare.result == 'success' &&
+          needs.frontend-tests.result == 'success' &&
           needs.build.result == 'success' && needs.build_macos_arm64.result == 'success' &&
           needs.build_android.result == 'success' && needs.editor_e2e.result != 'cancelled' }}
     steps:

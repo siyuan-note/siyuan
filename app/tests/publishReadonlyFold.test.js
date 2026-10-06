@@ -15,7 +15,7 @@ const cases = async () => {
     document.body.append(element);
     const listHTML = '<div data-node-id="list" data-type="NodeListItem" fold="1"><div></div><div></div><div></div><div></div></div>';
     const headingHTML = '<div data-node-id="heading" data-type="NodeHeading" data-subtype="h1" fold="1"></div>';
-    const protyle = {id: "editor", block: {rootID: "doc"}, wysiwyg: {element}, disabled: true};
+    const protyle = {id: "editor", block: {rootID: "doc"}, wysiwyg: {element}, disabled: true, options: {action: []}};
     element.innerHTML = listHTML + headingHTML;
     await fold.applyPublishFoldStates(protyle);
     assert.equal(fold.hasViewFoldContext(protyle), true);
@@ -71,6 +71,43 @@ const cases = async () => {
     assert.equal(carrier.getAttribute("custom-sy-av-view"), "second");
     assert.equal(window.avRenders.length, 1);
     assert.equal(window.transactions.length, 0);
+    window.siyuan.isPublish = false;
+    carrier.setAttribute("custom-sy-av-view", "first");
+    carrier.querySelectorAll('[data-type="av-group-fold"]').forEach(item => {
+        item.firstElementChild.classList.add("av__group-arrow--open");
+    });
+    click(carrier.querySelector('[data-type="av-group-fold"]'));
+    const readingGroups = {viewID: "first", view: {groups: [{id: "a", groupFolded: false}, {id: "b", groupFolded: false}]}};
+    window.readonlyAV.applyReadonlyAVFolds(carrier, readingGroups);
+    assert.deepEqual(readingGroups.view.groups.map(group => group.groupFolded), [true, false]);
+    click(carrier.querySelector('[data-type="av-group-fold"]'), true);
+    window.readonlyAV.applyReadonlyAVFolds(carrier, readingGroups);
+    assert.deepEqual(readingGroups.view.groups.map(group => group.groupFolded), [false, false]);
+    click(carrier.querySelector('[data-id="second"]'));
+    assert.equal(window.readonlyAV.getReadonlyAVView(carrier), "second");
+    assert.equal(carrier.getAttribute("custom-sy-av-view"), "second");
+    assert.equal(window.transactions.length, 0);
+    window.avAction.switchAVView(protyle, carrier, carrier.querySelector('[data-id="first"]'));
+    assert.equal(window.readonlyAV.getReadonlyAVView(carrier), "first");
+    assert.equal(window.transactions.length, 0);
+    assert.equal(window.readonlyAV.clearReadonlyAVState(carrier), true);
+    assert.equal(carrier.getAttribute("custom-sy-av-view"), "first");
+    assert.equal(window.readonlyAV.getReadonlyAVView(carrier), "");
+    const defaults = {viewID: "first", view: {groups: [{id: "a", groupFolded: true}]}};
+    window.readonlyAV.applyReadonlyAVFolds(carrier, defaults);
+    assert.equal(defaults.view.groups[0].groupFolded, true);
+    protyle.disabled = false;
+    window.avAction.switchAVView(protyle, carrier, carrier.querySelector('[data-id="second"]'));
+    assert.equal(window.transactions.length, 1);
+    assert.equal(window.transactions[0][1][0].action, "setAttrViewBlockView");
+    window.transactions.length = 0;
+    click(carrier.querySelector('[data-type="av-group-fold"]'));
+    protyle.disabled = true;
+    await new Promise(resolve => setTimeout(resolve, 10));
+    assert.equal(window.transactions.length, 0);
+    window.avAssets.editAssetItem({protyle});
+    window.avAssets.updateAssetCell({protyle});
+    assert.equal(window.transactions.length, 0);
 };
 
 const runElectron = async () => {
@@ -103,9 +140,13 @@ const runElectron = async () => {
                 window.blockFold, name => name === "./viewFold" ? window.fold : dependencies);
             window.publishAV = {};
             new Function("exports", ${JSON.stringify(compile("protyle/render/av/publishState.ts"))})(window.publishAV);
+            window.readonlyAV = {};
+            new Function("exports", "require", ${JSON.stringify(compile("protyle/render/av/readonlyState.ts"))})(
+                window.readonlyAV, () => ({Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view"}}));
             window.avAction = {}; window.avRenders = [];
             const avDependencies = new Proxy({
                 ...window.publishAV,
+                ...window.readonlyAV,
                 Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view", TIMEOUT_COUNT: 1},
                 hasClosestBlock: element => element.closest('[data-type="NodeAttributeView"]'),
                 hasClosestByClassName: (element, name) => element.closest("." + name),
@@ -116,6 +157,9 @@ const runElectron = async () => {
             }, {get: (target, key) => key in target ? target[key] : () => {}});
             new Function("exports", "require", ${JSON.stringify(compile("protyle/render/av/action.ts"))})(
                 window.avAction, () => avDependencies);
+            window.avAssets = {};
+            new Function("exports", "require", ${JSON.stringify(compile("protyle/render/av/asset.ts"))})(
+                window.avAssets, () => avDependencies);
         `);
         await win.webContents.executeJavaScript(`(${cases.toString()})()`);
         console.log("Publish read-only fold cases passed");

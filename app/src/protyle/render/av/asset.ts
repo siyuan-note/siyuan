@@ -129,6 +129,9 @@ export const updateAssetCell = (options: {
     blockElement: Element,
     menuElement?: HTMLElement | null,
 }) => {
+    if (options.protyle.disabled) {
+        return;
+    }
     const viewType = options.blockElement.getAttribute("data-av-type") as TAVView;
     const colId = getColId(options.cellElements[0], viewType);
     const cellDoOperations: IOperation[] = [];
@@ -256,9 +259,15 @@ export const editAssetItem = (options: {
     rect: DOMRect,
     keepMenuOpen?: boolean,
 }) => {
+    if (options.protyle.disabled) {
+        return;
+    }
     const linkAddress = removeCompressURL(options.content);
     const type = options.type as "image" | "file";
     const menu = new Menu(Constants.MENU_AV_ASSET_EDIT, async () => {
+        if (options.protyle.disabled) {
+            return;
+        }
         let currentLink = textElements[0].value;
         if ((!textElements[1] && currentLink === decodeURI(linkAddress)) ||
             (textElements[1] && currentLink === decodeURI(linkAddress) && textElements[1].value === options.name)) {

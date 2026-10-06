@@ -39,6 +39,7 @@ import {
 } from "./locate";
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {getPublishAVView} from "./publishState";
+import {getReadonlyAVView} from "./readonlyState";
 import {updateHotkeyTip} from "../../util/compatibility";
 import {inspectAVInsertedItem} from "./filteredTip";
 import {
@@ -687,7 +688,8 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 calendarRange: getCalendarRequestRange(e, locateParams?.viewID || undefined),
                 id: e.getAttribute("data-av-id"),
                 blockID: standalone ? "" : e.getAttribute("data-node-id"),
-                viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(e) : ""),
+                viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(e) :
+                    protyle.disabled ? getReadonlyAVView(e) : ""),
             };
             const paging = {
                 pageSize: avPageSize.unGroupPageSize,

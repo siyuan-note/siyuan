@@ -58,6 +58,7 @@ import {openDatabaseRowByData} from "./openDatabaseRow";
 import {openKanbanGroupMenu} from "./kanban/groupMenu";
 import {getGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {setPublishAVFolds, setPublishAVView} from "./publishState";
+import {setReadonlyAVFolds, setReadonlyAVView} from "./readonlyState";
 import {
     finishCardCoverPosition,
     isCardCoverPositioning,
@@ -646,8 +647,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 initUnfoldedGroupTables(blockElement, protyle);
                 updateGroupFoldedStates(blockElement, doData);
                 clearTimeout(foldTimeout);
-                if (window.siyuan.isPublish) {
-                    setPublishAVFolds(blockElement, viewID, doData);
+                if (window.siyuan.isPublish || protyle.disabled) {
+                    if (window.siyuan.isPublish) {
+                        setPublishAVFolds(blockElement, viewID, doData);
+                    } else {
+                        setReadonlyAVFolds(blockElement, viewID, doData);
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     return true;
@@ -671,13 +676,20 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 initUnfoldedGroupTables(blockElement, protyle);
                 updateGroupFoldedStates(blockElement, {[target.dataset.id]: isOpen});
                 clearTimeout(foldTimeout);
-                if (window.siyuan.isPublish) {
-                    setPublishAVFolds(blockElement, viewID, {[target.dataset.id]: isOpen});
+                if (window.siyuan.isPublish || protyle.disabled) {
+                    if (window.siyuan.isPublish) {
+                        setPublishAVFolds(blockElement, viewID, {[target.dataset.id]: isOpen});
+                    } else {
+                        setReadonlyAVFolds(blockElement, viewID, {[target.dataset.id]: isOpen});
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     return true;
                 }
                 foldTimeout = window.setTimeout(() => {
+                    if (protyle.disabled) {
+                        return;
+                    }
                     transaction(protyle, [{
                         action: "foldAttrViewGroup",
                         avID: blockElement.dataset.avId,
@@ -727,32 +739,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             /// #endif
             if (target.classList.contains("item--focus")) {
                 openViewMenu({protyle, blockElement, element: target});
-            } else if (window.siyuan.isPublish || protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
-                clearSelect(["row", "galleryItem"], blockElement);
-                if (window.siyuan.isPublish) {
-                    setPublishAVView(blockElement, target.dataset.id);
-                }
-                blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, target.dataset.id);
-                blockElement.removeAttribute("data-render");
-                if (target.dataset.page) {
-                    blockElement.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
-                        bodyItem.dataset.pageSize = target.dataset.page;
-                    });
-                }
-                avRender(blockElement, protyle);
             } else {
-                clearSelect(["row", "galleryItem"], blockElement);
-                transaction(protyle, [{
-                    action: "setAttrViewBlockView",
-                    blockID: blockElement.getAttribute("data-node-id"),
-                    id: target.dataset.id,
-                    avID: blockElement.getAttribute("data-av-id"),
-                }], [{
-                    action: "setAttrViewBlockView",
-                    blockID: blockElement.getAttribute("data-node-id"),
-                    id: getAVCurrentViewID(blockElement),
-                    avID: blockElement.getAttribute("data-av-id"),
-                }]);
+                switchAVView(protyle, blockElement, target);
             }
             event.preventDefault();
             event.stopPropagation();
@@ -1532,6 +1520,37 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
             item.remove();
         });
     }
+};
+
+export const switchAVView = (protyle: IProtyle, blockElement: HTMLElement, target: HTMLElement) => {
+    clearSelect(["row", "galleryItem"], blockElement);
+    if (protyle.disabled || window.siyuan.isPublish || protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
+        if (window.siyuan.isPublish) {
+            setPublishAVView(blockElement, target.dataset.id);
+        } else if (protyle.disabled) {
+            setReadonlyAVView(blockElement, target.dataset.id);
+        }
+        blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, target.dataset.id);
+        blockElement.removeAttribute("data-render");
+        if (target.dataset.page) {
+            blockElement.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
+                bodyItem.dataset.pageSize = target.dataset.page;
+            });
+        }
+        void avRender(blockElement, protyle);
+        return;
+    }
+    transaction(protyle, [{
+        action: "setAttrViewBlockView",
+        blockID: blockElement.dataset.nodeId,
+        id: target.dataset.id,
+        avID: blockElement.dataset.avId,
+    }], [{
+        action: "setAttrViewBlockView",
+        blockID: blockElement.dataset.nodeId,
+        id: getAVCurrentViewID(blockElement),
+        avID: blockElement.dataset.avId,
+    }]);
 };
 
 export const duplicateCompletely = (protyle: IProtyle, nodeElement: HTMLElement) => {

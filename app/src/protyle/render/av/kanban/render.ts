@@ -1,6 +1,7 @@
 import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
 import {getPublishAVView} from "../publishState";
+import {getReadonlyAVView} from "../readonlyState";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
 import {getPageSize} from "../groups";
 import {fetchSyncPost} from "../../../../util/fetch";
@@ -157,7 +158,8 @@ export const renderKanban = async (options: {
         const common = {
             id: options.blockElement.getAttribute("data-av-id"),
             blockID: standalone ? "" : options.blockElement.getAttribute("data-node-id"),
-            viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(options.blockElement) : ""),
+            viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(options.blockElement) :
+                options.protyle.disabled ? getReadonlyAVView(options.blockElement) : ""),
         };
         const paging = {
             pageSize: avPageSize.unGroupPageSize,

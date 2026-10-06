@@ -21,6 +21,7 @@ import {isMobile} from "../../util/functions";
 import {foldPassiveType} from "../wysiwyg/renderBacklink";
 import {showMessage} from "../../dialog/message";
 import {avRender} from "../render/av/render";
+import {clearReadonlyAVState} from "../render/av/readonlyState";
 import {refreshCalendarReadonly} from "../render/av/calendar/render";
 import {hideTooltip} from "../../dialog/tooltip";
 import {stickyRow} from "../render/av/row";
@@ -608,6 +609,11 @@ export const enableProtyle = (protyle: IProtyle) => {
         stickyRow(item, protyle.contentElement, "all");
     });
     if (wasDisabled) {
+        protyle.wysiwyg.element.querySelectorAll<HTMLElement>(".av").forEach(item => {
+            if (clearReadonlyAVState(item)) {
+                void avRender(item, protyle);
+            }
+        });
         refreshCalendarReadonly(protyle);
     }
     if (protyle.breadcrumb) {

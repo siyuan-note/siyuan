@@ -155,12 +155,11 @@ import {getTableCellTextStyleMenus} from "../toolbar/tableCell";
 import {isNestedListCrossBlockSelection, NESTED_LIST_PASTE_MARKER} from "../util/pasteSource";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
-import {avClick, avContextmenu, updateAVName} from "../render/av/action";
+import {avClick, avContextmenu, switchAVView, updateAVName} from "../render/av/action";
 import {selectRow, stickyRow, updateHeader} from "../render/av/row";
 import {getAVSelectedItemIDs, getAVSelectedTableCells, updateAVRowSelect} from "../render/av/virtualScroll";
 import {autoFitAVColumns, setFreezeColumn, showAVColumnWidthMenu, showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
-import {getAVCurrentViewID} from "../render/av/viewVisibility";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {
@@ -3805,18 +3804,7 @@ export class WYSIWYG {
                 if (avTabHeaderElement.classList.contains("item--focus")) {
                     openViewMenu({protyle, blockElement: nodeElement, element: avTabHeaderElement});
                 } else {
-                    clearSelect(["row", "galleryItem"], nodeElement);
-                    transaction(protyle, [{
-                        action: "setAttrViewBlockView",
-                        blockID: nodeElement.getAttribute("data-node-id"),
-                        id: avTabHeaderElement.dataset.id,
-                        avID: nodeElement.getAttribute("data-av-id"),
-                    }], [{
-                        action: "setAttrViewBlockView",
-                        blockID: nodeElement.getAttribute("data-node-id"),
-                        id: getAVCurrentViewID(nodeElement),
-                        avID: nodeElement.getAttribute("data-av-id"),
-                    }]);
+                    switchAVView(protyle, nodeElement, avTabHeaderElement);
                     window.siyuan.menus.menu.remove();
                     openViewMenu({
                         protyle,

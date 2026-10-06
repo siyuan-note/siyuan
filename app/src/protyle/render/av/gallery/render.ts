@@ -26,6 +26,7 @@ import {
 import {getCardStyle} from "./style";
 import {setGroupFoldedStates} from "../groupFold";
 import {getPublishAVView} from "../publishState";
+import {getReadonlyAVView} from "../readonlyState";
 import {renderAVRichTextElements} from "../richText";
 import {replaceAVContainer} from "../container";
 
@@ -274,7 +275,8 @@ export const renderGallery = async (options: {
         const common = {
             id: options.blockElement.getAttribute("data-av-id"),
             blockID: standalone ? "" : options.blockElement.getAttribute("data-node-id"),
-            viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(options.blockElement) : ""),
+            viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(options.blockElement) :
+                options.protyle.disabled ? getReadonlyAVView(options.blockElement) : ""),
         };
         const paging = {
             pageSize: avPageSize.unGroupPageSize,

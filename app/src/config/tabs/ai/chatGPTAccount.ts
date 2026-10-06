@@ -22,22 +22,27 @@ export const genChatGPTAccountHTML = () => {
     const L = window.siyuan.languages;
     return `<div class="b3-label config-item" data-type="chatGPTAccount">
         ${genConfigItemMainHtml(L.chatGPTAccount, L.chatGPTPlanUsageTip)}
-        <div class="fn__hr"></div>
-        <select class="b3-select fn__block" data-chatgpt="account" aria-label="${L.chatGPTAccount}"></select>
+        <div class="fn__none" data-chatgpt="accountRow">
+            <div class="fn__hr"></div>
+            <div data-chatgpt="accountInfo"></div>
+            <select class="b3-select fn__block fn__none" data-chatgpt="account" aria-label="${L.chatGPTAccount}"></select>
+        </div>
         <div class="fn__hr"></div>
         <div class="fn__flex fn__flex-wrap">
             <button class="b3-button" data-chatgpt="login">${L.chatGPTConnect}</button>
             <span class="fn__space"></span>
-            <button class="b3-button b3-button--outline" data-chatgpt="add">${L.chatGPTAddAccount}</button>
+            <button class="b3-button b3-button--outline fn__none" data-chatgpt="add">${L.chatGPTAddAccount}</button>
             <span class="fn__space"></span>
-            <button class="b3-button b3-button--outline" data-chatgpt="logout">${L.logout}</button>
+            <button class="b3-button b3-button--outline fn__none" data-chatgpt="logout">${L.logout}</button>
             <span class="fn__space"></span>
-            <button class="b3-button b3-button--outline" data-chatgpt="usage">${L.chatGPTUsage}</button>
+            <button class="b3-button b3-button--outline fn__none" data-chatgpt="usage">${L.chatGPTUsage}</button>
             <span class="fn__space"></span>
             <button class="b3-button b3-button--cancel fn__none" data-chatgpt="cancel">${L.cancel}</button>
         </div>
-        <div class="fn__hr"></div>
-        <div class="ft__on-surface" data-chatgpt="status"></div>
+        <div class="fn__none" data-chatgpt="statusRow">
+            <div class="fn__hr"></div>
+            <div class="ft__on-surface" data-chatgpt="status"></div>
+        </div>
         <div class="fn__hr"></div>
         <div class="ft__on-surface">${L.chatGPTRemoteTip}</div>
         <div class="fn__hr"></div>
@@ -68,10 +73,17 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
     let exportedFile = "";
     let timer: number;
     let disposed = false;
+    const accountLabel = (account: ChatGPTAccount) =>
+        (account.email || account.name || "ChatGPT") + " (" + account.id.slice(-8) + ")";
     const update = () => {
         const selected = profiles.find(item => item.id === draft.accountID);
-        picker.innerHTML = `<option value="">${escapeHtmlTextAndAttr(L.chatGPTConnect)}</option>` + profiles.map(item =>
-            `<option value="${escapeHtmlTextAndAttr(item.id)}">${escapeHtmlTextAndAttr((item.email || item.name || "ChatGPT") + " (" + item.id.slice(-8) + ")")}</option>`).join("");
+        root.querySelector<HTMLElement>("[data-chatgpt='accountRow']").classList.toggle("fn__none", profiles.length === 0);
+        const accountInfo = root.querySelector<HTMLElement>("[data-chatgpt='accountInfo']");
+        accountInfo.textContent = profiles.length === 1 ? accountLabel(profiles[0]) : "";
+        accountInfo.classList.toggle("fn__none", profiles.length !== 1);
+        picker.classList.toggle("fn__none", profiles.length < 2);
+        picker.innerHTML = (selected ? "" : `<option value="" disabled hidden>${escapeHtmlTextAndAttr(L.chatGPTAccount)}</option>`) + profiles.map(item =>
+            `<option value="${escapeHtmlTextAndAttr(item.id)}">${escapeHtmlTextAndAttr(accountLabel(item))}</option>`).join("");
         picker.value = draft.accountID || "";
         picker.disabled = busy || !!attemptID;
         root.querySelectorAll<HTMLButtonElement>("button").forEach(button => {
@@ -80,18 +92,30 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
         const cancel = root.querySelector<HTMLButtonElement>("[data-chatgpt='cancel']");
         cancel.classList.toggle("fn__none", !attemptID);
         cancel.disabled = busy;
+        root.querySelector<HTMLButtonElement>("[data-chatgpt='add']").classList.toggle("fn__none", profiles.length === 0);
+        root.querySelector<HTMLButtonElement>("[data-chatgpt='logout']").classList.toggle("fn__none", !selected?.connected);
+        root.querySelector<HTMLButtonElement>("[data-chatgpt='usage']").classList.toggle("fn__none", !selected);
         root.querySelector<HTMLButtonElement>("[data-chatgpt='logout']").disabled ||= !selected?.connected;
         root.querySelector<HTMLButtonElement>("[data-chatgpt='export']").disabled ||= !selected?.connected && !exportedFile;
         for (const action of ["login", "add"]) {
             root.querySelector<HTMLButtonElement>(`[data-chatgpt='${action}']`).disabled ||= !localKernel;
         }
         status.textContent = attemptID ? L.chatGPTSignInPendingTip : selected?.sharing ? L.mcpStatusConnected :
-            localKernel ? L.chatGPTConnect : L.chatGPTRemoteTip;
+            selected?.connected ? L.mcpStatusAuthorizationRequired : selected ? L.chatGPTSignedOut : "";
+        root.querySelector<HTMLElement>("[data-chatgpt='statusRow']").classList.toggle("fn__none", !status.textContent);
         onChange(!!selected?.sharing && !busy && !attemptID);
     };
     const load = async () => {
         await fetchPost("/api/ai/chatgpt/accounts", undefined, response => {
-            if (!disposed && response.code === 0) { profiles = response.data; update(); }
+            if (!disposed && response.code === 0) {
+                profiles = response.data;
+                if (profiles.length === 1 && draft.accountID !== profiles[0].id) {
+                    draft.accountID = profiles[0].id;
+                    draft.models = [];
+                    exportedFile = "";
+                }
+                update();
+            }
         });
     };
     const stop = () => {

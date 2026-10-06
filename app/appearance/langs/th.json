@@ -1,4 +1,5 @@
 {
+	"chatGPTSignedOut": "ยังไม่ได้เข้าสู่ระบบ โดยเก็บข้อมูลบัญชีไว้เพื่อเข้าสู่ระบบอีกครั้ง",
 	"chatGPTAddAccount": "เพิ่มบัญชี",
 	"chatGPTCallbackTip": "กลับไปที่ SiYuan เพื่อดูผลการเข้าสู่ระบบ",
 	"chatGPTAccount": "บัญชี ChatGPT",

@@ -2,8 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -63,6 +65,44 @@ func TestAPIContractChatGPTAccountLifecycle(t *testing.T) {
 		if string(result["code"]) != "-1" {
 			t.Fatalf("invalid %s accepted", path)
 		}
+	}
+}
+
+func TestAPIContractChatGPTCallbackUsesSharedPage(t *testing.T) {
+	aiContractConfiguration(t)
+	oldHome := util.HomeDir
+	util.HomeDir = t.TempDir()
+	t.Cleanup(func() { util.HomeDir = oldHome })
+	engine := gin.New()
+	engine.POST("/api/ai/chatgpt/start", chatGPTStart)
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/api/ai/chatgpt/start", strings.NewReader(`{}`)))
+	var result struct {
+		Data apicontract.ChatGPTLogin `json:"data"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || result.Data.ID == "" {
+		t.Fatalf("unable to start sign-in: %s", recorder.Body.String())
+	}
+	t.Cleanup(func() { util.ChatGPTService().Cancel(result.Data.ID) })
+	authorization, err := url.Parse(result.Data.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	query := url.Values{"state": {authorization.Query().Get("state")}, "error": {"access_denied"}}
+	response, err := http.Get(authorization.Query().Get("redirect_uri") + "?" + query.Encode())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	page := string(body)
+	if response.Header.Get("Content-Type") != "text/html; charset=utf-8" ||
+		!strings.Contains(page, `class="brand">SiYuan</div>`) || !strings.Contains(page, `class="mark mark--error"`) ||
+		strings.Contains(page, "access_denied") || strings.Contains(page, "window.close") {
+		t.Fatalf("callback did not use the shared failure page: %s", page)
 	}
 }
 

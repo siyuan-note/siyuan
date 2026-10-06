@@ -93,9 +93,9 @@ func newFixture(t *testing.T) *fixture {
 	return f
 }
 
-func (f *fixture) login(t *testing.T, accountID string) Login {
+func (f *fixture) login(t *testing.T, accountID string, pages ...CallbackPages) Login {
 	t.Helper()
-	login, err := f.service.Start(context.Background(), accountID)
+	login, err := f.service.Start(context.Background(), accountID, pages...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,6 +118,59 @@ func (f *fixture) callback(t *testing.T, login Login, state string) int {
 	}
 	response.Body.Close()
 	return response.StatusCode
+}
+
+func TestChatGPTCallbackPages(t *testing.T) {
+	for _, scenario := range []string{"success", "denied", "invalid-state", "duplicate-state", "invalid-nonce"} {
+		t.Run(scenario, func(t *testing.T) {
+			f := newFixture(t)
+			pages := CallbackPages{Success: []byte("<!doctype html><h1>completed</h1>"), Failure: []byte("<!doctype html><h1>failed</h1>")}
+			login := f.login(t, "", pages)
+			u, _ := url.Parse(login.URL)
+			query := url.Values{"code": {"code"}, "state": {u.Query().Get("state")}, "client_id": {"oaiapp_test"}}
+			expectedStatus, expectedState := http.StatusOK, "failed"
+			if scenario == "success" {
+				expectedState = "completed"
+			}
+			switch scenario {
+			case "denied":
+				query.Set("error", "access_denied")
+				query.Set("error_description", "<script>credential</script>")
+			case "invalid-state":
+				query.Set("state", "invalid")
+				expectedStatus, expectedState = http.StatusBadRequest, "pending"
+			case "duplicate-state":
+				query.Add("state", "invalid")
+				expectedStatus, expectedState = http.StatusBadRequest, "pending"
+			case "invalid-nonce":
+				f.nonce = "invalid"
+			}
+			response, err := http.Get(u.Query().Get("redirect_uri") + "?" + query.Encode())
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer response.Body.Close()
+			body, err := io.ReadAll(response.Body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			expectedPage := pages.Failure
+			if scenario == "success" {
+				expectedPage = pages.Success
+			}
+			if response.StatusCode != expectedStatus || string(body) != string(expectedPage) {
+				t.Fatalf("unexpected callback page: %d %s", response.StatusCode, body)
+			}
+			if response.Header.Get("Content-Type") != "text/html; charset=utf-8" || response.Header.Get("Cache-Control") != "no-store" ||
+				response.Header.Get("Referrer-Policy") != "no-referrer" || response.Header.Get("X-Content-Type-Options") != "nosniff" ||
+				!strings.Contains(response.Header.Get("Content-Security-Policy"), "default-src 'none'") {
+				t.Fatalf("missing callback security headers: %v", response.Header)
+			}
+			if status, _ := f.service.Status(login.ID); status.State != expectedState {
+				t.Fatalf("unexpected callback state: %+v", status)
+			}
+		})
+	}
 }
 
 func TestChatGPTSignInIdentityAndEncryptedStore(t *testing.T) {

@@ -30,6 +30,11 @@ type LoginStatus struct {
 	Error     string `json:"error"`
 }
 
+// CallbackPages 由调用方提供本地化的通用授权结果页面。
+type CallbackPages struct {
+	Success, Failure []byte
+}
+
 type attempt struct {
 	state, nonce, verifier, redirect string
 	account                          *Account
@@ -175,7 +180,7 @@ func (s *Service) verifyIdentity(ctx context.Context, token, clientID, nonce str
 	return
 }
 
-func (s *Service) Start(ctx context.Context, accountID string, messages ...string) (login Login, err error) {
+func (s *Service) Start(ctx context.Context, accountID string, pages ...CallbackPages) (login Login, err error) {
 	var hostID string
 	var selected *Account
 	err = s.withStore(ctx, func(store *diskStore) error {
@@ -223,6 +228,21 @@ func (s *Service) Start(ctx context.Context, accountID string, messages ...strin
 	a.server = &http.Server{ReadHeaderTimeout: 5 * time.Second, Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store")
 		w.Header().Set("Referrer-Policy", "no-referrer")
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		writePage := func(status int, success bool) {
+			content := []byte("SiYuan")
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			if len(pages) > 0 {
+				content = pages[0].Failure
+				if success {
+					content = pages[0].Success
+				}
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			}
+			w.WriteHeader(status)
+			_, _ = w.Write(content)
+		}
 		if r.Method != "GET" || r.URL.Path != "/auth/callback" {
 			w.WriteHeader(404)
 			return
@@ -230,18 +250,18 @@ func (s *Service) Start(ctx context.Context, accountID string, messages ...strin
 		values := r.URL.Query()
 		for _, key := range []string{"state", "code", "client_id", "error"} {
 			if len(values[key]) > 1 {
-				w.WriteHeader(400)
+				writePage(http.StatusBadRequest, false)
 				return
 			}
 		}
 		if subtle.ConstantTimeCompare([]byte(values.Get("state")), []byte(a.state)) != 1 {
-			w.WriteHeader(400)
+			writePage(http.StatusBadRequest, false)
 			return
 		}
 		s.mu.Lock()
 		if a.consumed || a.status.State != "pending" {
 			s.mu.Unlock()
-			w.WriteHeader(409)
+			writePage(http.StatusConflict, false)
 			return
 		}
 		a.consumed = true
@@ -254,12 +274,7 @@ func (s *Service) Start(ctx context.Context, accountID string, messages ...strin
 			a.status = LoginStatus{State: "completed", AccountID: result.ClientID}
 		}
 		s.mu.Unlock()
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		message := "SiYuan"
-		if len(messages) > 0 {
-			message = messages[0]
-		}
-		_, _ = w.Write([]byte(message))
+		writePage(http.StatusOK, completeErr == nil)
 		cancel()
 	})}
 	s.mu.Lock()

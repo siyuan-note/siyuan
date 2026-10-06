@@ -1,4 +1,5 @@
 {
+	"chatGPTSignedOut": "未登录，保留账户信息以便重新登录",
 	"chatGPTAddAccount": "添加账户",
 	"chatGPTCallbackTip": "请返回思源查看登录结果",
 	"chatGPTAccount": "ChatGPT 账户",

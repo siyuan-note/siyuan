@@ -46,7 +46,12 @@ var chatGPTStart = contractHandler(apicontract.ChatGPTStart, chatGPTStartContrac
 
 func chatGPTStartContract(c *gin.Context, req apicontract.ChatGPTAccountRequest) apicontract.Response[apicontract.ChatGPTLogin] {
 	chatGPTNoCache(c)
-	login, err := util.ChatGPTService().Start(c.Request.Context(), req.AccountID, util.I18nTerm(model.Conf.Lang, "chatGPTCallbackTip"))
+	lang := util.LangToBCP47(model.Conf.Lang)
+	pages := chatgpt.CallbackPages{
+		Success: util.RenderOAuthCallbackPage(lang, model.Conf.Language(325), model.Conf.Language(326), true),
+		Failure: util.RenderOAuthCallbackPage(lang, model.Conf.Language(327), model.Conf.Language(328), false),
+	}
+	login, err := util.ChatGPTService().Start(c.Request.Context(), req.AccountID, pages)
 	if err != nil {
 		return apicontract.Failure[apicontract.ChatGPTLogin](-1, err.Error())
 	}

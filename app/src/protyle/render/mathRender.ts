@@ -113,11 +113,12 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                             // 相邻的数学公式删除或光标移动有问题
                             mathElement.after(document.createTextNode(Constants.ZWSP));
                         } else if (nextSibling &&
-                            !nextSibling.textContent.startsWith("\n") && // https://github.com/siyuan-note/insider/issues/1089
+                            !/^[\u200B\uFEFF]*\n/.test(nextSibling.textContent) && // https://github.com/siyuan-note/insider/issues/1089
                             // 输入 $a$ 后，光标移动到其他块，再点击 a 后，光标不显示 https://github.com/siyuan-note/insider/issues/1076#issuecomment-1253215515
                             nextSibling.textContent !== Constants.ZWSP) {
                             // 数学公式后一个字符删除多 br https://ld246.com/article/1647157880974
-                            // 数学公式后有 \n 不能再添加 &#xFEFF; https://ld246.com/article/1647329437541
+                            // 公式后的换行可能带有零宽边界字符，此时不添加内部占位符，避免划选被截断。
+                            // https://ld246.com/article/1647329437541
                             mathElement.insertAdjacentHTML("beforeend", "&#xFEFF;");
                         }
                         // 光标无法移动到段首 https://ld246.com/article/1623551823742

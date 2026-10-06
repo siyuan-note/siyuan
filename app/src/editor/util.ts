@@ -226,15 +226,18 @@ export const openFile = async (options: IOpenFileOptions) => {
         allModels.editor.find((item) => {
             if (item.editor.protyle.block.rootID === options.rootID) {
                 if (hasClosestByClassName(item.element, "layout__wnd--active")) {
-                    activeEditor = item;
+                    if (item.headElement.classList.contains("item--focus")) {
+                        activeEditor = item;
+                        return true;
+                    }
+                    if (!activeEditor) {
+                        activeEditor = item;
+                    }
                 }
                 if (!editor || item.headElement.getAttribute("data-activetime") > editor.headElement.getAttribute("data-activetime")) {
                     // https://github.com/siyuan-note/siyuan/issues/11981#issuecomment-2351939812
                     editor = item;
                 }
-            }
-            if (activeEditor) {
-                return true;
             }
         });
         if (activeEditor) {

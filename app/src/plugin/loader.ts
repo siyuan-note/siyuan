@@ -28,6 +28,8 @@ import {
     deactivateCustomBlockPlugin,
 } from "./customBlockRender";
 import {getHostCapabilities} from "../util/hostCapabilities";
+import {isSettingsWindow} from "../config/setting/windowContext";
+import {ensureLute} from "../protyle/util/lute";
 
 const requireFunc = (key: string) => {
     if (key === "siyuan") {
@@ -121,10 +123,24 @@ const getLifecycleManager = (app: App) => {
     return manager;
 };
 
+const fetchPluginData = async () => {
+    const settingsWindow = isSettingsWindow();
+    const response = await fetchSyncPost("/api/petal/loadPetals", {
+        frontend: getFrontend(), ...(settingsWindow ? {settingsWindow: true} : {}),
+    });
+    if (settingsWindow && response.code !== 0) {
+        throw new Error(response.msg || "Could not read settings plugins");
+    }
+    const items = response.code === 0 && Array.isArray(response.data) ?
+        response.data.filter(item => !settingsWindow || item.settingsWindow === true) : [];
+    if (settingsWindow && items.length) await ensureLute({reloadOnFailure: false});
+    return items;
+};
+
 const createPluginDataLoader = () => {
     let promise: Promise<IPluginData[]>;
     return (name: string) => {
-        promise ??= fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()}).then(response => response.code === 0 && Array.isArray(response.data) ? response.data : []);
+        promise ??= fetchPluginData();
         return promise.then(items => items.find(item => item.name === name));
     };
 };
@@ -141,8 +157,8 @@ export const loadPlugins = async (app: App, names?: string[], init = true) => {
         tasks = Array.from(new Set(names)).map(name => manager.requestLoad(name, () => loadPluginData(name)));
     } else {
         const batch = manager.beginLoadBatch(!manager.isStarted());
-        const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
-        tasks = (response.code === 0 && Array.isArray(response.data) ? response.data : []).map(item => manager.requestBatchLoad(item.name, item, batch));
+        const items = await fetchPluginData();
+        tasks = items.map(item => manager.requestBatchLoad(item.name, item, batch));
         shouldStart = manager.isLatestLoadBatch(batch);
     }
     if (shouldStart) {
@@ -180,6 +196,10 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
         return;
     }
     const manager = getLifecycleManager(app);
+    if (isSettingsWindow()) {
+        await loadPlugins(app, [item.name], false);
+        return manager.getInstance(item.name);
+    }
     manager.start();
     await manager.requestLoad(item.name, async () => item);
     saveLayout();
@@ -237,6 +257,7 @@ const updateDock = (dockItem: Config.IUILayoutDockTab[], index: number, plugin: 
 };
 
 const mountPlugin = (plugin: Plugin) => {
+    if (isSettingsWindow()) return;
     if (!isWindow() || isMobile()) {
         plugin.topBarIcons.forEach(element => {
             if (document.contains(element)) {
@@ -257,6 +278,7 @@ const mountPlugin = (plugin: Plugin) => {
             return;
         }
         const statusElement = document.getElementById("status");
+        if (!statusElement) return;
         if (element.getAttribute("data-location") === "right") {
             statusElement.insertAdjacentElement("beforeend", element);
         } else {
@@ -271,7 +293,7 @@ const mountPlugin = (plugin: Plugin) => {
 
 export const afterLayoutReady = (app: App) => {
     const manager = getLifecycleManager(app);
-    void manager.setLayoutReady();
+    return manager.setLayoutReady();
 };
 
 const getPluginCatalogPlugins = (plugin: Plugin) => window.siyuan.ws?.app?.plugins || [plugin];
@@ -411,4 +433,21 @@ export const uninstallPlugin = async (app: App, name: string) => {
     const manager = getLifecycleManager(app);
     manager.start();
     await manager.requestUninstall(name);
+};
+
+// 窗口销毁时同步撤销实例，异步钩子的迟到完成不能重新挂载界面。
+export const disposePlugins = (app: App) => lifecycleManagers.get(app)?.dispose();
+
+// 重连后以当前启用清单恢复实例，期间收到的更新请求优先于这次快照。
+export const refreshPlugins = async (app: App) => {
+    if (!getHostCapabilities().plugins) return;
+    const manager = getLifecycleManager(app);
+    const batch = manager.beginLoadBatch();
+    const items = await fetchPluginData();
+    if (!manager.isLatestLoadBatch(batch)) return;
+    const names = new Set(items.map(item => item.name));
+    const tasks = app.plugins.filter(plugin => !names.has(plugin.name)).map(plugin => manager.requestBatchUnload(plugin.name, batch));
+    tasks.push(...items.map(item => manager.requestBatchLoad(item.name, item, batch, true)));
+    manager.start();
+    await Promise.all(tasks);
 };

@@ -12,9 +12,11 @@ for (const keywords of ["", "gradient"]) {
         const root = {innerHTML: "settings", scrollTop: 235.5, scrollLeft: 12, contains: () => false,
             querySelector: (): Element | null => null};
         const visibleItemIds = new Set(["bodyGradient"]);
+        const owner = {plugins: [{name: "main-only"}]};
         const tab = {
             scanSearch: () => ({visibleItemIds}),
-            mount: async (element: typeof root, search: {visibleItemIds?: Set<string>}, _app: unknown, rebuild: boolean) => {
+            mount: async (element: typeof root, search: {visibleItemIds?: Set<string>}, app: unknown, rebuild: boolean) => {
+                assert.equal(app, owner);
                 assert.equal(element, root);
                 assert.equal(rebuild, true);
                 assert.equal(search.visibleItemIds, keywords ? visibleItemIds : undefined);
@@ -42,6 +44,7 @@ for (const keywords of ["", "gradient"]) {
                 if (name === "./tabs") {
                     return {getSettingTab: () => tab};
                 }
+                if (name === "./windowContext") return {getSettingsOwnerApp: () => owner};
                 return {};
             },
         });
@@ -63,6 +66,7 @@ test("all settings refreshes preserve focused inputs and remount when focus leav
     const timers: Array<() => void> = [];
     const document = {activeElement: input, addEventListener: (_name: string, callback: () => void) => { focusout = callback; }};
     const dependencies = {Constants: {DIALOG_SETTING: "settings"}, getSearchKeywordsLower: () => "",
+        getSettingsOwnerApp: () => ({}),
         getSettingTab: () => ({mount: async () => { mounted++; }})};
     const exports = {} as {remountOpenSettingTab: (tab: string) => Promise<void>};
     runInNewContext(code, {exports, require: () => dependencies, document,
@@ -89,6 +93,7 @@ test("settings refresh preserves an unfocused profile draft and resumes after th
     const root = {innerHTML: "draft", scrollTop: 12, scrollLeft: 0, contains: () => false,
         querySelector: () => view};
     const dependencies = {Constants: {DIALOG_SETTING: "settings"}, getSearchKeywordsLower: () => "",
+        getSettingsOwnerApp: () => ({}),
         getSettingTab: () => ({mount: async () => { mounted++; root.innerHTML = "refreshed"; }})};
     const exports = {} as {remountOpenSettingTab: (tab: string) => Promise<void>};
     runInNewContext(code, {exports, require: () => dependencies,
@@ -132,6 +137,7 @@ test("deferred refresh preserves a pressed label until its click completes or is
     const exports = {} as {remountOpenSettingTab: (tab: string) => Promise<void>; watchSettingTabInteractions: () => void};
     runInNewContext(code, {exports, document, setTimeout: (callback: () => void) => timers.push(callback),
         require: () => ({Constants: {DIALOG_SETTING: "settings"}, getSearchKeywordsLower: () => "",
+            getSettingsOwnerApp: () => ({}),
             getSettingTab: () => ({mount: async () => { mounted++; }})}),
         window: {siyuan: {ws: {app: {}}, dialogs: [{element: {getAttribute: () => "settings", querySelector: () => root}}]}}});
     exports.watchSettingTabInteractions();

@@ -49,7 +49,7 @@ import {bindTouchOrder} from "./touchOrder";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
 /// #if !MOBILE
-import {getSettingsWindowHost, isSettingsWindow} from "../setting/windowContext";
+import {getSettingsOwnerApp, getSettingsWindowHost, isSettingsWindow} from "../setting/windowContext";
 /// #endif
 import {
     DOCK_ORDER_SCOPES,
@@ -580,7 +580,7 @@ const getProfileDockOrderSnapshot = (builtin: boolean) => {
 };
 
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
-    const plugins = window.siyuan.ws?.app?.plugins || [];
+    const plugins = getSettingsOwnerApp()?.plugins || [];
     refreshTopBarCatalog(plugins);
     refreshDockCatalog(plugins);
     refreshSlashMenuCatalog(plugins);
@@ -1035,7 +1035,7 @@ export const genEntryVisibilityHtml = () => `<div class="b3-label config-item" d
 </div>`;
 
 export const mountEntryVisibility = (root: HTMLElement) => {
-    const plugins = window.siyuan.ws?.app?.plugins || [];
+    const plugins = getSettingsOwnerApp()?.plugins || [];
     refreshDockCatalog(plugins);
     refreshSlashMenuCatalog(plugins);
     renderProfileCards(root);

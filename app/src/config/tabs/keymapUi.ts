@@ -20,6 +20,7 @@ import {escapeHtml} from "../../util/escape";
 import {Menu} from "../../plugin/Menu";
 import {refreshSettingConfig} from "../setting/sync";
 import {trackSettingSave} from "../setting/pending";
+import {getSettingsOwnerApp} from "../setting/windowContext";
 import type {App} from "../../index";
 
 const keymapToolbarSearchStrings = (): string[] => [
@@ -173,7 +174,7 @@ const buildKeymapCommandTexts = (): string[] => {
 
 const buildKeymapPluginDisplayNames = (): string[] => {
     const names: string[] = [];
-    window.siyuan.ws.app.plugins.forEach((item) => {
+    getSettingsOwnerApp().plugins.forEach((item) => {
         if (pluginHasKeymapItems(item) && item.displayName) {
             names.push(item.displayName);
         }
@@ -208,7 +209,7 @@ const genKeymapListHtml = () => {
     ).join("");
 
     const pluginHtmlParts: string[] = [];
-    for (const item of window.siyuan.ws.app.plugins) {
+    for (const item of getSettingsOwnerApp().plugins) {
         if (!pluginHasKeymapItems(item)) {
             continue;
         }
@@ -348,7 +349,7 @@ const bindKeymapList = (root: HTMLElement) => {
         searchKeymapList(keymapListElement, searchElement.value, searchKeymapElement.dataset.keymap);
     });
     searchKeymapElement.addEventListener("focus", () => {
-        sendUnregisterGlobalShortcut(window.siyuan.ws.app);
+        sendUnregisterGlobalShortcut(getSettingsOwnerApp());
     });
     searchKeymapElement.addEventListener("blur", () => {
         sendGlobalShortcut(window.siyuan.ws.app);

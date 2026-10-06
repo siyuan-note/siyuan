@@ -34,14 +34,15 @@ import (
 
 // Petal represents a plugin's management status.
 type Petal struct {
-	Name                  string `json:"name"`                  // Plugin name
-	DisplayName           string `json:"displayName"`           // Plugin display name
-	Version               string `json:"version"`               // Plugin version
-	Enabled               bool   `json:"enabled"`               // Whether enabled
-	Incompatible          bool   `json:"incompatible"`          // Whether incompatible
-	DisabledInPublish     bool   `json:"disabledInPublish"`     // Whether disabled in publish mode
-	UserDisabledInPublish bool   `json:"userDisabledInPublish"` // 是否由用户在发布服务中禁用
-	DisallowInstall       bool   `json:"disallowInstall"`       // Whether disallow install
+	Name                  string `json:"name"`                     // Plugin name
+	DisplayName           string `json:"displayName"`              // Plugin display name
+	Version               string `json:"version"`                  // Plugin version
+	Enabled               bool   `json:"enabled"`                  // Whether enabled
+	Incompatible          bool   `json:"incompatible"`             // Whether incompatible
+	DisabledInPublish     bool   `json:"disabledInPublish"`        // Whether disabled in publish mode
+	UserDisabledInPublish bool   `json:"userDisabledInPublish"`    // 是否由用户在发布服务中禁用
+	DisallowInstall       bool   `json:"disallowInstall"`          // Whether disallow install
+	SettingsWindow        bool   `json:"settingsWindow,omitempty"` // 已验证设置窗口运行声明
 
 	JS     string         `json:"js"`     // JS code
 	CSS    string         `json:"css"`    // CSS code
@@ -199,6 +200,20 @@ func LoadKernelPetals() (ret []*Petal) {
 		return []*Petal{}
 	}
 	return v.([]*Petal)
+}
+
+// LoadSettingsWindowPetals 保留启用、信任、前端兼容和发布权限检查，只返回主动声明支持设置窗口的插件。
+func LoadSettingsWindowPetals(frontend string, isPublish bool) (ret []*Petal) {
+	ret = []*Petal{}
+	for _, petal := range LoadPetals(frontend, isPublish) {
+		manifest, err := bazaar.ParsePackageJSON(filepath.Join(util.DataDir, "plugins", petal.Name, "plugin.json"))
+		if err == nil && bazaar.IsValidInstalledPackage(manifest, petal.Name) && manifest.SettingsWindow {
+			copy := *petal
+			copy.SettingsWindow = true
+			ret = append(ret, &copy)
+		}
+	}
+	return
 }
 
 func loadPetals(frontend string, isPublish, isKernel bool) (ret []*Petal) {

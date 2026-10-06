@@ -17,6 +17,7 @@ import {destroyEventBus} from "./EventBusCore";
 import {unregisterPluginCommands} from "./commandAdapter";
 import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
 import {releaseTrackedRangesByPlugin} from "../protyle/util/trackedRange";
+import {isSettingsWindow} from "../config/setting/windowContext";
 /// #if !MOBILE
 import {applyTopBarEntryVisibility} from "../config/entryVisibility/runtime";
 /// #endif
@@ -44,7 +45,7 @@ export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) =>
     beginPluginTeardown(plugin);
     runCleanup(plugin, "kernel", () => plugin.kernel.destroy());
     runCleanup(plugin, "event bus", () => destroyEventBus(plugin.eventBus));
-    if (isUninstall) {
+    if (isUninstall && !isSettingsWindow()) {
         runCleanup(plugin, "dock storage", () => {
             const pluginDocks = window.siyuan.storage?.[Constants.LOCAL_PLUGIN_DOCKS] || {};
             pluginDocks[plugin.name] = {};
@@ -106,7 +107,7 @@ export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) =>
     if (index > -1) {
         app.plugins.splice(index, 1);
     }
-    runCleanup(plugin, "dock catalog", () => refreshDockCatalog(app.plugins));
+    if (!isSettingsWindow()) runCleanup(plugin, "dock catalog", () => refreshDockCatalog(app.plugins));
     /// #if !MOBILE
     runCleanup(plugin, "top bar catalog", () => applyTopBarEntryVisibility());
     runCleanup(plugin, "top bar layout", () => resizeTopBar());

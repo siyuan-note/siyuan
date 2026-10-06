@@ -97,6 +97,7 @@ test("entry profile saves in settings windows send requests and flush pending ch
     runInNewContext(compile("config/entryVisibility/runtime.ts"), {...context, exports, require: () => ({
         syncDockBarVisibility: bar.syncDockBarVisibility,
         refreshDockCatalog: () => {},
+        getSettingsOwnerApp: (): undefined => undefined,
         getDockEntryOrderSnapshot: () => Object.fromEntries(DOCK_ORDER_SCOPES.map(scope => [scope, []])),
         mergeDockEntryOrderSnapshot,
         applyDockEntryOrderSnapshot: () => {},

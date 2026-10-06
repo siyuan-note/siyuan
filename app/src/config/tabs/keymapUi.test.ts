@@ -4,6 +4,18 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, isMethodDeclaration, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
+test("settings keymap search keeps undeclared owner plugins visible", () => {
+    const source = createSourceFile("keymapUi.ts", readFileSync("src/config/tabs/keymapUi.ts", "utf8"), ScriptTarget.ES2021, true);
+    const declarations = source.statements.filter(statement => isVariableStatement(statement) &&
+        statement.declarationList.declarations.some(item => ["buildKeymapPluginDisplayNames", "pluginHasKeymapItems"].includes(item.name.getText(source))));
+    const code = transpileModule(declarations.map(item => item.getText(source)).join("\n") +
+        "\nexports.names = buildKeymapPluginDisplayNames;", {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
+    const owner = {plugins: [{displayName: "Main-only plugin", commands: [{}]}]};
+    const exports = {} as {names: () => string[]};
+    runInNewContext(code, {exports, getSettingsOwnerApp: () => owner, window: {siyuan: {ws: {app: {plugins: []}}}}});
+    assert.deepEqual(Array.from(exports.names()), ["Main-only plugin"]);
+});
+
 test("panel mounts forward refresh intent without changing search and navigation arguments", async () => {
     const source = createSourceFile("builder.ts", readFileSync("src/config/setting/builder.ts", "utf8"),
         ScriptTarget.ES2021, true);

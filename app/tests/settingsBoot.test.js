@@ -22,6 +22,7 @@ const createBoot = (plugin = false, failed = "", waitForStyles = false) => {
     const events = new Map();
     const eventOptions = new Map();
     const documentEvents = new Map();
+    const pluginApp = {appId: "settings-app", plugins: []};
     const menu = {hidden: true, handledKey: false,
         element: {style: {zIndex: "12"}, classList: {contains: () => menu.hidden}},
         remove: isKey => { calls.push(isKey ? "close-menu-key" : "close-menu"); menu.hidden = true; },
@@ -45,12 +46,19 @@ const createBoot = (plugin = false, failed = "", waitForStyles = false) => {
         }, removeListener() {}, send: name => calls.push(name), invoke: async () => false}, webFrame: {setZoomFactor() {}}},
         "../../constants": {Constants: constants},
         "../../layout/Model": {Model: class {
+            constructor({app}) { assert.equal(app, pluginApp); }
             ws = {close() {}};
             connect() {}
             flushMainMessages() {}
             destroy() { calls.push("disconnect"); }
         }},
         "../../menus": {Menus: class {menu = menu;}},
+        "../../plugin/settingsApp": {createSettingsPluginApp: () => pluginApp},
+        "../../plugin/loader": {loadPlugins: async app => {
+            assert.equal(app, pluginApp);
+            calls.push("load-plugins");
+        }, afterLayoutReady: app => { assert.equal(app, pluginApp); calls.push("plugin-layout"); },
+            disposePlugins: app => { assert.equal(app, pluginApp); calls.push("dispose-plugins"); }},
         "../../menus/Menu": {bindMenuKeydown: () => { calls.push("menu-keydown"); return menu.handledKey; }},
         "../../menus/menuClick": {globalClickHideMenu: target => calls.push(target)},
         "../../util/zIndex": {isAbove: (element, reference) => Number(element.style.zIndex) > Number(reference.style.zIndex)},
@@ -225,6 +233,9 @@ for (const plugin of [false, true]) {
         assert.ok(boot.calls.indexOf("render") < boot.calls.indexOf("siyuan-settings-ready"));
         assert.ok(boot.calls.indexOf("render") < boot.calls.indexOf("tooltips"));
         assert.ok(boot.calls.indexOf("tooltips") < boot.calls.indexOf("siyuan-settings-ready"));
+        assert.ok(boot.calls.indexOf("render") < boot.calls.indexOf("load-plugins"));
+        assert.ok(boot.calls.indexOf("load-plugins") < boot.calls.indexOf("plugin-layout"));
+        assert.ok(boot.calls.indexOf("plugin-layout") < boot.calls.indexOf("siyuan-settings-ready"));
     });
 }
 

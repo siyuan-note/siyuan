@@ -161,6 +161,17 @@ const bootChild = async (sources) => {
     check.ok(pluginEvents.includes("before-show-tooltip"));
     check.ok(pluginEvents.includes("before-hide-tooltip"));
     button.remove();
+    const {Setting: NestedSetting} = loadRendererModule(sources.setting, {
+        "../util/functions": {isMobile: () => false, getFrontend: frontend.getFrontend}, "../dialog": {Dialog},
+        "../config/setting/nativeWindow": {}, "../config/setting/windowContext": context,
+        "../config/setting/windowDialog": fit, "../util/genID": {genUUID},
+    });
+    const rootDialog = window.siyuan.dialogs[0];
+    const nested = new NestedSetting({});
+    nested.open("Nested settings");
+    check.equal(nested.dialog.element.querySelector(".toolbar"), null);
+    nested.close();
+    check.equal(window.siyuan.dialogs.includes(rootDialog), true);
     if (!document.getElementById("pendingTheme").sheet) throw new Error("settings shown before theme loaded");
     ipcRenderer.send("siyuan-settings-ready");
     ipcRenderer.send("test-settings-ready");
@@ -216,6 +227,7 @@ const runCases = async (sources) => {
         "../render/render": {}, "../search/normalize": {getSearchKeywordsLower: () => ""},
         "../../constants": {Constants: {DIALOG_SETTING: "settings"}},
         "./tabs": {getSettingTab: () => ({mount: async root => { remounted++; root.innerHTML = markup(); }})},
+        "./windowContext": {getSettingsOwnerApp: () => window.siyuan.ws.app},
     });
     const saving = loadRendererModule(sources.save, {
         "./mount": mounting,

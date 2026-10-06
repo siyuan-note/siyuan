@@ -16628,6 +16628,9 @@
         "repoURL": {
           "type": "string"
         },
+        "settingsWindow": {
+          "type": "boolean"
+        },
         "size": {
           "type": "integer"
         },
@@ -29851,6 +29854,9 @@
       "properties": {
         "frontend": {
           "type": "string"
+        },
+        "settingsWindow": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -34046,6 +34052,9 @@
         },
         "name": {
           "type": "string"
+        },
+        "settingsWindow": {
+          "type": "boolean"
         },
         "userDisabledInPublish": {
           "type": "boolean"

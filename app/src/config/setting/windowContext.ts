@@ -38,7 +38,9 @@ export interface ISettingsWindowHost {
 let host: ISettingsWindowHost;
 export const setSettingsWindowHost = (value: ISettingsWindowHost) => { host = value; };
 export const getSettingsWindowHost = () => host;
-export const isSettingsWindow = () => typeof document !== "undefined" && document.body.classList.contains("body--settings");
+export const getSettingsOwnerApp = () => host?.app || window.siyuan.ws?.app;
+export const isSettingsWindow = () => Boolean(host) ||
+    (typeof document !== "undefined" && document.body.classList.contains("body--settings"));
 
 // 重载和重置结束设置会话，不触发关闭时的旧窗口偏好保存。
 export const closeSettingsWindow = () => {

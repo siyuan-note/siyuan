@@ -67,6 +67,7 @@ export class Setting {
             });
             return;
         }
+        const windowRoot = isSettingsWindow() && window.siyuan.dialogs.length === 0;
         const dialog = new Dialog({
             title: name,
             content: `<div class="b3-dialog__content">
@@ -82,7 +83,7 @@ export class Setting {
                 if (this.destroyCallback) {
                     this.destroyCallback();
                 }
-                if (isSettingsWindow()) {
+                if (windowRoot) {
                     window.close();
                 }
             }
@@ -147,7 +148,7 @@ export class Setting {
             dialog.destroy();
         });
         this.dialog = dialog;
-        if (isSettingsWindow()) {
+        if (windowRoot) {
             fitSettingsWindowDialog(dialog);
         }
     }

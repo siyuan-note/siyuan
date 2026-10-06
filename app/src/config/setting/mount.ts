@@ -3,6 +3,7 @@ import {getSearchKeywordsLower, normalizeSearchText} from "../search/normalize";
 import {Constants} from "../../constants";
 import type {SettingSearchUnavailableItem, SettingTabMountContext} from "./builder";
 import {getSettingTab, type TSettingTab} from "./tabs";
+import {getSettingsOwnerApp} from "./windowContext";
 
 const deferredTabs = new Set<TSettingTab>();
 let watchingFocus = false;
@@ -75,7 +76,7 @@ export const remountOpenSettingTab = async (tabId: TSettingTab) => {
     }
     // 重建和异步初始化配置项会改变内容高度，完成后恢复面板的滚动位置。
     const {scrollTop, scrollLeft} = root;
-    await tab.mount(root, search, window.siyuan.ws.app, true);
+    await tab.mount(root, search, getSettingsOwnerApp(), true);
     root.scrollTop = scrollTop;
     root.scrollLeft = scrollLeft;
 };

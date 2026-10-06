@@ -45,6 +45,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
                 "dialog/message": {showMessage: noop},
                 "protyle/util/compatibility": {isInMobileApp: () => true},
                 "config/setting/windowContext": {isSettingsWindow: () => settingsWindow,
+                    getSettingsOwnerApp: () => window.siyuan.ws?.app,
                     getSettingsWindowHost: () => ({getDockOrderSnapshot: () => { ownerReads++; return ownerSnapshot; }})},
             };
             check(id in mocks, `Missing module ${id}`);

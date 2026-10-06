@@ -799,6 +799,8 @@ interface ICommand {
 }
 
 interface IPluginData {
+    /** 内核已验证 plugin.json 的设置窗口运行声明；省略时不在设置窗口加载 */
+    settingsWindow?: boolean,
     displayName: string,
     name: string,
     js: string,

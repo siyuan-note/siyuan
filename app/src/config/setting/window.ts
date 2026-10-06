@@ -30,6 +30,10 @@ import {hideTooltip, initTooltips} from "../../dialog/tooltip";
 import {applyCloudUserState} from "../tabs/accountUi";
 import {updateServerAddresses} from "../tabs/accessRuntime";
 import {installPluginStorageFetchAppId} from "../../util/fetchAppId";
+import {createSettingsPluginApp} from "../../plugin/settingsApp";
+import {afterLayoutReady, disposePlugins, loadPlugins, refreshPlugins} from "../../plugin/loader";
+import {applyPluginReload} from "../../plugin/globalState";
+import {emitToPlugins} from "../../plugin/EventBusCore";
 import type {Dialog} from "../../dialog";
 import type {ISettingsCommand} from "./nativeWindow";
 import {getSettingTabDefs} from "./tabs";
@@ -49,12 +53,14 @@ const initialize = async () => {
     }
     setSettingsWindowHost(host);
     let disposed = false;
-    const ws = new Model({app: host.app});
+    const app = createSettingsPluginApp(Constants.SIYUAN_APPID);
+    const ws = new Model({app});
     const listeners: {channel: string; listener: Parameters<typeof ipcRenderer.on>[1]}[] = [];
     disposeSettingsWindow = () => {
         if (disposed) return;
         disposed = true;
         if (window.siyuan) window.siyuan.isReady = false;
+        disposePlugins(app);
         ws.destroy();
         listeners.forEach(({channel, listener}) => ipcRenderer.removeListener(channel, listener));
         setSettingsWindowHost(undefined);
@@ -123,9 +129,12 @@ const initialize = async () => {
     ws.connect({id: genUUID(), type: "main", callback: () => {
         if (isActive() && window.siyuan.isReady) {
             void runtime.reconnect().catch(error => console.error("Could not reconnect settings runtime", error));
+            void refreshPlugins(app).catch(error => console.error("Could not reconnect settings plugins", error));
         }
     }, msgCallback: data => {
-        if (!isActive() || !data || runtime.handleMessage(data)) return;
+        if (!isActive() || !data) return;
+        emitToPlugins("ws-main", data);
+        if (runtime.handleMessage(data)) return;
         switch (data.cmd) {
             case "logoutAuth": redirectToCheckAuth(); break;
             case "settingChanged": void refreshSettingConfig(data.data.namespace); break;
@@ -137,7 +146,10 @@ const initialize = async () => {
             case "refreshAppearance": void refreshAppearance(data.data); break;
             case "reloadInlineStyles": void reloadInlineStyles(); break;
             case "refreshtheme": refreshThemeStyle(data.data.theme); break;
-            case "reloadPlugin": void refreshSettingConfig("bazaar"); break;
+            case "reloadPlugin":
+                void refreshSettingConfig("bazaar");
+                void applyPluginReload(app, data.data).catch(error => console.error("Could not update settings plugins", error));
+                break;
             case "readonly": window.siyuan.config.editor.readOnly = data.data; break;
             case "progress": progressLoading(data); break;
             case "downloadProgress": downloadProgress(data.data); break;
@@ -252,6 +264,14 @@ const initialize = async () => {
         });
         window.addEventListener("resize", () => window.siyuan.menus.menu.resetPosition());
         await runtime.refreshSnippets();
+        if (!isActive()) return;
+        try {
+            await loadPlugins(app);
+            if (!isActive()) return;
+            void afterLayoutReady(app);
+        } catch (error) {
+            console.error("Could not load settings plugins", error);
+        }
         if (!isActive()) return;
         window.siyuan.isReady = true;
         ws.flushMainMessages();

@@ -1,5 +1,6 @@
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
+import {getSettingsOwnerApp} from "../setting/windowContext";
 import {
     getEntryCatalogDefaultVisibility,
     getEntryCatalogCustomDefaultVisibility,
@@ -216,7 +217,7 @@ export const syncDockEntryOrders = () => {
     if (window.siyuan.config.readonly) {
         return;
     }
-    refreshDockCatalog(window.siyuan.ws?.app?.plugins || []);
+    refreshDockCatalog(getSettingsOwnerApp()?.plugins || []);
     const currentOrders = getCurrentDockEntryOrderSnapshot();
     const config = cloneEntryVisibilityConfig();
     const profile = getWritableEntryProfile(config);
@@ -356,7 +357,7 @@ export const applyMenuEntryVisibility = (menuElement: HTMLElement) => {
 
 export const applyDockEntryVisibility = () => {
     /// #if !MOBILE
-    refreshDockCatalog(window.siyuan.ws?.app?.plugins || []);
+    refreshDockCatalog(getSettingsOwnerApp()?.plugins || []);
     const profile = getActiveEntryProfile();
     const current = getDockEntryOrderSnapshot();
     applyDockEntryOrderSnapshot(mergeDockEntryOrderSnapshot(
@@ -418,7 +419,7 @@ export const applyToolbarEntryVisibility = (toolbarElement: HTMLElement) => {
 
 export const refreshTopBarEntryCatalog = () => {
     /// #if !MOBILE
-    refreshTopBarCatalog(window.siyuan.ws?.app?.plugins || []);
+    refreshTopBarCatalog(getSettingsOwnerApp()?.plugins || []);
     /// #endif
 };
 

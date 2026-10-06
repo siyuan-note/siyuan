@@ -235,6 +235,7 @@ type BazaarPackage struct {
 	Kernels           []string            `json:"kernels"`
 	Backends          []string            `json:"backends"`
 	Frontends         []string            `json:"frontends"`
+	SettingsWindow    bool                `json:"settingsWindow,omitempty"` // 声明支持在独立设置窗口运行
 	BootAppearances   []string            `json:"bootAppearances,omitempty"`
 	DisplayName       BazaarLocaleStrings `json:"displayName"`
 	Description       BazaarLocaleStrings `json:"description"`

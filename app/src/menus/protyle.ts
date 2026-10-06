@@ -2327,8 +2327,12 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
     return subMenus;
 };
 
-export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string) => {
+export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string): IMenu[] => {
     const videoElement = nodeElement.querySelector(type === "NodeVideo" ? "video" : "audio");
+    const src = videoElement.getAttribute("src");
+    if (protyle.disabled) {
+        return src && src.startsWith("assets/") ? [exportAsset(src)] : [];
+    }
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{
         id: "asset",
@@ -2345,7 +2349,6 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
             });
         }
     }];
-    const src = videoElement.getAttribute("src");
     if (src && src.startsWith("assets/")) {
         subMenus.push({
             id: "separator_rename",

@@ -29,6 +29,7 @@ const runCases = async (sources) => {
     const requests = [];
     const tick = () => new Promise(resolve => setTimeout(resolve, 10));
     const stubs = {
+        "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "editor/assetOpen": {normalizeAssetOpenConfig: value => value},
         "layout/dock/backlinkRefFilterMenu": {loadBacklinkRefFilterMenu: noop},
         "protyle/render/av/editorSession": {hasAVEditorSession: () => false},

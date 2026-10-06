@@ -14,6 +14,7 @@ const sources = () => {
         "layout/dock/agent/AgentMessageRenderer",
         "layout/dock/agent/AgentScrollState",
         "layout/dock/agent/AgentReasoning",
+        "ai/reasoningEffort",
         "protyle/render/setLute",
         "protyle/util/inlineElementBoundary",
         "protyle/util/tableVirtualizationDOM",

@@ -29,6 +29,7 @@ const setup = (detached = false) => {
     const registeredCommands: ICommand[] = [];
     const document = {activeElement: {matches: () => false}};
     const dependencies: Record<string, unknown> = {
+        "../config/setting/windowContext": {isSettingsWindow: () => false},
         "../../config/setting/windowContext": {getSettingsWindowHost: (): undefined => undefined},
         "../../constants": {Constants: {SIYUAN_HOTKEY: "siyuan-hotkey"}},
         "../../util/functions": {isWindow: () => detached},

@@ -176,7 +176,7 @@ for (const file of ["src/history/doc.ts", "src/history/history.ts"]) {
                 }).outputText, {
                     openInputDialog: (options: typeof dialogs[number]) => dialogs.push(options),
                     window: {siyuan: {languages: {jumpToPage: "Page ${x}"}}},
-                    totalPage: 5, currentPage: 2, pageNumElement: {textContent: "2"}, target: {textContent: "2"},
+                    readonly: false, totalPage: 5, currentPage: 2, pageNumElement: {textContent: "2"}, target: {textContent: "2"},
                     options: {id: "doc"}, fileElement: {}, repoElement: {}, firstPanelElement: {},
                     showMessage: () => messages++,
                     renderDoc: (element: unknown, page: number) => pages.push(page),

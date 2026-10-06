@@ -43,7 +43,7 @@ const setup = (storage: Record<string, any> = {}, options: {
     const folds: Array<(zoomIn: boolean) => void> = [];
     let empty = 0;
     let sequence = 0;
-    const window: any = {siyuan: {storage: clone(storage), languages: {untitled: "Untitled"},
+    const window: any = {location: {search: ""}, siyuan: {storage: clone(storage), languages: {untitled: "Untitled"},
         config: {fileTree: {maxOpenTabCount: 32, tabStartupMode: options.mode || 0}},
         mobile: {}, menus: {menu: {remove: () => {}}}}};
     if (options.android) {
@@ -96,7 +96,8 @@ const setup = (storage: Record<string, any> = {}, options: {
         AbortController, DOMException, console});
     api.MobileTabs.prototype.renderOverview = () => {};
     api.MobileTabs.prototype.openOverview = () => {};
-    const dependencies = {window, Constants: constants, MobileTabs: api.MobileTabs,
+    const dependencies = {window, URLSearchParams, Constants: constants, MobileTabs: api.MobileTabs,
+        processMobileSystemUri: () => {}, parseSiYuanUriInfo: (url: string) => url === "external",
         getOpenNotebookCount: () => options.notebooks ?? 1,
         parseUriInfo: () => options.uri ? {id: options.uri} : {},
         openStandaloneDatabaseItemByURI: () => false, finishMobileStartup: () => {},

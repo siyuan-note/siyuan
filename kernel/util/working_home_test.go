@@ -27,16 +27,9 @@ func TestSetHomeDir(t *testing.T) {
 	}
 
 	base := t.TempDir()
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	relative, err := filepath.Rel(cwd, filepath.Join(base, "relative-home"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, path := range []string{filepath.Join(base, "absolute-home"), relative} {
-		if err = SetHomeDir(path); err != nil {
+	t.Chdir(base)
+	for _, path := range []string{filepath.Join(base, "absolute-home"), "relative-home"} {
+		if err := SetHomeDir(path); err != nil {
 			t.Fatalf("SetHomeDir(%q): %v", path, err)
 		}
 		want, _ := filepath.Abs(path)

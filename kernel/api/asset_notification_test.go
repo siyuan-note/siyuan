@@ -130,10 +130,7 @@ func testAPIContractUnusedNotificationScope(t *testing.T, attributeViews bool) {
 					var event struct {
 						Cmd  string
 						Code int
-						Data struct {
-							ID           string
-							CloseTimeout int
-						}
+						Data json.RawMessage
 					}
 					if err := connection.ReadJSON(&event); err != nil {
 						t.Fatal(err)
@@ -141,7 +138,18 @@ func testAPIContractUnusedNotificationScope(t *testing.T, attributeViews bool) {
 					if event.Cmd == "barrier" {
 						break
 					}
-					if event.Cmd != "msg" || event.Code != 0 || event.Data.ID == "" || event.Data.CloseTimeout != 5000 {
+					// 同一连接也会收到后台状态事件，仅解码并统计提示消息。
+					if event.Cmd != "msg" {
+						continue
+					}
+					var data struct {
+						ID           string
+						CloseTimeout int
+					}
+					if err := json.Unmarshal(event.Data, &data); err != nil {
+						t.Fatal(err)
+					}
+					if event.Code != 0 || data.ID == "" || data.CloseTimeout != 5000 {
 						t.Fatalf("unexpected notification: %+v", event)
 					}
 					count++

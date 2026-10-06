@@ -24,7 +24,7 @@ const sources = () => {
         node.declarationList.declarations.some(item => item.name.getText(selection) === "getEditorRange"));
     assert.ok(range);
     const wordSelection = readFileSync(path.join(__dirname, "../src/mobile/util/wordSelection.ts"), "utf8")
-        .replace("export const ", "const ");
+        .replaceAll("export const ", "const ");
     const preprocess = (source, mobile) => {
         const active = [true];
         return source.split("\n").filter(line => {

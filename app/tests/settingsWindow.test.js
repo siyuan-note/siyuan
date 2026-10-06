@@ -614,12 +614,13 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("native settings preserve plugin controls, callbacks, default dialogs and owning-window lifecycle", async () => {
+    test("native settings preserve plugin controls, callbacks, default dialogs and owning-window lifecycle", {timeout: 120000}, async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-settings-window-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         try {
-            await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 30000});
+            // 两轮窗口生命周期包含多个原生命中测试子进程，为 CI 启动开销预留时间。
+            await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 110000});
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});

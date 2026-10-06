@@ -343,7 +343,9 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             }).element);
         }
         /// #endif
-        if (!protyle.disabled) {
+        if (!window.siyuan.config.readonly && !window.siyuan.isPublish &&
+            !protyle.options.history?.created && !protyle.options.history?.snapshot &&
+            protyle.element.getAttribute("disabled-forever") !== "true") {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "fileHistory",
                 label: window.siyuan.languages.dataHistory,
@@ -353,7 +355,8 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                         app: protyle.app,
                         id: protyle.block.rootID,
                         notebookId: protyle.notebookId,
-                        pathString: response.data.name
+                        pathString: response.data.name,
+                        readonly: protyle.disabled,
                     });
                 }
             }).element);

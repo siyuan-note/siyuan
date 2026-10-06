@@ -27,7 +27,7 @@ const genCurrentVersionItem = () => `<li class="b3-list-item history__current-ve
     </span>
 </li>`;
 
-const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
+const renderDoc = (element: HTMLElement, currentPage: number, id: string, readonly: boolean) => {
     getDocHistorySnapshots(element)?.reset();
     const request = (Number(element.dataset.historyRequest) || 0) + 1;
     element.dataset.historyRequest = String(request);
@@ -79,9 +79,9 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
             logsHTML += `<li class="b3-list-item b3-list-item--hide-action" data-created="${item}">
     <div class="fn__flex-1 fn__flex-column"><span class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span><span data-history-tags="${item}"></span></div>
     <span class="fn__space"></span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
+    ${readonly ? "" : `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
-    </span>
+    </span>`}
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
         <svg><use xlink:href="#iconUncheck"></use></svg>
     </span>
@@ -93,7 +93,7 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
     });
 };
 
-const renderRepo = async (element: HTMLElement, currentPage: number, id: string) => {
+const renderRepo = async (element: HTMLElement, currentPage: number, id: string, readonly: boolean) => {
     if (element.getAttribute("data-loading") === "true") {
         return;
     }
@@ -157,7 +157,7 @@ const renderRepo = async (element: HTMLElement, currentPage: number, id: string)
         .replace("${x}", String(pageCount))
         .replace("${y}", String(response.data.totalCount));
     pageInfoElement.classList.remove("fn__none");
-    renderRepoFileList(response.data.files, listElement, false, true);
+    renderRepoFileList(response.data.files, listElement, false, true, !readonly);
     listElement.insertAdjacentHTML("afterbegin", genCurrentVersionItem());
     getDocHistorySnapshots(element)?.setEntries(response.data.files.map(file => ({
         created: file.fileID, historyPath: "", snapshots: file.snapshots || []
@@ -169,8 +169,10 @@ export const openDocHistory = (options: {
     app: App,
     id: string,
     notebookId: string,
-    pathString: string
+    pathString: string,
+    readonly?: boolean
 }) => {
+    const readonly = options.readonly || window.siyuan.config.readonly;
     let historyEditor: Protyle;
     let isLoading = false;
     const getHistoryPath = (target: Element, op: string, id: string, cb: (item: {path: string, title: string}) => void) => {
@@ -324,13 +326,13 @@ export const openDocHistory = (options: {
     repoElement.addEventListener("versionListRendered", syncVersionSelection);
     const opElement = fileElement.querySelector(".b3-select") as HTMLSelectElement;
     opElement.addEventListener("change", () => {
-        renderDoc(fileElement, 1, options.id);
+        renderDoc(fileElement, 1, options.id, readonly);
     });
     const docElement = fileElement.querySelector('.history__text[data-type="docPanel"]') as HTMLElement;
     const mdElement = fileElement.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
     const repoPreviewElement = repoElement.querySelector('[data-type="repoPanel"]') as HTMLElement;
     const repoTitleElement = repoElement.querySelector(".protyle-title__input") as HTMLElement;
-    renderDoc(fileElement, 1, options.id);
+    renderDoc(fileElement, 1, options.id, readonly);
     historyEditor = new Protyle(options.app, docElement, {
         blockId: "",
         history: {
@@ -367,6 +369,11 @@ export const openDocHistory = (options: {
         while (target && !target.isEqualNode(dialog.element)) {
             const type = target.getAttribute("data-type");
             const repoFileElement = target.closest('[data-type="searchFileItem"]');
+            if (type === "rollback" && (readonly || window.siyuan.config.readonly)) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             if (target.classList.contains("item")) {
                 target.parentElement.querySelector(".item--focus").classList.remove("item--focus");
                 Array.from(dialog.element.querySelector("#docHistoryContainer").children).forEach((item: HTMLElement) => {
@@ -376,7 +383,7 @@ export const openDocHistory = (options: {
                         target.classList.add("item--focus");
                         if (type === "repo" && item.getAttribute("data-init") !== "true" &&
                             item.getAttribute("data-loading") !== "true") {
-                            renderRepo(item, 1, options.id);
+                            renderRepo(item, 1, options.id, readonly);
                         }
                     } else {
                         item.classList.add("fn__none");
@@ -506,7 +513,7 @@ export const openDocHistory = (options: {
                 break;
             } else if ((type === "docprevious" || type === "docnext") && target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(pageNumElement.textContent);
-                renderDoc(fileElement, type === "docprevious" ? currentPage - 1 : currentPage + 1, options.id);
+                renderDoc(fileElement, type === "docprevious" ? currentPage - 1 : currentPage + 1, options.id, readonly);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -523,14 +530,14 @@ export const openDocHistory = (options: {
                             showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
                             return;
                         }
-                        renderDoc(fileElement, Math.max(1, Math.min(parseInt(value), totalPage)), options.id);
+                        renderDoc(fileElement, Math.max(1, Math.min(parseInt(value), totalPage)), options.id, readonly);
                         dialog.destroy();
                     },
                 });
             } else if ((type === "snapshotprevious" || type === "snapshotnext") &&
                 target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(repoElement.getAttribute("data-page") || "1");
-                renderRepo(repoElement, type === "snapshotprevious" ? currentPage - 1 : currentPage + 1, options.id);
+                renderRepo(repoElement, type === "snapshotprevious" ? currentPage - 1 : currentPage + 1, options.id, readonly);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -547,7 +554,7 @@ export const openDocHistory = (options: {
                             showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
                             return;
                         }
-                        renderRepo(repoElement, Math.max(1, Math.min(parseInt(value), totalPage)), options.id);
+                        renderRepo(repoElement, Math.max(1, Math.min(parseInt(value), totalPage)), options.id, readonly);
                         dialog.destroy();
                     },
                 });

@@ -22,7 +22,8 @@ interface IRepoFile {
 
 let repoFileRequestId = 0;
 
-export const renderRepoFileList = (files: IRepoFile[], element: Element, showPath: boolean, showCompare = false) => {
+export const renderRepoFileList = (files: IRepoFile[], element: Element, showPath: boolean,
+                                   showCompare = false, allowRollback = true) => {
     if (files.length === 0) {
         element.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
         return;
@@ -34,9 +35,9 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
             html += `<li class="b3-list-item b3-list-item--hide-action" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}" data-title="${escapeAttr(escapeHtml(item.title))}">
     <div class="fn__flex-1 fn__flex-column"><span class="b3-list-item__text">${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}</span><span data-history-tags="${escapeAttr(item.fileID)}"></span></div>
     <span class="fn__space"></span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
+    ${allowRollback ? `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
-    </span>
+    </span>` : ""}
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w${getHostCapabilities().importExport ? "" : " fn__none"}" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
         <svg><use xlink:href="#iconDownload"></use></svg>
     </span>
@@ -63,10 +64,10 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
                 <span class="fn__space"></span>${window.siyuan.languages.saveAs}
             </span>
             <span class="fn__space"></span>
-            <span class="b3-list-item__action" data-type="rollback">
+            ${allowRollback ? `<span class="b3-list-item__action" data-type="rollback">
                 <svg><use xlink:href="#iconUndo"></use></svg>
                 <span class="fn__space"></span> ${window.siyuan.languages.rollback}
-            </span>
+            </span>` : ""}
         </div>
     </div>
 </li>`;
@@ -83,9 +84,9 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w${getHostCapabilities().importExport ? "" : " fn__none"}" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
         <svg><use xlink:href="#iconDownload"></use></svg>
     </span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
+    ${allowRollback ? `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
-    </span>
+    </span>` : ""}
 </li>`;
         /// #endif
     });

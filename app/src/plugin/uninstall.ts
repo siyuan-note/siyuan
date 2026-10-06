@@ -109,9 +109,11 @@ export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) =>
     }
     if (!isSettingsWindow()) runCleanup(plugin, "dock catalog", () => refreshDockCatalog(app.plugins));
     /// #if !MOBILE
-    runCleanup(plugin, "top bar catalog", () => applyTopBarEntryVisibility());
-    runCleanup(plugin, "top bar layout", () => resizeTopBar());
-    runCleanup(plugin, "tab layout", () => setTabPosition(true));
+    if (!isSettingsWindow()) {
+        runCleanup(plugin, "top bar catalog", () => applyTopBarEntryVisibility());
+        runCleanup(plugin, "top bar layout", () => resizeTopBar());
+        runCleanup(plugin, "tab layout", () => setTabPosition(true));
+    }
     /// #endif
     /// #if MOBILE
     // 移动端卸载插件后，若无任何插件停靠栏则隐藏插件入口图标。

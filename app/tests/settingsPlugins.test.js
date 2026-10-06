@@ -42,7 +42,7 @@ const runCases = async sources => {
         resolvePluginToolbar: () => [], clearPluginToolbarItems() {},
         activateCustomBlockPlugin() {}, deactivateCustomBlockPlugin() {},
         refreshDockCatalog() {}, applyTopBarEntryVisibility() {},
-        resizeTopBar() {}, setTabPosition() {}, saveLayout() {},
+        resizeTopBar() {}, saveLayout() {},
         unregisterPluginCommands() {}, cancelAssetUploadsByPlugin() {}, releaseTrackedRangesByPlugin() {},
         removeBreadcrumbButtons() {}, unregisterCapability() {},
         registerPluginCommand() { throw new Error("settings registered a command"); },
@@ -51,6 +51,9 @@ const runCases = async sources => {
     };
     window.siyuan = {config: {bazaar: {petalDisabled: false}, readonly: false}, dialogs: [], layout: {}, storage: {}, ws: {app}};
     document.body.className = "body--settings";
+    const layouts = load(sources.layouts, {});
+    const tabs = load(sources.tabs, {"./getAll": layouts});
+    dependencies.setTabPosition = tabs.setTabPosition;
     const pluginAPI = load(sources.plugin, {});
     Object.assign(dependencies, pluginAPI);
     const uninstall = load(sources.uninstall, {});
@@ -192,6 +195,11 @@ if (process.versions.electron && process.type === "browser") {
                 "../src/config/setting/windowContext.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
             }).outputText;
+            for (const [key, file] of Object.entries({layouts: "getAll.ts", tabs: "tabUtil.ts"})) {
+                sources[key] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/layout", file), "utf8"), {
+                    compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
+                }).outputText;
+            }
             await win.loadURL("about:blank");
             await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)})`);
         } catch (error) {

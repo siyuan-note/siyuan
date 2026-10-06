@@ -382,6 +382,118 @@ func TestPluginServiceStreamResponse(t *testing.T) {
 	}
 }
 
+// serviceTestEval 在插件的事件循环上求值 script 并导出结果；3 秒内没有完成说明事件循环被阻塞。
+func serviceTestEval(t *testing.T, p *KernelPlugin, script string) any {
+	t.Helper()
+	result := make(chan any, 1)
+	go func() {
+		value, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
+			value, err := rt.RunString(script)
+			if err != nil {
+				return nil, err
+			}
+			return value.Export(), nil
+		})
+		if err != nil {
+			value = err
+		}
+		result <- value
+	}()
+	select {
+	case value := <-result:
+		if err, ok := value.(error); ok {
+			t.Fatalf("evaluate %q: %v", script, err)
+		}
+		return value
+	case <-time.After(3 * time.Second):
+		t.Fatalf("plugin event loop did not respond while evaluating %q", script)
+	}
+	return nil
+}
+
+// TestPluginServiceStreamResponseQueuedChunksAndStatus 验证插件在 start() 中一次性入队多块数据时，响应既不会卡住
+// 请求，也不会卡住插件的事件循环，并且使用插件指定的状态码，没有任何数据块的空流也不例外。
+func TestPluginServiceStreamResponseQueuedChunksAndStatus(t *testing.T) {
+	p, cancel := newServiceTestPlugin(t, `globalThis.siyuan={server:{private:{http:{handler:(r)=>{
+		const count = Number(r.context.path.slice(1));
+		const stream = new ReadableStream({
+			start(controller) {
+				for (let i = 0; i < count; i++) controller.enqueue(new Uint8Array([48 + i]));
+				controller.close();
+			},
+		});
+		return {statusCode: 201, body: {stream: {contentType: "text/plain", stream}}};
+	}}}}};`)
+	defer cancel()
+
+	engine := gin.New()
+	engine.Any("/plugin/private/:name/*path", serviceTestHandler)
+	server := httptest.NewServer(engine)
+	defer server.Close()
+	client := &http.Client{Timeout: 5 * time.Second}
+
+	for _, tt := range []struct{ path, want string }{{"/8", "01234567"}, {"/0", ""}} {
+		response, err := client.Get(server.URL + "/plugin/private/" + p.Name + tt.path)
+		if err != nil {
+			t.Fatalf("GET %s: %v", tt.path, err)
+		}
+		data, err := io.ReadAll(response.Body)
+		response.Body.Close()
+		if err != nil || response.StatusCode != http.StatusCreated || string(data) != tt.want {
+			t.Fatalf("GET %s = %d %q %v, want %d %q", tt.path, response.StatusCode, data, err, http.StatusCreated, tt.want)
+		}
+		serviceTestEval(t, p, "0")
+	}
+}
+
+// TestPluginServiceStreamResponseBackpressure 验证客户端不读取响应体时，内核只按写出进度向流拉取数据，插件的
+// 事件循环保持可用；客户端断开连接后流被取消。每块 1 MiB，写满连接缓冲区后写出被阻塞，拉取次数随之停止增长。
+func TestPluginServiceStreamResponseBackpressure(t *testing.T) {
+	p, cancel := newServiceTestPlugin(t, `globalThis.__pulls = 0; globalThis.__cancelled = false;
+	globalThis.siyuan={server:{private:{http:{handler:()=>({statusCode: 200, body: {stream: {stream: new ReadableStream({
+		pull(controller) { globalThis.__pulls++; controller.enqueue(new Uint8Array(1 << 20)); },
+		cancel() { globalThis.__cancelled = true; },
+	})}}})}}}};`)
+	defer cancel()
+
+	engine := gin.New()
+	engine.Any("/plugin/private/:name/*path", serviceTestHandler)
+	server := httptest.NewServer(engine)
+	defer server.Close()
+	client := &http.Client{Timeout: 5 * time.Second}
+
+	response, err := client.Get(server.URL + "/plugin/private/" + p.Name + "/endless")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pulls := func() int64 { return serviceTestEval(t, p, "globalThis.__pulls").(int64) }
+	deadline := time.Now().Add(3 * time.Second)
+	previous := pulls()
+	for {
+		time.Sleep(200 * time.Millisecond)
+		current := pulls()
+		if current == previous {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("stream kept being pulled while the client was not reading: %d pulls", current)
+		}
+		previous = current
+	}
+	if previous > 64 {
+		t.Fatalf("stream was pulled far ahead of the client: %d pulls", previous)
+	}
+
+	response.Body.Close()
+	for !serviceTestEval(t, p, "globalThis.__cancelled").(bool) {
+		if time.Now().After(deadline.Add(3 * time.Second)) {
+			t.Fatal("stream was not cancelled after the client disconnected")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+}
+
 // TestPluginServiceFileConfinedToWorkspace 校验插件私有服务只能服务工作空间内的文件。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phmw-4rgv-r4xv
 func TestPluginServiceFileConfinedToWorkspace(t *testing.T) {

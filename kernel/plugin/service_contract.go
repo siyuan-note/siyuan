@@ -145,7 +145,7 @@ func pluginServiceHTTPResponse(p *KernelPlugin, c *gin.Context, name string, res
 		} else if response.Body.Proxy != nil {
 			return pluginServiceStream(apicontract.PluginServiceProxy, 200, func() { writeProxyResponse(c, response.Body.Proxy) })
 		} else if response.Body.Stream != nil {
-			return pluginServiceStream(apicontract.PluginServiceStream, response.StatusCode, func() { p.writeStreamResponse(c, response.Body.Stream) })
+			return pluginServiceStream(apicontract.PluginServiceStream, response.StatusCode, func() { p.writeStreamResponse(c, response.StatusCode, response.Body.Stream) })
 		}
 	}
 	return pluginServiceStream(apicontract.PluginServiceEmpty, response.StatusCode, func() { c.Status(response.StatusCode) })

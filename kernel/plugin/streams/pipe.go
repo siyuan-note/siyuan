@@ -104,10 +104,20 @@ func readableStreamPipeTo(h *Host, source *readableState, destValue, optionsValu
 	writer := acquireWritableStreamDefaultWriter(h, dest)
 	source.disturbed = true
 
+	// 对应规范"If destination starts out closed or closing"：开始管道时目的地已经关闭或正在关闭，即使源流
+	// 没有任何数据也要立即以 TypeError 收尾，不能一直等待源数据。
+	destStartedClosed := dest.status == writableClosed || writableCloseQueuedOrInFlight(dest)
+
 	promise, resolve, reject := rt.NewPromise()
 	var shuttingDown bool
 
+	finalized := false
 	finalize := func(ok bool, reason goja.Value) {
+		if finalized {
+			return
+		}
+		finalized = true
+		shuttingDown = true
 		writableWriterRelease(writer)
 		readableStreamReaderGenericRelease(h, reader)
 		if ok {
@@ -155,6 +165,11 @@ func readableStreamPipeTo(h *Host, source *readableState, destValue, optionsValu
 		}
 	}
 
+	if destStartedClosed {
+		shutdown(typeErrorf(rt, "Cannot pipe to a writable stream that is closed or closing"), false)
+		return rt.ToValue(promise)
+	}
+
 	if options.signal != nil {
 		if pipeSignalAborted(options.signal) {
 			reason := pipeSignalReason(rt, options.signal)
@@ -165,6 +180,15 @@ func readableStreamPipeTo(h *Host, source *readableState, destValue, optionsValu
 			shutdown(pipeSignalReason(rt, options.signal), false)
 		})
 	}
+
+	// 目的地出错必须立即触发收尾（对应规范"Errors must be propagated backward: if dest becomes errored"），
+	// 不能只等当前这一次 write() 的结果——此时管道可能正卡在等待源数据（reader.read() 未落定）或等待
+	// writer.ready 解除背压，这两种等待都不会主动去看 write() 的结果，若不单独监听会一直挂起。因为管道
+	// 持有 dest 唯一的 writer（acquireWritableStreamDefaultWriter 要求其未被锁定），writer.closed 不会
+	// 被管道之外的代码正常 resolve，所以只需处理它的拒绝分支；shutdown 本身是幂等的，重复调用是安全的。
+	awaitResult(rt, writer.closed.value(rt), func(goja.Value) {}, func(reason goja.Value) {
+		shutdown(reason, false)
+	})
 
 	var pump func()
 	pump = func() {

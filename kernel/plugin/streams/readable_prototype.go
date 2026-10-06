@@ -150,15 +150,17 @@ func newReadableStreamPrototype(h *Host) *goja.Object {
 	})
 	defineMethod(rt, prototype, "getReader", 0, func(call goja.FunctionCall) goja.Value {
 		stream := self(call, "getReader")
-		if options := call.Argument(0); !goja.IsUndefined(options) {
-			if optionsObj, ok := options.(*goja.Object); ok {
-				if mode := optionsObj.Get("mode"); !goja.IsUndefined(mode) {
-					modeStr := mode.String()
-					if modeStr == "byob" {
-						panic(typeErrorf(rt, "ReadableStream.prototype.getReader: byte stream readers (mode: \"byob\") are not supported"))
-					}
-					panic(typeErrorf(rt, "ReadableStream.prototype.getReader: '%s' (value of 'mode' member of ReadableGetReaderOptions) is not a valid value for enumeration ReadableStreamReaderMode", modeStr))
+		if options := call.Argument(0); isJsValueNotNull(options) {
+			optionsObj, ok := options.(*goja.Object)
+			if !ok {
+				panic(typeErrorf(rt, "ReadableStream.prototype.getReader: Argument 1 can't be converted to a dictionary"))
+			}
+			if mode := dictMember(optionsObj, "mode"); mode != nil {
+				modeStr := mode.String()
+				if modeStr == "byob" {
+					panic(typeErrorf(rt, "ReadableStream.prototype.getReader: byte stream readers (mode: \"byob\") are not supported"))
 				}
+				panic(typeErrorf(rt, "ReadableStream.prototype.getReader: '%s' (value of 'mode' member of ReadableGetReaderOptions) is not a valid value for enumeration ReadableStreamReaderMode", modeStr))
 			}
 		}
 		return acquireReadableStreamDefaultReader(h, stream).jsValue()
@@ -274,7 +276,17 @@ func (h *Host) readableStreamFrom(iterable goja.Value) *goja.Object {
 		}
 		promise, resolve, reject := rt.NewPromise()
 		awaitResult(rt, result, func(value goja.Value) {
-			object := value.ToObject(rt)
+			// 对应规范 IteratorNext：next() 的返回值必须是对象，否则抛 TypeError。只用 ToObject 转换会把
+			// 数字、字符串等原始值自动装箱成临时对象、悄悄放过本该报错的输入（object.Get("done") 在装箱
+			// 对象上读不到值返回裸 nil，没有命中下面的 close 分支，而是把 undefined 当成 chunk 入队），
+			// 所以要先显式检查 value 本身是不是对象。
+			object, ok := value.(*goja.Object)
+			if !ok {
+				err := typeErrorf(rt, "ReadableStream.from: the iterator result is not an object")
+				readableControllerError(h, c, err)
+				must0(reject(err))
+				return
+			}
 			if done := object.Get("done"); done != nil && done.ToBoolean() {
 				readableControllerClose(h, c)
 			} else {

@@ -95,6 +95,32 @@ func TestAbortControllerAbort(t *testing.T) {
 	}
 }
 
+// addEventListener 的选项可以是缺少成员的字典或布尔值（以及会被转换为布尔值的其他原始值），缺少的成员按缺省值处理；
+// dispatchEvent 的参数缺少 type 成员时不派发。这些调用都不能让宿主因读取不存在的成员而崩溃。
+func TestAbortSignalListenerOptionDefaults(t *testing.T) {
+	rt := newAbortTestRuntime(t)
+
+	got := rt.run(`(() => {
+		const controller = new AbortController();
+		const signal = controller.signal;
+		const events = [];
+		signal.addEventListener("abort", () => events.push("empty"), {});
+		signal.addEventListener("abort", () => events.push("capture"), true);
+		signal.addEventListener("abort", () => events.push("string"), "yes");
+		signal.addEventListener("abort", () => events.push("once"), { once: true });
+		const dispatched = [signal.dispatchEvent({}), signal.dispatchEvent("abort")];
+		events.push("|");
+		controller.abort();
+		events.push("|");
+		signal.dispatchEvent({ type: "abort" });
+		return JSON.stringify([dispatched, events]);
+	})()`)
+	want := `[[true,true],["|","empty","capture","string","once","|","empty","capture","string"]]`
+	if got.String() != want {
+		t.Fatalf("listener options = %s, want %s", got.String(), want)
+	}
+}
+
 func TestAbortSignalDefaultReasonIsAbortError(t *testing.T) {
 	rt := newAbortTestRuntime(t)
 

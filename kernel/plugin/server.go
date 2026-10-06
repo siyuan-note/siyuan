@@ -28,6 +28,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/plugin/streams"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -309,52 +310,66 @@ func writeProxyResponse(c *gin.Context, proxy *ResponseProxy) {
 	}
 }
 
-// streamChunk 是从 ConsumeReadableStream 的 Go 回调传给响应写入循环的一条消息：done 为真时表示流已经结束
-// （err 非 nil 说明是异常结束），否则 data 是这一块要写入响应体的字节。
+// streamChunk 是从拉取一块数据的 Go 回调传给响应写入循环的一条消息：done 为真时表示流已经结束（err 非 nil
+// 说明是异常结束），否则 data 是这一块要写入响应体的字节。
 type streamChunk struct {
 	data []byte
 	done bool
 	err  error
 }
 
-// writeStreamResponse 把插件处理函数返回的 response.body.stream 逐块写入 HTTP 响应：从事件循环线程消费
-// ReadableStream，经一个有缓冲的 channel 转交给当前处理请求的 goroutine 写入 c.Writer 并立即 Flush，
-// 不等整个流读完再一次性写出。chunk 必须是 BufferSource（ArrayBuffer 或其视图，如 Uint8Array）或字符串
-// （按 UTF-8 写入），和 siyuan.client.fetch 的 response.body 用同一套鸭子类型。客户端提前断开连接时取消
-// reader，不再继续向一个没有人读的响应体生产数据。
-func (p *KernelPlugin) writeStreamResponse(c *gin.Context, response *ResponseStream) {
+// writeStreamResponse 把插件处理函数返回的 response.body.stream 逐块写入 HTTP 响应，statusCode 是插件在
+// HttpResponse.statusCode 中指定的状态码（而不是固定 200）：写入循环每写完一块、Flush 之后才向事件循环请求
+// 下一块，不提前拉取——这是背压的关键，避免插件在没有人消费数据的情况下把响应体生产得远远超前；一块数据的
+// 请求与到达都经由 p.worker.Run 异步完成，不占用事件循环线程等待任何 I/O，不会因为写入循环暂时写不出数据
+// （例如客户端读取缓慢）而卡住插件的其它脚本任务。chunk 必须是 BufferSource（ArrayBuffer 或其视图，如
+// Uint8Array）或字符串（按 UTF-8 写入），和 siyuan.client.fetch 的 response.body 用同一套鸭子类型。客户端
+// 提前断开连接时取消 reader，不再继续向一个没有人读的响应体生产数据。
+func (p *KernelPlugin) writeStreamResponse(c *gin.Context, statusCode int, response *ResponseStream) {
+	c.Writer.WriteHeader(statusCode)
 	if response.ContentType != "" {
 		c.Header("Content-Type", response.ContentType)
 	}
 
-	chunks := make(chan streamChunk, 4)
-	var cancelReader func(reason goja.Value)
+	chunks := make(chan streamChunk, 1)
+	var consumer *streams.StreamConsumer
 
-	// 用 RunSync：必须等 cancelReader 真正赋值之后才能进入下面的写入循环，否则客户端提前断开连接时，
-	// 下面处理 c.Request.Context().Done() 的分支可能在 cancelReader 还没被这个回调设置之前就去调用它。
+	// pullNext 在事件循环线程上请求下一块数据，调用方必须等上一次请求的结果（通过 chunks 收到）之后才能
+	// 再次调用，不能连续发起多次拉取。
+	pullNext := func() {
+		if runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+			consumer.PullOnVMThread(func(chunk goja.Value) error {
+				data, convertErr := streamChunkBytes(p, rt, chunk)
+				if convertErr != nil {
+					return convertErr
+				}
+				select {
+				case chunks <- streamChunk{data: data}:
+				case <-c.Request.Context().Done():
+				}
+				return nil
+			}, func(doneErr error) {
+				select {
+				case chunks <- streamChunk{done: true, err: doneErr}:
+				case <-c.Request.Context().Done():
+				}
+			})
+			return nil, nil
+		}, nil); runErr != nil {
+			select {
+			case chunks <- streamChunk{done: true, err: runErr}:
+			case <-c.Request.Context().Done():
+			}
+		}
+	}
+
 	_, runErr := p.worker.RunSync(func(rt *goja.Runtime) (_ any, err error) {
 		defer func() {
 			if r := recover(); r != nil {
 				err = fmt.Errorf("panic while starting response stream: %v", r)
 			}
 		}()
-
-		cancelReader = p.streamsHost.ConsumeReadableStream(response.Stream, func(chunk goja.Value) error {
-			data, convertErr := streamChunkBytes(p, rt, chunk)
-			if convertErr != nil {
-				return convertErr
-			}
-			select {
-			case chunks <- streamChunk{data: data}:
-			case <-c.Request.Context().Done():
-			}
-			return nil
-		}, func(doneErr error) {
-			select {
-			case chunks <- streamChunk{done: true, err: doneErr}:
-			case <-c.Request.Context().Done():
-			}
-		})
+		consumer, err = p.streamsHost.OpenReadableStreamConsumer(response.Stream)
 		return
 	})
 	if runErr != nil {
@@ -362,6 +377,16 @@ func (p *KernelPlugin) writeStreamResponse(c *gin.Context, response *ResponseStr
 		return
 	}
 
+	// cancelConsumer 让 reader 取消，不必等它自然读完，避免插件继续为无人读取的响应体生产数据；
+	// 写入循环的每一条退出路径（流自然结束之外）都要走这里，不止客户端断开连接那一条。
+	cancelConsumer := func(reason string) {
+		p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+			consumer.CancelOnVMThread(rt.NewTypeError(reason))
+			return nil, nil
+		}, nil)
+	}
+
+	pullNext()
 	for {
 		select {
 		case chunk := <-chunks:
@@ -373,15 +398,13 @@ func (p *KernelPlugin) writeStreamResponse(c *gin.Context, response *ResponseStr
 			}
 			if _, writeErr := c.Writer.Write(chunk.data); writeErr != nil {
 				logging.LogWarnf("[plugin:%s] write response stream chunk failed: %s", p.Name, writeErr)
+				cancelConsumer("failed to write the response stream chunk")
 				return
 			}
 			c.Writer.Flush()
+			pullNext()
 		case <-c.Request.Context().Done():
-			// 客户端提前断开：让 reader 取消，不必等它自然读完，避免插件继续为无人读取的响应体生产数据。
-			p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-				cancelReader(rt.NewTypeError("client disconnected"))
-				return
-			}, nil)
+			cancelConsumer("client disconnected")
 			return
 		}
 	}

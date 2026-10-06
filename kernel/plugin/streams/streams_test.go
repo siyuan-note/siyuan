@@ -332,6 +332,112 @@ func TestPipeToPropagatesSourceErrorAndAbortsDest(t *testing.T) {
 	}
 }
 
+// 目的地在 pipeTo 等待源数据期间出错：管道必须以目的地的错误拒绝并释放两端的锁；未设置 preventCancel 时以同一
+// 错误取消源流，设置时源流保持可读，之后的数据交给新的 reader 而不是被管道遗留的读取请求截走。源流的
+// highWaterMark 为 0，pull 只在有挂起的读取请求时调用，日志里的 "pull" 证明出错时管道正在等待源数据。
+func TestPipeToPropagatesDestinationErrorWhileWaitingForSource(t *testing.T) {
+	rt, _ := newTestRuntime(t)
+	got := runAsync(t, rt, `
+		const run = async (options) => {
+			const log = [];
+			let source, dest;
+			const rs = new ReadableStream({
+				start(c) { source = c; },
+				pull() { log.push("pull"); },
+				cancel(reason) { log.push("cancel:" + reason.message); },
+			}, { highWaterMark: 0 });
+			const ws = new WritableStream({ start(c) { dest = c; } });
+			const piping = rs.pipeTo(ws, options);
+			await null;
+			await null;
+			dest.error(new Error("dest failed"));
+			log.push(await piping.then(() => "resolved", (e) => "rejected:" + e.message));
+			log.push("locked:" + rs.locked + "," + ws.locked);
+			const reading = rs.getReader().read();
+			if (options) source.enqueue("later");
+			log.push("read:" + JSON.stringify(await reading));
+			return log;
+		};
+		return JSON.stringify([await run(), await run({ preventCancel: true })]);
+	`)
+	want := `[["pull","cancel:dest failed","rejected:dest failed","locked:false,false","read:{\"done\":true}"],` +
+		`["pull","rejected:dest failed","locked:false,false","pull","read:{\"value\":\"later\",\"done\":false}"]]`
+	if got != want {
+		t.Fatalf("pipeTo destination error = %s, want %s", got, want)
+	}
+}
+
+// 目的地在 pipeTo 开始前已经关闭：即使源流没有任何数据，管道也要以 TypeError 拒绝、取消源流并释放两端的锁，
+// 不能一直等待源数据。
+func TestPipeToDestinationClosedBeforePipe(t *testing.T) {
+	rt, _ := newTestRuntime(t)
+	got := runAsync(t, rt, `
+		const log = [];
+		const rs = new ReadableStream({
+			cancel(reason) { log.push("cancel:" + (reason instanceof TypeError)); },
+		}, { highWaterMark: 0 });
+		const ws = new WritableStream();
+		const writer = ws.getWriter();
+		await writer.close();
+		writer.releaseLock();
+		log.push(await rs.pipeTo(ws).then(() => "resolved", (e) => "rejected:" + (e instanceof TypeError)));
+		log.push("locked:" + rs.locked + "," + ws.locked);
+		return JSON.stringify(log);
+	`)
+	if want := `["cancel:true","rejected:true","locked:false,false"]`; got != want {
+		t.Fatalf("pipeTo closed destination = %s, want %s", got, want)
+	}
+}
+
+// getReader 的选项字典缺少 mode 成员（或为 undefined/null）时按缺省值返回默认 reader；无法转换为字典的值与不支持
+// 的 mode 抛出 TypeError。
+func TestReadableStreamGetReaderOptionDefaults(t *testing.T) {
+	rt, _ := newTestRuntime(t)
+	got := runAsync(t, rt, `
+		const results = [];
+		for (const options of [undefined, null, {}, { mode: undefined }]) {
+			const rs = new ReadableStream({ start(c) { c.enqueue("x"); c.close(); } });
+			results.push((await rs.getReader(options).read()).value);
+		}
+		for (const options of [{ mode: "byob" }, { mode: "other" }, 1]) {
+			try {
+				new ReadableStream().getReader(options);
+				results.push("no error");
+			} catch (e) {
+				results.push(e instanceof TypeError);
+			}
+		}
+		return JSON.stringify(results);
+	`)
+	if want := `["x","x","x","x",true,true,true]`; got != want {
+		t.Fatalf("getReader options = %s, want %s", got, want)
+	}
+}
+
+// ReadableStream.from 的迭代结果缺少 value 成员时按 undefined 入队；结果不是对象时流以 TypeError 出错。
+func TestReadableStreamFromIteratorResultMembers(t *testing.T) {
+	rt, _ := newTestRuntime(t)
+	got := runAsync(t, rt, `
+		const iterable = (next) => ({ [Symbol.iterator]() { return { next }; } });
+		let count = 0;
+		const missing = ReadableStream.from(iterable(() => (count++ ? { done: true } : { done: false })));
+		const first = await missing.getReader().read();
+		const results = ["value" in first, first.value === undefined, first.done];
+		for (const result of [1, undefined]) {
+			try {
+				await ReadableStream.from(iterable(() => result)).getReader().read();
+				results.push("no error");
+			} catch (e) {
+				results.push(e instanceof TypeError);
+			}
+		}
+		return JSON.stringify(results);
+	`)
+	if want := `[true,true,false,true,true]`; got != want {
+		t.Fatalf("ReadableStream.from iterator results = %s, want %s", got, want)
+	}
+}
+
 func TestTeeBothBranchesReceiveSameChunks(t *testing.T) {
 	rt, _ := newTestRuntime(t)
 	got := runAsync(t, rt, `

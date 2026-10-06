@@ -251,7 +251,9 @@ func newSignalPrototype(rt *goja.Runtime) (*goja.Object, error) {
 		once := false
 		if options := call.Argument(2); isJsValueNotNull(options) {
 			if optionsObj := options.ToObject(rt); optionsObj != nil {
-				once = optionsObj.Get("once").ToBoolean()
+				if value := dictMember(optionsObj, "once"); value != nil {
+					once = value.ToBoolean()
+				}
 			}
 		}
 
@@ -290,7 +292,9 @@ func newSignalPrototype(rt *goja.Runtime) (*goja.Object, error) {
 		eventType := ""
 		if event := call.Argument(0); isJsValueNotNull(event) {
 			if eventObj := event.ToObject(rt); eventObj != nil {
-				eventType = eventObj.Get("type").String()
+				if value := dictMember(eventObj, "type"); value != nil {
+					eventType = value.String()
+				}
 			}
 		}
 		if eventType == "abort" {

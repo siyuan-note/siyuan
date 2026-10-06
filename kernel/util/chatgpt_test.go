@@ -36,6 +36,12 @@ func TestChatGPTRequestCapabilitiesAndToolReplay(t *testing.T) {
 	if tool["type"] != "namespace" || tool["name"] != "siyuan" {
 		t.Fatal("tools not namespaced")
 	}
+	if description, ok := tool["description"].(string); !ok || strings.TrimSpace(description) == "" {
+		t.Fatal("tool namespace is missing its required description")
+	}
+	if functions, ok := tool["tools"].([]any); !ok || len(functions) != 1 || functions[0].(map[string]any)["name"] != "query" {
+		t.Fatal("namespaced tool definitions were not preserved")
+	}
 	if _, err = chatGPTRequestBody([]byte(`{"input":[],"tools":[{"type":"image_generation"}]}`)); err == nil {
 		t.Fatal("unsupported hosted tool accepted")
 	}

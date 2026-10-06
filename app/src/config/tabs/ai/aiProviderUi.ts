@@ -498,6 +498,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     let availableModelContextLengths: Record<string, number> = {};
     let hasFetchedModels = false;
     let fetchingModels = false;
+    let chatGPTAccountReady = false;
     let draggingModelIndex: number | undefined;
     let dropModelTarget: {index: number; after: boolean} | undefined;
     const updateResponsesCompatibility = () => {
@@ -741,7 +742,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             confirmButton.disabled = false;
             icon?.classList.remove("fn__rotate");
             if (draft.authType === "chatgpt" && draft.accountID !== requestedAccountID) {
-                if (draft.accountID) { fetchModels(); }
+                if (chatGPTAccountReady) { fetchModels(); }
             } else { onFinished?.(); }
         });
     };
@@ -751,10 +752,17 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             "[data-provider-field='protocol']", "[data-type='providerHeaders']"]) {
             view.querySelector(selector)?.closest(".config-item")?.classList.add("fn__none");
         }
-        mountChatGPTAccount(view, draft, ready => {
+        mountChatGPTAccount(view, draft, (ready, refreshModels) => {
+            chatGPTAccountReady = ready;
+            if (refreshModels) {
+                availableModels = [];
+                availableModelDisplayNames = {};
+                availableModelContextLengths = {};
+                hasFetchedModels = false;
+            }
             updateModelActionButtons();
             renderDraftModels(modelsContainer, draft.models, availableModels);
-            if (ready && draft.models.length === 0 && !fetchingModels) { fetchModels(); }
+            if (ready && refreshModels && draft.models.length === 0 && !fetchingModels) { fetchModels(); }
         });
     }
 

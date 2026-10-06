@@ -100,11 +100,12 @@ func chatGPTRequestBody(data []byte) ([]byte, error) {
 				}
 			}
 			body["tools"], _ = json.Marshal([]struct {
-				Type  string            `json:"type"`
-				Name  string            `json:"name"`
-				Tools []json.RawMessage `json:"tools"`
+				Type        string            `json:"type"`
+				Name        string            `json:"name"`
+				Description string            `json:"description"`
+				Tools       []json.RawMessage `json:"tools"`
 			}{
-				{Type: "namespace", Name: "siyuan", Tools: tools},
+				{Type: "namespace", Name: "siyuan", Description: "Tools for working with notes and the SiYuan workspace", Tools: tools},
 			})
 		}
 	}

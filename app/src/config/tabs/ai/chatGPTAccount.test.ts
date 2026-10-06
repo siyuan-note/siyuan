@@ -100,10 +100,11 @@ const fixture = (remote = false, initialProfiles = [account()], accountID = "") 
     });
     const draft = {authType: "chatgpt", accountID, models: [{name: "previous-model"}]};
     const ready: boolean[] = [];
-    const mount = namespace.mountChatGPTAccount as (root: unknown, draft: unknown, onChange: (ready: boolean) => void) => void;
-    mount(view, draft, value => ready.push(value));
+    const refreshes: boolean[] = [];
+    const mount = namespace.mountChatGPTAccount as (root: unknown, draft: unknown, onChange: (ready: boolean, refreshModels: boolean) => void) => void;
+    mount(view, draft, (value, refreshModels) => { ready.push(value); refreshes.push(refreshModels); });
     return {
-        controls, root, view, draft, calls, timers, ready, browserWindow, profiles, confirmations, outcomes, messages,
+        controls, root, view, draft, calls, timers, ready, refreshes, browserWindow, profiles, confirmations, outcomes, messages,
         remove: () => { view.isConnected = false; observerCallback(); },
         finish: (response: unknown) => pendingStatus(response),
     };
@@ -188,12 +189,14 @@ test("a single saved account is selected and displayed as text", () => {
     assert.equal(f.draft.models.length, 0);
     assert.equal(f.ready.at(-1), true);
     assert.equal(f.controls.login.classes.has("fn__none"), true);
+    assert.equal(f.refreshes.at(-1), false);
 });
 
 test("reopening a selected single account preserves its models", () => {
     const f = fixture(false, [account()], "account-one");
     assert.equal(f.draft.models.length, 1);
     assert.equal(f.ready.at(-1), true);
+    assert.equal(f.refreshes.at(-1), false);
 });
 
 test("logging out shows the signed-out state and retains the registration for sign-in", async () => {
@@ -249,6 +252,7 @@ test("multiple saved accounts show a picker and switching clears the previous mo
     assert.equal(f.draft.accountID, "account-two");
     assert.equal(f.draft.models.length, 0);
     assert.equal(f.ready.at(-1), true);
+    assert.equal(f.refreshes.at(-1), true);
 });
 
 test("logging in adds the first account and replaces the empty state with account information", async () => {
@@ -265,6 +269,7 @@ test("logging in adds the first account and replaces the empty state with accoun
     assert.equal(f.draft.accountID, "account-one");
     assert.equal(f.ready.at(-1), true);
     assert.equal(f.controls.login.classes.has("fn__none"), true);
+    assert.equal(f.refreshes.at(-1), true);
 });
 
 test("importing another account shows the picker with the imported account selected", async () => {
@@ -277,6 +282,7 @@ test("importing another account shows the picker with the imported account selec
     assert.equal(f.draft.accountID, "account-two");
     assert.equal(f.draft.models.length, 0);
     assert.equal(f.ready.at(-1), true);
+    assert.equal(f.refreshes.at(-1), true);
 });
 
 test("remote account settings offer import and retain account selection", async () => {

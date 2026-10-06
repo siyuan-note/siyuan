@@ -60,7 +60,8 @@ export const genChatGPTAccountHTML = () => {
     </div>`;
 };
 
-export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, onChange: (ready: boolean) => void) => {
+export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider,
+                                   onChange: (ready: boolean, refreshModels: boolean) => void) => {
     const root = view.querySelector<HTMLElement>("[data-type='chatGPTAccount']");
     const localKernel = !getHostCapabilities().remoteKernel && ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
     const picker = root.querySelector<HTMLSelectElement>("[data-chatgpt='account']");
@@ -81,7 +82,7 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
     transferButton.setAttribute("aria-expanded", "false");
     const accountLabel = (account: ChatGPTAccount) =>
         (account.email || account.name || "ChatGPT") + " (" + account.id.slice(-8) + ")";
-    const update = () => {
+    const update = (refreshModels = false) => {
         const selected = profiles.find(item => item.id === draft.accountID);
         root.querySelector<HTMLElement>("[data-chatgpt='accountRow']").classList.toggle("fn__none", profiles.length === 0 && !attemptID);
         const accountInfo = root.querySelector<HTMLElement>("[data-chatgpt='accountInfo']");
@@ -112,9 +113,9 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
         status.textContent = attemptID ? L.chatGPTSignInPendingTip : selected?.sharing ? L.mcpStatusConnected :
             selected?.connected ? L.mcpStatusAuthorizationRequired : selected ? L.chatGPTSignedOut : "";
         root.querySelector<HTMLElement>("[data-chatgpt='statusRow']").classList.toggle("fn__none", !status.textContent);
-        onChange(!!selected?.sharing && !busy && !attemptID);
+        onChange(!!selected?.sharing && !busy && !attemptID, refreshModels);
     };
-    const load = async () => {
+    const load = async (refreshModels = false) => {
         await fetchPost("/api/ai/chatgpt/accounts", undefined, response => {
             if (!disposed && response.code === 0) {
                 profiles = response.data;
@@ -123,7 +124,7 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
                     draft.models = [];
                     exportedFile = "";
                 }
-                update();
+                update(refreshModels);
             }
         });
     };
@@ -147,7 +148,7 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
                 draft.accountID = response.data.accountID;
                 attemptID = "";
                 draft.models = [];
-                await load();
+                await load(true);
             } else if (response.data.state === "failed") {
                 attemptID = "";
                 update();
@@ -160,7 +161,7 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
         draft.accountID = picker.value;
         draft.models = [];
         exportedFile = "";
-        update();
+        update(true);
     });
     const transferPassword = () => {
         if (Array.from(password.value).length < 12) {
@@ -182,6 +183,7 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
         if (action === "cancel") { stop(); update(); return; }
         if (action === "import") { if (transferPassword()) { fileInput.click(); } return; }
         let authorizationWindow: Window;
+        let refreshModels = false;
         /// #if BROWSER
         if ((action === "login" || action === "add") && !isInMobileApp()) {
             authorizationWindow = window.open("about:blank", "_blank");
@@ -220,6 +222,7 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
                     draft.accountID = "";
                     draft.models = [];
                     exportedFile = "";
+                    refreshModels = true;
                     if (!response.data.revoked) { showMessage(L.chatGPTRevokeFailed); }
                 });
                 await load();
@@ -238,7 +241,7 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
         } finally {
             if (authorizationWindow && !attemptID) { authorizationWindow.close(); }
             busy = false;
-            if (!disposed) { update(); }
+            if (!disposed) { update(refreshModels); }
         }
     });
     fileInput.addEventListener("change", async () => {
@@ -247,12 +250,17 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
         if (!file || !secret) { return; }
         if (file.size > 1024 * 1024) { showMessage(L.chatGPTRemoteTip, undefined, "error"); return; }
         busy = true; update();
+        let imported = false;
         try {
             await fetchPost("/api/ai/chatgpt/import", {password: secret, data: await file.text()}, response => {
-                if (!disposed && response.code === 0) { draft.accountID = response.data.id; draft.models = []; }
+                if (!disposed && response.code === 0) {
+                    draft.accountID = response.data.id;
+                    draft.models = [];
+                    imported = true;
+                }
             });
             await load();
-        } finally { password.value = ""; fileInput.value = ""; busy = false; if (!disposed) { update(); } }
+        } finally { password.value = ""; fileInput.value = ""; busy = false; if (!disposed) { update(imported); } }
     });
     void load();
 };

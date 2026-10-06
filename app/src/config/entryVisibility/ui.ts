@@ -48,8 +48,9 @@ import {isInMobileApp} from "../../protyle/util/compatibility";
 import {bindTouchOrder} from "./touchOrder";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
+import {getSettingsOwnerApp} from "../setting/windowContext";
 /// #if !MOBILE
-import {getSettingsOwnerApp, getSettingsWindowHost, isSettingsWindow} from "../setting/windowContext";
+import {getSettingsWindowHost, isSettingsWindow} from "../setting/windowContext";
 /// #endif
 import {
     DOCK_ORDER_SCOPES,

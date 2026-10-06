@@ -7,7 +7,10 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (sources: Record<string, string>, languages: Record<string, string>, narrow = false) => {
+const {parse} = require("ifdef-loader/preprocessor");
+
+const browserCases = async (sources: Record<string, string>, languages: Record<string, string>, narrow = false,
+                            mobileBuild = false) => {
     const check = (condition: unknown, message: string) => {
         if (!condition) {
             throw new Error(message);
@@ -78,6 +81,30 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         ui.open(root, id);
         return document.querySelector<HTMLElement>(".config-entry-visibility__view");
     };
+    if (mobileBuild) {
+        root.innerHTML = ui.genEntryVisibilityHtml();
+        ui.mountEntryVisibility(root);
+        check(root.querySelectorAll("[data-profile-id]").length === 3,
+            "Mobile build must render built-in and saved profiles on first mount");
+        const saved = JSON.stringify(config());
+        root.querySelector<HTMLElement>("[data-action='create']").click();
+        check(document.querySelector("[data-profile-field='template']"), "Create must open the new profile editor");
+        document.querySelector<HTMLElement>(".config__view [data-action='cancel']").click();
+        check(JSON.stringify(config()) === saved, "Cancelling creation must preserve saved profiles");
+        for (const id of ["simple", "full", "custom"]) {
+            document.querySelectorAll(".config-entry-visibility__view").forEach(item => item.remove());
+            root.querySelector<HTMLElement>(`[data-profile-id='${id}'] .config-name`).click();
+            const editor = document.querySelector<HTMLElement>(".config__view--show");
+            check(editor?.querySelector("[data-type='entry-section']"), "Profile cards must open the mobile editor");
+            check(Boolean(editor.querySelector("[data-action='confirm']")) === (id === "custom"),
+                "Built-in profiles must remain read-only and custom profiles editable");
+            editor.querySelector<HTMLElement>("[data-action='cancel']").click();
+        }
+        check(JSON.stringify(config()) === saved, "Viewing and cancelling profiles must preserve saved preferences");
+        root.querySelector<HTMLElement>("[data-profile-id='full'] [data-action='activate']").click();
+        check(config().active === "full", "Profile activation must work in the mobile build");
+        return "Mobile compiled settings passed";
+    }
     let view = open();
     const selectSlash = () => {
         const select = view.querySelector<HTMLSelectElement>("[data-type='entry-section']");
@@ -338,20 +365,22 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     return "Mobile entry settings passed";
 };
 
-test("mobile entry settings preserve preferences and support touch sorting without arrow controls", {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 45000,
-}, async () => {
+const runEntryUiCases = async (mobileBuild: boolean) => {
     const modules = ["config/entryVisibility/ui", "config/entryVisibility/catalog", "config/entryVisibility/order",
         "config/entryVisibility/profile", "config/entryVisibility/mobileToolbarContext",
         "config/entryVisibility/dockOrder", "config/entryVisibility/touchOrder",
         "protyle/toolbar/defaults", "mobile/util/toolbarActions", "protyle/wysiwyg/codeBlockUtil", "protyle/gutter/turnIntoMenu",
         "plugin/dockKey", "plugin/topBarKey", "util/escape"];
-    const sources = Object.fromEntries(modules.map(id => [id, transpileModule(
-        readFileSync(path.resolve(process.cwd(), "src", id + ".ts"), "utf8") +
-        (id.endsWith("/ui") ? "\nexports.open = openProfileEditor;" : ""),
-        {compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS}},
-    ).outputText]));
+    if (mobileBuild) {
+        modules.push("config/setting/windowContext");
+    }
+    const sources = Object.fromEntries(modules.map(id => {
+        const source = readFileSync(path.resolve(process.cwd(), "src", id + ".ts"), "utf8");
+        const processed = mobileBuild ? parse(source, {MOBILE: true, BROWSER: true}, false, true) : source;
+        return [id, transpileModule(processed + (id.endsWith("/ui") ? "\nexports.open = openProfileEditor;" : ""), {
+            compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
+        }).outputText];
+    }));
     const languages = JSON.parse(readFileSync(path.resolve(process.cwd(), "appearance/langs/zh-CN.json"), "utf8"));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-entry-ui-test-"));
     const script = path.join(temporary, "run.cjs");
@@ -366,13 +395,13 @@ app.whenReady().then(async () => {
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(path.resolve("appearance/icons/litheness/icon.js"))}, "utf8"));
         await win.webContents.insertCSS(require(${JSON.stringify(require.resolve("sass"))}).compile(${JSON.stringify(path.resolve("src/assets/scss/mobile.scss"))}, {logger: {warn() {}}}).css);
         await win.webContents.insertCSS(".config__tab-container {position: relative; height: 100vh;} .config__view {transition: none;}");
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(languages) + ")")}));
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(languages) + ",false," + mobileBuild + ")")}));
         await win.webContents.insertCSS("body {font-size: 20px;}");
         win.setSize(320, 640);
         await new Promise(resolve => setTimeout(resolve, 300));
         await win.webContents.executeJavaScript("document.querySelector('.config__tab-container').remove()");
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify("(" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(languages) + ",true)")}));
-        if (process.env.SIYUAN_ENTRY_UI_SCREENSHOT) {
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify("(" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(languages) + ",true," + mobileBuild + ")")}));
+        if (process.env.SIYUAN_ENTRY_UI_SCREENSHOT && !${mobileBuild}) {
             await new Promise(resolve => setTimeout(resolve, 300));
             require("node:fs").writeFileSync(process.env.SIYUAN_ENTRY_UI_SCREENSHOT, (await win.webContents.capturePage()).toPNG());
             await win.webContents.insertCSS(require("node:fs").readFileSync(${JSON.stringify(path.resolve("appearance/themes/midnight/theme.css"))}, "utf8"));
@@ -399,11 +428,19 @@ app.whenReady().then(async () => {
     try {
         const result = await promisify(execFile)(require("electron") as unknown as string, [script],
             {env, timeout: 40000, windowsHide: true});
-        assert.match(result.stdout, /Mobile entry settings passed/);
+        assert.match(result.stdout, mobileBuild ? /Mobile compiled settings passed/ : /Mobile entry settings passed/);
     } finally {
         if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) &&
             path.basename(temporary).startsWith("siyuan-entry-ui-test-")) {
             rmSync(temporary, {recursive: true, force: true});
         }
     }
-});
+};
+
+for (const mobileBuild of [false, true]) {
+    test(mobileBuild ? "mobile compiled entry settings mount profiles and bind editor actions" :
+        "mobile entry settings preserve preferences and support touch sorting without arrow controls", {
+        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+        timeout: 45000,
+    }, () => runEntryUiCases(mobileBuild));
+}

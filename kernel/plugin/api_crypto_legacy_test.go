@@ -25,7 +25,7 @@ func TestCryptoMD5InSandbox(t *testing.T) {
 
 	// digest 可以使用 MD5，结果与 RFC 1321 一致。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const hex = (b) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 
 		const digest = await subtle.digest("MD5", new TextEncoderLike("abc"));
@@ -39,7 +39,7 @@ func TestCryptoMD5InSandbox(t *testing.T) {
 
 	// HMAC-MD5 可用，向量来自 RFC 2202 用例 2。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const hex = (b) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 
 		const key = await subtle.importKey("raw", new TextEncoderLike("Jefe"),
@@ -57,7 +57,7 @@ func TestCryptoMD5InSandbox(t *testing.T) {
 
 	// HKDF 与 PBKDF2 也接受 MD5。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const results = [];
 		for (const params of [
 			{name: "HKDF", hash: "MD5", salt: new Uint8Array(8), info: new TextEncoderLike("ctx")},
@@ -80,7 +80,7 @@ func TestCryptoMD5RejectedBySignaturesInSandbox(t *testing.T) {
 
 	// RSA 生成密钥时拒绝 MD5。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const results = [];
 		for (const name of ["RSASSA-PKCS1-v1_5", "RSA-PSS", "RSA-OAEP"]) {
 			const usages = name === "RSA-OAEP" ? ["encrypt", "decrypt"] : ["sign", "verify"];
@@ -101,7 +101,7 @@ func TestCryptoMD5RejectedBySignaturesInSandbox(t *testing.T) {
 
 	// ECDSA 在签名与校验时拒绝 MD5，同一密钥用 SHA-256 仍然可用。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const pair = await subtle.generateKey({name: "ECDSA", namedCurve: "P-256"},
 			true, ["sign", "verify"]);
 		const data = new TextEncoderLike("md5 is rejected");
@@ -131,7 +131,7 @@ func TestCryptoMD5RejectedBySignaturesInSandbox(t *testing.T) {
 	// 错误消息说明原因，便于插件作者定位。
 	got = rt.await(`(async () => {
 		try {
-			await siyuan.crypto.subtle.generateKey({name: "RSA-PSS", modulusLength: 2048,
+			await crypto.subtle.generateKey({name: "RSA-PSS", modulusLength: 2048,
 				publicExponent: new Uint8Array([1, 0, 1]), hash: "MD5"}, true, ["sign"]);
 			report("resolved");
 		} catch (e) {
@@ -148,7 +148,7 @@ func TestCryptoAESECBInSandbox(t *testing.T) {
 
 	// NIST SP 800-38A F.1.1 的第一个分组，密钥与明文都取自该向量。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const hex = (b) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 		const unhex = (s) => new Uint8Array(s.match(/../g).map((x) => parseInt(x, 16)));
 
@@ -175,7 +175,7 @@ func TestCryptoAESECBInSandbox(t *testing.T) {
 
 	// 相同明文分组产生相同密文分组，且不需要 iv。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const hex = (b) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 
 		const key = await subtle.generateKey({name: "AES-ECB", length: 256}, true, ["encrypt", "decrypt"]);
@@ -192,7 +192,7 @@ func TestCryptoAESECBInSandbox(t *testing.T) {
 
 	// 填充被破坏时报 OperationError。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const key = await subtle.generateKey({name: "AES-ECB", length: 128}, true, ["encrypt", "decrypt"]);
 		const ciphertext = await subtle.encrypt({name: "AES-ECB"}, key, new TextEncoderLike("legacy"));
 
@@ -224,7 +224,7 @@ func TestCryptoAESECBRejectsWrappingInSandbox(t *testing.T) {
 
 	// AES-ECB 不支持包装密钥，声明该用法时即报错。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const results = [];
 		for (const usages of [["wrapKey"], ["unwrapKey"], ["encrypt", "wrapKey"]]) {
 			try {
@@ -257,7 +257,7 @@ func TestCryptoAESECBKeyFormatsInSandbox(t *testing.T) {
 
 	// raw 与 jwk 往返，jwk 不含 alg 成员。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const hex = (b) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 
 		const key = await subtle.generateKey({name: "AES-ECB", length: 256}, true, ["encrypt", "decrypt"]);
@@ -288,7 +288,7 @@ func TestCryptoAESECBKeyFormatsInSandbox(t *testing.T) {
 
 	// 对称密钥不支持 spki 与 pkcs8。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const key = await subtle.generateKey({name: "AES-ECB", length: 128}, true, ["encrypt"]);
 		const results = [];
 		for (const format of ["spki", "pkcs8"]) {

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Package crypto 以 Go 标准库实现 Web Crypto API 的算法层，供内核插件沙箱的 siyuan.crypto 绑定调用。
+// Package crypto 以 Go 标准库实现 Web Crypto API 的算法层，供内核插件沙箱的 globalThis.crypto 绑定调用。
 // 该包不依赖 goja，密钥材料只保存在 Go 侧，不向插件脚本暴露。
 package crypto
 

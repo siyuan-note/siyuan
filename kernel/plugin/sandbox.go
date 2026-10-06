@@ -18,8 +18,15 @@ package plugin
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
+	"io/fs"
+	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dop251/goja"
@@ -30,6 +37,10 @@ import (
 	"github.com/imroc/req/v3"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/plugin/abort"
+	"github.com/siyuan-note/siyuan/kernel/plugin/encoding"
+	"github.com/siyuan-note/siyuan/kernel/plugin/formdata"
+	"github.com/siyuan-note/siyuan/kernel/plugin/streams"
 )
 
 type WebSocketState int64
@@ -84,7 +95,7 @@ func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) (err error) {
 		}
 	}()
 
-	registry := require.NewRegistry()
+	registry := require.NewRegistry(require.WithLoader(pluginSourceLoader(p)))
 
 	registry.Enable(rt)
 	registry.RegisterNativeModule(
@@ -95,7 +106,52 @@ func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	url.Enable(rt)
 	buffer.Enable(rt)
 	console.Enable(rt)
+	encoding.Enable(rt)
+	abort.Enable(rt)
+	p.formDataHost = formdata.Enable(rt)
+	p.streamsHost = streams.Enable(rt)
 	return
+}
+
+// pluginSourceLoader 返回 require 的源码加载器，只读取插件目录（kernel.js 所在目录）内的普通文件。
+// require 以调用方脚本名为基准解析相对路径，kernel.js 的脚本名是 p.file，因此 p.file 所在目录对应插件目录；
+// 绝对路径、越出插件目录的路径以及向上查找到的 node_modules 都视为模块文件不存在，解析器会继续尝试其他候选路径。
+// 文件经插件目录句柄打开，指向插件目录之外的符号链接无法读取。
+func pluginSourceLoader(p *KernelPlugin) require.SourceLoader {
+	prefix := filepath.Dir(p.file) + string(filepath.Separator)
+	return func(name string) ([]byte, error) {
+		rel, ok := strings.CutPrefix(name, prefix)
+		if !ok || !filepath.IsLocal(rel) {
+			return nil, require.ModuleFileDoesNotExistError
+		}
+
+		root, err := os.OpenRoot(p.pluginDir)
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				return nil, require.ModuleFileDoesNotExistError
+			}
+			return nil, err
+		}
+		defer root.Close()
+
+		file, err := root.Open(rel)
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				return nil, require.ModuleFileDoesNotExistError
+			}
+			return nil, err
+		}
+		defer file.Close()
+
+		info, err := file.Stat()
+		if err != nil {
+			return nil, err
+		}
+		if !info.Mode().IsRegular() {
+			return nil, require.ModuleFileDoesNotExistError
+		}
+		return io.ReadAll(file)
+	}
 }
 
 // EnableSiyuanModule injects all siyuan.* APIs into the plugin's goja global context.
@@ -117,7 +173,7 @@ func EnableSiyuanModule(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	lo.Must0(injectClient(p, rt, siyuan))
 	lo.Must0(injectServer(p, rt, siyuan))
 	lo.Must0(injectSecretsVars(p, rt, siyuan))
-	lo.Must0(injectCrypto(p, rt, siyuan))
+	lo.Must0(injectCrypto(p, rt))
 
 	lo.Must0(ObjectFreeze(rt, siyuan))
 
@@ -157,14 +213,19 @@ func ObjectSeal(rt *goja.Runtime, obj *goja.Object) error {
 	return err
 }
 
-// ObjectSetDataMethods attaches text(), json(), buffer() and arrayBuffer() methods to a JS object,
-// each returning a Promise that resolves with the corresponding representation of data.
-func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object, data []byte) (err error) {
+// ObjectSetDataMethods 给 JS 对象添加 text()、json()、buffer()、arrayBuffer()、bytes() 与 blob() 方法，各方法返回以
+// data 的相应形式完成的 Promise。buffer()、arrayBuffer() 与 bytes() 的结果直接引用 data，不做复制；blob()
+// 返回 data 的副本，脚本修改其他方法的结果不会改变 Blob 的内容，Blob 的 type 是按 Blob 构造函数的 type 选项
+// 规范化后的 contentType（不按 MIME 类型解析）。
+func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object, data []byte, contentType string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("ObjectSetDataMethods: %v", r)
 		}
 	}()
+
+	// 使用注册时捕获的 Blob 原型与 Uint8Array 构造函数，插件脚本改写同名全局不影响返回的对象。
+	host := p.formDataHost
 
 	lo.Must0(object.Set("text", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
@@ -276,13 +337,65 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 
 		return rt.ToValue(promise)
 	})))
+	lo.Must0(object.Set("bytes", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+		promise, resolve, reject := rt.NewPromise()
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			result, err = host.NewUint8Array(rt, data)
+			return
+		}, func(rt *goja.Runtime, result any, err error) {
+			if lo.IsNil(err) {
+				if resolveErr := resolve(rt.ToValue(result)); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] data.bytes() resolve: %v", p.Name, resolveErr)
+				}
+			} else {
+				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] data.bytes() reject: %v", p.Name, rejectErr)
+				}
+			}
+		})
+		if runErr != nil {
+			logging.LogErrorf("[plugin:%s] bytes worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] data.bytes() reject: %v", p.Name, rejectErr)
+			}
+		}
+
+		return rt.ToValue(promise)
+	})))
+	lo.Must0(object.Set("blob", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+		promise, resolve, reject := rt.NewPromise()
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			result = host.NewBlob(rt, data, contentType)
+			return
+		}, func(rt *goja.Runtime, result any, err error) {
+			if lo.IsNil(err) {
+				if resolveErr := resolve(rt.ToValue(result)); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] data.blob() resolve: %v", p.Name, resolveErr)
+				}
+			} else {
+				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] data.blob() reject: %v", p.Name, rejectErr)
+				}
+			}
+		})
+		if runErr != nil {
+			logging.LogErrorf("[plugin:%s] blob worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] data.blob() reject: %v", p.Name, rejectErr)
+			}
+		}
+
+		return rt.ToValue(promise)
+	})))
 	return
 }
 
-// NewDataObject creates a new JS object with text(), json(), buffer() and arrayBuffer() methods for the given data.
-func NewDataObject(p *KernelPlugin, rt *goja.Runtime, data []byte) (*goja.Object, error) {
+// NewDataObject 创建带有 ObjectSetDataMethods 所述数据方法的 JS 对象，contentType 为 blob() 返回的 Blob 的媒体类型。
+func NewDataObject(p *KernelPlugin, rt *goja.Runtime, data []byte, contentType string) (*goja.Object, error) {
 	obj := rt.NewObject()
-	if err := ObjectSetDataMethods(p, rt, obj, data); err != nil {
+	if err := ObjectSetDataMethods(p, rt, obj, data, contentType); err != nil {
 		return nil, err
 	}
 	return obj, nil
@@ -549,7 +662,8 @@ func getRequestHandler(rt *goja.Runtime, scope AccessScope, requestType RequestT
 func requestGoToJs(p *KernelPlugin, rt *goja.Runtime, request *Request) (jsRequest goja.Value, err error) {
 	// convert body raw data to js object
 	if data, ok := request.Request.Body.Data.(*[]byte); ok && data != nil {
-		request.Request.Body.Data, err = NewDataObject(p, rt, *data)
+		contentType := http.Header(request.Request.Headers).Get("Content-Type")
+		request.Request.Body.Data, err = NewDataObject(p, rt, *data, contentType)
 		if err != nil {
 			return
 		}
@@ -560,7 +674,8 @@ func requestGoToJs(p *KernelPlugin, rt *goja.Runtime, request *Request) (jsReque
 		for _, fileList := range request.Request.Body.Form.File {
 			for _, file := range fileList {
 				if data, ok := file.Data.(*[]byte); ok && data != nil {
-					file.Data, err = NewDataObject(p, rt, *data)
+					contentType := http.Header(file.Headers).Get("Content-Type")
+					file.Data, err = NewDataObject(p, rt, *data, contentType)
 					if err != nil {
 						return
 					}

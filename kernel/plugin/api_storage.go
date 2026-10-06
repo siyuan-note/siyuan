@@ -146,7 +146,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 
 	storage := rt.NewObject()
 
-	// siyuan.storage.get(path) -> Promise<{text, json, arrayBuffer}>
+	// siyuan.storage.get(path) -> Promise<{text, json, buffer, arrayBuffer, bytes, blob}>
 	lo.Must0(storage.Set("get", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
@@ -179,9 +179,11 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 							return nil, err
 						}
 
+						// 存储文件没有媒体类型，blob() 返回的 Blob 的 type 为空串。
+						// 错误存入局部变量而不是外层的 err：外层 goroutine 返回时会读取 err，在事件循环上写入它会构成数据竞争。
 						content := rt.NewObject()
-						if err = ObjectSetDataMethods(p, rt, content, result); err != nil {
-							return nil, err
+						if setErr := ObjectSetDataMethods(p, rt, content, result, ""); setErr != nil {
+							return nil, setErr
 						}
 
 						return content, nil

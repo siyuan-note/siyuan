@@ -112987,6 +112987,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -113471,6 +113480,15 @@
           },
           {
             "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "stream",
             "statusPolicy": "plugin",
             "mediaTypes": [
               "dynamic"
@@ -115253,6 +115271,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -116094,6 +116121,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -116586,6 +116622,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -117070,6 +117115,15 @@
           },
           {
             "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "stream",
             "statusPolicy": "plugin",
             "mediaTypes": [
               "dynamic"
@@ -168794,6 +168848,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -169286,6 +169349,15 @@
             "headersOverrideMedia": true
           },
           {
+            "mode": "stream",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
             "mode": "redirect",
             "statusPolicy": "redirect",
             "mediaTypes": [
@@ -169770,6 +169842,15 @@
           },
           {
             "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "stream",
             "statusPolicy": "plugin",
             "mediaTypes": [
               "dynamic"

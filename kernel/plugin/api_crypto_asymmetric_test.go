@@ -23,7 +23,7 @@ func TestCryptoGenerateKeyPairShape(t *testing.T) {
 
 	// 非对称算法返回含 publicKey 与 privateKey 的 CryptoKeyPair。
 	got := rt.await(`(async () => {
-		const pair = await siyuan.crypto.subtle.generateKey(
+		const pair = await crypto.subtle.generateKey(
 			{name: "ECDSA", namedCurve: "P-256"}, true, ["sign", "verify"]);
 		report([
 			typeof pair,
@@ -44,7 +44,7 @@ func TestCryptoGenerateKeyPairShape(t *testing.T) {
 
 	// RSA 的 algorithm 暴露 modulusLength 与 publicExponent。
 	got = rt.await(`(async () => {
-		const pair = await siyuan.crypto.subtle.generateKey(
+		const pair = await crypto.subtle.generateKey(
 			{name: "RSA-OAEP", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256"},
 			true, ["encrypt", "decrypt"]);
 		const alg = pair.publicKey.algorithm;
@@ -65,7 +65,7 @@ func TestCryptoGenerateKeyPairShape(t *testing.T) {
 
 	// 不可导出时只有私钥不可导出，公钥始终可导出。
 	got = rt.await(`(async () => {
-		const pair = await siyuan.crypto.subtle.generateKey({name: "Ed25519"}, false, ["sign", "verify"]);
+		const pair = await crypto.subtle.generateKey({name: "Ed25519"}, false, ["sign", "verify"]);
 		report([pair.privateKey.extractable, pair.publicKey.extractable].join(","));
 	})()`)
 	if got != "false,true" {
@@ -78,7 +78,7 @@ func TestCryptoPublicExponentIsNotAliased(t *testing.T) {
 
 	// publicExponent 由内核保留并被公私钥共享，脚本修改它不应影响后续读取。
 	got := rt.await(`(async () => {
-		const pair = await siyuan.crypto.subtle.generateKey(
+		const pair = await crypto.subtle.generateKey(
 			{name: "RSA-OAEP", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256"},
 			true, ["encrypt", "decrypt"]);
 
@@ -114,7 +114,7 @@ func TestCryptoAsymmetricSignVerify(t *testing.T) {
 
 	for _, c := range cases {
 		got := rt.await(`(async () => {
-			const subtle = siyuan.crypto.subtle;
+			const subtle = crypto.subtle;
 			const pair = await subtle.generateKey(` + c.generate + `, true, ["sign", "verify"]);
 			const data = new TextEncoderLike("sign me");
 
@@ -139,7 +139,7 @@ func TestCryptoECDSAUsesOperationHash(t *testing.T) {
 
 	// ECDSA 密钥不携带 hash，摘要算法由签名参数指定，同一密钥可配不同摘要。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const pair = await subtle.generateKey({name: "ECDSA", namedCurve: "P-256"}, true, ["sign", "verify"]);
 		const data = new TextEncoderLike("hash choice");
 
@@ -165,7 +165,7 @@ func TestCryptoRSAOAEPEncryptDecrypt(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const pair = await subtle.generateKey(
 			{name: "RSA-OAEP", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256"},
 			true, ["encrypt", "decrypt"]);
@@ -194,7 +194,7 @@ func TestCryptoRSAOAEPEncryptDecrypt(t *testing.T) {
 
 	// 公钥不能解密，私钥不能加密。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const pair = await subtle.generateKey(
 			{name: "RSA-OAEP", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256"},
 			true, ["encrypt", "decrypt"]);
@@ -219,7 +219,7 @@ func TestCryptoECDHDeriveInSandbox(t *testing.T) {
 
 	for _, generate := range []string{`{name: "ECDH", namedCurve: "P-256"}`, `{name: "X25519"}`} {
 		got := rt.await(`(async () => {
-			const subtle = siyuan.crypto.subtle;
+			const subtle = crypto.subtle;
 			const alice = await subtle.generateKey(` + generate + `, true, ["deriveBits", "deriveKey"]);
 			const bob = await subtle.generateKey(` + generate + `, true, ["deriveBits", "deriveKey"]);
 			const name = alice.privateKey.algorithm.name;
@@ -231,7 +231,7 @@ func TestCryptoECDHDeriveInSandbox(t *testing.T) {
 			// 派生出的 AES 密钥可用于加解密。
 			const key = await subtle.deriveKey({name, public: bob.publicKey}, alice.privateKey,
 				{name: "AES-GCM", length: 256}, true, ["encrypt", "decrypt"]);
-			const iv = siyuan.crypto.getRandomValues(new Uint8Array(12));
+			const iv = crypto.getRandomValues(new Uint8Array(12));
 			const payload = new TextEncoderLike("shared");
 			const ciphertext = await subtle.encrypt({name: "AES-GCM", iv}, key, payload);
 			const plaintext = await subtle.decrypt({name: "AES-GCM", iv}, key, ciphertext);
@@ -251,7 +251,7 @@ func TestCryptoECDHDeriveInSandbox(t *testing.T) {
 
 	// 对方公钥算法不符时报 InvalidAccessError。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const ecdh = await subtle.generateKey({name: "ECDH", namedCurve: "P-256"}, true, ["deriveBits"]);
 		const x = await subtle.generateKey({name: "X25519"}, true, ["deriveBits"]);
 		try {
@@ -267,7 +267,7 @@ func TestCryptoECDHDeriveInSandbox(t *testing.T) {
 
 	// public 成员必须是 CryptoKey。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const ecdh = await subtle.generateKey({name: "ECDH", namedCurve: "P-256"}, true, ["deriveBits"]);
 		try {
 			await subtle.deriveBits({name: "ECDH", public: {}}, ecdh.privateKey, 128);
@@ -286,7 +286,7 @@ func TestCryptoKeyFormatsInSandbox(t *testing.T) {
 
 	// spki 与 pkcs8 往返。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const alg = {name: "ECDSA", namedCurve: "P-256"};
 		const pair = await subtle.generateKey(alg, true, ["sign", "verify"]);
 
@@ -309,7 +309,7 @@ func TestCryptoKeyFormatsInSandbox(t *testing.T) {
 
 	// jwk 往返，私钥含 d 成员。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const alg = {name: "ECDSA", namedCurve: "P-256"};
 		const pair = await subtle.generateKey(alg, true, ["sign", "verify"]);
 
@@ -329,7 +329,7 @@ func TestCryptoKeyFormatsInSandbox(t *testing.T) {
 
 	// raw 格式导出 Ed25519 与 ECDH 公钥。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const ed = await subtle.generateKey({name: "Ed25519"}, true, ["sign", "verify"]);
 		const raw = await subtle.exportKey("raw", ed.publicKey);
 		const reimported = await subtle.importKey("raw", raw, {name: "Ed25519"}, true, ["verify"]);
@@ -353,7 +353,7 @@ func TestCryptoKeyFormatsInSandbox(t *testing.T) {
 
 	// 算法不支持的格式报 NotSupportedError，不受密钥数据影响。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const results = [];
 		const key = await subtle.generateKey({name: "AES-GCM", length: 128}, true, ["encrypt"]);
 		for (const format of ["spki", "pkcs8"]) {
@@ -382,7 +382,7 @@ func TestCryptoAESKWInSandbox(t *testing.T) {
 	rt := newCryptoTestRuntime(t)
 
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const wrapping = await subtle.generateKey({name: "AES-KW", length: 256}, true, ["wrapKey", "unwrapKey"]);
 		const target = await subtle.generateKey({name: "AES-GCM", length: 128}, true, ["encrypt", "decrypt"]);
 
@@ -417,11 +417,11 @@ func TestCryptoWrapsAsymmetricKeys(t *testing.T) {
 
 	// 用 AES-GCM 包装 pkcs8 私钥，解包装后仍能签名。
 	got := rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const alg = {name: "ECDSA", namedCurve: "P-256"};
 		const pair = await subtle.generateKey(alg, true, ["sign", "verify"]);
 		const wrapping = await subtle.generateKey({name: "AES-GCM", length: 256}, true, ["wrapKey", "unwrapKey"]);
-		const iv = siyuan.crypto.getRandomValues(new Uint8Array(12));
+		const iv = crypto.getRandomValues(new Uint8Array(12));
 
 		const wrapped = await subtle.wrapKey("pkcs8", pair.privateKey, wrapping, {name: "AES-GCM", iv});
 		const unwrapped = await subtle.unwrapKey("pkcs8", wrapped, wrapping, {name: "AES-GCM", iv},
@@ -443,7 +443,7 @@ func TestCryptoAsymmetricLimits(t *testing.T) {
 	// RSA 的公开指数限制。
 	got := rt.await(`(async () => {
 		try {
-			await siyuan.crypto.subtle.generateKey(
+			await crypto.subtle.generateKey(
 				{name: "RSA-PSS", modulusLength: 2048, publicExponent: new Uint8Array([3]), hash: "SHA-256"},
 				true, ["sign"]);
 			report("resolved");
@@ -457,7 +457,7 @@ func TestCryptoAsymmetricLimits(t *testing.T) {
 
 	// RSA-PSS 的零长度盐。
 	got = rt.await(`(async () => {
-		const subtle = siyuan.crypto.subtle;
+		const subtle = crypto.subtle;
 		const pair = await subtle.generateKey(
 			{name: "RSA-PSS", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256"},
 			true, ["sign"]);
@@ -475,7 +475,7 @@ func TestCryptoAsymmetricLimits(t *testing.T) {
 	// 未知曲线。
 	got = rt.await(`(async () => {
 		try {
-			await siyuan.crypto.subtle.generateKey({name: "ECDSA", namedCurve: "P-224"}, true, ["sign"]);
+			await crypto.subtle.generateKey({name: "ECDSA", namedCurve: "P-224"}, true, ["sign"]);
 			report("resolved");
 		} catch (e) {
 			report(e.name);
@@ -488,7 +488,7 @@ func TestCryptoAsymmetricLimits(t *testing.T) {
 	// 生成密钥对时必须至少有一个私钥用法。
 	got = rt.await(`(async () => {
 		try {
-			await siyuan.crypto.subtle.generateKey({name: "ECDSA", namedCurve: "P-256"}, true, ["verify"]);
+			await crypto.subtle.generateKey({name: "ECDSA", namedCurve: "P-256"}, true, ["verify"]);
 			report("resolved");
 		} catch (e) {
 			report(e.name);

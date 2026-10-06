@@ -572,9 +572,14 @@ export class Outline extends Model {
         }
     }
 
+    public invalidateCurrent() {
+        this.currentRequestID++;
+    }
+
     public async setCurrent(nodeElement: HTMLElement) {
         const requestID = ++this.currentRequestID;
         if (!nodeElement) {
+            this.setCurrentById("");
             return;
         }
         if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
@@ -619,12 +624,8 @@ export class Outline extends Model {
                     if (!isCurrent()) {
                         return;
                     }
-                    response.data.reverse().find((item: IBreadcrumb) => {
-                        if (item.type === "NodeHeading") {
-                            this.setCurrentById(item.id);
-                            return true;
-                        }
-                    });
+                    const heading = response.data.reverse().find((item: IBreadcrumb) => item.type === "NodeHeading");
+                    this.setCurrentById(heading?.id || "");
                 });
             }
         }

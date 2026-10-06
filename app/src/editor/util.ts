@@ -44,6 +44,8 @@ import {isHiddenTabContent} from "../protyle/render/tabsVisibility";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {shouldCheckOtherWindows} from "./openFileWindow";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
+import type {Outline} from "../layout/dock/Outline";
+import {updateOutlineCurrentBlock} from "../protyle/util/outlineBlock";
 
 const isSameCustomTab = (type: string, data: any, options: IOpenFileOptions) => {
     if (!options.custom || (options.custom.id && options.custom.id !== type)) {
@@ -579,6 +581,9 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                 scrollCenter(editor.editor.protyle, undefined, options.scrollPosition);
             }
         }
+        if (nodeElement && options.action?.includes(Constants.CB_GET_OUTLINE)) {
+            updateOutlineCurrentBlock(editor.editor.protyle, nodeElement as HTMLElement);
+        }
         if (isPhablet()) {
             pushBackByEditor(editor.editor.protyle, nodeElement);
         } else {
@@ -765,12 +770,36 @@ export const isCurrentEditor = (blockId: string) => {
     return false;
 };
 
+const outlineRequests = new WeakMap<Outline, object>();
+
+const syncOutlineCurrent = (outline: Outline, protyle: IProtyle) => {
+    if (!protyle || outline.isPreview || !protyle.preview.element.classList.contains("fn__none") ||
+        outline.blockId !== protyle.block?.rootID) {
+        return;
+    }
+    const selection = getSelection();
+    const selectedRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+    const range = selectedRange && protyle.element.contains(selectedRange.startContainer) &&
+        protyle.element.contains(selectedRange.endContainer) ? selectedRange : protyle.toolbar.range;
+    const currentElement = range && protyle.wysiwyg.element.contains(range.startContainer) &&
+        protyle.wysiwyg.element.contains(range.endContainer) ?
+        hasClosestByAttribute(range.startContainer, "data-node-id", null) : undefined;
+    void outline.setCurrent(currentElement || undefined);
+};
+
 export const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
     models.outline.find(item => {
+        if (!reload && item.type === "local" && item.blockId !== protyle?.block?.rootID) {
+            return;
+        }
+        const request = {};
+        outlineRequests.set(item, request);
+        item.invalidateCurrent();
+        const isPreview = protyle ? !protyle.preview.element.classList.contains("fn__none") : false;
         if (reload ||
             (item.type === "pin" &&
                 (!protyle || item.blockId !== protyle.block?.rootID ||
-                    item.isPreview === protyle.preview.element.classList.contains("fn__none"))
+                    item.isPreview !== isPreview)
             )
         ) {
             let blockId = "";
@@ -780,39 +809,33 @@ export const updateOutline = (models: IModels, protyle: IProtyle, reload = false
                     blockId = item.blockId;
                 }
             }
-            if (blockId === item.blockId && !reload && item.isPreview !== protyle.preview.element.classList.contains("fn__none")) {
-                return;
-            }
-
             const outlineParam: IObject = {
                 id: blockId,
-                preview: !protyle.preview.element.classList.contains("fn__none")
+                preview: isPreview
             };
             if (protyle && isEncryptedBox(protyle.notebookId)) {
                 outlineParam.notebook = protyle.notebookId;
             }
             fetchPost("/api/outline/getDocOutline", outlineParam, response => {
-                if (!reload && (!isCurrentEditor(blockId) || item.blockId === blockId) &&
-                    item.isPreview !== protyle.preview.element.classList.contains("fn__none")) {
+                if (outlineRequests.get(item) !== request) {
                     return;
                 }
-                item.isPreview = !protyle.preview.element.classList.contains("fn__none");
+                if (protyle && (!protyle.element.isConnected ||
+                    isPreview === protyle.preview.element.classList.contains("fn__none") ||
+                    (item.type === "pin" && (protyle.element.classList.contains("fn__none") || !isCurrentEditor(blockId))))) {
+                    return;
+                }
+                item.isPreview = isPreview;
                 item.update(response, blockId, protyle?.notebookId || "");
                 if (protyle) {
                     item.updateDocTitle(protyle.background.ial, Array.isArray(response.data) ? response.data.length : 0);
-                    if (getSelection().rangeCount > 0) {
-                        const startContainer = getSelection().getRangeAt(0).startContainer;
-                        if (protyle.wysiwyg.element.contains(startContainer)) {
-                            const currentElement = hasClosestByAttribute(startContainer, "data-node-id", null);
-                            if (currentElement) {
-                                item.setCurrent(currentElement);
-                            }
-                        }
-                    }
+                    syncOutlineCurrent(item, protyle);
                 } else {
                     item.updateDocTitle();
                 }
             });
+        } else {
+            syncOutlineCurrent(item, protyle);
         }
     });
 };

@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {screenToGraph} from "./core";
 
 const noop = () => {};
 
@@ -16,13 +17,13 @@ const setup = () => {
     const listeners = new Map<string, (event: unknown) => void>();
     const canvas = () => ({setAttribute: noop, addEventListener: noop, removeEventListener: noop, remove: noop});
     runInNewContext(code, {
-        exports, require: () => ({GraphLabelRenderer: class {destroy = noop;}}),
+        exports, require: () => ({GraphLabelRenderer: class {destroy = noop;}, screenToGraph}),
         document: {createElement: canvas},
         ResizeObserver: class {observe = noop; disconnect = noop;},
     });
     Object.assign(exports.GraphEngine.prototype, {
         resize: noop, createRenderer: () => ({destroy: noop}), scheduleRender: noop,
-        hideTooltip: noop, stopLayout: noop, resetInteraction: noop,
+        hideTooltip: noop, stopLayout: noop, resetInteraction: noop, updateCursor: noop,
     });
     const container = {append: noop,
         getBoundingClientRect: () => ({left: 40, top: 60}),
@@ -30,7 +31,9 @@ const setup = () => {
         removeEventListener: (name: string) => listeners.delete(name)};
     const menus: import("./types").IGraphNodeContextMenu[] = [];
     let clicks = 0;
+    let closedMenus = 0;
     const engine = new exports.GraphEngine(container as unknown as HTMLElement, {
+        onPointerDown: () => { closedMenus++; },
         onNodeClick: () => { clicks++; },
         onNodeContextMenu: details => {
             if (details.node.type !== "NodeDocument") { return false; }
@@ -49,7 +52,7 @@ const setup = () => {
             preventDefault: () => { prevented = true; }, stopPropagation: () => { stopped = true; }});
         return {prevented, stopped};
     };
-    return {state, listeners, menus, context, clicks: () => clicks};
+    return {state, listeners, menus, context, clicks: () => clicks, closedMenus: () => closedMenus};
 };
 
 test("graph context menu resolves transformed coordinates without opening or dragging the document", () => {
@@ -65,6 +68,25 @@ test("graph context menu resolves transformed coordinates without opening or dra
     assert.equal(clicks(), 0);
     state.destroy();
     assert.equal(listeners.has("contextmenu"), false);
+});
+
+test("starting a graph background interaction dismisses menus before preventing pointer defaults", () => {
+    const {listeners, closedMenus, state, clicks} = setup();
+    listeners.get("pointerdown")({pointerType: "mouse", button: 0, pointerId: 1, clientX: 500, clientY: 500,
+        preventDefault: () => { assert.equal(closedMenus(), 1); }});
+    assert.equal(state.selected, -1);
+    assert.equal(state.pointers.size, 1);
+    assert.equal(clicks(), 0);
+});
+
+test("an empty graph still dismisses menus while secondary mouse buttons do not start an interaction", () => {
+    const {listeners, closedMenus, state} = setup();
+    Object.assign(state, {data: undefined});
+    listeners.get("pointerdown")({pointerType: "mouse", button: 2});
+    assert.equal(closedMenus(), 0);
+    listeners.get("pointerdown")({pointerType: "touch", button: 0});
+    assert.equal(closedMenus(), 1);
+    assert.equal(state.pointers.size, 0);
 });
 
 test("graph background and tag nodes do not receive a document context menu", () => {

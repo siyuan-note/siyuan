@@ -576,7 +576,11 @@ export class GraphEngine {
     }
 
     private readonly handlePointerDown = (event: PointerEvent) => {
-        if (!this.data || (event.pointerType === "mouse" && event.button !== 0)) {
+        if (event.pointerType === "mouse" && event.button !== 0) {
+            return;
+        }
+        this.engineOptions.onPointerDown?.();
+        if (!this.data) {
             return;
         }
         const pointer = this.getPointer(event);

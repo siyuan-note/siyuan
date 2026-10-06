@@ -14,7 +14,8 @@ const loadModule = (path: string, mobile: boolean, dependencies: Record<string, 
     const code = transpileModule(source, {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
-    runInNewContext(code, {exports, require: (name: string) => dependencies[name] || {}, ...globals});
+    runInNewContext(code, {exports, require: (name: string) => name === "./documentMenu" ?
+        loadModule("protyle/header/documentMenu.ts", mobile, dependencies, globals) : dependencies[name] || {}, ...globals});
     return exports;
 };
 
@@ -38,7 +39,7 @@ for (const mobile of [false, true]) {
                 "../../menus/Menu": {MenuItem: class {element: IMenu; constructor(item: IMenu) { this.element = item; }}},
                 "../../menus/commonMenuItem": {copySubMenu: (): IMenu[] => [], exportMd: () => ({}), movePathToMenu: () => ({})},
                 "../../util/fetch": {fetchPost: (_url: string, _body: unknown, callback: (response: unknown) => void) =>
-                    callback({data: {name: "Document", ial: {id: "20231011123456", updated: "20231011123456"}}})},
+                    callback({code: 0, data: {name: "Document", ial: {id: "20231011123456", updated: "20231011123456"}}})},
                 "../../history/doc": {openDocHistory: (options: typeof opened[number]) => opened.push(options)},
                 "../../util/pathName": {isEncryptedBox: () => false},
                 "../../util/hostCapabilities": {getHostCapabilities: () => ({})},

@@ -124,12 +124,12 @@ export const openWechatNotify = (nodeElement: Element) => {
     });
 };
 
-export const openFileWechatNotify = (protyle: IProtyle) => {
+export const openFileWechatNotify = (id: string, notebookId: string) => {
     const docInfoParam: BlockQueryRequestInput = {
-        id: protyle.block.rootID
+        id
     };
-    if (isEncryptedBox(protyle.notebookId)) {
-        docInfoParam.notebook = protyle.notebookId;
+    if (isEncryptedBox(notebookId)) {
+        docInfoParam.notebook = notebookId;
     }
     fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
         const reminder = response.data.ial[Constants.CUSTOM_REMINDER_WECHAT];
@@ -160,7 +160,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
             dialog.destroy();
         });
         btnsElement[1].addEventListener("click", () => {
-            fetchPost("/api/block/setBlockReminder", {id: protyle.block.rootID, timed: "0"}, () => {
+            fetchPost("/api/block/setBlockReminder", {id, timed: "0"}, () => {
                 dialog.destroy();
             });
         });
@@ -172,7 +172,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
                     return;
                 }
                 fetchPost("/api/block/setBlockReminder", {
-                    id: protyle.block.rootID,
+                    id,
                     timed: dayjs(date).format("YYYYMMDDHHmmss")
                 }, () => {
                     dialog.destroy();

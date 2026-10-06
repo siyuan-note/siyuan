@@ -12,10 +12,10 @@ import {openGlobalSearch} from "../../search/util";
 import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {Editor} from "../../editor";
-import {getDocDisplayName, isEncryptedBox, pathPosix} from "../../util/pathName";
+import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {GraphEngine} from "./graph/GraphEngine";
 import {IGraphNodeClick, IGraphNodeContextMenu, IGraphSourceLink, IGraphSourceNode} from "./graph/types";
-import {initDocumentMenu} from "../../menus/navigation";
+import {openDocumentMenu} from "../../protyle/header/documentMenu";
 import {Constants} from "../../constants";
 
 interface IGraphSearchOptions {
@@ -687,6 +687,7 @@ export class Graph extends Model {
     private ensureGraphEngine() {
         if (!this.graphEngine) {
             this.graphEngine = new GraphEngine(this.graphElement, {
+                onPointerDown: () => window.siyuan.menus.menu.remove(),
                 onNodeClick: (details) => this.openGraphNode(details),
                 onNodeContextMenu: (details) => {
                     if (details.node.type !== "NodeDocument") {
@@ -778,32 +779,22 @@ export class Graph extends Model {
                 !info.data.box || !info.data.path || doc.data.rootID !== details.node.id) {
                 return;
             }
-            const siblings = await fetchSyncPost("/api/filetree/listDocsByPath", {
-                notebook: info.data.box,
-                path: pathPosix().dirname(info.data.path),
-                maxListCount: 1,
-                ignoreMaxListHint: true,
-            }, undefined, false, abort.signal);
-            if (request !== this.menuRequestVersion || !this.graphElement.isConnected || siblings.code !== 0) {
+            if (!this.graphElement.isConnected) {
                 return;
             }
-            const sortValue = doc.data.ial?.[Constants.CUSTOM_SY_SUBDOC_SORT_MODE];
-            const sortMode = sortValue ? Number(sortValue) : null;
             const position = {x: details.x, y: details.y};
-            initDocumentMenu(this.app, {
+            openDocumentMenu({
+                app: this.app,
                 id: details.node.id,
                 notebookId: info.data.box,
                 path: info.data.path,
-                name: doc.data.name,
-                subFileCount: doc.data.subFileCount,
-                childrenSortMode: Number.isInteger(sortMode) ? sortMode : null,
-                customSort: siblings.data.effectiveSortMode === 6,
+                docInfo: doc.data,
                 target: this.graphElement,
-                elements: this.graphElement.querySelectorAll<HTMLElement>(".b3-list-item"),
                 position,
-                readonlyHistory: window.siyuan.config.editor.readOnly ||
+                from: "graph",
+                disabled: window.siyuan.config.readonly || window.siyuan.config.editor.readOnly ||
                     doc.data.ial?.[Constants.CUSTOM_SY_READONLY] === "true",
-            }).popup(position);
+            });
         } catch (error) {
             if (!abort.signal.aborted) {
                 console.warn("Unable to open graph document menu", error);

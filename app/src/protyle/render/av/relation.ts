@@ -121,7 +121,8 @@ const setDatabase = (avId: string, element: HTMLElement, item: HTMLElement) => {
 
 export const openSearchAV = (options: IOpenSearchAVOptions) => {
     window.siyuan.menus.menu.remove();
-    const menu = new Menu();
+    let cancelSearch: () => void;
+    const menu = new Menu(undefined, () => cancelSearch?.());
     menu.addItem({
         iconHTML: "",
         type: "empty",
@@ -138,16 +139,26 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
             let searchTimer = 0;
             let requestSequence = 0;
             let controller: AbortController;
+            let closed = false;
+            cancelSearch = () => {
+                closed = true;
+                clearTimeout(searchTimer);
+                requestSequence++;
+                controller?.abort();
+            };
             // 列表内容变化后重新适配菜单位置和面板高度。
             const updateMenuPosition = () => {
                 window.siyuan.menus.menu.resetPosition();
             };
             const loadList = (keyword: string, cb?: () => void) => {
+                if (closed) {
+                    return;
+                }
                 controller?.abort();
                 controller = new AbortController();
                 const currentSequence = ++requestSequence;
                 genSearchList(listElement, keyword, options, controller.signal, () => {
-                    if (currentSequence !== requestSequence) {
+                    if (closed || currentSequence !== requestSequence) {
                         return;
                     }
                     cb?.();
@@ -155,6 +166,9 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
                 });
             };
             const search = () => {
+                if (closed) {
+                    return;
+                }
                 controller?.abort();
                 requestSequence++;
                 clearTimeout(searchTimer);

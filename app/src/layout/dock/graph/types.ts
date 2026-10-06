@@ -95,6 +95,7 @@ export interface IGraphNodeContextMenu extends Omit<IGraphNodeClick, "event"> {
 export interface IGraphEngineOptions {
     onNodeClick: (details: IGraphNodeClick) => void;
     onNodeContextMenu?: (details: IGraphNodeContextMenu) => boolean;
+    onPointerDown?: () => void;
 }
 
 export interface IGraphSetDataOptions {

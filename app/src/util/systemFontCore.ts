@@ -7,6 +7,19 @@ export interface IFontItem {
     spacing?: string;
 }
 
+export const parseSystemFontsJSON = (json: string): IFontItem[] => {
+    const value: unknown = JSON.parse(json);
+    if (!Array.isArray(value)) {
+        throw new Error("Invalid system font list");
+    }
+    return value.filter((font): font is IFontItem => font && typeof font.family === "string" &&
+        font.family.trim() && typeof font.displayName === "string" &&
+        Number.isInteger(font.weight) && font.weight >= 1 && font.weight <= 1000 &&
+        (font.aliases === undefined || (Array.isArray(font.aliases) &&
+            font.aliases.every((alias: unknown) => typeof alias === "string"))) &&
+        (font.spacing === undefined || typeof font.spacing === "string"));
+};
+
 export const getFontFamilyDisplayName = (fonts: IFontItem[], family?: string) => {
     if (!family) {
         return family;

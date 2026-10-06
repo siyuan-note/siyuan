@@ -93,8 +93,9 @@ const createPendingFontMenu = (key: string) => {
     });
     const appearance = load("src/config/tabs/appearanceTab.ts", {
         "../../plugin/Menu": pluginMenu,
-        "../../util/customFont": {supportsCustomFonts: () => false},
-        "../../util/systemFont": {loadSystemFonts: () => new Promise(resolve => { resolveFonts = resolve; })},
+        "../../util/availableFont": {loadAvailableFonts: () => new Promise(resolve => {
+            resolveFonts = fonts => resolve({customFontSupported: false, customFonts: [], fontItems: fonts});
+        })},
         "../../util/functions": {isMobile: () => false},
         "../../util/escape": {escapeAttr: (text: string) => text},
     }, "\nexports.mountAppearanceFontFamily = mountAppearanceFontFamily;");

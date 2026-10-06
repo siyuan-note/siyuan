@@ -30,15 +30,13 @@ import {upDownHint} from "../../util/upDownHint";
 import {isThemeFrontendSupported} from "../../util/themeCompatibility";
 import {setEditorFontSize} from "../../util/editorFontSize";
 import {
-    ICustomFont,
     invalidateCustomFonts,
-    supportsCustomFonts,
-    loadCustomFonts,
     registerCustomFont,
     unregisterCustomFont
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
-import {IFontItem, loadSystemFonts} from "../../util/systemFont";
+import {IFontItem} from "../../util/systemFontCore";
+import {loadAvailableFonts} from "../../util/availableFont";
 import {observeFontPreview} from "../../util/fontPreview";
 import {
     shouldShowBootAppearanceSetting,
@@ -80,19 +78,6 @@ const getEditorFontDisplay = (fonts: IFontItem[]) =>
 
 const isCodeFont = (font: Pick<IFontItem, "spacing">) =>
     font.spacing === "monospace" || font.spacing === "dual" || font.spacing === "character-cell";
-
-const loadAvailableFonts = async () => {
-    const customFontSupported = supportsCustomFonts();
-    const [systemFonts, customFonts] = await Promise.all([
-        loadSystemFonts(),
-        customFontSupported ? loadCustomFonts() : Promise.resolve([] as ICustomFont[])
-    ]);
-    return {
-        customFontSupported,
-        customFonts,
-        fontItems: [...customFonts, ...systemFonts],
-    };
-};
 
 const genFontConfigHtml = (configKey: FontFamiliesConfigKey, title: string, description: string) => {
     const fonts = getConfiguredFonts(getFontConfig(), configKey);

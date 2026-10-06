@@ -8,6 +8,7 @@ import {afterExport} from "./util";
 /// #endif
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {getThemeMode, setInlineStyle} from "../../util/assets";
+import {getCustomFontStyle} from "../../util/customFont";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
@@ -360,6 +361,7 @@ const renderPDF = async (id: string) => {
             visibility: hidden;
         }
         ${await setInlineStyle(false, servePath)}
+        ${getHostCapabilities().customAppearance ? await getCustomFontStyle() : ""}
         ${await getPluginStyle()}
     </style>
     ${getSnippetCSS()}
@@ -1146,7 +1148,7 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
     <!-- Exported by SiYuan v${Constants.SIYUAN_VERSION} -->
     <style>
         body {font-family: var(--b3-font-family);background-color: var(--b3-theme-background);color: var(--b3-theme-on-background)}
-        ${await setInlineStyle(false, servePath)}
+        ${await setInlineStyle(false, servePath, data.data.content)}
         ${await getPluginStyle()}
         ${mobileHtml.css}
     </style>

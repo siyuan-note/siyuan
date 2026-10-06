@@ -338,7 +338,7 @@ export const initAssets = (keepLoading = false) => {
     });
 };
 
-export const setInlineStyle = async (set = true, servePath = "../../../") => {
+export const setInlineStyle = async (set = true, servePath = "../../../", exportHTML = "") => {
     const allowCustomAppearance = getHostCapabilities().customAppearance;
     const globalFonts = allowCustomAppearance ? window.siyuan.config.appearance.globalFontFamilies || [] : [];
     const editorFonts = allowCustomAppearance ? window.siyuan.config.editor.fontFamilies || [] : [];
@@ -360,7 +360,8 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
     let style = getEmojiFontStyle(emojiPlatform, servePath);
     style += getGlobalFontStyle(globalFonts);
     if (!set) {
-        style += "\n" + await getExportCustomFontStyle([...globalFonts, ...editorFonts, ...codeFonts]);
+        style += "\n" + await getExportCustomFontStyle([...globalFonts, ...editorFonts, ...codeFonts],
+            allowCustomAppearance ? exportHTML : "");
     }
     const editorFontFamilies = editorFonts.map((font) => CSS.escape(font.family)).join(", ");
     const editorFontWeight = editorFonts[0]?.weight;

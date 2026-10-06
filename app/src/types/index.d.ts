@@ -244,6 +244,7 @@ interface Window {
         logInputEvent?(details: string): void
     };
     JSHarmony: {
+        getSystemFonts?(): Promise<string>
         openAuthURL(url: string): void
         showKeyboard(): void
         hideKeyboard(): void

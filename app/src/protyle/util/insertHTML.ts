@@ -12,6 +12,7 @@ import {copyTableCellContent} from "./tableCellRich";
 import {
     fixAdjacentTags,
     getContenteditableElement,
+    getNextBlockSibling,
     getParentBlock,
     getPreviousBlockSibling
 } from "../wysiwyg/getBlock";
@@ -66,6 +67,8 @@ import {resetCodeBlockRenderState} from "./codeBlockRenderState";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
 import {renderIFrameResize} from "../render/iframeResize";
+import {genEmptyElement} from "../../block/util";
+import {resumeMobileEditorAfterInsertion} from "../../mobile/util/keyboardToolbar";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -1397,6 +1400,19 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
     normalizeHTMLAssetIFrameSources(tempElement.content);
     markFoldHeadingChildren(tempElement.content);
+    let mobileVideoFocus: Element;
+    if (isMobile() && !templateDocTreePlanID &&
+        tempElement.content.lastElementChild?.getAttribute("data-type") === "NodeVideo") {
+        // 视频插入后在同一容器内继续编辑，新增段落与视频共用一次撤销事务。
+        const nextElement = insertBefore ? blockElement : getNextBlockSibling(blockElement);
+        if (nextElement?.getAttribute("data-type") === "NodeParagraph" &&
+            nextElement.getAttribute("fold") !== "1" && !nextElement.hasAttribute("parent-heading")) {
+            mobileVideoFocus = nextElement;
+        } else {
+            mobileVideoFocus = genEmptyElement(false, false);
+            tempElement.content.appendChild(mobileVideoFocus);
+        }
+    }
     (insertBefore ? Array.from(tempElement.content.children) : Array.from(tempElement.content.children).reverse()).find((item) => {
         let addId = item.getAttribute("data-node-id");
         const hasParentHeading = item.getAttribute("parent-heading");
@@ -1491,7 +1507,12 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         });
         blockElement.remove();
     }
-    if (lastElement) {
+    if (mobileVideoFocus) {
+        const focusRange = focusBlock(mobileVideoFocus);
+        if (focusRange) {
+            resumeMobileEditorAfterInsertion(protyle, focusRange);
+        }
+    } else if (lastElement) {
         // https://github.com/siyuan-note/siyuan/issues/5591
         focusBlock(lastElement, undefined, false);
     }

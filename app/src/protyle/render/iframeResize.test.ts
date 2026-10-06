@@ -10,7 +10,7 @@ import {createSourceFile, isClassDeclaration, isIfStatement, isVariableStatement
 
 const browserCases = async (renderSource: string, resizeSource: string, luteSource: string, css: string,
                             bridgeSource: string, coreSource: string, insertSources: Record<string, string>,
-                            hintSource: string, menuSource: string) => {
+                            hintSource: string, menuSource: string, mobileCSS: string) => {
     const check: typeof assert = require("node:assert/strict");
     document.body.replaceChildren();
     new Function(luteSource)();
@@ -35,13 +35,32 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
     root.dataset.readonly = "false";
     document.body.appendChild(root);
     const inserts: {operations: IOperation[], undo: IOperation[]}[] = [];
+    let mobileInsertion = false;
+    let videoInsertion = false;
+    let resumed = 0;
     const modules: Record<string, unknown> = {
+        "src/util/functions": {isMobile: () => mobileInsertion},
         "src/constants": {Constants: {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing"}},
         "src/util/hostCapabilities": {getHostCapabilities: () => ({remoteKernel: false})},
         "src/protyle/util/selection": {
             getEditorRange: () => window.getSelection().getRangeAt(0),
-            focusBlock() {},
+            focusBlock: (element: Element) => {
+                if (!videoInsertion) {
+                    return;
+                }
+                const range = document.createRange();
+                range.selectNodeContents(element.querySelector('[contenteditable="true"]') || element);
+                range.collapse(true);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                return range;
+            },
         },
+        "src/mobile/util/keyboardToolbar": {resumeMobileEditorAfterInsertion: (protyle: IProtyle, range: Range) => {
+            resumed++;
+            const {restoreEditorFocusRange} = load("src/protyle/util/editorFocus") as typeof import("../util/editorFocus");
+            check.equal(restoreEditorFocusRange(protyle.wysiwyg.element, range), true);
+        }},
         "src/protyle/wysiwyg/transaction": {
             transaction: (_protyle: IProtyle, operations: IOperation[], undo: IOperation[]) => inserts.push({operations, undo}),
         },
@@ -98,6 +117,131 @@ const browserCases = async (renderSource: string, resizeSource: string, luteSour
             }
         }
     }
+    const replay = (operations: IOperation[]) => {
+        operations.forEach(operation => {
+            const current = root.querySelector(`[data-node-id="${operation.id}"]`);
+            if (operation.action === "delete") {
+                current?.remove();
+                return;
+            }
+            if (typeof operation.data !== "string") {
+                throw new Error("Block insertion and update operations must contain serialized block DOM");
+            }
+            const holder = document.createElement("template");
+            holder.innerHTML = operation.data;
+            if (operation.action === "update") {
+                current.replaceWith(holder.content);
+            } else {
+                const previous = root.querySelector(`[data-node-id="${operation.previousID}"]`);
+                const next = root.querySelector(`[data-node-id="${operation.nextID}"]`);
+                if (previous) {
+                    previous.after(holder.content);
+                } else if (next) {
+                    next.before(holder.content);
+                } else {
+                    (root.querySelector(`[data-node-id="${operation.parentID}"]`) || root).prepend(holder.content);
+                }
+            }
+        });
+        root.querySelectorAll("wbr").forEach(marker => marker.remove());
+    };
+    videoInsertion = true;
+    window.siyuan = {config: {editor: {spellcheck: false}}} as typeof window.siyuan;
+    for (const mobile of [false, true]) {
+        mobileInsertion = mobile;
+        for (const container of ["document", "list", "quote"]) {
+            for (const following of ["none", "paragraph", "video"]) {
+                for (const empty of [false, true]) {
+                    root.innerHTML = lute.Md2BlockDOM(container === "list" ? "- Start" : container === "quote" ? "> Start" : "Start");
+                    const paragraph = root.querySelector('[data-type="NodeParagraph"]');
+                    const parent = paragraph.parentElement;
+                    if (empty) {
+                        paragraph.firstElementChild.replaceChildren();
+                    }
+                    if (following !== "none") {
+                        paragraph.insertAdjacentHTML("afterend", following === "paragraph" ? lute.Md2BlockDOM("Continue here") :
+                            lute.SpinBlockDOM('<video src="assets/existing.mp4" controls="controls"></video>'));
+                    }
+                    const next = paragraph.nextElementSibling;
+                    const before = lute.BlockDOM2StdMd(root.innerHTML);
+                    const range = document.createRange();
+                    range.selectNodeContents(paragraph.firstElementChild);
+                    range.collapse(false);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                    const protyle = {lute, wysiwyg: {element: root}, toolbar: {range, getCurrentType: () => []},
+                        block: {parentID: "document"}} as IProtyle;
+                    resumed = 0;
+                    inserts.length = 0;
+                    insertHTML(lute.SpinBlockDOM('<video src="assets/inserted.mp4" controls="controls"></video>'),
+                        protyle, true, true);
+                    const video = root.querySelector('video[src="assets/inserted.mp4"]').closest('[data-type="NodeVideo"]');
+                    check.equal(video.parentElement, parent, "insertion stays in the original container");
+                    check.equal(inserts.length, 1);
+                    check.equal(resumed, mobile ? 1 : 0);
+                    if (mobile) {
+                        const target = video.nextElementSibling;
+                        check.equal(target.getAttribute("data-type"), "NodeParagraph");
+                        check.equal(document.activeElement, target.firstElementChild);
+                        check.ok(target.contains(window.getSelection().anchorNode));
+                        if (following === "paragraph") {
+                            check.equal(target, next, "reuse the next paragraph without overwriting it");
+                            check.equal(target.firstElementChild.textContent, "Continue here");
+                        } else {
+                            check.equal(target.firstElementChild.textContent, "");
+                            check.ok(inserts[0].undo.some(operation => operation.action === "delete" &&
+                                operation.id === target.getAttribute("data-node-id")), "undo removes the automatically created paragraph");
+                        }
+                    }
+                    const after = lute.BlockDOM2StdMd(root.innerHTML);
+                    replay(inserts[0].undo);
+                    check.equal(lute.BlockDOM2StdMd(root.innerHTML), before, "one undo restores the original content");
+                    replay(inserts[0].operations);
+                    check.equal(lute.BlockDOM2StdMd(root.innerHTML), after, "redo restores the video and continuation paragraph");
+                }
+            }
+        }
+    }
+    root.innerHTML = lute.Md2BlockDOM("Start");
+    const sourceParagraph = root.firstElementChild;
+    const rangeBefore = document.createRange();
+    rangeBefore.selectNodeContents(sourceParagraph.firstElementChild);
+    rangeBefore.collapse(true);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(rangeBefore);
+    const multiProtyle = {lute, wysiwyg: {element: root}, toolbar: {range: rangeBefore, getCurrentType: () => []},
+        block: {parentID: "document"}} as IProtyle;
+    insertHTML(lute.SpinBlockDOM('<video src="assets/first.mp4"></video>') +
+        lute.SpinBlockDOM('<video src="assets/second.mp4"></video>'),
+        multiProtyle, true, true, false, "before");
+    check.deepEqual(Array.from(root.querySelectorAll("video")).map(video => video.getAttribute("src")),
+        ["assets/first.mp4", "assets/second.mp4"]);
+    check.equal(root.querySelectorAll('[data-type="NodeParagraph"]').length, 1);
+    check.equal(document.activeElement, sourceParagraph.firstElementChild, "continue after all videos inserted before existing text");
+    mobileInsertion = false;
+    videoInsertion = false;
+
+    const mobileStyle = document.createElement("style");
+    mobileStyle.textContent = mobileCSS;
+    document.head.appendChild(mobileStyle);
+    const sizedVideo = root.querySelector("video");
+    sizedVideo.style.height = "1800px";
+    sizedVideo.style.width = "100px";
+    for (const viewportHeight of [700, 350, 700]) {
+        await require("electron").ipcRenderer.invoke("video-test-resize", viewportHeight, window.innerWidth);
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        check.equal(window.innerHeight, viewportHeight);
+        document.documentElement.style.setProperty("--mobile-video-max-height", "630px");
+        check.equal(getComputedStyle(sizedVideo).maxHeight, "630px", `keyboard viewport height ${viewportHeight}`);
+        check.equal(sizedVideo.getBoundingClientRect().height, 630, "manual dimensions still obey the stable height cap");
+    }
+    document.documentElement.style.setProperty("--mobile-video-max-height", "350px");
+    check.equal(sizedVideo.getBoundingClientRect().height, 350, "rotation can update the cached height cap");
+    mobileStyle.remove();
+    document.documentElement.style.removeProperty("--mobile-video-max-height");
+    check.equal(getComputedStyle(sizedVideo).maxHeight, `${window.innerHeight * 0.9}px`,
+        "desktop and export retain the shared video height limit");
+    await require("electron").ipcRenderer.invoke("video-test-resize", null);
     const constants = {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing", BLOCK_HINT_KEYS: ["(("], INLINE_TYPE: [] as string[]};
     const selection = window.getSelection();
     const menuElement = document.createElement("div");
@@ -467,8 +611,17 @@ test("external resize handles preserve source, independent axes, historical dime
         "src/protyle/wysiwyg/getBlock", "src/protyle/util/inlineElementBoundary", "src/protyle/util/inlineElementMarker",
         "src/protyle/util/longTextWrap", "src/protyle/util/codeBlockRenderState", "src/asset/html",
         "src/protyle/hint/blockHintRange",
+        "src/protyle/util/editorFocus",
     ].map(file => [file, transpileModule(readFileSync(file + ".ts", "utf8"),
         {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText]));
+    const blockFile = createSourceFile("block.ts", readFileSync("src/block/util.ts", "utf8"), ScriptTarget.ES2021, true);
+    const emptyDeclaration = blockFile.statements.find(node => isVariableStatement(node) &&
+        node.declarationList.declarations.some(item => item.name.getText(blockFile) === "genEmptyElement"));
+    assert.ok(emptyDeclaration);
+    insertSources["src/block/util"] = transpileModule('import {Constants} from "../constants";\n' +
+        emptyDeclaration.getText(blockFile), {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText;
+    const mobileCSS = compileString('@use "main/mobile";',
+        {loadPaths: ["src/assets/scss"], logger: {warn() {}, debug() {}}}).css;
     const hintFile = createSourceFile("hint.ts", readFileSync("src/protyle/hint/index.ts", "utf8"), ScriptTarget.ES2021, true);
     const hintDeclaration = hintFile.statements.find(node => isClassDeclaration(node) && node.name.text === "Hint");
     assert.ok(hintDeclaration && isClassDeclaration(hintDeclaration));
@@ -483,7 +636,7 @@ test("external resize handles preserve source, independent axes, historical dime
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const makeCode = (styles: string) => "const __name = value => value; (" + browserCases.toString() + ")(" +
         [renderSource, resizeSource, readFileSync("stage/protyle/js/lute/lute.min.js", "utf8"), styles, ...bridgeSources,
-            insertSources, hintSource, menuSource]
+            insertSources, hintSource, menuSource, mobileCSS]
             .map(value => JSON.stringify(value)).join(",") + ")";
     const code = makeCode(css);
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -492,6 +645,9 @@ app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, width: 900, height: 700,
         webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: !!process.env.SIYUAN_RESIZE_PREVIEW}});
+    require("electron").ipcMain.handle("video-test-resize", (_event, height, width) => height === null ?
+        win.webContents.debugger.sendCommand("Emulation.clearDeviceMetricsOverride") :
+        win.webContents.debugger.sendCommand("Emulation.setDeviceMetricsOverride", {width, height, deviceScaleFactor: 1, mobile: false}));
     win.webContents.setBackgroundThrottling(false);
     try {
         win.webContents.debugger.attach("1.3");

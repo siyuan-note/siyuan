@@ -943,6 +943,12 @@ const restoreKeyboardToolbarRange = (protyle: IProtyle | undefined, range?: Rang
     }
 };
 
+export const resumeMobileEditorAfterInsertion = (protyle: IProtyle, range: Range) => {
+    hideKeyboardToolbarUtilOnEditorClick();
+    restoreKeyboardToolbarRange(protyle, range);
+    showKeyboardToolbar();
+};
+
 export const bindMobileMenuKeyboard = (element: HTMLElement, selector: string, getProtyle: () => IProtyle) => {
     let restoreKeyboard: (() => void) | undefined;
     if (isMobile()) {
@@ -994,7 +1000,7 @@ const renderKeyboardToolbar = () => {
     renderKeyboardToolbarFrame = window.requestAnimationFrame(() => {
         renderKeyboardToolbarFrame = undefined;
         if (!canInput(document.activeElement)) {
-            hideKeyboardToolbar();
+            hideKeyboardToolbar(false);
             return;
         }
         const selection = getSelection();
@@ -1085,7 +1091,7 @@ const showKeyboardToolbarElement = () => {
         // 普通输入框可能保留文档选区，不能据此恢复编辑焦点或显示文档工具栏。
         keyboardPanelClosing = false;
         hideKeyboardToolbarUtil();
-        hideKeyboardToolbar();
+        hideKeyboardToolbar(false);
         notifyMobileKeyboardChange(true);
         return;
     }
@@ -1231,7 +1237,7 @@ const scrollKeyboardSelectionIntoView = () => {
     }, Constants.TIMEOUT_TRANSITION);
 };
 
-export const hideKeyboardToolbar = () => {
+export const hideKeyboardToolbar = (keyboardClosed = true) => {
     if (renderKeyboardToolbarFrame !== undefined) {
         window.cancelAnimationFrame(renderKeyboardToolbarFrame);
         renderKeyboardToolbarFrame = undefined;
@@ -1261,7 +1267,10 @@ export const hideKeyboardToolbar = () => {
     if (modelElement.style.transform === "translateX(0px)") {
         modelElement.style.paddingBottom = "";
     }
-    notifyMobileKeyboardChange(false);
+    // 仅隐藏编辑工具栏时保留系统键盘状态，关闭通知由原生回调或主动收起操作发送。
+    if (keyboardClosed) {
+        notifyMobileKeyboardChange(false);
+    }
 };
 
 export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
@@ -1321,6 +1330,14 @@ export const activeBlur = (force = false) => {
     (document.activeElement as HTMLElement).blur();
 };
 
+const updateVideoMaxHeight = () => {
+    const size = window.siyuan.mobile.size;
+    const height = (size.isLandscape ? size.landscape : size.portrait)?.height1;
+    if (height) {
+        document.documentElement.style.setProperty("--mobile-video-max-height", `${height * 0.9}px`);
+    }
+};
+
 export const initKeyboardToolbar = () => {
     window.addEventListener("siyuan-mobile-toolbar-focus", renderKeyboardToolbar);
     window.addEventListener("siyuan-mobile-toolbar-editor", (event: CustomEvent<IProtyle>) => {
@@ -1332,7 +1349,7 @@ export const initKeyboardToolbar = () => {
         }
         keyboardPanelClosing = false;
         hideKeyboardToolbarUtil();
-        hideKeyboardToolbar();
+        hideKeyboardToolbar(false);
         renderKeyboardToolbar();
     });
     let composing = false;
@@ -1427,6 +1444,7 @@ export const initKeyboardToolbar = () => {
             height2: window.innerHeight,
         };
     }
+    updateVideoMaxHeight();
     if (!isInEdge()) {
         window.addEventListener("resize", () => {
             updateKeyboardToolbarPosition();
@@ -1479,6 +1497,7 @@ export const initKeyboardToolbar = () => {
                     renderKeyboardToolbar();
                 }
             }
+            updateVideoMaxHeight();
         });
     }
     const toolbarElement = document.getElementById("keyboardToolbar");

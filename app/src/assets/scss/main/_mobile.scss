@@ -561,6 +561,10 @@ body.mobile-topbar--merged {
   }
 }
 
+.protyle-wysiwyg video {
+  max-height: var(--mobile-video-max-height, 90vh);
+}
+
 .mobile-keyboard--open .mobile-bottom-bar,
 .mobile-selection--active .mobile-bottom-bar {
   opacity: 0;

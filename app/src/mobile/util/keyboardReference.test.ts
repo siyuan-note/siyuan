@@ -4,6 +4,7 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, forEachChild, isCallExpression, isVariableDeclaration, Node, ScriptTarget, transpileModule} from "typescript";
+import {getMobileToolbarContextPath} from "../../config/entryVisibility/mobileToolbarContext";
 
 const source = createSourceFile("keyboardToolbar.ts", readFileSync(join(__dirname, "keyboardToolbar.ts"), "utf8"), ScriptTarget.Latest);
 let handlerSource: string;
@@ -40,6 +41,7 @@ test("mobile reference remains available at a caret without exposing other selec
                     stripSemanticMarkersFromRangeText: () => hasText ? "selected" : "",
                     Constants: {ZWSP: "\u200b"}, getEntryOrder: (): string[] => [], isEntryVisible: () => false,
                     TOOLBAR_ENTRY_ROOT_PATH: "editor.toolbar", MOBILE_TOOLBAR_NAMES: ["block-ref", "strong"],
+                    getMobileToolbarContextPath,
                     MOBILE_TOOLBAR_ACTION_NAMES: [],
                     applyMobileToolbarEntries: (_element: unknown, _toolbar: unknown, options: {
                         isAvailable: (name: string) => boolean, isVisible: (key: string) => boolean,

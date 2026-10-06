@@ -11,6 +11,7 @@ import {shouldHideKeyboardAfterResize} from "./touchSelection";
 const source = createSourceFile("keyboardToolbar.ts", readFileSync(join(__dirname, "keyboardToolbar.ts"), "utf8"), ScriptTarget.Latest);
 let resizeSource: string;
 let panelSource: string;
+let videoSource: string;
 const visit = (node: Node) => {
     if (isCallExpression(node) && node.expression.getText(source) === "window.addEventListener" &&
         node.arguments[0].getText(source) === '"resize"' &&
@@ -20,10 +21,13 @@ const visit = (node: Node) => {
     if (isVariableDeclaration(node) && node.name.getText(source) === "updateKeyboardPanelHeight") {
         panelSource = node.initializer.getText(source);
     }
+    if (isVariableDeclaration(node) && node.name.getText(source) === "updateVideoMaxHeight") {
+        videoSource = node.initializer.getText(source);
+    }
     forEachChild(node, visit);
 };
 visit(source);
-assert.ok(resizeSource && panelSource);
+assert.ok(resizeSource && panelSource && videoSource);
 const compile = (text: string) => transpileModule(`(${text})`, {
     compilerOptions: {target: ScriptTarget.ES2020},
 }).outputText;
@@ -37,6 +41,14 @@ const createBrowser = () => ({
 
 test("portrait keyboard resizing updates only the portrait height cache", () => {
     const browser = createBrowser();
+    let videoHeight: string;
+    const updateVideoMaxHeight = runInNewContext(compile(videoSource), {
+        window: browser,
+        document: {documentElement: {style: {setProperty: (name: string, value: string) => {
+            assert.equal(name, "--mobile-video-max-height");
+            videoHeight = value;
+        }}}},
+    });
     const onResize = runInNewContext(compile(resizeSource), {
         window: browser,
         isMobileLandscape: () => isMobileLandscape(browser as unknown as typeof window),
@@ -44,6 +56,7 @@ test("portrait keyboard resizing updates only the portrait height cache", () => 
         document: {activeElement: {tagName: "DIV", isContentEditable: true}},
         shouldHideKeyboardAfterResize, hasRecentAndroidTableCellSelectAll: () => false,
         activeBlur: () => assert.fail("keyboard-only resizing must keep editor focus"), preventRender: false,
+        updateVideoMaxHeight,
     });
     for (const height of [450, 1200, 450]) {
         browser.innerHeight = height;
@@ -52,6 +65,7 @@ test("portrait keyboard resizing updates only the portrait height cache", () => 
         assert.equal("landscape" in browser.siyuan.mobile.size, false);
         assert.equal(browser.siyuan.mobile.size.portrait.height1, 1200);
         assert.equal(browser.siyuan.mobile.size.portrait.height2, 450);
+        assert.equal(videoHeight, "1080px");
     }
 });
 

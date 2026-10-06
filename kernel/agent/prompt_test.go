@@ -109,6 +109,25 @@ func TestSystemPromptDocumentsSuperBlockLayout(t *testing.T) {
 	}
 }
 
+func TestSystemPromptDocumentsNativeContainerEditing(t *testing.T) {
+	for _, instruction := range []string{
+		"Tabs and Mindmap are native, editable SiYuan blocks",
+		"::: tabs\n@tab First",
+		"@tab:active Second",
+		`data-type="NodeMindmap"`,
+		`data-type="NodeMindmapItem"`,
+		"block.move/delete on item IDs",
+		"call block.dom and preserve all existing data-node-id values and attributes",
+		"lockType=true",
+		"Never rebuild these containers from their reading Markdown",
+		"Missing guide search results alone do not prove a feature is unsupported",
+	} {
+		if !strings.Contains(systemPrompt, instruction) {
+			t.Fatalf("missing native container instruction %q", instruction)
+		}
+	}
+}
+
 func TestSystemPromptOmitsUnavailableSkillInstructions(t *testing.T) {
 	capabilities := &capabilitySet{registrations: map[string]*capabilityRegistration{}}
 	prompt := buildSystemPrompt("English", capabilities)

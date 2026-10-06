@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -29,7 +30,7 @@ import (
 
 var BlockTool = &Tool{
 	Name:        "block",
-	Description: "Block operations. Actions: get(id), get_kramdown(id), get_children(id), tree_stat(id, by document), dom(id), insert(data, dataType, parentID?, nextID?, previousID?), append(data, dataType, parentID) / prepend(...) add a NEW child and return its ID — use after block.update when both modifying and adding, update(id, data, dataType, lockType?) replaces ONE block only (no append), delete(id), move(id, parentID, previousID?), breadcrumb(id), batch_get(ids) / batch_kramdown(ids) where ids is comma-separated.",
+	Description: "Block operations, including native Tabs (NodeTabs/NodeTabItem) and Mindmap (NodeMindmap/NodeMindmapItem). Actions: get(id), get_kramdown(id), get_children(id), tree_stat(id, by document), dom(id), insert(data, dataType, parentID?, nextID?, previousID?), append(data, dataType, parentID) / prepend(...) add a NEW child and return its ID — use after block.update when both modifying and adding, update(id, data, dataType, lockType?) replaces ONE block only (no append), delete(id), move(id, parentID, previousID?), breadcrumb(id), batch_get(ids) / batch_kramdown(ids) where ids is comma-separated. get/get_kramdown/batch_kramdown return Markdown for reading, which flattens tabs and renders mindmaps as lists; use dom before editing these containers, preserve IDs/attributes, and update with dataType=dom and lockType=true. Prefer editing body blocks individually and move/delete for structural changes.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -37,9 +38,9 @@ var BlockTool = &Tool{
 			"notebook":   {Type: "string", Description: "Notebook ID that owns the target blocks; required for encrypted notebooks"},
 			"id":         {Type: "string", Description: "Block ID"},
 			"ids":        {Type: "string", Description: "Comma-separated block IDs (for batch_get, batch_kramdown)"},
-			"data":       {Type: "string", Description: "Content in markdown or block DOM. Prefer markdown. A horizontal super-block uses {{{col with blank-line-separated child blocks and }}} on its own line; col is horizontal and row is vertical. Raw super-block DOM uses data-type=\"NodeSuperBlock\" and data-sb-layout, never data-layout, and every child needs an explicit data-type. Markdown block references use ((blockID \"anchor text\")); never [[blockID]]"},
+			"data":       {Type: "string", Description: "Content in markdown or block DOM. Prefer markdown for ordinary blocks. Native Tabs Markdown: ::: tabs\n@tab First\n\nBody\n\n@tab:active Second\n\nOther body\n\n::: (tabs requires a space). For nested tabs use a longer outer colon fence. Native Mindmap requires dataType=dom: <div data-type=\"NodeMindmap\" data-subtype=\"u\" class=\"mindmap\"><div data-type=\"NodeMindmapItem\" data-subtype=\"u\" data-marker=\"-\" class=\"mindmap-item\"><div data-type=\"NodeParagraph\" class=\"p\"><div contenteditable=\"true\">Root</div></div></div></div>. Nest NodeMindmap inside NodeMindmapItem for child branches; every block needs an explicit data-type. New native DOM blocks may omit data-node-id; the tool generates IDs. When inserting a Tabs or Mindmap group into an existing container of the same type, only its direct items are inserted; parent attributes remain unchanged. A horizontal super-block uses {{{col with blank-line-separated child blocks and }}} on its own line; col is horizontal and row is vertical. Raw super-block DOM uses data-type=\"NodeSuperBlock\" and data-sb-layout, never data-layout, and every child needs an explicit data-type. Markdown block references use ((blockID \"anchor text\")); never [[blockID]]"},
 			"dataType":   {Type: "string", Description: "Content type: markdown or dom", Enum: []string{"markdown", "dom"}},
-			"lockType":   {Type: "boolean", Description: "Reject update when the parsed block type differs from the existing block type; defaults to false"},
+			"lockType":   {Type: "boolean", Description: "Reject update when the parsed block type differs from the existing block type; defaults to true for native Tabs/Mindmap containers and items, false otherwise. Set false only for an intentional type conversion"},
 			"parentID":   {Type: "string", Description: "Parent block ID"},
 			"nextID":     {Type: "string", Description: "Next sibling block ID (for insert)"},
 			"previousID": {Type: "string", Description: "Previous sibling block ID (for insert)"},
@@ -204,12 +205,9 @@ func blockInsert(args map[string]any) (CallToolResult, error) {
 		}
 	}
 
-	if dataType == "markdown" {
-		var err error
-		data, err = markdownToBlockDOM(data)
-		if err != nil {
-			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "convert markdown failed: " + err.Error()}}, IsError: true}, nil
-		}
+	data, err := prepareBlockWriteData(data, dataType)
+	if err != nil {
+		return blockToolError("prepare block data failed: " + err.Error())
 	}
 
 	operation := &model.Operation{
@@ -260,12 +258,9 @@ func blockAppend(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
 	}
 
-	if dataType == "markdown" {
-		var err error
-		data, err = markdownToBlockDOM(data)
-		if err != nil {
-			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "convert markdown failed: " + err.Error()}}, IsError: true}, nil
-		}
+	data, err := prepareBlockWriteData(data, dataType)
+	if err != nil {
+		return blockToolError("prepare block data failed: " + err.Error())
 	}
 
 	operation := &model.Operation{
@@ -304,12 +299,9 @@ func blockPrepend(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
 	}
 
-	if dataType == "markdown" {
-		var err error
-		data, err = markdownToBlockDOM(data)
-		if err != nil {
-			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "convert markdown failed: " + err.Error()}}, IsError: true}, nil
-		}
+	data, err := prepareBlockWriteData(data, dataType)
+	if err != nil {
+		return blockToolError("prepare block data failed: " + err.Error())
 	}
 
 	operation := &model.Operation{
@@ -359,12 +351,29 @@ func blockUpdate(args map[string]any) (CallToolResult, error) {
 	if _, exists := args["data"]; !exists {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
 	}
-	lockType, _ := args["lockType"].(bool)
-	_, release, scopeErr := beginBlockToolScope(args, true, id)
+	boxID, release, scopeErr := beginBlockToolScope(args, true, id)
 	if scopeErr != nil {
 		return blockToolError(scopeErr.Error())
 	}
 	defer release()
+
+	lockType, explicitLockType := args["lockType"].(bool)
+	if !explicitLockType {
+		if block := treenode.GetBlockTreeInExactBox(id, boxID); block != nil {
+			switch block.Type {
+			case "tabs", "tab", "mindmap", "mindmap_item":
+				lockType = true
+			}
+		}
+	}
+
+	if dataType == "dom" {
+		var err error
+		data, err = prepareBlockWriteData(data, dataType)
+		if err != nil {
+			return blockToolError("prepare block data failed: " + err.Error())
+		}
+	}
 
 	_, rootIDs, err := model.PerformBlockUpdates([]model.BlockUpdateInput{{
 		ID:       id,
@@ -430,6 +439,60 @@ func markdownToBlockDOM(md string) (string, error) {
 		return "", fmt.Errorf("empty result")
 	}
 	return result, nil
+}
+
+// prepareBlockWriteData 为原生页签和脑图 DOM 中的新块补全 ID，保留已有块的 ID 和属性。
+func prepareBlockWriteData(data, dataType string) (string, error) {
+	if dataType == "markdown" {
+		return markdownToBlockDOM(data)
+	}
+	if dataType != "dom" {
+		return "", fmt.Errorf("unsupported block data type [%s]", dataType)
+	}
+	engine := util.NewLute()
+	tree := engine.BlockDOM2Tree(data)
+	if tree == nil || tree.Root == nil {
+		return "", fmt.Errorf("parse tree failed")
+	}
+	hasNativeContainer := false
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && (node.Type == ast.NodeTabs || node.Type == ast.NodeTabItem ||
+			node.Type == ast.NodeMindmap || node.Type == ast.NodeMindmapItem) {
+			hasNativeContainer = true
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	if !hasNativeContainer {
+		return data, nil
+	}
+	var err error
+	ids := map[string]struct{}{}
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !node.IsBlock() || node.Type == ast.NodeDocument || node.Type == ast.NodeKramdownBlockIAL {
+			return ast.WalkContinue
+		}
+		if node.ID == "" {
+			node.ID = ast.NewNodeID()
+			node.SetIALAttr("id", node.ID)
+		} else if !ast.IsNodeIDPattern(node.ID) {
+			err = fmt.Errorf("found invalid ID [%s]", node.ID)
+			return ast.WalkStop
+		}
+		if _, exists := ids[node.ID]; exists {
+			err = fmt.Errorf("found duplicate ID [%s]", node.ID)
+			return ast.WalkStop
+		}
+		ids[node.ID] = struct{}{}
+		if node.IALAttr("updated") == "" {
+			node.SetIALAttr("updated", node.ID[:14])
+		}
+		return ast.WalkContinue
+	})
+	if err != nil {
+		return "", err
+	}
+	return engine.Tree2BlockDOM(tree, engine.RenderOptions, engine.ParseOptions), nil
 }
 
 func blockMove(args map[string]any) (CallToolResult, error) {

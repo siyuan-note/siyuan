@@ -12,6 +12,10 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestBlockToolDocumentsSuperBlockSyntax(t *testing.T) {
@@ -76,5 +80,76 @@ func TestBlockWriteSuccessRejectsEmptyID(t *testing.T) {
 	}
 	if !result.IsError {
 		t.Fatalf("expected empty block ID to fail: %#v", result)
+	}
+}
+
+const nativeMindmapTestDOM = `<div data-type="NodeMindmap" data-subtype="u" class="mindmap"><div data-type="NodeMindmapItem" data-subtype="u" data-marker="-" class="mindmap-item"><div data-type="NodeParagraph" class="p"><div contenteditable="true">Root</div></div><div data-type="NodeMindmap" data-subtype="u" class="mindmap"><div data-type="NodeMindmapItem" data-subtype="u" data-marker="-" class="mindmap-item"><div data-type="NodeParagraph" class="p"><div contenteditable="true">Child</div></div></div></div></div></div>`
+
+func TestBlockToolCreatesNativeContainers(t *testing.T) {
+	for _, tc := range []struct {
+		name, data, dataType string
+		want                 ast.NodeType
+		count                int
+	}{
+		{"tabs", "::: tabs\n@tab First\n\nBody\n\n@tab:active Second\n\nOther body\n\n:::\n", "markdown", ast.NodeTabs, 5},
+		{"mindmap", nativeMindmapTestDOM, "dom", ast.NodeMindmap, 6},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dom, err := prepareBlockWriteData(tc.data, tc.dataType)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tree := util.NewLute().BlockDOM2Tree(dom)
+			if tree.Root.FirstChild.Type != tc.want {
+				t.Fatalf("expected native %s, got %s", tc.want, tree.Root.FirstChild.Type)
+			}
+			if err = treenode.ValidateBlockSubtree(tree.Root); err != nil {
+				t.Fatal(err)
+			}
+			ids := map[string]bool{}
+			ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+				if entering && node.IsBlock() && node.Type != ast.NodeDocument && node.Type != ast.NodeKramdownBlockIAL {
+					if !ast.IsNodeIDPattern(node.ID) || ids[node.ID] || node.IALAttr("updated") == "" {
+						t.Fatalf("invalid or duplicate block identity: %+v", node)
+					}
+					ids[node.ID] = true
+				}
+				return ast.WalkContinue
+			})
+			if len(ids) != tc.count {
+				t.Fatalf("expected %d independently editable blocks, got %d", tc.count, len(ids))
+			}
+			if tc.want == ast.NodeTabs && tree.Root.FirstChild.IALAttr("tabs-active-id") != tree.Root.FirstChild.ChildrenByType(ast.NodeTabItem)[1].ID {
+				t.Fatal("active tab was not preserved")
+			}
+		})
+	}
+}
+
+func TestBlockToolPreservesNativeDOMIdentity(t *testing.T) {
+	const id = "20261007000000-para001"
+	dom := strings.Replace(nativeMindmapTestDOM, `data-type="NodeParagraph"`, `data-node-id="`+id+`" updated="20261006000000" custom-test="kept" data-type="NodeParagraph"`, 1)
+	prepared, err := prepareBlockWriteData(dom, "dom")
+	if err != nil {
+		t.Fatal(err)
+	}
+	node := treenode.GetNodeInTree(util.NewLute().BlockDOM2Tree(prepared), id)
+	if node == nil || node.IALAttr("updated") != "20261006000000" || node.IALAttr("custom-test") != "kept" {
+		t.Fatal("existing identity or attributes were changed")
+	}
+	if _, err = prepareBlockWriteData(strings.Replace(dom, id, "invalid", 1), "dom"); err == nil {
+		t.Fatal("invalid explicit block ID was accepted")
+	}
+	duplicate := strings.Replace(nativeMindmapTestDOM, `data-type="NodeParagraph"`, `data-node-id="`+id+`" data-type="NodeParagraph"`, -1)
+	if _, err = prepareBlockWriteData(duplicate, "dom"); err == nil {
+		t.Fatal("duplicate explicit block IDs were accepted")
+	}
+}
+
+func TestBlockToolDocumentsNativeContainerEditing(t *testing.T) {
+	for _, instruction := range []string{"NodeTabs/NodeTabItem", "NodeMindmap/NodeMindmapItem", "use dom before editing", "lockType=true"} {
+		if !strings.Contains(BlockTool.Description, instruction) {
+			t.Fatalf("missing native container instruction %q", instruction)
+		}
 	}
 }

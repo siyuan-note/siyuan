@@ -13,6 +13,7 @@ import {loadMobileFileById, updateRecentDocSwitchTime} from "../editor";
 import {openModel} from "../menu/model";
 import {closeModel} from "../util/closePanel";
 import {setEmpty} from "../util/setEmpty";
+import {saveMobileStorage} from "../util/saveLayout";
 import {canCloseTab, moveTab, orderTabsForOverview, toggleTabPin, trimTabsToLimit} from "./mobileTabsState";
 
 const MAX_HISTORY = 32;
@@ -124,6 +125,7 @@ export class MobileTabs {
     private state: MobileTabsState;
     private hasStoredTabs: boolean;
     private navigationEpoch = 0;
+    private renderedEntry?: MobileTabEntry;
     private abortController?: AbortController;
     private activationBackStack: string[] = [];
     private activationForwardStack: string[] = [];
@@ -207,8 +209,9 @@ export class MobileTabs {
             activationForwardStack: this.activationForwardStack,
         };
         window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] = persistedState;
-        setStorageVal(Constants.LOCAL_MOBILE_TABS, persistedState);
+        const saved = saveMobileStorage(Constants.LOCAL_MOBILE_TABS, persistedState);
         this.updateNavigationButtons();
+        return saved;
     }
 
     private updateCounter() {
@@ -230,12 +233,16 @@ export class MobileTabs {
     }
 
     private snapshot(tab = this.activeTab) {
-        if (!tab?.current || !window.siyuan.mobile.editor?.protyle) {
+        if (!tab?.current || tab.current !== this.renderedEntry || !window.siyuan.mobile.editor?.protyle) {
             return;
         }
         const protyle = window.siyuan.mobile.editor.protyle;
-        if (protyle.block.rootID === tab.current.rootID) {
-            tab.current.scroll = saveScroll(protyle, true) as IScrollAttr | undefined;
+        if (protyle.block.rootID === tab.current.rootID && protyle.notebookId === tab.current.notebookID) {
+            const scroll = saveScroll(protyle, true) as IScrollAttr | undefined;
+            if (!scroll) {
+                return;
+            }
+            tab.current.scroll = scroll;
             tab.current.title = (document.getElementById("toolbarName") as HTMLInputElement)?.value || tab.current.title;
             tab.current.id = protyle.block.showAll ? protyle.block.id : protyle.block.rootID;
             tab.current.notebookID = protyle.notebookId;
@@ -416,6 +423,10 @@ export class MobileTabs {
             };
             abortController.signal.addEventListener("abort", () => finish("cancelled"), {once: true});
             // 过期响应由 epoch 和 isValid 丢弃，不向 fetch 传递 signal。
+            // 共享编辑器加载期间不属于任何页签，不能把中间状态保存到原页签。
+            const renderedEntry = this.renderedEntry;
+            const renderedProtyle = window.siyuan.mobile.editor?.protyle;
+            this.renderedEntry = undefined;
             loadMobileFileById(this.app, loadID, loadAction, options.scrollPosition, info.box, (protyle) => {
                 if (epoch !== this.navigationEpoch) {
                     finish("cancelled");
@@ -433,6 +444,7 @@ export class MobileTabs {
                     this.state.tabs.push(tab);
                 }
                 tab.current = this.entryFromProtyle(loadID, loadAction, protyle);
+                this.renderedEntry = tab.current;
                 tab.activeAt = Date.now();
                 if (options.recordActivation !== false && activeBefore?.id !== tab.id) {
                     this.recordActivation(activeBefore?.id);
@@ -458,7 +470,12 @@ export class MobileTabs {
                 }
                 finish("success");
                 options.afterOpen?.(protyle);
-            }, options.forceReload, () => epoch === this.navigationEpoch, undefined, loadScroll, false, (invalid) => {
+            }, options.forceReload, () => epoch === this.navigationEpoch, undefined, loadScroll, false, (invalid, editorUnchanged) => {
+                // 加载尚未修改编辑器时恢复原页签归属，允许用户继续阅读和保存。
+                if (editorUnchanged && epoch === this.navigationEpoch && this.activeTab?.current === renderedEntry &&
+                    window.siyuan.mobile.editor?.protyle === renderedProtyle) {
+                    this.renderedEntry = renderedEntry;
+                }
                 finish(abortController.signal.aborted ? "cancelled" : (invalid ? "invalid" : "failed"));
             }, options.keepPanels);
         });
@@ -793,13 +810,13 @@ export class MobileTabs {
         this.updateCounter();
     }
 
-    save() {
+    async save(): Promise<boolean> {
         this.snapshot();
         // 尚未迁移成功的临时空状态不能在关闭页面时覆盖旧版恢复记录。
         if (!this.hasStoredTabs && this.state.tabs.length === 0) {
-            return;
+            return true;
         }
-        this.persist();
+        return this.persist();
     }
 
     pushCurrent() {

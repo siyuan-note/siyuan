@@ -70,7 +70,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                                    afterOpen?: (protyle: IProtyle) => void, forceReload = false,
                                    isValid: () => boolean = () => true, signal?: AbortSignal,
                                    scrollAttr?: IScrollAttr, updateRecent = true,
-                                   onFailure?: (invalid?: boolean) => void, keepPanels = false) => {
+                                   onFailure?: (invalid?: boolean, editorUnchanged?: boolean) => void, keepPanels = false) => {
     invalidateMobileReferenceOpen();
     const closing = closeMobileEditorSheets();
     if (closing) {
@@ -79,11 +79,11 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 loadMobileFileById(app, id, action, scrollPosition, notebookId, afterOpen, forceReload,
                     isValid, signal, scrollAttr, updateRecent, onFailure, keepPanels);
             } else {
-                onFailure?.();
+                onFailure?.(undefined, true);
             }
         }).catch(error => {
             console.error(error);
-            onFailure?.();
+            onFailure?.(undefined, true);
         });
         return;
     }
@@ -122,7 +122,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
         if (titleHidden && isValid() && window.siyuan.mobile.editor?.protyle.wysiwyg.element.childElementCount > 0) {
             setEditor();
         }
-        onFailure?.(invalid);
+        onFailure?.(invalid, !titleHidden);
     };
     if (!isValid()) {
         fail();

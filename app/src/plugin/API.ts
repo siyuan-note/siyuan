@@ -29,7 +29,7 @@ import {getAllEditor} from "../layout/getAll";
 import {openPluginSetting} from "../config";
 import {openAttr, openFileAttr} from "../menus/commonMenuItem";
 import {globalCommand} from "../boot/globalEvent/command/global";
-import {saveScroll} from "../protyle/scroll/saveScroll";
+import {saveMobileLayout} from "../mobile/util/saveLayout";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import type {MobileFiles} from "../mobile/dock/MobileFiles";
 import type {Files} from "../layout/dock/Files";
@@ -224,14 +224,13 @@ const openAttributePanel = (options: {
 
 const saveLayout = (cb: () => void) => {
     /// #if MOBILE
-    if (window.siyuan.mobile.editor) {
-        const result = saveScroll(window.siyuan.mobile.editor.protyle);
-        if (cb && result instanceof Promise) {
-            result.then(() => {
-                cb();
-            });
+    void saveMobileLayout().then((saved) => {
+        if (saved) {
+            cb?.();
+        } else {
+            showMessage(window.siyuan.languages.mobileLayoutSaveError, 6000, "error");
         }
-    }
+    });
     /// #else
     exportLayout({cb, errorExit: false});
     /// #endif

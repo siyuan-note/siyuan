@@ -17,7 +17,7 @@ import {confirmDialog} from "./confirmDialog";
 import {escapeHtml} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";
 import {hideAllElements} from "../protyle/ui/hideElements";
-import {saveScroll} from "../protyle/scroll/saveScroll";
+import {saveMobileLayout} from "../mobile/util/saveLayout";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {emitToPlugins} from "../plugin/EventBusCore";
 import {createHostQuitGuard} from "./hostQuit";
@@ -144,10 +144,8 @@ export const lockScreen = async () => {
         }
     });
     /// #else
-    if (window.siyuan.mobile.editor) {
-        await saveScroll(window.siyuan.mobile.editor.protyle);
-        fetchPost("/api/system/logoutAuth");
-    }
+    await saveMobileLayout();
+    fetchPost("/api/system/logoutAuth");
     /// #endif
 
 };
@@ -228,8 +226,9 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
     }
     /// #endif
     /// #if MOBILE
-    if (window.siyuan.mobile.editor) {
-        await saveScroll(window.siyuan.mobile.editor.protyle);
+    if (!await saveMobileLayout()) {
+        showMessage(window.siyuan.languages.mobileLayoutSaveError, 6000, "error");
+        return;
     }
     /// #endif
     if (!getHostCapabilities().ownsKernel) {

@@ -1,4 +1,5 @@
 {
+	"mobileLayoutSaveError": "Could not save the mobile layout. Please try again.",
 	"ocrThresholdSettings": "Recognition thresholds",
 	"ocrReasoningEffortTip": "Default follows model behavior; None disables or minimizes thinking, depending on provider and model support",
 	"mobileToolbarNoSelection": "No text selected",

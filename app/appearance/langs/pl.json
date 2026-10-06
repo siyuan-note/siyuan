@@ -1,4 +1,5 @@
 {
+	"mobileLayoutSaveError": "Nie udało się zapisać układu mobilnego. Spróbuj ponownie.",
 	"ocrThresholdSettings": "Progi rozpoznawania",
 	"ocrReasoningEffortTip": "Domyślne zachowuje działanie modelu; Brak wyłącza lub minimalizuje rozumowanie zależnie od obsługi przez dostawcę i model",
 	"mobileToolbarNoSelection": "Brak zaznaczonego tekstu",

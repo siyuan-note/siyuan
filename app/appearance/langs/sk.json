@@ -1,4 +1,5 @@
 {
+	"mobileLayoutSaveError": "Mobilné rozloženie sa nepodarilo uložiť. Skúste to znova.",
 	"ocrThresholdSettings": "Prahy rozpoznávania",
 	"ocrReasoningEffortTip": "Predvolené používa správanie modelu; Žiadne vypne alebo minimalizuje uvažovanie podľa podpory poskytovateľa a modelu",
 	"mobileToolbarNoSelection": "Žiadny vybratý text",

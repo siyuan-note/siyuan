@@ -1,4 +1,5 @@
 {
+	"mobileLayoutSaveError": "Das mobile Layout konnte nicht gespeichert werden. Bitte erneut versuchen.",
 	"ocrThresholdSettings": "Erkennungsschwellen",
 	"ocrReasoningEffortTip": "Standard folgt dem Modellverhalten; Keine deaktiviert oder minimiert das Denken, abhängig von Anbieter und Modell",
 	"mobileToolbarNoSelection": "Kein Text ausgewählt",

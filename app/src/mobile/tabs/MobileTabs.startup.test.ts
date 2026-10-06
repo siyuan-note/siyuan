@@ -67,6 +67,10 @@ const setup = (storage: Record<string, any> = {}, options: {
             writes.push({key, value: clone(value)});
             return Promise.resolve();
         }},
+        "../util/saveLayout": {saveMobileStorage: (key: string, value: unknown) => {
+            writes.push({key, value: clone(value)});
+            return Promise.resolve(true);
+        }},
         "../../util/pathName": {isEncryptedBox: (id: string) => options.encrypted?.includes(id)},
         "../../util/genID": {genUUID: () => `new-${++sequence}`},
         "../../protyle/scroll/saveScroll": {saveScroll: (): undefined => undefined},

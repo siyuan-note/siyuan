@@ -1,4 +1,5 @@
 {
+	"mobileLayoutSaveError": "Impossible d'enregistrer la disposition mobile. Veuillez réessayer.",
 	"ocrThresholdSettings": "Seuils de reconnaissance",
 	"ocrReasoningEffortTip": "Par défaut suit le comportement du modèle ; Aucun désactive ou minimise le raisonnement selon le fournisseur et le modèle",
 	"mobileToolbarNoSelection": "Aucun texte sélectionné",

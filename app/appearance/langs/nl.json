@@ -1,4 +1,5 @@
 {
+	"mobileLayoutSaveError": "De mobiele indeling kon niet worden opgeslagen. Probeer het opnieuw.",
 	"ocrThresholdSettings": "Herkenningsdrempels",
 	"ocrReasoningEffortTip": "Standaard volgt het modelgedrag; Geen schakelt denken uit of beperkt het tot een minimum, afhankelijk van de aanbieder en het model",
 	"mobileToolbarNoSelection": "Geen tekst geselecteerd",

@@ -26,6 +26,7 @@ import {
 } from "./util/touch";
 import {fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
+import {saveMobileLayout} from "./util/saveLayout";
 import {finishMobileStartup} from "./util/setEmpty";
 import {initAssets} from "../util/assets";
 import {bootSync, lockScreen} from "../dialog/processSystem";
@@ -185,11 +186,16 @@ class App {
             };
         }
         window.addEventListener("beforeunload", () => {
-            window.siyuan.mobile.tabs?.save();
+            void saveMobileLayout();
         }, false);
         window.addEventListener("pagehide", () => {
-            window.siyuan.mobile.tabs?.save();
+            void saveMobileLayout();
         }, false);
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+                void saveMobileLayout();
+            }
+        });
         // 判断手机横竖屏状态
         bindMobileOrientationChange(() => {
             updateCardHV();

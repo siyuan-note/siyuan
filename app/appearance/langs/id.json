@@ -1,4 +1,5 @@
 {
+	"mobileLayoutSaveError": "Tidak dapat menyimpan tata letak seluler. Silakan coba lagi.",
 	"ocrThresholdSettings": "Ambang pengenalan",
 	"ocrReasoningEffortTip": "Default mengikuti perilaku model; Tidak ada menonaktifkan atau meminimalkan pemikiran sesuai dukungan penyedia dan model",
 	"mobileToolbarNoSelection": "Tidak ada teks dipilih",

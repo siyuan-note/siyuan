@@ -1,4 +1,5 @@
 {
+	"mobileLayoutSaveError": "לא ניתן לשמור את העיצוב לנייד. יש לנסות שוב.",
 	"ocrThresholdSettings": "ספי זיהוי",
 	"ocrReasoningEffortTip": "ברירת המחדל פועלת לפי התנהגות המודל; ללא מכבה או מצמצם את החשיבה בהתאם לתמיכת הספק והמודל",
 	"mobileToolbarNoSelection": "ללא טקסט נבחר",

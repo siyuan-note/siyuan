@@ -1,4 +1,5 @@
 {
+	"mobileLayoutSaveError": "行動端佈局儲存失敗，請重試。",
 	"ocrThresholdSettings": "辨識閾值",
 	"ocrReasoningEffortTip": "預設沿用模型行為；無表示關閉或盡量減少思考，是否支援取決於提供商和模型",
 	"mobileToolbarNoSelection": "未選取文字",

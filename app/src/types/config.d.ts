@@ -243,6 +243,9 @@ declare namespace Config {
      * AI provider configuration
      */
     export interface IProvider {
+        /** 账户认证只保存本机账户引用；省略时使用 API Key */
+        authType?: string;
+        accountID?: string;
         headers?: Record<string, string>;
         id: string;
         enabled: boolean;

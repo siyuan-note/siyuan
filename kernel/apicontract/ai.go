@@ -199,9 +199,10 @@ type AIDecisionTestData struct {
 	Msg     *string `json:"msg,omitempty"`
 }
 type AIModelsData struct {
-	Models         []string       `json:"models"`
-	ContextLengths map[string]int `json:"contextLengths"`
-	Msg            *string        `json:"msg,omitempty"`
+	DisplayNames   map[string]string `json:"displayNames,omitempty"`
+	Models         []string          `json:"models"`
+	ContextLengths map[string]int    `json:"contextLengths"`
+	Msg            *string           `json:"msg,omitempty"`
 }
 type AIMCPEnvironmentData struct {
 	Names    []string `json:"names"`

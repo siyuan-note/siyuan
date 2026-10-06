@@ -17,6 +17,7 @@ import {isBazaarAvailable} from "../util/bazaarAvailability";
 import {getSettingTabDefs} from "./setting/tabs";
 import {clearAccessTabElement} from "./tabs/accessRuntime";
 import {clearSyncTabElement} from "./tabs/syncRuntime";
+import {openChatGPTProvider} from "./tabs/ai/aiProviderUi";
 import type {TSettingTab} from "./setting/tabs";
 import type {App} from "../index";
 import {unmountAssetsTab} from "./assets";
@@ -129,7 +130,7 @@ export const openPluginSetting = (app: App) => {
     /// #endif
 };
 
-export const openSetting = (app: App, tab?: TSettingTab) => {
+export const openSetting = (app: App, tab?: TSettingTab, aiProvider?: "chatgpt") => {
     if (tab === "bazaar" && !isBazaarAvailable()) {
         return;
     }
@@ -138,10 +139,11 @@ export const openSetting = (app: App, tab?: TSettingTab) => {
     }
     /// #if MOBILE
     openMobileSetting(app, tab);
+    if (aiProvider === "chatgpt") { openChatGPTProvider(); }
     /// #else
     /// #if !BROWSER
     if (!isSettingsWindow() && getSettingsWindowMode() === 1) {
-        void openNativeSettings(app, {tab});
+        void openNativeSettings(app, aiProvider ? {tab, aiProvider} : {tab});
         return;
     }
     /// #endif
@@ -149,10 +151,13 @@ export const openSetting = (app: App, tab?: TSettingTab) => {
         const dialog = window.siyuan.dialogs.find(item => item.element.getAttribute("data-key") === Constants.DIALOG_SETTING);
         if (dialog) {
             switchSettingTab(dialog.element, app, tab || "editor");
+            if (aiProvider === "chatgpt") { openChatGPTProvider(); }
             return dialog;
         }
     }
-    return openSettingDialog(app, tab);
+    const dialog = openSettingDialog(app, tab);
+    if (aiProvider === "chatgpt") { openChatGPTProvider(); }
+    return dialog;
     /// #endif
 };
 

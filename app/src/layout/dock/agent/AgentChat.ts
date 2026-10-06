@@ -614,6 +614,8 @@ export class AgentChat extends Model {
         const existing = window.siyuan.dialogs.find(d => d.element.querySelector(".config__tab-container"));
         if (!existing) {
             openSetting(this.app, "ai");
+        } else {
+            existing.element.querySelector<HTMLElement>(".config__tab-scroll [data-name='ai']")?.click();
         }
     }
 
@@ -810,6 +812,16 @@ export class AgentChat extends Model {
                     this.openAiSetting();
                 });
             }
+            this.messagesContainer.querySelector("[data-type='go-chatgpt']")?.addEventListener("click", async () => {
+                if (this.host.openAiSetting || window.siyuan.dialogs.some(dialog => dialog.element.querySelector(".config__tab-container"))) {
+                    await this.openAiSetting();
+                    const {openChatGPTProvider} = await import("../../../config/tabs/ai/aiProviderUi");
+                    openChatGPTProvider();
+                } else {
+                    const {openSetting} = await import("../../../config");
+                    openSetting(this.app, "ai", "chatgpt");
+                }
+            });
             return;
         }
         const examples = this.messagesContainer.querySelectorAll(".agent-welcome__example");

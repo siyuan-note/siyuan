@@ -100,6 +100,7 @@ type OpenAICompletionStream struct {
 	responseContent   strings.Builder
 	responseToolCalls map[int]openai.ToolCall
 	responsesDone     bool
+	chatGPT           bool
 }
 
 func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protocol string,
@@ -129,6 +130,7 @@ func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protoco
 		break
 	}
 	return &OpenAICompletionStream{
+		chatGPT:           client.ChatGPT,
 		responses:         stream,
 		responseToolCalls: map[int]openai.ToolCall{},
 	}, nil
@@ -136,6 +138,33 @@ func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protoco
 
 func CreateOpenAICompletion(ctx context.Context, client *AIClient, protocol string,
 	request openai.ChatCompletionRequest, responseInput []any) (openai.ChatCompletionResponse, error) {
+	if client.ChatGPT {
+		stream, err := CreateOpenAICompletionStream(ctx, client, protocol, request, responseInput)
+		if err != nil {
+			return openai.ChatCompletionResponse{}, err
+		}
+		defer stream.Close()
+		var completed openai.ChatCompletionResponse
+		var text strings.Builder
+		for {
+			chunk, recvErr := stream.Recv()
+			if errors.Is(recvErr, io.EOF) {
+				break
+			}
+			if recvErr != nil {
+				return completed, recvErr
+			}
+			completed.ID, completed.Model = chunk.ID, chunk.Model
+			if chunk.Usage != nil {
+				completed.Usage = *chunk.Usage
+			}
+			for _, choice := range chunk.Choices {
+				text.WriteString(choice.Delta.Content)
+			}
+		}
+		completed.Choices = []openai.ChatCompletionChoice{{Message: openai.ChatCompletionMessage{Role: "assistant", Content: text.String()}, FinishReason: openai.FinishReasonStop}}
+		return completed, nil
+	}
 	if IsAnthropicMessagesProtocol(protocol) {
 		return createAnthropicCompletion(ctx, client, request)
 	}
@@ -577,6 +606,9 @@ func (stream *OpenAICompletionStream) Recv() (openai.ChatCompletionStreamRespons
 		case openai.ResponseStreamEventCompleted, openai.ResponseStreamEventIncomplete:
 			if event.Response == nil {
 				return openai.ChatCompletionStreamResponse{}, errors.New("response stream terminal event is missing response")
+			}
+			if stream.chatGPT && (event.Type != openai.ResponseStreamEventCompleted || event.Response.Status != openai.ResponseStatusCompleted) {
+				return openai.ChatCompletionStreamResponse{}, errors.New("ChatGPT response did not complete")
 			}
 			if err = stream.queueResponseTerminal(*event.Response); err != nil {
 				return openai.ChatCompletionStreamResponse{}, err

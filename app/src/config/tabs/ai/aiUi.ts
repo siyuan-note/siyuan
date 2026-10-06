@@ -15,6 +15,9 @@ import {shell} from "electron";
 type ModelPickerGroup = "editing" | "agent" | "imageGeneration";
 
 export const getProvidersBlockKeywords = (): string[] => [
+    "ChatGPT",
+    window.siyuan.languages.chatGPTAccount,
+    window.siyuan.languages.chatGPTConnect,
     window.siyuan.languages.apiKeyRequired,
     window.siyuan.languages.apiProvider,
     "Chat Completions",

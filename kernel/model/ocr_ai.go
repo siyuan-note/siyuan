@@ -103,7 +103,7 @@ func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool
 		defer cancel()
 	}
 	ctx = util.ContextWithOpenAIResponsesBaseURL(ctx, provider.BaseURL)
-	client := util.NewAIClientWithModel(provider.APIKey, provider.BaseURL, model.Name, ResolveAIProviderHeaders(provider))
+	client := NewAIProviderClient(provider, model.Name)
 	response, err := util.CreateOpenAICompletion(ctx, client, protocol, request, nil)
 	if err != nil {
 		return "", err

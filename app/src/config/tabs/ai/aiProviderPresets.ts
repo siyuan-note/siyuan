@@ -10,10 +10,12 @@ export interface IProviderPreset {
     responsesSupport: AIResponsesSupport;
     region?: "china" | "international";
     icon?: string;
+    authType?: "chatgpt";
 }
 
 export const PROVIDER_PRESETS: IProviderPreset[] = [
     {id: "openai", name: "OpenAI", baseURL: "https://api.openai.com/v1", category: "official", responsesSupport: "supported", icon: "/stage/images/ai-providers/openai.svg"},
+    {id: "chatgpt", name: "ChatGPT", baseURL: "https://api.openai.com/v1", authType: "chatgpt", category: "official", responsesSupport: "supported", icon: "/stage/images/ai-providers/openai.svg"},
     {id: "anthropic", name: "Anthropic", baseURL: "https://api.anthropic.com/v1", category: "official", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/anthropic.svg"},
     {
         id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", responsesSupport: "supported",
@@ -83,4 +85,4 @@ export const getResponsesSupport = (baseURL: string): AIResponsesSupport =>
     findProviderPreset(baseURL)?.responsesSupport || "experimental";
 
 export const getDefaultProviderProtocol = (presetId: string) =>
-    presetId === "anthropic" ? "anthropic-messages" : presetId === "openai" ? "openai-responses" : "openai";
+    presetId === "anthropic" ? "anthropic-messages" : ["openai", "chatgpt"].includes(presetId) ? "openai-responses" : "openai";

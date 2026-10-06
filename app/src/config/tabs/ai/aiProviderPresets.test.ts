@@ -16,8 +16,11 @@ describe("AI provider presets", () => {
         assert.equal(findProviderPreset("https://api.minimaxi.com/v1"), undefined);
     });
 
-    it("defaults only the OpenAI preset to Responses", () => {
+    it("defaults OpenAI and ChatGPT account presets to Responses", () => {
         assert.equal(getDefaultProviderProtocol("openai"), "openai-responses");
+        assert.equal(getDefaultProviderProtocol("chatgpt"), "openai-responses");
+        assert.equal(PROVIDER_PRESETS.find(item => item.id === "chatgpt")?.authType, "chatgpt");
+        assert.equal(findProviderPreset("https://api.openai.com/v1")?.id, "openai");
         assert.equal(getDefaultProviderProtocol("deepseek"), "openai");
         assert.equal(getDefaultProviderProtocol("custom"), "openai");
     });

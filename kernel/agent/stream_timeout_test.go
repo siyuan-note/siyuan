@@ -123,6 +123,7 @@ func TestClassifyRetryResponsesErrors(t *testing.T) {
 	}{
 		{code: "invalid_request_error", want: "fatal"},
 		{code: "rate_limit_exceeded", want: "rate_limit"},
+		{code: "subscription_sharing_usage_limit_exceeded", want: "fatal"},
 		{code: "server_error", want: "server_error"},
 	}
 	for _, test := range tests {

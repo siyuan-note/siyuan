@@ -22,7 +22,7 @@ const fixture = (browser = false, mobile = false) => {
         {BROWSER: browser, MOBILE: mobile}, false, true), ScriptTarget.ES2021, true);
     const declarations = index.statements.filter(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(item => ["openSetting", "openBazaarReadme"].includes(item.name.getText(index))));
-    const entry = {} as {openSetting: (app: unknown, tab?: string) => void;
+    const entry = {} as {openSetting: (app: unknown, tab?: string, aiProvider?: "chatgpt") => void;
         openBazaarReadme: (app: unknown, type: string, name: string, from: string) => Promise<void>};
     let native = false;
     runInNewContext(transpileModule(declarations.map(item => item.getText(index)).join("\n"), {compilerOptions}).outputText, {
@@ -31,6 +31,7 @@ const fixture = (browser = false, mobile = false) => {
         openNativeSettings: (...args: unknown[]) => calls.push(["native", ...args]),
         openSettingDialog: (...args: unknown[]) => calls.push(["dialog", ...args]),
         openMobileSetting: (...args: unknown[]) => calls.push(["mobile", ...args]),
+        openChatGPTProvider: () => calls.push(["chatgpt"]),
         window: {siyuan: {dialogs: [{element: {getAttribute: () => "settings"}}], config: {bazaar: {trust: true}}}},
         Constants: {DIALOG_SETTING: "settings"}, switchSettingTab: (...args: unknown[]) => calls.push(["switch", ...args]),
         fetchSyncPost: async () => ({code: 0, data: {packages: [{name: "plugin"}]}}),
@@ -74,4 +75,17 @@ test("browser and mobile keep their own settings UI regardless of the native pre
         f.entry.openSetting({});
         assert.equal(f.calls[0][0], expected);
     }
+});
+
+test("ChatGPT navigation reaches the native settings command and dialog entry", () => {
+    const f = fixture();
+    f.entry.openSetting({}, "ai", "chatgpt");
+    assert.equal(JSON.stringify(f.calls[0][2]), JSON.stringify({tab: "ai", aiProvider: "chatgpt"}));
+    f.calls.length = 0;
+    f.storage.mode = 0;
+    f.entry.openSetting({}, "ai", "chatgpt");
+    assert.deepEqual(f.calls.map(item => item[0]), ["dialog", "chatgpt"]);
+    const mobile = fixture(true, true);
+    mobile.entry.openSetting({}, "ai", "chatgpt");
+    assert.deepEqual(mobile.calls.map(item => item[0]), ["mobile", "chatgpt"]);
 });

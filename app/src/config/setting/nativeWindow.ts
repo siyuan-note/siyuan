@@ -20,6 +20,7 @@ import type {TSettingTab} from "./tabs";
 
 export interface ISettingsCommand {
     tab?: TSettingTab;
+    aiProvider?: "chatgpt";
     readme?: {type: TBazaarType; from: "bazaar" | "downloaded"; resource: IBazaarItem};
 }
 

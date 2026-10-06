@@ -149,6 +149,8 @@ type Rerank struct {
 }
 
 type Provider struct {
+	AuthType       string            `json:"authType,omitempty"`
+	AccountID      string            `json:"accountID,omitempty"`
 	Headers        map[string]string `json:"headers,omitempty"`
 	ID             string            `json:"id"`
 	DisplayName    string            `json:"displayName,omitempty"`
@@ -467,7 +469,11 @@ func (ai *AI) GetImageGenerationModel() (*Provider, *Model) {
 	if ai.ImageGeneration == nil || ai.ImageGeneration.ModelID == "" {
 		return nil, nil
 	}
-	return ai.GetModel(ai.ImageGeneration.ModelID)
+	provider, model := ai.GetModel(ai.ImageGeneration.ModelID)
+	if provider != nil && provider.AuthType == "chatgpt" {
+		return nil, nil
+	}
+	return provider, model
 }
 
 // ReconcileModelIDs 校正各使用场景引用的模型，并将旧版名称引用转换为模型 ID。
@@ -629,6 +635,12 @@ func (ai *AI) Normalize() {
 		}
 		p.DisplayName = strings.TrimSpace(p.DisplayName)
 		p.APIKey = strings.TrimSpace(p.APIKey)
+		if p.AuthType == "chatgpt" {
+			p.APIKey = ""
+			p.BaseURL = "https://api.openai.com/v1"
+			p.Protocol = util.OpenAIProtocolResponses
+			p.Headers = nil
+		}
 		p.Protocol = strings.ToLower(strings.TrimSpace(p.Protocol))
 		if p.Protocol == "" {
 			p.Protocol = util.OpenAIProtocolChatCompletions

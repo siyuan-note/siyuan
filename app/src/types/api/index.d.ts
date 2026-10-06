@@ -70,7 +70,7 @@ export type AIModelRequestInput = { "model": string; "provider"?: string | null;
 
 export type AIModelTestData = { "available": Array<string> | null; "matched": boolean; "msg"?: string; };
 
-export type AIModelsData = { "contextLengths": Record<string, number> | null; "models": Array<string> | null; "msg"?: string; };
+export type AIModelsData = { "contextLengths": Record<string, number> | null; "displayNames"?: Record<string, string>; "models": Array<string> | null; "msg"?: string; };
 
 export type AINativeContent = { "blocks": Array<JSONValue> | null; "protocol": string; "version": number; };
 
@@ -773,6 +773,20 @@ export type ChangeAttrViewLayoutRequestInput = { "avID": string; "blockID": stri
 export type ChangeMasterPasswordRequestInput = { "newPassword": string; "oldPassword": string; };
 
 export type ChangeSortNotebookRequestInput = { "notebooks": Array<string>; };
+
+export type ChatGPTAccount = { "connected": boolean; "email": string; "id": string; "name": string; "sharing": boolean; };
+
+export type ChatGPTAccountRequestInput = { "accountID"?: string; };
+
+export type ChatGPTLogin = { "id": string; "url": string; };
+
+export type ChatGPTLoginRequestInput = { "id": string; };
+
+export type ChatGPTLoginStatus = { "accountID": string; "error": string; "state": string; };
+
+export type ChatGPTLogoutResult = { "revoked": boolean; };
+
+export type ChatGPTTransferRequestInput = { "accountID"?: string; "data"?: string; "password": string; };
 
 export type CheckActivationCodeRequestInput = { "data": string; };
 
@@ -2012,9 +2026,9 @@ export type SettingPetalDisabledData = { "dataChangePlugins": Array<string> | nu
 
 export type SettingPetalDisabledRequestInput = { "petalDisabled": boolean; };
 
-export type SettingProvider = { "apiKey": string; "baseURL": string; "displayName"?: string; "enabled": boolean; "headers"?: Record<string, string>; "id": string; "models": Array<SettingModel | null> | null; "protocol"?: string; "requestTimeout": number; };
+export type SettingProvider = { "accountID"?: string; "apiKey": string; "authType"?: string; "baseURL": string; "displayName"?: string; "enabled": boolean; "headers"?: Record<string, string>; "id": string; "models": Array<SettingModel | null> | null; "protocol"?: string; "requestTimeout": number; };
 
-export type SettingProviderInput = { "apiKey"?: string | null; "baseURL"?: string | null; "displayName"?: string | null; "enabled"?: boolean | null; "headers"?: Record<string, string> | null; "id"?: string | null; "models"?: Array<SettingModelInput | null> | null; "protocol"?: string | null; "requestTimeout"?: number | null; };
+export type SettingProviderInput = { "accountID"?: string | null; "apiKey"?: string | null; "authType"?: string | null; "baseURL"?: string | null; "displayName"?: string | null; "enabled"?: boolean | null; "headers"?: Record<string, string> | null; "id"?: string | null; "models"?: Array<SettingModelInput | null> | null; "protocol"?: string | null; "requestTimeout"?: number | null; };
 
 export type SettingPublish = { "auth": SettingBasicAuth | null; "enable": boolean; "port": number; };
 
@@ -2737,6 +2751,41 @@ export interface APIPOSTRoutes {
     "/api/ai/chatGPTWithAction": {
         request: AIActionRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/chatgpt/accounts": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<ChatGPTAccount>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/chatgpt/cancel": {
+        request: ChatGPTLoginRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/chatgpt/export": {
+        request: ChatGPTTransferRequestInput;
+        response: { "code": 0; "data": ExportFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/chatgpt/import": {
+        request: ChatGPTTransferRequestInput;
+        response: { "code": 0; "data": ChatGPTAccount; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/chatgpt/logout": {
+        request: ChatGPTAccountRequestInput;
+        response: { "code": 0; "data": ChatGPTLogoutResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/chatgpt/start": {
+        request: ChatGPTAccountRequestInput;
+        response: { "code": 0; "data": ChatGPTLogin; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/chatgpt/status": {
+        request: ChatGPTLoginRequestInput;
+        response: { "code": 0; "data": ChatGPTLoginStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/ai/editor/chat": {

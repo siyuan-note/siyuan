@@ -216,6 +216,8 @@ func settingProviderPayload(value *conf.Provider) *apicontract.SettingProvider {
 		return nil
 	}
 	result := &apicontract.SettingProvider{}
+	result.AuthType = value.AuthType
+	result.AccountID = value.AccountID
 	result.Headers = value.Headers
 	result.ID = value.ID
 	result.DisplayName = value.DisplayName

@@ -37,6 +37,7 @@ import (
 	"github.com/siyuan-note/logging"
 
 	"github.com/sashabaranov/go-openai"
+	"github.com/siyuan-note/siyuan/kernel/chatgpt"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	mcptools "github.com/siyuan-note/siyuan/kernel/mcp/tools"
@@ -802,7 +803,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 
 			nativeResponsesCompaction := util.IsOpenAIResponsesProtocol(protocol) &&
-				util.SupportsOpenAIResponsesCompaction(ctx)
+				util.SupportsOpenAIResponsesCompaction(ctx) && !client.ChatGPT
 			// 原生 compact 无法限制输出长度，覆盖所有已完成轮次，避免 opaque window 返回后仍超出预算。
 			selectedCandidateIndex := len(candidates) - 1
 			if !nativeResponsesCompaction {
@@ -2697,10 +2698,20 @@ func classifyRetry(err error) string {
 	if errors.Is(err, errModelRequestTimeout) || errors.Is(err, errModelStreamIdleTimeout) || errors.Is(err, context.DeadlineExceeded) {
 		return "timeout"
 	}
+	var subscriptionErr *chatgpt.RequestError
+	if errors.As(err, &subscriptionErr) {
+		if subscriptionErr.Status >= 500 {
+			return "server_error"
+		}
+		return "fatal"
+	}
 
 	var apiErr *openai.APIError
 	if errors.As(err, &apiErr) {
 		code := strings.ToLower(strings.TrimSpace(fmt.Sprint(apiErr.Code)))
+		if code == "subscription_sharing_usage_limit_exceeded" {
+			return "fatal"
+		}
 		switch {
 		case strings.Contains(code, "rate_limit"):
 			return "rate_limit"

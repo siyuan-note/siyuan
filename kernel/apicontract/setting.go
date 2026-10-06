@@ -120,6 +120,9 @@ type SettingImageGeneration struct {
 }
 
 type SettingProvider struct {
+	// 套餐认证固定使用公开 Responses API；账户引用不包含令牌，省略时保留 API Key 认证。
+	AuthType       string            `json:"authType,omitempty" api:"optional,nullable"`
+	AccountID      string            `json:"accountID,omitempty" api:"optional,nullable"`
 	Headers        map[string]string `json:"headers,omitempty" api:"optional,nullable"`
 	ID             string            `json:"id" api:"optional,nullable"`
 	DisplayName    string            `json:"displayName,omitempty" api:"optional,nullable"`

@@ -1007,6 +1007,24 @@ var AITestEmbeddingModel = define[EmptyRequest, AIEmbeddingTestData]("testEmbedd
 var AITestRerankModel = define[EmptyRequest, AIRerankTestData]("testRerankModel", "/api/ai/testRerankModel", NoBody, ResponseOptions{}, "POST")
 var AITestDecisionModel = define[EmptyRequest, AIDecisionTestData]("testDecisionModel", "/api/ai/testDecisionModel", NoBody, ResponseOptions{}, "POST")
 var AIListModels = define[AIProviderRequest, AIModelsData]("listModels", "/api/ai/listModels", JSONBody, ResponseOptions{}, "POST")
+
+// 套餐授权接口仅供已鉴权管理员使用，遵守 AI 禁用开关及只读限制。
+// 账户列表只返回身份及连接状态；令牌保存在主机私有目录，配置仅保存账户 ID。
+var ChatGPTAccounts = define[EmptyRequest, []ChatGPTAccount]("chatGPTAccounts", "/api/ai/chatgpt/accounts", NoBody, ResponseOptions{NonNullable: true}, "POST")
+
+// 登录地址可能包含身份提示，客户端不得记录；回调使用独立的 IPv4 回环监听器。
+var ChatGPTStart = define[ChatGPTAccountRequest, ChatGPTLogin]("chatGPTStart", "/api/ai/chatgpt/start", JSONBody, ResponseOptions{}, "POST")
+var ChatGPTStatus = define[ChatGPTLoginRequest, ChatGPTLoginStatus]("chatGPTStatus", "/api/ai/chatgpt/status", JSONBody, ResponseOptions{}, "POST")
+var ChatGPTCancel = define[ChatGPTLoginRequest, Null]("chatGPTCancel", "/api/ai/chatgpt/cancel", JSONBody, ResponseOptions{}, "POST")
+
+// 退出清除本地令牌并保留账户映射；revoked 表示远程撤销是否确认成功。
+var ChatGPTLogout = define[ChatGPTAccountRequest, ChatGPTLogoutResult]("chatGPTLogout", "/api/ai/chatgpt/logout", JSONBody, ResponseOptions{}, "POST")
+
+// 导出使用至少 12 个字符的密码，先写入带版本的认证加密文件，再停止源主机刷新。
+var ChatGPTExport = define[ChatGPTTransferRequest, ExportFileData]("chatGPTExport", "/api/ai/chatgpt/export", JSONBody, ResponseOptions{}, "POST")
+
+// 导入限制为 1 MiB，认证文件和账户身份后续期；失败保留账户及目标主机标识。
+var ChatGPTImport = define[ChatGPTTransferRequest, ChatGPTAccount]("chatGPTImport", "/api/ai/chatgpt/import", JSONBody, ResponseOptions{}, "POST")
 var AIGetEmbeddingStat = define[EmptyRequest, *AIEmbeddingStat]("embeddingStat", "/api/ai/embeddingStat", NoBody, ResponseOptions{}, "POST")
 var AIGetMCPStatus = define[EmptyRequest, []AIMCPStatus]("mcpStatus", "/api/ai/mcpStatus", NoBody, ResponseOptions{}, "POST")
 var AIGetMCPEnvironment = define[EmptyRequest, AIMCPEnvironmentData]("mcpEnvironmentVariables", "/api/ai/mcpEnvironmentVariables", NoBody, ResponseOptions{}, "POST")

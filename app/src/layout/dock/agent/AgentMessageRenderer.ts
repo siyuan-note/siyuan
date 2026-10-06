@@ -59,6 +59,7 @@ export const renderWelcomeHTML = (hasModel = true): string => {
             '<div class="agent-welcome__no-model-title">' + (L.agentNoModel || "No model configured") + "</div>" +
             '<div class="agent-welcome__no-model-tip">' + L.agentNoModelTip + "</div>" +
             '<button class="b3-button agent-welcome__go-setting" data-type="go-ai-setting">' + (L.agentGoToSetting || "Go to Settings") + "</button>" +
+            '<div class="fn__hr"></div><button class="b3-button b3-button--outline" data-type="go-chatgpt">' + L.chatGPTConnect + "</button>" +
             "</div>" +
             "</div>";
     }

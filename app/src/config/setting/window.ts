@@ -104,10 +104,14 @@ const initialize = async () => {
             const url = new URL(location.href);
             url.searchParams.set("tab", next.tab);
             history.replaceState(null, "", url);
-            if (next.tab === "assets") {
+            if (next.tab === "assets" || next.aiProvider === "chatgpt") {
                 await mounted;
                 if (!isActive()) return;
             }
+        }
+        if (next.tab === "ai" && next.aiProvider === "chatgpt") {
+            const {openChatGPTProvider} = await import("../tabs/ai/aiProviderUi");
+            if (isActive()) { openChatGPTProvider(); }
         }
         if (next.readme) {
             const {type, from, resource} = next.readme;

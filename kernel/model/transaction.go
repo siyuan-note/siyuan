@@ -186,10 +186,8 @@ func PerformTransactions(transactions *[]*Transaction) {
 	})
 }
 
-// PerformTransactionSync 同步执行单个事务，把执行结果返回给调用方，同时保留异步队列原有的错误提示行为。
-// 异步队列 flushTx 会把事务错误转成界面提示或界面重载，但调用方拿不到执行结果；
-// 需要根据事务成败作答的 API（例如 moveBlock）改用本函数，避免事务已回滚却仍返回成功。
-// 返回前仍按 flushTx 的既有分支处理错误，确保界面重载与提示不会因为改走同步路径而丢失。
+// PerformTransactionSync 先执行已排队编辑，再同步执行事务并返回实际错误，同时发送事务错误通知。
+// 主动跳过的操作保持成功语义，结构校验或提交失败仍返回错误。
 func PerformTransactionSync(transaction *Transaction) (err error) {
 	flushLock.Lock()
 	isFlushing.Store(true)
@@ -206,6 +204,9 @@ func PerformTransactionSync(transaction *Transaction) (err error) {
 	if err = performTxSyncLocked(transaction); nil != err {
 		if txErr, ok := err.(*TxErr); ok {
 			handleTxErr(transaction, txErr)
+			if txErr.code == TxErrCodeSkipTx {
+				return nil
+			}
 		}
 	}
 	return

@@ -208,6 +208,7 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 		}
 	}
 	testAPIContractBlockEdits(t, engine, box.ID, docID, heading.ID)
+	testAPIContractMoveBlock(t, engine, box.ID)
 }
 
 func testAPIContractBlockEdits(t *testing.T, engine *gin.Engine, boxID, docID, headingID string) {

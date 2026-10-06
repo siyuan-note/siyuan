@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -69,6 +70,116 @@ func TestChatGPTCompletionUsesStreamAndRejectsIncomplete(t *testing.T) {
 				t.Fatal("unfinished response accepted")
 			}
 		})
+	}
+}
+
+func TestChatGPTCompletionWithStreamedOutputItems(t *testing.T) {
+	for _, scenario := range []string{"text", "refusal", "missing-item", "mismatch", "missing-index", "api-key"} {
+		t.Run(scenario, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "text/event-stream")
+				deltaType, contentType, field := "output_text", "output_text", "text"
+				if scenario == "refusal" {
+					deltaType, contentType, field = "refusal", "refusal", "refusal"
+				}
+				fmt.Fprintf(w, "data: {\"type\":\"response.%s.delta\",\"output_index\":0,\"content_index\":0,\"delta\":\"OK\"}\n\n", deltaType)
+				if scenario != "missing-item" {
+					index, text := 0, "OK"
+					if scenario == "missing-index" {
+						index = 1
+					}
+					if scenario == "mismatch" {
+						text = "different"
+					}
+					fmt.Fprintf(w, "data: {\"type\":\"response.output_item.done\",\"output_index\":%d,\"item\":{\"id\":\"message\",\"type\":\"message\",\"status\":\"completed\",\"role\":\"assistant\",\"content\":[{\"type\":\"%s\",\"%s\":\"%s\"}]}}\n\n", index, contentType, field, text)
+				}
+				io.WriteString(w, "data: {\"type\":\"response.completed\",\"response\":{\"id\":\"response\",\"status\":\"completed\",\"model\":\"model\",\"usage\":{\"input_tokens\":2,\"output_tokens\":1,\"total_tokens\":3}}}\n\n")
+			}))
+			defer server.Close()
+			client := NewAIClientWithModel("test", server.URL, "model")
+			client.ChatGPT = scenario != "api-key"
+			if scenario == "api-key" {
+				stream, err := CreateOpenAICompletionStream(context.Background(), client, OpenAIProtocolResponses,
+					openai.ChatCompletionRequest{Model: "model"}, nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer stream.Close()
+				for {
+					_, err = stream.Recv()
+					if err != nil {
+						break
+					}
+				}
+				if err == io.EOF || !strings.Contains(err.Error(), "does not match") {
+					t.Fatalf("API key stream lost its terminal validation: %v", err)
+				}
+				return
+			}
+			response, err := CreateOpenAICompletion(context.Background(), client, OpenAIProtocolResponses,
+				openai.ChatCompletionRequest{Model: "model"}, nil)
+			if scenario == "text" || scenario == "refusal" {
+				if err != nil || len(response.Choices) != 1 || response.Choices[0].Message.Content != "OK" || response.Usage.TotalTokens != 3 {
+					t.Fatalf("streamed items did not complete correctly: %+v %v", response, err)
+				}
+			} else if err == nil {
+				t.Fatal("inconsistent terminal output was accepted")
+			}
+		})
+	}
+}
+
+func TestChatGPTStreamedOutputPreservesToolAndReasoning(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		io.WriteString(w, `data: {"type":"response.output_item.done","output_index":0,"item":{"id":"reasoning","type":"reasoning","encrypted_content":"encrypted-reasoning"}}
+
+data: {"type":"response.output_text.delta","output_index":1,"content_index":0,"delta":"Checking"}
+
+data: {"type":"response.output_item.done","output_index":1,"item":{"id":"message","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"Checking"}]}}
+
+data: {"type":"response.output_item.added","output_index":2,"item":{"id":"function","type":"function_call","status":"in_progress","call_id":"call","namespace":"siyuan","name":"lookup","arguments":""}}
+
+data: {"type":"response.function_call_arguments.delta","output_index":2,"delta":"{}"}
+
+data: {"type":"response.output_item.done","output_index":2,"item":{"id":"function","type":"function_call","status":"completed","call_id":"call","namespace":"siyuan","name":"lookup","arguments":"{}"}}
+
+data: {"type":"response.completed","response":{"id":"response","status":"completed","model":"model","output":[]}}
+
+`)
+	}))
+	defer server.Close()
+	client := NewAIClientWithModel("test", server.URL, "model")
+	client.ChatGPT = true
+	stream, err := CreateOpenAICompletionStream(context.Background(), client, OpenAIProtocolResponses, openai.ChatCompletionRequest{Model: "model"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer stream.Close()
+	var text, arguments strings.Builder
+	var finish openai.FinishReason
+	for {
+		chunk, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, choice := range chunk.Choices {
+			text.WriteString(choice.Delta.Content)
+			for _, call := range choice.Delta.ToolCalls {
+				arguments.WriteString(call.Function.Arguments)
+			}
+			if choice.FinishReason != "" {
+				finish = choice.FinishReason
+			}
+		}
+	}
+	output := stream.ResponseOutput()
+	if len(output) != 3 || !strings.Contains(string(output[0]), `"encrypted_content":"encrypted-reasoning"`) ||
+		!strings.Contains(string(output[2]), `"namespace":"siyuan"`) || text.String() != "Checking" || arguments.String() != "{}" || finish != openai.FinishReasonToolCalls {
+		t.Fatalf("streamed output was not preserved: %s %q %q %s", output, text.String(), arguments.String(), finish)
 	}
 }
 

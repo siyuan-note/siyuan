@@ -97,6 +97,7 @@ type OpenAICompletionStream struct {
 	responses         *openai.ResponseStream
 	pending           []openai.ChatCompletionStreamResponse
 	responseOutput    []json.RawMessage
+	completedOutput   map[int]json.RawMessage
 	responseContent   strings.Builder
 	responseToolCalls map[int]openai.ToolCall
 	responsesDone     bool
@@ -133,6 +134,7 @@ func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protoco
 		chatGPT:           client.ChatGPT,
 		responses:         stream,
 		responseToolCalls: map[int]openai.ToolCall{},
+		completedOutput:   map[int]json.RawMessage{},
 	}, nil
 }
 
@@ -603,6 +605,17 @@ func (stream *OpenAICompletionStream) Recv() (openai.ChatCompletionStreamRespons
 				}}},
 			}}
 			return response, nil
+		case openai.ResponseStreamEventOutputItemDone:
+			if !stream.chatGPT {
+				break
+			}
+			var completed struct {
+				Item json.RawMessage `json:"item"`
+			}
+			if err = json.Unmarshal(event.Raw, &completed); err != nil || len(completed.Item) == 0 || string(completed.Item) == "null" {
+				return openai.ChatCompletionStreamResponse{}, errors.New("completed response output item is missing")
+			}
+			stream.completedOutput[event.OutputIndex] = completed.Item
 		case openai.ResponseStreamEventCompleted, openai.ResponseStreamEventIncomplete:
 			if event.Response == nil {
 				return openai.ChatCompletionStreamResponse{}, errors.New("response stream terminal event is missing response")
@@ -610,7 +623,19 @@ func (stream *OpenAICompletionStream) Recv() (openai.ChatCompletionStreamRespons
 			if stream.chatGPT && (event.Type != openai.ResponseStreamEventCompleted || event.Response.Status != openai.ResponseStatusCompleted) {
 				return openai.ChatCompletionStreamResponse{}, errors.New("ChatGPT response did not complete")
 			}
-			if err = stream.queueResponseTerminal(*event.Response); err != nil {
+			terminal := *event.Response
+			// 套餐流的结束事件可能省略输出，按输出索引恢复已完成项，保留工具命名空间及加密推理字段。
+			if stream.chatGPT && len(terminal.Output) == 0 && len(stream.completedOutput) > 0 {
+				terminal.Output = make([]any, len(stream.completedOutput))
+				for index := range terminal.Output {
+					item, ok := stream.completedOutput[index]
+					if !ok {
+						return openai.ChatCompletionStreamResponse{}, errors.New("completed response output items are missing")
+					}
+					terminal.Output[index] = item
+				}
+			}
+			if err = stream.queueResponseTerminal(terminal); err != nil {
 				return openai.ChatCompletionStreamResponse{}, err
 			}
 			stream.responsesDone = true

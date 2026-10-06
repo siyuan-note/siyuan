@@ -154,6 +154,8 @@ import {removeSearchMark} from "../toolbar/util";
 import {getTableCellTextStyleMenus} from "../toolbar/tableCell";
 import {isNestedListCrossBlockSelection, NESTED_LIST_PASTE_MARKER} from "../util/pasteSource";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
+import {canInput} from "../../mobile/util/mobileAppUtil";
+import {notifyMobileKeyboardChange} from "../../mobile/util/mobileKeyboardChange";
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, switchAVView, updateAVName} from "../render/av/action";
 import {selectRow, stickyRow, updateHeader} from "../render/av/row";
@@ -5295,6 +5297,11 @@ export class WYSIWYG {
                         range.setStart(nextSibling, 0);
                     }
                     range.collapse(true);
+                    if (isMobile() && !protyle.disabled && canInput(nextSibling.nodeType === 3 ?
+                        nextSibling.parentElement : nextSibling as HTMLElement)) {
+                        // 恢复图片后的光标前隐藏普通底栏，避免底栏随软键盘弹起而上移。
+                        notifyMobileKeyboardChange(true);
+                    }
                     focusByRange(range);
                     // 需等待 range 更新再次进行渲染
                     if (protyle.options.render.breadcrumb) {

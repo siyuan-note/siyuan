@@ -44,6 +44,7 @@ type TSearchAVPurpose = "addToDatabase" | "selectRelation";
 interface IOpenSearchAVOptions {
     avID: string;
     target: HTMLElement;
+    position?: IPosition;
     callback?: (element: HTMLElement) => void;
     purpose: TSearchAVPurpose;
     blockID?: string;
@@ -227,7 +228,7 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
             });
             loadList("", () => {
                 const rect = options.target.getBoundingClientRect();
-                menu.open({
+                menu.open(options.position || {
                     x: rect.left,
                     y: rect.bottom,
                     h: rect.height,

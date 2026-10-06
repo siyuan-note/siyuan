@@ -5,16 +5,18 @@ import {getDockByType} from "../tabUtil";
 import {Model} from "../Model";
 import {BlockPanel} from "../../block/Panel";
 import {fullscreen} from "../../protyle/breadcrumb/action";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openFileById} from "../../editor/util";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
 import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {Editor} from "../../editor";
-import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
+import {getDocDisplayName, isEncryptedBox, pathPosix} from "../../util/pathName";
 import {GraphEngine} from "./graph/GraphEngine";
-import {IGraphNodeClick, IGraphSourceLink, IGraphSourceNode} from "./graph/types";
+import {IGraphNodeClick, IGraphNodeContextMenu, IGraphSourceLink, IGraphSourceNode} from "./graph/types";
+import {initDocumentMenu} from "../../menus/navigation";
+import {Constants} from "../../constants";
 
 interface IGraphSearchOptions {
     id?: string;
@@ -43,6 +45,8 @@ export class Graph extends Model {
     };
     private renderedGraphData: Graph["graphData"];
     private requestVersion = 0;
+    private menuRequestVersion = 0;
+    private menuAbort?: AbortController;
     public type: "local" | "pin" | "global";
 
     constructor(options: {
@@ -530,6 +534,8 @@ export class Graph extends Model {
 
     public destroy() {
         this.requestVersion++;
+        this.menuRequestVersion++;
+        this.menuAbort?.abort();
         if (this.searchTimeout) {
             window.clearTimeout(this.searchTimeout);
         }
@@ -682,6 +688,13 @@ export class Graph extends Model {
         if (!this.graphEngine) {
             this.graphEngine = new GraphEngine(this.graphElement, {
                 onNodeClick: (details) => this.openGraphNode(details),
+                onNodeContextMenu: (details) => {
+                    if (details.node.type !== "NodeDocument") {
+                        return false;
+                    }
+                    void this.openGraphNodeMenu(details);
+                    return true;
+                },
             });
             this.renderedGraphData = undefined;
         }
@@ -741,6 +754,66 @@ export class Graph extends Model {
                     zoomIn
                 });
             });
+        }
+    }
+
+    private async openGraphNodeMenu(details: IGraphNodeContextMenu) {
+        this.menuAbort?.abort();
+        const abort = new AbortController();
+        this.menuAbort = abort;
+        const request = ++this.menuRequestVersion;
+        const cancel = () => {
+            this.menuRequestVersion++;
+            abort.abort();
+        };
+        document.addEventListener("pointerdown", cancel, true);
+        document.addEventListener("keydown", cancel, true);
+        window.siyuan.menus.menu.remove();
+        try {
+            const [info, doc] = await Promise.all([
+                fetchSyncPost("/api/block/getBlockInfo", {id: details.node.id}, undefined, false, abort.signal),
+                fetchSyncPost("/api/block/getDocInfo", {id: details.node.id}, undefined, false, abort.signal),
+            ]);
+            if (request !== this.menuRequestVersion || info.code !== 0 || doc.code !== 0 || !info.data || !doc.data ||
+                !info.data.box || !info.data.path || doc.data.rootID !== details.node.id) {
+                return;
+            }
+            const siblings = await fetchSyncPost("/api/filetree/listDocsByPath", {
+                notebook: info.data.box,
+                path: pathPosix().dirname(info.data.path),
+                maxListCount: 1,
+                ignoreMaxListHint: true,
+            }, undefined, false, abort.signal);
+            if (request !== this.menuRequestVersion || !this.graphElement.isConnected || siblings.code !== 0) {
+                return;
+            }
+            const sortValue = doc.data.ial?.[Constants.CUSTOM_SY_SUBDOC_SORT_MODE];
+            const sortMode = sortValue ? Number(sortValue) : null;
+            const position = {x: details.x, y: details.y};
+            initDocumentMenu(this.app, {
+                id: details.node.id,
+                notebookId: info.data.box,
+                path: info.data.path,
+                name: doc.data.name,
+                subFileCount: doc.data.subFileCount,
+                childrenSortMode: Number.isInteger(sortMode) ? sortMode : null,
+                customSort: siblings.data.effectiveSortMode === 6,
+                target: this.graphElement,
+                elements: this.graphElement.querySelectorAll<HTMLElement>(".b3-list-item"),
+                position,
+                readonlyHistory: window.siyuan.config.editor.readOnly ||
+                    doc.data.ial?.[Constants.CUSTOM_SY_READONLY] === "true",
+            }).popup(position);
+        } catch (error) {
+            if (!abort.signal.aborted) {
+                console.warn("Unable to open graph document menu", error);
+            }
+        } finally {
+            document.removeEventListener("pointerdown", cancel, true);
+            document.removeEventListener("keydown", cancel, true);
+            if (this.menuAbort === abort) {
+                this.menuAbort = undefined;
+            }
         }
     }
 }

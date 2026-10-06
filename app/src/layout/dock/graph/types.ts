@@ -88,8 +88,13 @@ export interface IGraphNodeClick {
     y: number;
 }
 
+export interface IGraphNodeContextMenu extends Omit<IGraphNodeClick, "event"> {
+    event: MouseEvent;
+}
+
 export interface IGraphEngineOptions {
     onNodeClick: (details: IGraphNodeClick) => void;
+    onNodeContextMenu?: (details: IGraphNodeContextMenu) => boolean;
 }
 
 export interface IGraphSetDataOptions {

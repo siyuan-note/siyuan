@@ -106,6 +106,7 @@ export class GraphEngine {
         this.container.addEventListener("pointerup", this.handlePointerUp);
         this.container.addEventListener("pointercancel", this.handlePointerUp);
         this.container.addEventListener("pointerleave", this.handlePointerLeave);
+        this.container.addEventListener("contextmenu", this.handleContextMenu);
         this.container.addEventListener("wheel", this.handleWheel, {passive: false});
         this.resizeObserver = new ResizeObserver(() => this.resize());
         this.resizeObserver.observe(this.container);
@@ -308,6 +309,7 @@ export class GraphEngine {
         this.container.removeEventListener("pointerup", this.handlePointerUp);
         this.container.removeEventListener("pointercancel", this.handlePointerUp);
         this.container.removeEventListener("pointerleave", this.handlePointerLeave);
+        this.container.removeEventListener("contextmenu", this.handleContextMenu);
         this.container.removeEventListener("wheel", this.handleWheel);
         this.baseCanvas.removeEventListener("webglcontextlost", this.handleContextLost);
         if (this.renderFrame) {
@@ -542,7 +544,7 @@ export class GraphEngine {
         });
     }
 
-    private getPointer(event: PointerEvent): IPointerPosition {
+    private getPointer(event: MouseEvent): IPointerPosition {
         const rect = this.container.getBoundingClientRect();
         return {
             clientX: event.clientX,
@@ -616,6 +618,28 @@ export class GraphEngine {
         }
         this.scheduleRender();
         event.preventDefault();
+    };
+
+    private readonly handleContextMenu = (event: MouseEvent) => {
+        if (!this.data || !this.engineOptions.onNodeContextMenu) {
+            return;
+        }
+        const pointer = this.getPointer(event);
+        const index = this.hitTest(pointer.x, pointer.y);
+        if (index < 0 || !this.engineOptions.onNodeContextMenu({
+            event,
+            node: this.data.nodes[index],
+            x: event.clientX,
+            y: event.clientY,
+        })) {
+            return;
+        }
+        this.selected = index;
+        this.selectionVersion++;
+        this.hideTooltip();
+        this.scheduleRender();
+        event.preventDefault();
+        event.stopPropagation();
     };
 
     private readonly handlePointerMove = (event: PointerEvent) => {

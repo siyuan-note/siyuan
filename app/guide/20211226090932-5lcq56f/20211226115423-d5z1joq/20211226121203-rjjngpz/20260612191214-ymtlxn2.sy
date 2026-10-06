@@ -6,7 +6,7 @@
 		"id": "20260612191214-ymtlxn2",
 		"title": "命令列",
 		"type": "doc",
-		"updated": "20260913020024"
+		"updated": "20261006133358"
 	},
 	"Children": [
 		{
@@ -67,7 +67,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123823-9n2h06a",
-				"updated": "20260618123823"
+				"updated": "20261006133358"
 			},
 			"Children": [
 				{
@@ -114,7 +114,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260618123823-gwobglg",
-				"updated": "20260618123823"
+				"updated": "20261006133358"
 			},
 			"Children": [
 				{
@@ -126,7 +126,7 @@
 					},
 					"Properties": {
 						"id": "20260618123823-pg296go",
-						"updated": "20260618123823"
+						"updated": "20261006133358"
 					},
 					"Children": [
 						{
@@ -134,7 +134,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260618123823-dsraz6n",
-								"updated": "20260618123823"
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
@@ -166,25 +166,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "。Microsoft Store 版本執行於 MSIX 沙箱中，無法自動修改 "
+									"Data": "。Microsoft Store 版（3.8.7 及以上）在 Windows 10 1607（組建 14393）及以上系統中註冊 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "PATH"
+									"TextMarkTextContent": "siyuan.exe"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​。可部署一個 "
+									"Data": "​ 應用程式執行別名。安裝或更新後，開啟新的終端機並執行 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "siyuan.cmd"
+									"TextMarkTextContent": "siyuan --help"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 轉發器（一次性，商店版更新後依然有效）"
+									"Data": "​"
 								}
 							]
 						},
@@ -194,7 +194,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20260708122000-twstore1",
-								"updated": "20260708122000"
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
@@ -207,7 +207,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": "# 僅適用於 Microsoft Store 版 —— 在 PowerShell 中執行一次\n$shimDir = \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\"   # 該目錄預設已在 PATH 中\n@(\n    '@echo off'\n    'setlocal'\n    'set \"ROOT=\"'\n    'for /f \"delims=\" %%i in (''powershell -NoProfile -Command \"(Get-AppxPackage *SiYuan*).InstallLocation\"'') do set \"ROOT=%%i\"'\n    'if not defined ROOT goto :noshim'\n    '\"%ROOT%\\app\\resources\\kernel\\SiYuan-Kernel.exe\" %*'\n    'exit /b %ERRORLEVEL%'\n    ':noshim'\n    '1>&2 echo siyuan: 找不到 Microsoft Store 版本'\n    'exit /b 1'\n) | Set-Content \"$shimDir\\siyuan.cmd\"\n"
+									"Data": "siyuan --help\n\n# 檢查實際使用的命令\nGet-Command siyuan -All\nwhere.exe siyuan\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -216,16 +216,75 @@
 							]
 						},
 						{
-							"ID": "20260708130000-twuninst",
+							"ID": "20261006133358-uu0ne7i",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260708130000-twuninst",
-								"updated": "20260708130000"
+								"id": "20261006133358-uu0ne7i",
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "解除安裝商店版時如需清理："
+									"Data": "如果找不到命令，請檢查 Windows 中思源的應用程式執行別名是否已啟用，以及 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "%LOCALAPPDATA%\\Microsoft\\WindowsApps"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 是否在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中。上述命令可檢查命令解析結果；同時安裝多個思源版本或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 順序可能導致呼叫其他可執行檔"
+								}
+							]
+						},
+						{
+							"ID": "20260708130000-twuninst",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260708130000-twuninst",
+								"updated": "20261006133358"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果曾建立舊的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan.cmd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 轉發器，請先執行 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "& \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\\siyuan.exe\" --help"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 確認商店版別名可用，再視需要刪除轉發器："
 								},
 								{
 									"Type": "NodeTextMark",

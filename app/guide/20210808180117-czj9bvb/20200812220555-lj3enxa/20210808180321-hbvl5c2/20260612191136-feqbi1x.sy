@@ -6,7 +6,7 @@
 		"id": "20260612191136-feqbi1x",
 		"title": "命令行接口",
 		"type": "doc",
-		"updated": "20260913020024"
+		"updated": "20261006133358"
 	},
 	"Children": [
 		{
@@ -67,7 +67,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123536-f5newid",
-				"updated": "20260618123536"
+				"updated": "20261006133358"
 			},
 			"Children": [
 				{
@@ -114,7 +114,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260618123536-fdlw82f",
-				"updated": "20260618123536"
+				"updated": "20261006133358"
 			},
 			"Children": [
 				{
@@ -126,7 +126,7 @@
 					},
 					"Properties": {
 						"id": "20260618123536-lkzcvp0",
-						"updated": "20260618123536"
+						"updated": "20261006133358"
 					},
 					"Children": [
 						{
@@ -134,7 +134,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260618123536-n29x52o",
-								"updated": "20260618123536"
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
@@ -166,25 +166,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "。微软商店版运行在 MSIX 沙箱中，无法自动修改 "
+									"Data": "。微软商店版（3.8.7 及以上）在 Windows 10 1607（内部版本 14393）及以上系统中注册 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "PATH"
+									"TextMarkTextContent": "siyuan.exe"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​。可部署一个 "
+									"Data": "​ 应用执行别名。安装或更新后，打开新的终端并运行 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "siyuan.cmd"
+									"TextMarkTextContent": "siyuan --help"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 转发器（一次性，商店版更新后依然有效）"
+									"Data": "​"
 								}
 							]
 						},
@@ -194,7 +194,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20260708121000-cnstore1",
-								"updated": "20260708121000"
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
@@ -207,7 +207,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": "# 仅适用于微软商店版 —— 在 PowerShell 中运行一次\n$shimDir = \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\"   # 该目录默认已在 PATH 中\n@(\n    '@echo off'\n    'setlocal'\n    'set \"ROOT=\"'\n    'for /f \"delims=\" %%i in (''powershell -NoProfile -Command \"(Get-AppxPackage *SiYuan*).InstallLocation\"'') do set \"ROOT=%%i\"'\n    'if not defined ROOT goto :noshim'\n    '\"%ROOT%\\app\\resources\\kernel\\SiYuan-Kernel.exe\" %*'\n    'exit /b %ERRORLEVEL%'\n    ':noshim'\n    '1>&2 echo siyuan: 未找到微软商店版'\n    'exit /b 1'\n) | Set-Content \"$shimDir\\siyuan.cmd\"\n"
+									"Data": "siyuan --help\n\n# 检查实际使用的命令\nGet-Command siyuan -All\nwhere.exe siyuan\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -216,16 +216,75 @@
 							]
 						},
 						{
-							"ID": "20260708130000-cnuninst",
+							"ID": "20261006133358-v3b716p",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260708130000-cnuninst",
-								"updated": "20260708130000"
+								"id": "20261006133358-v3b716p",
+								"updated": "20261006133358"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "卸载商店版时如需清理："
+									"Data": "如果找不到命令，请检查 Windows 中思源的应用执行别名是否已启用，以及 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "%LOCALAPPDATA%\\Microsoft\\WindowsApps"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 是否在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中。上述命令可检查命令解析结果；同时安装多个思源版本或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 顺序可能导致调用其他可执行文件"
+								}
+							]
+						},
+						{
+							"ID": "20260708130000-cnuninst",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260708130000-cnuninst",
+								"updated": "20261006133358"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果曾创建旧的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan.cmd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 转发器，请先运行 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "& \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\\siyuan.exe\" --help"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 确认商店版别名可用，再按需删除转发器："
 								},
 								{
 									"Type": "NodeTextMark",

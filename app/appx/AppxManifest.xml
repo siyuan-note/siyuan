@@ -3,8 +3,10 @@
 <Package
         xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+        xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
         xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
-        xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
+        xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+        IgnorableNamespaces="uap3 desktop">
     <!-- use single quotes to avoid double quotes escaping in the publisher value  -->
     <Identity Name="89C2A984.SiYuan"
               ProcessorArchitecture="x64"
@@ -49,6 +51,13 @@
             </uap:VisualElements>
 
             <Extensions>
+                <uap3:Extension Category="windows.appExecutionAlias"
+                                Executable="app\resources\kernel\SiYuan-Kernel.exe"
+                                EntryPoint="Windows.FullTrustApplication">
+                    <uap3:AppExecutionAlias>
+                        <desktop:ExecutionAlias Alias="siyuan.exe"/>
+                    </uap3:AppExecutionAlias>
+                </uap3:Extension>
                 <uap:Extension Category="windows.protocol">
                     <uap:Protocol Name="siyuan"/>
                 </uap:Extension>

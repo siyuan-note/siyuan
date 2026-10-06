@@ -21,6 +21,7 @@ import {expandFileTree} from "../layout/dock/fileTreeAnimation";
 import {getHostCapabilities} from "./hostCapabilities";
 import {highlightSearchText} from "./searchHighlight";
 import {addClearButton} from "./addClearButton";
+import {normalizeSiYuanUri} from "./normalizeSiYuanUri";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     if (!getHostCapabilities().localFileSystem) {
@@ -61,10 +62,11 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
     try {
         if (uri == null) return null;
 
-        const uriObj = uri instanceof URL ? uri : new URL(uri);
-        if (!isSiYuanUriProtocol(uriObj)) {
+        const parsedURI = uri instanceof URL ? uri : new URL(uri);
+        if (!isSiYuanUriProtocol(parsedURI)) {
             return null;
         }
+        const uriObj = normalizeSiYuanUri(parsedURI);
         if (uriObj.hostname === "blocks" && /^\/\d{14}-\w{7}/.test(uriObj.pathname)) {
             const avItemID = uriObj.searchParams.get("avItemID") || undefined;
             const avViewID = uriObj.searchParams.get("avViewID") || undefined;

@@ -81,7 +81,9 @@ func RuntimeInfo(ctx context.Context) string {
 	logStage("go_heap")
 	driveType := ""
 	if !IsMobileContainer() {
-		driveType = detectWorkspaceDriveType()
+		storageCtx, cancel := context.WithTimeout(ctx, time.Second)
+		driveType = workspaceDrive.get(storageCtx, detectWorkspaceDriveType)
+		cancel()
 	}
 	logStage("workspace_storage")
 	if driveType == "" {

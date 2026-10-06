@@ -18,6 +18,7 @@ package util
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"fmt"
 	"net/url"
@@ -152,7 +153,7 @@ func getWorkspaceDriveType() string {
 	if IsMobileContainer() {
 		return ghw.DriveTypeSSD.String()
 	}
-	return detectWorkspaceDriveType()
+	return workspaceDrive.get(context.Background(), detectWorkspaceDriveType)
 }
 
 // detectWorkspaceDriveType 仅返回实际检测到的磁盘类型，不根据平台推断。

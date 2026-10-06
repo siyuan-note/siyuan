@@ -25,12 +25,12 @@ const account = (id = "account-one", email = "user@example.com") => ({id, email,
 
 const fixture = (remote = false, initialProfiles = [account()], accountID = "") => {
     const controls: Record<string, Control> = {};
-    for (const name of ["accountRow", "accountInfo", "account", "password", "file", "statusRow", "status", "login", "add", "logout", "usage", "cancel", "export", "import"]) {
+    for (const name of ["accountRow", "accountInfo", "account", "password", "file", "statusRow", "status", "login", "add", "logout", "remove", "usage", "cancel", "export", "import"]) {
         controls[name] = new Control();
         controls[name].dataset.chatgpt = name;
     }
     const root = new Control();
-    const buttons = ["login", "add", "logout", "usage", "cancel", "export", "import"].map(name => controls[name]);
+    const buttons = ["login", "add", "logout", "remove", "usage", "cancel", "export", "import"].map(name => controls[name]);
     Object.assign(root, {
         querySelector: (selector: string) => controls[selector.match(/data-chatgpt='([^']+)'/)![1]],
         querySelectorAll: () => buttons,
@@ -44,6 +44,9 @@ const fixture = (remote = false, initialProfiles = [account()], accountID = "") 
     const namespace: Record<string, unknown> = {};
     let pendingStatus: (response: unknown) => void;
     let loginCount = 0;
+    const confirmations: Array<{text: string; confirm: () => void; cancel: () => void}> = [];
+    const messages: string[] = [];
+    const outcomes = {removeCode: 0, revoked: true};
     const source = readFileSync("src/config/tabs/ai/chatGPTAccount.ts", "utf8");
     runInNewContext(transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText, {
         exports: namespace,
@@ -59,6 +62,11 @@ const fixture = (remote = false, initialProfiles = [account()], accountID = "") 
                         if (selected) { selected.connected = false; selected.sharing = false; }
                         callback?.({code: 0, data: {revoked: true}});
                     }
+                    if (path.endsWith("remove")) {
+                        const index = profiles.findIndex(profile => profile.id === (body as {accountID: string}).accountID);
+                        if (outcomes.removeCode === 0 && index !== -1) { profiles.splice(index, 1); }
+                        callback?.({code: outcomes.removeCode, data: {revoked: outcomes.revoked}});
+                    }
                     if (path.endsWith("import")) {
                         const imported = account("account-two", "imported@example.com");
                         profiles.push(imported);
@@ -70,7 +78,10 @@ const fixture = (remote = false, initialProfiles = [account()], accountID = "") 
             if (name.endsWith("util/hostCapabilities")) { return {getHostCapabilities: () => ({remoteKernel: remote})}; }
             if (name.endsWith("util/compatibility")) { return {isInMobileApp: () => false, saveExportFile: async () => ({status: "success"})}; }
             if (name.endsWith("editor/openLink")) { return {openByMobile: () => {}}; }
-            if (name.endsWith("dialog/message")) { return {showMessage: () => {}}; }
+            if (name.endsWith("dialog/message")) { return {showMessage: (message: string) => messages.push(message)}; }
+            if (name.endsWith("dialog/confirmDialog")) {
+                return {confirmDialog: (_title: string, text: string, confirm: () => void, cancel: () => void) => confirmations.push({text, confirm, cancel})};
+            }
             if (name.endsWith("render/fragments")) { return {genConfigItemMainHtml: () => ""}; }
             if (name === "electron") { return {shell: {openExternal: async () => {}}}; }
             throw new Error(name);
@@ -78,7 +89,7 @@ const fixture = (remote = false, initialProfiles = [account()], accountID = "") 
         location: {hostname: remote ? "notes.example.com" : "127.0.0.1"},
         MutationObserver: class { constructor(callback: () => void) { observerCallback = callback; } observe() {} disconnect() {} },
         window: {
-            siyuan: {languages: {chatGPTAccount: "ChatGPT account", chatGPTSignedOut: "Not signed in; account info is kept for signing in again", mcpStatusConnected: "Connected", mcpStatusAuthorizationRequired: "Authorization required", chatGPTConnect: "Continue", chatGPTSignInPendingTip: "Signing in", chatGPTRemoteTip: "Import on remote"}},
+            siyuan: {languages: {confirmDeleteTip: "Delete ${x}?", chatGPTRevokeFailed: "Remote revocation was not confirmed", chatGPTAccount: "ChatGPT account", chatGPTSignedOut: "Not signed in; account info is kept for signing in again", mcpStatusConnected: "Connected", mcpStatusAuthorizationRequired: "Authorization required", chatGPTConnect: "Continue", chatGPTSignInPendingTip: "Signing in", chatGPTRemoteTip: "Import on remote"}},
             setTimeout: (callback: () => void) => { const id = timers.size + 1; timers.set(id, callback); return id; },
             clearTimeout: (id: number) => { timers.delete(id); },
             open: () => browserWindow,
@@ -90,7 +101,7 @@ const fixture = (remote = false, initialProfiles = [account()], accountID = "") 
     const mount = namespace.mountChatGPTAccount as (root: unknown, draft: unknown, onChange: (ready: boolean) => void) => void;
     mount(view, draft, value => ready.push(value));
     return {
-        controls, root, view, draft, calls, timers, ready, browserWindow, profiles,
+        controls, root, view, draft, calls, timers, ready, browserWindow, profiles, confirmations, outcomes, messages,
         remove: () => { view.isConnected = false; observerCallback(); },
         finish: (response: unknown) => pendingStatus(response),
     };
@@ -100,11 +111,68 @@ test("no saved accounts show login without an account picker or repeated login t
     const f = fixture(false, []);
     assert.equal(f.controls.accountRow.classes.has("fn__none"), true);
     assert.equal(f.controls.account.classes.has("fn__none"), true);
-    for (const name of ["add", "logout", "usage", "statusRow"]) {
+    for (const name of ["add", "logout", "remove", "usage", "statusRow"]) {
         assert.equal(f.controls[name].classes.has("fn__none"), true);
     }
     assert.equal(f.controls.login.disabled, false);
     assert.equal(f.ready.at(-1), false);
+});
+
+test("removing the selected registration preserves another registration with the same email", async () => {
+    const f = fixture(false, [account(), account("account-two")], "account-one");
+    const removing = f.root.listeners.get("click")!({target: f.controls.remove});
+    assert.equal(f.confirmations[0].text, "Delete user@example.com (ount-one)?");
+    assert.equal(f.calls.some(call => call.path.endsWith("remove")), false);
+    f.confirmations[0].confirm();
+    await removing;
+    assert.equal(f.profiles.length, 1);
+    assert.equal(f.profiles[0].id, "account-two");
+    assert.equal(f.controls.account.classes.has("fn__none"), true);
+    assert.equal(f.draft.accountID, "account-two");
+    assert.equal(f.draft.models.length, 0);
+});
+
+test("cancelling account removal does not send a request", async () => {
+    const f = fixture();
+    const removing = f.root.listeners.get("click")!({target: f.controls.remove});
+    f.confirmations[0].cancel();
+    await removing;
+    assert.equal(f.calls.some(call => call.path.endsWith("remove")), false);
+    assert.equal(f.draft.accountID, "account-one");
+    assert.equal(f.controls.remove.disabled, false);
+});
+
+test("removing the last signed-out account on a remote kernel restores the empty state", async () => {
+    const f = fixture(true, [{...account(), connected: false, sharing: false}]);
+    assert.equal(f.controls.remove.disabled, false);
+    const removing = f.root.listeners.get("click")!({target: f.controls.remove});
+    f.confirmations[0].confirm();
+    await removing;
+    assert.equal(f.controls.accountRow.classes.has("fn__none"), true);
+    assert.equal(f.controls.remove.classes.has("fn__none"), true);
+    assert.equal(f.draft.accountID, "");
+    assert.equal(f.ready.at(-1), false);
+});
+
+test("failed removal retains the selected registration and model configuration", async () => {
+    const f = fixture(false, [account()], "account-one");
+    f.outcomes.removeCode = -1;
+    const removing = f.root.listeners.get("click")!({target: f.controls.remove});
+    f.confirmations[0].confirm();
+    await removing;
+    assert.equal(f.draft.accountID, "account-one");
+    assert.equal(f.draft.models.length, 1);
+    assert.equal(f.controls.remove.disabled, false);
+});
+
+test("unconfirmed remote revocation is reported after local removal", async () => {
+    const f = fixture();
+    f.outcomes.revoked = false;
+    const removing = f.root.listeners.get("click")!({target: f.controls.remove});
+    f.confirmations[0].confirm();
+    await removing;
+    assert.equal(f.draft.accountID, "");
+    assert.equal(f.messages.at(-1), "Remote revocation was not confirmed");
 });
 
 test("a single saved account is selected and displayed as text", () => {

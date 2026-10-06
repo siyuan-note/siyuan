@@ -34,6 +34,7 @@ func TestAPIContractChatGPTAccountLifecycle(t *testing.T) {
 	engine.POST("/api/ai/chatgpt/import", chatGPTImport)
 	engine.POST("/api/ai/chatgpt/export", chatGPTExport)
 	engine.POST("/api/ai/chatgpt/logout", chatGPTLogout)
+	engine.POST("/api/ai/chatgpt/remove", chatGPTRemove)
 	request := func(path, body string) map[string]json.RawMessage {
 		w := httptest.NewRecorder()
 		engine.ServeHTTP(w, httptest.NewRequest(http.MethodPost, path, strings.NewReader(body)))
@@ -60,7 +61,7 @@ func TestAPIContractChatGPTAccountLifecycle(t *testing.T) {
 	t.Cleanup(func() { util.ChatGPTService().Cancel(login.ID) })
 	request("/api/ai/chatgpt/status", string(body))
 	request("/api/ai/chatgpt/cancel", string(body))
-	for _, path := range []string{"import", "export", "logout"} {
+	for _, path := range []string{"import", "export", "logout", "remove"} {
 		result = request("/api/ai/chatgpt/"+path, `{"accountID":"missing","password":"short","data":"{}"}`)
 		if string(result["code"]) != "-1" {
 			t.Fatalf("invalid %s accepted", path)
@@ -116,7 +117,7 @@ func TestAPIContractChatGPTAuthorizationBeforeBody(t *testing.T) {
 		engine := gin.New()
 		engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, role); c.Next() })
 		ServeAPI(engine)
-		paths := []string{"start", "cancel", "logout", "export", "import"}
+		paths := []string{"start", "cancel", "logout", "remove", "export", "import"}
 		if role != model.RoleAdministrator {
 			paths = append(paths, "accounts", "status")
 		}

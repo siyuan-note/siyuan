@@ -684,6 +684,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/chatgpt/status", model.CheckAuth, model.CheckAdminRole, chatGPTStatus)
 	ginServer.Handle("POST", "/api/ai/chatgpt/cancel", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, chatGPTCancel)
 	ginServer.Handle("POST", "/api/ai/chatgpt/logout", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, chatGPTLogout)
+	ginServer.Handle("POST", "/api/ai/chatgpt/remove", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, chatGPTRemove)
 	ginServer.Handle("POST", "/api/ai/chatgpt/export", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, chatGPTExport)
 	ginServer.Handle("POST", "/api/ai/chatgpt/import", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, chatGPTImport)
 	ginServer.Handle("POST", "/api/ai/embeddingStat", model.CheckAuth, model.CheckAdminRole, embeddingStat)

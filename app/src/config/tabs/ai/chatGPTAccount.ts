@@ -2,6 +2,7 @@ import {fetchPost} from "../../../util/fetch";
 import type {ChatGPTAccount} from "../../../types/api";
 import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import {showMessage} from "../../../dialog/message";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {genConfigItemMainHtml} from "../../render/fragments";
 import {openByMobile} from "../../../editor/openLink";
 import {isInMobileApp, saveExportFile} from "../../../protyle/util/compatibility";
@@ -34,6 +35,8 @@ export const genChatGPTAccountHTML = () => {
             <button class="b3-button b3-button--outline fn__none" data-chatgpt="add">${L.chatGPTAddAccount}</button>
             <span class="fn__space"></span>
             <button class="b3-button b3-button--outline fn__none" data-chatgpt="logout">${L.logout}</button>
+            <span class="fn__space"></span>
+            <button class="b3-button b3-button--outline fn__none" data-chatgpt="remove">${L.remove}</button>
             <span class="fn__space"></span>
             <button class="b3-button b3-button--outline fn__none" data-chatgpt="usage">${L.chatGPTUsage}</button>
             <span class="fn__space"></span>
@@ -94,6 +97,8 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
         cancel.disabled = busy;
         root.querySelector<HTMLButtonElement>("[data-chatgpt='add']").classList.toggle("fn__none", profiles.length === 0);
         root.querySelector<HTMLButtonElement>("[data-chatgpt='logout']").classList.toggle("fn__none", !selected?.connected);
+        root.querySelector<HTMLButtonElement>("[data-chatgpt='remove']").classList.toggle("fn__none", !selected);
+        root.querySelector<HTMLButtonElement>("[data-chatgpt='remove']").disabled ||= !selected;
         root.querySelector<HTMLButtonElement>("[data-chatgpt='usage']").classList.toggle("fn__none", !selected);
         root.querySelector<HTMLButtonElement>("[data-chatgpt='logout']").disabled ||= !selected?.connected;
         root.querySelector<HTMLButtonElement>("[data-chatgpt='export']").disabled ||= !selected?.connected && !exportedFile;
@@ -189,6 +194,23 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
             } else if (action === "logout") {
                 await fetchPost("/api/ai/chatgpt/logout", {accountID: draft.accountID}, response => {
                     if (response.code === 0 && !response.data.revoked) { showMessage(L.chatGPTRevokeFailed); }
+                });
+                await load();
+            } else if (action === "remove") {
+                const accountID = draft.accountID;
+                const selected = profiles.find(item => item.id === accountID);
+                if (!selected) { return; }
+                const confirmed = await new Promise<boolean>(resolve => {
+                    confirmDialog(L.deleteOpConfirm, L.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(accountLabel(selected))),
+                        () => resolve(true), () => resolve(false), true);
+                });
+                if (!confirmed || disposed) { return; }
+                await fetchPost("/api/ai/chatgpt/remove", {accountID}, response => {
+                    if (disposed || response.code !== 0) { return; }
+                    draft.accountID = "";
+                    draft.models = [];
+                    exportedFile = "";
+                    if (!response.data.revoked) { showMessage(L.chatGPTRevokeFailed); }
                 });
                 await load();
             } else if (action === "export") {

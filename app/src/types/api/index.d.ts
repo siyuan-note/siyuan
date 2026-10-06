@@ -2778,6 +2778,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": ChatGPTLogoutResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/ai/chatgpt/remove": {
+        request: ChatGPTAccountRequestInput;
+        response: { "code": 0; "data": ChatGPTLogoutResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/ai/chatgpt/start": {
         request: ChatGPTAccountRequestInput;
         response: { "code": 0; "data": ChatGPTLogin; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

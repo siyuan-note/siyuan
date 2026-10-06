@@ -130,7 +130,8 @@ export const openPluginSetting = (app: App) => {
     /// #endif
 };
 
-export const openSetting = (app: App, tab?: TSettingTab, aiProvider?: "chatgpt") => {
+export const openSetting = (app: App, tab?: TSettingTab, options?: {aiProvider?: "chatgpt"}) => {
+    const aiProvider = options?.aiProvider;
     if (tab === "bazaar" && !isBazaarAvailable()) {
         return;
     }

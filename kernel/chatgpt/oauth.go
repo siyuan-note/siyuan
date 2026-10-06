@@ -341,7 +341,13 @@ func (s *Service) complete(ctx context.Context, a *attempt, values url.Values) (
 	}
 	// 签发的注册 ID 在换码失败后仍可复用，未校验的账户不会成为已连接账户。
 	if err := s.withStore(ctx, func(store *diskStore) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		if _, err := findAccount(store, clientID); err != nil {
+			if a.account != nil {
+				return err
+			}
 			store.Accounts = append(store.Accounts, &Account{ClientID: clientID})
 		}
 		return nil
@@ -366,6 +372,9 @@ func (s *Service) complete(ctx context.Context, a *attempt, values url.Values) (
 		return nil, err
 	}
 	err = s.withStore(ctx, func(store *diskStore) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		old, err := findAccount(store, clientID)
 		if err != nil {
 			return err
@@ -459,6 +468,23 @@ func (s *Service) Token(ctx context.Context, id string, force bool) (token strin
 }
 
 func (s *Service) Logout(ctx context.Context, id string) (revoked bool, err error) {
+	return s.endSession(ctx, id, false)
+}
+
+// Remove 撤销会话并删除指定注册，不按邮箱合并其他注册。
+func (s *Service) Remove(ctx context.Context, id string) (revoked bool, err error) {
+	s.mu.Lock()
+	for _, a := range s.attempts {
+		if a.account != nil && a.account.ClientID == id && a.status.State == "pending" {
+			a.cancel()
+			a.status = LoginStatus{State: "failed", Error: "ChatGPT account was removed"}
+		}
+	}
+	s.mu.Unlock()
+	return s.endSession(ctx, id, true)
+}
+
+func (s *Service) endSession(ctx context.Context, id string, remove bool) (revoked bool, err error) {
 	s.stopRequests(id)
 	err = s.withStore(ctx, func(store *diskStore) error {
 		a, err := findAccount(store, id)
@@ -491,6 +517,14 @@ func (s *Service) Logout(ctx context.Context, id string) (revoked bool, err erro
 			}
 		}
 		clearTokens(a)
+		if remove {
+			for index, account := range store.Accounts {
+				if account.ClientID == id {
+					store.Accounts = append(store.Accounts[:index], store.Accounts[index+1:]...)
+					break
+				}
+			}
+		}
 		return nil
 	})
 	return

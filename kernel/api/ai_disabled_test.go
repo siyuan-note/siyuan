@@ -41,6 +41,7 @@ func TestAPIContractAIDisabled(t *testing.T) {
 		"/api/ai/chatgpt/status":     chatGPTStatus,
 		"/api/ai/chatgpt/cancel":     chatGPTCancel,
 		"/api/ai/chatgpt/logout":     chatGPTLogout,
+		"/api/ai/chatgpt/remove":     chatGPTRemove,
 		"/api/ai/chatgpt/import":     chatGPTImport,
 		"/api/ai/chatgpt/export":     chatGPTExport,
 		"/api/ai/mcpOAuthAuthorize":  mcpOAuthAuthorize,

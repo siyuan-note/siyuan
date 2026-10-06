@@ -29,6 +29,7 @@ type fixture struct {
 	server                                  *httptest.Server
 	nonce, challenge, subject, refreshError string
 	refreshes                               atomic.Int32
+	revokeFailed                            bool
 }
 
 func newFixture(t *testing.T) *fixture {
@@ -81,6 +82,11 @@ func newFixture(t *testing.T) *fixture {
 			}
 			io.WriteString(w, `{"models":[{"slug":"model-a","display_name":"Model A","visibility":"list"},{"slug":"hidden","visibility":"hide"},{"slug":"model-b","display_name":"Model B","visibility":"list"}]}`)
 		case "/revoke":
+			if f.revokeFailed {
+				w.WriteHeader(http.StatusServiceUnavailable)
+				io.WriteString(w, `{"error":"server_error"}`)
+				return
+			}
 			w.WriteHeader(200)
 		default:
 			w.WriteHeader(404)
@@ -326,9 +332,66 @@ func TestChatGPTCorruptionPreservesOriginal(t *testing.T) {
 	if _, err := s.Profiles(context.Background()); err == nil {
 		t.Fatal("corrupted credentials accepted")
 	}
+	if _, err := s.Remove(context.Background(), "missing"); err == nil {
+		t.Fatal("removal accepted corrupted credentials")
+	}
 	current, _ := os.ReadFile(path)
 	if string(current) != string(data) {
 		t.Fatal("corrupted credentials overwritten")
+	}
+}
+
+func TestChatGPTRemoveRegistration(t *testing.T) {
+	for _, scenario := range []string{"connected", "signed-out", "revocation-failed"} {
+		t.Run(scenario, func(t *testing.T) {
+			f := newFixture(t)
+			login := f.login(t, "")
+			u, _ := url.Parse(login.URL)
+			f.callback(t, login, u.Query().Get("state"))
+			var hostID string
+			if err := f.service.withStore(context.Background(), func(store *diskStore) error {
+				hostID = store.HostID
+				copy := *store.Accounts[0]
+				copy.ClientID = "other-registration"
+				store.Accounts = append(store.Accounts, &copy)
+				if scenario == "signed-out" {
+					clearTokens(store.Accounts[0])
+				}
+				return nil
+			}); err != nil {
+				t.Fatal(err)
+			}
+			returning := f.login(t, "oaiapp_test")
+			f.service.mu.Lock()
+			pending := f.service.attempts[returning.ID]
+			f.service.mu.Unlock()
+			f.revokeFailed = scenario == "revocation-failed"
+			revoked, err := f.service.Remove(context.Background(), "oaiapp_test")
+			if err != nil || revoked == f.revokeFailed {
+				t.Fatalf("remove: %v %v", revoked, err)
+			}
+			profiles, err := f.service.Profiles(context.Background())
+			if err != nil || len(profiles) != 1 || profiles[0].ID != "other-registration" || !profiles[0].Connected {
+				t.Fatalf("other registration changed: %+v %v", profiles, err)
+			}
+			if status, _ := f.service.Status(returning.ID); status.State != "failed" {
+				t.Fatalf("pending sign-in was not cancelled: %+v", status)
+			}
+			if _, err = f.service.complete(context.Background(), pending, url.Values{"code": {"late"}}); err == nil {
+				t.Fatal("late sign-in recreated removed registration")
+			}
+			if _, err = f.service.Token(context.Background(), "oaiapp_test", false); err == nil {
+				t.Fatal("removed credentials remained usable")
+			}
+			if err = f.service.withStore(context.Background(), func(store *diskStore) error {
+				if store.HostID != hostID || len(store.Accounts) != 1 {
+					t.Fatal("host or account mappings changed")
+				}
+				return nil
+			}); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }
 

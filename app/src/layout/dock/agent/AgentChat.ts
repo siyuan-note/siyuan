@@ -819,7 +819,7 @@ export class AgentChat extends Model {
                     openChatGPTProvider();
                 } else {
                     const {openSetting} = await import("../../../config");
-                    openSetting(this.app, "ai", "chatgpt");
+                    openSetting(this.app, "ai", {aiProvider: "chatgpt"});
                 }
             });
             return;

@@ -87,6 +87,17 @@ func chatGPTLogoutContract(c *gin.Context, req apicontract.ChatGPTAccountRequest
 	return apicontract.Success(apicontract.ChatGPTLogoutResult{Revoked: revoked})
 }
 
+var chatGPTRemove = contractHandler(apicontract.ChatGPTRemove, chatGPTRemoveContract)
+
+func chatGPTRemoveContract(c *gin.Context, req apicontract.ChatGPTAccountRequest) apicontract.Response[apicontract.ChatGPTLogoutResult] {
+	chatGPTNoCache(c)
+	revoked, err := util.ChatGPTService().Remove(c.Request.Context(), req.AccountID)
+	if err != nil {
+		return apicontract.Failure[apicontract.ChatGPTLogoutResult](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.ChatGPTLogoutResult{Revoked: revoked})
+}
+
 var chatGPTExport = contractHandler(apicontract.ChatGPTExport, chatGPTExportContract)
 
 func chatGPTExportContract(c *gin.Context, req apicontract.ChatGPTTransferRequest) apicontract.Response[apicontract.ExportFileData] {

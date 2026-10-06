@@ -1020,6 +1020,10 @@ var ChatGPTCancel = define[ChatGPTLoginRequest, Null]("chatGPTCancel", "/api/ai/
 // 退出清除本地令牌并保留账户映射；revoked 表示远程撤销是否确认成功。
 var ChatGPTLogout = define[ChatGPTAccountRequest, ChatGPTLogoutResult]("chatGPTLogout", "/api/ai/chatgpt/logout", JSONBody, ResponseOptions{}, "POST")
 
+// 删除指定的本机账户注册并终止其请求及登录尝试，不合并同邮箱注册；不修改提供商配置或主机 ID。
+// 先尝试撤销会话，远程撤销未确认时仍清除本地记录并返回 revoked=false；缺失账户报错。
+var ChatGPTRemove = define[ChatGPTAccountRequest, ChatGPTLogoutResult]("chatGPTRemove", "/api/ai/chatgpt/remove", JSONBody, ResponseOptions{}, "POST")
+
 // 导出使用至少 12 个字符的密码，先写入带版本的认证加密文件，再停止源主机刷新。
 var ChatGPTExport = define[ChatGPTTransferRequest, ExportFileData]("chatGPTExport", "/api/ai/chatgpt/export", JSONBody, ResponseOptions{}, "POST")
 

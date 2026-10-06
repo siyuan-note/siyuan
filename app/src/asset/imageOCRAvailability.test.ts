@@ -43,10 +43,15 @@ test("shared image menus hide unavailable recognition and its separator while re
     const end = menuSource.indexOf("}).element);", start) + 1;
     const getMenu = new Function("window", "ocrAvailability", "canOCR", "canAIOCR",
         `return (${menuSource.slice(start, end)});`);
+    const recognitionStart = menuSource.lastIndexOf("const canOCR =", start);
+    const recognitionEnd = menuSource.indexOf(";", menuSource.indexOf("const canAIOCR =", recognitionStart)) + 1;
+    const getRecognition = new Function("window", "ocrAvailability", "isDisabledFeature",
+        `${menuSource.slice(recognitionStart, recognitionEnd)}\nreturn {canOCR, canAIOCR};`);
     const visibleItems = (path: string, notebookId: string, disabled = false, provider = "paddleocr") => {
         const status = availability(path, notebookId);
-        const menu = getMenu({siyuan: {languages: {}}}, status,
-            status.local && (provider !== "ai" || status.ai && !disabled), status.ai && !disabled);
+        const config = {siyuan: {languages: {}, config: {ocr: {provider}}}};
+        const {canOCR, canAIOCR} = getRecognition(config, status, () => disabled);
+        const menu = getMenu(config, status, canOCR, canAIOCR);
         return menu.ignore ? [] : menu.submenu.filter((item: {ignore?: boolean}) => !item.ignore)
             .map((item: {id: string}) => item.id);
     };
@@ -58,6 +63,8 @@ test("shared image menus hide unavailable recognition and its separator while re
     assert.deepEqual(visibleItems("assets/image.svg", "ordinary"), ["ocrResult", "copyOCRText", "separator_reOCR", "reOCR"]);
     assert.deepEqual(visibleItems("assets/image.heic", "ordinary"), ["ocrResult", "copyOCRText", "separator_reOCR", "reOCR", "reAIOCR"]);
     assert.deepEqual(visibleItems("assets/image.png", "ordinary", true), ["ocrResult", "copyOCRText", "separator_reOCR", "reOCR"]);
+    assert.deepEqual(visibleItems("assets/image.png", "ordinary", false, "tesseract"), ["ocrResult", "copyOCRText", "separator_reOCR", "reOCR", "reAIOCR"]);
+    assert.deepEqual(visibleItems("assets/image.png", "ordinary", false, "ai"), ["ocrResult", "copyOCRText", "separator_reOCR", "reAIOCR"]);
     assert.deepEqual(visibleItems("assets/image.svg", "ordinary", false, "ai"), ["ocrResult", "copyOCRText"]);
     assert.deepEqual(visibleItems("assets/image.png", "ordinary", true, "ai"), ["ocrResult", "copyOCRText"]);
 });

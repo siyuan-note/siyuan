@@ -1381,7 +1381,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         const imagePath = imgElement.getAttribute("data-src");
         const ocrAvailability = getImageOCRAvailability(imagePath, protyle.notebookId);
-        const canOCR = ocrAvailability.local && (window.siyuan.config.ocr?.provider !== "ai" || ocrAvailability.ai && !isDisabledFeature("ai"));
+        const canOCR = ocrAvailability.local && window.siyuan.config.ocr?.provider !== "ai";
         const canAIOCR = ocrAvailability.ai && !isDisabledFeature("ai");
         if (imagePath.startsWith("assets/")) {
             window.siyuan.menus.menu.append(new MenuItem({

@@ -69,8 +69,8 @@ export const registerOCRTab = (tab: SettingTabBuilder) => {
         thresholds.slot({
             key: `ocrThreshold_${field.key}`,
             keywords: [field.title, languages.ocrThresholdsTip],
-            html: () => `<label class="fn__flex b3-label config-item">${genConfigItemMainHtml(field.title, field.key === "detection" ? languages.ocrThresholdsTip : undefined)}
-<span class="fn__space"></span>${genNumberInputHtml(`ocrThreshold_${field.key}`, "", 0, 1, "any")}</label>`,
+            html: () => `<div class="fn__flex b3-label config-item">${genConfigItemMainHtml(`<label for="ocrThreshold_${field.key}">${field.title}</label>`, field.key === "detection" ? languages.ocrThresholdsTip : undefined)}
+<span class="fn__space"></span>${genNumberInputHtml(`ocrThreshold_${field.key}`, "", 0, 1, "any")}</div>`,
         });
     });
     tab.group("models", languages.ocrImportModels).slot({

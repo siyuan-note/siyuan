@@ -26,6 +26,7 @@ import {
 } from "./util/touch";
 import {fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
+import {finishMobileSystemUris, processMobileSystemUri} from "./util/systemUri";
 import {saveMobileLayout} from "./util/saveLayout";
 import {finishMobileStartup} from "./util/setEmpty";
 import {initAssets} from "../util/assets";
@@ -250,6 +251,7 @@ class App {
                                 initRightMenu(this);
                                 openChangelog();
                                 window.siyuan.isReady = true;
+                                finishMobileSystemUris(this);
                                 mainWs.flushMainMessages();
                                 fetchPost("/api/setting/getCloudUser", {});
                             } catch (error) {
@@ -352,5 +354,5 @@ window.openFileByURL = (openURL) => {
         blockInfo.avItemID ? undefined : "start", undefined, blockInfo.avItemID ? (protyle) => activateQueuedAVLocate(protyle, blockInfo.id) : undefined);
         return true;
     }
-    return false;
+    return processMobileSystemUri(siyuanApp, openURL);
 };

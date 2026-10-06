@@ -10,7 +10,8 @@ import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
 import {finishMobileStartup, setEmpty} from "./setEmpty";
-import {getOpenNotebookCount, parseUriInfo} from "../../util/pathName";
+import {getOpenNotebookCount, parseSiYuanUriInfo, parseUriInfo} from "../../util/pathName";
+import {processMobileSystemUri} from "./systemUri";
 import {popMenu} from "../menu";
 import {MobileFiles} from "../dock/MobileFiles";
 import {MobileOutline} from "../dock/MobileOutline";
@@ -370,8 +371,10 @@ export const initFramework = async (app: App, isStart: boolean) => {
     } else {
         await window.siyuan.mobile.tabs.removeMissingTabs();
     }
+    const systemURL = window.JSAndroid?.getBlockURL() || new URLSearchParams(window.location.search).get("url");
+    processMobileSystemUri(app, systemURL);
     if (getOpenNotebookCount() > 0) {
-        if (window.JSAndroid && window.openFileByURL(window.JSAndroid.getBlockURL())) {
+        if (window.JSAndroid && parseSiYuanUriInfo(systemURL) && window.openFileByURL(systemURL)) {
             return;
         }
         const info = parseUriInfo();

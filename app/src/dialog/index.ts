@@ -119,12 +119,14 @@ left:${left || "auto"};top:${top || "auto"}">
                 event.stopPropagation();
             });
         }
+        if (options.disableAnimation) {
+            // 禁用动画时先设置打开状态，确保聚焦和定位使用最终尺寸。
+            this.element.classList.add("b3-dialog--open");
+        }
         document.body.append(this.element);
         document.addEventListener("keydown", this.trapFocus, true);
         (this.element.querySelector(".b3-dialog__container") as HTMLElement).focus({preventScroll: true});
-        if (options.disableAnimation) {
-            this.element.classList.add("b3-dialog--open");
-        } else {
+        if (!options.disableAnimation) {
             setTimeout(() => {
                 this.element.classList.add("b3-dialog--open");
             }, Constants.TIMEOUT_OPENDIALOG);

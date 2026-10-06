@@ -182,6 +182,63 @@ const runCases = async (source) => {
     await tick();
 };
 
+const runPositionCases = async (dialogSource, positionSource, dialogCSS) => {
+    const assert = require("node:assert/strict");
+    const style = document.createElement("style");
+    style.textContent = dialogCSS;
+    document.head.append(style);
+    window.siyuan = {dialogs: [], zIndex: 1, menus: {menu: {element: document.createElement("div"), remove() {}}}};
+    const modules = {
+        "../util/genID": {genUUID: () => "position"},
+        "../util/zIndex": {isAbove: () => false},
+        "./moveResize": {moveResize() {}},
+        "../util/functions": {isMobile: () => false},
+        "../constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
+        "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
+        "../layout/getTopBarHeight": {getTopBarHeight: () => 0},
+    };
+    const load = source => {
+        const exports = {};
+        new Function("require", "exports", source)(name => modules[name] || {}, exports);
+        return exports;
+    };
+    const {Dialog} = load(dialogSource);
+    const {setPosition} = load(positionSource);
+    try {
+        for (const position of [
+            {x: 80, y: 100},
+            {x: window.innerWidth - 180, y: 100},
+            {x: window.innerWidth - 180, y: window.innerHeight - 10},
+        ]) {
+            const dialog = new Dialog({content: "<input>", width: "368px", height: "50vh", disableAnimation: true});
+            const container = dialog.element.querySelector(".b3-dialog__container");
+            const panel = dialog.element.querySelector(".b3-dialog");
+            panel.style.justifyContent = "inherit";
+            panel.style.alignItems = "inherit";
+            assert.equal(document.activeElement, container);
+            assert.equal(container.getBoundingClientRect().width, container.offsetWidth);
+            assert.equal(getComputedStyle(container).transform, "none");
+            setPosition(container, position.x, position.y, 24, 24);
+            await new Promise(resolve => setTimeout(resolve, 200));
+            const rect = container.getBoundingClientRect();
+            assert.equal(rect.width, container.offsetWidth);
+            assert.ok(rect.left >= 0 && rect.right <= window.innerWidth, JSON.stringify(rect));
+            assert.ok(rect.top >= 0 && rect.bottom <= window.innerHeight, JSON.stringify(rect));
+            dialog.destroy();
+            await new Promise(resolve => setTimeout(resolve, 20));
+        }
+        const animated = new Dialog({content: "<input>", width: "368px"});
+        const container = animated.element.querySelector(".b3-dialog__container");
+        assert.ok(container.getBoundingClientRect().width < container.offsetWidth);
+        assert.notEqual(getComputedStyle(container).transitionDuration, "0s");
+        animated.destroy();
+        await new Promise(resolve => setTimeout(resolve, 20));
+        assert.equal(window.siyuan.dialogs.length, 0);
+    } finally {
+        style.remove();
+    }
+};
+
 const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
     const assert = require("node:assert/strict");
     const tick = () => new Promise(resolve => setTimeout(resolve, 20));
@@ -301,6 +358,12 @@ if (process.versions.electron && process.type === "browser") {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
             }).outputText;
             await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(source)})`);
+            const positionSource = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/util/setPosition.ts"), "utf8"), {
+                compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+            }).outputText;
+            const dialogCSS = require("sass").compile(path.join(__dirname, "../src/assets/scss/component/_dialog.scss")).css;
+            await win.webContents.executeJavaScript(
+                `(${runPositionCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(positionSource)}, ${JSON.stringify(dialogCSS)})`);
             const {parse} = require("ifdef-loader/preprocessor");
             const cardSource = fs.readFileSync(path.join(__dirname, "../src/card/openCard.ts"), "utf8");
             for (const mobile of [false, true]) {
@@ -322,7 +385,7 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("dialogs restore focus and flashcards reopen after cleanup failures on desktop and mobile", async () => {
+    test("dialogs preserve positioning and focus, and flashcards reopen after cleanup failures on desktop and mobile", async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-dialog-focus-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

@@ -422,7 +422,12 @@ var moveBlock = contractHandler(apicontract.MoveBlock, func(c *gin.Context, requ
 		}
 
 		// Check the validity of the API `moveBlock` parameter `previousID` https://github.com/siyuan-note/siyuan/issues/8007
-		if bt := treenode.GetBlockTree(previousID); nil == bt || "d" == bt.Type {
+		// 文档与不存在的块需要分别提示：文档 ID 格式合法但不是同级锚点，块不存在则是调用方传了失效 ID。
+		if bt := treenode.GetBlockTree(previousID); nil == bt {
+			ret.Code = -1
+			ret.Msg = "`previousID` block not found"
+			return contractFailure[apicontract.Null](ret)
+		} else if "d" == bt.Type {
 			ret.Code = -1
 			ret.Msg = "`previousID` can not be the ID of a document"
 			return contractFailure[apicontract.Null](ret)

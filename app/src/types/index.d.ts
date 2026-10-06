@@ -238,6 +238,7 @@ interface Window {
         exit(): void
         setWebViewFocusable(enable: boolean): void
         getWordSelection?(text: string, start: number, end: number): string
+        prepareWordSelection?(word: string, startAdjust: number, endAdjust: number): boolean
         sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number
         cancelNotification(id: number): void
         logInputEvent?(details: string): void

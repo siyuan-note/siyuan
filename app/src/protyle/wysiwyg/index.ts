@@ -1,5 +1,5 @@
 import {recordReplacementUndo} from "./replacementInput";
-import {expandAndroidWordSelection} from "../../mobile/util/wordSelection";
+import {expandAndroidWordSelection, isAndroidWordSelectionPending} from "../../mobile/util/wordSelection";
 import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
 import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
@@ -3677,12 +3677,22 @@ export class WYSIWYG {
                 return;
             }
             event.stopPropagation();
+            const target = event.detail.target || event.target as HTMLElement;
+            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+            /// #if MOBILE
+            if (event.isTrusted && !protyle.disabled && window.JSAndroid?.prepareWordSelection &&
+                selectElements.length === 0 && target.closest('[contenteditable="true"]') && !isInEmbedBlock(target)) {
+                const blockElement = hasClosestBlock(target);
+                if (blockElement && expandAndroidWordSelection(blockElement, true)) {
+                    return;
+                }
+            }
+            /// #endif
             /// #if BROWSER
             event.preventDefault();
             /// #endif
             const x = event.clientX || event.detail.x;
             const y = event.clientY || event.detail.y;
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 1 ||
                 getBlockSelectionModeElement(protyle.wysiwyg.element) && selectElements.length > 0) {
                 // 多选块
@@ -3696,7 +3706,6 @@ export class WYSIWYG {
                 window.siyuan.menus.menu.popup({x, y});
                 return;
             }
-            const target = event.detail.target || event.target as HTMLElement;
             const embedElement = isInEmbedBlock(target);
             if (embedElement) {
                 if (!protyle.gutter) {
@@ -4723,6 +4732,9 @@ export class WYSIWYG {
                 target.closest("[contenteditable]")?.getAttribute("contenteditable") !== "false" &&
                 selection?.rangeCount && !selection.isCollapsed && selection.toString() &&
                 nodeElement.contains(selection.anchorNode) && nodeElement.contains(selection.focusNode)) {
+                if (isAndroidWordSelectionPending(nodeElement)) {
+                    return;
+                }
                 protyle.toolbar.range = expandAndroidWordSelection(nodeElement) || selection.getRangeAt(0);
                 contentMenu(protyle, nodeElement);
             }

@@ -4,6 +4,13 @@ interface IWordTextPart {
     text: string;
 }
 
+const nativeWordSelections = new WeakMap<Element, {range: Range, expanded: Range}>();
+
+export const isAndroidWordSelectionPending = (blockElement: Element) => {
+    const selection = blockElement.ownerDocument.getSelection();
+    return selection?.rangeCount > 0 && nativeWordSelections.get(blockElement)?.range === selection.getRangeAt(0);
+};
+
 const WORD_SELECTION_BOUNDARY = '[contenteditable="false"], a, img, svg, br, input, textarea, select, button, ' +
     '[data-type~="a"], [data-type~="block-ref"], [data-type~="virtual-block-ref"], [data-type~="code"], ' +
     '[data-type~="kbd"], [data-type~="tag"], [data-type~="inline-math"], [data-type~="file-annotation-ref"], ' +
@@ -52,7 +59,7 @@ const getWordTextParts = (element: Element, range: Range) => {
     return found;
 };
 
-export const expandAndroidWordSelection = (blockElement: Element): Range | undefined => {
+export const expandAndroidWordSelection = (blockElement: Element, nativeContextMenu = false): Range | undefined => {
     const bridge = window.JSAndroid;
     const selection = blockElement.ownerDocument.getSelection();
     if (!bridge?.getWordSelection || !selection?.rangeCount || selection.isCollapsed ||
@@ -60,6 +67,11 @@ export const expandAndroidWordSelection = (blockElement: Element): Range | undef
         return;
     }
     const range = selection.getRangeAt(0);
+    const pending = nativeWordSelections.get(blockElement);
+    if (!nativeContextMenu && pending?.range === range) {
+        return pending.expanded;
+    }
+    nativeWordSelections.delete(blockElement);
     if (!/^\p{Script=Han}$/u.test(range.toString()) ||
         range.startContainer.nodeType !== Node.TEXT_NODE || range.endContainer.nodeType !== Node.TEXT_NODE) {
         return;
@@ -131,6 +143,15 @@ export const expandAndroidWordSelection = (blockElement: Element): Range | undef
         }
     }
     if (remainingStart !== -1 || remainingEnd !== -1) {
+        return;
+    }
+    if (nativeContextMenu) {
+        // 原生分词完成后会再次触发上下文菜单，避免前端改写选区使选择手柄消失。
+        if (bridge.prepareWordSelection?.(expanded.toString(), boundaries[0] + contextStart - start,
+            boundaries[1] + contextStart - end)) {
+            nativeWordSelections.set(blockElement, {range, expanded});
+            return expanded;
+        }
         return;
     }
     selection.removeAllRanges();

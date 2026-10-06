@@ -133,6 +133,38 @@ const runCases = async () => {
         }
     }
 
+    // 原生分词保留当前选区；双击回调复用待完成的范围，原生完成后菜单使用完整词语。
+    const nativeState = createEditor(false);
+    nativeState.editable.innerHTML = "😀呀，为<b>什</b>么";
+    selectChinese(nativeState);
+    nativeState.toolbar.subElement.classList.add("fn__none");
+    const prepared = [];
+    window.JSAndroid.prepareWordSelection = (word, start, end) => {
+        prepared.push({word, start, end});
+        return true;
+    };
+    const nativeRange = window.expandAndroidWordSelection(nativeState.block, true);
+    assert.equal(nativeRange.toString(), "为什么");
+    assert.equal(getSelection().toString(), "什");
+    assert.deepEqual(prepared, [{word: "为什么", start: -1, end: 1}]);
+    const callsBeforeDoubleClick = nativeCalls.length;
+    nativeState.editable.querySelector("b").dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    assert.equal(getSelection().toString(), "什");
+    assert.equal(nativeState.toolbar.subElement.classList.contains("fn__none"), true);
+    assert.equal(nativeCalls.length, callsBeforeDoubleClick);
+    getSelection().setBaseAndExtent(nativeRange.startContainer, nativeRange.startOffset,
+        nativeRange.endContainer, nativeRange.endOffset);
+    nativeState.editable.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+    await click(nativeState, "copy");
+    assert.deepEqual(commands.at(-1), {command: "copy", text: "为什么"});
+    // 原生接口拒绝时保留原选区，并继续支持旧客户端的前端扩展。
+    selectChinese(nativeState);
+    window.JSAndroid.prepareWordSelection = () => false;
+    assert.equal(window.expandAndroidWordSelection(nativeState.block, true), undefined);
+    assert.equal(getSelection().toString(), "什");
+    assert.equal(window.expandAndroidWordSelection(nativeState.block).toString(), "为什么");
+    delete window.JSAndroid.prepareWordSelection;
+
     // 特殊元素与隐藏标记切断分词上下文，已选词语、英文和代码块不重新分词。
     for (const boundary of ['<span data-type="code">为</span>', "为\u200b", '<a href="#">为</a>']) {
         const state = createEditor(false);

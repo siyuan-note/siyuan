@@ -67,6 +67,7 @@ import {getContextFilterKeyID} from "./contextFilterState";
 import {isAVCellPanelForBlock} from "./panelTarget";
 import {replaceAVContainer} from "./container";
 import {updateFrozenColumns} from "./frozenColumns";
+import {updateAVTableColumnWidths} from "./columnWidth";
 
 interface IIds {
     groupId: string,
@@ -930,26 +931,17 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         });
         return;
     }
-    if (operation.action === "setAttrViewColWidth") {
+    if (operation.action === "setAttrViewColWidth" || operation.action === "setAttrViewColsWidth") {
+        const widths = operation.action === "setAttrViewColWidth" ?
+            {[operation.id]: operation.data} : operation.data as Record<string, string>;
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
-            if (!cellElement || cellElement.style.width === operation.data) {
-                return;
+            const data = getAVData(item);
+            if (data && isTableLikeView(data.viewType)) {
+                // 折叠分组和虚拟滚动从缓存创建单元格，列宽需同步更新到全部分组。
+                updateAVTableColumnWidths(data.view as IAVTable, widths);
             }
             item.querySelectorAll(".av__row, .av__row--footer").forEach(rowItem => {
-                const columnElement = rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement;
-                if (columnElement) {
-                    columnElement.style.width = operation.data;
-                }
-            });
-            updateFrozenColumns(item);
-        });
-        return;
-    }
-    if (operation.action === "setAttrViewColsWidth") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            item.querySelectorAll(".av__row, .av__row--footer").forEach(rowItem => {
-                Object.entries(operation.data as Record<string, string>).forEach(([columnID, width]) => {
+                Object.entries(widths).forEach(([columnID, width]) => {
                     const columnElement = rowItem.querySelector(`[data-col-id="${columnID}"]`) as HTMLElement;
                     if (columnElement) {
                         columnElement.style.width = width;

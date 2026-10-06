@@ -1,5 +1,14 @@
 import {hasAVRenderTemplateResult} from "./cellValue";
 
+export const updateAVTableColumnWidths = (view: IAVTable, widths: Record<string, string>) => {
+    view.columns.forEach(column => {
+        if (Object.prototype.hasOwnProperty.call(widths, column.id)) {
+            column.width = widths[column.id];
+        }
+    });
+    (view.groups as IAVTable[] || []).forEach(group => updateAVTableColumnWidths(group, widths));
+};
+
 const getEstimatedTextWidth = (value: string) => {
     return Array.from(value.trim().replace(/[\r\n]+/g, " ")).reduce((width, character) => {
         if (/[\u2E80-\u9FFF\uAC00-\uD7AF]/u.test(character)) {

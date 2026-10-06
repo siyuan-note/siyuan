@@ -403,6 +403,7 @@
       .config__tab-scroll {
         flex: 1;
         min-height: 0;
+        outline: none;
         overflow-y: auto;
         margin: 0 -12px 0 0;
         padding-right: 2px;

@@ -41,6 +41,9 @@ func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool
 	}
 	provider, model := getOCRAIModel(value)
 	if provider == nil || model == nil {
+		if value.Provider == "ai" || value.AIModelID != "" {
+			return "", errors.New(Conf.Language(414))
+		}
 		return "", errors.New(Conf.Language(412))
 	}
 	protocol := strings.ToLower(strings.TrimSpace(provider.Protocol))
@@ -80,7 +83,7 @@ func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool
 		maxTokens = 8192
 	}
 	request := openai.ChatCompletionRequest{
-		Model: model.Name, MaxCompletionTokens: maxTokens,
+		Model: model.Name, MaxCompletionTokens: maxTokens, ReasoningEffort: value.ReasoningEffort,
 		Messages: []openai.ChatCompletionMessage{
 			{Role: openai.ChatMessageRoleSystem, Content: "Transcribe all visible text in the image in reading order. " +
 				"Preserve the original language, line breaks, and meaningful spacing. Return only the transcribed text, " +

@@ -1,4 +1,5 @@
 {
+	"ocrReasoningEffortTip": "Standaard volgt het modelgedrag; Geen schakelt denken uit of beperkt het tot een minimum, afhankelijk van de aanbieder en het model",
 	"mobileToolbarNoSelection": "Geen tekst geselecteerd",
 	"mobileToolbarTextSelection": "Tekst geselecteerd",
 	"ocrAIModel": "AI-model",
@@ -3094,6 +3095,7 @@
 		"410": "Conversie geannuleerd: de hele lijst is gekoppeld aan een databaserij, maar de conversie levert meerdere blokken op zonder uniek koppelingsdoel. Ontkoppel eerst de lijst of koppel afzonderlijke lijstitems",
 		"411": "Conversie geannuleerd: het lijstitem en het eerste blok zijn gekoppeld aan verschillende rijen in dezelfde database. Verwijder eerst een van de koppelingen",
 		"412": "Configureer eerst het agentmodel",
-		"413": "AI-OCR heeft geen volledige transcriptie teruggegeven; het bestaande resultaat is behouden"
+		"413": "AI-OCR heeft geen volledige transcriptie teruggegeven; het bestaande resultaat is behouden",
+		"414": "Selecteer een beschikbaar AI-model voor OCR"
 	}
 }

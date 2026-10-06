@@ -1,4 +1,5 @@
 {
+	"ocrReasoningEffortTip": "Default mengikuti perilaku model; Tidak ada menonaktifkan atau meminimalkan pemikiran sesuai dukungan penyedia dan model",
 	"mobileToolbarNoSelection": "Tidak ada teks dipilih",
 	"mobileToolbarTextSelection": "Teks dipilih",
 	"ocrAIModel": "Model AI",
@@ -3094,6 +3095,7 @@
 		"410": "Konversi dibatalkan: seluruh daftar terikat ke baris basis data, tetapi konversi menghasilkan beberapa blok tanpa satu tujuan pengikatan. Lepaskan ikatan daftar atau ikat setiap item terlebih dahulu",
 		"411": "Konversi dibatalkan: item daftar dan blok pertamanya terikat ke baris berbeda dalam basis data yang sama. Lepaskan salah satu ikatan terlebih dahulu",
 		"412": "Harap konfigurasi model agen terlebih dahulu",
-		"413": "AI OCR tidak mengembalikan transkripsi lengkap; hasil sebelumnya dipertahankan"
+		"413": "AI OCR tidak mengembalikan transkripsi lengkap; hasil sebelumnya dipertahankan",
+		"414": "Pilih model AI yang tersedia untuk OCR"
 	}
 }

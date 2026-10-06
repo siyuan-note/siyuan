@@ -1,4 +1,5 @@
 {
+	"ocrReasoningEffortTip": "Par défaut suit le comportement du modèle ; Aucun désactive ou minimise le raisonnement selon le fournisseur et le modèle",
 	"mobileToolbarNoSelection": "Aucun texte sélectionné",
 	"mobileToolbarTextSelection": "Texte sélectionné",
 	"ocrAIModel": "Modèle d’IA",
@@ -3094,6 +3095,7 @@
 		"410": "Conversion annulée : la liste entière est liée à une ligne de base de données, mais la conversion produit plusieurs blocs sans cible unique. Déliez la liste ou liez ses éléments individuellement au préalable",
 		"411": "Conversion annulée : l’élément de liste et son premier bloc sont liés à des lignes différentes de la même base de données. Supprimez d’abord l’un des liens",
 		"412": "Veuillez d’abord configurer le modèle de l’agent",
-		"413": "L’OCR par IA n’a pas renvoyé de transcription complète ; le résultat précédent a été conservé"
+		"413": "L’OCR par IA n’a pas renvoyé de transcription complète ; le résultat précédent a été conservé",
+		"414": "Veuillez sélectionner un modèle d’IA disponible pour l’OCR"
 	}
 }

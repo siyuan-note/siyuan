@@ -88,7 +88,7 @@ const createSettingTabs = () => {
         }),
         ocr: setting.tab({
             id: "ocr",
-            icon: "iconImage",
+            icon: "iconOCR",
             title: () => "OCR",
             afterMount: mountOCRTab,
         }, registerOCRTab),

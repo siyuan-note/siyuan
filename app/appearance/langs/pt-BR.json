@@ -1,4 +1,5 @@
 {
+	"ocrReasoningEffortTip": "Padrão segue o comportamento do modelo; Nenhum desativa ou minimiza o raciocínio conforme o suporte do provedor e do modelo",
 	"mobileToolbarNoSelection": "Sem texto selecionado",
 	"mobileToolbarTextSelection": "Texto selecionado",
 	"ocrAIModel": "Modelo de IA",
@@ -3094,6 +3095,7 @@
 		"410": "Conversão cancelada: a lista inteira está vinculada a uma linha do banco de dados, mas a conversão gera vários blocos sem um destino único. Desvincule a lista ou vincule seus itens individualmente primeiro",
 		"411": "Conversão cancelada: o item da lista e seu primeiro bloco estão vinculados a linhas diferentes do mesmo banco de dados. Desvincule um deles primeiro",
 		"412": "Configure primeiro o modelo do agente",
-		"413": "O OCR com IA não retornou uma transcrição completa; o resultado anterior foi preservado"
+		"413": "O OCR com IA não retornou uma transcrição completa; o resultado anterior foi preservado",
+		"414": "Selecione um modelo de IA disponível para OCR"
 	}
 }

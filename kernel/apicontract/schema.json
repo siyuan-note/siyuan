@@ -46197,6 +46197,9 @@
         "provider": {
           "type": "string"
         },
+        "reasoningEffort": {
+          "type": "string"
+        },
         "thresholds": {
           "$ref": "#/$defs/OCRThresholds"
         }
@@ -46229,6 +46232,16 @@
         },
         "provider": {
           "type": "string"
+        },
+        "reasoningEffort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "thresholds": {
           "anyOf": [

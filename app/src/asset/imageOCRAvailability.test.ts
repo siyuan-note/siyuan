@@ -50,6 +50,8 @@ test("shared image menus hide unavailable recognition and its separator while re
         return menu.ignore ? [] : menu.submenu.filter((item: {ignore?: boolean}) => !item.ignore)
             .map((item: {id: string}) => item.id);
     };
+    const modelMenu = getMenu({siyuan: {languages: {}}}, availability("assets/image.png", "ordinary"), true, true);
+    assert.equal(modelMenu.submenu.find((item: {id: string}) => item.id === "reOCR").icon, "iconOCR");
     assert.deepEqual(visibleItems("https://example.com/image.png", "ordinary"), ["ocrResult", "copyOCRText"]);
     assert.deepEqual(visibleItems("assets/image.png?box=encrypted", "ordinary"), []);
     assert.deepEqual(visibleItems("assets/image.png", "encrypted"), []);

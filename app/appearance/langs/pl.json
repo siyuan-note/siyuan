@@ -1,4 +1,5 @@
 {
+	"ocrReasoningEffortTip": "Domyślne zachowuje działanie modelu; Brak wyłącza lub minimalizuje rozumowanie zależnie od obsługi przez dostawcę i model",
 	"mobileToolbarNoSelection": "Brak zaznaczonego tekstu",
 	"mobileToolbarTextSelection": "Zaznaczony tekst",
 	"ocrAIModel": "Model AI",
@@ -3094,6 +3095,7 @@
 		"410": "Konwersja anulowana: cała lista jest powiązana z wierszem bazy danych, ale konwersja tworzy wiele bloków bez jednoznacznego celu powiązania. Najpierw odłącz listę lub powiąż jej poszczególne elementy",
 		"411": "Konwersja anulowana: element listy i jego pierwszy blok są powiązane z różnymi wierszami tej samej bazy danych. Najpierw usuń jedno z powiązań",
 		"412": "Najpierw skonfiguruj model agenta",
-		"413": "OCR z AI nie zwrócił pełnej transkrypcji; zachowano dotychczasowy wynik"
+		"413": "OCR z AI nie zwrócił pełnej transkrypcji; zachowano dotychczasowy wynik",
+		"414": "Wybierz dostępny model AI do OCR"
 	}
 }

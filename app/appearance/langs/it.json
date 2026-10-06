@@ -1,4 +1,5 @@
 {
+	"ocrReasoningEffortTip": "Predefinito segue il comportamento del modello; Nessuno disattiva o riduce al minimo il ragionamento secondo il provider e il modello",
 	"mobileToolbarNoSelection": "Nessun testo selezionato",
 	"mobileToolbarTextSelection": "Testo selezionato",
 	"ocrAIModel": "Modello IA",
@@ -3094,6 +3095,7 @@
 		"410": "Conversione annullata: l’intero elenco è associato a una riga del database, ma la conversione genera più blocchi senza una destinazione univoca. Rimuovi prima l’associazione dell’elenco o associa le singole voci",
 		"411": "Conversione annullata: la voce dell’elenco e il suo primo blocco sono associati a righe diverse dello stesso database. Rimuovi prima una delle associazioni",
 		"412": "Configura prima il modello dell’agente",
-		"413": "L’OCR con IA non ha restituito una trascrizione completa; il risultato precedente è stato conservato"
+		"413": "L’OCR con IA non ha restituito una trascrizione completa; il risultato precedente è stato conservato",
+		"414": "Selezionare un modello IA disponibile per OCR"
 	}
 }

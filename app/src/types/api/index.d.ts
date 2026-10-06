@@ -2004,9 +2004,9 @@ export type SettingNotifications = { "browserCompatibility": boolean; "docTreeMa
 
 export type SettingNotificationsInput = { "browserCompatibility"?: boolean | null; "docTreeMaxList"?: boolean | null; "formatPainterTip"?: boolean | null; "selectAllIncompleteTip"?: boolean | null; "selectAllTip"?: boolean | null; "tagMaxList"?: boolean | null; "workspaceNotSSD"?: boolean | null; };
 
-export type SettingOCR = { "aiModelId"?: string; "auto": boolean; "model": string; "provider": string; "thresholds"?: OCRThresholds; };
+export type SettingOCR = { "aiModelId"?: string; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string; "thresholds"?: OCRThresholds; };
 
-export type SettingOCRInput = { "aiModelId"?: string | null; "auto": boolean; "model": string; "provider": string; "thresholds"?: OCRThresholdsInput | null; };
+export type SettingOCRInput = { "aiModelId"?: string | null; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string | null; "thresholds"?: OCRThresholdsInput | null; };
 
 export type SettingPetalDisabledData = { "dataChangePlugins": Array<string> | null; "globalPetalChanged": boolean; "globalPetalDisabled": boolean; "globalPetalEnabled": boolean; "globalPetalRevision": number; "reloadPlugins": Array<string> | null; "uninstallPlugins": Array<string> | null; "unloadPlugins": Array<string> | null; };
 

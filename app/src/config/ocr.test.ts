@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import type {OCRThresholds, SettingOCR} from "../types/api";
+import {getReasoningEffortOptions} from "../ai/reasoningEffort";
 
 test("OCR settings register separate searchable rows in shared desktop and mobile groups", () => {
     const compiled = transpileModule(readFileSync("src/config/ocr.ts", "utf8"), {
@@ -24,13 +25,16 @@ test("OCR settings register separate searchable rows in shared desktop and mobil
     };
     exports.registerOCRTab(tab);
     assert.deepEqual(rows.filter(row => row.group === "general").map(row => row.key),
-        ["ocrAuto", "ocrProvider", "ocrModel", "ocrAIModel"]);
+        ["ocrAuto", "ocrProvider", "ocrModel", "ocrAIModel", "ocrReasoningEffort"]);
     const aiRow = rows.find(row => row.key === "ocrAIModel");
     assert.ok(aiRow.keywords.includes("ocrAIModelTip"));
     assert.match(aiRow.html(), /class="b3-select/);
     assert.deepEqual(rows.filter(row => row.group === "models").map(row => row.key), ["ocrImportModels", "ocrImport"]);
     const tabs = readFileSync("src/config/setting/tabs.ts", "utf8");
     assert.match(tabs, /ocr: setting\.tab\([\s\S]*?afterMount: mountOCRTab,[\s\S]*?registerOCRTab/);
+    assert.match(tabs, /ocr: setting\.tab\([\s\S]*?icon: "iconOCR"/);
+    assert.match(readFileSync("appearance/icons/litheness/icon.js", "utf8"), /<symbol id="iconOCR"/);
+    assert.match(readFileSync("appearance/icons/index.html", "utf8"), /xlink:href="#iconOCR"/);
     assert.doesNotMatch(readFileSync("src/config/assets.ts", "utf8"), /data-type="ocr"/);
     assert.match(readFileSync("src/mobile/menu/settingPanel.ts", "utf8"), /tabId === "ocr"[\s\S]*?unmountOCRTab\(root\)/);
 });
@@ -50,11 +54,11 @@ const createOCRPanel = async () => {
         providers: [{id: "paddleocr", available: true}, ...(aiModels.length || serverConfig.provider === "ai" ?
             [{id: "ai", available: aiModels.some(model => model.id === serverConfig.aiModelId)}] : [])], models, aiModels}});
     const controls = Object.fromEntries([
-        "ocrProvider", "ocrModel", "ocrAIModel", "ocrAuto", "ocrImportModels", "ocrImport",
+        "ocrProvider", "ocrModel", "ocrAIModel", "ocrReasoningEffort", "ocrAuto", "ocrImportModels", "ocrImport",
         "detector", "detectorConfig", "recognizer", "recognizerConfig",
         "ocrAdvanced",
     ].map(id => [id, {
-        id, value: id === "ocrProvider" ? "paddleocr" : id === "ocrAIModel" ? "" : "tiny", checked: false, disabled: false, innerHTML: "",
+        id, value: id === "ocrProvider" ? "paddleocr" : id === "ocrAIModel" || id === "ocrReasoningEffort" ? "" : "tiny", checked: false, disabled: false, innerHTML: "",
         files: [{name: `${id}.onnx`}],
         tagName: id === "ocrImport" || id === "ocrAdvanced" ? "BUTTON" : "INPUT",
         closest: () => ({classList: {toggle() {}}}),
@@ -86,6 +90,7 @@ const createOCRPanel = async () => {
         OCR_CHANGED_EVENT: "ocr-test",
         AI_CONFIG_CHANGED_EVENT: "ai-test",
         trackSettingSave: (task: Promise<boolean>) => task,
+        getReasoningEffortOptions,
         openOCRThresholds: (initial: OCRThresholds, save: (value: OCRThresholds) => Promise<boolean>, onClose: () => void) => {
             advanced = {initial, save, destroy: () => { dialogCloses++; onClose(); }};
             return advanced;
@@ -121,6 +126,10 @@ const createOCRPanel = async () => {
             controls.ocrProvider.value = value;
             return listeners.get("change")({target: controls.ocrProvider, stopPropagation() {}});
         },
+        changeEffort: (value: string) => {
+            controls.ocrReasoningEffort.value = value;
+            return listeners.get("change")({target: controls.ocrReasoningEffort, stopPropagation() {}});
+        },
         deferRead: () => { deferredRead = true; },
         updateServer: (next: typeof config.ocr) => { serverConfig = next; },
         addModel: (id: string) => { models = [...models, {id, name: "Imported", builtIn: false}]; },
@@ -139,6 +148,7 @@ test("selecting AI uses a separate model and requires opting into automatic reco
     panel.notifyAI();
     await new Promise(setImmediate);
     assert.match(panel.controls.ocrProvider.innerHTML, /value="ai"/);
+    assert.match(panel.controls.ocrAIModel.innerHTML, /value="" disabled/);
     const saving = panel.changeProvider("ai");
     await new Promise(setImmediate);
     assert.equal(panel.requests[0].config.aiModelId, "vision");
@@ -147,12 +157,35 @@ test("selecting AI uses a separate model and requires opting into automatic reco
     assert.equal(panel.controls.ocrAIModel.disabled, false);
     panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
     await saving;
+    assert.doesNotMatch(panel.controls.ocrAIModel.innerHTML, /value=""/);
     const automatic = panel.changeAuto(true);
     await new Promise(setImmediate);
     assert.equal(panel.requests[1].config.aiModelId, "vision");
     assert.equal(panel.requests[1].config.auto, true);
     panel.requests[1].resolve({code: 0, data: panel.requests[1].config});
     await automatic;
+    panel.close();
+});
+
+test("OCR reasoning effort is saved independently, restored on failure, and refreshed without rebuilding the form", async () => {
+    const panel = await createOCRPanel();
+    panel.updateServer({provider: "ai", model: "tiny", aiModelId: "vision", reasoningEffort: "low", auto: false});
+    panel.setAIModels([{id: "vision", name: "Image model", provider: "Provider"}]);
+    panel.notify();
+    await new Promise(setImmediate);
+    assert.equal(panel.controls.ocrReasoningEffort.value, "low");
+    const failed = panel.changeEffort("high");
+    await new Promise(setImmediate);
+    panel.requests[0].resolve({code: -1});
+    await failed;
+    assert.equal(panel.controls.ocrReasoningEffort.value, "low");
+    const saved = panel.changeEffort("none");
+    await new Promise(setImmediate);
+    assert.equal(panel.requests[1].config.reasoningEffort, "none");
+    assert.equal(panel.requests[1].config.aiModelId, "vision");
+    panel.requests[1].resolve({code: 0, data: panel.requests[1].config});
+    await saved;
+    assert.equal(panel.config.ocr.reasoningEffort, "none");
     panel.close();
 });
 

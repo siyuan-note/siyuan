@@ -44,7 +44,8 @@ import {
     renderWelcomeHTML
 } from "./AgentMessageRenderer";
 import {bindThinkingCardToggle, updateThinkingBody} from "../../../ai/thinkingCard";
-import {getAgentReasoningEffort, getAgentReasoningEffortOptions, setAgentReasoningEffort} from "./AgentReasoning";
+import {getAgentReasoningEffort, setAgentReasoningEffort} from "./AgentReasoning";
+import {getReasoningEffortOptions} from "../../../ai/reasoningEffort";
 import {mountGroupedModelPicker, type IGroupedModelPicker} from "../../../config/tabs/ai/aiProviderUi";
 import {AI_CONFIG_CHANGED_EVENT} from "../../../config/tabs/ai/aiRuntime";
 import {
@@ -758,7 +759,7 @@ export class AgentChat extends Model {
 
     // 初始化思考强度菜单：提供各供应商使用的标准档位，并在本地保存选择结果。
     private initReasoningEffortMenu() {
-        const options = getAgentReasoningEffortOptions(window.siyuan.languages);
+        const options = getReasoningEffortOptions(window.siyuan.languages);
         const updateLabel = () => {
             const selected = options.find(option => option.value === this.selectedReasoningEffort) || options[0];
             this.reasoningEffortButton.querySelector(".agent-chat__reasoning-effort-label").textContent = selected.label;

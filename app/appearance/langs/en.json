@@ -1,4 +1,5 @@
 {
+	"ocrReasoningEffortTip": "Default follows model behavior; None disables or minimizes thinking, depending on provider and model support",
 	"mobileToolbarNoSelection": "No text selected",
 	"mobileToolbarTextSelection": "Text selected",
 	"ocrAIModel": "AI model",
@@ -3094,6 +3095,7 @@
 		"410": "Conversion canceled: the whole list is bound to a database row, but conversion produces multiple blocks with no unique binding target. Unbind the whole list or bind individual list items first",
 		"411": "Conversion canceled: the list item and its first block are bound to different rows in the same database. Unbind one of them first",
 		"412": "Please configure the agent model first",
-		"413": "AI OCR did not return a complete transcription; the existing result was preserved"
+		"413": "AI OCR did not return a complete transcription; the existing result was preserved",
+		"414": "Please select an available AI model for OCR"
 	}
 }

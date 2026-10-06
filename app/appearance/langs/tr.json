@@ -1,4 +1,5 @@
 {
+	"ocrReasoningEffortTip": "Varsayılan, model davranışını izler; Yok, sağlayıcı ve model desteğine göre düşünmeyi kapatır veya en aza indirir",
 	"mobileToolbarNoSelection": "Metin seçilmedi",
 	"mobileToolbarTextSelection": "Metin seçildi",
 	"ocrAIModel": "Yapay zekâ modeli",
@@ -3094,6 +3095,7 @@
 		"410": "Dönüştürme iptal edildi: tüm liste bir veritabanı satırına bağlı, ancak dönüştürme birden fazla blok oluşturuyor ve tek bir bağlama hedefi belirlenemiyor. Önce listenin bağını kaldırın veya liste öğelerini ayrı ayrı bağlayın",
 		"411": "Dönüştürme iptal edildi: liste öğesi ve ilk bloğu aynı veritabanındaki farklı satırlara bağlı. Önce bağlantılardan birini kaldırın",
 		"412": "Lütfen önce ajan modelini yapılandırın",
-		"413": "Yapay zekâ OCR tam bir metin döndürmedi; mevcut sonuç korundu"
+		"413": "Yapay zekâ OCR tam bir metin döndürmedi; mevcut sonuç korundu",
+		"414": "Lütfen OCR için kullanılabilir bir yapay zekâ modeli seçin"
 	}
 }

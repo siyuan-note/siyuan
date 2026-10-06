@@ -1,4 +1,5 @@
 {
+	"ocrReasoningEffortTip": "Standard folgt dem Modellverhalten; Keine deaktiviert oder minimiert das Denken, abhängig von Anbieter und Modell",
 	"mobileToolbarNoSelection": "Kein Text ausgewählt",
 	"mobileToolbarTextSelection": "Text ausgewählt",
 	"ocrAIModel": "KI-Modell",
@@ -3094,6 +3095,7 @@
 		"410": "Konvertierung abgebrochen: Die gesamte Liste ist an eine Datenbankzeile gebunden, die Konvertierung erzeugt jedoch mehrere Blöcke ohne eindeutiges Bindungsziel. Lösen Sie zuerst die Bindung der Liste oder binden Sie einzelne Listeneinträge",
 		"411": "Konvertierung abgebrochen: Der Listeneintrag und sein erster Block sind an verschiedene Zeilen derselben Datenbank gebunden. Lösen Sie zuerst eine der Bindungen",
 		"412": "Bitte konfigurieren Sie zuerst das Agentenmodell",
-		"413": "Die KI-OCR hat keinen vollständigen Text zurückgegeben; das bisherige Ergebnis wurde beibehalten"
+		"413": "Die KI-OCR hat keinen vollständigen Text zurückgegeben; das bisherige Ergebnis wurde beibehalten",
+		"414": "Bitte wählen Sie ein verfügbares KI-Modell für OCR"
 	}
 }

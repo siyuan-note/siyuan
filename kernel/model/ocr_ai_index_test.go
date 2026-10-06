@@ -27,6 +27,7 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 	previousOCR := Conf.GetOCR()
 	defer func() { Conf.AI, Conf.OCR = previousAI, &previousOCR }()
 	calls := 0
+	providerFailure := false
 	var beforeResponse func()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		calls++
@@ -34,6 +35,11 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 			beforeResponse()
 		}
 		w.Header().Set("Content-Type", "application/json")
+		if providerFailure {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = io.WriteString(w, `{"error":{"message":"unsupported reasoning effort","type":"invalid_request_error"}}`)
+			return
+		}
 		_, _ = io.WriteString(w, `{"choices":[{"finish_reason":"stop","message":{"content":"aiocrkeyword\nsecond  column"}}]}`)
 	}))
 	defer server.Close()
@@ -75,6 +81,7 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 	}{
 		{"automatic disabled", func() { Conf.m.Lock(); Conf.OCR.Auto = false; Conf.m.Unlock() }, ""},
 		{"model changed", func() { Conf.m.Lock(); Conf.OCR.AIModelID = "other"; Conf.m.Unlock() }, ""},
+		{"reasoning changed", func() { Conf.m.Lock(); Conf.OCR.ReasoningEffort = "none"; Conf.m.Unlock() }, ""},
 		{"AI model disabled", func() { Conf.AI.Providers[0].Models[0].Enabled = false }, ""},
 		{"manually edited", func() { SetOCRAssetText(path, "manual text") }, "manual text"},
 	} {
@@ -130,6 +137,19 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 	autoOCRAssets()
 	if calls != previousCalls+2 {
 		t.Fatal("disabled automatic OCR or unavailable model reached provider")
+	}
+	Conf.OCR.AIModelID = "vision"
+	providerFailure = true
+	autoOCRAssets()
+	providerFailure = false
+	autoOCRAssets()
+	if calls != previousCalls+3 || util.ExistsAssetText(extra) {
+		t.Fatal("failed automatic OCR was not held for retry")
+	}
+	Conf.OCR.ReasoningEffort = "none"
+	autoOCRAssets()
+	if calls != previousCalls+4 || !util.ExistsAssetText(extra) {
+		t.Fatal("changed reasoning effort inherited the previous retry delay")
 	}
 	if err = os.Remove(filepath.Join(util.DataDir, filepath.FromSlash(extra))); err != nil {
 		t.Fatal(err)

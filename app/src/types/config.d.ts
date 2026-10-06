@@ -31,6 +31,7 @@ declare namespace Config {
          * 当前设备的 OCR 设置；阈值只影响后续 PaddleOCR 识别，空值使用模型检测参数和 0.5 的识别阈值。
          * provider 为 ai 时，手动和自动识别均使用独立的 aiModelId；失效时不回退到其他模型或提供商。
          * 首次从本地提供商切换到 AI 时关闭自动识别，之后可以显式开启。
+         * reasoningEffort 独立控制手动和自动 AI OCR，空字符串沿用模型默认。
          */
         ocr: import("./api").SettingOCR;
         api: IAPI;

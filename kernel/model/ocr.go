@@ -81,6 +81,11 @@ func (config *AppConf) GetOCR() conf.OCR {
 }
 
 func (config *AppConf) SetOCR(value conf.OCR) error {
+	switch value.ReasoningEffort {
+	case "", "none", "low", "medium", "high", "xhigh", "max":
+	default:
+		return errors.New("invalid OCR reasoning effort")
+	}
 	// 兼容旧客户端提交的内置 Small 标识，响应和持久化配置均使用 Tiny。
 	if value.Model == "small" {
 		value.Model = "tiny"
@@ -107,7 +112,7 @@ func (config *AppConf) SetOCR(value conf.OCR) error {
 		provider, model := getOCRAIModel(value)
 		if provider == nil || model == nil {
 			config.m.Unlock()
-			return errors.New(Conf.Language(412))
+			return errors.New(Conf.Language(414))
 		}
 	}
 	if value.Provider == "ai" && (previous == nil || previous.Provider != "ai") {
@@ -291,7 +296,7 @@ func autoOCRAssets() {
 		if util.ExistsAssetText(asset.Path) {
 			continue
 		}
-		key := fmt.Sprintf("%s:%s:%s:%s", value.Provider, value.Model, value.AIModelID, asset.Path)
+		key := fmt.Sprintf("%s:%s:%s:%s:%s", value.Provider, value.Model, value.AIModelID, value.ReasoningEffort, asset.Path)
 		if retry, exists := ocrRetry.Load(key); exists && time.Now().Before(retry.(time.Time)) {
 			continue
 		}
@@ -357,7 +362,7 @@ func automaticOCRTimeout(value conf.OCR) time.Duration {
 
 func automaticOCRMatches(value conf.OCR) bool {
 	current := Conf.GetOCR()
-	return current.Auto && current.Provider == value.Provider && current.Model == value.Model && current.AIModelID == value.AIModelID
+	return current.Auto && current.Provider == value.Provider && current.Model == value.Model && current.AIModelID == value.AIModelID && current.ReasoningEffort == value.ReasoningEffort
 }
 
 // 自动识别仅提交仍为空的结果，关闭自动识别、切换配置或手动编辑后丢弃在途响应。

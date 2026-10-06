@@ -11,6 +11,7 @@ import {openOCRThresholds} from "./ocrThresholds";
 import {AI_CONFIG_CHANGED_EVENT} from "./tabs/ai/aiRuntime";
 import type {SettingTabBuilder} from "./setting/builder";
 import {trackSettingSave} from "./setting/pending";
+import {getReasoningEffortOptions} from "../ai/reasoningEffort";
 
 const mounts = new WeakMap<HTMLElement, () => void>();
 
@@ -53,6 +54,10 @@ export const registerOCRTab = (tab: SettingTabBuilder) => {
         key: "ocrAIModel",
         keywords: ["AI", languages.ocrAIModel, languages.ocrAIModelTip],
         html: () => selectRow("ocrAIModel", languages.ocrAIModel, languages.ocrAIModelTip),
+    }).slot({
+        key: "ocrReasoningEffort",
+        keywords: [languages.reasoningEffortTooltip, languages.ocrReasoningEffortTip],
+        html: () => selectRow("ocrReasoningEffort", languages.reasoningEffortTooltip, languages.ocrReasoningEffortTip),
     });
     tab.group("advanced", languages.configGroupAdvanced).slot({
         key: "ocrAdvanced",
@@ -91,6 +96,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
             root.querySelector(`#${id}`).closest(".config-item").classList.toggle("fn__none", !isPaddleOCR);
         });
         root.querySelector("#ocrAIModel").closest(".config-item").classList.toggle("fn__none", !isAI);
+        root.querySelector("#ocrReasoningEffort").closest(".config-item").classList.toggle("fn__none", !isAI);
         ["advanced", "models"].forEach(group => {
             root.querySelector(`[data-config-group-id="${group}"]`)?.classList.toggle("fn__none", !isPaddleOCR);
         });
@@ -100,6 +106,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         });
         root.querySelector<HTMLSelectElement>("#ocrModel").disabled = busy || !isPaddleOCR;
         root.querySelector<HTMLSelectElement>("#ocrAIModel").disabled = busy || !isAI;
+        root.querySelector<HTMLSelectElement>("#ocrReasoningEffort").disabled = busy || !isAI;
         root.querySelector<HTMLButtonElement>("#ocrImport").disabled = busy || pendingSaves > 0 || !isPaddleOCR || files.some(file => !root.querySelector<HTMLInputElement>(`#${file.id}`).files?.length);
     };
     const providerOptions = () => {
@@ -116,7 +123,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     const aiModelOptions = () => {
         const models = data.aiModels || [];
         const selected = data.config.aiModelId || "";
-        let html = `<option value="">${escapeHtml(languages.noModelConfigured)}</option>`;
+        let html = selected ? "" : `<option value="" disabled>${escapeHtml(languages.noModelConfigured)}</option>`;
         if (selected && !models.some(model => model.id === selected)) {
             html += `<option value="${escapeAttr(selected)}" disabled>${escapeHtml(languages.ocrUnavailable)}</option>`;
         }
@@ -143,6 +150,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         provider.value = data.config.provider;
         model.value = data.config.model;
         root.querySelector<HTMLSelectElement>("#ocrAIModel").value = data.config.aiModelId || "";
+        root.querySelector<HTMLSelectElement>("#ocrReasoningEffort").value = data.config.reasoningEffort || "";
         root.querySelector<HTMLInputElement>("#ocrAuto").checked = data.config.auto;
         updateControls();
     };
@@ -150,6 +158,8 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         root.querySelector<HTMLSelectElement>("#ocrProvider").innerHTML = providerOptions();
         root.querySelector<HTMLSelectElement>("#ocrModel").innerHTML = modelOptions();
         root.querySelector<HTMLSelectElement>("#ocrAIModel").innerHTML = aiModelOptions();
+        root.querySelector<HTMLSelectElement>("#ocrReasoningEffort").innerHTML = getReasoningEffortOptions(languages)
+            .map(option => `<option value="${option.value}">${escapeHtml(option.label)}</option>`).join("");
         updateForm(data);
     };
     const load = (): Promise<void> => {
@@ -205,6 +215,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
             model: root.querySelector<HTMLSelectElement>("#ocrModel").value,
             auto: root.querySelector<HTMLInputElement>("#ocrAuto").checked,
             aiModelId: root.querySelector<HTMLSelectElement>("#ocrAIModel").value,
+            reasoningEffort: root.querySelector<HTMLSelectElement>("#ocrReasoningEffort").value,
             thresholds,
         };
         writeRevision++;
@@ -231,7 +242,9 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
                     root.querySelector<HTMLSelectElement>("#ocrProvider").value = data.config.provider;
                     root.querySelector<HTMLSelectElement>("#ocrModel").value = data.config.model;
                     root.querySelector<HTMLInputElement>("#ocrAuto").checked = data.config.auto;
+                    root.querySelector<HTMLSelectElement>("#ocrAIModel").innerHTML = aiModelOptions();
                     root.querySelector<HTMLSelectElement>("#ocrAIModel").value = data.config.aiModelId || "";
+                    root.querySelector<HTMLSelectElement>("#ocrReasoningEffort").value = data.config.reasoningEffort || "";
                     updateControls();
                     if (refreshPending) void load().catch(handleError);
                 }

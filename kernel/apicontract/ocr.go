@@ -10,12 +10,15 @@ import "mime/multipart"
 // provider 可为 tesseract、paddleocr 或 ai；aiModelId 是已配置 AI 模型的 ID，与本地 model 独立保存。
 // aiModelId 省略或为 null 时保留已有选择；失效的已保存 ID 保留并显示不可用，不回退到其他模型。
 // 首次切换到 ai 时 auto 强制关闭；之后可显式开启，手动和自动识别均使用所选 AI 模型。
+// reasoningEffort 独立于智能体设置，省略或为 null 时保留；空字符串沿用模型默认行为。
+// 可选 none、low、medium、high、xhigh、max，均复用现有协议适配；提供商拒绝参数时返回错误，不自动回退。
 type SettingOCR struct {
-	Provider   string         `json:"provider"`
-	Model      string         `json:"model"`
-	Auto       bool           `json:"auto"`
-	AIModelID  *string        `json:"aiModelId,omitempty" api:"optional"`
-	Thresholds *OCRThresholds `json:"thresholds,omitempty" api:"optional"`
+	Provider        string         `json:"provider"`
+	Model           string         `json:"model"`
+	Auto            bool           `json:"auto"`
+	AIModelID       *string        `json:"aiModelId,omitempty" api:"optional"`
+	ReasoningEffort *string        `json:"reasoningEffort,omitempty" api:"optional"`
+	Thresholds      *OCRThresholds `json:"thresholds,omitempty" api:"optional"`
 }
 
 // OCRThresholds 的 detection、box 必须为 (0, 1) 内的有限数，recognition 为 [0, 1] 内的有限数。

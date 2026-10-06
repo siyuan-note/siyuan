@@ -44,7 +44,7 @@ var getOCRConfig = contractHandler(apicontract.GetOCRConfig, func(c *gin.Context
 
 func ocrConfigPayload(value conf.OCR) apicontract.SettingOCR {
 	thresholds := apicontract.OCRThresholds(value.Thresholds)
-	return apicontract.SettingOCR{Provider: value.Provider, Model: value.Model, Auto: value.Auto, Thresholds: &thresholds, AIModelID: &value.AIModelID}
+	return apicontract.SettingOCR{Provider: value.Provider, Model: value.Model, Auto: value.Auto, Thresholds: &thresholds, AIModelID: &value.AIModelID, ReasoningEffort: &value.ReasoningEffort}
 }
 
 func ocrModelPayload(id string) apicontract.OCRModel {
@@ -62,6 +62,9 @@ var setOCRConfig = contractHandler(apicontract.SetOCRConfig, serializeSetting("o
 	value.Provider, value.Model, value.Auto = request.Provider, request.Model, request.Auto
 	if request.AIModelID != nil {
 		value.AIModelID = *request.AIModelID
+	}
+	if request.ReasoningEffort != nil {
+		value.ReasoningEffort = *request.ReasoningEffort
 	}
 	if request.Thresholds != nil {
 		value.Thresholds = conf.OCRThresholds(*request.Thresholds)

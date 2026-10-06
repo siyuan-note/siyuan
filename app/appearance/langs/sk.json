@@ -1,4 +1,5 @@
 {
+	"ocrReasoningEffortTip": "Predvolené používa správanie modelu; Žiadne vypne alebo minimalizuje uvažovanie podľa podpory poskytovateľa a modelu",
 	"mobileToolbarNoSelection": "Žiadny vybratý text",
 	"mobileToolbarTextSelection": "Vybratý text",
 	"ocrAIModel": "Model AI",
@@ -3094,6 +3095,7 @@
 		"410": "Konverzia zrušená: celý zoznam je naviazaný na riadok databázy, ale konverzia vytvorí viac blokov bez jednoznačného cieľa väzby. Najprv zrušte väzbu zoznamu alebo naviažte jednotlivé položky",
 		"411": "Konverzia zrušená: položka zoznamu a jej prvý blok sú naviazané na rôzne riadky tej istej databázy. Najprv zrušte jednu z väzieb",
 		"412": "Najprv nakonfigurujte model agenta",
-		"413": "AI OCR nevrátil úplný prepis; pôvodný výsledok bol zachovaný"
+		"413": "AI OCR nevrátil úplný prepis; pôvodný výsledok bol zachovaný",
+		"414": "Vyberte dostupný model AI pre OCR"
 	}
 }

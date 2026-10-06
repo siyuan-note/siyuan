@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {getReasoningEffortOptions} from "../../../ai/reasoningEffort";
 
 const compiled = transpileModule(readFileSync("src/layout/dock/agent/AgentReasoning.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -14,6 +15,7 @@ const createPreference = (values: Record<string, unknown> = {}, readonly = false
     runInNewContext(compiled, {
         exports,
         require: (id: string) => {
+            if (id === "../../../ai/reasoningEffort") return {getReasoningEffortOptions};
             assert.equal(id, "../../../protyle/util/compatibility");
             return {setStorageVal: (key: string, value: unknown) => {
                 if (!readonly) {
@@ -30,12 +32,10 @@ const createPreference = (values: Record<string, unknown> = {}, readonly = false
     return {...exports, values, storage};
 };
 
-const getAgentReasoningEffortOptions = createPreference().getAgentReasoningEffortOptions;
-
 describe("AgentReasoning", () => {
     it("restores every saved effort after reinitialization, including default and none", () => {
         const preference = createPreference();
-        for (const {value} of getAgentReasoningEffortOptions({}).reverse()) {
+        for (const {value} of getReasoningEffortOptions({}).reverse()) {
             preference.setAgentReasoningEffort(value);
             assert.equal(preference.getAgentReasoningEffort(), value);
             assert.equal(createPreference(preference.values).getAgentReasoningEffort(), value);
@@ -62,7 +62,7 @@ describe("AgentReasoning", () => {
     });
 
     it("provides every supported reasoning effort value", () => {
-        const options = getAgentReasoningEffortOptions({});
+        const options = getReasoningEffortOptions({});
         assert.deepEqual(Array.from(options, option => option.value), [
             "",
             "none",
@@ -75,7 +75,7 @@ describe("AgentReasoning", () => {
     });
 
     it("uses localized labels when available", () => {
-        const options = getAgentReasoningEffortOptions({
+        const options = getReasoningEffortOptions({
             reasoningEffortDefault: "default-label",
             reasoningEffortNone: "none-label",
             reasoningEffortLow: "low-label",

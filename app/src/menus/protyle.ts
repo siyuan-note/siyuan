@@ -1432,7 +1432,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 ignore: !canOCR && !canAIOCR,
             }, {
                 id: "reOCR",
-                iconHTML: "",
+                icon: "iconOCR",
                 label: window.siyuan.languages.performOCR,
                 ignore: !canOCR,
                 click() {

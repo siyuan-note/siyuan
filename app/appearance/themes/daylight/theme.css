@@ -28,7 +28,7 @@
     --b3-font-family-default: var(--b3-font-family-emoji-reset), BlinkMacSystemFont, Helvetica, "Luxi Sans", "DejaVu Sans", arial, sans-serif, emojis;
     --b3-font-family: var(--b3-font-family-default);
     --b3-font-family-protyle: var(--b3-font-family);
-    --b3-font-family-code: var(--b3-font-family-emoji-reset), "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", var(--b3-font-family);
+    --b3-font-family-code: var(--b3-font-family-emoji-reset), "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", var(--b3-font-family), monospace;
     --b3-font-family-graph: arial;
     --b3-font-family-emoji: "Emojis Additional", emojis;
     --b3-font-family-math: KaTeX_Math;

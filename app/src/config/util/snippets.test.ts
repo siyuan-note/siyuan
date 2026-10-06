@@ -68,6 +68,39 @@ test("shared snippet renderer preserves CSS, JS enable flags, nonce and unchange
     assert.equal(f.elements.size, 0);
 });
 
+test("snippet cleanup preserves plugin styles and scripts used by exports", async () => {
+    const f = fixture();
+    const pluginCSS = {id: "snippetCSSplugin-font", tagName: "STYLE", textContent: "body {font-family: plugin-font;}",
+        remove() { f.elements.delete(this.id); }};
+    const pluginJS = {id: "snippetJSplugin-emoji", tagName: "SCRIPT", textContent: "pluginEmoji();",
+        remove() { f.elements.delete(this.id); }};
+    f.elements.set(pluginCSS.id, pluginCSS);
+    f.elements.set(pluginJS.id, pluginJS);
+    await f.render([]);
+    assert.equal(f.elements.get(pluginCSS.id), pluginCSS);
+    assert.equal(f.elements.get(pluginJS.id), pluginJS);
+    assert.equal(f.measurements(), 0);
+
+    const css = {id: "css", type: "css", enabled: true, content: "body {color: red;}"};
+    const js = {id: "js", type: "js", enabled: true, content: "run();"};
+    await f.render([css, js]);
+    await f.render([{...css, content: "body {color: blue;}"}, {...js, content: "updated();"}]);
+    assert.equal(f.elements.get("snippetCSScss").textContent, "body {color: blue;}");
+    assert.deepEqual(f.executed, [js.content, "updated();"]);
+    await f.render([]);
+    assert.equal(f.elements.size, 2);
+    assert.equal(f.elements.get(pluginCSS.id), pluginCSS);
+    assert.equal(f.elements.get(pluginJS.id), pluginJS);
+    assert.equal(f.measurements(), 3);
+
+    f.config.snippet.enabledCSS = false;
+    f.config.snippet.enabledJS = false;
+    await f.render([]);
+    assert.equal(f.elements.get(pluginCSS.id), pluginCSS);
+    assert.equal(f.elements.get(pluginJS.id), pluginJS);
+    assert.equal(f.measurements(), 3);
+});
+
 test("snippet capability and active guards prevent fetches and late script/style execution", async () => {
     const f = fixture();
     f.setAllowed(false);

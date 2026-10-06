@@ -6,6 +6,8 @@ import {Constants} from "../../constants";
 import {refreshHeadingNumberMeasurements} from "../../util/assets";
 import {getExtensionScriptNonce, getHostCapabilities} from "../../util/hostCapabilities";
 
+const snippetElements = new WeakSet<HTMLElement>();
+
 export const renderSnippet = (timeout = 0, isActive = () => true, beforeJS?: () => Promise<void>, includeJS = true) => {
     if (!isActive() || !getHostCapabilities().customAppearance) {
         return Promise.resolve();
@@ -27,12 +29,13 @@ export const renderSnippet = (timeout = 0, isActive = () => true, beforeJS?: () 
             if (nonce) script.nonce = nonce;
             script.text = item.content;
             script.id = `snippetJS${item.id}`;
+            snippetElements.add(script);
             document.head.appendChild(script);
         };
         const snippetIds = new Set(response.data.snippets.map((item: ISnippet) =>
             `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`));
-        document.querySelectorAll('style[id^="snippetCSS"], script[id^="snippetJS"]').forEach(element => {
-            if (!snippetIds.has(element.id)) {
+        document.querySelectorAll<HTMLStyleElement | HTMLScriptElement>('style[id^="snippetCSS"], script[id^="snippetJS"]').forEach(element => {
+            if (snippetElements.has(element) && !snippetIds.has(element.id)) {
                 cssChanged ||= element.tagName === "STYLE";
                 element.remove();
             }
@@ -68,6 +71,7 @@ export const renderSnippet = (timeout = 0, isActive = () => true, beforeJS?: () 
                 const styleEl = document.createElement("style");
                 styleEl.id = id;
                 styleEl.textContent = item.content;
+                snippetElements.add(styleEl);
                 document.head.appendChild(styleEl);
                 cssChanged = true;
             } else if (item.type === "js") {

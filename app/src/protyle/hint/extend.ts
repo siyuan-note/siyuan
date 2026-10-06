@@ -452,7 +452,9 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
 };
 
 export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, sourceOrHideConfiguredCreate: THintSource | boolean = false) => {
-    const enabled = getConfiguredEntryVisibility(SLASH_MENU_ROOT_PATH);
+    // 加号面板由用户主动打开，复用插入项配置但不受输入斜杠的提示开关影响。
+    const visibilityRoot = protyle.hint.element.closest("#keyboardToolbar") ? SLASH_MENU_ROOT_PATH : undefined;
+    const enabled = getConfiguredEntryVisibility(SLASH_MENU_ROOT_PATH, visibilityRoot);
     if (!enabled) {
         return [];
     }
@@ -500,7 +502,7 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
         canUpload: !!(protyle.options.upload.handler || (protyle.options.upload.url && protyle.upload)),
         key,
         order: getEntryOrder(SLASH_MENU_ROOT_PATH),
-        visible: (entryKey) => getConfiguredEntryVisibility(getSlashMenuEntryPath(entryKey)),
+        visible: (entryKey) => getConfiguredEntryVisibility(getSlashMenuEntryPath(entryKey), visibilityRoot),
     });
 });
 

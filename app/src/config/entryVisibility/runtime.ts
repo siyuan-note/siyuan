@@ -74,7 +74,11 @@ export const isEntryVisible = (path: string): boolean => {
     return getConfiguredEntryVisibility(path);
 };
 
-export const getConfiguredEntryVisibility = (path: string): boolean => {
+export const getConfiguredEntryVisibility = (path: string, stopAt?: string): boolean => {
+    // 独立入口可只复用指定菜单内部的配置，不继承该菜单触发入口的总开关。
+    if (path === stopAt) {
+        return true;
+    }
     const config = getConfig();
     const active = config.active;
     let visible: boolean;
@@ -90,7 +94,7 @@ export const getConfiguredEntryVisibility = (path: string): boolean => {
     }
     const parentPath = getEntryParentPath(path);
     if (parentPath && getEntryCatalogNode(parentPath)) {
-        return getConfiguredEntryVisibility(parentPath);
+        return getConfiguredEntryVisibility(parentPath, stopAt);
     }
     return true;
 };

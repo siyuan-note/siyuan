@@ -1745,6 +1745,12 @@ export class AgentChat extends Model {
                     console.error("recover interrupted agent turn failed:", e);
                     continue;
                 }
+                if (this.sessionId !== sessionID || this.isStreaming) {
+                    return;
+                }
+                if (session) {
+                    this.updateSessionRunLock(session);
+                }
                 if (!session?.recoveryTurnID) {
                     if (session && !session.agentRunning) {
                         this.pendingRecoverySessionIDs.delete(sessionID);
@@ -1799,8 +1805,9 @@ export class AgentChat extends Model {
         }
     }
 
-    // 从 session 更新标题/时间戳/token 计数/model 等元数据，不动 entries 与 DOM。
+    // 从 session 更新运行锁、标题/时间戳/token 计数/model 等元数据，保留消息内容。
     private updateMetaFromSession(session: AgentSession) {
+        this.updateSessionRunLock(session);
         this.sessionTitle = this.pendingSessionTitle || session.title || this.defaultTitle;
         this.hasTitled = session.titled !== false;
         this.sessionCreatedAt = session.createdAt || this.sessionCreatedAt;
@@ -1819,6 +1826,23 @@ export class AgentChat extends Model {
         this.applyPermissionMode(session.permissionMode || "confirm");
         this.titleElement.textContent = this.sessionTitle;
         this.updateTokenDisplay();
+    }
+
+    // 根据权威运行状态更新当前会话的镜像锁，本地运行由 sessionRuns 独立管理。
+    private updateSessionRunLock(session: AgentSession) {
+        if (session.id !== this.sessionId) {
+            return;
+        }
+        const locked = !!session.agentRunning && !this.sessionRuns.get(session.id);
+        if (this.mirrorLocked === locked) {
+            return;
+        }
+        this.mirrorLocked = locked;
+        this.updateRegenerateButtons();
+        this.updateSendButtonState();
+        if (!locked) {
+            this.removeMirrorPlaceholder();
+        }
     }
 
     // 浅比较两个 entries 数组是否等价（用于判断是否需要重绘）。用 JSON 序列化比较，简单可靠。

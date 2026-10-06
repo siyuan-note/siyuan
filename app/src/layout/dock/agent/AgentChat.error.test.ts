@@ -41,6 +41,7 @@ const createChat = () => {
         sessionId: "first",
         entries: sessions.get("first").entries,
         sessionErrors: new Map(),
+        mirrorLocked: false,
         pendingRecoverySessionIDs: new Set(),
         recoveryInFlightSessionIDs: new Set(),
         recoveryCommitTurnIDs: new Map(),
@@ -52,7 +53,7 @@ const createChat = () => {
             appendChild: (element: typeof elements[number]) => elements.push(element),
             querySelectorAll: () => elements.filter(element => element.className.includes("agent-chat__msg--error")),
         },
-        sessionRuns: {begin: () => ({controller: {}}), markRead: () => undefined},
+        sessionRuns: {begin: () => ({controller: {}}), markRead: () => undefined, get: () => undefined},
         isScrolledToBottom: () => true,
     });
     for (const method of ["finishActiveThinking", "clearThinking", "scrollToBottom", "flushThinkingStep",

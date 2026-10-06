@@ -1,4 +1,5 @@
 {
+	"ocrThresholdSettings": "Пороги распознавания",
 	"ocrReasoningEffortTip": "По умолчанию используется поведение модели; Нет отключает или минимизирует рассуждения в зависимости от провайдера и модели",
 	"mobileToolbarNoSelection": "Текст не выделен",
 	"mobileToolbarTextSelection": "Текст выделен",

@@ -1,4 +1,5 @@
 {
+	"ocrThresholdSettings": "Пороги розпізнавання",
 	"ocrReasoningEffortTip": "За замовчуванням використовується поведінка моделі; Немає вимикає або мінімізує міркування залежно від підтримки провайдера та моделі",
 	"mobileToolbarNoSelection": "Текст не виділено",
 	"mobileToolbarTextSelection": "Текст виділено",

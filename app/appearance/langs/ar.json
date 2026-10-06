@@ -1,4 +1,5 @@
 {
+	"ocrThresholdSettings": "عتبات التعرف",
 	"ocrReasoningEffortTip": "يتبع الإعداد الافتراضي سلوك النموذج؛ يعطل خيار بدون التفكير أو يقلله حسب دعم المزود والنموذج",
 	"mobileToolbarNoSelection": "دون تحديد نص",
 	"mobileToolbarTextSelection": "نص محدد",

@@ -17,7 +17,7 @@ export const openOCRThresholds = (
     let closed = false;
     let saving = false;
     const dialog = new Dialog({
-        title: `PaddleOCR - ${languages.configGroupAdvanced}`,
+        title: `PaddleOCR - ${languages.ocrThresholdSettings}`,
         width: isMobile() ? "92vw" : "520px",
         content: `<div class="b3-dialog__content">
 <div class="b3-label__text">${languages.ocrThresholdsTip}</div><div class="fn__hr--b"></div>

@@ -1,4 +1,5 @@
 {
+	"ocrThresholdSettings": "辨識閾值",
 	"ocrReasoningEffortTip": "預設沿用模型行為；無表示關閉或盡量減少思考，是否支援取決於提供商和模型",
 	"mobileToolbarNoSelection": "未選取文字",
 	"mobileToolbarTextSelection": "已選取文字",

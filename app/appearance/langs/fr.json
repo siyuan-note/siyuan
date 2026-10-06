@@ -1,4 +1,5 @@
 {
+	"ocrThresholdSettings": "Seuils de reconnaissance",
 	"ocrReasoningEffortTip": "Par défaut suit le comportement du modèle ; Aucun désactive ou minimise le raisonnement selon le fournisseur et le modèle",
 	"mobileToolbarNoSelection": "Aucun texte sélectionné",
 	"mobileToolbarTextSelection": "Texte sélectionné",

@@ -1,4 +1,5 @@
 {
+	"ocrThresholdSettings": "認識のしきい値",
 	"ocrReasoningEffortTip": "デフォルトはモデルの動作に従います。「なし」は思考を無効化または最小化しますが、対応状況はプロバイダーとモデルによって異なります",
 	"mobileToolbarNoSelection": "テキスト未選択",
 	"mobileToolbarTextSelection": "テキスト選択中",

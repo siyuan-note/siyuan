@@ -1,4 +1,5 @@
 {
+	"ocrThresholdSettings": "Прагови препознавања",
 	"ocrReasoningEffortTip": "Подразумевано прати понашање модела; Без искључује или своди размишљање на минимум у зависности од подршке добављача и модела",
 	"mobileToolbarNoSelection": "Без изабраног текста",
 	"mobileToolbarTextSelection": "Изабрани текст",

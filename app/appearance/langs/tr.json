@@ -1,4 +1,5 @@
 {
+	"ocrThresholdSettings": "Tanıma eşikleri",
 	"ocrReasoningEffortTip": "Varsayılan, model davranışını izler; Yok, sağlayıcı ve model desteğine göre düşünmeyi kapatır veya en aza indirir",
 	"mobileToolbarNoSelection": "Metin seçilmedi",
 	"mobileToolbarTextSelection": "Metin seçildi",

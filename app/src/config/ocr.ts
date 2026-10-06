@@ -61,8 +61,8 @@ export const registerOCRTab = (tab: SettingTabBuilder) => {
     });
     tab.group("advanced", languages.configGroupAdvanced).slot({
         key: "ocrAdvanced",
-        keywords: [languages.ocrDetectionThreshold, languages.ocrBoxThreshold, languages.ocrRecognitionThreshold],
-        html: () => genButtonRowHtml("ocrAdvanced", languages.configGroupAdvanced, undefined, languages.config, "iconSettings"),
+        keywords: [languages.ocrThresholdSettings, languages.ocrDetectionThreshold, languages.ocrBoxThreshold, languages.ocrRecognitionThreshold],
+        html: () => genButtonRowHtml("ocrAdvanced", languages.ocrThresholdSettings, undefined, languages.config, "iconSettings"),
     });
     tab.group("models", languages.ocrImportModels).slot({
         key: "ocrImportModels",

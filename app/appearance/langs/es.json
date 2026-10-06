@@ -1,4 +1,5 @@
 {
+	"ocrThresholdSettings": "Umbrales de reconocimiento",
 	"ocrReasoningEffortTip": "Predeterminado sigue el comportamiento del modelo; Ninguno desactiva o minimiza el razonamiento según el proveedor y el modelo",
 	"mobileToolbarNoSelection": "Sin texto seleccionado",
 	"mobileToolbarTextSelection": "Texto seleccionado",

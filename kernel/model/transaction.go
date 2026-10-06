@@ -128,43 +128,49 @@ func flushTx(tx *Transaction) {
 
 	start := time.Now()
 	if txErr := performTx(tx); nil != txErr {
-		switch txErr.code {
-		case TxErrCodeSkipTx:
-			// 操作已跳过，不弹状态异常
-			return
-		case TxErrCodeBlockNotFound, TxErrCodePushMsg:
-			pushMsg := txErr.msg
-			if pushMsg == "" {
-				if TxErrCodeBlockNotFound == txErr.code {
-					pushMsg = "Transaction failed: block not found"
-				} else {
-					pushMsg = "Transaction failed"
-				}
-			}
-			if txErr.id != "" && !strings.Contains(pushMsg, txErr.id) {
-				pushMsg += fmt.Sprintf(" [%s]", txErr.id)
-			}
-			util.PushTxErr(pushMsg, txErr.code, nil)
-			return
-		case TxErrCodeReloadUI:
-			logging.LogErrorf("transaction failed and requires UI reload: %s", txErr.msg)
-			util.ReloadUI()
-			return
-		case TxErrCodeDataIsSyncing:
-			util.PushMsg(Conf.Language(222), 5000)
-		case TxErrHandleAttributeView:
-			util.PushMsg(Conf.language(258), 5000)
-			logging.LogErrorf("handle attribute view failed: %s", txErr.msg)
-		default:
-			txData, _ := gulu.JSON.MarshalJSON(tx)
-			logging.LogFatalf(logging.ExitCodeFatal, "transaction failed [%d]: %s\n  tx [%s]", txErr.code, txErr.msg, txData)
-		}
+		handleTxErr(tx, txErr)
 	}
 	elapsed := time.Since(start).Milliseconds()
 	if 0 < len(tx.DoOperations) {
 		if 2000 < elapsed {
 			logging.LogWarnf("op tx [%dms]", elapsed)
 		}
+	}
+}
+
+// handleTxErr 按错误码处理事务失败：状态异常提示、界面重载或记录致命日志。
+// 异步队列与同步执行共用本函数，避免同步路径丢失界面重载和提示。
+func handleTxErr(tx *Transaction, txErr *TxErr) {
+	switch txErr.code {
+	case TxErrCodeSkipTx:
+		// 操作已跳过，不弹状态异常
+		return
+	case TxErrCodeBlockNotFound, TxErrCodePushMsg:
+		pushMsg := txErr.msg
+		if pushMsg == "" {
+			if TxErrCodeBlockNotFound == txErr.code {
+				pushMsg = "Transaction failed: block not found"
+			} else {
+				pushMsg = "Transaction failed"
+			}
+		}
+		if txErr.id != "" && !strings.Contains(pushMsg, txErr.id) {
+			pushMsg += fmt.Sprintf(" [%s]", txErr.id)
+		}
+		util.PushTxErr(pushMsg, txErr.code, nil)
+		return
+	case TxErrCodeReloadUI:
+		logging.LogErrorf("transaction failed and requires UI reload: %s", txErr.msg)
+		util.ReloadUI()
+		return
+	case TxErrCodeDataIsSyncing:
+		util.PushMsg(Conf.Language(222), 5000)
+	case TxErrHandleAttributeView:
+		util.PushMsg(Conf.language(258), 5000)
+		logging.LogErrorf("handle attribute view failed: %s", txErr.msg)
+	default:
+		txData, _ := gulu.JSON.MarshalJSON(tx)
+		logging.LogFatalf(logging.ExitCodeFatal, "transaction failed [%d]: %s\n  tx [%s]", txErr.code, txErr.msg, txData)
 	}
 }
 
@@ -178,6 +184,32 @@ func PerformTransactions(transactions *[]*Transaction) {
 	sort.SliceStable(txQueue, func(i, j int) bool {
 		return txQueue[i].Timestamp < txQueue[j].Timestamp
 	})
+}
+
+// PerformTransactionSync 先执行已排队编辑，再同步执行事务并返回实际错误，同时发送事务错误通知。
+// 主动跳过的操作保持成功语义，结构校验或提交失败仍返回错误。
+func PerformTransactionSync(transaction *Transaction) (err error) {
+	flushLock.Lock()
+	isFlushing.Store(true)
+	defer func() {
+		isFlushing.Store(false)
+		flushLock.Unlock()
+	}()
+
+	// 先处理已入队的修改，确保目标校验和执行使用一致的文档状态。
+	for _, queued := range takeQueuedTransactions() {
+		flushTx(queued)
+	}
+
+	if err = performTxSyncLocked(transaction); nil != err {
+		if txErr, ok := err.(*TxErr); ok {
+			handleTxErr(transaction, txErr)
+			if txErr.code == TxErrCodeSkipTx {
+				return nil
+			}
+		}
+	}
+	return
 }
 
 func takeQueuedTransactions() (ret []*Transaction) {

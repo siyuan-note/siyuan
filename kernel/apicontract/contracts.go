@@ -367,6 +367,8 @@ var UnfoldBlock = define[BlockIDRequest, Null]("unfoldBlock", "/api/block/unfold
 
 var FoldBlock = define[BlockIDRequest, Null]("foldBlock", "/api/block/foldBlock", JSONBody, ResponseOptions{}, "POST")
 
+// MoveBlock 同步移动块，previousID 优先于 parentID，省略 previousID 时移动到父块开头。
+// 成功和主动跳过返回 code=0、data=null；事务校验或提交失败返回 code=-1、data=null 和原因。
 var MoveBlock = define[MoveBlockRequest, Null]("moveBlock", "/api/block/moveBlock", JSONBody, ResponseOptions{}, "POST")
 
 var GetHeadingDeleteTransaction = define[BlockIDRequest, *BlockTransaction]("getHeadingDeleteTransaction", "/api/block/getHeadingDeleteTransaction", JSONBody, ResponseOptions{}, "POST")

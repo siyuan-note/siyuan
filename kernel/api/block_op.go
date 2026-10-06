@@ -469,8 +469,11 @@ var moveBlock = contractHandler(apicontract.MoveBlock, func(c *gin.Context, requ
 		},
 	}
 
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if err := model.PerformTransactionSync(transactions[0]); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return contractFailure[apicontract.Null](ret)
+	}
 
 	model.ReloadProtyle(currentBt.RootID)
 	if currentBt.RootID != targetBt.RootID {

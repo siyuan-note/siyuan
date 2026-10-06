@@ -367,6 +367,128 @@ func TestPipeToPropagatesDestinationErrorWhileWaitingForSource(t *testing.T) {
 	}
 }
 
+// 目的地一直施加背压时，源流的关闭和错误仍要传递，收尾后释放两端的锁。
+func TestPipeToSourceSettlesWhileWaitingForBackpressure(t *testing.T) {
+	rt, _ := newTestRuntime(t)
+	got := runAsync(t, rt, `
+		const results = [];
+		for (const initial of [false, true]) {
+			for (const error of [false, true]) {
+				for (const preventAbort of [false, true]) {
+					let source;
+					const log = [];
+					const rs = new ReadableStream({ start(c) {
+						source = c;
+						if (initial) {
+							if (error) c.error("source failed"); else c.close();
+						}
+					} });
+					const ws = new WritableStream({
+						abort(reason) { log.push("abort:" + reason); },
+						close() { log.push("close"); },
+					}, { highWaterMark: 0 });
+					const piping = rs.pipeTo(ws, { preventAbort });
+					if (!initial) {
+						await null;
+						if (error) source.error("source failed"); else source.close();
+					}
+					log.push(await piping.then(() => "resolved", reason => "rejected:" + reason));
+					log.push(rs.locked, ws.locked);
+					results.push(log);
+				}
+			}
+		}
+		return JSON.stringify(results);
+	`)
+	want := `[["close","resolved",false,false],["close","resolved",false,false],` +
+		`["abort:source failed","rejected:source failed",false,false],["rejected:source failed",false,false],` +
+		`["close","resolved",false,false],["close","resolved",false,false],` +
+		`["abort:source failed","rejected:source failed",false,false],["rejected:source failed",false,false]]`
+	if got != want {
+		t.Fatalf("source settlement under backpressure = %s, want %s", got, want)
+	}
+}
+
+// 源流结束时所有已提交的异步写入都要完成，preventClose 只决定是否关闭目的地，不能跳过排空或丢失写入错误。
+func TestPipeToWaitsForQueuedWrites(t *testing.T) {
+	for _, preventClose := range []bool{false, true} {
+		for _, fail := range []bool{false, true} {
+			rt, _ := newTestRuntime(t)
+			must(rt.Set("preventClose", preventClose))
+			run(t, rt, `
+				globalThis.finishWrite = null;
+				globalThis.failWrite = null;
+				globalThis.chunks = [];
+				globalThis.closed = false;
+				globalThis.rs = new ReadableStream({ start(c) { c.enqueue("first"); c.enqueue("last"); c.close(); } });
+				globalThis.ws = new WritableStream({
+					write(chunk) {
+						chunks.push(chunk);
+						return new Promise((resolve, reject) => { finishWrite = resolve; failWrite = reject; });
+					},
+					close() { closed = true; },
+				}, { highWaterMark: 3 });
+				globalThis.piping = rs.pipeTo(ws, { preventClose });
+			`)
+			promise := rt.Get("piping").Export().(*goja.Promise)
+			if promise.State() != goja.PromiseStatePending || !rt.Get("ws").ToObject(rt).Get("locked").ToBoolean() {
+				t.Fatalf("pipe settled before its first write: preventClose=%v fail=%v", preventClose, fail)
+			}
+			run(t, rt, "finishWrite();")
+			if promise.State() != goja.PromiseStatePending || run(t, rt, "JSON.stringify(chunks)").String() != `["first","last"]` {
+				t.Fatalf("pipe did not wait for its last write: preventClose=%v fail=%v", preventClose, fail)
+			}
+			if fail {
+				run(t, rt, `failWrite("write failed");`)
+				if promise.State() != goja.PromiseStateRejected || promise.Result().String() != "write failed" {
+					t.Fatalf("write failure was lost: %v %v", promise.State(), promise.Result())
+				}
+			} else {
+				run(t, rt, "finishWrite();")
+				if promise.State() != goja.PromiseStateFulfilled || rt.Get("closed").ToBoolean() == preventClose {
+					t.Fatalf("pipe did not finish correctly: preventClose=%v state=%v", preventClose, promise.State())
+				}
+			}
+			if run(t, rt, "rs.locked || ws.locked").ToBoolean() {
+				t.Fatal("pipe kept a stream locked after settlement")
+			}
+		}
+	}
+}
+
+// 源流在异步写入期间出错时先排空已提交的分块，再以源错误中止目的地。
+func TestPipeToSourceErrorDrainsQueuedWrites(t *testing.T) {
+	rt, _ := newTestRuntime(t)
+	run(t, rt, `
+		globalThis.source = null;
+		globalThis.finishWrite = null;
+		globalThis.log = [];
+		globalThis.rs = new ReadableStream({ start(c) { source = c; c.enqueue(1); c.enqueue(2); } });
+		globalThis.ws = new WritableStream({
+			write(chunk) {
+				log.push(chunk);
+				return new Promise(resolve => { finishWrite = resolve; });
+			},
+			abort(reason) { log.push("abort:" + reason); },
+		}, { highWaterMark: 3 });
+		globalThis.piping = rs.pipeTo(ws);
+	`)
+	promise := rt.Get("piping").Export().(*goja.Promise)
+	run(t, rt, `source.error("source failed");`)
+	if promise.State() != goja.PromiseStatePending || run(t, rt, "JSON.stringify(log)").String() != `[1]` {
+		t.Fatal("pipe did not wait for its pending writes before aborting")
+	}
+	run(t, rt, "finishWrite();")
+	if promise.State() != goja.PromiseStatePending || run(t, rt, "JSON.stringify(log)").String() != `[1,2]` {
+		t.Fatal("pipe did not drain its queued write")
+	}
+	run(t, rt, "finishWrite();")
+	if promise.State() != goja.PromiseStateRejected || promise.Result().String() != "source failed" ||
+		run(t, rt, "JSON.stringify(log)").String() != `[1,2,"abort:source failed"]` {
+		t.Fatalf("source error was not propagated after draining: %v %v", promise.State(), promise.Result())
+	}
+}
+
 // 目的地在 pipeTo 开始前已经关闭：即使源流没有任何数据，管道也要以 TypeError 拒绝、取消源流并释放两端的锁，
 // 不能一直等待源数据。
 func TestPipeToDestinationClosedBeforePipe(t *testing.T) {

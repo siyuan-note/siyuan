@@ -494,6 +494,47 @@ func TestPluginServiceStreamResponseBackpressure(t *testing.T) {
 	}
 }
 
+// 插件上下文取消后，等待下一块数据的流式请求必须退出，不依赖客户端断开连接。
+func TestPluginServiceStreamResponsePluginStopped(t *testing.T) {
+	p, cancel := newServiceTestPlugin(t, `globalThis.siyuan={server:{private:{http:{handler:()=>({
+		statusCode: 200,
+		body: {stream: {stream: new ReadableStream({
+			start(c) { c.enqueue("ready"); },
+			pull() { return new Promise(() => {}); },
+		}, {highWaterMark: 0})}},
+	})}}}};`)
+	defer cancel()
+
+	engine := gin.New()
+	engine.Any("/plugin/private/:name/*path", serviceTestHandler)
+	server := httptest.NewServer(engine)
+	defer server.Close()
+	client := &http.Client{Timeout: 5 * time.Second}
+	response, err := client.Get(server.URL + "/plugin/private/" + p.Name + "/pending")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	first := make([]byte, 5)
+	if _, err = io.ReadFull(response.Body, first); err != nil || string(first) != "ready" {
+		t.Fatalf("initial chunk = %q %v", first, err)
+	}
+	finished := make(chan error, 1)
+	go func() {
+		_, readErr := io.Copy(io.Discard, response.Body)
+		finished <- readErr
+	}()
+	cancel()
+	select {
+	case err = <-finished:
+		if err != nil {
+			t.Fatalf("response did not end cleanly: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("response remained open after the plugin stopped")
+	}
+}
+
 // TestPluginServiceFileConfinedToWorkspace 校验插件私有服务只能服务工作空间内的文件。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phmw-4rgv-r4xv
 func TestPluginServiceFileConfinedToWorkspace(t *testing.T) {

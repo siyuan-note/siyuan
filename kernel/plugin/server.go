@@ -346,12 +346,14 @@ func (p *KernelPlugin) writeStreamResponse(c *gin.Context, statusCode int, respo
 				select {
 				case chunks <- streamChunk{data: data}:
 				case <-c.Request.Context().Done():
+				case <-p.context.Done():
 				}
 				return nil
 			}, func(doneErr error) {
 				select {
 				case chunks <- streamChunk{done: true, err: doneErr}:
 				case <-c.Request.Context().Done():
+				case <-p.context.Done():
 				}
 			})
 			return nil, nil
@@ -359,6 +361,7 @@ func (p *KernelPlugin) writeStreamResponse(c *gin.Context, statusCode int, respo
 			select {
 			case chunks <- streamChunk{done: true, err: runErr}:
 			case <-c.Request.Context().Done():
+			case <-p.context.Done():
 			}
 		}
 	}
@@ -405,6 +408,9 @@ func (p *KernelPlugin) writeStreamResponse(c *gin.Context, statusCode int, respo
 			pullNext()
 		case <-c.Request.Context().Done():
 			cancelConsumer("client disconnected")
+			return
+		case <-p.context.Done():
+			cancelConsumer("plugin stopped")
 			return
 		}
 	}

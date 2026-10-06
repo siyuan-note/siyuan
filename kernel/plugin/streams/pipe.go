@@ -110,6 +110,8 @@ func readableStreamPipeTo(h *Host, source *readableState, destValue, optionsValu
 
 	promise, resolve, reject := rt.NewPromise()
 	var shuttingDown bool
+	var currentWrite goja.Value
+	var reading, sourceClosed bool
 
 	finalized := false
 	finalize := func(ok bool, reason goja.Value) {
@@ -134,34 +136,56 @@ func readableStreamPipeTo(h *Host, source *readableState, destValue, optionsValu
 		}
 		shuttingDown = true
 
-		actions := []func() goja.Value{}
-		if !options.preventAbort && dest.status == writableWritable {
-			actions = append(actions, func() goja.Value { return writableStreamAbort(h, dest, reason) })
-		}
-		if !options.preventCancel && source.status == statusReadable {
-			actions = append(actions, func() goja.Value { return readableStreamCancel(h, source, reason) })
-		}
-		if len(actions) == 0 {
-			finalize(ok, reason)
-			return
-		}
-		remaining := len(actions)
-		var firstErr goja.Value
-		settleOne := func(err goja.Value) {
-			remaining--
-			if err != nil && firstErr == nil {
-				firstErr = err
-			}
-			if remaining == 0 {
-				if firstErr != nil {
-					finalize(false, firstErr)
-				} else {
-					finalize(ok, reason)
+		complete := func() {
+			actions := []func() goja.Value{}
+			if ok {
+				if !options.preventClose {
+					actions = append(actions, func() goja.Value { return writableStreamClose(h, dest) })
+				}
+			} else {
+				if !options.preventAbort && dest.status == writableWritable {
+					actions = append(actions, func() goja.Value { return writableStreamAbort(h, dest, reason) })
+				}
+				if !options.preventCancel && source.status == statusReadable {
+					actions = append(actions, func() goja.Value { return readableStreamCancel(h, source, reason) })
 				}
 			}
+			if len(actions) == 0 {
+				finalize(ok, reason)
+				return
+			}
+			remaining := len(actions)
+			var firstErr goja.Value
+			settleOne := func(err goja.Value) {
+				remaining--
+				if err != nil && firstErr == nil {
+					firstErr = err
+				}
+				if remaining == 0 {
+					if firstErr != nil {
+						finalize(false, firstErr)
+					} else {
+						finalize(ok, reason)
+					}
+				}
+			}
+			for _, action := range actions {
+				awaitResult(rt, action(), func(goja.Value) { settleOne(nil) }, func(r goja.Value) { settleOne(r) })
+			}
 		}
-		for _, action := range actions {
-			awaitResult(rt, action(), func(goja.Value) { settleOne(nil) }, func(r goja.Value) { settleOne(r) })
+
+		// 写入按队列顺序完成，等待最后一次写入即可排空所有已提交的分块；收尾期间不再发起新的读取。
+		// 正常结束时写入失败要传递给调用方，错误收尾时保留先触发收尾的原因。
+		if currentWrite != nil && (ok || (dest.status == writableWritable && !writableCloseQueuedOrInFlight(dest))) {
+			awaitResult(rt, currentWrite, func(goja.Value) { complete() }, func(writeReason goja.Value) {
+				if ok {
+					ok = false
+					reason = writeReason
+				}
+				complete()
+			})
+		} else {
+			complete()
 		}
 	}
 
@@ -190,6 +214,17 @@ func readableStreamPipeTo(h *Host, source *readableState, destValue, optionsValu
 		shutdown(reason, false)
 	})
 
+	// 源流的结束和错误独立于目的地的背压通知。最后一块出队时 closed 会先于 read() 完成，
+	// 因此有挂起读取时先让读取回调提交该分块，再开始正常收尾。
+	awaitResult(rt, reader.closed.value(rt), func(goja.Value) {
+		sourceClosed = true
+		if !reading {
+			shutdown(nil, true)
+		}
+	}, func(reason goja.Value) {
+		shutdown(reason, false)
+	})
+
 	var pump func()
 	pump = func() {
 		if shuttingDown {
@@ -201,27 +236,29 @@ func readableStreamPipeTo(h *Host, source *readableState, destValue, optionsValu
 		}
 
 		readPromise, readResolve, readReject := rt.NewPromise()
+		reading = true
 		readableStreamDefaultReaderRead(h, reader, readRequest{resolve: readResolve, reject: readReject})
 		awaitResult(rt, rt.ToValue(readPromise), func(result goja.Value) {
+			reading = false
 			if shuttingDown {
 				return
 			}
 			resultObj := result.ToObject(rt)
 			if done := resultObj.Get("done"); done != nil && done.ToBoolean() {
-				if !options.preventClose {
-					awaitResult(rt, writableStreamClose(h, dest), func(goja.Value) { finalize(true, nil) },
-						func(reason goja.Value) { shutdown(reason, false) })
-				} else {
-					finalize(true, nil)
-				}
+				shutdown(nil, true)
 				return
 			}
 			// 不等待这一次 write() 落定就继续循环：真正的节流由下一轮 writer.ready 的背压信号负责，
 			// 与规范"读取和写入独立并行推进"的描述一致。
-			writePromise := writableWriterWrite(h, writer, resultObj.Get("value"))
-			awaitResult(rt, writePromise, func(goja.Value) {}, func(reason goja.Value) { shutdown(reason, false) })
-			pump()
+			currentWrite = writableWriterWrite(h, writer, resultObj.Get("value"))
+			awaitResult(rt, currentWrite, func(goja.Value) {}, func(reason goja.Value) { shutdown(reason, false) })
+			if sourceClosed {
+				shutdown(nil, true)
+			} else {
+				pump()
+			}
 		}, func(reason goja.Value) {
+			reading = false
 			shutdown(reason, false)
 		})
 	}

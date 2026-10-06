@@ -1,4 +1,5 @@
 {
+	"chatGPTTransfer": "Перенести аккаунт",
 	"chatGPTSignedOut": "Вход не выполнен; данные аккаунта сохранены для повторного входа",
 	"chatGPTAddAccount": "Добавить аккаунт",
 	"chatGPTCallbackTip": "Вернитесь в SiYuan, чтобы увидеть результат входа",

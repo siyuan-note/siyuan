@@ -25,39 +25,37 @@ export const genChatGPTAccountHTML = () => {
         ${genConfigItemMainHtml(L.chatGPTAccount, L.chatGPTPlanUsageTip)}
         <div class="fn__none" data-chatgpt="accountRow">
             <div class="fn__hr"></div>
-            <div data-chatgpt="accountInfo"></div>
-            <select class="b3-select fn__block fn__none" data-chatgpt="account" aria-label="${L.chatGPTAccount}"></select>
+            <div class="fn__flex fn__flex-wrap config-chatgpt__account">
+                <div class="config-chatgpt__info" data-chatgpt="accountInfo"></div>
+                <select class="b3-select config-chatgpt__picker fn__none" data-chatgpt="account" aria-label="${L.chatGPTAccount}"></select>
+                <div class="ft__on-surface fn__none" data-chatgpt="statusRow">
+                    <span data-chatgpt="status" role="status"></span>
+                </div>
+            </div>
         </div>
         <div class="fn__hr"></div>
-        <div class="fn__flex fn__flex-wrap">
+        <div class="fn__flex fn__flex-wrap config-chatgpt__actions">
             <button class="b3-button" data-chatgpt="login">${L.chatGPTConnect}</button>
-            <span class="fn__space"></span>
             <button class="b3-button b3-button--outline fn__none" data-chatgpt="add">${L.chatGPTAddAccount}</button>
-            <span class="fn__space"></span>
             <button class="b3-button b3-button--outline fn__none" data-chatgpt="logout">${L.logout}</button>
-            <span class="fn__space"></span>
             <button class="b3-button b3-button--outline fn__none" data-chatgpt="remove">${L.remove}</button>
-            <span class="fn__space"></span>
             <button class="b3-button b3-button--outline fn__none" data-chatgpt="usage">${L.chatGPTUsage}</button>
-            <span class="fn__space"></span>
+            <button class="b3-button b3-button--outline" data-chatgpt="transfer" aria-expanded="false">${L.chatGPTTransfer}</button>
             <button class="b3-button b3-button--cancel fn__none" data-chatgpt="cancel">${L.cancel}</button>
         </div>
-        <div class="fn__none" data-chatgpt="statusRow">
+        <div class="fn__none" data-chatgpt="transferPanel">
             <div class="fn__hr"></div>
-            <div class="ft__on-surface" data-chatgpt="status"></div>
-        </div>
-        <div class="fn__hr"></div>
-        <div class="ft__on-surface">${L.chatGPTRemoteTip}</div>
-        <div class="fn__hr"></div>
-        <label class="fn__flex">${L.password}<span class="fn__space"></span><input class="b3-text-field fn__flex-1" data-chatgpt="password" type="password" minlength="12" autocomplete="new-password"></label>
-        <div class="fn__hr"></div>
-        <div class="ft__on-surface">${L.chatGPTTransferTip}</div>
-        <div class="fn__hr"></div>
-        <div class="fn__flex fn__flex-wrap">
-            <button class="b3-button b3-button--outline" data-chatgpt="export">${L.export}</button>
-            <span class="fn__space"></span>
-            <button class="b3-button b3-button--outline" data-chatgpt="import">${L.import}</button>
-            <input class="fn__none" data-chatgpt="file" type="file" accept=".json">
+            <div class="ft__on-surface">${L.chatGPTRemoteTip}</div>
+            <div class="fn__hr"></div>
+            <label class="fn__flex">${L.password}<span class="fn__space"></span><input class="b3-text-field fn__flex-1" data-chatgpt="password" type="password" minlength="12" autocomplete="new-password"></label>
+            <div class="fn__hr"></div>
+            <div class="ft__on-surface">${L.chatGPTTransferTip}</div>
+            <div class="fn__hr"></div>
+            <div class="fn__flex fn__flex-wrap config-chatgpt__actions">
+                <button class="b3-button b3-button--outline" data-chatgpt="export">${L.export}</button>
+                <button class="b3-button b3-button--outline" data-chatgpt="import">${L.import}</button>
+                <input class="fn__none" data-chatgpt="file" type="file" accept=".json">
+            </div>
         </div>
     </div>`;
 };
@@ -69,6 +67,8 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
     const password = root.querySelector<HTMLInputElement>("[data-chatgpt='password']");
     const fileInput = root.querySelector<HTMLInputElement>("[data-chatgpt='file']");
     const status = root.querySelector<HTMLElement>("[data-chatgpt='status']");
+    const transferButton = root.querySelector<HTMLButtonElement>("[data-chatgpt='transfer']");
+    const transferPanel = root.querySelector<HTMLElement>("[data-chatgpt='transferPanel']");
     const L = window.siyuan.languages;
     let profiles: ChatGPTAccount[] = [];
     let attemptID = "";
@@ -76,11 +76,14 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
     let exportedFile = "";
     let timer: number;
     let disposed = false;
+    let transferOpen = false;
+    transferPanel.classList.toggle("fn__none", true);
+    transferButton.setAttribute("aria-expanded", "false");
     const accountLabel = (account: ChatGPTAccount) =>
         (account.email || account.name || "ChatGPT") + " (" + account.id.slice(-8) + ")";
     const update = () => {
         const selected = profiles.find(item => item.id === draft.accountID);
-        root.querySelector<HTMLElement>("[data-chatgpt='accountRow']").classList.toggle("fn__none", profiles.length === 0);
+        root.querySelector<HTMLElement>("[data-chatgpt='accountRow']").classList.toggle("fn__none", profiles.length === 0 && !attemptID);
         const accountInfo = root.querySelector<HTMLElement>("[data-chatgpt='accountInfo']");
         accountInfo.textContent = profiles.length === 1 ? accountLabel(profiles[0]) : "";
         accountInfo.classList.toggle("fn__none", profiles.length !== 1);
@@ -95,6 +98,7 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
         const cancel = root.querySelector<HTMLButtonElement>("[data-chatgpt='cancel']");
         cancel.classList.toggle("fn__none", !attemptID);
         cancel.disabled = busy;
+        root.querySelector<HTMLButtonElement>("[data-chatgpt='login']").classList.toggle("fn__none", !!selected?.sharing);
         root.querySelector<HTMLButtonElement>("[data-chatgpt='add']").classList.toggle("fn__none", profiles.length === 0);
         root.querySelector<HTMLButtonElement>("[data-chatgpt='logout']").classList.toggle("fn__none", !selected?.connected);
         root.querySelector<HTMLButtonElement>("[data-chatgpt='remove']").classList.toggle("fn__none", !selected);
@@ -168,6 +172,12 @@ export const mountChatGPTAccount = (view: HTMLElement, draft: Config.IProvider, 
         const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-chatgpt]");
         if (!button || button.disabled) { return; }
         const action = button.dataset.chatgpt;
+        if (action === "transfer") {
+            transferOpen = !transferOpen;
+            transferPanel.classList.toggle("fn__none", !transferOpen);
+            transferButton.setAttribute("aria-expanded", String(transferOpen));
+            return;
+        }
         if (action === "usage") { openExternal("https://chatgpt.com/settings/usage"); return; }
         if (action === "cancel") { stop(); update(); return; }
         if (action === "import") { if (transferPassword()) { fileInput.click(); } return; }

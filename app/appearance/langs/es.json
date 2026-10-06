@@ -1,4 +1,5 @@
 {
+	"chatGPTTransfer": "Transferir cuenta",
 	"chatGPTSignedOut": "No has iniciado sesión; se conserva la información de la cuenta para volver a iniciar sesión",
 	"chatGPTAddAccount": "Añadir cuenta",
 	"chatGPTCallbackTip": "Vuelva a SiYuan para ver el resultado del inicio de sesión",

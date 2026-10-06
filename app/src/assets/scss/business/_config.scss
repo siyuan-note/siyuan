@@ -1,3 +1,21 @@
+.config-chatgpt__actions,
+.config-chatgpt__account {
+  gap: 8px;
+}
+
+.config-chatgpt__account {
+  align-items: center;
+}
+
+.config-chatgpt__info {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.config-chatgpt__picker {
+  max-width: 100%;
+}
+
 .workspace-storage {
   &__header {
     flex-wrap: wrap;

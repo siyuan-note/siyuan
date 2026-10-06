@@ -12,10 +12,12 @@ class Control {
     isConnected = true;
     files: Array<{size: number; text: () => Promise<string>}> = [];
     dataset: Record<string, string> = {};
+    attributes: Record<string, string> = {};
     listeners = new Map<string, (event: {target: Control}) => void | Promise<void>>();
     classes = new Set<string>();
     classList = {toggle: (name: string, force: boolean) => { if (force) { this.classes.add(name); } else { this.classes.delete(name); } }};
     addEventListener(name: string, handler: (event: {target: Control}) => void | Promise<void>) { this.listeners.set(name, handler); }
+    setAttribute(name: string, value: string) { this.attributes[name] = value; }
     closest() { return this; }
     focus() {}
     click() {}
@@ -25,12 +27,12 @@ const account = (id = "account-one", email = "user@example.com") => ({id, email,
 
 const fixture = (remote = false, initialProfiles = [account()], accountID = "") => {
     const controls: Record<string, Control> = {};
-    for (const name of ["accountRow", "accountInfo", "account", "password", "file", "statusRow", "status", "login", "add", "logout", "remove", "usage", "cancel", "export", "import"]) {
+    for (const name of ["accountRow", "accountInfo", "account", "password", "file", "statusRow", "status", "login", "add", "logout", "remove", "usage", "transfer", "transferPanel", "cancel", "export", "import"]) {
         controls[name] = new Control();
         controls[name].dataset.chatgpt = name;
     }
     const root = new Control();
-    const buttons = ["login", "add", "logout", "remove", "usage", "cancel", "export", "import"].map(name => controls[name]);
+    const buttons = ["login", "add", "logout", "remove", "usage", "transfer", "cancel", "export", "import"].map(name => controls[name]);
     Object.assign(root, {
         querySelector: (selector: string) => controls[selector.match(/data-chatgpt='([^']+)'/)![1]],
         querySelectorAll: () => buttons,
@@ -115,6 +117,7 @@ test("no saved accounts show login without an account picker or repeated login t
         assert.equal(f.controls[name].classes.has("fn__none"), true);
     }
     assert.equal(f.controls.login.disabled, false);
+    assert.equal(f.controls.login.classes.has("fn__none"), false);
     assert.equal(f.ready.at(-1), false);
 });
 
@@ -184,6 +187,7 @@ test("a single saved account is selected and displayed as text", () => {
     assert.equal(f.draft.accountID, "account-one");
     assert.equal(f.draft.models.length, 0);
     assert.equal(f.ready.at(-1), true);
+    assert.equal(f.controls.login.classes.has("fn__none"), true);
 });
 
 test("reopening a selected single account preserves its models", () => {
@@ -200,6 +204,7 @@ test("logging out shows the signed-out state and retains the registration for si
     assert.equal(f.controls.logout.classes.has("fn__none"), true);
     assert.equal(f.controls.export.disabled, true);
     assert.equal(f.controls.login.disabled, false);
+    assert.equal(f.controls.login.classes.has("fn__none"), false);
     assert.equal(f.draft.accountID, "account-one");
     assert.equal(f.ready.at(-1), false);
     await f.root.listeners.get("click")!({target: f.controls.login});
@@ -219,6 +224,18 @@ test("an account without plan permission is shown as requiring authorization", (
     assert.equal(f.controls.status.textContent, "Authorization required");
     assert.equal(f.controls.logout.classes.has("fn__none"), false);
     assert.equal(f.ready.at(-1), false);
+    assert.equal(f.controls.login.classes.has("fn__none"), false);
+});
+
+test("switching between connected and signed-out accounts updates login visibility", async () => {
+    const f = fixture(false, [account(), {...account("account-two"), connected: false, sharing: false}], "account-one");
+    assert.equal(f.controls.login.classes.has("fn__none"), true);
+    f.controls.account.value = "account-two";
+    await f.controls.account.listeners.get("change")!({target: f.controls.account});
+    assert.equal(f.controls.login.classes.has("fn__none"), false);
+    f.controls.account.value = "account-one";
+    await f.controls.account.listeners.get("change")!({target: f.controls.account});
+    assert.equal(f.controls.login.classes.has("fn__none"), true);
 });
 
 test("multiple saved accounts show a picker and switching clears the previous models", async () => {
@@ -238,6 +255,7 @@ test("logging in adds the first account and replaces the empty state with accoun
     const f = fixture(false, []);
     await f.root.listeners.get("click")!({target: f.controls.login});
     assert.equal(f.controls.statusRow.classes.has("fn__none"), false);
+    assert.equal(f.controls.accountRow.classes.has("fn__none"), false);
     for (const callback of [...f.timers.values()]) { callback(); }
     f.profiles.push(account());
     await f.finish({code: 0, data: {state: "completed", accountID: "account-one"}});
@@ -246,6 +264,7 @@ test("logging in adds the first account and replaces the empty state with accoun
     assert.equal(f.controls.accountInfo.textContent, "user@example.com (ount-one)");
     assert.equal(f.draft.accountID, "account-one");
     assert.equal(f.ready.at(-1), true);
+    assert.equal(f.controls.login.classes.has("fn__none"), true);
 });
 
 test("importing another account shows the picker with the imported account selected", async () => {
@@ -273,8 +292,26 @@ test("remote account settings offer import and retain account selection", async 
     assert.equal(f.ready.at(-1), true);
 });
 
+test("account transfer stays collapsed by default and can be toggled on local and remote kernels", async () => {
+    for (const remote of [false, true]) {
+        const f = fixture(remote);
+        assert.equal(f.controls.transferPanel.classes.has("fn__none"), true);
+        assert.equal(f.controls.transfer.attributes["aria-expanded"], "false");
+        assert.equal(f.controls.transfer.disabled, false);
+        const calls = f.calls.length;
+        await f.root.listeners.get("click")!({target: f.controls.transfer});
+        assert.equal(f.controls.transferPanel.classes.has("fn__none"), false);
+        assert.equal(f.controls.transfer.attributes["aria-expanded"], "true");
+        assert.equal(f.controls.import.disabled, false);
+        await f.root.listeners.get("click")!({target: f.controls.transfer});
+        assert.equal(f.controls.transferPanel.classes.has("fn__none"), true);
+        assert.equal(f.controls.transfer.attributes["aria-expanded"], "false");
+        assert.equal(f.calls.length, calls);
+    }
+});
+
 test("closing account settings cancels login and ignores a late callback", async () => {
-    const f = fixture();
+    const f = fixture(false, [{...account(), connected: false, sharing: false}]);
     await Promise.resolve();
     await f.root.listeners.get("click")!({target: f.controls.login});
     assert.equal(f.browserWindow.location.href, "https://auth.openai.com/authorize");
@@ -287,7 +324,7 @@ test("closing account settings cancels login and ignores a late callback", async
 });
 
 test("an old login result cannot replace a newer login attempt", async () => {
-    const f = fixture();
+    const f = fixture(false, [{...account(), connected: false, sharing: false}]);
     await Promise.resolve();
     await f.root.listeners.get("click")!({target: f.controls.login});
     for (const callback of [...f.timers.values()]) { callback(); }

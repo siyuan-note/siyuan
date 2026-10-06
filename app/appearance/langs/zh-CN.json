@@ -1,4 +1,5 @@
 {
+	"chatGPTTransfer": "账户转移",
 	"chatGPTSignedOut": "未登录，保留账户信息以便重新登录",
 	"chatGPTAddAccount": "添加账户",
 	"chatGPTCallbackTip": "请返回思源查看登录结果",

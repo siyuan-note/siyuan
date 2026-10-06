@@ -1,4 +1,5 @@
 {
+	"chatGPTTransfer": "Transfer account",
 	"chatGPTSignedOut": "Not signed in; account info is kept for signing in again",
 	"chatGPTAddAccount": "Add account",
 	"chatGPTCallbackTip": "Return to SiYuan to view the sign-in result",

@@ -95,6 +95,7 @@ type attributeViewItemCreationOptions struct {
 	templateTime    time.Time
 	primaryFallback string
 	expectedPrimary string
+	primaryOverride *string
 	operations      func(string) (do, undo []*Operation)
 }
 
@@ -141,6 +142,15 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	}
 	if options != nil && preview.PrimaryKey != options.expectedPrimary {
 		return nil, errors.New("new item template preview changed")
+	}
+	if options != nil && options.primaryOverride != nil {
+		preview.PrimaryKey = *options.primaryOverride
+		if av.NewItemTargetDocument == itemTemplate.TargetType {
+			preview, err = resolveAttributeViewItemDocument(blockID, *options.primaryOverride, itemTemplate, renderAt)
+			if nil != err {
+				return nil, err
+			}
+		}
 	}
 	for _, prunedOption := range prunedOptions {
 		if templateID == prunedOption.TemplateID {

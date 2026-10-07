@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "${x}에 기본 템플릿으로 새로 만들기: <b>${y}</b>",
+	"newRelationItemWithInputName": "${x}에 입력한 이름으로 새로 만들기: <b>${y}</b>",
 	"parentDocDoubleClickOpen": "제목을 두 번 클릭하여 상위 문서 열기",
 	"parentDocDoubleClickOpenTip": "활성화하면 제목을 두 번 클릭하거나 탭하여 펼침 상태를 유지한 채 상위 문서를 엽니다. 한 번 클릭하거나 탭하면 두 번 클릭인지 판단하기 위해 약 300밀리초 기다립니다. 비활성화하면 한 번 클릭하거나 탭하여 하위 문서를 바로 펼치거나 접습니다",
 	"decisionSaveFailed": "의사결정 서비스 설정을 저장할 수 없습니다. 작성 중인 내용은 유지됩니다",

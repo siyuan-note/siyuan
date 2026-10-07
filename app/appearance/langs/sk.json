@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "Vytvoriť s predvolenou šablónou v ${x}: <b>${y}</b>",
+	"newRelationItemWithInputName": "Vytvoriť so zadaným názvom v ${x}: <b>${y}</b>",
 	"parentDocDoubleClickOpen": "Otvoriť nadradený dokument dvojklikom na názov",
 	"parentDocDoubleClickOpenTip": "Po zapnutí dvojklik alebo dvojité ťuknutie na názov otvorí nadradený dokument bez zmeny stavu rozbalenia; jedno kliknutie alebo ťuknutie čaká približne 300 ms na rozpoznanie dvojkliku. Po vypnutí jedno kliknutie alebo ťuknutie priamo rozbalí alebo zbalí podradené dokumenty",
 	"decisionSaveFailed": "Nastavenia rozhodovacej služby sa nepodarilo uložiť; koncept zostal zachovaný",

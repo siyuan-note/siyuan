@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "Met standaardsjabloon maken in ${x}: <b>${y}</b>",
+	"newRelationItemWithInputName": "Met ingevoerde naam maken in ${x}: <b>${y}</b>",
 	"parentDocDoubleClickOpen": "Bovenliggend document openen met een dubbelklik op de titel",
 	"parentDocDoubleClickOpenTip": "Als dit is ingeschakeld, opent een dubbelklik of dubbele tik op de titel het bovenliggende document zonder de uitvouwstatus te wijzigen; een enkele klik of tik wacht ongeveer 300 ms om een dubbelklik te herkennen. Als dit is uitgeschakeld, vouwt een enkele klik of tik de onderliggende documenten direct uit of in",
 	"decisionSaveFailed": "De instellingen van de beslissingsdienst konden niet worden opgeslagen; uw concept is bewaard",

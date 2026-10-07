@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "Mit Standardvorlage in ${x} erstellen: <b>${y}</b>",
+	"newRelationItemWithInputName": "Mit eingegebenem Namen in ${x} erstellen: <b>${y}</b>",
 	"parentDocDoubleClickOpen": "Über einen Doppelklick auf den Titel das übergeordnete Dokument öffnen",
 	"parentDocDoubleClickOpenTip": "Wenn aktiviert, öffnet ein Doppelklick oder Doppeltippen auf den Titel das übergeordnete Dokument ohne Änderung des Aufklappzustands; ein einzelner Klick oder Tipp wartet etwa 300 ms zur Doppelklickerkennung. Wenn deaktiviert, klappt ein einzelner Klick oder Tipp die untergeordneten Dokumente direkt auf oder zu",
 	"decisionSaveFailed": "Die Einstellungen des Entscheidungsdienstes konnten nicht gespeichert werden; Ihr Entwurf bleibt erhalten",

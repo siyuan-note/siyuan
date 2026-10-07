@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "Buat dengan templat bawaan di ${x}: <b>${y}</b>",
+	"newRelationItemWithInputName": "Buat dengan nama yang dimasukkan di ${x}: <b>${y}</b>",
 	"parentDocDoubleClickOpen": "Buka dokumen induk dengan klik ganda pada judul",
 	"parentDocDoubleClickOpenTip": "Jika diaktifkan, klik atau ketuk dua kali pada judul membuka dokumen induk tanpa mengubah status perluasannya; satu klik atau ketukan menunggu sekitar 300 ms untuk mengenali klik ganda. Jika dinonaktifkan, satu klik atau ketukan langsung memperluas atau menciutkan dokumen anak",
 	"decisionSaveFailed": "Tidak dapat menyimpan pengaturan layanan keputusan; draf Anda tetap tersedia",

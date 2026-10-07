@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "Create with default template in ${x}: <b>${y}</b>",
+	"newRelationItemWithInputName": "Create with input name in ${x}: <b>${y}</b>",
 	"parentDocDoubleClickOpen": "Double-click a title to open the parent document",
 	"parentDocDoubleClickOpenTip": "When enabled, double-click or double-tap a title to open the parent without changing its expansion state; a single click or tap waits about 300 ms to distinguish a double click. When disabled, a single click or tap directly expands or collapses child documents",
 	"decisionSaveFailed": "Unable to save the decision service settings; your draft is still available",

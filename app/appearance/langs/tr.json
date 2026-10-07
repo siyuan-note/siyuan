@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "${x} içinde varsayılan şablonla oluştur: <b>${y}</b>",
+	"newRelationItemWithInputName": "${x} içinde girilen adla oluştur: <b>${y}</b>",
 	"parentDocDoubleClickOpen": "Üst belgeyi başlığa çift tıklayarak aç",
 	"parentDocDoubleClickOpenTip": "Etkinleştirildiğinde başlığa çift tıklamak veya çift dokunmak, genişletme durumunu değiştirmeden üst belgeyi açar; tek tıklama veya dokunma, çift tıklamayı ayırt etmek için yaklaşık 300 ms bekler. Devre dışı bırakıldığında tek tıklama veya dokunma alt belgeleri doğrudan genişletir veya daraltır",
 	"decisionSaveFailed": "Karar hizmeti ayarları kaydedilemedi; taslağınız korunuyor",

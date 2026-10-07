@@ -97,9 +97,12 @@ func TestAttributeViewRelationItemEncrypted(t *testing.T) {
 		t.Fatalf("encrypted preview: %+v", preview)
 	}
 	cells := []*AttributeViewRelationItemCell{{ItemID: fixture.itemIDs[0]}}
-	created, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "Input", cells, preview)
+	created, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "Input", cells, preview, true)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if created.Content != "Input" {
+		t.Fatalf("encrypted input name not applied: %+v", created)
 	}
 	for _, operations := range [][]*Operation{created.Transaction.UndoOperations, created.Transaction.DoOperations} {
 		if err = PerformTxSync(&Transaction{DoOperations: cloneOperations(operations), isReplay: true}); err != nil {
@@ -163,7 +166,7 @@ func TestAttributeViewRelationItemEncrypted(t *testing.T) {
 			if p := PreviewAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "Input"); p.Error == "" {
 				t.Fatal("inaccessible encrypted preview succeeded")
 			}
-			if _, err = CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "Input", cells, preview); err == nil {
+			if _, err = CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "Input", cells, preview, false); err == nil {
 				t.Fatal("inaccessible encrypted creation succeeded")
 			}
 			for path, before := range paths {

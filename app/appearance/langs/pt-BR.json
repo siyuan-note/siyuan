@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "Criar com o modelo padrão em ${x}: <b>${y}</b>",
+	"newRelationItemWithInputName": "Criar com o nome digitado em ${x}: <b>${y}</b>",
 	"parentDocDoubleClickOpen": "Abrir o documento pai com um clique duplo no título",
 	"parentDocDoubleClickOpenTip": "Quando ativado, um clique duplo ou toque duplo no título abre o documento pai sem alterar seu estado de expansão; um clique ou toque simples aguarda cerca de 300 ms para identificar o clique duplo. Quando desativado, um clique ou toque simples expande ou recolhe diretamente os documentos filhos",
 	"decisionSaveFailed": "Não foi possível salvar as configurações do serviço de decisão; seu rascunho foi mantido",

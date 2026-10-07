@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "Crear con la plantilla predeterminada en ${x}: <b>${y}</b>",
+	"newRelationItemWithInputName": "Crear con el nombre introducido en ${x}: <b>${y}</b>",
 	"parentDocDoubleClickOpen": "Abrir el documento padre al hacer doble clic en el título",
 	"parentDocDoubleClickOpenTip": "Al activar esta opción, un doble clic o doble toque en el título abre el documento padre sin cambiar su estado de expansión; un clic o toque espera unos 300 ms para detectar el doble clic. Al desactivarla, un clic o toque expande o contrae directamente los documentos hijos",
 	"decisionSaveFailed": "No se pudo guardar la configuración del servicio de decisión; el borrador se conserva",

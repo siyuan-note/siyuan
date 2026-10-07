@@ -10319,6 +10319,12 @@
         "error": {
           "type": "string"
         },
+        "hasPrimaryKeyTemplate": {
+          "type": "boolean"
+        },
+        "inputPrimaryKey": {
+          "type": "string"
+        },
         "primaryKey": {
           "type": "string"
         },
@@ -10328,6 +10334,7 @@
       },
       "required": [
         "createdAt",
+        "inputPrimaryKey",
         "primaryKey",
         "templateID"
       ],
@@ -10340,6 +10347,26 @@
           "type": "integer"
         },
         "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hasPrimaryKeyTemplate": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inputPrimaryKey": {
           "anyOf": [
             {
               "type": "string"
@@ -20948,6 +20975,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "useInputName": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

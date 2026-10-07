@@ -229,14 +229,16 @@ type CreateAttributeViewItemRequest struct {
 // preview 来自 includeNewItemPreview 候选查询，解析时间最多保留五分钟；默认模板 ID 或名称变化时拒绝写入。
 // 不可用保存笔记本返回 code 1 和 unavailableNotebook；其他失败返回 code -1，保留原数据。
 type CreateAttributeViewRelationItemRequest struct {
-	AvID    string                 `json:"avID" api:"trim"`
-	BlockID string                 `json:"blockID" api:"trim"`
-	KeyID   string                 `json:"keyID" api:"trim"`
-	Keyword string                 `json:"keyword" api:"optional,nullable"`
-	Cells   []*AVRelationItemCell  `json:"cells"`
-	Preview *AVRelationItemPreview `json:"preview"`
-	App     string                 `json:"app" api:"optional,nullable"`
-	Session string                 `json:"session" api:"optional,nullable"`
+	// useInputName 为 true 时只用非空 keyword 覆盖主键，其他默认模板配置仍然生效；省略时使用模板名称。
+	UseInputName bool                   `json:"useInputName" api:"optional,nullable"`
+	AvID         string                 `json:"avID" api:"trim"`
+	BlockID      string                 `json:"blockID" api:"trim"`
+	KeyID        string                 `json:"keyID" api:"trim"`
+	Keyword      string                 `json:"keyword" api:"optional,nullable"`
+	Cells        []*AVRelationItemCell  `json:"cells"`
+	Preview      *AVRelationItemPreview `json:"preview"`
+	App          string                 `json:"app" api:"optional,nullable"`
+	Session      string                 `json:"session" api:"optional,nullable"`
 }
 
 type AVRelationItemCell struct {
@@ -246,10 +248,14 @@ type AVRelationItemCell struct {
 
 // 默认模板 ID、解析后的主键和解析时间；error 非空时只能选择已有条目，不能确认新建。
 type AVRelationItemPreview struct {
-	TemplateID string `json:"templateID"`
-	PrimaryKey string `json:"primaryKey"`
-	CreatedAt  int64  `json:"createdAt"`
-	Error      string `json:"error,omitempty" api:"optional,nullable"`
+	// 输入名称经过目标条目的标题规则解析后的主键，供新建入口展示实际名称。
+	InputPrimaryKey string `json:"inputPrimaryKey" api:"optional,nullable"`
+	// 是否配置主键模板，用于在模板名称与输入不同时展示两个新建入口。
+	HasPrimaryKeyTemplate bool   `json:"hasPrimaryKeyTemplate,omitempty" api:"optional,nullable"`
+	TemplateID            string `json:"templateID"`
+	PrimaryKey            string `json:"primaryKey"`
+	CreatedAt             int64  `json:"createdAt"`
+	Error                 string `json:"error,omitempty" api:"optional,nullable"`
 }
 
 type CreateAttributeViewItemWithMarkdownRequest struct {

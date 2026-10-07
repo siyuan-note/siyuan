@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "Créer avec le modèle par défaut dans ${x} : <b>${y}</b>",
+	"newRelationItemWithInputName": "Créer avec le nom saisi dans ${x} : <b>${y}</b>",
 	"parentDocDoubleClickOpen": "Double-cliquer sur le titre pour ouvrir le document parent",
 	"parentDocDoubleClickOpenTip": "Lorsque cette option est activée, un double-clic ou un double appui sur le titre ouvre le document parent sans modifier son état de déploiement ; un clic ou appui simple attend environ 300 ms pour détecter un double-clic. Lorsqu’elle est désactivée, un clic ou appui simple développe ou réduit directement les documents enfants",
 	"decisionSaveFailed": "Impossible d’enregistrer les paramètres du service de décision ; votre brouillon est conservé",

@@ -31,6 +31,24 @@ func TestAVRequestCompatibility(t *testing.T) {
 	}
 }
 
+func TestAVRelationItemNameChoiceCompatibility(t *testing.T) {
+	base := `"avID":"av","blockID":"block","keyID":"key","keyword":"Input","cells":[],"preview":{"templateID":"template","primaryKey":"Template","createdAt":123}`
+	for _, test := range []struct {
+		field string
+		want  bool
+	}{
+		{"", false}, {`,"useInputName":false`, false}, {`,"useInputName":null`, false}, {`,"useInputName":true`, true},
+	} {
+		request, err := CreateAttributeViewRelationItem.Decode(strings.NewReader(`{` + base + test.field + `}`))
+		if err != nil || request.UseInputName != test.want {
+			t.Fatalf("name choice compatibility: %+v %v", request, err)
+		}
+	}
+	if _, err := CreateAttributeViewRelationItem.Decode(strings.NewReader(`{` + base + `,"useInputName":"true"}`)); err == nil {
+		t.Fatal("invalid name choice accepted")
+	}
+}
+
 func TestAVValuePatchPresence(t *testing.T) {
 	for _, patch := range []string{`{}`, `{"text":{}}`, `{"text":{"content":""}}`, `{"text":null}`, `{"TEXT":{"CONTENT":"x"},"unknown":{"keep":true}}`} {
 		request, err := SetAttributeViewBlockAttr.Decode(strings.NewReader(`{"avID":"av","keyID":"key","itemID":"item","value":` + patch + `}`))

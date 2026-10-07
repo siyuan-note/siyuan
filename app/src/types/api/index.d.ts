@@ -384,9 +384,9 @@ export type AVRelationCandidatesData = { "blockIDs": Array<string> | null; "colu
 
 export type AVRelationItemCellInput = { "itemID": string; "relatedItemIDs": Array<string>; };
 
-export type AVRelationItemPreview = { "createdAt": number; "error"?: string; "primaryKey": string; "templateID": string; };
+export type AVRelationItemPreview = { "createdAt": number; "error"?: string; "hasPrimaryKeyTemplate"?: boolean; "inputPrimaryKey": string; "primaryKey": string; "templateID": string; };
 
-export type AVRelationItemPreviewInput = { "createdAt": number; "error"?: string | null; "primaryKey": string; "templateID": string; };
+export type AVRelationItemPreviewInput = { "createdAt": number; "error"?: string | null; "hasPrimaryKeyTemplate"?: boolean | null; "inputPrimaryKey"?: string | null; "primaryKey": string; "templateID": string; };
 
 export type AVRelativeDate = { "count": number; "direction": number; "unit": number; };
 
@@ -852,7 +852,7 @@ export type CreateAttributeViewItemRequestInput = { "app"?: string | null; "avID
 
 export type CreateAttributeViewItemWithMarkdownRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "clippingHref"?: string | null; "groupID"?: string | null; "listDocTree"?: boolean | null; "markdown": string; "previousID"?: string | null; "session"?: string | null; "tags"?: string | null; "templateID": string; "title": string; "viewID"?: string | null; "withMath"?: boolean | null; };
 
-export type CreateAttributeViewRelationItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "cells": Array<AVRelationItemCellInput | null>; "keyID": string; "keyword"?: string | null; "preview": AVRelationItemPreviewInput | null; "session"?: string | null; };
+export type CreateAttributeViewRelationItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "cells": Array<AVRelationItemCellInput | null>; "keyID": string; "keyword"?: string | null; "preview": AVRelationItemPreviewInput | null; "session"?: string | null; "useInputName"?: boolean | null; };
 
 export type CreateDocHistoryRequestInput = { "id": string; };
 

@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "在 ${x} 中按默认模板新建：<b>${y}</b>",
+	"newRelationItemWithInputName": "在 ${x} 中使用输入名称新建：<b>${y}</b>",
 	"parentDocDoubleClickOpen": "双击标题打开父文档",
 	"parentDocDoubleClickOpenTip": "启用后双击标题打开父文档并保持展开或折叠状态，单击需等待约 300 毫秒以判断是否双击；关闭后单击直接展开或折叠下级文档",
 	"decisionSaveFailed": "保存决策服务配置失败，草稿已保留",

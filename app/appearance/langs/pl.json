@@ -1,4 +1,6 @@
 {
+	"newRelationItemWithTemplate": "Utwórz z domyślnym szablonem w ${x}: <b>${y}</b>",
+	"newRelationItemWithInputName": "Utwórz z wpisaną nazwą w ${x}: <b>${y}</b>",
 	"parentDocDoubleClickOpen": "Otwieraj dokument nadrzędny po dwukrotnym kliknięciu tytułu",
 	"parentDocDoubleClickOpenTip": "Po włączeniu dwukrotne kliknięcie lub stuknięcie tytułu otwiera dokument nadrzędny bez zmiany stanu rozwinięcia; pojedyncze kliknięcie lub stuknięcie czeka około 300 ms na rozpoznanie podwójnego kliknięcia. Po wyłączeniu pojedyncze kliknięcie lub stuknięcie bezpośrednio rozwija lub zwija dokumenty podrzędne",
 	"decisionSaveFailed": "Nie można zapisać ustawień usługi decyzyjnej; wersja robocza została zachowana",

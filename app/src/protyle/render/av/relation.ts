@@ -506,11 +506,18 @@ const genRelationFooterHTML = (menuElement: HTMLElement, keyword: string) => {
     const refElement = menuElement.querySelector(".popover__block");
     const databaseName = `<span style="color: var(--b3-protyle-inline-blockref-color);" class="popover__block"
 data-id="${escapeAttr(refElement?.getAttribute("data-id") || "")}">${escapeHtml(refElement?.textContent || "")}</span>`;
-    return `<button class="b3-menu__item av__relation-table-footer" data-type="setRelationCell" data-relation-type="create"
+    const inputName = preview?.inputPrimaryKey ?? keyword.trim();
+    const hasNameChoice = preview?.hasPrimaryKeyTemplate && keyword.trim() && inputName !== content;
+    const genButton = (label: string, name: string, useInputName = false) => `<button class="b3-menu__item av__relation-table-footer" data-type="setRelationCell" data-relation-type="create" data-use-input-name="${useInputName}"
 ${!preview || preview.error || creating ? "disabled" : ""} title="${escapeAttr(preview?.error || "")}">
-    <span class="b3-menu__label fn__ellipsis">${window.siyuan.languages.newRowInRelation.replace("${x}", databaseName).
-        replace("${y}", escapeHtmlTextAndAttr(content || window.siyuan.languages.untitled))}</span>
+    <span class="b3-menu__label fn__ellipsis">${label.replace("${x}", databaseName).
+        replace("${y}", escapeHtmlTextAndAttr(name || window.siyuan.languages.untitled))}</span>
 </button>`;
+    if (hasNameChoice) {
+        return genButton(window.siyuan.languages.newRelationItemWithTemplate, content) +
+            genButton(window.siyuan.languages.newRelationItemWithInputName, inputName, true);
+    }
+    return genButton(window.siyuan.languages.newRowInRelation, content);
 };
 
 const genRelationLoaderHTML = (loading: boolean, visible = loading) => {
@@ -679,7 +686,7 @@ export const bindRelationEvent = (options: {
         });
     };
     const renderFooter = () => {
-        listElement.querySelector('[data-relation-type="create"], [data-relation-type="empty"]')?.remove();
+        listElement.querySelectorAll('[data-relation-type="create"], [data-relation-type="empty"]').forEach(element => element.remove());
         const more = hasMore();
         listElement.dataset.hasMore = more.toString();
         const footerHTML = genRelationFooterHTML(options.menuElement, state.keyword);
@@ -1083,13 +1090,15 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                 return;
             }
             relationElement.dataset.creating = "true";
+            const useInputName = target.dataset.useInputName === "true";
             target.setAttribute("disabled", "");
             try {
                 // 用临时 ID 计算批量关系合并结果，仅成功创建后更新面板。
                 const pendingID = Lute.NewNodeID();
                 const value = getRelationValue(menuElement);
                 value.blockIDs.push(pendingID);
-                value.contents.push({type: "block", block: {content: entry.preview.primaryKey}, isDetached: true});
+                value.contents.push({type: "block", block: {content: useInputName ?
+                    (entry.preview.inputPrimaryKey ?? entry.keyword.trim()) : entry.preview.primaryKey}, isDetached: true});
                 const operations = await updateCellsValue(protyle, nodeElement, value, cellElements,
                     null, null, true, false, false, undefined, false);
                 const cells: AVRelationItemCellInput[] = [];
@@ -1107,6 +1116,7 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                     blockID: nodeElement.dataset.nodeId,
                     keyID: relationElement.dataset.keyId,
                     keyword: entry.keyword,
+                    useInputName,
                     cells,
                     preview: entry.preview,
                     app: protyle.app.appId,

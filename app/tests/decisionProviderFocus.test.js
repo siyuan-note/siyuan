@@ -133,6 +133,37 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
                 assert.ok(input instanceof HTMLInputElement, "Exercise the actual input, not a missing optional selector");
                 assert.equal(document.activeElement, input, `${context} must focus the endpoint`);
                 assert.equal(view.querySelectorAll("[data-decision-field]").length, 4);
+                assert.equal(view.querySelector(".block__logo span").textContent, languages.apiProvider);
+                const content = view.querySelector(".b3-dialog__body > .b3-dialog__content");
+                const groups = [...content.children];
+                assert.equal(groups.length, 2, "Provider and model settings are separate groups");
+                for (const group of groups) {
+                    assert.ok(group.classList.contains("config-group"));
+                    assert.equal(getComputedStyle(group).marginLeft, "24px");
+                    assert.equal(getComputedStyle(group).marginRight, "24px");
+                    assert.ok(group.querySelector(":scope > .config-items"), "Reuse the provider detail's grouped surface");
+                }
+                assert.equal(groups[0].querySelector(":scope > .config-title").textContent, languages.aiProviderSettings);
+                assert.equal(groups[1].querySelector(":scope > .config-title").textContent, languages.aiModelSettings);
+                assert.deepEqual([...groups[0].querySelectorAll("[data-decision-field]")].map(element => element.dataset.decisionField),
+                    ["endpoint", "timeout", "apiKey"]);
+                for (const row of groups[0].querySelectorAll(".config-item")) {
+                    assert.equal(row.querySelector(".b3-label__text"), null, "Provider rows keep the original compact layout");
+                }
+                assert.ok(groups[0].textContent.includes(provider === "typesafe" ? "TypeSafe System One" : "OpenAI Decisions API (Beta)"));
+                assert.ok(groups[0].textContent.includes(provider === "typesafe" ? languages.decisionEndpointTip : languages.decisionOpenAIEndpointTip));
+                const modelRow = groups[1].querySelector(".config-items > .config-ai-provider__model");
+                const modelInput = modelRow.querySelector("[data-decision-field='name']");
+                const testButton = modelRow.querySelector("[data-action='test']");
+                assert.ok(modelInput.classList.contains("fn__flex-1"));
+                assert.equal(testButton.querySelector("use").getAttribute("xlink:href"), "#iconPlugZap");
+                assert.ok(groups[1].textContent.includes(languages.decisionTestDraftTip));
+                assert.ok(groups[1].querySelector("[data-type='testResult'][role='status'][aria-live='polite']"));
+                for (const action of ["save", "use"]) {
+                    const button = view.querySelector(`.b3-dialog__body > .b3-dialog__action > [data-action='${action}']`);
+                    assert.ok(button.classList.contains("b3-button--text"), "Reuse the provider footer button style");
+                    assert.equal(button.classList.contains("b3-button--outline"), false);
+                }
                 assert.ok(getComputedStyle(view).transitionDuration.split(",").some(value => parseFloat(value) > 0),
                     "The regression requires the production entry animation");
                 if (reproduceUnsafeFocus) {
@@ -147,6 +178,18 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
                 visible(view, `${context} detail`);
                 visible(input, `${context} endpoint`);
                 visible(back, `${context} back button`);
+                visible(modelInput, `${context} model input`);
+                visible(testButton, `${context} inline test button`);
+                const modelRect = modelInput.getBoundingClientRect();
+                const testRect = testButton.getBoundingClientRect();
+                if (matchMedia("(max-width: 750px)").matches) {
+                    assert.ok(testRect.top >= modelRect.bottom, "Reuse provider controls' narrow-layout wrapping");
+                    assert.ok(Math.abs(testRect.width - modelRect.width) < 1, "Wrapped provider controls fill the same row width");
+                } else {
+                    assert.ok(testRect.left >= modelRect.right, "Test action sits to the right of the model input");
+                    assert.ok(Math.abs(testRect.top + testRect.height / 2 - modelRect.top - modelRect.height / 2) < 1,
+                        "Model input and test action remain vertically aligned");
+                }
                 assert.equal(getComputedStyle(view).opacity, "1");
                 assert.deepEqual(errors, [], `${context} animation must not throw`);
                 const close = cycle ? back : view.querySelector("[data-action='cancel']");

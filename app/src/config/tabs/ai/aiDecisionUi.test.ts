@@ -26,7 +26,7 @@ class ElementStub {
     focus(options?: FocusOptions) { this.focused = true; this.focusOptions = options; }
 }
 
-const loadUI = () => {
+const loadUI = (provider = "openai") => {
     const source = readFileSync(resolve(process.cwd(), "src/config/tabs/ai/aiDecisionUi.ts"), "utf8");
     const code = transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
     const profile = {endpoint: "https://type.example", apiKey: "type-key", name: "jev-latest", timeout: 30};
@@ -39,11 +39,13 @@ const loadUI = () => {
     for (const selector of [".b3-dialog__body", "[data-type='testResult']", "[data-action='test']", "[data-decision-field='endpoint']"]) {
         view.elements[selector] = new ElementStub();
     }
+    view.elements["[data-action='test']"].elements.span = new ElementStub();
     const patches: any[] = [];
     const requests: Array<{body: any; complete: (response: any) => void; fail: () => void; done: () => void}> = [];
     let confirms = 0;
     let removed = false;
     let applySave = true;
+    let backLabel = "";
     let finishRemoval: () => void;
     const exports: any = {};
     runInNewContext(code, {
@@ -66,7 +68,10 @@ const loadUI = () => {
                 }}};
             }
             if (name === "./aiProviderUi") {
-                return {createProviderView: () => view, removeProviderView: (_root: unknown, _view: unknown, callback: () => void) => {
+                return {createProviderView: (_root: unknown, label: string) => {
+                    backLabel = label;
+                    return view;
+                }, removeProviderView: (_root: unknown, _view: unknown, callback: () => void) => {
                     removed = true;
                     finishRemoval = callback;
                 }};
@@ -76,7 +81,7 @@ const loadUI = () => {
     });
     exports.mountDecisionCards(root);
     const target = new ElementStub();
-    target.dataset.decisionProvider = "openai";
+    target.dataset.decisionProvider = provider;
     cards.events.click({target});
     const click = (action: string) => {
         const target = new ElementStub();
@@ -84,7 +89,7 @@ const loadUI = () => {
         return view.events.click({target});
     };
     const edit = (key: string, value: string) => view.events.input({target: {dataset: {decisionField: key}, value}});
-    return {exports, decision, patches, requests, view, root, click, edit, finishRemoval: () => finishRemoval(),
+    return {exports, decision, patches, requests, view, root, click, edit, backLabel, finishRemoval: () => finishRemoval(),
         confirms: () => confirms, removed: () => removed, failSave: () => applySave = false};
 };
 
@@ -100,19 +105,50 @@ test("opening and cancelling a decision card never selects or saves it", async (
     assert.equal(ui.patches.length, 0);
 });
 
-test("decision cards use bundled provider artwork with square intrinsic dimensions", () => {
+test("decision cards use transparent bundled provider artwork with square view boxes", () => {
     const ui = loadUI();
     const html = ui.root.elements["#aiDecisionCards"].innerHTML;
     const paths = [...html.matchAll(/<img src="([^"]+)"/g)].map(match => match[1]);
-    assert.deepEqual(paths, ["/stage/images/ai-providers/typesafe.png", "/stage/images/ai-providers/openai.svg"]);
+    assert.deepEqual(paths, ["/stage/images/ai-providers/typesafe.svg", "/stage/images/ai-providers/openai.svg"]);
+    assert.equal([...html.matchAll(/<img [^>]*class="config-ai-decision__icon"/g)].length, 2);
     assert.equal(html.includes("#iconBrain"), false);
     assert.match(html, /alt="TypeSafe System One"/);
     assert.match(html, /alt="OpenAI Decisions API \(Beta\)"/);
-    const typesafe = readFileSync(resolve(process.cwd(), paths[0].slice(1)));
-    assert.equal(typesafe.subarray(1, 4).toString(), "PNG");
-    assert.equal(typesafe.readUInt32BE(16), 400);
-    assert.equal(typesafe.readUInt32BE(20), 400);
-    assert.match(readFileSync(resolve(process.cwd(), paths[1].slice(1)), "utf8"), /viewBox="0 0 24 24"/);
+    for (const path of paths) {
+        const svg = readFileSync(resolve(process.cwd(), path.slice(1)), "utf8");
+        const viewBox = svg.match(/viewBox="([^"]+)"/)[1].split(/\s+/).map(Number);
+        assert.equal(viewBox.length, 4);
+        assert.ok(viewBox[2] > 0);
+        assert.equal(viewBox[2], viewBox[3]);
+        assert.doesNotMatch(svg, /<(?:rect|image)\b|background(?:-color)?\s*[:=]/i);
+        assert.match(svg, /<path\b/);
+    }
+});
+
+test("decision details reuse provider settings groups and compact model testing controls", () => {
+    for (const provider of ["typesafe", "openai"]) {
+        const ui = loadUI(provider);
+        const html = ui.view.elements[".b3-dialog__body"].innerHTML;
+        assert.equal(ui.backLabel, "apiProvider");
+        assert.equal([...html.matchAll(/class="config-group"/g)].length, 2);
+        assert.match(html, /class="config-title">aiProviderSettings<\/div>/);
+        assert.match(html, /class="config-title">aiModelSettings<\/div>/);
+        const modelStart = html.indexOf('class="config-title">aiModelSettings');
+        const providerHTML = html.slice(0, modelStart);
+        const modelHTML = html.slice(modelStart);
+        assert.match(providerHTML, /data-decision-field="endpoint"/);
+        assert.match(providerHTML, /data-decision-field="apiKey"/);
+        assert.match(providerHTML, /data-decision-field="timeout"/);
+        assert.doesNotMatch(providerHTML, /data-decision-field="name"|data-action="test"/);
+        assert.match(providerHTML, provider === "typesafe" ? /TypeSafe System One<br>decisionEndpointTip/
+            : /OpenAI Decisions API \(Beta\)<br>decisionOpenAIEndpointTip/);
+        assert.doesNotMatch(html, /apiKeyTip|apiModelTip|apiTimeoutTip/);
+        assert.match(modelHTML, /class="fn__flex b3-label config-item config-ai-provider__model">\s*<input[^>]*class="b3-text-field fn__flex-1"[^>]*data-decision-field="name"[^>]*>[\s\S]*?data-action="test">\s*<svg class="b3-button__icon"><use xlink:href="#iconPlugZap"/);
+        assert.match(modelHTML, /decisionTestDraftTip/);
+        for (const action of ["save", "use"]) {
+            assert.match(html, new RegExp(`class="b3-button b3-button--text" data-action="${action}"`));
+        }
+    }
 });
 
 test("profile drafts isolate keys and save only the edited provider atomically", async () => {
@@ -237,9 +273,13 @@ test("provider view removal invokes its completion once after animation or timeo
 test("current test results clear on edits and failures restore the test button", async () => {
     const ui = loadUI();
     const testing = ui.click("test");
+    const testButton = ui.view.elements["[data-action='test']"];
+    assert.equal(testButton.elements.span.textContent, "testConnectionTesting");
     ui.requests[0].complete({data: {matched: true}});
     ui.requests[0].done();
     await testing;
+    assert.equal(testButton.elements.span.textContent, "testConnection");
+    assert.equal(testButton.textContent, "");
     const result = ui.view.elements["[data-type='testResult']"];
     assert.equal(result.textContent, "testConnectionSuccess");
     ui.edit("endpoint", "https://changed.example");

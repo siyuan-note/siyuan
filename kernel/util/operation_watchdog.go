@@ -17,12 +17,14 @@ const operationStallThreshold = 10 * time.Second
 
 // OperationWatchdog 在操作仍未返回时记录阶段和调用栈，不取消操作、不改变数据写入顺序。
 type OperationWatchdog struct {
-	mu      sync.Mutex
-	name    string
-	stage   string
-	started time.Time
-	done    bool
-	timer   *time.Timer
+	mu           sync.Mutex
+	name         string
+	stage        string
+	started      time.Time
+	stageStarted time.Time
+	logTiming    bool
+	done         bool
+	timer        *time.Timer
 }
 
 type operationStall struct {
@@ -39,8 +41,19 @@ func WatchOperation(name, stage string) *OperationWatchdog {
 	})
 }
 
+// WatchOperationWithTiming 记录每个阶段的开始、耗时和操作总耗时，并保留慢操作调用栈。
+func WatchOperationWithTiming(name, stage string) *OperationWatchdog {
+	w := WatchOperation(name, stage)
+	w.mu.Lock()
+	w.logTiming = true
+	w.mu.Unlock()
+	logging.LogInfof("operation [%s], stage [%s] started", name, stage)
+	return w
+}
+
 func watchOperation(name, stage string, threshold time.Duration, report func(operationStall)) *OperationWatchdog {
-	w := &OperationWatchdog{name: name, stage: stage, started: time.Now()}
+	now := time.Now()
+	w := &OperationWatchdog{name: name, stage: stage, started: now, stageStarted: now}
 	w.timer = time.AfterFunc(threshold, func() {
 		w.mu.Lock()
 		if w.done {
@@ -56,8 +69,15 @@ func watchOperation(name, stage string, threshold time.Duration, report func(ope
 
 func (w *OperationWatchdog) Stage(stage string) {
 	w.mu.Lock()
+	previous, elapsed, total := w.stage, time.Since(w.stageStarted), time.Since(w.started)
+	logTiming := w.logTiming
 	w.stage = stage
+	w.stageStarted = time.Now()
 	w.mu.Unlock()
+	if logTiming {
+		logging.LogInfof("operation [%s], stage [%s] finished, elapsed [%s], total [%s]", w.name, previous, elapsed, total)
+		logging.LogInfof("operation [%s], stage [%s] started", w.name, stage)
+	}
 }
 
 func (w *OperationWatchdog) Finish() {
@@ -65,7 +85,12 @@ func (w *OperationWatchdog) Finish() {
 	w.done = true
 	w.timer.Stop()
 	elapsed, stage := time.Since(w.started), w.stage
+	stageElapsed, logTiming := time.Since(w.stageStarted), w.logTiming
 	w.mu.Unlock()
+	if logTiming {
+		logging.LogInfof("operation [%s], stage [%s] finished, elapsed [%s], total [%s]", w.name, stage, stageElapsed, elapsed)
+		return
+	}
 	if elapsed >= operationStallThreshold {
 		logging.LogInfof("slow operation finished [%s], stage [%s], elapsed [%s]", w.name, stage, elapsed)
 	}

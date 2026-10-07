@@ -1039,24 +1039,33 @@ var exitLock = sync.Mutex{}
 // 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且新版本安装包已经准备就绪时，将安装包路径返回给桌面宿主
 // https://github.com/siyuan-note/siyuan/issues/10288
 func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, installPkgPath string) {
+	diagnostic := util.WatchOperationWithTiming("exit kernel", "wait for exit lock")
+	defer diagnostic.Finish()
 	exitLock.Lock()
 	defer exitLock.Unlock()
 
 	logging.LogInfof("exiting kernel [force=%v, setCurrentWorkspace=%v, execInstallPkg=%d]", force, setCurrentWorkspace, execInstallPkg)
-	defer stopLANSyncManager()
+	defer func() {
+		diagnostic.Stage("stop LAN sync manager")
+		stopLANSyncManager()
+	}()
 
+	diagnostic.Stage("flush editing transactions")
 	util.PushMsg(Conf.Language(95), 10000*60)
 	FlushTxQueue()
 
+	diagnostic.Stage("cancel purge")
 	cancelPurge()
 
 	if !force {
 		if OnKernelPluginsStop != nil {
+			diagnostic.Stage("stop kernel plugins")
 			OnKernelPluginsStop()
 		}
 
 		if Conf.Sync.Enabled && 3 != Conf.Sync.Mode &&
 			((IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider) || conf.ProviderSiYuan != Conf.Sync.Provider) {
+			diagnostic.Stage("exit sync")
 			syncData(true, false)
 			if 0 != ExitSyncSucc {
 				exitCode = 1
@@ -1069,15 +1078,19 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	}
 
 	// Close the user guide when exiting https://github.com/siyuan-note/siyuan/issues/10322
+	diagnostic.Stage("close user guide")
 	closeUserGuide()
 
 	// Improve indexing completeness when exiting https://github.com/siyuan-note/siyuan/issues/12039
+	diagnostic.Stage("flush database index")
 	sql.FlushQueue()
 
 	util.IsExiting.Store(true)
 	// 等待正在执行的路径批次退出，未完成任务保留在配置目录供下次启动恢复。
+	diagnostic.Stage("wait for path refresh")
 	hpathRefresh.Lock()
 	hpathRefresh.Unlock()
+	diagnostic.Stage("check install package")
 	newVerInstallPkgPath := getNewVerInstallPkgPath()
 	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {
 		if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 将新版本安装包交给桌面宿主执行
@@ -1091,6 +1104,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 		}
 	}
 
+	diagnostic.Stage("save configuration")
 	Conf.Close()
 	// 退出前关闭已打开的加密笔记本并推送 closeBox，让前端关闭对应的明文文档标签页，避免重启后泄密。
 	// 走 Unmount：落盘 Closed=true + 生成历史 + 锁定清 DEK + 广播 closeBox。
@@ -1098,17 +1112,25 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	// 放在 BroadcastByType("exit")（第 933 行）之前推送，随后的 time.Sleep(500ms) 留给前端处理事件。
 	for _, box := range Conf.GetOpenedBoxes() {
 		if IsEncryptedBox(box.ID) && !IsUserGuide(box.ID) {
+			diagnostic.Stage("unmount encrypted notebook " + box.ID)
 			Unmount(box.ID)
 		}
 	}
+	diagnostic.Stage("close databases")
 	sql.CloseDatabase()
+	diagnostic.Stage("close push queue")
 	closePushQueue()
+	diagnostic.Stage("save asset texts")
 	util.SaveAssetsTexts()
+	diagnostic.Stage("clear workspace temp")
 	clearWorkspaceTemp(installPkgPath)
+	diagnostic.Stage("clear corrupted notebooks")
 	clearCorruptedNotebooks()
+	diagnostic.Stage("clear port file")
 	clearPortJSON()
 
 	if setCurrentWorkspace {
+		diagnostic.Stage("save workspace paths")
 		// 将当前工作空间放到工作空间列表的最后一个
 		// Open the last workspace by default https://github.com/siyuan-note/siyuan/issues/10570
 		workspacePaths, err := util.ReadWorkspacePaths()
@@ -1121,21 +1143,28 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 		}
 	}
 
+	diagnostic.Stage("unlock workspace")
 	util.UnlockWorkspace()
 
+	diagnostic.Stage("wait for frontend events")
 	time.Sleep(500 * time.Millisecond)
+	diagnostic.Stage("close sync websocket")
 	closeSyncWebSocket()
 
 	go func() {
+		diagnostic := util.WatchOperationWithTiming("exit kernel servers", "wait for exit response")
 		time.Sleep(500 * time.Millisecond)
 		logging.LogInfof("exited kernel")
 		if nil != util.WebSocketServer {
+			diagnostic.Stage("close frontend websockets")
 			util.WebSocketServer.Close()
 		}
 		if nil != util.HttpServer {
+			diagnostic.Stage("close HTTP server")
 			util.HttpServer.Close()
 		}
 		util.HttpServing = false
+		diagnostic.Finish()
 
 		if util.IsMobileContainer() {
 			return

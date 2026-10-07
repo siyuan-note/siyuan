@@ -1447,20 +1447,28 @@ func cleanupInvalidRefs(database *sql.DB) (err error) {
 }
 
 func CloseDatabase() {
+	diagnostic := util.WatchOperationWithTiming("close databases", "close index queue")
+	defer diagnostic.Finish()
 	closeIndexQueue()
 	// 退出时删除所有已打开的加密 db 文件：加密索引可由 box.Index() 全量重建，
 	// 文件无需持久化，删除可避免重启后残留旧索引数据导致下次解锁叠加重复行。
+	diagnostic.Stage("remove encrypted indexes")
 	RemoveAllEncryptedDBFiles()
+	diagnostic.Stage("remove encrypted block tree indexes")
 	treenode.RemoveAllEncryptedBlockTreeDBFiles()
+	diagnostic.Stage("close block database")
 	if err := db.Close(); err != nil {
 		logging.LogErrorf("close database failed: %s", err)
 	}
+	diagnostic.Stage("close history database")
 	if err := historyDB.Close(); err != nil {
 		logging.LogErrorf("close history database failed: %s", err)
 	}
+	diagnostic.Stage("close asset content database")
 	if err := assetContentDB.Close(); err != nil {
 		logging.LogErrorf("close asset content database failed: %s", err)
 	}
+	diagnostic.Stage("close block tree database")
 	treenode.CloseDatabase()
 	logging.LogInfof("closed database")
 }

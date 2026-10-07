@@ -1899,75 +1899,86 @@ func serveWebSocket(ginServer *gin.Engine) {
 		return nil
 	})
 
-	util.WebSocketServer.HandleMessage(func(s *melody.Session, msg []byte) {
-		start := time.Now()
-		logging.LogTracef("request [%s]", shortReqMsg(msg))
+	util.WebSocketServer.HandleMessage(handleWebSocketMessage)
+}
 
-		if util.IsAuthSession(s) {
+func handleWebSocketMessage(s *melody.Session, msg []byte) {
+	badRequest := func() {
+		result := util.NewResult()
+		result.Code = -1
+		result.Msg = "Bad Request"
+		s.Write(result.Bytes())
+	}
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			logging.LogErrorf("handle websocket message failed: %v", recovered)
+			badRequest()
+		}
+	}()
+	start := time.Now()
+	logging.LogTracef("request [%s]", shortReqMsg(msg))
+
+	if util.IsAuthSession(s) {
+		return
+	}
+	if value, ok := s.Get("oidcSessionVersion"); ok {
+		version, valid := value.(string)
+		if !valid || !model.IsOIDCSessionVersionCurrent(version) {
+			s.CloseWithMsg([]byte("  OIDC session expired"))
 			return
 		}
-		if value, ok := s.Get("oidcSessionVersion"); ok {
-			version, valid := value.(string)
-			if !valid || !model.IsOIDCSessionVersionCurrent(version) {
-				s.CloseWithMsg([]byte("  OIDC session expired"))
-				return
+	}
+
+	request := map[string]any{}
+	if err := gulu.JSON.UnmarshalJSON(msg, &request); err != nil {
+		badRequest()
+		return
+	}
+
+	if _, ok := s.Get("app"); !ok {
+		badRequest()
+		return
+	}
+
+	cmdStr, cmdOK := request["cmd"].(string)
+	cmdId, idOK := request["reqId"].(float64)
+	param, paramOK := request["param"].(map[string]any)
+	if !cmdOK || !idOK || !paramOK {
+		badRequest()
+		return
+	}
+	command := cmd.NewCommand(cmdStr, cmdId, param, s)
+	if nil == command {
+		result := util.NewResult()
+		result.Code = -1
+		result.Msg = "can not find command [" + cmdStr + "]"
+		s.Write(result.Bytes())
+		return
+	}
+	if !command.IsRead() {
+		readonly := util.ReadOnly
+		if !readonly {
+			if token := model.ParseXAuthToken(s.Request); token != nil {
+				readonly = token.Valid && model.IsValidRole(model.GetClaimRole(model.GetTokenClaims(token)), []model.Role{
+					model.RoleReader,
+					model.RoleVisitor,
+				})
 			}
 		}
 
-		request := map[string]any{}
-		if err := gulu.JSON.UnmarshalJSON(msg, &request); err != nil {
+		if readonly {
 			result := util.NewResult()
 			result.Code = -1
-			result.Msg = "Bad Request"
-			responseData, _ := gulu.JSON.MarshalJSON(result)
-			s.Write(responseData)
-			return
-		}
-
-		if _, ok := s.Get("app"); !ok {
-			result := util.NewResult()
-			result.Code = -1
-			result.Msg = "Bad Request"
+			result.Msg = model.Conf.Language(34)
 			s.Write(result.Bytes())
 			return
 		}
+	}
 
-		cmdStr := request["cmd"].(string)
-		cmdId := request["reqId"].(float64)
-		param := request["param"].(map[string]any)
-		command := cmd.NewCommand(cmdStr, cmdId, param, s)
-		if nil == command {
-			result := util.NewResult()
-			result.Code = -1
-			result.Msg = "can not find command [" + cmdStr + "]"
-			s.Write(result.Bytes())
-			return
-		}
-		if !command.IsRead() {
-			readonly := util.ReadOnly
-			if !readonly {
-				if token := model.ParseXAuthToken(s.Request); token != nil {
-					readonly = token.Valid && model.IsValidRole(model.GetClaimRole(model.GetTokenClaims(token)), []model.Role{
-						model.RoleReader,
-						model.RoleVisitor,
-					})
-				}
-			}
+	end := time.Now()
+	logging.LogTracef("parse cmd [%s] consumed [%d]ms", command.Name(), end.Sub(start).Milliseconds())
 
-			if readonly {
-				result := util.NewResult()
-				result.Code = -1
-				result.Msg = model.Conf.Language(34)
-				s.Write(result.Bytes())
-				return
-			}
-		}
-
-		end := time.Now()
-		logging.LogTracef("parse cmd [%s] consumed [%d]ms", command.Name(), end.Sub(start).Milliseconds())
-
-		cmd.Exec(command)
-	})
+	cmd.Exec(command)
 }
 
 // encryptedBoxAwareWebdavFS 包装 webdav.Dir，拦截所有指向加密笔记本的访问。

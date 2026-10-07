@@ -311,11 +311,14 @@ type SettingExport struct {
 }
 
 type SettingFileTree struct {
-	AlwaysSelectOpenedFile   bool   `json:"alwaysSelectOpenedFile" api:"optional,nullable"`
-	OpenFilesUseCurrentTab   bool   `json:"openFilesUseCurrentTab" api:"optional,nullable"`
-	CloseTabOnDoubleClick    bool   `json:"closeTabOnDoubleClick" api:"optional,nullable"`
-	DocIconClickExpand       bool   `json:"docIconClickExpand" api:"optional,nullable"`
-	ParentDocClickExpand     bool   `json:"parentDocClickExpand" api:"optional,nullable"`
+	AlwaysSelectOpenedFile bool `json:"alwaysSelectOpenedFile" api:"optional,nullable"`
+	OpenFilesUseCurrentTab bool `json:"openFilesUseCurrentTab" api:"optional,nullable"`
+	CloseTabOnDoubleClick  bool `json:"closeTabOnDoubleClick" api:"optional,nullable"`
+	DocIconClickExpand     bool `json:"docIconClickExpand" api:"optional,nullable"`
+	ParentDocClickExpand   bool `json:"parentDocClickExpand" api:"optional,nullable"`
+	// 仅在 parentDocClickExpand 启用时生效；关闭后单击标题不再等待双击判定。
+	// 默认启用；更新时省略或传 null 保留当前值，旧持久化配置缺失时继承默认值。
+	ParentDocDoubleClickOpen *bool  `json:"parentDocDoubleClickOpen" api:"optional,nullable"`
 	BoxDocEnabled            *bool  `json:"boxDocEnabled" api:"optional,nullable"`
 	UseSVGDefaultIcon        *bool  `json:"useSVGDefaultIcon" api:"optional,nullable"`
 	RefCreateSaveBox         string `json:"refCreateSaveBox" api:"optional,nullable"`

@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261003225941"
+		"updated": "20261007111840"
 	},
 	"Children": [
 		{
@@ -17548,7 +17548,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002135-5dfw1yo",
-				"updated": "20260922150640"
+				"updated": "20261007111840"
 			},
 			"Children": [
 				{
@@ -17562,12 +17562,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922150640-l6dnc3c",
-				"updated": "20260923212237"
+				"updated": "20261007111840"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "When “Click parent document title to expand or collapse child documents” is enabled, click or tap a parent title in the document tree or pinned documents to expand or collapse its children after a short delay. Double-click or double-tap the title to open the parent document without changing its expansion state. Documents without children still open with one click or tap"
+					"Data": "When "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Click parent document title to expand or collapse child documents"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is enabled, click or tap a parent title in the document tree or pinned documents to expand or collapse its children. Its "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Double-click a title to open the parent document"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " sub-option is enabled by default: a single click or tap waits about 300 ms, while a double-click or double-tap opens the parent without changing its expansion state. Disable the sub-option to expand or collapse with one click or tap without waiting for double-click detection; open the parent through its document menu. Documents without children still open with one click or tap"
 				}
 			]
 		},

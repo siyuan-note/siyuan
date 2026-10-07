@@ -379,6 +379,13 @@ export class Files extends Model {
                         this.lastSelectedElement = target.parentElement;
                         this.setCurrent(target.parentElement, false);
                         const row = target.parentElement;
+                        if (window.siyuan.config.fileTree.parentDocDoubleClickOpen === false) {
+                            this.toggleLeaf(row, notebookId);
+                            event.preventDefault();
+                            event.stopPropagation();
+                            window.siyuan.menus.menu.remove();
+                            break;
+                        }
                         this.parentDocClick.click(row, async () => {
                             const expanded = !!row.querySelector(".b3-list-item__arrow--open");
                             const path = row.getAttribute("data-path");
@@ -389,6 +396,7 @@ export class Files extends Model {
                             });
                             return () => {
                                 if (!window.siyuan.config.fileTree.parentDocClickExpand ||
+                                    window.siyuan.config.fileTree.parentDocDoubleClickOpen === false ||
                                     row.getAttribute("data-path") !== path ||
                                     !!row.querySelector(".b3-list-item__arrow--open") !== expanded) { return; }
                                 if (expanded) {

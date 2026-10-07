@@ -46,6 +46,8 @@ interface PanelSettingTabOptions<TId extends string = string> extends SettingTab
 type ControlSpecBase = {
     title: string;
     desc?: string;
+    /** 补充检索词，用于同时展示有依赖关系的设置项 */
+    keywords?: string[];
     save?: SaveFn;
     afterMount?: (root: HTMLElement) => void | Promise<void>;
     /** 搜索时动态判断条目是否可用 */
@@ -255,6 +257,7 @@ class SettingGroupBuilder<TId extends string> {
             kind: "full",
             rowParts,
             searchTitle: spec.title,
+            searchTexts: spec.keywords ? () => spec.keywords : undefined,
             searchAvailability: spec.searchAvailability,
             readValue: (el) => control.readValue(el),
             save: spec.save ?? this.tab.defaultSave?.bind(null, id),

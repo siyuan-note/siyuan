@@ -2086,6 +2086,42 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem, err error) {
 		return nil, readAgentSessionsErr
 	}
 	removeReferencedAssetPaths(assetsPathMap, agentSessionDests)
+	templateDests := map[string]bool{}
+	templateDir := filepath.Join(util.DataDir, "templates")
+	if resolved, resolveErr := filepath.EvalSymlinks(templateDir); resolveErr == nil {
+		templateDir = resolved
+	} else if !os.IsNotExist(resolveErr) {
+		return nil, fmt.Errorf("resolve template directory failed: %w", resolveErr)
+	}
+	err = filepath.WalkDir(templateDir, func(filename string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			if filename == templateDir && os.IsNotExist(walkErr) {
+				return nil
+			}
+			return walkErr
+		}
+		if entry.IsDir() || !strings.HasSuffix(strings.ToLower(entry.Name()), ".md") {
+			return nil
+		}
+		data, readErr := filelock.ReadFile(filename)
+		if readErr != nil {
+			return readErr
+		}
+		// 只解析模板里的静态引用，不执行模板函数或查询。
+		tree := parse.Parse("", data, luteEngine.ParseOptions)
+		for _, dest := range getAssetsLinkDests(tree.Root, false, normalizeAssetScanLinkDest) {
+			templateDests[dest] = true
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("read template asset references failed: %w", err)
+	}
+	for _, dest := range removeReferencedAssetPaths(assetsPathMap, templateDests) {
+		if strings.HasSuffix(dest, ".pdf") {
+			delete(assetsPathMap, dest+".sya")
+		}
+	}
 
 	var toRemoves []string
 	for asset := range assetsPathMap {

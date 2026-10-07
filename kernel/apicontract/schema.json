@@ -10319,6 +10319,12 @@
         "error": {
           "type": "string"
         },
+        "hasPrimaryKeyTemplate": {
+          "type": "boolean"
+        },
+        "inputPrimaryKey": {
+          "type": "string"
+        },
         "primaryKey": {
           "type": "string"
         },
@@ -10328,6 +10334,7 @@
       },
       "required": [
         "createdAt",
+        "inputPrimaryKey",
         "primaryKey",
         "templateID"
       ],
@@ -10340,6 +10347,26 @@
           "type": "integer"
         },
         "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hasPrimaryKeyTemplate": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inputPrimaryKey": {
           "anyOf": [
             {
               "type": "string"
@@ -20948,6 +20975,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "useInputName": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -40424,6 +40461,16 @@
             }
           ]
         },
+        "parentDocDoubleClickOpen": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "recentDocsMaxListCount": {
           "anyOf": [
             {
@@ -45253,6 +45300,16 @@
         "parentDocClickExpand": {
           "type": "boolean"
         },
+        "parentDocDoubleClickOpen": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "recentDocsMaxListCount": {
           "type": "integer"
         },
@@ -45315,6 +45372,7 @@
         "noSplitScreenWhenOpenTab",
         "openFilesUseCurrentTab",
         "parentDocClickExpand",
+        "parentDocDoubleClickOpen",
         "recentDocsMaxListCount",
         "refCreateSaveBox",
         "refCreateSavePath",
@@ -45482,6 +45540,16 @@
           ]
         },
         "parentDocClickExpand": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parentDocDoubleClickOpen": {
           "anyOf": [
             {
               "type": "boolean"

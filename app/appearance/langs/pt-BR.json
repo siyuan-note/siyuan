@@ -1,4 +1,8 @@
 {
+	"newRelationItemWithTemplate": "Criar com o modelo padrão em ${x}: <b>${y}</b>",
+	"newRelationItemWithInputName": "Criar com o nome digitado em ${x}: <b>${y}</b>",
+	"parentDocDoubleClickOpen": "Abrir o documento pai com um clique duplo no título",
+	"parentDocDoubleClickOpenTip": "Quando ativado, um clique duplo ou toque duplo no título abre o documento pai sem alterar seu estado de expansão; um clique ou toque simples aguarda cerca de 300 ms para identificar o clique duplo. Quando desativado, um clique ou toque simples expande ou recolhe diretamente os documentos filhos",
 	"decisionSaveFailed": "Não foi possível salvar as configurações do serviço de decisão; seu rascunho foi mantido",
 	"decisionProvidersTip": "As configurações dos provedores são salvas separadamente; a troca se aplica às novas solicitações",
 	"decisionCurrentProvider": "Em uso",
@@ -868,7 +872,7 @@
 	"docIconClickExpand": "Clique no ícone do documento ou do caderno para expandir ou recolher documentos filhos",
 	"docIconClickExpandTip": "Quando ativado, clicar no ícone de um documento ou caderno expande ou recolhe os documentos filhos; quando não há documentos filhos, um documento disponível é aberto, caso contrário, o ícone pode ser alterado; quando desativado, clicar em qualquer um dos ícones o altera",
 	"parentDocClickExpand": "Clique no título do documento pai para expandir ou recolher documentos filhos",
-	"parentDocClickExpandTip": "Quando ativado, clicar ou tocar no título expande ou recolhe os documentos filhos; clicar ou tocar duas vezes abre o documento pai sem alterar a expansão; sem documentos filhos, basta um clique ou toque",
+	"parentDocClickExpandTip": "Quando ativado, um clique ou toque no título do documento pai expande ou recolhe os documentos filhos; documentos sem filhos continuam abrindo com um clique ou toque",
 	"mcpStatusAuthorizing": "Autorizando",
 	"mcpStatusAuthorizationRequired": "Autorização necessária",
 	"mcpAuthorize": "Autorizar",

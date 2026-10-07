@@ -7,6 +7,10 @@
   align-items: center;
 }
 
+:root[data-theme-mode="dark"] .config-ai-decision__icon {
+  filter: invert(1);
+}
+
 .config-chatgpt__info {
   min-width: 0;
   overflow-wrap: anywhere;

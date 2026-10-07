@@ -99,7 +99,9 @@ const getProviderViews = (root: HTMLElement) => {
 };
 
 export const removeProviderView = (root: HTMLElement, view?: HTMLElement, onRemoved?: () => void) => {
-    const views = view ? [view] : getProviderViews(root);
+    // 暂停的决策详情保留未保存草稿，只有显式关闭该详情时才销毁。
+    const views = view ? [view] : getProviderViews(root).filter(item =>
+        !item.hasAttribute("data-decision-profile-view") || !item.classList.contains("fn__none"));
     views.forEach((item) => {
         let removed = false;
         const remove = () => {

@@ -934,6 +934,11 @@ declare namespace Config {
          */
         parentDocClickExpand: boolean;
         /**
+         * 单击标题展开启用时，是否允许双击打开父文档；缺失时默认启用
+         * 关闭后单击不等待双击判定；设置接口省略或传 null 时保留当前值
+         */
+        parentDocDoubleClickOpen: boolean;
+        /**
          * Whether to enable top-level notebook documents
          */
         boxDocEnabled: boolean;

@@ -235,7 +235,8 @@ var getAttributeViewRelationCandidates = contractHandler(apicontract.GetAttribut
 	if request.IncludeNewItemPreview {
 		preview := model.PreviewAttributeViewRelationItem(avID, request.BlockID, request.KeyID, request.Keyword)
 		data.NewItemPreview = &apicontract.AVRelationItemPreview{TemplateID: preview.TemplateID,
-			PrimaryKey: preview.PrimaryKey, CreatedAt: preview.CreatedAt, Error: preview.Error}
+			PrimaryKey: preview.PrimaryKey, CreatedAt: preview.CreatedAt, Error: preview.Error,
+			HasPrimaryKeyTemplate: preview.HasPrimaryKeyTemplate, InputPrimaryKey: preview.InputPrimaryKey}
 	}
 	return apicontract.Success(data)
 })
@@ -388,7 +389,7 @@ var createAttributeViewRelationItem = contractHandler(apicontract.CreateAttribut
 		}
 		cells = append(cells, &model.AttributeViewRelationItemCell{ItemID: cell.ItemID, RelatedItemIDs: cell.RelatedItemIDs})
 	}
-	result, err := model.CreateAttributeViewRelationItem(request.AvID, request.BlockID, request.KeyID, request.Keyword, cells, preview)
+	result, err := model.CreateAttributeViewRelationItem(request.AvID, request.BlockID, request.KeyID, request.Keyword, cells, preview, request.UseInputName)
 	if err != nil {
 		if errors.Is(err, model.ErrBoxNotFound) {
 			return apicontract.CreateAttributeViewRelationItem.FailureWithData(1, "", apicontract.NewAVCreateItemResultError(apicontract.AVUnavailableNotebook{UnavailableNotebook: true}))

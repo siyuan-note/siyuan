@@ -1,4 +1,8 @@
 {
+	"newRelationItemWithTemplate": "Crear con la plantilla predeterminada en ${x}: <b>${y}</b>",
+	"newRelationItemWithInputName": "Crear con el nombre introducido en ${x}: <b>${y}</b>",
+	"parentDocDoubleClickOpen": "Abrir el documento padre al hacer doble clic en el título",
+	"parentDocDoubleClickOpenTip": "Al activar esta opción, un doble clic o doble toque en el título abre el documento padre sin cambiar su estado de expansión; un clic o toque espera unos 300 ms para detectar el doble clic. Al desactivarla, un clic o toque expande o contrae directamente los documentos hijos",
 	"decisionSaveFailed": "No se pudo guardar la configuración del servicio de decisión; el borrador se conserva",
 	"decisionProvidersTip": "La configuración de cada proveedor se guarda por separado; el cambio se aplica a las nuevas solicitudes",
 	"decisionCurrentProvider": "En uso",
@@ -868,7 +872,7 @@
 	"docIconClickExpand": "Haz clic en el icono del documento o del cuaderno para expandir o contraer los documentos secundarios",
 	"docIconClickExpandTip": "Cuando está activado, al hacer clic en el icono de un documento o cuaderno se expanden o contraen los documentos secundarios; si no hay documentos secundarios, se abre un documento si está disponible; de lo contrario, se puede cambiar el icono; cuando está desactivado, al hacer clic en cualquiera de los iconos se cambia",
 	"parentDocClickExpand": "Haz clic en el título del documento principal para expandir o contraer los documentos secundarios",
-	"parentDocClickExpandTip": "Al activarlo, un clic o toque en el título expande o contrae los documentos secundarios; el doble clic o doble toque abre el documento principal sin cambiar su estado de expansión; si no tiene documentos secundarios, basta con un clic o toque",
+	"parentDocClickExpandTip": "Al activar esta opción, un clic o toque en el título del documento padre expande o contrae los documentos hijos; los documentos sin hijos se siguen abriendo con un clic o toque",
 	"mcpStatusAuthorizing": "Autorizando",
 	"mcpStatusAuthorizationRequired": "Se requiere autorización",
 	"mcpAuthorize": "Autorizar",

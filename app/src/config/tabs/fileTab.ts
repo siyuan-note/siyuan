@@ -15,6 +15,18 @@ import {getAllModels} from "../../layout/getAll";
 const isMobileKernelContainer = () =>
     ["android", "ios", "harmony"].includes(window.siyuan.config.system.container);
 
+const bindParentDocClickSettingsVisibility = (root: HTMLElement) => {
+    const parent = root.querySelector<HTMLInputElement>(`#${CSS.escape("fileTree.parentDocClickExpand")}`);
+    const childRow = root.querySelector(`#${CSS.escape("fileTree.parentDocDoubleClickOpen")}`)?.closest(".config-item");
+    if (!parent || !childRow) {
+        return;
+    }
+    childRow.classList.add("config-filetree-click__child");
+    const updateVisibility = () => childRow.classList.toggle("fn__none", !parent.checked);
+    parent.addEventListener("change", updateVisibility);
+    updateVisibility();
+};
+
 const genNotebookSavePathHtml = (
     title: string,
     desc: string,
@@ -52,14 +64,24 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
         }),
     });
     /// #endif
+    const parentDocClickKeywords = [window.siyuan.languages.parentDocClickExpand, window.siyuan.languages.parentDocClickExpandTip,
+        window.siyuan.languages.parentDocDoubleClickOpen, window.siyuan.languages.parentDocDoubleClickOpenTip];
     group.switch("fileTree.parentDocClickExpand", {
         title: window.siyuan.languages.parentDocClickExpand,
         desc: window.siyuan.languages.parentDocClickExpandTip,
+        keywords: parentDocClickKeywords,
+        afterMount: bindParentDocClickSettingsVisibility,
         save: (value) => fileConfigApi.patch("parentDocClickExpand", value, () => {
             /// #if !MOBILE
             getAllModels().files.forEach((files) => files.updateDocActions());
             /// #endif
         }),
+    });
+    group.switch("fileTree.parentDocDoubleClickOpen", {
+        title: window.siyuan.languages.parentDocDoubleClickOpen,
+        desc: window.siyuan.languages.parentDocDoubleClickOpenTip,
+        keywords: parentDocClickKeywords,
+        readConfig: () => window.siyuan.config.fileTree.parentDocDoubleClickOpen !== false,
     });
     group.switch("fileTree.alwaysSelectOpenedFile", {
         title: window.siyuan.languages.selectOpen,

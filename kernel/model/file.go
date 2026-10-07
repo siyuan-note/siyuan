@@ -2140,6 +2140,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	allRemoveRootIDs = append(allRemoveRootIDs, removeIDs...)
 	allRemoveRootIDs = gulu.Str.RemoveDuplicatedElem(allRemoveRootIDs)
 	removeTrees := make([]*parse.Tree, 0, len(allRemoveRootIDs))
+	deletedBindings := map[string]map[string]struct{}{}
 	for _, rootID := range allRemoveRootIDs {
 		removeTree := ret
 		if rootID != ret.ID {
@@ -2153,13 +2154,30 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 			return
 		}
 		removeTrees = append(removeTrees, removeTree)
+		collectDeletedAttributeViewBlocks(removeTree.Root, true, deletedBindings)
+	}
+	boundDeletion := &Transaction{}
+	defer func() { boundDeletion.finishAttributeViewMutation(err != nil) }()
+	avBoxID := ""
+	if IsEncryptedBox(box.ID) {
+		avBoxID = box.ID
+	}
+	before, after, prepareErr := boundDeletion.prepareDeletedBoundAttributeViewBlocks(deletedBindings, avBoxID)
+	if prepareErr != nil {
+		return ret, prepareErr
 	}
 	diagnostic.Stage("index document history")
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 	diagnostic.Stage("remove database bindings")
+	if err = boundDeletion.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{boxID: avBoxID}, before, after); err != nil {
+		return
+	}
+	var nonEditorTx *Transaction
 	for _, removeTree := range removeTrees {
 		removedRootPaths[removeTree.ID] = removeTree.Path
-		syncDelete2AvBlock(removeTree.Root, removeTree, true, nil)
+		for _, id := range nonEditorTx.syncDelete2Block(removeTree.Root, removeTree) {
+			ReloadAttrView(id)
+		}
 	}
 
 	diagnostic.Stage("remove document files")
@@ -2175,6 +2193,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		return
 	}
 	logging.LogInfof("removed doc [%s%s]", box.ID, p)
+	boundDeletion.finishAttributeViewMutation(false)
 	removedPins := map[string]bool{}
 	for rootID := range removedRootPaths {
 		removedPins[rootID] = true

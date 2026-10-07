@@ -1,4 +1,8 @@
 {
+	"newRelationItemWithTemplate": "Create with default template in ${x}: <b>${y}</b>",
+	"newRelationItemWithInputName": "Create with input name in ${x}: <b>${y}</b>",
+	"parentDocDoubleClickOpen": "Double-click a title to open the parent document",
+	"parentDocDoubleClickOpenTip": "When enabled, double-click or double-tap a title to open the parent without changing its expansion state; a single click or tap waits about 300 ms to distinguish a double click. When disabled, a single click or tap directly expands or collapses child documents",
 	"decisionSaveFailed": "Unable to save the decision service settings; your draft is still available",
 	"decisionProvidersTip": "Provider settings are saved separately; switching applies to new requests",
 	"decisionCurrentProvider": "Currently in use",
@@ -868,7 +872,7 @@
 	"docIconClickExpand": "Click document or notebook icon to expand or collapse child documents",
 	"docIconClickExpandTip": "When enabled, clicking a document or notebook icon expands or collapses child documents; when there are no child documents, an available document opens, otherwise the icon can be changed; when disabled, clicking either icon changes it",
 	"parentDocClickExpand": "Click parent document title to expand or collapse child documents",
-	"parentDocClickExpandTip": "When enabled, click or tap the title to toggle child documents; double-click or double-tap to open the parent without changing expansion. With no children, one click or tap opens it",
+	"parentDocClickExpandTip": "When enabled, click or tap a parent title to expand or collapse child documents; documents without children still open with one click or tap",
 	"mcpStatusAuthorizing": "Authorizing",
 	"mcpStatusAuthorizationRequired": "Authorization required",
 	"mcpAuthorize": "Authorize",

@@ -6,7 +6,7 @@
 		"id": "20260920123707-taf3ttd",
 		"title": "Decision model",
 		"type": "doc",
-		"updated": "20261007020517"
+		"updated": "20261007050953"
 	},
 	"Children": [
 		{
@@ -43,7 +43,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-gv610zn",
-				"updated": "20261007020517"
+				"updated": "20261007050953"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-omz7px3",
-				"updated": "20261007020517"
+				"updated": "20261007050953"
 			},
 			"Children": [
 				{
@@ -90,7 +90,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", open a provider card to edit its API endpoint, API key, model name and request timeout. Opening a card does not change the active provider. Save keeps that provider’s settings; Save and use also selects it for new requests. Each provider retains its own settings and key when you switch. The global switch is off by default; disabling it retains both configurations. TypeSafe defaults to https://api.typesafe.ai/v1/systemone with jev-latest; OpenAI defaults to https://api.openai.com/v1/decisions with gpt-6-luna. Both default to a 30-second timeout. A chat-compatible endpoint does not necessarily support Decisions. Existing TypeSafe settings are retained after upgrading."
+					"Data": ", first turn on the global switch, then open a provider card to edit its API endpoint, API key, model name and request timeout. Opening a card does not change the active provider. Save keeps that provider’s settings; Save and use also selects it for new requests. Each provider retains its own settings and key when you switch. The global switch is off by default. When it is off, only the switch is shown; provider cards and configuration details are hidden, and the decision model cannot be called. Both saved configurations, their keys and the active provider selection are retained. TypeSafe defaults to https://api.typesafe.ai/v1/systemone with jev-latest; OpenAI defaults to https://api.openai.com/v1/decisions with gpt-6-luna. Both default to a 30-second timeout. A chat-compatible endpoint does not necessarily support Decisions. Existing TypeSafe settings are retained after upgrading."
 				}
 			]
 		},
@@ -128,7 +128,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-5yw9ara",
-				"updated": "20261007020517"
+				"updated": "20261007050953"
 			},
 			"Children": [
 				{
@@ -143,12 +143,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-fvzl2j1",
-				"updated": "20261007020517"
+				"updated": "20261007050953"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Relevant text is sent to the selected decision service and charges may apply. Tool calls follow the existing capability confirmation policy. Encrypted notebooks must be unlocked; encrypted sources also require their notebook ID, and their selected content is sent in readable form. The connection test uses the complete draft settings and a fixed sample, does not read notes, and may incur charges. Testing does not save settings, change the active provider or enable the service. A successful test checks the connection and basic protocol, not answer quality."
+					"Data": "Turning on the switch alone does not send requests or incur usage charges. Requests are sent to the selected decision service only when you manually run a connection test or use a decision tool, and charges may apply. Tool calls follow the existing capability confirmation policy. Encrypted notebooks must be unlocked; encrypted sources also require their notebook ID, and their selected content is sent in readable form. After enabling the feature, you can manually run a connection test using the complete draft settings and a fixed sample; it does not read notes. Testing does not save settings or change the active provider. A successful test checks the connection and basic protocol, not answer quality."
 				}
 			]
 		},

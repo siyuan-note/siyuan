@@ -18,6 +18,8 @@ const load = (names: string[], dependencies: Record<string, unknown>) => {
 
 const languages = {
     newRowInRelation: "Create in ${x} <b>${y}</b>", untitled: "Untitled",
+    newRelationItemWithTemplate: "Create with template in ${x}: <b>${y}</b>",
+    newRelationItemWithInputName: "Create with input name in ${x}: <b>${y}</b>",
     newItemTemplateUnavailableNotebookTip: "Notebook unavailable",
 };
 
@@ -30,11 +32,28 @@ it("always offers creation, previews the template name, and escapes database nam
     });
     assert.match(genRelationFooterHTML(menu, ""), /data-relation-type="create"/);
     assert.match(genRelationFooterHTML(menu, ""), /disabled/);
-    previews.set(menu, {keyword: "Task A", preview: {primaryKey: "<Template name>"}});
+    previews.set(menu, {keyword: "Task A", preview: {primaryKey: "<Template name>", hasPrimaryKeyTemplate: true}});
     const html = genRelationFooterHTML(menu, "Task A");
     assert.match(html, /&lt;Database>/);
     assert.match(html, /&lt;Template name&gt;/);
-    assert.doesNotMatch(html, /Task A|disabled/);
+    assert.match(html, /Create with template/);
+    assert.match(html, /Create with input name.*Task A/s);
+    assert.equal((html.match(/data-relation-type="create"/g) || []).length, 2);
+    assert.doesNotMatch(html, /disabled/);
+    previews.set(menu, {preview: {primaryKey: "Task A", inputPrimaryKey: "Task A", hasPrimaryKeyTemplate: true}});
+    assert.equal((genRelationFooterHTML(menu, "Task /A").match(/data-relation-type="create"/g) || []).length, 1);
+    for (const [keyword, primaryKey, hasPrimaryKeyTemplate] of [
+        ["", "Template name", true], ["Task A", "Task A", true], [" Task A ", "Task A", true],
+        ["Task A", "Template name", false],
+    ] as [string, string, boolean][]) {
+        previews.set(menu, {preview: {primaryKey, hasPrimaryKeyTemplate}});
+        assert.equal((genRelationFooterHTML(menu, keyword).match(/data-relation-type="create"/g) || []).length, 1);
+    }
+    previews.set(menu, {preview: {primaryKey: "<Template>", hasPrimaryKeyTemplate: true, error: 'Bad "template"'}});
+    const errorHTML = genRelationFooterHTML(menu, "<Input>");
+    assert.equal((errorHTML.match(/disabled/g) || []).length, 2);
+    assert.match(errorHTML, /&lt;Input&gt;/);
+    assert.match(errorHTML, /title="Bad &quot;template&quot;"/);
     previews.set(menu, {keyword: "Task A", preview: {primaryKey: ""}});
     assert.match(genRelationFooterHTML(menu, "Task A"), /Untitled/);
     assert.doesNotMatch(genRelationFooterHTML(menu, "Task A"), /Task A/);
@@ -42,10 +61,10 @@ it("always offers creation, previews the template name, and escapes database nam
     assert.match(genRelationFooterHTML(menu, ""), /disabled.*title="Invalid template"/);
 });
 
-const creationFixture = (mobile: boolean, response: Promise<unknown>) => {
+const creationFixture = (mobile: boolean, response: Promise<unknown>, useInputName = false) => {
     const attributes = new Set<string>();
     const target = {
-        dataset: {relationType: "create"}, classList: {contains: () => true}, getAttribute: (): string | null => null,
+        dataset: {relationType: "create", useInputName: useInputName.toString()}, classList: {contains: () => true}, getAttribute: (): string | null => null,
         hasAttribute: (name: string) => attributes.has(name),
         setAttribute: (name: string) => attributes.add(name), removeAttribute: (name: string) => attributes.delete(name),
     };
@@ -73,8 +92,9 @@ const creationFixture = (mobile: boolean, response: Promise<unknown>) => {
         relationItemPreviews: previews,
         hasClosestByClassName: () => menu,
         getRelationValue: () => ({blockIDs: ["existing"], contents: [{type: "block", block: {content: "Existing"}}]}),
-        updateCellsValue: async (_protyle: unknown, _node: unknown, value: {blockIDs: string[]}, ...args: unknown[]) => {
+        updateCellsValue: async (_protyle: unknown, _node: unknown, value: {blockIDs: string[], contents: {block: {content: string}}[]}, ...args: unknown[]) => {
             assert.deepEqual(value.blockIDs, ["existing", "pending"]);
+            assert.equal(value.contents[1].block.content, useInputName ? "Task A" : "Template name");
             assert.equal(args[3], true);
             assert.equal(args[7], false);
             assert.equal(html.length, 0);
@@ -96,24 +116,38 @@ const creationFixture = (mobile: boolean, response: Promise<unknown>) => {
         CustomEvent: class { constructor(public type: string) {} },
         window: {siyuan: {languages}},
     });
-    return {run: () => setRelationCell(protyle, node, target, [{}]), html, events, messages, requests, attributes};
+    return {run: () => setRelationCell(protyle, node, target, [{}]),
+        runOther: () => setRelationCell(protyle, node, {...target,
+            dataset: {relationType: "create", useInputName: (!useInputName).toString()}, hasAttribute: () => false}, [{}]),
+        html, events, messages, requests, attributes};
 };
 
 for (const mobile of [false, true]) {
+    it(`uses the input name without changing the original preview on ${mobile ? "mobile" : "desktop"}`, async () => {
+        const fixture = creationFixture(mobile, Promise.resolve({code: 0,
+            data: {itemID: "created", content: "Task A", isDetached: true}}), true);
+        await fixture.run();
+        const request = fixture.requests[0] as {useInputName: boolean, preview: {primaryKey: string}};
+        assert.equal(request.useInputName, true);
+        assert.equal(request.preview.primaryKey, "Template name");
+        assert.match(fixture.html[0], /Task A/);
+        assert.match(fixture.html[0], /detached-icon/);
+    });
     it(`creates a document relation once and preserves batch relations on ${mobile ? "mobile" : "desktop"}`, async () => {
         let finish: (value: unknown) => void;
         const fixture = creationFixture(mobile, new Promise(resolve => { finish = resolve; }));
         const pending = fixture.run();
         await Promise.resolve();
-        await fixture.run();
+        await fixture.runOther();
         assert.equal(fixture.requests.length, 1);
         assert.equal(fixture.html.length, 0);
-        const request = fixture.requests[0] as {cells: unknown[], preview: {primaryKey: string}, keyword: string};
+        const request = fixture.requests[0] as {cells: unknown[], preview: {primaryKey: string}, keyword: string, useInputName: boolean};
         assert.deepEqual(request.cells, [
             {itemID: "source-row-1", relatedItemIDs: ["existing"]},
             {itemID: "source-row-2", relatedItemIDs: ["hidden-existing"]},
         ]);
         assert.equal(request.keyword, "Task A");
+        assert.equal(request.useInputName, false);
         assert.equal(request.preview.primaryKey, "Template name");
         finish({code: 0, data: {itemID: "created", blockID: "document", content: "Template name", isDetached: false}});
         await pending;

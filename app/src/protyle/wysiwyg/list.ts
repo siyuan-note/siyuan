@@ -25,6 +25,7 @@ import {showMessage} from "../../dialog/message";
 import {activateTrackedRangeInsertion, type ITrackedRangeInsertion} from "../util/trackedRange";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {isTaskListMarker, nextTaskListMarker, nextTaskListStatus} from "./taskListMarker";
+import {confirmBlockRef} from "../../util/checkBlockRef";
 
 const getLastChildBlock = (element: Element) => {
     if (!element || !element.lastElementChild) {
@@ -1121,6 +1122,44 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
     }
     if (!liElement.isConnected || !parentLiItemElement.isConnected ||
         liItemElements.some((item) => !item.isConnected)) {
+        return;
+    }
+    // 只检查反向缩进时消失的容器，保留的正文块和移动的列表项不属于删除范围。
+    const removedElements: Element[] = [];
+    const topLevel = ["protyle-wysiwyg", "sb", "bq", "callout", "tab-item"].some(name =>
+        parentLiItemElement.classList.contains(name));
+    const flattenChild = !topLevel && liElement.childElementCount === 2 &&
+        (parentLiItemElement.childElementCount === 3 ||
+            (window.siyuan.config.editor.listLogicalOutdent &&
+                liElement.previousElementSibling?.classList.contains("protyle-action")));
+    if (topLevel || flattenChild) {
+        removedElements.push(...liItemElements);
+    }
+    const retainedItems = new Set(Array.from(liElement.children).filter(item =>
+        item.hasAttribute("data-node-id") && !liItemElements.includes(item)));
+    if (!window.siyuan.config.editor.listLogicalOutdent) {
+        // 传统反向缩进会将选中范围之后的列表项一起移出原列表。
+        let following = liItemElements[liItemElements.length - 1].nextElementSibling;
+        while (following && !following.classList.contains("protyle-attr")) {
+            retainedItems.delete(following);
+            following = following.nextElementSibling;
+        }
+    }
+    if (retainedItems.size === 0) {
+        removedElements.push(liElement);
+        if (!topLevel && !flattenChild && parentLiItemElement.childElementCount === 3) {
+            removedElements.push(parentLiItemElement);
+        }
+    }
+    const removedIDs = removedElements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
+    if (removedIDs.length > 0 && !await confirmBlockRef({
+        scope: "blocks", ids: removedIDs, exactIDs: removedIDs, deletedIDs: removedIDs,
+        notebook: protyle.notebookId,
+    }, protyle)) {
+        return;
+    }
+    if (!liElement.isConnected || !parentLiItemElement.isConnected ||
+        liItemElements.some(item => !item.isConnected || item.parentElement !== liElement)) {
         return;
     }
     activateTrackedRangeInsertion(trackedRangeInsertion);

@@ -31,7 +31,7 @@ var DailynoteTool = &Tool{
 		Properties: map[string]Property{
 			"action":   {Type: "string", Description: "Operation", Enum: []string{"create", "append", "prepend"}},
 			"notebook": {Type: "string", Description: "Notebook ID"},
-			"data":     {Type: "string", Description: "Content in markdown or dom (for append/prepend)"},
+			"data":     {Type: "string", Description: "Content in markdown or dom (for append/prepend).\n\n" + markdownContentSyntax},
 			"dataType": {Type: "string", Description: "Content type: markdown or dom", Enum: []string{"markdown", "dom"}},
 		},
 		Required: []string{"action", "notebook"},

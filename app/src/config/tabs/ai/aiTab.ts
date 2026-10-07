@@ -161,15 +161,18 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
 
 const registerAiDecisionGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("decision", window.siyuan.languages.decisionModel);
+    const keywords = [window.siyuan.languages.decisionModel, window.siyuan.languages.decisionModelTip,
+        "TypeSafe", "OpenAI", "Decisions", window.siyuan.languages.apiKey,
+        window.siyuan.languages.apiEndpoint, window.siyuan.languages.apiModel,
+        window.siyuan.languages.apiTimeout, window.siyuan.languages.testConnection];
     group.switch("ai.decision.enabled", {
         title: window.siyuan.languages.decisionModel,
         desc: window.siyuan.languages.decisionModelTip,
+        keywords,
     });
     group.slot({
         key: "decisionProviders",
-        keywords: ["TypeSafe", "OpenAI", "Decisions", window.siyuan.languages.apiKey,
-            window.siyuan.languages.apiEndpoint, window.siyuan.languages.apiModel,
-            window.siyuan.languages.apiTimeout, window.siyuan.languages.testConnection],
+        keywords,
         html: genDecisionCardsHtml,
         afterMount: mountDecisionCards,
     });

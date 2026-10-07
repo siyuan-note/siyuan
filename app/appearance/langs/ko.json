@@ -1,4 +1,8 @@
 {
+	"newRelationItemWithTemplate": "${x}에 기본 템플릿으로 새로 만들기: <b>${y}</b>",
+	"newRelationItemWithInputName": "${x}에 입력한 이름으로 새로 만들기: <b>${y}</b>",
+	"parentDocDoubleClickOpen": "제목을 두 번 클릭하여 상위 문서 열기",
+	"parentDocDoubleClickOpenTip": "활성화하면 제목을 두 번 클릭하거나 탭하여 펼침 상태를 유지한 채 상위 문서를 엽니다. 한 번 클릭하거나 탭하면 두 번 클릭인지 판단하기 위해 약 300밀리초 기다립니다. 비활성화하면 한 번 클릭하거나 탭하여 하위 문서를 바로 펼치거나 접습니다",
 	"decisionSaveFailed": "의사결정 서비스 설정을 저장할 수 없습니다. 작성 중인 내용은 유지됩니다",
 	"decisionProvidersTip": "공급자 설정은 개별 저장되며 전환은 새 요청에 적용됩니다",
 	"decisionCurrentProvider": "현재 사용 중",
@@ -868,7 +872,7 @@
 	"docIconClickExpand": "문서 또는 노트북 아이콘을 클릭하여 하위 문서 펼치기 또는 접기",
 	"docIconClickExpandTip": "활성화하면 문서 또는 노트북 아이콘을 클릭하여 하위 문서를 펼치거나 접을 수 있습니다. 하위 문서가 없으면 열 수 있는 문서를 열고, 그렇지 않으면 아이콘을 변경할 수 있습니다. 비활성화하면 어느 아이콘이든 클릭하여 변경할 수 있습니다",
 	"parentDocClickExpand": "상위 문서 제목을 클릭하여 하위 문서 펼치기 또는 접기",
-	"parentDocClickExpandTip": "활성화하면 제목을 클릭하거나 탭하여 하위 문서를 펼치거나 접습니다. 두 번 클릭하거나 두 번 탭하면 펼침 상태를 바꾸지 않고 상위 문서를 엽니다. 하위 문서가 없으면 한 번 클릭하거나 탭하여 엽니다",
+	"parentDocClickExpandTip": "활성화하면 상위 문서 제목을 클릭하거나 탭하여 하위 문서를 펼치거나 접습니다. 하위 문서가 없으면 한 번 클릭하거나 탭하여 바로 엽니다",
 	"mcpStatusAuthorizing": "인증 중",
 	"mcpStatusAuthorizationRequired": "인증 필요",
 	"mcpAuthorize": "인증",

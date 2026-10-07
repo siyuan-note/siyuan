@@ -28,6 +28,7 @@ export type SettingItemSearchAvailability = {
 type FullSettingItem = SettingItemBase & {
     kind: "full";
     rowParts: RowPart[];
+    searchTexts?: () => string[];
 };
 
 /** 自定义 HTML 块：参与 mount、搜索 */

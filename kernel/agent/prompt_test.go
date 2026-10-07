@@ -47,26 +47,13 @@ func TestTurnContextStaysInUserMessage(t *testing.T) {
 	}
 }
 
-func TestSystemPromptDocumentsBlockReferenceSyntax(t *testing.T) {
-	if !strings.Contains(systemPrompt, `((<blockID> "<static anchor text>"))`) {
-		t.Fatal("system prompt is missing the static SiYuan block-reference syntax")
-	}
-	if !strings.Contains(systemPrompt, `((<blockID> '<dynamic anchor text>'))`) {
-		t.Fatal("system prompt is missing the dynamic SiYuan block-reference syntax")
-	}
-	if !strings.Contains(systemPrompt, `for fixed text`) ||
-		!strings.Contains(systemPrompt, `for text that follows the target block's content`) {
-		t.Fatal("system prompt does not explain static and dynamic block-reference behavior")
-	}
-	if !strings.Contains(systemPrompt, `required whenever the anchor text differs from the referenced block's content`) ||
-		!strings.Contains(systemPrompt, `only when the anchor text is the target block's own content`) {
-		t.Fatal("system prompt does not tie static anchor text to mismatched content and dynamic anchor text to the target's own content")
-	}
-	if !strings.Contains(systemPrompt, `Never use ((<blockID>)) or [[<blockID>]]`) {
-		t.Fatal("system prompt does not reject block references without anchor text or bracketed block IDs")
-	}
-	if !strings.Contains(systemPrompt, `in chat responses use [title](siyuan://blocks/<blockID>)`) {
-		t.Fatal("system prompt does not distinguish note-content block references from chat-response links")
+func TestSystemPromptDocumentsChatBlockLinks(t *testing.T) {
+	for _, capabilities := range []*capabilitySet{nil, {registrations: map[string]*capabilityRegistration{}}} {
+		prompt := filterSystemPromptByCapabilities(systemPrompt, capabilities)
+		if !strings.Contains(prompt, `[title](siyuan://blocks/<blockID>)`) ||
+			!strings.Contains(prompt, "never fabricate IDs") {
+			t.Fatal("chat block links and their ID constraints must remain available without content tools")
+		}
 	}
 }
 
@@ -93,37 +80,34 @@ func TestSystemPromptUsesSanitizedKernelLogTool(t *testing.T) {
 	}
 }
 
-func TestSystemPromptDocumentsSuperBlockLayout(t *testing.T) {
+func TestSystemPromptPreservesNativeStructure(t *testing.T) {
 	for _, instruction := range []string{
-		`"row" means a vertical layout`,
-		`"col" means a horizontal layout`,
-		`{{{col`,
-		`Use {{{row for a vertical super-block`,
-		`Never use data-layout in raw block DOM`,
-		`data-sb-layout="row" or data-sb-layout="col"`,
-		`every child must be complete block DOM with an explicit data-type`,
-	} {
-		if !strings.Contains(systemPrompt, instruction) {
-			t.Fatalf("system prompt is missing the super-block instruction %q", instruction)
-		}
-	}
-}
-
-func TestSystemPromptDocumentsNativeContainerEditing(t *testing.T) {
-	for _, instruction := range []string{
-		"Tabs and Mindmap are native, editable SiYuan blocks",
-		"::: tabs\n@tab First",
-		"@tab:active Second",
-		`data-type="NodeMindmap"`,
-		`data-type="NodeMindmapItem"`,
-		"block.move/delete on item IDs",
-		"call block.dom and preserve all existing data-node-id values and attributes",
-		"lockType=true",
-		"Never rebuild these containers from their reading Markdown",
+		"use native capabilities and preserve existing structure, block IDs, and metadata",
+		"Follow the relevant tool descriptions for block-specific syntax and operations",
 		"Missing guide search results alone do not prove a feature is unsupported",
 	} {
 		if !strings.Contains(systemPrompt, instruction) {
-			t.Fatalf("missing native container instruction %q", instruction)
+			t.Fatalf("missing native structure instruction %q", instruction)
+		}
+	}
+	for _, capabilities := range []*capabilitySet{
+		nil,
+		{registrations: map[string]*capabilityRegistration{"block": {ModelName: "block"}}},
+		{registrations: map[string]*capabilityRegistration{}},
+	} {
+		prompt := filterSystemPromptByCapabilities(systemPrompt, capabilities)
+		if !strings.Contains(prompt, "preserve existing structure, block IDs, and metadata") {
+			t.Fatal("native structure protection was removed by capability filtering")
+		}
+		for _, detail := range []string{
+			"NodeTabs", "NodeTabItem", "NodeMindmap", "NodeMindmapItem", "::: tabs", "@tab", "tabs-position", "tabs-active-id",
+			"{{{col", "{{{row", "first paragraph", "second paragraph", "data-sb-layout", "NodeList", "previousID", "parentID",
+			"((<blockID>", "[[<blockID>]]", `data-type="text`, `data-type="u"`, `data-type="sup"`, `data-type="sub"`,
+			`data-type="kbd"`, "font-size", "font-weight", "<ruby>", "NodeHTMLBlock", "NodeCodeBlock",
+		} {
+			if strings.Contains(prompt, detail) {
+				t.Fatalf("block-specific detail %q belongs in the tool description, not the system prompt", detail)
+			}
 		}
 	}
 }

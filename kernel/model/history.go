@@ -393,7 +393,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 				srcAvPath = boxSrcAvPath
 				destAvPath = filepath.Join(util.DataDir, boxID, "storage", "av", avNode.AttributeViewID+".json")
 			}
-			if gulu.File.IsExist(destAvPath) {
+			if gulu.File.IsExist(destAvPath) || gulu.File.IsExist(srcAvPath) {
 				avBoxID := ""
 				if encrypted {
 					avBoxID = boxID
@@ -660,6 +660,11 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	to := filepath.Join(util.DataDir, boxID)
 	if filelock.IsExist(to) {
 		return errors.New(Conf.Language(371))
+	}
+	boundRecovery := &Transaction{trees: map[string]*parse.Tree{}}
+	defer func() { boundRecovery.finishAttributeViewMutation(err != nil) }()
+	if err = boundRecovery.restoreNotebookAttributeViewHistory(from, boxID); err != nil {
+		return err
 	}
 
 	if err = filelock.CopyNewtimes(from, to); err != nil {

@@ -498,6 +498,7 @@ func settingFileTreePayload(value *conf.FileTree) *apicontract.SettingFileTree {
 	result.CloseTabOnDoubleClick = value.CloseTabOnDoubleClick
 	result.DocIconClickExpand = value.DocIconClickExpand
 	result.ParentDocClickExpand = value.ParentDocClickExpand
+	result.ParentDocDoubleClickOpen = value.ParentDocDoubleClickOpen
 	result.BoxDocEnabled = value.BoxDocEnabled
 	result.UseSVGDefaultIcon = value.UseSVGDefaultIcon
 	result.RefCreateSaveBox = value.RefCreateSaveBox

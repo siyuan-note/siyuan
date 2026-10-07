@@ -28,7 +28,7 @@ func TestAVRelationItemContract(t *testing.T) {
 			t.Fatalf("candidate preview: %s %v", response.Body.String(), err)
 		}
 		if include {
-			if p := result.Data.NewItemPreview; p == nil || p.Error != "" || p.PrimaryKey != "Task A" || p.TemplateID != "" {
+			if p := result.Data.NewItemPreview; p == nil || p.Error != "" || p.PrimaryKey != "Task A" || p.TemplateID != "" || p.HasPrimaryKeyTemplate || p.InputPrimaryKey != "Task A" {
 				t.Fatalf("unexpected blank-template preview: %+v", p)
 			}
 		} else if result.Data.NewItemPreview != nil {
@@ -50,14 +50,14 @@ func TestAVRelationItemContract(t *testing.T) {
 		Data apicontract.AVRelationCandidatesData `json:"data"`
 	}
 	decodeAttributeViewContextFilterAPIResponse(t, response, &result)
-	if p := result.Data.NewItemPreview; p == nil || p.PrimaryKey != "Task from template" || p.Error != "" {
+	if p := result.Data.NewItemPreview; p == nil || p.PrimaryKey != "Task from template" || p.Error != "" || !p.HasPrimaryKeyTemplate || p.InputPrimaryKey != "Task A" {
 		t.Fatalf("template did not take precedence: %+v", p)
 	}
 	const createPath = "/api/av/createAttributeViewRelationItem"
 	before, _ := json.Marshal(fixture.attrView)
 	response = callAttributeViewContextFilterAPI(t, createPath, map[string]any{
 		"avID": fixture.attrView.ID, "blockID": fixture.databaseID, "keyID": fixture.relationKeyID,
-		"keyword": "Task A", "preview": result.Data.NewItemPreview,
+		"keyword": "Task A", "preview": result.Data.NewItemPreview, "useInputName": true,
 		"cells": []map[string]any{{"itemID": "missing", "relatedItemIDs": []string{}}},
 	}, createAttributeViewRelationItem)
 	requireAPIContract(t, http.MethodPost, createPath, response)

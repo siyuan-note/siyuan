@@ -31,6 +31,31 @@ it("keeps the footer loader hidden while refreshing existing candidates", () => 
     }
 });
 
+it("replaces both creation choices without accumulating rows on refresh", () => {
+    const source = readFileSync(join(__dirname, "relation.ts"), "utf8");
+    const start = source.indexOf("    const renderFooter = () => {");
+    const end = source.indexOf("    const updateLayout =", start);
+    assert.ok(start > 0 && end > start);
+    const rows = new Set<{remove: () => void}>();
+    const insert = () => {
+        for (let i = 0; i < 2; i++) {
+            const row = {remove: () => rows.delete(row)};
+            rows.add(row);
+        }
+    };
+    insert();
+    const listElement = {
+        dataset: {}, querySelectorAll: () => [...rows],
+        querySelector: (selector: string) => selector.includes("loader") ? {insertAdjacentHTML: insert} : [...rows][0],
+    };
+    const renderFooter = new Function("listElement", "hasMore", "genRelationFooterHTML", "options", "state",
+        transpileModule(source.slice(start, end), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText +
+        "\nreturn renderFooter;")(listElement, () => true, () => "two choices", {menuElement: {}}, {keyword: "Task A"});
+    renderFooter();
+    renderFooter();
+    assert.equal(rows.size, 2);
+});
+
 it("toggles one candidate sort, resets paging, and ignores width dragging", () => {
     const source = readFileSync(join(__dirname, "relation.ts"), "utf8");
     const start = source.indexOf('    listElement.addEventListener("click", event => {');

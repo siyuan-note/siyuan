@@ -1,4 +1,8 @@
 {
+	"newRelationItemWithTemplate": "Направи са подразумеваним шаблоном у ${x}: <b>${y}</b>",
+	"newRelationItemWithInputName": "Направи са унетим називом у ${x}: <b>${y}</b>",
+	"parentDocDoubleClickOpen": "Отвори надређени документ двоструким кликом на наслов",
+	"parentDocDoubleClickOpenTip": "Када је укључено, двоструки клик или додир на наслов отвара надређени документ без промене стања проширења; један клик или додир чека око 300 ms ради препознавања двоструког клика. Када је искључено, један клик или додир непосредно проширује или скупља подређене документе",
 	"decisionSaveFailed": "Није могуће сачувати подешавања услуге одлучивања; нацрт је задржан",
 	"decisionProvidersTip": "Подешавања добављача се чувају одвојено; промена важи за нове захтеве",
 	"decisionCurrentProvider": "Тренутно се користи",
@@ -868,7 +872,7 @@
 	"docIconClickExpand": "Klik na ikonicu dokumenta ili beležnice razvija ili sklapa poddokumente",
 	"docIconClickExpandTip": "Kada je uključeno, klik na ikonicu dokumenta ili beležnice razvija ili sklapa poddokumente; ako poddokumenata nema, otvara se dostupan dokument, a u suprotnom se ikonica može promeniti; kada je isključeno, klik na bilo koju ikonicu je menja",
 	"parentDocClickExpand": "Klik na naslov nadređenog dokumenta širi ili sažima poddokumente",
-	"parentDocClickExpandTip": "Kada je omogućeno, klik ili dodir naslova širi ili sažima poddokumente; dvostruki klik ili dvostruki dodir otvara nadređeni dokument bez promene stanja; ako nema poddokumenata, dovoljan je jedan klik ili dodir",
+	"parentDocClickExpandTip": "Када је укључено, клик или додир на наслов надређеног документа проширује или скупља подређене документе; документи без подређених докумената и даље се отварају једним кликом или додиром",
 	"mcpStatusAuthorizing": "Autorizacija u toku",
 	"mcpStatusAuthorizationRequired": "Potrebna autorizacija",
 	"mcpAuthorize": "Autorizuj",

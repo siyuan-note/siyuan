@@ -4,7 +4,10 @@ package model
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -12,6 +15,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type relationItemTestFixture struct {
@@ -83,26 +87,54 @@ func TestAttributeViewRelationItemCreation(t *testing.T) {
 	for _, test := range []struct {
 		name, primary, keyword, want string
 		target                       av.NewItemTargetType
+		useInputName                 bool
 	}{
-		{"without template", "", "Task A", "Task A", ""},
-		{"fallback", "", "Task A", "Task A", av.NewItemTargetDetached},
-		{"primary takes precedence", "Task from template", "Task A", "Task from template", av.NewItemTargetDetached},
-		{"empty search", "Task from template", "", "Task from template", av.NewItemTargetDetached},
-		{"blank item", "", "", "", ""},
-		{"document", "Task document", "Task A", "Task document", av.NewItemTargetDocument},
+		{"without template", "", "Task A", "Task A", "", false},
+		{"fallback", "", "Task A", "Task A", av.NewItemTargetDetached, false},
+		{"primary takes precedence", "Task from template", "Task A", "Task from template", av.NewItemTargetDetached, false},
+		{"empty search", "Task from template", "", "Task from template", av.NewItemTargetDetached, false},
+		{"blank item", "", "", "", "", false},
+		{"document", "Task document", "Task A", "Task document", av.NewItemTargetDocument, false},
+		{"input name", "Task from template", "  Task A  ", "Task A", av.NewItemTargetDetached, true},
+		{"document input name", "Task document", "Task A", "Task A", av.NewItemTargetDocument, true},
+		{"normalized document input", "Task document", "Task /A", "Task A", av.NewItemTargetDocument, true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			var template *av.NewItemTemplate
 			if test.target != "" {
 				template = &av.NewItemTemplate{TargetType: test.target, PrimaryKeyTemplate: test.primary, Icon: "1f600"}
 			}
+			if test.target == av.NewItemTargetDocument && test.useInputName {
+				template.SaveLocation = &av.NewItemSaveLocation{PathTemplate: "/Relation items/"}
+				template.ContentTemplatePath = "/relation.md"
+			}
 			fixture := setupRelationItemTest(t, template)
+			if template != nil && template.ContentTemplatePath != "" {
+				templateDir := filepath.Join(util.DataDir, "templates")
+				if err := os.MkdirAll(templateDir, 0755); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filepath.Join(templateDir, "relation.md"), []byte("Template body"), 0644); err != nil {
+					t.Fatal(err)
+				}
+			}
 			preview := PreviewAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, test.keyword)
-			if preview.Error != "" || preview.PrimaryKey != test.want {
+			wantPreview := test.want
+			if test.useInputName {
+				wantPreview = test.primary
+			}
+			if preview.Error != "" || preview.PrimaryKey != wantPreview || preview.HasPrimaryKeyTemplate != (test.primary != "") {
 				t.Fatalf("unexpected preview: %+v", preview)
 			}
+			wantInput := strings.TrimSpace(test.keyword)
+			if test.target == av.NewItemTargetDocument {
+				wantInput = normalizeDocTitle(wantInput)
+			}
+			if preview.InputPrimaryKey != wantInput {
+				t.Fatalf("input preview: got %q, want %q", preview.InputPrimaryKey, wantInput)
+			}
 			cells := []*AttributeViewRelationItemCell{{ItemID: fixture.itemIDs[0]}, {ItemID: fixture.itemIDs[1]}}
-			created, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, test.keyword, cells, preview)
+			created, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, test.keyword, cells, preview, test.useInputName)
 			if err != nil || created.Content != test.want || created.IsDetached != (test.target != av.NewItemTargetDocument) {
 				t.Fatalf("creation: %+v, %v", created, err)
 			}
@@ -122,6 +154,22 @@ func TestAttributeViewRelationItemCreation(t *testing.T) {
 					assertContextFilterRelationIDs(t, source.GetValue(fixture.keyID, id), created.ItemID)
 				}
 				assertContextFilterRelationIDs(t, target.GetValue(fixture.backKeyID, created.ItemID), fixture.itemIDs...)
+				if template != nil && template.ContentTemplatePath != "" {
+					tree, err := LoadTreeByBlockID(created.BlockID)
+					if err != nil {
+						t.Fatal(err)
+					}
+					found := false
+					ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+						if entering && node.Type == ast.NodeText && string(node.Tokens) == "Template body" {
+							found = true
+						}
+						return ast.WalkContinue
+					})
+					if !found {
+						t.Fatal("input name override lost the content template")
+					}
+				}
 			}
 			assertCreated()
 			entry := GlobalUndoLog.Peek(fixture.files.sourceID)
@@ -130,7 +178,11 @@ func TestAttributeViewRelationItemCreation(t *testing.T) {
 			}
 			if !created.IsDetached {
 				block := treenode.GetBlockTree(created.BlockID)
-				if block == nil || block.HPath != "/Target/"+test.want {
+				parent := "/Target/"
+				if test.useInputName {
+					parent = "/Relation items/"
+				}
+				if block == nil || block.HPath != parent+test.want {
 					t.Fatalf("document did not use the target database location: %+v", block)
 				}
 			}
@@ -162,6 +214,9 @@ func TestAttributeViewRelationItemPreviewValidation(t *testing.T) {
 	preview.PrimaryKey = "Task " + time.UnixMilli(preview.CreatedAt).Format("150405.000")
 	cells := []*AttributeViewRelationItemCell{{ItemID: fixture.itemIDs[0]}}
 	before, _ := json.Marshal(fixture.target)
+	if _, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "  ", cells, preview, true); err == nil {
+		t.Fatal("empty input name accepted")
+	}
 	for _, test := range []struct {
 		name   string
 		change func(*AttributeViewRelationItemPreview)
@@ -174,8 +229,10 @@ func TestAttributeViewRelationItemPreviewValidation(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			p := *preview
 			test.change(&p)
-			if _, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "Search", cells, &p); err == nil {
-				t.Fatal("invalid preview accepted")
+			for _, useInputName := range []bool{false, true} {
+				if _, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "Search", cells, &p, useInputName); err == nil {
+					t.Fatal("invalid preview accepted")
+				}
 			}
 			after, _ := json.Marshal(readAttributeViewItemsTest(t, fixture.target.ID))
 			if string(before) != string(after) {
@@ -184,11 +241,11 @@ func TestAttributeViewRelationItemPreviewValidation(t *testing.T) {
 		})
 	}
 	for _, invalid := range []*AttributeViewRelationItemCell{{ItemID: "missing"}, {ItemID: fixture.itemIDs[0], RelatedItemIDs: []string{"missing"}}} {
-		if _, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "Search", []*AttributeViewRelationItemCell{invalid}, preview); err == nil {
+		if _, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "Search", []*AttributeViewRelationItemCell{invalid}, preview, false); err == nil {
 			t.Fatal("invalid source or related item accepted")
 		}
 	}
-	created, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "Search", cells, preview)
+	created, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, "Search", cells, preview, false)
 	if err != nil || created.Content != preview.PrimaryKey {
 		t.Fatalf("preview time changed during creation: %+v %v", created, err)
 	}
@@ -202,7 +259,7 @@ func TestAttributeViewRelationItemPreservesExistingAndRollsBack(t *testing.T) {
 	cells := []*AttributeViewRelationItemCell{{ItemID: fixture.itemIDs[0]}}
 	create := func(name string) *CreateAttributeViewItemResult {
 		preview := PreviewAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, name)
-		result, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, name, cells, preview)
+		result, err := CreateAttributeViewRelationItem(fixture.source.ID, fixture.sourceBlockID, fixture.keyID, name, cells, preview, false)
 		if err != nil {
 			t.Fatal(err)
 		}

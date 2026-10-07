@@ -1460,15 +1460,7 @@ func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) (delete
 }
 
 func syncDelete2AvBlock(node *ast.Node, nodeTree *parse.Tree, delChildrenWhenDelParent bool, tx *Transaction) {
-	if nil == tx {
-		// 非事务调用（例如 RemoveDoc）无法批量收集，收集后立即清理已删除块的属性视图绑定行
-		// https://github.com/siyuan-note/siyuan/issues/18557
-		deletedAttrViewBlockIDs := map[string]map[string]struct{}{}
-		collectDeletedAttributeViewBlocks(node, delChildrenWhenDelParent, deletedAttrViewBlockIDs)
-		flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs)
-	} else {
-		tx.collectDeletedAttributeViewBlocks(node, nodeTree, delChildrenWhenDelParent)
-	}
+	tx.collectDeletedAttributeViewBlocks(node, nodeTree, delChildrenWhenDelParent)
 
 	for _, avID := range tx.syncDelete2Block(node, nodeTree) {
 		ReloadAttrView(avID)
@@ -1584,20 +1576,40 @@ func (tx *Transaction) flushDeletedAttributeViewBlocks() {
 	tx.deletedAttrViewBlockIDs = map[string]map[string]struct{}{}
 }
 
-func flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs map[string]map[string]struct{}) {
-	for avID, deletedBlockIDs := range deletedAttrViewBlockIDs {
-		attrView, err := av.ParseAttributeView(avID)
-		if nil != err || !removeAttributeViewBoundBlocks(attrView, deletedBlockIDs) {
+// 非编辑器删除先准备整批数据库变化，保存失败或文档删除失败时统一回滚。
+func (tx *Transaction) prepareDeletedBoundAttributeViewBlocks(deleted map[string]map[string]struct{}, boxID string) (
+	before, after map[string]*av.AttributeView, err error) {
+	before, after = map[string]*av.AttributeView{}, map[string]*av.AttributeView{}
+	for _, id := range sortedAttributeViewFieldKeys(deleted) {
+		original := before[id]
+		if original == nil {
+			original, err = tx.readAttributeViewForMutation(id, "", boxID)
+			if errors.Is(err, av.ErrViewNotFound) {
+				continue
+			}
+			if err != nil {
+				return nil, nil, err
+			}
+		}
+		current := after[id]
+		if current == nil {
+			current, err = cloneAttributeViewForFieldMutation(original)
+			if err != nil {
+				return nil, nil, err
+			}
+		}
+		if !removeAttributeViewBoundBlocks(current, deleted[id]) {
 			continue
 		}
-		regenAttrViewGroups(attrView)
-		if err = av.SaveAttributeView(attrView); err != nil {
-			logging.LogErrorf("remove deleted database bindings [%s] failed: %s", avID, err)
-			continue
+		before[id], after[id] = original, current
+		if err = tx.clearDeletedAttributeViewRelations(original, current, "", boxID, before, after); err != nil {
+			return nil, nil, err
 		}
-		GlobalUndoLog.ClearAttributeView(avID)
-		ReloadAttrView(avID)
 	}
+	for _, view := range after {
+		regenAttrViewGroups(view)
+	}
+	return before, after, nil
 }
 
 func removeAttributeViewBoundBlocks(attrView *av.AttributeView, deletedBlockIDs map[string]struct{}) (changed bool) {
@@ -1874,7 +1886,17 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	insertedNode.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
 
 	// 复制为副本时移除闪卡相关属性 https://github.com/siyuan-note/siyuan/issues/13987
-	insertedNode.RemoveIALAttr(NodeAttrRiffDecks)
+	if !tx.isReplay {
+		if insertedNode.IALAttr(NodeAttrRiffDecks) != "" {
+			insertedNode.RemoveIALAttr(NodeAttrRiffDecks)
+			// 重做使用规范化后的插入数据，副本保持与首次插入一致的闪卡状态。
+			normalized := tx.luteEngine.BlockDOM2Tree(operation.Data.(string))
+			if copied := treenode.GetNodeInTree(normalized, insertedNode.ID); copied != nil {
+				copied.RemoveIALAttr(NodeAttrRiffDecks)
+				operation.Data = tx.luteEngine.Tree2BlockDOM(normalized, tx.luteEngine.RenderOptions, tx.luteEngine.ParseOptions)
+			}
+		}
+	}
 
 	if ast.NodeAttributeView == insertedNode.Type {
 		// 插入数据库块时需要重新绑定其中已经存在的块

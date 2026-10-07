@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -79,11 +81,70 @@ func (tx *Transaction) restoreEmbeddedAttributeViewHistory(filename, boxID, avID
 		return err
 	}
 	current, err := tx.readAttributeViewForMutation(avID, "", boxID)
+	if errors.Is(err, av.ErrViewNotFound) {
+		cache.RemoveAVDataInBox(avID, boxID)
+		if tx.attributeViewRollback.createdViews == nil {
+			tx.attributeViewRollback.createdViews = map[string]string{}
+		}
+		tx.attributeViewRollback.createdViews[boxID+"/"+avID] = boundAttributeViewHistoryPath(util.DataDir, boxID, avID)
+		current, err = av.NewAttributeView(avID), nil
+	}
 	if err != nil {
 		return err
 	}
 	return tx.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{boxID: boxID},
 		map[string]*av.AttributeView{avID: current}, map[string]*av.AttributeView{avID: historical})
+}
+
+// 普通笔记本的数据库定义存放在全局目录，恢复笔记本时同时恢复内嵌数据库和缺失绑定条目。
+func (tx *Transaction) restoreNotebookAttributeViewHistory(historyPath, boxID string) error {
+	historyDir := filepath.Dir(historyPath)
+	if !filelock.IsExist(filepath.Join(historyDir, "storage", "av")) {
+		return nil
+	}
+	data, err := filelock.ReadFile(filepath.Join(historyPath, ".siyuan", "conf.json"))
+	if err != nil {
+		return err
+	}
+	var boxConf struct {
+		Encrypted bool `json:"encrypted"`
+	}
+	if err = json.Unmarshal(data, &boxConf); err != nil {
+		return err
+	}
+	if boxConf.Encrypted {
+		return nil
+	}
+	pages, err := pagedPathsWithError(historyPath, 32)
+	if err != nil {
+		return err
+	}
+	combined := &parse.Tree{Box: boxID, Root: &ast.Node{Type: ast.NodeDocument}}
+	for _, paths := range pages {
+		for _, filename := range paths {
+			data, readErr := filelock.ReadFile(filename)
+			if readErr != nil {
+				return readErr
+			}
+			tree, parseErr := loadTreeByData0(data)
+			if parseErr != nil {
+				return parseErr
+			}
+			tree.Box = boxID
+			combined.Root.AppendChild(tree.Root)
+			for _, node := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
+				if _, readErr := tx.readAttributeViewForMutation(node.AttributeViewID, "", ""); readErr == nil {
+					continue
+				} else if !errors.Is(readErr, av.ErrViewNotFound) {
+					return readErr
+				}
+				if err = tx.restoreEmbeddedAttributeViewHistory(boundAttributeViewHistoryPath(historyDir, "", node.AttributeViewID), "", node.AttributeViewID); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return tx.restoreBoundAttributeViewHistory(combined, historyDir)
 }
 
 // 删除文档前备份内嵌和绑定的数据库，沿用现有历史格式与加密路径，保留同一批删除的早期快照。
@@ -96,6 +157,27 @@ func backupBoundAttributeViewHistory(tree *parse.Tree, historyDir string) error 
 	boxID := ""
 	if IsEncryptedBox(tree.Box) {
 		boxID = tree.Box
+	}
+	// 单向关联的值存放在引用方数据库，删除前与绑定数据库一起保留快照。
+	for _, id := range sortedAttributeViewFieldKeys(bound) {
+		if len(bound[id]) == 0 {
+			continue
+		}
+		source, _ := av.FindAttributeViewPathInBox(id, boxID)
+		if source == "" {
+			continue
+		}
+		view, err := readBoundAttributeViewHistory(source, boxID, id)
+		if err != nil {
+			return err
+		}
+		for _, relatedID := range deletedAttributeViewRelationIDs(view) {
+			if relatedID != "" {
+				if _, exists := bound[relatedID]; !exists {
+					bound[relatedID] = nil
+				}
+			}
+		}
 	}
 	for _, id := range sortedAttributeViewFieldKeys(bound) {
 		source, _ := av.FindAttributeViewPathInBox(id, boxID)
@@ -165,7 +247,17 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 			if primary.IsDetached || primary.Block == nil {
 				continue
 			}
-			if _, exists := bound[id][primary.Block.ID]; !exists || current.GetBlockValueByBoundID(primary.Block.ID) != nil {
+			if _, exists := bound[id][primary.Block.ID]; !exists {
+				continue
+			}
+			if existing := current.GetBlockValueByBoundID(primary.Block.ID); existing != nil {
+				// 内嵌数据库整份恢复后条目已存在，仍需恢复删除期间被清理的外部关联。
+				key := boxID + "/" + id
+				original := tx.attributeViewRollback.views[key]
+				_, created := tx.attributeViewRollback.createdViews[key]
+				if created || original != nil && original.GetBlockValue(existing.BlockID) == nil {
+					restoredItems[id] = append(restoredItems[id], existing.BlockID)
+				}
 				continue
 			}
 			if existing := current.GetBlockValue(primary.BlockID); existing != nil {
@@ -194,6 +286,14 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 				}
 				if field.GetValue(value.BlockID) == nil {
 					field.Values = append(field.Values, value.Clone())
+				} else if field.Key.Type == av.KeyTypeRelation {
+					// 删除整篇文档会清理保留字段中的关联 ID，恢复条目时从历史还原关联值。
+					for i, currentValue := range field.Values {
+						if currentValue.BlockID == value.BlockID {
+							field.Values[i] = value.Clone()
+							break
+						}
+					}
 				}
 			}
 		}
@@ -215,7 +315,7 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 				current.CardCoverPositions[itemID] = covers
 			}
 		}
-		restoredItems[id] = itemIDs
+		restoredItems[id] = append(restoredItems[id], itemIDs...)
 	}
 	// 先合并所有主键，再恢复双向关联，允许同一文档内的条目互相关联。
 	for id, itemIDs := range restoredItems {
@@ -253,6 +353,56 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 					if !slices.Contains(backValue.Relation.BlockIDs, value.BlockID) {
 						backValue.Relation.BlockIDs = append(backValue.Relation.BlockIDs, value.BlockID)
 					}
+				}
+			}
+		}
+	}
+	// 只合并指向本次恢复条目的历史关联，保留引用方其他条目的后续编辑。
+	for id, itemIDs := range restoredItems {
+		for _, sourceID := range av.GetSrcAvIDs(id) {
+			historical, err := readBoundAttributeViewHistory(boundAttributeViewHistoryPath(historyDir, boxID, sourceID), boxID, sourceID)
+			if os.IsNotExist(err) {
+				continue
+			}
+			if err != nil {
+				return err
+			}
+			source, err := load(sourceID)
+			if err != nil {
+				return err
+			}
+			for _, oldField := range historical.KeyValues {
+				if oldField.Key.Type != av.KeyTypeRelation || oldField.Key.Relation == nil || oldField.Key.Relation.AvID != id {
+					continue
+				}
+				field, fieldErr := source.GetKeyValues(oldField.Key.ID)
+				if fieldErr != nil || field.Key.Type != av.KeyTypeRelation || !reflect.DeepEqual(field.Key.Relation, oldField.Key.Relation) {
+					continue
+				}
+				for _, oldValue := range oldField.Values {
+					if oldValue.Relation == nil || source.GetBlockValue(oldValue.BlockID) == nil {
+						continue
+					}
+					var missing []string
+					value := field.GetValue(oldValue.BlockID)
+					if value != nil && value.Relation == nil {
+						return errors.New("database relation value is invalid")
+					}
+					for _, targetID := range oldValue.Relation.BlockIDs {
+						if slices.Contains(itemIDs, targetID) && (value == nil || !slices.Contains(value.Relation.BlockIDs, targetID)) {
+							missing = append(missing, targetID)
+						}
+					}
+					if len(missing) == 0 {
+						continue
+					}
+					if value == nil {
+						value = oldValue.Clone()
+						value.Relation.BlockIDs = nil
+						field.Values = append(field.Values, value)
+					}
+					value.Relation.BlockIDs = restoreAttributeViewItemOrder(value.Relation.BlockIDs, oldValue.Relation.BlockIDs, missing)
+					value.Relation.Contents = nil
 				}
 			}
 		}

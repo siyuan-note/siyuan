@@ -1,4 +1,4 @@
-import {MobileEditorDialog} from "./MobileEditorDialog";
+import {getMobileEditorDialog, type MobileEditorDialog} from "./MobileEditorDialog";
 import {BacklinkContent} from "../../layout/dock/BacklinkContent";
 import {activeBlur} from "./keyboardToolbar";
 import {registerMobileBacklinkPanel} from "./backlinkPanels";
@@ -21,6 +21,7 @@ export const openMobileBacklinks = async (protyle: IProtyle, blockId: string) =>
     if (version !== openVersion || !protyle.element.isConnected) {
         return;
     }
+    const MobileEditorDialog = getMobileEditorDialog();
     const dialog = new MobileEditorDialog({
         content: '<div class="mobile-backlinks-content fn__flex-column"></div>',
         width: "100vw",

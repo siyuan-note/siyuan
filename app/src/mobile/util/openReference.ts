@@ -4,7 +4,7 @@ import {fetchSyncPost} from "../../util/fetch";
 import {showMessage} from "../../dialog/message";
 import {escapeHtml} from "../../util/escape";
 import {bindBottomSheetDialog} from "./bindBottomSheetDialog";
-import {MobileEditorDialog} from "./MobileEditorDialog";
+import {getMobileEditorDialog, type MobileEditorDialog} from "./MobileEditorDialog";
 import {activeBlur} from "./keyboardToolbar";
 import {flushMobileSecondaryEditor, registerMobileSecondaryEditor} from "./secondaryEditors";
 import {getVisibleViewportBounds} from "./visibleViewport";
@@ -117,6 +117,7 @@ export const openMobileReference = async (protyle: IProtyle, blockId: string) =>
                 source.contentElement.scrollLeft = scrollLeft;
             }
         };
+        const MobileEditorDialog = getMobileEditorDialog();
         const dialog = new MobileEditorDialog({
             title: window.siyuan.languages.viewRefContent,
             content: '<div class="mobile-reference-editor fn__flex-1"></div>',

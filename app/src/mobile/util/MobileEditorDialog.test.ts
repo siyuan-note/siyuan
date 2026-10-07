@@ -33,10 +33,36 @@ const setup = () => {
         assert.ok(modules[name], `Unexpected module: ${name}`);
         return modules[name];
     }, console: {error: (error: unknown) => errors.push(error)}});
-    const dialog = () => new api.MobileEditorDialog({content: "editor"}) as
-        InstanceType<typeof api.MobileEditorDialog> & {destroyed: number};
+    const dialog = () => new (api.getMobileEditorDialog())({content: "editor"}) as
+        import("./MobileEditorDialog").MobileEditorDialog & {destroyed: number};
     return {...api, dialog, messages, errors};
 };
+
+test("editor sheet imports wait for the dialog base class to finish initializing", () => {
+    const api = {} as typeof import("./MobileEditorDialog");
+    const dialogModule: {Dialog?: unknown} = {};
+    let dialogReads = 0;
+    runInNewContext(compiled, {exports: api, require: (name: string) => {
+        if (name === "../../dialog") {
+            dialogReads++;
+            return dialogModule;
+        }
+        return {};
+    }});
+    assert.equal(dialogReads, 0);
+    assert.equal(api.closeMobileEditorSheets(), undefined);
+    class Dialog {
+        constructor(public options: unknown) {}
+    }
+    dialogModule.Dialog = Dialog;
+    const DialogClass = api.getMobileEditorDialog();
+    const options = {content: "editor"};
+    const dialog = new DialogClass(options);
+    assert.ok(dialog instanceof Dialog);
+    assert.equal(dialog.options, options);
+    assert.equal(api.getMobileEditorDialog(), DialogClass);
+    assert.equal(dialogReads, 1);
+});
 
 test("registered editor sheets coalesce concurrent close requests and wait for every save", async () => {
     const fixture = setup();

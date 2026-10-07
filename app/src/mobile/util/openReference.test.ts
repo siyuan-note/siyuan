@@ -202,7 +202,7 @@ const setup = (readonly = false) => {
     return {...api, ...dialogAPI, ...saveAPI, ...editorSessionAPI, ...cellEditorAPI,
         source, requests, messages, editors, registered, flushes, refreshed, titleEvents, cellMasks, viewport,
         window, document, answer, open,
-        dialogs: dialogs as Array<DialogMock & InstanceType<typeof dialogAPI.MobileEditorDialog>>,
+        dialogs: dialogs as Array<DialogMock & import("./MobileEditorDialog").MobileEditorDialog>,
         setFlush: (callback: typeof flush) => { flush = callback; },
         finishDestroy: () => { destroyCallbacks.splice(0).forEach(callback => callback()); },
         disposedBindings: () => disposedBindings};

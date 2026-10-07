@@ -32,6 +32,7 @@ import {getDockHotkey} from "./hotkey";
 import {resolveDockPanelVisibility} from "./panelVisibility";
 import {syncDockEntryOrders} from "../../config/entryVisibility/runtime";
 import {isWindow} from "../../util/functions";
+import {bindPanelTransitionGuard} from "../../util/panelTransition";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 const DEFAULT_DOCK_SIZE = 232;
@@ -89,6 +90,7 @@ export class Dock {
         this.app = options.app;
         this.position = options.position;
         this.pin = options.data.pin;
+        bindPanelTransitionGuard(this.layout.element, () => this.isFloating());
         this.data = {};
         if (options.data.data[0]) {
             this.genButton(options.data.data[0], 0);

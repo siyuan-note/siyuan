@@ -67,6 +67,7 @@ import {nbsp2space} from "../protyle/util/normalizeText";
 import {armKeyboardLock, callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {initTouchDragBridge} from "../util/touchDragBridge";
+import {bindPanelTransitionGuard} from "../util/panelTransition";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {openByMobile} from "../editor/openLink";
 import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
@@ -297,6 +298,9 @@ class App {
                         }
                     }
                 }
+            });
+            ["sidebar", "sidebarRight"].forEach(id => {
+                bindPanelTransitionGuard(document.getElementById(id));
             });
             initTouchDragBridge();
         });

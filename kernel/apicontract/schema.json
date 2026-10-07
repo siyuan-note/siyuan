@@ -48347,6 +48347,18 @@
       },
       "additionalProperties": false
     },
+    "SettingsWindowRequestInput": {
+      "type": "object",
+      "properties": {
+        "settingsWindow": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "settingsWindow"
+      ],
+      "additionalProperties": false
+    },
     "Shorthand": {
       "type": "object",
       "properties": {
@@ -51557,6 +51569,9 @@
         "safeMode": {
           "type": "boolean"
         },
+        "settingsWindow": {
+          "type": "boolean"
+        },
         "updateChannel": {
           "type": "string"
         },
@@ -51586,6 +51601,7 @@
         "os",
         "osPlatform",
         "safeMode",
+        "settingsWindow",
         "workspaceDir"
       ],
       "additionalProperties": false
@@ -166757,6 +166773,81 @@
                     "type": "null"
                   }
                 ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setSettingsWindow",
+      "handler": "setSettingsWindow",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingsWindowRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
               },
               "msg": {
                 "type": "string"

@@ -1338,6 +1338,12 @@ var setDownloadInstallPkg = contractHandler(apicontract.SetDownloadInstallPkg, f
 	return apicontract.Success(apicontract.Null{})
 })
 
+var setSettingsWindow = contractHandler(apicontract.SetSettingsWindow, func(c *gin.Context, request apicontract.SettingsWindowRequest) apicontract.Response[apicontract.Null] {
+	model.Conf.System.SettingsWindow = request.SettingsWindow
+	model.Conf.Save()
+	return apicontract.Success(apicontract.Null{})
+})
+
 var setUpdateChannel = contractHandler(apicontract.SetUpdateChannel, func(c *gin.Context, request apicontract.UpdateChannelRequest) apicontract.Response[apicontract.Null] {
 	if err := model.SetUpdateChannel(request.UpdateChannel); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())

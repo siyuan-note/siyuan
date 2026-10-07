@@ -135,6 +135,8 @@ type SystemSystem struct {
 	DisabledFeatures                  []string            `json:"disabledFeatures" api:"optional,nullable"`
 	MicrosoftDefenderExcluded         bool                `json:"microsoftDefenderExcluded" api:"optional,nullable"`
 	SafeMode                          bool                `json:"safeMode" api:"optional,nullable"`
+	// 独立设置窗口默认关闭，不读取旧的本地存储偏好；重置设置时恢复为 false。
+	SettingsWindow bool `json:"settingsWindow" api:"optional,nullable"`
 }
 
 type SystemNetworkProxy struct {

@@ -6,7 +6,7 @@
 		"id": "20200924100906-0u4zfq3",
 		"title": "Window and Tab",
 		"type": "doc",
-		"updated": "20261001054930"
+		"updated": "20261007101500"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-fdf0e30",
-				"updated": "20261001054930"
+				"updated": "20261007101500"
 			},
 			"Children": [
 				{
@@ -1233,7 +1233,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260930192450-5l394sc",
-				"updated": "20261001054930"
+				"updated": "20261007101500"
 			},
 			"Children": [
 				{
@@ -1251,12 +1251,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930192450-jc5b7ix",
-				"updated": "20261001054930"
+				"updated": "20261007101500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The desktop client opens settings in an independent window by default. It can be moved, resized, and minimized. In "
+					"Data": "The desktop client opens settings in the main window by default. In "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1283,7 +1283,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", turn this switch off to open settings in the main window; the change applies the next time settings are opened. You can also open settings with the configured shortcut from a detached document window. You can keep it open while scrolling, switching, and editing documents. Opening settings again focuses the existing window. Setting changes synchronize with other windows in the same workspace. Bulk cleanup of unreferenced assets or databases and settings import temporarily block interaction while they run. The browser uses a settings dialog, and mobile uses a settings page. Legacy plugin settings open in their owning window and bring it to the foreground; plugins that opt in open in an independent window. In an independent settings window, press "
+					"Data": ", turn this switch on to open settings in an independent window that can be moved, resized, and minimized; the change applies the next time settings are opened. You can also open settings with the configured shortcut from a detached document window. You can keep it open while scrolling, switching, and editing documents. Opening settings again focuses the existing window. Setting changes synchronize with other windows in the same workspace. Bulk cleanup of unreferenced assets or databases and settings import temporarily block interaction while they run. The browser uses a settings dialog, and mobile uses a settings page. Legacy plugin settings open in their owning window and bring it to the foreground; plugins that opt in open in an independent window. In an independent settings window, press "
 				},
 				{
 					"Type": "NodeTextMark",

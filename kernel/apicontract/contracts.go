@@ -271,6 +271,7 @@ var (
 	SetFollowSystemLockScreen           = define[LockScreenRequest, Null]("setFollowSystemLockScreen", "/api/system/setFollowSystemLockScreen", JSONBody, ResponseOptions{}, "POST")
 	SetAutoLaunch                       = define[AutoLaunchRequest, Null]("setAutoLaunch", "/api/system/setAutoLaunch", JSONBody, ResponseOptions{}, "POST")
 	SetDownloadInstallPkg               = define[DownloadInstallPkgRequest, Null]("setDownloadInstallPkg", "/api/system/setDownloadInstallPkg", JSONBody, ResponseOptions{}, "POST")
+	SetSettingsWindow                   = define[SettingsWindowRequest, Null]("setSettingsWindow", "/api/system/setSettingsWindow", JSONBody, ResponseOptions{}, "POST")
 	SetNetworkServe                     = define[NetworkServeRequest, Null]("setNetworkServe", "/api/system/setNetworkServe", JSONBody, ResponseOptions{}, "POST")
 	SetNetworkServeTLS                  = define[NetworkServeTLSRequest, Null]("setNetworkServeTLS", "/api/system/setNetworkServeTLS", JSONBody, ResponseOptions{}, "POST")
 	SetUpdateChannel                    = define[UpdateChannelRequest, Null]("setUpdateChannel", "/api/system/setUpdateChannel", JSONBody, ResponseOptions{}, "POST")

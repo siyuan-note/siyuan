@@ -17567,25 +17567,25 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "When "
+					"Data": "With "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Click parent document title to expand or collapse child documents"
+					"TextMarkTextContent": "Clicking a document icon"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " is enabled, click or tap a parent title in the document tree or pinned documents to expand or collapse its children. Its "
+					"Data": " and "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Double-click a title to open the parent document"
+					"TextMarkTextContent": "Clicking a parent document title"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " sub-option is enabled by default: a single click or tap waits about 300 ms, while a double-click or double-tap opens the parent without changing its expansion state. Disable the sub-option to expand or collapse with one click or tap without waiting for double-click detection; open the parent through its document menu. Documents without children still open with one click or tap"
+					"Data": " set, the document tree and pinned documents decide the click action: the expand-only choice expands or collapses immediately, while the double-click choice opens the parent on a double-click or double-tap without changing its expansion state and makes a single click or tap wait about 300 ms; the parent can still be opened from its document menu. A title without child documents still opens directly; clicking a document icon opens an openable document or otherwise changes the icon; a notebook icon always only changes the icon"
 				}
 			]
 		},

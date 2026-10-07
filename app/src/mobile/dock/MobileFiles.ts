@@ -164,7 +164,7 @@ export class MobileFiles extends Model {
             let target = event.target as HTMLElement;
             const parentTitle = target.closest<HTMLElement>(".b3-list-item__text");
             const parentRow = parentTitle?.parentElement;
-            const isParentTitle = window.siyuan.config.fileTree.parentDocClickExpand &&
+            const isParentTitle = window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 &&
                 !!parentRow?.getAttribute("data-node-id") && Number(parentRow.getAttribute("data-count")) > 0;
             if (!isParentTitle) {
                 this.parentDocClick.cancel();
@@ -315,7 +315,7 @@ export class MobileFiles extends Model {
                     const ulElement = hasTopClosestByTag(target, "UL");
                     const notebookId = ulElement ? ulElement.getAttribute("data-url") : "";
                     if (target.getAttribute("data-type") === "navigation-file") {
-                        if (window.siyuan.config.fileTree.parentDocClickExpand && Number(target.getAttribute("data-count")) > 0) {
+                        if (window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 && Number(target.getAttribute("data-count")) > 0) {
                             if (parentRow === target) {
                                 this.handleParentDocClick(target, notebookId);
                             } else {
@@ -328,7 +328,7 @@ export class MobileFiles extends Model {
                     } else if (target.getAttribute("data-type") === "navigation-root") {
                         const boxDocID = target.getAttribute("data-node-id");
                         if (boxDocID) {
-                            if (window.siyuan.config.fileTree.parentDocClickExpand && Number(target.getAttribute("data-count")) > 0) {
+                            if (window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 && Number(target.getAttribute("data-count")) > 0) {
                                 if (parentRow === target) {
                                     this.handleParentDocClick(target, notebookId);
                                 } else {
@@ -1483,7 +1483,8 @@ export class MobileFiles extends Model {
 
     private handleParentDocClick(item: HTMLElement, notebookId: string) {
         const docId = item.getAttribute("data-node-id");
-        if (window.siyuan.config.fileTree.parentDocDoubleClickOpen === false) {
+        // 单击展开且不双击打开时立即切换，无需等待双击判定
+        if (window.siyuan.config.fileTree.parentDocTitleClickMode !== 2) {
             this.parentDocClick.cancel();
             this.toggleTreeItem(item);
             return;
@@ -1497,8 +1498,7 @@ export class MobileFiles extends Model {
                 app: Constants.SIYUAN_APPID,
             });
             return () => {
-                if (!window.siyuan.config.fileTree.parentDocClickExpand ||
-                    window.siyuan.config.fileTree.parentDocDoubleClickOpen === false ||
+                if (window.siyuan.config.fileTree.parentDocTitleClickMode !== 2 ||
                     item.getAttribute("data-node-id") !== docId || item.getAttribute("data-path") !== path ||
                     Number(item.getAttribute("data-count")) <= 0 ||
                     !!item.querySelector(".b3-list-item__arrow--open") !== expanded) { return; }

@@ -45,8 +45,7 @@ const loadPanel = (fetchCode = 0) => {
     const storage = new Map<string, string>();
     const docs: {id: string, notebook: string, name: string}[] = [];
     const childData = {effectiveSortMode: 6, files: [] as {id: string, name: string, icon?: string}[]};
-    const config = {readonly: false, fileTree: {docIconClickExpand: false, parentDocClickExpand: false,
-        parentDocDoubleClickOpen: undefined as boolean | undefined}};
+    const config = {readonly: false, fileTree: {docIconClickMode: 0, parentDocTitleClickMode: 0}};
     const calls: {kind: string, args: unknown[]}[] = [];
     const timers: (() => void)[] = [];
     const runtime = {config, notebooks: [] as unknown[], languages: {pinDoc: "Pin", dragTipMoveChild: "Into ${x}",
@@ -212,7 +211,7 @@ test("pinned icons respect editing, expansion and readonly settings", () => {
     config.readonly = true;
     panel.click(event);
     assert.equal(calls.length, 1);
-    config.fileTree.docIconClickExpand = true;
+    config.fileTree.docIconClickMode = 1;
     panel.toggle = () => { calls.push({kind: "toggle", args: []}); };
     panel.open = () => { calls.push({kind: "open", args: []}); };
     panel.click(event);
@@ -406,7 +405,7 @@ test("parent titles prefetch once and double clicks preserve expanded and collap
         {expanded: false, mobile: true}, {expanded: true, mobile: true},
     ]) {
         const {panel, config, calls} = loadPanel();
-        config.fileTree.parentDocClickExpand = true;
+        config.fileTree.parentDocTitleClickMode = 2;
         panel.mobile = mobile;
         panel.generation = 0;
         panel.expanded = new Set(expanded ? ["doc"] : []);
@@ -430,7 +429,7 @@ test("parent titles prefetch once and double clicks preserve expanded and collap
 
 test("single parent click reuses prefetched children after the click window", async () => {
     const {panel, config, calls, childData} = loadPanel();
-    config.fileTree.parentDocClickExpand = true;
+    config.fileTree.parentDocTitleClickMode = 2;
     panel.generation = 0;
     panel.expanded = new Set();
     const row = {isConnected: true, dataset: {nodeId: "doc", notebook: "box", pinRow: "doc", path: "/doc.sy", count: "1"},
@@ -445,17 +444,16 @@ test("single parent click reuses prefetched children after the click window", as
     assert.deepEqual(calls.find(call => call.kind === "toggle").args, [row, true, childData]);
 });
 
-test("disabled double-click opening toggles pinned parent titles immediately on desktop and mobile", () => {
+test("expand-only mode toggles pinned parent titles immediately on desktop and mobile", () => {
     for (const mobile of [false, true]) {
         const {panel, config, calls} = loadPanel();
-        config.fileTree.parentDocClickExpand = true;
-        config.fileTree.parentDocDoubleClickOpen = false;
+        config.fileTree.parentDocTitleClickMode = 1;
         panel.mobile = mobile;
         const row = {dataset: {nodeId: "doc", notebook: "box", count: "4"}, classList: {add() {}}};
         const event = {stopPropagation() {}, target: {closest: (selector: string) =>
             selector === "[data-pin-row]" || selector === ".b3-list-item__text" ? row : null}};
         panel.toggle = () => { panel.parentDocClick.cancel(); calls.push({kind: "toggle", args: []}); };
-        panel.open = () => assert.fail("disabled double-click opening must not open the document");
+        panel.open = () => assert.fail("expand-only mode must not open the document");
         panel.click(event);
         assert.deepEqual(calls.map(call => call.kind), ["toggle"]);
         panel.click(event);

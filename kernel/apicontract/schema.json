@@ -31235,6 +31235,16 @@
             }
           ]
         },
+        "RawSignatureAlgorithm": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "RawSubject": {
           "anyOf": [
             {
@@ -31416,6 +31426,7 @@
         "PublicKeyAlgorithm",
         "Raw",
         "RawIssuer",
+        "RawSignatureAlgorithm",
         "RawSubject",
         "RawSubjectPublicKeyInfo",
         "RawTBSCertificate",
@@ -31453,6 +31464,26 @@
         },
         "HelloRetryRequest": {
           "type": "boolean"
+        },
+        "LocalCertificate": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "NegotiatedProtocol": {
           "type": "string"
@@ -31564,6 +31595,7 @@
         "ECHAccepted",
         "HandshakeComplete",
         "HelloRetryRequest",
+        "LocalCertificate",
         "NegotiatedProtocol",
         "NegotiatedProtocolIsMutual",
         "OCSPResponse",
@@ -40391,10 +40423,10 @@
             }
           ]
         },
-        "docIconClickExpand": {
+        "docIconClickMode": {
           "anyOf": [
             {
-              "type": "boolean"
+              "type": "integer"
             },
             {
               "type": "null"
@@ -40451,20 +40483,10 @@
             }
           ]
         },
-        "parentDocClickExpand": {
+        "parentDocTitleClickMode": {
           "anyOf": [
             {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "parentDocDoubleClickOpen": {
-          "anyOf": [
-            {
-              "type": "boolean"
+              "type": "integer"
             },
             {
               "type": "null"
@@ -45279,8 +45301,8 @@
         "docCreateTemplatePath": {
           "type": "string"
         },
-        "docIconClickExpand": {
-          "type": "boolean"
+        "docIconClickMode": {
+          "type": "integer"
         },
         "largeFileWarningSize": {
           "type": "integer"
@@ -45297,18 +45319,8 @@
         "openFilesUseCurrentTab": {
           "type": "boolean"
         },
-        "parentDocClickExpand": {
-          "type": "boolean"
-        },
-        "parentDocDoubleClickOpen": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ]
+        "parentDocTitleClickMode": {
+          "type": "integer"
         },
         "recentDocsMaxListCount": {
           "type": "integer"
@@ -45365,14 +45377,13 @@
         "docCreateSaveBox",
         "docCreateSavePath",
         "docCreateTemplatePath",
-        "docIconClickExpand",
+        "docIconClickMode",
         "largeFileWarningSize",
         "maxListCount",
         "maxOpenTabCount",
         "noSplitScreenWhenOpenTab",
         "openFilesUseCurrentTab",
-        "parentDocClickExpand",
-        "parentDocDoubleClickOpen",
+        "parentDocTitleClickMode",
         "recentDocsMaxListCount",
         "refCreateSaveBox",
         "refCreateSavePath",
@@ -45479,10 +45490,10 @@
             }
           ]
         },
-        "docIconClickExpand": {
+        "docIconClickMode": {
           "anyOf": [
             {
-              "type": "boolean"
+              "type": "integer"
             },
             {
               "type": "null"
@@ -45539,20 +45550,10 @@
             }
           ]
         },
-        "parentDocClickExpand": {
+        "parentDocTitleClickMode": {
           "anyOf": [
             {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "parentDocDoubleClickOpen": {
-          "anyOf": [
-            {
-              "type": "boolean"
+              "type": "integer"
             },
             {
               "type": "null"

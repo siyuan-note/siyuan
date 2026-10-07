@@ -300,10 +300,13 @@ export class PinnedDocs {
         row.style.setProperty("--file-action-offset", `${paddingLeft + 20}px`);
         row.setAttribute("aria-disabled", String(Boolean(doc.unavailable)));
         if (doc.subFileCount) { row.setAttribute("aria-expanded", "false"); }
-        const iconExpands = this.mobile || window.siyuan.config.fileTree.docIconClickExpand;
-        const iconLabel = iconExpands ? (doc.subFileCount ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument) : window.siyuan.languages.changeIcon;
+        // 桌面端点击会修改图标时给出提示，移动端保留无障碍标签
+        const iconExpands = this.mobile || window.siyuan.config.fileTree.docIconClickMode === 1;
+        const iconLabel = iconExpands ? (this.mobile ?
+            (doc.subFileCount ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument) : "") :
+            window.siyuan.languages.changeIcon;
         if (!doc.icon) { row.dataset.defaultIcon = doc.subFileCount ? "folder" : "file"; }
-        row.innerHTML = `<span data-pin-toggle="true" style="padding-left:${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${doc.subFileCount ? "" : " fn__hidden"}"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__icon ariaLabel" data-position="8east" aria-label="${iconLabel}">${getFileTreeIconHTML(doc.icon, doc.subFileCount ? "folder" : "file")}</span><span class="b3-list-item__text">${escapeHtml(doc.name)}${doc.unavailable ? ` (${window.siyuan.languages.closeNotebook})` : ""}</span><span data-pin-more="true" class="b3-list-item__action" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`;
+        row.innerHTML = `<span data-pin-toggle="true" style="padding-left:${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${doc.subFileCount ? "" : " fn__hidden"}"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__icon${iconLabel ? " ariaLabel" : ""}" data-position="8east"${iconLabel ? ` aria-label="${iconLabel}"` : ""}>${getFileTreeIconHTML(doc.icon, doc.subFileCount ? "folder" : "file")}</span><span class="b3-list-item__text">${escapeHtml(doc.name)}${doc.unavailable ? ` (${window.siyuan.languages.closeNotebook})` : ""}</span><span data-pin-more="true" class="b3-list-item__action" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`;
         if (!doc.unavailable && !window.siyuan.config.readonly) {
             const add = document.createElement("span");
             add.className = "b3-list-item__action";
@@ -443,7 +446,7 @@ export class PinnedDocs {
         } else if (target.closest("[data-pin-toggle]")) {
             this.toggle(row);
         } else if (target.closest(".b3-list-item__icon") && row.dataset.unavailable !== "true") {
-            if (this.mobile || window.siyuan.config.fileTree.docIconClickExpand) {
+            if (this.mobile || window.siyuan.config.fileTree.docIconClickMode === 1) {
                 this.selectRow(row);
                 if (Number(row.dataset.count) > 0) { this.toggle(row); } else { this.open(row.dataset.nodeId, row.dataset.notebook); }
             } else if (!window.siyuan.config.readonly) {
@@ -454,10 +457,10 @@ export class PinnedDocs {
             }
         } else if (row.dataset.unavailable !== "true") {
             this.selectRow(row);
-            if (window.siyuan.config.fileTree.parentDocClickExpand && Number(row.dataset.count) > 0) {
+            if (window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 && Number(row.dataset.count) > 0) {
                 if (!target.closest(".b3-list-item__text") ||
                     event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ||
-                    window.siyuan.config.fileTree.parentDocDoubleClickOpen === false) {
+                    window.siyuan.config.fileTree.parentDocTitleClickMode !== 2) {
                     this.toggle(row);
                     return;
                 }
@@ -468,8 +471,7 @@ export class PinnedDocs {
                     const response = expanded ? undefined : await this.requestChildren(row);
                     return () => {
                         if (generation !== this.generation || row.dataset.path !== path ||
-                            !window.siyuan.config.fileTree.parentDocClickExpand ||
-                            window.siyuan.config.fileTree.parentDocDoubleClickOpen === false ||
+                            window.siyuan.config.fileTree.parentDocTitleClickMode !== 2 ||
                             this.expanded.has(row.dataset.pinRow) !== expanded) { return; }
                         if (expanded) {
                             void this.toggle(row, false);

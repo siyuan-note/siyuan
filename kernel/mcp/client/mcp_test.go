@@ -303,7 +303,7 @@ func TestMCPToolRetriesAfterSessionRejection(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	result, err := mcpToolContextHandler(configured.Name, "execute", 5*time.Second, false)(ctx, nil)
+	result, err := mcpToolContextHandler(configured.ID, "execute", 5*time.Second, false)(ctx, nil)
 	if err != nil || result.IsError || result.ExecutionUnknown || len(result.Content) == 0 || result.Content[0].Text != "done" {
 		t.Fatalf("unexpected tool result: result=%#v err=%v", result, err)
 	}
@@ -315,7 +315,7 @@ func TestMCPToolRetriesAfterSessionRejection(t *testing.T) {
 	denyInitialize.Store(true)
 	failedCtx, failedCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer failedCancel()
-	result, err = mcpToolContextHandler(configured.Name, "execute", 5*time.Second, false)(failedCtx, nil)
+	result, err = mcpToolContextHandler(configured.ID, "execute", 5*time.Second, false)(failedCtx, nil)
 	if err != nil || !result.IsError || result.ExecutionUnknown {
 		t.Fatalf("reconnect failure was not reported as a known rejection: result=%#v err=%v", result, err)
 	}
@@ -476,8 +476,14 @@ func TestOAuthToolFailureRemovesUnauthorizedConnection(t *testing.T) {
 	mcpMu.Lock()
 	oldConns := mcpConns
 	oldRuntime := mcpRuntime
-	mcpConns = []Connection{{ServerID: serverID, ServerName: "oauth-tool", Tools: 1}}
-	mcpRuntime = map[string]mcpRuntimeState{serverID: {Status: "oauth_retrying", Tools: 1}}
+	mcpConns = []Connection{
+		{ServerID: "other-server", ServerName: "oauth-tool", Tools: 1},
+		{ServerID: serverID, ServerName: "oauth-tool", Tools: 1},
+	}
+	mcpRuntime = map[string]mcpRuntimeState{
+		"other-server": {Status: "connected", Tools: 1},
+		serverID:       {Status: "oauth_retrying", Tools: 1},
+	}
 	mcpMu.Unlock()
 	t.Cleanup(func() {
 		mcpMu.Lock()
@@ -486,12 +492,17 @@ func TestOAuthToolFailureRemovesUnauthorizedConnection(t *testing.T) {
 		mcpMu.Unlock()
 	})
 
-	updateMCPRuntimeAfterToolCall("oauth-tool", errors.New("401 Unauthorized"))
+	updateMCPRuntimeAfterToolCall(serverID, errors.New("401 Unauthorized"))
 	mcpMu.Lock()
 	connections := len(mcpConns)
 	state := mcpRuntime[serverID]
+	otherState := mcpRuntime["other-server"]
+	remainingID := ""
+	if len(mcpConns) > 0 {
+		remainingID = mcpConns[0].ServerID
+	}
 	mcpMu.Unlock()
-	if connections != 0 || state.Status != "authorization_required" {
+	if connections != 1 || remainingID != "other-server" || otherState.Status != "connected" || state.Status != "authorization_required" {
 		t.Fatalf("unexpected unauthorized connection state: connections=%d state=%#v", connections, state)
 	}
 }
@@ -513,7 +524,7 @@ func TestReconnectMCPDoesNotInterruptPendingConnection(t *testing.T) {
 		mcpMu.Unlock()
 	})
 
-	if reconnectMCP("server") {
+	if reconnectMCP("server-id") {
 		t.Fatal("pending connection was interrupted")
 	}
 	mcpMu.Lock()
@@ -526,7 +537,7 @@ func TestReconnectMCPDoesNotInterruptPendingConnection(t *testing.T) {
 
 func TestReconnectMCPAsyncKeepsOtherConnections(t *testing.T) {
 	serverA := conf.MCPServer{ID: "server-a", Name: "server-a", Enabled: true, Type: "stdio"}
-	serverB := conf.MCPServer{ID: "server-b", Name: "server-b", Enabled: true, Type: "stdio"}
+	serverB := conf.MCPServer{ID: "server-b", Name: serverA.Name, Enabled: true, Type: "stdio"}
 	mcpMu.Lock()
 	oldConns := mcpConns
 	oldServers := mcpServers
@@ -559,7 +570,9 @@ func TestReconnectMCPAsyncKeepsOtherConnections(t *testing.T) {
 		mcpMu.Unlock()
 	})
 
-	ReconnectMCPAsync([]conf.MCPServer{serverA, serverB}, []string{serverA.ID}, nil)
+	if !reconnectMCP(serverA.ID) {
+		t.Fatal("same-name server was not selected by ID for reconnect")
+	}
 	deadline := time.Now().Add(5 * time.Second)
 	for time.Now().Before(deadline) {
 		mcpMu.Lock()

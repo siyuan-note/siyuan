@@ -211,6 +211,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             rootId: data.data.rootID,
             notebookId: data.data.box,
             scrollPosition,
+            scrollAttr,
             action: actionList,
             render: {
                 scroll: true,

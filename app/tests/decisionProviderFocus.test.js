@@ -21,7 +21,9 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
     const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
     const unexpected = () => { throw new Error("Opening and closing decision profiles must not call an external service"); };
     const mocks = {
-        "config/tabs/ai/aiRuntime": {AI_CONFIG_CHANGED_EVENT: "siyuan-ai-config-changed", aiConfigApi: {patch: unexpected}},
+        "config/tabs/ai/aiRuntime": {AI_CONFIG_CHANGED_EVENT: "siyuan-ai-config-changed", aiConfigApi: {
+            patch: unexpected, waitForSave: async () => true,
+        }},
         "dialog/confirmDialog": {confirmDialog: unexpected},
         "dialog/message": {showMessage: unexpected},
         "util/fetch": {fetchPost: unexpected},
@@ -47,12 +49,11 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
         return exports;
     };
     window.siyuan = {languages, config: {ai: {decision: {
-        enabled: true, provider: "typesafe", profiles: {
+        enabled: false, provider: "typesafe", profiles: {
             typesafe: {endpoint: "https://typesafe.example/v1/systemone", apiKey: "", name: "jev-latest", timeout: 30},
             openai: {endpoint: "https://openai.example/v1/decisions", apiKey: "", name: "gpt-6-luna", timeout: 30},
         },
     }}}};
-    const initialConfig = JSON.stringify(window.siyuan.config);
     const ui = load("config/tabs/ai/aiDecisionUi");
     // 复用桌面设置外壳，绝对定位参照是面板而非滚动页，保留真实溢出与动画规则。
     document.body.insertAdjacentHTML("beforeend", `<div class="b3-dialog b3-dialog--open">
@@ -69,10 +70,31 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
     const dialog = document.querySelector(".b3-dialog");
     const panel = dialog.querySelector(".config__panel");
     const root = dialog.querySelector(".config__tab-container");
+    const switchHTML = load("config/render/fragments").genSwitchRow("ai.decision.enabled",
+        languages.decisionModel, languages.decisionModelTip, false);
     root.innerHTML = `<div class="config-group config-group--first config-group--last">
-        <div class="config-title">${languages.decisionModel}</div><div class="config-items">${ui.genDecisionCardsHtml()}</div>
+        <div class="config-title">${languages.decisionModel}</div><div class="config-items">${switchHTML}${ui.genDecisionCardsHtml()}</div>
     </div>`;
     ui.mountDecisionCards(root);
+    const decision = window.siyuan.config.ai.decision;
+    const preservedConfig = JSON.stringify({provider: decision.provider, profiles: decision.profiles});
+    const enabledInput = root.querySelector('[id="ai.decision.enabled"]');
+    const providerBlock = root.querySelector("#aiDecisionCardsBlock");
+    const refreshConfig = enabled => {
+        decision.enabled = enabled;
+        window.dispatchEvent(new CustomEvent("siyuan-ai-config-changed"));
+    };
+    assert.equal(getComputedStyle(providerBlock).display, "none", "The entire provider configuration starts hidden while disabled");
+    root.querySelector("[data-decision-provider='typesafe']").click();
+    assert.equal(root.querySelector("[data-decision-profile-view]"), null, "Disabled cards cannot open a detail");
+    enabledInput.checked = true;
+    enabledInput.dispatchEvent(new Event("change", {bubbles: true}));
+    assert.notEqual(getComputedStyle(providerBlock).display, "none", "Reuse immediate switch-controlled visibility");
+    root.querySelector("[data-decision-provider='typesafe']").click();
+    assert.equal(root.querySelector("[data-decision-profile-view]"), null, "Pending enable must not bypass saved configuration");
+    refreshConfig(true);
+    await wait(0);
+    const initialConfig = JSON.stringify(window.siyuan.config);
     assert.equal(getComputedStyle(root).position, "static", "Do not hide the bug with a positioned tab fixture");
     assert.equal(getComputedStyle(panel).overflowX, "hidden");
     const ancestors = element => {
@@ -204,6 +226,74 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
                 assert.equal(JSON.stringify(window.siyuan.config), initialConfig, "Opening and cancelling never changes configuration");
             }
         }
+        const card = root.querySelector("[data-decision-provider='openai']");
+        card.click();
+        await wait(360);
+        const view = root.querySelector("[data-decision-profile-view='openai']");
+        const draftInput = view.querySelector("[data-decision-field='endpoint']");
+        const originalEndpoint = draftInput.value;
+        draftInput.value = "https://unsaved.example/v1/decisions";
+        draftInput.dispatchEvent(new Event("input", {bubbles: true}));
+        enabledInput.checked = false;
+        enabledInput.dispatchEvent(new Event("change", {bubbles: true}));
+        assert.equal(getComputedStyle(providerBlock).display, "none", "Disabling immediately hides all provider content");
+        assert.equal(getComputedStyle(view).display, "none", "Disabling also hides an already open detail");
+        refreshConfig(false);
+        assert.equal(enabledInput.checked, false);
+        assert.equal(view.isConnected, true, "An unsaved draft stays mounted while disabled");
+        for (const action of ["save", "use", "test"]) {
+            const button = view.querySelector(`[data-action='${action}']`);
+            assert.equal(button.disabled, true);
+            button.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        }
+        await wait(0);
+        assert.equal(JSON.stringify({provider: decision.provider, profiles: decision.profiles}), preservedConfig,
+            "Disabling never clears saved profiles, credentials, or the active provider");
+        const providerViews = load("config/tabs/ai/aiProviderUi");
+        const ordinaryView = providerViews.createProviderView(root, languages.apiProvider);
+        ordinaryView.querySelector(".b3-dialog__body").textContent = "Ordinary provider settings";
+        await wait(360);
+        assert.equal(view.isConnected, true, "Opening another provider must not destroy the paused decision draft");
+        refreshConfig(true);
+        assert.equal(getComputedStyle(view).display, "none", "Resuming enablement must not cover another provider detail");
+        providerViews.removeProviderView(root, ordinaryView);
+        await wait(360);
+        root.querySelector("[data-decision-provider='openai']").click();
+        await wait(360);
+        assert.equal(root.querySelector("[data-decision-profile-view='openai']"), view, "Enabling resumes the same draft");
+        assert.equal(draftInput.value, "https://unsaved.example/v1/decisions");
+        assert.notEqual(getComputedStyle(view).display, "none");
+        visible(draftInput, "resumed unsaved draft");
+        draftInput.value = originalEndpoint;
+        draftInput.dispatchEvent(new Event("input", {bubbles: true}));
+        view.querySelector("[data-action='cancel']").click();
+        await wait(360);
+        refreshConfig(false);
+        assert.equal(getComputedStyle(providerBlock).display, "none");
+        assert.equal(root.querySelector("[data-decision-profile-view]"), null);
+        refreshConfig(true);
+        assert.equal(JSON.stringify(window.siyuan.config), initialConfig);
+        // 原生输入会在目标与祖先监听器间执行微任务，不能只用 dispatchEvent 验证保存顺序。
+        const savedSwitches = [];
+        let pendingSave = Promise.resolve(true);
+        mocks["config/tabs/ai/aiRuntime"].aiConfigApi.waitForSave = () => pendingSave;
+        root.addEventListener("change", event => {
+            if (event.target !== enabledInput) { return; }
+            assert.equal(event.isTrusted, true);
+            const enabled = enabledInput.checked;
+            savedSwitches.push(enabled);
+            pendingSave = wait(20).then(() => { refreshConfig(enabled); return true; });
+        });
+        for (const enabled of [false, true]) {
+            enabledInput.focus({preventScroll: true});
+            await require("electron").ipcRenderer.invoke("decision-test-toggle");
+            await wait(60);
+            assert.equal(enabledInput.checked, enabled, "Native switch input survives delegated save ordering");
+            assert.equal(decision.enabled, enabled);
+            assert.equal(getComputedStyle(providerBlock).display === "none", !enabled);
+        }
+        assert.deepEqual(savedSwitches, [false, true]);
+        assert.equal(JSON.stringify(window.siyuan.config), initialConfig);
     } finally {
         HTMLElement.prototype.focus = nativeFocus;
         dialog.remove();
@@ -214,7 +304,7 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
 };
 
 const runElectron = async () => {
-    const {app, BrowserWindow} = require("electron");
+    const {app, BrowserWindow, ipcMain} = require("electron");
     const {ModuleKind, ScriptTarget, transpileModule} = require("typescript");
     const appRoot = path.join(__dirname, "..");
     const sources = Object.fromEntries(sourceModules.map(id => [id, transpileModule(
@@ -233,6 +323,11 @@ const runElectron = async () => {
         nodeIntegration: true, contextIsolation: false, backgroundThrottling: false, offscreen: true,
     }});
     const requests = [];
+    ipcMain.handle("decision-test-toggle", event => {
+        assert.equal(event.sender, win.webContents);
+        win.webContents.sendInputEvent({type: "keyDown", keyCode: "Space"});
+        win.webContents.sendInputEvent({type: "keyUp", keyCode: "Space"});
+    });
     win.webContents.session.webRequest.onBeforeRequest({urls: ["http://*/*", "https://*/*"]}, (details, callback) => {
         requests.push(details.url);
         callback({cancel: true});
@@ -257,6 +352,7 @@ const runElectron = async () => {
         assert.deepEqual(requests, [], "No external network requests are permitted");
         console.log("Unsafe focus negative control detected horizontal scrolling");
     } finally {
+        ipcMain.removeHandler("decision-test-toggle");
         win.destroy();
     }
     app.exit(0);

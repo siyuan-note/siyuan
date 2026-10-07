@@ -61,10 +61,16 @@ export const getDecisionProfilePatch = (provider: DecisionProvider, profile: Con
     ...(use ? {provider} : {}),
 });
 
-export const genDecisionCardsHtml = () => `<div class="b3-label config-item">
+export const genDecisionCardsHtml = () => `<div class="b3-label config-item${window.siyuan.config.ai.decision.enabled ? "" : " fn__none"}" id="aiDecisionCardsBlock">
     ${genConfigItemMainHtml(window.siyuan.languages.apiProvider, window.siyuan.languages.decisionProvidersTip)}
     <div class="fn__hr"></div><div id="aiDecisionCards"></div>
 </div>`;
+
+const getDecisionEnabledInput = (root: HTMLElement) =>
+    root.querySelector<HTMLInputElement>('[id="ai.decision.enabled"]');
+
+const isDecisionEnabled = (root: HTMLElement) =>
+    Boolean(window.siyuan.config.ai.decision.enabled) && getDecisionEnabledInput(root)?.checked !== false;
 
 const renderDecisionCards = (root: HTMLElement) => {
     const container = root.querySelector<HTMLElement>("#aiDecisionCards");
@@ -83,6 +89,13 @@ const renderDecisionCards = (root: HTMLElement) => {
 };
 
 const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
+    if (!isDecisionEnabled(root)) { return; }
+    const host = root.closest<HTMLElement>(".config__tab-container") || root;
+    const existing = host.querySelector<HTMLElement>(`[data-decision-profile-view='${provider}'].config__view--show`);
+    if (existing) {
+        existing.dispatchEvent(new CustomEvent("siyuan-decision-profile-resume"));
+        return;
+    }
     const draft = getDecisionProfileDraft(window.siyuan.config.ai.decision, provider);
     const initial = JSON.stringify(draft);
     const view = createProviderView(root, window.siyuan.languages.apiProvider);
@@ -133,18 +146,52 @@ const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
     let closed = false;
     let saving = false;
     let testing = false;
+    const enabledInput = getDecisionEnabledInput(root);
+    const canEdit = () => isDecisionEnabled(root) && !view.classList.contains("fn__none");
+    const updateControls = () => {
+        const disabled = !canEdit() || saving;
+        view.querySelectorAll<HTMLInputElement | HTMLButtonElement>("input, button").forEach(element => element.disabled = disabled);
+        testButton.disabled = disabled || testing;
+    };
+    const stopWatching = () => {
+        enabledInput?.removeEventListener("change", updateVisibility);
+        root.removeEventListener(AI_CONFIG_CHANGED_EVENT, updateVisibility);
+        window.removeEventListener(AI_CONFIG_CHANGED_EVENT, updateVisibility);
+    };
+    const updateVisibility = () => {
+        if (!view.isConnected) { stopWatching(); return; }
+        const enabled = isDecisionEnabled(root);
+        const otherView = host.querySelector(".config__view--show:not(.fn__none)");
+        // 隐藏详情但保留 DOM 和草稿，继续阻止设置刷新替换未保存的内容。
+        view.classList.toggle("fn__none", !enabled || view.classList.contains("fn__none") && !!otherView && otherView !== view);
+        if (!enabled) {
+            revision++;
+            result.textContent = "";
+            if (view.contains(document.activeElement)) { enabledInput?.focus({preventScroll: true}); }
+        }
+        updateControls();
+    };
+    enabledInput?.addEventListener("change", updateVisibility);
+    root.addEventListener(AI_CONFIG_CHANGED_EVENT, updateVisibility);
+    window.addEventListener(AI_CONFIG_CHANGED_EVENT, updateVisibility);
+    view.addEventListener("siyuan-decision-profile-resume", () => {
+        if (closed || !isDecisionEnabled(root) || !view.classList.contains("fn__none")) { return; }
+        removeProviderView(root);
+        updateVisibility();
+        view.querySelector<HTMLInputElement>("[data-decision-field='endpoint']")?.focus({preventScroll: true});
+    });
     const leave = () => {
         closed = true;
+        stopWatching();
         removeProviderView(root, view, () => {
-            const host = root.closest<HTMLElement>(".config__tab-container") || root;
-            if (root.isConnected && !host.querySelector(".config-ai-provider__view.config__view--show")) {
+            if (root.isConnected && isDecisionEnabled(root) && !host.querySelector(".config__view--show:not(.fn__none)")) {
                 root.querySelector<HTMLElement>(`[data-decision-provider='${provider}']`)?.focus({preventScroll: true});
             }
             root.dispatchEvent(new CustomEvent("siyuan-decision-profile-closed", {bubbles: true}));
         });
     };
     const close = () => {
-        if (saving) { return; }
+        if (saving || closed || !canEdit()) { return; }
         if (JSON.stringify(draft) !== initial) {
             confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.discardUnsavedChanges, leave);
         } else { leave(); }
@@ -168,6 +215,7 @@ const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
         return true;
     };
     view.addEventListener("input", event => {
+        if (!canEdit() || saving || closed) { return; }
         const input = event.target as HTMLInputElement;
         const field = input.dataset.decisionField as keyof Config.IDecisionProfile;
         if (!field) { return; }
@@ -176,6 +224,7 @@ const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
         result.textContent = "";
     });
     view.addEventListener("click", async event => {
+        if (!canEdit()) { return; }
         const action = (event.target as Element).closest<HTMLElement>("[data-action]")?.dataset.action;
         if (action === "back" || action === "cancel") { close(); return; }
         if (saving || closed) { return; }
@@ -184,7 +233,7 @@ const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
             saving = true;
             revision++;
             result.textContent = "";
-            view.querySelectorAll<HTMLInputElement | HTMLButtonElement>("input, button").forEach(element => element.disabled = true);
+            updateControls();
             let applied = false;
             try {
                 await aiConfigApi.patch("decision", getDecisionProfilePatch(provider, draft, action === "use"), () => {
@@ -195,8 +244,7 @@ const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
             } finally {
                 if (!applied) { result.textContent = window.siyuan.languages.decisionSaveFailed; }
                 saving = false;
-                view.querySelectorAll<HTMLInputElement | HTMLButtonElement>("input, button").forEach(element => element.disabled = false);
-                testButton.disabled = testing;
+                updateControls();
             }
         } else if (action === "test" && !testing && validate(true)) {
             testing = true;
@@ -204,7 +252,7 @@ const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
             testLabel.textContent = window.siyuan.languages.testConnectionTesting;
             result.textContent = "";
             const testedRevision = revision;
-            const current = () => !closed && view.isConnected && testedRevision === revision;
+            const current = () => !closed && view.isConnected && canEdit() && testedRevision === revision;
             try {
                 await fetchPost("/api/ai/testDecisionModel", {provider, profile: {...draft}}, response => {
                     if (!current()) { return; }
@@ -218,7 +266,7 @@ const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
                 if (current()) { result.textContent = window.siyuan.languages.testConnectionFail; }
             } finally {
                 testing = false;
-                testButton.disabled = saving;
+                updateControls();
                 testLabel.textContent = window.siyuan.languages.testConnection;
             }
         }
@@ -227,13 +275,37 @@ const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
 
 export const mountDecisionCards = (root: HTMLElement) => {
     const container = root.querySelector<HTMLElement>("#aiDecisionCards");
-    if (!container) { return; }
+    const block = root.querySelector<HTMLElement>("#aiDecisionCardsBlock");
+    if (!container || !block) { return; }
+    const enabledInput = getDecisionEnabledInput(root);
+    let changeRevision = 0;
+    let pendingChange = 0;
+    const updateVisibility = () => block.classList.toggle("fn__none", !(enabledInput?.checked ?? window.siyuan.config.ai.decision.enabled));
+    enabledInput?.addEventListener("change", () => {
+        const revision = ++changeRevision;
+        pendingChange = revision;
+        updateVisibility();
+        const complete = () => {
+            if (pendingChange !== revision || !container.isConnected) { return; }
+            pendingChange = 0;
+            enabledInput.checked = window.siyuan.config.ai.decision.enabled;
+            updateVisibility();
+            root.dispatchEvent(new CustomEvent(AI_CONFIG_CHANGED_EVENT));
+        };
+        // change 完整派发后委托保存已入队；旧响应不得覆盖用户最新一次切换。
+        window.setTimeout(() => {
+            if (pendingChange !== revision || !container.isConnected) { return; }
+            void aiConfigApi.waitForSave().then(complete, complete);
+        }, 0);
+    });
+    updateVisibility();
     renderDecisionCards(root);
     container.addEventListener("click", event => {
         const provider = (event.target as Element).closest<HTMLElement>("[data-decision-provider]")?.dataset.decisionProvider as DecisionProvider;
         if (PROVIDERS.includes(provider)) { openDecisionProfile(root, provider); }
     });
     container.addEventListener("keydown", event => {
+        if (!isDecisionEnabled(root)) { return; }
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
             (event.target as HTMLElement).click();
@@ -241,6 +313,8 @@ export const mountDecisionCards = (root: HTMLElement) => {
     });
     const update = () => {
         if (!container.isConnected) { window.removeEventListener(AI_CONFIG_CHANGED_EVENT, update); return; }
+        if (enabledInput && !pendingChange) { enabledInput.checked = window.siyuan.config.ai.decision.enabled; }
+        updateVisibility();
         renderDecisionCards(root);
     };
     window.addEventListener(AI_CONFIG_CHANGED_EVENT, update);

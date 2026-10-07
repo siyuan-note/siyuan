@@ -1355,6 +1355,7 @@ export class Files extends Model {
     }
 
     public updateDocActions() {
+        this.pinnedDocs?.updateDocActions();
         this.element.querySelectorAll<HTMLElement>(
             'li[data-type="navigation-file"], li[data-type="navigation-root"]'
         ).forEach((item) => {

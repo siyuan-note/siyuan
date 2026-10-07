@@ -926,12 +926,13 @@ declare namespace Config {
          */
         alwaysSelectOpenedFile: boolean;
         /**
-         * Behavior of clicking a document or notebook icon: 0 changes the icon, 1 expands or collapses its child documents
+         * 桌面端单击文档图标的行为：0 修改图标，1 展开或折叠子文档；没有子文档时打开文档
+         * 桌面端笔记本图标始终用于修改图标；旧的布尔配置不迁移
          */
         docIconClickMode: number;
         /**
-         * Behavior of clicking a parent document title: 0 opens the document, 1 expands or collapses its child documents,
-         * 2 expands or collapses on a single click and opens the parent on a double-click
+         * 点击父文档标题的行为：0 打开文档，1 立即展开或折叠子文档，2 单击展开或折叠、双击打开父文档
+         * 取 2 时单击等待约 300 毫秒；没有子文档时直接打开；旧的布尔配置不迁移
          */
         parentDocTitleClickMode: number;
         /**

@@ -14,6 +14,7 @@ interface IPanelHarness {
     heading: unknown;
     sourceTree: unknown;
     clearSelection(): void;
+    updateDocActions(): void;
     refresh(dirtyChildren?: Set<string>): Promise<void>;
     onFileTreeMessage(data: {cmd: string, data?: {id: string}}): void;
     collapse(): void;
@@ -219,6 +220,63 @@ test("pinned icons respect editing, expansion and readonly settings", () => {
     row.dataset.count = "0";
     panel.click(event);
     assert.equal(calls[2].kind, "open");
+});
+
+test("document action updates refresh existing pinned icons without reloading their documents", () => {
+    const {panel, config, runtime, calls} = loadPanel();
+    Object.assign(runtime.languages, {changeIcon: "Change icon", docIconClickExpand: "Expand children", openDocument: "Open"});
+    const makeRow = (count: number) => {
+        const attributes = new Map<string, string>();
+        const classes = new Set<string>();
+        const icon = {
+            classList: {toggle: (name: string, enabled: boolean) => {
+                if (enabled) { classes.add(name); } else { classes.delete(name); }
+            }},
+            setAttribute: (name: string, value: string) => attributes.set(name, value),
+            removeAttribute: (name: string) => attributes.delete(name),
+        };
+        return {dataset: {count: String(count)}, querySelector: () => icon, attributes, classes};
+    };
+    const rows = [makeRow(2), makeRow(0)];
+    panel.list = {querySelectorAll: () => rows};
+    panel.expanded = new Set(["parent"]);
+    const file = "Files.ts";
+    const source = ts.createSourceFile(file, readFileSync(join(__dirname, file), "utf8"), ts.ScriptTarget.Latest, true);
+    let method: ts.MethodDeclaration;
+    const visit = (node: ts.Node) => {
+        if (ts.isMethodDeclaration(node) && node.name.getText(source) === "updateDocActions") { method = node; }
+        ts.forEachChild(node, visit);
+    };
+    visit(source);
+    assert.ok(method?.body);
+    const exports = {} as {update: () => void};
+    runInNewContext(ts.transpileModule(`exports.update = function() ${method.body.getText(source)};`, {
+        compilerOptions: {target: ts.ScriptTarget.ES2020},
+    }).outputText, {exports});
+    const regularRow = {};
+    const regularUpdates: unknown[] = [];
+    const files = {pinnedDocs: panel, element: {querySelectorAll: () => [regularRow]},
+        updateDocActionElement: (row: unknown) => regularUpdates.push(row)};
+    for (const mode of [1, 0, 1]) {
+        config.fileTree.docIconClickMode = mode;
+        exports.update.call(files);
+        rows.forEach(row => {
+            assert.equal(row.classes.has("ariaLabel"), mode === 0);
+            assert.equal(row.attributes.get("aria-label"), mode === 0 ? "Change icon" : undefined);
+        });
+    }
+    assert.equal(regularUpdates.length, 3);
+    assert.equal(regularUpdates[0], regularRow);
+    assert.deepEqual([...panel.expanded], ["parent"]);
+    assert.equal(calls.length, 0);
+    panel.mobile = true;
+    for (const mode of [0, 1]) {
+        config.fileTree.docIconClickMode = mode;
+        panel.updateDocActions();
+        assert.equal(rows[0].attributes.get("aria-label"), "Expand children");
+        assert.equal(rows[1].attributes.get("aria-label"), "Open");
+        assert.equal(rows.every(row => row.classes.has("ariaLabel")), true);
+    }
 });
 
 test("root drops create an entry without invoking source movement", async () => {

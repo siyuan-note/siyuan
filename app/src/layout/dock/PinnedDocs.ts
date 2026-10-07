@@ -226,6 +226,28 @@ export class PinnedDocs {
         this.scheduleRefresh();
     }
 
+    private getDocIconLabel(subFileCount: number) {
+        if (this.mobile) {
+            return subFileCount > 0 ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument;
+        }
+        return window.siyuan.config.fileTree.docIconClickMode === 1 ? "" : window.siyuan.languages.changeIcon;
+    }
+
+    public updateDocActions() {
+        // 直接更新现有图标提示，保留展开状态并避开文档快照缓存。
+        this.list.querySelectorAll<HTMLElement>("[data-pin-row]").forEach(row => {
+            const icon = row.querySelector<HTMLElement>(".b3-list-item__icon");
+            if (!icon) { return; }
+            const label = this.getDocIconLabel(Number(row.dataset.count));
+            icon.classList.toggle("ariaLabel", Boolean(label));
+            if (label) {
+                icon.setAttribute("aria-label", label);
+            } else {
+                icon.removeAttribute("aria-label");
+            }
+        });
+    }
+
     private setCollapsed(collapsed: boolean, animate = false) {
         setFileTreeVisibility(this.list, !collapsed, animate);
         this.heading.setAttribute("aria-expanded", String(!collapsed));
@@ -301,10 +323,7 @@ export class PinnedDocs {
         row.setAttribute("aria-disabled", String(Boolean(doc.unavailable)));
         if (doc.subFileCount) { row.setAttribute("aria-expanded", "false"); }
         // 桌面端点击会修改图标时给出提示，移动端保留无障碍标签
-        const iconExpands = this.mobile || window.siyuan.config.fileTree.docIconClickMode === 1;
-        const iconLabel = iconExpands ? (this.mobile ?
-            (doc.subFileCount ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument) : "") :
-            window.siyuan.languages.changeIcon;
+        const iconLabel = this.getDocIconLabel(doc.subFileCount);
         if (!doc.icon) { row.dataset.defaultIcon = doc.subFileCount ? "folder" : "file"; }
         row.innerHTML = `<span data-pin-toggle="true" style="padding-left:${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${doc.subFileCount ? "" : " fn__hidden"}"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__icon${iconLabel ? " ariaLabel" : ""}" data-position="8east"${iconLabel ? ` aria-label="${iconLabel}"` : ""}>${getFileTreeIconHTML(doc.icon, doc.subFileCount ? "folder" : "file")}</span><span class="b3-list-item__text">${escapeHtml(doc.name)}${doc.unavailable ? ` (${window.siyuan.languages.closeNotebook})` : ""}</span><span data-pin-more="true" class="b3-list-item__action" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`;
         if (!doc.unavailable && !window.siyuan.config.readonly) {

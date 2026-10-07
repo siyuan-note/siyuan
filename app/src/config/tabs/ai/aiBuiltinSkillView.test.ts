@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {runInNewContext} from "node:vm";
 import test from "node:test";
 import {ModuleKind, transpileModule} from "typescript";
+import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {setBuiltinSkillEnabled, setUserSkillEnabled} from "./aiSkillState";
 
 class ElementStub {
@@ -30,7 +31,7 @@ class ElementStub {
     querySelectorAll() { return this.elements.input ? [this.elements.input] : []; }
 }
 
-const loadView = () => {
+const loadView = (languages: Record<string, string> = new Proxy({}, {get: (_object, key) => String(key)})) => {
     const source = readFileSync("src/config/tabs/ai/aiSkillUi.ts", "utf8");
     const code = transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
     const root = new ElementStub();
@@ -50,9 +51,9 @@ const loadView = () => {
         exports,
         HTMLElement: ElementStub,
         document: {createElement: () => view},
-        window: {siyuan: {config, languages: new Proxy({}, {get: (_object, key) => String(key)})}},
+        window: {siyuan: {config, languages}},
         require: (name: string) => {
-            if (name.endsWith("/escape")) return {escapeHtml: (text: string) => text, escapeAttr: (text: string) => text};
+            if (name.endsWith("/escape")) return {escapeHtml, escapeAttr};
             if (name.endsWith("/fetch")) return {fetchPost: (url: string, _data: unknown, callback: (response: unknown) => void) => new Promise<void>(resolve => {
                 requests.push({url, finish: data => { if (data) callback({data}); resolve(); }});
             })};
@@ -76,6 +77,54 @@ const loadView = () => {
 
 const builtin = {id: "builtin:siyuan-plugin-development", name: "siyuan-plugin-development", description: "official", version: "1.0.0", enabled: true};
 const flush = async () => { await Promise.resolve(); await Promise.resolve(); };
+
+for (const locale of ["en", "ja", "zh-TW"]) {
+    test(`official plugin skill description uses the ${locale} UI language without changing metadata`, () => {
+        const languages = JSON.parse(readFileSync(`appearance/langs/${locale}.json`, "utf8"));
+        const description = languages.agentBuiltinPluginDevelopmentDescription;
+        assert.ok(description);
+        const skill = {...builtin};
+        const state = loadView(languages);
+        state.open();
+        state.requests[0].finish([skill]);
+        assert.ok(state.list.innerHTML.includes(`<div class="b3-label__text">${escapeHtml(description)}</div>`));
+        assert.ok(!state.list.innerHTML.includes(`<div class="b3-label__text">${builtin.description}</div>`));
+        assert.match(state.list.innerHTML, /builtin:siyuan-plugin-development · 1.0.0/);
+        assert.deepEqual(skill, builtin);
+    });
+}
+
+test("official plugin skill localization does not depend on a metadata description", () => {
+    const state = loadView({agentBuiltinPluginDevelopmentDescription: "Localized <workflow> & details"});
+    state.open();
+    state.requests[0].finish([{...builtin, description: ""}]);
+    assert.ok(state.list.innerHTML.includes("Localized &lt;workflow> &amp; details"));
+});
+
+test("unknown official skills and user skills preserve their escaped metadata descriptions", () => {
+    const languages = {agentBuiltinPluginDevelopmentDescription: "Localized official workflow"};
+    for (const {official, id} of [
+        {official: true, id: "builtin:future"},
+        {official: true, id: builtin.name},
+        {official: false, id: builtin.name},
+        {official: false, id: builtin.id},
+    ]) {
+        const state = loadView(languages);
+        state.open(official);
+        state.requests[0].finish([{...builtin, id, description: "Original <workflow> & details"}]);
+        assert.ok(state.list.innerHTML.includes("Original &lt;workflow> &amp; details"));
+        assert.ok(!state.list.innerHTML.includes(languages.agentBuiltinPluginDevelopmentDescription));
+    }
+});
+
+test("official plugin skill falls back to metadata when localization is unavailable", () => {
+    for (const languages of [{}, {agentBuiltinPluginDevelopmentDescription: ""}]) {
+        const state = loadView(languages);
+        state.open();
+        state.requests[0].finish([{...builtin, description: "Metadata <workflow> & details"}]);
+        assert.ok(state.list.innerHTML.includes("Metadata &lt;workflow> &amp; details"));
+    }
+});
 
 test("skill settings ignore responses after Back and newer navigation", () => {
     const state = loadView();

@@ -1,52 +1,52 @@
 ---
 name: siyuan-plugin-development
-description: 官方前端插件开发流程：在用户明确选择后澄清缺失要求、确认简短方案、使用受管副本实现、验证和打包；安装与启用另行授权
+description: Official frontend plugin development workflow. After the user explicitly opts in, clarify missing requirements, confirm a short plan, implement in a managed copy, verify, and package. Installation and activation require separate authorization.
 ---
 
-# 思源前端插件开发
+# SiYuan Frontend Plugin Development
 
-这是随思源发布的只读官方技能。当前范围是前端插件的新建和修改；默认采用无第三方运行依赖的 CommonJS JavaScript。kernel.js 的完整开发、验证与恢复不在此流程范围内。
+This is a read-only official skill shipped with SiYuan. Its current scope is creating and modifying frontend plugins, using CommonJS JavaScript without third-party runtime dependencies by default. Full development, verification, and recovery of kernel.js are outside this workflow's scope.
 
-示例占位符（如 ${PLUGIN_NAME}）需要按照已确认的方案替换，不把用户变量设置当作官方内容。
+Replace example placeholders such as ${PLUGIN_NAME} according to the confirmed plan. Do not treat user-defined variable settings as official content.
 
-## 先取得真实选择，再确认方案
+## Obtain an Explicit Choice, Then Confirm the Plan
 
-- 仅在用户明确要求开发或修改插件时使用。普通模板、文档和主题需求不自动升级为插件
-- 官方选择由 question 工具的 workflow.action="choose" 发起，questions 可传空数组；服务器显示固定的本地化是／否问题。不要把普通问题、聊天文字、模型自己的 consent 或用户旧答案当作该任务的许可
-- 用户选择是之后，以 skill 的 action="load"、source="builtin"、name="siyuan-plugin-development" 加载正文。只有服务器确认成功加载后才继续。拒绝、取消或禁用时不要读取官方正文；仍可按原权限处理用户要求的自定义开发
-- 从当前对话提取已知需求，仅补问会改变实现的缺口：功能、入口、触发方式、目标前端、数据读取与写入影响、交付内容。不要重复问已经明确的内容，也不要猜笔记本或扩大到全部平台
-- 通过 question 的 workflow.action="plan" 提交短方案，绑定选择返回的 taskId。方案全文清楚说明插件名称、前端、功能与入口、数据变化、交付范围、导入来源及允许打包的文件。服务器冻结并显示整份方案；真正接受确认前不写源码
-- 修改已经确认的目标、源码来源、数据影响或打包范围时更新方案并取得新的确认。不要伪造 taskId、方案摘要或已确认状态；旧问题和旧版本不作为新任务授权
+- Use this skill only when the user explicitly asks to develop or modify a plugin. Do not automatically turn ordinary template, document, or theme requests into plugins
+- Initiate the official choice with workflow.action="choose" in the question tool; questions may be an empty array. The server displays a fixed, localized yes/no question. Do not treat ordinary questions, chat text, the model's own consent, or the user's previous answers as permission for this task
+- After the user chooses yes, load the body through skill with action="load", source="builtin", and name="siyuan-plugin-development". Continue only after the server confirms successful loading. Do not read the official body if the user declines or cancels, or if the skill is disabled; user-requested custom development may still proceed under its original permissions
+- Extract known requirements from the current conversation, and ask only about gaps that would change the implementation: functionality, entry points, triggers, target frontend, data-read and data-write effects, and deliverables. Do not repeat questions already answered, guess a notebook, or expand the scope to every platform
+- Submit a short plan through question with workflow.action="plan", bound to the taskId returned by the choice. The full plan must clearly state the plugin name, frontend, functionality and entry points, data changes, delivery scope, import source, and files allowed in the package. The server freezes and displays the entire plan; do not write source code before actual acceptance is confirmed
+- Update the plan and obtain new confirmation when changing a confirmed goal, source-code origin, data effects, or packaging scope. Do not fabricate a taskId, plan digest, or confirmed state; previous questions and versions do not authorize a new task
 
-选择调用示例：{"questions":[],"workflow":{"action":"choose"}}。用户明确要求另一个插件时才用 newTask=true；明确更改当前流程选择时可用 reconsider=true。普通重复调用沿用当前选择，不重复询问。
+Example choice call: {"questions":[],"workflow":{"action":"choose"}}. Use newTask=true only when the user explicitly requests another plugin; reconsider=true may be used when the user explicitly changes the current workflow choice. Ordinary repeated calls reuse the current choice without asking again.
 
-方案字段：taskId、proposal（不超过 2000 字符）、packageName、frontend（desktop、desktop-window、browser-desktop、mobile 或 browser-mobile 中一个）、dataEffects 与 deliverables（各不超过 1000 字符）、files（最多 200 个准确的相对文件路径）。导入现有插件前，调用 bazaar 的 project_status，提供 taskId、sourcePath 和准确的 sourceFiles；sourceFiles 必须与待确认的 workflow.files 一致。宿主返回所选现存安全文件的 sourceRevision，方案中一并提供该摘要与 sourcePath；不要隐式读取或计算整个仓库的摘要。排除的 .git、node_modules、config 等路径只列出而不读取内容。新建时省略来源字段。技术清单也会显示给用户，不在确认后增加未批准文件；允许清单可包含尚未存在的可选文件，但入口、manifest 和声明资源不能因此省略。
+Plan fields: taskId, proposal (at most 2000 characters), packageName, frontend (one of desktop, desktop-window, browser-desktop, mobile, or browser-mobile), dataEffects and deliverables (at most 1000 characters each), and files (at most 200 exact relative file paths). Before importing an existing plugin, call bazaar's project_status with taskId, sourcePath, and exact sourceFiles; sourceFiles must match the workflow.files awaiting confirmation. The host returns a sourceRevision for the selected existing safe files; include that digest and sourcePath in the plan. Do not implicitly read or hash the entire repository. List excluded paths such as .git, node_modules, and config without reading their contents. Omit source fields when creating a new project. The technical file list is also shown to the user; do not add unapproved files after confirmation. The allowlist may contain optional files that do not yet exist, but this does not permit omitting the entry point, manifest, or declared resources.
 
-## 先核实工具和接口
+## Verify Tools and APIs First
 
-先读 references/development.md，所有资源均通过 skill 的 source="builtin" 和 name="siyuan-plugin-development/相对路径" 读取。检查当前可用工具和目标思源版本，按需核实官方 plugin-sample、petal 与目标版本源码。不把类型声明、README 的旧版本或未发布接口当作当前宿主已支持。
+Read references/development.md first. Read every resource through skill with source="builtin" and name="siyuan-plugin-development/relative-path". Check the tools currently available and the target SiYuan version; consult the official plugin-sample, petal, and source code for that version as needed. Do not treat type declarations, outdated README versions, or unreleased APIs as evidence of support in the current host.
 
-默认使用 CommonJS JavaScript。只有实际存在并获准使用的依赖与构建工具时才采用 TypeScript；源码不等于可运行的 index.js。原生智能体不保证拥有 shell、依赖安装或任意代码执行能力。缺工具时准确报告阻塞步骤，不编造执行结果，不绕过工具拒绝。若用户指定 TypeScript，先确认替代路线，不擅自改成 JavaScript。
+Use CommonJS JavaScript by default. Use TypeScript only when the required dependencies and build tools actually exist and are authorized for use; source code is not equivalent to a runnable index.js. Native agents are not guaranteed to have a shell, dependency-installation tools, or arbitrary code execution. If a tool is missing, report the exact blocked step. Do not invent execution results or bypass a tool denial. If the user specifies TypeScript, confirm an alternative approach before switching to JavaScript.
 
-## 在受管副本中实现
+## Implement in a Managed Copy
 
-1. 方案确认后调用 bazaar 的 prepare_project，以 taskId 由宿主创建源码副本和基线检查点；不要自己指定绝对写入目录。导入项目先按明确的 sourceFiles 只读检查，批准来源和所选文件的基线摘要后导入副本；原目录保持原样。已有受管项目重新确认方案后，先用 project_status(taskId) 取得当前源码版本，再调用 prepare_project(taskId, expectedSourceRevision) 建立新检查点；该动作保留当前源码，不重新导入或覆盖它
-2. 新文件使用 file.write 的 ifAbsent=true。编辑已有文本之前使用 file.read 的 withMetadata=true；按同一 expectedRevision 和 nextOffsetByte 续读，直到完整覆盖需要修改的原始内容。truncated=true 不是完整文件
-3. 局部修改优先使用 file.edit，提供 expectedRevision 与唯一、不重叠的 oldText/newText；需要全文替换才使用带 expectedRevision 的 file.write，且必须先在同一 revision 下完整读取整个文件。遇到冲突先重读并核对，不重试盲写、不把找不到或多处匹配降级为整文件覆盖
-4. 使用宿主返回的路径和项目版本；通过 bazaar 的 project_status 核实当前源码、方案和检查点。无法建立检查点就停止写入，部分失败须如实报告；需要恢复时使用 restore_project 并遵守当前版本和工具确认
-5. 不使用 copy、unzip、目录改名或 HTTP 文件接口绕过受管源码的条件写入；不触碰宿主控制、备份或制品目录，不直接覆盖真实插件安装目录
+1. After plan confirmation, call bazaar's prepare_project with taskId so the host creates a source-code copy and baseline checkpoint; do not specify an absolute write directory yourself. For imports, first perform a read-only inspection of the exact sourceFiles, then import a copy after approval of the source and the selected files' baseline digest; leave the original directory unchanged. After reconfirming a plan for an existing managed project, obtain the current source revision with project_status(taskId), then call prepare_project(taskId, expectedSourceRevision) to establish a new checkpoint. This preserves the current source code without reimporting or overwriting it
+2. Use file.write with ifAbsent=true for new files. Before editing existing text, use file.read with withMetadata=true; continue reading with the same expectedRevision and nextOffsetByte until you have fully read the original content that needs changing. truncated=true does not represent a complete file
+3. Prefer file.edit for partial changes, providing expectedRevision and unique, nonoverlapping oldText/newText replacements. Use file.write with expectedRevision only when full replacement is necessary, and only after reading the entire file at that same revision. On a conflict, reread and verify first. Do not blindly retry writes or fall back to overwriting the entire file when a match is missing or ambiguous
+4. Use the paths and project revisions returned by the host; verify the current source code, plan, and checkpoint through bazaar's project_status. Stop writing if a checkpoint cannot be established, and report partial failures accurately. When recovery is needed, use restore_project and respect the current revision and tool confirmation requirements
+5. Do not bypass conditional writes for managed source code through copy, unzip, directory renaming, or HTTP file APIs. Do not touch host-controlled, backup, or artifact directories, or directly overwrite the actual plugin installation directory
 
-取消流程不会自动回退；取消、写入结果未知或部分准备使普通方案无法继续时，用 question 的 questions=[]、workflow.action="recover" 和 taskId 请求仅恢复授权，由服务器展示并绑定最近真正批准的方案及摘要。
-确认后可调用 restore_project，或仅为同一冻结的中断准备重试 prepare_project；恢复不回退笔记、运行时数据或其他配置，也不授权继续修改源码，后续普通源码修改仍需正常的方案确认。
+Canceling the workflow does not automatically roll back changes. When cancellation, an unknown write result, or partial preparation prevents the ordinary plan from continuing, request recovery-only authorization through question with questions=[], workflow.action="recover", and taskId. The server displays and binds the most recently actually approved plan and its digest.
+After confirmation, you may call restore_project, or retry prepare_project only for the same frozen, interrupted preparation. Recovery does not roll back notes, runtime data, or other configuration, and does not authorize further source-code changes; subsequent ordinary source changes still require normal plan confirmation.
 
-参考 examples/index.js 的最小入口模式，按实际功能调整。通过公开 Plugin API 创建入口，通过内核 API 修改笔记，禁止用 fs 或 Electron 直接改 data 文件。界面文案放 i18n，检查返回码、目标缺失、关闭的笔记本、重复点击与迟到响应。onunload 必须处理部分初始化，并清理自有监听器、定时器、观察器和请求；卸载不能撤销已发送的写请求。
+Use the minimal entry-point pattern in examples/index.js as a reference and adapt it to the actual functionality. Create entry points through the public Plugin API and modify notes through kernel APIs; never use fs or Electron to modify data files directly. Put UI text in i18n. Handle return codes, missing targets, closed notebooks, repeated clicks, and late responses. onunload must handle partial initialization and clean up the plugin's own listeners, timers, observers, and requests; unloading cannot undo write requests that have already been sent.
 
-## 验证、打包和交付
+## Verify, Package, and Deliver
 
-先读 references/verification.md。仅声明实际实现和已验证的前端；没有 kernel.js 不声明 kernels。不要照搬示例作者、仓库、赞助或数据权限，不为本地原型虚构发布身份。
+Read references/verification.md first. Declare only frontends that are actually implemented and verified; do not declare kernels without kernel.js. Do not copy the example's author, repository, funding information, or data permissions, or invent a publishing identity for a local prototype.
 
-通过 bazaar 的 package_local，以 taskId 和最新 expectedSourceRevision 请求确定性本地 ZIP。宿主只冻结允许清单中实际存在的安全文件，允许可选路径不存在，但必须存在 plugin.json、index.js 和 manifest 声明的资源；不执行项目脚本、不下载依赖。缺入口、缺声明资源或命中秘密文件时先修正源码或重新确认范围。保留返回的 packageHash、sourceRevision 和验证结果。打包成功不代表 JavaScript 语法、真实安装、前端加载或业务运行通过。
+Request a deterministic local ZIP through bazaar's package_local with taskId and the latest expectedSourceRevision. The host freezes only existing safe files on the allowlist. Optional paths may be absent, but plugin.json, index.js, and resources declared by the manifest must exist. It does not execute project scripts or download dependencies. If the entry point or declared resources are missing, or a secret file is detected, first correct the source code or reconfirm the scope. Retain the returned packageHash, sourceRevision, and validation results. Successful packaging does not mean JavaScript syntax, actual installation, frontend loading, or functional execution has passed verification.
 
-分项交付源码、静态检查、构建、ZIP、模拟测试、真实安装、启用配置、前端加载和业务运行的结果与依据。纯 JavaScript 构建写“不适用”；没运行的步骤写“未验证”和原因。SDK 替身或独立 Electron DOM 测试不能称为思源集成测试；桌面 Electron 与桌面浏览器单独验证。
+Report separate results and evidence for source code, static checks, builds, ZIP packaging, simulated tests, actual installation, activation configuration, frontend loading, and functional execution. Mark builds for plain JavaScript as "not applicable"; mark steps that were not run as "unverified" and explain why. Tests using SDK substitutes or a standalone Electron DOM environment are not SiYuan integration tests; verify desktop Electron and the desktop browser separately.
 
-安装和启用均需用户明确授权对应动作与目标。已启用插件的覆盖可能立即执行代码；disable 通知没有所有前端卸载确认，不能声称自动保证停止。获得授权后仅使用原生安装接口并绑定宿主返回的包摘要、目标版本，不靠通用文件写入安装。回退旧代码不等于回退用户笔记与配置。
+Installation and activation each require the user's explicit authorization for the corresponding action and target. Overwriting an enabled plugin may execute code immediately; a disable notification does not confirm unloading in every frontend, so do not claim it automatically guarantees execution has stopped. Once authorized, use only the native installation interface, bound to the package digest and target revision returned by the host; do not install through generic file writes. Rolling back code does not roll back the user's notes or configuration.

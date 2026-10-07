@@ -56,18 +56,21 @@ type PluginProjectArtifact struct {
 
 // 项目清单不保存授权状态；每次操作都须重新取得可信运行时授权。
 type pluginProjectManifest struct {
-	Version           int                                `json:"version"`
-	PlanHash          string                             `json:"planHash"`
-	SourcePath        string                             `json:"sourcePath,omitempty"`
-	SourceRevision    string                             `json:"sourceRevision,omitempty"`
-	Preparing         bool                               `json:"preparing,omitempty"`
-	Baseline          map[string]string                  `json:"baseline"`
-	BaselineDirectory string                             `json:"baselineDirectory,omitempty"`
-	Current           map[string]string                  `json:"current"`
-	Pending           map[string]PluginProjectMutation   `json:"pending,omitempty"`
-	Journal           []map[string]PluginProjectMutation `json:"journal,omitempty"`
-	TemporaryFiles    map[string]string                  `json:"temporaryFiles,omitempty"`
-	Artifact          *PluginProjectArtifact             `json:"artifact,omitempty"`
+	Version           int                              `json:"version"`
+	PlanHash          string                           `json:"planHash"`
+	SourcePath        string                           `json:"sourcePath,omitempty"`
+	SourceRevision    string                           `json:"sourceRevision,omitempty"`
+	Preparing         bool                             `json:"preparing,omitempty"`
+	Baseline          map[string]string                `json:"baseline"`
+	BaselineDirectory string                           `json:"baselineDirectory,omitempty"`
+	Current           map[string]string                `json:"current"`
+	Pending           map[string]PluginProjectMutation `json:"pending,omitempty"`
+	TemporaryFiles    map[string]string                `json:"temporaryFiles,omitempty"`
+	Artifact          *PluginProjectArtifact           `json:"artifact,omitempty"`
+}
+
+func (manifest *pluginProjectManifest) mutationPending() bool {
+	return len(manifest.Pending) > 0 || len(manifest.TemporaryFiles) > 0
 }
 
 type PluginProjectStatus struct {
@@ -590,7 +593,7 @@ func WithPluginProjectSource(ctx context.Context, write bool, fn func(*PluginDev
 			if manifest.PlanHash != grant.PlanHash {
 				return errors.New("revision_conflict: prepare_project is required for the newly approved plan")
 			}
-			if len(manifest.Pending) != 0 {
+			if manifest.mutationPending() {
 				return errors.New("result_unknown: interrupted mutation requires project_status and restore_project")
 			}
 			if err = validateProjectBaseline(grant, manifest); err != nil {
@@ -642,7 +645,7 @@ func PluginProjectArtifactStatus(grant *PluginDevelopmentGrant, root *os.Root) (
 	}
 	files, err := snapshotPluginProject(root, nil, manifest.TemporaryFiles)
 	if err != nil {
-		if len(manifest.Pending) > 0 {
+		if manifest.mutationPending() {
 			return nil, fmt.Errorf("result_unknown: pending project cannot be safely inspected; manual inspection required; source and journal preserved: %w", err)
 		}
 		return nil, err
@@ -650,7 +653,7 @@ func PluginProjectArtifactStatus(grant *PluginDevelopmentGrant, root *os.Root) (
 	ret := projectStatus(files)
 	ret.TaskID, ret.Prepared, ret.SourceRoot = grant.TaskID, !manifest.Preparing, workspacePluginProjectPath(grant.SourceRoot)
 	ret.BaselineRevision = PluginProjectTreeRevision(manifest.Baseline)
-	ret.Pending = manifest.Preparing || len(manifest.Pending) > 0
+	ret.Pending = manifest.Preparing || manifest.mutationPending()
 	ret.ExternalChanges = ret.SourceRevision != PluginProjectTreeRevision(manifest.Current)
 	ret.PlanMismatch = manifest.PlanHash != grant.PlanHash
 	if !ret.Pending && !ret.ExternalChanges && !ret.PlanMismatch && manifest.Artifact != nil && manifest.Artifact.SourceRevision == ret.SourceRevision {
@@ -666,7 +669,7 @@ func BeginPluginProjectMutations(grant *PluginDevelopmentGrant, changes map[stri
 	if err != nil {
 		return err
 	}
-	if len(changes) == 0 || len(manifest.Pending) > 0 {
+	if len(changes) == 0 || manifest.mutationPending() {
 		return errors.New("result_unknown: pending or empty project mutation")
 	}
 	if err = validateProjectBaseline(grant, manifest); err != nil {
@@ -718,10 +721,6 @@ func BeginPluginProjectMutations(grant *PluginDevelopmentGrant, changes map[stri
 			manifest.TemporaryFiles[tmp] = change.NewRevision
 		}
 	}
-	if len(manifest.Journal) >= 512 {
-		return errors.New("backup_failed: project journal limit reached; recovery history was preserved")
-	}
-	manifest.Journal = append(manifest.Journal, changes)
 	if err = savePluginProjectManifest(grant, manifest); err != nil {
 		return fmt.Errorf("backup_failed: mutation journal could not be saved: %w", err)
 	}
@@ -785,7 +784,7 @@ func RecordPluginProjectArtifact(grant *PluginDevelopmentGrant, artifact *Plugin
 	if err != nil {
 		return err
 	}
-	if len(manifest.Pending) > 0 || artifact.SourceRevision != PluginProjectTreeRevision(manifest.Current) {
+	if manifest.mutationPending() || artifact.SourceRevision != PluginProjectTreeRevision(manifest.Current) {
 		return errors.New("revision_conflict: artifact source is not the recorded project revision")
 	}
 	manifest.Artifact = artifact
@@ -823,7 +822,7 @@ func RestorePluginProject(ctx context.Context, taskID, expectedRevision string) 
 		defer root.Close()
 		files, err := snapshotPluginProject(root, nil, manifest.TemporaryFiles)
 		if err != nil {
-			if len(manifest.Pending) > 0 {
+			if manifest.mutationPending() {
 				return fmt.Errorf("result_unknown: pending project cannot be safely restored; manual inspection required; source and journal preserved: %w", err)
 			}
 			return err
@@ -882,10 +881,6 @@ func RestorePluginProject(ctx context.Context, taskID, expectedRevision string) 
 			}
 		}
 		manifest.Current, manifest.Pending, manifest.Artifact = inventory, changes, nil
-		if len(manifest.Journal) >= 512 {
-			return errors.New("backup_failed: project journal limit reached; recovery history was preserved")
-		}
-		manifest.Journal = append(manifest.Journal, changes)
 		if manifest.TemporaryFiles == nil {
 			manifest.TemporaryFiles = map[string]string{}
 		}

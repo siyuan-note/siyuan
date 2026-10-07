@@ -1,4 +1,5 @@
 {
+	"agentBuiltinPluginDevelopmentDescription": "Resmî ön yüz eklentisi geliştirme süreci: açık onayınızın ardından eksik gereksinimler netleştirilir, kısa bir plan onaylanır ve yönetilen bir kopyada geliştirme, doğrulama ve paketleme yapılır; yükleme ve etkinleştirme için ayrı izin gerekir",
 	"agentPluginRecoveryQuestion": "Yalnızca daha önce onaylanan önerinin kaynak kodu kontrol noktası geri yüklensin mi? Kurtarma; notları, çalışma zamanı verilerini veya diğer ayarları geri almaz ve kaynak kodunda başka değişikliklere izin vermez.",
 	"agentPluginFlowQuestion": "Resmî eklenti geliştirme iş akışı kullanılsın mı?",
 	"agentPluginFlowYes": "Evet",

@@ -19,6 +19,7 @@ package bazaar
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"errors"
 	"fmt"
@@ -49,17 +50,25 @@ var localPackageManifests = map[string]string{
 
 // ExtractLocalPackage 将本地集市包解压到临时目录并识别包类型。
 func ExtractLocalPackage(archivePath string) (pkgType string, pkg *Package, packagePath string, cleanup func(), err error) {
-	pkgType, pkg, packagePath, _, cleanup, err = extractLocalPackageWithHash(archivePath, "", false)
+	pkgType, pkg, packagePath, _, cleanup, err = extractLocalPackageWithHash(context.Background(), archivePath, "", false)
 	return
 }
 
 // ExtractLocalPackageWithHash 从同一份已核验字节解压，不会在摘要验证后重新打开原始路径。
 func ExtractLocalPackageWithHash(archivePath, expectedHash string) (pkgType string, pkg *Package, packagePath, packageHash string, cleanup func(), err error) {
-	return extractLocalPackageWithHash(archivePath, expectedHash, true)
+	return ExtractLocalPackageWithHashContext(context.Background(), archivePath, expectedHash)
 }
 
-func extractLocalPackageWithHash(archivePath, expectedHash string, private bool) (pkgType string, pkg *Package, packagePath, packageHash string, cleanup func(), err error) {
+// ExtractLocalPackageWithHashContext 在核验与解压期间响应取消，未提交的临时内容会清理。
+func ExtractLocalPackageWithHashContext(ctx context.Context, archivePath, expectedHash string) (pkgType string, pkg *Package, packagePath, packageHash string, cleanup func(), err error) {
+	return extractLocalPackageWithHash(ctx, archivePath, expectedHash, true)
+}
+
+func extractLocalPackageWithHash(ctx context.Context, archivePath, expectedHash string, private bool) (pkgType string, pkg *Package, packagePath, packageHash string, cleanup func(), err error) {
 	cleanup = func() {}
+	if err = ctx.Err(); err != nil {
+		return
+	}
 	if expectedHash != "" && !validInstallHash(expectedHash) {
 		err = errors.New("invalid package hash")
 		return
@@ -71,6 +80,9 @@ func extractLocalPackageWithHash(archivePath, expectedHash string, private bool)
 	packageHash = fmt.Sprintf("%x", sha256.Sum256(data))
 	if expectedHash != "" && packageHash != expectedHash {
 		err = ErrPackageHashConflict
+		return
+	}
+	if err = ctx.Err(); err != nil {
 		return
 	}
 	tempPath := filepath.Join(util.TempDir, "bazaar", "local", gulu.Rand.String(7))
@@ -91,7 +103,7 @@ func extractLocalPackageWithHash(archivePath, expectedHash string, private bool)
 		cleanup()
 		return
 	}
-	if err = extractLocalPackageReader(reader, tempPath); err != nil {
+	if err = extractLocalPackageReaderContext(ctx, reader, tempPath); err != nil {
 		cleanup()
 		return
 	}
@@ -145,6 +157,13 @@ func extractLocalPackageArchive(archivePath, destination string) error {
 }
 
 func extractLocalPackageReader(reader *zip.Reader, destination string) error {
+	return extractLocalPackageReaderContext(context.Background(), reader, destination)
+}
+
+func extractLocalPackageReaderContext(ctx context.Context, reader *zip.Reader, destination string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if err := validateLocalPackageArchive(reader); err != nil {
 		return err
 	}
@@ -153,11 +172,14 @@ func extractLocalPackageReader(reader *zip.Reader, destination string) error {
 	}
 	var extractedTotal uint64
 	for _, item := range reader.File {
-		if err := extractLocalPackageItem(item, destination, &extractedTotal); err != nil {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if err := extractLocalPackageItem(ctx, item, destination, &extractedTotal); err != nil {
 			return err
 		}
 	}
-	return nil
+	return ctx.Err()
 }
 
 func validateLocalPackageArchive(reader *zip.Reader) error {
@@ -291,7 +313,19 @@ func InspectLocalPackageWithHash(archivePath, expectedHash string) (pkgType stri
 	return
 }
 
-func extractLocalPackageItem(item *zip.File, destination string, extractedTotal *uint64) error {
+type localPackageContextReader struct {
+	ctx    context.Context
+	reader io.Reader
+}
+
+func (reader localPackageContextReader) Read(data []byte) (int, error) {
+	if err := reader.ctx.Err(); err != nil {
+		return 0, err
+	}
+	return reader.reader.Read(data)
+}
+
+func extractLocalPackageItem(ctx context.Context, item *zip.File, destination string, extractedTotal *uint64) error {
 	name := strings.ReplaceAll(item.Name, "\\", "/")
 	if name == "" || strings.HasPrefix(name, "/") {
 		return errors.New("marketplace package contains an invalid path")
@@ -321,7 +355,7 @@ func extractLocalPackageItem(item *zip.File, destination string, extractedTotal 
 	if err != nil {
 		return err
 	}
-	written, copyErr := io.Copy(target, io.LimitReader(source, int64(maxLocalPackageFileSize)+1))
+	written, copyErr := io.Copy(target, io.LimitReader(localPackageContextReader{ctx: ctx, reader: source}, int64(maxLocalPackageFileSize)+1))
 	closeErr := target.Close()
 	if copyErr != nil {
 		return copyErr

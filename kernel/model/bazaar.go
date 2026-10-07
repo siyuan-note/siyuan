@@ -32,6 +32,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
+	"golang.org/x/sync/semaphore"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -114,12 +115,14 @@ type LocalBazaarPackageInstallResult struct {
 type LocalBazaarInstallOptions struct {
 	ExpectedPackageHash       string
 	ExpectedInstalledRevision string
+	Context                   context.Context
+	Recheck                   func() error
 }
 
 var (
 	ErrLocalBazaarPackageExists       = errors.New("marketplace package already exists")
 	ErrLocalBazaarPackageIncompatible = errors.New("marketplace package is incompatible")
-	localBazaarInstallLock            sync.Mutex
+	localBazaarInstallLock            = semaphore.NewWeighted(1)
 )
 
 // updatePackages 更新一组集市包；同类型批量更新时，安装后处理只执行一次
@@ -662,11 +665,32 @@ func InstallLocalBazaarPackage(archivePath, frontend string, overwrite bool) (re
 }
 
 func InstallLocalBazaarPackageWithOptions(archivePath, frontend string, overwrite bool, options LocalBazaarInstallOptions) (result *LocalBazaarPackageInstallResult, err error) {
-	pkgType, pkg, sourcePath, packageHash, cleanup, err := bazaar.ExtractLocalPackageWithHash(archivePath, options.ExpectedPackageHash)
+	ctx := options.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	check := func() error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if options.Recheck != nil {
+			if err := options.Recheck(); err != nil {
+				return err
+			}
+		}
+		return ctx.Err()
+	}
+	if err = check(); err != nil {
+		return nil, err
+	}
+	pkgType, pkg, sourcePath, packageHash, cleanup, err := bazaar.ExtractLocalPackageWithHashContext(ctx, archivePath, options.ExpectedPackageHash)
 	if err != nil {
 		return nil, err
 	}
 	defer cleanup()
+	if err = check(); err != nil {
+		return nil, err
+	}
 
 	result = &LocalBazaarPackageInstallResult{
 		PackageType:   pkgType,
@@ -689,8 +713,13 @@ func InstallLocalBazaarPackageWithOptions(archivePath, frontend string, overwrit
 		return result, ErrLocalBazaarPackageIncompatible
 	}
 
-	localBazaarInstallLock.Lock()
-	defer localBazaarInstallLock.Unlock()
+	if err = localBazaarInstallLock.Acquire(ctx, 1); err != nil {
+		return result, err
+	}
+	defer localBazaarInstallLock.Release(1)
+	if err = check(); err != nil {
+		return result, err
+	}
 	containsFile, statErr := bazaar.PackageDirContainsFile(installPath)
 	if statErr != nil && !os.IsNotExist(statErr) {
 		return result, statErr
@@ -699,7 +728,7 @@ func InstallLocalBazaarPackageWithOptions(archivePath, frontend string, overwrit
 	if result.Updated && !overwrite {
 		return result, ErrLocalBazaarPackageExists
 	}
-	installOptions := bazaar.PackageInstallOptions{ExpectedInstalledRevision: options.ExpectedInstalledRevision}
+	installOptions := bazaar.PackageInstallOptions{ExpectedInstalledRevision: options.ExpectedInstalledRevision, Context: ctx, Recheck: check}
 	installed, err := bazaar.InstallLocalPackageWithOptions(sourcePath, installPath, pkgType, pkg.Name, result.Updated, installOptions)
 	if installed != nil {
 		result.InstalledRevision, result.PreviousRevision = installed.InstalledRevision, installed.PreviousRevision

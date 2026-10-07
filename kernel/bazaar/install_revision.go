@@ -5,6 +5,7 @@
 package bazaar
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -31,6 +32,27 @@ type PackageInstallOptions struct {
 	ExpectedInstalledRevision string
 	PrivateTemp               bool
 	BeforeReplace             func() error
+	Context                   context.Context
+	Recheck                   func() error
+}
+
+func (options PackageInstallOptions) context() context.Context {
+	if options.Context == nil {
+		return context.Background()
+	}
+	return options.Context
+}
+
+func (options PackageInstallOptions) check() error {
+	if err := options.context().Err(); err != nil {
+		return err
+	}
+	if options.Recheck != nil {
+		if err := options.Recheck(); err != nil {
+			return err
+		}
+	}
+	return options.context().Err()
 }
 
 type PackageInstallResult struct {
@@ -52,8 +74,10 @@ func validateInstalledRevision(revision string) error {
 
 // InstalledPackageRevision 在与安装、卸载相同的锁内读取完整代码目录摘要。
 func InstalledPackageRevision(installPath string) (string, error) {
-	packageInstallLock.Lock()
-	defer packageInstallLock.Unlock()
+	if err := packageInstallLock.Acquire(context.Background(), 1); err != nil {
+		return "", err
+	}
+	defer packageInstallLock.Release(1)
 	if err := rejectInstallPathLinks(installPath); err != nil {
 		return "", err
 	}

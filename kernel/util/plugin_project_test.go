@@ -2,9 +2,12 @@ package util
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -143,8 +146,8 @@ func TestPluginProjectMutationRecoveryAndExternalConflict(t *testing.T) {
 		t.Fatal("restoration incomplete")
 	}
 	manifest, err := readPluginProjectManifest(grant)
-	if err != nil || len(manifest.Journal) != 2 {
-		t.Fatal("failure history not preserved", err)
+	if err != nil || len(manifest.Pending) != 0 || len(manifest.TemporaryFiles) != 0 {
+		t.Fatal("completed recovery journal not cleared", err)
 	}
 	if data, _ := os.ReadFile(filepath.Join(grant.SourceRoot, "index.js")); string(data) != "old" {
 		t.Fatal("baseline not restored")
@@ -276,7 +279,7 @@ func TestPluginProjectRequiresTrustedCurrentGrant(t *testing.T) {
 	}
 }
 
-func TestPluginProjectReplanPreservesCurrentSourceAndPriorCheckpoint(t *testing.T) {
+func TestPluginProjectReplanPreservesCurrentSourceAndReplacesCheckpoint(t *testing.T) {
 	ctx, grant := pluginProjectFixture(t, map[string]string{"index.js": "old"})
 	if _, err := PreparePluginProject(ctx, grant.TaskID, nil); err != nil {
 		t.Fatal(err)
@@ -309,11 +312,216 @@ func TestPluginProjectReplanPreservesCurrentSourceAndPriorCheckpoint(t *testing.
 	if data, _ := os.ReadFile(filepath.Join(grant.SourceRoot, "index.js")); string(data) != "new" {
 		t.Fatal("replan overwrote current source")
 	}
-	if data, _ := os.ReadFile(filepath.Join(PluginProjectPrivateDir(grant.TaskID), "baseline", "index.js")); string(data) != "old" {
-		t.Fatal("prior checkpoint lost")
+	if _, err := os.Stat(filepath.Join(PluginProjectPrivateDir(grant.TaskID), "baseline")); !os.IsNotExist(err) {
+		t.Fatal("obsolete checkpoint not cleaned", err)
 	}
 	if data, _ := os.ReadFile(filepath.Join(pluginProjectBaselinePath(grant, manifest), "index.js")); string(data) != "new" {
 		t.Fatal("new checkpoint does not cover current code")
+	}
+}
+
+func TestPluginProjectRepeatedMutationsKeepBoundedRecoveryState(t *testing.T) {
+	ctx, grant := pluginProjectFixture(t, map[string]string{"index.js": "initial"})
+	if _, err := PreparePluginProject(ctx, grant.TaskID, nil); err != nil {
+		t.Fatal(err)
+	}
+	previous := "initial"
+	for i := 0; i < 600; i++ {
+		next := fmt.Sprintf("revision %d", i)
+		err := WithPluginProjectSource(ctx, true, func(g *PluginDevelopmentGrant, root *os.Root) error {
+			if err := BeginPluginProjectMutation(g, "index.js", PluginProjectDigest([]byte(previous)), PluginProjectDigest([]byte(next))); err != nil {
+				return err
+			}
+			if err := root.WriteFile("index.js", []byte(next), 0600); err != nil {
+				return err
+			}
+			return FinishPluginProjectMutation(g, "index.js")
+		})
+		if err != nil {
+			t.Fatalf("mutation %d: %v", i, err)
+		}
+		previous = next
+	}
+	manifestPath := filepath.Join(PluginProjectPrivateDir(grant.TaskID), "project.json")
+	data, err := os.ReadFile(manifestPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var stored map[string]any
+	if err = json.Unmarshal(data, &stored); err != nil {
+		t.Fatal(err)
+	}
+	if _, found := stored["journal"]; found || len(data) > 2048 {
+		t.Fatalf("completed history accumulated: %d bytes", len(data))
+	}
+	// 最后一次写入故意不完成，恢复必须仍能识别实际落盘的新字节。
+	err = WithPluginProjectSource(ctx, true, func(g *PluginDevelopmentGrant, root *os.Root) error {
+		if err := BeginPluginProjectMutation(g, "index.js", PluginProjectDigest([]byte(previous)), PluginProjectDigest([]byte("interrupted"))); err != nil {
+			return err
+		}
+		return root.WriteFile("index.js", []byte("interrupted"), 0600)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	status, err := GetPluginProjectStatus(ctx, grant.TaskID)
+	if err != nil || !status.Pending {
+		t.Fatal("pending recovery evidence missing", err)
+	}
+	if _, err = RestorePluginProject(ctx, grant.TaskID, status.SourceRevision); err != nil {
+		t.Fatal(err)
+	}
+	if data, err = os.ReadFile(filepath.Join(grant.SourceRoot, "index.js")); err != nil || string(data) != "initial" {
+		t.Fatal("repeated modifications could not be restored", string(data), err)
+	}
+}
+
+func TestPluginProjectRepeatedReplansKeepOnlyCurrentCheckpoint(t *testing.T) {
+	ctx, grant := pluginProjectFixture(t, map[string]string{"index.js": "initial"})
+	status, err := PreparePluginProject(ctx, grant.TaskID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	unknown := filepath.Join(PluginProjectPrivateDir(grant.TaskID), "checkpoints", "user-notes", "keep.txt")
+	if err = os.MkdirAll(filepath.Dir(unknown), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(unknown, []byte("keep"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 20; i++ {
+		grant.PlanHash, grant.PlanVersion = fmt.Sprintf("plan %d", i), i+2
+		status, err = PreparePluginProject(ctx, grant.TaskID, nil, status.SourceRevision)
+		if err != nil {
+			t.Fatalf("replan %d: %v", i, err)
+		}
+		entries, err := os.ReadDir(filepath.Join(PluginProjectPrivateDir(grant.TaskID), "checkpoints"))
+		if err != nil || len(entries) != 2 {
+			t.Fatalf("replan retained obsolete checkpoints: %v, %v", entries, err)
+		}
+	}
+	if data, err := os.ReadFile(unknown); err != nil || string(data) != "keep" {
+		t.Fatal("unknown content was removed", err)
+	}
+	if _, err = RestorePluginProject(ctx, grant.TaskID, status.SourceRevision); err != nil {
+		t.Fatal("current checkpoint is not recoverable", err)
+	}
+}
+
+func TestPluginProjectReplanFailuresKeepRecoverableBaseline(t *testing.T) {
+	if runtime.GOOS == "windows" || os.Geteuid() == 0 {
+		t.Skip("requires Unix directory permissions for ordinary I/O failure injection")
+	}
+	for _, phase := range []string{"cleanup-before", "manifest-save", "cleanup-after"} {
+		t.Run(phase, func(t *testing.T) {
+			ctx, grant := pluginProjectFixture(t, map[string]string{"index.js": "initial"})
+			status, err := PreparePluginProject(ctx, grant.TaskID, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			private := PluginProjectPrivateDir(grant.TaskID)
+			previousPlan := grant.PlanHash
+			grant.PlanHash, grant.PlanVersion = "next plan", 2
+			blocked := private
+			if phase == "cleanup-before" {
+				blocked = filepath.Join(private, "checkpoints", PluginProjectDigest([]byte("obsolete checkpoint")))
+				if err = os.MkdirAll(blocked, 0700); err != nil {
+					t.Fatal(err)
+				}
+				if err = os.WriteFile(filepath.Join(blocked, "index.js"), []byte("obsolete"), 0600); err != nil {
+					t.Fatal(err)
+				}
+			} else if phase == "cleanup-after" {
+				blocked = filepath.Join(private, "baseline")
+			}
+			t.Cleanup(func() { _ = os.Chmod(blocked, 0700) })
+			checks := 0
+			failing := WithPluginDevelopmentAccess(context.Background(), func(string) (*PluginDevelopmentGrant, error) {
+				checks++
+				if phase == "cleanup-before" && checks == 1 || phase != "cleanup-before" && checks == 2 {
+					if err := os.Chmod(blocked, 0500); err != nil {
+						return nil, err
+					}
+				}
+				return grant, nil
+			})
+			if _, err = PreparePluginProject(failing, grant.TaskID, nil, status.SourceRevision); err == nil {
+				t.Fatal("injected checkpoint I/O failure was not reported")
+			}
+			manifest, err := readPluginProjectManifestForStatus(grant)
+			if err != nil {
+				t.Fatal("failed replan lost the published manifest", err)
+			}
+			wantPlan := previousPlan
+			if phase == "cleanup-after" {
+				wantPlan = grant.PlanHash
+			}
+			if manifest.PlanHash != wantPlan {
+				t.Fatalf("published plan %q, want %q", manifest.PlanHash, wantPlan)
+			}
+			if err = validateProjectBaseline(grant, manifest); err != nil {
+				t.Fatal("failed replan lost the published baseline", err)
+			}
+			if err = os.Chmod(blocked, 0700); err != nil {
+				t.Fatal(err)
+			}
+			if _, err = PreparePluginProject(ctx, grant.TaskID, nil, status.SourceRevision); err != nil {
+				t.Fatal("replan could not resume after the I/O failure", err)
+			}
+			if _, err = RestorePluginProject(ctx, grant.TaskID, status.SourceRevision); err != nil {
+				t.Fatal("published checkpoint is not recoverable", err)
+			}
+		})
+	}
+}
+
+func TestPluginProjectRecoveryTailRemainsPendingUntilCompleted(t *testing.T) {
+	for _, exists := range []bool{false, true} {
+		t.Run(fmt.Sprintf("temporary-file-exists-%t", exists), func(t *testing.T) {
+			ctx, grant := pluginProjectFixture(t, map[string]string{"index.js": "initial"})
+			if _, err := PreparePluginProject(ctx, grant.TaskID, nil); err != nil {
+				t.Fatal(err)
+			}
+			manifest, err := readPluginProjectManifest(grant)
+			if err != nil {
+				t.Fatal(err)
+			}
+			// 源码已恢复，但清理临时文件或清空其记录之前中断。
+			name := ".restore-" + PluginProjectDigest([]byte("index.js")) + ".tmp"
+			manifest.TemporaryFiles = map[string]string{name: PluginProjectDigest([]byte("initial"))}
+			if err = savePluginProjectManifest(grant, manifest); err != nil {
+				t.Fatal(err)
+			}
+			if exists {
+				if err = os.WriteFile(filepath.Join(grant.SourceRoot, name), []byte("initial"), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			status, err := GetPluginProjectStatus(ctx, grant.TaskID)
+			if err != nil || !status.Pending || status.ExternalChanges {
+				t.Fatal("unfinished recovery tail was not reported as pending", status, err)
+			}
+			called := false
+			if err = WithPluginProjectSource(ctx, true, func(*PluginDevelopmentGrant, *os.Root) error { called = true; return nil }); err == nil || called {
+				t.Fatal("ordinary writes continued before recovery finished", err)
+			}
+			if _, err = PreparePluginProject(ctx, grant.TaskID, nil, status.SourceRevision); err == nil {
+				t.Fatal("preparation discarded the unfinished recovery tail")
+			}
+			if err = RecordPluginProjectArtifact(grant, &PluginProjectArtifact{SourceRevision: status.SourceRevision}); err == nil {
+				t.Fatal("artifact became ready before recovery finished")
+			}
+			if _, err = RestorePluginProject(ctx, grant.TaskID, status.SourceRevision); err != nil {
+				t.Fatal("recovery tail could not resume", err)
+			}
+			status, err = GetPluginProjectStatus(ctx, grant.TaskID)
+			if err != nil || status.Pending || status.ExternalChanges {
+				t.Fatal("recovery did not clear pending state", status, err)
+			}
+			if _, err = PreparePluginProject(ctx, grant.TaskID, nil, status.SourceRevision); err != nil {
+				t.Fatal("completed recovery still blocked preparation", err)
+			}
+		})
 	}
 }
 
@@ -476,6 +684,13 @@ func TestPluginProjectInterruptedReplanAndProvenance(t *testing.T) {
 	})
 	if _, err := PreparePluginProject(interrupted, grant.TaskID, nil, status.SourceRevision); err == nil {
 		t.Fatal("replan cancellation did not trigger")
+	}
+	manifest, err := readPluginProjectManifestForStatus(grant)
+	if err != nil || manifest.PlanHash == grant.PlanHash {
+		t.Fatal("interrupted replan switched the current baseline", err)
+	}
+	if err = validateProjectBaseline(grant, manifest); err != nil {
+		t.Fatal("interrupted replan removed the current baseline", err)
 	}
 	if _, err := PreparePluginProject(ctx, grant.TaskID, nil, status.SourceRevision); err != nil {
 		t.Fatal("complete checkpoint could not be reused", err)

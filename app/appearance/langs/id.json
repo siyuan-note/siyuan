@@ -1,4 +1,5 @@
 {
+	"agentBuiltinPluginDevelopmentDescription": "Alur kerja resmi pengembangan plugin antarmuka: setelah Anda menyetujuinya secara eksplisit, perjelas kebutuhan yang belum lengkap, konfirmasi rencana singkat, implementasikan dalam salinan terkelola, validasi, dan kemas; pemasangan dan pengaktifan memerlukan izin terpisah",
 	"agentPluginRecoveryQuestion": "Pulihkan hanya titik pemeriksaan kode sumber dari usulan yang sebelumnya disetujui? Pemulihan tidak mengembalikan catatan, data runtime, atau pengaturan lain, dan tidak mengizinkan perubahan kode sumber lebih lanjut.",
 	"agentPluginFlowQuestion": "Gunakan alur pengembangan plugin resmi?",
 	"agentPluginFlowYes": "Ya",

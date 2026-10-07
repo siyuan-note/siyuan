@@ -230,6 +230,7 @@ func bazaarHandler(ctx context.Context, args map[string]any) (CallToolResult, er
 		expectedInstalled, _ := args["expectedInstalledRevision"].(string)
 		var archive string
 		var err error
+		installOptions := model.LocalBazaarInstallOptions{ExpectedPackageHash: expectedHash, ExpectedInstalledRevision: expectedInstalled, Context: ctx}
 		if util.IsPluginProjectPath(filepath.Join(util.WorkspaceDir, filepath.FromSlash(path))) || bazaar.IsPluginProjectDeliveryPath(filepath.Join(util.WorkspaceDir, filepath.FromSlash(path))) {
 			taskID, _ := args["taskId"].(string)
 			if expectedHash == "" || expectedInstalled == "" {
@@ -243,6 +244,7 @@ func bazaarHandler(ctx context.Context, args map[string]any) (CallToolResult, er
 				return blockToolError("frontend differs from the approved plugin development plan")
 			}
 			archive, err = bazaar.ResolvePluginProjectArtifact(ctx, taskID, path, expectedHash)
+			installOptions.Recheck = func() error { return util.RecheckPluginProjectGrant(ctx, grant) }
 		} else {
 			archive, err = resolvePath(path)
 		}
@@ -263,7 +265,7 @@ func bazaarHandler(ctx context.Context, args map[string]any) (CallToolResult, er
 			}
 		}
 		overwrite, _ := args["overwrite"].(bool)
-		result, err := model.InstallLocalBazaarPackageWithOptions(archive, frontend, overwrite, model.LocalBazaarInstallOptions{ExpectedPackageHash: expectedHash, ExpectedInstalledRevision: expectedInstalled})
+		result, err := model.InstallLocalBazaarPackageWithOptions(archive, frontend, overwrite, installOptions)
 		if err != nil {
 			return bazaarProjectError(err, result)
 		}

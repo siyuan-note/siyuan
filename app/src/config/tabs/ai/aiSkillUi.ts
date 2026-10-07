@@ -77,15 +77,19 @@ const renderUserSkills = (root: HTMLElement, skills: IUserSkillInfo[], builtin: 
         list.innerHTML = `<div class="b3-label config-item"><div class="b3-label__text">${builtin ? window.siyuan.languages.empty : window.siyuan.languages.agentUserSkillsEmpty}</div></div>`;
         return;
     }
-    list.innerHTML = `${skills.map((skill) => `<label class="fn__flex b3-label config-item" data-user-skill-id="${escapeAttribute(skill.id)}">
+    list.innerHTML = `${skills.map((skill) => {
+        const description = builtin && skill.id === "builtin:siyuan-plugin-development" ?
+            window.siyuan.languages.agentBuiltinPluginDevelopmentDescription || skill.description : skill.description;
+        return `<label class="fn__flex b3-label config-item" data-user-skill-id="${escapeAttribute(skill.id)}">
     <div class="fn__flex-1">
         <div class="config-name">${escapeHtml(skill.name)}</div>
-        ${skill.description ? `<div class="b3-label__text">${escapeHtml(skill.description)}</div>` : ""}
+        ${description ? `<div class="b3-label__text">${escapeHtml(description)}</div>` : ""}
         <div class="b3-label__text"><code>${builtin ? `${escapeHtml(skill.id)} · ${escapeHtml(skill.version || "")}` : `~/.agents/skills/${escapeHtml(skill.id)}`}</code>${skill.shadowed ? ` · ${window.siyuan.languages.agentUserSkillShadowed}` : ""}</div>
     </div>
     <span class="fn__space"></span>
     <input class="b3-switch" data-type="toggleAgentUserSkill" type="checkbox" aria-label="${escapeAttribute(skill.name)}"${skill.enabled ? " checked" : ""}>
-</label>`).join("")}`;
+</label>`;
+    }).join("")}`;
 };
 
 const openUserSkillsView = (settingRoot: HTMLElement, skills: IUserSkillInfo[], builtin: boolean, request: string) => {

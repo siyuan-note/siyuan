@@ -1,4 +1,5 @@
 {
+	"agentBuiltinPluginDevelopmentDescription": "官方前端外掛開發流程：在使用者明確選擇後釐清缺漏需求、確認簡短方案、使用受管理的副本實作、驗證及封裝；安裝與啟用須另行授權",
 	"agentPluginRecoveryQuestion": "是否僅還原先前已確認方案的原始碼檢查點？還原不會回復筆記、執行階段資料或其他設定，也不授權繼續修改原始碼。",
 	"agentPluginFlowQuestion": "是否使用官方外掛開發流程？",
 	"agentPluginFlowYes": "是",

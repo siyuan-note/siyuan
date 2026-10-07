@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 	"testing/fstest"
+	"unicode"
 )
 
 func TestBuiltinSkillMetadataAndResources(t *testing.T) {
@@ -39,6 +40,28 @@ func TestBuiltinSkillMetadataAndResources(t *testing.T) {
 	for _, dir := range []string{workspace, user} {
 		if _, err = os.Stat(dir); !os.IsNotExist(err) {
 			t.Fatalf("builtin discovery wrote directory %s: %v", dir, err)
+		}
+	}
+}
+
+func TestBuiltinSkillEnglishMarkdownKeepsMetadataBinding(t *testing.T) {
+	info, err := BuiltinPluginSkill(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(info.Description, "Official frontend plugin development workflow") {
+		t.Fatal("builtin metadata description is not in English", info.Description)
+	}
+	for _, resource := range []string{"SKILL.md", "references/development.md", "references/verification.md"} {
+		loaded, err := LoadBuiltinSkill(PluginDevelopmentSkillName+"/"+resource, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if loaded.Digest != info.Digest || loaded.Version != info.Version {
+			t.Fatalf("resource metadata differs from current content binding: %s", resource)
+		}
+		if strings.ContainsFunc(loaded.Content, func(r rune) bool { return unicode.Is(unicode.Han, r) }) {
+			t.Fatalf("builtin Markdown still contains untranslated Chinese: %s", resource)
 		}
 	}
 }

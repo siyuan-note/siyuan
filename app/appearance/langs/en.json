@@ -1,4 +1,5 @@
 {
+	"agentBuiltinPluginDevelopmentDescription": "Official frontend plugin development workflow: after you explicitly opt in, clarify missing requirements, confirm a brief plan, implement in a managed copy, validate, and package; installation and activation require separate authorization",
 	"agentPluginRecoveryQuestion": "Restore only the source checkpoint of the previously approved proposal? Recovery will not roll back notes, runtime data, or other settings, and does not authorize further source changes.",
 	"agentPluginFlowQuestion": "Use the official plugin development workflow?",
 	"agentPluginFlowYes": "Yes",

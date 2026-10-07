@@ -1,4 +1,5 @@
 {
+	"agentBuiltinPluginDevelopmentDescription": "Officiële werkwijze voor frontend-pluginontwikkeling: na je uitdrukkelijke toestemming worden ontbrekende vereisten verduidelijkt, wordt een kort plan bevestigd en wordt de plugin in een beheerde kopie geïmplementeerd, gevalideerd en verpakt; installatie en activering vereisen afzonderlijke toestemming",
 	"agentPluginRecoveryQuestion": "Alleen het broncodecontrolepunt van het eerder goedgekeurde voorstel herstellen? Het herstel draait geen notities, runtimegegevens of andere instellingen terug en geeft geen toestemming voor verdere broncodewijzigingen.",
 	"agentPluginFlowQuestion": "De officiële workflow voor pluginontwikkeling gebruiken?",
 	"agentPluginFlowYes": "Ja",

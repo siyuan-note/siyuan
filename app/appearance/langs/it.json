@@ -1,4 +1,5 @@
 {
+	"agentBuiltinPluginDevelopmentDescription": "Procedura ufficiale per lo sviluppo di plugin frontend: dopo il tuo consenso esplicito, chiarire i requisiti mancanti, confermare un piano sintetico, implementare in una copia gestita, verificare e creare il pacchetto; l’installazione e l’attivazione richiedono un’autorizzazione separata",
 	"agentPluginRecoveryQuestion": "Ripristinare solo il punto di controllo del codice della proposta approvata in precedenza? Il ripristino non annulla le modifiche a note, dati di esecuzione o altre impostazioni e non autorizza ulteriori modifiche al codice.",
 	"agentPluginFlowQuestion": "Usare il flusso ufficiale di sviluppo dei plugin?",
 	"agentPluginFlowYes": "Sì",

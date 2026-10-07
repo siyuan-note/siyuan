@@ -19,24 +19,25 @@ package bazaar
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/sync/semaphore"
 	"golang.org/x/sync/singleflight"
 )
 
 var downloadPackageFlight singleflight.Group
 var bazaarDownloadCloudServer = util.GetCloudServer
-var packageInstallLock sync.Mutex
+var packageInstallLock = semaphore.NewWeighted(1)
 
 // downloadBazaarFile 下载集市文件
 func downloadBazaarFile(repoURLHash string, pushProgress bool) (data []byte, err error) {
@@ -223,8 +224,13 @@ func replacePackageDirectory(sourcePath, installPath string, update bool) error 
 }
 
 func replacePackageDirectoryWithOptions(sourcePath, installPath string, update bool, options PackageInstallOptions) (result *PackageInstallResult, err error) {
-	packageInstallLock.Lock()
-	defer packageInstallLock.Unlock()
+	if err = packageInstallLock.Acquire(options.context(), 1); err != nil {
+		return nil, err
+	}
+	defer packageInstallLock.Release(1)
+	if err = options.check(); err != nil {
+		return nil, err
+	}
 	if err = validateInstalledRevision(options.ExpectedInstalledRevision); err != nil {
 		return
 	}
@@ -307,6 +313,10 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 	if finalStagingRevision != stagingRevision {
 		return result, ErrInstalledRevisionConflict
 	}
+	// 最后一次取消和授权检查紧邻提交点；开始替换后必须完成提交或回滚并返回真实结果。
+	if err = options.check(); err != nil {
+		return result, err
+	}
 	if targetExists {
 		if err = os.Rename(installPath, backupPath); err != nil {
 			return
@@ -355,8 +365,10 @@ func InstallLocalPackageWithOptions(sourcePath, installPath, pkgType, packageNam
 
 // UninstallPackage 卸载集市包
 func UninstallPackage(installPath string) (err error) {
-	packageInstallLock.Lock()
-	defer packageInstallLock.Unlock()
+	if err = packageInstallLock.Acquire(context.Background(), 1); err != nil {
+		return err
+	}
+	defer packageInstallLock.Release(1)
 
 	if err = os.RemoveAll(installPath); err != nil {
 		logging.LogErrorf("remove [%s] failed: %s", installPath, err)

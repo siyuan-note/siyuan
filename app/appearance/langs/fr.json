@@ -1,4 +1,5 @@
 {
+	"agentBuiltinPluginDevelopmentDescription": "Processus officiel de développement de plugins d’interface : après votre accord explicite, clarifier les exigences manquantes, confirmer un plan succinct, réaliser le développement dans une copie gérée, valider et préparer le paquet ; l’installation et l’activation nécessitent une autorisation distincte",
 	"agentPluginRecoveryQuestion": "Restaurer uniquement le point de contrôle du code de la proposition précédemment approuvée ? La restauration ne rétablit ni les notes, ni les données d’exécution, ni les autres paramètres, et n’autorise aucune modification supplémentaire du code.",
 	"agentPluginFlowQuestion": "Utiliser le processus officiel de développement de plugins ?",
 	"agentPluginFlowYes": "Oui",

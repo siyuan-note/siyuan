@@ -1,4 +1,5 @@
 {
+	"agentBuiltinPluginDevelopmentDescription": "公式フロントエンドプラグイン開発フロー：ユーザーが明示的に選択した後、不足している要件を確認し、簡潔な計画に合意したうえで、管理対象のコピーで実装・検証・パッケージ化を行います。インストールと有効化には別途許可が必要です",
 	"agentPluginRecoveryQuestion": "以前に承認した提案のソースチェックポイントのみを復元しますか？復元してもノート、実行時データ、その他の設定は元に戻らず、ソースの追加変更も許可されません。",
 	"agentPluginFlowQuestion": "公式プラグイン開発フローを使用しますか？",
 	"agentPluginFlowYes": "はい",

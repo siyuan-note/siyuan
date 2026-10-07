@@ -1,4 +1,5 @@
 {
+	"agentBuiltinPluginDevelopmentDescription": "官方前端插件开发流程：在用户明确选择后澄清缺失要求、确认简短方案、使用受管副本实现、验证和打包；安装与启用另行授权",
 	"agentPluginRecoveryQuestion": "是否只恢复此前已确认方案的源码检查点？恢复不会回退笔记、运行时数据或其他配置，也不授权继续修改源码。",
 	"agentPluginFlowQuestion": "是否使用官方插件开发流程？",
 	"agentPluginFlowYes": "是",

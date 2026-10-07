@@ -48,6 +48,7 @@ import {recordRestoredSpellcheckFocus} from "./spellcheckFocus";
 import {applyPublishFoldStates} from "./viewFold";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
+import {pauseMobileBarsScroll} from "../../mobile/util/mobileBars";
 /// #endif
 
 export const onGet = (options: {
@@ -533,6 +534,11 @@ export const disabledForeverProtyle = (protyle: IProtyle) => {
 /** 禁用编辑器 */
 export const disabledProtyle = (protyle: IProtyle) => {
     const wasDisabled = protyle.disabled;
+    /// #if MOBILE
+    if (!wasDisabled && window.siyuan.mobile.editor?.protyle === protyle) {
+        pauseMobileBarsScroll();
+    }
+    /// #endif
     window.siyuan.menus.menu.remove();
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
     protyle.disabled = true;
@@ -573,6 +579,11 @@ export const enableProtyle = (protyle: IProtyle) => {
         return;
     }
     const wasDisabled = protyle.disabled;
+    /// #if MOBILE
+    if (wasDisabled && window.siyuan.mobile.editor?.protyle === protyle) {
+        pauseMobileBarsScroll();
+    }
+    /// #endif
     protyle.disabled = false;
     protyle.databaseAttributePanel?.updateReadonly();
     if (isMobile()) {

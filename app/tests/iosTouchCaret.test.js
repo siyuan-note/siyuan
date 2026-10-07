@@ -375,7 +375,8 @@ const runElectron = async () => {
     app.setPath("userData", process.argv[2]);
     app.commandLine.appendSwitch("disable-gpu");
     await app.whenReady();
-    const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
+    // 字符坐标和原生选区校正依赖实际渲染帧，测试窗口保持可见。
+    const win = new BrowserWindow({show: true, webPreferences: {nodeIntegration: true, contextIsolation: false}});
     let exitCode = 0;
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");

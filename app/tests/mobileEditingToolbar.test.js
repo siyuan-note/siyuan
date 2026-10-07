@@ -313,12 +313,13 @@ const runElectron = async () => {
     app.setPath("userData", process.argv[2]);
     app.commandLine.appendSwitch("disable-gpu");
     await app.whenReady();
-    const win = new BrowserWindow({show: false, width: 400, height: 800,
+    // 工具栏位置和选区滚动依赖实际渲染帧，测试窗口保持可见。
+    const win = new BrowserWindow({show: true, width: 400, height: 800,
         webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false}});
     let exitCode = 0;
     try {
         const ts = require("typescript");
-        const modules = ["mobile/util/keyboardToolbar", "mobile/util/toolbarActions",
+        const modules = ["mobile/util/keyboardToolbar", "mobile/util/keyboardSelectionScroll", "mobile/util/toolbarActions",
             "mobile/util/toolbarEntries", "mobile/util/mobileAppUtil", "mobile/util/mobileKeyboardChange",
             "mobile/util/touchSelection", "mobile/util/visibleViewport", "protyle/util/hasClosest",
             "protyle/toolbar/defaults", "protyle/toolbar/entryVisibility", "config/entryVisibility/order",

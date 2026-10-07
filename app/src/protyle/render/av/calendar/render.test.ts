@@ -356,6 +356,7 @@ test("calendar edit-mode changes refresh controls and stale actions cannot creat
         const handlers: Record<string, (event: unknown) => void> = {};
         let html = "";
         let created = 0;
+        let paused = 0;
         const root = {
             querySelectorAll: (): unknown[] => [],
             querySelector: () => ({addEventListener() {}}),
@@ -397,10 +398,12 @@ test("calendar edit-mode changes refresh controls and stale actions cannot creat
             "./setEditMode": {updateMobileTitleReadonly() {}},
             "../../dialog/tooltip": {hideTooltip() {}},
             "./compatibility": {isAndroid: () => mobile, isIPhone: () => false},
+            "../../mobile/util/mobileBars": {pauseMobileBarsScroll: () => paused++},
         };
         const context = {
             require: (name: string) => modules[name] || {},
-            window: {siyuan: {config: {lang: "en"}, languages: {}, menus: {menu: {remove() {}}}}},
+            window: {siyuan: {config: {lang: "en"}, languages: {}, menus: {menu: {remove() {}}},
+                mobile: {editor: mobile ? {protyle} : undefined}}},
             document: {activeElement: null as Element | null},
         };
         const compile = (file: string) => transpileModule(readFileSync(file, "utf8"), {
@@ -427,5 +430,6 @@ test("calendar edit-mode changes refresh controls and stale actions cannot creat
         assert.match(html, /data-calendar-add=/);
         clickAdd();
         assert.equal(created, 2);
+        assert.equal(paused, mobile ? 3 : 0);
     }
 });

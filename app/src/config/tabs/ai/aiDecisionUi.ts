@@ -280,7 +280,12 @@ export const mountDecisionCards = (root: HTMLElement) => {
     const enabledInput = getDecisionEnabledInput(root);
     let changeRevision = 0;
     let pendingChange = 0;
-    const updateVisibility = () => block.classList.toggle("fn__none", !(enabledInput?.checked ?? window.siyuan.config.ai.decision.enabled));
+    const updateVisibility = () => {
+        const enabled = enabledInput?.checked ?? window.siyuan.config.ai.decision.enabled;
+        block.classList.toggle("fn__none", !enabled);
+        // 隐藏的提供商仍占最后子节点，开关行需复用无边框样式。
+        enabledInput?.closest(".config-item")?.classList.toggle("b3-label--noborder", !enabled);
+    };
     enabledInput?.addEventListener("change", () => {
         const revision = ++changeRevision;
         pendingChange = revision;

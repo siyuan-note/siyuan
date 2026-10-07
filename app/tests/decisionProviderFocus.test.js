@@ -79,17 +79,20 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
     const decision = window.siyuan.config.ai.decision;
     const preservedConfig = JSON.stringify({provider: decision.provider, profiles: decision.profiles});
     const enabledInput = root.querySelector('[id="ai.decision.enabled"]');
+    const enabledRow = enabledInput.closest(".config-item");
     const providerBlock = root.querySelector("#aiDecisionCardsBlock");
     const refreshConfig = enabled => {
         decision.enabled = enabled;
         window.dispatchEvent(new CustomEvent("siyuan-ai-config-changed"));
     };
     assert.equal(getComputedStyle(providerBlock).display, "none", "The entire provider configuration starts hidden while disabled");
+    assert.equal(getComputedStyle(enabledRow).borderBottomWidth, "0px", "Disabled lone switch has no trailing separator");
     root.querySelector("[data-decision-provider='typesafe']").click();
     assert.equal(root.querySelector("[data-decision-profile-view]"), null, "Disabled cards cannot open a detail");
     enabledInput.checked = true;
     enabledInput.dispatchEvent(new Event("change", {bubbles: true}));
     assert.notEqual(getComputedStyle(providerBlock).display, "none", "Reuse immediate switch-controlled visibility");
+    assert.equal(getComputedStyle(enabledRow).borderBottomWidth, "1px", "Enabling restores the separator above provider settings");
     root.querySelector("[data-decision-provider='typesafe']").click();
     assert.equal(root.querySelector("[data-decision-profile-view]"), null, "Pending enable must not bypass saved configuration");
     refreshConfig(true);
@@ -291,6 +294,8 @@ const runCases = async (sources, languages, reproduceUnsafeFocus = false) => {
             assert.equal(enabledInput.checked, enabled, "Native switch input survives delegated save ordering");
             assert.equal(decision.enabled, enabled);
             assert.equal(getComputedStyle(providerBlock).display === "none", !enabled);
+            assert.equal(getComputedStyle(enabledRow).borderBottomWidth, enabled ? "1px" : "0px",
+                "Native toggles keep the separator consistent with visible rows");
         }
         assert.deepEqual(savedSwitches, [false, true]);
         assert.equal(JSON.stringify(window.siyuan.config), initialConfig);

@@ -433,7 +433,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     const notebookId = liElement.parentElement.getAttribute("data-url");
     const name = getNotebookName(notebookId);
     const boxDocID = liElement.getAttribute("data-node-id");
-    if (boxDocID && window.siyuan.config.fileTree.parentDocClickExpand &&
+    if (boxDocID && window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 &&
         Number(liElement.getAttribute("data-count")) > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "openDocument",
@@ -766,7 +766,7 @@ export const initDocumentMenu = (app: App, options: {
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({id: "separator_open", type: "separator"}).element);
     /// #endif
-    if (window.siyuan.config.fileTree.parentDocClickExpand && subFileCount > 0) {
+    if (window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 && subFileCount > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "openDocument",
             label: window.siyuan.languages.openDocument,

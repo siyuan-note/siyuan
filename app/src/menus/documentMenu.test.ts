@@ -59,7 +59,7 @@ const setup = (mobile = false, readonly = false) => {
             return dependencies[name] || {};
         },
         window: {siyuan: {menus: {menu}, languages: {}, mobile: {docks: {}},
-            config: {readonly, fileTree: {parentDocClickExpand: true}, flashcard: {deck: true},
+            config: {readonly, fileTree: {parentDocTitleClickMode: 1}, flashcard: {deck: true},
                 keymap: {general: keymap, editor: {general: keymap}}}}},
     });
     const options: Parameters<typeof exports.initDocumentMenu>[1] = {

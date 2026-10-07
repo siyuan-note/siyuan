@@ -23,8 +23,11 @@ import (
 
 func TestNewFileTreeDefaults(t *testing.T) {
 	fileTree := NewFileTree()
-	if nil == fileTree.ParentDocDoubleClickOpen || !*fileTree.ParentDocDoubleClickOpen {
-		t.Fatal("parent document double-click opening should be enabled by default")
+	if 0 != fileTree.DocIconClickMode {
+		t.Fatal("clicking a document or notebook icon should change the icon by default")
+	}
+	if 0 != fileTree.ParentDocTitleClickMode {
+		t.Fatal("clicking a parent document title should open the document by default")
 	}
 	if nil == fileTree.BoxDocEnabled {
 		t.Fatal("box document setting should be initialized")
@@ -40,26 +43,26 @@ func TestNewFileTreeDefaults(t *testing.T) {
 	}
 }
 
-func TestFileTreeParentDocDoubleClickOpenCompatibility(t *testing.T) {
+func TestFileTreeClickModeSerialization(t *testing.T) {
 	for _, entry := range []struct {
-		body string
-		want bool
+		body                 string
+		docIcon, parentTitle int
 	}{
-		{`{"parentDocClickExpand":true}`, true},
-		{`{"parentDocDoubleClickOpen":null}`, true},
-		{`{"parentDocDoubleClickOpen":false}`, false},
-		{`{"parentDocDoubleClickOpen":true}`, true},
+		{`{"docIconClickMode":1,"parentDocTitleClickMode":2}`, 1, 2},
+		{`{"docIconClickMode":0,"parentDocTitleClickMode":0}`, 0, 0},
+		{`{"parentDocTitleClickMode":1}`, 0, 1},
+		// 已废弃的布尔字段不再被读取，升级后按默认值生效
+		{`{"docIconClickExpand":true,"parentDocClickExpand":true,"parentDocDoubleClickOpen":false}`, 0, 0},
 	} {
 		t.Run(entry.body, func(t *testing.T) {
-			var fileTree FileTree
-			if err := json.Unmarshal([]byte(entry.body), &fileTree); err != nil {
+			fileTree := NewFileTree()
+			if err := json.Unmarshal([]byte(entry.body), fileTree); err != nil {
 				t.Fatal(err)
 			}
-			fileTree.NormalizeParentDocDoubleClickOpen()
-			if nil == fileTree.ParentDocDoubleClickOpen || *fileTree.ParentDocDoubleClickOpen != entry.want {
-				t.Fatalf("double-click preference: %v", fileTree.ParentDocDoubleClickOpen)
+			if fileTree.DocIconClickMode != entry.docIcon || fileTree.ParentDocTitleClickMode != entry.parentTitle {
+				t.Fatalf("click modes: %d, %d", fileTree.DocIconClickMode, fileTree.ParentDocTitleClickMode)
 			}
-			encoded, err := json.Marshal(&fileTree)
+			encoded, err := json.Marshal(fileTree)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -67,8 +70,8 @@ func TestFileTreeParentDocDoubleClickOpenCompatibility(t *testing.T) {
 			if err = json.Unmarshal(encoded, &restored); err != nil {
 				t.Fatal(err)
 			}
-			if nil == restored.ParentDocDoubleClickOpen || *restored.ParentDocDoubleClickOpen != entry.want {
-				t.Fatal("double-click preference was not preserved after serialization")
+			if restored.DocIconClickMode != entry.docIcon || restored.ParentDocTitleClickMode != entry.parentTitle {
+				t.Fatal("click modes were not preserved after serialization")
 			}
 		})
 	}

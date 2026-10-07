@@ -93,11 +93,15 @@ func TestAPIContractSettingMindmapCompatibility(t *testing.T) {
 	})
 }
 
-func TestAPIContractSettingParentDocDoubleClickCompatibility(t *testing.T) {
+func TestAPIContractSettingFileTreeClickModeCompatibility(t *testing.T) {
 	compareSettingConfig(t, apicontract.SetFiletree, conf.NewFileTree, []string{
-		`{}`, `{"parentDocDoubleClickOpen":true}`, `{"parentDocDoubleClickOpen":false}`,
-		`{"parentDocDoubleClickOpen":null}`, `{"ParentDocDoubleClickOpen":false}`,
-		`{"parentDocDoubleClickOpen":"false"}`, `{"parentDocDoubleClickOpen":0}`,
+		`{}`, `{"docIconClickMode":1,"parentDocTitleClickMode":2}`,
+		`{"docIconClickMode":0}`, `{"docIconClickMode":null}`, `{"DocIconClickMode":1}`,
+		`{"parentDocTitleClickMode":0}`, `{"parentDocTitleClickMode":1}`, `{"parentDocTitleClickMode":null}`,
+		`{"ParentDocTitleClickMode":2}`, `{"docIconClickMode":2}`, `{"parentDocTitleClickMode":3}`,
+		`{"docIconClickMode":"1"}`, `{"docIconClickMode":1.5}`, `{"parentDocTitleClickMode":true}`,
+		// 已废弃的布尔字段不再被读取
+		`{"docIconClickExpand":true}`, `{"parentDocClickExpand":true,"parentDocDoubleClickOpen":false}`,
 	})
 }
 

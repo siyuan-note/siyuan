@@ -32,9 +32,9 @@ const loadClick = (mobile: boolean, context: Record<string, unknown>) => {
     return exports.click;
 };
 
-const harness = (mobile: boolean, doubleClickOpen?: boolean, expanded = false) => {
+const harness = (mobile: boolean, mode: 1 | 2 = 2, expanded = false) => {
     const calls: string[] = [];
-    const config = {parentDocClickExpand: true, parentDocDoubleClickOpen: doubleClickOpen};
+    const config = {parentDocTitleClickMode: mode};
     const attributes: Record<string, string> = {
         "data-type": "navigation-file", "data-path": "/doc.sy", "data-node-id": "doc", "data-count": "4",
     };
@@ -73,10 +73,10 @@ const harness = (mobile: boolean, doubleClickOpen?: boolean, expanded = false) =
         resolve: (code = 0) => resolveRequest({...response, code})};
 };
 
-test("desktop and mobile titles toggle immediately with double-click opening disabled", () => {
+test("desktop and mobile titles toggle immediately in expand-only mode", () => {
     for (const mobile of [false, true]) {
         for (const expanded of [false, true]) {
-            const h = harness(mobile, false, expanded);
+            const h = harness(mobile, 1, expanded);
             h.click();
             assert.deepEqual(h.calls, ["toggle"]);
             h.click();
@@ -86,23 +86,21 @@ test("desktop and mobile titles toggle immediately with double-click opening dis
     }
 });
 
-test("missing and enabled preferences prefetch immediately and double clicks discard child responses", async () => {
+test("double-click mode prefetches immediately and double clicks discard child responses", async () => {
     for (const mobile of [false, true]) {
-        for (const setting of [undefined, true]) {
-            const h = harness(mobile, setting);
-            h.click();
-            assert.deepEqual(h.calls, ["request"]);
-            h.click();
-            assert.deepEqual(h.calls, ["request", "open"]);
-            h.resolve();
-            await delay(0);
-            assert.deepEqual(h.calls, ["request", "open"]);
-        }
+        const h = harness(mobile, 2);
+        h.click();
+        assert.deepEqual(h.calls, ["request"]);
+        h.click();
+        assert.deepEqual(h.calls, ["request", "open"]);
+        h.resolve();
+        await delay(0);
+        assert.deepEqual(h.calls, ["request", "open"]);
     }
 });
 
 test("desktop and mobile single clicks wait for data without requesting children twice", async () => {
-    const contexts = [false, true].map(mobile => harness(mobile, true));
+    const contexts = [false, true].map(mobile => harness(mobile, 2));
     contexts.forEach(h => h.click());
     await delay(330);
     contexts.forEach(h => {
@@ -115,9 +113,9 @@ test("desktop and mobile single clicks wait for data without requesting children
 
 test("prefetch results cannot apply after settings, paths, attachment or expansion state change", async () => {
     const contexts = [false, true].flatMap(mobile => [0, 1, 2, 3].map(change => {
-        const h = harness(mobile, true);
+        const h = harness(mobile, 2);
         h.click();
-        if (change === 0) { h.config.parentDocDoubleClickOpen = false; }
+        if (change === 0) { h.config.parentDocTitleClickMode = 1; }
         if (change === 1) { h.attributes["data-path"] = "/moved.sy"; }
         if (change === 2) { h.row.isConnected = false; }
         if (change === 3) { h.row.querySelector = () => ({}); }
@@ -129,7 +127,7 @@ test("prefetch results cannot apply after settings, paths, attachment or expansi
 });
 
 test("failed child requests never render prefetched lists", async () => {
-    const contexts = [false, true].map(mobile => harness(mobile, true));
+    const contexts = [false, true].map(mobile => harness(mobile, 2));
     contexts.forEach(h => { h.click(); h.resolve(-1); });
     await delay(330);
     contexts.forEach(h => assert.deepEqual(h.calls, ["request"]));

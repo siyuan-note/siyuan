@@ -926,18 +926,14 @@ declare namespace Config {
          */
         alwaysSelectOpenedFile: boolean;
         /**
-         * Whether clicking a document icon expands or collapses its child documents
+         * Behavior of clicking a document or notebook icon: 0 changes the icon, 1 expands or collapses its child documents
          */
-        docIconClickExpand: boolean;
+        docIconClickMode: number;
         /**
-         * Whether clicking a parent document title expands or collapses its child documents
+         * Behavior of clicking a parent document title: 0 opens the document, 1 expands or collapses its child documents,
+         * 2 expands or collapses on a single click and opens the parent on a double-click
          */
-        parentDocClickExpand: boolean;
-        /**
-         * 单击标题展开启用时，是否允许双击打开父文档；缺失时默认启用
-         * 关闭后单击不等待双击判定；设置接口省略或传 null 时保留当前值
-         */
-        parentDocDoubleClickOpen: boolean;
+        parentDocTitleClickMode: number;
         /**
          * Whether to enable top-level notebook documents
          */

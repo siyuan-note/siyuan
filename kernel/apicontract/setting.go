@@ -314,11 +314,13 @@ type SettingFileTree struct {
 	AlwaysSelectOpenedFile bool `json:"alwaysSelectOpenedFile" api:"optional,nullable"`
 	OpenFilesUseCurrentTab bool `json:"openFilesUseCurrentTab" api:"optional,nullable"`
 	CloseTabOnDoubleClick  bool `json:"closeTabOnDoubleClick" api:"optional,nullable"`
-	DocIconClickExpand     bool `json:"docIconClickExpand" api:"optional,nullable"`
-	ParentDocClickExpand   bool `json:"parentDocClickExpand" api:"optional,nullable"`
-	// 仅在 parentDocClickExpand 启用时生效；关闭后单击标题不再等待双击判定。
-	// 默认启用；更新时省略或传 null 保留当前值，旧持久化配置缺失时继承默认值。
-	ParentDocDoubleClickOpen *bool  `json:"parentDocDoubleClickOpen" api:"optional,nullable"`
+	// 单击文档图标或笔记本图标的行为：0 修改图标，1 展开或折叠子文档。无子文档时，1 在有可打开文档时打开文档，否则修改图标。
+	// 超出取值范围的输入按 0 处理。已废弃的 docIconClickExpand 不再读取，旧配置升级后回到 0。
+	DocIconClickMode int `json:"docIconClickMode" api:"optional,nullable"`
+	// 点击父文档标题的行为：0 打开文档，1 展开或折叠子文档，2 单击展开或折叠子文档、双击打开父文档。
+	// 没有子文档时各取值均直接打开文档；取 2 时单击需等待约 300 毫秒以判断是否双击。超出取值范围的输入按 0 处理。
+	// 已废弃的 parentDocClickExpand 与 parentDocDoubleClickOpen 不再读取，旧配置升级后回到 0。
+	ParentDocTitleClickMode  int    `json:"parentDocTitleClickMode" api:"optional,nullable"`
 	BoxDocEnabled            *bool  `json:"boxDocEnabled" api:"optional,nullable"`
 	UseSVGDefaultIcon        *bool  `json:"useSVGDefaultIcon" api:"optional,nullable"`
 	RefCreateSaveBox         string `json:"refCreateSaveBox" api:"optional,nullable"`

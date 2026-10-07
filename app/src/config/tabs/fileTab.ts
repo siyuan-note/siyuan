@@ -15,18 +15,6 @@ import {getAllModels} from "../../layout/getAll";
 const isMobileKernelContainer = () =>
     ["android", "ios", "harmony"].includes(window.siyuan.config.system.container);
 
-const bindParentDocClickSettingsVisibility = (root: HTMLElement) => {
-    const parent = root.querySelector<HTMLInputElement>(`#${CSS.escape("fileTree.parentDocClickExpand")}`);
-    const childRow = root.querySelector(`#${CSS.escape("fileTree.parentDocDoubleClickOpen")}`)?.closest(".config-item");
-    if (!parent || !childRow) {
-        return;
-    }
-    childRow.classList.add("config-filetree-click__child");
-    const updateVisibility = () => childRow.classList.toggle("fn__none", !parent.checked);
-    parent.addEventListener("change", updateVisibility);
-    updateVisibility();
-};
-
 const genNotebookSavePathHtml = (
     title: string,
     desc: string,
@@ -54,34 +42,40 @@ const genNotebookSavePathHtml = (
 
 const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("behavior", window.siyuan.languages.configGroupBehavior);
+    // 两个下拉共用展开项文案，搜索任一文案都同时命中两项
+    const clickActionKeywords = [window.siyuan.languages.docTreeClickExpandChildren,
+        window.siyuan.languages.docTreeClickExpandChildrenDblclick];
 
     /// #if !MOBILE
-    group.switch("fileTree.docIconClickExpand", {
-        title: window.siyuan.languages.docIconClickExpand,
-        desc: window.siyuan.languages.docIconClickExpandTip,
-        save: (value) => fileConfigApi.patch("docIconClickExpand", value, () => {
+    group.select("fileTree.docIconClickMode", {
+        title: window.siyuan.languages.docIconClickAction,
+        desc: window.siyuan.languages.docIconClickActionTip,
+        keywords: [...clickActionKeywords, window.siyuan.languages.changeIcon,
+            window.siyuan.languages.docIconClickActionTip],
+        options: [
+            {value: 0, label: window.siyuan.languages.changeIcon},
+            {value: 1, label: window.siyuan.languages.docTreeClickExpandChildren},
+        ],
+        save: (value) => fileConfigApi.patch("docIconClickMode", value, () => {
             getAllModels().files.forEach((files) => files.updateDocActions());
         }),
     });
     /// #endif
-    const parentDocClickKeywords = [window.siyuan.languages.parentDocClickExpand, window.siyuan.languages.parentDocClickExpandTip,
-        window.siyuan.languages.parentDocDoubleClickOpen, window.siyuan.languages.parentDocDoubleClickOpenTip];
-    group.switch("fileTree.parentDocClickExpand", {
-        title: window.siyuan.languages.parentDocClickExpand,
-        desc: window.siyuan.languages.parentDocClickExpandTip,
-        keywords: parentDocClickKeywords,
-        afterMount: bindParentDocClickSettingsVisibility,
-        save: (value) => fileConfigApi.patch("parentDocClickExpand", value, () => {
+    group.select("fileTree.parentDocTitleClickMode", {
+        title: window.siyuan.languages.parentDocTitleClickAction,
+        desc: window.siyuan.languages.parentDocTitleClickActionTip,
+        keywords: [...clickActionKeywords, window.siyuan.languages.openDocument,
+            window.siyuan.languages.parentDocTitleClickActionTip],
+        options: [
+            {value: 0, label: window.siyuan.languages.openDocument},
+            {value: 1, label: window.siyuan.languages.docTreeClickExpandChildren},
+            {value: 2, label: window.siyuan.languages.docTreeClickExpandChildrenDblclick},
+        ],
+        save: (value) => fileConfigApi.patch("parentDocTitleClickMode", value, () => {
             /// #if !MOBILE
             getAllModels().files.forEach((files) => files.updateDocActions());
             /// #endif
         }),
-    });
-    group.switch("fileTree.parentDocDoubleClickOpen", {
-        title: window.siyuan.languages.parentDocDoubleClickOpen,
-        desc: window.siyuan.languages.parentDocDoubleClickOpenTip,
-        keywords: parentDocClickKeywords,
-        readConfig: () => window.siyuan.config.fileTree.parentDocDoubleClickOpen !== false,
     });
     group.switch("fileTree.alwaysSelectOpenedFile", {
         title: window.siyuan.languages.selectOpen,

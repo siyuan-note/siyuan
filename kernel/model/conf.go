@@ -441,7 +441,6 @@ func InitConf() {
 		// 配置缺失时默认关闭顶层笔记本文档。
 		Conf.FileTree.BoxDocEnabled = new(bool)
 	}
-	Conf.FileTree.NormalizeParentDocDoubleClickOpen()
 
 	if conf.MinFileTreeRecentDocsListCount > Conf.FileTree.RecentDocsMaxListCount {
 		Conf.FileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount

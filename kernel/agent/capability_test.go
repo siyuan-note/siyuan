@@ -9,6 +9,7 @@
 package agent
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -27,6 +28,44 @@ func TestFrontendCapabilityModelNamesAreStableAndDistinct(t *testing.T) {
 	}
 	if len(first) > maxCapabilityModelNameLen || len(second) > maxCapabilityModelNameLen {
 		t.Fatal("capability model name exceeds the provider limit")
+	}
+}
+
+func TestBlockCapabilityExposesSharedToolDescriptions(t *testing.T) {
+	originalConf := kernelModel.Conf
+	kernelModel.Conf = kernelModel.NewAppConf()
+	kernelModel.Conf.AI = conf.NewAI()
+	id := tools.CapabilityIDForTool(tools.BlockTool)
+	kernelModel.Conf.AI.Agent.CapabilityPolicy = &conf.CapabilityPolicy{
+		Default: "deny", Overrides: map[string]string{id: "allow"},
+	}
+	t.Cleanup(func() { kernelModel.Conf = originalConf })
+	set, err := buildCapabilitySet(nil, capabilityAccessContext{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(set.definitions) != 1 || set.definitions[0].Function.Name != "block" {
+		t.Fatal("block capability was not exposed independently")
+	}
+	definition := set.definitions[0].Function
+	if definition.Description != tools.BlockTool.Description {
+		t.Fatal("agent did not receive the shared block tool description")
+	}
+	data, err := json.Marshal(definition.Parameters)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var schema tools.ToolSchema
+	if err = json.Unmarshal(data, &schema); err != nil {
+		t.Fatal(err)
+	}
+	if schema.Properties["data"].Description != tools.BlockTool.InputSchema.Properties["data"].Description {
+		t.Fatal("agent did not receive the native block creation examples")
+	}
+	kernelModel.Conf.AI.Agent.CapabilityPolicy.Overrides[id] = "deny"
+	set, err = buildCapabilitySet(nil, capabilityAccessContext{})
+	if err != nil || len(set.definitions) != 0 {
+		t.Fatalf("disabled block tool descriptions were still exposed: %v", err)
 	}
 }
 

@@ -64,27 +64,7 @@ second paragraph
 }}}
 
   Use {{{row for a vertical super-block. Never use data-layout in raw block DOM. If raw DOM is unavoidable, the outer block must use data-type="NodeSuperBlock" and data-sb-layout="row" or data-sb-layout="col", and every child must be complete block DOM with an explicit data-type; otherwise content may become an HTML block.
-- Tabs and Mindmap are native, editable SiYuan blocks supported by the block tool; do not substitute HTML widgets, Mermaid diagrams, or plugins unless requested.
-- Tabs: NodeTabs contains only NodeTabItem; each item contains body blocks and may contain nested tabs. Create with block.insert/append/prepend and dataType="markdown":
-
-::: tabs
-@tab First
-
-First body
-
-@tab:active Second
-
-Second body
-
-:::
-
-  The opening fence requires a space before tabs; never write :::tabs or :::tab. Nested groups require longer outer colon fences. To add tabs to an existing NodeTabs, pass a group containing only the new items; the tool inserts those items and preserves the target group's attributes. Use attr.set for tabs-position (top/left) and tabs-active-id (an existing direct item ID). Use block.move/delete on item IDs for reordering/removal, and edit body blocks individually.
-- Mindmap: NodeMindmap contains only NodeMindmapItem. Each item contains content blocks and may contain a nested NodeMindmap for child branches; never put a plain NodeList, NodeListItem, or a bare NodeMindmapItem directly inside an item. Create with block.insert/append/prepend and dataType="dom", for example:
-
-<div data-type="NodeMindmap" data-subtype="u" class="mindmap"><div data-type="NodeMindmapItem" data-subtype="u" data-marker="-" class="mindmap-item"><div data-type="NodeParagraph" class="p"><div contenteditable="true">Root</div></div><div data-type="NodeMindmap" data-subtype="u" class="mindmap"><div data-type="NodeMindmapItem" data-subtype="u" data-marker="-" class="mindmap-item"><div data-type="NodeParagraph" class="p"><div contenteditable="true">Child</div></div></div></div></div></div>
-
-  Every block requires an explicit data-type; the tool generates IDs for new native DOM blocks that omit data-node-id. A mindmap code fence creates an ordinary code block, not a native mindmap. To add siblings to an existing NodeMindmap, pass a group containing only the new items; to add a child branch, insert a NodeMindmap under a NodeMindmapItem. Use block.move/delete on item IDs and edit their content blocks individually.
-- Structural edits: block.get/get_kramdown/batch_kramdown return reading Markdown that flattens Tabs and renders Mindmap as ordinary lists. Before editing either container, call block.dom and preserve all existing data-node-id values and attributes, including active tabs and mindmap metadata. Use dataType="dom" and lockType=true for updates unless the user explicitly requests a type conversion. Never rebuild these containers from their reading Markdown.
+- Native structured blocks: use native capabilities and preserve existing structure, block IDs, and metadata unless the user explicitly requests a conversion. Follow the relevant tool descriptions for block-specific syntax and operations.
 - Notebook: a top-level container holding documents. Use notebook.list to enumerate; pass notebook ID when creating documents.
 - hPath (human-readable path): the title-based path shown in the document tree, e.g. "/Diary/2024/June". The "path" parameter in document.create/move/list refers to hPath, not the internal ID-based filesystem path. A rename changes hPath but not the ID.
 - Document vs block move: document.move relocates an entire document (and children) to a new hPath within a notebook — needs id, notebook (from document.get field "Box"), and path. block.move repositions a single content block under a new parent block.
@@ -93,8 +73,8 @@ Second body
 ## Tool Usage Patterns
 - Find: search.fulltext (keyword) → block.get (by ID). For semantic search use search.semantic.
 - Explore structure: document.list (children under an hPath) → document.get → block.get_children → block.get. Use block breadcrumb to trace a block's location.
-- Create content: document.create (notebook + hPath) → block.append/prepend/insert (dataType "markdown").
-- Modify: block.update replaces ONE block's content with new markdown — it does NOT create or append new blocks. To both modify and add, call block.update first, then block.append/prepend/insert as separate calls.
+- Create content: document.create (notebook + hPath) → block.append/prepend/insert.
+- Modify: block.update replaces ONE block's content — it does NOT create or append new blocks. To both modify and add, call block.update first, then block.append/prepend/insert as separate calls.
 - Organize: document.move (full document), document.rename (title), block.move (single content block), document.delete.
 - Inbox (cloud-synced clippings, messages, and audio/video/file attachments; requires subscription): inbox.list (paged, summaries only) → inbox.get (read full content to judge how to file it) → inbox.convert (move one or many into local documents under a notebook, auto-deleting the cloud originals on success). Failed conversions are left in the inbox for retry. If a request fails with an auth/subscription error, report it honestly — do not retry.
 - Attributes: attr.get/set on any block. Database/attribute views: database.create (database block with ordered fields), database.item_add (rows), database.key_add (columns), database.key_update (field configuration: name/type/icon/description, number/date format, display template, date defaults, select options, relation and rollup settings; inspect keys first, send exactly one config setting per call, and render to verify), database.key_set_template (existing template field formulas; use .action{add .Number 1} for a number field plus one, then render to verify; do not write computed template cells with item_update), database.render (view). Create database blocks via database.create, never via the file tool or generic block insertion.

@@ -86,13 +86,24 @@ func TestBlockWriteSuccessRejectsEmptyID(t *testing.T) {
 const nativeMindmapTestDOM = `<div data-type="NodeMindmap" data-subtype="u" class="mindmap"><div data-type="NodeMindmapItem" data-subtype="u" data-marker="-" class="mindmap-item"><div data-type="NodeParagraph" class="p"><div contenteditable="true">Root</div></div><div data-type="NodeMindmap" data-subtype="u" class="mindmap"><div data-type="NodeMindmapItem" data-subtype="u" data-marker="-" class="mindmap-item"><div data-type="NodeParagraph" class="p"><div contenteditable="true">Child</div></div></div></div></div></div>`
 
 func TestBlockToolCreatesNativeContainers(t *testing.T) {
+	description := BlockTool.InputSchema.Properties["data"].Description
+	tabsStart := strings.Index(description, "::: tabs\n")
+	tabsEnd := strings.Index(description, "\nThe opening fence")
+	if tabsStart < 0 || tabsEnd <= tabsStart {
+		t.Fatal("missing native tabs Markdown example")
+	}
+	_, mindmap, found := strings.Cut(description, "Native Mindmap DOM (dataType=dom):\n")
+	if !found {
+		t.Fatal("missing native mindmap DOM example")
+	}
+	mindmap, _, _ = strings.Cut(mindmap, "\n")
 	for _, tc := range []struct {
 		name, data, dataType string
 		want                 ast.NodeType
 		count                int
 	}{
-		{"tabs", "::: tabs\n@tab First\n\nBody\n\n@tab:active Second\n\nOther body\n\n:::\n", "markdown", ast.NodeTabs, 5},
-		{"mindmap", nativeMindmapTestDOM, "dom", ast.NodeMindmap, 6},
+		{"tabs", description[tabsStart:tabsEnd], "markdown", ast.NodeTabs, 5},
+		{"mindmap", mindmap, "dom", ast.NodeMindmap, 6},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			dom, err := prepareBlockWriteData(tc.data, tc.dataType)
@@ -147,9 +158,30 @@ func TestBlockToolPreservesNativeDOMIdentity(t *testing.T) {
 }
 
 func TestBlockToolDocumentsNativeContainerEditing(t *testing.T) {
-	for _, instruction := range []string{"NodeTabs/NodeTabItem", "NodeMindmap/NodeMindmapItem", "use dom before editing", "lockType=true"} {
+	for _, instruction := range []string{
+		"NodeTabs/NodeTabItem", "NodeMindmap/NodeMindmapItem",
+		"native, editable blocks", "do not substitute HTML widgets, Mermaid diagrams, or plugins unless requested",
+		"NodeTabs contains only NodeTabItem", "at least one body block", "empty paragraph for an empty body",
+		"NodeMindmap contains only NodeMindmapItem", "nested NodeMindmap for child branches",
+		"never put a plain NodeList, NodeListItem, or a bare NodeMindmapItem directly inside an item",
+		"mindmap code fence creates an ordinary code block, not a native mindmap",
+		"only the group's direct items are inserted", "target container's attributes are preserved",
+		"move/delete on existing item IDs", "edit body blocks individually",
+		"tabs-position (top/left)", "tabs-active-id (an existing direct item ID)",
+		"use dom before editing", "Never rebuild these containers from their reading Markdown",
+		"Preserve all existing data-node-id values and attributes", "active tabs and mindmap metadata",
+		"dataType=dom and lockType=true", "unless the user explicitly requests a type conversion",
+	} {
 		if !strings.Contains(BlockTool.Description, instruction) {
 			t.Fatalf("missing native container instruction %q", instruction)
+		}
+	}
+	for _, instruction := range []string{
+		"never write :::tabs or :::tab", "Nested groups require longer outer colon fences",
+		"Every block needs an explicit data-type", "may omit data-node-id; the tool generates IDs",
+	} {
+		if !strings.Contains(BlockTool.InputSchema.Properties["data"].Description, instruction) {
+			t.Fatalf("missing native block data instruction %q", instruction)
 		}
 	}
 }

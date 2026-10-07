@@ -133,6 +133,42 @@ func TestModernProtocolClient(t *testing.T) {
 	}
 }
 
+func TestBlockToolDescriptionsReachMCPClients(t *testing.T) {
+	server, httpServer := newTestHTTPServer(t)
+	syncTool(server, tools.BlockTool.Name, tools.BlockTool)
+	client := mcpsdk.NewClient(&mcpsdk.Implementation{Name: "block-description-test", Version: "1.0.0"}, nil)
+	session, err := client.Connect(t.Context(), &mcpsdk.StreamableClientTransport{Endpoint: httpServer.URL}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { session.Close() })
+	result, err := session.ListTools(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tool := range result.Tools {
+		if tool.Name != tools.BlockTool.Name {
+			continue
+		}
+		if tool.Description != tools.BlockTool.Description {
+			t.Fatal("MCP client did not receive the shared native block rules")
+		}
+		data, err := json.Marshal(tool.InputSchema)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var schema tools.ToolSchema
+		if err = json.Unmarshal(data, &schema); err != nil {
+			t.Fatal(err)
+		}
+		if schema.Properties["data"].Description != tools.BlockTool.InputSchema.Properties["data"].Description {
+			t.Fatal("MCP client did not receive the native block creation examples")
+		}
+		return
+	}
+	t.Fatal("native block tool was not listed")
+}
+
 func TestToolProjectionPolicyAndExecutionRecheck(t *testing.T) {
 	server := newServer()
 	allowed := true

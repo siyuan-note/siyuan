@@ -109,21 +109,29 @@ func TestSystemPromptDocumentsSuperBlockLayout(t *testing.T) {
 	}
 }
 
-func TestSystemPromptDocumentsNativeContainerEditing(t *testing.T) {
+func TestSystemPromptPreservesNativeStructure(t *testing.T) {
 	for _, instruction := range []string{
-		"Tabs and Mindmap are native, editable SiYuan blocks",
-		"::: tabs\n@tab First",
-		"@tab:active Second",
-		`data-type="NodeMindmap"`,
-		`data-type="NodeMindmapItem"`,
-		"block.move/delete on item IDs",
-		"call block.dom and preserve all existing data-node-id values and attributes",
-		"lockType=true",
-		"Never rebuild these containers from their reading Markdown",
+		"use native capabilities and preserve existing structure, block IDs, and metadata",
+		"Follow the relevant tool descriptions for block-specific syntax and operations",
 		"Missing guide search results alone do not prove a feature is unsupported",
 	} {
 		if !strings.Contains(systemPrompt, instruction) {
-			t.Fatalf("missing native container instruction %q", instruction)
+			t.Fatalf("missing native structure instruction %q", instruction)
+		}
+	}
+	for _, capabilities := range []*capabilitySet{
+		nil,
+		{registrations: map[string]*capabilityRegistration{"block": {ModelName: "block"}}},
+		{registrations: map[string]*capabilityRegistration{}},
+	} {
+		prompt := filterSystemPromptByCapabilities(systemPrompt, capabilities)
+		if !strings.Contains(prompt, "preserve existing structure, block IDs, and metadata") {
+			t.Fatal("native structure protection was removed by capability filtering")
+		}
+		for _, detail := range []string{"NodeTabs", "NodeTabItem", "NodeMindmap", "NodeMindmapItem", "::: tabs", "@tab", "tabs-position", "tabs-active-id"} {
+			if strings.Contains(prompt, detail) {
+				t.Fatalf("block-specific detail %q belongs in the tool description, not the system prompt", detail)
+			}
 		}
 	}
 }

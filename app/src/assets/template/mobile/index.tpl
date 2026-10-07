@@ -7,7 +7,7 @@
     <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 </head>
 <body class="fn__flex-column" style="background-color: #1e1e1e">
-<div id="loading" class="b3-dialog b3-dialog--open" style="padding: 0;">
+<div id="loading" class="b3-dialog b3-dialog--open" style="padding: 0; z-index: 10;">
     <div class="b3-dialog__scrim" style="background-color: #1e1e1e"></div>
     <img style="position: absolute;width: 24vh;height: 24vh;" src="../../icon.svg">
 </div>

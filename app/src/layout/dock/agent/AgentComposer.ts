@@ -112,7 +112,7 @@ const hintSkill = registerBuiltinSlashHint((key: string, protyle: IProtyle): IHi
             .map((s: Record<string, string>) => ({
                 value: '<span data-type="text" custom-agent-skill="true" contenteditable="false">' +
                     escapeHtml(s.name) + "</span> ",
-                html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic">' +
+                html: '<div class="b3-list-item__first" data-type="agent-skill"><svg class="b3-list-item__graphic">' +
                     '<use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">' +
                     escapeHtml(s.name) + "</span></div>" +
                     (s.description ? '<div class="b3-list-item__meta b3-list-item__showall">' + escapeHtml(s.description) + "</div>" : ""),

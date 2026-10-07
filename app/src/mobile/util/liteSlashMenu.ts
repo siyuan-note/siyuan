@@ -20,6 +20,9 @@ export const getLiteSlashMenuHTML = (items: IHintData[]) => {
         button.dataset.focus = item.focus === false ? "false" : "true";
         const content = document.createElement("div");
         content.innerHTML = item.html;
+        if (content.querySelector('[data-type="agent-skill"]')) {
+            button.classList.add("keyboard__slash-item--full");
+        }
         const uploads = Array.from(content.querySelectorAll('input[type="file"]'));
         uploads.forEach(input => input.remove());
         const label = content.querySelector(".b3-list-item__text");

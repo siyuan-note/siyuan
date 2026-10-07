@@ -1470,6 +1470,10 @@ body.mobile-topbar--merged {
       color: var(--b3-theme-on-background);
       min-height: 50px;
       text-align: left;
+
+      &--full {
+        width: calc(100% - 8px);
+      }
     }
 
     &-icon {

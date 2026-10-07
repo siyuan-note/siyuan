@@ -139,16 +139,26 @@ const setup = (resize = true) => {
             isInAndroid: () => false, ipcRenderer: {on() {}}, stopScrollAnimation() {},
         }, ...globals});
     bridge.initTouchDragBridge();
-    const dispatch = (type: string, x: number, eventTarget = target) => {
+    const dispatch = (type: string, x: number, eventTarget = target, properties = {}) => {
         now += 50;
         const point = {target: eventTarget, clientX: x, clientY: 200, radiusX: 1};
         const event = {target: eventTarget, touches: [point], changedTouches: [point], defaultPrevented: false,
-            preventDefault() { this.defaultPrevented = true; }, stopImmediatePropagation() {}};
+            preventDefault() { this.defaultPrevented = true; }, stopImmediatePropagation() {}, ...properties};
         handlers.get(type)?.forEach(listener => listener(event));
         return event;
     };
-    return {actions, left, right, target, child, scroll, dispatch, width: () => width};
+    return {actions, left, right, target, child, scroll, dispatch, width: () => width,
+        advance: (duration: number) => now += duration};
 };
+
+test("delayed short taps do not become global long-press menus while actual long presses are consumed", () => {
+    const fixture = setup(false);
+    fixture.dispatch("touchstart", 180, fixture.target, {timeStamp: 100});
+    fixture.advance(600);
+    assert.equal(fixture.dispatch("touchend", 180, fixture.target, {timeStamp: 150}).defaultPrevented, false);
+    fixture.dispatch("touchstart", 180, fixture.target, {timeStamp: 200});
+    assert.equal(fixture.dispatch("touchend", 180, fixture.target, {timeStamp: 800}).defaultPrevented, true);
+});
 
 for (const x of [120, 240]) {
     test(`database width drag to ${x}px keeps both sidebars closed while the resize bridge runs`, () => {

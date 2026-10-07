@@ -41,6 +41,7 @@ let clientY: number;
 let xDiff: number;
 let yDiff: number;
 let time: number;
+let touchStartTimeStamp: number;
 let firstDirection: MobileSwipeDirection;
 let firstXY: "x" | "y";
 let lastClientX: number;    // 和起始方向不一致时，记录最后一次的 clientX
@@ -180,6 +181,8 @@ export const handleTouchEnd = (event: TouchEvent) => {
     }
     const target = event.target as HTMLElement;
     const currentTime = Date.now();
+    const touchDuration = Number.isFinite(event.timeStamp) && Number.isFinite(touchStartTimeStamp) ?
+        event.timeStamp - touchStartTimeStamp : currentTime - time;
     const editor = getCurrentEditor();
     if (!isInHarmony() && !isInAndroid()) {
         handleTouchUp();
@@ -212,7 +215,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
                 event.stopImmediatePropagation();
                 event.preventDefault();
             }
-        } else if (currentTime - time > Constants.TIMEOUT_LONGPRESS) {
+        } else if (touchDuration > Constants.TIMEOUT_LONGPRESS) {
             // 长按：多选已在按住满阈值时触发，此处取消定时器避免重复触发
             if (isIPhone() && !isChromeBrowser() && !window.siyuan.touchDragActive) {
                 target.dispatchEvent(new MouseEvent("contextmenu", {
@@ -374,6 +377,7 @@ export const handleTouchStart = (event: TouchEvent) => {
     updateSidebarSwipeState();
     resetTouchGesture();
     time = Date.now();
+    touchStartTimeStamp = event.timeStamp;
     longPressBlockElement = undefined;
     longPressTouchRange = undefined;
     const target = event.touches[0].target as HTMLElement;

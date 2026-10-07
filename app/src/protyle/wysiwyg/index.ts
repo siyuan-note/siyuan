@@ -11,6 +11,7 @@ import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
 import {isCommittedTextInput} from "./compositionInput";
+import {bindIOSTouchCaret} from "./touchCaret";
 import {isDirectMathClick} from "../util/mathClick";
 import {
     beforePaste,
@@ -414,6 +415,7 @@ export class WYSIWYG {
     private disposeEmbedToolbarVisibility?: () => void;
     private disposeHeadingFoldIndicators?: () => void;
     private disposeBoundedBlockDragSelect?: () => void;
+    private disposeTouchCaret?: () => void;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -556,6 +558,11 @@ export class WYSIWYG {
         if (isAndroid() || isIOSDevice()) {
             this.disposeBoundedBlockDragSelect = bindBoundedBlockDragSelect(protyle, this.element);
         }
+        if (isIOSDevice()) {
+            this.disposeTouchCaret = bindIOSTouchCaret(this.element, () => !protyle.disabled &&
+                !protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive &&
+                !getBlockSelectionModeElement(this.element));
+        }
         /// #if !MOBILE
         bindTouchNavigation(this.element, (target, point) => {
             if (!protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive) {
@@ -588,6 +595,7 @@ export class WYSIWYG {
         this.disposeEmbedToolbarVisibility?.();
         this.disposeSpellcheckFocus?.();
         this.disposeBoundedBlockDragSelect?.();
+        this.disposeTouchCaret?.();
         this.largeListVirtualizer?.destroy();
         this.largeTableVirtualizer?.destroy();
     }

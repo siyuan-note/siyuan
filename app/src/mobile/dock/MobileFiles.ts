@@ -1483,11 +1483,34 @@ export class MobileFiles extends Model {
 
     private handleParentDocClick(item: HTMLElement, notebookId: string) {
         const docId = item.getAttribute("data-node-id");
-        this.parentDocClick.click(item, async () => () => {
-            if (window.siyuan.config.fileTree.parentDocClickExpand && item.getAttribute("data-node-id") === docId &&
-                Number(item.getAttribute("data-count")) > 0) {
-                this.toggleTreeItem(item);
-            }
+        if (window.siyuan.config.fileTree.parentDocDoubleClickOpen === false) {
+            this.parentDocClick.cancel();
+            this.toggleTreeItem(item);
+            return;
+        }
+        this.parentDocClick.click(item, async () => {
+            const expanded = !!item.querySelector(".b3-list-item__arrow--open");
+            const path = item.getAttribute("data-path");
+            const response = expanded ? undefined : await fetchSyncPost("/api/filetree/listDocsByPath", {
+                notebook: notebookId,
+                path,
+                app: Constants.SIYUAN_APPID,
+            });
+            return () => {
+                if (!window.siyuan.config.fileTree.parentDocClickExpand ||
+                    window.siyuan.config.fileTree.parentDocDoubleClickOpen === false ||
+                    item.getAttribute("data-node-id") !== docId || item.getAttribute("data-path") !== path ||
+                    Number(item.getAttribute("data-count")) <= 0 ||
+                    !!item.querySelector(".b3-list-item__arrow--open") !== expanded) { return; }
+                if (expanded) {
+                    this.toggleTreeItem(item);
+                } else if (response.code === 0) {
+                    this.onLsHTML(response.data);
+                    this.getOpenPaths();
+                    this.setCurrent(item, false);
+                    window.siyuan.menus.menu.remove();
+                }
+            };
         }, () => openMobileFileById(this.app, docId, [Constants.CB_GET_SCROLL], undefined, notebookId));
     }
 

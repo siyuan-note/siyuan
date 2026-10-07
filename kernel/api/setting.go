@@ -515,6 +515,7 @@ func applyFiletreeSetting(c *gin.Context, request apicontract.SetFiletreeRequest
 	fileTree := conf.NewFileTree()
 	fileTree.BoxDocEnabled = nil
 	fileTree.UseSVGDefaultIcon = nil
+	fileTree.ParentDocDoubleClickOpen = nil
 	if err = gulu.JSON.UnmarshalJSON(param, fileTree); err != nil {
 		ret = apicontract.Failure[*apicontract.SettingFileTree](-1, err.Error())
 		return
@@ -534,6 +535,10 @@ func applyFiletreeSetting(c *gin.Context, request apicontract.SetFiletreeRequest
 		}
 	}
 	oldBoxDocEnabled := model.IsBoxDocEnabled()
+	if nil == fileTree.ParentDocDoubleClickOpen {
+		fileTree.ParentDocDoubleClickOpen = model.Conf.FileTree.ParentDocDoubleClickOpen
+		fileTree.NormalizeParentDocDoubleClickOpen()
+	}
 
 	fileTree.DocCreateSavePath = util.TrimSpaceInPath(fileTree.DocCreateSavePath)
 	fileTree.DocCreateTemplatePath = util.NormalizeTemplatePath(fileTree.DocCreateTemplatePath)

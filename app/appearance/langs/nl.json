@@ -1,4 +1,6 @@
 {
+	"parentDocDoubleClickOpen": "Bovenliggend document openen met een dubbelklik op de titel",
+	"parentDocDoubleClickOpenTip": "Als dit is ingeschakeld, opent een dubbelklik of dubbele tik op de titel het bovenliggende document zonder de uitvouwstatus te wijzigen; een enkele klik of tik wacht ongeveer 300 ms om een dubbelklik te herkennen. Als dit is uitgeschakeld, vouwt een enkele klik of tik de onderliggende documenten direct uit of in",
 	"decisionSaveFailed": "De instellingen van de beslissingsdienst konden niet worden opgeslagen; uw concept is bewaard",
 	"decisionProvidersTip": "Providerinstellingen worden afzonderlijk opgeslagen; wisselen geldt voor nieuwe verzoeken",
 	"decisionCurrentProvider": "Momenteel in gebruik",
@@ -868,7 +870,7 @@
 	"docIconClickExpand": "Klik op het document- of notitieboekpictogram om onderliggende documenten uit of in te klappen",
 	"docIconClickExpandTip": "Indien ingeschakeld, worden onderliggende documenten uit- of ingeklapt door op een document- of notitieboekpictogram te klikken; zonder onderliggende documenten wordt een beschikbaar document geopend, anders kan het pictogram worden gewijzigd; indien uitgeschakeld, wordt het aangeklikte pictogram gewijzigd",
 	"parentDocClickExpand": "Klik op de titel van het bovenliggende document om onderliggende documenten uit of in te klappen",
-	"parentDocClickExpandTip": "Indien ingeschakeld, klapt een klik of tik op de titel onderliggende documenten in of uit; dubbelklikken of dubbeltikken opent het bovenliggende document zonder de uitklapstatus te wijzigen; zonder onderliggende documenten volstaat één klik of tik",
+	"parentDocClickExpandTip": "Als dit is ingeschakeld, vouwt een klik of tik op de titel van het bovenliggende document de onderliggende documenten uit of in; documenten zonder onderliggende documenten openen nog steeds met één klik of tik",
 	"mcpStatusAuthorizing": "Bezig met autoriseren",
 	"mcpStatusAuthorizationRequired": "Autorisatie vereist",
 	"mcpAuthorize": "Autoriseren",

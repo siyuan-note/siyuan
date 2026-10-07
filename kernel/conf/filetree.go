@@ -26,6 +26,7 @@ type FileTree struct {
 	CloseTabOnDoubleClick    bool   `json:"closeTabOnDoubleClick"`    // 是否使用双击关闭页签
 	DocIconClickExpand       bool   `json:"docIconClickExpand"`       // 单击文档或笔记本图标时展开或折叠下级文档
 	ParentDocClickExpand     bool   `json:"parentDocClickExpand"`     // 单击父文档标题时展开或折叠下级文档
+	ParentDocDoubleClickOpen *bool  `json:"parentDocDoubleClickOpen"` // 双击父文档标题打开文档
 	BoxDocEnabled            *bool  `json:"boxDocEnabled"`            // 是否启用顶层笔记本文档
 	UseSVGDefaultIcon        *bool  `json:"useSVGDefaultIcon"`        // 是否使用 SVG 默认图标
 	RefCreateSaveBox         string `json:"refCreateSaveBox"`         // 块引时新建文档存储笔记本
@@ -56,6 +57,7 @@ func NewFileTree() *FileTree {
 		CloseTabOnDoubleClick:    false,
 		DocIconClickExpand:       false,
 		ParentDocClickExpand:     false,
+		ParentDocDoubleClickOpen: new(true),
 		BoxDocEnabled:            new(bool),
 		UseSVGDefaultIcon:        new(true),
 		Sort:                     util.SortModeCustom,
@@ -68,6 +70,13 @@ func NewFileTree() *FileTree {
 		LargeFileWarningSize:     util.LargeFileWarningSize,
 		CreateDocAtTop:           new(bool),
 		NoSplitScreenWhenOpenTab: false,
+	}
+}
+
+// 缺失配置时启用父文档标题双击打开，保留文档树的展开状态。
+func (fileTree *FileTree) NormalizeParentDocDoubleClickOpen() {
+	if nil == fileTree.ParentDocDoubleClickOpen {
+		fileTree.ParentDocDoubleClickOpen = new(true)
 	}
 }
 

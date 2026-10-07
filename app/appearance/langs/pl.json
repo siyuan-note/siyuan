@@ -1,4 +1,6 @@
 {
+	"parentDocDoubleClickOpen": "Otwieraj dokument nadrzędny po dwukrotnym kliknięciu tytułu",
+	"parentDocDoubleClickOpenTip": "Po włączeniu dwukrotne kliknięcie lub stuknięcie tytułu otwiera dokument nadrzędny bez zmiany stanu rozwinięcia; pojedyncze kliknięcie lub stuknięcie czeka około 300 ms na rozpoznanie podwójnego kliknięcia. Po wyłączeniu pojedyncze kliknięcie lub stuknięcie bezpośrednio rozwija lub zwija dokumenty podrzędne",
 	"decisionSaveFailed": "Nie można zapisać ustawień usługi decyzyjnej; wersja robocza została zachowana",
 	"decisionProvidersTip": "Ustawienia dostawców są zapisywane oddzielnie; zmiana dotyczy nowych żądań",
 	"decisionCurrentProvider": "Obecnie używany",
@@ -868,7 +870,7 @@
 	"docIconClickExpand": "Kliknij ikonę dokumentu lub notatnika, aby rozwinąć lub zwinąć dokumenty podrzędne",
 	"docIconClickExpandTip": "Po włączeniu kliknięcie ikony dokumentu lub notatnika rozwija albo zwija dokumenty podrzędne; gdy nie ma dokumentów podrzędnych, dostępny dokument zostaje otwarty, w przeciwnym razie ikonę można zmienić; po wyłączeniu kliknięcie dowolnej z tych ikon zmienia ją",
 	"parentDocClickExpand": "Kliknij tytuł dokumentu nadrzędnego, aby rozwinąć lub zwinąć dokumenty podrzędne",
-	"parentDocClickExpandTip": "Po włączeniu kliknięcie lub stuknięcie tytułu rozwija albo zwija dokumenty podrzędne; dwukrotne kliknięcie lub dwukrotne stuknięcie otwiera dokument nadrzędny bez zmiany stanu rozwinięcia; bez dokumentów podrzędnych wystarczy jedno kliknięcie lub stuknięcie",
+	"parentDocClickExpandTip": "Po włączeniu kliknięcie lub stuknięcie tytułu dokumentu nadrzędnego rozwija lub zwija dokumenty podrzędne; dokumenty bez dokumentów podrzędnych nadal otwierają się po jednym kliknięciu lub stuknięciu",
 	"mcpStatusAuthorizing": "Autoryzowanie",
 	"mcpStatusAuthorizationRequired": "Wymagana autoryzacja",
 	"mcpAuthorize": "Autoryzuj",

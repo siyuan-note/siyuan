@@ -93,6 +93,14 @@ func TestAPIContractSettingMindmapCompatibility(t *testing.T) {
 	})
 }
 
+func TestAPIContractSettingParentDocDoubleClickCompatibility(t *testing.T) {
+	compareSettingConfig(t, apicontract.SetFiletree, conf.NewFileTree, []string{
+		`{}`, `{"parentDocDoubleClickOpen":true}`, `{"parentDocDoubleClickOpen":false}`,
+		`{"parentDocDoubleClickOpen":null}`, `{"ParentDocDoubleClickOpen":false}`,
+		`{"parentDocDoubleClickOpen":"false"}`, `{"parentDocDoubleClickOpen":0}`,
+	})
+}
+
 func TestAPIContractSettingImageDisplayCompatibility(t *testing.T) {
 	compareSettingConfig(t, apicontract.SetEditor, conf.NewEditor, []string{
 		`{}`, `{"displayImgName":true}`, `{"displayImgName":false}`,

@@ -456,7 +456,8 @@ export class PinnedDocs {
             this.selectRow(row);
             if (window.siyuan.config.fileTree.parentDocClickExpand && Number(row.dataset.count) > 0) {
                 if (!target.closest(".b3-list-item__text") ||
-                    event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
+                    event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ||
+                    window.siyuan.config.fileTree.parentDocDoubleClickOpen === false) {
                     this.toggle(row);
                     return;
                 }
@@ -468,6 +469,7 @@ export class PinnedDocs {
                     return () => {
                         if (generation !== this.generation || row.dataset.path !== path ||
                             !window.siyuan.config.fileTree.parentDocClickExpand ||
+                            window.siyuan.config.fileTree.parentDocDoubleClickOpen === false ||
                             this.expanded.has(row.dataset.pinRow) !== expanded) { return; }
                         if (expanded) {
                             void this.toggle(row, false);

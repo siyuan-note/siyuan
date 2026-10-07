@@ -1,4 +1,6 @@
 {
+	"parentDocDoubleClickOpen": "Apri il documento padre con un doppio clic sul titolo",
+	"parentDocDoubleClickOpenTip": "Se attivato, un doppio clic o doppio tocco sul titolo apre il documento padre senza modificarne lo stato di espansione; un clic o tocco singolo attende circa 300 ms per rilevare il doppio clic. Se disattivato, un clic o tocco singolo espande o comprime direttamente i documenti figli",
 	"decisionSaveFailed": "Impossibile salvare le impostazioni del servizio decisionale; la bozza è stata conservata",
 	"decisionProvidersTip": "Le impostazioni dei fornitori vengono salvate separatamente; il cambio si applica alle nuove richieste",
 	"decisionCurrentProvider": "Attualmente in uso",
@@ -868,7 +870,7 @@
 	"docIconClickExpand": "Fai clic sull’icona di un documento o di un taccuino per espandere o comprimere i documenti secondari",
 	"docIconClickExpandTip": "Quando è attiva, facendo clic sull’icona di un documento o di un taccuino si espandono o comprimono i documenti secondari; se non sono presenti documenti secondari, viene aperto un documento disponibile, altrimenti è possibile modificare l’icona; quando è disattiva, facendo clic su una delle due icone la si modifica",
 	"parentDocClickExpand": "Fai clic sul titolo del documento principale per espandere o comprimere i documenti secondari",
-	"parentDocClickExpandTip": "Se attiva, un clic o tocco sul titolo espande o comprime i documenti secondari; un doppio clic o doppio tocco apre il documento principale senza cambiare lo stato di espansione; senza documenti secondari basta un clic o tocco",
+	"parentDocClickExpandTip": "Se attivato, un clic o tocco sul titolo del documento padre espande o comprime i documenti figli; i documenti senza figli si aprono comunque con un clic o tocco",
 	"mcpStatusAuthorizing": "Autorizzazione in corso",
 	"mcpStatusAuthorizationRequired": "Autorizzazione richiesta",
 	"mcpAuthorize": "Autorizza",

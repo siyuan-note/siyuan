@@ -16,10 +16,16 @@
 
 package conf
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+)
 
 func TestNewFileTreeDefaults(t *testing.T) {
 	fileTree := NewFileTree()
+	if nil == fileTree.ParentDocDoubleClickOpen || !*fileTree.ParentDocDoubleClickOpen {
+		t.Fatal("parent document double-click opening should be enabled by default")
+	}
 	if nil == fileTree.BoxDocEnabled {
 		t.Fatal("box document setting should be initialized")
 	}
@@ -31,5 +37,39 @@ func TestNewFileTreeDefaults(t *testing.T) {
 	}
 	if !*fileTree.UseSVGDefaultIcon {
 		t.Fatal("SVG default icons should be enabled for new users")
+	}
+}
+
+func TestFileTreeParentDocDoubleClickOpenCompatibility(t *testing.T) {
+	for _, entry := range []struct {
+		body string
+		want bool
+	}{
+		{`{"parentDocClickExpand":true}`, true},
+		{`{"parentDocDoubleClickOpen":null}`, true},
+		{`{"parentDocDoubleClickOpen":false}`, false},
+		{`{"parentDocDoubleClickOpen":true}`, true},
+	} {
+		t.Run(entry.body, func(t *testing.T) {
+			var fileTree FileTree
+			if err := json.Unmarshal([]byte(entry.body), &fileTree); err != nil {
+				t.Fatal(err)
+			}
+			fileTree.NormalizeParentDocDoubleClickOpen()
+			if nil == fileTree.ParentDocDoubleClickOpen || *fileTree.ParentDocDoubleClickOpen != entry.want {
+				t.Fatalf("double-click preference: %v", fileTree.ParentDocDoubleClickOpen)
+			}
+			encoded, err := json.Marshal(&fileTree)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var restored FileTree
+			if err = json.Unmarshal(encoded, &restored); err != nil {
+				t.Fatal(err)
+			}
+			if nil == restored.ParentDocDoubleClickOpen || *restored.ParentDocDoubleClickOpen != entry.want {
+				t.Fatal("double-click preference was not preserved after serialization")
+			}
+		})
 	}
 }

@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261003225941"
+		"updated": "20261007111840"
 	},
 	"Children": [
 		{
@@ -17602,7 +17602,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619001156-26volkp",
-				"updated": "20260922150640"
+				"updated": "20261007111840"
 			},
 			"Children": [
 				{
@@ -17616,12 +17616,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922150640-fahlo11",
-				"updated": "20260923212237"
+				"updated": "20261007111840"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "启用“单击父文档标题时展开或折叠下级文档”后，在文档树或置顶文档区单击或点按父文档标题，会在短暂等待后展开或折叠下级文档；双击或连续点按两次标题则打开父文档，且不改变展开或折叠状态。没有子文档时仍然单击或点按直接打开"
+					"Data": "启用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "单击父文档标题时展开或折叠下级文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后，在文档树或置顶文档区单击或点按父文档标题可展开或折叠下级文档。其子项 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "双击标题打开父文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 默认开启：单击需等待约 300 毫秒以判断是否双击，双击或连续点按两次标题打开父文档并保持展开或折叠状态。关闭子项后，单击或点按展开或折叠不再等待双击判定，仍可通过文档菜单打开父文档。没有子文档时仍单击或点按直接打开"
 				}
 			]
 		},

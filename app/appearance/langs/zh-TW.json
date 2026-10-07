@@ -1,4 +1,6 @@
 {
+	"parentDocDoubleClickOpen": "按兩下標題開啟父文件",
+	"parentDocDoubleClickOpenTip": "啟用後按兩下標題可開啟父文件，並保持展開或折疊狀態，點擊需等待約 300 毫秒以判斷是否按兩下；關閉後點擊直接展開或折疊下級文件",
 	"decisionSaveFailed": "儲存決策服務設定失敗，草稿已保留",
 	"decisionProvidersTip": "各提供商的設定獨立儲存，切換僅對新請求生效",
 	"decisionCurrentProvider": "目前使用",
@@ -868,7 +870,7 @@
 	"docIconClickExpand": "點擊文件或筆記本圖示展開或折疊下級文件",
 	"docIconClickExpandTip": "啟用後點擊文件或筆記本圖示將展開或折疊下級文件；沒有下級文件時，有可開啟文件則開啟文件，否則修改圖示；關閉後點擊文件或筆記本圖示將修改圖示",
 	"parentDocClickExpand": "點擊父文件標題時展開或折疊下級文件",
-	"parentDocClickExpandTip": "啟用後點擊標題將展開或折疊子文件；按兩下可開啟父文件且不改變展開狀態；沒有子文件時點擊即可開啟",
+	"parentDocClickExpandTip": "啟用後點擊或點按父文件標題可展開或折疊下級文件；沒有子文件時仍點擊或點按直接開啟",
 	"mcpStatusAuthorizing": "正在授權",
 	"mcpStatusAuthorizationRequired": "需要授權",
 	"mcpAuthorize": "授權",

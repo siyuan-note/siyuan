@@ -1,4 +1,6 @@
 {
+	"parentDocDoubleClickOpen": "Üst belgeyi başlığa çift tıklayarak aç",
+	"parentDocDoubleClickOpenTip": "Etkinleştirildiğinde başlığa çift tıklamak veya çift dokunmak, genişletme durumunu değiştirmeden üst belgeyi açar; tek tıklama veya dokunma, çift tıklamayı ayırt etmek için yaklaşık 300 ms bekler. Devre dışı bırakıldığında tek tıklama veya dokunma alt belgeleri doğrudan genişletir veya daraltır",
 	"decisionSaveFailed": "Karar hizmeti ayarları kaydedilemedi; taslağınız korunuyor",
 	"decisionProvidersTip": "Sağlayıcı ayarları ayrı kaydedilir; değişiklik yeni isteklere uygulanır",
 	"decisionCurrentProvider": "Şu anda kullanılıyor",
@@ -868,7 +870,7 @@
 	"docIconClickExpand": "Alt belgeleri genişletmek veya daraltmak için belge ya da not defteri simgesine tıklayın",
 	"docIconClickExpandTip": "Etkinleştirildiğinde belge veya not defteri simgesine tıklamak alt belgeleri genişletir ya da daraltır; alt belge yoksa kullanılabilir bir belge açılır, aksi takdirde simge değiştirilebilir; devre dışı bırakıldığında iki simgeden birine tıklamak o simgeyi değiştirir",
 	"parentDocClickExpand": "Alt belgeleri genişletmek veya daraltmak için üst belgenin başlığına tıklayın",
-	"parentDocClickExpandTip": "Etkinleştirildiğinde başlığa tıklamak veya dokunmak alt belgeleri açar ya da kapatır; çift tıklamak veya iki kez dokunmak üst belgeyi açılma durumunu değiştirmeden açar; alt belge yoksa tek tıklama veya dokunma yeterlidir",
+	"parentDocClickExpandTip": "Etkinleştirildiğinde üst belgenin başlığına tıklamak veya dokunmak alt belgeleri genişletir veya daraltır; alt belgesi olmayan belgeler tek tıklama veya dokunmayla açılmaya devam eder",
 	"mcpStatusAuthorizing": "Yetkilendiriliyor",
 	"mcpStatusAuthorizationRequired": "Yetkilendirme gerekli",
 	"mcpAuthorize": "Yetkilendir",

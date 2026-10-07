@@ -40424,6 +40424,16 @@
             }
           ]
         },
+        "parentDocDoubleClickOpen": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "recentDocsMaxListCount": {
           "anyOf": [
             {
@@ -45253,6 +45263,16 @@
         "parentDocClickExpand": {
           "type": "boolean"
         },
+        "parentDocDoubleClickOpen": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "recentDocsMaxListCount": {
           "type": "integer"
         },
@@ -45315,6 +45335,7 @@
         "noSplitScreenWhenOpenTab",
         "openFilesUseCurrentTab",
         "parentDocClickExpand",
+        "parentDocDoubleClickOpen",
         "recentDocsMaxListCount",
         "refCreateSaveBox",
         "refCreateSavePath",
@@ -45482,6 +45503,16 @@
           ]
         },
         "parentDocClickExpand": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parentDocDoubleClickOpen": {
           "anyOf": [
             {
               "type": "boolean"

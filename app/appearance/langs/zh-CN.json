@@ -1,4 +1,6 @@
 {
+	"parentDocDoubleClickOpen": "双击标题打开父文档",
+	"parentDocDoubleClickOpenTip": "启用后双击标题打开父文档并保持展开或折叠状态，单击需等待约 300 毫秒以判断是否双击；关闭后单击直接展开或折叠下级文档",
 	"decisionSaveFailed": "保存决策服务配置失败，草稿已保留",
 	"decisionProvidersTip": "各提供商的配置独立保存，切换仅对新请求生效",
 	"decisionCurrentProvider": "当前使用",
@@ -868,7 +870,7 @@
 	"docIconClickExpand": "单击文档或笔记本图标展开或折叠下级文档",
 	"docIconClickExpandTip": "启用后单击文档或笔记本图标将展开或折叠下级文档；没有下级文档时，有可打开文档则打开文档，否则修改图标；关闭后单击文档或笔记本图标将修改图标",
 	"parentDocClickExpand": "单击父文档标题时展开或折叠下级文档",
-	"parentDocClickExpandTip": "启用后单击标题将展开或折叠子文档；双击可打开父文档且不改变展开状态；没有子文档时单击直接打开",
+	"parentDocClickExpandTip": "启用后单击或点按父文档标题展开或折叠下级文档；没有子文档时仍单击或点按直接打开",
 	"mcpStatusAuthorizing": "正在授权",
 	"mcpStatusAuthorizationRequired": "需要授权",
 	"mcpAuthorize": "授权",

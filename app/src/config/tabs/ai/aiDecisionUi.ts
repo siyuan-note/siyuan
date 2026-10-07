@@ -14,9 +14,10 @@ interface IDecisionField {
     type: string;
 }
 // 各供应商分别声明字段和默认值，共用控件只负责渲染，不限定其他供应商的参数。
-const PROVIDER_DETAILS: Record<DecisionProvider, {title: string; defaults: Config.IDecisionProfile; fields: IDecisionField[]}> = {
+const PROVIDER_DETAILS: Record<DecisionProvider, {title: string; icon: string; defaults: Config.IDecisionProfile; fields: IDecisionField[]}> = {
     typesafe: {
         title: "TypeSafe System One",
+        icon: "/stage/images/ai-providers/typesafe.png",
         defaults: {endpoint: "https://api.typesafe.ai/v1/systemone", apiKey: "", name: "jev-latest", timeout: 30},
         fields: [
             {key: "endpoint", title: "apiEndpoint", type: "url", desc: "decisionEndpointTip"},
@@ -27,6 +28,7 @@ const PROVIDER_DETAILS: Record<DecisionProvider, {title: string; defaults: Confi
     },
     openai: {
         title: "OpenAI Decisions API (Beta)",
+        icon: "/stage/images/ai-providers/openai.svg",
         defaults: {endpoint: "https://api.openai.com/v1/decisions", apiKey: "", name: "gpt-6-luna", timeout: 30},
         fields: [
             {key: "endpoint", title: "apiEndpoint", type: "url", desc: "decisionOpenAIEndpointTip"},
@@ -70,7 +72,7 @@ const renderDecisionCards = (root: HTMLElement) => {
     container.innerHTML = `<div class="b3-cards b3-cards--nowrap">${PROVIDERS.map(provider => {
         const active = (decision.provider || "typesafe") === provider;
         return `<div class="b3-card${active ? " b3-card--current" : ""}" role="button" tabindex="0" data-decision-provider="${provider}" aria-label="${escapeHTML(title(provider))}${active ? `: ${escapeHTML(window.siyuan.languages.decisionCurrentProvider)}` : ""}">
-    <div class="b3-card__img"><span><svg class="b3-card__icon"><use xlink:href="#iconBrain"></use></svg></span></div>
+    <div class="b3-card__img"><img src="${PROVIDER_DETAILS[provider].icon}" alt="${escapeHTML(title(provider))}"></div>
     <div class="fn__flex-1 fn__flex-column"><div class="b3-card__info b3-card__info--left fn__flex-1">
         <div class="fn__ellipsis config-name">${title(provider)}</div>
         <div class="b3-card__desc">${active ? window.siyuan.languages.decisionCurrentProvider : window.siyuan.languages.config}</div>

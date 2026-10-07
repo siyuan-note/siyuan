@@ -100,6 +100,21 @@ test("opening and cancelling a decision card never selects or saves it", async (
     assert.equal(ui.patches.length, 0);
 });
 
+test("decision cards use bundled provider artwork with square intrinsic dimensions", () => {
+    const ui = loadUI();
+    const html = ui.root.elements["#aiDecisionCards"].innerHTML;
+    const paths = [...html.matchAll(/<img src="([^"]+)"/g)].map(match => match[1]);
+    assert.deepEqual(paths, ["/stage/images/ai-providers/typesafe.png", "/stage/images/ai-providers/openai.svg"]);
+    assert.equal(html.includes("#iconBrain"), false);
+    assert.match(html, /alt="TypeSafe System One"/);
+    assert.match(html, /alt="OpenAI Decisions API \(Beta\)"/);
+    const typesafe = readFileSync(resolve(process.cwd(), paths[0].slice(1)));
+    assert.equal(typesafe.subarray(1, 4).toString(), "PNG");
+    assert.equal(typesafe.readUInt32BE(16), 400);
+    assert.equal(typesafe.readUInt32BE(20), 400);
+    assert.match(readFileSync(resolve(process.cwd(), paths[1].slice(1)), "utf8"), /viewBox="0 0 24 24"/);
+});
+
 test("profile drafts isolate keys and save only the edited provider atomically", async () => {
     const ui = loadUI();
     ui.edit("apiKey", "new-open-key");

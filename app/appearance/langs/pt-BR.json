@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "Restaurar apenas o ponto de controle do código da proposta aprovada anteriormente? A recuperação não reverte notas, dados de execução ou outras configurações e não autoriza novas alterações no código.",
+	"agentPluginFlowQuestion": "Usar o fluxo oficial de desenvolvimento de plugins?",
+	"agentPluginFlowYes": "Sim",
+	"agentPluginFlowNo": "Não",
+	"agentPluginPlanQuestion": "Aprovar a proposta de plugin exibida?",
+	"agentBuiltinSkills": "Habilidades oficiais",
+	"agentBuiltinSkillsTip": "Habilidades somente leitura fornecidas pelo SiYuan; escolha quais o agente pode usar",
+	"agentPluginPlanDetails": "Plugin: %[1]s\nInterface: %[2]s\nOrigem: %[3]s\nEfeitos nos dados: %[4]s\nEntregas: %[5]s\nArquivos: %[6]d · %[7]s\nRevisão do código: %[8]s",
 	"docIconClickAction": "Clique no ícone de um documento",
 	"docIconClickActionTip": "Ação ao clicar no ícone de um documento",
 	"parentDocTitleClickAction": "Clique no título do documento pai",

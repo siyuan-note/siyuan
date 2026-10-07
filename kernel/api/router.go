@@ -712,6 +712,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/agent/setInstructions", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAgentInstructions)
 	ginServer.Handle("POST", "/api/ai/agent/manageSkills", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, manageSkills)
 	ginServer.Handle("POST", "/api/ai/agent/lsUserSkills", model.CheckAuth, model.CheckAdminRole, lsUserSkills)
+	ginServer.Handle("POST", "/api/ai/agent/lsBuiltinSkills", model.CheckAuth, model.CheckAdminRole, lsBuiltinSkills)
 	ginServer.Handle("POST", "/api/ai/agent/getSkill", model.CheckAuth, model.CheckAdminRole, getSkill)
 	ginServer.Handle("POST", "/api/ai/agent/saveSkill", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, saveSkill)
 	ginServer.Handle("POST", "/api/ai/agent/removeSkill", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeSkill)

@@ -237,6 +237,7 @@ type QuestionAnswer struct {
 
 var questionChannelsMu sync.Mutex
 var questionChannels = make(map[string]chan QuestionAnswer)
+var questionValidators = make(map[string]func([]string) bool)
 
 func AnswerQuestion(id string, answers []string) bool {
 	questionChannelsMu.Lock()
@@ -245,9 +246,13 @@ func AnswerQuestion(id string, answers []string) bool {
 	if !ok {
 		return false
 	}
+	if validate := questionValidators[id]; validate != nil && !validate(answers) {
+		return false
+	}
 	select {
 	case ch <- QuestionAnswer{Answers: answers}:
 		delete(questionChannels, id)
+		delete(questionValidators, id)
 		return true
 	default:
 		return false
@@ -493,6 +498,11 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 	go func() {
 		defer close(ch)
 		defer func() {
+			if ctx.Err() != nil && sessionID != "" {
+				pausePluginWorkflow(sessionID)
+			}
+		}()
+		defer func() {
 			if r := recover(); r != nil {
 				logging.LogErrorf("agent chat panic: %v\n%s", r, logging.ShortStack())
 			}
@@ -521,6 +531,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			return
 		}
 		defer unregisterSessionPermissionController(sessionID, permissionController)
+		ctx = pluginWorkflowContext(ctx, sessionID)
 
 		rawUserMessage := userMessage
 		// 变量（非敏感）在用户消息注入对话时解析，让 LLM 看到实际值；密钥不进上下文。
@@ -1189,6 +1200,20 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						toolInputErr = validateCapabilityCall(ctx, registration, args)
 					}
 					requiresConfirm, forcedConfirm := false, false
+					confirmationArgs := args
+					if toolInputErr == nil && registration.Tool != nil && registration.Tool.Name == "bazaar" &&
+						(registration.Tool.Source == "native" || registration.Tool.Source == "") {
+						preview, previewErr := mcptools.PluginDevelopmentInstallPreview(ctx, args)
+						if previewErr != nil {
+							toolInputErr = previewErr
+						} else if preview != nil {
+							confirmationArgs = make(map[string]any, len(args)+1)
+							for key, value := range args {
+								confirmationArgs[key] = value
+							}
+							confirmationArgs["verifiedPackage"] = preview
+						}
+					}
 					if toolInputErr == nil {
 						requiresConfirm, forcedConfirm = capabilityConfirmRequirement(
 							registration, action, args, permissionController.allowSession.Load(), nil)
@@ -1201,7 +1226,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						confirmChannelsMu.Unlock()
 						effects := capabilityEffects(registration, action)
 						sendCriticalEvent(ctx, ch, AgentEvent{
-							Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID, Effects: effects,
+							Type: "confirm", Name: tc.Function.Name, Arguments: confirmationArgs, ConfirmID: confirmID, Effects: effects,
 							ForcedConfirm: forcedConfirm, CapabilityID: registration.ID,
 						})
 						var rejectionMsg string
@@ -1391,7 +1416,13 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 						resultStr = toolInputErr.Error()
 						isErr = true
 					} else if tc.Function.Name == "question" {
-						resultStr = handleQuestion(ctx, args, roundID, ch, resolveQuestionTimeout(confirmTimeout))
+						if workflowResult, handled := handlePluginWorkflowQuestion(ctx, args, sessionID, turn.TurnID,
+							userEntryID, roundID, language, ch, resolveQuestionTimeout(confirmTimeout)); handled {
+							resultStr = workflowResult
+							isErr = strings.HasPrefix(workflowResult, "Plugin workflow error:")
+						} else {
+							resultStr = handleQuestion(ctx, args, roundID, ch, resolveQuestionTimeout(confirmTimeout))
+						}
 					} else if registration.isBrowser() {
 						executed := handleBrowserCapability(ctx, tc, registration, args, ch,
 							resolveBrowserCapabilityTimeout(confirmTimeout))
@@ -1776,9 +1807,21 @@ func needsLocalSnapshot(toolName, action string) bool {
 
 func handleQuestion(ctx context.Context, args map[string]any, roundID string, ch chan<- AgentEvent, timeout time.Duration) string {
 	questionID := ast.NewNodeID()
+	answer, status := waitForQuestion(ctx, args, questionID, roundID, ch, timeout, nil)
+	if status != "" {
+		return status
+	}
+	return strings.Join(answer.Answers, ", ")
+}
+
+func waitForQuestion(ctx context.Context, args map[string]any, questionID, roundID string,
+	ch chan<- AgentEvent, timeout time.Duration, validate func([]string) bool) (QuestionAnswer, string) {
 	ch2 := make(chan QuestionAnswer, 1)
 	questionChannelsMu.Lock()
 	questionChannels[questionID] = ch2
+	if validate != nil {
+		questionValidators[questionID] = validate
+	}
 	questionChannelsMu.Unlock()
 
 	sendCriticalEvent(ctx, ch, AgentEvent{
@@ -1795,25 +1838,26 @@ func handleQuestion(ctx context.Context, args map[string]any, roundID string, ch
 		if acceptedAnswer, accepted := finishQuestionWait(questionID, ch2); accepted {
 			answer = acceptedAnswer
 		} else {
-			return "Question cancelled."
+			return QuestionAnswer{}, "Question cancelled."
 		}
 	case <-optionalAgentDeadline(timeout):
 		if acceptedAnswer, accepted := finishQuestionWait(questionID, ch2); accepted {
 			answer = acceptedAnswer
 		} else {
-			return "No answer received (timed out)."
+			return QuestionAnswer{}, "No answer received (timed out)."
 		}
 	}
 
 	questionChannelsMu.Lock()
 	delete(questionChannels, questionID)
+	delete(questionValidators, questionID)
 	questionChannelsMu.Unlock()
 
 	if len(answer.Answers) == 0 {
-		return "User provided no answer."
+		return answer, "User provided no answer."
 	}
 
-	return strings.Join(answer.Answers, ", ")
+	return answer, ""
 }
 
 func finishQuestionWait(questionID string, ch chan QuestionAnswer) (QuestionAnswer, bool) {
@@ -1822,6 +1866,7 @@ func finishQuestionWait(questionID string, ch chan QuestionAnswer) (QuestionAnsw
 	pending := exists && registered == ch
 	if pending {
 		delete(questionChannels, questionID)
+		delete(questionValidators, questionID)
 	}
 	questionChannelsMu.Unlock()
 	if pending {
@@ -2019,6 +2064,16 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 	skills := util.DiscoverSkills(kernelModel.EnabledUserSkills())
 	if capabilities.hasModelName("skill") && len(skills) > 0 {
 		sb.WriteString(availableSkillsSegment(skills))
+	}
+	if capabilities.hasModelName("skill") && capabilities.hasModelName("question") {
+		if builtin, err := util.BuiltinPluginSkill(kernelModel.DisabledBuiltinSkills()); err == nil && builtin.Enabled {
+			sb.WriteString("\n\n## Official plugin development\n")
+			sb.WriteString("Only when the user explicitly asks to create or modify a plugin, first call question with questions=[] and workflow.action=choose. " +
+				"Yes requires loading skill with source=builtin and name=siyuan-plugin-development BEFORE asking only materially missing details; No skips that skill and continues the user's custom approach. " +
+				"Do not turn ordinary templates or existing capabilities into plugin work. Confirm a short proposal with workflow.action=plan before implementation; neither choice nor proposal authorizes installation or enabling. " +
+				"Reuse the taskId for adjustments; use newTask only for a separate requested plugin and reconsider only when the user changes the choice.\n")
+			sb.WriteString("Official skill: " + html.EscapeString(builtin.ID) + " · " + html.EscapeString(builtin.Version) + " · " + html.EscapeString(builtin.Digest) + ". This entry requires the workflow question; generic skill matching does not activate it.")
+		}
 	}
 
 	if capabilities.hasModelName("skill") {
@@ -2334,7 +2389,7 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 					ToolCalls:        toolCalls,
 				})
 				for _, tc := range cm.ToolCalls {
-					result := tc.Result
+					result := pluginSkillResultForContext(tc)
 					if result == "" {
 						result = "(result unavailable)"
 					}
@@ -2433,7 +2488,7 @@ func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, lang
 				}
 			}
 			for _, toolCall := range message.ToolCalls {
-				result := toolCall.Result
+				result := pluginSkillResultForContext(toolCall)
 				if result == "" {
 					result = "(result unavailable)"
 				}

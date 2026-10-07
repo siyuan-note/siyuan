@@ -168,6 +168,7 @@ declare namespace Config {
         capabilityPolicy: ICapabilityPolicy;
         skills: {
             userEnabled: string[];
+            builtinDisabled: string[];
         };
         approvalPolicy: {
             default: string;

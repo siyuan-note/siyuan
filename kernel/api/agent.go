@@ -679,6 +679,12 @@ func lsSkillsContract(c *gin.Context, req apicontract.EmptyRequest) apicontract.
 
 var lsUserSkills = contractHandler(apicontract.AIListUserSkills, lsUserSkillsContract)
 
+var lsBuiltinSkills = contractHandler(apicontract.AIListBuiltinSkills, lsBuiltinSkillsContract)
+
+func lsBuiltinSkillsContract(c *gin.Context, req apicontract.EmptyRequest) apicontract.Response[[]apicontract.AIBuiltinSkillInfo] {
+	return apicontract.Success(aiBuiltinSkillsContract(util.DiscoverBuiltinSkills(model.DisabledBuiltinSkills())))
+}
+
 func lsUserSkillsContract(c *gin.Context, req apicontract.EmptyRequest) apicontract.Response[[]apicontract.AIUserSkillInfo] {
 	return apicontract.Success(aiUserSkillsContract(util.DiscoverUserSkills(model.EnabledUserSkills())))
 }
@@ -687,6 +693,10 @@ var getSkill = contractHandler(apicontract.AIGetSkill, getSkillContract)
 
 func getSkillContract(c *gin.Context, req apicontract.AISkillNameRequest) apicontract.Response[apicontract.AISkillData] {
 	ret := gulu.Ret.NewResult()
+	if req.Source != "" {
+		ret.Code, ret.Msg = -1, "official skill content requires a confirmed agent workflow"
+		return contractFailure[apicontract.AISkillData](ret)
+	}
 
 	content, err := util.ReadSkill(req.Name, model.EnabledUserSkills())
 	if err != nil {
@@ -702,6 +712,10 @@ var saveSkill = contractHandler(apicontract.AISaveSkill, saveSkillContract)
 
 func saveSkillContract(c *gin.Context, req apicontract.AISkillSaveRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
+	if req.Source != "" {
+		ret.Code, ret.Msg = -1, "only workspace skills can be modified"
+		return contractFailure[apicontract.Null](ret)
+	}
 
 	if err := util.SaveSkill(req.Name, req.Content); err != nil {
 		ret.Code = -1
@@ -715,6 +729,10 @@ var removeSkill = contractHandler(apicontract.AIRemoveSkill, removeSkillContract
 
 func removeSkillContract(c *gin.Context, req apicontract.AISkillNameRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
+	if req.Source != "" {
+		ret.Code, ret.Msg = -1, "only workspace skills can be modified"
+		return contractFailure[apicontract.Null](ret)
+	}
 
 	if err := util.RemoveSkill(req.Name); err != nil {
 		ret.Code = -1
@@ -728,6 +746,10 @@ var renameSkill = contractHandler(apicontract.AIRenameSkill, renameSkillContract
 
 func renameSkillContract(c *gin.Context, req apicontract.AISkillRenameRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
+	if req.Source != "" {
+		ret.Code, ret.Msg = -1, "only workspace skills can be modified"
+		return contractFailure[apicontract.Null](ret)
+	}
 
 	if err := util.RenameSkill(req.OldName, req.NewName); err != nil {
 		ret.Code = -1

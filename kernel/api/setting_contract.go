@@ -197,6 +197,7 @@ func settingAgentSkillsPayload(value *conf.AgentSkills) *apicontract.SettingAgen
 	}
 	result := &apicontract.SettingAgentSkills{}
 	result.UserEnabled = value.UserEnabled
+	result.BuiltinDisabled = value.BuiltinDisabled
 	return result
 }
 

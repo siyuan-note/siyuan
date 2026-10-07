@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "לשחזר רק את נקודת הביקורת של קוד המקור מההצעה שאושרה קודם? השחזור אינו מחזיר לאחור הערות, נתוני זמן ריצה או הגדרות אחרות, ואינו מאשר שינויים נוספים בקוד המקור.",
+	"agentPluginFlowQuestion": "להשתמש בתהליך הרשמי לפיתוח תוספים?",
+	"agentPluginFlowYes": "כן",
+	"agentPluginFlowNo": "לא",
+	"agentPluginPlanQuestion": "לאשר את הצעת התוסף המוצגת?",
+	"agentBuiltinSkills": "מיומנויות רשמיות",
+	"agentBuiltinSkillsTip": "מיומנויות לקריאה בלבד של SiYuan; ניתן לבחור באילו מהן הסוכן רשאי להשתמש",
+	"agentPluginPlanDetails": "תוסף: %[1]s\nממשק: %[2]s\nמקור: %[3]s\nהשפעות על הנתונים: %[4]s\nתוצרים: %[5]s\nקבצים: %[6]d · %[7]s\nגרסת המקור: %[8]s",
 	"docIconClickAction": "לחיצה על סמל מסמך",
 	"docIconClickActionTip": "הפעולה בעת לחיצה על סמל מסמך",
 	"parentDocTitleClickAction": "לחיצה על כותרת מסמך האב",

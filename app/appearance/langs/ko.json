@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "이전에 승인한 제안의 소스 체크포인트만 복원할까요? 복원해도 노트, 런타임 데이터 또는 기타 설정은 되돌아가지 않으며 추가 소스 변경이 허용되지 않습니다.",
+	"agentPluginFlowQuestion": "공식 플러그인 개발 절차를 사용할까요?",
+	"agentPluginFlowYes": "예",
+	"agentPluginFlowNo": "아니요",
+	"agentPluginPlanQuestion": "표시된 플러그인 제안을 승인할까요?",
+	"agentBuiltinSkills": "공식 스킬",
+	"agentBuiltinSkillsTip": "SiYuan이 제공하는 읽기 전용 스킬 중 에이전트가 사용할 스킬 선택",
+	"agentPluginPlanDetails": "플러그인: %[1]s\n프런트엔드: %[2]s\n소스: %[3]s\n데이터 영향: %[4]s\n결과물: %[5]s\n파일: %[6]d · %[7]s\n소스 리비전: %[8]s",
 	"docIconClickAction": "문서 아이콘 클릭",
 	"docIconClickActionTip": "문서 아이콘을 클릭할 때 수행할 동작",
 	"parentDocTitleClickAction": "상위 문서 제목 클릭",

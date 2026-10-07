@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "是否僅還原先前已確認方案的原始碼檢查點？還原不會回復筆記、執行階段資料或其他設定，也不授權繼續修改原始碼。",
+	"agentPluginFlowQuestion": "是否使用官方外掛開發流程？",
+	"agentPluginFlowYes": "是",
+	"agentPluginFlowNo": "否",
+	"agentPluginPlanQuestion": "是否確認以上外掛方案？",
+	"agentBuiltinSkills": "官方技能",
+	"agentBuiltinSkillsTip": "思源提供的唯讀技能，選擇允許智慧體使用的技能",
+	"agentPluginPlanDetails": "外掛：%[1]s\n前端：%[2]s\n來源：%[3]s\n資料影響：%[4]s\n交付內容：%[5]s\n檔案：%[6]d · %[7]s\n原始碼版本：%[8]s",
 	"docIconClickAction": "點擊文件圖示",
 	"docIconClickActionTip": "點擊文件圖示執行的操作",
 	"parentDocTitleClickAction": "點擊父文件標題",

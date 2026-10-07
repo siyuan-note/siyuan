@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "Nur den Quellcode-Prüfpunkt des zuvor genehmigten Vorschlags wiederherstellen? Die Wiederherstellung setzt weder Notizen noch Laufzeitdaten oder andere Einstellungen zurück und erlaubt keine weiteren Quellcodeänderungen.",
+	"agentPluginFlowQuestion": "Den offiziellen Ablauf zur Plugin-Entwicklung verwenden?",
+	"agentPluginFlowYes": "Ja",
+	"agentPluginFlowNo": "Nein",
+	"agentPluginPlanQuestion": "Den angezeigten Plugin-Vorschlag genehmigen?",
+	"agentBuiltinSkills": "Offizielle Skills",
+	"agentBuiltinSkillsTip": "Schreibgeschützte Skills von SiYuan; wähle aus, welche der Agent verwenden darf",
+	"agentPluginPlanDetails": "Plugin: %[1]s\nFrontend: %[2]s\nQuelle: %[3]s\nAuswirkungen auf Daten: %[4]s\nLieferumfang: %[5]s\nDateien: %[6]d · %[7]s\nQuellversion: %[8]s",
 	"docIconClickAction": "Klick auf ein Dokumentsymbol",
 	"docIconClickActionTip": "Aktion beim Klicken auf ein Dokumentsymbol",
 	"parentDocTitleClickAction": "Klick auf den Titel eines übergeordneten Dokuments",

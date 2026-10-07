@@ -1050,6 +1050,9 @@ var AIAgentTitle = define[AITitleRequest, string]("agentChatTitle", "/api/ai/age
 var AIListSessions = define[AISessionsRequest, AISessionList]("lsSessions", "/api/ai/agent/lsSessions", StructJSONBody, ResponseOptions{}, "POST")
 var AIRemoveSession = define[AISessionIDRequest, Null]("removeSession", "/api/ai/agent/removeSession", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409, 500}}, "POST")
 var AIListSkills = define[EmptyRequest, []AISkillInfo]("lsSkills", "/api/ai/agent/lsSkills", NoBody, ResponseOptions{}, "POST")
+
+// AIListBuiltinSkills 独立于斜杠菜单的普通技能发现，只返回只读元数据，包括已禁用条目。
+var AIListBuiltinSkills = define[EmptyRequest, []AIBuiltinSkillInfo]("lsBuiltinSkills", "/api/ai/agent/lsBuiltinSkills", NoBody, ResponseOptions{}, "POST")
 var AIGetAgentInstructions = define[EmptyRequest, AIAgentInstructionsData]("getAgentInstructions", "/api/ai/agent/getInstructions", NoBody, ResponseOptions{}, "POST")
 var AISetAgentInstructions = define[AIAgentInstructionsSaveRequest, AIAgentInstructionsData]("setAgentInstructions", "/api/ai/agent/setInstructions", JSONBody, ResponseOptions{}, "POST")
 var AIListUserSkills = define[EmptyRequest, []AIUserSkillInfo]("lsUserSkills", "/api/ai/agent/lsUserSkills", NoBody, ResponseOptions{}, "POST")

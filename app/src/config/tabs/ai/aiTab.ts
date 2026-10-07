@@ -25,7 +25,9 @@ import {
     mountAgentCapabilityBlock,
 } from "./aiCapabilityUi";
 import {
+    getBuiltinSkillsBlockKeywords,
     getUserSkillsBlockKeywords,
+    mountBuiltinSkillsBlock,
     mountUserSkillsBlock,
 } from "./aiSkillUi";
 import {isAgentStreamingMarkdownEnabled, setAgentStreamingMarkdownEnabled} from "./agentStreamingMarkdown";
@@ -202,6 +204,15 @@ const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
 const registerAiSkillsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("skills", window.siyuan.languages.tokenCatSkills);
 
+    group.button({
+        id: "aiBuiltinSkills",
+        title: window.siyuan.languages.agentBuiltinSkills,
+        desc: window.siyuan.languages.agentBuiltinSkillsTip,
+        label: window.siyuan.languages.config,
+        icon: "iconSettings",
+        keywords: getBuiltinSkillsBlockKeywords(),
+        afterMount: mountBuiltinSkillsBlock,
+    });
     group.button({
         id: "aiWorkspaceSkills",
         title: window.siyuan.languages.agentWorkspaceSkills,

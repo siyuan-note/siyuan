@@ -37,6 +37,9 @@ import (
 
 // rejectEncryptedArchivePath 检查路径是否落入加密笔记本目录（含 symlink 绕过），是则返回错误。
 func rejectEncryptedArchivePath(absPath string) error {
+	if util.IsPluginDevelopmentRawPathForbidden(absPath, false) {
+		return fmt.Errorf("managed plugin development files require their dedicated tools")
+	}
 	if boxID := model.EncryptedRawPathBoxID(absPath); boxID != "" {
 		return fmt.Errorf("path belongs to encrypted notebook [%s]", boxID)
 	}
@@ -133,6 +136,9 @@ var zip = contractHandler(apicontract.Zip, func(c *gin.Context, request apicontr
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return contractFailure[apicontract.Null](ret)
+	}
+	if util.IsPluginDevelopmentRawWriteForbidden(resolvedZipPath) {
+		return apicontract.Failure[apicontract.Null](-1, "managed plugin development files require their dedicated tools")
 	}
 	if err = rejectEncryptedArchivePath(resolvedZipPath); err != nil {
 		ret.Code = -1
@@ -252,6 +258,9 @@ func unzipWorkspaceArchive(zipPath, destination string) error {
 }
 
 func validateArchiveEntryPath(destination, entryPath string) error {
+	if util.IsPluginDevelopmentRawWriteForbidden(entryPath) {
+		return fmt.Errorf("managed plugin development files require their dedicated tools")
+	}
 	rel, err := filepath.Rel(destination, entryPath)
 	if err != nil || !filepath.IsLocal(rel) {
 		return fmt.Errorf("invalid archive entry path [%s]", entryPath)

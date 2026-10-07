@@ -69,6 +69,11 @@ func validateCapabilityCall(ctx context.Context, registration *capabilityRegistr
 	if err := registration.Validator.ValidateInputContext(ctx, args); err != nil {
 		return fmt.Errorf("invalid capability arguments: %w", err)
 	}
+	if registration.Tool != nil && (registration.Tool.Source == "native" || registration.Tool.Source == "") {
+		if err := validatePluginWorkflowTool(ctx, registration.Tool.Name, args); err != nil {
+			return err
+		}
+	}
 	if !registration.isBrowser() &&
 		(registration.Tool == nil || registration.Tool.ContextHandler == nil && registration.Tool.Handler == nil) {
 		return fmt.Errorf("capability handler unavailable: %s", registration.ID)
@@ -94,6 +99,9 @@ func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) exec
 
 func executeCapability(ctx context.Context, tc openai.ToolCall, sessionID string,
 	registration *capabilityRegistration) executedToolResult {
+	if registration != nil && registration.Tool != nil && (registration.Tool.Source == "native" || registration.Tool.Source == "") {
+		ctx = pluginWorkflowContext(ctx, sessionID)
+	}
 	args, err := parseToolArgs(tc.Function.Arguments)
 	if err != nil {
 		return executedToolResult{Text: "invalid capability arguments: " + err.Error(), IsError: true}

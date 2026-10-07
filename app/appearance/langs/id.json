@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "Pulihkan hanya titik pemeriksaan kode sumber dari usulan yang sebelumnya disetujui? Pemulihan tidak mengembalikan catatan, data runtime, atau pengaturan lain, dan tidak mengizinkan perubahan kode sumber lebih lanjut.",
+	"agentPluginFlowQuestion": "Gunakan alur pengembangan plugin resmi?",
+	"agentPluginFlowYes": "Ya",
+	"agentPluginFlowNo": "Tidak",
+	"agentPluginPlanQuestion": "Setujui usulan plugin yang ditampilkan?",
+	"agentBuiltinSkills": "Keterampilan resmi",
+	"agentBuiltinSkillsTip": "Keterampilan hanya-baca dari SiYuan; pilih yang dapat digunakan agen",
+	"agentPluginPlanDetails": "Plugin: %[1]s\nAntarmuka: %[2]s\nSumber: %[3]s\nDampak data: %[4]s\nHasil: %[5]s\nBerkas: %[6]d · %[7]s\nRevisi sumber: %[8]s",
 	"docIconClickAction": "Klik ikon dokumen",
 	"docIconClickActionTip": "Tindakan saat mengeklik ikon dokumen",
 	"parentDocTitleClickAction": "Klik judul dokumen induk",

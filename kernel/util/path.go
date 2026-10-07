@@ -451,6 +451,9 @@ func IsSensitivePath(p string) bool {
 	if p == "" {
 		return false
 	}
+	if IsPluginDevelopmentRawPathForbidden(p, false) {
+		return true
+	}
 	if isSensitivePath(p, false) {
 		return true
 	}
@@ -471,6 +474,9 @@ func IsSensitivePath(p string) bool {
 func IsSensitiveHTMLAssetPath(p string) bool {
 	if p == "" {
 		return false
+	}
+	if IsPluginDevelopmentRawPathForbidden(p, false) {
+		return true
 	}
 	return isSensitivePath(p, true) || isSensitivePath(ResolveLongestExistingParent(p), true)
 }

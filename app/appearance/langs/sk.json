@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "Obnoviť iba kontrolný bod zdrojového kódu predtým schváleného návrhu? Obnova nevráti poznámky, údaje za behu ani iné nastavenia a nepovoľuje ďalšie zmeny zdrojového kódu.",
+	"agentPluginFlowQuestion": "Použiť oficiálny postup vývoja doplnkov?",
+	"agentPluginFlowYes": "Áno",
+	"agentPluginFlowNo": "Nie",
+	"agentPluginPlanQuestion": "Schváliť zobrazený návrh doplnku?",
+	"agentBuiltinSkills": "Oficiálne zručnosti",
+	"agentBuiltinSkillsTip": "Zručnosti SiYuan iba na čítanie; vyberte, ktoré môže agent používať",
+	"agentPluginPlanDetails": "Doplnok: %[1]s\nRozhranie: %[2]s\nZdroj: %[3]s\nVplyv na údaje: %[4]s\nVýstupy: %[5]s\nSúbory: %[6]d · %[7]s\nRevízia zdroja: %[8]s",
 	"docIconClickAction": "Kliknutie na ikonu dokumentu",
 	"docIconClickActionTip": "Činnosť po kliknutí na ikonu dokumentu",
 	"parentDocTitleClickAction": "Kliknutie na názov nadradeného dokumentu",

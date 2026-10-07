@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "هل تريد استعادة نقطة حفظ الشفرة المصدرية للمقترح المعتمد سابقًا فقط؟ لا تتراجع الاستعادة عن الملاحظات أو بيانات وقت التشغيل أو الإعدادات الأخرى، ولا تسمح بإجراء تغييرات إضافية على الشفرة المصدرية.",
+	"agentPluginFlowQuestion": "هل تريد استخدام سير العمل الرسمي لتطوير الإضافات؟",
+	"agentPluginFlowYes": "نعم",
+	"agentPluginFlowNo": "لا",
+	"agentPluginPlanQuestion": "هل توافق على مقترح الإضافة المعروض؟",
+	"agentBuiltinSkills": "المهارات الرسمية",
+	"agentBuiltinSkillsTip": "مهارات للقراءة فقط يوفرها SiYuan؛ اختر ما يمكن للوكيل استخدامه",
+	"agentPluginPlanDetails": "الإضافة: %[1]s\nالواجهة: %[2]s\nالمصدر: %[3]s\nالتأثيرات على البيانات: %[4]s\nالمخرجات: %[5]s\nالملفات: %[6]d · %[7]s\nمراجعة المصدر: %[8]s",
 	"docIconClickAction": "النقر على أيقونة مستند",
 	"docIconClickActionTip": "الإجراء عند النقر على أيقونة مستند",
 	"parentDocTitleClickAction": "النقر على عنوان المستند الأصل",

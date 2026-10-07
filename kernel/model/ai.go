@@ -39,6 +39,13 @@ func EnabledUserSkills() []string {
 	return append([]string(nil), Conf.AI.Agent.Skills.UserEnabled...)
 }
 
+func DisabledBuiltinSkills() []string {
+	if Conf == nil || Conf.AI == nil || Conf.AI.Agent == nil || Conf.AI.Agent.Skills == nil {
+		return nil
+	}
+	return append([]string(nil), Conf.AI.Agent.Skills.BuiltinDisabled...)
+}
+
 func ChatGPT(msg string) (ret string) {
 	if !isOpenAIAPIEnabled() {
 		return

@@ -49,16 +49,20 @@ type AISessionIDRequest struct {
 
 type AISkillNameRequest struct {
 	Name string `json:"name" api:"optional,nullable"`
+	// Source 省略时保持工作空间和用户技能解析；显式内置来源拒绝由普通 HTTP 读取或修改。
+	Source string `json:"source" api:"optional,nullable"`
 }
 
 type AISkillSaveRequest struct {
 	Name    string `json:"name" api:"optional,nullable"`
 	Content string `json:"content" api:"optional,nullable"`
+	Source  string `json:"source" api:"optional,nullable"`
 }
 
 type AISkillRenameRequest struct {
 	OldName string `json:"oldName" api:"optional,nullable"`
 	NewName string `json:"newName" api:"optional,nullable"`
+	Source  string `json:"source" api:"optional,nullable"`
 }
 
 type AIBrowserCapabilityResultRequest struct {
@@ -103,6 +107,17 @@ type AIMCPStatus struct {
 type AISkillInfo struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+
+// AIBuiltinSkillInfo 仅提供官方技能的发现信息；正文加载另由可信任务选择授权，不能通过 getSkill 读取。
+type AIBuiltinSkillInfo struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Source      string `json:"source"`
+	Version     string `json:"version"`
+	Digest      string `json:"digest"`
+	Enabled     bool   `json:"enabled"`
 }
 
 type AIUserSkillInfo struct {

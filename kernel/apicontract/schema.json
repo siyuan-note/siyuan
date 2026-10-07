@@ -714,6 +714,42 @@
       },
       "additionalProperties": false
     },
+    "AIBuiltinSkillInfo": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "digest": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "description",
+        "digest",
+        "enabled",
+        "id",
+        "name",
+        "source",
+        "version"
+      ],
+      "additionalProperties": false
+    },
     "AICapabilityAction": {
       "type": "object",
       "properties": {
@@ -5415,6 +5451,16 @@
               "type": "null"
             }
           ]
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -5441,6 +5487,16 @@
               "type": "null"
             }
           ]
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -5459,6 +5515,16 @@
           ]
         },
         "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
           "anyOf": [
             {
               "type": "string"
@@ -41879,6 +41945,19 @@
     "SettingAgentSkills": {
       "type": "object",
       "properties": {
+        "builtinDisabled": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "userEnabled": {
           "anyOf": [
             {
@@ -41894,6 +41973,7 @@
         }
       },
       "required": [
+        "builtinDisabled",
         "userEnabled"
       ],
       "additionalProperties": false
@@ -41901,6 +41981,19 @@
     "SettingAgentSkillsInput": {
       "type": "object",
       "properties": {
+        "builtinDisabled": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "userEnabled": {
           "anyOf": [
             {
@@ -118415,6 +118508,91 @@
               },
               "data": {
                 "$ref": "#/$defs/AISkillData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai/agent/lsBuiltinSkills",
+      "handler": "lsBuiltinSkills",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/AIBuiltinSkillInfo"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "msg": {
                 "type": "string"

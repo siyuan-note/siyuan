@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "Alleen het broncodecontrolepunt van het eerder goedgekeurde voorstel herstellen? Het herstel draait geen notities, runtimegegevens of andere instellingen terug en geeft geen toestemming voor verdere broncodewijzigingen.",
+	"agentPluginFlowQuestion": "De officiële workflow voor pluginontwikkeling gebruiken?",
+	"agentPluginFlowYes": "Ja",
+	"agentPluginFlowNo": "Nee",
+	"agentPluginPlanQuestion": "Het getoonde pluginvoorstel goedkeuren?",
+	"agentBuiltinSkills": "Officiële vaardigheden",
+	"agentBuiltinSkillsTip": "Alleen-lezenvaardigheden van SiYuan; kies welke de agent mag gebruiken",
+	"agentPluginPlanDetails": "Plugin: %[1]s\nFrontend: %[2]s\nBron: %[3]s\nGevolgen voor gegevens: %[4]s\nResultaten: %[5]s\nBestanden: %[6]d · %[7]s\nBronversie: %[8]s",
 	"docIconClickAction": "Klikken op een documentpictogram",
 	"docIconClickActionTip": "Actie bij het klikken op een documentpictogram",
 	"parentDocTitleClickAction": "Klikken op de titel van een bovenliggend document",

@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "Przywrócić tylko punkt kontrolny kodu wcześniej zatwierdzonego planu? Odzyskiwanie nie cofa notatek, danych wykonania ani innych ustawień i nie zezwala na dalsze zmiany kodu.",
+	"agentPluginFlowQuestion": "Użyć oficjalnego procesu tworzenia wtyczek?",
+	"agentPluginFlowYes": "Tak",
+	"agentPluginFlowNo": "Nie",
+	"agentPluginPlanQuestion": "Zatwierdzić wyświetlony plan wtyczki?",
+	"agentBuiltinSkills": "Oficjalne umiejętności",
+	"agentBuiltinSkillsTip": "Umiejętności SiYuan tylko do odczytu; wybierz, z których może korzystać agent",
+	"agentPluginPlanDetails": "Wtyczka: %[1]s\nInterfejs: %[2]s\nŹródło: %[3]s\nWpływ na dane: %[4]s\nRezultaty: %[5]s\nPliki: %[6]d · %[7]s\nWersja kodu: %[8]s",
 	"docIconClickAction": "Kliknięcie ikony dokumentu",
 	"docIconClickActionTip": "Działanie po kliknięciu ikony dokumentu",
 	"parentDocTitleClickAction": "Kliknięcie tytułu dokumentu nadrzędnego",

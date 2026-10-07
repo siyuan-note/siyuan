@@ -30,6 +30,8 @@ export type AIAgentToolCallProviderDataInput = { "google"?: AIAgentGoogleToolCal
 
 export type AIBrowserCapabilityResultRequestInput = { "callID"?: string | null; "isError"?: boolean | null; "result"?: string | null; "structuredContent"?: JSONValue | null; "structuredContentSet"?: boolean | null; };
 
+export type AIBuiltinSkillInfo = { "description": string; "digest": string; "enabled": boolean; "id": string; "name": string; "source": string; "version": string; };
+
 export type AICapabilityAction = { "effects"?: AIToolEffects; "name": string; };
 
 export type AICapabilityManifest = { "actions"?: Array<AICapabilityAction>; "agentOnly"?: boolean; "available": boolean; "description": string; "effects"?: AIToolEffects; "id": string; "name": string; "ownerId"?: string; "ownerName"?: string; "runtime": string; "source": string; "title"?: string; };
@@ -196,11 +198,11 @@ export type AISkillFileRequestInput = { "action": string; "content"?: string; "p
 
 export type AISkillInfo = { "description": string; "name": string; };
 
-export type AISkillNameRequestInput = { "name"?: string | null; };
+export type AISkillNameRequestInput = { "name"?: string | null; "source"?: string | null; };
 
-export type AISkillRenameRequestInput = { "newName"?: string | null; "oldName"?: string | null; };
+export type AISkillRenameRequestInput = { "newName"?: string | null; "oldName"?: string | null; "source"?: string | null; };
 
-export type AISkillSaveRequestInput = { "content"?: string | null; "name"?: string | null; };
+export type AISkillSaveRequestInput = { "content"?: string | null; "name"?: string | null; "source"?: string | null; };
 
 export type AITitleRequestInput = { "language"?: string | null; "message"?: string | null; "model"?: string | null; };
 
@@ -1890,9 +1892,9 @@ export type SettingAgent = { "approvalPolicy": SettingApprovalPolicy | null; "ca
 
 export type SettingAgentInput = { "approvalPolicy"?: SettingApprovalPolicyInput | null; "capabilityPolicy"?: SettingCapabilityPolicyInput | null; "confirmTimeout"?: number | null; "maxCompletionTokens"?: number | null; "maxRetries"?: number | null; "maxToolCallRounds"?: number | null; "modelId"?: string | null; "sessionTimeout"?: number | null; "skills"?: SettingAgentSkillsInput | null; "streamIdleTimeout"?: number | null; "temperature"?: number | null; };
 
-export type SettingAgentSkills = { "userEnabled": Array<string> | null; };
+export type SettingAgentSkills = { "builtinDisabled": Array<string> | null; "userEnabled": Array<string> | null; };
 
-export type SettingAgentSkillsInput = { "userEnabled"?: Array<string> | null; };
+export type SettingAgentSkillsInput = { "builtinDisabled"?: Array<string> | null; "userEnabled"?: Array<string> | null; };
 
 export type SettingAppearance = { "bodyGradient": SettingBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "darkThemes": Array<SettingAppearanceTheme | null> | null; "entryVisibility": SettingEntryVisibility | null; "globalFontFamilies": Array<SettingEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<SettingAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<SettingAppearanceTheme | null> | null; "mode": number; "modeOS": boolean; "notifications": SettingNotifications | null; "statusBar": SettingStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
 
@@ -2690,6 +2692,11 @@ export interface APIPOSTRoutes {
         request: AISkillNameRequestInput;
         response: { "code": 0; "data": AISkillData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+    };
+    "/api/ai/agent/lsBuiltinSkills": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AIBuiltinSkillInfo> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
     };
     "/api/ai/agent/lsSessions": {
         request: AISessionsRequestInput;

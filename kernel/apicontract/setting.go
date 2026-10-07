@@ -111,6 +111,8 @@ type SettingCapabilityApproval struct {
 
 type SettingAgentSkills struct {
 	UserEnabled []string `json:"userEnabled" api:"optional,nullable"`
+	// BuiltinDisabled 保存稳定的官方技能 ID；省略时默认启用，未知 ID 在配置规范化时保留。
+	BuiltinDisabled []string `json:"builtinDisabled" api:"optional,nullable"`
 }
 
 type SettingEditing struct {

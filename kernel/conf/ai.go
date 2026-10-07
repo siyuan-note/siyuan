@@ -65,7 +65,8 @@ type Agent struct {
 }
 
 type AgentSkills struct {
-	UserEnabled []string `json:"userEnabled"`
+	UserEnabled     []string `json:"userEnabled"`
+	BuiltinDisabled []string `json:"builtinDisabled"`
 }
 
 type CapabilityPolicy struct {
@@ -333,7 +334,7 @@ func defaultAgent() *Agent {
 		MaxToolCallRounds:   64,
 		CapabilityPolicy:    defaultCapabilityPolicy(),
 		ApprovalPolicy:      defaultApprovalPolicy(),
-		Skills:              &AgentSkills{UserEnabled: []string{}},
+		Skills:              &AgentSkills{UserEnabled: []string{}, BuiltinDisabled: []string{}},
 	}
 }
 
@@ -659,7 +660,7 @@ func (ai *AI) Normalize() {
 		ai.Agent = defaultAgent()
 	} else {
 		if ai.Agent.Skills == nil {
-			ai.Agent.Skills = &AgentSkills{UserEnabled: []string{}}
+			ai.Agent.Skills = &AgentSkills{UserEnabled: []string{}, BuiltinDisabled: []string{}}
 		} else {
 			seen := map[string]struct{}{}
 			normalized := []string{}
@@ -676,6 +677,21 @@ func (ai *AI) Normalize() {
 				normalized = append(normalized, id)
 			}
 			ai.Agent.Skills.UserEnabled = normalized
+			// 保留未知内置 ID，升级或降级后不丢失用户的禁用选择。
+			seen = map[string]struct{}{}
+			normalized = []string{}
+			for _, id := range ai.Agent.Skills.BuiltinDisabled {
+				id = strings.TrimSpace(id)
+				if id == "" {
+					continue
+				}
+				if _, ok := seen[id]; ok {
+					continue
+				}
+				seen[id] = struct{}{}
+				normalized = append(normalized, id)
+			}
+			ai.Agent.Skills.BuiltinDisabled = normalized
 		}
 		ai.Agent.CapabilityPolicy = normalizeCapabilityPolicy(ai.Agent.CapabilityPolicy)
 		if ai.Agent.ApprovalPolicy == nil {

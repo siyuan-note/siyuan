@@ -340,6 +340,7 @@ func SaveSessionState(data []byte) (int64, map[string]any, error) {
 	delete(newData, "recoveryRevision")
 	delete(newData, "agentRunning")
 	delete(newData, "lastCommittedTurnID")
+	delete(newData, "pluginWorkflow")
 	commitTurnID := meta.CommitTurnID
 	if commitTurnID == "" {
 		commitTurnID = meta.RecoveryTurnID
@@ -371,7 +372,7 @@ func SaveSessionState(data []byte) (int64, map[string]any, error) {
 					// messages 是已废弃的旧会话字段，不再带入新格式；其他未知字段原样保留，
 					// 避免前后端版本不一致时擦除较新版本写入的数据。
 					if k != "messages" && k != "expectedRevision" && k != "commitTurnID" &&
-						k != "recoveryTurnID" && k != "recoveryState" && k != "recoveryRevision" && k != "agentRunning" {
+						k != "recoveryTurnID" && k != "recoveryState" && k != "recoveryRevision" && k != "agentRunning" && k != "pluginWorkflow" {
 						newData[k] = v
 					}
 				}

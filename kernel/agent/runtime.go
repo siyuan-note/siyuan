@@ -38,13 +38,14 @@ const (
 )
 
 type agentRuntime struct {
-	SchemaVersion  int                `json:"schemaVersion"`
-	Revision       int64              `json:"revision"`
-	SessionID      string             `json:"sessionID"`
-	PermissionMode string             `json:"permissionMode,omitempty"`
-	AlwaysAllow    bool               `json:"alwaysAllow,omitempty"`
-	ActiveTurn     *agentRuntimeTurn  `json:"activeTurn,omitempty"`
-	Compaction     *runtimeCompaction `json:"compaction,omitempty"`
+	SchemaVersion  int                  `json:"schemaVersion"`
+	Revision       int64                `json:"revision"`
+	SessionID      string               `json:"sessionID"`
+	PermissionMode string               `json:"permissionMode,omitempty"`
+	AlwaysAllow    bool                 `json:"alwaysAllow,omitempty"`
+	ActiveTurn     *agentRuntimeTurn    `json:"activeTurn,omitempty"`
+	Compaction     *runtimeCompaction   `json:"compaction,omitempty"`
+	PluginWorkflow *pluginWorkflowState `json:"pluginWorkflow,omitempty"`
 }
 
 type sessionPermissionController struct {

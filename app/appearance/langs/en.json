@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "Restore only the source checkpoint of the previously approved proposal? Recovery will not roll back notes, runtime data, or other settings, and does not authorize further source changes.",
+	"agentPluginFlowQuestion": "Use the official plugin development workflow?",
+	"agentPluginFlowYes": "Yes",
+	"agentPluginFlowNo": "No",
+	"agentPluginPlanQuestion": "Approve the displayed plugin proposal?",
+	"agentBuiltinSkills": "Official skills",
+	"agentBuiltinSkillsTip": "Read-only skills provided by SiYuan; choose which skills the agent can use",
+	"agentPluginPlanDetails": "Plugin: %[1]s\nFrontend: %[2]s\nSource: %[3]s\nData effects: %[4]s\nDeliverables: %[5]s\nFiles: %[6]d · %[7]s\nSource revision: %[8]s",
 	"docIconClickAction": "Clicking a document icon",
 	"docIconClickActionTip": "Action performed by clicking a document icon",
 	"parentDocTitleClickAction": "Clicking a parent document title",

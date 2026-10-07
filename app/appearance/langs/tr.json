@@ -1,4 +1,12 @@
 {
+	"agentPluginRecoveryQuestion": "Yalnızca daha önce onaylanan önerinin kaynak kodu kontrol noktası geri yüklensin mi? Kurtarma; notları, çalışma zamanı verilerini veya diğer ayarları geri almaz ve kaynak kodunda başka değişikliklere izin vermez.",
+	"agentPluginFlowQuestion": "Resmî eklenti geliştirme iş akışı kullanılsın mı?",
+	"agentPluginFlowYes": "Evet",
+	"agentPluginFlowNo": "Hayır",
+	"agentPluginPlanQuestion": "Gösterilen eklenti önerisi onaylansın mı?",
+	"agentBuiltinSkills": "Resmî beceriler",
+	"agentBuiltinSkillsTip": "SiYuan tarafından sağlanan salt okunur beceriler; aracının kullanabileceklerini seçin",
+	"agentPluginPlanDetails": "Eklenti: %[1]s\nÖn yüz: %[2]s\nKaynak: %[3]s\nVeri etkileri: %[4]s\nTeslim edilecekler: %[5]s\nDosyalar: %[6]d · %[7]s\nKaynak sürümü: %[8]s",
 	"docIconClickAction": "Belge simgesine tıklama",
 	"docIconClickActionTip": "Belge simgesine tıklandığında yapılacak işlem",
 	"parentDocTitleClickAction": "Üst belge başlığına tıklama",

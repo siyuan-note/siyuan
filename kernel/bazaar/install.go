@@ -17,6 +17,7 @@
 package bazaar
 
 import (
+	"archive/zip"
 	"bytes"
 	"errors"
 	"fmt"
@@ -26,9 +27,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/imroc/req/v3"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -97,6 +96,19 @@ var packageManifestNames = func() map[string]string {
 
 // InstallPackage 安装集市包
 func InstallPackage(repoURL, repoHash, repoRef, installPath, systemID, pkgType, packageName string, update bool) error {
+	_, err := InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, systemID, pkgType, packageName, update, PackageInstallOptions{})
+	return err
+}
+
+// InstallPackageWithOptions 将在线包替换也纳入目标版本校验和代码备份。
+func InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, systemID, pkgType, packageName string, update bool, options PackageInstallOptions) (*PackageInstallResult, error) {
+	if options.ExpectedInstalledRevision == "" {
+		revision, err := InstalledPackageRevision(installPath)
+		if err != nil {
+			return nil, err
+		}
+		options.ExpectedInstalledRevision = revision
+	}
 	var fallbackInstallTime time.Time
 	if update {
 		if info, statErr := os.Stat(installPath); statErr == nil {
@@ -107,10 +119,11 @@ func InstallPackage(repoURL, repoHash, repoRef, installPath, systemID, pkgType, 
 	repoURLHash := repoURL + "@" + repoHash
 	data, err := downloadBazaarFile(repoURLHash, true)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if err = installPackage(data, installPath, pkgType, packageName, update); err != nil {
-		return err
+	result, err := installPackageWithOptions(data, installPath, pkgType, packageName, update, options)
+	if err != nil {
+		return nil, err
 	}
 	RemoveInstalledPackageSizeCache(pkgType, packageName)
 
@@ -124,37 +137,46 @@ func InstallPackage(repoURL, repoHash, repoRef, installPath, systemID, pkgType, 
 	}
 
 	go incPackageDownloads(repoURL, packageName, systemID)
-	return nil
+	return result, nil
 }
 
-func installPackage(data []byte, installPath, pkgType, packageName string, update bool) (err error) {
+func installPackage(data []byte, installPath, pkgType, packageName string, update bool) error {
+	_, err := installPackageWithOptions(data, installPath, pkgType, packageName, update, PackageInstallOptions{})
+	return err
+}
+
+func installPackageWithOptions(data []byte, installPath, pkgType, packageName string, update bool, options PackageInstallOptions) (result *PackageInstallResult, err error) {
 	// 非更新安装时目标目录已存在且非空则拒绝覆盖，防止把其他包的内容写入已有包目录
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
 	if !update {
 		containsFile, statErr := PackageDirContainsFile(installPath)
 		if statErr != nil && !os.IsNotExist(statErr) {
-			return statErr
+			return nil, statErr
 		}
 		if containsFile {
-			return errors.New("marketplace package install path already exists")
+			return nil, errors.New("marketplace package install path already exists")
 		}
 	}
 
 	tmpPackage := filepath.Join(util.TempDir, "bazaar", "package")
-	if err = os.MkdirAll(tmpPackage, 0755); err != nil {
+	if options.BackupRoot != "" {
+		tmpPackage = filepath.Join(installPrivateRoot(), "install-operations")
+		if err = makePrivateInstallDir(tmpPackage); err != nil {
+			return
+		}
+	} else if err = os.MkdirAll(tmpPackage, 0755); err != nil {
 		return
 	}
-	name := gulu.Rand.String(7)
-	tmp := filepath.Join(tmpPackage, name+".zip")
-	defer os.RemoveAll(tmp)
-	if err = os.WriteFile(tmp, data, 0644); err != nil {
+	unzipPath, err := os.MkdirTemp(tmpPackage, "online-")
+	if err != nil {
 		return
 	}
-
-	unzipPath := filepath.Join(tmpPackage, name)
 	defer os.RemoveAll(unzipPath)
-	if err = gulu.Zip.Unzip(tmp, unzipPath); err != nil {
-		logging.LogErrorf("write file [%s] failed: %s", installPath, err)
+	reader, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		return
+	}
+	if err = extractLocalPackageReader(reader, unzipPath); err != nil {
 		return
 	}
 
@@ -172,17 +194,21 @@ func installPackage(data []byte, installPath, pkgType, packageName string, updat
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
 	jsonFileName, ok := packageManifestNames[pkgType]
 	if !ok {
-		return errors.New("invalid marketplace package type")
+		return nil, errors.New("invalid marketplace package type")
 	}
-	pkg, parseErr := ParsePackageJSON(filepath.Join(srcPath, jsonFileName))
+	manifestData, readErr := os.ReadFile(filepath.Join(srcPath, jsonFileName))
+	if readErr != nil {
+		return nil, errors.New("marketplace package manifest not found or invalid")
+	}
+	pkg, parseErr := parseInstallPackageManifest(manifestData)
 	if parseErr != nil || nil == pkg {
-		return errors.New("marketplace package manifest not found or invalid")
+		return nil, errors.New("marketplace package manifest not found or invalid")
 	}
 	if packageName != pkg.Name {
-		return fmt.Errorf("marketplace package name mismatch: expected [%s], got [%s]", packageName, pkg.Name)
+		return nil, fmt.Errorf("marketplace package name mismatch: expected [%s], got [%s]", packageName, pkg.Name)
 	}
 
-	if err = replacePackageDirectory(srcPath, installPath, update); err != nil {
+	if result, err = replacePackageDirectoryWithOptions(srcPath, installPath, update, options); err != nil {
 		return
 	}
 	return
@@ -191,15 +217,46 @@ func installPackage(data []byte, installPath, pkgType, packageName string, updat
 // replacePackageDirectory 将 sourcePath 整目录替换到 installPath。
 // 先拷到安装目录同级的 staging，更新时再把旧目录 rename 成 backup，最后把 staging rename 成目标路径。
 // 这样新包已删除的文件不会残留，失败时也可以把 backup rename 回去。
-func replacePackageDirectory(sourcePath, installPath string, update bool) (err error) {
+func replacePackageDirectory(sourcePath, installPath string, update bool) error {
+	_, err := replacePackageDirectoryWithOptions(sourcePath, installPath, update, PackageInstallOptions{})
+	return err
+}
+
+func replacePackageDirectoryWithOptions(sourcePath, installPath string, update bool, options PackageInstallOptions) (result *PackageInstallResult, err error) {
 	packageInstallLock.Lock()
 	defer packageInstallLock.Unlock()
-
+	if err = validateInstalledRevision(options.ExpectedInstalledRevision); err != nil {
+		return
+	}
+	if err = rejectInstallPathLinks(installPath); err != nil {
+		return
+	}
+	previousRevision, err := installedPackageRevision(installPath)
+	if err != nil {
+		return nil, err
+	}
+	if options.ExpectedInstalledRevision != "" && previousRevision != options.ExpectedInstalledRevision {
+		return nil, ErrInstalledRevisionConflict
+	}
+	containsFile, statErr := PackageDirContainsFile(installPath)
+	targetExists := statErr == nil
+	if statErr != nil && !os.IsNotExist(statErr) {
+		return nil, statErr
+	}
+	if targetExists && !update && containsFile {
+		return nil, errors.New("marketplace package install path already exists")
+	}
+	if update && !targetExists {
+		return nil, os.ErrNotExist
+	}
+	result = &PackageInstallResult{PreviousRevision: previousRevision}
 	if err = os.MkdirAll(filepath.Dir(installPath), 0755); err != nil {
 		return
 	}
-
-	operationPath := filepath.Join(filepath.Dir(installPath), ".siyuan-package-install-"+gulu.Rand.String(7))
+	operationPath, err := os.MkdirTemp(filepath.Dir(installPath), ".siyuan-package-install-")
+	if err != nil {
+		return result, err
+	}
 	stagingPath := filepath.Join(operationPath, "staging")
 	backupPath := filepath.Join(operationPath, "backup")
 	preserveOperationPath := false
@@ -208,22 +265,54 @@ func replacePackageDirectory(sourcePath, installPath string, update bool) (err e
 			_ = os.RemoveAll(operationPath)
 		}
 	}()
-	if err = filelock.CopyNewtimes(sourcePath, stagingPath); err != nil {
-		return
+	copiedRevision, err := copyInstallTree(sourcePath, stagingPath)
+	if err != nil {
+		return result, err
 	}
-
-	containsFile, statErr := PackageDirContainsFile(installPath)
-	targetExists := statErr == nil
-	if statErr != nil && !os.IsNotExist(statErr) {
-		return statErr
+	sourceRevision, err := installedPackageRevision(sourcePath)
+	if err != nil {
+		return result, err
 	}
-	if targetExists && !update && containsFile {
-		return errors.New("marketplace package install path already exists")
+	stagingRevision, err := installedPackageRevision(stagingPath)
+	if err != nil {
+		return result, err
 	}
-	if update && !targetExists {
-		return os.ErrNotExist
+	if sourceRevision != copiedRevision || stagingRevision != copiedRevision {
+		return result, ErrInstalledRevisionConflict
 	}
-
+	if containsFile && options.BackupRoot != "" {
+		result.Backup, err = createInstallBackup(installPath, previousRevision, options)
+		if err != nil {
+			return result, fmt.Errorf("backup_failed: %w", err)
+		}
+	}
+	currentRevision, err := installedPackageRevision(installPath)
+	if err != nil {
+		return result, err
+	}
+	if currentRevision != previousRevision {
+		return result, ErrInstalledRevisionConflict
+	}
+	if options.BeforeReplace != nil {
+		if err = options.BeforeReplace(); err != nil {
+			return
+		}
+	}
+	// 回调、备份和复制均结束后再复核，线上与本地安装共享这一个实际替换段。
+	currentRevision, err = installedPackageRevision(installPath)
+	if err != nil {
+		return result, err
+	}
+	if currentRevision != previousRevision {
+		return result, ErrInstalledRevisionConflict
+	}
+	finalStagingRevision, err := installedPackageRevision(stagingPath)
+	if err != nil {
+		return result, err
+	}
+	if finalStagingRevision != stagingRevision {
+		return result, ErrInstalledRevisionConflict
+	}
 	if targetExists {
 		if err = os.Rename(installPath, backupPath); err != nil {
 			return
@@ -233,26 +322,31 @@ func replacePackageDirectory(sourcePath, installPath string, update bool) (err e
 		if targetExists {
 			if rollbackErr := os.Rename(backupPath, installPath); rollbackErr != nil {
 				preserveOperationPath = true
-				return fmt.Errorf("install marketplace package failed: %w; rollback failed: %s", err, rollbackErr)
+				return result, fmt.Errorf("result_unknown: install marketplace package failed: %w; rollback failed: %s", err, rollbackErr)
 			}
 		}
 		return
 	}
-	if targetExists {
-		if removeErr := os.RemoveAll(operationPath); removeErr != nil {
-			logging.LogWarnf("remove package backup [%s] failed: %s", backupPath, removeErr)
-		}
+	result.InstalledRevision, err = installedPackageRevision(installPath)
+	if err != nil || result.InstalledRevision != stagingRevision {
+		preserveOperationPath = true
+		return result, errors.New("result_unknown: installed package changed after replacement; recovery copy preserved")
 	}
 	return
 }
 
 // InstallLocalPackage 从已解压并验证的目录安装本地集市包。
-func InstallLocalPackage(sourcePath, installPath, pkgType, packageName string, update bool) (err error) {
+func InstallLocalPackage(sourcePath, installPath, pkgType, packageName string, update bool) error {
+	_, err := InstallLocalPackageWithOptions(sourcePath, installPath, pkgType, packageName, update, PackageInstallOptions{})
+	return err
+}
+
+func InstallLocalPackageWithOptions(sourcePath, installPath, pkgType, packageName string, update bool, options PackageInstallOptions) (result *PackageInstallResult, err error) {
 	var fallbackInstallTime time.Time
 	if info, statErr := os.Stat(installPath); statErr == nil {
 		fallbackInstallTime = info.ModTime()
 	}
-	if err = replacePackageDirectory(sourcePath, installPath, update); err != nil {
+	if result, err = replacePackageDirectoryWithOptions(sourcePath, installPath, update, options); err != nil {
 		return
 	}
 

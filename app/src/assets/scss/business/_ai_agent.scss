@@ -1024,6 +1024,7 @@
 }
 
 .agent-chat__question-text {
+  white-space: pre-wrap;
   margin-bottom: 10px;
   color: var(--b3-theme-on-surface);
   line-height: 1.5;

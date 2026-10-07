@@ -1,6 +1,18 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {canChangeSkillEntry, getSkillDirectory, isSkillEntryPoint, SkillSourceState} from "./state";
+import {canChangeSkillEntry, getSkillDirectory, isSkillEntryPoint, isValidSkillName, SkillSourceState} from "./state";
+
+test("skill names reject invalid path components and Windows device names", () => {
+    for (const name of ["", ".", "..", " notes", "notes ", "notes.", "a/b", "a\\b", "a:b", "a<b", "a>b",
+        "a\"b", "a|b", "a?b", "a*b", "a~b", "a\u0000b", "a\u001fb", "a\u007fb", "a\u0085b", "CON", "con.txt",
+        "PRN", "AUX", "NUL", "CONIN$", "CONOUT$", "COM0", "COM1.md", "LPT9", "COM\u00b9", "LPT\u00b2.txt",
+        "COM\u00b3", "COMLPT1", "con .txt"]) {
+        assert.equal(isValidSkillName(name), false, name);
+    }
+    for (const name of ["notes", "notes.md", ".config", "SKILL.md", "my notes", "技能", "CONSOLE", "COM10", "LPT12.txt"]) {
+        assert.equal(isValidSkillName(name), true, name);
+    }
+});
 
 test("skill entry points and resources cannot be renamed or deleted separately", () => {
     assert.equal(isSkillEntryPoint({path: "review/SKILL.md", isDir: false, editable: true}), true);

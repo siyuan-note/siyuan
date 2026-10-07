@@ -1,5 +1,18 @@
 import type {AISkillFileEntry} from "../../types/api";
 
+// 技能资源名称遵循内核的跨平台路径规则。
+export const isValidSkillName = (name: string) => {
+    if (!name || name === "." || name === ".." || name !== name.trim() || name.endsWith(".") ||
+        /[\\/:<>"|?*~]/.test(name) || Array.from(name).some(char => {
+            const code = char.charCodeAt(0);
+            return code <= 0x1f || (code >= 0x7f && code <= 0x9f);
+        })) {
+        return false;
+    }
+    const device = name.split(".")[0].replace(/[ .]+$/, "").toUpperCase();
+    return !/^(CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|(COM(LPT)?|LPT)[0-9\u00b9\u00b2\u00b3])$/.test(device);
+};
+
 export const isSkillEntryPoint = (entry: AISkillFileEntry) =>
     !entry.isDir && /^[^/]+\/SKILL\.md$/i.test(entry.path);
 

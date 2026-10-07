@@ -27,6 +27,11 @@
     font-size: inherit;
   }
 
+  &.table__cell-rich {
+    // 富文本预览沿用所在单元格的字体。
+    font-family: inherit;
+  }
+
   img {
     max-width: 100%;
     margin: 0 auto;

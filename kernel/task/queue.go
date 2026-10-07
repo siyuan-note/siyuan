@@ -83,15 +83,16 @@ func appendTaskWithDelayTimeout(action string, async bool, delay, timeout time.D
 }
 
 func containTask(task *Task, tasks []*Task) bool {
+nextTask:
 	for _, t := range tasks {
 		if t.Action == task.Action {
 			if len(t.Args) != len(task.Args) {
-				return false
+				continue nextTask
 			}
 
 			for i, arg := range t.Args {
 				if !areArgsEqual(arg, task.Args[i]) {
-					return false
+					continue nextTask
 				}
 			}
 			return true

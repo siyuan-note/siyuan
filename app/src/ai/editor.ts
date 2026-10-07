@@ -558,6 +558,7 @@ const startTaskStream = (task: IAIEditorTask) => {
             return;
         }
         task.status = "error";
+        finishTaskReasoning(task);
         task.notice = error instanceof Error ? error.message : String(error);
         task.stopButton.classList.add("fn__none");
         task.actionsElement.classList.remove("fn__none");

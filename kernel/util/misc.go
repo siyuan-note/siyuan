@@ -157,7 +157,8 @@ func HasUnclosedHtmlTag(htmlStr string) bool {
 
 	tagRe := regexp.MustCompile(`<(/?)([a-zA-Z0-9]+)[^>]*?>`)
 	selfClosing := map[string]bool{
-		"br": true, "img": true, "hr": true, "input": true, "meta": true, "link": true,
+		"area": true, "base": true, "br": true, "col": true, "embed": true, "hr": true, "img": true,
+		"input": true, "link": true, "meta": true, "param": true, "source": true, "track": true, "wbr": true,
 	}
 	stack := []string{}
 	matches := tagRe.FindAllStringSubmatch(htmlStr, -1)

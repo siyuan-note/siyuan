@@ -44,6 +44,7 @@ const gNet = require("net");
 const childProcess = require("child_process");
 const remote = require("@electron/remote/main");
 const {probeRemoteKernelAuthentication} = require("./remoteKernelAuth");
+const {installKernelRequestLog} = require("./kernelRequestLog");
 const {saveRemoteExport} = require("./remoteExport");
 const remoteExportSenders = new WeakSet();
 const {createConnectionManager, getRemoteSession} = require("./connectionManager");
@@ -2983,6 +2984,7 @@ app.whenReady().then(() => {
     });
     // 前端菜单同步完成前也保留原生编辑操作，避免复制、粘贴依赖界面初始化成功。
     setStartupApplicationMenu();
+    installKernelRequestLog(session.defaultSession, {getTarget: getWindowKernelTarget, writeLog});
     // 仅本进程启动的本地内核允许自签名证书，远程内核始终使用系统信任链。
     session.defaultSession.setCertificateVerifyProc((request, callback) => {
         const kernelMode = remoteKernelTarget ? "remote" : "local";

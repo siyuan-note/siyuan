@@ -590,7 +590,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 								continue
 							}
 							currentUserExists = userEntryID != "" && truncated[i].EntryID == userEntryID
-							if userEntryID == "" && truncated[i].Content == userMessage {
+							if userEntryID == "" && (truncated[i].Content == userMessage || truncated[i].Content == rawUserMessage) {
 								currentUserExists = true
 							}
 							break
@@ -602,6 +602,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					} else {
 						for i := len(checkpointMsgs) - 1; i >= 0; i-- {
 							if checkpointMsgs[i].Role == "user" {
+								checkpointMsgs[i].Content = userMessage
 								checkpointMsgs[i].References = append([]Reference(nil), references...)
 								checkpointMsgs[i].EditorContext = cloneEditorContext(editorCtx)
 								break

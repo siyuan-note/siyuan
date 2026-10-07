@@ -335,6 +335,23 @@ func RemoveBox(boxID string) (err error) {
 			logging.LogErrorf("gen sync history failed: %s", err)
 			return
 		}
+		if !isEncrypted {
+			pages, walkErr := pagedPathsWithError(localPath, 32)
+			if walkErr != nil {
+				return walkErr
+			}
+			for _, paths := range pages {
+				for _, filename := range paths {
+					tree, loadErr := loadTree(filename, util.NewLute())
+					if loadErr != nil {
+						return loadErr
+					}
+					if err = backupBoundAttributeViewHistory(tree, historyDir); err != nil {
+						return err
+					}
+				}
+			}
+		}
 
 		// 加密笔记本的 assets 不提升到全局 data/assets，避免密文污染全局或被全局索引
 		if !isEncrypted {

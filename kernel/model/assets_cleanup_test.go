@@ -155,6 +155,27 @@ func TestHTMLAssetLinkDests(t *testing.T) {
 	}
 }
 
+func TestUnusedAssetsTemplateReferences(t *testing.T) {
+	setupUnusedAssetWorkspace(t)
+	templateDir := filepath.Join(util.DataDir, "templates", "nested")
+	if err := os.MkdirAll(templateDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	content := "![template](../assets/space%20name.png?preview#image)\n\n[PDF](assets/file.pdf?page=2)\n\n<img src=\"/assets/html.png\">\n\n{{now | date \"2006\"}}\n"
+	if err := os.WriteFile(filepath.Join(templateDir, "example.md"), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"space name.png", "file.pdf", "file.pdf.sya", "html.png", "unused.png"} {
+		if err := os.WriteFile(filepath.Join(util.DataDir, "assets", name), []byte(name), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	items, err := UnusedAssets(false)
+	if err != nil || len(items) != 1 || items[0].Item != "assets/unused.png" {
+		t.Fatalf("template assets reported unused: %+v, %v", items, err)
+	}
+}
+
 func TestUnusedAssetsAbortUnreadableDocument(t *testing.T) {
 	for _, test := range []struct{ name, data string }{
 		{"new spec", `{"Type":"NodeDocument","Spec":"99"}`},

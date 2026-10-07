@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -79,11 +81,70 @@ func (tx *Transaction) restoreEmbeddedAttributeViewHistory(filename, boxID, avID
 		return err
 	}
 	current, err := tx.readAttributeViewForMutation(avID, "", boxID)
+	if errors.Is(err, av.ErrViewNotFound) {
+		cache.RemoveAVDataInBox(avID, boxID)
+		if tx.attributeViewRollback.createdViews == nil {
+			tx.attributeViewRollback.createdViews = map[string]string{}
+		}
+		tx.attributeViewRollback.createdViews[boxID+"/"+avID] = boundAttributeViewHistoryPath(util.DataDir, boxID, avID)
+		current, err = av.NewAttributeView(avID), nil
+	}
 	if err != nil {
 		return err
 	}
 	return tx.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{boxID: boxID},
 		map[string]*av.AttributeView{avID: current}, map[string]*av.AttributeView{avID: historical})
+}
+
+// 普通笔记本的数据库定义存放在全局目录，恢复笔记本时同时恢复内嵌数据库和缺失绑定条目。
+func (tx *Transaction) restoreNotebookAttributeViewHistory(historyPath, boxID string) error {
+	historyDir := filepath.Dir(historyPath)
+	if !filelock.IsExist(filepath.Join(historyDir, "storage", "av")) {
+		return nil
+	}
+	data, err := filelock.ReadFile(filepath.Join(historyPath, ".siyuan", "conf.json"))
+	if err != nil {
+		return err
+	}
+	var boxConf struct {
+		Encrypted bool `json:"encrypted"`
+	}
+	if err = json.Unmarshal(data, &boxConf); err != nil {
+		return err
+	}
+	if boxConf.Encrypted {
+		return nil
+	}
+	pages, err := pagedPathsWithError(historyPath, 32)
+	if err != nil {
+		return err
+	}
+	combined := &parse.Tree{Box: boxID, Root: &ast.Node{Type: ast.NodeDocument}}
+	for _, paths := range pages {
+		for _, filename := range paths {
+			data, readErr := filelock.ReadFile(filename)
+			if readErr != nil {
+				return readErr
+			}
+			tree, parseErr := loadTreeByData0(data)
+			if parseErr != nil {
+				return parseErr
+			}
+			tree.Box = boxID
+			combined.Root.AppendChild(tree.Root)
+			for _, node := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
+				if _, readErr := tx.readAttributeViewForMutation(node.AttributeViewID, "", ""); readErr == nil {
+					continue
+				} else if !errors.Is(readErr, av.ErrViewNotFound) {
+					return readErr
+				}
+				if err = tx.restoreEmbeddedAttributeViewHistory(boundAttributeViewHistoryPath(historyDir, "", node.AttributeViewID), "", node.AttributeViewID); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return tx.restoreBoundAttributeViewHistory(combined, historyDir)
 }
 
 // 删除文档前备份内嵌和绑定的数据库，沿用现有历史格式与加密路径，保留同一批删除的早期快照。
@@ -194,6 +255,14 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 				}
 				if field.GetValue(value.BlockID) == nil {
 					field.Values = append(field.Values, value.Clone())
+				} else if field.Key.Type == av.KeyTypeRelation {
+					// 删除整篇文档会清理保留字段中的关联 ID，恢复条目时从历史还原关联值。
+					for i, currentValue := range field.Values {
+						if currentValue.BlockID == value.BlockID {
+							field.Values[i] = value.Clone()
+							break
+						}
+					}
 				}
 			}
 		}

@@ -7,6 +7,8 @@ import {restoreUndoFocus} from "../util/selection";
 import {ipcRenderer} from "electron";
 import {getUndoRootID, markMirror, refreshUndoButtons, requestRedo, requestUndo} from "./globalUndo";
 import {scrollCenter} from "../../util/highlightById";
+import {countBlockWord} from "../../layout/status";
+import {getBlockSelectionStatusIDs} from "../wysiwyg/blockSelection";
 
 // 撤销/重做统一契约：kernel 模式由 Undo 实现（转发 kernel），lite 模式由 LocalUndo 实现（前端操作日志）。
 export interface IUndo {
@@ -85,6 +87,7 @@ export class Undo implements IUndo {
         // 导致后续异步操作（如 F3 创建子文档）读到无效 range 而报错 https://github.com/siyuan-note/siyuan/issues/17896
         syncToolbarRange(protyle);
         scrollCenter(protyle);
+        countBlockWord(getBlockSelectionStatusIDs(protyle.wysiwyg.element), protyle, true);
     }
 
     // add 降级为：不压栈（kernel 已在 commit 后 Record），仅置位本地镜像 + 刷新按钮态。

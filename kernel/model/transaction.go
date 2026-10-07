@@ -1586,17 +1586,30 @@ func (tx *Transaction) flushDeletedAttributeViewBlocks() {
 
 func flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs map[string]map[string]struct{}) {
 	for avID, deletedBlockIDs := range deletedAttrViewBlockIDs {
-		attrView, err := av.ParseAttributeView(avID)
-		if nil != err || !removeAttributeViewBoundBlocks(attrView, deletedBlockIDs) {
+		tx := &Transaction{}
+		_, boxID := av.FindAttributeViewPath(avID)
+		attrView, err := tx.readAttributeViewForMutation(avID, "", boxID)
+		if err != nil {
+			tx.finishAttributeViewMutation(true)
 			continue
 		}
-		regenAttrViewGroups(attrView)
-		if err = av.SaveAttributeView(attrView); err != nil {
+		current, err := cloneAttributeViewForFieldMutation(attrView)
+		if err != nil || !removeAttributeViewBoundBlocks(current, deletedBlockIDs) {
+			tx.finishAttributeViewMutation(true)
+			continue
+		}
+		before, after, err := tx.prepareDeletedAttributeViewRelations(attrView, current, "", boxID)
+		if err == nil {
+			for _, view := range after {
+				regenAttrViewGroups(view)
+			}
+			err = tx.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{boxID: boxID}, before, after)
+		}
+		tx.finishAttributeViewMutation(err != nil)
+		if err != nil {
 			logging.LogErrorf("remove deleted database bindings [%s] failed: %s", avID, err)
 			continue
 		}
-		GlobalUndoLog.ClearAttributeView(avID)
-		ReloadAttrView(avID)
 	}
 }
 
@@ -1874,7 +1887,9 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	insertedNode.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
 
 	// 复制为副本时移除闪卡相关属性 https://github.com/siyuan-note/siyuan/issues/13987
-	insertedNode.RemoveIALAttr(NodeAttrRiffDecks)
+	if !tx.isReplay {
+		insertedNode.RemoveIALAttr(NodeAttrRiffDecks)
+	}
 
 	if ast.NodeAttributeView == insertedNode.Type {
 		// 插入数据库块时需要重新绑定其中已经存在的块

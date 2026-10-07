@@ -113,15 +113,16 @@ const customDialog = (protyle: IProtyle, elements: HTMLElement[], range?: Range)
 };
 
 const filterAI = (element: HTMLElement, inputElement: HTMLInputElement) => {
+    const keyword = inputElement.value.trim().toLowerCase();
     element.querySelectorAll(".b3-list-item").forEach(item => {
-        if (item.textContent.indexOf(inputElement.value) > -1) {
+        if (item.textContent.toLowerCase().indexOf(keyword) > -1) {
             item.classList.remove("fn__none");
         } else {
             item.classList.add("fn__none");
         }
     });
     element.querySelectorAll(".b3-menu__separator").forEach(item => {
-        if (inputElement.value) {
+        if (keyword) {
             item.classList.add("fn__none");
         } else {
             item.classList.remove("fn__none");

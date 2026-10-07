@@ -67,8 +67,8 @@ func additionalSettingNamespace(path string) string {
 	case "/api/system/importConf":
 		return "*"
 	case "/api/system/setAutoLaunch", "/api/system/setFollowSystemLockScreen",
-		"/api/system/setDownloadInstallPkg", "/api/system/setUpdateChannel", "/api/system/setNetworkProxy",
-		"/api/system/setAPIToken", "/api/system/setAccessAuthCode", "/api/system/setOIDC":
+		"/api/system/setDownloadInstallPkg", "/api/system/setSettingsWindow", "/api/system/setUpdateChannel",
+		"/api/system/setNetworkProxy", "/api/system/setAPIToken", "/api/system/setAccessAuthCode", "/api/system/setOIDC":
 		return "system"
 	}
 	if strings.HasPrefix(path, "/api/sync/set") {

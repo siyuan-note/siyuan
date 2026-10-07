@@ -1,77 +1,73 @@
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
+// openSetting / openBazaarReadme 按工作空间偏好决定默认打开位置：独立窗口或主窗口内对话框
 const fixture = (browser = false, mobile = false) => {
-    const storage: Record<string, unknown> = {};
-    const saved: unknown[] = [];
     const calls: unknown[][] = [];
-    const source = readFileSync("src/config/setting/windowMode.ts", "utf8");
-    const mode = {} as {getSettingsWindowMode: () => number; setSettingsWindowMode: (value: unknown) => void};
-    const compilerOptions = {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021};
-    runInNewContext(transpileModule(source, {compilerOptions}).outputText, {
-        exports: mode, window: {siyuan: {storage}}, require: () => ({
-            Constants: {LOCAL_SETTINGS_WINDOW_MODE: "mode"}, setStorageVal: (...args: unknown[]) => saved.push(args),
-        }),
-    });
-    const index = createSourceFile("index.ts", parse(readFileSync("src/config/index.ts", "utf8"),
+    const system: Record<string, unknown> = {settingsWindow: false};
+    const config = {bazaar: {trust: true}, system};
+    const index = createSourceFile("index.ts", parse(readFileSync(resolve(process.cwd(), "src/config/index.ts"), "utf8"),
         {BROWSER: browser, MOBILE: mobile}, false, true), ScriptTarget.ES2021, true);
     const declarations = index.statements.filter(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(item => ["openSetting", "openBazaarReadme"].includes(item.name.getText(index))));
     const entry = {} as {openSetting: (app: unknown, tab?: string, options?: {aiProvider?: "chatgpt"}) => void;
         openBazaarReadme: (app: unknown, type: string, name: string, from: string) => Promise<void>};
     let native = false;
-    runInNewContext(transpileModule(declarations.map(item => item.getText(index)).join("\n"), {compilerOptions}).outputText, {
-        exports: entry, ...mode, isSettingsWindow: () => native,
+    runInNewContext(transpileModule(declarations.map(item => item.getText(index)).join("\n"),
+        {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText, {
+        exports: entry, isSettingsWindow: () => native,
         isBazaarAvailable: () => true, getHostCapabilities: () => ({documentImportExport: true}),
         openNativeSettings: (...args: unknown[]) => calls.push(["native", ...args]),
         openSettingDialog: (...args: unknown[]) => calls.push(["dialog", ...args]),
         openMobileSetting: (...args: unknown[]) => calls.push(["mobile", ...args]),
         openChatGPTProvider: () => calls.push(["chatgpt"]),
-        window: {siyuan: {dialogs: [{element: {getAttribute: () => "settings"}}], config: {bazaar: {trust: true}}}},
+        window: {siyuan: {dialogs: [{element: {getAttribute: () => "settings"}}], config}},
         Constants: {DIALOG_SETTING: "settings"}, switchSettingTab: (...args: unknown[]) => calls.push(["switch", ...args]),
         fetchSyncPost: async () => ({code: 0, data: {packages: [{name: "plugin"}]}}),
         getFrontend: () => "desktop", withMountedBazaar: async () => calls.push(["readme"]),
     });
-    return {storage, saved, calls, mode, entry, setNative: () => { native = true; }};
+    return {calls, entry,
+        setPreference: (value: unknown) => { system.settingsWindow = value; },
+        setNative: () => { native = true; }};
 };
-
-test("settings mode defaults to a native window, persists valid choices and ignores invalid values", () => {
-    const f = fixture();
-    assert.equal(f.mode.getSettingsWindowMode(), 1);
-    for (const value of [null, false, "0", 2]) f.mode.setSettingsWindowMode(value);
-    assert.equal(f.saved.length, 0);
-    f.mode.setSettingsWindowMode(0);
-    assert.equal(f.mode.getSettingsWindowMode(), 0);
-    assert.equal(JSON.stringify(f.saved), JSON.stringify([["mode", 0]]));
-    f.mode.setSettingsWindowMode(1);
-    assert.equal(f.mode.getSettingsWindowMode(), 1);
-});
 
 test("settings and marketplace readmes follow the current workspace preference", async () => {
     const f = fixture();
     const app = {};
     f.entry.openSetting(app, "app");
     await f.entry.openBazaarReadme(app, "plugins", "plugin", "downloaded");
-    assert.deepEqual(f.calls.map(item => item[0]), ["native", "native"]);
+    assert.deepEqual(f.calls.map(item => item[0]), ["dialog", "dialog", "readme"]);
     f.calls.length = 0;
-    f.storage.mode = 0;
+    f.setPreference(true);
     f.entry.openSetting(app, "app");
     await f.entry.openBazaarReadme(app, "plugins", "plugin", "downloaded");
-    assert.deepEqual(f.calls.map(item => item[0]), ["dialog", "dialog", "readme"]);
+    assert.deepEqual(f.calls.map(item => item[0]), ["native", "native"]);
     f.calls.length = 0;
     f.setNative();
     f.entry.openSetting(app, "app");
     assert.deepEqual(f.calls.map(item => item[0]), ["switch"]);
 });
 
+test("only a truthy workspace preference opens the independent settings window", () => {
+    for (const [stored, expected] of [[false, "dialog"], [0, "dialog"], ["", "dialog"],
+        [true, "native"], [1, "native"]] as const) {
+        const f = fixture();
+        f.setPreference(stored);
+        f.entry.openSetting({});
+        assert.equal(f.calls[0][0], expected, `stored ${JSON.stringify(stored)}`);
+    }
+});
+
 test("browser and mobile keep their own settings UI regardless of the native preference", () => {
     for (const [browser, mobile, expected] of [[true, false, "dialog"], [true, true, "mobile"]] as const) {
         const f = fixture(browser, mobile);
+        f.setPreference(true);
         f.entry.openSetting({});
         assert.equal(f.calls[0][0], expected);
     }
@@ -79,10 +75,11 @@ test("browser and mobile keep their own settings UI regardless of the native pre
 
 test("ChatGPT navigation reaches the native settings command and dialog entry", () => {
     const f = fixture();
+    f.setPreference(true);
     f.entry.openSetting({}, "ai", {aiProvider: "chatgpt"});
     assert.equal(JSON.stringify(f.calls[0][2]), JSON.stringify({tab: "ai", aiProvider: "chatgpt"}));
     f.calls.length = 0;
-    f.storage.mode = 0;
+    f.setPreference(false);
     f.entry.openSetting({}, "ai", {aiProvider: "chatgpt"});
     assert.deepEqual(f.calls.map(item => item[0]), ["dialog", "chatgpt"]);
     const mobile = fixture(true, true);

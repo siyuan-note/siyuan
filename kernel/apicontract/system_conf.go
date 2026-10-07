@@ -135,6 +135,7 @@ type SystemSystem struct {
 	DisabledFeatures                  []string            `json:"disabledFeatures" api:"optional,nullable"`
 	MicrosoftDefenderExcluded         bool                `json:"microsoftDefenderExcluded" api:"optional,nullable"`
 	SafeMode                          bool                `json:"safeMode" api:"optional,nullable"`
+	SettingsWindow                    bool                `json:"settingsWindow" api:"optional,nullable"`
 }
 
 type SystemNetworkProxy struct {

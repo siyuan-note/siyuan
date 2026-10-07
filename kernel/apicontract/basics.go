@@ -40,6 +40,10 @@ type DownloadInstallPkgRequest struct {
 	DownloadInstallPkg bool `json:"downloadInstallPkg"`
 }
 
+type SettingsWindowRequest struct {
+	SettingsWindow bool `json:"settingsWindow"`
+}
+
 type UpdateChannelRequest struct {
 	UpdateChannel string `json:"updateChannel"`
 }

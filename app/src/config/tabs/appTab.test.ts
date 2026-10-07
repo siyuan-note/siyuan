@@ -67,7 +67,7 @@ test("settings window mode is configurable only in the Electron desktop client",
     for (const [browser, mobile] of [[false, false], [true, false], [true, true], [false, true]]) {
         const switches: string[] = [];
         getAccessibilitySlot(browser, mobile, undefined, "unused", switches);
-        assert.equal(switches.includes("settingsWindowMode"), !browser && !mobile);
+        assert.equal(switches.includes("system.settingsWindow"), !browser && !mobile);
     }
 });
 

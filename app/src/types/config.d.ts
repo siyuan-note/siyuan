@@ -2104,6 +2104,10 @@ declare namespace Config {
          */
         safeMode: boolean;
         /**
+         * Whether to open the settings UI in a separate window (desktop client only)
+         */
+        settingsWindow: boolean;
+        /**
          * The absolute path of the workspace directory
          */
         workspaceDir: string;

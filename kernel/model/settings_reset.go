@@ -17,7 +17,7 @@ import (
 
 // 仅清理内置偏好；保存的布局、插件数据、最近记录和未知键保持不变。
 var resetSettingsStorageKeys = []string{
-	"local-zoom", "local-settings-window-mode", "local-searchdata", "local-searchasset", "local-searchunref",
+	"local-zoom", "local-searchdata", "local-searchasset", "local-searchunref",
 	"local-exportpdf", "local-exportword", "local-exportimg", "local-pdftheme", "local-flashcard",
 	"local-mobile-bars", "local-mobile-bottom-bar", "local-mobile-side-panel", "local-outline",
 	"local-fileposition", "local-dialogposition",
@@ -64,6 +64,7 @@ func defaultWorkspaceSettings(current *AppConf) *AppConf {
 	if current.System != nil {
 		system := *current.System
 		system.DownloadInstallPkg = conf.NewSystem().DownloadInstallPkg
+		system.SettingsWindow = false
 		next.System = &system
 	}
 	return &next
@@ -119,6 +120,7 @@ func ResetSettings() error {
 	Conf.UILayout, Conf.Keymap = next.UILayout, next.Keymap
 	if Conf.System != nil {
 		Conf.System.DownloadInstallPkg = next.System.DownloadInstallPkg
+		Conf.System.SettingsWindow = next.System.SettingsWindow
 	}
 	return nil
 }

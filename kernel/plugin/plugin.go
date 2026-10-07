@@ -1449,7 +1449,10 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 						e.Retry = uint(retry.ToInteger())
 					}
 
-					events.In <- e
+					select {
+					case events.In <- e:
+					case <-ctx.Done():
+					}
 					return goja.Undefined()
 				}
 			}

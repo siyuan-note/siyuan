@@ -271,6 +271,7 @@ var (
 	SetFollowSystemLockScreen           = define[LockScreenRequest, Null]("setFollowSystemLockScreen", "/api/system/setFollowSystemLockScreen", JSONBody, ResponseOptions{}, "POST")
 	SetAutoLaunch                       = define[AutoLaunchRequest, Null]("setAutoLaunch", "/api/system/setAutoLaunch", JSONBody, ResponseOptions{}, "POST")
 	SetDownloadInstallPkg               = define[DownloadInstallPkgRequest, Null]("setDownloadInstallPkg", "/api/system/setDownloadInstallPkg", JSONBody, ResponseOptions{}, "POST")
+	SetSettingsWindow                   = define[SettingsWindowRequest, Null]("setSettingsWindow", "/api/system/setSettingsWindow", JSONBody, ResponseOptions{}, "POST")
 	SetNetworkServe                     = define[NetworkServeRequest, Null]("setNetworkServe", "/api/system/setNetworkServe", JSONBody, ResponseOptions{}, "POST")
 	SetNetworkServeTLS                  = define[NetworkServeTLSRequest, Null]("setNetworkServeTLS", "/api/system/setNetworkServeTLS", JSONBody, ResponseOptions{}, "POST")
 	SetUpdateChannel                    = define[UpdateChannelRequest, Null]("setUpdateChannel", "/api/system/setUpdateChannel", JSONBody, ResponseOptions{}, "POST")
@@ -894,6 +895,9 @@ var GetDocImageAssets = define[AssetDocumentRequest, []string]("getDocImageAsset
 var GetDocAssets = define[AssetDocumentAssetsRequest, []string]("getDocAssets", "/api/asset/getDocAssets", JSONBody, ResponseOptions{}, "POST")
 var SetFileAnnotation = define[SetAssetAnnotationRequest, Null]("setFileAnnotation", "/api/asset/setFileAnnotation", JSONBody, ResponseOptions{}, "POST")
 var GetFileAnnotation = define[AssetPathRequest, AssetAnnotationData]("getFileAnnotation", "/api/asset/getFileAnnotation", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 403}}, "POST")
+
+// path 为 data 相对资源路径。仅全局 assets/android-notification-texts.txt 普通文件允许显式删除，
+// 无需未引用扫描；该文件仍不参与未引用资源列表和批量清理。其余资源必须经完整扫描确认未被引用。
 var RemoveUnusedAsset = define[AssetPathRequest, AssetPathData]("removeUnusedAsset", "/api/asset/removeUnusedAsset", JSONBody, ResponseOptions{}, "POST")
 
 // 未引用资源扫描失败时返回标准错误，禁止使用不完整的引用集合清理资源。

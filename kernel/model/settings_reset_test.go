@@ -69,6 +69,7 @@ func TestSettingsResetPreservesDataAndProtectedConfiguration(t *testing.T) {
 	Conf.System.LockScreenMode = 1
 	Conf.System.EncryptedNotebookFollowSystemLock = true
 	Conf.System.DownloadInstallPkg = false
+	Conf.System.SettingsWindow = true
 	util.MarkdownSettings = util.NewMarkdown()
 	util.MarkdownSettings.InlineMath = false
 	util.UseSingleLineSave, util.LargeFileWarningSize = false, 64
@@ -104,6 +105,9 @@ func TestSettingsResetPreservesDataAndProtectedConfiguration(t *testing.T) {
 		if Conf.System.AutoLaunch2 != 2 || !Conf.System.NetworkServe || !Conf.System.NetworkServeTLS ||
 			Conf.System.NetworkProxy.Host != "proxy" || Conf.System.LockScreenMode != 1 || !Conf.System.EncryptedNotebookFollowSystemLock {
 			t.Fatal("host, networking and authentication settings changed")
+		}
+		if Conf.System.SettingsWindow {
+			t.Fatal("desktop settings window preference must be reset to its default")
 		}
 		if !reflect.DeepEqual((*Conf.Keymap)["plugin"], keymap["plugin"]) || (*Conf.Keymap)["general"] != nil {
 			t.Fatal("only built-in shortcuts should be reset")

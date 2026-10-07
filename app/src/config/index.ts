@@ -26,7 +26,6 @@ import {getHostCapabilities} from "../util/hostCapabilities";
 import {unmountWorkspaceStorage} from "./tabs/workspaceStorage";
 /// #if !MOBILE
 import {openNativeSettings} from "./setting/nativeWindow";
-import {getSettingsWindowMode} from "./setting/windowMode";
 import {isSettingsWindow} from "./setting/windowContext";
 import {fitSettingsWindowDialog} from "./setting/windowDialog";
 /// #endif
@@ -143,7 +142,8 @@ export const openSetting = (app: App, tab?: TSettingTab, options?: {aiProvider?:
     if (aiProvider === "chatgpt") { openChatGPTProvider(); }
     /// #else
     /// #if !BROWSER
-    if (!isSettingsWindow() && getSettingsWindowMode() === 1) {
+    // 是否在独立窗口中打开设置界面，仅桌面端 Electron 客户端生效
+    if (!isSettingsWindow() && window.siyuan.config.system.settingsWindow) {
         void openNativeSettings(app, aiProvider ? {tab, aiProvider} : {tab});
         return;
     }
@@ -207,7 +207,7 @@ export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemNa
     }
 
     /// #if !BROWSER && !MOBILE
-    if (!isSettingsWindow() && getSettingsWindowMode() === 1) {
+    if (!isSettingsWindow() && window.siyuan.config.system.settingsWindow) {
         await openNativeSettings(app, {tab: "bazaar", readme: {type: bazaarType, from, resource}});
         return;
     }

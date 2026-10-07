@@ -1194,10 +1194,24 @@ func ResolveDataAssetPath(assetPath string) (relativePath, absPath string, err e
 	return
 }
 
-// ResolveUnusedDataAssetPath 解析 data 相对资源路径，并确认目标当前未被引用。
+// ResolveUnusedDataAssetPath 解析可单独删除的资源路径，允许显式关闭 Android 保活通知。
 func ResolveUnusedDataAssetPath(assetPath string) (relativePath, absPath string, err error) {
 	relativePath, absPath, err = ResolveDataAssetPath(assetPath)
 	if err != nil {
+		return
+	}
+
+	if relativePath == "assets/android-notification-texts.txt" {
+		// 保活开关不参与批量清理，但可显式删除普通文件；目录和符号链接不能使用该例外。
+		info, statErr := os.Lstat(absPath)
+		if statErr != nil {
+			err = statErr
+			return
+		}
+		if info.Mode().IsRegular() {
+			return
+		}
+		err = fmt.Errorf("Android notification texts must be a regular file: %s", relativePath)
 		return
 	}
 

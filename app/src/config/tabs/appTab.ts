@@ -3,9 +3,6 @@ import {ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import type {SettingTabBuilder} from "../setting/builder";
-/// #if !BROWSER && !MOBILE
-import {getSettingsWindowMode, setSettingsWindowMode} from "../setting/windowMode";
-/// #endif
 import {runSettingsMaintenance} from "../setting/maintenance";
 import {confirmResetSettings} from "../setting/reset";
 import {Constants} from "../../constants";
@@ -194,11 +191,10 @@ const registerAppGeneralGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("general", window.siyuan.languages.configGroupGeneral);
 
     /// #if !BROWSER && !MOBILE
-    group.switch("settingsWindowMode", {
+    group.switch("system.settingsWindow", {
         title: window.siyuan.languages.settingsWindowMode,
         desc: window.siyuan.languages.settingsWindowModeTip,
-        readConfig: () => getSettingsWindowMode() === 1,
-        save: (value) => setSettingsWindowMode(value ? 1 : 0),
+        save: (value) => sendAppSetting("system.settingsWindow", value),
     });
     /// #endif
     /// #if !BROWSER

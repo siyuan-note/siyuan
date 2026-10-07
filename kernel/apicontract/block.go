@@ -13,6 +13,10 @@ type TailChildBlocksRequest struct {
 	N *float64 `json:"n" api:"optional"`
 }
 
+// CheckBlocksExistRequest 批量查询有效块 ID，忽略非字符串及不符合块 ID 格式的值，重复 ID 合并为一个结果。
+// notebook 为加密笔记本时只查询该库；省略或传入普通笔记本时查询全局库及本请求已持有租约的加密库。
+// 不存在或已锁定且无法确定归属的块返回 false；显式指定已锁定的加密笔记本返回错误。
+// 发布读者的不可访问块不返回结果，加密响应租约保持到响应发送完成。
 type CheckBlocksExistRequest struct {
 	IDs      []JSONValue `json:"ids"`
 	Notebook string      `json:"notebook" api:"optional,nullable,ignoretype"`

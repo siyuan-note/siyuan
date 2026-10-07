@@ -145,6 +145,18 @@ func TestContractBatchIndexesNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, false, true)
 }
 
+func TestContractCheckBlocksExistNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, false)
+}
+
+func TestContractCheckBlocksExistExplicitNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
+func TestContractCheckBlocksExistBatchNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, true)
+}
+
 func runNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	t.Helper()
 	if os.Getenv("SIYUAN_TEST_NOTEBOOK_RESPONSE_LEASE") == t.Name() {
@@ -239,6 +251,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.POST("/api/block/getBlockInfo", getBlockInfo)
 	engine.POST("/api/block/getBlockSiblingID", getBlockSiblingID)
 	engine.POST("/api/block/getBlocksIndexes", getBlocksIndexes)
+	engine.POST("/api/block/checkBlocksExist", checkBlocksExist)
 	engine.POST("/review/blockSwapLease", func(c *gin.Context) {
 		tx := &model.Transaction{DoOperations: []*model.Operation{{Action: "swapBlockRef"}}}
 		if err := holdBlockSwapReplayRequests(c, tx, boxIDs); err != nil {
@@ -306,6 +319,10 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		endpoint, typedQuery = "/api/block/getBlockSiblingID", true
 	case "TestContractBatchIndexesNotebookResponseLease":
 		endpoint, typedQuery = "/api/block/getBlocksIndexes", true
+	case "TestContractCheckBlocksExistNotebookResponseLease", "TestContractCheckBlocksExistExplicitNotebookResponseLease", "TestContractCheckBlocksExistBatchNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/checkBlocksExist", true
+		delete(args, "id")
+		args["ids"] = boxIDs
 	}
 	requestBody, err := json.Marshal(args)
 	if err != nil {
@@ -325,6 +342,20 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		releaseWriter.Do(func() { close(writer.proceed) })
 		<-responseDone
 		t.Fatalf("fixture did not produce plaintext: %s", body)
+	}
+	if endpoint == "/api/block/checkBlocksExist" {
+		var response struct {
+			Code int             `json:"code"`
+			Data map[string]bool `json:"data"`
+		}
+		if err := json.Unmarshal(body, &response); err != nil || response.Code != 0 {
+			t.Fatalf("existence query failed: %s, %v", body, err)
+		}
+		for _, boxID := range boxIDs {
+			if !response.Data[boxID] {
+				t.Fatalf("unlocked notebook block was not found: %s", body)
+			}
+		}
 	}
 	lockDone := make(chan string, len(boxIDs))
 	for _, boxID := range boxIDs {

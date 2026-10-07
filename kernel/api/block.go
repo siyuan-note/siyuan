@@ -344,7 +344,18 @@ var checkBlocksExist = contractHandler(apicontract.CheckBlocksExist, func(c *gin
 		return apicontract.Failure[map[string]bool](-1, err.Error())
 	}
 	ids = filterBlockIDsByPublishAccess(c, ids, boxID)
-	return apicontract.Success(treenode.ExistBlockTreesInBox(ids, boxID))
+	existing := treenode.ExistBlockTreesInBox(ids, boxID)
+	if boxID == "" {
+		// 隐式批量查询仅合并已持有响应租约的加密库，避免读取随后解锁但未取得租约的笔记本。
+		for _, leasedBoxID := range requestBoxLeases(c) {
+			for id, exists := range treenode.ExistBlockTreesInBox(ids, leasedBoxID) {
+				if exists {
+					existing[id] = true
+				}
+			}
+		}
+	}
+	return apicontract.Success(existing)
 })
 
 var getDocInfo = contractHandler(apicontract.GetDocInfo, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[*apicontract.DocInfo] {

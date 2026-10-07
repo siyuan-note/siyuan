@@ -2522,7 +2522,7 @@ func getAssetLinkDestsByNode(node *ast.Node, includeServePath bool, normalize ..
 
 func emojisInTree(tree *parse.Tree) (ret []string) {
 	if icon := tree.Root.IALAttr("icon"); "" != icon {
-		if !strings.Contains(icon, "://") && !strings.HasPrefix(icon, "api/icon/") && !util.NativeEmojiChars[icon] {
+		if !strings.Contains(icon, "://") && !strings.HasPrefix(icon, "api/icon/") && !util.IsNativeEmoji(icon) {
 			ret = append(ret, "/emojis/"+icon)
 		}
 	}

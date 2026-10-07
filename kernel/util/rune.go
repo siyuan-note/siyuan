@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"unicode"
 
 	"github.com/88250/gulu"
@@ -85,7 +86,16 @@ func RemoveInvalidRetainCtrl(text string) (ret string) {
 	return
 }
 
-var NativeEmojiChars = map[string]bool{}
+var (
+	nativeEmojiChars     = map[string]bool{}
+	nativeEmojiCharsLock sync.RWMutex
+)
+
+func IsNativeEmoji(value string) bool {
+	nativeEmojiCharsLock.RLock()
+	defer nativeEmojiCharsLock.RUnlock()
+	return nativeEmojiChars[value]
+}
 
 func InitEmojiChars() {
 	builtConfPath := filepath.Join(AppearancePath, "emojis", "conf.json")
@@ -101,12 +111,16 @@ func InitEmojiChars() {
 		return
 	}
 
+	chars := map[string]bool{}
 	for _, emoji := range conf {
 		items := emoji["items"].([]any)
 		for _, item := range items {
 			e := item.(map[string]any)
-			NativeEmojiChars[e["unicode"].(string)] = true
+			chars[e["unicode"].(string)] = true
 		}
 	}
+	nativeEmojiCharsLock.Lock()
+	nativeEmojiChars = chars
+	nativeEmojiCharsLock.Unlock()
 	return
 }

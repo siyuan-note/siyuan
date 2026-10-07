@@ -1135,7 +1135,17 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
     if (topLevel || flattenChild) {
         removedElements.push(...liItemElements);
     }
-    if (liElement.childElementCount === liItemElements.length + 1) {
+    const retainedItems = new Set(Array.from(liElement.children).filter(item =>
+        item.hasAttribute("data-node-id") && !liItemElements.includes(item)));
+    if (!window.siyuan.config.editor.listLogicalOutdent) {
+        // 传统反向缩进会将选中范围之后的列表项一起移出原列表。
+        let following = liItemElements[liItemElements.length - 1].nextElementSibling;
+        while (following && !following.classList.contains("protyle-attr")) {
+            retainedItems.delete(following);
+            following = following.nextElementSibling;
+        }
+    }
+    if (retainedItems.size === 0) {
         removedElements.push(liElement);
         if (!topLevel && !flattenChild && parentLiItemElement.childElementCount === 3) {
             removedElements.push(parentLiItemElement);

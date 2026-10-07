@@ -43,6 +43,12 @@ class TestElement {
         this.parentElement.children.splice(this.parentElement.children.indexOf(this) + 1, 0, element);
     }
 
+    before(element: TestElement) {
+        element.remove();
+        element.parentElement = this.parentElement;
+        this.parentElement.children.splice(this.parentElement.children.indexOf(this), 0, element);
+    }
+
     get previousElementSibling(): TestElement {
         return this.parentElement?.children[this.parentElement.children.indexOf(this) - 1];
     }
@@ -72,6 +78,14 @@ class TestElement {
         return this.attrs.get(name) || null;
     }
 
+    hasAttribute(name: string) {
+        return this.attrs.has(name);
+    }
+
+    setAttribute(name: string, value: string) {
+        this.attrs.set(name, value);
+    }
+
     removeAttribute(name: string) {
         this.attrs.delete(name);
     }
@@ -81,7 +95,7 @@ class TestElement {
     }
 }
 
-const fixture = (single: boolean, containerClass = "tab-item", confirmed = true) => {
+const fixture = (single: boolean, containerClass = "tab-item", confirmed = true, logical = true) => {
     const attr = () => new TestElement("protyle-attr");
     const paragraph = new TestElement("p", "empty-paragraph").append(new TestElement("editable"), attr());
     const item = new TestElement("li", "empty-item").append(new TestElement("protyle-action"), paragraph, attr());
@@ -116,7 +130,7 @@ const fixture = (single: boolean, containerClass = "tab-item", confirmed = true)
     runInNewContext(compiled, {
         exports,
         require: () => dependencies,
-        window: {siyuan: {config: {editor: {listLogicalOutdent: true}}}},
+        window: {siyuan: {config: {editor: {listLogicalOutdent: logical}}}},
         document: {createElement: (name: string) => new TestElement(name)},
     });
     const range = {
@@ -175,5 +189,27 @@ for (const single of [false, true]) {
         assert.equal(f.tabs.outerHTML, before);
         assert.equal(f.operations.length, 0);
         assert.equal(f.focused(), undefined);
+    });
+}
+
+for (const confirmed of [false, true]) {
+    test(`traditional outdent checks the disappearing list and ${confirmed ? "deletes it after confirmation" : "preserves it on cancellation"}`, async () => {
+        const f = fixture(false, "tab-item", confirmed, false);
+        const trailing = f.list.children[0];
+        f.item.after(trailing);
+        trailing.setAttribute("data-subtype", "u");
+        const nested = new TestElement("list", "nested-list").append(new TestElement("protyle-attr"));
+        nested.setAttribute("data-subtype", "u");
+        f.item.lastElementChild.before(nested);
+        const before = f.tabs.outerHTML;
+        await f.run();
+        assert.deepEqual(Array.from(f.checks[0].ids), ["empty-item", "list"]);
+        if (confirmed) {
+            assert.equal(f.list.isConnected, false);
+            assert.ok(f.operations[0].doOperations.some(op => op.action === "delete" && op.id === "list"));
+        } else {
+            assert.equal(f.tabs.outerHTML, before);
+            assert.equal(f.operations.length, 0);
+        }
     });
 }

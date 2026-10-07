@@ -8,7 +8,7 @@ import {
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {getSuperBlockCommand} from "../../block/superBlock";
-import {focusBlock, focusByRange, getSelectionPosition} from "../../protyle/util/selection";
+import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
 import {getCurrentEditor as getDocumentEditor} from "../editor";
 import {getMobileToolbarPaddingElement, getMobileToolbarProtyle, getMobileToolbarUndo} from "../../protyle/lite/mobileToolbar";
 import {LocalUndo} from "../../protyle/undo";
@@ -25,7 +25,6 @@ import {
 } from "../../protyle/util/compatibility";
 import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
 import {armKeyboardLock, callMobileAppShowKeyboard, canInput, keyboardLockUntil} from "./mobileAppUtil";
-import {isNotEditBlock} from "../../protyle/wysiwyg/getBlock";
 import {getMirror, getUndoRootID, hasUndoStateMirror, initMirror} from "../../protyle/undo/globalUndo";
 import {getMobilePluginToolbarItems} from "./pluginToolbar";
 import {escapeHtml} from "../../util/escape";
@@ -94,6 +93,8 @@ import {pauseMobileBarsScroll} from "./mobileBars";
 import {getBlockTypeSelection, openBlockTypeMenu, updateBlockTypeButton} from "../../protyle/toolbar/BlockType";
 import {TTextBlockSelection} from "../../protyle/toolbar/blockTypeCore";
 import {getMobileToolbarContextPath} from "../../config/entryVisibility/mobileToolbarContext";
+import {createKeyboardSelectionScroll} from "./keyboardSelectionScroll";
+import {getCaretOverflowDirection, getCaretScrollDelta} from "../../protyle/wysiwyg/caretScrollCore";
 
 const getCurrentEditor = () => getMobileToolbarProtyle()?.getInstance() || getDocumentEditor();
 let toolbarProtyle: IProtyle;
@@ -154,8 +155,12 @@ const ANDROID_TABLE_CELL_SELECT_ALL_TIMEOUT = 2000;
 const inlineMathSelection = createInlineMathSelection();
 
 let renderKeyboardToolbarFrame: number | undefined;
-let scrollSelectionIntoViewTimeout: number;
 let clearRenderGutterAfterScroll: () => void;
+const keyboardSelectionScroll = createKeyboardSelectionScroll({
+    delay: Constants.TIMEOUT_TRANSITION,
+    scroll: container => scrollKeyboardSelection(container),
+    onCancel: () => clearRenderGutterAfterScroll?.(),
+});
 let showUtil = false;
 let keyboardPanelTop: number | undefined;
 let keyboardPanelClosing = false;
@@ -1161,80 +1166,103 @@ export const showKeyboardToolbar = () => {
     }
 };
 
-const scrollKeyboardSelectionIntoView = () => {
+const scrollKeyboardSelectionIntoView = (force = false) => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     if (!toolbarElement || toolbarElement.classList.contains("fn__none") || showUtil) {
         return;
     }
-    clearTimeout(scrollSelectionIntoViewTimeout);
+    const editor = getCurrentEditor();
+    const selection = getSelection();
+    if (!editor || selection.rangeCount === 0 ||
+        !editor.protyle.wysiwyg.element.contains(selection.anchorNode) ||
+        !editor.protyle.wysiwyg.element.contains(selection.focusNode)) {
+        return;
+    }
+    const container = hasClosestByClassName(selection.focusNode, "protyle-content", true);
+    if (!container) {
+        return;
+    }
+    const viewport = getVisibleViewportBounds();
+    const contentRect = container.getBoundingClientRect();
+    keyboardSelectionScroll.request({
+        container,
+        anchorNode: selection.anchorNode,
+        anchorOffset: selection.anchorOffset,
+        focusNode: selection.focusNode,
+        focusOffset: selection.focusOffset,
+        viewportTop: Math.max(viewport.top, contentRect.top),
+        viewportBottom: Math.min(viewport.bottom, contentRect.bottom, toolbarElement.getBoundingClientRect().top),
+    }, force);
+};
+
+const scrollKeyboardSelection = (container: HTMLElement) => {
     clearRenderGutterAfterScroll?.();
-    scrollSelectionIntoViewTimeout = window.setTimeout(() => {
-        const editor = getCurrentEditor();
-        const selection = getSelection();
-        if (!editor || editor.protyle.toolbar.isMultiSelectMode() || selection.rangeCount === 0 ||
-            !editor.protyle.wysiwyg.element.contains(document.activeElement) ||
-            toolbarElement.classList.contains("fn__none") || showUtil) {
-            return;
-        }
-        // 视口稳定后读取当前选区，避免键盘动画期间使用已经移动的光标位置。
-        const range = selection.getRangeAt(0);
-        if (!editor.protyle.wysiwyg.element.contains(range.startContainer)) {
-            return;
-        }
-        const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
-        if (contentElement) {
-            const renderGutter = () => {
-                restoreGutterBySelection(editor.protyle);
-            };
-            let cursorTop = getSelectionPosition(contentElement, range.cloneRange()).top;
-            if (cursorTop < 0 && window.siyuan.mobile.touchRange) {
-                const rangeBlockElement = hasClosestBlock(window.siyuan.mobile.touchRange.startContainer);
-                if (rangeBlockElement) {
-                    if (isNotEditBlock(rangeBlockElement)) {
-                        focusBlock(rangeBlockElement);
-                    } else {
-                        focusByRange(window.siyuan.mobile.touchRange);
-                    }
-                    cursorTop = getSelectionPosition(contentElement, window.siyuan.mobile.touchRange).top;
-                }
-            }
-            const viewportBounds = getVisibleViewportBounds();
-            const cursorElement = range.startContainer.nodeType === Node.ELEMENT_NODE ?
-                range.startContainer as Element : range.startContainer.parentElement;
-            // 自动滚动时额外预留一行，避免输入文字被键盘工具栏遮挡。
-            const extraLineHeight = parseFloat(getComputedStyle(cursorElement).lineHeight) ||
-                window.siyuan.config.editor.fontSize * 1.625;
-            const visibleBottom = Math.min(viewportBounds.bottom, contentElement.getBoundingClientRect().bottom,
-                toolbarElement.getBoundingClientRect().top);
-            if (cursorTop + extraLineHeight < visibleBottom &&
-                cursorTop > Math.max(contentElement.getBoundingClientRect().top, viewportBounds.top)) {
-                renderGutter();
-                return;
-            }
-            const clearRenderGutter = () => {
-                contentElement.removeEventListener("scrollend", renderGutterAfterScroll);
-                contentElement.removeEventListener("touchstart", clearRenderGutter);
-                clearTimeout(renderGutterTimeout);
-                clearRenderGutterAfterScroll = undefined;
-            };
-            const renderGutterAfterScroll = () => {
-                clearRenderGutter();
-                renderGutter();
-            };
-            const renderGutterTimeout = window.setTimeout(renderGutterAfterScroll, Constants.TIMEOUT_COUNT);
-            clearRenderGutterAfterScroll = clearRenderGutter;
-            contentElement.addEventListener("scrollend", renderGutterAfterScroll, {once: true});
-            contentElement.addEventListener("touchstart", clearRenderGutter, {once: true, passive: true});
-            pauseMobileBarsScroll(Constants.TIMEOUT_COUNT);
-            contentElement.scroll({
-                top: cursorTop < 0 ?
-                    contentElement.scrollTop + visibleBottom - viewportBounds.top + extraLineHeight :
-                    contentElement.scrollTop + cursorTop - visibleBottom + extraLineHeight * 2,
-                left: contentElement.scrollLeft,
-                behavior: "smooth"
-            });
-        }
-    }, Constants.TIMEOUT_TRANSITION);
+    const toolbarElement = document.getElementById("keyboardToolbar");
+    const editor = getCurrentEditor();
+    const selection = getSelection();
+    if (!editor || !container.isConnected || !toolbarElement ||
+        editor.protyle.toolbar.isMultiSelectMode() || selection.rangeCount === 0 ||
+        !editor.protyle.wysiwyg.element.contains(document.activeElement) ||
+        toolbarElement.classList.contains("fn__none") || showUtil) {
+        return false;
+    }
+    // 视口稳定后读取当前选区，避免键盘动画期间使用已经移动的光标位置。
+    const range = selection.getRangeAt(0);
+    if (!editor.protyle.wysiwyg.element.contains(range.startContainer) ||
+        !editor.protyle.wysiwyg.element.contains(range.endContainer)) {
+        return false;
+    }
+    const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
+    if (contentElement !== container) {
+        return false;
+    }
+    const renderGutter = () => {
+        restoreGutterBySelection(editor.protyle);
+    };
+    const cursorTop = getSelectionPosition(contentElement, range.cloneRange()).top;
+    const viewportBounds = getVisibleViewportBounds();
+    const cursorElement = range.startContainer.nodeType === Node.ELEMENT_NODE ?
+        range.startContainer as Element : range.startContainer.parentElement;
+    // 自动滚动时额外预留一行，避免输入文字被键盘工具栏遮挡。
+    const extraLineHeight = parseFloat(getComputedStyle(cursorElement).lineHeight) ||
+        window.siyuan.config.editor.fontSize * 1.625;
+    const visibleBottom = Math.min(viewportBounds.bottom, contentElement.getBoundingClientRect().bottom,
+        toolbarElement.getBoundingClientRect().top);
+    const visibleTop = Math.max(contentElement.getBoundingClientRect().top, viewportBounds.top);
+    const geometry = {
+        caretTop: cursorTop,
+        caretHeight: extraLineHeight,
+        viewportTop: visibleTop,
+        viewportHeight: visibleBottom - visibleTop,
+        lineHeight: extraLineHeight,
+        surroundingLines: 1,
+    };
+    const direction = getCaretOverflowDirection(geometry);
+    if (!direction) {
+        renderGutter();
+        return false;
+    }
+    const clearRenderGutter = () => {
+        contentElement.removeEventListener("scrollend", renderGutterAfterScroll);
+        contentElement.removeEventListener("touchstart", clearRenderGutter);
+        clearTimeout(renderGutterTimeout);
+        clearRenderGutterAfterScroll = undefined;
+    };
+    const renderGutterAfterScroll = () => {
+        clearRenderGutter();
+        renderGutter();
+    };
+    const renderGutterTimeout = window.setTimeout(renderGutterAfterScroll, Constants.TIMEOUT_COUNT);
+    clearRenderGutterAfterScroll = clearRenderGutter;
+    contentElement.addEventListener("scrollend", renderGutterAfterScroll, {once: true});
+    contentElement.addEventListener("touchstart", clearRenderGutter, {once: true, passive: true});
+    pauseMobileBarsScroll(Constants.TIMEOUT_COUNT);
+    contentElement.scroll({
+        top: contentElement.scrollTop + getCaretScrollDelta(geometry, direction),
+        left: contentElement.scrollLeft,
+        behavior: "smooth"
+    });
+    return true;
 };
 
 export const hideKeyboardToolbar = (keyboardClosed = true) => {
@@ -1242,7 +1270,7 @@ export const hideKeyboardToolbar = (keyboardClosed = true) => {
         window.cancelAnimationFrame(renderKeyboardToolbarFrame);
         renderKeyboardToolbarFrame = undefined;
     }
-    clearTimeout(scrollSelectionIntoViewTimeout);
+    keyboardSelectionScroll.reset();
     clearRenderGutterAfterScroll?.();
     // 键盘退场时保留已展开的移动端菜单，菜单由用户操作或编辑器切换关闭。
     if (showUtil || keyboardPanelTop !== undefined) {
@@ -1397,6 +1425,9 @@ export const initKeyboardToolbar = () => {
     document.addEventListener("input", (event: InputEvent) => {
         if (isCommittedTextInput(event)) {
             composing = false;
+        }
+        if (getCurrentEditor()?.protyle.wysiwyg.element.contains(event.target as Node)) {
+            scrollKeyboardSelectionIntoView(true);
         }
     }, true);
     document.addEventListener("selectionchange", () => {

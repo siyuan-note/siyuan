@@ -31,7 +31,7 @@ test("a non-editable video focus hides editing controls without reporting a syst
         window: {requestAnimationFrame: (callback: () => void) => { frame = callback; return 1; }, cancelAnimationFrame() {}},
         document: {activeElement: {tagName: "VIDEO"}, getElementById: (id: string) => id === "keyboardToolbar" ? toolbar :
             {style: {transform: ""}}},
-        renderKeyboardToolbarFrame: undefined as number | undefined, scrollSelectionIntoViewTimeout: undefined as number | undefined,
+        renderKeyboardToolbarFrame: undefined as number | undefined, keyboardSelectionScroll: {reset() {}},
         clearRenderGutterAfterScroll: undefined as (() => void) | undefined, showUtil: false,
         keyboardPanelTop: undefined as number | undefined,
         pendingKeyboardFocus: undefined as {protyle: unknown, range: unknown} | undefined,

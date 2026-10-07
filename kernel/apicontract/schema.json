@@ -31235,16 +31235,6 @@
             }
           ]
         },
-        "RawSignatureAlgorithm": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "RawSubject": {
           "anyOf": [
             {
@@ -31426,7 +31416,6 @@
         "PublicKeyAlgorithm",
         "Raw",
         "RawIssuer",
-        "RawSignatureAlgorithm",
         "RawSubject",
         "RawSubjectPublicKeyInfo",
         "RawTBSCertificate",
@@ -31464,26 +31453,6 @@
         },
         "HelloRetryRequest": {
           "type": "boolean"
-        },
-        "LocalCertificate": {
-          "anyOf": [
-            {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            {
-              "type": "null"
-            }
-          ]
         },
         "NegotiatedProtocol": {
           "type": "string"
@@ -31595,7 +31564,6 @@
         "ECHAccepted",
         "HandshakeComplete",
         "HelloRetryRequest",
-        "LocalCertificate",
         "NegotiatedProtocol",
         "NegotiatedProtocolIsMutual",
         "OCSPResponse",

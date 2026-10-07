@@ -1538,6 +1538,11 @@ body.mobile-topbar--merged {
 }
 
 .b3-menu {
+  &__item {
+    min-height: 40px;
+    align-items: center;
+  }
+
   &__scrim {
     background-color: transparent;
   }

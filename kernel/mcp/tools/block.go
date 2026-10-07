@@ -33,6 +33,10 @@ var BlockTool = &Tool{
 	Description: `Block operations, including native Tabs (NodeTabs/NodeTabItem) and Mindmap (NodeMindmap/NodeMindmapItem).
 Actions: get(id), get_kramdown(id), get_children(id), tree_stat(id, by document), dom(id), insert(data, dataType, parentID?, nextID?, previousID?), append(data, dataType, parentID) / prepend(...) add a NEW child and return its ID — use after block.update when both modifying and adding, update(id, data, dataType, lockType?) replaces ONE block only (no append), delete(id), move(id, parentID, previousID?), breadcrumb(id), batch_get(ids) / batch_kramdown(ids) where ids is comma-separated.
 
+Block placement:
+- Headings (h1-h6) are leaf blocks; content shown below a heading is its following siblings, not its children. To place a block below a heading, use the heading ID (or the last block currently below it) as previousID, never as parentID.
+- A list-item must have a NodeList parent and cannot directly contain another list-item. To nest lists, create a NodeList inside the outer list-item, then add list-items to the inner list.
+
 Native container structure and operations:
 - These are native, editable blocks; do not substitute HTML widgets, Mermaid diagrams, or plugins unless requested.
 - Tabs: NodeTabs contains only NodeTabItem; each item contains at least one body block and may contain nested tabs. Use an empty paragraph for an empty body. Use attr.set for tabs-position (top/left) and tabs-active-id (an existing direct item ID).
@@ -69,10 +73,12 @@ Native Mindmap DOM (dataType=dom):
 <div data-type="NodeMindmap" data-subtype="u" class="mindmap"><div data-type="NodeMindmapItem" data-subtype="u" data-marker="-" class="mindmap-item"><div data-type="NodeParagraph" class="p"><div contenteditable="true">Root</div></div><div data-type="NodeMindmap" data-subtype="u" class="mindmap"><div data-type="NodeMindmapItem" data-subtype="u" data-marker="-" class="mindmap-item"><div data-type="NodeParagraph" class="p"><div contenteditable="true">Child</div></div></div></div></div></div>
 Every block needs an explicit data-type. New native DOM blocks may omit data-node-id; the tool generates IDs.
 
-A horizontal super-block uses {{{col with blank-line-separated child blocks and }}} on its own line; col is horizontal and row is vertical. Raw super-block DOM uses data-type="NodeSuperBlock" and data-sb-layout, never data-layout, and every child needs an explicit data-type. Markdown block references use ((blockID "anchor text")); never [[blockID]].`},
+Raw super-block DOM uses data-type="NodeSuperBlock" and data-sb-layout="row" or data-sb-layout="col", never data-layout, and every child needs an explicit data-type; otherwise content may become an HTML block.
+
+` + markdownContentSyntax},
 			"dataType":   {Type: "string", Description: "Content type: markdown or dom", Enum: []string{"markdown", "dom"}},
 			"lockType":   {Type: "boolean", Description: "Reject update when the parsed block type differs from the existing block type; defaults to true for native Tabs/Mindmap containers and items, false otherwise. Set false only for an intentional type conversion"},
-			"parentID":   {Type: "string", Description: "Parent block ID"},
+			"parentID":   {Type: "string", Description: "Parent container block ID; never a heading or another leaf block. A list-item requires a NodeList parent"},
 			"nextID":     {Type: "string", Description: "Next sibling block ID (for insert)"},
 			"previousID": {Type: "string", Description: "Previous sibling block ID (for insert)"},
 		},

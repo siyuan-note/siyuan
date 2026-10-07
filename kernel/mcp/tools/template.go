@@ -36,7 +36,7 @@ var TemplateTool = &Tool{
 			"path":      {Type: "string", Description: "Template file path as returned by search (for get, remove, render)"},
 			"id":        {Type: "string", Description: "Block ID (for render, save_as)"},
 			"name":      {Type: "string", Description: "Template name without extension (for save_as, create)"},
-			"content":   {Type: "string", Description: "Markdown content (for create)"},
+			"content":   {Type: "string", Description: "Markdown content (for create).\n\n" + markdownContentSyntax},
 			"overwrite": {Type: "boolean", Description: "Overwrite if exists (for save_as, create, default false)"},
 		},
 		Required: []string{"action"},

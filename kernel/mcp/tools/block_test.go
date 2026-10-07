@@ -34,7 +34,13 @@ func TestBlockToolDocumentsSuperBlockSyntax(t *testing.T) {
 }
 
 func TestMarkdownToBlockDOMCreatesHorizontalSuperBlock(t *testing.T) {
-	dom, err := markdownToBlockDOM("{{{col\n\nfirst paragraph\n\nsecond paragraph\n\n}}}")
+	description := BlockTool.InputSchema.Properties["data"].Description
+	start := strings.Index(description, "{{{col\n")
+	end := strings.Index(description, "\nUse {{{row")
+	if start < 0 || end <= start {
+		t.Fatal("missing super-block Markdown example")
+	}
+	dom, err := markdownToBlockDOM(description[start:end])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,6 +52,18 @@ func TestMarkdownToBlockDOMCreatesHorizontalSuperBlock(t *testing.T) {
 	}
 	if strings.Contains(dom, `data-type="NodeHTMLBlock"`) {
 		t.Fatalf("super-block children became HTML blocks: %s", dom)
+	}
+}
+
+func TestBlockToolDocumentsPlacement(t *testing.T) {
+	for _, instruction := range []string{
+		"following siblings, not its children", "as previousID, never as parentID",
+		"list-item must have a NodeList parent", "cannot directly contain another list-item",
+		"create a NodeList inside the outer list-item",
+	} {
+		if !strings.Contains(BlockTool.Description, instruction) {
+			t.Fatalf("missing block placement rule %q", instruction)
+		}
 	}
 }
 

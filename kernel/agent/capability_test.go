@@ -31,41 +31,51 @@ func TestFrontendCapabilityModelNamesAreStableAndDistinct(t *testing.T) {
 	}
 }
 
-func TestBlockCapabilityExposesSharedToolDescriptions(t *testing.T) {
+func TestContentCapabilitiesExposeSharedToolDescriptions(t *testing.T) {
 	originalConf := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()
 	kernelModel.Conf.AI = conf.NewAI()
-	id := tools.CapabilityIDForTool(tools.BlockTool)
-	kernelModel.Conf.AI.Agent.CapabilityPolicy = &conf.CapabilityPolicy{
-		Default: "deny", Overrides: map[string]string{id: "allow"},
-	}
 	t.Cleanup(func() { kernelModel.Conf = originalConf })
-	set, err := buildCapabilitySet(nil, capabilityAccessContext{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(set.definitions) != 1 || set.definitions[0].Function.Name != "block" {
-		t.Fatal("block capability was not exposed independently")
-	}
-	definition := set.definitions[0].Function
-	if definition.Description != tools.BlockTool.Description {
-		t.Fatal("agent did not receive the shared block tool description")
-	}
-	data, err := json.Marshal(definition.Parameters)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var schema tools.ToolSchema
-	if err = json.Unmarshal(data, &schema); err != nil {
-		t.Fatal(err)
-	}
-	if schema.Properties["data"].Description != tools.BlockTool.InputSchema.Properties["data"].Description {
-		t.Fatal("agent did not receive the native block creation examples")
-	}
-	kernelModel.Conf.AI.Agent.CapabilityPolicy.Overrides[id] = "deny"
-	set, err = buildCapabilitySet(nil, capabilityAccessContext{})
-	if err != nil || len(set.definitions) != 0 {
-		t.Fatalf("disabled block tool descriptions were still exposed: %v", err)
+	for _, tc := range []struct {
+		tool     *tools.Tool
+		property string
+	}{
+		{tools.BlockTool, "data"}, {tools.DocumentTool, "markdown"},
+		{tools.DailynoteTool, "data"}, {tools.TemplateTool, "content"},
+	} {
+		t.Run(tc.tool.Name, func(t *testing.T) {
+			id := tools.CapabilityIDForTool(tc.tool)
+			kernelModel.Conf.AI.Agent.CapabilityPolicy = &conf.CapabilityPolicy{
+				Default: "deny", Overrides: map[string]string{id: "allow"},
+			}
+			set, err := buildCapabilitySet(nil, capabilityAccessContext{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(set.definitions) != 1 || set.definitions[0].Function.Name != tc.tool.Name {
+				t.Fatal("content capability was not exposed independently")
+			}
+			definition := set.definitions[0].Function
+			if definition.Description != tc.tool.Description {
+				t.Fatal("agent did not receive the shared content tool description")
+			}
+			data, err := json.Marshal(definition.Parameters)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var schema tools.ToolSchema
+			if err = json.Unmarshal(data, &schema); err != nil {
+				t.Fatal(err)
+			}
+			if schema.Properties[tc.property].Description != tc.tool.InputSchema.Properties[tc.property].Description {
+				t.Fatal("agent did not receive the shared content syntax")
+			}
+			kernelModel.Conf.AI.Agent.CapabilityPolicy.Overrides[id] = "deny"
+			set, err = buildCapabilitySet(nil, capabilityAccessContext{})
+			if err != nil || len(set.definitions) != 0 {
+				t.Fatalf("disabled content tool descriptions were still exposed: %v", err)
+			}
+		})
 	}
 }
 

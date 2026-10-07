@@ -16,13 +16,14 @@ class ElementStub {
     attributes: Record<string, string> = {};
     emitted: string[] = [];
     focused = false;
+    focusOptions?: FocusOptions;
     setAttribute(name: string, value: string) { this.attributes[name] = value; }
     dispatchEvent(event: {type: string}) { this.emitted.push(event.type); }
     addEventListener(name: string, callback: (event: any) => any) { this.events[name] = callback; }
     querySelector(selector: string) { return this.elements[selector]; }
     querySelectorAll(): ElementStub[] { return []; }
     closest() { return this; }
-    focus() { this.focused = true; }
+    focus(options?: FocusOptions) { this.focused = true; this.focusOptions = options; }
 }
 
 const loadUI = () => {
@@ -35,7 +36,7 @@ const loadUI = () => {
     const cards = new ElementStub();
     root.elements["#aiDecisionCards"] = cards;
     const view = new ElementStub();
-    for (const selector of [".b3-dialog__body", "[data-type='testResult']", "[data-action='test']"]) {
+    for (const selector of [".b3-dialog__body", "[data-type='testResult']", "[data-action='test']", "[data-decision-field='endpoint']"]) {
         view.elements[selector] = new ElementStub();
     }
     const patches: any[] = [];
@@ -89,6 +90,9 @@ const loadUI = () => {
 
 test("opening and cancelling a decision card never selects or saves it", async () => {
     const ui = loadUI();
+    const endpoint = ui.view.elements["[data-decision-field='endpoint']"];
+    assert.equal(endpoint.focused, true);
+    assert.equal(endpoint.focusOptions?.preventScroll, true);
     assert.equal(ui.decision.provider, "typesafe");
     assert.equal(ui.patches.length, 0);
     await ui.click("cancel");
@@ -181,6 +185,7 @@ test("closing restores card focus only when the settings root is still connected
         ui.root.isConnected = connected;
         ui.finishRemoval();
         assert.equal(card.focused, connected);
+        if (connected) { assert.equal(card.focusOptions?.preventScroll, true); }
         assert.deepEqual(ui.root.emitted, ["siyuan-decision-profile-closed"]);
     }
 });

@@ -112,7 +112,7 @@ const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
         removeProviderView(root, view, () => {
             const host = root.closest<HTMLElement>(".config__tab-container") || root;
             if (root.isConnected && !host.querySelector(".config-ai-provider__view.config__view--show")) {
-                root.querySelector<HTMLElement>(`[data-decision-provider='${provider}']`)?.focus();
+                root.querySelector<HTMLElement>(`[data-decision-provider='${provider}']`)?.focus({preventScroll: true});
             }
             root.dispatchEvent(new CustomEvent("siyuan-decision-profile-closed", {bubbles: true}));
         });
@@ -132,7 +132,8 @@ const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
             close();
         }
     });
-    view.querySelector<HTMLInputElement>("[data-decision-field='endpoint']")?.focus();
+    // 入场动画尚未完成，禁止聚焦将设置面板滚动到视口外的详情位置。
+    view.querySelector<HTMLInputElement>("[data-decision-field='endpoint']")?.focus({preventScroll: true});
     const validate = (required: boolean) => {
         for (const input of Array.from(view.querySelectorAll<HTMLInputElement>("[data-decision-field]"))) {
             input.required = required || input.type === "number";

@@ -4,8 +4,8 @@ import {fetchPost} from "../../util/fetch";
 import {editorConfigApi} from "./editorRuntime";
 import {fileConfigApi} from "./fileRuntime";
 import type {SettingTabBuilder} from "../setting/builder";
-import {controlBoolean, controlNumber, controlSelect, controlString} from "../setting/control";
-import {genConfigItemName, genSwitchRow} from "../render/fragments";
+import {controlNumber, controlSelect, controlString} from "../setting/control";
+import {genConfigItemName} from "../render/fragments";
 import {genButtonHtml, genNumberInputHtml} from "../render/render";
 import {refreshDefaultFileTreeIcons} from "../../emoji/fileTreeIcon";
 /// #if !MOBILE
@@ -14,6 +14,18 @@ import {getAllModels} from "../../layout/getAll";
 
 const isMobileKernelContainer = () =>
     ["android", "ios", "harmony"].includes(window.siyuan.config.system.container);
+
+const bindParentDocClickSettingsVisibility = (root: HTMLElement) => {
+    const parent = root.querySelector<HTMLInputElement>(`#${CSS.escape("fileTree.parentDocClickExpand")}`);
+    const childRow = root.querySelector(`#${CSS.escape("fileTree.parentDocDoubleClickOpen")}`)?.closest(".config-item");
+    if (!parent || !childRow) {
+        return;
+    }
+    childRow.classList.add("config-filetree-click__child");
+    const updateVisibility = () => childRow.classList.toggle("fn__none", !parent.checked);
+    parent.addEventListener("change", updateVisibility);
+    updateVisibility();
+};
 
 const genNotebookSavePathHtml = (
     title: string,
@@ -52,42 +64,24 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
         }),
     });
     /// #endif
-    group.composite({
-        key: "parentDocClick",
-        keywords: [window.siyuan.languages.parentDocClickExpand, window.siyuan.languages.parentDocClickExpandTip,
-            window.siyuan.languages.parentDocDoubleClickOpen, window.siyuan.languages.parentDocDoubleClickOpenTip],
-        html: () => `<div class="b3-label config-item">
-    ${genSwitchRow("fileTree.parentDocClickExpand", window.siyuan.languages.parentDocClickExpand,
-            window.siyuan.languages.parentDocClickExpandTip, window.siyuan.config.fileTree.parentDocClickExpand, {inner: true})}
-    <div class="config-filetree-click__child">
-        ${genSwitchRow("fileTree.parentDocDoubleClickOpen", window.siyuan.languages.parentDocDoubleClickOpen,
-            window.siyuan.languages.parentDocDoubleClickOpenTip,
-            window.siyuan.config.fileTree.parentDocDoubleClickOpen !== false,
-            {inner: true, disabled: !window.siyuan.config.fileTree.parentDocClickExpand})}
-    </div>
-</div>`,
-        afterMount: (root) => {
-            const parent = root.querySelector<HTMLInputElement>(`#${CSS.escape("fileTree.parentDocClickExpand")}`);
-            const child = root.querySelector<HTMLInputElement>(`#${CSS.escape("fileTree.parentDocDoubleClickOpen")}`);
-            const updateDisabled = () => { child.disabled = !parent.checked; };
-            updateDisabled();
-            parent.addEventListener("change", updateDisabled);
-        },
-        controls: [
-            {
-                control: controlBoolean("fileTree.parentDocClickExpand"),
-                save: (value) => fileConfigApi.patch("parentDocClickExpand", value, () => {
-                    /// #if !MOBILE
-                    getAllModels().files.forEach((files) => files.updateDocActions());
-                    /// #endif
-                }),
-            },
-            {
-                control: controlBoolean("fileTree.parentDocDoubleClickOpen", {
-                    readConfig: () => window.siyuan.config.fileTree.parentDocDoubleClickOpen !== false,
-                }),
-            },
-        ],
+    const parentDocClickKeywords = [window.siyuan.languages.parentDocClickExpand, window.siyuan.languages.parentDocClickExpandTip,
+        window.siyuan.languages.parentDocDoubleClickOpen, window.siyuan.languages.parentDocDoubleClickOpenTip];
+    group.switch("fileTree.parentDocClickExpand", {
+        title: window.siyuan.languages.parentDocClickExpand,
+        desc: window.siyuan.languages.parentDocClickExpandTip,
+        keywords: parentDocClickKeywords,
+        afterMount: bindParentDocClickSettingsVisibility,
+        save: (value) => fileConfigApi.patch("parentDocClickExpand", value, () => {
+            /// #if !MOBILE
+            getAllModels().files.forEach((files) => files.updateDocActions());
+            /// #endif
+        }),
+    });
+    group.switch("fileTree.parentDocDoubleClickOpen", {
+        title: window.siyuan.languages.parentDocDoubleClickOpen,
+        desc: window.siyuan.languages.parentDocDoubleClickOpenTip,
+        keywords: parentDocClickKeywords,
+        readConfig: () => window.siyuan.config.fileTree.parentDocDoubleClickOpen !== false,
     });
     group.switch("fileTree.alwaysSelectOpenedFile", {
         title: window.siyuan.languages.selectOpen,

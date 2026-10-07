@@ -9,15 +9,14 @@ export const genConfigItemMainHtml = (title: string, desc?: string): string =>
     ${desc ? `<div class="b3-label__text">${desc}</div>` : ""}
 </div>`;
 
-const genSwitchInputHtml = (id: string, checked: boolean, disabled = false): string =>
-    `<input class="b3-switch fn__flex-center" id="${id}" type="checkbox"${checked ? " checked" : ""}${disabled ? " disabled" : ""}/>`;
+const genSwitchInputHtml = (id: string, checked: boolean): string =>
+    `<input class="b3-switch fn__flex-center" id="${id}" type="checkbox"${checked ? " checked" : ""}/>`;
 
-export const genSwitchRow = (id: string, title: string, desc: string | undefined, checked: boolean,
-                             options: {disabled?: boolean, inner?: boolean} = {}): string =>
-    `<label class="fn__flex b3-label ${options.inner ? "b3-label--inner" : "config-item"}">
+export const genSwitchRow = (id: string, title: string, desc: string | undefined, checked: boolean): string =>
+    `<label class="fn__flex b3-label config-item">
     ${genConfigItemMainHtml(title, desc)}
     <span class="fn__space"></span>
-    ${genSwitchInputHtml(id, checked, options.disabled)}
+    ${genSwitchInputHtml(id, checked)}
 </label>`;
 
 /** 列表项开关（`b3-list-item` 布局） */

@@ -81,7 +81,7 @@ class TestElement {
     }
 }
 
-const fixture = (single: boolean, containerClass = "tab-item") => {
+const fixture = (single: boolean, containerClass = "tab-item", confirmed = true) => {
     const attr = () => new TestElement("protyle-attr");
     const paragraph = new TestElement("p", "empty-paragraph").append(new TestElement("editable"), attr());
     const item = new TestElement("li", "empty-item").append(new TestElement("protyle-action"), paragraph, attr());
@@ -95,6 +95,7 @@ const fixture = (single: boolean, containerClass = "tab-item") => {
     const tabs = new TestElement("tabs", "tabs").append(container, otherTab, attr());
     new TestElement("protyle-wysiwyg").append(tabs);
     const operations: {doOperations: IOperation[], undoOperations: IOperation[]}[] = [];
+    const checks: Array<{ids: string[], exactIDs: string[], deletedIDs: string[]}> = [];
     let focused: TestElement;
     const exports: any = {};
     const dependencies = {
@@ -102,6 +103,10 @@ const fixture = (single: boolean, containerClass = "tab-item") => {
         getPreviousBlockSibling: (element: TestElement) => element.previousElementSibling,
         getEmbedChildOperationContext: (): void => undefined,
         activateTrackedRangeInsertion: (): void => undefined,
+        confirmBlockRef: async (options: {ids: string[], exactIDs: string[], deletedIDs: string[]}) => {
+            checks.push(options);
+            return confirmed;
+        },
         moveToPrevious: (): void => undefined,
         isBlockElement: (element: TestElement) => !!element.getAttribute("data-node-id"),
         transaction: (_protyle: IProtyle, doOperations: IOperation[], undoOperations: IOperation[]) =>
@@ -121,7 +126,7 @@ const fixture = (single: boolean, containerClass = "tab-item") => {
     };
     const protyle = {block: {id: "doc", parentID: "doc"}};
     return {
-        paragraph, item, list, before, content, title, container, tabs, otherTab, operations,
+        paragraph, item, list, before, content, title, container, tabs, otherTab, operations, checks,
         run: () => exports.listOutdent(protyle, [item], range),
         focused: () => focused,
     };
@@ -139,6 +144,9 @@ for (const single of [false, true]) {
         assert.equal(f.tabs.childElementCount, 3);
         assert.equal(f.focused(), f.container);
         assert.equal(f.operations.length, 1);
+        assert.deepEqual(Array.from(f.checks[0].ids), single ? ["empty-item", "list"] : ["empty-item"]);
+        assert.deepEqual(Array.from(f.checks[0].exactIDs), Array.from(f.checks[0].ids));
+        assert.deepEqual(Array.from(f.checks[0].deletedIDs), Array.from(f.checks[0].ids));
         const {doOperations, undoOperations} = f.operations[0];
         assert.equal(doOperations[0].action, "move");
         assert.equal(doOperations[0].id, "empty-paragraph");
@@ -156,5 +164,16 @@ for (const single of [false, true]) {
             assert.equal(doOperations[1].action, "update");
             assert.equal(doOperations[1].id, "list");
         }
+    });
+}
+
+for (const single of [false, true]) {
+    test(`cancelling ${single ? "single" : "partial"} list outdent preserves the editor and sends no transaction`, async () => {
+        const f = fixture(single, "tab-item", false);
+        const before = f.tabs.outerHTML;
+        await f.run();
+        assert.equal(f.tabs.outerHTML, before);
+        assert.equal(f.operations.length, 0);
+        assert.equal(f.focused(), undefined);
     });
 }

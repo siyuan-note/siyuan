@@ -128,6 +128,7 @@ const notebookSystemLock = createNotebookSystemLock({
 });
 const windowKernelTargets = new Map();
 const initializedWindowIds = new Set();
+const pendingWindowIds = new Set();
 createSettingsTaskBridge({
     ipcMain,
     getTarget: id => getWindowKernelTarget(id),
@@ -3875,7 +3876,9 @@ app.whenReady().then(() => {
             }
             const existingWindow = windowWorkspaces.get(kernelTarget.origin, workspaceID);
             if (existingWindow) {
-                showWindow(existingWindow);
+                if (!pendingWindowIds.has(existingWindow.webContents.id)) {
+                    showWindow(existingWindow);
+                }
                 return;
             }
         }
@@ -3885,7 +3888,7 @@ app.whenReady().then(() => {
         const geometry = workspaceID ? normalizeWindowGeometry(data.windowGeometry, screen) : undefined;
         const win = new BrowserWindow({
             title: "SiYuan",
-            show: true,
+            show: false,
             trafficLightPosition: {x: 8, y: 13},
             width: Math.floor(data.width || mainScreen.size.width * 0.7),
             height: Math.floor(data.height || mainScreen.size.height * 0.9),
@@ -3897,6 +3900,7 @@ app.whenReady().then(() => {
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",
             webPreferences: {
+                backgroundThrottling: false,
                 contextIsolation: false,
                 nodeIntegration: true,
                 nodeIntegrationInSubFrames: false,
@@ -3915,16 +3919,61 @@ app.whenReady().then(() => {
             windowWorkspaces.associate(win, kernelTarget.origin, workspaceID);
         }
 
-        if (geometry) {
-            if (data.windowGeometry.maximized) {
+        // 原生窗口和主题内容均完成绘制后再显示，最大化和全屏也延后到此时执行。
+        const windowId = win.webContents.id;
+        pendingWindowIds.add(windowId);
+        let painted = false;
+        let initialized = false;
+        const stopWaiting = () => {
+            clearTimeout(readyTimeout);
+            ipcMain.removeListener("siyuan-window-ready", onWindowReady);
+            pendingWindowIds.delete(windowId);
+        };
+        const revealWindow = () => {
+            if (!painted || !initialized || win.isDestroyed() || !pendingWindowIds.has(windowId)) {
+                return;
+            }
+            stopWaiting();
+            if (geometry && data.windowGeometry.maximized) {
                 win.maximize();
             }
-            if (data.windowGeometry.fullscreen) {
+            if (geometry && data.windowGeometry.fullscreen) {
                 win.setFullScreen(true);
             }
-        } else if (data.position) {
+            showWindow(win);
+            win.webContents.setBackgroundThrottling(true);
+        };
+        const onWindowReady = readyEvent => {
+            if (readyEvent.sender.id === windowId) {
+                initialized = true;
+                revealWindow();
+            }
+        };
+        ipcMain.on("siyuan-window-ready", onWindowReady);
+        win.once("ready-to-show", () => {
+            painted = true;
+            revealWindow();
+        });
+        win.webContents.on("did-finish-load", () => {
+            if (getWindowPathname(win) !== "/stage/build/app/window.html") {
+                initialized = true;
+                revealWindow();
+            }
+        });
+        // 初始化失败时显示窗口供用户处理，避免留下无法访问的隐藏窗口。
+        const readyTimeout = setTimeout(() => {
+            if (!win.isDestroyed()) {
+                writeLog("siyuan-window-ready timeout, force showing detached window");
+                painted = true;
+                initialized = true;
+                revealWindow();
+            }
+        }, 60000);
+        win.once("closed", stopWaiting);
+
+        if (!geometry && data.position) {
             win.setPosition(data.position.x, data.position.y);
-        } else {
+        } else if (!geometry) {
             win.center();
         }
         win.setAlwaysOnTop(data.alwaysOnTop, "win32" === process.platform ? "pop-up-menu" : "floating");

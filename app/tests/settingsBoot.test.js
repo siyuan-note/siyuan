@@ -103,7 +103,7 @@ const createBoot = (plugin = false, failed = "", waitForStyles = false) => {
         }},
         "./tabs": {getSettingTabDefs: () => []},
         "../search/dialog": {switchSettingTab: () => wait("assets")},
-        "./windowPaint": {waitForSettingsWindowPaint: async render => render()},
+        "../../util/windowPaint": {waitForWindowPaint: async render => render()},
         "./windowRuntime": {resolveSettingsWindowHost: () => host, createSettingsWindowRuntime: (_active, deferScripts) => {
             assert.equal(deferScripts, true);
             return {

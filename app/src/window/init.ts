@@ -5,7 +5,7 @@ import {adjustLayout, getInstanceById, JSONToCenter} from "../layout/util";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "../layout/tabUtil";
 import {initStatus} from "../layout/status";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
-import {initAssets, setInlineStyle} from "../util/assets";
+import {enqueueAppearanceUpdate, initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
 import {getSearch} from "../util/functions";
 import {initDesktopHost, initWindow} from "../boot/onGetConfig";
@@ -90,7 +90,9 @@ export const init = async (app: App) => {
     /// #endif
     appearanceConfigApi.apply(window.siyuan.config.appearance);
     initAssets();
-    setInlineStyle();
+    await enqueueAppearanceUpdate(async () => {
+        await setInlineStyle();
+    });
     renderSnippet();
     let resizeTimeout = 0;
     window.addEventListener("resize", () => {

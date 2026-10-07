@@ -39,7 +39,7 @@ import type {ISettingsCommand} from "./nativeWindow";
 import {getSettingTabDefs} from "./tabs";
 import {onWindowsMsg} from "../../window/onWindowsMsg";
 import {applyWindowState} from "../../boot/windowControls";
-import {waitForSettingsWindowPaint} from "./windowPaint";
+import {waitForWindowPaint} from "../../util/windowPaint";
 import {createSettingsWindowRuntime, resolveSettingsWindowHost, startSettingsWindow} from "./windowRuntime";
 
 let disposeSettingsWindow = () => {};
@@ -208,7 +208,7 @@ const initialize = async () => {
     if (!isActive()) return;
     applyWindowState(fullscreen ? "enter-full-screen" : "leave-full-screen");
     applyWindowState(maximized ? "maximize" : "unmaximize");
-    await waitForSettingsWindowPaint(async () => {
+    await waitForWindowPaint(async () => {
         await loadAssets(window.siyuan.config.appearance);
         if (!isActive()) return;
         await setInlineStyle();

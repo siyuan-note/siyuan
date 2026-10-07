@@ -46,6 +46,8 @@ import {emitToPlugins} from "../plugin/EventBusCore";
 import {initializeEnglishCommandTranslations} from "../command/english";
 import {loadLanguages} from "../boot/loadLanguages";
 import {installPluginStorageFetchAppId} from "../util/fetchAppId";
+import {waitForWindowPaint} from "../util/windowPaint";
+import {ipcRenderer} from "electron";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -251,11 +253,12 @@ class App {
                     window.siyuan.menus = new Menus(this);
                     fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
-                        await init(this);
+                        await waitForWindowPaint(() => init(this));
                         setTitle("", true);
                         initMessage();
                         window.siyuan.isReady = true;
                         mainWs.flushMainMessages();
+                        ipcRenderer.send("siyuan-window-ready");
                         fetchPost("/api/setting/getCloudUser", {});
                     });
                 });

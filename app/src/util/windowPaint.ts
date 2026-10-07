@@ -1,7 +1,7 @@
 const FRAME_WAIT_LIMIT = 250;
 
-// 等主题样式和设置内容绘制完成，再通知主进程显示原生窗口。
-export const waitForSettingsWindowPaint = async (render: () => Promise<void>) => {
+// 等主题样式和窗口内容绘制完成，再通知主进程显示原生窗口。
+export const waitForWindowPaint = async (render: () => Promise<void>) => {
     const initialStyles = new Set(document.head.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]'));
     const styles = new Map<HTMLLinkElement, () => void>();
     const pending: Promise<void>[] = [];

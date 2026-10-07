@@ -12,7 +12,7 @@ const fixture = () => {
     const listeners = new Map<string, () => void>();
     const styles: unknown[] = [];
     const exports = {} as typeof import("./windowPaint");
-    runInNewContext(transpileModule(readFileSync("src/config/setting/windowPaint.ts", "utf8"), {
+    runInNewContext(transpileModule(readFileSync("src/util/windowPaint.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText, {exports, document: {head: {querySelectorAll: () => styles}},
         MutationObserver: class {observe() {} disconnect() { disconnected = true; }},
@@ -35,7 +35,7 @@ const fixture = () => {
         frames.clear();
         callbacks.forEach(callback => callback());
     };
-    return {wait: exports.waitForSettingsWindowPaint, frames, timers, listeners, addStyle, nextFrame,
+    return {wait: exports.waitForWindowPaint, frames, timers, listeners, addStyle, nextFrame,
         disconnected: () => disconnected};
 };
 

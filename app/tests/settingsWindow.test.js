@@ -47,7 +47,7 @@ const rendererModules = (sources) => {
 
 const bootChild = async (sources) => {
     const {ipcRenderer} = require("electron");
-    const {waitForSettingsWindowPaint} = loadRendererModule(sources.paint, {});
+    const {waitForWindowPaint} = loadRendererModule(sources.paint, {});
     const {Dialog, genUUID, context, fit, frontend, titles} = rendererModules(sources);
     require("node:assert/strict").equal(navigator.userAgent.startsWith("SiYuan/"), false);
     require("node:assert/strict").equal(frontend.getFrontend(), "desktop", navigator.userAgent);
@@ -58,7 +58,7 @@ const bootChild = async (sources) => {
     class Plugin {openSetting() {}}
     const pluginSettings = {};
     new Function("Plugin", "exports", sources.pluginSettings)(Plugin, pluginSettings);
-    await waitForSettingsWindowPaint(async () => {
+    await waitForWindowPaint(async () => {
         const theme = document.createElement("link");
         theme.id = "pendingTheme";
         theme.rel = "stylesheet";
@@ -442,7 +442,7 @@ if (process.versions.electron && process.type === "browser") {
             "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
         for (const [key, file] of Object.entries({dialog: "dialog/index.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
-            paint: "config/setting/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts",
+            paint: "util/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts",
             mount: "config/setting/mount.ts", save: "config/setting/save.ts", fragments: "config/render/fragments.ts",
             bazaarPath: "config/bazaar/openPath.ts", tooltip: "dialog/tooltip.ts"})) {
             let source = fs.readFileSync(path.join(__dirname, "../src", file), "utf8");

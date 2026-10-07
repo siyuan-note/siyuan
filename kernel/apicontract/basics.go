@@ -40,6 +40,8 @@ type DownloadInstallPkgRequest struct {
 	DownloadInstallPkg bool `json:"downloadInstallPkg"`
 }
 
+// SettingsWindowRequest 更新工作空间的设置窗口偏好，接口要求管理员权限且禁止只读写入。
+// settingsWindow 为必填布尔值；true 仅影响桌面 Electron 客户端，保存后通知 system 配置域。
 type SettingsWindowRequest struct {
 	SettingsWindow bool `json:"settingsWindow"`
 }

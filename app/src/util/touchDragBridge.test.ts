@@ -12,7 +12,12 @@ const compiled = transpileModule(readFileSync("src/util/touchDragBridge.ts", "ut
 class TestElement {
     draggable = "false";
     events: string[] = [];
-    classList = {contains: (name: string) => this.classes.includes(name)};
+    classList = {contains: (name: string) => this.classes.includes(name), toggle: (name: string, active: boolean) => {
+        this.classes = this.classes.filter(value => value !== name);
+        if (active) {
+            this.classes.push(name);
+        }
+    }};
 
     constructor(private classes: string[] = [], public parentElement?: TestElement) {}
 

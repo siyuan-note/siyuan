@@ -16,7 +16,13 @@ const bridgeSource = compile("src/util/touchDragBridge.ts");
 class TestElement {
     private classes: Set<string>;
     classList = {contains: (name: string) => this.classes.has(name), add: (name: string) => this.classes.add(name),
-        remove: (name: string) => this.classes.delete(name)};
+        remove: (name: string) => this.classes.delete(name), toggle: (name: string, active: boolean) => {
+            if (active) {
+                this.classes.add(name);
+            } else {
+                this.classes.delete(name);
+            }
+        }};
     tagName = "DIV";
     dataset: Record<string, string> = {};
     id = "";

@@ -185,13 +185,39 @@ export const isLastPointerMouse = (): boolean => {
 
 let touchResizeHandle: HTMLElement | null = null;
 let touchResizeEdges: HTMLElement[] = [];
+let touchResizeInput = false;
+
+const setTouchResizeInput = (touch: boolean) => {
+    if (touchResizeInput === touch) {
+        return;
+    }
+    touchResizeInput = touch;
+    document.body.classList.toggle("body--touch-resize", touch);
+};
+
+const updateResizePointerInput = (event: PointerEvent) => {
+    if (["mouse", "touch", "pen"].includes(event.pointerType)) {
+        setTouchResizeInput(event.pointerType !== "mouse");
+    }
+};
 
 // 触摸起始：先判断是否命中原生 Drag API（draggable="true"），命中则走原生路径；否则判断手动 mousedown 白名单
 const handleTouchStart = (e: TouchEvent) => {
     if (e.touches.length !== 1) return;
 
-    const target = e.target as HTMLElement;
+    let target = e.target as HTMLElement;
     const touch = e.touches[0];
+    setTouchResizeInput(!isMouseInput(touch));
+    if (!isMouseInput(touch) &&
+        (target.classList.contains("b3-dialog__scrim") || target.classList.contains("b3-dialog"))) {
+        // 首次触摸启用外侧把手后重新命中，只接管当前弹窗的缩放边缘。
+        const resizeTarget = document.elementFromPoint(touch.clientX, touch.clientY)?.closest<HTMLElement>(
+            ".resize__rd, .resize__ld, .resize__rt, .resize__lt, .resize__r, .resize__l, .resize__t, .resize__d",
+        );
+        if (resizeTarget && resizeTarget.closest(".b3-dialog") === target.closest(".b3-dialog")) {
+            target = resizeTarget;
+        }
+    }
 
     // 部分 Android WebView 会在鼠标 Pointer 事件后继续合成 Touch 事件，此时沿用候选状态并切换为 Touch 驱动。
     if (dragState?.inputType === "pointer" && isMouseInput(touch)) {
@@ -1117,7 +1143,10 @@ export const initTouchDragBridge = () => {
     // 所有平台都需记录输入源，供 Touch 回调识别鼠标合成事件。
     document.addEventListener("pointerdown", (event: PointerEvent) => {
         lastPointerType = event.pointerType;
+        updateResizePointerInput(event);
     }, {capture: true, passive: true});
+    document.addEventListener("pointerover", updateResizePointerInput, {capture: true, passive: true});
+    document.addEventListener("pointermove", updateResizePointerInput, {capture: true, passive: true});
 
     let enablePointerBridge = !!isInAndroid();
     /// #if !BROWSER

@@ -174,7 +174,7 @@
   border-top-left-radius: calc(var(--b3-border-radius-b) + 6px);
 }
 
-@media (any-pointer: coarse) {
+.body--touch-resize {
   // 扩大弹窗外侧的触摸把手，避免侵占内部按钮和滚动条。
   .b3-dialog {
     .resize__r {

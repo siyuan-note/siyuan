@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261007014930"
+		"updated": "20260926163337"
 	},
 	"Children": [
 		{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170024-uta8c8r",
-				"updated": "20261007014930"
+				"updated": "20260804180000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The AI agent can do more than answer questions. It can use SiYuan's built-in tools, skills, MCP services, and plugin capabilities to search, read, and operate on the knowledge base. It works through tasks step by step and requests confirmation before changing data. The agent can create and edit native tabbed blocks and mind map blocks, add, move, or delete tabs and mind map nodes, and modify their content. For example, ask it to create study notes with several tabs or organize a topic into an editable mind map."
+					"Data": "The AI agent can do more than answer questions. It can use SiYuan's built-in tools, skills, MCP services, and plugin capabilities to search, read, and operate on the knowledge base. It works through tasks step by step and requests confirmation before changing data."
 				}
 			]
 		},

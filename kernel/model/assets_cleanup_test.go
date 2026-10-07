@@ -296,3 +296,52 @@ func TestUnusedAssetsExcludesEncryptedNotebook(t *testing.T) {
 		t.Fatalf("encrypted notebook must remain outside global cleanup: %v, %v", items, err)
 	}
 }
+
+func TestAndroidNotificationAssetDeletionPaths(t *testing.T) {
+	boxID, docPath := setupUnusedAssetWorkspace(t)
+	for _, name := range []string{"assets/android-notification-texts.txt", "assets/sub/android-notification-texts.txt", "assets/other-android-notification-texts.txt", boxID + "/assets/android-notification-texts.txt", "assets/ocr-texts.json"} {
+		p := filepath.Join(util.DataDir, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte("original"), 0644); err != nil {
+			t.Fatal(err)
+		}
+		if _, _, err := ResolveUnusedDataAssetPath(name); (err == nil) != (name == "assets/android-notification-texts.txt") {
+			t.Fatalf("unexpected deletion admission for %s: %v", name, err)
+		}
+	}
+	if err := os.WriteFile(docPath, []byte(`{"Type":"NodeDocument","Spec":"99"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := ResolveUnusedDataAssetPath("assets/android-notification-texts.txt"); err != nil {
+		t.Fatalf("explicit switch deletion must not depend on document scanning: %v", err)
+	}
+	for _, name := range []string{"../assets/android-notification-texts.txt", "/assets/android-notification-texts.txt", "assets/../../android-notification-texts.txt"} {
+		if _, _, err := ResolveUnusedDataAssetPath(name); err == nil {
+			t.Fatalf("invalid path admitted: %s", name)
+		}
+	}
+	p := filepath.Join(util.DataDir, "assets", "android-notification-texts.txt")
+	if err := os.Remove(p); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := ResolveUnusedDataAssetPath("assets/android-notification-texts.txt"); err == nil {
+		t.Fatal("missing switch admitted")
+	}
+	if err := os.Mkdir(p, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := ResolveUnusedDataAssetPath("assets/android-notification-texts.txt"); err == nil {
+		t.Fatal("directory admitted as notification switch")
+	}
+	if err := os.Remove(p); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(filepath.Join(util.DataDir, "assets", "ocr-texts.json"), p); err != nil {
+		t.Skipf("symlink unavailable: %v", err)
+	}
+	if _, _, err := ResolveUnusedDataAssetPath("assets/android-notification-texts.txt"); err == nil {
+		t.Fatal("symlink admitted as notification switch")
+	}
+}

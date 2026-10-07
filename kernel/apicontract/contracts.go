@@ -894,6 +894,9 @@ var GetDocImageAssets = define[AssetDocumentRequest, []string]("getDocImageAsset
 var GetDocAssets = define[AssetDocumentAssetsRequest, []string]("getDocAssets", "/api/asset/getDocAssets", JSONBody, ResponseOptions{}, "POST")
 var SetFileAnnotation = define[SetAssetAnnotationRequest, Null]("setFileAnnotation", "/api/asset/setFileAnnotation", JSONBody, ResponseOptions{}, "POST")
 var GetFileAnnotation = define[AssetPathRequest, AssetAnnotationData]("getFileAnnotation", "/api/asset/getFileAnnotation", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 403}}, "POST")
+
+// path 为 data 相对资源路径。仅全局 assets/android-notification-texts.txt 普通文件允许显式删除，
+// 无需未引用扫描；该文件仍不参与未引用资源列表和批量清理。其余资源必须经完整扫描确认未被引用。
 var RemoveUnusedAsset = define[AssetPathRequest, AssetPathData]("removeUnusedAsset", "/api/asset/removeUnusedAsset", JSONBody, ResponseOptions{}, "POST")
 
 // 未引用资源扫描失败时返回标准错误，禁止使用不完整的引用集合清理资源。

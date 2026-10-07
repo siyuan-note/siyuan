@@ -266,11 +266,33 @@ func compareSettingPayload[Source, Data any](t *testing.T, route string, convert
 		if err != nil {
 			t.Fatal(err)
 		}
+		// Decision 的旧字段只在响应中投影，持久化配置不重复存储凭证。
+		if ai, ok := any(source).(*conf.AI); ok && ai.Decision != nil {
+			var expected map[string]json.RawMessage
+			if err = json.Unmarshal(before, &expected); err != nil {
+				t.Fatal(err)
+			}
+			expected["decision"], err = json.Marshal(settingDecisionPayload(ai.Decision))
+			if err != nil {
+				t.Fatal(err)
+			}
+			before, err = json.Marshal(expected)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
 		after, err := json.Marshal(convert(source))
 		if err != nil {
 			t.Fatal(err)
 		}
-		if string(before) != string(after) {
+		var beforeValue, afterValue any
+		if err = json.Unmarshal(before, &beforeValue); err != nil {
+			t.Fatal(err)
+		}
+		if err = json.Unmarshal(after, &afterValue); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(beforeValue, afterValue) {
 			t.Fatalf("%s response mapping changed:\n%s\n%s", route, before, after)
 		}
 		if route == "" {

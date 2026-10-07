@@ -13,7 +13,6 @@ import {
     mountEmbeddingStatsBlock,
     mountEmbeddingTestBtn,
     mountRerankTestBtn,
-    mountDecisionTestBtn,
 } from "./aiUi";
 import {
     genProviderCardsHtml,
@@ -32,6 +31,7 @@ import {
 import {isAgentStreamingMarkdownEnabled, setAgentStreamingMarkdownEnabled} from "./agentStreamingMarkdown";
 import {openSkillManager} from "../../../ai/skills/manager";
 import {openAgentInstructions} from "./aiInstructions";
+import {genDecisionCardsHtml, mountDecisionCards} from "./aiDecisionUi";
 import {genMcpOAuthHtml, mountMcpOAuth} from "./mcpOAuthUi";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
@@ -165,31 +165,13 @@ const registerAiDecisionGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.decisionModel,
         desc: window.siyuan.languages.decisionModelTip,
     });
-    group.textBlock("ai.decision.endpoint", {
-        spellcheck: false,
-        title: window.siyuan.languages.apiEndpoint,
-        desc: window.siyuan.languages.decisionEndpointTip,
-        mode: "input-text",
-    });
-    group.textBlock("ai.decision.apiKey", {
-        spellcheck: false,
-        title: window.siyuan.languages.apiKey,
-        desc: window.siyuan.languages.apiKeyTip,
-        mode: "input-password",
-    });
-    group.textBlock("ai.decision.name", {
-        spellcheck: false,
-        title: window.siyuan.languages.apiModel,
-        desc: window.siyuan.languages.apiModelTip,
-        mode: "input-text",
-        afterMount: mountDecisionTestBtn,
-    });
-    group.number("ai.decision.timeout", {
-        title: window.siyuan.languages.apiTimeout,
-        desc: window.siyuan.languages.apiTimeoutTip,
-        min: 1,
-        max: 600,
-        unit: "s",
+    group.slot({
+        key: "decisionProviders",
+        keywords: ["TypeSafe", "OpenAI", "Decisions", window.siyuan.languages.apiKey,
+            window.siyuan.languages.apiEndpoint, window.siyuan.languages.apiModel,
+            window.siyuan.languages.apiTimeout, window.siyuan.languages.testConnection],
+        html: genDecisionCardsHtml,
+        afterMount: mountDecisionCards,
     });
 };
 

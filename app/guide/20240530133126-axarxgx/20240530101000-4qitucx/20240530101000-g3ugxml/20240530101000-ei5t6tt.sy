@@ -6,7 +6,7 @@
 		"id": "20240530101000-ei5t6tt",
 		"title": "人工知能",
 		"type": "doc",
-		"updated": "20260920123707"
+		"updated": "20261007020517"
 	},
 	"Children": [
 		{
@@ -324,7 +324,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-ejudvzu",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -339,12 +339,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920123707-x2ixv5y",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "エージェントは TypeSafe System One（Jev）を使って分類、絞り込み、評価を行えます。設定と使い方は "
+					"Data": "エージェントは TypeSafe System One（Jev）または OpenAI Decisions API（Beta）を使って分類、絞り込み、評価を行えます。設定と使い方は "
 				},
 				{
 					"Type": "NodeTextMark",

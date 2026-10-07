@@ -542,6 +542,11 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 		}
 		if nil != clonedConf.AI.Decision {
 			clonedConf.AI.Decision.APIKey = ""
+			for _, profile := range clonedConf.AI.Decision.Profiles {
+				if profile != nil {
+					profile.APIKey = ""
+				}
+			}
 		}
 		clonedConf.AI.MCP = nil
 	}

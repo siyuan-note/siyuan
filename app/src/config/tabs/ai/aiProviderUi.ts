@@ -98,20 +98,27 @@ const getProviderViews = (root: HTMLElement) => {
         element instanceof HTMLElement && element.classList.contains("config-ai-provider__view"));
 };
 
-const removeProviderView = (root: HTMLElement, view?: HTMLElement) => {
+export const removeProviderView = (root: HTMLElement, view?: HTMLElement, onRemoved?: () => void) => {
     const views = view ? [view] : getProviderViews(root);
     views.forEach((item) => {
+        let removed = false;
+        const remove = () => {
+            if (removed) { return; }
+            removed = true;
+            item.remove();
+            onRemoved?.();
+        };
         item.classList.remove("config__view--show");
         item.addEventListener("transitionend", (event) => {
             if (event.propertyName === "opacity") {
-                item.remove();
+                remove();
             }
         });
-        window.setTimeout(() => item.remove(), 300);
+        window.setTimeout(remove, 300);
     });
 };
 
-const createProviderView = (root: HTMLElement, backLabel: string, stacked = false) => {
+export const createProviderView = (root: HTMLElement, backLabel: string, stacked = false) => {
     if (!stacked) {
         removeProviderView(root);
     }

@@ -185,6 +185,13 @@ func applyAISetting(c *gin.Context, request apicontract.SetAIRequest) (ret apico
 		ret = apicontract.Failure[*apicontract.SettingAI](-1, err.Error())
 		return
 	}
+	if model.Conf.AI != nil {
+		if ai.Decision == nil {
+			ai.Decision = model.Conf.AI.Decision.Clone()
+		} else {
+			ai.Decision.MergePrevious(model.Conf.AI.Decision)
+		}
+	}
 	if ai.MCP != nil {
 		for _, server := range ai.MCP.Servers {
 			if err = mcpclient.ValidateMCPServerEnvironment(server); err != nil {

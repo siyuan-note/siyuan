@@ -6,7 +6,7 @@
 		"id": "20260920123707-taf3ttd",
 		"title": "Decision model",
 		"type": "doc",
-		"updated": "20260920123707"
+		"updated": "20261007020517"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260920122941-wpyglnt",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-y6ady6p",
-				"updated": "20260920122941"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The agent prefers TypeSafe System One (Jev) for repetitive classification, filtering and scoring with explicit criteria. For example, ask it to rate selected documents against a research question using a defined rubric. It can pass block IDs for the kernel to read the full content, reducing repeated text generation by the main model. Embedding and reranking models are not required."
+					"Data": "The agent uses the selected decision service for repetitive classification, filtering and scoring with explicit criteria. Choose TypeSafe System One (Jev) or OpenAI Decisions API (Beta). For example, ask it to rate selected documents against a research question using a defined rubric. It can pass block IDs for the kernel to read the full content, reducing repeated text generation by the main model. Embedding and reranking models are not required. Inputs remain text or blocks; this feature does not replace chat or process images."
 				}
 			]
 		},
@@ -43,7 +43,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-gv610zn",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-omz7px3",
-				"updated": "20260920122941"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -90,7 +90,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", configure the API endpoint, API key, model name and request timeout, test the connection, then enable the model. It is disabled by default; the default endpoint is https://api.typesafe.ai/v1/systemone, model jev-latest, and timeout 30 seconds. Disabling it keeps the configuration."
+					"Data": ", open a provider card to edit its API endpoint, API key, model name and request timeout. Opening a card does not change the active provider. Save keeps that provider’s settings; Save and use also selects it for new requests. Each provider retains its own settings and key when you switch. The global switch is off by default; disabling it retains both configurations. TypeSafe defaults to https://api.typesafe.ai/v1/systemone with jev-latest; OpenAI defaults to https://api.openai.com/v1/decisions with gpt-6-luna. Both default to a 30-second timeout. A chat-compatible endpoint does not necessarily support Decisions. Existing TypeSafe settings are retained after upgrading."
 				}
 			]
 		},
@@ -99,7 +99,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-nuj8zg2",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -114,12 +114,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-falzyb0",
-				"updated": "20260920122941"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The main model still understands the request, handles complex reasoning and tool selection, and prepares the final answer. Scores may fall between rubric levels, and probabilities or confidence do not guarantee correctness. Failed and unprocessed items are reported separately; completed items are retained and requests are not automatically retried."
+					"Data": "The main model still understands the request, handles complex reasoning and tool selection, and prepares the final answer. Scores may fall between rubric levels, and probabilities or confidence do not guarantee correctness. Failed and unprocessed items are reported separately; completed items are retained and requests are not automatically retried. Switching providers affects new requests; a batch already in progress keeps its original provider settings. Errors or refusals are not treated as zero scores or negative answers, and failures never silently switch to another provider."
 				}
 			]
 		},
@@ -128,7 +128,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-5yw9ara",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -143,12 +143,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-fvzl2j1",
-				"updated": "20260920122941"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Relevant content is sent to the configured decision service and charges may apply. Tool calls follow the existing capability confirmation policy. Encrypted notebooks must be unlocked; encrypted sources also require their notebook ID. The connection test uses a fixed sample and does not read your notes."
+					"Data": "Relevant text is sent to the selected decision service and charges may apply. Tool calls follow the existing capability confirmation policy. Encrypted notebooks must be unlocked; encrypted sources also require their notebook ID, and their selected content is sent in readable form. The connection test uses the complete draft settings and a fixed sample, does not read notes, and may incur charges. Testing does not save settings, change the active provider or enable the service. A successful test checks the connection and basic protocol, not answer quality."
 				}
 			]
 		},
@@ -157,7 +157,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-p6korqp",
-				"updated": "20260920122941"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -179,6 +179,16 @@
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://docs.typesafe.ai/",
 					"TextMarkTextContent": "System One API"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://developers.openai.com/api/docs/guides/decisions",
+					"TextMarkTextContent": "OpenAI Decisions API"
 				}
 			]
 		}

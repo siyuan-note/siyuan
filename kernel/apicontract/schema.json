@@ -833,6 +833,25 @@
       ],
       "additionalProperties": false
     },
+    "AIDecisionTestRequestInput": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingDecisionProfileInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
     "AIEditorAction": {
       "type": "object",
       "properties": {
@@ -42972,6 +42991,29 @@
         "name": {
           "type": "string"
         },
+        "profiles": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingDecisionProfile"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "type": "string"
+        },
         "timeout": {
           "type": "integer"
         }
@@ -42981,6 +43023,8 @@
         "enabled",
         "endpoint",
         "name",
+        "profiles",
+        "provider",
         "timeout"
       ],
       "additionalProperties": false
@@ -43028,6 +43072,36 @@
             }
           ]
         },
+        "profiles": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingDecisionProfileInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "timeout": {
           "anyOf": [
             {
@@ -43039,6 +43113,54 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "SettingDecisionProfile": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "apiKey",
+        "endpoint",
+        "name",
+        "timeout"
+      ],
+      "additionalProperties": false
+    },
+    "SettingDecisionProfileInput": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "apiKey",
+        "endpoint",
+        "name",
+        "timeout"
+      ],
       "additionalProperties": false
     },
     "SettingEditing": {
@@ -120995,9 +121117,9 @@
       "method": "POST",
       "path": "/api/ai/testDecisionModel",
       "handler": "testDecisionModel",
-      "body": "none",
+      "body": "json",
       "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
+        "$ref": "#/$defs/AIDecisionTestRequestInput"
       },
       "response": {
         "anyOf": [

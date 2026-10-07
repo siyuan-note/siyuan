@@ -1,0 +1,220 @@
+import {escapeHtmlTextAndAttr} from "../../../util/escape";
+import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../../render/fragments";
+import {confirmDialog} from "../../../dialog/confirmDialog";
+import {fetchPost} from "../../../util/fetch";
+import {aiConfigApi, AI_CONFIG_CHANGED_EVENT} from "./aiRuntime";
+import {createProviderView, removeProviderView} from "./aiProviderUi";
+
+type DecisionProvider = "typesafe" | "openai";
+const PROVIDERS: DecisionProvider[] = ["typesafe", "openai"];
+interface IDecisionField {
+    key: keyof Config.IDecisionProfile;
+    title: string;
+    desc: string;
+    type: string;
+}
+// 各供应商分别声明字段和默认值，共用控件只负责渲染，不限定其他供应商的参数。
+const PROVIDER_DETAILS: Record<DecisionProvider, {title: string; defaults: Config.IDecisionProfile; fields: IDecisionField[]}> = {
+    typesafe: {
+        title: "TypeSafe System One",
+        defaults: {endpoint: "https://api.typesafe.ai/v1/systemone", apiKey: "", name: "jev-latest", timeout: 30},
+        fields: [
+            {key: "endpoint", title: "apiEndpoint", type: "url", desc: "decisionEndpointTip"},
+            {key: "apiKey", title: "apiKey", type: "password", desc: "apiKeyTip"},
+            {key: "name", title: "apiModel", type: "text", desc: "apiModelTip"},
+            {key: "timeout", title: "apiTimeout", type: "number", desc: "apiTimeoutTip"},
+        ],
+    },
+    openai: {
+        title: "OpenAI Decisions API (Beta)",
+        defaults: {endpoint: "https://api.openai.com/v1/decisions", apiKey: "", name: "gpt-6-luna", timeout: 30},
+        fields: [
+            {key: "endpoint", title: "apiEndpoint", type: "url", desc: "decisionOpenAIEndpointTip"},
+            {key: "apiKey", title: "apiKey", type: "password", desc: "apiKeyTip"},
+            {key: "name", title: "apiModel", type: "text", desc: "apiModelTip"},
+            {key: "timeout", title: "apiTimeout", type: "number", desc: "apiTimeoutTip"},
+        ],
+    },
+};
+const title = (provider: DecisionProvider) => PROVIDER_DETAILS[provider].title;
+const escapeHTML = (value: string) => escapeHtmlTextAndAttr(value ?? "");
+
+export const getDecisionProfileDraft = (decision: Config.IDecision, provider: DecisionProvider): Config.IDecisionProfile => {
+    const profile = decision.profiles?.[provider];
+    if (profile) {
+        return {...profile};
+    }
+    const defaults = PROVIDER_DETAILS[provider].defaults;
+    if (provider === "typesafe" && !decision.profiles) {
+        return {endpoint: decision.endpoint || defaults.endpoint, apiKey: decision.apiKey || "",
+            name: decision.name || defaults.name, timeout: decision.timeout || defaults.timeout};
+    }
+    return {...defaults};
+};
+
+// 只提交编辑的供应商配置，由设置补丁接口原子合并，保留其他供应商及其他窗口的修改。
+export const getDecisionProfilePatch = (provider: DecisionProvider, profile: Config.IDecisionProfile, use: boolean) => ({
+    profiles: {[provider]: {...profile}},
+    ...(use ? {provider} : {}),
+});
+
+export const genDecisionCardsHtml = () => `<div class="b3-label config-item">
+    ${genConfigItemMainHtml(window.siyuan.languages.apiProvider, window.siyuan.languages.decisionProvidersTip)}
+    <div class="fn__hr"></div><div id="aiDecisionCards"></div>
+</div>`;
+
+const renderDecisionCards = (root: HTMLElement) => {
+    const container = root.querySelector<HTMLElement>("#aiDecisionCards");
+    if (!container) { return; }
+    const decision = window.siyuan.config.ai.decision;
+    container.innerHTML = `<div class="b3-cards b3-cards--nowrap">${PROVIDERS.map(provider => {
+        const active = (decision.provider || "typesafe") === provider;
+        return `<div class="b3-card${active ? " b3-card--current" : ""}" role="button" tabindex="0" data-decision-provider="${provider}" aria-label="${escapeHTML(title(provider))}${active ? `: ${escapeHTML(window.siyuan.languages.decisionCurrentProvider)}` : ""}">
+    <div class="b3-card__img"><span><svg class="b3-card__icon"><use xlink:href="#iconBrain"></use></svg></span></div>
+    <div class="fn__flex-1 fn__flex-column"><div class="b3-card__info b3-card__info--left fn__flex-1">
+        <div class="fn__ellipsis config-name">${title(provider)}</div>
+        <div class="b3-card__desc">${active ? window.siyuan.languages.decisionCurrentProvider : window.siyuan.languages.config}</div>
+    </div></div>
+</div>`;
+    }).join("")}</div>`;
+};
+
+const openDecisionProfile = (root: HTMLElement, provider: DecisionProvider) => {
+    const draft = getDecisionProfileDraft(window.siyuan.config.ai.decision, provider);
+    const initial = JSON.stringify(draft);
+    const view = createProviderView(root, title(provider));
+    view.setAttribute("data-decision-profile-view", provider);
+    const fields = PROVIDER_DETAILS[provider].fields;
+    view.querySelector(".b3-dialog__body").innerHTML = `<div class="b3-dialog__content" style="padding: 0">
+    <div class="config-items">${fields.map(field => {
+        const input = `<input id="aiDecisionDetail-${field.key}" class="b3-text-field${field.type === "password" ? " b3-form__icona-input" : " fn__flex-center fn__size200"}" data-decision-field="${field.key}" type="${field.type}" spellcheck="false" autocomplete="off"${field.type === "number" ? ' min="1" max="600" step="1" required' : ""} value="${escapeHTML(String(draft[field.key]))}">`;
+        return `<label class="fn__flex b3-label config-item">${genConfigItemMainHtml(window.siyuan.languages[field.title], window.siyuan.languages[field.desc])}
+        <span class="fn__space"></span>${field.type === "password" ? `<div class="b3-form__icona fn__size200">${input}<svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg></div>` : input}</label>`;
+    }).join("")}</div>
+    <div class="b3-label"><div class="b3-label__text">${window.siyuan.languages.decisionTestDraftTip}</div>
+        <div class="fn__hr"></div><button class="b3-button b3-button--outline" data-action="test">${window.siyuan.languages.testConnection}</button>
+        <div class="fn__hr"></div><div data-type="testResult" role="status" aria-live="polite"></div>
+    </div>
+</div><div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel" data-action="cancel">${window.siyuan.languages.cancel}</button><span class="fn__space"></span>
+    <button class="b3-button b3-button--outline" data-action="save">${window.siyuan.languages.save}</button><span class="fn__space"></span>
+    <button class="b3-button b3-button--text" data-action="use">${window.siyuan.languages.decisionSaveAndUse}</button>
+</div>`;
+    bindPasswordIconaToggle(view, "aiDecisionDetail-apiKey");
+    const result = view.querySelector<HTMLElement>("[data-type='testResult']");
+    const testButton = view.querySelector<HTMLButtonElement>("[data-action='test']");
+    let revision = 0;
+    let closed = false;
+    let saving = false;
+    let testing = false;
+    const leave = () => {
+        closed = true;
+        removeProviderView(root, view, () => {
+            const host = root.closest<HTMLElement>(".config__tab-container") || root;
+            if (root.isConnected && !host.querySelector(".config-ai-provider__view.config__view--show")) {
+                root.querySelector<HTMLElement>(`[data-decision-provider='${provider}']`)?.focus();
+            }
+            root.dispatchEvent(new CustomEvent("siyuan-decision-profile-closed", {bubbles: true}));
+        });
+    };
+    const close = () => {
+        if (saving) { return; }
+        if (JSON.stringify(draft) !== initial) {
+            confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.discardUnsavedChanges, leave);
+        } else { leave(); }
+    };
+    const back = view.querySelector<HTMLElement>("[data-action='back']");
+    back?.setAttribute("role", "button");
+    back?.setAttribute("tabindex", "0");
+    back?.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            close();
+        }
+    });
+    view.querySelector<HTMLInputElement>("[data-decision-field='endpoint']")?.focus();
+    const validate = (required: boolean) => {
+        for (const input of Array.from(view.querySelectorAll<HTMLInputElement>("[data-decision-field]"))) {
+            input.required = required || input.type === "number";
+            if (!input.reportValidity()) { return false; }
+        }
+        return true;
+    };
+    view.addEventListener("input", event => {
+        const input = event.target as HTMLInputElement;
+        const field = input.dataset.decisionField as keyof Config.IDecisionProfile;
+        if (!field) { return; }
+        if (field === "timeout") { draft.timeout = input.valueAsNumber; } else { draft[field] = input.value; }
+        revision++;
+        result.textContent = "";
+    });
+    view.addEventListener("click", async event => {
+        const action = (event.target as Element).closest<HTMLElement>("[data-action]")?.dataset.action;
+        if (action === "back" || action === "cancel") { close(); return; }
+        if (saving || closed) { return; }
+        if (action === "save" || action === "use") {
+            if (!validate(action === "use")) { return; }
+            saving = true;
+            revision++;
+            result.textContent = "";
+            view.querySelectorAll<HTMLInputElement | HTMLButtonElement>("input, button").forEach(element => element.disabled = true);
+            let applied = false;
+            try {
+                await aiConfigApi.patch("decision", getDecisionProfilePatch(provider, draft, action === "use"), () => {
+                    applied = true;
+                    renderDecisionCards(root);
+                    leave();
+                });
+            } finally {
+                if (!applied) { result.textContent = window.siyuan.languages.decisionSaveFailed; }
+                saving = false;
+                view.querySelectorAll<HTMLInputElement | HTMLButtonElement>("input, button").forEach(element => element.disabled = false);
+                testButton.disabled = testing;
+            }
+        } else if (action === "test" && !testing && validate(true)) {
+            testing = true;
+            testButton.disabled = true;
+            testButton.textContent = window.siyuan.languages.testConnectionTesting;
+            result.textContent = "";
+            const testedRevision = revision;
+            const current = () => !closed && view.isConnected && testedRevision === revision;
+            try {
+                await fetchPost("/api/ai/testDecisionModel", {provider, profile: {...draft}}, response => {
+                    if (!current()) { return; }
+                    result.textContent = response.data?.matched ? window.siyuan.languages.testConnectionSuccess
+                        : response.data?.msg ? window.siyuan.languages.testConnectionFailMsg.replace("${msg}", String(response.data.msg))
+                            : window.siyuan.languages.testConnectionFail;
+                }, undefined, () => {
+                    if (current()) { result.textContent = window.siyuan.languages.testConnectionFail; }
+                });
+            } catch (_error) {
+                if (current()) { result.textContent = window.siyuan.languages.testConnectionFail; }
+            } finally {
+                testing = false;
+                testButton.disabled = saving;
+                testButton.textContent = window.siyuan.languages.testConnection;
+            }
+        }
+    });
+};
+
+export const mountDecisionCards = (root: HTMLElement) => {
+    const container = root.querySelector<HTMLElement>("#aiDecisionCards");
+    if (!container) { return; }
+    renderDecisionCards(root);
+    container.addEventListener("click", event => {
+        const provider = (event.target as Element).closest<HTMLElement>("[data-decision-provider]")?.dataset.decisionProvider as DecisionProvider;
+        if (PROVIDERS.includes(provider)) { openDecisionProfile(root, provider); }
+    });
+    container.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            (event.target as HTMLElement).click();
+        }
+    });
+    const update = () => {
+        if (!container.isConnected) { window.removeEventListener(AI_CONFIG_CHANGED_EVENT, update); return; }
+        renderDecisionCards(root);
+    };
+    window.addEventListener(AI_CONFIG_CHANGED_EVENT, update);
+};

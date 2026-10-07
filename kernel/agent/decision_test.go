@@ -31,7 +31,7 @@ func TestDecisionCapabilityAvailabilityAndApproval(t *testing.T) {
 	check(false)
 	kernelModel.Conf.AI.Decision.Enabled = true
 	check(false)
-	kernelModel.Conf.AI.Decision.APIKey = "key"
+	kernelModel.Conf.AI.Decision.Profiles["typesafe"].APIKey = "key"
 	set := check(true)
 	registration := set.registration("decision")
 	if !tools.DecisionTool.AgentOnly || !needsCapabilityConfirm(registration, "evaluate", nil, false, nil) {

@@ -23,7 +23,8 @@ func TestAPIContractSystemExportSecrets(t *testing.T) {
 		model.Conf = model.NewAppConf()
 		if populated {
 			model.Conf.AI = conf.NewAI()
-			model.Conf.AI.Decision.APIKey = "export-test-decision-secret"
+			model.Conf.AI.Decision.Profiles["typesafe"].APIKey = "export-test-decision-secret"
+			model.Conf.AI.Decision.Profiles["openai"].APIKey = "export-test-openai-secret"
 			model.Conf.OIDC = conf.NewOIDC()
 			model.Conf.OIDC.ClientID = "test-client"
 			model.Conf.OIDC.ClientSecret = "export-test-oidc-secret"
@@ -65,11 +66,11 @@ func TestAPIContractSystemExportSecrets(t *testing.T) {
 			t.Fatal(err)
 		}
 		if populated {
-			if exported.AI.Decision.APIKey != "" || exported.OIDC.ClientSecret != "" ||
+			if exported.AI.Decision.APIKey != "" || exported.AI.Decision.Profiles["typesafe"].APIKey != "" || exported.AI.Decision.Profiles["openai"].APIKey != "" || exported.OIDC.ClientSecret != "" ||
 				bytes.Contains(data, []byte("export-test-")) {
 				t.Fatal("export retained secrets")
 			}
-			if exported.AI.Decision.Name != model.Conf.AI.Decision.Name || exported.OIDC.ClientID != "test-client" {
+			if exported.AI.Decision.Profiles["typesafe"].Name != model.Conf.AI.Decision.Profiles["typesafe"].Name || exported.OIDC.ClientID != "test-client" {
 				t.Fatal("export lost non-secret settings")
 			}
 		}

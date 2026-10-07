@@ -19,6 +19,7 @@ package conf
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"os"
 	"strconv"
@@ -117,21 +118,136 @@ type Embedding struct {
 	Dimensions int    `json:"dimensions"` // 输出向量维度，仅 text-embedding-3 及以上模型支持；0 表示用模型默认值（不传该参数）
 }
 
-// Decision 配置智能体使用的 TypeSafe System One 决策模型。
+// Decision 按供应商隔离凭证，平铺字段仅用于兼容旧配置输入。
 type Decision struct {
-	Enabled  bool   `json:"enabled"`
+	Enabled  bool                        `json:"enabled"`
+	Provider string                      `json:"provider"`
+	Profiles map[string]*DecisionProfile `json:"profiles"`
+	Endpoint string                      `json:"endpoint,omitempty"`
+	APIKey   string                      `json:"apiKey,omitempty"`
+	Name     string                      `json:"name,omitempty"`
+	Timeout  int                         `json:"timeout,omitempty"`
+}
+
+type DecisionProfile struct {
 	Endpoint string `json:"endpoint"`
 	APIKey   string `json:"apiKey"`
 	Name     string `json:"name"`
 	Timeout  int    `json:"timeout"`
 }
 
-func (decision *Decision) Configured() bool {
-	return decision != nil && decision.Endpoint != "" && decision.APIKey != "" && decision.Name != ""
+func (decision *Decision) ActiveOptions() (util.DecisionOptions, error) {
+	if decision == nil {
+		return util.DecisionOptions{}, fmt.Errorf("decision model not configured")
+	}
+	provider := strings.TrimSpace(decision.Provider)
+	if provider == "" {
+		provider = "typesafe"
+	}
+	if provider != "typesafe" && provider != "openai" {
+		return util.DecisionOptions{}, fmt.Errorf("unknown decision provider")
+	}
+	profile := decision.Profiles[provider]
+	if decision.Profiles == nil && provider == "typesafe" {
+		profile = &DecisionProfile{decision.Endpoint, decision.APIKey, decision.Name, decision.Timeout}
+	}
+	if profile == nil || profile.Endpoint == "" || profile.APIKey == "" || profile.Name == "" {
+		return util.DecisionOptions{}, fmt.Errorf("decision model not configured")
+	}
+	return util.DecisionOptions{Provider: provider, Endpoint: profile.Endpoint, APIKey: profile.APIKey, Model: profile.Name, Timeout: profile.Timeout}, nil
+}
+
+func (decision *Decision) Configured() bool { _, err := decision.ActiveOptions(); return err == nil }
+
+func defaultDecisionProfile(provider string) *DecisionProfile {
+	if provider == "openai" {
+		return &DecisionProfile{Endpoint: "https://api.openai.com/v1/decisions", Name: "gpt-6-luna", Timeout: 30}
+	}
+	return &DecisionProfile{Endpoint: "https://api.typesafe.ai/v1/systemone", Name: "jev-latest", Timeout: 30}
 }
 
 func defaultDecision() *Decision {
-	return &Decision{Endpoint: "https://api.typesafe.ai/v1/systemone", Name: "jev-latest", Timeout: 30}
+	return &Decision{Provider: "typesafe", Profiles: map[string]*DecisionProfile{"typesafe": defaultDecisionProfile("typesafe"), "openai": defaultDecisionProfile("openai")}}
+}
+
+func (decision *Decision) Normalize() {
+	decision.Provider = strings.TrimSpace(decision.Provider)
+	if decision.Provider == "" {
+		decision.Provider = "typesafe"
+	}
+	if decision.Profiles == nil {
+		decision.Profiles = map[string]*DecisionProfile{"typesafe": {Endpoint: decision.Endpoint, APIKey: decision.APIKey, Name: decision.Name, Timeout: decision.Timeout}}
+	}
+	for _, provider := range []string{"typesafe", "openai"} {
+		profile := decision.Profiles[provider]
+		defaults := defaultDecisionProfile(provider)
+		if profile == nil {
+			profile = defaults
+			decision.Profiles[provider] = profile
+		}
+		profile.Endpoint = strings.TrimSpace(profile.Endpoint)
+		profile.APIKey = strings.TrimSpace(profile.APIKey)
+		profile.Name = strings.TrimSpace(profile.Name)
+		if profile.Endpoint == "" {
+			profile.Endpoint = defaults.Endpoint
+		}
+		if profile.Name == "" {
+			profile.Name = defaults.Name
+		}
+		if profile.Timeout < 1 {
+			profile.Timeout = 30
+		} else if profile.Timeout > 600 {
+			profile.Timeout = 600
+		}
+	}
+	decision.Endpoint, decision.APIKey, decision.Name, decision.Timeout = "", "", "", 0
+}
+
+// MergePrevious 合并旧客户端输入或单个供应商更新，保留其他配置和活动供应商。
+func (decision *Decision) MergePrevious(previous *Decision) {
+	if previous == nil {
+		return
+	}
+	old := previous.Clone()
+	old.Normalize()
+	if decision.Profiles == nil {
+		old.Enabled = decision.Enabled
+		if decision.Provider != "" {
+			old.Provider = decision.Provider
+		}
+		if decision.Endpoint != "" || decision.APIKey != "" || decision.Name != "" || decision.Timeout != 0 {
+			old.Profiles["typesafe"] = &DecisionProfile{decision.Endpoint, decision.APIKey, decision.Name, decision.Timeout}
+		}
+		*decision = *old
+		return
+	}
+	if strings.TrimSpace(decision.Provider) == "" {
+		decision.Provider = old.Provider
+	}
+	for provider, profile := range old.Profiles {
+		if _, exists := decision.Profiles[provider]; !exists {
+			decision.Profiles[provider] = profile
+		}
+	}
+}
+
+func (decision *Decision) Clone() *Decision {
+	if decision == nil {
+		return nil
+	}
+	result := *decision
+	if decision.Profiles != nil {
+		result.Profiles = make(map[string]*DecisionProfile, len(decision.Profiles))
+		for id, profile := range decision.Profiles {
+			if profile != nil {
+				copy := *profile
+				result.Profiles[id] = &copy
+			} else {
+				result.Profiles[id] = nil
+			}
+		}
+	}
+	return &result
 }
 
 // Rerank 配置语义搜索结果的重排模型。重排在向量召回后对 query 与候选文档逐对精排，
@@ -693,20 +809,7 @@ func (ai *AI) Normalize() {
 	if ai.Decision == nil {
 		ai.Decision = defaultDecision()
 	}
-	ai.Decision.Endpoint = strings.TrimSpace(ai.Decision.Endpoint)
-	ai.Decision.APIKey = strings.TrimSpace(ai.Decision.APIKey)
-	ai.Decision.Name = strings.TrimSpace(ai.Decision.Name)
-	if ai.Decision.Endpoint == "" {
-		ai.Decision.Endpoint = defaultDecision().Endpoint
-	}
-	if ai.Decision.Name == "" {
-		ai.Decision.Name = defaultDecision().Name
-	}
-	if ai.Decision.Timeout < 1 {
-		ai.Decision.Timeout = 30
-	} else if ai.Decision.Timeout > 600 {
-		ai.Decision.Timeout = 600
-	}
+	ai.Decision.Normalize()
 	if ai.Rerank.Timeout < 1 {
 		ai.Rerank.Timeout = 30
 	}
@@ -784,13 +887,24 @@ func normalizeApprovalPolicy(policy *ApprovalPolicy) {
 }
 
 func (ai *AI) DecryptAPIKeys() {
-	if ai.Decision != nil && ai.Decision.APIKey != "" {
-		if dec := util.AESDecrypt(ai.Decision.APIKey); dec != nil {
-			if plain, err := hex.DecodeString(string(dec)); err == nil {
-				ai.Decision.APIKey = string(plain)
+	if ai.Decision != nil {
+		decrypt := func(key *string) {
+			if *key != "" {
+				if dec := util.AESDecrypt(*key); dec != nil {
+					if plain, err := hex.DecodeString(string(dec)); err == nil {
+						*key = string(plain)
+					}
+				}
+			}
+		}
+		decrypt(&ai.Decision.APIKey)
+		for _, profile := range ai.Decision.Profiles {
+			if profile != nil {
+				decrypt(&profile.APIKey)
 			}
 		}
 	}
+
 	for _, p := range ai.Providers {
 		if p == nil || p.APIKey == "" {
 			continue
@@ -824,9 +938,15 @@ func (ai *AI) DecryptAPIKeys() {
 }
 
 func (ai *AI) EncryptAPIKeys() {
-	if ai.Decision != nil && ai.Decision.APIKey != "" {
-		ai.Decision.APIKey = util.AESEncrypt(ai.Decision.APIKey)
+	if ai.Decision != nil {
+		ai.Decision.Normalize()
+		for _, profile := range ai.Decision.Profiles {
+			if profile != nil && profile.APIKey != "" {
+				profile.APIKey = util.AESEncrypt(profile.APIKey)
+			}
+		}
 	}
+
 	for _, p := range ai.Providers {
 		if p == nil || p.APIKey == "" {
 			continue

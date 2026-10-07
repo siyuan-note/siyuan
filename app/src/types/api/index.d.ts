@@ -38,6 +38,8 @@ export type AIConfirmRequestInput = { "always"?: boolean | null; "approved"?: bo
 
 export type AIDecisionTestData = { "matched": boolean; "msg"?: string; };
 
+export type AIDecisionTestRequestInput = { "profile"?: SettingDecisionProfileInput | null; "provider"?: string; };
+
 export type AIEditorAction = { "action": string; "id": string; "name": string; };
 
 export type AIEditorActionIDRequestInput = { "id": string; };
@@ -1946,9 +1948,13 @@ export type SettingCapabilityPolicyInput = { "default"?: string | null; "overrid
 
 export type SettingCloudUserRequestInput = { "cached"?: boolean; "token"?: string | null; };
 
-export type SettingDecision = { "apiKey": string; "enabled": boolean; "endpoint": string; "name": string; "timeout": number; };
+export type SettingDecision = { "apiKey": string; "enabled": boolean; "endpoint": string; "name": string; "profiles": Record<string, SettingDecisionProfile | null> | null; "provider": string; "timeout": number; };
 
-export type SettingDecisionInput = { "apiKey"?: string | null; "enabled"?: boolean | null; "endpoint"?: string | null; "name"?: string | null; "timeout"?: number | null; };
+export type SettingDecisionInput = { "apiKey"?: string | null; "enabled"?: boolean | null; "endpoint"?: string | null; "name"?: string | null; "profiles"?: Record<string, SettingDecisionProfileInput | null> | null; "provider"?: string | null; "timeout"?: number | null; };
+
+export type SettingDecisionProfile = { "apiKey": string; "endpoint": string; "name": string; "timeout": number; };
+
+export type SettingDecisionProfileInput = { "apiKey": string; "endpoint": string; "name": string; "timeout": number; };
 
 export type SettingEditing = { "maxCompletionTokens": number; "maxHistoryMessages": number; "modelId": string; "temperature": number; };
 
@@ -2866,9 +2872,9 @@ export interface APIPOSTRoutes {
         body: "none";
     };
     "/api/ai/testDecisionModel": {
-        request: EmptyRequestInput;
+        request: AIDecisionTestRequestInput;
         response: { "code": 0; "data": AIDecisionTestData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
-        body: "none";
+        body: "json";
     };
     "/api/ai/testEmbeddingModel": {
         request: EmptyRequestInput;

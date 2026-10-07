@@ -129,8 +129,22 @@ func settingDecisionPayload(value *conf.Decision) *apicontract.SettingDecision {
 	if value == nil {
 		return nil
 	}
-	return &apicontract.SettingDecision{Enabled: value.Enabled, Endpoint: value.Endpoint,
-		APIKey: value.APIKey, Name: value.Name, Timeout: value.Timeout}
+	result := &apicontract.SettingDecision{Enabled: value.Enabled, Provider: value.Provider, Endpoint: value.Endpoint, APIKey: value.APIKey, Name: value.Name, Timeout: value.Timeout}
+	if value.Profiles != nil {
+		result.Profiles = map[string]*apicontract.SettingDecisionProfile{}
+	}
+	for provider, profile := range value.Profiles {
+		if profile == nil {
+			result.Profiles[provider] = nil
+		} else {
+			result.Profiles[provider] = &apicontract.SettingDecisionProfile{Endpoint: profile.Endpoint, APIKey: profile.APIKey, Name: profile.Name, Timeout: profile.Timeout}
+		}
+	}
+	// 旧客户端兼容字段固定投影 TypeSafe，不能投影当前供应商的凭证。
+	if profile := value.Profiles["typesafe"]; profile != nil {
+		result.Endpoint, result.APIKey, result.Name, result.Timeout = profile.Endpoint, profile.APIKey, profile.Name, profile.Timeout
+	}
+	return result
 }
 
 func settingAgentPayload(value *conf.Agent) *apicontract.SettingAgent {

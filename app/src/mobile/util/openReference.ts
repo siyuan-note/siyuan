@@ -123,6 +123,7 @@ export const openMobileReference = async (protyle: IProtyle, blockId: string) =>
             content: '<div class="mobile-reference-editor fn__flex-1"></div>',
             width: "100vw",
             height: "60%",
+            hideCloseIcon: true,
             containerClassName: "mobile-reference-sheet",
             destroyCallback: () => {
                 disposeSheet();

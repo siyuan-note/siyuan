@@ -250,6 +250,7 @@ test("reference editors load whole blocks or ordinary documents and preserve rea
         for (const blockId of ["target-block", "target-root"]) {
             const fixture = setup(readonly);
             await fixture.open(blockId);
+            assert.equal(fixture.dialogs[0].options.hideCloseIcon, true);
             const editor = fixture.editors[0];
             assert.deepEqual(Array.from(editor.options.action), [blockId === "target-root" ? "context" : "all"]);
             assert.equal(editor.options.render.title, blockId === "target-root");

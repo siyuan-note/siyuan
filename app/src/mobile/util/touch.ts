@@ -81,6 +81,24 @@ const clearLongPress = () => {
     }
 };
 
+const blurEditorForSidebar = () => {
+    const editor = getCurrentEditor();
+    const selection = window.getSelection();
+    if (editor && selection?.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        if (editor.protyle.wysiwyg.element.contains(range.startContainer) &&
+            editor.protyle.wysiwyg.element.contains(range.endContainer)) {
+            // 保存正文编辑位置，清除原生光标，避免侧栏覆盖编辑器后光标仍显示在覆盖层上。
+            window.siyuan.mobile.touchRange = range.cloneRange();
+            selection.removeAllRanges();
+        }
+    }
+    if (editor?.protyle.wysiwyg.element.contains(document.activeElement)) {
+        (document.activeElement as HTMLElement).blur();
+    }
+    activeBlur(true);
+};
+
 const clearInvisibleEditorSelection = () => {
     const editor = getCurrentEditor();
     const selection = window.getSelection();
@@ -648,6 +666,7 @@ export const handleTouchMove = (event: TouchEvent) => {
                 scrollBlock = true;
                 return;
             }
+            blurEditorForSidebar();
             sideMaskElement.style.zIndex = (++window.siyuan.zIndex).toString();
             showPanelMask();
             const activeSidebar = getTargetSidebar(target) || openingSidebar;
@@ -655,6 +674,8 @@ export const handleTouchMove = (event: TouchEvent) => {
             getSidebarElement(activeSidebar).style.zIndex = (++window.siyuan.zIndex).toString();
             isFirstMove = false;
         }
+        // 侧栏接管横向手势后禁止浏览器沿触摸位置重新放置光标。
+        event.preventDefault();
         const windowWidth = window.innerWidth;
         const targetSidebar = getTargetSidebar(target);
         if (targetSidebar) {
@@ -668,7 +689,6 @@ export const handleTouchMove = (event: TouchEvent) => {
         getSidebarElement(otherSidebar)?.style.removeProperty("transform");
         const offset = getSidebarOpeningOffset(openingSidebar, xDiff, windowWidth);
         getSidebarElement(openingSidebar).style.transform = `translateX(${offset}px)`;
-        activeBlur();
         if (window.siyuan.mobile.editor) {
             window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "hidden";
         }

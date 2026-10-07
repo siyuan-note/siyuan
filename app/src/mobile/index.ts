@@ -263,7 +263,7 @@ class App {
                 });
             });
             document.addEventListener("touchstart", handleTouchStart, false);
-            document.addEventListener("touchmove", handleTouchMove, false);
+            document.addEventListener("touchmove", handleTouchMove, {passive: false});
             document.addEventListener("touchend", handleTouchEnd, false);
             document.addEventListener("touchcancel", handleTouchCancel, false);
             document.addEventListener("contextmenu", handleTouchContextMenu, true);

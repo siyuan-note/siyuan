@@ -70,6 +70,7 @@ test("sidebar cycling follows visible tab order and dispatches plugin activation
 
 const createTouchHarness = (side: "left" | "right", options: {
     scrollable?: boolean, disabled?: boolean, closed?: boolean,
+    editorSelection?: "editor" | "outside",
 } = {}) => {
     const actions: string[] = [];
     const panel = {
@@ -86,6 +87,20 @@ const createTouchHarness = (side: "left" | "right", options: {
         scrollWidth: options.scrollable ? 600 : 300, clientWidth: 300, scrollLeft: 100,
     };
     let now = 1000;
+    let blurred = 0;
+    let forcedBlur = false;
+    const editorNode = {};
+    const outsideNode = {};
+    const activeElement = {blur: () => blurred++};
+    const range = {collapsed: true, startContainer: options.editorSelection === "editor" ? editorNode : outsideNode,
+        endContainer: options.editorSelection === "editor" ? editorNode : outsideNode,
+        cloneRange() { return {...this}; }};
+    const selection = {rangeCount: options.editorSelection ? 1 : 0, getRangeAt: () => range,
+        removeAllRanges() { this.rangeCount = 0; }};
+    const mobile: {touchRange?: typeof range} = {};
+    const editor = {protyle: {wysiwyg: {element: {contains: (node: unknown) =>
+        node === editorNode || node === activeElement}}, disabled: false, options: {render: {gutter: false}},
+        toolbar: {isMultiSelectMode: () => false}}};
     const modules: Record<string, unknown> = {
         "./sidebar": {
             getSidebarElement: () => panel,
@@ -108,30 +123,39 @@ const createTouchHarness = (side: "left" | "right", options: {
             hasClosestBlock: (): undefined => undefined,
         },
         "./closePanel": {closePanel: () => actions.push("close"), showPanelMask: () => {}},
-        "./keyboardToolbar": {activeBlur: () => {}, resetAndroidBoundedSelectionGesture: () => {}},
+        "./keyboardToolbar": {activeBlur: (force: boolean) => { forcedBlur = force; }, resetAndroidBoundedSelectionGesture: () => {}},
         "../../protyle/util/compatibility": {isInHarmony: () => false, isInAndroid: () => false, isIPhone: () => false},
-        "../editor": {getCurrentEditor: (): undefined => undefined},
+        "../editor": {getCurrentEditor: () => options.editorSelection ? editor : undefined},
+        "./touchSelection": {hasVisibleSelectionText: () => false},
+        "../../protyle/util/inlineElementMarker": {stripSemanticMarkersFromRangeText: () => ""},
         "../../constants": {Constants: {SIZE_DRAG_THRESHOLD: 5, TIMEOUT_LONGPRESS: 500, TIMEOUT_MULTIPLE_SELECT: 500}},
     };
     const touch = loadModule("touch", {
         require: (name: string) => modules[name] || {},
         document: {
+            activeElement,
             querySelector: (selector: string) => selector === ".side-mask" ? mask : {classList: classList("fn__none")},
             getElementById: (): null => null,
         },
-        window: {innerWidth: 360, siyuan: {mobile: {}, zIndex: 0}, getSelection: () => ({rangeCount: 0})},
-        getSelection: () => ({rangeCount: 0}),
+        window: {innerWidth: 360, innerHeight: 800, siyuan: {mobile, zIndex: 0}, getSelection: () => selection},
+        getSelection: () => selection,
         getComputedStyle: () => ({overflowX: options.scrollable ? "auto" : "visible"}),
         Date: {now: () => now},
     });
     const event = (x: number, y = 200, count = 1) => ({
         target, touches: Array.from({length: count}, () => ({target, clientX: x, clientY: y})),
         changedTouches: [{target, clientX: x, clientY: y}],
+        defaultPrevented: false,
+        preventDefault() { this.defaultPrevented = true; },
     });
     return {
-        actions, panel, target,
+        actions, panel, target, selection, mobile, range, blurred: () => blurred, forcedBlur: () => forcedBlur,
         start: (x = 180, y = 200) => touch.handleTouchStart(event(x, y)),
-        move: (x: number, y = 200, count = 1) => touch.handleTouchMove(event(x, y, count)),
+        move: (x: number, y = 200, count = 1) => {
+            const moveEvent = event(x, y, count);
+            touch.handleTouchMove(moveEvent);
+            return moveEvent;
+        },
         end: (x: number, y = 200) => { now += 100; touch.handleTouchEnd(event(x, y)); },
         handledMove: (x: number) => touch.handleTouchMove({...event(x), defaultPrevented: true}),
         handledEnd: (x: number) => touch.handleTouchEnd({...event(x), defaultPrevented: true}),
@@ -142,6 +166,37 @@ const createTouchHarness = (side: "left" | "right", options: {
 for (const side of ["left", "right"] as const) {
     const nextX = side === "left" ? 240 : 120;
     const closeX = side === "left" ? 120 : 240;
+    test(`${side} sidebar clears the native editor caret at gesture takeover and saves its position`, () => {
+        const harness = createTouchHarness(side, {closed: true, editorSelection: "editor"});
+        harness.start();
+        assert.equal(harness.move(185).defaultPrevented, false);
+        assert.equal(harness.selection.rangeCount, 1);
+        assert.equal(harness.move(nextX).defaultPrevented, true);
+        assert.equal(harness.selection.rangeCount, 0);
+        assert.equal(harness.blurred(), 1);
+        assert.equal(harness.forcedBlur(), true);
+        assert.deepEqual(harness.mobile.touchRange, harness.range);
+        assert.notEqual(harness.mobile.touchRange, harness.range);
+        harness.move(nextX);
+        assert.equal(harness.blurred(), 1);
+        harness.end(nextX);
+        assert.deepEqual(harness.actions, [`open:${side}`]);
+        assert.equal(harness.selection.rangeCount, 0);
+    });
+
+    test(`${side} sidebar preserves unrelated selections and ordinary vertical gestures`, () => {
+        const outside = createTouchHarness(side, {closed: true, editorSelection: "outside"});
+        outside.start();
+        outside.move(nextX);
+        assert.equal(outside.selection.rangeCount, 1);
+        assert.equal(outside.mobile.touchRange, undefined);
+        const vertical = createTouchHarness(side, {closed: true, editorSelection: "editor"});
+        vertical.start();
+        assert.equal(vertical.move(185, 240).defaultPrevented, false);
+        assert.equal(vertical.selection.rangeCount, 1);
+        assert.equal(vertical.blurred(), 0);
+    });
+
     test(`${side} sidebar does not reuse a gesture consumed by editor block selection`, () => {
         const harness = createTouchHarness(side, {closed: true});
         harness.start();

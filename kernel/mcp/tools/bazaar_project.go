@@ -103,10 +103,6 @@ func bazaarPluginProjectAction(ctx context.Context, action string, args map[stri
 		} else {
 			payload["installedRevisionError"] = revisionErr.Error()
 		}
-		backups, backupErr := model.ListLocalBazaarInstallBackups(grant.PackageName)
-		if backupErr == nil && len(backups) > 0 {
-			payload["codeBackups"] = backups
-		}
 	}
 	return bazaarProjectJSON(payload)
 }

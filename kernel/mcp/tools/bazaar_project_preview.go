@@ -13,7 +13,7 @@ import (
 // PluginDevelopmentInstallPreview 供宿主在原生工具确认前展示真实包身份及运行风险，不授予安装权限。
 func PluginDevelopmentInstallPreview(ctx context.Context, args map[string]any) (map[string]any, error) {
 	action, _ := args["action"].(string)
-	if action != "install_local" && action != "restore_install" {
+	if action != "install_local" {
 		return nil, nil
 	}
 	if err := ctx.Err(); err != nil {
@@ -22,30 +22,7 @@ func PluginDevelopmentInstallPreview(ctx context.Context, args map[string]any) (
 	expectedHash, _ := args["expectedPackageHash"].(string)
 	expectedInstalled, _ := args["expectedInstalledRevision"].(string)
 	frontend, _ := args["frontend"].(string)
-	payload := map[string]any{"action": action, "frontend": frontend, "runtimeWarning": "Replacing or restoring plugin code may execute or reload code, or encounter code that is still running, regardless of the current enabled setting. Disabling changes configuration and sends a notification; it does not acknowledge runtime unload.", "expectedInstalledRevision": expectedInstalled}
-	if action == "restore_install" {
-		backupID, _ := args["backupId"].(string)
-		if backupID == "" || expectedHash == "" || expectedInstalled == "" {
-			return nil, errors.New("backupId, expectedPackageHash and expectedInstalledRevision are required for rollback confirmation")
-		}
-		backup, err := model.GetLocalBazaarInstallBackup(backupID)
-		if err != nil {
-			return nil, err
-		}
-		if backup.PackageHash != expectedHash {
-			return nil, errors.New("revision_conflict: backup hash changed")
-		}
-		preview, err := model.PreviewLocalBazaarRestore(backupID, expectedHash)
-		if err != nil {
-			return nil, err
-		}
-		if preview.InstalledRevision != expectedInstalled {
-			return nil, errors.New("revision_conflict: installed package changed before confirmation")
-		}
-		payload["backup"], payload["package"] = backup, preview
-		payload["recoveryScope"] = "Retained plugin code only. Runtime data and other configuration are unchanged. The restored plugin is configured disabled."
-		return payload, nil
-	}
+	payload := map[string]any{"action": action, "frontend": frontend, "runtimeWarning": "Replacing plugin code may execute or reload code, or encounter code that is still running, regardless of the current enabled setting. Disabling changes configuration and sends a notification; it does not acknowledge runtime unload.", "expectedInstalledRevision": expectedInstalled}
 	archivePath, _ := args["path"].(string)
 	if archivePath == "" {
 		return nil, errors.New("path is required")

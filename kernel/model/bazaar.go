@@ -101,24 +101,19 @@ type ThemeInstallOptions struct {
 
 // LocalBazaarPackageInstallResult 描述本地集市包的识别和安装结果。
 type LocalBazaarPackageInstallResult struct {
-	PackageType       string   `json:"packageType"`
-	PackageName       string   `json:"packageName"`
-	MinAppVersion     string   `json:"minAppVersion,omitempty"`
-	Updated           bool     `json:"updated"`
-	PackageHash       string   `json:"packageHash,omitempty"`
-	InstalledRevision string   `json:"installedRevision,omitempty"`
-	PreviousRevision  string   `json:"previousRevision,omitempty"`
-	BackupID          string   `json:"backupId,omitempty"`
-	Restored          bool     `json:"restored,omitempty"`
-	Enabled           *bool    `json:"enabled,omitempty"`
-	Warnings          []string `json:"warnings,omitempty"`
+	PackageType       string `json:"packageType"`
+	PackageName       string `json:"packageName"`
+	MinAppVersion     string `json:"minAppVersion,omitempty"`
+	Updated           bool   `json:"updated"`
+	PackageHash       string `json:"packageHash,omitempty"`
+	InstalledRevision string `json:"installedRevision,omitempty"`
+	PreviousRevision  string `json:"previousRevision,omitempty"`
 }
 
 // LocalBazaarInstallOptions 保留旧调用形式，官方受管制品由工具层要求同时绑定这两个摘要。
 type LocalBazaarInstallOptions struct {
 	ExpectedPackageHash       string
 	ExpectedInstalledRevision string
-	restoreBackup             *bazaar.InstallBackupInfo
 }
 
 var (
@@ -553,10 +548,7 @@ func installBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName strin
 	installedPkg, parseErr := bazaar.ParsePackageJSON(filepath.Join(installPath, jsonFileName))
 	meta.update = parseErr == nil && installedPkg != nil && installedPkg.Name == packageName
 
-	options, err := bazaarInstallOptions(pkgType, packageName, "")
-	if err != nil {
-		return meta, err
-	}
+	options := bazaar.PackageInstallOptions{PrivateTemp: pkgType == "plugins"}
 	_, err = bazaar.InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, Conf.System.ID, pkgType, packageName, meta.update, options)
 	if err != nil {
 		err = fmt.Errorf(Conf.Language(46), packageName, err)
@@ -682,9 +674,6 @@ func InstallLocalBazaarPackageWithOptions(archivePath, frontend string, overwrit
 		MinAppVersion: pkg.MinAppVersion,
 		PackageHash:   packageHash,
 	}
-	if options.restoreBackup != nil && (pkgType != "plugins" || pkg.Name != options.restoreBackup.PackageName) {
-		return result, errors.New("install backup package identity mismatch")
-	}
 	installPath, _, err := getPackageInstallPath(pkgType, pkg.Name)
 	if err != nil {
 		return result, err
@@ -710,43 +699,16 @@ func InstallLocalBazaarPackageWithOptions(archivePath, frontend string, overwrit
 	if result.Updated && !overwrite {
 		return result, ErrLocalBazaarPackageExists
 	}
-	installOptions, err := bazaarInstallOptions(pkgType, pkg.Name, options.ExpectedInstalledRevision)
-	if err != nil {
-		return result, err
-	}
-	restoreDisabled := false
-	if options.restoreBackup != nil {
-		installOptions.BeforeReplace = func() error {
-			if err := disablePluginForRestore(pkg.Name, result.Updated); err != nil {
-				return err
-			}
-			restoreDisabled = true
-			result.Enabled = new(false)
-			result.Warnings = append(result.Warnings, installRestoreWarning)
-			return nil
-		}
-	}
+	installOptions := bazaar.PackageInstallOptions{ExpectedInstalledRevision: options.ExpectedInstalledRevision}
 	installed, err := bazaar.InstallLocalPackageWithOptions(sourcePath, installPath, pkgType, pkg.Name, result.Updated, installOptions)
 	if installed != nil {
 		result.InstalledRevision, result.PreviousRevision = installed.InstalledRevision, installed.PreviousRevision
-		if installed.Backup != nil {
-			result.BackupID = installed.Backup.ID
-			result.Warnings = append(result.Warnings, installCodeBackupWarning)
-		}
 	}
 	if err != nil {
-		if restoreDisabled {
-			return result, fmt.Errorf("restore_failed: plugin remains configured disabled; %w", err)
-		}
 		return result, err
 	}
 	IncSyncIfNeeded(installPath)
-	if options.restoreBackup != nil {
-		result.Restored = true
-		pushBazaarChanged(pkgType)
-	} else {
-		finishInstall(pkgType, []batchInstallItem{{name: pkg.Name, meta: installMeta{update: result.Updated}}}, nil, false)
-	}
+	finishInstall(pkgType, []batchInstallItem{{name: pkg.Name, meta: installMeta{update: result.Updated}}}, nil, false)
 	return result, nil
 }
 

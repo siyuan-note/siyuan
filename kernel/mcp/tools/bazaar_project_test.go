@@ -40,7 +40,7 @@ func TestBazaarProjectOfflineGuardsAndEffects(t *testing.T) {
 	if err != nil || result.IsError {
 		t.Fatal("read-only status blocked", probeText(result), err)
 	}
-	for _, action := range []string{"prepare_project", "restore_project", "package_local", "restore_install"} {
+	for _, action := range []string{"prepare_project", "restore_project", "package_local", "install_local"} {
 		result, err = bazaarHandler(ctx, map[string]any{"action": action, "taskId": grant.TaskID, "frontend": "desktop"})
 		if err != nil || !result.IsError || !strings.Contains(probeText(result), "read-only") {
 			t.Fatal("read-only write bypass", action, probeText(result), err)
@@ -116,13 +116,47 @@ func TestBazaarProjectManagedArchiveCannotUseLegacyInstall(t *testing.T) {
 }
 
 func TestBazaarProjectUnknownErrorsRetainExecutionState(t *testing.T) {
-	result, err := bazaarProjectError(errors.New("result_unknown: staged replacement may be partial"), map[string]any{"backupId": "retained"})
-	if err != nil || !result.IsError || !result.ExecutionUnknown || !strings.Contains(probeText(result), "retained") {
+	result, err := bazaarProjectError(errors.New("result_unknown: staged replacement may be partial"), map[string]any{"installedRevision": "observed"})
+	if err != nil || !result.IsError || !result.ExecutionUnknown || !strings.Contains(probeText(result), "observed") {
 		t.Fatal(result, err)
 	}
 	result, err = bazaarProjectError(errors.New("revision_conflict: source changed"), nil)
 	if err != nil || !result.IsError || result.ExecutionUnknown {
 		t.Fatal("ordinary conflict misclassified", result, err)
+	}
+}
+
+func TestBazaarProjectUsesExistingSnapshotRecovery(t *testing.T) {
+	ctx, grant := bazaarProjectGrant(t)
+	_, validator := LookupToolWithValidator("bazaar")
+	if err := validator.ValidateInput(map[string]any{"action": "restore_install", "frontend": "desktop"}); err == nil {
+		t.Fatal("removed installation recovery action is still accepted")
+	}
+	if _, found := BazaarTool.InputSchema.Properties["backupId"]; found {
+		t.Fatal("removed backup identifier is still advertised")
+	}
+	if _, found := BazaarTool.ActionEffects["restore_install"]; found {
+		t.Fatal("removed recovery action still has effects")
+	}
+	if !strings.Contains(BazaarTool.Description, "repo snapshot tools") {
+		t.Fatal("installation recovery does not refer to existing snapshots")
+	}
+	if _, err := util.PreparePluginProject(ctx, grant.TaskID, nil); err != nil {
+		t.Fatal(err)
+	}
+	result, err := bazaarHandler(ctx, map[string]any{"action": "project_status", "taskId": grant.TaskID})
+	if err != nil || result.IsError {
+		t.Fatal(probeText(result), err)
+	}
+	var payload map[string]any
+	if err = json.Unmarshal([]byte(probeText(result)), &payload); err != nil {
+		t.Fatal(err)
+	}
+	if _, found := payload["codeBackups"]; found {
+		t.Fatal("project status exposes installation backups")
+	}
+	if payload["installedRevision"] != "missing" {
+		t.Fatal("project status lost its installation revision", payload)
 	}
 }
 

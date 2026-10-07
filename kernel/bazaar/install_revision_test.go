@@ -1,7 +1,6 @@
 package bazaar
 
 import (
-	"archive/zip"
 	"crypto/sha256"
 	"errors"
 	"fmt"
@@ -13,7 +12,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func useInstallRevisionFixture(t *testing.T) (source, target, backups string) {
+func useInstallRevisionFixture(t *testing.T) (source, target string) {
 	t.Helper()
 	oldConf, oldData, oldTemp := util.ConfDir, util.DataDir, util.TempDir
 	root := t.TempDir()
@@ -30,17 +29,17 @@ func useInstallRevisionFixture(t *testing.T) (source, target, backups string) {
 			}
 		}
 	}
-	return source, target, DefaultInstallBackupRoot()
+	return source, target
 }
 
-func installRevisionOptions(target, backups string) PackageInstallOptions {
+func installRevisionOptions(target string) PackageInstallOptions {
 	revision, _ := InstalledPackageRevision(target)
-	return PackageInstallOptions{ExpectedInstalledRevision: revision, BackupRoot: backups, PackageType: "plugins", PackageName: "sample"}
+	return PackageInstallOptions{ExpectedInstalledRevision: revision, PrivateTemp: true}
 }
 
-func TestInstallRevisionConflictHasNoReplacementOrBackup(t *testing.T) {
-	source, target, backups := useInstallRevisionFixture(t)
-	options := installRevisionOptions(target, backups)
+func TestInstallRevisionConflictHasNoReplacement(t *testing.T) {
+	source, target := useInstallRevisionFixture(t)
+	options := installRevisionOptions(target)
 	if err := os.WriteFile(filepath.Join(target, "index.js"), []byte("external edit"), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -52,9 +51,6 @@ func TestInstallRevisionConflictHasNoReplacementOrBackup(t *testing.T) {
 	if string(data) != "external edit" {
 		t.Fatal("stale install changed target")
 	}
-	if _, err = os.Stat(backups); !os.IsNotExist(err) {
-		t.Fatalf("stale install created backup: %v", err)
-	}
 	entries, _ := os.ReadDir(filepath.Dir(target))
 	if len(entries) != 1 {
 		t.Fatalf("stale install left staging: %v", entries)
@@ -62,7 +58,7 @@ func TestInstallRevisionConflictHasNoReplacementOrBackup(t *testing.T) {
 }
 
 func TestInstallRevisionMissingBinding(t *testing.T) {
-	source, target, _ := useInstallRevisionFixture(t)
+	source, target := useInstallRevisionFixture(t)
 	options := PackageInstallOptions{ExpectedInstalledRevision: MissingInstalledRevision}
 	if _, err := replacePackageDirectoryWithOptions(source, target, true, options); !errors.Is(err, ErrInstalledRevisionConflict) {
 		t.Fatalf("missing binding accepted existing target: %v", err)
@@ -80,8 +76,8 @@ func TestInstallRevisionMissingBinding(t *testing.T) {
 }
 
 func TestInstallRevisionFinalRecheckRejectsExternalChange(t *testing.T) {
-	source, target, _ := useInstallRevisionFixture(t)
-	options := installRevisionOptions(target, "")
+	source, target := useInstallRevisionFixture(t)
+	options := installRevisionOptions(target)
 	options.BeforeReplace = func() error { return os.WriteFile(filepath.Join(target, "index.js"), []byte("external edit"), 0644) }
 	_, err := replacePackageDirectoryWithOptions(source, target, true, options)
 	if !errors.Is(err, ErrInstalledRevisionConflict) {
@@ -94,8 +90,8 @@ func TestInstallRevisionFinalRecheckRejectsExternalChange(t *testing.T) {
 }
 
 func TestInstallRevisionFinalRecheckRejectsChangedStaging(t *testing.T) {
-	source, target, _ := useInstallRevisionFixture(t)
-	options := installRevisionOptions(target, "")
+	source, target := useInstallRevisionFixture(t)
+	options := installRevisionOptions(target)
 	options.BeforeReplace = func() error {
 		staged, err := filepath.Glob(filepath.Join(filepath.Dir(target), ".siyuan-package-install-*", "staging", "index.js"))
 		if err != nil || len(staged) != 1 {
@@ -114,8 +110,8 @@ func TestInstallRevisionFinalRecheckRejectsChangedStaging(t *testing.T) {
 }
 
 func TestInstallRevisionOnlineAndLocalShareReplacementLock(t *testing.T) {
-	source, target, backups := useInstallRevisionFixture(t)
-	options := installRevisionOptions(target, backups)
+	source, target := useInstallRevisionFixture(t)
+	options := installRevisionOptions(target)
 	entered, release := make(chan struct{}), make(chan struct{})
 	localOptions := options
 	localOptions.BeforeReplace = func() error { close(entered); <-release; return nil }
@@ -142,14 +138,10 @@ func TestInstallRevisionOnlineAndLocalShareReplacementLock(t *testing.T) {
 	if string(data) != "new" {
 		t.Fatal("online installer overwrote local replacement")
 	}
-	list, err := ListInstallBackups(backups, "sample")
-	if err != nil || len(list) != 1 {
-		t.Fatalf("backup count = %d, %v", len(list), err)
-	}
 }
 
 func TestInstallArchiveHashConsumesVerifiedSnapshot(t *testing.T) {
-	_, target, _ := useInstallRevisionFixture(t)
+	_, target := useInstallRevisionFixture(t)
 	archivePath := filepath.Join(t.TempDir(), "package.zip")
 	writeLocalPackageArchive(t, archivePath, map[string]string{"plugin.json": `{"name":"sample","version":"2.0.0"}`, "index.js": "approved"})
 	data, err := os.ReadFile(archivePath)
@@ -183,92 +175,8 @@ func TestInstallArchiveHashConsumesVerifiedSnapshot(t *testing.T) {
 	}
 }
 
-func TestInstallBackupsRetainOnlyCodeAndEnabledFlag(t *testing.T) {
-	source, target, backups := useInstallRevisionFixture(t)
-	for name, content := range map[string]string{"node_modules/marked/index.js": "module.exports = {}", "secrets-management.js": "module.exports = {}", "i18n/en.json": `{}`, "assets/icon.svg": "STATIC"} {
-		p := filepath.Join(target, filepath.FromSlash(name))
-		if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
-			t.Fatal(err)
-		}
-		if err := os.WriteFile(p, []byte(content), 0644); err != nil {
-			t.Fatal(err)
-		}
-	}
-	options := installRevisionOptions(target, backups)
-	options.PriorEnabled = func() (bool, error) { return true, nil }
-	result, err := replacePackageDirectoryWithOptions(source, target, true, options)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if result.Backup == nil || result.Backup.PreviousEnabled == nil || !*result.Backup.PreviousEnabled || !result.Backup.CodeOnly {
-		t.Fatalf("backup metadata = %+v", result.Backup)
-	}
-	backup, archivePath, err := ReadInstallBackup(backups, result.Backup.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if backup.InstalledRevision != options.ExpectedInstalledRevision || len(backup.OmittedPaths) != 0 {
-		t.Fatalf("incorrect backup metadata: %+v", backup)
-	}
-	reader, err := zip.OpenReader(archivePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer reader.Close()
-	names := map[string]bool{}
-	for _, file := range reader.File {
-		names[file.Name] = true
-		if excludedInstallCodePath(file.Name) {
-			t.Fatalf("backup contains excluded file %q", file.Name)
-		}
-	}
-	for _, name := range []string{"plugin.json", "index.js", "i18n/en.json", "assets/icon.svg", "node_modules/marked/index.js", "secrets-management.js"} {
-		if !names[name] {
-			t.Fatalf("code backup missing %q", name)
-		}
-	}
-	options.ExpectedInstalledRevision = result.InstalledRevision
-	second, err := replacePackageDirectoryWithOptions(source, target, true, options)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if second.Backup.ID == backup.ID {
-		t.Fatal("backup ID was overwritten")
-	}
-	list, err := ListInstallBackups(backups, "sample")
-	if err != nil || len(list) != 2 {
-		t.Fatalf("recovery points were not retained: %d, %v", len(list), err)
-	}
-}
-
-func TestInstallBackupRefusesIncompleteRecovery(t *testing.T) {
-	for _, ambiguous := range []string{".env", "config.json", "data/runtime.json", "private.pem"} {
-		t.Run(ambiguous, func(t *testing.T) {
-			source, target, backups := useInstallRevisionFixture(t)
-			name := filepath.Join(target, filepath.FromSlash(ambiguous))
-			if err := os.MkdirAll(filepath.Dir(name), 0755); err != nil {
-				t.Fatal(err)
-			}
-			if err := os.WriteFile(name, []byte("runtime or required code resource"), 0600); err != nil {
-				t.Fatal(err)
-			}
-			options := installRevisionOptions(target, backups)
-			if _, err := replacePackageDirectoryWithOptions(source, target, true, options); err == nil || !strings.Contains(err.Error(), "refusing incomplete code recovery") {
-				t.Fatalf("ambiguous recovery accepted: %v", err)
-			}
-			if revision, _ := InstalledPackageRevision(target); revision != options.ExpectedInstalledRevision {
-				t.Fatal("incomplete recovery overwrote old code")
-			}
-			entries, _ := os.ReadDir(backups)
-			if len(entries) != 0 {
-				t.Fatal("incomplete recovery point was published")
-			}
-		})
-	}
-}
-
 func TestInspectLocalArchiveIsReadOnlyAndRejectsNullManifest(t *testing.T) {
-	_, _, _ = useInstallRevisionFixture(t)
+	_, _ = useInstallRevisionFixture(t)
 	archive := filepath.Join(t.TempDir(), "wrapped.zip")
 	writeLocalPackageArchive(t, archive, map[string]string{"wrapper/plugin.json": `{"name":"sample","version":"1.0.0"}`, "wrapper/index.js": "old"})
 	pkgType, pkg, hash, err := InspectLocalPackageWithHash(archive, "")
@@ -289,30 +197,8 @@ func TestInspectLocalArchiveIsReadOnlyAndRejectsNullManifest(t *testing.T) {
 	}
 }
 
-func TestInstallBackupFullRefusesReplacementWithoutEviction(t *testing.T) {
-	source, target, backups := useInstallRevisionFixture(t)
-	for i := 0; i < maxInstallBackupCount; i++ {
-		if err := os.MkdirAll(filepath.Join(backups, fmt.Sprintf("%032x", i)), 0700); err != nil {
-			t.Fatal(err)
-		}
-	}
-	options := installRevisionOptions(target, backups)
-	_, err := replacePackageDirectoryWithOptions(source, target, true, options)
-	if err == nil || !strings.Contains(err.Error(), "retention is full") {
-		t.Fatalf("full retention accepted install: %v", err)
-	}
-	revision, _ := InstalledPackageRevision(target)
-	if revision != options.ExpectedInstalledRevision {
-		t.Fatal("backup failure changed installed package")
-	}
-	entries, _ := os.ReadDir(backups)
-	if len(entries) != maxInstallBackupCount {
-		t.Fatal("backup failure deleted a recovery point")
-	}
-}
-
 func TestInstallRevisionRejectsLinksAndCollidingArchives(t *testing.T) {
-	source, target, _ := useInstallRevisionFixture(t)
+	source, target := useInstallRevisionFixture(t)
 	if err := os.Link(filepath.Join(source, "index.js"), filepath.Join(source, "hard.js")); err == nil {
 		if _, err = InstalledPackageRevision(source); err == nil {
 			t.Fatal("hard link accepted")

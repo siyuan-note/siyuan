@@ -438,7 +438,7 @@ func TestPluginWorkflowPlanValidationAndEffects(t *testing.T) {
 			t.Errorf("file %s lost permission/snapshot", action)
 		}
 	}
-	for _, action := range []string{"prepare_project", "restore_project", "package_local", "restore_install"} {
+	for _, action := range []string{"prepare_project", "restore_project", "package_local", "install_local"} {
 		if !needsConfirm("bazaar", action, nil) || !needsLocalSnapshot("bazaar", action) {
 			t.Errorf("bazaar %s lost permission/snapshot", action)
 		}
@@ -461,9 +461,9 @@ func TestPluginWorkflowUnknownExecutionSurvivesNativeBoundary(t *testing.T) {
 	original := tools.BazaarTool.ContextHandler
 	t.Cleanup(func() { tools.BazaarTool.ContextHandler = original })
 	tools.BazaarTool.ContextHandler = func(context.Context, map[string]any) (tools.CallToolResult, error) {
-		return tools.CallToolResult{IsError: true, ExecutionUnknown: true, Content: []tools.ContentItem{{Type: "text", Text: `{"error":"result_unknown: partial restore","recovery":"inspect before retry"}`}}}, nil
+		return tools.CallToolResult{IsError: true, ExecutionUnknown: true, Content: []tools.ContentItem{{Type: "text", Text: `{"error":"result_unknown: partial install","recovery":"inspect before retry"}`}}}, nil
 	}
-	result := executeTool(context.Background(), openai.ToolCall{ID: "unknown-restore", Function: openai.FunctionCall{Name: "bazaar", Arguments: `{"action":"restore_install","frontend":"desktop"}`}}, testSessionID)
+	result := executeTool(context.Background(), openai.ToolCall{ID: "unknown-install", Function: openai.FunctionCall{Name: "bazaar", Arguments: `{"action":"install_local","frontend":"desktop"}`}}, testSessionID)
 	if !result.IsError || !result.ExecutionUnknown || !strings.Contains(result.Text, "inspect before retry") {
 		t.Fatalf("unknown execution flag or recovery detail was lost: %+v", result)
 	}

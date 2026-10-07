@@ -29,17 +29,13 @@ var (
 // PackageInstallOptions 只由宿主安装服务构造，回调在共用安装锁内执行。
 type PackageInstallOptions struct {
 	ExpectedInstalledRevision string
-	BackupRoot                string
-	PackageType               string
-	PackageName               string
-	PriorEnabled              func() (bool, error)
+	PrivateTemp               bool
 	BeforeReplace             func() error
 }
 
 type PackageInstallResult struct {
 	InstalledRevision string
 	PreviousRevision  string
-	Backup            *InstallBackupInfo
 }
 
 func validInstallHash(hash string) bool {

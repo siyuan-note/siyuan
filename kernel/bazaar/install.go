@@ -100,7 +100,7 @@ func InstallPackage(repoURL, repoHash, repoRef, installPath, systemID, pkgType, 
 	return err
 }
 
-// InstallPackageWithOptions 将在线包替换也纳入目标版本校验和代码备份。
+// InstallPackageWithOptions 将在线包替换也纳入目标版本校验。
 func InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, systemID, pkgType, packageName string, update bool, options PackageInstallOptions) (*PackageInstallResult, error) {
 	if options.ExpectedInstalledRevision == "" {
 		revision, err := InstalledPackageRevision(installPath)
@@ -159,7 +159,7 @@ func installPackageWithOptions(data []byte, installPath, pkgType, packageName st
 	}
 
 	tmpPackage := filepath.Join(util.TempDir, "bazaar", "package")
-	if options.BackupRoot != "" {
+	if options.PrivateTemp {
 		tmpPackage = filepath.Join(installPrivateRoot(), "install-operations")
 		if err = makePrivateInstallDir(tmpPackage); err != nil {
 			return
@@ -280,12 +280,6 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 	if sourceRevision != copiedRevision || stagingRevision != copiedRevision {
 		return result, ErrInstalledRevisionConflict
 	}
-	if containsFile && options.BackupRoot != "" {
-		result.Backup, err = createInstallBackup(installPath, previousRevision, options)
-		if err != nil {
-			return result, fmt.Errorf("backup_failed: %w", err)
-		}
-	}
 	currentRevision, err := installedPackageRevision(installPath)
 	if err != nil {
 		return result, err
@@ -298,7 +292,7 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 			return
 		}
 	}
-	// 回调、备份和复制均结束后再复核，线上与本地安装共享这一个实际替换段。
+	// 回调和复制均结束后再复核，线上与本地安装共享这一个实际替换段。
 	currentRevision, err = installedPackageRevision(installPath)
 	if err != nil {
 		return result, err

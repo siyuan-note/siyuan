@@ -1236,7 +1236,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             }
         }
     }
-    if (nextBatchDisplayValue) {
+    if (nextBatchDisplayValue && updateElements) {
         setAVBatchDisplayValue(cellElements as HTMLElement[], nextBatchDisplayValue);
     }
     if (getOperations) {

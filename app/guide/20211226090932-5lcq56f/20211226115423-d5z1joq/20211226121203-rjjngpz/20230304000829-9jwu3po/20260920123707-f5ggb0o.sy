@@ -6,7 +6,7 @@
 		"id": "20260920123707-f5ggb0o",
 		"title": "決策模型",
 		"type": "doc",
-		"updated": "20260920123707"
+		"updated": "20261007020517"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260920122941-41jh42y",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-ihm3tk3",
-				"updated": "20260920122941"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "智能體會優先將標準明確、重複的分類、篩選和評分任務交給 TypeSafe System One（Jev）。例如，要求智能體依指定標準評估選取文件與研究問題的相關程度。智能體可以直接傳遞區塊 ID，由核心讀取完整內文，減少主模型重複輸出內文的負擔。無須啟用嵌入或重排模型。"
+					"Data": "智能體會將標準明確、重複的分類、篩選和評分任務交給選定的決策服務，可選擇 TypeSafe System One（Jev）或 OpenAI Decisions API（Beta）。例如，要求智能體依指定標準評估選取文件與研究問題的相關程度。智能體可以直接傳遞區塊 ID，由核心讀取完整內文，減少主模型重複輸出內文的負擔。無須啟用嵌入或重排模型。輸入仍為文字或區塊，此功能不取代聊天，也不處理圖片。"
 				}
 			]
 		},
@@ -43,7 +43,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-z1tozow",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-2h90hjs",
-				"updated": "20260920122941"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -90,7 +90,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中填寫介面位址、API 金鑰、模型名稱和請求逾時，測試連線後啟用。預設關閉，介面位址為 https://api.typesafe.ai/v1/systemone，模型為 jev-latest，逾時為 30 秒。關閉後保留設定。"
+					"Data": " 中點擊提供商卡片，進入詳細資料編輯介面位址、API 金鑰、模型名稱和請求逾時。開啟卡片不會切換目前的提供商。「儲存」僅儲存該提供商的設定，「儲存並使用」還會將其設為新請求使用的提供商。切換時各自的設定和金鑰均保留。全域開關預設關閉，關閉後仍保留兩套設定。TypeSafe 預設介面為 https://api.typesafe.ai/v1/systemone，模型為 jev-latest；OpenAI 預設介面為 https://api.openai.com/v1/decisions，模型為 gpt-6-luna；兩者預設逾時均為 30 秒。相容聊天介面的服務不一定支援 Decisions。升級後保留原有 TypeSafe 設定。"
 				}
 			]
 		},
@@ -99,7 +99,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-nnwx8ao",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -114,12 +114,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-fl4ev86",
-				"updated": "20260920122941"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "主模型仍負責理解需求、複雜推理、工具選擇和最終回答。評分可能介於兩個等級之間，機率和信心度不代表結果一定正確。失敗和未處理的項目會個別標示，已完成的結果會保留，請求不會自動重試。"
+					"Data": "主模型仍負責理解需求、複雜推理、工具選擇和最終回答。評分可能介於兩個等級之間，機率和信心度不代表結果一定正確。失敗和未處理的項目會個別標示，已完成的結果會保留，請求不會自動重試。 切換提供商僅影響新請求，執行中的批次繼續使用原有提供商設定。錯誤或拒答不會被當作零分或否定答案，失敗時不會無提示地切換至其他提供商。"
 				}
 			]
 		},
@@ -128,7 +128,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-sgt2wba",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -143,12 +143,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-hyptw2z",
-				"updated": "20260920122941"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "相關內容會傳送至設定的決策服務，可能產生費用。工具呼叫沿用既有的能力確認策略。加密筆記本必須先解鎖，引用其中的區塊還需要提供筆記本 ID。連線測試使用固定範例，不讀取筆記內容。"
+					"Data": "相關文字會傳送至選定的決策服務，可能產生費用。工具呼叫沿用既有的能力確認策略。加密筆記本必須先解鎖，引用其中的區塊還需要提供筆記本 ID，選取的內容會以可讀形式傳送。連線測試使用完整的設定草稿和固定範例，不讀取筆記，可能產生費用。測試不會儲存設定、切換目前的提供商或啟用服務。測試成功僅代表連線和基本協定可用，不代表答案品質已通過驗證。"
 				}
 			]
 		},
@@ -157,7 +157,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920122941-5j2mjsr",
-				"updated": "20260920122941"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -179,6 +179,16 @@
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://docs.typesafe.ai/",
 					"TextMarkTextContent": "System One API"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://developers.openai.com/api/docs/guides/decisions",
+					"TextMarkTextContent": "OpenAI Decisions API"
 				}
 			]
 		}

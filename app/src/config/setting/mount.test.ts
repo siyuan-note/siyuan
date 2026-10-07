@@ -163,3 +163,57 @@ test("deferred refresh preserves a pressed label until its click completes or is
     await Promise.resolve();
     assert.equal(mounted, 1);
 });
+
+test("AI remount preserves an unfocused decision draft through discard confirmation and closing animation", async () => {
+    const code = transpileModule(readFileSync("src/config/setting/mount.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    const draft = {apiKey: "unsaved-openai-key"};
+    const card = {};
+    let view: object = draft;
+    let mounted = 0;
+    const listeners = new Map<string, () => void>();
+    const timers: Array<() => void> = [];
+    const root = {innerHTML: "decision settings", scrollTop: 25, scrollLeft: 0,
+        contains: (element: unknown) => element === card,
+        querySelector: (selector: string) => selector.includes("[data-decision-profile-view]") ? view : null};
+    const document = {activeElement: {}, addEventListener: (name: string, callback: () => void) => listeners.set(name, callback)};
+    const exports = {} as {remountOpenSettingTab: (tab: string) => Promise<void>};
+    runInNewContext(code, {exports, document,
+        setTimeout: (callback: () => void) => timers.push(callback),
+        require: () => ({Constants: {DIALOG_SETTING: "settings"}, getSearchKeywordsLower: () => "",
+            getSettingsOwnerApp: () => ({}), getSettingTab: () => ({mount: async () => {
+                mounted++;
+                root.innerHTML = "refreshed";
+            }})}),
+        window: {siyuan: {dialogs: [{element: {getAttribute: () => "settings", querySelector: () => root}}]}}});
+    const flush = async () => {
+        timers.splice(0).forEach(callback => callback());
+        await Promise.resolve();
+    };
+    // 外部 AI 更新到达时，焦点在空白区域，仍需保留详情中的未保存密钥。
+    await exports.remountOpenSettingTab("ai");
+    assert.equal(mounted, 0);
+    document.activeElement = {modal: "discard confirmation"};
+    listeners.get("focusout")();
+    await flush();
+    await exports.remountOpenSettingTab("ai");
+    assert.equal(mounted, 0);
+    assert.equal((view as typeof draft).apiKey, "unsaved-openai-key");
+    // 动画未结束时详情仍在 DOM，关闭通知也不能提前重建。
+    listeners.get("siyuan-decision-profile-closed")();
+    await flush();
+    assert.equal(mounted, 0);
+    view = undefined;
+    document.activeElement = card;
+    listeners.get("siyuan-decision-profile-closed")();
+    await flush();
+    assert.equal(mounted, 0);
+    // 返回后的卡片焦点不得被刷新替换，真正离开设置面板后再恢复待执行刷新。
+    document.activeElement = {};
+    listeners.get("focusout")();
+    await flush();
+    assert.equal(mounted, 1);
+    assert.equal(root.innerHTML, "refreshed");
+    assert.equal(root.scrollTop, 25);
+});

@@ -218,3 +218,16 @@ type AISkillData struct {
 	Name    string `json:"name"`
 	Content string `json:"content"`
 }
+
+// AIDecisionTestRequest 使用固定三类问题测试完整草稿，不保存、不读笔记，也不借用已保存的凭证。
+// 空请求或未提供草稿字段的对象测试已保存配置；提供任一草稿字段即要求完整配置。
+// 损坏的 JSON 和尾随内容返回错误，不回退到已保存配置，测试可能产生供应商费用。
+type AIDecisionTestRequest struct {
+	Provider string                  `json:"provider" api:"optional"`
+	Profile  *SettingDecisionProfile `json:"profile" api:"optional"`
+	draft    bool
+}
+
+func (request AIDecisionTestRequest) HasDraft() bool {
+	return request.draft || request.Provider != "" || request.Profile != nil
+}

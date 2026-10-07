@@ -129,6 +129,48 @@ func mergeSettingJSON(base, patch []byte) ([]byte, error) {
 	return json.Marshal(current)
 }
 
+// migrateDecisionSettingPatch 在合并前识别旧客户端的平铺字段，避免被现有 profiles 遮蔽。
+func migrateDecisionSettingPatch(patch []byte) ([]byte, error) {
+	var ai map[string]json.RawMessage
+	if err := json.Unmarshal(patch, &ai); err != nil {
+		return nil, err
+	}
+	var decision map[string]json.RawMessage
+	if json.Unmarshal(ai["decision"], &decision) != nil || decision == nil {
+		return patch, nil
+	}
+	if _, modern := decision["profiles"]; modern {
+		return patch, nil
+	}
+	profile := map[string]json.RawMessage{}
+	for _, field := range []string{"endpoint", "apiKey", "name", "timeout"} {
+		if value, exists := decision[field]; exists {
+			// 旧设置字段允许 null，保持清空密钥和恢复默认参数的既有语义。
+			if bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+				value = json.RawMessage(`""`)
+				if field == "timeout" {
+					value = json.RawMessage(`0`)
+				}
+			}
+			profile[field] = value
+			delete(decision, field)
+		}
+	}
+	if len(profile) == 0 {
+		return patch, nil
+	}
+	profiles, err := json.Marshal(map[string]map[string]json.RawMessage{"typesafe": profile})
+	if err != nil {
+		return nil, err
+	}
+	decision["profiles"] = profiles
+	ai["decision"], err = json.Marshal(decision)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(ai)
+}
+
 func applySettingPatch[Request, Data, Config any](c *gin.Context, patch []byte, config Config,
 	endpoint apicontract.Endpoint[Request, Data], apply func(*gin.Context, Request) apicontract.Response[Data]) apicontract.Response[apicontract.Null] {
 	base, err := json.Marshal(config)
@@ -180,6 +222,11 @@ var patchSetting = contractHandler(apicontract.PatchSetting, func(c *gin.Context
 	case "ai":
 		if util.IsDisabledFeature("ai") {
 			return apicontract.Failure[apicontract.Null](-1, util.I18nTerm(model.Conf.Lang, "agentCapabilitiesUnavailable"))
+		}
+		var err error
+		patch, err = migrateDecisionSettingPatch(patch)
+		if err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
 		}
 		response = applySettingPatch(c, patch, model.Conf.AI, apicontract.SetAI, applyAISetting)
 	default:

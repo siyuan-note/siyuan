@@ -79,7 +79,7 @@ type CreateAttributeViewItemDocsResult struct {
 
 // CreateAttributeViewItem 按指定模板创建一个数据库条目。templateID 为空时创建空白游离条目。
 func CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID string, calendarDates ...*int64) (*CreateAttributeViewItemResult, error) {
-	return createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID, nil, calendarDates...)
+	return createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID, nil, nil, calendarDates...)
 }
 
 // CreateAttributeViewItemWithMarkdown 按指定的文档类型模板创建数据库条目，并使用传入的 Markdown 创建绑定文档。
@@ -88,16 +88,27 @@ func CreateAttributeViewItemWithMarkdown(avID, blockID, viewID, templateID, prev
 	if nil == document {
 		return nil, errors.New("attribute view item markdown is nil")
 	}
-	return createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID, document)
+	return createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID, document, nil)
+}
+
+type attributeViewItemCreationOptions struct {
+	templateTime    time.Time
+	primaryFallback string
+	expectedPrimary string
+	operations      func(string) (do, undo []*Operation)
 }
 
 func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID string,
-	document *CreateAttributeViewItemMarkdown, calendarDates ...*int64) (*CreateAttributeViewItemResult, error) {
+	document *CreateAttributeViewItemMarkdown, options *attributeViewItemCreationOptions, calendarDates ...*int64) (*CreateAttributeViewItemResult, error) {
 	attrView, err := avParseView(avID, blockID)
 	if nil != err {
 		return nil, err
 	}
 	createdAt := time.Now()
+	renderAt := createdAt
+	if options != nil {
+		renderAt = options.templateTime
+	}
 	itemTemplate := attrView.GetNewItemTemplate(templateID)
 	var prunedOptions []*av.PrunedNewItemTemplateOption
 	if "" != templateID && nil == itemTemplate {
@@ -118,12 +129,18 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 		return nil, fmt.Errorf("new item template [%s] does not create a bound block", templateID)
 	}
 	primaryFallback := ""
+	if options != nil {
+		primaryFallback = options.primaryFallback
+	}
 	if nil != document {
 		primaryFallback = document.Title
 	}
-	preview, err := resolveAttributeViewNewItemTemplateWithFallback(blockID, itemTemplate, createdAt, primaryFallback)
+	preview, err := resolveAttributeViewNewItemTemplateWithFallback(blockID, itemTemplate, renderAt, primaryFallback)
 	if nil != err {
 		return nil, err
+	}
+	if options != nil && preview.PrimaryKey != options.expectedPrimary {
+		return nil, errors.New("new item template preview changed")
 	}
 	for _, prunedOption := range prunedOptions {
 		if templateID == prunedOption.TemplateID {
@@ -141,7 +158,11 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 		return nil, ErrBlockNotFound
 	}
 	itemID := ast.NewNodeID()
-	fieldValues, err := resolveNewItemFieldValues(attrView, itemTemplate, createdAt, dbTree.Box)
+	var additionalDo, additionalUndo []*Operation
+	if options != nil {
+		additionalDo, additionalUndo = options.operations(itemID)
+	}
+	fieldValues, err := resolveNewItemFieldValues(attrView, itemTemplate, renderAt, dbTree.Box)
 	if nil != err {
 		return nil, err
 	}
@@ -186,17 +207,24 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	})
 	fieldOperations := buildNewItemFieldValueOperations(attrView, fieldValues, itemID, blockID)
 	doOperations = append(doOperations, fieldOperations...)
+	doOperations = append(doOperations, additionalDo...)
 	doOperations = append(doOperations, &Operation{Action: "doUpdateUpdated", ID: blockID, Data: util.CurrentTimeSecondsStr()})
 
-	undoOperations := []*Operation{{Action: "removeAttrViewBlock", AvID: avID, BlockID: blockID, SrcIDs: []string{itemID}}}
+	undoOperations := append(additionalUndo, &Operation{Action: "removeAttrViewBlock", AvID: avID, BlockID: blockID, SrcIDs: []string{itemID}})
 	if nil != createdTree {
 		undoOperations = append(undoOperations, &Operation{Action: "removeCreatedDoc", ID: boundBlockID, Tree: createdTree})
 	}
 	undoOperations = append(undoOperations, &Operation{Action: "doUpdateUpdated", ID: blockID, Data: dbNode.IALAttr("updated")})
 	tx := &Transaction{DoOperations: doOperations, UndoOperations: undoOperations, Timestamp: createdAt.UnixMilli()}
+	// 关联新建在没有启用自动化时也保留数据库和载体快照，覆盖联合写入失败后的恢复。
+	tx.attributeViewItemCreation = options != nil
 	tx.MarkFromAPI()
 	if err = PerformTxSync(tx); nil != err {
-		cleanupErr := removeAttributeViewBlock([]string{itemID}, avID, blockID, nil)
+		// 事务回滚可能已经移除新条目，只有仍存在时才清理，避免再次改动恢复后的关联。
+		current, cleanupErr := avParseView(avID, blockID)
+		if cleanupErr == nil && current.GetBlockValue(itemID) != nil {
+			cleanupErr = removeAttributeViewBlock([]string{itemID}, avID, blockID, nil)
+		}
 		if nil != createdTree {
 			cleanupErr = errors.Join(cleanupErr, removeCreatedNewItemDoc(boundBlockID))
 		}

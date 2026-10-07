@@ -75,6 +75,7 @@ func TestAVResponseSchemas(t *testing.T) {
 		{"/api/av/getAttributeViewAddingBlockDefaultValues", `{"code":0,"msg":"","data":{"values":null}}`},
 		{"/api/av/renderAttributeView", `{"code":-1,"msg":"missing","data":{"error":"viewNotFound"}}`},
 		{"/api/av/createAttributeViewItem", `{"code":1,"msg":"","data":{"unavailableNotebook":true}}`},
+		{"/api/av/createAttributeViewRelationItem", `{"code":1,"msg":"","data":{"unavailableNotebook":true}}`},
 		{"/api/av/createAttributeViewItemDocs", `{"code":1,"msg":"","data":{"unavailableNotebook":true}}`},
 		{"/api/av/getAttributeViewRowSort", `{"code":0,"msg":"","data":{"conflict":false,"doOperations":[],"undoOperations":[]}}`},
 	} {
@@ -84,6 +85,23 @@ func TestAVResponseSchemas(t *testing.T) {
 	}
 	if err = bundle.ValidateResponse("POST", "/api/av/getAttributeViewAddingBlockDefaultValues", []byte(`{"code":0,"msg":"","data":{"values":[]}}`)); err == nil {
 		t.Fatal("incorrect default values array accepted")
+	}
+}
+
+func TestAVRelationItemInputContract(t *testing.T) {
+	valid := `{"avID":" av ","blockID":"block","keyID":"key","cells":[{"itemID":"item","relatedItemIDs":[]}],"preview":{"templateID":"","primaryKey":"Task","createdAt":123}}`
+	request, err := CreateAttributeViewRelationItem.Decode(strings.NewReader(valid))
+	if err != nil || request.AvID != "av" || request.Keyword != "" || request.Preview.PrimaryKey != "Task" {
+		t.Fatalf("relation creation input: %+v %v", request, err)
+	}
+	for _, invalid := range []string{
+		strings.Replace(valid, `"createdAt":123`, `"createdAt":"123"`, 1),
+		strings.Replace(valid, `"relatedItemIDs":[]`, `"relatedItemIDs":[null]`, 1),
+		strings.Replace(valid, `"cells":[{"itemID":"item","relatedItemIDs":[]}]`, `"cells":null`, 1),
+	} {
+		if _, err = CreateAttributeViewRelationItem.Decode(strings.NewReader(invalid)); err == nil {
+			t.Fatalf("invalid relation input accepted: %s", invalid)
+		}
 	}
 }
 

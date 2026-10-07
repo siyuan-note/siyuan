@@ -53,13 +53,14 @@ export const remountOpenSettingTab = async (tabId: TSettingTab) => {
         return;
     }
     if (root.contains(document.activeElement) || pressedTarget && root.contains(pressedTarget as Node) ||
-        root.querySelector(".config-entry-visibility__view")) {
+        root.querySelector(".config-entry-visibility__view, [data-decision-profile-view]")) {
         deferredTabs.add(tabId);
         if (!watchingFocus) {
             watchingFocus = true;
-            // 离开输入控件或关闭入口方案编辑器后再刷新，保留尚未提交的输入与草稿。
+            // 离开输入控件或关闭配置详情后再刷新，保留尚未提交的输入与草稿。
             document.addEventListener("focusout", refreshDeferredTabs);
             document.addEventListener("siyuan-entry-profile-closed", refreshDeferredTabs);
+            document.addEventListener("siyuan-decision-profile-closed", refreshDeferredTabs);
         }
         return;
     }

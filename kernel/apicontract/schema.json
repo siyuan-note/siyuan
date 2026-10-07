@@ -833,6 +833,25 @@
       ],
       "additionalProperties": false
     },
+    "AIDecisionTestRequestInput": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingDecisionProfileInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
     "AIEditorAction": {
       "type": "object",
       "properties": {
@@ -10210,6 +10229,9 @@
         "name": {
           "type": "string"
         },
+        "newItemPreview": {
+          "$ref": "#/$defs/AVRelationItemPreview"
+        },
         "notebookID": {
           "type": "string"
         },
@@ -10266,6 +10288,78 @@
         "rows",
         "selectedRows",
         "total"
+      ],
+      "additionalProperties": false
+    },
+    "AVRelationItemCellInput": {
+      "type": "object",
+      "properties": {
+        "itemID": {
+          "type": "string"
+        },
+        "relatedItemIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "itemID",
+        "relatedItemIDs"
+      ],
+      "additionalProperties": false
+    },
+    "AVRelationItemPreview": {
+      "type": "object",
+      "properties": {
+        "createdAt": {
+          "type": "integer"
+        },
+        "error": {
+          "type": "string"
+        },
+        "primaryKey": {
+          "type": "string"
+        },
+        "templateID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "createdAt",
+        "primaryKey",
+        "templateID"
+      ],
+      "additionalProperties": false
+    },
+    "AVRelationItemPreviewInput": {
+      "type": "object",
+      "properties": {
+        "createdAt": {
+          "type": "integer"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "primaryKey": {
+          "type": "string"
+        },
+        "templateID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "createdAt",
+        "primaryKey",
+        "templateID"
       ],
       "additionalProperties": false
     },
@@ -20795,6 +20889,81 @@
       ],
       "additionalProperties": false
     },
+    "CreateAttributeViewRelationItemRequestInput": {
+      "type": "object",
+      "properties": {
+        "app": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "avID": {
+          "type": "string"
+        },
+        "blockID": {
+          "type": "string"
+        },
+        "cells": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AVRelationItemCellInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "keyID": {
+          "type": "string"
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "preview": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVRelationItemPreviewInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "session": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "avID",
+        "blockID",
+        "cells",
+        "keyID",
+        "preview"
+      ],
+      "additionalProperties": false
+    },
     "CreateDocHistoryRequestInput": {
       "type": "object",
       "properties": {
@@ -26511,10 +26680,30 @@
             }
           ]
         },
+        "blockID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "includeNewItemPreview": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -42972,6 +43161,29 @@
         "name": {
           "type": "string"
         },
+        "profiles": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingDecisionProfile"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "type": "string"
+        },
         "timeout": {
           "type": "integer"
         }
@@ -42981,6 +43193,8 @@
         "enabled",
         "endpoint",
         "name",
+        "profiles",
+        "provider",
         "timeout"
       ],
       "additionalProperties": false
@@ -43028,6 +43242,36 @@
             }
           ]
         },
+        "profiles": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingDecisionProfileInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "timeout": {
           "anyOf": [
             {
@@ -43039,6 +43283,54 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "SettingDecisionProfile": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "apiKey",
+        "endpoint",
+        "name",
+        "timeout"
+      ],
+      "additionalProperties": false
+    },
+    "SettingDecisionProfileInput": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "apiKey",
+        "endpoint",
+        "name",
+        "timeout"
+      ],
       "additionalProperties": false
     },
     "SettingEditing": {
@@ -120995,9 +121287,9 @@
       "method": "POST",
       "path": "/api/ai/testDecisionModel",
       "handler": "testDecisionModel",
-      "body": "none",
+      "body": "json",
       "request": {
-        "$ref": "#/$defs/EmptyRequestInput"
+        "$ref": "#/$defs/AIDecisionTestRequestInput"
       },
       "response": {
         "anyOf": [
@@ -124476,6 +124768,85 @@
       "body": "json",
       "request": {
         "$ref": "#/$defs/CreateAttributeViewItemWithMarkdownRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AVCreateItemResult"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/AVCreateItemResult"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/av/createAttributeViewRelationItem",
+      "handler": "createAttributeViewRelationItem",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/CreateAttributeViewRelationItemRequestInput"
       },
       "response": {
         "anyOf": [

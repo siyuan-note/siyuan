@@ -1149,6 +1149,7 @@ interface IAV {
     views: IAVView[];
     isMirror?: boolean;
     newItemTemplates?: IAVNewItemTemplate[];
+    /** 关联选择面板新建也使用此默认模板，主键模板优先于搜索文本；未配置主键模板时使用搜索文本。 */
     defaultTemplateID?: string;
     customColors?: IAVCustomColor[];
     colorOrder?: string[];

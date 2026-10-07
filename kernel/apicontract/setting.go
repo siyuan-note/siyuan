@@ -69,11 +69,20 @@ type SettingRerank struct {
 }
 
 type SettingDecision struct {
-	Enabled  bool   `json:"enabled" api:"optional,nullable"`
-	Endpoint string `json:"endpoint" api:"optional,nullable"`
-	APIKey   string `json:"apiKey" api:"optional,nullable"`
-	Name     string `json:"name" api:"optional,nullable"`
-	Timeout  int    `json:"timeout" api:"optional,nullable"`
+	Enabled  bool                               `json:"enabled" api:"optional,nullable"`
+	Provider string                             `json:"provider" api:"optional,nullable"`
+	Profiles map[string]*SettingDecisionProfile `json:"profiles" api:"optional,nullable"`
+	Endpoint string                             `json:"endpoint" api:"optional,nullable"`
+	APIKey   string                             `json:"apiKey" api:"optional,nullable"`
+	Name     string                             `json:"name" api:"optional,nullable"`
+	Timeout  int                                `json:"timeout" api:"optional,nullable"`
+}
+
+type SettingDecisionProfile struct {
+	Endpoint string `json:"endpoint"`
+	APIKey   string `json:"apiKey"`
+	Name     string `json:"name"`
+	Timeout  int    `json:"timeout"`
 }
 
 type SettingAgent struct {

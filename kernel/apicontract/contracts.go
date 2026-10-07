@@ -982,6 +982,7 @@ var GetAttributeView = define[GetAttributeViewRequest, AVData]("getAttributeView
 var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPasteRowsData]("getAttributeViewPasteRows", "/api/av/getAttributeViewPasteRows", JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", JSONBody, ResponseOptions{}, "POST")
 var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
+var CreateAttributeViewRelationItem = define[CreateAttributeViewRelationItemRequest, AVCreateItemResult]("createAttributeViewRelationItem", "/api/av/createAttributeViewRelationItem", JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 var CreateAttributeViewItemWithMarkdown = define[CreateAttributeViewItemWithMarkdownRequest, AVCreateItemResult]("createAttributeViewItemWithMarkdown", "/api/av/createAttributeViewItemWithMarkdown", JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 var CreateAttributeViewItemDocs = define[CreateAttributeViewItemDocsRequest, AVCreateItemDocsResult]("createAttributeViewItemDocs", "/api/av/createAttributeViewItemDocs", JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
 var SearchAttributeView = define[SearchAttributeViewRequest, AVSearchData]("searchAttributeView", "/api/av/searchAttributeView", JSONBody, ResponseOptions{}, "POST")
@@ -1005,7 +1006,7 @@ var AIRemoveEditorAction = define[AIEditorActionIDRequest, Null]("removeAIEditor
 var AITestModel = define[AIModelRequest, AIModelTestData]("testModel", "/api/ai/testModel", JSONBody, ResponseOptions{}, "POST")
 var AITestEmbeddingModel = define[EmptyRequest, AIEmbeddingTestData]("testEmbeddingModel", "/api/ai/testEmbeddingModel", NoBody, ResponseOptions{}, "POST")
 var AITestRerankModel = define[EmptyRequest, AIRerankTestData]("testRerankModel", "/api/ai/testRerankModel", NoBody, ResponseOptions{}, "POST")
-var AITestDecisionModel = define[EmptyRequest, AIDecisionTestData]("testDecisionModel", "/api/ai/testDecisionModel", NoBody, ResponseOptions{}, "POST")
+var AITestDecisionModel = define[AIDecisionTestRequest, AIDecisionTestData]("testDecisionModel", "/api/ai/testDecisionModel", JSONBody, ResponseOptions{}, "POST")
 var AIListModels = define[AIProviderRequest, AIModelsData]("listModels", "/api/ai/listModels", JSONBody, ResponseOptions{}, "POST")
 
 // 套餐授权接口仅供已鉴权管理员使用，遵守 AI 禁用开关及只读限制。

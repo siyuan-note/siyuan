@@ -2712,6 +2712,7 @@ type Transaction struct {
 	blockSwapOriginalTrees       []*parse.Tree
 	attributeViewRollback        *attributeViewRollback
 	attributeViewAutomations     *attributeViewAutomationState
+	attributeViewItemCreation    bool
 	invalidatedAvHistory         map[string]bool
 
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
@@ -3029,6 +3030,7 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.removeCreatedDoc, tx.writeTransactionTree = nil, nil
 	tx.luteEngine = nil
 	tx.attributeViewAutomations = nil
+	tx.attributeViewItemCreation = false
 }
 
 func (tx *Transaction) rollback() {

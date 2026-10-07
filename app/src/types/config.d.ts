@@ -201,15 +201,19 @@ declare namespace Config {
         outputFormat: string;
     }
 
-    /**
-     * 智能体决策模型配置，使用 TypeSafe System One 协议。
-     */
-    export interface IDecision {
-        enabled: boolean;
+    /** 独立保存的决策服务凭证和参数。 */
+    export interface IDecisionProfile {
         endpoint: string;
         apiKey: string;
         name: string;
         timeout: number;
+    }
+
+    /** 当前决策服务及各供应商独立配置；平铺字段仅兼容 TypeSafe 客户端。 */
+    export interface IDecision extends IDecisionProfile {
+        enabled: boolean;
+        provider: string;
+        profiles: Record<string, IDecisionProfile>;
     }
 
     /**

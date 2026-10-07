@@ -2772,6 +2772,28 @@ img.av__cellassetimg {
   .av__relation-table-cell {
     border-right: 1px solid var(--b3-border-color);
 
+    &[data-dtype="relation"] {
+      gap: 4px 12px;
+
+      > .av__cell--relation {
+        flex-shrink: 0;
+        margin-right: 0;
+      }
+
+      .av__celltext {
+        min-width: 0;
+      }
+
+      &[data-wrap="true"] {
+        flex-wrap: wrap;
+
+        .av__celltext {
+          overflow-wrap: anywhere;
+          white-space: normal;
+        }
+      }
+    }
+
     &:last-child {
       border-right: 0;
     }

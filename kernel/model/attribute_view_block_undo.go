@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"slices"
 	"strings"
 
@@ -56,34 +57,43 @@ func (tx *Transaction) flushAttributeViewBlockDeletions() error {
 		if !removeAttributeViewBoundItems(current, tx.deletedAttrViewBlockIDs[key], true) {
 			continue
 		}
-		state := &attributeViewFieldsSnapshot{avID: avID, keyID: avID, blockID: carrier, boxID: boxID,
-			changes: map[string]*attributeViewFieldChange{}, fieldTypes: map[string]map[string]av.KeyType{avID: {}}}
-		for _, kv := range original.KeyValues {
-			if remaining, _ := current.GetKeyValues(kv.Key.ID); len(remaining.Values) != len(kv.Values) {
-				state.fieldTypes[avID][kv.Key.ID] = kv.Key.Type
-			}
+		before, after, err := tx.prepareDeletedAttributeViewRelations(original, current, carrier, boxID)
+		if err != nil {
+			return err
 		}
-		regenAttrViewGroups(current)
-		if err = tx.saveAttributeViewFieldChanges(state, map[string]*av.AttributeView{avID: original},
-			map[string]*av.AttributeView{avID: current}); err != nil {
+		state := &attributeViewFieldsSnapshot{avID: avID, keyID: avID, blockID: carrier, boxID: boxID,
+			changes: map[string]*attributeViewFieldChange{}, fieldTypes: map[string]map[string]av.KeyType{}}
+		for id, view := range before {
+			state.fieldTypes[id] = map[string]av.KeyType{}
+			for _, kv := range view.KeyValues {
+				remaining, _ := after[id].GetKeyValues(kv.Key.ID)
+				if !reflect.DeepEqual(kv.Values, remaining.Values) {
+					state.fieldTypes[id][kv.Key.ID] = kv.Key.Type
+				}
+			}
+			regenAttrViewGroups(after[id])
+		}
+		if err = tx.saveAttributeViewFieldChanges(state, before, after); err != nil {
 			return err
 		}
 		if !tx.fromAPI || tx.isReplay || len(tx.UndoOperations) == 0 {
 			continue
 		}
-		current, err = tx.readAttributeViewForMutation(avID, carrier, boxID)
-		if err != nil {
-			return err
+		for id, view := range before {
+			persisted, readErr := tx.readAttributeViewForMutation(id, carrier, boxID)
+			if readErr != nil {
+				return readErr
+			}
+			oldJSON, jsonErr := attributeViewFieldJSON(view)
+			if jsonErr != nil {
+				return jsonErr
+			}
+			newJSON, jsonErr := attributeViewFieldJSON(persisted)
+			if jsonErr != nil {
+				return jsonErr
+			}
+			state.changes[id] = diffAttributeViewFields(oldJSON, newJSON, true, true)
 		}
-		oldJSON, err := attributeViewFieldJSON(original)
-		if err != nil {
-			return err
-		}
-		newJSON, err := attributeViewFieldJSON(current)
-		if err != nil {
-			return err
-		}
-		state.changes[avID] = diffAttributeViewFields(oldJSON, newJSON, true, true)
 		inverse := &Operation{Action: "insertAttrViewBlock", AvID: avID, ID: avID, BlockID: carrier,
 			attributeViewFields: state, attributeViewFieldUndo: true}
 		for _, value := range original.GetBlockKeyValues().Values {
@@ -97,6 +107,66 @@ func (tx *Transaction) flushAttributeViewBlockDeletions() error {
 		tx.attributeViewDeletionUndo = append([]*Operation{inverse}, tx.attributeViewDeletionUndo...)
 	}
 	return nil
+}
+
+// 删除绑定条目时清理所有指向这些条目的关联，两个方向一起保存和撤销。
+func (tx *Transaction) prepareDeletedAttributeViewRelations(original, current *av.AttributeView, carrier, boxID string) (
+	before, after map[string]*av.AttributeView, err error) {
+	before = map[string]*av.AttributeView{original.ID: original}
+	after = map[string]*av.AttributeView{current.ID: current}
+	removed := map[string]bool{}
+	for _, value := range original.GetBlockKeyValues().Values {
+		if value != nil && current.GetBlockValue(value.BlockID) == nil {
+			removed[value.BlockID] = true
+		}
+	}
+	ids := append([]string{original.ID}, av.GetSrcAvIDs(original.ID)...)
+	for _, kv := range original.KeyValues {
+		if kv.Key.Relation != nil && kv.Key.Relation.IsTwoWay {
+			ids = append(ids, kv.Key.Relation.AvID)
+		}
+	}
+	for _, id := range slices.Compact(slices.Sorted(slices.Values(ids))) {
+		if id == "" {
+			continue
+		}
+		view := after[id]
+		var source *av.AttributeView
+		if view == nil {
+			source, err = tx.readAttributeViewForMutation(id, carrier, boxID)
+			if errors.Is(err, av.ErrViewNotFound) {
+				continue
+			}
+			if err != nil {
+				return nil, nil, err
+			}
+			view, err = cloneAttributeViewForFieldMutation(source)
+			if err != nil {
+				return nil, nil, err
+			}
+		}
+		changed := false
+		for _, kv := range view.KeyValues {
+			if kv.Key.Type != av.KeyTypeRelation || kv.Key.Relation == nil || kv.Key.Relation.AvID != original.ID {
+				continue
+			}
+			for _, value := range kv.Values {
+				if value == nil || value.Relation == nil {
+					continue
+				}
+				count := len(value.Relation.BlockIDs)
+				value.Relation.BlockIDs = slices.DeleteFunc(value.Relation.BlockIDs, func(id string) bool { return removed[id] })
+				if len(value.Relation.BlockIDs) != count {
+					value.Relation.Contents = nil
+					changed = true
+				}
+			}
+		}
+		if changed && source != nil {
+			before[id], after[id] = source, view
+		}
+	}
+	return before, after, nil
 }
 
 func (tx *Transaction) restoreDeletedAttributeViewBlocks(op *Operation) error {

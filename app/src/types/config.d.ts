@@ -2105,7 +2105,6 @@ declare namespace Config {
         safeMode: boolean;
         /**
          * 是否在独立窗口中打开设置界面，仅桌面 Electron 客户端生效，默认 false。
-         * 该工作空间偏好保存在 conf.json，不读取旧的 local-settings-window-mode；重置设置时恢复为 false。
          */
         settingsWindow: boolean;
         /**

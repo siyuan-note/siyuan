@@ -380,7 +380,13 @@ export type AVRelation = { "avID": string; "backKeyID": string; "candidateFilter
 
 export type AVRelationCandidateSortInput = { "column": string; "order": string; };
 
-export type AVRelationCandidatesData = { "blockIDs": Array<string> | null; "columns": Array<AVTableColumn | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "name": string; "notebookID": string; "rows": Array<AVTableRow | null> | null; "selectedRows": Array<AVTableRow | null> | null; "total": number; };
+export type AVRelationCandidatesData = { "blockIDs": Array<string> | null; "columns": Array<AVTableColumn | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "name": string; "newItemPreview"?: AVRelationItemPreview; "notebookID": string; "rows": Array<AVTableRow | null> | null; "selectedRows": Array<AVTableRow | null> | null; "total": number; };
+
+export type AVRelationItemCellInput = { "itemID": string; "relatedItemIDs": Array<string>; };
+
+export type AVRelationItemPreview = { "createdAt": number; "error"?: string; "primaryKey": string; "templateID": string; };
+
+export type AVRelationItemPreviewInput = { "createdAt": number; "error"?: string | null; "primaryKey": string; "templateID": string; };
 
 export type AVRelativeDate = { "count": number; "direction": number; "unit": number; };
 
@@ -846,6 +852,8 @@ export type CreateAttributeViewItemRequestInput = { "app"?: string | null; "avID
 
 export type CreateAttributeViewItemWithMarkdownRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "clippingHref"?: string | null; "groupID"?: string | null; "listDocTree"?: boolean | null; "markdown": string; "previousID"?: string | null; "session"?: string | null; "tags"?: string | null; "templateID": string; "title": string; "viewID"?: string | null; "withMath"?: boolean | null; };
 
+export type CreateAttributeViewRelationItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "cells": Array<AVRelationItemCellInput | null>; "keyID": string; "keyword"?: string | null; "preview": AVRelationItemPreviewInput | null; "session"?: string | null; };
+
 export type CreateDocHistoryRequestInput = { "id": string; };
 
 export type CreateEncryptedNotebookRequestInput = { "name": string; "password": string; };
@@ -1132,7 +1140,7 @@ export type GetAttributeViewPasteRowsRequestInput = { "avID": string; "blockID":
 
 export type GetAttributeViewPrimaryKeyValuesRequestInput = { "blockIDs"?: Array<string> | null; "id": string; "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; };
 
-export type GetAttributeViewRelationCandidatesRequestInput = { "avID"?: string | null; "id"?: string | null; "keyID"?: string | null; "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; "selectedBlockIDs"?: Array<string> | null; "sort"?: AVRelationCandidateSortInput | null; };
+export type GetAttributeViewRelationCandidatesRequestInput = { "avID"?: string | null; "blockID"?: string | null; "id"?: string | null; "includeNewItemPreview"?: boolean | null; "keyID"?: string | null; "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; "selectedBlockIDs"?: Array<string> | null; "sort"?: AVRelationCandidateSortInput | null; };
 
 export type GetAttributeViewRequestInput = { "id": string; };
 
@@ -3098,6 +3106,11 @@ export interface APIPOSTRoutes {
     };
     "/api/av/createAttributeViewItemWithMarkdown": {
         request: CreateAttributeViewItemWithMarkdownRequestInput;
+        response: { "code": 0; "data": AVCreateItemResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemResult; "msg": string; };
+        body: "json";
+    };
+    "/api/av/createAttributeViewRelationItem": {
+        request: CreateAttributeViewRelationItemRequestInput;
         response: { "code": 0; "data": AVCreateItemResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemResult; "msg": string; };
         body: "json";
     };

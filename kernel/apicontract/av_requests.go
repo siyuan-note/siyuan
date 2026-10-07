@@ -104,13 +104,17 @@ type GetAttributeViewPrimaryKeyValuesRequest struct {
 }
 
 type GetAttributeViewRelationCandidatesRequest struct {
-	AvID             string   `json:"avID" api:"optional,nullable,ignoretype"`
-	KeyID            string   `json:"keyID" api:"optional,nullable,ignoretype"`
-	ID               string   `json:"id" api:"optional,nullable,ignoretype"`
-	Keyword          string   `json:"keyword" api:"optional,nullable"`
-	Page             *float64 `json:"page" api:"optional,nullable"`
-	PageSize         *float64 `json:"pageSize" api:"optional,nullable"`
-	SelectedBlockIDs []string `json:"selectedBlockIDs" api:"optional,nullable,filterstrings"`
+	// 按需返回目标数据库默认条目的名称预览；省略时保持候选查询响应。
+	// BlockID 指定来源载体并限定候选读取的加密边界；省略时保留原有全局查询行为。
+	IncludeNewItemPreview bool     `json:"includeNewItemPreview" api:"optional,nullable"`
+	BlockID               string   `json:"blockID" api:"optional,nullable"`
+	AvID                  string   `json:"avID" api:"optional,nullable,ignoretype"`
+	KeyID                 string   `json:"keyID" api:"optional,nullable,ignoretype"`
+	ID                    string   `json:"id" api:"optional,nullable,ignoretype"`
+	Keyword               string   `json:"keyword" api:"optional,nullable"`
+	Page                  *float64 `json:"page" api:"optional,nullable"`
+	PageSize              *float64 `json:"pageSize" api:"optional,nullable"`
+	SelectedBlockIDs      []string `json:"selectedBlockIDs" api:"optional,nullable,filterstrings"`
 	// Sort 仅对本次候选查询排序，在搜索过滤后、分页前应用；不修改数据库视图或已选条目的顺序。
 	// 省略时按创建时间倒序；指定时 column 必须属于关联数据库，order 为 ASC 或 DESC。
 	Sort *AVRelationCandidateSort `json:"sort" api:"optional,nullable"`
@@ -218,6 +222,34 @@ type CreateAttributeViewItemRequest struct {
 	GroupID      string `json:"groupID" api:"optional,nullable"`
 	App          string `json:"app" api:"optional,nullable"`
 	Session      string `json:"session" api:"optional,nullable"`
+}
+
+// 关联新建使用目标数据库的默认模板；未配置主键模板时以 keyword 作为名称。
+// cells 保留已有条目的顺序及批量编辑结果，新条目追加到每个来源单元格；创建和关联共用一次撤销。
+// preview 来自 includeNewItemPreview 候选查询，解析时间最多保留五分钟；默认模板 ID 或名称变化时拒绝写入。
+// 不可用保存笔记本返回 code 1 和 unavailableNotebook；其他失败返回 code -1，保留原数据。
+type CreateAttributeViewRelationItemRequest struct {
+	AvID    string                 `json:"avID" api:"trim"`
+	BlockID string                 `json:"blockID" api:"trim"`
+	KeyID   string                 `json:"keyID" api:"trim"`
+	Keyword string                 `json:"keyword" api:"optional,nullable"`
+	Cells   []*AVRelationItemCell  `json:"cells"`
+	Preview *AVRelationItemPreview `json:"preview"`
+	App     string                 `json:"app" api:"optional,nullable"`
+	Session string                 `json:"session" api:"optional,nullable"`
+}
+
+type AVRelationItemCell struct {
+	ItemID         string   `json:"itemID"`
+	RelatedItemIDs []string `json:"relatedItemIDs"`
+}
+
+// 默认模板 ID、解析后的主键和解析时间；error 非空时只能选择已有条目，不能确认新建。
+type AVRelationItemPreview struct {
+	TemplateID string `json:"templateID"`
+	PrimaryKey string `json:"primaryKey"`
+	CreatedAt  int64  `json:"createdAt"`
+	Error      string `json:"error,omitempty" api:"optional,nullable"`
 }
 
 type CreateAttributeViewItemWithMarkdownRequest struct {

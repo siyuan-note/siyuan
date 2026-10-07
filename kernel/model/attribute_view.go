@@ -2644,14 +2644,19 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, p
 	return
 }
 
-func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, selectedBlockIDs []string, page, pageSize int, candidateSort *av.ViewSort) (
+func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, selectedBlockIDs []string, page, pageSize int, candidateSort *av.ViewSort, blockIDs ...string) (
 	attributeViewName string, databaseBlockIDs []string, customColors []*av.AttributeViewCustomColor,
 	columns []*av.TableColumn, selectedRows, rows []*av.TableRow,
 	total int, err error,
 ) {
 	waitForSyncingStorages()
 
-	srcAttrView, err := av.ParseAttributeView(srcAvID)
+	var srcAttrView *av.AttributeView
+	if len(blockIDs) > 0 && blockIDs[0] != "" {
+		srcAttrView, err = avParseView(srcAvID, blockIDs[0])
+	} else {
+		srcAttrView, err = av.ParseAttributeView(srcAvID)
+	}
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", srcAvID, err)
 		return
@@ -2665,7 +2670,12 @@ func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, 
 			return
 		}
 		if relationKey.Relation.AvID != srcAvID {
-			attrView, err = av.ParseAttributeView(relationKey.Relation.AvID)
+			if len(blockIDs) > 0 && blockIDs[0] != "" {
+				_, boxID := av.FindAttributeViewPath(srcAvID)
+				attrView, err = av.ParseAttributeViewInBox(relationKey.Relation.AvID, boxID)
+			} else {
+				attrView, err = av.ParseAttributeView(relationKey.Relation.AvID)
+			}
 		}
 		if err != nil {
 			logging.LogErrorf("parse attribute view [%s] failed: %s", relationKey.Relation.AvID, err)

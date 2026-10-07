@@ -19,6 +19,7 @@ it("keeps the footer loader hidden while refreshing existing candidates", () => 
             getSelectedItems: (): {id: string}[] => [],
             setLoading: (show: boolean) => loading.push(show),
             relationElement: {getAttribute: () => "database"},
+            options: {blockElement: {getAttribute: () => "carrier"}},
             RELATION_PAGE_SIZE: 16,
             fetchPost: () => ({finally() {}}),
         };

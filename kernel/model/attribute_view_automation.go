@@ -97,7 +97,7 @@ func (tx *Transaction) prepareAttributeViewAutomations() error {
 }
 
 func (tx *Transaction) rememberAutomationView(view *av.AttributeView, blockID string) error {
-	if tx == nil || tx.attributeViewAutomations == nil {
+	if tx == nil || (tx.attributeViewAutomations == nil && !tx.attributeViewItemCreation) {
 		return nil
 	}
 	if view == nil {
@@ -134,7 +134,7 @@ func (tx *Transaction) rememberAutomationView(view *av.AttributeView, blockID st
 
 // 文档仍由原事务提交；预先保存磁盘快照以补偿后续数据库动作或提交失败。
 func (tx *Transaction) rememberAutomationTree(tree *parse.Tree) error {
-	if tx.attributeViewAutomations == nil || tx.attributeViewRollback == nil ||
+	if (tx.attributeViewAutomations == nil && !tx.attributeViewItemCreation) || tx.attributeViewRollback == nil ||
 		tx.attributeViewRollback.trees[tree.ID] != nil {
 		return nil
 	}

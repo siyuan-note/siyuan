@@ -2,7 +2,8 @@ import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
 import {UDLRHint, upDownHint} from "../../../util/upDownHint";
-import {fetchPost} from "../../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../../util/fetch";
+import type {AVRelationItemPreview, AVRelationItemCellInput} from "../../../types/api";
 import {escapeAttr, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
 import {genCellValueByElement, getCellValueText, renderCell, updateCellsValue} from "./cell";
@@ -51,6 +52,7 @@ interface IOpenSearchAVOptions {
 }
 
 const RELATION_PAGE_SIZE = 16;
+const relationItemPreviews = new WeakMap<HTMLElement, {keyword: string, preview: AVRelationItemPreview}>();
 
 const SEARCH_AV_LOADING_HTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">';
 
@@ -497,20 +499,18 @@ const genRelationRowsHTML = (rows: IAVRow[], columns: IAVColumn[], type: "select
     return html;
 };
 
-const genRelationFooterHTML = (menuElement: HTMLElement, keyword: string, hasCandidates: boolean, hasMore: boolean) => {
-    if (keyword) {
-        const refElement = menuElement.querySelector(".popover__block");
-        const databaseName = `<span style="color: var(--b3-protyle-inline-blockref-color);" class="popover__block"
+const genRelationFooterHTML = (menuElement: HTMLElement, keyword: string) => {
+    const preview = relationItemPreviews.get(menuElement)?.preview;
+    const creating = menuElement.querySelector<HTMLElement>(".av__relation")?.dataset.creating === "true";
+    const content = preview ? preview.primaryKey : keyword;
+    const refElement = menuElement.querySelector(".popover__block");
+    const databaseName = `<span style="color: var(--b3-protyle-inline-blockref-color);" class="popover__block"
 data-id="${escapeAttr(refElement?.getAttribute("data-id") || "")}">${escapeHtml(refElement?.textContent || "")}</span>`;
-        return `<button class="b3-menu__item av__relation-table-footer" data-type="setRelationCell" data-relation-type="create">
+    return `<button class="b3-menu__item av__relation-table-footer" data-type="setRelationCell" data-relation-type="create"
+${!preview || preview.error || creating ? "disabled" : ""} title="${escapeAttr(preview?.error || "")}">
     <span class="b3-menu__label fn__ellipsis">${window.siyuan.languages.newRowInRelation.replace("${x}", databaseName).
-            replace("${y}", escapeHtmlTextAndAttr(keyword))}</span>
+        replace("${y}", escapeHtmlTextAndAttr(content || window.siyuan.languages.untitled))}</span>
 </button>`;
-    }
-    if (!hasCandidates && !hasMore) {
-        return `<div class="b3-list--empty av__relation-table-footer" data-relation-type="empty">${window.siyuan.languages.noMoreItems}</div>`;
-    }
-    return "";
 };
 
 const genRelationLoaderHTML = (loading: boolean, visible = loading) => {
@@ -678,11 +678,11 @@ export const bindRelationEvent = (options: {
             };
         });
     };
-    const renderFooter = (hasCandidates: boolean) => {
+    const renderFooter = () => {
         listElement.querySelector('[data-relation-type="create"], [data-relation-type="empty"]')?.remove();
         const more = hasMore();
         listElement.dataset.hasMore = more.toString();
-        const footerHTML = genRelationFooterHTML(options.menuElement, state.keyword, hasCandidates, more);
+        const footerHTML = genRelationFooterHTML(options.menuElement, state.keyword);
         if (footerHTML) {
             listElement.querySelector('[data-relation-type="loader"]').insertAdjacentHTML("beforebegin", footerHTML);
         }
@@ -726,7 +726,7 @@ ${genRelationLoaderHTML(false)}`;
             Array.from(listElement.querySelectorAll<HTMLElement>('[role="columnheader"]'))
                 .find(header => header.dataset.relationColumn === focusedColumn)?.focus();
         }
-        renderFooter(!!listElement.querySelector('[data-relation-type="candidate"]'));
+        renderFooter();
         if (!listElement.querySelector(".b3-menu__item--current")) {
             listElement.querySelector('[data-type="setRelationCell"]')?.classList.add("b3-menu__item--current");
         }
@@ -753,6 +753,8 @@ ${genRelationLoaderHTML(false)}`;
         setLoading(initialLoad || !reset, initialLoad && reset, controller);
         let succeeded = false;
         fetchPost("/api/av/getAttributeViewRelationCandidates", {
+            includeNewItemPreview: true,
+            blockID: options.blockElement.getAttribute("data-node-id"),
             avID: relationElement.getAttribute("data-source-av-id"),
             keyID: relationElement.getAttribute("data-key-id"),
             keyword,
@@ -773,6 +775,11 @@ ${genRelationLoaderHTML(false)}`;
             databaseName.setAttribute("data-id", response.data.blockIDs?.[0] || "");
             relationElement.dataset.databaseBlockId = response.data.blockIDs?.[0] || "";
             relationElement.dataset.notebookId = response.data.notebookID || "";
+            if (response.data.newItemPreview) {
+                relationItemPreviews.set(options.menuElement, {keyword, preview: response.data.newItemPreview});
+            } else {
+                relationItemPreviews.delete(options.menuElement);
+            }
             const columns = response.data.columns as IAVColumn[] || [];
             const selectedRowsByID = new Map<string, IAVRow>((response.data.selectedRows as IAVRow[] || []).
                 map((row) => [row.id, row]));
@@ -853,6 +860,8 @@ ${genRelationLoaderHTML(false)}`;
     });
     const search = () => {
         state.keyword = inputElement.value;
+        relationItemPreviews.delete(options.menuElement);
+        renderFooter();
         state.controller?.abort();
         state.controller = undefined;
         state.loading = false;
@@ -1008,13 +1017,13 @@ const getRelationValue = (menuElement: HTMLElement) => {
     return value;
 };
 
-const genCreatedRelationRowHTML = (menuElement: HTMLElement, rowID: string, content: string) => {
+const genCreatedRelationRowHTML = (menuElement: HTMLElement, rowID: string, content: string, blockID = "", isDetached = true) => {
     const headerElement = menuElement.querySelector('[data-relation-type="header"]') as HTMLElement;
     const columns = headerElement?.querySelectorAll<HTMLElement>(".av__relation-table-cell");
     let cellsHTML = `<span data-relation-column="${escapeAttr(columns?.[0]?.dataset.relationColumn || "")}" class="av__relation-table-cell av__relation-table-primary" data-row-id="${rowID}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <span class="av__relation-row-icon">${getAVBlockIconHTML({isDetached: true})}</span>
-    <span class="b3-menu__label fn__ellipsis" data-id="">${escapeHtmlTextAndAttr(content)}</span>
+    <span class="av__relation-row-icon">${getAVBlockIconHTML({isDetached})}</span>
+    <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}" data-id="${escapeAttr(isDetached ? "" : blockID)}">${escapeHtmlTextAndAttr(content)}</span>
 </span>`;
     for (let i = 1; i < (columns?.length || 1); i++) {
         cellsHTML += `<span data-relation-column="${escapeAttr(columns[i].dataset.relationColumn)}" class="av__relation-table-cell${columns[i].classList.contains("fn__none") ? " fn__none" : ""}"></span>`;
@@ -1068,32 +1077,62 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
             updateCellsValue(protyle, nodeElement, getRelationValue(menuElement), cellElements);
             menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
         } else {
-            const blockID = target.querySelector(".popover__block").getAttribute("data-id");
-            const content = target.querySelector("b").textContent;
-            const rowId = Lute.NewNodeID();
-            const bodyElement = hasClosestByClassName(cellElements[0], "av__body");
-            menuElement.querySelector('[data-relation-type="selectedRows"]').insertAdjacentHTML(
-                "beforeend", genCreatedRelationRowHTML(menuElement, rowId, content));
-            const newValue = getRelationValue(menuElement);
-            const updateOptions = await updateCellsValue(protyle, nodeElement, newValue, cellElements, null, null, true);
-            const doOperations: IOperation[] = [{
-                action: "insertAttrViewBlock",
-                ignoreDefaultFill: true,
-                avID: relationElement.getAttribute("data-av-id"),
-                srcs: [{
-                    itemID: rowId,
-                    id: Lute.NewNodeID(),
-                    isDetached: true,
-                    content
-                }],
-                blockID,
-                groupID: bodyElement ? bodyElement.getAttribute("data-group-id") : "",
-            }, {
-                action: "doUpdateUpdated",
-                id: blockID,
-                data: dayjs().format("YYYYMMDDHHmmss"),
-            }];
-            transaction(protyle, doOperations.concat(updateOptions.doOperations));
+            const entry = relationItemPreviews.get(menuElement);
+            if (target.hasAttribute("disabled") || relationElement.dataset.creating === "true" ||
+                !entry || entry.preview.error || entry.keyword !== menuElement.querySelector("input").value) {
+                return;
+            }
+            relationElement.dataset.creating = "true";
+            target.setAttribute("disabled", "");
+            try {
+                // 用临时 ID 计算批量关系合并结果，仅成功创建后更新面板。
+                const pendingID = Lute.NewNodeID();
+                const value = getRelationValue(menuElement);
+                value.blockIDs.push(pendingID);
+                value.contents.push({type: "block", block: {content: entry.preview.primaryKey}, isDetached: true});
+                const operations = await updateCellsValue(protyle, nodeElement, value, cellElements,
+                    null, null, true, false, false, undefined, false);
+                const cells: AVRelationItemCellInput[] = [];
+                operations.doOperations.forEach(operation => {
+                    if (operation.action === "updateAttrViewCell" && operation.data.relation) {
+                        cells.push({itemID: operation.rowID,
+                            relatedItemIDs: operation.data.relation.blockIDs.filter(id => id !== pendingID)});
+                    }
+                });
+                if (!cells.length) {
+                    return;
+                }
+                const response = await fetchSyncPost("/api/av/createAttributeViewRelationItem", {
+                    avID: nodeElement.dataset.avId,
+                    blockID: nodeElement.dataset.nodeId,
+                    keyID: relationElement.dataset.keyId,
+                    keyword: entry.keyword,
+                    cells,
+                    preview: entry.preview,
+                    app: protyle.app.appId,
+                    session: protyle.id,
+                });
+                if (response.code !== 0 || !response.data || !("itemID" in response.data)) {
+                    if (response.code === 1 && response.data && "unavailableNotebook" in response.data && response.data.unavailableNotebook) {
+                        showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
+                    }
+                    return;
+                }
+                if (response.data.warnings?.length) {
+                    showMessage(response.data.warnings.map(item => escapeHtml(item)).join("<br>"));
+                }
+                if (menuElement.isConnected && !menuElement.querySelector(`[data-relation-type="selected"][data-row-id="${response.data.itemID}"]`)) {
+                    menuElement.querySelector('[data-relation-type="selectedRows"]').insertAdjacentHTML("beforeend",
+                        genCreatedRelationRowHTML(menuElement, response.data.itemID, response.data.content,
+                            response.data.blockID, response.data.isDetached));
+                }
+            } catch (error) {
+                showMessage(escapeHtml(error.message), 6000, "error");
+            } finally {
+                delete relationElement.dataset.creating;
+                target.removeAttribute("disabled");
+                menuElement.dispatchEvent(new CustomEvent("relationrefresh"));
+            }
         }
     }
     updateCopyRelatedItems(menuElement);

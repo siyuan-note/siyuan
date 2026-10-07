@@ -176,6 +176,40 @@ func TestUnusedAssetsTemplateReferences(t *testing.T) {
 	}
 }
 
+func TestUnusedAssetsTemplatePaths(t *testing.T) {
+	for _, mode := range []string{"uppercase extension", "symlink root"} {
+		t.Run(mode, func(t *testing.T) {
+			setupUnusedAssetWorkspace(t)
+			Conf.Search = conf.NewSearch()
+			templateDir := filepath.Join(util.DataDir, "templates")
+			name := "example.MD"
+			if mode == "symlink root" {
+				target := t.TempDir()
+				if err := os.Symlink(target, templateDir); err != nil {
+					t.Skipf("symlink unavailable: %v", err)
+				}
+				templateDir, name = target, "example.md"
+			}
+			if err := os.MkdirAll(templateDir, 0755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(templateDir, name), []byte("![image](assets/template.png)"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			if matches := SearchTemplate(""); len(matches) != 1 {
+				t.Fatalf("template manager did not expose the fixture: %v", matches)
+			}
+			if err := os.WriteFile(filepath.Join(util.DataDir, "assets", "template.png"), []byte("image"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			unused, err := UnusedAssets(false)
+			if err != nil || len(unused) != 0 {
+				t.Fatalf("supported template asset listed for deletion: %+v, %v", unused, err)
+			}
+		})
+	}
+}
+
 func TestUnusedAssetsAbortUnreadableDocument(t *testing.T) {
 	for _, test := range []struct{ name, data string }{
 		{"new spec", `{"Type":"NodeDocument","Spec":"99"}`},

@@ -158,6 +158,27 @@ func backupBoundAttributeViewHistory(tree *parse.Tree, historyDir string) error 
 	if IsEncryptedBox(tree.Box) {
 		boxID = tree.Box
 	}
+	// 单向关联的值存放在引用方数据库，删除前与绑定数据库一起保留快照。
+	for _, id := range sortedAttributeViewFieldKeys(bound) {
+		if len(bound[id]) == 0 {
+			continue
+		}
+		source, _ := av.FindAttributeViewPathInBox(id, boxID)
+		if source == "" {
+			continue
+		}
+		view, err := readBoundAttributeViewHistory(source, boxID, id)
+		if err != nil {
+			return err
+		}
+		for _, relatedID := range deletedAttributeViewRelationIDs(view) {
+			if relatedID != "" {
+				if _, exists := bound[relatedID]; !exists {
+					bound[relatedID] = nil
+				}
+			}
+		}
+	}
 	for _, id := range sortedAttributeViewFieldKeys(bound) {
 		source, _ := av.FindAttributeViewPathInBox(id, boxID)
 		if source == "" {
@@ -226,7 +247,17 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 			if primary.IsDetached || primary.Block == nil {
 				continue
 			}
-			if _, exists := bound[id][primary.Block.ID]; !exists || current.GetBlockValueByBoundID(primary.Block.ID) != nil {
+			if _, exists := bound[id][primary.Block.ID]; !exists {
+				continue
+			}
+			if existing := current.GetBlockValueByBoundID(primary.Block.ID); existing != nil {
+				// 内嵌数据库整份恢复后条目已存在，仍需恢复删除期间被清理的外部关联。
+				key := boxID + "/" + id
+				original := tx.attributeViewRollback.views[key]
+				_, created := tx.attributeViewRollback.createdViews[key]
+				if created || original != nil && original.GetBlockValue(existing.BlockID) == nil {
+					restoredItems[id] = append(restoredItems[id], existing.BlockID)
+				}
 				continue
 			}
 			if existing := current.GetBlockValue(primary.BlockID); existing != nil {
@@ -284,7 +315,7 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 				current.CardCoverPositions[itemID] = covers
 			}
 		}
-		restoredItems[id] = itemIDs
+		restoredItems[id] = append(restoredItems[id], itemIDs...)
 	}
 	// 先合并所有主键，再恢复双向关联，允许同一文档内的条目互相关联。
 	for id, itemIDs := range restoredItems {
@@ -322,6 +353,56 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 					if !slices.Contains(backValue.Relation.BlockIDs, value.BlockID) {
 						backValue.Relation.BlockIDs = append(backValue.Relation.BlockIDs, value.BlockID)
 					}
+				}
+			}
+		}
+	}
+	// 只合并指向本次恢复条目的历史关联，保留引用方其他条目的后续编辑。
+	for id, itemIDs := range restoredItems {
+		for _, sourceID := range av.GetSrcAvIDs(id) {
+			historical, err := readBoundAttributeViewHistory(boundAttributeViewHistoryPath(historyDir, boxID, sourceID), boxID, sourceID)
+			if os.IsNotExist(err) {
+				continue
+			}
+			if err != nil {
+				return err
+			}
+			source, err := load(sourceID)
+			if err != nil {
+				return err
+			}
+			for _, oldField := range historical.KeyValues {
+				if oldField.Key.Type != av.KeyTypeRelation || oldField.Key.Relation == nil || oldField.Key.Relation.AvID != id {
+					continue
+				}
+				field, fieldErr := source.GetKeyValues(oldField.Key.ID)
+				if fieldErr != nil || field.Key.Type != av.KeyTypeRelation || !reflect.DeepEqual(field.Key.Relation, oldField.Key.Relation) {
+					continue
+				}
+				for _, oldValue := range oldField.Values {
+					if oldValue.Relation == nil || source.GetBlockValue(oldValue.BlockID) == nil {
+						continue
+					}
+					var missing []string
+					value := field.GetValue(oldValue.BlockID)
+					if value != nil && value.Relation == nil {
+						return errors.New("database relation value is invalid")
+					}
+					for _, targetID := range oldValue.Relation.BlockIDs {
+						if slices.Contains(itemIDs, targetID) && (value == nil || !slices.Contains(value.Relation.BlockIDs, targetID)) {
+							missing = append(missing, targetID)
+						}
+					}
+					if len(missing) == 0 {
+						continue
+					}
+					if value == nil {
+						value = oldValue.Clone()
+						value.Relation.BlockIDs = nil
+						field.Values = append(field.Values, value)
+					}
+					value.Relation.BlockIDs = restoreAttributeViewItemOrder(value.Relation.BlockIDs, oldValue.Relation.BlockIDs, missing)
+					value.Relation.Contents = nil
 				}
 			}
 		}

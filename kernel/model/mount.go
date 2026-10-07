@@ -32,6 +32,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -299,6 +300,16 @@ func RemoveBox(boxID string) (err error) {
 
 	// 删目录前固定加密状态，确保后续历史、资源和索引清理始终使用同一个安全边界。
 	isEncrypted := IsEncryptedBox(boxID)
+	boundDeletion := &Transaction{}
+	defer func() { boundDeletion.finishAttributeViewMutation(err != nil) }()
+	var before, after map[string]*av.AttributeView
+	if !isEncrypted {
+		// 普通数据库跨笔记本共享，删除目录前校验全部关联，避免删除成功后留下失效绑定。
+		before, after, err = boundDeletion.prepareDeletedBoundAttributeViewBlocks(deletedAttrViewBlockIDs, "")
+		if err != nil {
+			return
+		}
+	}
 	if !isUserGuide {
 		if err = EnsureAssetPrefixLocal(localPath); err != nil {
 			return
@@ -371,13 +382,17 @@ func RemoveBox(boxID string) (err error) {
 		RevokeManagedEncryptedExportsForBox(boxID)
 	}
 
+	if !isEncrypted {
+		if err = boundDeletion.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{}, before, after); err != nil {
+			return
+		}
+	}
 	if err = removeBoxDir(localPath); err != nil {
 		return
 	}
+	boundDeletion.finishAttributeViewMutation(false)
 	removeHPathRefreshBox(boxID)
 	maintainPinnedDocs(nil, boxID, "")
-	// 目录删除成功后再清理，避免删除失败时提前移除数据库条目。
-	flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs)
 	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
 	if isEncrypted {
 		sql.RemoveEncryptedDBFile(boxID)

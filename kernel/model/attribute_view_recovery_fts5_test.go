@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
@@ -156,10 +157,25 @@ func TestAttributeViewMissingDatabaseHistoryRecovery(t *testing.T) {
 }
 
 func TestAttributeViewNotebookHistoryRestoresBindings(t *testing.T) {
-	for _, cleanup := range []bool{false, true} {
-		t.Run(map[bool]string{false: "bound rows", true: "cleaned embedded database"}[cleanup], func(t *testing.T) {
+	for _, scenario := range []struct {
+		name            string
+		cleanup, oneWay bool
+	}{
+		{"bound rows", false, false},
+		{"cleaned embedded database", true, false},
+		{"one-way relations", false, true},
+		{"cleaned embedded one-way relations", true, true},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			cleanup := scenario.cleanup
 			fixture, before, _ := setupAttributeViewDeletedBlockTest(t, "container")
-			dest, _, targetID := addDeletedBlockTestRelation(t, before, false)
+			var dest *av.AttributeView
+			var targetID string
+			if scenario.oneWay {
+				dest, _, targetID = addDeletedBlockOneWayTestRelation(t, before)
+			} else {
+				dest, _, targetID = addDeletedBlockTestRelation(t, before, false)
+			}
 			primary := dest.GetBlockValue(targetID)
 			primary.IsDetached, primary.Block.ID = false, fixture.targetID
 			dest.Views[0].ItemIDs = []string{targetID}
@@ -254,5 +270,248 @@ func TestDeletedFlashcardBlockReplayRetainsDeckAttribute(t *testing.T) {
 			t.Fatal("flashcard undo lost its deck attribute")
 		}
 		replayAttributeViewFieldsTest(t, entry.DoOperationsForReplay())
+	}
+}
+
+func TestFlashcardCopyRedoPreservesNormalizedAttributes(t *testing.T) {
+	fixture, _, original := setupAttributeViewDeletedBlockTest(t, "block")
+	originalID := original.DoOperations[0].ID
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	treenode.GetNodeInTree(tree, originalID).SetIALAttr(NodeAttrRiffDecks, "20230218211946-2kw8jgx")
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	copyID := ast.NewNodeID()
+	data := strings.ReplaceAll(GetBlockDOM(originalID), originalID, copyID)
+	tx := &Transaction{fromAPI: true,
+		DoOperations:   []*Operation{{Action: "insert", ID: copyID, PreviousID: originalID, Data: data}},
+		UndoOperations: []*Operation{{Action: "delete", ID: copyID}},
+	}
+	if err = PerformTxSync(tx); err != nil {
+		t.Fatal(err)
+	}
+	check := func() {
+		t.Helper()
+		current, loadErr := LoadTreeByBlockID(fixture.sourceID)
+		if loadErr != nil {
+			t.Fatal(loadErr)
+		}
+		if got := treenode.GetNodeInTree(current, copyID).IALAttr(NodeAttrRiffDecks); got != "" {
+			t.Fatalf("copied block became a flashcard: %s", got)
+		}
+		if got := treenode.GetNodeInTree(current, originalID).IALAttr(NodeAttrRiffDecks); got != "20230218211946-2kw8jgx" {
+			t.Fatal("copy changed the original flashcard")
+		}
+	}
+	check()
+	entry := GlobalUndoLog.Peek(fixture.sourceID)
+	for cycle := 0; cycle < 2; cycle++ {
+		replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
+		replayAttributeViewFieldsTest(t, entry.DoOperationsForReplay())
+		check()
+	}
+}
+
+func addDeletedBlockOneWayTestRelation(t *testing.T, source *av.AttributeView) (*av.AttributeView, string, string) {
+	t.Helper()
+	dest, keyID, itemID := addDeletedBlockTestRelation(t, source, false)
+	source.KeyValues = slices.DeleteFunc(source.KeyValues, func(kv *av.KeyValues) bool { return kv.Key.Type == av.KeyTypeRelation })
+	key, _ := dest.GetKey(keyID)
+	key.Relation.IsTwoWay, key.Relation.BackKeyID = false, ""
+	for _, view := range []*av.AttributeView{source, dest} {
+		if err := av.SaveAttributeView(view); err != nil {
+			t.Fatal(err)
+		}
+	}
+	av.RemoveAvRel(source.ID, dest.ID)
+	return dest, keyID, itemID
+}
+
+func TestAttributeViewDocumentHistoryOneWayRelations(t *testing.T) {
+	fixture, source, _ := setupAttributeViewDeletedBlockTest(t, "container")
+	dest, keyID, itemID := addDeletedBlockOneWayTestRelation(t, source)
+	want := append([]string(nil), dest.GetValue(keyID, itemID).Relation.BlockIDs...)
+	oldWorkspace := util.WorkspaceDir
+	util.WorkspaceDir = filepath.Dir(util.HistoryDir)
+	t.Cleanup(func() { util.WorkspaceDir = oldWorkspace })
+	if _, err := removeDoc(fixture.box, fixture.sourcePath, util.NewLute()); err != nil {
+		t.Fatal(err)
+	}
+	sql.FlushQueue()
+	current := readAttributeViewItemsTest(t, dest.ID)
+	if got := current.GetValue(keyID, itemID).Relation.BlockIDs; len(got) != 0 {
+		t.Fatalf("deletion did not clear incoming IDs: %v", got)
+	}
+	keptID := source.GetBlockKeyValues().Values[2].BlockID
+	current.GetValue(keyID, itemID).Relation.BlockIDs = []string{keptID}
+	if err := av.SaveAttributeView(current); err != nil {
+		t.Fatal(err)
+	}
+	paths, err := filepath.Glob(filepath.Join(util.HistoryDir, "*-delete", fixture.box.ID, fixture.sourceID+".sy"))
+	if err != nil || len(paths) != 1 {
+		t.Fatalf("history paths: %v %v", paths, err)
+	}
+	relative, err := filepath.Rel(util.WorkspaceDir, paths[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = RollbackDocHistory(relative); err != nil {
+		t.Fatal(err)
+	}
+	sql.FlushQueue()
+	assertAttributeViewItemsEqual(t, source, readAttributeViewItemsTest(t, source.ID))
+	want = append(want, keptID)
+	if got := readAttributeViewItemsTest(t, dest.ID).GetValue(keyID, itemID).Relation.BlockIDs; !slices.Equal(got, want) {
+		t.Fatalf("recovery lost one-way relations or later edits: want %v, got %v", want, got)
+	}
+}
+
+func TestAttributeViewExternalDeletionUnreadableRelationPreservesData(t *testing.T) {
+	for _, notebook := range []bool{false, true} {
+		t.Run(map[bool]string{false: "document", true: "notebook"}[notebook], func(t *testing.T) {
+			fixture, source, _ := setupAttributeViewDeletedBlockTest(t, "container")
+			dest, _, _ := addDeletedBlockTestRelation(t, source, false)
+			corrupted := []byte("invalid database JSON")
+			filename := av.GetAttributeViewDataPath(dest.ID)
+			if err := os.WriteFile(filename, corrupted, 0600); err != nil {
+				t.Fatal(err)
+			}
+			cache.ClearAVCache()
+			var err error
+			if notebook {
+				err = RemoveBox(fixture.box.ID)
+			} else {
+				_, err = removeDoc(fixture.box, fixture.sourcePath, util.NewLute())
+			}
+			if err == nil {
+				t.Fatal("unreadable relation did not abort deletion")
+			}
+			if _, err = os.Stat(filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)); err != nil {
+				t.Fatalf("failed deletion removed the document: %v", err)
+			}
+			assertAttributeViewItemsEqual(t, source, readAttributeViewItemsTest(t, source.ID))
+			if data, err := os.ReadFile(filename); err != nil || !bytes.Equal(data, corrupted) {
+				t.Fatal("failed deletion changed the unreadable database")
+			}
+			if notebook && fixture.box.GetConf().Closed {
+				t.Fatal("failed preflight closed the notebook")
+			}
+		})
+	}
+}
+
+func TestAttributeViewExternalDeletionSaveFailureRollsBackBatch(t *testing.T) {
+	fixture, source, _ := setupAttributeViewDeletedBlockTest(t, "container")
+	dest, _, _ := addDeletedBlockTestRelation(t, source, false)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deleted := map[string]map[string]struct{}{}
+	collectDeletedAttributeViewBlocks(tree.Root, true, deleted)
+	tx := &Transaction{}
+	before, after, err := tx.prepareDeletedBoundAttributeViewBlocks(deleted, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ids := sortedAttributeViewFieldKeys(after)
+	after[ids[len(ids)-1]].ID = "invalid"
+	err = tx.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{}, before, after)
+	tx.finishAttributeViewMutation(err != nil)
+	if err == nil {
+		t.Fatal("invalid save did not fail")
+	}
+	assertAttributeViewFieldsTest(t, source, readAttributeViewItemsTest(t, source.ID))
+	assertAttributeViewFieldsTest(t, dest, readAttributeViewItemsTest(t, dest.ID))
+}
+
+func TestAttributeViewBoundHistoryOneWayEncrypted(t *testing.T) {
+	fixture, source, _ := setupAttributeViewDeletedBlockTest(t, "container")
+	dest, keyID, itemID := addDeletedBlockOneWayTestRelation(t, source)
+	boxID := ast.NewNodeID()
+	markRuntimeEncryptedBox(boxID)
+	setDEKForTest(boxID, bytes.Repeat([]byte{0x79}, 32))
+	t.Cleanup(func() {
+		for _, view := range []*av.AttributeView{source, dest} {
+			av.SetAVBoxID(view.ID, "")
+		}
+		forgetRuntimeEncryptedBox(boxID)
+		encryptedBoxLifecycles.Delete(boxID)
+		cachedDEKsLock.Lock()
+		delete(cachedDEKs, boxID)
+		cachedDEKsLock.Unlock()
+	})
+	for _, view := range []*av.AttributeView{source, dest} {
+		av.SetAVBoxID(view.ID, boxID)
+		if err := av.SaveAttributeView(view); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Remove(av.GetAttributeViewDataPath(view.ID)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	av.UpsertAvBackRel(dest.ID, source.ID)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tree.Box = boxID
+	historyDir := t.TempDir()
+	if err = backupBoundAttributeViewHistory(tree, historyDir); err != nil {
+		t.Fatal(err)
+	}
+	historyPath := boundAttributeViewHistoryPath(historyDir, boxID, dest.ID)
+	data, err := os.ReadFile(historyPath)
+	if err != nil || !util.IsCiphertext(data) {
+		t.Fatalf("incoming relation history is not encrypted: %v", err)
+	}
+	deleted := map[string]map[string]struct{}{}
+	collectDeletedAttributeViewBlocks(tree.Root, true, deleted)
+	tx := &Transaction{}
+	before, after, err := tx.prepareDeletedBoundAttributeViewBlocks(deleted, boxID)
+	if err == nil {
+		err = tx.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{boxID: boxID}, before, after)
+	}
+	tx.finishAttributeViewMutation(err != nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	corrupted := append([]byte(nil), data...)
+	corrupted[len(corrupted)-1] ^= 1
+	if err = os.WriteFile(historyPath, corrupted, 0600); err != nil {
+		t.Fatal(err)
+	}
+	tx = &Transaction{}
+	err = tx.restoreBoundAttributeViewHistory(tree, historyDir)
+	tx.finishAttributeViewMutation(err != nil)
+	if err == nil {
+		t.Fatal("corrupted incoming relation history was accepted")
+	}
+	current, err := av.ParseAttributeViewForIndexInBox(dest.ID, boxID)
+	if err != nil || len(current.GetValue(keyID, itemID).Relation.BlockIDs) != 0 {
+		t.Fatalf("failed authentication changed incoming relations: %v", err)
+	}
+	if err = os.WriteFile(historyPath, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	tx = &Transaction{}
+	err = tx.restoreBoundAttributeViewHistory(tree, historyDir)
+	tx.finishAttributeViewMutation(err != nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	current, err = av.ParseAttributeViewForIndexInBox(dest.ID, boxID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertAttributeViewFieldsTest(t, dest, current)
+	for _, view := range []*av.AttributeView{source, dest} {
+		stored, readErr := os.ReadFile(boundAttributeViewHistoryPath(util.DataDir, boxID, view.ID))
+		if readErr != nil || !util.IsCiphertext(stored) {
+			t.Fatal("recovery wrote a plaintext database")
+		}
 	}
 }

@@ -114,35 +114,46 @@ func (tx *Transaction) prepareDeletedAttributeViewRelations(original, current *a
 	before, after map[string]*av.AttributeView, err error) {
 	before = map[string]*av.AttributeView{original.ID: original}
 	after = map[string]*av.AttributeView{current.ID: current}
-	removed := map[string]bool{}
-	for _, value := range original.GetBlockKeyValues().Values {
-		if value != nil && current.GetBlockValue(value.BlockID) == nil {
-			removed[value.BlockID] = true
-		}
-	}
+	err = tx.clearDeletedAttributeViewRelations(original, current, carrier, boxID, before, after)
+	return
+}
+
+func deletedAttributeViewRelationIDs(original *av.AttributeView) []string {
 	ids := append([]string{original.ID}, av.GetSrcAvIDs(original.ID)...)
 	for _, kv := range original.KeyValues {
 		if kv.Key.Relation != nil && kv.Key.Relation.IsTwoWay {
 			ids = append(ids, kv.Key.Relation.AvID)
 		}
 	}
-	for _, id := range slices.Compact(slices.Sorted(slices.Values(ids))) {
+	return slices.Compact(slices.Sorted(slices.Values(ids)))
+}
+
+func (tx *Transaction) clearDeletedAttributeViewRelations(original, current *av.AttributeView, carrier, boxID string,
+	before, after map[string]*av.AttributeView) error {
+	removed := map[string]bool{}
+	for _, value := range original.GetBlockKeyValues().Values {
+		if value != nil && current.GetBlockValue(value.BlockID) == nil {
+			removed[value.BlockID] = true
+		}
+	}
+	for _, id := range deletedAttributeViewRelationIDs(original) {
 		if id == "" {
 			continue
 		}
 		view := after[id]
 		var source *av.AttributeView
 		if view == nil {
+			var err error
 			source, err = tx.readAttributeViewForMutation(id, carrier, boxID)
 			if errors.Is(err, av.ErrViewNotFound) {
 				continue
 			}
 			if err != nil {
-				return nil, nil, err
+				return err
 			}
 			view, err = cloneAttributeViewForFieldMutation(source)
 			if err != nil {
-				return nil, nil, err
+				return err
 			}
 		}
 		changed := false
@@ -166,7 +177,7 @@ func (tx *Transaction) prepareDeletedAttributeViewRelations(original, current *a
 			before[id], after[id] = source, view
 		}
 	}
-	return before, after, nil
+	return nil
 }
 
 func (tx *Transaction) restoreDeletedAttributeViewBlocks(op *Operation) error {

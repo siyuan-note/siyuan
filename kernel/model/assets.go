@@ -2088,6 +2088,11 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem, err error) {
 	removeReferencedAssetPaths(assetsPathMap, agentSessionDests)
 	templateDests := map[string]bool{}
 	templateDir := filepath.Join(util.DataDir, "templates")
+	if resolved, resolveErr := filepath.EvalSymlinks(templateDir); resolveErr == nil {
+		templateDir = resolved
+	} else if !os.IsNotExist(resolveErr) {
+		return nil, fmt.Errorf("resolve template directory failed: %w", resolveErr)
+	}
 	err = filepath.WalkDir(templateDir, func(filename string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			if filename == templateDir && os.IsNotExist(walkErr) {
@@ -2095,7 +2100,7 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem, err error) {
 			}
 			return walkErr
 		}
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
+		if entry.IsDir() || !strings.HasSuffix(strings.ToLower(entry.Name()), ".md") {
 			return nil
 		}
 		data, readErr := filelock.ReadFile(filename)

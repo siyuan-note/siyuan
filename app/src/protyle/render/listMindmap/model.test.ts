@@ -1891,7 +1891,14 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     HTMLElement.prototype.hasPointerCapture = originalHasCapture;
     HTMLElement.prototype.releasePointerCapture = originalReleaseCapture;
     relationChanges.length = 0;
-    const nativeHandle = centerPoint(host.querySelector<HTMLElement>(".mindmap-view__route-handle:not(.mindmap-view__route-endpoint)"));
+    // 使用远离端点的手动路由，保留触屏设备的大触摸目标及真实命中测试。
+    model.metadata.relations[0].route = savedRoute;
+    view.update(model);
+    await settle();
+    const nativeRouteHandle = view.routeHandles.get(`drag-route:${returningSegment}`);
+    check.ok(nativeRouteHandle);
+    const nativeHandle = centerPoint(nativeRouteHandle);
+    check.equal(document.elementFromPoint(nativeHandle.x, nativeHandle.y), nativeRouteHandle);
     await nativeInput([
         {type: "mouseMove", ...nativeHandle},
         {type: "mouseDown", ...nativeHandle, button: "left", clickCount: 1},

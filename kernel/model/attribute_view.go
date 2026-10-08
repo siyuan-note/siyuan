@@ -1435,14 +1435,36 @@ func (tx *Transaction) doChangeAttrViewLayout(operation *Operation) (ret *TxErr)
 }
 
 func ChangeAttrViewLayout(blockID, avID string, newLayout av.LayoutType) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
+	return ChangeAttrViewLayoutForView(blockID, avID, "", "", newLayout)
+}
+
+// ChangeAttrViewLayoutForView 精确修改指定视图的布局，并同步显示该视图的镜像数据库块。
+func ChangeAttrViewLayoutForView(blockID, avID, viewID, revision string, newLayout av.LayoutType) (err error) {
+	if "" != viewID {
+		FlushTxQueue()
+	}
+	attrView, err := avParseView(avID, blockID)
 	if err != nil {
 		return
 	}
 
-	view, err := getAttrViewViewByBlockID(attrView, blockID)
-	if err != nil {
-		return
+	var view *av.View
+	if "" != viewID {
+		if _, _, err = getAttributeViewInstanceNode(attrView, blockID); nil != err {
+			return
+		}
+		view = attrView.GetView(viewID)
+		if nil == view {
+			return av.ErrViewNotFound
+		}
+		if err = checkAttributeViewViewConfigRevision(view, revision); nil != err {
+			return
+		}
+	} else {
+		view, err = getAttrViewViewByBlockID(attrView, blockID)
+		if err != nil {
+			return
+		}
 	}
 
 	if newLayout == view.LayoutType {
@@ -1463,7 +1485,7 @@ func ChangeAttrViewLayout(blockID, avID string, newLayout av.LayoutType) (err er
 
 		changed := false
 		attrs := parse.IAL2Map(node.KramdownIAL)
-		if blockID == bID { // 当前操作的镜像库
+		if blockID == bID && "" == viewID { // 当前操作的镜像库
 			attrs[av.NodeAttrView] = view.ID
 			node.AttributeViewType = string(view.LayoutType)
 			changed = true
@@ -1486,7 +1508,7 @@ func ChangeAttrViewLayout(blockID, avID string, newLayout av.LayoutType) (err er
 
 	regenAttrViewGroups(attrView)
 
-	if err = av.SaveAttributeView(attrView); nil != err {
+	if err = avSaveView(attrView, blockID); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return
 	}
@@ -4815,7 +4837,7 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 	var err error
 	avID := operation.AvID
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := avParseView(avID, operation.BlockID)
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: avID}
@@ -4849,7 +4871,7 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 	}
 
 	view = attrView.Views[index]
-	if err = av.SaveAttributeView(attrView); err != nil {
+	if err = avSaveView(attrView, operation.BlockID); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}
 	}
@@ -5001,7 +5023,7 @@ func (tx *Transaction) doDuplicateAttrViewRow(operation *Operation) (ret *TxErr)
 func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr) {
 	var err error
 	avID := operation.AvID
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := avParseView(avID, operation.BlockID)
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrHandleAttributeView, id: avID}
@@ -5054,6 +5076,9 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 
 	view.Icon = masterView.Icon
 	view.Name = util.GetDuplicateName(masterView.Name)
+	if name := strings.TrimSpace(operation.Name); "" != name {
+		view.Name = name
+	}
 	view.HideAttrViewName = masterView.HideAttrViewName
 	view.Desc = masterView.Desc
 	view.LayoutType = masterView.LayoutType
@@ -5088,7 +5113,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		regenAttrViewGroups(attrView)
 	}
 
-	if err = av.SaveAttributeView(attrView); err != nil {
+	if err = avSaveView(attrView, operation.BlockID); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
 	}
@@ -5096,7 +5121,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 }
 
 func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
-	err := addAttrViewView(operation.AvID, operation.ID, operation.BlockID, operation.Layout)
+	err := addAttrViewViewNamed(operation.AvID, operation.ID, operation.BlockID, operation.Name, operation.Layout)
 	if nil != err {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
@@ -5104,7 +5129,11 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 }
 
 func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
+	return addAttrViewViewNamed(avID, viewID, blockID, "", layout)
+}
+
+func addAttrViewViewNamed(avID, viewID, blockID, name string, layout av.LayoutType) (err error) {
+	attrView, err := avParseView(avID, blockID)
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
@@ -5202,6 +5231,9 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 
 	view.ItemIDs = firstView.ItemIDs
 	view.ID = viewID
+	if name = strings.TrimSpace(name); "" != name {
+		view.Name = name
+	}
 	attrView.Views = append(attrView.Views, view)
 
 	if av.LayoutTypeKanban == layout {
@@ -5220,7 +5252,7 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 		return
 	}
 
-	if err = av.SaveAttributeView(attrView); err != nil {
+	if err = avSaveView(attrView, blockID); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return
 	}

@@ -60,6 +60,12 @@ func TestAttributeViewCarrierUsesExactCryptoBoundary(t *testing.T) {
 	if _, err = avParseView(foreignAvID, carrierBlockID); !errors.Is(err, av.ErrViewNotFound) {
 		t.Fatalf("ordinary carrier should not parse an encrypted attribute view through fallback: %v", err)
 	}
+	if _, _, err = GetAttributeViewViewTarget(foreignAvID, carrierBlockID, fixture.tableView.ID); !errors.Is(err, av.ErrViewNotFound) {
+		t.Fatalf("view configuration should preserve the carrier crypto boundary: %v", err)
+	}
+	if _, err = AddAttributeViewView(foreignAvID, carrierBlockID, "Wrong box", av.LayoutTypeTable); !errors.Is(err, av.ErrViewNotFound) {
+		t.Fatalf("view creation should preserve the carrier crypto boundary: %v", err)
+	}
 	if _, err = avParseView(fixture.attrView.ID, "20260904120002-missing"); nil == err ||
 		!strings.Contains(err.Error(), "carrier") {
 		t.Fatalf("a supplied but missing carrier should fail closed: %v", err)

@@ -750,20 +750,6 @@ export const deleteListMindmapNode = (list: HTMLElement, id: string): boolean =>
     return true;
 };
 
-// 只替换指定的直属正文块，并沿用块身份和属性，其余正文及嵌套列表保持原样。
-export const replaceListMindmapBlock = (list: HTMLElement, nodeId: string, blockId: string,
-                                        replacement: HTMLElement): boolean => {
-    const node = readListMindmap(list).nodes.get(nodeId);
-    const block = node?.contentBlocks.find(item => item.getAttribute("data-node-id") === blockId);
-    if (!block || replacement.getAttribute("data-type") !== block.getAttribute("data-type")) {
-        return false;
-    }
-    const updated = replacement.cloneNode(true) as HTMLElement;
-    Array.from(block.attributes).forEach(attribute => updated.setAttribute(attribute.name, attribute.value));
-    block.replaceWith(updated);
-    return true;
-};
-
 // 按原正文槽位写入编辑结果，保留穿插在正文之间的子列表及未改写的持久属性。
 export const replaceListMindmapContent = (list: HTMLElement, nodeId: string, blockHTML: string): boolean => {
     const node = readListMindmap(list).nodes.get(nodeId);

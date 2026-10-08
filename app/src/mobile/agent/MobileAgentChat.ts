@@ -161,8 +161,6 @@ export const insertMobileAgentMentions = (currentApp: App, mentions: Array<{id: 
     agentChat?.insertBlockMentions(mentions);
 };
 
-export const isMobileAgentVisible = () => isAgentSidebarVisible();
-
 export const reopenMobileAgent = () => {
     if (app) {
         openMobileAgent(app);

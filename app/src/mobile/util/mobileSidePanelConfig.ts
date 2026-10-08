@@ -60,14 +60,6 @@ export const DEFAULT_MOBILE_SIDE_PANEL_RIGHT: readonly MobileSidePanelBuiltInDoc
     "agent",
 ];
 
-export const DEFAULT_MOBILE_SIDE_PANEL_CONFIG: Readonly<IMobileSidePanelConfig> = {
-    version: MOBILE_SIDE_PANEL_CONFIG_VERSION,
-    left: [...DEFAULT_MOBILE_SIDE_PANEL_LEFT],
-    right: [...DEFAULT_MOBILE_SIDE_PANEL_RIGHT],
-    pluginDockIds: [],
-    hidden: [],
-};
-
 const mobileSidePanelDockIdSet = new Set<string>(MOBILE_SIDE_PANEL_DOCK_IDS);
 
 export const isMobileSidePanelBuiltInDockId = (value: unknown): value is MobileSidePanelBuiltInDockId => {

@@ -1,5 +1,4 @@
 import {getHostCapabilities} from "./hostCapabilities";
-import {getPdfAnnotationReference} from "../editor/pdfAssetLink";
 
 const CONTAINER_BACKEND_SET = new Set(["docker", "ios", "android", "harmony"]);
 
@@ -83,10 +82,6 @@ export const isBrowser = () => {
 
 export const isDynamicRef = (text: string) => {
     return /^\(\(\d{14}-\w{7} '.*'\)\)$/.test(text);
-};
-
-export const isFileAnnotation = (text: string) => {
-    return typeof getPdfAnnotationReference(text) !== "undefined";
 };
 
 export const isValidCustomAttrName = (name: string) => {

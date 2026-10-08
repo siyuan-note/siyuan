@@ -429,12 +429,6 @@ export const unloadPlugin = async (app: App, name: string) => {
     await manager.requestUnload(name);
 };
 
-export const uninstallPlugin = async (app: App, name: string) => {
-    const manager = getLifecycleManager(app);
-    manager.start();
-    await manager.requestUninstall(name);
-};
-
 // 窗口销毁时同步撤销实例，异步钩子的迟到完成不能重新挂载界面。
 export const disposePlugins = (app: App) => lifecycleManagers.get(app)?.dispose();
 

@@ -7,14 +7,6 @@ import {destroyAVRichTextEditor} from "../../protyle/render/av/richTextEditor";
 import {isAbove} from "../../util/zIndex";
 import {getMobileSelectMenuElement} from "./nativeSelect";
 
-export const clearMobileBackForward = (notebookId?: string) => {
-    if (notebookId) {
-        window.siyuan.mobile.tabs?.removeNotebook(notebookId);
-    } else {
-        window.siyuan.backStack = [];
-    }
-};
-
 export const pushBack = () => {
     window.siyuan.mobile.tabs?.pushCurrent();
 };

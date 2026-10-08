@@ -107,7 +107,11 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
    - For an improvement to existing functionality, write the title from an improvement perspective and prefer `Improve ...`
    - For a capability that did not previously exist, write the title from a support perspective and prefer `Support ...`
    - If the nature is unclear, infer the perspective from the issue content
-8. **LD246:** When accessing `ld246.com`, set the HTTP `User-Agent` header to `SiYuan-Coding-Agent`
+8. **LD246:**
+   - When accessing `ld246.com`, set the HTTP `User-Agent` header to `SiYuan-Coding-Agent`
+   - Read post details with `GET https://ld246.com/api/v2/article/{articleId}?p=1`; `data.article` contains the post, and `p` paginates replies. For Markdown, use `GET https://ld246.com/article/raw/{articleId}`
+   - Authenticate both endpoints with `Authorization: token <LD_TOKEN>` using the environment variable; on Windows, check process, user, then machine scope. Do not expose the Token or rely on UA exemptions
+   - Check HTTP status and JSON `code` (`0` means success); report missing credentials or authentication errors
 9. **Configurable entries:**
    - Treat the `data-id` of a configurable desktop menu item and the `data-type` of a configurable dock entry as persisted configuration identifiers. Do not rename or reuse them unless the same change migrates existing visibility and order configuration
    - When adding, removing, renaming, or moving a configurable desktop menu item or dock entry, or changing its `data-id` / `data-type`, update `app/src/config/entryVisibility/catalog.ts` in the same change, including its type, hierarchy, label, Simple profile default, and default position, and update the related tests

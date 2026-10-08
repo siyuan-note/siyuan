@@ -3158,6 +3158,11 @@
 		"411": "Konversi dibatalkan: item daftar dan blok pertamanya terikat ke baris berbeda dalam basis data yang sama. Lepaskan salah satu ikatan terlebih dahulu",
 		"412": "Harap konfigurasi model agen terlebih dahulu",
 		"413": "AI OCR tidak mengembalikan transkripsi lengkap; hasil sebelumnya dipertahankan",
-		"414": "Pilih model AI yang tersedia untuk OCR"
+		"414": "Pilih model AI yang tersedia untuk OCR",
+		"415": "Masukan saat ini melebihi kapasitas konteks model yang dipilih. Kurangi masukan atau gunakan model dengan jendela konteks yang lebih besar",
+		"416": "Model tidak memiliki anggaran masukan yang tersedia. Periksa pengaturan panjang konteks dan jumlah token maksimum",
+		"417": "Pemadatan konteks agen gagal. Percakapan Anda telah disimpan; coba lagi: %s",
+		"418": "Model ini mengharuskan seluruh riwayat pemanggilan alat pada giliran saat ini tetap utuh. Gunakan model dengan jendela konteks yang lebih besar atau bagi tugasnya",
+		"419": "Pemadatan konteks agen mencapai batas permintaan atau waktu. Percakapan Anda telah disimpan"
 	}
 }

@@ -3158,6 +3158,11 @@
 		"411": "Conversión cancelada: el elemento de la lista y su primer bloque están vinculados a filas distintas de la misma base de datos. Desvincule uno de ellos primero",
 		"412": "Configure primero el modelo del agente",
 		"413": "El OCR con IA no devolvió una transcripción completa; se conservó el resultado anterior",
-		"414": "Seleccione un modelo de IA disponible para OCR"
+		"414": "Seleccione un modelo de IA disponible para OCR",
+		"415": "La entrada actual supera la capacidad de contexto del modelo seleccionado. Reduzca la entrada o utilice un modelo con una ventana de contexto mayor",
+		"416": "El modelo no dispone de un presupuesto de entrada. Compruebe la longitud del contexto y el número máximo de tokens",
+		"417": "La compresión del contexto del agente ha fallado. La conversación se ha conservado; inténtelo de nuevo: %s",
+		"418": "Este modelo exige conservar íntegro el historial de llamadas a herramientas del turno actual. Utilice un modelo con una ventana de contexto mayor o divida la tarea",
+		"419": "La compresión del contexto del agente ha alcanzado el límite de solicitudes o de tiempo. La conversación se ha conservado"
 	}
 }

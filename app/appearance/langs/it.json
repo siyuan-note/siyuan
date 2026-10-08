@@ -3158,6 +3158,11 @@
 		"411": "Conversione annullata: la voce dell’elenco e il suo primo blocco sono associati a righe diverse dello stesso database. Rimuovi prima una delle associazioni",
 		"412": "Configura prima il modello dell’agente",
 		"413": "L’OCR con IA non ha restituito una trascrizione completa; il risultato precedente è stato conservato",
-		"414": "Selezionare un modello IA disponibile per OCR"
+		"414": "Selezionare un modello IA disponibile per OCR",
+		"415": "L’input corrente supera la capacità di contesto del modello selezionato. Riduci l’input o usa un modello con una finestra di contesto più ampia",
+		"416": "Il modello non dispone di spazio per l’input. Controlla la lunghezza del contesto e il numero massimo di token",
+		"417": "La compressione del contesto dell’agente non è riuscita. La conversazione è stata conservata; riprova: %s",
+		"418": "Questo modello richiede di conservare integralmente la cronologia delle chiamate agli strumenti del turno corrente. Usa un modello con una finestra di contesto più ampia o suddividi l’attività",
+		"419": "La compressione del contesto dell’agente ha raggiunto il limite di richieste o di tempo. La conversazione è stata conservata"
 	}
 }

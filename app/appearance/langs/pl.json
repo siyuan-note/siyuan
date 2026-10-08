@@ -3158,6 +3158,11 @@
 		"411": "Konwersja anulowana: element listy i jego pierwszy blok są powiązane z różnymi wierszami tej samej bazy danych. Najpierw usuń jedno z powiązań",
 		"412": "Najpierw skonfiguruj model agenta",
 		"413": "OCR z AI nie zwrócił pełnej transkrypcji; zachowano dotychczasowy wynik",
-		"414": "Wybierz dostępny model AI do OCR"
+		"414": "Wybierz dostępny model AI do OCR",
+		"415": "Bieżące dane wejściowe przekraczają pojemność kontekstu wybranego modelu. Ogranicz dane lub wybierz model z większym oknem kontekstu",
+		"416": "Model nie ma dostępnego budżetu wejściowego. Sprawdź długość kontekstu i maksymalną liczbę tokenów",
+		"417": "Kompresja kontekstu agenta nie powiodła się. Rozmowa została zachowana; spróbuj ponownie: %s",
+		"418": "Ten model wymaga zachowania pełnej historii wywołań narzędzi w bieżącej turze. Wybierz model z większym oknem kontekstu lub podziel zadanie",
+		"419": "Kompresja kontekstu agenta osiągnęła limit żądań lub czasu. Rozmowa została zachowana"
 	}
 }

@@ -3158,6 +3158,11 @@
 		"411": "Konverzia zrušená: položka zoznamu a jej prvý blok sú naviazané na rôzne riadky tej istej databázy. Najprv zrušte jednu z väzieb",
 		"412": "Najprv nakonfigurujte model agenta",
 		"413": "AI OCR nevrátil úplný prepis; pôvodný výsledok bol zachovaný",
-		"414": "Vyberte dostupný model AI pre OCR"
+		"414": "Vyberte dostupný model AI pre OCR",
+		"415": "Aktuálny vstup presahuje kapacitu kontextu vybraného modelu. Zmenšite vstup alebo použite model s väčším kontextovým oknom",
+		"416": "Model nemá dostupný rozpočet na vstup. Skontrolujte dĺžku kontextu a maximálny počet tokenov",
+		"417": "Kompresia kontextu agenta zlyhala. Konverzácia bola zachovaná; skúste to znova: %s",
+		"418": "Tento model vyžaduje zachovanie celej histórie volaní nástrojov v aktuálnom ťahu. Použite model s väčším kontextovým oknom alebo rozdeľte úlohu",
+		"419": "Kompresia kontextu agenta dosiahla limit požiadaviek alebo času. Konverzácia bola zachovaná"
 	}
 }

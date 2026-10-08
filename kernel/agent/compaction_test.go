@@ -326,7 +326,7 @@ func TestRuntimeCompactionPersistsBesideActiveTurn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := saveRuntimeCompaction(testSessionID, compaction); err != nil {
+	if err := saveRuntimeCompaction(testSessionID, turn.TurnID, compaction); err != nil {
 		t.Fatal(err)
 	}
 	runtime, err := loadRuntimeState(testSessionID)
@@ -336,6 +336,15 @@ func TestRuntimeCompactionPersistsBesideActiveTurn(t *testing.T) {
 	if runtime.ActiveTurn == nil || runtime.ActiveTurn.TurnID != turn.TurnID ||
 		!validRuntimeCompaction(entries, runtime.Compaction) {
 		t.Fatalf("runtime compaction did not persist beside the active turn: %#v", runtime)
+	}
+	lateCompaction := cloneRuntimeCompaction(compaction)
+	lateCompaction.Summary = "Late summary must not be persisted"
+	if err = saveRuntimeCompaction(testSessionID, "another-turn", lateCompaction); err == nil {
+		t.Fatal("compaction from another turn was accepted")
+	}
+	runtime, err = loadRuntimeState(testSessionID)
+	if err != nil || runtime.Compaction.Summary != compaction.Summary {
+		t.Fatalf("late compaction replaced the active turn state: %#v, err=%v", runtime, err)
 	}
 }
 
@@ -408,7 +417,7 @@ func TestAgentChatCompactsBeforeSendingOversizedContext(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if runtime.Compaction == nil || runtime.Compaction.CoveredEntryCount != 2 ||
+	if runtime.Compaction == nil || runtime.Compaction.CoveredMessageCount != 2 ||
 		!validRuntimeCompaction(entries, runtime.Compaction) {
 		t.Fatalf("proactive compaction was not persisted: %#v", runtime.Compaction)
 	}
@@ -601,7 +610,7 @@ func TestAgentChatRetriesOverflowAfterProactiveCompaction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if runtime.Compaction == nil || runtime.Compaction.CoveredEntryCount != 4 {
+	if runtime.Compaction == nil || runtime.Compaction.CoveredMessageCount != 4 {
 		t.Fatalf("overflow fallback did not extend the compaction boundary: %#v", runtime.Compaction)
 	}
 }

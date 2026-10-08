@@ -3158,6 +3158,11 @@
 		"411": "Conversion canceled: the list item and its first block are bound to different rows in the same database. Unbind one of them first",
 		"412": "Please configure the agent model first",
 		"413": "AI OCR did not return a complete transcription; the existing result was preserved",
-		"414": "Please select an available AI model for OCR"
+		"414": "Please select an available AI model for OCR",
+		"415": "The current input cannot fit the selected model. Reduce the input or use a model with a larger context window",
+		"416": "The model input budget is unavailable. Check the context length and maximum token settings",
+		"417": "Agent context compaction failed. Your conversation has been preserved; please retry: %s",
+		"418": "This model requires the current tool history to remain intact. Use a model with a larger context window or split the task",
+		"419": "Agent context compaction reached its request or time limit. Your conversation has been preserved"
 	}
 }

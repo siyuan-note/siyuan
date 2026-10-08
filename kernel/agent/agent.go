@@ -27,7 +27,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -551,8 +550,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		tools := capabilities.definitions
 		var messages []openai.ChatCompletionMessage
 		var checkpointMsgs []AgentMessage
-		var sessionEntries []SessionEntry
+		var contextMsgs []AgentMessage
 		var compaction *runtimeCompaction
+		scopeKey := compactionScopeKey(protocol, model, imageCapabilityKey)
 		var totalPrompt, totalCompletion, lastPromptTokens, lastCachedTokens int
 		var doomLoop doomLoopTracker
 		var snapshotIDs []string
@@ -566,19 +566,21 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 			if cp := loadCheckpoint(sessionID); cp != nil {
 				if len(cp.Entries) > 0 {
-					sessionEntries = append([]SessionEntry(nil), cp.Entries...)
-					contextEntries := cp.Entries
 					currentUserIndex := sessionUserEntryIndex(cp.Entries, userEntryID)
 					if runtime != nil && runtimeCompactionMatchesProtocol(runtime.Compaction, protocol) &&
 						validRuntimeCompaction(cp.Entries, runtime.Compaction) {
-						if currentUserIndex >= runtime.Compaction.CoveredEntryCount {
+						if runtime.Compaction.Version == messageCompactionVersion {
+							if runtime.Compaction.Model == model && runtime.Compaction.ScopeKey == scopeKey {
+								compaction = cloneRuntimeCompaction(runtime.Compaction)
+							}
+						} else if currentUserIndex >= runtime.Compaction.CoveredEntryCount {
 							compaction = cloneRuntimeCompaction(runtime.Compaction)
-							contextEntries = cp.Entries[compaction.CoveredEntryCount:]
+							compaction.CoveredMessageCount = len(entriesToAgentMessages(cp.Entries[:compaction.CoveredEntryCount]))
 						}
 					}
 					// entries 是唯一持久化数据源。先转回 AgentMessage 视图用于
 					// 截断/重建逻辑（thinking/confirm/snapshot 不参与 LLM 上下文）。
-					loadedMsgs := entriesToAgentMessages(contextEntries)
+					loadedMsgs := entriesToAgentMessages(cp.Entries)
 					truncated := loadedMsgs
 					currentUserExists := false
 					if regenerate {
@@ -620,30 +622,24 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							}
 						}
 					}
-					if currentUserIndex >= 0 {
-						if regenerate {
-							// 重新生成只保留目标用户消息之前的历史，避免压缩时从持久化会话重新引入
-							// 已被前端截断的旧回答和后续轮次。
-							sessionEntries = sessionEntries[:currentUserIndex+1]
-						}
-						currentUserEntry := &sessionEntries[currentUserIndex]
-						currentUserEntry.Content = userMessage
-						currentUserEntry.References = append([]Reference(nil), references...)
-						currentUserEntry.EditorContext = cloneEditorContext(editorCtx)
-						if userBlockHTML != nil {
-							currentUserEntry.BlockHTML = *userBlockHTML
-						}
-					}
-					messages = checkpointMessagesToOpenAIWithSummary(checkpointMsgs, language, capabilities, compaction, instructions.Content)
 				}
 			}
 		}
 
-		if messages == nil {
+		if len(checkpointMsgs) == 0 {
 			checkpointMsgs = []AgentMessage{newAgentUserMessage(userMessage, userEntryID, references, editorCtx)}
-			messages = buildInitialMessages(userMessage, language, references, editorCtx, capabilities, instructions.Content)
 		}
-		restoreGeminiThoughtSignatures(thoughtSignatureState, checkpointMsgs)
+		if compaction != nil && compaction.Version == messageCompactionVersion &&
+			!validMessageCompaction(compactionRecordMessages(checkpointMsgs, rawUserMessage), compaction) {
+			compaction = nil
+		}
+		coveredMessages := 0
+		if compaction != nil {
+			coveredMessages = compaction.CoveredMessageCount
+		}
+		contextMsgs = projectCompactionContext(checkpointMsgs, coveredMessages)
+		messages = checkpointMessagesToOpenAIWithSummary(contextMsgs, language, capabilities, compaction, instructions.Content)
+		restoreGeminiThoughtSignatures(thoughtSignatureState, contextMsgs)
 
 		turnBaseIndex := len(checkpointMsgs)
 		turn := &agentRuntimeTurn{
@@ -725,6 +721,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		toolCallRounds := 0
 		overflowRetryPending := false
 		imageInputDisabled := imageInputUnsupportedCached(imageCapabilityKey)
+		compactionRequests := 0
 		projectImageMessages := func(source []openai.ChatCompletionMessage) ([]openai.ChatCompletionMessage, bool) {
 			if imageInputDisabled {
 				return downgradeImageInput(source)
@@ -732,11 +729,24 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			return source, false
 		}
 		compactionErrorMessage := func(err error) string {
+			switch {
+			case errors.Is(err, errCompactionInputTooLarge):
+				return kernelModel.Conf.Language(415)
+			case errors.Is(err, errCompactionBudget):
+				return kernelModel.Conf.Language(416)
+			case errors.Is(err, errCompactionProtected):
+				return kernelModel.Conf.Language(418)
+			case errors.Is(err, errCompactionLimit):
+				return kernelModel.Conf.Language(419)
+			case errors.Is(err, errCompactionSummaryFailed):
+				requestMessages, _ := projectImageMessages(messages)
+				return fmt.Sprintf(kernelModel.Conf.Language(417), getAgentRequestErrorMessage(err, requestMessages))
+			}
 			if errors.Is(err, errContextCannotBeCompacted) || isContextOverflow(err) {
 				return kernelModel.Conf.Language(352)
 			}
 			requestMessages, _ := projectImageMessages(messages)
-			return getAgentRequestErrorMessage(err, requestMessages)
+			return fmt.Sprintf(kernelModel.Conf.Language(417), getAgentRequestErrorMessage(err, requestMessages))
 		}
 
 		compactContext := func(requestTools []openai.Tool, force bool) (bool, error) {
@@ -744,87 +754,113 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				if !force {
 					return false, nil
 				}
-				return false, fmt.Errorf("%w: model context length is unknown", errContextCannotBeCompacted)
+				return false, fmt.Errorf("%w: model context length is unknown", errCompactionBudget)
 			}
 			inputBudget := contextInputBudget(contextLimit, maxCompletionTokens)
 			if inputBudget <= 0 {
-				return false, fmt.Errorf("%w: no input budget remains", errContextCannotBeCompacted)
+				return false, fmt.Errorf("%w: no input budget remains", errCompactionBudget)
 			}
 			estimatedMessages, _ := projectImageMessages(messages)
-			if !force && estimateProtocolRequestTokens(model, protocol, estimatedMessages, checkpointMsgs,
-				compaction, requestTools) <= inputBudget {
+			estimatedTokens := estimateProtocolRequestTokens(model, protocol, estimatedMessages, contextMsgs, compaction, requestTools)
+			if !force && estimatedTokens <= inputBudget*9/10 {
 				return false, nil
 			}
-
-			coveredEntryCount := 0
 			previousSummary := ""
 			if compaction != nil {
-				coveredEntryCount = compaction.CoveredEntryCount
 				previousSummary = compaction.Summary
 			}
-			candidates := compactionCandidateEntryCounts(sessionEntries, coveredEntryCount, userEntryID)
-			if len(candidates) == 0 {
-				return false, fmt.Errorf("%w: the current turn is too large", errContextCannotBeCompacted)
-			}
-			tail, ok := currentTurnTail(checkpointMsgs, userEntryID, userMessage)
-			if !ok {
-				return false, fmt.Errorf("%w: current user turn not found", errContextCannotBeCompacted)
-			}
-
 			nativeResponsesCompaction := util.IsOpenAIResponsesProtocol(protocol) &&
 				util.SupportsOpenAIResponsesCompaction(ctx) && !client.ChatGPT
-			// 原生 compact 无法限制输出长度，覆盖所有已完成轮次，避免 opaque window 返回后仍超出预算。
-			selectedCandidateIndex := len(candidates) - 1
+			candidates, protected := compactionCandidateMessageCounts(checkpointMsgs, coveredMessages, protocol, nativeResponsesCompaction, imageInputDisabled)
+			if len(candidates) == 0 {
+				if !force && estimatedTokens <= inputBudget {
+					return false, nil
+				}
+				if protected {
+					return false, errCompactionProtected
+				}
+				return false, errCompactionInputTooLarge
+			}
+			// 压缩后留出继续调用工具的空间，避免在上限附近每轮都重新摘要。
+			targetBudget := inputBudget * 3 / 4
+			if force {
+				targetBudget = min(targetBudget, estimatedTokens*3/4)
+			}
+			selectedCount := candidates[len(candidates)-1]
 			if !nativeResponsesCompaction {
-				selectedCandidateIndex = sort.Search(len(candidates), func(i int) bool {
-					candidate := candidates[i]
-					candidateCheckpointMsgs := checkpointMessagesAfterCompaction(sessionEntries, candidate, tail)
+				for _, candidate := range candidates {
+					candidateCheckpointMsgs := projectCompactionContext(checkpointMsgs, candidate)
 					candidateMessages := checkpointMessagesToOpenAIWithSummary(
 						candidateCheckpointMsgs, language, capabilities, nil, instructions.Content)
 					candidateMessages, _ = projectImageMessages(candidateMessages)
 					baseTokens := estimateProtocolRequestTokens(model, protocol, candidateMessages,
 						candidateCheckpointMsgs, nil, requestTools)
-					return compactionSummaryMinTokens <= inputBudget-baseTokens-compactionSummaryOverhead
-				})
+					if compactionSummaryMinTokens <= targetBudget-baseTokens-compactionSummaryOverhead {
+						selectedCount = candidate
+						break
+					}
+				}
 			}
-			if selectedCandidateIndex == len(candidates) {
-				return false, fmt.Errorf("%w: recent messages exceed the input budget", errContextCannotBeCompacted)
-			}
-			selectedEntryCount := candidates[selectedCandidateIndex]
-			selectedCheckpointMsgs := checkpointMessagesAfterCompaction(sessionEntries, selectedEntryCount, tail)
+			selectedCheckpointMsgs := projectCompactionContext(checkpointMsgs, selectedCount)
 			selectedMessages := checkpointMessagesToOpenAIWithSummary(
 				selectedCheckpointMsgs, language, capabilities, nil, instructions.Content)
 			estimatedSelectedMessages, _ := projectImageMessages(selectedMessages)
 			baseTokens := estimateProtocolRequestTokens(model, protocol, estimatedSelectedMessages,
 				selectedCheckpointMsgs, nil, requestTools)
 			summaryMaxTokens := min(
-				compactionSummaryMaxTokens, inputBudget-baseTokens-compactionSummaryOverhead)
-
-			sourceMessages := entriesToAgentMessages(sessionEntries[coveredEntryCount:selectedEntryCount])
+				compactionSummaryMaxTokens, targetBudget-baseTokens-compactionSummaryOverhead)
+			if summaryMaxTokens < compactionSummaryMinTokens {
+				// 小窗口仍可使用硬预算，但没有继续工作的余量时不在未超限状态下强行压缩。
+				summaryMaxTokens = min(compactionSummaryMaxTokens, inputBudget-baseTokens-compactionSummaryOverhead)
+			}
+			if summaryMaxTokens < compactionSummaryMinTokens {
+				if !force && estimatedTokens <= inputBudget {
+					return false, nil
+				}
+				if protected {
+					return false, errCompactionProtected
+				}
+				return false, errCompactionInputTooLarge
+			}
+			history := compactionHistory(checkpointMsgs)
+			sourceMessages := history[coveredMessages:selectedCount]
+			compactionCtx, cancelCompaction := context.WithTimeout(ctx, compactionTimeout)
+			defer cancelCompaction()
+			compactionCtx = context.WithValue(compactionCtx, compactionRequestBudgetKey{}, &compactionRequests)
 
 			sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "compacting context"})
 			var nextCompaction *runtimeCompaction
 			var compactionStateErr error
 			if nativeResponsesCompaction {
-				responseSource := entriesToAgentMessages(sessionEntries[coveredEntryCount:selectedEntryCount])
 				responseInput := checkpointMessagesToOpenAIResponseInput(
-					responseSource, language, capabilities, compaction, imageInputDisabled)
+					sourceMessages, language, capabilities, compaction, imageInputDisabled)
 				compactRequest := openai.ChatCompletionRequest{
 					Model:           model,
 					Messages:        []openai.ChatCompletionMessage{{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, capabilities, instructions.Content)}},
 					Tools:           requestTools,
 					ReasoningEffort: reasoningEffort,
 				}
+				if compactionRequests >= compactionMaxRequests {
+					return false, errCompactionLimit
+				}
 				responseOutput, promptTokens, completionTokens, compactErr := createResponseCompaction(
-					ctx, client, compactRequest, responseInput, maxRetries, requestTimeout, ch)
+					compactionCtx, client, compactRequest, responseInput, maxRetries, requestTimeout, ch)
 				totalPrompt += promptTokens
 				totalCompletion += completionTokens
+				if compactErr != nil && ctx.Err() == nil && compactionCtx.Err() != nil {
+					return false, errCompactionLimit
+				}
 				if compactErr == nil {
-					nextCompaction, compactionStateErr = newRuntimeResponseCompaction(
-						sessionEntries, selectedEntryCount, responseOutput,
-						compactionOutputTokenCost(model, responseOutput, completionTokens))
+					nextCompaction, compactionStateErr = newRuntimeMessageCompaction(
+						compactionRecordMessages(checkpointMsgs, rawUserMessage), selectedCount, protocol, model, scopeKey)
+					if nextCompaction != nil {
+						nextCompaction.ResponseOutput = responseOutput
+						nextCompaction.ResponseOutputTokens = compactionOutputTokenCost(model, responseOutput, completionTokens)
+					}
 				} else if compaction != nil && len(compaction.ResponseOutput) > 0 {
 					return false, compactErr
+				} else if selectedCount > sessionUserMessageIndex(history) && protected {
+					return false, fmt.Errorf("%w: %v", errCompactionProtected, compactErr)
 				} else {
 					logging.LogWarnf("responses compaction failed, fallback to summary: %s", compactErr)
 				}
@@ -834,22 +870,22 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				if sourceErr != nil {
 					return false, fmt.Errorf("%w: build summary source: %v", errContextCannotBeCompacted, sourceErr)
 				}
-				summaryRequestMessages := compactionSummaryMessages(source)
-				summaryInputBudget := contextInputBudget(contextLimit, summaryMaxTokens)
-				if summaryInputBudget <= 0 ||
-					estimateChatRequestTokens(model, summaryRequestMessages, nil) > summaryInputBudget {
-					return false, fmt.Errorf("%w: summary input exceeds the model context", errContextCannotBeCompacted)
-				}
-				summary, promptTokens, completionTokens, summaryErr := createProtocolCompactionSummary(
-					ctx, client, protocol, model, source, summaryMaxTokens, maxRetries, requestTimeout,
-					streamIdleTimeout, ch)
+				summary, promptTokens, completionTokens, summaryErr := createBatchedCompactionSummary(
+					compactionCtx, client, protocol, model, source, contextLimit, summaryMaxTokens, maxRetries,
+					requestTimeout, streamIdleTimeout, &compactionRequests, ch)
 				totalPrompt += promptTokens
 				totalCompletion += completionTokens
 				if summaryErr != nil {
+					if ctx.Err() == nil && compactionCtx.Err() != nil {
+						return false, errCompactionLimit
+					}
 					return false, summaryErr
 				}
-				nextCompaction, compactionStateErr = newRuntimeProtocolSummaryCompaction(
-					sessionEntries, selectedEntryCount, summary, protocol)
+				nextCompaction, compactionStateErr = newRuntimeMessageCompaction(
+					compactionRecordMessages(checkpointMsgs, rawUserMessage), selectedCount, protocol, model, scopeKey)
+				if nextCompaction != nil {
+					nextCompaction.Summary = summary
+				}
 			}
 			if compactionStateErr != nil {
 				return false, fmt.Errorf(
@@ -862,11 +898,12 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 				nextCompaction, requestTools) > inputBudget {
 				return false, fmt.Errorf("%w: compacted context still exceeds the input budget", errContextCannotBeCompacted)
 			}
-			if err := saveRuntimeCompaction(sessionID, nextCompaction); err != nil {
-				return false, fmt.Errorf("%w: persist compaction: %v", errContextCannotBeCompacted, err)
+			if err := saveRuntimeCompaction(sessionID, turn.TurnID, nextCompaction); err != nil {
+				return false, fmt.Errorf("persist compaction: %w", err)
 			}
 			compaction = nextCompaction
-			checkpointMsgs = selectedCheckpointMsgs
+			coveredMessages = selectedCount
+			contextMsgs = selectedCheckpointMsgs
 			messages = nextMessages
 			return true, nil
 		}
@@ -902,6 +939,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 			capabilities = roundCapabilities
 			tools = requestTools
+			contextMsgs = projectCompactionContext(checkpointMsgs, coveredMessages)
+			messages = checkpointMessagesToOpenAIWithSummary(contextMsgs, language, capabilities, compaction, instructions.Content)
 			if len(messages) > 0 && messages[0].Role == openai.ChatMessageRoleSystem {
 				messages[0].Content = buildSystemPrompt(language, roundCapabilities, instructions.Content)
 			}
@@ -932,11 +971,11 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			if util.IsOpenAIResponsesProtocol(protocol) {
 				responseInput = func(downgradeImages bool) []any {
 					return checkpointMessagesToOpenAIResponseInput(
-						checkpointMsgs, language, capabilities, compaction, downgradeImages)
+						contextMsgs, language, capabilities, compaction, downgradeImages)
 				}
 			}
 			stream, firstResp, roundCancel, requestMessages, imageDowngraded, imageUnsupportedDetected, streamErr :=
-				createProtocolImageCompatibleStream(contextWithNativeContents(util.ContextWithGeminiThoughtSummaries(ctx), checkpointMsgs), client, protocol, req,
+				createProtocolImageCompatibleStream(contextWithNativeContents(util.ContextWithGeminiThoughtSummaries(ctx), contextMsgs), client, protocol, req,
 					responseInput, imageCapabilityKey,
 					imageInputDisabled, maxRetries, requestTimeout, streamIdleTimeout, delayForCategory, ch)
 			if imageUnsupportedDetected {
@@ -2632,6 +2671,9 @@ func createProtocolStreamWithRetry(ctx context.Context, client *util.AIClient, p
 
 	var lastErr error
 	for attempt := 0; attempt <= maxRetries; attempt++ {
+		if err := consumeCompactionRequest(ctx); err != nil {
+			return nil, openai.ChatCompletionStreamResponse{}, nil, err
+		}
 		if attempt > 0 {
 			category := classifyRetry(lastErr)
 			delay := retryDelay(category, attempt)

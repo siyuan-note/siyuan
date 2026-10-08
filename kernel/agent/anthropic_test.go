@@ -266,7 +266,7 @@ func TestAnthropicCompactionPreservesRecentNativeHistory(t *testing.T) {
 		}
 	}
 	runtime, err := loadRuntimeState(testSessionID)
-	if err != nil || requests.Load() != 2 || runtime.Compaction == nil || runtime.Compaction.CoveredEntryCount != 2 ||
+	if err != nil || requests.Load() != 2 || runtime.Compaction == nil || runtime.Compaction.CoveredMessageCount != 2 ||
 		!validRuntimeCompaction(entries, runtime.Compaction) {
 		t.Fatalf("unexpected compaction: %+v %v requests=%d", runtime, err, requests.Load())
 	}

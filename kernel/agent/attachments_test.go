@@ -589,8 +589,8 @@ func TestCompactionCandidatesKeepAttachmentToolCallInItsTurn(t *testing.T) {
 		{ID: "user-2", Type: "user", Content: "second"},
 		{ID: "user-3", Type: "user", Content: "current"},
 	}
-	candidates := compactionCandidateEntryCounts(entries, 0, "user-3")
-	if len(candidates) != 2 || candidates[0] != 3 || candidates[1] != 4 {
+	candidates, _ := compactionCandidateMessageCounts(entriesToAgentMessages(entries), 0, "openai", false, false)
+	if len(candidates) != 2 || candidates[0] != 2 || candidates[1] != 3 {
 		t.Fatalf("unexpected complete-turn compaction boundaries: %#v", candidates)
 	}
 }

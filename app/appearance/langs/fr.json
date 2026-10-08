@@ -3158,6 +3158,11 @@
 		"411": "Conversion annulée : l’élément de liste et son premier bloc sont liés à des lignes différentes de la même base de données. Supprimez d’abord l’un des liens",
 		"412": "Veuillez d’abord configurer le modèle de l’agent",
 		"413": "L’OCR par IA n’a pas renvoyé de transcription complète ; le résultat précédent a été conservé",
-		"414": "Veuillez sélectionner un modèle d’IA disponible pour l’OCR"
+		"414": "Veuillez sélectionner un modèle d’IA disponible pour l’OCR",
+		"415": "L’entrée actuelle dépasse la capacité de contexte du modèle sélectionné. Réduisez l’entrée ou utilisez un modèle avec une fenêtre de contexte plus grande",
+		"416": "Le modèle ne dispose d’aucun budget d’entrée. Vérifiez les paramètres de longueur du contexte et du nombre maximal de tokens",
+		"417": "La compression du contexte de l’agent a échoué. Votre conversation a été conservée ; réessayez: %s",
+		"418": "Ce modèle exige de conserver intégralement l’historique des appels d’outils du tour actuel. Utilisez un modèle avec une fenêtre de contexte plus grande ou divisez la tâche",
+		"419": "La compression du contexte de l’agent a atteint la limite de requêtes ou de durée. Votre conversation a été conservée"
 	}
 }

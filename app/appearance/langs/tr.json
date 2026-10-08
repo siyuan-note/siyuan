@@ -3158,6 +3158,11 @@
 		"411": "Dönüştürme iptal edildi: liste öğesi ve ilk bloğu aynı veritabanındaki farklı satırlara bağlı. Önce bağlantılardan birini kaldırın",
 		"412": "Lütfen önce ajan modelini yapılandırın",
 		"413": "Yapay zekâ OCR tam bir metin döndürmedi; mevcut sonuç korundu",
-		"414": "Lütfen OCR için kullanılabilir bir yapay zekâ modeli seçin"
+		"414": "Lütfen OCR için kullanılabilir bir yapay zekâ modeli seçin",
+		"415": "Mevcut girdi seçilen modelin bağlam kapasitesini aşıyor. Girdiyi azaltın veya daha geniş bağlam penceresine sahip bir model kullanın",
+		"416": "Modelin kullanılabilir girdi bütçesi yok. Bağlam uzunluğu ve en fazla token sayısı ayarlarını kontrol edin",
+		"417": "Ajan bağlamı sıkıştırılamadı. Görüşmeniz korundu; yeniden deneyin: %s",
+		"418": "Bu model, mevcut turdaki araç çağrısı geçmişinin tamamının korunmasını gerektirir. Daha geniş bağlam penceresine sahip bir model kullanın veya görevi bölün",
+		"419": "Ajan bağlamı sıkıştırma işlemi istek veya süre sınırına ulaştı. Görüşmeniz korundu"
 	}
 }

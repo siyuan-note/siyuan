@@ -3158,6 +3158,11 @@
 		"411": "Konvertierung abgebrochen: Der Listeneintrag und sein erster Block sind an verschiedene Zeilen derselben Datenbank gebunden. Lösen Sie zuerst eine der Bindungen",
 		"412": "Bitte konfigurieren Sie zuerst das Agentenmodell",
 		"413": "Die KI-OCR hat keinen vollständigen Text zurückgegeben; das bisherige Ergebnis wurde beibehalten",
-		"414": "Bitte wählen Sie ein verfügbares KI-Modell für OCR"
+		"414": "Bitte wählen Sie ein verfügbares KI-Modell für OCR",
+		"415": "Die aktuelle Eingabe passt nicht in das Kontextfenster des ausgewählten Modells. Reduzieren Sie die Eingabe oder verwenden Sie ein Modell mit größerem Kontextfenster",
+		"416": "Für das Modell ist kein Eingabebudget verfügbar. Prüfen Sie die Einstellungen für Kontextlänge und maximale Tokenanzahl",
+		"417": "Die Kontextkomprimierung des Agenten ist fehlgeschlagen. Ihr Gespräch wurde beibehalten; versuchen Sie es erneut: %s",
+		"418": "Dieses Modell benötigt den vollständigen Werkzeugverlauf des aktuellen Gesprächsschritts. Verwenden Sie ein Modell mit größerem Kontextfenster oder teilen Sie die Aufgabe auf",
+		"419": "Die Kontextkomprimierung des Agenten hat die Anfrage- oder Zeitgrenze erreicht. Ihr Gespräch wurde beibehalten"
 	}
 }

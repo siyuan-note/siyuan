@@ -45,7 +45,7 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
     if (window.siyuan.isPublish) {
         return;
     }
-    if (config.method === 2) {
+    if (config.method === 2 || config.method === 4) {
         showMessage(window.siyuan.languages._kernel[132]);
         return;
     }

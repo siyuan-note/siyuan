@@ -631,8 +631,9 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 // FindReplaceInBox 与 FindReplace 一致，但按 boxID 路由到加密 db 或全局 db。
 func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types, subTypes map[string]bool, method int, boxID string) (err error) {
-	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
-	if 2 == method {
+	// method：0：文本，1：查询语法，2：SQL，3：正则表达式，4：语义搜索。
+	// SQL 和语义搜索不支持替换，必须在查询目标和生成历史前拒绝。
+	if 2 == method || 4 == method {
 		err = errors.New(Conf.Language(132))
 		return
 	}

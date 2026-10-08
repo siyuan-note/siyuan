@@ -43,6 +43,7 @@ const fixture = () => {
     const focused = [];
     let picker;
     const deps = {
+        "./dailyNote": {getDailyNoteHints: async () => []},
         hasClosestBlock: node => node.block,
         Constants: {ZWSP: "\u200b", BLOCK_HINT_KEYS: ["((", "[[", "（（", "【【"]},
         fetchPost: (url, data, cb) => requests.push({url, data, cb}),
@@ -188,13 +189,13 @@ test("typed and searched reference suggestions offer location selection includin
             const extend = load("protyle/hint/extend", f.deps, f.window, f.Lute);
             extend.hintRef("New title", f.protyle, source);
             f.requests[0].cb({data: {newDoc: true, k: "New title", blocks: []}});
-            await Promise.resolve();
+            await new Promise(resolve => setImmediate(resolve));
             assert.equal(f.hint.items.some(item => item.value.startsWith("((newFileAtPath ")), true);
             assert.equal(f.hint.items.some(item => item.value.startsWith("((newFile ")), !hideConfigured);
             assert.equal(f.hint.items.some(item => item.value.startsWith("((newSubDoc ")), true);
             f.hint.genSearchHTML(f.protyle, {value: "New title"}, false, "Original anchor", source);
             f.requests[1].cb({data: {newDoc: true, k: "New title", blocks: []}});
-            await Promise.resolve();
+            await new Promise(resolve => setImmediate(resolve));
             assert.equal(f.hint.element.lastElementChild.innerHTML.includes("newFileAtPath"), true);
         }
     }

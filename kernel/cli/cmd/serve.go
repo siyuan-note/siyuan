@@ -61,7 +61,7 @@ var serveCmd = &cobra.Command{
 		return nil // bypass root's init — BootWithFlags() handles it
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// --workspace 优先取 serve 自己的（rootCmd 的 persistent flag），兜底环境变量与默认值交给 util.BootWithFlags 内部处理（与原 Boot() 行为一致）。
+		// --workspace 使用 rootCmd 的 persistent flag，环境变量回退与默认值由 util.BootWithFlags 处理。
 		ws := workspacePath
 
 		util.BootWithFlags(ws, serveWdPath, servePort, serveReadOnly, serveAccessAuthCode, serveLang, serveMode, serveSSL, serveAttachUI, serveSafeMode, serveEnablePprof)

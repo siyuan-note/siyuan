@@ -125,11 +125,11 @@ func TestBootHomeDir(t *testing.T) {
 	command.Env = append(os.Environ(), "SIYUAN_TEST_BOOT_HOME="+oldHome)
 	output, err := command.CombinedOutput()
 	if err != nil {
-		t.Fatalf("Boot() failed: %v\n%s", err, output)
+		t.Fatalf("BootWithFlags failed: %v\n%s", err, output)
 	}
 	for _, expected := range []string{"HOME_DIR=" + home, "WORKSPACE=" + workspace, "WD=" + wd} {
 		if !strings.Contains(string(output), expected) {
-			t.Fatalf("missing %q in Boot() output:\n%s", expected, output)
+			t.Fatalf("missing %q in BootWithFlags output:\n%s", expected, output)
 		}
 	}
 	registry := filepath.Join(home, ".config", "siyuan", "workspace.json")
@@ -154,8 +154,17 @@ func TestBootHomeDirProcess(t *testing.T) {
 			break
 		}
 	}
-	flag.CommandLine = flag.NewFlagSet("home-dir-test", flag.ExitOnError)
-	Boot()
+	flags := flag.NewFlagSet("home-dir-test", flag.ContinueOnError)
+	home := flags.String("home-dir", "", "")
+	workspace := flags.String("workspace", "", "")
+	wd := flags.String("wd", "", "")
+	if err := flags.Parse(os.Args[1:]); err != nil {
+		t.Fatal(err)
+	}
+	if err := SetHomeDir(*home); err != nil {
+		t.Fatal(err)
+	}
+	BootWithFlags(*workspace, *wd, "0", "false", "", "", "prod", false, false, false, false)
 	defer UnlockWorkspace()
 	fmt.Printf("HOME_DIR=%s\nWORKSPACE=%s\nWD=%s\n", HomeDir, WorkspaceDir, WorkingDir)
 	cwd, err := os.Getwd()
@@ -194,11 +203,11 @@ func TestBootWorkingDir(t *testing.T) {
 			command.Env = append(os.Environ(), "SIYUAN_TEST_BOOT_HOME="+filepath.Join(root, "system-home"))
 			output, err := command.CombinedOutput()
 			if err != nil {
-				t.Fatalf("Boot() failed: %v\n%s", err, output)
+				t.Fatalf("BootWithFlags failed: %v\n%s", err, output)
 			}
 			for _, expected := range []string{"WD=" + test.want + "\n", "CWD=" + launcher + "\n"} {
 				if !strings.Contains(string(output), expected) {
-					t.Fatalf("missing %q in Boot() output:\n%s", expected, output)
+					t.Fatalf("missing %q in BootWithFlags output:\n%s", expected, output)
 				}
 			}
 		})

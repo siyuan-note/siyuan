@@ -18,7 +18,6 @@ package util
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"mime"
 	"net/http"
@@ -120,33 +119,7 @@ func InitWorkspace(workspacePath, wdPath string) {
 	LogPath = filepath.Join(TempDir, "siyuan.log")
 }
 
-func Boot() {
-	IncBootProgress(3, BootL10n(299, "Booting kernel..."))
-
-	// 由标准库 flag 解析 os.Args，再走统一的 BootWithFlags。
-	homeDirPath := flag.String("home-dir", "", "base directory for user configuration (defaults to the system user home)")
-	workspacePath := flag.String("workspace", "", "dir path of the workspace, default to ~/SiYuan/")
-	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
-	port := flag.String("port", "0", "port of the HTTP server")
-	readOnly := flag.String("readonly", "false", "read-only mode")
-	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
-	ssl := flag.Bool("ssl", false, "for https and wss")
-	attachUI := flag.Bool("attach-ui", false, "attach kernel lifecycle to desktop UI process (used by Electron)")
-	lang := flag.String("lang", "", "ar/de/en/es/fr/he/hi/id/it/ja/ko/nl/pl/pt-BR/ru/sk/sr/th/tr/uk/zh-CN/zh-TW")
-	mode := flag.String("mode", "prod", "dev/prod")
-	enablePprof := flag.Bool("enable-pprof", false, "enable unauthenticated /debug/pprof/ endpoints (dev only, never on a network-exposed instance)")
-	safeMode := flag.Bool("safe-mode", false, "boot in safe mode")
-	flag.Parse()
-
-	if err := SetHomeDir(*homeDirPath); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(logging.ExitCodeInitWorkspaceErr)
-	}
-
-	BootWithFlags(*workspacePath, *wdPath, *port, *readOnly, *accessAuthCode, *lang, *mode, *ssl, *attachUI, *safeMode, *enablePprof)
-}
-
-// BootWithFlags 接收已解析好的启动参数，完成环境变量回退、全局变量赋值、工作空间初始化与加锁等启动收尾工作。Boot()（标准库 flag 解析）和 serve 子命令（cobra 解析）都走这个统一入口。
+// BootWithFlags 接收已解析的启动参数，完成环境变量回退、全局变量赋值、工作空间初始化与加锁。
 func BootWithFlags(workspacePath, wdPath, port, readOnly, accessAuthCode, lang, mode string, ssl, attachUI, safeMode, enablePprof bool) {
 	SafeMode = safeMode
 	EnablePprof = enablePprof

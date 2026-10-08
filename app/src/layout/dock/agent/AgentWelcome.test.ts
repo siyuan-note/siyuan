@@ -90,10 +90,10 @@ test("plugin suggestion uses the existing localized message sending path", async
         welcomeGreeting: {getKey: () => ""},
         messagesContainer: {innerHTML: "", querySelectorAll: () => [example]},
         getSelectedModel: () => "model",
-        beginSessionRun: () => ({sessionID: "session", controller: {signal: {}}}),
+        sessionRunController: {begin: () => ({sessionID: "session", controller: {signal: {}}}), finish: () => {}},
     });
     for (const method of ["destroyEditingComposer", "appendUserMessage", "rebuildNavMarkers", "tryGenerateTitle",
-        "setStreaming", "saveSession", "finishSessionRun"]) {
+        "setStreaming", "saveSession"]) {
         chat[method] = (): void => undefined;
     }
     chat.showWelcome();

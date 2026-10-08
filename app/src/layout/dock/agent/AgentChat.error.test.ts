@@ -1,3 +1,4 @@
+import {AgentRunController} from "./AgentRunController";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -18,6 +19,7 @@ const createChat = () => {
     runInNewContext(compiled, {
         exports,
         require: () => ({
+            AgentRunController,
             Model: class {},
             SessionStore: {load: async (id: string) => sessions.get(id)},
             buildAgentPresentationEntries: (entries: unknown[]) => entries,
@@ -118,7 +120,7 @@ test("recovery errors remain scoped to their session when switching views", asyn
 test("a new run clears the previous interruption even when regenerating the same user turn", async () => {
     const {chat, elements} = createChat();
     chat.appendError("Session timed out");
-    chat.beginSessionRun();
+    chat.runController.begin();
     await chat.reloadFromDisk(true);
     assert.equal(elements.length, 0);
     assert.equal(chat.sessionErrors.size, 0);

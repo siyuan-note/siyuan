@@ -1,3 +1,4 @@
+import {AgentRunController} from "./AgentRunController";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -14,7 +15,7 @@ const createChat = (load: (id: string) => Promise<AgentSession>) => {
     const exports = {} as {AgentChat: {prototype: object}};
     runInNewContext(compiled, {
         exports,
-        require: () => ({Model: class {}, SessionStore: {load}}),
+        require: () => ({AgentRunController, Model: class {}, SessionStore: {load}}),
         window: {
             siyuan: {languages: {}},
             setTimeout: (callback: () => void) => { queueMicrotask(callback); return 1; },
@@ -60,7 +61,7 @@ const createChat = (load: (id: string) => Promise<AgentSession>) => {
         isScrolledToBottom: () => true,
     });
     for (const method of ["destroyEditingComposer", "flushTokenUpdate", "cancelTokenUpdate",
-        "updateHostRunStatus", "prepareSessionRunForDetach", "captureSessionRunView", "renderLoadedSession",
+        "updateHostRunStatus", "prepareRunViewForDetach", "captureRunView", "captureRunViewState", "renderLoadedSession",
         "rebuildNavMarkers", "scrollToBottom", "removeMirrorPlaceholder", "showMirrorPlaceholder",
         "applyPermissionMode", "applySessionModelIfValid", "updateTokenDisplay", "finishActiveThinking",
         "clearThinking", "observeStickTarget", "flushThinkingStep"]) {
@@ -84,7 +85,7 @@ test("a background turn ending during a session switch releases the stale mirror
     const {chat, attributes} = createChat(async () => {
         loads++;
         if (loads === 1) {
-            await chat.finishSessionRun(firstRun);
+            await chat.runController.finish(firstRun);
             return session({agentRunning: true});
         }
         return session({recoveryTurnID: "first-turn", recoveryState: "finished"});
@@ -153,10 +154,10 @@ test("a completed background turn does not change the foreground stream or its c
     chat.abortController = secondRun.controller;
     chat.currentThinkingReasoningContent = "second session reasoning";
 
-    await chat.handleSessionRunEvent(firstRun, {type: "snapshot", snapshotID: "snapshot-id"});
-    await chat.handleSessionRunEvent(firstRun, {type: "done", turnID: "first-turn"});
+    await chat.runController.handleEvent(firstRun, {type: "snapshot", snapshotID: "snapshot-id"});
+    await chat.runController.handleEvent(firstRun, {type: "done", turnID: "first-turn"});
 
-    await chat.finishSessionRun(firstRun);
+    await chat.runController.finish(firstRun);
 
     assert.equal(chat.isStreaming, true);
     assert.equal(chat.abortController, secondRun.controller);

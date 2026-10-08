@@ -57,7 +57,8 @@ import {isEncryptedBox} from "../../../util/pathName";
 import {Menu} from "../../../plugin/Menu";
 import {getAgentDefaultModelID, getUsableAgentModels} from "./agentModel";
 import {AgentScrollStateMode, resolveAgentScrollState} from "./AgentScrollState";
-import {AgentSessionRun, AgentSessionRuns} from "./AgentSessionRuns";
+import {AgentSessionRuns} from "./AgentSessionRuns";
+import {AgentRunController, ManagedAgentRun, PendingAgentInteraction} from "./AgentRunController";
 import {fullscreen} from "../../../protyle/breadcrumb/action";
 import {AgentWelcomeGreeting} from "./AgentWelcomeGreeting";
 
@@ -82,7 +83,6 @@ export interface AgentChatHost {
 
 type EntryBase = { id?: string };
 type AgentReference = { id: string; title: string };
-type PendingAgentInteraction = Extract<ISSEResult, {type: "confirm" | "question"}>;
 type UserEntry = EntryBase & {
     type: "user";
     content: string;
@@ -187,7 +187,7 @@ type AgentSessionRunViewState = {
     permissionMode: AgentPermissionMode;
 };
 
-type ManagedAgentSessionRun = AgentSessionRun<PendingAgentInteraction, ISSEResult, AgentSessionRunViewState>;
+type ManagedAgentSessionRun = ManagedAgentRun<AgentSessionRunViewState>;
 
 export class AgentChat extends Model {
     private welcomeGreeting = new AgentWelcomeGreeting();
@@ -867,11 +867,11 @@ export class AgentChat extends Model {
                     this.currentRoundID = "";
                     const selectedModel = this.getSelectedModel();
                     const reasoningEffort = this.selectedReasoningEffort;
-                    const run = this.beginSessionRun();
+                    const run = this.runController.begin();
                     try {
                         await this.saveSession();
                     } catch (e) {
-                        this.discardSessionRun(run);
+                        this.runController.discard(run);
                         if (this.sessionId === run.sessionID) {
                             this.rollbackUserEntry(userEntryId);
                             await this.reloadFromDisk();
@@ -881,7 +881,7 @@ export class AgentChat extends Model {
                     void this.sessionPanel?.refresh();
                     try {
                         await fetchAgentSSE(text, window.siyuan.config.appearance.lang, [],
-                            (event: ISSEResult) => this.handleSessionRunEvent(run, event),
+                            (event: ISSEResult) => this.runController.handleEvent(run, event),
                             (err: Error) => this.handleSessionRunError(run, err, userEntryId),
                             run.controller.signal,
                             run.sessionID,
@@ -893,7 +893,7 @@ export class AgentChat extends Model {
                             userEntryId,
                             SessionStore.getRevision(run.sessionID));
                     } finally {
-                        await this.finishSessionRun(run);
+                        await this.runController.finish(run);
                     }
                 }
             });
@@ -1167,38 +1167,135 @@ export class AgentChat extends Model {
         return result.session ?? null;
     }
 
-    private beginSessionRun(): ManagedAgentSessionRun {
-        this.sessionErrors.delete(this.sessionId);
-        this.messagesContainer.querySelectorAll(".agent-chat__msg--error").forEach(el => el.remove());
-        const run = this.sessionRuns.begin(this.sessionId);
-        this.abortController = run.controller;
-        this.sessionRuns.markRead(this.sessionId);
-        this.updateHostRunStatus();
-        this.updateSendButtonState();
-        void this.sessionPanel?.refresh();
-        return run;
+    private sessionRunController: AgentRunController<AgentSessionRunViewState>;
+
+    private get runController(): AgentRunController<AgentSessionRunViewState> {
+        if (!this.sessionRunController) {
+            this.sessionRunController = new AgentRunController(this.sessionRuns, {
+                currentSessionID: () => this.sessionId,
+                beforeBegin: () => {
+                    this.sessionErrors.delete(this.sessionId);
+                    this.messagesContainer.querySelectorAll(".agent-chat__msg--error").forEach(el => el.remove());
+                },
+                activate: run => { this.abortController = run.controller; },
+                detached: run => {
+                    this.pendingRecoverySessionIDs.add(run.sessionID);
+                    this.clearRunAbortController(run);
+                },
+                completed: run => this.clearRunAbortController(run),
+                discarded: (run, current) => {
+                    this.clearRunAbortController(run);
+                    if (current) {
+                        this.setStreaming(false);
+                    }
+                },
+                changed: () => {
+                    this.updateHostRunStatus();
+                    this.updateSendButtonState();
+                    void this.sessionPanel?.refresh();
+                },
+                finishedDetached: (run, attached) => this.finishDetachedRunView(run, attached),
+                snapshot: () => this.captureRunViewState(),
+                prepareDetach: () => this.prepareRunViewForDetach(),
+                captureView: state => this.captureRunView(state),
+                restore: (state, consumed) => this.restoreRunView(state, consumed),
+                notifyInteraction: () => this.notifyRunInteraction(),
+                renderInteraction: event => this.renderRunInteractionView(event),
+                handleEvent: event => this.handleSSEEvent(event),
+                handleBrowserCall: event => this.handleBrowserCapabilityCall(event.callID, event.capabilityID, event.generation, event.arguments),
+                startReplay: run => {
+                    this.abortController = run.controller;
+                    this.currentTurnID = run.turnID;
+                    this.removeMirrorPlaceholder();
+                    this.setStreaming(true);
+                },
+                prepareReplayContent: () => {
+                    if (!this.currentContent.trim() && this.messagesContainer.querySelector(
+                        ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)")) {
+                        this.finishActiveThinking();
+                        this.flushThinkingStep();
+                    }
+                },
+                idleReplay: () => {
+                    const activeThinking = this.messagesContainer.querySelector(
+                        ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
+                    );
+                    if (this.isStreaming && activeThinking) {
+                        this.startThinkingTimer();
+                    }
+                },
+                recoverUnavailable: run => {
+                    if (this.sessionId === run.sessionID && this.pendingRecoverySessionIDs.has(run.sessionID)) {
+                        void this.recoverInterruptedTurn(run.sessionID, run.turnID);
+                    }
+                },
+            });
+        }
+        return this.sessionRunController;
     }
 
-    private detachSessionRun(sessionID: string): boolean {
-        const run = this.sessionRuns.get(sessionID);
-        if (!run) {
-            return false;
-        }
-        this.sessionRuns.detach(sessionID);
-        this.pendingRecoverySessionIDs.add(sessionID);
+    private clearRunAbortController(run: ManagedAgentSessionRun) {
         if (this.abortController === run.controller) {
             this.abortController = null;
         }
-        this.updateHostRunStatus();
-        this.updateSendButtonState();
-        void this.sessionPanel?.refresh();
-        return true;
     }
 
-    private snapshotSessionRunState(run: ManagedAgentSessionRun) {
+    private notifyRunInteraction() {
+        if (this.host.notify) {
+            this.host.notify("confirm");
+        } else if (!document.hasFocus() || document.hidden) {
+            const L = window.siyuan.languages;
+            sendNotification({title: L.agentNotifyConfirm, body: "", timeoutType: "default"});
+        }
+    }
+
+    private async renderRunInteractionView(event: PendingAgentInteraction) {
+        this.removeMirrorPlaceholder();
+        if (event.type === "confirm") {
+            await this.appendConfirm(event.name, event.arguments, event.confirmID, event.effects, event.forced, false);
+        } else {
+            this.appendQuestion(event.questionID, event.arguments, event.roundID);
+        }
+    }
+
+    private finishDetachedRunView(run: ManagedAgentSessionRun, attached: boolean) {
+        this.pendingRecoverySessionIDs.add(run.sessionID);
+        if (attached) {
+            const pendingTitle = this.pendingSessionTitles.get(run.sessionID);
+            if (pendingTitle) {
+                this.sessionTitle = pendingTitle;
+                this.pendingSessionTitle = pendingTitle;
+                this.titleElement.textContent = pendingTitle;
+            }
+            this.currentTurnID = run.turnID;
+            this.setStreaming(false);
+            this.removeMirrorPlaceholder();
+            void this.recoverInterruptedTurn(run.sessionID, run.turnID).then(() => {
+                if (!this.pendingSessionTitles.has(run.sessionID)) {
+                    return;
+                }
+                if (this.sessionId === run.sessionID && !this.isCurrentSessionRunning() &&
+                    !this.pendingRecoverySessionIDs.has(run.sessionID) && !this.currentTurnID) {
+                    void this.saveSession();
+                } else if (this.sessionId !== run.sessionID) {
+                    this.persistPendingSessionTitle(run.sessionID);
+                }
+            });
+        } else {
+            this.persistPendingSessionTitle(run.sessionID);
+            if (this.host.notify) {
+                this.host.notify("done");
+            } else if (!document.hasFocus() || document.hidden) {
+                const L = window.siyuan.languages;
+                sendNotification({title: L.agentNotifyDone, timeoutType: "default"});
+            }
+        }
+    }
+
+    private captureRunViewState(): AgentSessionRunViewState {
         this.flushTokenUpdate();
         this.flushReasoningUpdate();
-        run.viewState = {
+        return {
             entries: this.entries,
             hasTitled: this.hasTitled,
             currentAIElement: this.currentAIElement,
@@ -1227,7 +1324,7 @@ export class AgentChat extends Model {
         };
     }
 
-    private prepareSessionRunForDetach(run: ManagedAgentSessionRun) {
+    private prepareRunViewForDetach() {
         this.flushTokenUpdate();
         this.flushReasoningUpdate();
         if (this.currentContent.trim()) {
@@ -1236,27 +1333,19 @@ export class AgentChat extends Model {
         } else {
             this.stopThinkingTimer();
         }
-        this.snapshotSessionRunState(run);
     }
 
-    private captureSessionRunView(run: ManagedAgentSessionRun) {
-        if (!run.viewState) {
-            return;
-        }
+    private captureRunView(state: AgentSessionRunViewState) {
         this.cancelTokenUpdate();
         const view = document.createDocumentFragment();
         this.observeStickTarget(null);
         while (this.messagesContainer.firstChild) {
             view.appendChild(this.messagesContainer.firstChild);
         }
-        run.viewState.view = view;
+        state.view = view;
     }
 
-    private restoreSessionRunState(run: ManagedAgentSessionRun): boolean {
-        const state = run.viewState;
-        if (!state) {
-            return false;
-        }
+    private restoreRunView(state: AgentSessionRunViewState, consumed: () => void): boolean {
         this.cancelTokenUpdate();
         this.observeStickTarget(null);
         if (state.view?.hasChildNodes()) {
@@ -1288,7 +1377,7 @@ export class AgentChat extends Model {
         this.hasInterveningCard = state.hasInterveningCard;
         this.lastStepToolCount = state.lastStepToolCount;
         this.applyPermissionMode(state.permissionMode);
-        run.viewState = undefined;
+        consumed();
         this.updateTokenDisplay();
         this.rebuildNavMarkers();
         const body = this.currentAIElement?.querySelector<HTMLElement>(".agent-chat__body--streaming");
@@ -1325,264 +1414,17 @@ export class AgentChat extends Model {
         });
     }
 
-    private interactionKey(event: PendingAgentInteraction): string {
-        return event.type === "confirm" ? `confirm:${event.confirmID}` : `question:${event.questionID}`;
-    }
-
-    private queueRunInteraction(run: ManagedAgentSessionRun, event: PendingAgentInteraction,
-                                notify = true) {
-        const key = this.interactionKey(event);
-        if (!run.pendingInteractions.some(item => this.interactionKey(item) === key)) {
-            run.pendingInteractions.push(event);
-            if (notify) {
-                if (this.host.notify) {
-                    this.host.notify("confirm");
-                } else if (!document.hasFocus() || document.hidden) {
-                    const L = window.siyuan.languages;
-                    sendNotification({title: L.agentNotifyConfirm, body: "", timeoutType: "default"});
-                }
-            }
-        }
-    }
-
-    private removeRunInteraction(sessionID: string, type: PendingAgentInteraction["type"], id: string) {
-        const run = this.sessionRuns.get(sessionID);
-        if (!run) {
-            return;
-        }
-        const key = `${type}:${id}`;
-        run.pendingInteractions = run.pendingInteractions.filter(item => this.interactionKey(item) !== key);
-        run.renderedInteractionKeys.delete(key);
-    }
-
-    private async renderRunInteraction(run: ManagedAgentSessionRun, event: PendingAgentInteraction) {
-        if (this.sessionId !== run.sessionID || !run.interactionViewReady) {
-            return;
-        }
-        const key = this.interactionKey(event);
-        if (run.renderedInteractionKeys.has(key)) {
-            return;
-        }
-        run.renderedInteractionKeys.add(key);
-        this.removeMirrorPlaceholder();
-        if (event.type === "confirm") {
-            await this.appendConfirm(event.name, event.arguments, event.confirmID, event.effects, event.forced, false);
-        } else {
-            this.appendQuestion(event.questionID, event.arguments, event.roundID);
-        }
-    }
-
-    private async renderPendingRunInteractions(run: ManagedAgentSessionRun) {
-        for (const event of run.pendingInteractions) {
-            await this.renderRunInteraction(run, event);
-        }
-    }
-
-    private async processSessionRunView(run: ManagedAgentSessionRun, task: () => Promise<void>) {
-        const processingPromise = task();
-        run.processingPromise = processingPromise;
-        try {
-            await processingPromise;
-        } finally {
-            if (run.processingPromise === processingPromise) {
-                run.processingPromise = undefined;
-            }
-        }
-    }
-
-    private async waitForSessionRunView(run: ManagedAgentSessionRun) {
-        const pending = [run.processingPromise, run.replayPromise].filter(Boolean) as Promise<void>[];
-        await Promise.all(pending.map(promise => promise.catch(() => undefined)));
-    }
-
     private async handleSessionRunError(run: ManagedAgentSessionRun, err: Error, userEntryId?: string,
                                         restoreSession = false) {
         if (run.detached || this.sessionId !== run.sessionID) {
             return;
         }
-        await this.processSessionRunView(run, async () => {
+        await this.runController.processView(run, async () => {
             if (err instanceof AgentHttpError && err.status === 409) {
                 await this.handleConflictReject();
                 return;
             }
             await this.handleConfigError(err, userEntryId, restoreSession);
-        });
-    }
-
-    private enqueueSessionRunEvent(run: ManagedAgentSessionRun, event: ISSEResult) {
-        if (this.sessionRuns.get(run.sessionID) !== run) {
-            return;
-        }
-        const lastIndex = run.pendingEvents.length - 1;
-        const lastEvent = run.pendingEvents[lastIndex];
-        if (event.type === "content" && lastEvent?.type === "content") {
-            run.pendingEvents[lastIndex] = {...lastEvent, token: lastEvent.token + event.token};
-            return;
-        }
-        if (event.type === "reasoning" && lastEvent?.type === "reasoning") {
-            run.pendingEvents[lastIndex] = {...lastEvent, token: lastEvent.token + event.token};
-            return;
-        }
-        this.sessionRuns.enqueue(run, event);
-    }
-
-    private async handleSessionRunEvent(run: ManagedAgentSessionRun, event: ISSEResult) {
-        if (event.type === "turn") {
-            run.turnID = event.turnID;
-        }
-        if (!run.detached && !run.replaying && this.sessionId === run.sessionID) {
-            if (event.type === "confirm" || event.type === "question") {
-                this.queueRunInteraction(run, event, false);
-                run.renderedInteractionKeys.add(this.interactionKey(event));
-            }
-            await this.processSessionRunView(run, () => this.handleSSEEvent(event));
-            return;
-        }
-        if (event.type === "browser_capability_call") {
-            await this.handleBrowserCapabilityCall(event.callID, event.capabilityID, event.generation, event.arguments);
-            return;
-        }
-        if (event.type === "confirm" || event.type === "question") {
-            this.queueRunInteraction(run, event, this.sessionId !== run.sessionID);
-            return;
-        }
-        this.enqueueSessionRunEvent(run, event);
-    }
-
-    private async finishSessionRun(run: ManagedAgentSessionRun) {
-        const replayPromise = run.replayPromise;
-        if (replayPromise) {
-            await replayPromise;
-        }
-        const current = this.sessionId === run.sessionID;
-        const detached = run.detached;
-        const attached = current && run.interactionViewReady;
-        if (!this.sessionRuns.complete(run, detached && !attached)) {
-            return;
-        }
-        if (this.abortController === run.controller) {
-            this.abortController = null;
-        }
-        this.updateHostRunStatus();
-        this.updateSendButtonState();
-        void this.sessionPanel?.refresh();
-        if (!detached) {
-            return;
-        }
-        this.pendingRecoverySessionIDs.add(run.sessionID);
-        if (attached) {
-            const pendingTitle = this.pendingSessionTitles.get(run.sessionID);
-            if (pendingTitle) {
-                this.sessionTitle = pendingTitle;
-                this.pendingSessionTitle = pendingTitle;
-                this.titleElement.textContent = pendingTitle;
-            }
-            this.currentTurnID = run.turnID;
-            this.setStreaming(false);
-            this.removeMirrorPlaceholder();
-            void this.recoverInterruptedTurn(run.sessionID, run.turnID).then(() => {
-                if (!this.pendingSessionTitles.has(run.sessionID)) {
-                    return;
-                }
-                if (this.sessionId === run.sessionID && !this.isCurrentSessionRunning() &&
-                    !this.pendingRecoverySessionIDs.has(run.sessionID) && !this.currentTurnID) {
-                    void this.saveSession();
-                } else if (this.sessionId !== run.sessionID) {
-                    this.persistPendingSessionTitle(run.sessionID);
-                }
-            });
-        } else {
-            this.persistPendingSessionTitle(run.sessionID);
-            if (this.host.notify) {
-                this.host.notify("done");
-            } else if (!document.hasFocus() || document.hidden) {
-                const L = window.siyuan.languages;
-                sendNotification({title: L.agentNotifyDone, timeoutType: "default"});
-            }
-        }
-    }
-
-    private discardSessionRun(run: ManagedAgentSessionRun) {
-        this.sessionRuns.complete(run, false);
-        if (this.abortController === run.controller) {
-            this.abortController = null;
-        }
-        if (this.sessionId === run.sessionID) {
-            this.setStreaming(false);
-        }
-        this.updateHostRunStatus();
-        this.updateSendButtonState();
-        void this.sessionPanel?.refresh();
-    }
-
-    private hasUnrenderedRunInteraction(run: ManagedAgentSessionRun): boolean {
-        return run.pendingInteractions.some(event => !run.renderedInteractionKeys.has(this.interactionKey(event)));
-    }
-
-    private async replaySessionRun(run: ManagedAgentSessionRun) {
-        run.replaying = true;
-        this.restoreSessionRunState(run);
-        run.interactionViewReady = true;
-        this.abortController = run.controller;
-        this.currentTurnID = run.turnID;
-        this.removeMirrorPlaceholder();
-        this.setStreaming(true);
-        try {
-            while (this.sessionId === run.sessionID && run.interactionViewReady &&
-                this.sessionRuns.get(run.sessionID) === run) {
-                const events = this.sessionRuns.drain(run);
-                for (const event of events) {
-                    if (event.type === "content" && !this.currentContent.trim() &&
-                        this.messagesContainer.querySelector(
-                            ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)")) {
-                        this.finishActiveThinking();
-                        this.flushThinkingStep();
-                    }
-                    await this.handleSSEEvent(event);
-                    if (this.sessionId !== run.sessionID || !run.interactionViewReady ||
-                        this.sessionRuns.get(run.sessionID) !== run) {
-                        return;
-                    }
-                }
-                await this.renderPendingRunInteractions(run);
-                if (run.pendingEvents.length === 0 && !this.hasUnrenderedRunInteraction(run)) {
-                    run.detached = false;
-                    const activeThinking = this.messagesContainer.querySelector(
-                        ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
-                    );
-                    if (this.isStreaming && activeThinking) {
-                        this.startThinkingTimer();
-                    }
-                    return;
-                }
-            }
-        } finally {
-            run.replaying = false;
-            if (this.sessionId !== run.sessionID || !run.interactionViewReady) {
-                run.detached = true;
-                run.interactionViewReady = false;
-            }
-        }
-    }
-
-    private attachSessionRun(run: ManagedAgentSessionRun) {
-        if (this.sessionRuns.get(run.sessionID) !== run) {
-            if (this.sessionId === run.sessionID && this.pendingRecoverySessionIDs.has(run.sessionID)) {
-                void this.recoverInterruptedTurn(run.sessionID, run.turnID);
-            }
-            return;
-        }
-        if (run.replayPromise) {
-            return;
-        }
-        const replayPromise = this.replaySessionRun(run).catch((e) => {
-            console.error("replay background agent events failed:", e);
-        });
-        run.replayPromise = replayPromise;
-        void replayPromise.finally(() => {
-            if (run.replayPromise === replayPromise) {
-                run.replayPromise = undefined;
-            }
         });
     }
 
@@ -1943,15 +1785,15 @@ export class AgentChat extends Model {
             this.pendingRecoverySessionIDs.add(previousSessionID);
         }
         if (previousRun) {
-            this.detachSessionRun(previousSessionID);
-            await this.waitForSessionRunView(previousRun);
+            this.runController.detach(previousSessionID);
+            await this.runController.waitForView(previousRun);
         }
         this.abortController = null;
         this.setStreaming(false);
         this.mirrorLocked = false;
         this.removeMirrorPlaceholder();
         if (previousRun) {
-            this.prepareSessionRunForDetach(previousRun);
+            this.runController.prepareForDetach(previousRun);
         } else {
             this.finishActiveThinking();
             this.flushThinkingStep();
@@ -1963,7 +1805,7 @@ export class AgentChat extends Model {
         if (!session) {
             if (previousRun) {
                 this.sessionRuns.markRead(previousSessionID);
-                this.attachSessionRun(previousRun);
+                this.runController.attach(previousRun);
                 void this.sessionPanel?.refresh();
             }
             return;
@@ -2039,7 +1881,7 @@ export class AgentChat extends Model {
                         return;
                     }
                     if (previousRun) {
-                        this.captureSessionRunView(previousRun);
+                        this.runController.captureView(previousRun);
                     }
                     this.messagesContainer.innerHTML = "";
                     this.titleElement.textContent = session.title;
@@ -2053,7 +1895,7 @@ export class AgentChat extends Model {
                     }
                     const activeRun = this.sessionRuns.get(session.id);
                     if (activeRun) {
-                        this.attachSessionRun(activeRun);
+                        this.runController.attach(activeRun);
                     } else if (this.mirrorLocked) {
                         this.showMirrorPlaceholder();
                     } else {
@@ -2398,15 +2240,15 @@ export class AgentChat extends Model {
             this.pendingRecoverySessionIDs.add(previousSessionID);
         }
         if (previousRun) {
-            this.detachSessionRun(previousSessionID);
-            await this.waitForSessionRunView(previousRun);
+            this.runController.detach(previousSessionID);
+            await this.runController.waitForView(previousRun);
         }
         this.abortController = null;
         this.setStreaming(false);
         this.mirrorLocked = false;
         this.removeMirrorPlaceholder();
         if (previousRun) {
-            this.prepareSessionRunForDetach(previousRun);
+            this.runController.prepareForDetach(previousRun);
         } else {
             this.finishActiveThinking();
             this.flushThinkingStep();
@@ -2451,7 +2293,7 @@ export class AgentChat extends Model {
             this.tokenDisplayEl.classList.add("fn__none");
         }
         if (previousRun) {
-            this.captureSessionRunView(previousRun);
+            this.runController.captureView(previousRun);
         }
         this.messagesContainer.innerHTML = "";
         this.currentThinkingSteps = [];
@@ -2548,11 +2390,11 @@ export class AgentChat extends Model {
         this.currentThinkingDuration = 0;
         this.currentTurnID = "";
         this.currentRoundID = "";
-        const run = this.beginSessionRun();
+        const run = this.runController.begin();
         try {
             await this.saveSession();
         } catch (e) {
-            this.discardSessionRun(run);
+            this.runController.discard(run);
             if (this.sessionId === run.sessionID) {
                 this.rollbackUserEntry(userEntryId);
                 await this.reloadFromDisk();
@@ -2566,7 +2408,7 @@ export class AgentChat extends Model {
                 text,
                 window.siyuan.config.appearance.lang,
                 refs,
-                (event: ISSEResult) => this.handleSessionRunEvent(run, event),
+                (event: ISSEResult) => this.runController.handleEvent(run, event),
                 (err: Error) => this.handleSessionRunError(run, err, userEntryId),
                 run.controller.signal,
                 run.sessionID,
@@ -2579,7 +2421,7 @@ export class AgentChat extends Model {
                 SessionStore.getRevision(run.sessionID),
             );
         } finally {
-            await this.finishSessionRun(run);
+            await this.runController.finish(run);
         }
     }
 
@@ -3681,13 +3523,13 @@ export class AgentChat extends Model {
         const editorContext = this.captureEditorContext();
         lastUserEntry.editorContext = editorContext;
         const frontendCapabilities = listCapabilityManifests();
-        const run = this.beginSessionRun();
+        const run = this.runController.begin();
         try {
             await fetchAgentSSE(
                 lastUserText,
                 window.siyuan.config.appearance.lang,
                 lastUserEntry.references || [],
-                (event: ISSEResult) => this.handleSessionRunEvent(run, event),
+                (event: ISSEResult) => this.runController.handleEvent(run, event),
                 (err: Error) => this.handleSessionRunError(run, err, undefined, true),
                 run.controller.signal,
                 run.sessionID,
@@ -3701,7 +3543,7 @@ export class AgentChat extends Model {
                 editedData?.blockHTML,
             );
         } finally {
-            await this.finishSessionRun(run);
+            await this.runController.finish(run);
         }
     }
 
@@ -4228,7 +4070,7 @@ export class AgentChat extends Model {
             console.error("agent confirm request error:", e);
             return false;
         }
-        this.removeRunInteraction(sessionID, "confirm", confirmID);
+        this.runController.removeInteraction(sessionID, "confirm", confirmID);
         if (this.sessionId !== sessionID) {
             return true;
         }
@@ -4434,7 +4276,7 @@ export class AgentChat extends Model {
             console.error("agent question request error:", e);
             return false;
         }
-        this.removeRunInteraction(sessionID, "question", questionID);
+        this.runController.removeInteraction(sessionID, "question", questionID);
         if (this.sessionId !== sessionID) {
             return true;
         }

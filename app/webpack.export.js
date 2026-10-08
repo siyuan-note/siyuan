@@ -59,6 +59,8 @@ module.exports = (env, argv) => {
                             options: {
                                 "ifdef-verbose": false,
                                 BROWSER: true,
+                                // 用于隔离应用界面依赖，不表示导出页的运行平台，见 #5326、#20219。
+                                // 导出依赖边界测试同时检查桌面分支，防止渲染逻辑被静默裁剪。
                                 MOBILE: true,
                             },
                         },

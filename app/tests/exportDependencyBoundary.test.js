@@ -14,7 +14,7 @@ const options = {...loaders.find(loader => loader.loader === "ifdef-loader").opt
 delete options["ifdef-verbose"];
 
 // 按导出包的条件编译与类型擦除流程检查静态和动态依赖，不生成构建产物。
-const getExportDependencies = () => {
+const getExportDependencies = (compileOptions = options) => {
     const visited = new Set();
     const pending = [path.join(root, "protyle/method.ts")];
     while (pending.length) {
@@ -24,7 +24,7 @@ const getExportDependencies = () => {
         }
         visited.add(file);
         const original = readFileSync(file, "utf8");
-        const code = file.endsWith(".ts") ? transformSync(parse(original, options, false), {
+        const code = file.endsWith(".ts") ? transformSync(parse(original, compileOptions, false), {
             loader: "ts", target: "es6", format: "esm",
         }).code : original;
         const source = ts.createSourceFile(file, code, ts.ScriptTarget.Latest, true);
@@ -65,4 +65,14 @@ test("export rendering keeps application UI outside its runtime dependency graph
     assert.deepEqual(applicationModules, [], "Export rendering imported application or editing UI");
     assert.ok(dependencies.includes("protyle/render/listMindmap/legacy.ts"), "Legacy mind map rendering must remain available");
     t.diagnostic(`Export renderer runtime dependency graph: ${dependencies.length} modules`);
+});
+
+test("export rendering has no desktop-only branches or platform-dependent dependencies", () => {
+    const dependencies = getExportDependencies();
+    const desktopDependencies = getExportDependencies({...options, MOBILE: false});
+    assert.deepEqual([...dependencies].sort(), [...desktopDependencies].sort(),
+        "Export rendering dependencies must not depend on the MOBILE flag");
+    const desktopBranches = dependencies.filter(file =>
+        /^\s*\/\/\/\s*#(?:if|elif)\b[^\r\n]*!\s*MOBILE\b/m.test(readFileSync(path.join(root, file), "utf8")));
+    assert.deepEqual(desktopBranches, [], "Export rendering must not silently discard desktop-only branches");
 });

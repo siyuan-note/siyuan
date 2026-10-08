@@ -30954,7 +30954,9 @@
         "Type",
         "Value"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoBitString": {
       "type": "object",
@@ -30977,7 +30979,9 @@
         "BitLength",
         "Bytes"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoCertificate": {
       "type": "object",
@@ -31553,7 +31557,9 @@
         "UnknownExtKeyUsage",
         "Version"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoConnectionState": {
       "type": "object",
@@ -31696,7 +31702,9 @@
         "VerifiedChains",
         "Version"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoContext": {
       "type": "object",
@@ -31837,7 +31845,9 @@
         "Unparsed",
         "Value"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoCurveParams": {
       "type": "object",
@@ -31908,7 +31918,9 @@
         "Name",
         "P"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoDSAPublicKey": {
       "type": "object",
@@ -31960,7 +31972,9 @@
         "Q",
         "Y"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoData": {
       "type": "object",
@@ -32033,7 +32047,9 @@
         "X",
         "Y"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoExtension": {
       "type": "object",
@@ -32070,7 +32086,9 @@
         "Id",
         "Value"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoFile": {
       "type": "object",
@@ -32137,7 +32155,9 @@
         "IP",
         "Mask"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoMultipart": {
       "type": "object",
@@ -32335,7 +32355,9 @@
         "SerialNumber",
         "StreetAddress"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoParam": {
       "type": "object",
@@ -32392,7 +32414,9 @@
         "P",
         "Q"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoPolicyMapping": {
       "type": "object",
@@ -32408,7 +32432,9 @@
         "IssuerDomainPolicy",
         "SubjectDomainPolicy"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoRSAPublicKey": {
       "type": "object",
@@ -32431,7 +32457,9 @@
         "E",
         "N"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoRawValue": {
       "type": "object",
@@ -32473,7 +32501,9 @@
         "IsCompound",
         "Tag"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoRequest": {
       "type": "object",
@@ -32744,7 +32774,9 @@
         "Scheme",
         "User"
       ],
-      "additionalProperties": false
+      "additionalProperties": {
+        "$ref": "#/$defs/JSONValue"
+      }
     },
     "NetworkEchoURLInfo": {
       "type": "object",

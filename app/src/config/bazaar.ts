@@ -1154,7 +1154,7 @@ type="checkbox">
 </div>
 <div class="item__main">
     ${previewHTML}
-    <div class="b3-typography${displayData.preferredDesc ? "" : " fn__none"}">
+    <div class="item__desc b3-typography${displayData.preferredDesc ? "" : " fn__none"}">
         <blockquote>
             <p>
                 ${escapeHtml(displayData.preferredDesc)}

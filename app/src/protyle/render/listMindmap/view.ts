@@ -722,7 +722,9 @@ export class ListMindmapView {
                                 list.replaceWith(host);
                             }
                         });
-                        clone.querySelectorAll(".protyle-attr, .protyle-action, .protyle-action__table, .protyle-icons, .mindmap-view")
+                        // 富文本单元格的列表标记保留为只读内容，其他编辑控件不进入预览。
+                        clone.querySelectorAll(".protyle-attr, .protyle-action:not(.li[data-table-cell-node] > .protyle-action), " +
+                            ".protyle-action__table, .protyle-icons, .mindmap-view")
                             .forEach(item => item.remove());
                         [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))].forEach((item) => {
                             // 页签预览使用独立 DOM 标识切换正文，不携带可提交事务的块身份。

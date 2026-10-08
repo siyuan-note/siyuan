@@ -19,7 +19,7 @@ const extract = (file: string, names: string[]) => {
     return compile(declarations.map(declaration => declaration.getText(source)).join("\n"));
 };
 
-const cases = async (source: string) => {
+const cases = async (source: string, css: string) => {
     const check = require("node:assert/strict");
     const requests: {url: string, data: Record<string, string>}[] = [];
     const chartRefreshes: Element[] = [];
@@ -31,11 +31,12 @@ const cases = async (source: string) => {
         isEncryptedBox: () => false,
         hasClosestByClassName: (element: HTMLElement, name: string) => element.closest(`.${name}`),
         chartRender: (element: Element) => chartRefreshes.push(element),
+        mathRender: (): undefined => undefined,
     };
     const api = new Function(...Object.keys(dependencies), source + "; return {customBlockRender, " +
         "registerCustomBlockRoot, setCustomBlockRootReady, unregisterCustomBlockRoot, activateCustomBlockPlugin, " +
         "deactivateCustomBlockPlugin, htmlRender, blockRender, avRender, getAVElements, getCell, getTableNode, " +
-        "TablePreviewControl, refreshChartTheme, getAVRichTextUnsupportedPasteBlocks};")(...Object.values(dependencies));
+        "TablePreviewControl, MindmapPreviewView, refreshChartTheme, getAVRichTextUnsupportedPasteBlocks};")(...Object.values(dependencies));
     const root = document.createElement("div");
     root.className = "protyle-wysiwyg";
     document.body.append(root);
@@ -149,6 +150,55 @@ const cases = async (source: string) => {
     controls.renderPinnedTableFrames();
     check.equal(controls.pinnedTableActions.size, 0);
 
+    // 表格单元格的列表标记属于只读内容，预览保留序号、圆点和任务状态。
+    const style = document.createElement("style");
+    style.textContent = css;
+    document.head.append(style);
+    const richTable = block("NodeTable", '<table><tbody><tr><td><div class="table__cell-rich">' +
+        '<div class="list" data-type="NodeList" data-table-cell-node>' +
+        ["o", "u", "t"].map((type, index) => `<div class="li" data-type="NodeListItem" data-subtype="${type}" data-table-cell-node>` +
+            `<div class="protyle-action${type === "o" ? " protyle-action--order" : type === "t" ? " protyle-action--task" : ""}" draggable="true">` +
+            (type === "o" ? "1." : `<svg><use href="#${type === "u" ? "iconDot" : "iconCheck"}"></use></svg>`) +
+            `</div><div class="p" data-type="NodeParagraph" data-table-cell-node><div data-table-cell-content>Item ${index}</div>` +
+            '<div class="protyle-attr"></div></div><div class="protyle-attr"></div></div>').join("") +
+        '</div><span class="img"><span class="protyle-action">Image controls</span></span>' +
+        '</div></td></tr></tbody></table><div class="protyle-action__table"></div>');
+    const originalTable = richTable.outerHTML;
+    const map = document.createElement("div");
+    map.className = "mindmap-view";
+    map.innerHTML = '<div class="mindmap-view__node"><div class="mindmap-view__content"></div>' +
+        '<button class="mindmap-view__fold"><span></span></button></div>';
+    root.append(map);
+    const nodeElement = map.firstElementChild;
+    const node = {id: "table-node", children: [] as unknown[], contentBlocks: [richTable], virtual: false};
+    const model = {root: node, nodes: new Map([[node.id, node]]), metadata: {nodes: {}, relations: [] as {id: string}[]}};
+    const view = Object.assign(new api.MindmapPreviewView(), {
+        options: {}, persistedLocked: false, nodeElements: new Map([[node.id, nodeElement]]), folded: new Map(),
+        cancelSummarySelection: () => {}, renderTask: () => {}, destroyContentViews: () => {},
+        label: (key: string) => key, updateRelations: () => {}, updateSummaries: () => {},
+        updateSelection: () => {}, renderInspector: () => {}, refreshLayout: () => {},
+    });
+    view.update(model);
+    const richPreview = map.querySelector(".table__cell-rich");
+    check.equal(richPreview.querySelectorAll(".li > .protyle-action").length, 3);
+    check.equal(richPreview.querySelector(".protyle-action--order").textContent, "1.");
+    check.equal(richPreview.querySelector(".protyle-action--task use").getAttribute("href"), "#iconCheck");
+    check.equal(map.querySelector(".img .protyle-action, .protyle-attr, .protyle-action__table"), null);
+    check.equal(map.querySelector("[data-node-id], [draggable], [contenteditable]"), null);
+    check.equal(richTable.outerHTML, originalTable, "preview rendering leaves the source table intact");
+    for (const size of [16, 32]) {
+        map.style.fontSize = `${size}px`;
+        for (const item of richPreview.querySelectorAll<HTMLElement>(".li")) {
+            const action = item.querySelector(".protyle-action");
+            const text = item.querySelector("[data-table-cell-content]");
+            check.equal(getComputedStyle(action).position, "absolute");
+            check.ok(action.getBoundingClientRect().left >= item.getBoundingClientRect().left - 1);
+            check.ok(action.getBoundingClientRect().right <= text.getBoundingClientRect().left + 1,
+                "list markers keep their shared indentation at large editor fonts");
+        }
+    }
+    style.remove();
+
     // 脑图预览保留复杂块，数据库和表格单元格仍按原有规则拒绝这些块。
     const types = ["NodeTable", "NodeAttributeView", "NodeBlockQueryEmbed", "NodeCustomBlock", "NodeHTMLBlock",
         "NodeIFrame", "NodeWidget", "NodeVideo", "NodeAudio", "NodeCallout", "NodeSuperBlock", "NodeTabs"];
@@ -182,6 +232,13 @@ test("special block previews cannot acquire document writes or lose unsupported 
     const methods = tableClass.members.filter(member => ["getEdgeHover", "renderPinnedTableFrames"]
         .includes(member.name?.getText(tableSource)));
     assert.equal(methods.length, 2);
+    const viewSource = createSourceFile("view.ts", readFileSync(path.join(__dirname, "view.ts"), "utf8"), ScriptTarget.Latest, true);
+    const viewClass = viewSource.statements.find(isClassDeclaration);
+    const viewMethods = viewClass.members.filter(member => ["update", "getContentHost"].includes(member.name?.getText(viewSource)));
+    assert.equal(viewMethods.length, 2);
+    const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/base.scss"), {
+        logger: require("sass").Logger.silent,
+    }).css;
     const source = compile(readFileSync(path.join(__dirname, "../../../plugin/customBlockRender.ts"), "utf8")) +
         extract("../htmlRender.ts", ["htmlRender"]) + extract("../blockRender.ts", ["blockRender"]) +
         extract("../chartRender.ts", ["refreshChartTheme"]) +
@@ -189,6 +246,7 @@ test("special block previews cannot acquire document writes or lose unsupported 
         extract("../../util/tableVirtualizationDOM.ts", ["TABLE_VIRTUAL_ID", "TABLE_VIRTUAL_ROWS"]) +
         extract("../../util/tableControl.ts", ["getCell", "getTableNode"]) +
         compile(`class TablePreviewControl {${methods.map(method => method.getText(tableSource)).join("\n")}}`) +
+        compile(`class MindmapPreviewView {${viewMethods.map(method => method.getText(viewSource)).join("\n")}}`) +
         extract("../av/richText.ts", ["ALLOWED_BLOCK_TYPES", "isSupportedAVRichTextBlock", "getAVRichTextUnsupportedPasteBlocks"]) +
         extract("../av/richTextValue.ts", ["EXECUTABLE_CODE_LANGUAGES", "isAVRichTextExecutableCodeLanguage"]);
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-preview-"));
@@ -202,7 +260,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript("window.Lute = {UnEscapeHTMLStr: value => value}; void 0;");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${cases.toString()})(${JSON.stringify(source)})`)}));
+        `const __name = value => value; (${cases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)}));
         win.destroy();
         app.exit(0);
     } catch (error) {

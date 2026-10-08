@@ -59,6 +59,32 @@ const confirmEncryptedExport = (notebookId: string, callback: () => void) => {
     confirmDialog(window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, callback);
 };
 
+const openFileTreeSearch = async (app: App, notebookId: string, pathString: string, hasReplace: boolean) => {
+    const searchPath = getDisplayName(pathString, false, true);
+    /// #if MOBILE
+    const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
+        notebook: notebookId,
+        path: searchPath + ".sy"
+    });
+    if (response.code !== 0 || typeof response.data !== "string") {
+        return;
+    }
+    popSearch(app, {
+        hasReplace,
+        hPath: pathPosix().join(getNotebookName(notebookId), response.data),
+        idPath: [pathPosix().join(notebookId, searchPath)],
+        page: 1,
+    });
+    /// #else
+    openSearch({
+        app,
+        hotkey: hasReplace ? Constants.DIALOG_REPLACE : Constants.DIALOG_SEARCH,
+        notebookId,
+        searchPath
+    });
+    /// #endif
+};
+
 const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) => {
     const selectedItems = Array.from(selectItemElements);
     const fileItemElements = selectedItems.filter((item) => item.getAttribute("data-type") === "navigation-file");
@@ -1010,62 +1036,14 @@ export const initDocumentMenu = (app: App, options: {
             label: window.siyuan.languages.search,
             icon: "iconSearch",
             accelerator: window.siyuan.config.keymap.general.search.custom,
-            async click() {
-                const searchPath = getDisplayName(pathString, false, true);
-                /// #if MOBILE
-                const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
-                    notebook: notebookId,
-                    path: searchPath + ".sy"
-                });
-                if (response.code !== 0 || typeof response.data !== "string") {
-                    return;
-                }
-                popSearch(app, {
-                    hasReplace: false,
-                    hPath: pathPosix().join(getNotebookName(notebookId), response.data),
-                    idPath: [pathPosix().join(notebookId, searchPath)],
-                    page: 1,
-                });
-                /// #else
-                openSearch({
-                    app,
-                    hotkey: Constants.DIALOG_SEARCH,
-                    notebookId,
-                    searchPath
-                });
-                /// #endif
-            }
+            click: () => openFileTreeSearch(app, notebookId, pathString, false)
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             id: "replace",
             label: window.siyuan.languages.replace,
             accelerator: window.siyuan.config.keymap.general.replace.custom,
             icon: "iconReplace",
-            async click() {
-                const searchPath = getDisplayName(pathString, false, true);
-                /// #if MOBILE
-                const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
-                    notebook: notebookId,
-                    path: searchPath + ".sy"
-                });
-                if (response.code !== 0 || typeof response.data !== "string") {
-                    return;
-                }
-                popSearch(app, {
-                    hasReplace: true,
-                    hPath: pathPosix().join(getNotebookName(notebookId), response.data),
-                    idPath: [pathPosix().join(notebookId, searchPath)],
-                    page: 1,
-                });
-                /// #else
-                openSearch({
-                    app,
-                    hotkey: Constants.DIALOG_REPLACE,
-                    notebookId,
-                    searchPath
-                });
-                /// #endif
-            }
+            click: () => openFileTreeSearch(app, notebookId, pathString, true)
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_3", type: "separator"}).element);
     }

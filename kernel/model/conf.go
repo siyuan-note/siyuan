@@ -1213,6 +1213,28 @@ func (conf *AppConf) Save() {
 	conf.m.Lock()
 	defer conf.m.Unlock()
 
+	conf.saveLocked()
+}
+
+// SaveGraphQueryConf 仅在查询携带的图配置变化时更新并保存，比较、赋值和序列化共用配置锁。
+func (appConf *AppConf) SaveGraphQueryConf(global *conf.GlobalGraph, local *conf.LocalGraph) {
+	appConf.m.Lock()
+	defer appConf.m.Unlock()
+	changed := false
+	if global != nil && !reflect.DeepEqual(appConf.Graph.Global, global) {
+		appConf.Graph.Global = global
+		changed = true
+	}
+	if local != nil && !reflect.DeepEqual(appConf.Graph.Local, local) {
+		appConf.Graph.Local = local
+		changed = true
+	}
+	if changed && !util.ReadOnly {
+		appConf.saveLocked()
+	}
+}
+
+func (conf *AppConf) saveLocked() {
 	newData, err := conf.marshalForSave()
 	if err != nil {
 		logging.LogErrorf("marshal conf failed: %s", err)

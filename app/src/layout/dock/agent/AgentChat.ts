@@ -293,7 +293,7 @@ export class AgentChat extends Model {
     // 由 ws 的 streamStart/streamEnd 事件驱动，与发起者的 isStreaming 互斥（发起者走 SSE）。
     private mirrorLocked = false;
     private mirrorPlaceholderEl: HTMLElement | null = null;
-    // 思考计时器：流式进行时每 100ms 刷新未完成思考卡片的标题为「思考中... X.Xs」。
+    // 思考计时器：流式进行时每秒刷新未完成思考卡片的标题。
     private thinkingTimerId = 0;
     // 上一个 thinking step 快照时 currentToolCalls 的长度基准，
     // 用于计算本轮新增的工具（避免 step.toolNames 累积重复历史工具）。
@@ -4737,25 +4737,28 @@ export class AgentChat extends Model {
         }
     }
 
-    // 启动思考计时器，每 100ms 刷新所有未完成思考卡片的标题文本为「思考中... X.Xs」。
+    // 启动思考计时器，每秒刷新当前未完成思考卡片的标题文本。
     private startThinkingTimer() {
         this.stopThinkingTimer();
         if (!this.requestStartTime) {
             return;
         }
+        const cards = this.messagesContainer.querySelectorAll<HTMLElement>(
+            ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-text"
+        );
         const tick = () => {
             const sec = Math.floor((Date.now() - this.requestStartTime) / 1000);
             const L = window.siyuan.languages;
             const live = (L.agentThinking || "Thinking") + " " + sec + "s";
-            const cards = this.messagesContainer.querySelectorAll(
-                ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-text"
-            );
             for (let i = 0; i < cards.length; i++) {
-                (cards[i] as HTMLElement).textContent = live;
+                if (this.messagesContainer.contains(cards[i]) &&
+                    !cards[i].closest(".agent-chat__msg--thinking-done")) {
+                    cards[i].textContent = live;
+                }
             }
         };
         tick();
-        this.thinkingTimerId = window.setInterval(tick, 100);
+        this.thinkingTimerId = window.setInterval(tick, 1000);
     }
 
     // 停止思考计时器（思考结束/切换会话/停止生成时调用，避免泄漏）。

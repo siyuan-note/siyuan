@@ -293,11 +293,10 @@ func getFloat64Arg(args map[string]any, key string) float64 {
 }
 
 func resolveLimit(args map[string]any, defaultLimit int) int {
-	limit := int(getFloat64Arg(args, "limit"))
-	if limit <= 0 {
+	if _, exists := args["limit"]; !exists {
 		return defaultLimit
 	}
-	return limit
+	return int(getFloat64Arg(args, "limit"))
 }
 
 func fileRead(args map[string]any) (CallToolResult, error) {
@@ -973,9 +972,6 @@ func grepGuarded(root, include, pattern string, context, maxResults int) ([]*gul
 	if err != nil {
 		return nil, err
 	}
-	if maxResults <= 0 {
-		maxResults = 64
-	}
 
 	var results []*gulu.GrepResult
 	info, err := os.Stat(root)
@@ -1016,7 +1012,7 @@ func grepGuarded(root, include, pattern string, context, maxResults int) ([]*gul
 	if err != nil {
 		return results, err
 	}
-	if len(results) > maxResults {
+	if maxResults > 0 && len(results) > maxResults {
 		results = results[:maxResults]
 	}
 	return results, nil
@@ -1024,7 +1020,7 @@ func grepGuarded(root, include, pattern string, context, maxResults int) ([]*gul
 
 // grepGuardedFile 逐行匹配单个文件并收集上下文行，语义与 gulu 的 grep 保持一致。
 func grepGuardedFile(path string, re *regexp.Regexp, context int, results *[]*gulu.GrepResult, maxResults int) {
-	if len(*results) >= maxResults {
+	if maxResults > 0 && len(*results) >= maxResults {
 		return
 	}
 
@@ -1044,7 +1040,7 @@ func grepGuardedFile(path string, re *regexp.Regexp, context int, results *[]*gu
 
 	flushBeforeBuf := func() {
 		for _, e := range beforeBuf {
-			if len(*results) >= maxResults {
+			if maxResults > 0 && len(*results) >= maxResults {
 				return
 			}
 			*results = append(*results, &gulu.GrepResult{File: path, Line: e.lineNum, Text: e.text, Context: true})
@@ -1053,7 +1049,7 @@ func grepGuardedFile(path string, re *regexp.Regexp, context int, results *[]*gu
 	}
 
 	emit := func(lineNum int, text string, isContext bool) {
-		if len(*results) >= maxResults {
+		if maxResults > 0 && len(*results) >= maxResults {
 			return
 		}
 		*results = append(*results, &gulu.GrepResult{File: path, Line: lineNum, Text: text, Context: isContext})
@@ -1063,7 +1059,7 @@ func grepGuardedFile(path string, re *regexp.Regexp, context int, results *[]*gu
 	scanner.Buffer(make([]byte, 1024*1024), 1024*1024)
 	lineNum := 0
 	for scanner.Scan() {
-		if len(*results) >= maxResults {
+		if maxResults > 0 && len(*results) >= maxResults {
 			return
 		}
 		lineNum++

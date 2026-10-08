@@ -3446,5 +3446,7 @@ func filterQueryInvisibleChars(query string) string {
 
 func replaceCaseInsensitive(input, old, new []byte) []byte {
 	re := regexp.MustCompile("(?i)" + regexp.QuoteMeta(string(old)))
-	return []byte(re.ReplaceAllString(string(input), string(new)))
+	return re.ReplaceAllFunc(input, func([]byte) []byte {
+		return new
+	})
 }

@@ -2321,12 +2321,8 @@ func upsertAvBlockRel(node *ast.Node) {
 		time.Sleep(100 * time.Millisecond)
 
 		affectedAvIDs = gulu.Str.RemoveDuplicatedElem(affectedAvIDs)
-		var relatedAvIDs []string
-		for _, avID := range affectedAvIDs {
-			relatedAvIDs = append(relatedAvIDs, av.GetSrcAvIDs(avID)...)
-		}
+		relatedAvIDs := av.GetSrcAvIDsForRefresh(affectedAvIDs)
 		affectedAvIDs = append(affectedAvIDs, relatedAvIDs...)
-		affectedAvIDs = gulu.Str.RemoveDuplicatedElem(affectedAvIDs)
 		for _, avID := range affectedAvIDs {
 			attrView, _ := av.ParseAttributeView(avID)
 			if nil != attrView {

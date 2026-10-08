@@ -8482,18 +8482,7 @@ func refreshRelatedSrcAvs(destAvID string, tx *Transaction) {
 }
 
 func refreshRelatedSrcAvsInBlock(destAvID, blockID string, tx *Transaction) {
-	relatedAvIDs := av.GetSrcAvIDs(destAvID)
-
-	var tmp []string
-	for _, relatedAvID := range relatedAvIDs {
-		if relatedAvID == destAvID {
-			// 目标和源相同则跳过
-			continue
-		}
-
-		tmp = append(tmp, relatedAvID)
-	}
-	relatedAvIDs = tmp
+	relatedAvIDs := av.GetSrcAvIDsForRefresh([]string{destAvID})
 
 	if nil != tx {
 		tx.relatedAvIDs = append(tx.relatedAvIDs, relatedAvIDs...)

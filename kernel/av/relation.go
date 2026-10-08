@@ -99,6 +99,35 @@ func GetSrcAvIDs(destAvID string) []string {
 	return srcAvIDs
 }
 
+// GetSrcAvIDsForRefresh 按广度优先顺序收集需要刷新的直接和间接关联源，不包含起始数据库。
+func GetSrcAvIDsForRefresh(destAvIDs []string) []string {
+	return collectSrcAvIDsForRefresh(destAvIDs, GetSrcAvIDs)
+}
+
+func collectSrcAvIDsForRefresh(destAvIDs []string, getSrcAvIDs func(string) []string) (ret []string) {
+	visited := map[string]bool{}
+	var queue []string
+	for _, avID := range destAvIDs {
+		if visited[avID] {
+			continue
+		}
+		visited[avID] = true
+		queue = append(queue, avID)
+	}
+
+	for i := 0; i < len(queue); i++ {
+		for _, srcAvID := range getSrcAvIDs(queue[i]) {
+			if visited[srcAvID] {
+				continue
+			}
+			visited[srcAvID] = true
+			queue = append(queue, srcAvID)
+			ret = append(ret, srcAvID)
+		}
+	}
+	return
+}
+
 func RemoveAvRel(srcAvID, destAvID string) {
 	attributeViewRelationsLock.Lock()
 	defer attributeViewRelationsLock.Unlock()

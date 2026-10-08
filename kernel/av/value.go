@@ -2718,7 +2718,7 @@ func (r *ValueRollup) BuildContents(attrView *AttributeView, destKey *Key, relat
 
 		destVal := GetValue(attrView.KeyValues, destKey.ID, blockID)
 		if nil != context && nil != context.FurtherCollection &&
-			(KeyTypeTemplate == destKey.Type || KeyTypeUpdated == destKey.Type || KeyTypeCreated == destKey.Type) {
+			(KeyTypeTemplate == destKey.Type || KeyTypeUpdated == destKey.Type || KeyTypeCreated == destKey.Type || KeyTypeRollup == destKey.Type) {
 			destVal = context.FurtherCollection.GetValue(blockID, destKey.ID)
 		}
 
@@ -2731,6 +2731,17 @@ func (r *ValueRollup) BuildContents(attrView *AttributeView, destKey *Key, relat
 			continue
 		}
 
+		if KeyTypeRollup == destKey.Type {
+			// 嵌套汇总使用目标字段的计算结果，保持外层显示、筛选和统计的值类型一致。
+			if nil != destVal.Rollup {
+				for _, content := range destVal.Rollup.Contents {
+					if nil != content {
+						r.Contents = append(r.Contents, content.Clone())
+					}
+				}
+			}
+			continue
+		}
 		if val := destVal.GetValByType(destKey.Type); nil == val || reflect.ValueOf(val).IsNil() {
 			// 目标字段因为修改类型导致空值
 			continue

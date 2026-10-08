@@ -77,6 +77,9 @@ export const getDocByScroll = (options: {
     scrollAttr?: IScrollAttr,
     mergedOptions?: IProtyleOptions,
     cb?: (keys: string[]) => void,
+    beforeAVRender?: () => void,
+    afterAVRender?: () => void | Promise<void>,
+    onRenderError?: () => void,
     focus?: boolean,
     updateReadonly?: boolean,
     signal?: AbortSignal,
@@ -91,6 +94,7 @@ export const getDocByScroll = (options: {
             callback(response);
         }, undefined, undefined, options.signal).then(() => {
             if (!handled) {
+                options.onRenderError?.();
                 options.fail?.();
             }
         });
@@ -106,6 +110,9 @@ export const getDocByScroll = (options: {
         }
     }
     const renderDoc = (response: IWebSocketData) => {
+        if (response.code !== 0) {
+            options.onRenderError?.();
+        }
         try {
             onGet({
                 scrollPosition: options.mergedOptions?.scrollPosition,
@@ -118,9 +125,13 @@ export const getDocByScroll = (options: {
                 } : undefined,
                 updateReadonly: options.updateReadonly,
                 isValid: options.isValid,
+                beforeAVRender: options.beforeAVRender,
+                afterAVRender: options.afterAVRender,
+                onAVRenderError: options.onRenderError,
             });
         } catch (error) {
             console.error(error);
+            options.onRenderError?.();
             options.fail?.();
             return;
         }

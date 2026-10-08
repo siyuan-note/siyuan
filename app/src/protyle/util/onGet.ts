@@ -59,7 +59,9 @@ export const onGet = (options: {
     updateReadonly?: boolean,
     scrollPosition?: ScrollLogicalPosition,
     afterCB?: () => void,
+    beforeAVRender?: () => void,
     afterAVRender?: () => void | Promise<void>,
+    onAVRenderError?: () => void,
     dataDocType?: string,
     isValid?: () => boolean,
     focusAfterZoom?: boolean,
@@ -160,7 +162,9 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            beforeAVRender: options.beforeAVRender,
             afterAVRender: options.afterAVRender,
+            onAVRenderError: options.onAVRenderError,
             isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
@@ -181,7 +185,9 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            beforeAVRender: options.beforeAVRender,
             afterAVRender: options.afterAVRender,
+            onAVRenderError: options.onAVRenderError,
             isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
@@ -215,7 +221,9 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
+            beforeAVRender: options.beforeAVRender,
             afterAVRender: options.afterAVRender,
+            onAVRenderError: options.onAVRenderError,
             isValid: options.isValid,
             scrollPosition: options.scrollPosition,
             focusAfterZoom: options.focusAfterZoom,
@@ -249,7 +257,9 @@ const setHTML = (options: {
     scrollPosition?: ScrollLogicalPosition,
     refreshHeadingNumbers?: boolean,
     afterCB?: () => void,
+    beforeAVRender?: () => void,
     afterAVRender?: () => void | Promise<void>,
+    onAVRenderError?: () => void,
     focusAfterZoom?: boolean,
     suppressFocus?: boolean,
     isValid?: () => boolean,
@@ -390,13 +400,17 @@ const setHTML = (options: {
     }
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);
+    options.beforeAVRender?.();
     const avRendering = avRender(protyle.wysiwyg.element, protyle);
     if (options.afterAVRender) {
         void avRendering.then(() => {
             if (!options.isValid || options.isValid()) {
                 return options.afterAVRender();
             }
-        }).catch(error => console.error(error));
+        }).catch(error => {
+            console.error(error);
+            options.onAVRenderError?.();
+        });
     }
     blockRender(protyle, protyle.wysiwyg.element);
     renderHeadingNumbers(protyle);

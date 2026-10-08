@@ -40,8 +40,27 @@ func TestExportFootnotesAcrossNotebooks(t *testing.T) {
 	for _, tree := range []*parse.Tree{source, target, nested} {
 		writeExportRelatedTestTree(t, tree)
 	}
-	exported, err := exportTree(prepareExportTree(getExportBlockTree(source.ID)), true, true, false, true,
-		4, 0, 0, "#", "#", "", "", false, "", false, true, nil, nil)
+	exported, err := exportTree(prepareExportTree(getExportBlockTree(source.ID)), treeExportOptions{
+		Config: conf.Export{
+			BlockRefMode:          4,
+			BlockEmbedMode:        0,
+			FileAnnotationRefMode: 0,
+			TagOpenMarker:         "#",
+			TagCloseMarker:        "#",
+			BlockRefTextLeft:      "",
+			BlockRefTextRight:     "",
+			AddTitle:              false,
+			InlineMemo:            false,
+		},
+		WYSIWYG:          true,
+		RichTableCells:   true,
+		KeepFold:         false,
+		AVHiddenCol:      true,
+		CustomTitle:      "",
+		AddDocAnchorSpan: true,
+		References:       nil,
+		AVPublishFilter:  nil,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,8 +131,27 @@ func TestExportFootnotesStayWithinBlockScope(t *testing.T) {
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
 			tree := prepareExportTree(getExportBlockTree(scenario.id))
-			exported, err := exportTree(tree, true, true, false, true,
-				4, 0, 0, "#", "#", "", "", false, "", false, true, nil, nil)
+			exported, err := exportTree(tree, treeExportOptions{
+				Config: conf.Export{
+					BlockRefMode:          4,
+					BlockEmbedMode:        0,
+					FileAnnotationRefMode: 0,
+					TagOpenMarker:         "#",
+					TagCloseMarker:        "#",
+					BlockRefTextLeft:      "",
+					BlockRefTextRight:     "",
+					AddTitle:              false,
+					InlineMemo:            false,
+				},
+				WYSIWYG:          true,
+				RichTableCells:   true,
+				KeepFold:         false,
+				AVHiddenCol:      true,
+				CustomTitle:      "",
+				AddDocAnchorSpan: true,
+				References:       nil,
+				AVPublishFilter:  nil,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -230,8 +268,27 @@ func TestExportFootnotesHeadingAndContainerScopes(t *testing.T) {
 		{"container retains local anchor", container.ID, 0},
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
-			tree, err := exportTree(prepareExportTree(getExportBlockTree(scenario.id)), true, true, false, true,
-				4, 0, 0, "#", "#", "", "", false, "", false, true, nil, nil)
+			tree, err := exportTree(prepareExportTree(getExportBlockTree(scenario.id)), treeExportOptions{
+				Config: conf.Export{
+					BlockRefMode:          4,
+					BlockEmbedMode:        0,
+					FileAnnotationRefMode: 0,
+					TagOpenMarker:         "#",
+					TagCloseMarker:        "#",
+					BlockRefTextLeft:      "",
+					BlockRefTextRight:     "",
+					AddTitle:              false,
+					InlineMemo:            false,
+				},
+				WYSIWYG:          true,
+				RichTableCells:   true,
+				KeepFold:         false,
+				AVHiddenCol:      true,
+				CustomTitle:      "",
+				AddDocAnchorSpan: true,
+				References:       nil,
+				AVPublishFilter:  nil,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -264,8 +321,27 @@ func TestExportFootnotesUseMaterializedTableContent(t *testing.T) {
 	for _, tree := range []*parse.Tree{source, target} {
 		writeAssetDownloadDocumentTest(t, tree)
 	}
-	exported, err := exportTree(prepareExportTree(getExportBlockTree(table.ID)), true, true, false, true,
-		4, 0, 0, "#", "#", "", "", false, "", false, true, nil, nil)
+	exported, err := exportTree(prepareExportTree(getExportBlockTree(table.ID)), treeExportOptions{
+		Config: conf.Export{
+			BlockRefMode:          4,
+			BlockEmbedMode:        0,
+			FileAnnotationRefMode: 0,
+			TagOpenMarker:         "#",
+			TagCloseMarker:        "#",
+			BlockRefTextLeft:      "",
+			BlockRefTextRight:     "",
+			AddTitle:              false,
+			InlineMemo:            false,
+		},
+		WYSIWYG:          true,
+		RichTableCells:   true,
+		KeepFold:         false,
+		AVHiddenCol:      true,
+		CustomTitle:      "",
+		AddDocAnchorSpan: true,
+		References:       nil,
+		AVPublishFilter:  nil,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

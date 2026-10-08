@@ -401,7 +401,17 @@ var exportMdContent = contractHandler(apicontract.ExportMdContent, func(c *gin.C
 		addTitle = *request.AddTitle
 	}
 
-	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, yfm, fillCSSVar, adjustHeadingLevel, imgTag, addTitle)
+	hPath, content := model.ExportMarkdownContent(id, &model.ExportOptions{
+		BlockRefMode:   new(refMode),
+		BlockEmbedMode: new(embedMode),
+		MarkdownYFM:    new(yfm),
+		AddTitle:       new(addTitle),
+		Render: model.ExportRenderOptions{
+			FillCSSVar:         fillCSSVar,
+			AdjustHeadingLevel: adjustHeadingLevel,
+			ImgTag:             imgTag,
+		},
+	})
 	return apicontract.Success(apicontract.ExportMarkdownContentData{HPath: hPath, Content: content})
 })
 
@@ -687,12 +697,21 @@ func exportMarkdownOptions(options apicontract.ExportMarkdownOptions) *model.Exp
 		result := int(*value)
 		return &result
 	}
-	return &model.ExportOptions{AddTitle: options.AddTitle, InlineMemo: options.InlineMemo,
-		BlockRefMode: integer(options.BlockRefMode), BlockEmbedMode: integer(options.BlockEmbedMode),
-		FileAnnotationRefMode: integer(options.FileAnnotationRefMode), BlockRefTextLeft: options.BlockRefTextLeft,
-		BlockRefTextRight: options.BlockRefTextRight, TagOpenMarker: options.TagOpenMarker, TagCloseMarker: options.TagCloseMarker,
-		IncludeSubDocs: options.IncludeSubDocs, IncludeRelatedDocs: options.IncludeRelatedDocs,
-		MarkdownYFM: options.MarkdownYFM, RemoveAssetsID: options.RemoveAssetsID}
+	return &model.ExportOptions{
+		AddTitle:              options.AddTitle,
+		InlineMemo:            options.InlineMemo,
+		BlockRefMode:          integer(options.BlockRefMode),
+		BlockEmbedMode:        integer(options.BlockEmbedMode),
+		FileAnnotationRefMode: integer(options.FileAnnotationRefMode),
+		BlockRefTextLeft:      options.BlockRefTextLeft,
+		BlockRefTextRight:     options.BlockRefTextRight,
+		TagOpenMarker:         options.TagOpenMarker,
+		TagCloseMarker:        options.TagCloseMarker,
+		IncludeSubDocs:        options.IncludeSubDocs,
+		IncludeRelatedDocs:    options.IncludeRelatedDocs,
+		MarkdownYFM:           options.MarkdownYFM,
+		RemoveAssetsID:        options.RemoveAssetsID,
+	}
 }
 
 func holdEncryptedExportRequest(c *gin.Context, id string, ret *gulu.Result) bool {

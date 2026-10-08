@@ -51,7 +51,7 @@ func TestAssetDownloadCrossNotebookExport(t *testing.T) {
 	source.Root.FirstChild.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: other.Root.FirstChild.ID, TextMarkBlockRefSubtype: "d", TextMarkTextContent: "Other"})
 	writeAssetDownloadDocumentTest(t, source)
 	Conf.Export.IncludeRelatedDocs = true
-	_, paths := prepareExportTrees([]string{source.Path}, source.Box)
+	_, paths := prepareExportTreesWithConfig([]string{source.Path}, resolveExportOptions(nil), source.Box)
 	if len(paths) != 2 {
 		t.Fatalf("expected two export documents, got %v", paths)
 	}
@@ -74,11 +74,27 @@ func TestAssetDownloadFootnoteExport(t *testing.T) {
 	if err := prepareExportBlockAssets(source.ID, false); err != nil {
 		t.Fatal(err)
 	}
-	exported, prepareErr := exportTree(prepareExportTree(getExportBlockTree(source.ID)), true, true, false, true,
-		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
-		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
-		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, nil, nil)
+	exported, prepareErr := exportTree(prepareExportTree(getExportBlockTree(source.ID)), treeExportOptions{
+		Config: conf.Export{
+			BlockRefMode:          Conf.Export.BlockRefMode,
+			BlockEmbedMode:        Conf.Export.BlockEmbedMode,
+			FileAnnotationRefMode: Conf.Export.FileAnnotationRefMode,
+			TagOpenMarker:         Conf.Export.TagOpenMarker,
+			TagCloseMarker:        Conf.Export.TagCloseMarker,
+			BlockRefTextLeft:      Conf.Export.BlockRefTextLeft,
+			BlockRefTextRight:     Conf.Export.BlockRefTextRight,
+			AddTitle:              Conf.Export.AddTitle,
+			InlineMemo:            Conf.Export.InlineMemo,
+		},
+		WYSIWYG:          true,
+		RichTableCells:   true,
+		KeepFold:         false,
+		AVHiddenCol:      true,
+		CustomTitle:      "",
+		AddDocAnchorSpan: true,
+		References:       nil,
+		AVPublishFilter:  nil,
+	})
 	if prepareErr != nil {
 		t.Fatal(prepareErr)
 	}

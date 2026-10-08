@@ -126,7 +126,10 @@ func TestExportMarkdownFootnoteLinksToEarlierDocument(t *testing.T) {
 	for _, tree := range []*parse.Tree{first, source, external} {
 		writeAssetDownloadDocumentTest(t, tree)
 	}
-	zipPath := exportPandocConvertZip(boxID, "Ordered", []string{first.Path, source.Path}, nil, "", "", ".md")
+	zipPath := exportPandocConvertZip0(archiveExportOptions{
+		Config: resolveExportOptions(nil), BoxID: boxID, BaseFolderName: "Ordered",
+		DocPaths: []string{first.Path, source.Path}, Ext: ".md",
+	})
 	archive := openExportArchive(t, zipPath)
 	md := markdownArchiveDocument(t, archive, "Source")
 	if !strings.Contains(md, "[^1]:") || !strings.Contains(md, "First.md#"+first.Root.FirstChild.ID) || strings.Contains(md, "[^2]") {

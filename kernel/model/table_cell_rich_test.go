@@ -297,8 +297,27 @@ func TestTableCellRichFootnoteExport(t *testing.T) {
 	referring.Root.FirstChild.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref",
 		TextMarkBlockRefID: table.ID, TextMarkBlockRefSubtype: "s", TextMarkTextContent: "Rich target"})
 	writeAssetDownloadDocumentTest(t, referring)
-	exported, err := exportTree(prepareExportTree(getExportBlockTree(referring.ID)), true, true, false, true,
-		4, 0, 0, "#", "#", "", "", false, "", false, true, nil, nil)
+	exported, err := exportTree(prepareExportTree(getExportBlockTree(referring.ID)), treeExportOptions{
+		Config: conf.Export{
+			BlockRefMode:          4,
+			BlockEmbedMode:        0,
+			FileAnnotationRefMode: 0,
+			TagOpenMarker:         "#",
+			TagCloseMarker:        "#",
+			BlockRefTextLeft:      "",
+			BlockRefTextRight:     "",
+			AddTitle:              false,
+			InlineMemo:            false,
+		},
+		WYSIWYG:          true,
+		RichTableCells:   true,
+		KeepFold:         false,
+		AVHiddenCol:      true,
+		CustomTitle:      "",
+		AddDocAnchorSpan: true,
+		References:       nil,
+		AVPublishFilter:  nil,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

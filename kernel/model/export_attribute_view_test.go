@@ -80,8 +80,27 @@ func TestAttributeViewExportTablePresentation(t *testing.T) {
 				AttributeViewID: attrView.ID, AttributeViewType: string(av.LayoutTypeTable)}
 			database.SetIALAttr(av.NodeAttrView, view.ID)
 			tree.Root.AppendChild(database)
-			exported, err := exportTree(tree, tc.wysiwyg, false, false, tc.hiddenCol, 0, 0, 0,
-				"", "", "", "", false, "", false, false, nil, nil)
+			exported, err := exportTree(tree, treeExportOptions{
+				Config: conf.Export{
+					BlockRefMode:          0,
+					BlockEmbedMode:        0,
+					FileAnnotationRefMode: 0,
+					TagOpenMarker:         "",
+					TagCloseMarker:        "",
+					BlockRefTextLeft:      "",
+					BlockRefTextRight:     "",
+					AddTitle:              false,
+					InlineMemo:            false,
+				},
+				WYSIWYG:          tc.wysiwyg,
+				RichTableCells:   false,
+				KeepFold:         false,
+				AVHiddenCol:      tc.hiddenCol,
+				CustomTitle:      "",
+				AddDocAnchorSpan: false,
+				References:       nil,
+				AVPublishFilter:  nil,
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -222,7 +241,27 @@ func TestAttributeViewExportDoesNotCrossEncryptedBoundary(t *testing.T) {
 		t.Fatal("CSV export crossed from a normal document to an encrypted attribute view")
 	}
 
-	exported, exportErr := exportTree(tree, false, false, false, true, 0, 0, 0, "", "", "", "", false, "", false, false, nil, nil)
+	exported, exportErr := exportTree(tree, treeExportOptions{
+		Config: conf.Export{
+			BlockRefMode:          0,
+			BlockEmbedMode:        0,
+			FileAnnotationRefMode: 0,
+			TagOpenMarker:         "",
+			TagCloseMarker:        "",
+			BlockRefTextLeft:      "",
+			BlockRefTextRight:     "",
+			AddTitle:              false,
+			InlineMemo:            false,
+		},
+		WYSIWYG:          false,
+		RichTableCells:   false,
+		KeepFold:         false,
+		AVHiddenCol:      true,
+		CustomTitle:      "",
+		AddDocAnchorSpan: false,
+		References:       nil,
+		AVPublishFilter:  nil,
+	})
 	if exportErr != nil {
 		t.Fatal(exportErr)
 	}

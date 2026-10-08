@@ -193,7 +193,15 @@ func TestExportAttributeViewFilteredByPublishAccess(t *testing.T) {
 	fixture := setupExportAVPublishTest(t)
 	filter := newExportAVPublishReaderFilter(t, fixture.privateID)
 
-	markdown := ExportStdMarkdown(fixture.hostDocID, false, false, false, false, filter)
+	markdown := ExportStdMarkdown(fixture.hostDocID, &ExportOptions{
+		Render: ExportRenderOptions{
+			AssetsDestSpace2Underscore: false,
+			FillCSSVar:                 false,
+			AdjustHeadingLevel:         false,
+			ImgTag:                     false,
+			AVPublishFilter:            filter,
+		},
+	})
 	if strings.Contains(markdown, "PRIVATE") {
 		t.Fatalf("publish reader received private attribute view content in markdown: %s", markdown)
 	}
@@ -209,7 +217,15 @@ func TestExportAttributeViewFilteredByPublishAccess(t *testing.T) {
 		t.Fatalf("publish reader lost the accessible row in preview: %s", stdHTML)
 	}
 
-	adminMarkdown := ExportStdMarkdown(fixture.hostDocID, false, false, false, false, nil)
+	adminMarkdown := ExportStdMarkdown(fixture.hostDocID, &ExportOptions{
+		Render: ExportRenderOptions{
+			AssetsDestSpace2Underscore: false,
+			FillCSSVar:                 false,
+			AdjustHeadingLevel:         false,
+			ImgTag:                     false,
+			AVPublishFilter:            nil,
+		},
+	})
 	if !strings.Contains(adminMarkdown, "PRIVATE") {
 		t.Fatalf("administrator export should include private attribute view content: %s", adminMarkdown)
 	}
@@ -231,7 +247,15 @@ func TestExportAttributeViewRowPublishAccessSemantics(t *testing.T) {
 	fixture := setupExportAVPublishTest(t)
 	filter := newExportAVPublishReaderFilter(t, fixture.privateID)
 
-	markdown := ExportStdMarkdown(fixture.hostDocID, false, false, false, false, filter)
+	markdown := ExportStdMarkdown(fixture.hostDocID, &ExportOptions{
+		Render: ExportRenderOptions{
+			AssetsDestSpace2Underscore: false,
+			FillCSSVar:                 false,
+			AdjustHeadingLevel:         false,
+			ImgTag:                     false,
+			AVPublishFilter:            filter,
+		},
+	})
 	if !strings.Contains(markdown, "DETACHED") {
 		t.Fatalf("detached row should stay visible to publish readers: %s", markdown)
 	}

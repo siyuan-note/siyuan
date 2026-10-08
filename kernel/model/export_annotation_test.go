@@ -40,8 +40,27 @@ func TestExportTreeMissingFileAnnotationRef(t *testing.T) {
 				node := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "file-annotation-ref",
 					TextMarkFileAnnotationRefID: "assets/document.pdf/20260817235351-rp33lbv", TextMarkTextContent: "retained annotation"}
 				tree.Root.FirstChild.AppendChild(node)
-				exported, err := exportTree(tree, true, true, wysiwyg, true,
-					0, 0, mode, "#", "#", "", "", false, "", false, true, nil, nil)
+				exported, err := exportTree(tree, treeExportOptions{
+					Config: conf.Export{
+						BlockRefMode:          0,
+						BlockEmbedMode:        0,
+						FileAnnotationRefMode: mode,
+						TagOpenMarker:         "#",
+						TagCloseMarker:        "#",
+						BlockRefTextLeft:      "",
+						BlockRefTextRight:     "",
+						AddTitle:              false,
+						InlineMemo:            false,
+					},
+					WYSIWYG:          true,
+					RichTableCells:   true,
+					KeepFold:         wysiwyg,
+					AVHiddenCol:      true,
+					CustomTitle:      "",
+					AddDocAnchorSpan: true,
+					References:       nil,
+					AVPublishFilter:  nil,
+				})
 				if err != nil {
 					t.Fatalf("wysiwyg=%v mode=%d: %v", wysiwyg, mode, err)
 				}

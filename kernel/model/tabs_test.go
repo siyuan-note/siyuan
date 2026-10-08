@@ -33,10 +33,12 @@ func TestTabTitleAssetScanRewriteAndExport(t *testing.T) {
 		t.Fatalf("title rewrite: %s", item.TabItemTitle)
 	}
 	oldConf := Conf
-	Conf = &AppConf{Export: &conf.Export{RemoveAssetsID: true}}
+	Conf = &AppConf{Export: &conf.Export{
+		RemoveAssetsID: true,
+	}}
 	t.Cleanup(func() { Conf = oldConf })
 	oldNew, newOld := map[string]string{}, map[string]string{}
-	removeAssetsID(tree, oldNew, newOld)
+	removeAssetsID(tree, oldNew, newOld, Conf.Export.RemoveAssetsID)
 	if !strings.Contains(item.TabItemTitle, "assets/renamed.png") || strings.Contains(item.TabItemTitle, "asset01") || item.FirstChild != body {
 		t.Fatalf("export title asset: %s", item.TabItemTitle)
 	}

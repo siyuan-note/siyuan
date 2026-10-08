@@ -49,7 +49,12 @@ var exportMdCmd = &cobra.Command{
 			return nil
 		}
 
-		_, content := model.ExportMarkdownContent(id, 4, 0, true, false, false, false, false)
+		_, content := model.ExportMarkdownContent(id, &model.ExportOptions{
+			BlockRefMode:   new(4),
+			BlockEmbedMode: new(0),
+			MarkdownYFM:    new(true),
+			AddTitle:       new(false),
+		})
 		return writeExportContent(content, output)
 	},
 }

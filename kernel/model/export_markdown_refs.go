@@ -6,6 +6,7 @@ package model
 
 import (
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -31,7 +32,7 @@ func (refs *markdownExportReferences) contains(defID, sourceBoxID string) bool {
 }
 
 // prepareMarkdownExportReferences 在输出任何文件前收集锚点，避免脚注引用的目标已先行输出而缺失锚点。
-func prepareMarkdownExportReferences(docPaths []string, defBlockIDs []string) (*markdownExportReferences, error) {
+func prepareMarkdownExportReferences(docPaths []string, defBlockIDs []string, config conf.Export) (*markdownExportReferences, error) {
 	refs := &markdownExportReferences{docIDs: map[string]bool{}, anchorIDs: map[string]bool{}}
 	for _, docPath := range docPaths {
 		refs.docIDs[util.GetTreeID(docPath)] = true
@@ -45,7 +46,7 @@ func prepareMarkdownExportReferences(docPaths []string, defBlockIDs []string) (*
 			return nil, err
 		}
 		depth := 0
-		resolveEmbedR(tree.Root, Conf.Export.BlockEmbedMode, NewLute(), &[]string{}, &depth)
+		resolveEmbedR(tree.Root, config.BlockEmbedMode, NewLute(), &[]string{}, &depth)
 		collectMarkdownExportReferences(tree, refs)
 	}
 	return refs, nil

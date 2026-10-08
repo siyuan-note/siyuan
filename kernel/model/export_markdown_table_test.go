@@ -28,8 +28,29 @@ func TestExportMarkdownContentOmitsTableCellIAL(t *testing.T) {
 	if len(cells) != 6 {
 		t.Fatalf("expected six cells, got %d", len(cells))
 	}
-	markdown := exportMarkdownContent0(tree.Root.ID, tree, "", false, false, false,
-		".md", 3, 1, 0, "#", "#", "", "", false, false, nil, nil, false, nil, nil)
+	markdown := exportMarkdownContent0(tree.Root.ID, tree, markdownExportOptions{
+		Config: conf.Export{
+			BlockRefMode:          3,
+			BlockEmbedMode:        1,
+			FileAnnotationRefMode: 0,
+			TagOpenMarker:         "#",
+			TagCloseMarker:        "#",
+			BlockRefTextLeft:      "",
+			BlockRefTextRight:     "",
+			AddTitle:              false,
+			InlineMemo:            false,
+		},
+		CloudAssetsBase:            "",
+		AssetsDestSpace2Underscore: false,
+		AdjustHeadingLevel:         false,
+		ImgTag:                     false,
+		Ext:                        ".md",
+		DefBlockIDs:                nil,
+		References:                 nil,
+		FillCSSVar:                 false,
+		BoxPaths:                   nil,
+		AVPublishFilter:            nil,
+	})
 	if strings.Contains(markdown, "{:") || strings.Contains(markdown, "text-align") {
 		t.Fatalf("internal cell attributes leaked into Markdown: %s", markdown)
 	}

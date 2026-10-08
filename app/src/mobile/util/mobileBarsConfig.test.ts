@@ -5,8 +5,9 @@ import {createDefaultMobileBarsConfig, resolveMobileSidebarConfig} from "./mobil
 test("sidebar access defaults and stored configurations always retain an entry", () => {
     assert.deepEqual(resolveMobileSidebarConfig(), {sidebarSwipe: true, sidebarButtons: true});
     assert.deepEqual(resolveMobileSidebarConfig(createDefaultMobileBarsConfig()), {sidebarSwipe: true, sidebarButtons: true});
-    assert.deepEqual(resolveMobileSidebarConfig({}), {sidebarSwipe: true, sidebarButtons: false});
-    assert.deepEqual(resolveMobileSidebarConfig(null), {sidebarSwipe: true, sidebarButtons: false});
+    assert.deepEqual(resolveMobileSidebarConfig({}), {sidebarSwipe: true, sidebarButtons: true});
+    assert.deepEqual(resolveMobileSidebarConfig(null), {sidebarSwipe: true, sidebarButtons: true});
+    assert.deepEqual(resolveMobileSidebarConfig({autoHide: true}), {sidebarSwipe: true, sidebarButtons: false});
     assert.deepEqual(resolveMobileSidebarConfig({sidebarButtons: true}), {sidebarSwipe: true, sidebarButtons: true});
     assert.deepEqual(resolveMobileSidebarConfig({sidebarSwipe: false}), {sidebarSwipe: false, sidebarButtons: true});
     assert.deepEqual(resolveMobileSidebarConfig({sidebarButtons: false}), {sidebarSwipe: true, sidebarButtons: false});

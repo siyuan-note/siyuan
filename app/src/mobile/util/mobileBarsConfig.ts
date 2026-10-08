@@ -9,11 +9,14 @@ export const createDefaultMobileBarsConfig = () => ({
     sidebarButtons: true,
 });
 
-export const resolveMobileSidebarConfig = (config: {sidebarSwipe?: boolean, sidebarButtons?: boolean} | null = createDefaultMobileBarsConfig()) => ({
-    sidebarSwipe: config?.sidebarSwipe !== false,
-    // 保留已存储的侧栏访问方式，并确保至少有一个入口。
-    sidebarButtons: config?.sidebarButtons === true || config?.sidebarSwipe === false,
-});
+export const resolveMobileSidebarConfig = (config?: {autoHide?: boolean, sidebarSwipe?: boolean, sidebarButtons?: boolean} | null) => {
+    const stored = !config || Object.keys(config).length === 0 ? createDefaultMobileBarsConfig() : config;
+    return {
+        sidebarSwipe: stored.sidebarSwipe !== false,
+        // 保留已存储的侧栏访问方式，并确保至少有一个入口。
+        sidebarButtons: stored.sidebarButtons === true || stored.sidebarSwipe === false,
+    };
+};
 
 export const getMobileSidebarConfig = () =>
     resolveMobileSidebarConfig(window.siyuan.storage[MOBILE_BARS_CONFIG_KEY]);

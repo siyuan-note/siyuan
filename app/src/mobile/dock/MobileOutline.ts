@@ -635,6 +635,11 @@ export class MobileOutline extends Model {
             return;
         }
 
+        // 未打开文档时没有标题状态可持久化
+        if (!this.blockId) {
+            return;
+        }
+
         if (!this.isPreview) {
             fetchPost("/api/storage/setOutlineStorage", {
                 docID: this.blockId,

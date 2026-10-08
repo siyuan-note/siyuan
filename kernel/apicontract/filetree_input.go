@@ -193,6 +193,13 @@ func init() {
 		}
 		value, err := fileTreeBind[FileTreeNotebookRequest](r.fields)
 		r.Notebook = value.Notebook
+		if err != nil {
+			return r, err
+		}
+		date, err := fileTreeBind[struct {
+			Date string `json:"date" api:"optional,nullable"`
+		}](r.fields)
+		r.Date = date.Date
 		return r, err
 	}
 	ListDocTree.decodeRequest = func(reader io.Reader) (r FileTreePathRequest, err error) {

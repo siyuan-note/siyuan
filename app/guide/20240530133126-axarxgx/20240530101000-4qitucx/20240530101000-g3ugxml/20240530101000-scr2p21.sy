@@ -7,7 +7,7 @@
 		"id": "20240530101000-scr2p21",
 		"title": "デイリーノート",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261008101708"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613180757-9fax3mg",
-				"updated": "20260803163243"
+				"updated": "20261008101708"
 			},
 			"Children": [
 				{
@@ -197,6 +197,140 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-mjx358e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261008101708-mjx358e",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "日付による作成と参照"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-54h6a3e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-54h6a3e",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エディターで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[今日"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[明日"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[9月25日"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[25 sept"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と入力すると、参照候補にその日付のデイリーノートが表示されます。インターフェース言語と英語の相対日付、月の正式名称と略称に対応しています。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[2026-09-25"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " のような完全なグレゴリオ暦の日付も使用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-x9aa3xt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-x9aa3xt",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "年を省略した日付には今年を使用し、候補には完全な日付を表示します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "03/04"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " などの曖昧な表現や無効な日付は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYY-MM-DD"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 形式で入力してください。通常のドキュメント検索も引き続き使用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-712s18k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-712s18k",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "候補を選択すると、前回選択したデイリーノート用ノートブックを使用します。未選択の場合や以前のノートブックが利用できない場合は、選択を求められます。キャンセルしてもドキュメントは作成されません。暗号化ノートブックでは同じノートブックの日記のみ参照でき、通常のノートブックから暗号化ノートブックの日記は参照できません。"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-pvky8qm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-pvky8qm",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "入力や候補の表示だけではドキュメントを作成しません。候補を選択すると、対象ノートブックの対応する日付のデイリーノートを再利用します。日記の日付属性が残っていれば、移動や名前変更後のドキュメントも再利用します。存在しない場合のみ、日記の設定に従って作成して参照を挿入します。パステンプレート、本文テンプレート内の now、日記の日付属性には対象日付を使用し、実際の作成・更新時刻は操作時刻を保持します。"
 				}
 			]
 		},

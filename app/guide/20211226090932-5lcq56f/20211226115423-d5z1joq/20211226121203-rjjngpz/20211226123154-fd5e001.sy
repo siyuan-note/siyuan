@@ -6,7 +6,7 @@
 		"id": "20211226123154-fd5e001",
 		"title": "日記",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261008101708"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613181022-74zgp84",
-				"updated": "20260803171606"
+				"updated": "20261008101708"
 			},
 			"Children": [
 				{
@@ -196,6 +196,140 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-lr0o7zn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261008101708-lr0o7zn",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按日期建立和引用"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-idqliwj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-idqliwj",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在編輯器中輸入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[今天"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[明天"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[9月25日"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[25 sept"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可在區塊引用補全中顯示對應日期的日記候選。支援目前介面語言和英文的相對日期、月份全稱及縮寫，也支援 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[2026-09-25"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 這樣的完整公曆日期。"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-wyphboq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-wyphboq",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "未填寫年份時使用目前年份，候選項會顯示完整日期。對於 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "03/04"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 等有歧義的表達或無效日期，請改用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYY-MM-DD"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 格式。一般文件搜尋仍可使用。"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-e6z4q69",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-e6z4q69",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "選取日記候選後，使用上次選取的日記筆記本；尚未選取或原筆記本無法使用時，會提示選取。取消選取不會建立文件。加密筆記本內只能引用本筆記本的日記，一般筆記本不能引用加密筆記本的日記。"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-j20nycr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-j20nycr",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "輸入和查看候選不會建立文件。選取後會沿用目標筆記本中對應日期的日記，包括已移動或重新命名但保留日記日期屬性的文件；不存在時才依日記設定建立並插入區塊引用。路徑範本、內容範本中的 now 和日記日期屬性使用目標日期，實際建立和更新時間保持真實操作時間。"
 				}
 			]
 		},

@@ -56,6 +56,7 @@ import {
 } from "../wysiwyg/blockSelection";
 import {countBlockWord} from "../../layout/status";
 import {genTemplateDocTreePlanHTML} from "../../template/docTree";
+import {getDailyNoteHint} from "./dailyNote";
 
 const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
     infoStyle: "info",
@@ -611,6 +612,11 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
             }
             const dataList: IHintData[] = [];
             let createItemCount = 0;
+            const dailyNote = source === "hint" ? getDailyNoteHint(key, protyle) : undefined;
+            if (dailyNote) {
+                dataList.push(dailyNote);
+                createItemCount++;
+            }
             if (response.data.newDoc) {
                 const newFileName = Lute.UnEscapeHTMLStr(replaceFileName(response.data.k));
                 if (!hideConfiguredCreate) {

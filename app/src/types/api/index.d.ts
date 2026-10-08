@@ -1030,7 +1030,7 @@ export type FileTreeCreateRequestInput = { "docCreateTemplatePath"?: string | nu
 
 export type FileTreeCreateSavePathData = { "box": string; "docCreateTemplatePath": string; "path": string; };
 
-export type FileTreeDailyNoteRequestInput = { "app"?: string | null; "notebook": string; };
+export type FileTreeDailyNoteRequestInput = { "app"?: string | null; "date"?: string | null; "notebook": string; };
 
 export type FileTreeDocFile = { "children"?: Array<FileTreeDocFile | null>; "id": string; };
 

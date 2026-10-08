@@ -66,34 +66,45 @@ const openDailyNote = (app: App, useLastNotebook: boolean) => {
     if (lastNotebookId && useLastNotebook) {
         fetchNewDailyNote(app, lastNotebookId);
     } else {
-        const optionsHTML = genNotebookOptionsHTML(window.siyuan.notebooks);
-        const dialog = new Dialog({
-            positionId: Constants.DIALOG_DIALYNOTE,
-            title: window.siyuan.languages.plsChoose,
-            content: `<div class="b3-dialog__content">
+        selectDailyNoteNotebook(window.siyuan.notebooks, notebook => fetchNewDailyNote(app, notebook));
+    }
+};
+
+export const selectDailyNoteNotebook = (notebooks: readonly {id: string, name: string, closed: boolean}[],
+                                       callback: (notebook: string) => void) => {
+    const optionsHTML = genNotebookOptionsHTML(notebooks);
+    const dialog = new Dialog({
+        positionId: Constants.DIALOG_DIALYNOTE,
+        title: window.siyuan.languages.plsChoose,
+        content: `<div class="b3-dialog__content">
     <select class="b3-select fn__block">${optionsHTML}</select>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-            width: isMobile() ? "92vw" : "520px",
-        });
-        dialog.element.setAttribute("data-key", Constants.DIALOG_DIALYNOTE);
-        const btnsElement = dialog.element.querySelectorAll(".b3-button");
-        const selectElement = dialog.element.querySelector(".b3-select") as HTMLSelectElement;
+        width: isMobile() ? "92vw" : "520px",
+    });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_DIALYNOTE);
+    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    const selectElement = dialog.element.querySelector(".b3-select") as HTMLSelectElement;
+    const localNotebookId = getLastDailyNoteNotebookId(notebooks, window.siyuan.storage[Constants.LOCAL_DAILYNOTEID]);
+    if (localNotebookId) {
         selectElement.value = localNotebookId;
-        btnsElement[0].addEventListener("click", () => {
-            dialog.destroy();
-        });
-        btnsElement[1].addEventListener("click", () => {
-            const notebook = selectElement.value;
-            window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] = notebook;
-            setStorageVal(Constants.LOCAL_DAILYNOTEID, window.siyuan.storage[Constants.LOCAL_DAILYNOTEID]);
-            fetchNewDailyNote(app, notebook);
-            dialog.destroy();
-        });
     }
+    btnsElement[0].addEventListener("click", () => {
+        dialog.destroy();
+    });
+    btnsElement[1].addEventListener("click", () => {
+        const notebook = selectElement.value;
+        if (!notebooks.some(item => item.id === notebook && !item.closed)) {
+            return;
+        }
+        window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] = notebook;
+        setStorageVal(Constants.LOCAL_DAILYNOTEID, notebook);
+        callback(notebook);
+        dialog.destroy();
+    });
 };
 
 export const newDailyNote = (app: App) => {

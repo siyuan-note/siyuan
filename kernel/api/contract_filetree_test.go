@@ -73,6 +73,42 @@ func TestAPIContractFileTreeMissingDocuments(t *testing.T) {
 	}
 }
 
+func TestAPIContractFileTreeDailyNoteDate(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = model.NewAppConf()
+	t.Cleanup(func() { model.Conf = previousConf })
+	engine := gin.New()
+	const path = "/api/filetree/createDailyNote"
+	engine.POST(path, createDailyNote)
+	for _, entry := range []struct {
+		body string
+		code int
+	}{
+		{`{"notebook":"missing"}`, 1},
+		{`{"notebook":"missing","date":null}`, 1},
+		{`{"notebook":"missing","date":""}`, 1},
+		{`{"notebook":"missing","date":"2024-02-29"}`, 1},
+		{`{"notebook":"missing","date":"2026-02-29"}`, -1},
+		{`{"notebook":"missing","date":"2026-9-25"}`, -1},
+		{`{"notebook":"missing","date":"0000-01-01"}`, -1},
+		{`{"notebook":"missing","date":"03/04"}`, -1},
+		{`{"notebook":"missing","date":false}`, -1},
+	} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", path, strings.NewReader(entry.body)))
+		requireAPIContract(t, "POST", path, recorder)
+		var response struct {
+			Code int `json:"code"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+			t.Fatal(err)
+		}
+		if response.Code != entry.code {
+			t.Fatalf("unexpected daily note response for %s: %s", entry.body, recorder.Body.String())
+		}
+	}
+}
+
 func TestAPIContractFileTreePayloadConversions(t *testing.T) {
 	compare := func(before, after []byte) {
 		t.Helper()

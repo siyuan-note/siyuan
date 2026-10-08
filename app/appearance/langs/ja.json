@@ -1,4 +1,5 @@
 {
+	"dailyNoteDateInvalid": "日付が無効または曖昧です。YYYY-MM-DD 形式で完全な日付を入力してください",
 	"goToDocumentStart": "ドキュメントの先頭へ移動",
 	"goToDocumentEnd": "ドキュメントの末尾へ移動",
 	"agentBuiltinPluginDevelopmentDescription": "公式フロントエンドプラグイン開発フロー：ユーザーが明示的に選択した後、不足している要件を確認し、簡潔な計画に合意したうえで、管理対象のコピーで実装・検証・パッケージ化を行います。インストールと有効化には別途許可が必要です",

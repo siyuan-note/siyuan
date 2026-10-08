@@ -1,4 +1,5 @@
 {
+	"dailyNoteDateInvalid": "Fecha no válida o ambigua; introduce una fecha completa con el formato YYYY-MM-DD",
 	"goToDocumentStart": "Ir al inicio del documento",
 	"goToDocumentEnd": "Ir al final del documento",
 	"agentBuiltinPluginDevelopmentDescription": "Flujo oficial de desarrollo de plugins de interfaz: tras tu aceptación explícita, se aclaran los requisitos pendientes, se confirma un plan breve y se implementa, valida y empaqueta en una copia gestionada; la instalación y la activación requieren autorización por separado",

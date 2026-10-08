@@ -1443,6 +1443,15 @@ const (
 )
 
 func CreateDailyNote(boxID string) (p string, existed bool, err error) {
+	return createDailyNoteAt(boxID, time.Now(), false)
+}
+
+// CreateDailyNoteAt 按指定日期创建日记，复用日期属性指向的现有文档。
+func CreateDailyNoteAt(boxID string, date time.Time) (p string, existed bool, err error) {
+	return createDailyNoteAt(boxID, date, true)
+}
+
+func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, existed bool, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1458,7 +1467,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 
-	hPath, err := RenderGoTemplateInBox(boxConf.DailyNoteSavePath, box.ID)
+	hPath, err := RenderGoTemplateAtInBox(boxConf.DailyNoteSavePath, now, box.ID)
 	if err != nil {
 		return
 	}
@@ -1467,6 +1476,34 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 
 	hPath = util.TrimSpaceInPath(hPath)
 	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
+	date := now.Format("20060102")
+	if findByDate {
+		sql.FlushQueue()
+		var ids []string
+		ids, err = sql.QueryDailyNoteRootIDsInBox(box.ID, DailyNoteAttrPrefix+date, date)
+		if err != nil {
+			return
+		}
+		if len(ids) > 0 {
+			matchedPath := false
+			for _, id := range ids {
+				if existRoot != nil && existRoot.RootID == id {
+					matchedPath = true
+					break
+				}
+			}
+			if !matchedPath {
+				tree, loadErr := LoadTreeByBlockID(ids[0])
+				if loadErr != nil {
+					return "", false, loadErr
+				}
+				if tree.Box != box.ID || tree.Root.IALAttr(DailyNoteAttrPrefix+date) != date {
+					return "", false, ErrBlockNotFound
+				}
+				return tree.Path, true, nil
+			}
+		}
+	}
 	if nil != existRoot {
 		existed = true
 		p = existRoot.Path
@@ -1474,10 +1511,10 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		tree, loadErr := LoadTreeByBlockID(existRoot.RootID)
 		if nil != loadErr {
 			logging.LogWarnf("load tree by block id [%s] failed: %v", existRoot.RootID, loadErr)
+			err = loadErr
 			return
 		}
 		p = tree.Path
-		date := time.Now().Format("20060102")
 		if tree.Root.IALAttr(DailyNoteAttrPrefix+date) == "" {
 			tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
 			if err = indexWriteTreeUpsertQueue(tree); err != nil {
@@ -1494,7 +1531,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 
 	if "" != boxConf.DailyNoteTemplatePath {
 		sql.FlushQueue()
-		if renderErr := applyDocContentTemplate(boxConf.DailyNoteTemplatePath, id); nil != renderErr {
+		if renderErr := applyDocContentTemplateAt(boxConf.DailyNoteTemplatePath, id, &now); nil != renderErr {
 			logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, renderErr)
 		}
 	}
@@ -1508,7 +1545,6 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 	p = tree.Path
-	date := time.Now().Format("20060102")
 	tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
 	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return

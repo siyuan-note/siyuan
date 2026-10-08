@@ -24629,6 +24629,16 @@
             }
           ]
         },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "notebook": {
           "type": "string"
         }

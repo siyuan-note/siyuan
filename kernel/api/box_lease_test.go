@@ -81,6 +81,10 @@ func TestContractDocInfoNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
 
+func TestContractDailyNoteNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
 func TestContractGetDocNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
@@ -193,6 +197,20 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	model.Conf = model.NewAppConf()
 	model.Conf.NotebookCrypto, model.Conf.Sync, model.Conf.FileTree = conf.NewNotebookCrypto(), conf.NewSync(), conf.NewFileTree()
 	model.Conf.Editor, model.Conf.Export, model.Conf.Search = conf.NewEditor(), conf.NewExport(), conf.NewSearch()
+	if t.Name() == "TestContractDailyNoteNotebookResponseLease" {
+		content, err := os.ReadFile(filepath.Join("..", "..", "app", "appearance", "langs", "en.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var language struct {
+			Time map[string]any `json:"_time"`
+		}
+		if err := json.Unmarshal(content, &language); err != nil {
+			t.Fatal(err)
+		}
+		model.Conf.Lang = "en"
+		util.TimeLangs = map[string]map[string]any{"en": language.Time}
+	}
 	*model.Conf.FileTree.BoxDocEnabled = true
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
@@ -227,6 +245,11 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 			t.Fatal(err)
 		}
 		treenode.UpsertBlockTree(tree)
+		if t.Name() == "TestContractDailyNoteNotebookResponseLease" {
+			if _, err := model.Mount(boxID); err != nil {
+				t.Fatal(err)
+			}
+		}
 	}
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()
@@ -236,6 +259,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.POST("/api/block/getRefIDs", getRefIDs)
 	engine.POST("/api/block/checkBlockRef", checkBlockRef)
 	engine.POST("/api/block/getDocInfo", getDocInfo)
+	engine.POST("/api/filetree/createDailyNote", createDailyNote)
 	engine.POST("/api/filetree/getDoc", getDoc)
 	engine.POST("/api/block/getTreeStat", getTreeStat)
 	engine.POST("/api/block/getBlockBreadcrumb", getBlockBreadcrumb)
@@ -290,6 +314,9 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		args["scope"] = "notebook"
 	case "TestContractDocInfoNotebookResponseLease":
 		endpoint, typedQuery = "/api/block/getDocInfo", true
+	case "TestContractDailyNoteNotebookResponseLease":
+		endpoint, typedQuery = "/api/filetree/createDailyNote", true
+		args["date"] = "2024-02-29"
 	case "TestContractGetDocNotebookResponseLease":
 		endpoint, typedQuery = "/api/filetree/getDoc", true
 	case "TestContractTreeStatNotebookResponseLease":
@@ -402,6 +429,17 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	}
 	if lockedBeforeResponse {
 		t.Fatalf("lock completed before plaintext response was sent: %s", writer.Body.String())
+	}
+	if t.Name() == "TestContractDailyNoteNotebookResponseLease" {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, endpoint, strings.NewReader(string(requestBody))))
+		requireAPIContract(t, http.MethodPost, endpoint, recorder)
+		var response struct {
+			Code int `json:"code"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != -1 {
+			t.Fatalf("locked notebook daily note creation was admitted: %s, %v", recorder.Body.String(), err)
+		}
 	}
 	if t.Name() == "TestGetBlockInfoNotebookResponseLease" {
 		for _, explicit := range []bool{false, true} {

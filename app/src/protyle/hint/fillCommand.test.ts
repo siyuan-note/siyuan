@@ -16,6 +16,48 @@ const code = transpileModule(`class Hint { ${methods} } new Hint();`, {
     compilerOptions: {target: ScriptTarget.ES2020},
 }).outputText;
 
+test("daily note reference completion retains its range and ignores edited or removed input", () => {
+    for (const scenario of ["valid", "edited", "removed"]) {
+        let text = "[[2026-09-25";
+        let inserted = false;
+        let complete: ((id: string, title: string) => void) | undefined;
+        const block = {outerHTML: "paragraph", isConnected: true, getAttribute: () => "paragraph"};
+        const range = {startContainer: block, setStart() {}, setEnd() {}, collapse() {},
+            toString: () => text, cloneRange: () => range};
+        const protyle = {toolbar: {range, setInlineMark: (_protyle: unknown, type: string, source: string,
+                                                       options: {color: string}): HTMLElement[] => {
+            assert.equal(type, "block-ref");
+            assert.equal(source, "range");
+            assert.ok(options.color.includes("existing"));
+            assert.ok(options.color.includes("Daily title"));
+            inserted = true;
+            return [];
+        }}, wysiwyg: {element: {}}};
+        const hint = runInNewContext(code, {
+            Constants: {BLOCK_HINT_KEYS: ["[["], ZWSP: "\u200b"},
+            hideElements() {}, hasClosestBlock: () => block, focusByRange() {},
+            shouldCaptureHintUndoFocus, getUndoFocusContext: () => ({}),
+            getBlockRefAnchorText: (title: string) => title,
+            createDailyNoteReference: (_protyle: unknown, date: string, notebook: string,
+                                      callback: (id: string, title: string) => void) => {
+                assert.equal(date, "2026-09-25");
+                assert.equal(notebook, "daily");
+                complete = callback;
+            },
+        });
+        Object.assign(hint, {source: "hint", splitChar: "[[", lastIndex: 0});
+        hint.fill("daily-note:2026-09-25:daily", protyle, false);
+        assert.equal(inserted, false);
+        if (scenario === "edited") {
+            text = "edited input";
+        } else if (scenario === "removed") {
+            block.isConnected = false;
+        }
+        complete?.("existing", "Daily title");
+        assert.equal(inserted, scenario === "valid");
+    }
+});
+
 test("mobile reference command inserts at the saved caret and resets stale hint context", () => {
     for (const [text, offset] of [["", 0], ["text", 0], ["text", 2], ["text", 4]] as const) {
         for (const source of ["av", "search", "hint"]) {

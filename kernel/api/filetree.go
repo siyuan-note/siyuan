@@ -27,6 +27,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
@@ -764,7 +765,24 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
-	p, existed, err := model.CreateDailyNote(notebook)
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+		return apicontract.Failure[apicontract.FileTreeCreateData](-1, model.Conf.Language(314))
+	}
+	var p string
+	var existed bool
+	var err error
+	if request.Date == "" {
+		p, existed, err = model.CreateDailyNote(notebook)
+	} else {
+		var date time.Time
+		date, err = time.ParseInLocation("2006-01-02", request.Date, time.Local)
+		if err == nil && (date.Year() < 1 || date.Format("2006-01-02") != request.Date) {
+			err = fmt.Errorf("invalid daily note date [%s]", request.Date)
+		}
+		if err == nil {
+			p, existed, err = model.CreateDailyNoteAt(notebook, date)
+		}
+	}
 	if err != nil {
 		if errors.Is(err, model.ErrBoxNotFound) {
 			ret.Code = 1

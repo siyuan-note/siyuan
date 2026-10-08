@@ -1,4 +1,5 @@
 {
+	"dailyNoteDateInvalid": "Neplatný alebo nejednoznačný dátum; zadajte úplný dátum vo formáte YYYY-MM-DD",
 	"goToDocumentStart": "Prejsť na začiatok dokumentu",
 	"goToDocumentEnd": "Prejsť na koniec dokumentu",
 	"agentBuiltinPluginDevelopmentDescription": "Oficiálny postup vývoja doplnkov rozhrania: po výslovnom súhlase používateľa sa objasnia chýbajúce požiadavky, potvrdí stručný plán a v spravovanej kópii sa vykoná implementácia, overenie a vytvorenie balíka; inštalácia a aktivácia vyžadujú samostatné povolenie",

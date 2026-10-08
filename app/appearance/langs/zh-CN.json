@@ -1,4 +1,5 @@
 {
+	"dailyNoteDateInvalid": "日期无效或有歧义，请输入 YYYY-MM-DD 格式的完整日期",
 	"goToDocumentStart": "跳到文档开头",
 	"goToDocumentEnd": "跳到文档结尾",
 	"agentBuiltinPluginDevelopmentDescription": "官方前端插件开发流程：在用户明确选择后澄清缺失要求、确认简短方案、使用受管副本实现、验证和打包；安装与启用另行授权",

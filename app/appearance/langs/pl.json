@@ -1,4 +1,5 @@
 {
+	"dailyNoteDateInvalid": "Nieprawidłowa lub niejednoznaczna data; wpisz pełną datę w formacie YYYY-MM-DD",
 	"goToDocumentStart": "Przejdź do początku dokumentu",
 	"goToDocumentEnd": "Przejdź do końca dokumentu",
 	"agentBuiltinPluginDevelopmentDescription": "Oficjalny proces tworzenia wtyczek interfejsu: po wyraźnej zgodzie użytkownika następuje doprecyzowanie brakujących wymagań, zatwierdzenie krótkiego planu, implementacja w zarządzanej kopii, weryfikacja i przygotowanie pakietu; instalacja i aktywacja wymagają osobnej zgody",

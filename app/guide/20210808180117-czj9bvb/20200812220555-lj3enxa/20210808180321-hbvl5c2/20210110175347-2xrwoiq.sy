@@ -6,7 +6,7 @@
 		"id": "20210110175347-2xrwoiq",
 		"title": "日记",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261008101708"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613180438-q02mnqc",
-				"updated": "20260803171606"
+				"updated": "20261008101708"
 			},
 			"Children": [
 				{
@@ -196,6 +196,140 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-5rm6q63",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261008101708-5rm6q63",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按日期创建和引用"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-71fpzn5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-71fpzn5",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在编辑器中输入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[今天"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[明天"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[9月25日"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[25 sept"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可在引用补全中显示对应日期的日记候选。支持当前界面语言和英文的相对日期、月份全称及缩写，也支持 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[2026-09-25"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 这样的完整公历日期。"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-5vji0a1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-5vji0a1",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "未填写年份时使用当前年，候选项会显示完整日期。对于 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "03/04"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 等有歧义的表达或无效日期，请改用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYY-MM-DD"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 格式。普通文档搜索仍可使用。"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-0z31c9n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-0z31c9n",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选中日记候选后，使用上次选择的日记笔记本；尚未选择或原笔记本不可用时，会提示选择。取消选择不会创建文档。加密笔记本内只能引用本笔记本的日记，普通笔记本不能引用加密笔记本的日记。"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-m616klc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-m616klc",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "输入和查看候选不会创建文档。选中后会复用目标笔记本中对应日期的日记，包括已移动或重命名但保留日记日期属性的文档；不存在时才按日记设置创建并插入引用。路径模板、正文模板中的 now 和日记日期属性使用目标日期，实际创建和更新时间保持真实操作时间。"
 				}
 			]
 		},

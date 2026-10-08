@@ -957,6 +957,11 @@ func PreviewTemplateSource(p, id, content string) (tree *parse.Tree, dom string,
 
 func renderTemplateSource(p, id string, mode TemplateRenderMode, content *string) (tree *parse.Tree, dom string,
 	summary *TemplateDocTreePlanSummary, err error) {
+	return renderTemplateSourceAt(p, id, mode, content, nil)
+}
+
+func renderTemplateSourceAt(p, id string, mode TemplateRenderMode, content *string, now *time.Time) (tree *parse.Tree, dom string,
+	summary *TemplateDocTreePlanSummary, err error) {
 	if TemplateRenderModeContent != mode && TemplateRenderModePreview != mode && TemplateRenderModeEditorInsert != mode {
 		err = fmt.Errorf("unsupported template render mode [%s]", mode)
 		return
@@ -1015,6 +1020,9 @@ func renderTemplateSource(p, id string, mode TemplateRenderMode, content *string
 
 	goTpl := template.New("").Delims(".action{", "}")
 	tplFuncMap := filesys.BuiltInTemplateFuncs()
+	if now != nil {
+		tplFuncMap["now"] = func() time.Time { return *now }
+	}
 	tplFuncMap["createDocTree"] = collector.create
 	tplFuncMap["renderDocRef"] = collector.renderDocRef
 	sql.SQLTemplateFuncs(&tplFuncMap, sourceTree.Box)
@@ -1297,11 +1305,15 @@ func applyDocContentTemplateAfterIndex(templatePath, docID string) error {
 }
 
 func applyDocContentTemplate(templatePath, docID string) error {
+	return applyDocContentTemplateAt(templatePath, docID, nil)
+}
+
+func applyDocContentTemplateAt(templatePath, docID string, now *time.Time) error {
 	absPath, err := resolveDocContentTemplatePath(templatePath)
 	if nil != err {
 		return err
 	}
-	templateTree, templateDOM, err := RenderTemplate(absPath, docID, false)
+	templateTree, templateDOM, _, err := renderTemplateSourceAt(absPath, docID, TemplateRenderModeContent, nil, now)
 	if nil != err {
 		return err
 	}

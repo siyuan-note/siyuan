@@ -6,7 +6,7 @@
 		"id": "20210110181011-fbhoesf",
 		"title": "Daily notes",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261008101708"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613180619-15jwt8e",
-				"updated": "20260803171606"
+				"updated": "20261008101708"
 			},
 			"Children": [
 				{
@@ -196,6 +196,131 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-b7c9jyj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261008101708-b7c9jyj",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Create and reference daily notes by date"
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-65762qi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-65762qi",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[today"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[tomorrow"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[25 sept"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the editor to show a daily note candidate in reference completion. Relative dates and full or abbreviated month names are recognized in the interface language and English. Complete Gregorian dates such as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[2026-09-25"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " are also supported."
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-8o948mt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-8o948mt",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Dates without a year use the current year, and candidates display the complete date. For ambiguous expressions such as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "03/04"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or invalid dates, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYY-MM-DD"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Regular document search remains available."
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-3n0qxms",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-3n0qxms",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Selecting a daily note candidate uses the last selected daily note notebook. If none is selected or that notebook is unavailable, you are asked to choose one. Canceling creates no document. Encrypted notebooks can reference daily notes only within the same notebook; ordinary notebooks cannot reference daily notes in encrypted notebooks."
+				}
+			]
+		},
+		{
+			"ID": "20261008101708-yprxiyp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008101708-yprxiyp",
+				"updated": "20261008101708"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Typing and viewing candidates create no document. Selecting a candidate reuses the daily note for that date in the target notebook, including moved or renamed documents that retain their daily note date attribute. If none exists, the daily note settings are used to create it and insert a reference. The path template, now in the content template, and the daily note date attribute use the target date; actual creation and update timestamps retain the real operation time."
 				}
 			]
 		},

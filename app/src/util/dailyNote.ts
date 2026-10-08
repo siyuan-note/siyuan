@@ -21,3 +21,8 @@ export const getLastDailyNoteNotebookId = (
     }
     return notebooks.some(item => item.id === storedNotebookId && !item.closed) ? storedNotebookId : undefined;
 };
+
+// 加密文档只允许引用同一笔记本，普通文档不跨入加密笔记本。
+export const canReferenceDailyNoteNotebook = (sourceID: string, targetID: string,
+                                             sourceEncrypted: boolean, targetEncrypted: boolean) =>
+    sourceEncrypted ? sourceID === targetID : !targetEncrypted;

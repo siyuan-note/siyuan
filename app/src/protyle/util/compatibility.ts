@@ -16,6 +16,7 @@ import {buildWebClipboardHTML, getTextSiyuanFromTextHTML} from "./clipboardData"
 import {prepareExternalClipboardHTML} from "./richClipboard";
 import {isIOSPlatform, isIPadOSPlatform} from "./browserCompatibility";
 import {canOpenExternalURL, getHostCapabilities} from "../../util/hostCapabilities";
+import {createDefaultMobileBottomBarConfig} from "../../mobile/util/mobileBottomBarConfig";
 
 export {encodeBase64, getTextSiyuanFromTextHTML} from "./clipboardData";
 
@@ -786,10 +787,7 @@ export const getLocalStorage = (cb: () => void) => {
             tabs: [],
         };
         defaultStorage["local-mobile-bars"] = {autoHide: true};
-        defaultStorage[Constants.LOCAL_MOBILE_BOTTOM_BAR] = {
-            version: 1,
-            actions: ["documents", "search", "newDoc", "tabs"],
-        };
+        defaultStorage[Constants.LOCAL_MOBILE_BOTTOM_BAR] = createDefaultMobileBottomBarConfig();
         defaultStorage[Constants.LOCAL_MOBILE_SIDE_PANEL] = {
             version: 1,
             left: ["file", "bookmark", "tag", "inbox", "plugin"],

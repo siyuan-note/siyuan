@@ -3650,12 +3650,17 @@ test("list mindmap mutations preserve block data in the real DOM and Lute", {
         "../../util/hasClosest.ts", "../../wysiwyg/getBlock.ts", "../../util/selection.ts",
         "../../wysiwyg/taskListMarker.ts", "../../wysiwyg/turnIntoList.ts", "../../wysiwyg/input.ts"];
     let inputSource = inputModules.map(file => {
-        const filename = path.join(__dirname, file);
-        const module = typescript.createSourceFile(file, readFileSync(filename, "utf8"), typescript.ScriptTarget.ES2021, true);
-        const names = module.statements.filter(typescript.isVariableStatement).filter(statement =>
-            statement.modifiers?.some(modifier => modifier.kind === typescript.SyntaxKind.ExportKeyword))
-            .flatMap(statement => statement.declarationList.declarations.map(declaration => declaration.name.getText(module)));
-        return `const {${names.join(", ")}} = (() => {${compile(filename)}\nreturn {${names.join(", ")}};})();\n`;
+        // 选区计算与编辑器选区操作共用模块作用域，保留拆分函数之间的调用关系。
+        const files = file === "../../util/selection.ts" ? ["../../util/selectionOffsets.ts", file] : [file];
+        const names = files.flatMap(file => {
+            const module = typescript.createSourceFile(file, readFileSync(path.join(__dirname, file), "utf8"),
+                typescript.ScriptTarget.ES2021, true);
+            return module.statements.filter(typescript.isVariableStatement).filter(statement =>
+                statement.modifiers?.some(modifier => modifier.kind === typescript.SyntaxKind.ExportKeyword))
+                .flatMap(statement => statement.declarationList.declarations.map(declaration => declaration.name.getText(module)));
+        });
+        const code = files.map(file => compile(path.join(__dirname, file))).join("\n");
+        return `const {${names.join(", ")}} = (() => {${code}\nreturn {${names.join(", ")}};})();\n`;
     }).join("\n");
     const editorSource = typescript.createSourceFile("editor.ts", readFileSync(path.join(__dirname, "editor.ts"), "utf8"),
         typescript.ScriptTarget.ES2021, true);

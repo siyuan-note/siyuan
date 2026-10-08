@@ -1,3 +1,5 @@
+import {IMAGE_OCR_MENU} from "../../menus/declarations/imageOCRMenu";
+import {declaredMenuCatalog} from "../../menus/declarations/menuDeclaration";
 import {CODE_TAB_SPACE_VALUES} from "../../protyle/wysiwyg/codeBlockUtil";
 import {orderGutterTurnIntoItems} from "../../protyle/gutter/turnIntoMenu";
 import {
@@ -975,13 +977,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("delete", lang("delete")),
             separator("separator_2"),
             node("rename", lang("rename")),
-            node("ocr", literal("OCR"), false, [
-                node("ocrResult", lang("ocrResult"), false),
-                node("copyOCRText", () => `${window.siyuan.languages.copy} OCR`, false),
-                separator("separator_reOCR"),
-                node("reOCR", lang("performOCR"), false),
-                node("reAIOCR", lang("performAIOCR"), false),
-            ]),
+            declaredMenuCatalog(IMAGE_OCR_MENU),
             node("alignCenter", lang("alignCenter")),
             node("alignLeft", lang("alignLeft")),
             node("width", lang("width"), true, [

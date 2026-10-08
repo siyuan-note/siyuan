@@ -1,3 +1,9 @@
+import {IMAGE_OCR_MENU} from "../../menus/declarations/imageOCRMenu";
+import {createDeclaredMenu} from "../../menus/declarations/menuDeclaration";
+const imageOCRContext = {
+    textAvailable: true, localAvailable: true, aiAvailable: true,
+    getStatus: async () => false, openResult: () => {}, copyText: () => {}, runLocal: () => {}, runAI: () => {},
+};
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
@@ -39,7 +45,16 @@ import {
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
-test("image OCR actions retain their configurable paths and order", () => {
+test("image OCR actions retain their configurable paths and order", t => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", {configurable: true, value: {siyuan: {languages: {}}}});
+    t.after(() => {
+        if (descriptor) {
+            Object.defineProperty(globalThis, "window", descriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    });
     const imageAction = getEntryCatalogNode("editor.image.ocrText");
     assert.equal(imageAction.type, "entry");
     assert.equal(imageAction.simple, false);
@@ -53,10 +68,7 @@ test("image OCR actions retain their configurable paths and order", () => {
     assert.equal(getEntryParentPath("inline.image.ocr.copyOCRText"), "inline.image.ocr");
     assert.equal(getEntryCatalogNode("inline.image.ocr.reAIOCR").simple, false);
     assert.equal(getEntryParentPath("inline.image.ocr.reAIOCR"), "inline.image.ocr");
-    const source = readFileSync(resolve(process.cwd(), "src/menus/protyle.ts"), "utf8");
-    const start = source.indexOf('id: "ocr",', source.indexOf("export const imgMenu"));
-    const menu = source.slice(start, source.indexOf('id: "alignCenter",', start));
-    assert.deepEqual(Array.from(menu.matchAll(/id: "([^"]+)"/g), match => match[1]).slice(1),
+    assert.deepEqual(createDeclaredMenu(IMAGE_OCR_MENU, imageOCRContext).submenu.map(item => item.id),
         getEntryCatalogChildren("inline.image.ocr").map(item => item.key));
 });
 

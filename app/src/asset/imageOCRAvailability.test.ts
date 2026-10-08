@@ -1,3 +1,5 @@
+import {IMAGE_OCR_MENU} from "../menus/declarations/imageOCRMenu";
+import {createDeclaredMenu} from "../menus/declarations/menuDeclaration";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import test from "node:test";
@@ -37,25 +39,34 @@ test("AI OCR advertises only native or convertible image formats", () => {
 });
 
 test("shared image menus hide unavailable recognition and its separator while retaining text actions", () => {
-    const menuSource = readFileSync("src/menus/protyle.ts", "utf8");
-    const idPosition = menuSource.indexOf('id: "ocr",', menuSource.indexOf("export const imgMenu"));
-    const start = menuSource.lastIndexOf("new MenuItem(", idPosition) + "new MenuItem(".length;
-    const end = menuSource.indexOf("}).element);", start) + 1;
-    const getMenu = new Function("window", "ocrAvailability", "canOCR", "canAIOCR",
-        `return (${menuSource.slice(start, end)});`);
-    const recognitionStart = menuSource.lastIndexOf("const canOCR =", start);
-    const recognitionEnd = menuSource.indexOf(";", menuSource.indexOf("const canAIOCR =", recognitionStart)) + 1;
-    const getRecognition = new Function("window", "ocrAvailability", "isDisabledFeature",
-        `${menuSource.slice(recognitionStart, recognitionEnd)}\nreturn {canOCR, canAIOCR};`);
-    const visibleItems = (path: string, notebookId: string, disabled = false, provider = "paddleocr") => {
-        const status = availability(path, notebookId);
+    const factorySource = transpileModule(readFileSync("src/menus/imageOCRMenu.ts", "utf8")
+        .replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""), {
+        compilerOptions: {target: ScriptTarget.ES2020},
+    }).outputText;
+    const factory = new Function("window", "createDeclaredMenu", "IMAGE_OCR_MENU", "getImageOCRAvailability",
+        "getImageOCRStatus", "isDisabledFeature", `${factorySource}\nreturn createImageOCRMenu;`);
+    const getMenu = (path: string, notebookId: string, disabled = false, provider = "paddleocr") => {
         const config = {siyuan: {languages: {}, config: {ocr: {provider}}}};
-        const {canOCR, canAIOCR} = getRecognition(config, status, () => disabled);
-        const menu = getMenu(config, status, canOCR, canAIOCR);
+        const previous = Object.getOwnPropertyDescriptor(globalThis, "window");
+        Object.defineProperty(globalThis, "window", {configurable: true, value: config});
+        try {
+            return factory(config, createDeclaredMenu, IMAGE_OCR_MENU, availability, async () => false, () => disabled)(
+                {getAttribute: () => path}, notebookId,
+            );
+        } finally {
+            if (previous) {
+                Object.defineProperty(globalThis, "window", previous);
+            } else {
+                Reflect.deleteProperty(globalThis, "window");
+            }
+        }
+    };
+    const visibleItems = (path: string, notebookId: string, disabled = false, provider = "paddleocr") => {
+        const menu = getMenu(path, notebookId, disabled, provider);
         return menu.ignore ? [] : menu.submenu.filter((item: {ignore?: boolean}) => !item.ignore)
             .map((item: {id: string}) => item.id);
     };
-    const modelMenu = getMenu({siyuan: {languages: {}}}, availability("assets/image.png", "ordinary"), true, true);
+    const modelMenu = getMenu("assets/image.png", "ordinary");
     assert.equal(modelMenu.submenu.find((item: {id: string}) => item.id === "reOCR").icon, "iconOCR");
     assert.deepEqual(visibleItems("https://example.com/image.png", "ordinary"), ["ocrResult", "copyOCRText"]);
     assert.deepEqual(visibleItems("assets/image.png?box=encrypted", "ordinary"), []);

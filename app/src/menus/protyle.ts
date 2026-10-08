@@ -1,3 +1,4 @@
+import {createImageOCRMenu} from "./imageOCRMenu";
 import {escapeHtmlTextAndAttr} from "../util/escape";
 import type {FileTreeGetDocRequestInput} from "../types/api";
 import {
@@ -36,7 +37,7 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {copyPlainText, isDisabledFeature, isPhablet, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
+import {copyPlainText, isPhablet, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
 import {paste, pasteAndKeepSourceFormat, pasteAsPlainText, pasteEscaped} from "../protyle/util/paste";
@@ -52,7 +53,6 @@ import {blockRender} from "../protyle/render/blockRender";
 import {renameAsset} from "../editor/rename";
 import {renderImageDisplay} from "../protyle/render/imageDisplay";
 import {renderImageActions} from "../protyle/render/imageActions";
-import {getImageOCRStatus, invalidateImageOCRStatus} from "../asset/imageOCRStatus";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "./util";
@@ -90,9 +90,6 @@ import {getParentDocumentID} from "../protyle/util/parentDocument";
 import {prepareInlineElementBoundaryMutation} from "../protyle/util/inlineElementBoundary";
 import {getZoomFocusScrollAttr, shouldFocusAfterZoom} from "../protyle/util/focusRestore";
 import {scrollCenter} from "../util/highlightById";
-import {copyImageOCRText, openImageOCR} from "../asset/imageOCR";
-import {reImageAIOCR} from "../asset/imageAIOCR";
-import {getImageOCRAvailability} from "../asset/imageOCRAvailability";
 import {
     getSemanticInlineVisibleText,
     normalizeSemanticInlineElement,
@@ -1383,9 +1380,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         const imagePath = imgElement.getAttribute("data-src");
-        const ocrAvailability = getImageOCRAvailability(imagePath, protyle.notebookId);
-        const canOCR = ocrAvailability.local && window.siyuan.config.ocr?.provider !== "ai";
-        const canAIOCR = ocrAvailability.ai && !isDisabledFeature("ai");
         if (imagePath.startsWith("assets/")) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "rename",
@@ -1396,66 +1390,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }
             }).element);
         }
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "ocr",
-            label: "OCR",
-            ignore: !ocrAvailability.text,
-            bind(element) {
-                getImageOCRStatus(imagePath).then(hasText => {
-                    if (!element.isConnected || hasText === undefined) {
-                        return;
-                    }
-                    const localLabel = element.querySelector('[data-id="reOCR"] .b3-menu__label');
-                    if (localLabel) {
-                        localLabel.textContent = hasText ? window.siyuan.languages.reOCR : window.siyuan.languages.performOCR;
-                    }
-                    const aiLabel = element.querySelector('[data-id="reAIOCR"] .b3-menu__label');
-                    if (aiLabel) {
-                        aiLabel.textContent = hasText ? window.siyuan.languages.reAIOCR : window.siyuan.languages.performAIOCR;
-                    }
-                });
-            },
-            submenu: [{
-                id: "ocrResult",
-                icon: "iconEdit",
-                label: window.siyuan.languages.ocrResult,
-                click() {
-                    openImageOCR(imgElement.getAttribute("data-src"));
-                }
-            }, {
-                id: "copyOCRText",
-                icon: "iconCopy",
-                label: `${window.siyuan.languages.copy} OCR`,
-                click() {
-                    copyImageOCRText(imgElement.getAttribute("data-src"));
-                }
-            }, {
-                id: "separator_reOCR",
-                type: "separator",
-                ignore: !canOCR && !canAIOCR,
-            }, {
-                id: "reOCR",
-                icon: "iconOCR",
-                label: window.siyuan.languages.performOCR,
-                ignore: !canOCR,
-                click() {
-                    const path = imgElement.getAttribute("data-src");
-                    fetchPost("/api/asset/ocr", {
-                        path,
-                    }, () => {
-                        invalidateImageOCRStatus(path);
-                    });
-                }
-            }, {
-                id: "reAIOCR",
-                icon: "iconSparkles",
-                label: window.siyuan.languages.performAIOCR,
-                ignore: !canAIOCR,
-                click() {
-                    void reImageAIOCR(imgElement.getAttribute("data-src"));
-                }
-            }],
-        }).element);
+        window.siyuan.menus.menu.append(new MenuItem(createImageOCRMenu(imgElement, protyle.notebookId)).element);
         window.siyuan.menus.menu.append(new MenuItem({
             id: "alignCenter",
             icon: "iconAlignCenter",

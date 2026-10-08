@@ -3094,17 +3094,14 @@ func fromHPathSearchSQLBlockWithContentTerms(sqlBlock *sql.Block, hPathTerms, co
 func maxContent(content string, maxLen int) string {
 	idx := strings.Index(content, "<mark>")
 	if 128 < maxLen && maxLen <= idx {
-		head := bytes.Buffer{}
-		for range 512 {
-			r, size := utf8.DecodeLastRuneInString(content[:idx])
-			head.WriteRune(r)
+		const matchContextBytes = 64
+		matchIdx := idx
+		for idx > 0 && matchIdx-idx <= matchContextBytes {
+			_, size := utf8.DecodeLastRuneInString(content[:idx])
 			idx -= size
-			if 64 < head.Len() {
-				break
-			}
 		}
 
-		content = util.Reverse(head.String()) + content[idx:]
+		content = content[idx:]
 	}
 
 	if maxLen < utf8.RuneCountInString(content) {

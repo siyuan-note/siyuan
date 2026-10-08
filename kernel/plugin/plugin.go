@@ -475,7 +475,11 @@ func (p *KernelPlugin) pluginEventHandler(event any) {
 func (p *KernelPlugin) subscribeEventHandlers() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = r.(error)
+			if recoveredErr, ok := r.(error); ok {
+				err = recoveredErr
+			} else {
+				err = fmt.Errorf("%v", r)
+			}
 		}
 	}()
 
@@ -488,7 +492,11 @@ func (p *KernelPlugin) subscribeEventHandlers() (err error) {
 func (p *KernelPlugin) unsubscribeEventHandlers() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = r.(error)
+			if recoveredErr, ok := r.(error); ok {
+				err = recoveredErr
+			} else {
+				err = fmt.Errorf("%v", r)
+			}
 		}
 	}()
 

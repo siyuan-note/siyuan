@@ -24,7 +24,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -38,6 +37,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+var documentBaseNameReplacer = strings.NewReplacer("\r\n", "", "\r", "", "\n", "", "\u2028", "", "\u2029", "", "\t", "", "/", "")
 
 var moveLocalShorthands = contractHandler(apicontract.MoveLocalShorthands, moveLocalShorthandsContract)
 
@@ -838,8 +839,7 @@ func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateM
 
 	baseName := path.Base(hPath)
 	dir := path.Dir(hPath)
-	r, _ := regexp.Compile("\r\n|\r|\n|\u2028|\u2029|\t|/")
-	baseName = r.ReplaceAllString(baseName, "")
+	baseName = documentBaseNameReplacer.Replace(baseName)
 	if 512 < utf8.RuneCountInString(baseName) {
 		baseName = gulu.Str.SubStr(baseName, 512)
 	}

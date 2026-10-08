@@ -234,12 +234,15 @@ var (
 	errObsidianVaultMarkdownMissing = errors.New("Obsidian Vault has no readable Markdown")
 	errObsidianSourceChanged        = errors.New("Obsidian source file changed")
 
-	obsidianBlockIDPattern            = regexp.MustCompile(`(?m)(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$`)
-	obsidianQuotePattern              = regexp.MustCompile(`^((?:[ \t]*>[ \t]?)+)(.*)$`)
-	obsidianListItemPattern           = regexp.MustCompile(`^([ \t]*(?:[-+*]|\d+[.)])[ \t]+)(.*)$`)
-	obsidianFootnotePattern           = regexp.MustCompile(`(?m)\[\^[^\]\r\n]+\]`)
-	obsidianFootnoteDefinitionPattern = regexp.MustCompile(`(?m)^\[\^([^\]\r\n]+)\]:[ \t]*(.*?)[ \t]*\r?$`)
-	obsidianFootnoteReferencePattern  = regexp.MustCompile(`\[\^([^\]\r\n]+)\]`)
+	obsidianBlockIDPattern              = regexp.MustCompile(`(?m)(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$`)
+	obsidianQuotePattern                = regexp.MustCompile(`^((?:[ \t]*>[ \t]?)+)(.*)$`)
+	obsidianListItemPattern             = regexp.MustCompile(`^([ \t]*(?:[-+*]|\d+[.)])[ \t]+)(.*)$`)
+	obsidianFootnotePattern             = regexp.MustCompile(`(?m)\[\^[^\]\r\n]+\]`)
+	obsidianFootnoteDefinitionPattern   = regexp.MustCompile(`(?m)^\[\^([^\]\r\n]+)\]:[ \t]*(.*?)[ \t]*\r?$`)
+	obsidianFootnoteReferencePattern    = regexp.MustCompile(`\[\^([^\]\r\n]+)\]`)
+	obsidianBlockRefTextReplacer        = strings.NewReplacer("\\", "\\\\", "\"", "\\\"")
+	obsidianDynamicBlockRefTextReplacer = strings.NewReplacer("\\", "\\\\", "'", "\\'")
+	obsidianMarkdownTextReplacer        = strings.NewReplacer("\\", "\\\\", "[", "\\[", "]", "\\]")
 )
 
 func StartObsidianVaultAnalysis(localPath string) (*ObsidianVaultTask, error) {
@@ -1994,16 +1997,15 @@ func obsidianWikiLinkAnchor(token obsidianWikiToken, doc *obsidianDocPlan) strin
 }
 
 func escapeObsidianBlockRefText(text string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(text, "\\", "\\\\"), "\"", "\\\"")
+	return obsidianBlockRefTextReplacer.Replace(text)
 }
 
 func escapeObsidianDynamicBlockRefText(text string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(text, "\\", "\\\\"), "'", "\\'")
+	return obsidianDynamicBlockRefTextReplacer.Replace(text)
 }
 
 func escapeObsidianMarkdownText(text string) string {
-	replacer := strings.NewReplacer("\\", "\\\\", "[", "\\[", "]", "\\]")
-	return replacer.Replace(text)
+	return obsidianMarkdownTextReplacer.Replace(text)
 }
 
 func isObsidianImage(filePath string) bool {

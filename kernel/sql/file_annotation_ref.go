@@ -17,8 +17,13 @@
 package sql
 
 import (
+	"unicode/utf8"
+
 	"github.com/siyuan-note/logging"
 )
+
+const fileAnnotationRefQuery = "SELECT block_id FROM file_annotation_refs WHERE annotation_id = ? " +
+	"OR (annotation_id >= ? AND annotation_id < ?) OR (annotation_id >= ? AND annotation_id < ?)"
 
 type FileAnnotationRef struct {
 	ID           string
@@ -39,8 +44,14 @@ func QueryRefIDsByAnnotationID(annotationID string) (refIDs []string) {
 func QueryRefIDsByAnnotationIDInBox(annotationID, boxID string) (refIDs []string) {
 	refIDs = []string{}
 	// 兼容已持久化的带查询参数或片段的标注索引，新建索引只保存纯标注 ID。
-	rows, err := queryForBox(boxID, "SELECT block_id FROM file_annotation_refs WHERE annotation_id = ? "+
-		"OR substr(annotation_id, 1, ?) IN (?, ?)", annotationID, len(annotationID)+1, annotationID+"?", annotationID+"#")
+	stmt := fileAnnotationRefQuery
+	args := []any{annotationID, annotationID + "?", annotationID + "@", annotationID + "#", annotationID + "$"}
+	// 非 ASCII 参数保留按字节长度截取的既有查询语义，标准标注 ID 使用可索引的范围条件。
+	if len(annotationID) != utf8.RuneCountInString(annotationID) {
+		stmt = "SELECT block_id FROM file_annotation_refs WHERE annotation_id = ? OR substr(annotation_id, 1, ?) IN (?, ?)"
+		args = []any{annotationID, len(annotationID) + 1, annotationID + "?", annotationID + "#"}
+	}
+	rows, err := queryForBox(boxID, stmt, args...)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return

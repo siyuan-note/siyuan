@@ -137,6 +137,9 @@ func initDatabase(forceRebuild bool) {
 			if err := ensureDailyNoteAttributesIndex(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create daily note attributes index failed: %s", err)
 			}
+			if err := ensureFileAnnotationRefIndex(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create file annotation reference index failed: %s", err)
+			}
 			if err := ensureRecentUpdatedBlocksIndexes(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create recent updated block indexes failed: %s", err)
 			}
@@ -296,6 +299,9 @@ func initDBTables() {
 	_, err = db.Exec("CREATE TABLE file_annotation_refs (id, file_path, annotation_id, block_id, root_id, box, path, content, type)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create table [refs] failed: %s", err)
+	}
+	if err = ensureFileAnnotationRefIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create file annotation reference index failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS block_embeddings")
@@ -1480,6 +1486,11 @@ func ensureDailyNoteAttributesIndex(database *sql.DB) (err error) {
 	return
 }
 
+func ensureFileAnnotationRefIndex(database *sql.DB) (err error) {
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_file_annotation_refs_annotation_id ON file_annotation_refs(annotation_id)")
+	return
+}
+
 func ensureRefsDefIndexes(database *sql.DB) (err error) {
 	if _, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_refs_def_block_id ON refs(def_block_id)"); err != nil {
 		return
@@ -2157,6 +2168,9 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		return
 	}
 	if err = ensureDailyNoteAttributesIndex(boxDB); err != nil {
+		return
+	}
+	if err = ensureFileAnnotationRefIndex(boxDB); err != nil {
 		return
 	}
 	if err = cleanupInvalidRefs(boxDB); err != nil {

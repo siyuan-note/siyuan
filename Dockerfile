@@ -80,4 +80,4 @@ COPY LICENSE THIRD_PARTY_NOTICES.md .
 ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]
 # 默认启动伺服。若通过 `docker run` / `command:` 传额外参数，需自行带上 `serve` 子命令，
 # 否则用户参数会整体覆盖 CMD。
-CMD ["/opt/siyuan/kernel", "serve"]
+CMD ["serve"]

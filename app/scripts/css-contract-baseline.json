@@ -1,0 +1,1836 @@
+{
+  "classes": {
+    "agent-chat__body--error": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts"
+      ]
+    },
+    "agent-chat__confirm-always": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts",
+        "src/layout/dock/agent/agentConfirmActions.ts"
+      ]
+    },
+    "agent-chat__confirm-approve": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts",
+        "src/layout/dock/agent/agentConfirmActions.ts"
+      ]
+    },
+    "agent-chat__confirm-reject": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts",
+        "src/layout/dock/agent/agentConfirmActions.ts"
+      ]
+    },
+    "agent-chat__header": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts"
+      ]
+    },
+    "agent-chat__image-upload": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts"
+      ]
+    },
+    "agent-chat__image-upload-input": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts"
+      ]
+    },
+    "agent-chat__msg--confirm": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts"
+      ]
+    },
+    "agent-chat__msg--question": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts"
+      ]
+    },
+    "agent-chat__msg--snapshot": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts"
+      ]
+    },
+    "agent-chat__msg-time": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts"
+      ]
+    },
+    "agent-chat__question-submit-btn": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts",
+        "src/layout/dock/agent/AgentMessageRenderer.ts"
+      ]
+    },
+    "agent-chat__regenerate": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts"
+      ]
+    },
+    "agent-chat__thinking-arrow--contract": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/ai/editor.ts",
+        "src/ai/thinkingCard.ts",
+        "src/layout/dock/agent/AgentChat.ts",
+        "src/layout/dock/agent/AgentMessageRenderer.ts"
+      ]
+    },
+    "agent-chat__thinking-arrow--expand": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/ai/editor.ts",
+        "src/ai/thinkingCard.ts",
+        "src/layout/dock/agent/AgentChat.ts",
+        "src/layout/dock/agent/AgentMessageRenderer.ts"
+      ]
+    },
+    "agent-chat__user-copy": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts"
+      ]
+    },
+    "agent-chat__user-edit": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/agent/AgentChat.ts"
+      ]
+    },
+    "ai-editor-panel__close": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/ai/editor.ts"
+      ]
+    },
+    "ai-editor-panel__stop": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/ai/editor.ts"
+      ]
+    },
+    "asset-picker__cancel": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/asset/picker.ts"
+      ]
+    },
+    "asset-picker__more": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/asset/picker.ts"
+      ]
+    },
+    "asset-picker__select": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/asset/picker.ts"
+      ]
+    },
+    "av__batch-edit-proxy": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/batchEdit.ts"
+      ]
+    },
+    "av__calendar-today": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/calendar/render.ts"
+      ]
+    },
+    "av__calendar-undated-preview-layer": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/calendar/undated.ts"
+      ]
+    },
+    "av__cell--paste-placeholder": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/util/insertHTML.ts"
+      ]
+    },
+    "av__cell-check": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/cell.ts"
+      ]
+    },
+    "av__cell-uncheck": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/cell.ts"
+      ]
+    },
+    "av__celltext--template": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/action.ts",
+        "src/protyle/render/av/attributeValue.ts",
+        "src/protyle/render/av/blockAttr.ts",
+        "src/protyle/render/av/cell.ts"
+      ]
+    },
+    "av__group-name": {
+      "reason": "现有第三方主题接口，保留原因见 issue 15736",
+      "references": [
+        "src/protyle/render/av/kanban/render.ts",
+        "src/protyle/render/av/render.ts"
+      ]
+    },
+    "av__relation-fields": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/relationLayout.ts"
+      ]
+    },
+    "av__spacer--bottom": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/render.ts",
+        "src/protyle/render/av/virtualScroll.ts"
+      ]
+    },
+    "av__views--show": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/action.ts",
+        "src/protyle/render/av/search.ts",
+        "src/protyle/render/av/view.ts"
+      ]
+    },
+    "av__views-placeholder": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/row.ts"
+      ]
+    },
+    "b3-button__icon": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/config/bazaar.ts",
+        "src/config/entryVisibility/ui.ts",
+        "src/config/tabs/ai/aiDecisionUi.ts",
+        "src/config/tabs/ai/aiProviderUi.ts",
+        "src/config/tabs/ai/aiUi.ts"
+      ]
+    },
+    "b3-card__author": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/config/bazaar.ts"
+      ]
+    },
+    "b3-link": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/config/tabs/ai/aiUi.ts"
+      ]
+    },
+    "b3-list-item--warning": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/menus/dataMigration.ts"
+      ]
+    },
+    "b3-menu--fit": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/menus/Menu.ts",
+        "src/protyle/render/av/relation.ts"
+      ]
+    },
+    "b3-menu__item--custom": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/menus/Menu.ts"
+      ]
+    },
+    "b3-progress": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/menus/importObsidian.ts"
+      ]
+    },
+    "b3-progress__bar": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/menus/importObsidian.ts"
+      ]
+    },
+    "b3-textarea": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/config/setting/save.ts"
+      ]
+    },
+    "backlinkList__global": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/layout/dock/GlobalBacklinkList.ts"
+      ]
+    },
+    "config-agent-capability__list": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/config/tabs/ai/aiCapabilityUi.ts"
+      ]
+    },
+    "config-ai-provider__model": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/config/tabs/ai/aiDecisionUi.ts",
+        "src/config/tabs/ai/aiProviderUi.ts"
+      ]
+    },
+    "config-bazaar__rating-detail": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/config/bazaar/rating.ts"
+      ]
+    },
+    "config-entry-visibility__column--locations": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/config/entryVisibility/ui.ts"
+      ]
+    },
+    "dock__item--space": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/assets/template/app/index.tpl",
+        "src/assets/template/desktop/index.tpl",
+        "src/layout/dock/index.ts",
+        "src/menus/index.ts"
+      ]
+    },
+    "dock__items": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/assets/template/app/index.tpl",
+        "src/assets/template/desktop/index.tpl",
+        "src/boot/globalEvent/event.ts",
+        "src/layout/dock/barVisibility.ts",
+        "src/menus/index.ts"
+      ]
+    },
+    "drag-tip__action": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/util/dragTip.ts"
+      ]
+    },
+    "drag-tip__title": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/util/dragTip.ts"
+      ]
+    },
+    "emojis__chunks": {
+      "reason": "虚拟表情分块的外层容器，与内部 emojis__chunk 用途不同，不需要分块的裁剪样式",
+      "references": [
+        "src/emoji/index.ts"
+      ]
+    },
+    "emojis__link-footer--save": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/emoji/index.ts"
+      ]
+    },
+    "export-img__watermark": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/export/util.ts"
+      ]
+    },
+    "file-tree__items": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/boot/globalEvent/event.ts",
+        "src/layout/dock/Files.ts"
+      ]
+    },
+    "file-tree__publish-access--active": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/index.ts",
+        "src/layout/dock/Files.ts"
+      ]
+    },
+    "fn__selectnone": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/colorDialog.ts",
+        "src/protyle/toolbar/inlineStyleDialog.ts"
+      ]
+    },
+    "ft__b": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/automation.ts"
+      ]
+    },
+    "mindmap-view__summary": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/listMindmap/view.ts"
+      ]
+    },
+    "mobile-setting-menu__result": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/mobile/menu/mainMenu.ts",
+        "src/mobile/menu/mainMenuSearch.ts"
+      ]
+    },
+    "protyle-action__edit": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/util.ts",
+        "src/protyle/util/disabledWYSIWYG.ts",
+        "src/protyle/util/onGet.ts"
+      ]
+    },
+    "protyle-action__ocr": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/imageActions.ts"
+      ]
+    },
+    "protyle-action__reload": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/blockRender.ts",
+        "src/protyle/render/embedRenderState.ts",
+        "src/protyle/render/util.ts"
+      ]
+    },
+    "protyle-attr--alias": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/header/Title.ts",
+        "src/protyle/wysiwyg/transaction.ts"
+      ]
+    },
+    "protyle-attr--name": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/header/Title.ts",
+        "src/protyle/wysiwyg/keydown.ts",
+        "src/protyle/wysiwyg/transaction.ts"
+      ]
+    },
+    "protyle-content--transition": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/index.ts"
+      ]
+    },
+    "protyle-custom": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/util/tableControl.ts",
+        "src/protyle/wysiwyg/tableVirtualization.ts"
+      ]
+    },
+    "protyle-db-attr--show-all": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/render/av/attributePanel.ts"
+      ]
+    },
+    "protyle-img": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/boot/globalEvent/keydown.ts"
+      ]
+    },
+    "protyle-table-control__drop--column": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/util/tableControl.ts"
+      ]
+    },
+    "protyle-table-control__drop--row": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/util/tableControl.ts"
+      ]
+    },
+    "publish-access-dialog__comment": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/protyle/util/publishAccess.ts"
+      ]
+    },
+    "sy__bookmark": {
+      "reason": "书签面板识别钩子，外观由共享面板组件提供",
+      "references": [
+        "src/layout/dock/Bookmark.ts"
+      ]
+    },
+    "sy__inbox": {
+      "reason": "收集箱面板识别与事件查询钩子，外观由共享面板组件提供",
+      "references": [
+        "src/boot/globalEvent/keydown.ts",
+        "src/layout/dock/Inbox.ts",
+        "src/layout/dock/index.ts",
+        "src/layout/util.ts"
+      ]
+    },
+    "sy__outline": {
+      "reason": "大纲面板识别与事件查询钩子，外观由共享面板组件提供",
+      "references": [
+        "src/boot/globalEvent/keydown.ts",
+        "src/layout/dock/Outline.ts",
+        "src/util/touchDragBridge.ts"
+      ]
+    },
+    "sy__tag": {
+      "reason": "标签面板识别钩子，外观由共享面板组件提供",
+      "references": [
+        "src/layout/dock/Tag.ts"
+      ]
+    },
+    "window-controls__item--disabled": {
+      "reason": "现有最小化事件的禁用标识检查；是否保留外部设置该状态的接口需另行确认",
+      "references": [
+        "src/boot/windowControls.ts"
+      ]
+    },
+    "window-workspace__button": {
+      "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
+      "references": [
+        "src/window/workspace.ts"
+      ]
+    }
+  },
+  "styles": [
+    {
+      "file": "src/assets/scss/export.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "direction: ltr !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/export.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-height: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/export.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-height: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/export.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "overflow: visible !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/export.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "min-height: 22px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_ai_agent.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_ai_agent.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_ai_agent.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: 96px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_ai_agent.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_ai_agent.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_ai_editor.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "top: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_ai_editor.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "left: max(8px, env(safe-area-inset-left)) !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin-top: 4px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin-bottom: 4px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: 100% !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin-right: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding-right: 24px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background-color: var(--b3-theme-primary-lightest) !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "opacity: 1 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "object-position: center !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "overflow: hidden !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "font-size: 85% !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background-color: var(--b3-theme-background-light) !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_av.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "box-shadow: inset -2px 0 0 var(--b3-theme-primary) !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_card.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "font-size: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_config.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "font-size: 13px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_config.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: 100% !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_config.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: 16px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_config.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "height: 16px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_config.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": ".item__meta-funding {",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/business/_config.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": "& > span:first-child {",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/business/_config.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": "& > span:last-child {",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/business/_config.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": ".b3-chip {",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/business/_export.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_export.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_export.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "outline: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_export.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "box-shadow: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_export.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "font-size: 13px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_graph.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "overflow: hidden !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_graph.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "overflow: hidden !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_history.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "border-radius: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_history.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "border-radius: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_history.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "border-radius: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_history.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background-color: transparent !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_history.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "box-shadow: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_history.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "outline: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_history.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background-color: transparent !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_layout.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "transition: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_layout.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin-top: 8px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_layout.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": ".item__document-drop-option {",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/business/_layout.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": "&--active {",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/business/_search.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding: 5px 8px 5px 44px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_form.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding-left: 34px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_form.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding-left: 25px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_form.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding-right: 35px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_form.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "font-size: 14px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_form.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "overflow: hidden !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_form.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "border-bottom: 1px solid var(--b3-border-color) !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_list.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_menu.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "height: 100% !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_menu.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_menu.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: 100% !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_snackbar.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "transform: translate3d(0, 0, 0) !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "white-space: pre !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "border-left: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "border-right: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "border-top: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "border-bottom: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: inline-block !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "position: absolute !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: 1px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "left: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "outline: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background: 0 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "text-decoration: initial !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "text-shadow: initial !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "font-size: 12px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "overflow: hidden !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "min-height: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "min-height: 22px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/component/_typography.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "list-style: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_main.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: 100% !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_main.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "height: 100vh !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_main.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_main.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_main.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background-color: transparent !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background-color: transparent !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)) !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "height: 18px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: 18px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin: 0 12px 0 8px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-height: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "top: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "bottom: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "left: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "right: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "min-width: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-width: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "top: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "bottom: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "left: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "right: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "min-width: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-width: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-height: 90vh !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-height: 90dvh !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-width: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "border: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin: 0 12px 0 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "align-items: stretch !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": "> .fn__flex-1 {",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": "img,",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": "&--left {",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": "> .fn__flex-1 {",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": "&--mobile {",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/main/_mobile.scss",
+      "rule": "max-nesting-depth",
+      "text": "Too deep nesting, maximum 5 (max-nesting-depth)",
+      "source": "table {",
+      "reason": "现有内容结构与功能作用域嵌套；保留级联和匹配范围，禁止新增更深嵌套"
+    },
+    {
+      "file": "src/assets/scss/protyle/_mindmap-view.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "height: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_mindmap-view.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_mindmap-view.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background: var(--b3-theme-primary-lightest) !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_mindmap-view.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_mindmap-view.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "font-size: inherit !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_mindmap-view.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding-bottom: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin-right: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding-left: 4px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "text-align: center !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "padding: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "content: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_protyle.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_tabs.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: block !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_tabs.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_tabs.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: block !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_tabs.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_tabs.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "height: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_tabs.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "clip-path: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_wysiwyg.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_wysiwyg.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_wysiwyg.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin-left: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_wysiwyg.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin-right: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_wysiwyg.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "position: fixed !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_wysiwyg.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "opacity: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_wysiwyg.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "min-height: 62px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_wysiwyg.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "min-height: 26px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/protyle/_wysiwyg.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "border-left: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/annotation_layer_builder.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "opacity: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/annotation_layer_builder.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/annotation_layer_builder.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "outline: calc(1.5px * var(--scale-factor)) solid CanvasText !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/annotation_layer_builder.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background-color: ButtonFace !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/annotation_layer_builder.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "color: ButtonText !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/annotation_layer_builder.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "outline: calc(3px * var(--scale-factor)) solid Highlight !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/annotation_layer_builder.scss",
+      "rule": "selector-pseudo-class-disallowed-list",
+      "text": "Disallowed pseudo-class \":has\" (selector-pseudo-class-disallowed-list)",
+      "source": "&:has(div.annotationContent) {",
+      "reason": "现有第三方 PDF 注释层样式；本次不改变 PDF 渲染机制，禁止新增使用"
+    },
+    {
+      "file": "src/assets/scss/pdf/_pdf.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "user-select: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/_pdf.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/_pdf.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "position: absolute !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/_pdf.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "margin: 3px 4px 2px !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/_pdf.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "border: 0 none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/_pdf.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "cursor: crosshair !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/_pdf.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "cursor: inherit !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/_pdf.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "cursor: grab !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/_pdf.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "cursor: inherit !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/_pdf.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "cursor: grabbing !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/pdf/_pdf.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "left: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/viewerjs/_viewer.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-height: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/viewerjs/_viewer.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-width: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/viewerjs/_viewer.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "min-height: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/viewerjs/_viewer.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "min-width: 0 !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/viewerjs/_viewer.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-width: 90% !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/viewerjs/_viewer.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "max-width: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/util/_function.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "display: none !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/util/_function.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "color: var(--b3-theme-error) !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/util/_mixin.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "overflow: hidden !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/util/_reset.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "color: var(--b3-theme-on-surface-light) !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/util/_reset.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "background-color: var(--b3-theme-background-light) !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/util/_responsive.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "width: auto !important;",
+      "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    }
+  ]
+}

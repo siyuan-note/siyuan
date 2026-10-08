@@ -73,14 +73,19 @@ describe("inline font family", () => {
         assert.equal(hasInlineFontFamilyExcludedType(["strong", "a", "text"]), false);
     });
 
-    it("defines the emoji reset stack for every frontend bundle and built-in theme", () => {
+    it("defines the emoji reset stack in built-in themes without a bundle override", () => {
         const declaration = '--b3-font-family-emoji-reset: "Emojis Additional", "Emojis Reset";';
         [
-            "src/assets/scss/component/_typography.scss",
             "appearance/themes/daylight/theme.css",
             "appearance/themes/midnight/theme.css",
         ].forEach(path => {
             assert.ok(readFileSync(resolve(process.cwd(), path), "utf8").includes(declaration), path);
+        });
+        ["base", "mobile", "export"].forEach(entry => {
+            const css = require("sass").compile(resolve(process.cwd(), `src/assets/scss/${entry}.scss`), {
+                logger: require("sass").Logger.silent,
+            }).css;
+            assert.ok(!css.includes(declaration), entry);
         });
     });
 });

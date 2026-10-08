@@ -1,0 +1,20 @@
+@use "sass:map";
+@use "sass:string";
+
+// 默认值集中声明，仍在消费位置解析变量，保留主题局部覆盖和脚本按元素赋值的语义。
+$defaults: (
+  "--agent-code-pad": 8px,
+  "--b3-av-calendar-weekend-background": var(--b3-theme-surface),
+  "--tabs-border-top-width": 1px,
+  "--tabs-border-right-width": 1px,
+  "--tabs-border-left-width": 1px,
+  "--tabs-border-top-left-radius": var(--b3-border-radius),
+  "--tabs-border-top-right-radius": var(--b3-border-radius),
+);
+
+@function token($name) {
+  @if not map.has-key($defaults, $name) {
+    @error "Unknown token default: #{$name}";
+  }
+  @return string.unquote("var(#{$name}, #{map.get($defaults, $name)})");
+}

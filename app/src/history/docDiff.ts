@@ -128,12 +128,12 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
     <div class="history__compare-scroll fn__flex-1">
         <div class="history__compare-editors fn__flex">
             <div class="history__compare-panel fn__flex-column">
-                <div class="history__compare-label ft__on-surface ft__ellipsis"></div>
+                <div class="history__compare-label ft__on-surface fn__ellipsis"></div>
                 <div class="protyle-title__input ft__center ft__breakword"></div>
                 <div class="history__compare-content fn__flex-1"></div>
             </div>
             <div class="history__compare-panel fn__flex-column">
-                <div class="history__compare-label ft__on-surface ft__ellipsis"></div>
+                <div class="history__compare-label ft__on-surface fn__ellipsis"></div>
                 <div class="protyle-title__input ft__center ft__breakword"></div>
                 <div class="history__compare-content fn__flex-1"></div>
             </div>

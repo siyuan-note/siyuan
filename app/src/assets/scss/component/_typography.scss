@@ -1,10 +1,6 @@
 @use "../util/function";
 @use "../protyle/task";
 
-:root {
-  --b3-font-family-emoji-reset: "Emojis Additional", "Emojis Reset";
-}
-
 @font-face {
   font-family: 'JetBrainsMono-Regular';
   /*! /* webpackIgnore: true */

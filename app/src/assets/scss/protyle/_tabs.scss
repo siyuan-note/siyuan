@@ -1,3 +1,5 @@
+@use "../util/tokens";
+
 .protyle-wysiwyg, .b3-typography {
   .tabs {
     min-width: 0;
@@ -260,9 +262,9 @@
 
     &[data-tabs-orientation="horizontal"] {
       > .tabs-header {
-        margin-top: calc(-1 * var(--tabs-border-top-width, 1px));
-        margin-right: calc(-1 * var(--tabs-border-right-width, 1px));
-        margin-left: calc(-1 * var(--tabs-border-left-width, 1px));
+        margin-top: calc(-1 * tokens.token("--tabs-border-top-width"));
+        margin-right: calc(-1 * tokens.token("--tabs-border-right-width"));
+        margin-left: calc(-1 * tokens.token("--tabs-border-left-width"));
         border-width: inherit;
         border-style: inherit;
         border-color: transparent;
@@ -273,20 +275,20 @@
         &::before {
           content: "";
           position: absolute;
-          top: calc(-1 * var(--tabs-border-top-width, 1px));
-          right: calc(-1 * var(--tabs-border-right-width, 1px));
+          top: calc(-1 * tokens.token("--tabs-border-top-width"));
+          right: calc(-1 * tokens.token("--tabs-border-right-width"));
           bottom: -1px;
-          left: calc(-1 * var(--tabs-border-left-width, 1px));
+          left: calc(-1 * tokens.token("--tabs-border-left-width"));
           border-width: inherit;
           border-style: inherit;
           border-color: var(--b3-border-color);
           border-bottom-width: 0;
-          border-radius: var(--tabs-border-top-left-radius, var(--b3-border-radius)) var(--tabs-border-top-right-radius, var(--b3-border-radius)) 0 0;
+          border-radius: tokens.token("--tabs-border-top-left-radius") tokens.token("--tabs-border-top-right-radius") 0 0;
           pointer-events: none;
         }
 
         &::after {
-          border-radius: max(0px, calc(var(--tabs-border-top-left-radius, var(--b3-border-radius)) - var(--tabs-border-top-width, 1px))) max(0px, calc(var(--tabs-border-top-right-radius, var(--b3-border-radius)) - var(--tabs-border-top-width, 1px))) 0 0;
+          border-radius: max(0px, calc(tokens.token("--tabs-border-top-left-radius") - tokens.token("--tabs-border-top-width"))) max(0px, calc(tokens.token("--tabs-border-top-right-radius") - tokens.token("--tabs-border-top-width"))) 0 0;
         }
       }
 
@@ -326,8 +328,8 @@
         padding-top: 6px;
         border-bottom: 0;
         border-right: 1px solid var(--b3-border-color);
-        border-top-left-radius: max(0px, calc(var(--b3-border-radius) - var(--tabs-border-left-width, 1px)));
-        border-bottom-left-radius: max(0px, calc(var(--b3-border-radius) - var(--tabs-border-left-width, 1px)));
+        border-top-left-radius: max(0px, calc(var(--b3-border-radius) - tokens.token("--tabs-border-left-width")));
+        border-bottom-left-radius: max(0px, calc(var(--b3-border-radius) - tokens.token("--tabs-border-left-width")));
       }
     }
   }

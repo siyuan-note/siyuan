@@ -1,3 +1,5 @@
+@use "../util/tokens";
+
 .agent-chat {
   min-height: 0;
 }
@@ -321,7 +323,7 @@
 .agent-chat__body--mirror pre {
   position: relative;
   // 左右 padding 统一变量，::before 语言标签用同值 left 保证左对齐代码正文。
-  padding: 8px var(--agent-code-pad, 8px);
+  padding: 8px tokens.token("--agent-code-pad");
   margin: 0.5em 0;
   border: 0;
   border-radius: var(--b3-border-radius);
@@ -346,7 +348,7 @@
   content: attr(data-language);
   position: absolute;
   top: 4px;
-  left: var(--agent-code-pad, 8px);
+  left: tokens.token("--agent-code-pad");
   font-size: 12px;
   color: var(--b3-theme-on-surface-light);
 }

@@ -638,8 +638,8 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         }
         const ariaLabel = item ? this._genUpdateButtonAriaLabel(item, bazaarType) : window.siyuan.languages.update;
         return `<div data-type="readme-update-slot" class="${item?.outdated ? "" : "fn__none"}">
-    ${reserveSpace ? '<div class="fn__hr"></div>' : ""}
     <button ${item?.disallowUpdate ? `disabled aria-label="${ariaLabel}" data-position="north"` : ""} class="b3-button ariaLabel" style="width: 168px" data-type="install-t">${window.siyuan.languages.update}</button>
+    ${reserveSpace ? '<div class="fn__hr"></div>' : ""}
 </div>`;
     },
     _genUpdateItemHTML(item: IUpdatedBazaarItem, bazaarType: TBazaarType) {
@@ -1118,8 +1118,8 @@ type="checkbox">
         <span class="b3-list-item__text ft__breakword">${navTitle}</span>
     </div>`;
         const readmeActionsHTML = `<div class="item__actions${isMobile() ? " item__actions--mobile" : ""}" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}">
-        ${bazaar._genReadmeActionsHTML(bazaarType, installed, available)}
         ${bazaar._genReadmeUpdateButtonHTML(available, bazaarType, Boolean(installed))}
+        ${bazaar._genReadmeActionsHTML(bazaarType, installed, available)}
     </div>`;
         const previewHTML = displayData.previewURL ?
             `<div class="item__preview" data-preview-url="${escapeAttr(displayData.previewURL)}"></div>` : "";

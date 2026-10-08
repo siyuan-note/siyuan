@@ -1,46 +1,63 @@
-// SiYuan - From thought to insight, with agents
-// Copyright (c) 2020-present, b3log.org
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 package tools
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
 
 func TestTodoWriteRejectsInvalidSessionContext(t *testing.T) {
-	tests := []struct {
-		name      string
-		sessionID any
-		include   bool
-	}{
-		{name: "missing"},
-		{name: "wrong type", sessionID: 1, include: true},
-		{name: "invalid ID", sessionID: "..", include: true},
+	for _, sessionID := range []any{nil, "", "..", "20261008120000-invalid/child"} {
+		result, err := todoWriteHandler(map[string]any{"_sessionID": sessionID, "todos": []any{}})
+		if err != nil || !result.IsError {
+			t.Fatalf("invalid session context %v was accepted: %+v, %v", sessionID, result, err)
+		}
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			args := map[string]any{"todos": []any{}}
-			if test.include {
-				args["_sessionID"] = test.sessionID
-			}
-			result, err := todoWriteHandler(args)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if !result.IsError {
-				t.Fatalf("invalid Agent session context was accepted: %#v", test.sessionID)
-			}
-		})
+}
+
+func TestTodoWriteReturnsSessionResultWithoutSeparatePersistence(t *testing.T) {
+	previous := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = previous })
+	const sessionID = "20261008120000-abcdefg"
+	args := map[string]any{
+		"_sessionID": sessionID,
+		"todos": []any{
+			map[string]any{"content": "Pending", "status": "unknown"},
+			map[string]any{"content": "Working", "status": "in_progress"},
+			map[string]any{"content": "Done", "status": "completed"},
+			map[string]any{"content": "Cancelled", "status": "cancelled"},
+			map[string]any{"content": ""},
+			"invalid",
+		},
+	}
+	want := "Todo List\n\n- [ ] Pending\n- [/] Working\n- [x] Done\n- [-] Cancelled\n"
+	result, err := todoWriteHandler(args)
+	if err != nil || result.IsError || len(result.Content) != 1 || result.Content[0].Text != want {
+		t.Fatalf("unexpected todo result: %+v, %v", result, err)
+	}
+	entries, err := os.ReadDir(util.DataDir)
+	if err != nil || len(entries) != 0 {
+		t.Fatalf("todo_write created separate persistence: %v, %v", entries, err)
+	}
+	// 已有待办文件保留原始内容，不因更新工具结果被改写或删除。
+	path := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions", sessionID, "todos.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		t.Fatal(err)
+	}
+	const previousTodos = `{"sessionID":"20261008120000-abcdefg","todos":[{"content":"Previous","status":"pending"}]}`
+	if err := os.WriteFile(path, []byte(previousTodos), 0600); err != nil {
+		t.Fatal(err)
+	}
+	args["todos"] = []any{}
+	result, err = todoWriteHandler(args)
+	if err != nil || result.IsError || result.Content[0].Text != "Todo list is empty." {
+		t.Fatalf("empty list: %+v, %v", result, err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil || string(data) != previousTodos {
+		t.Fatalf("existing todo data changed: %q, %v", data, err)
 	}
 }

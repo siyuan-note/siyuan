@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/88250/lute/ast"
 )
 
 var TodoWriteTool = &Tool{
@@ -47,6 +47,11 @@ var TodoWriteTool = &Tool{
 	Handler: todoWriteHandler,
 }
 
+type agentTodoItem struct {
+	Content string
+	Status  string
+}
+
 func init() {
 	register(TodoWriteTool)
 }
@@ -68,7 +73,7 @@ func todoWriteHandler(args map[string]any) (CallToolResult, error) {
 		}, nil
 	}
 
-	todos := make([]model.AgentTodoItem, 0, len(items))
+	todos := make([]agentTodoItem, 0, len(items))
 	for _, item := range items {
 		obj, ok := item.(map[string]any)
 		if !ok {
@@ -82,7 +87,7 @@ func todoWriteHandler(args map[string]any) (CallToolResult, error) {
 		if status != "pending" && status != "in_progress" && status != "completed" && status != "cancelled" {
 			status = "pending"
 		}
-		todos = append(todos, model.AgentTodoItem{Content: content, Status: status})
+		todos = append(todos, agentTodoItem{Content: content, Status: status})
 	}
 
 	sessionID, ok := args["_sessionID"].(string)
@@ -92,9 +97,9 @@ func todoWriteHandler(args map[string]any) (CallToolResult, error) {
 			IsError: true,
 		}, nil
 	}
-	if err := model.SaveAgentTodos(sessionID, todos); err != nil {
+	if !ast.IsNodeIDPattern(sessionID) {
 		return CallToolResult{
-			Content: []ContentItem{{Type: "text", Text: "todo_write error: " + err.Error()}},
+			Content: []ContentItem{{Type: "text", Text: "todo_write error: invalid Agent session ID"}},
 			IsError: true,
 		}, nil
 	}
@@ -105,7 +110,8 @@ func todoWriteHandler(args map[string]any) (CallToolResult, error) {
 	}, nil
 }
 
-func formatTodoResult(todos []model.AgentTodoItem) string {
+// formatTodoResult 生成待办展示内容，由会话工具结果统一持久化与恢复。
+func formatTodoResult(todos []agentTodoItem) string {
 	if len(todos) == 0 {
 		return "Todo list is empty."
 	}

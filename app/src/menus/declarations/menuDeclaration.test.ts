@@ -1,9 +1,9 @@
 import * as assert from "node:assert/strict";
-import {test, TestContext} from "node:test";
+import {test} from "node:test";
 import {IMAGE_OCR_MENU, IImageOCRMenuContext} from "./imageOCRMenu";
 import {createDeclaredMenu, declaredMenuCatalog} from "./menuDeclaration";
 
-const installLanguages = (t: TestContext) => {
+const installLanguages = (t: {after: (callback: () => void) => void}) => {
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
     Object.defineProperty(globalThis, "window", {configurable: true, value: {
         siyuan: {languages: new Proxy({}, {get: (_target, key) => String(key)})},

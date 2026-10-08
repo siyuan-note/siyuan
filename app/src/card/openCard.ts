@@ -705,7 +705,8 @@ export const bindCardEvent = async (options: {
             return;
         }
         const revealState = getFlashcardRevealState(editor.protyle);
-        if (revealState.pendingGeneration === revealState.generation) {
+        if ((actionElements[0].classList.contains("fn__none") && actionElements[1].classList.contains("fn__none")) ||
+            revealState.pendingGeneration === revealState.generation) {
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -743,7 +744,7 @@ export const bindCardEvent = async (options: {
             }
             return;
         }
-        if ("-3" === type || (["1", "2", "3", "4"].includes(type) && actionElements[0].classList.contains("fn__none"))) {
+        if ("-3" === type || (["1", "2", "3", "4"].includes(type) && !actionElements[1].classList.contains("fn__none"))) {
             fetchPost(type === "-3" ? "/api/riff/skipReviewRiffCard" : "/api/riff/reviewRiffCard", {
                 deckID: currentCard.deckID,
                 cardID: currentCard.cardID,

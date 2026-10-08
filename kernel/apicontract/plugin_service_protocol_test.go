@@ -8,7 +8,7 @@ import (
 func TestPluginServiceProtocolVariants(t *testing.T) {
 	previous := definitions
 	t.Cleanup(func() { definitions = previous })
-	endpoint := define[EmptyRequest, PluginServiceContent]("pluginServiceTest", "/test/plugin/:name/*path", RawBody, PluginServiceOptions(), "ANY")
+	endpoint := define[EmptyRequest, PluginServiceContent]("pluginServiceTest", "/test/plugin/:name/*path", PublicAccess, RawBody, PluginServiceOptions(), "ANY")
 	bundle, err := BuildBundle()
 	if err != nil {
 		t.Fatal(err)

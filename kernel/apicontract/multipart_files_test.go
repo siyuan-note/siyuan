@@ -14,7 +14,7 @@ type multiFileRequest struct {
 func TestMultipartFileListAndSuccessMessage(t *testing.T) {
 	previous := definitions
 	t.Cleanup(func() { definitions = previous })
-	endpoint := define[multiFileRequest, []string]("multiFiles", "/test/multi-files", MultipartBody, ResponseOptions{}, "POST")
+	endpoint := define[multiFileRequest, []string]("multiFiles", "/test/multi-files", PublicAccess, MultipartBody, ResponseOptions{}, "POST")
 	files := []*multipart.FileHeader{{Filename: "first.txt"}, {Filename: "second.txt"}}
 	request, err := endpoint.DecodeMultipart(&multipart.Form{File: map[string][]*multipart.FileHeader{"files": files}})
 	if err != nil || len(request.Files) != 2 || request.Files[0] != files[0] || request.Files[1] != files[1] {

@@ -8,8 +8,8 @@ import (
 func TestRawBroadcastProtocols(t *testing.T) {
 	previous := definitions
 	t.Cleanup(func() { definitions = previous })
-	ws := define[EmptyRequest, Null]("rawBroadcastWS", "/test/broadcast/ws", NoBody, RawWebSocketOptions(), "GET")
-	stream := define[EmptyRequest, Null]("rawBroadcastSSE", "/test/broadcast/es", NoBody, RawSSEOptions(), "GET")
+	ws := define[EmptyRequest, Null]("rawBroadcastWS", "/test/broadcast/ws", PublicAccess, NoBody, RawWebSocketOptions(), "GET")
+	stream := define[EmptyRequest, Null]("rawBroadcastSSE", "/test/broadcast/es", PublicAccess, NoBody, RawSSEOptions(), "GET")
 	bundle, err := BuildBundle()
 	if err != nil {
 		t.Fatal(err)

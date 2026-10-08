@@ -16,7 +16,7 @@ type directJSONTestResult struct {
 func TestDirectJSONHTTPResponses(t *testing.T) {
 	previous := definitions
 	t.Cleanup(func() { definitions = previous })
-	endpoint := define[EmptyRequest, directJSONTestResult]("directJSONTest", "/test/direct-json", NoBody, ResponseOptions{Output: DirectJSONOutput, NoContent: true}, "POST")
+	endpoint := define[EmptyRequest, directJSONTestResult]("directJSONTest", "/test/direct-json", PublicAccess, NoBody, ResponseOptions{Output: DirectJSONOutput, NoContent: true}, "POST")
 	bundle, err := BuildBundle()
 	if err != nil {
 		t.Fatal(err)

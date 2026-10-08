@@ -213,7 +213,7 @@ func TestRouteCoverage(t *testing.T) {
 	if err := CheckRoutes(routes, bindings, legacy); err != nil {
 		t.Fatal(err)
 	}
-	if err := CheckRoutes(append(routes, Route{"POST", "/api/new/untyped", "newHandler"}), bindings, legacy); err == nil {
+	if err := CheckRoutes(append(routes, Route{Method: "POST", Path: "/api/new/untyped", Handler: "newHandler"}), bindings, legacy); err == nil {
 		t.Fatal("new untyped route was accepted")
 	}
 	bindings["getBlockAttrs"] = "setBlockAttrs"

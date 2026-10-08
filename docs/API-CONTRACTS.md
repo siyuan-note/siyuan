@@ -8,13 +8,13 @@ This document defines type declarations, compatibility requirements, generated a
 
 ## Endpoint maintenance
 
-1. Define or update transport types and endpoints in the contract package, specifying request bodies, error codes, null values, defaults, and historical input compatibility
-2. Bind business entry points through `contractHandler`, preserving route middleware order, authorization, and lease scope
+1. Define or update transport types and endpoints in the contract package, explicitly declaring public or authenticated access, administrator and write requirements, request bodies, error codes, null values, defaults, and historical input compatibility
+2. Bind business entry points through `contractHandler` and register their handlers with `contractRouteHandlers`, preserving route middleware order and lease scope
 3. Keep `legacy_routes.json` empty; when deleting an endpoint, remove both its route registration and contract definition
 4. Update actual-response, input-compatibility, and strict type tests; run generation and correct calls identified by the compiler
 5. Synchronize generated and related public declarations in `petal`; update API documentation for public endpoints
 
-Generation checks inspect actual route and handler declarations to verify methods, paths, handlers, and contract adapters. Prerelease CI compares the legacy list with the previous version tag reachable from the current commit's parent and prevents additional records. Do not bypass contract checks with `any`, type assertions, or changes to the legacy list.
+Generation checks inspect actual route and handler declarations to verify methods, paths, handlers, contract adapters, and authorization middleware. `define` requires an explicit authorization argument; public endpoints use `PublicAccess`, while authenticated endpoints may add `AdminAccess` and `WritableAccess`. Domain registration functions retain literal methods and paths, and `contractRouteHandlers` derives middleware from the bound endpoint. Generation rejects missing policies, mismatched endpoint bindings, and missing or reordered explicit middleware. Authorization metadata does not replace resource permissions or the global notebook lease middleware. Prerelease CI compares the legacy list with the previous version tag reachable from the current commit's parent and prevents additional records. Do not bypass contract checks with `any`, type assertions, or changes to the legacy list.
 
 ## Contracts and implementation
 

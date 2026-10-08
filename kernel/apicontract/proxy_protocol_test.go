@@ -10,9 +10,9 @@ import (
 func TestProxyProtocolResponses(t *testing.T) {
 	previous := definitions
 	t.Cleanup(func() { definitions = previous })
-	endpoint := define[EmptyRequest, ProxyFailure]("proxyTest", "/test/proxy", RawBody, ProxyOptions(HTTPProxy), "ANY")
-	define[EmptyRequest, ProxyFailure]("eventsProxyTest", "/test/eventsProxy", NoBody, ProxyOptions(EventSourceProxy), "GET")
-	define[EmptyRequest, ProxyFailure]("wsProxyTest", "/test/wsProxy", NoBody, ProxyOptions(WebSocketProxy), "GET")
+	endpoint := define[EmptyRequest, ProxyFailure]("proxyTest", "/test/proxy", PublicAccess, RawBody, ProxyOptions(HTTPProxy), "ANY")
+	define[EmptyRequest, ProxyFailure]("eventsProxyTest", "/test/eventsProxy", PublicAccess, NoBody, ProxyOptions(EventSourceProxy), "GET")
+	define[EmptyRequest, ProxyFailure]("wsProxyTest", "/test/wsProxy", PublicAccess, NoBody, ProxyOptions(WebSocketProxy), "GET")
 	bundle, err := BuildBundle()
 	if err != nil {
 		t.Fatal(err)

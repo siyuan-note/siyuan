@@ -8,8 +8,8 @@ import (
 func TestEmptyHTTPResponse(t *testing.T) {
 	previous := definitions
 	t.Cleanup(func() { definitions = previous })
-	endpoint := define[EmptyRequest, string]("optionalBody", "/test/empty", NoBody, ResponseOptions{EmptyResponseStatuses: []int{200, 403}}, "GET")
-	image := define[EmptyRequest, BinaryContent]("optionalImage", "/test/image", NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 200,
+	endpoint := define[EmptyRequest, string]("optionalBody", "/test/empty", PublicAccess, NoBody, ResponseOptions{EmptyResponseStatuses: []int{200, 403}}, "GET")
+	image := define[EmptyRequest, BinaryContent]("optionalImage", "/test/image", PublicAccess, NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 200,
 		ContentVariants: []HTTPContentVariant{{200, "image/png"}}, EmptyResponseStatuses: []int{500}}, "GET")
 	bundle, err := BuildBundle()
 	if err != nil {
@@ -58,7 +58,7 @@ func TestEmptyHTTPResponse(t *testing.T) {
 func TestHTTPRedirectResponse(t *testing.T) {
 	previous := definitions
 	t.Cleanup(func() { definitions = previous })
-	endpoint := define[EmptyRequest, BinaryContent]("redirect", "/test/redirect", NoBody,
+	endpoint := define[EmptyRequest, BinaryContent]("redirect", "/test/redirect", PublicAccess, NoBody,
 		HTTPContentOptions(HTTPContentVariant{302, "text/html"}), "GET")
 	response := RedirectHTTPContent(302, "/target?value=one&other=two")
 	if endpoint.Status(response) != 302 || response.Redirect().Location != "/target?value=one&other=two" {
@@ -82,7 +82,7 @@ func TestEmptyHTTPResponseDeclaration(t *testing.T) {
 	t.Cleanup(func() { definitions = previous })
 	for _, status := range []int{0, 101, 199, 600} {
 		definitions = previous
-		define[EmptyRequest, Null]("empty", "/test/empty", NoBody, ResponseOptions{EmptyResponseStatuses: []int{status}}, "GET")
+		define[EmptyRequest, Null]("empty", "/test/empty", PublicAccess, NoBody, ResponseOptions{EmptyResponseStatuses: []int{status}}, "GET")
 		if _, err := BuildBundle(); err == nil {
 			t.Fatalf("invalid empty status accepted: %d", status)
 		}

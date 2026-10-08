@@ -13,7 +13,8 @@ const loadFunction = (path: string, name: string, globals: Record<string, unknow
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
     const exports: any = {};
-    runInNewContext(compiled, {exports, logKeyboardDiagnostic: (): void => undefined, ...globals});
+    runInNewContext(compiled, {exports, logKeyboardDiagnostic: (): void => undefined,
+        handleDocumentBoundaryHotkey: () => false, ...globals});
     return exports.subject;
 };
 

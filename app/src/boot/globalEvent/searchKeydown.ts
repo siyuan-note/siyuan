@@ -87,6 +87,10 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
         // 不能返回 true，否则历史菜单无法使用快捷键
         return false;
     }
+    if (searchType === "doc" && targetId === "replaceInput" && event.key === "Enter") {
+        replace(element, config, edit, false);
+        return true;
+    }
     let currentList: HTMLElement = listElement.querySelector(".b3-list-item--focus");
     if (!currentList) {
         return false;

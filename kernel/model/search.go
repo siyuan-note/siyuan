@@ -2010,7 +2010,7 @@ func buildExactSearchOrderCondition(field, query string) string {
 	if Conf.Search.CaseSensitive {
 		return field + " = '" + escapedQuery + "'"
 	}
-	escapedQuery = strings.NewReplacer("\\", "\\\\", "%", "\\%", "_", "\\_").Replace(escapedQuery)
+	escapedQuery = conf.EscapeSearchLikePattern(query)
 	return field + " LIKE '" + escapedQuery + "' ESCAPE '\\'"
 }
 
@@ -2023,7 +2023,7 @@ func buildExactAliasSearchOrderCondition(field, query string) string {
 	if Conf.Search.CaseSensitive {
 		return "instr(',' || " + field + " || ',', '," + escapedQuery + ",') > 0"
 	}
-	escapedQuery = strings.NewReplacer("\\", "\\\\", "%", "\\%", "_", "\\_").Replace(escapedQuery)
+	escapedQuery = conf.EscapeSearchLikePattern(query)
 	return "(',' || " + field + " || ',') LIKE '%," + escapedQuery + ",%' ESCAPE '\\'"
 }
 

@@ -119,8 +119,8 @@ func initDatabase(forceRebuild bool) {
 		if util.DatabaseVer == getDatabaseVer() {
 			// 老库版本一致但缺少新加的列时，做幂等迁移（不升 DatabaseVer，避免全库重建丢失已嵌入向量）
 			migrateBlockEmbeddingsSchema()
-			if err := ensureBlocksDocHPathIndex(db); err != nil {
-				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document hpath index failed: %s", err)
+			if err := ensureBlocksDocIndexes(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document indexes failed: %s", err)
 			}
 			if err := ensureRefsDefIndexes(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create refs definition indexes failed: %s", err)
@@ -207,8 +207,8 @@ func initDBTables() {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_blocks_root_id_id_hash] failed: %s", err)
 	}
 
-	if err = ensureBlocksDocHPathIndex(db); err != nil {
-		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document hpath index failed: %s", err)
+	if err = ensureBlocksDocIndexes(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document indexes failed: %s", err)
 	}
 	if err = ensureRecentUpdatedBlocksIndexes(db); err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create recent updated block indexes failed: %s", err)
@@ -1457,8 +1457,11 @@ func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err
 	return
 }
 
-func ensureBlocksDocHPathIndex(database *sql.DB) (err error) {
-	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocks_doc_hpath ON blocks(hpath) WHERE type = 'd'")
+func ensureBlocksDocIndexes(database *sql.DB) (err error) {
+	if _, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocks_doc_hpath ON blocks(hpath) WHERE type = 'd'"); err != nil {
+		return
+	}
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocks_doc_root_id ON blocks(root_id) WHERE type = 'd'")
 	return
 }
 
@@ -2149,7 +2152,7 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 			return
 		}
 	}
-	if err = ensureBlocksDocHPathIndex(boxDB); err != nil {
+	if err = ensureBlocksDocIndexes(boxDB); err != nil {
 		return
 	}
 	if err = ensureRecentUpdatedBlocksIndexes(boxDB); err != nil {

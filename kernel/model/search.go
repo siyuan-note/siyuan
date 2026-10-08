@@ -2148,7 +2148,10 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		}
 	}
 
-	if 0 < len(simpleTypes) {
+	if 1 == len(simpleTypes) && "d" == simpleTypes[0] && 0 == len(clauses) {
+		// 仅文档查询使用等值条件，以便命中文档专用的稀疏索引。
+		clauses = append(clauses, prefix+"type = 'd'")
+	} else if 0 < len(simpleTypes) {
 		clauses = append([]string{prefix + "type IN (" + sqlQuoteJoin(simpleTypes) + ")"}, clauses...)
 	}
 

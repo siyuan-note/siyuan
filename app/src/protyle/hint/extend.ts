@@ -452,9 +452,12 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
     }];
 };
 
-export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, sourceOrHideConfiguredCreate: THintSource | boolean = false) => {
+export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle,
+                                                 sourceOrHideConfiguredCreate: THintSource | boolean = false,
+                                                 options: {visibilityRoot?: string} = {}) => {
     // 加号面板由用户主动打开，复用插入项配置但不受输入斜杠的提示开关影响。
-    const visibilityRoot = protyle.hint.element.closest("#keyboardToolbar") ? SLASH_MENU_ROOT_PATH : undefined;
+    const visibilityRoot = options.visibilityRoot ||
+        (protyle.hint.element.closest("#keyboardToolbar") ? SLASH_MENU_ROOT_PATH : undefined);
     const enabled = getConfiguredEntryVisibility(SLASH_MENU_ROOT_PATH, visibilityRoot);
     if (!enabled) {
         return [];
@@ -464,6 +467,7 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
     const allList = builtinList.map<TSlashMenuItem>((item) => ({
         ...item,
         entryKey: item.id || "",
+        frequentEligible: key === "",
     }));
     let hasPlugin = false;
     if (areProtylePluginExtensionsEnabled(protyle)) {
@@ -475,6 +479,7 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
                     id: slash.id,
                     entryKey: getPluginSlashEntryKey(plugin.name, slash.id,
                         slash.html === "separator" ? "separator" : "entry"),
+                    frequentEligible: key === "",
                     value: `plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
                     html: slash.html
                 });

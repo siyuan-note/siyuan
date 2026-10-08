@@ -19,6 +19,9 @@ import {
 } from "../util/selection";
 import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash, hintTag} from "./extend";
+import {getSlashEntryKey, TSlashMenuItem} from "./slashMenu";
+import {getFrequentSlashItems, recordSlashExecution} from "./frequentSlashStorage";
+import {escapeAttr} from "../../util/escape";
 import {createDailyNoteReference} from "./dailyNote";
 import {captureDailyNoteSelection, insertDailyNoteReference} from "./dailyNoteSelection";
 import {
@@ -154,8 +157,9 @@ export class Hint {
                 return;
             }
             const btnElement = hasClosestByTag(eventTarget, "BUTTON");
-            if (btnElement && !btnElement.classList.contains("emojis__item") && !btnElement.classList.contains("emojis__type")) {
-                this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, false, this.source === "search" ? isNotCtrl(event) : isOnlyMeta(event));
+            if (btnElement && btnElement.hasAttribute("data-value") && !btnElement.classList.contains("emojis__item") && !btnElement.classList.contains("emojis__type")) {
+                this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, false,
+                    this.source === "search" ? isNotCtrl(event) : isOnlyMeta(event), btnElement.dataset.slashEntryKey);
                 event.preventDefault();
                 event.stopPropagation(); // https://github.com/siyuan-note/siyuan/issues/3710
                 return;
@@ -552,6 +556,7 @@ export class Hint {
                 }
                 range.deleteContents();
                 range.collapse(true);
+                recordSlashExecution(item.closest<HTMLElement>("[data-slash-entry-key]")?.dataset.slashEntryKey);
                 uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
                     document: uploadDocument,
                     htmlAsIframe: event.target.dataset.uploadMode === "html-iframe",
@@ -566,6 +571,14 @@ export class Hint {
     }
 
     private getHTMLByData(data: IHintData[]) {
+        if (this.source === "hint") {
+            // 所有上下文过滤完成后再选常用项，保留原列表及搜索结果顺序。
+            const frequent = getFrequentSlashItems(data.filter(item => item.html !== "separator" &&
+                (item as TSlashMenuItem).frequentEligible === true), getSlashEntryKey);
+            if (frequent.length > 0) {
+                data = [...frequent, {html: "separator", entryKey: "__frequent_separator__"} as TSlashMenuItem, ...data];
+            }
+        }
         if (this.source === "hint" && this.element.closest("#keyboardToolbar")) {
             return getLiteSlashMenuHTML(data);
         }
@@ -580,7 +593,8 @@ export class Hint {
             if (hintData.html === "separator") {
                 hintsHTML += `<button data-id="${hintData.id || ""}" class="b3-menu__separator"></button>`;
             } else {
-                hintsHTML += `<button data-id="${hintData.id || ""}" style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${focusClass}" data-value="${encodeURIComponent(hintData.value)}">${hintData.html}</button>`;
+                const entryKey = getSlashEntryKey(hintData);
+                hintsHTML += `<button data-id="${hintData.id || ""}"${entryKey ? ` data-slash-entry-key="${escapeAttr(entryKey)}"` : ""} style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${focusClass}" data-value="${encodeURIComponent(hintData.value)}">${hintData.html}</button>`;
             }
         });
         return `${hintsHTML}</div>`;
@@ -794,15 +808,15 @@ ${genHintItemHTML(item)}
     }
 
     // 直接插入命令使用正文选区，不沿用候选面板的来源和触发位置。
-    public fillCommand(value: string, protyle: IProtyle, updateRange = true) {
+    public fillCommand(value: string, protyle: IProtyle, updateRange = true, slashEntryKey?: string) {
         this.source = "hint";
         this.splitChar = "/";
         this.lastIndex = -1;
         this.hashTagSearchElement = undefined;
-        this.fill(value, protyle, updateRange);
+        this.fill(value, protyle, updateRange, false, slashEntryKey);
     }
 
-    public fill(value: string, protyle: IProtyle, updateRange = true, refIsS = false) {
+    public fill(value: string, protyle: IProtyle, updateRange = true, refIsS = false, slashEntryKey?: string) {
         this.bindingDismissController?.abort();
         hideElements(["hint", "toolbar"], protyle);
         if (updateRange && this.source !== "av") {
@@ -1039,6 +1053,9 @@ ${genHintItemHTML(item)}
             blockRender(protyle, protyle.wysiwyg.element);
             return;
         } else if (this.splitChar === "/" || this.splitChar === "、") {
+            if (slashEntryKey && value !== Constants.ZWSP + 3) {
+                recordSlashExecution(slashEntryKey);
+            }
             // 精简模式的自定义候选按文本插入，内置候选执行命令；块引用保留本地事务和后续提示。
             if (protyle.lite && (Constants.BLOCK_HINT_KEYS.includes(value) ||
                 !isBuiltinSlashHint(protyle.options.hint.extend.find((item) => item.key === "/" && item.hint)?.hint,
@@ -1431,7 +1448,8 @@ ${genHintItemHTML(item)}
                 if (mark === Constants.ZWSP + 3) {
                     (this.element.querySelector(".b3-list-item--focus input") as HTMLElement).click();
                 } else {
-                    this.fill(mark, protyle, true, isOnlyMeta(event));
+                    this.fill(mark, protyle, true, isOnlyMeta(event),
+                        (this.element.querySelector(".b3-list-item--focus") as HTMLElement).dataset.slashEntryKey);
                 }
             }
             event.preventDefault();

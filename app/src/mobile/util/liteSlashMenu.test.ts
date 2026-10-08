@@ -9,8 +9,9 @@ import {createSourceFile, isClassDeclaration, isMethodDeclaration, ScriptTarget,
 
 const browserCases = async (source: string, hintSource: string) => {
     const check: typeof assert = require("node:assert/strict");
-    const {mount, render, paddingElement} = new Function(source + hintSource +
-        "\nreturn {mount: mountLiteSlashMenu, render: Hint.prototype.getHTMLByData, paddingElement: getMobileToolbarPaddingElement};")() as {
+    const {mount, render, paddingElement} = new Function("getFrequentSlashItems", "getSlashEntryKey", "escapeAttr", source + hintSource +
+        "\nreturn {mount: mountLiteSlashMenu, render: Hint.prototype.getHTMLByData, paddingElement: getMobileToolbarPaddingElement};")(
+        (): IHintData[] => [], (item: {entryKey?: string}) => item.entryKey || "", (value: string) => value) as {
         mount: typeof import("./liteSlashMenu").mountLiteSlashMenu,
         render: (data: IHintData[]) => string,
         paddingElement: typeof import("../../protyle/lite/mobileToolbar").getMobileToolbarPaddingElement,
@@ -161,7 +162,8 @@ test("mobile slash panel retains synchronous and asynchronous candidates and rel
 }, async () => {
     const source = transpileModule((readFileSync(path.join(__dirname, "liteSlashMenu.ts"), "utf8") + "\n" +
         readFileSync(path.join(__dirname, "../../protyle/lite/mobileToolbar.ts"), "utf8"))
-        .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+        .replace(/^import type .*;\n/gm, "").replace(/^export /gm, ""),
+    {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const hintFile = createSourceFile("hint.ts", readFileSync(path.join(__dirname, "../../protyle/hint/index.ts"), "utf8"),
         ScriptTarget.Latest, true);
     const hintClass = hintFile.statements.find(isClassDeclaration);

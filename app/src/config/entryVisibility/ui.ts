@@ -16,6 +16,7 @@ import {
     refreshSlashMenuCatalog,
     refreshTopBarCatalog,
     refreshToolbarCatalogEntries,
+    SLASH_MENU_ROOT_PATH,
     TOP_BAR_ROOT_PATH,
     STATUS_BAR_ROOT_PATH,
 } from "./catalog";
@@ -50,6 +51,7 @@ import {bindTouchOrder} from "./touchOrder";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
 import {getSettingsOwnerApp} from "../setting/windowContext";
+import {isFrequentSlashEnabled, setFrequentSlashEnabled} from "../../protyle/hint/frequentSlashStorage";
 /// #if !MOBILE
 import {getSettingsWindowHost, isSettingsWindow} from "../setting/windowContext";
 import {getEditorToolbarCatalogSnapshot} from "../../protyle/toolbar/catalogSnapshot";
@@ -314,7 +316,7 @@ const renderEntryRows = (profile: Config.IEntryVisibilityProfile, prefix: string
 
 const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
                            nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
-                           parentEnabled: boolean, readOnly: boolean, sortable: boolean,
+                           parentEnabled: boolean, readOnly: boolean, sortable: boolean, frequentSlashEnabled: boolean,
                            getItemPath = (item: IEntryCatalogNode) => `${prefix}.${item.key}`) => `<section class="config-entry-visibility__column"
     data-entry-column data-entry-depth="${depth}">
     <div class="config-entry-visibility__column-title">
@@ -322,6 +324,12 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
         ${sortable ? renderOrderReset(prefix) : ""}
     </div>
     <div class="config-entry-visibility__column-list">
+        ${prefix === SLASH_MENU_ROOT_PATH ? `<label class="config-entry-visibility__row config-entry-visibility__row--toggleable">
+            <span class="config-entry-visibility__label">${escapeHtml(window.siyuan.languages.slashMenuFrequent)}</span>
+            <input class="b3-switch" type="checkbox" data-type="slash-menu-frequent"
+                aria-label="${escapeAttr(window.siyuan.languages.slashMenuFrequent)}"${frequentSlashEnabled ? " checked" : ""}>
+            <span class="config-entry-visibility__arrow-space"></span>
+        </label>` : ""}
         ${renderEntryRows(profile, prefix, nodes, depth, selectedPaths, parentEnabled, readOnly, sortable, getItemPath)}
     </div>
 </section>`;
@@ -458,7 +466,8 @@ const getDockEntrySelectedPaths = (key: string) => [`${DOCK_SECTION_KEY}.${key}`
 
 const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey: string,
                             selectedPaths: string[], readOnly: boolean, visiblePaths?: Set<string>,
-                            visibleSectionKeys?: Set<string>, dockOrderSnapshot = getDockEntryOrderSnapshot()) => {
+                            visibleSectionKeys?: Set<string>, dockOrderSnapshot = getDockEntryOrderSnapshot(),
+                            frequentSlashEnabled = isFrequentSlashEnabled()) => {
     const catalog = getVisibleEntryCatalog();
     const sections = visibleSectionKeys
         ? catalog.filter((item) => visibleSectionKeys.has(item.key))
@@ -496,11 +505,11 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
         const columnNodes = visiblePaths
             ? orderedNodes.filter((item) => item.type !== "separator" && visiblePaths.has(`${prefix}.${item.key}`))
             : orderedNodes;
-        if (columnNodes.length === 0) {
+        if (columnNodes.length === 0 && prefix !== SLASH_MENU_ROOT_PATH) {
             break;
         }
         columns.push(renderEntryColumn(profile, title, prefix, columnNodes, depth, columnSelectedPaths,
-            parentEnabled, readOnly, !visiblePaths && isEntryOrderSortable(prefix) && !readOnly));
+            parentEnabled, readOnly, !visiblePaths && isEntryOrderSortable(prefix) && !readOnly, frequentSlashEnabled));
         const selectedPath = columnSelectedPaths[depth];
         const selectedNode = selectedPath && columnNodes.find((item) => `${prefix}.${item.key}` === selectedPath);
         if (!selectedNode?.children?.length) {
@@ -540,7 +549,15 @@ const getEntrySearchResults = (query: string) => {
             }
         });
     };
-    getVisibleEntryCatalog().forEach((section) => visit(section, section.key, section.children, [section.label()]));
+    getVisibleEntryCatalog().forEach((section) => {
+        visit(section, section.key, section.children, [section.label()]);
+        const root = getDirectDisplayRoot(section);
+        if (root && `${section.key}.${root.key}` === SLASH_MENU_ROOT_PATH &&
+            window.siyuan.languages.slashMenuFrequent.toLowerCase().includes(query)) {
+            results.push({section, item: root, path: SLASH_MENU_ROOT_PATH,
+                labels: [section.label(), window.siyuan.languages.slashMenuFrequent]});
+        }
+    });
     return results;
 };
 
@@ -613,6 +630,8 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         : createProfile(ENTRY_PROFILE_SIMPLE);
     draft.orders ||= createEntryOrderSnapshot();
     const initialJSON = JSON.stringify(draft);
+    const initialFrequentSlashEnabled = isFrequentSlashEnabled();
+    let frequentSlashEnabled = initialFrequentSlashEnabled;
     const creating = !builtin && !existing;
     const view = createEntryView(root);
     const body = view.querySelector<HTMLElement>(".b3-dialog__body");
@@ -712,7 +731,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
                 </label>` : "";
         }
         browser.innerHTML = renderEntryColumns(draft, selectedSectionKey, selectedPaths, builtin,
-            filter?.visiblePaths, filter?.visibleSectionKeys, dockOrderSnapshot);
+            filter?.visiblePaths, filter?.visibleSectionKeys, dockOrderSnapshot, frequentSlashEnabled);
         previousQuery = query;
         const columnsContainer = browser.querySelector<HTMLElement>(".config-entry-visibility__columns");
         const columns = Array.from(browser.querySelectorAll<HTMLElement>("[data-entry-column]"));
@@ -738,7 +757,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         removeEntryView(root, view);
     };
     const closeEditor = () => {
-        if (JSON.stringify(draft) !== initialJSON) {
+        if (JSON.stringify(draft) !== initialJSON || !builtin && frequentSlashEnabled !== initialFrequentSlashEnabled) {
             confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.discardUnsavedChanges, leaveEditor);
             return;
         }
@@ -901,6 +920,13 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     });
     view.addEventListener("change", (event) => {
         const control = event.target as HTMLInputElement | HTMLSelectElement;
+        if (control.dataset.type === "slash-menu-frequent") {
+            frequentSlashEnabled = (control as HTMLInputElement).checked;
+            if (builtin) {
+                setFrequentSlashEnabled(frequentSlashEnabled);
+            }
+            return;
+        }
         if (control.dataset.type === "entry-section") {
             selectedSectionKey = control.value;
             selectedPaths = [];
@@ -976,6 +1002,9 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
                 config.profiles.push(draft);
             }
             saveEntryVisibility(config);
+            if (frequentSlashEnabled !== initialFrequentSlashEnabled) {
+                setFrequentSlashEnabled(frequentSlashEnabled);
+            }
             renderProfileCards(root);
             leaveEditor();
         }

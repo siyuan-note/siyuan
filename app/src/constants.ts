@@ -191,6 +191,8 @@ export abstract class Constants {
     public static readonly LOCAL_DAILYNOTEID = "local-dailynoteid"; // string
     public static readonly LOCAL_HISTORY = "local-history";
     public static readonly LOCAL_CODELANG = "local-codelang"; // string
+    public static readonly LOCAL_SLASH_FREQUENT_ENABLED = "local-slash-frequent-enabled";
+    public static readonly LOCAL_SLASH_USAGE = "local-slash-usage";
     public static readonly LOCAL_FONTSTYLES = "local-fontstyles";
     public static readonly LOCAL_EXPORTPDF = "local-exportpdf";
     public static readonly LOCAL_EXPORTWORD = "local-exportword";

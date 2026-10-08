@@ -85,7 +85,10 @@ import {MOBILE_TOOLBAR_NAMES} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
 import {isMobileLandscape} from "./orientation";
 import {restoreGutterBySelection} from "../../protyle/gutter/restore";
-import {mountLiteSlashMenu} from "./liteSlashMenu";
+import {getFrequentSlashButtons, mountLiteSlashMenu, prependFrequentSlashButtons} from "./liteSlashMenu";
+import {getPluginSlashEntryKey, SLASH_MENU_ROOT_PATH} from "../../config/entryVisibility/catalog";
+import {hintSlash} from "../../protyle/hint/extend";
+import {getFrequentSlashItems} from "../../protyle/hint/frequentSlashStorage";
 import {getTableCellRichContext} from "../../protyle/util/tableCellRichContext";
 import {insertEmptyBlock} from "../../block/util";
 import {getIconByType} from "../../editor/getIcon";
@@ -468,14 +471,14 @@ const updateKeyboardPanelHeight = () => {
     }
 };
 
-const getSlashItem = (value: string, icon: string, text: string, focus = "false") => {
+const getSlashItem = (entryKey: string, value: string, icon: string, text: string, focus = "false") => {
     let iconHTML;
     if (icon && icon.startsWith("icon")) {
         iconHTML = `<svg class="keyboard__slash-icon"><use xlink:href="#${icon}"></use></svg>`;
     } else {
         iconHTML = icon;
     }
-    return `<button class="keyboard__slash-item" data-focus="${focus}" data-value="${encodeURIComponent(value)}">
+    return `<button class="keyboard__slash-item"${entryKey ? ` data-slash-entry-key="${escapeHtml(entryKey)}"` : ""} data-focus="${focus}" data-value="${encodeURIComponent(value)}">
     ${iconHTML}
     <span class="keyboard__slash-text">${text}</span>
 </button>`;
@@ -740,8 +743,8 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     let pluginHTML = "";
     protyle.app.plugins.forEach((plugin) => {
         plugin.protyleSlash.forEach(slash => {
-            pluginHTML += getSlashItem(`plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
-                "", slash.html, "true");
+            pluginHTML += getSlashItem(slash.html === "separator" ? "" : getPluginSlashEntryKey(plugin.name, slash.id),
+                `plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`, "", slash.html, "true");
         });
     });
     if (pluginHTML) {
@@ -754,74 +757,78 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
         }
         const style = getBuiltinStyleCSS(id);
         const preview = getBuiltinInlineStylePreview(id);
-        builtinStyleHTML += getSlashItem(`style${Constants.ZWSP}${style}`,
+        builtinStyleHTML += getSlashItem(id + "Style", `style${Constants.ZWSP}${style}`,
             `<div style="color:${preview.color};background-color:${preview.backgroundColor};" class="keyboard__slash-icon">A</div>`,
             getBuiltinStyleLabel(id), "true");
     });
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
     utilElement.innerHTML = `<div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
-    ${getSlashItem(Constants.ZWSP, "iconMarkdown", window.siyuan.languages.template)}
-    ${getHostCapabilities().widgets ? getSlashItem(Constants.ZWSP + 1, "iconBoth", window.siyuan.languages.widget) : ""}
-    ${getSlashItem(Constants.ZWSP + 2, "iconImage", window.siyuan.languages.assets)}
-    ${getSlashItem("((", "iconRef", window.siyuan.languages.ref, "true")}
-    ${getSlashItem("{{", "iconSQL", window.siyuan.languages.blockEmbed, "true")}
-    ${isDisabledFeature("ai") ? "" : getSlashItem(Constants.ZWSP + 5, "iconSparkles", window.siyuan.languages.aiWriting)}
-    ${getSlashItem('<div data-type="NodeAttributeView" data-av-type="table"></div>', "iconDatabase", window.siyuan.languages.database, "true")}
-    ${getSlashItem(Constants.ZWSP + 6, "iconFile", window.siyuan.languages.newSubDocRef)}
+    ${getSlashItem("template", Constants.ZWSP, "iconMarkdown", window.siyuan.languages.template)}
+    ${getHostCapabilities().widgets ? getSlashItem("widget", Constants.ZWSP + 1, "iconBoth", window.siyuan.languages.widget) : ""}
+    ${getSlashItem("assets", Constants.ZWSP + 2, "iconImage", window.siyuan.languages.assets)}
+    ${getSlashItem("ref", "((", "iconRef", window.siyuan.languages.ref, "true")}
+    ${getSlashItem("blockEmbed", "{{", "iconSQL", window.siyuan.languages.blockEmbed, "true")}
+    ${isDisabledFeature("ai") ? "" : getSlashItem("aiWriting", Constants.ZWSP + 5, "iconSparkles", window.siyuan.languages.aiWriting)}
+    ${getSlashItem("database", '<div data-type="NodeAttributeView" data-av-type="table"></div>', "iconDatabase", window.siyuan.languages.database, "true")}
+    ${getSlashItem("newSubDocRef", Constants.ZWSP + 6, "iconFile", window.siyuan.languages.newSubDocRef)}
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
-    ${isInAndroid() ? getSlashItem(Constants.ZWSP + 3, "iconImage", window.siyuan.languages.insertImage + '<input class="b3-form__upload" type="file" multiple="multiple" accept="image/*,application/x-siyuan-image-picker"/>', "true") : ""}
-    ${isInAndroid() ? getSlashItem(Constants.ZWSP + 3, "iconCamera", window.siyuan.languages.insertPhoto + '<input class="b3-form__upload" capture="user" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + "/>", "true") : ""}
-    ${getSlashItem(Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file" multiple="multiple"' + (protyle.options.upload.accept ? (' accept="' + protyle.options.upload.accept + '"') : "") + "/>", "true")}
-    ${getHostCapabilities().remoteKernel ? "" : getSlashItem('<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals allow-popups allow-storage-access-by-user-activation" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconGlobe", window.siyuan.languages.insertIframeURL, "true")}
-    ${getSlashItem("![]()", "iconImage", window.siyuan.languages.insertImgURL, "true")}
-    ${getSlashItem('<video controls="controls" src=""></video>', "iconVideo", window.siyuan.languages.insertVideoURL, "true")}
-    ${getSlashItem('<audio controls="controls" src=""></audio>', "iconRecord", window.siyuan.languages.insertAudioURL, "true")}
-    ${getSlashItem("emoji", "iconEmoji", window.siyuan.languages.emoji, "true")}
+    ${isInAndroid() ? getSlashItem("insertAsset", Constants.ZWSP + 3, "iconImage", window.siyuan.languages.insertImage + '<input class="b3-form__upload" type="file" multiple="multiple" accept="image/*,application/x-siyuan-image-picker"/>', "true") : ""}
+    ${isInAndroid() ? getSlashItem("insertAsset", Constants.ZWSP + 3, "iconCamera", window.siyuan.languages.insertPhoto + '<input class="b3-form__upload" capture="user" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + "/>", "true") : ""}
+    ${getSlashItem("insertAsset", Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file" multiple="multiple"' + (protyle.options.upload.accept ? (' accept="' + protyle.options.upload.accept + '"') : "") + "/>", "true")}
+    ${getHostCapabilities().remoteKernel ? "" : getSlashItem("insertIframeURL", '<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals allow-popups allow-storage-access-by-user-activation" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconGlobe", window.siyuan.languages.insertIframeURL, "true")}
+    ${getSlashItem("insertImgURL", "![]()", "iconImage", window.siyuan.languages.insertImgURL, "true")}
+    ${getSlashItem("insertVideoURL", '<video controls="controls" src=""></video>', "iconVideo", window.siyuan.languages.insertVideoURL, "true")}
+    ${getSlashItem("insertAudioURL", '<audio controls="controls" src=""></audio>', "iconRecord", window.siyuan.languages.insertAudioURL, "true")}
+    ${getSlashItem("emoji", "emoji", "iconEmoji", window.siyuan.languages.emoji, "true")}
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
-    ${getSlashItem("# " + Lute.Caret, "iconH1", window.siyuan.languages.heading1, "true")}
-    ${getSlashItem("## " + Lute.Caret, "iconH2", window.siyuan.languages.heading2, "true")}
-    ${getSlashItem("### " + Lute.Caret, "iconH3", window.siyuan.languages.heading3, "true")}
-    ${getSlashItem("#### " + Lute.Caret, "iconH4", window.siyuan.languages.heading4, "true")}
-    ${getSlashItem("##### " + Lute.Caret, "iconH5", window.siyuan.languages.heading5, "true")}
-    ${getSlashItem("###### " + Lute.Caret, "iconH6", window.siyuan.languages.heading6, "true")}
-    ${getSlashItem("- " + Lute.Caret, "iconList", window.siyuan.languages.list, "true")}
-    ${getSlashItem("1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
-    ${getSlashItem("- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
-    ${getSlashItem("> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
-    ${getSlashItem(getSuperBlockCommand("col"), "iconSuper", window.siyuan.languages.horizontalSuperBlock, "true")}
-    ${getSlashItem(getSuperBlockCommand("row"), "iconSuper", window.siyuan.languages.verticalSuperBlock, "true")}
-    ${getSlashItem(`::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`, "iconTabs", window.siyuan.languages.tabs, "true")}
-    ${getSlashItem(`- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
-    ${getSlashItem(`> [!NOTE]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">✏️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span>`, "true")}
-    ${getSlashItem(`> [!TIP]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">💡</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-tip)">Tip</span>`, "true")}
-    ${getSlashItem(`> [!IMPORTANT]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">❗</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-important)">Important</span>`, "true")}
-    ${getSlashItem(`> [!WARNING]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">⚠️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-warning)">Warning</span>`, "true")}
-    ${getSlashItem(`> [!CAUTION]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">🚨</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-caution)">Caution</span>`, "true")}
-    ${getSlashItem("```", "iconCode", window.siyuan.languages.code, "true")}
-    ${getSlashItem(`| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, "iconTable", window.siyuan.languages.table, "true")}
-    ${getSlashItem("---", "iconLine", window.siyuan.languages.line, "true")}
-    ${getSlashItem("$$", "iconMath", window.siyuan.languages.math)}
-    ${getSlashItem("<div>", "iconHTML5", "HTML")}
+    ${getSlashItem("heading1", "# " + Lute.Caret, "iconH1", window.siyuan.languages.heading1, "true")}
+    ${getSlashItem("heading2", "## " + Lute.Caret, "iconH2", window.siyuan.languages.heading2, "true")}
+    ${getSlashItem("heading3", "### " + Lute.Caret, "iconH3", window.siyuan.languages.heading3, "true")}
+    ${getSlashItem("heading4", "#### " + Lute.Caret, "iconH4", window.siyuan.languages.heading4, "true")}
+    ${getSlashItem("heading5", "##### " + Lute.Caret, "iconH5", window.siyuan.languages.heading5, "true")}
+    ${getSlashItem("heading6", "###### " + Lute.Caret, "iconH6", window.siyuan.languages.heading6, "true")}
+    ${getSlashItem("list", "- " + Lute.Caret, "iconList", window.siyuan.languages.list, "true")}
+    ${getSlashItem("orderedList", "1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
+    ${getSlashItem("check", "- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
+    ${getSlashItem("quote", "> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
+    ${getSlashItem("horizontalSuperBlock", getSuperBlockCommand("col"), "iconSuper", window.siyuan.languages.horizontalSuperBlock, "true")}
+    ${getSlashItem("verticalSuperBlock", getSuperBlockCommand("row"), "iconSuper", window.siyuan.languages.verticalSuperBlock, "true")}
+    ${getSlashItem("tabs", `::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`, "iconTabs", window.siyuan.languages.tabs, "true")}
+    ${getSlashItem("mindmap", `- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
+    ${getSlashItem("calloutNote", `> [!NOTE]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">✏️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span>`, "true")}
+    ${getSlashItem("calloutTip", `> [!TIP]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">💡</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-tip)">Tip</span>`, "true")}
+    ${getSlashItem("calloutImportant", `> [!IMPORTANT]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">❗</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-important)">Important</span>`, "true")}
+    ${getSlashItem("calloutWarning", `> [!WARNING]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">⚠️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-warning)">Warning</span>`, "true")}
+    ${getSlashItem("calloutCaution", `> [!CAUTION]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">🚨</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-caution)">Caution</span>`, "true")}
+    ${getSlashItem("code", "```", "iconCode", window.siyuan.languages.code, "true")}
+    ${getSlashItem("table", `| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, "iconTable", window.siyuan.languages.table, "true")}
+    ${getSlashItem("line", "---", "iconLine", window.siyuan.languages.line, "true")}
+    ${getSlashItem("math", "$$", "iconMath", window.siyuan.languages.math)}
+    ${getSlashItem("html", "<div>", "iconHTML5", "HTML")}
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
-    ${getSlashItem("```abc\n```", "", window.siyuan.languages.staff, "true")}
-    ${getSlashItem("```echarts\n```", "", window.siyuan.languages.chart, "true")}
-    ${getSlashItem("```flowchart\n```", "", "Flow Chart", "true")}
-    ${getSlashItem("```graphviz\n```", "", "Graph", "true")}
-    ${getSlashItem("```mermaid\n```", "", "Mermaid", "true")}
-    ${getSlashItem("```plantuml\n```", "", "UML", "true")}
+    ${getSlashItem("staff", "```abc\n```", "", window.siyuan.languages.staff, "true")}
+    ${getSlashItem("chart", "```echarts\n```", "", window.siyuan.languages.chart, "true")}
+    ${getSlashItem("flowChart", "```flowchart\n```", "", "Flow Chart", "true")}
+    ${getSlashItem("graph", "```graphviz\n```", "", "Graph", "true")}
+    ${getSlashItem("mermaid", "```mermaid\n```", "", "Mermaid", "true")}
+    ${getSlashItem("UML", "```plantuml\n```", "", "UML", "true")}
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
     ${builtinStyleHTML}
-    ${getSlashItem(`style${Constants.ZWSP}`, '<div class="keyboard__slash-icon">A</div>', window.siyuan.languages.clearFontStyle, "true")}
+    ${getSlashItem("clearFontStyle", `style${Constants.ZWSP}`, '<div class="keyboard__slash-icon">A</div>', window.siyuan.languages.clearFontStyle, "true")}
 </div>${pluginHTML}`;
+    const eligibleItems = hintSlash("", protyle, false, {visibilityRoot: SLASH_MENU_ROOT_PATH});
+    const buttons = getFrequentSlashButtons(utilElement, eligibleItems
+        .filter(item => item.html !== "separator").map(item => item.entryKey));
+    prependFrequentSlashButtons(utilElement, getFrequentSlashItems(buttons, button => button.dataset.slashEntryKey));
     protyle.hint.bindUploadEvent(protyle, utilElement);
 };
 
@@ -1675,7 +1682,7 @@ export const initKeyboardToolbar = () => {
                 }
                 hideKeyboardToolbarUtil();
             }
-            protyle.hint.fillCommand(dataValue, protyle, false);   // 点击后 range 会改变
+            protyle.hint.fillCommand(dataValue, protyle, false, slashBtnElement.dataset.slashEntryKey);   // 点击后 range 会改变
             event.preventDefault();
             event.stopPropagation();
             if (dataValue === "((" || dataValue === "{{") {

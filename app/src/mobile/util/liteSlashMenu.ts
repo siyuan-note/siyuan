@@ -1,23 +1,61 @@
+import type {TSlashMenuItem} from "../../protyle/hint/slashMenu";
+
+export const getFrequentSlashButtons = (container: HTMLElement, entryKeys: string[]) => {
+    const buttons = Array.from(container.querySelectorAll<HTMLButtonElement>("button[data-slash-entry-key]"));
+    return entryKeys.map(entryKey => {
+        const matches = buttons.filter(button => button.dataset.slashEntryKey === entryKey);
+        // 安卓图片和拍照入口共用附件命令，常用区保留完整文件选择入口。
+        return matches.find(button => !button.querySelector('input[capture], input[accept*="x-siyuan-image-picker"]')) || matches[0];
+    }).filter((button, index, items) => button && items.indexOf(button) === index);
+};
+
+export const prependFrequentSlashButtons = (container: HTMLElement, buttons: HTMLButtonElement[]) => {
+    if (buttons.length === 0) {
+        return;
+    }
+    const group = document.createElement("div");
+    group.className = "keyboard__slash-block";
+    buttons.forEach(button => group.appendChild(button.cloneNode(true)));
+    const separator = document.createElement("div");
+    separator.className = "b3-menu__separator";
+    separator.setAttribute("role", "separator");
+    container.prepend(group, separator);
+};
+
 export const getLiteSlashMenuHTML = (items: IHintData[]) => {
     const menu = document.createElement("div");
+    const hasFrequentItems = items.some(item => (item as TSlashMenuItem).entryKey === "__frequent_separator__");
     let group: HTMLElement;
     items.forEach(item => {
+        const entryKey = (item as TSlashMenuItem).entryKey;
         if (item.html === "separator") {
+            if (entryKey === "__frequent_separator__") {
+                const separator = document.createElement("div");
+                separator.className = "b3-menu__separator";
+                separator.setAttribute("role", "separator");
+                menu.appendChild(separator);
+            }
             group = undefined;
             return;
         }
         if (!group) {
-            const space = document.createElement("div");
-            space.className = "keyboard__slash-title";
+            if (menu.childElementCount > 0 || !hasFrequentItems) {
+                const space = document.createElement("div");
+                space.className = "keyboard__slash-title";
+                menu.appendChild(space);
+            }
             group = document.createElement("div");
             group.className = "keyboard__slash-block";
-            menu.append(space, group);
+            menu.appendChild(group);
         }
         const button = document.createElement("button");
         button.className = "keyboard__slash-item";
         button.dataset.id = item.id || "";
         button.dataset.value = encodeURIComponent(item.value);
         button.dataset.focus = item.focus === false ? "false" : "true";
+        if (typeof entryKey === "string" && entryKey) {
+            button.dataset.slashEntryKey = entryKey;
+        }
         const content = document.createElement("div");
         content.innerHTML = item.html;
         if (content.querySelector('[data-type="agent-skill"]')) {

@@ -59,3 +59,19 @@ test("reset waits for graph writes and rejects failed graph saves", async () => 
         await assert.rejects(flush);
     }
 });
+
+test("slash usage failures do not affect preference saves", async () => {
+    for (const result of [Promise.resolve({code: -1}), Promise.reject(new Error("offline"))]) {
+        const before = settingSaveFailures();
+        await trackSettingRequest("/api/storage/setLocalStorageVal", result, true).catch(() => {});
+        await flushSettingSaves(before);
+        assert.equal(settingSaveFailures(), before);
+    }
+    for (const path of ["/api/storage/setLocalStorage", "/api/storage/setLocalStorageVal", "/api/storage/removeLocalStorageVal", "/api/storage/removeLocalStorageVals"]) {
+        const before = settingSaveFailures();
+        await trackSettingRequest(path, Promise.resolve({code: -1}));
+        await assert.rejects(flushSettingSaves(before));
+    }
+    trackSettingRequest("/api/storage/setLocalStorageOther", new Promise(() => {}));
+    await flushSettingSaves();
+});

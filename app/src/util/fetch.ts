@@ -78,7 +78,7 @@ export const fetchPost = ((
                     return response.text();
                 }
         }
-    }), signal, timeout))).then((response: IWebSocketData) => {
+    }), signal, timeout), url === "/api/storage/setLocalStorageVal" && data?.key === Constants.LOCAL_SLASH_USAGE)).then((response: IWebSocketData) => {
         if (failCallback && url === "/api/file/getFile" && isGetFile202) {
             failCallback(response);
             return;
@@ -150,7 +150,7 @@ export const fetchSyncPost = (async (url: string, data?: any, headers?: Record<s
             processMessage(res2);
         }
         return res2;
-    }));
+    }), url === "/api/storage/setLocalStorageVal" && data?.key === Constants.LOCAL_SLASH_USAGE);
 }) as FetchSyncPost<IWebSocketData>;
 
 export const fetchGet = ((url: string, cb: (response: IWebSocketData | IObject | string) => void) => {

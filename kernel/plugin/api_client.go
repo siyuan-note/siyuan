@@ -41,7 +41,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// injectClient adds siyuan.server to the goja context.
+// injectClient 向沙箱安装并冻结客户端 API。
 func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -51,73 +51,271 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 	client := rt.NewObject()
 
+	bindClientFetch(p, rt, client)
+
+	bindClientSocket(p, rt, client)
+
+	bindClientEvent(p, rt, client)
+
+	lo.Must0(ObjectFreeze(rt, client))
+
+	lo.Must0(siyuan.Set("client", client))
+	return
+}
+
+// fetchTimeoutOf 将 siyuan.client.fetch 的 init.timeout（毫秒）转换为请求时限，返回 0 表示不限时。
+func fetchTimeoutOf(value goja.Value) (timeout time.Duration, err error) {
+	// 只接受数值类型：不转换字符串，也不调用对象的 valueOf 等脚本代码。
+	milliseconds := math.NaN()
+	if goja.IsNumber(value) {
+		milliseconds = value.ToFloat()
+	}
+	if math.IsNaN(milliseconds) || math.IsInf(milliseconds, 0) || milliseconds < 0 {
+		err = fmt.Errorf("timeout must be a non-negative finite number")
+		return
+	}
+
+	// 不足 1 纳秒的正数向上取整，避免变成表示不限时的 0；超出 time.Duration 范围时取最大值。
+	nanoseconds := math.Ceil(milliseconds * float64(time.Millisecond))
+	if nanoseconds >= math.MaxInt64 {
+		timeout = math.MaxInt64
+		return
+	}
+	timeout = time.Duration(nanoseconds)
+	return
+}
+
+// fetchStreamChunkSize 是 siyuan.client.fetch 流式读取响应体时每次向底层连接请求的字节数。
+const fetchStreamChunkSize = 32 * 1024
+
+// fetchResponseBody 管理一次 fetch 响应体的消费：response.body 的 ReadableStream 与 text()/json()/buffer()/
+// arrayBuffer()/bytes()/blob() 共享同一个只能读一次的底层字节源（resp.Body），哪个先开始读就"认领"它，
+// 其余路径都会得到"响应体已经被读取"的错误——与真实 fetch 的 bodyUsed 语义一致，而不是像本沙箱其它数据对象
+// 那样允许反复调用：响应体现在是真正流式到达、边读边释放的，不会先整体缓存一份供多次读取。claimed 只在
+// 事件循环线程上读写，不需要加锁。
+type fetchResponseBody struct {
+	resp    *req.Response
+	cancel  context.CancelFunc
+	claimed bool
+}
+
+// claim 第一次调用时把 claimed 置真并返回 true；此后调用返回 false。
+func (b *fetchResponseBody) claim() bool {
+	if b.claimed {
+		return false
+	}
+	b.claimed = true
+	return true
+}
+
+// finish 关闭底层连接并释放请求的 ctx；body 读完、出错或被取消后都应该调用一次。
+func (b *fetchResponseBody) finish() {
+	b.resp.Body.Close()
+	b.cancel()
+}
+
+// setFetchResponseBodyMethods 给 fetch 的响应对象设置 body 属性与 text()/json()/buffer()/arrayBuffer()/
+// bytes()/blob() 方法。body 是一个按需、分块读取 resp.Body 的 ReadableStream<Uint8Array>；六个数据方法里
+// 最先被调用的一个会把响应体整体读入内存后再转换成对应形式，和 body 的流式读取互斥，谁先开始读谁赢。
+func setFetchResponseBodyMethods(p *KernelPlugin, rt *goja.Runtime, response *goja.Object, body *fetchResponseBody) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("setFetchResponseBodyMethods: %v", r)
+		}
+	}()
+
+	lo.Must0(response.Set("body", newFetchResponseBodyStream(p, rt, body)))
+
+	contentType := body.resp.Header.Get("Content-Type")
+	for _, name := range []string{"text", "json", "buffer", "arrayBuffer", "bytes", "blob"} {
+		methodName := name
+		lo.Must0(response.Set(methodName, rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+			promise, resolve, reject := rt.NewPromise()
+			if !body.claim() {
+				if rejectErr := reject(rt.NewTypeError("body stream already read")); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.fetch %s() reject: %v", p.Name, methodName, rejectErr)
+				}
+				return rt.ToValue(promise)
+			}
+
+			go func() {
+				data, readErr := io.ReadAll(body.resp.Body)
+				body.finish()
+
+				p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+					if readErr != nil {
+						if rejectErr := reject(rt.NewGoError(fmt.Errorf("failed to read response body: %w", readErr))); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.fetch %s() reject: %v", p.Name, methodName, rejectErr)
+						}
+						return
+					}
+
+					// 复用既有数据对象的六个方法实现，避免在这里重复一遍 text/json/buffer/arrayBuffer/bytes/blob
+					// 各自的转换逻辑；data 已经是这次响应体专属的切片，不会被其它调用方共享或改写。
+					inner, innerErr := NewDataObject(p, rt, data, contentType)
+					if innerErr != nil {
+						if rejectErr := reject(rt.NewGoError(innerErr)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.fetch %s() reject: %v", p.Name, methodName, rejectErr)
+						}
+						return
+					}
+					innerMethod, ok := goja.AssertFunction(inner.Get(methodName))
+					if !ok {
+						if rejectErr := reject(rt.NewTypeError("internal error: %s is not callable", methodName)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.fetch %s() reject: %v", p.Name, methodName, rejectErr)
+						}
+						return
+					}
+					innerResult, callErr := innerMethod(inner)
+					if callErr != nil {
+						if rejectErr := reject(rt.NewGoError(callErr)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.fetch %s() reject: %v", p.Name, methodName, rejectErr)
+						}
+						return
+					}
+					forwardPromise(rt, innerResult, resolve, reject)
+					return
+				}, nil)
+			}()
+
+			return rt.ToValue(promise)
+		})))
+	}
+	return
+}
+
+// newFetchResponseBodyStream 构造 response.body：按 fetchStreamChunkSize 分块、按需从 resp.Body 读取的
+// ReadableStream<Uint8Array>。第一次拉取数据时才会去抢 body 的"认领权"，抢输了（某个数据方法先拿到）就把
+// controller 错误化；拉到 EOF 时关闭底层连接并 close() controller；读取出错时同样关闭连接并 error()。
+// cancel() 时直接关闭底层连接，不再继续读取。highWaterMark 必须是 0：非 0 时 desiredSize>0 会让流一构造出来
+// 就主动 pull 一次，不等任何 reader 读取就先把响应体读掉，和 text()/blob() 等方法抢着认领 body；0 时只有
+// reader 真正调用 read() 之后才会触发第一次 pull。
+func newFetchResponseBodyStream(p *KernelPlugin, rt *goja.Runtime, body *fetchResponseBody) *goja.Object {
+	started := false
+	finished := false // 已经读到过 EOF/出错/被取消：这几种情况都不该再发起下一次网络读取或再 close()/error() 一次
+	return p.streamsHost.NewReadableStream(nil, func(controller goja.Value) goja.Value {
+		if finished {
+			return nil
+		}
+		if !started {
+			if !body.claim() {
+				finished = true
+				callControllerMethod(rt, controller, "error", rt.NewTypeError("body stream already read"))
+				return nil
+			}
+			started = true
+		}
+
+		// pull 算法要返回一个在这一块真正读完前都不落定的 Promise：readableController 用它的落定状态判断
+		// "这次拉取有没有结束"，如果提前返回已经落定的值（nil 会被当成 undefined，立即算结束），背压机制会
+		// 认为可以立刻再拉一次，导致还没读完上一块就对同一个 resp.Body 并发发起下一次 Read，彼此踩踏。
+		promise, resolve, _ := rt.NewPromise()
+		go func() {
+			buf := make([]byte, fetchStreamChunkSize)
+			n, readErr := body.resp.Body.Read(buf)
+			p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+				defer func() {
+					if resolveErr := resolve(goja.Undefined()); resolveErr != nil {
+						logging.LogErrorf("[plugin:%s] siyuan.client.fetch response.body pull resolve: %v", p.Name, resolveErr)
+					}
+				}()
+				if finished {
+					return
+				}
+				if n > 0 {
+					callControllerMethod(rt, controller, "enqueue", uint8ArrayOf(p, rt, buf[:n]))
+				}
+				switch {
+				case readErr == io.EOF:
+					finished = true
+					body.finish()
+					callControllerMethod(rt, controller, "close")
+				case readErr != nil:
+					finished = true
+					body.finish()
+					callControllerMethod(rt, controller, "error", rt.NewGoError(readErr))
+				}
+				return
+			}, nil)
+		}()
+		return rt.ToValue(promise)
+	}, func(reason goja.Value) goja.Value {
+		finished = true
+		body.finish()
+		return nil
+	}, 0, nil)
+}
+
+// uint8ArrayOf 把 data 包装为 Uint8Array：data 已经是不会再被其它调用方共享或改写的独立切片，直接作为
+// ArrayBuffer 的底层存储，不需要再复制一次。
+func uint8ArrayOf(p *KernelPlugin, rt *goja.Runtime, data []byte) goja.Value {
+	value, err := p.formDataHost.NewUint8Array(rt, data)
+	if err != nil {
+		panic(err)
+	}
+	return value
+}
+
+// callControllerMethod 调用 ReadableStream controller 上的方法（enqueue/close/error），用于 Go 驱动的
+// pull/cancel 算法把结果交回 controller；方法不存在或调用失败只记录日志，不中断调用方。
+func callControllerMethod(rt *goja.Runtime, controller goja.Value, method string, args ...goja.Value) {
+	obj := controller.ToObject(rt)
+	fn, ok := goja.AssertFunction(obj.Get(method))
+	if !ok {
+		logging.LogErrorf("controller.%s is not a function", method)
+		return
+	}
+	if _, err := fn(obj, args...); err != nil {
+		logging.LogErrorf("controller.%s(): %v", method, err)
+	}
+}
+
+// forwardPromise 把 value（预期是一个 Promise）的落定结果转发给 resolve/reject；value 不是 Promise 时直接
+// 用它的值调用 resolve。
+func forwardPromise(rt *goja.Runtime, value goja.Value, resolve, reject func(any) error) {
+	promise, ok := value.Export().(*goja.Promise)
+	if !ok {
+		if err := resolve(value); err != nil {
+			logging.LogErrorf("forwardPromise resolve: %v", err)
+		}
+		return
+	}
+
+	object := rt.ToValue(promise).ToObject(rt)
+	then, ok := goja.AssertFunction(object.Get("then"))
+	if !ok {
+		if err := resolve(value); err != nil {
+			logging.LogErrorf("forwardPromise resolve: %v", err)
+		}
+		return
+	}
+	if _, err := then(object,
+		rt.ToValue(func(call goja.FunctionCall) goja.Value {
+			if err := resolve(call.Argument(0)); err != nil {
+				logging.LogErrorf("forwardPromise resolve: %v", err)
+			}
+			return goja.Undefined()
+		}),
+		rt.ToValue(func(call goja.FunctionCall) goja.Value {
+			if err := reject(call.Argument(0)); err != nil {
+				logging.LogErrorf("forwardPromise reject: %v", err)
+			}
+			return goja.Undefined()
+		}),
+	); err != nil {
+		panic(err)
+	}
+}
+
+// bindClientFetch 安装对应的沙箱方法，异步操作仍通过插件工作线程执行。
+func bindClientFetch(p *KernelPlugin, rt *goja.Runtime, client *goja.Object) {
 	lo.Must0(client.Set("fetch", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
-		var argErr error
-		var path string
-		method := "GET"
-		headers := map[string]string{}
-		var bodyString *string
-		var bodyBytes *[]byte
-		var bodyContentType string     // 请求体自带的媒体类型（如 FormData 的 multipart boundary），调用方未显式设置 Content-Type 时使用
-		timeout := fetchDefaultTimeout // 只约束到收到响应头为止，不覆盖读取响应体的过程，与浏览器 fetch 的 timeout/signal 分离语义一致
-		var signal *abort.SignalState
-
-		if goja.IsString(call.Argument(0)) {
-			path = call.Argument(0).String()
-		} else {
-			argErr = fmt.Errorf("path required")
-		}
-		if argErr == nil && !strings.HasPrefix(path, "/") {
-			argErr = fmt.Errorf("path must start with /")
-		}
-		if argErr == nil {
-			if init := call.Argument(1); isJsValueNotNull(init) {
-				if initObj := init.ToObject(rt); initObj != nil {
-					if m := initObj.Get("method"); goja.IsString(m) {
-						method = m.String()
-					}
-
-					if h := initObj.Get("headers"); isJsValueNotNull(h) {
-						if exportErr := rt.ExportTo(h, &headers); exportErr != nil {
-							argErr = fmt.Errorf("failed to export headers: %w", exportErr)
-						}
-					}
-
-					if argErr == nil {
-						if b := initObj.Get("body"); isJsValueNotNull(b) {
-							if goja.IsString(b) {
-								bodyString = new(b.String())
-							} else if formData, ok := formdata.StateOf(b); ok {
-								// 在调用时完成编码，之后对 FormData 的修改不影响本次请求（与 fetch 规范一致）。
-								body, contentType := formData.EncodeMultipart()
-								bodyBytes = &body
-								bodyContentType = contentType
-							} else {
-								body := b.Export()
-								if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
-									// ArrayBuffer.Bytes() 指向 JS 引擎内存，异步发送前需复制，避免脚本后续修改与发送并发读写。
-									bodyBytes = new(bytes.Clone(arrayBuffer.Bytes()))
-								}
-							}
-						}
-					}
-
-					if argErr == nil {
-						if t := initObj.Get("timeout"); isJsValueNotNull(t) {
-							timeout, argErr = fetchTimeoutOf(t)
-						}
-					}
-
-					if argErr == nil {
-						if s := initObj.Get("signal"); isJsValueNotNull(s) {
-							signal, argErr = abort.SignalOf(rt, s, "signal")
-						}
-					}
-				}
-			}
-		}
+		request, argErr := parseClientFetchRequest(call, rt)
+		path, method, headers := request.path, request.method, request.headers
+		bodyString, bodyBytes, bodyContentType := request.bodyString, request.bodyBytes, request.bodyContentType
+		timeout, signal := request.timeout, request.signal
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
 			if argErr != nil {
@@ -273,7 +471,10 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 		return rt.ToValue(promise)
 	})))
+}
 
+// bindClientSocket 安装对应的沙箱方法，异步操作仍通过插件工作线程执行。
+func bindClientSocket(p *KernelPlugin, rt *goja.Runtime, client *goja.Object) {
 	lo.Must0(client.Set("socket", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
@@ -700,7 +901,10 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 		return rt.ToValue(promise)
 	})))
+}
 
+// bindClientEvent 安装对应的沙箱方法，异步操作仍通过插件工作线程执行。
+func bindClientEvent(p *KernelPlugin, rt *goja.Runtime, client *goja.Object) {
 	lo.Must0(client.Set("event", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
@@ -856,253 +1060,86 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 		return rt.ToValue(promise)
 	})))
-
-	lo.Must0(ObjectFreeze(rt, client))
-
-	lo.Must0(siyuan.Set("client", client))
-	return
 }
 
-// fetchTimeoutOf 将 siyuan.client.fetch 的 init.timeout（毫秒）转换为请求时限，返回 0 表示不限时。
-func fetchTimeoutOf(value goja.Value) (timeout time.Duration, err error) {
-	// 只接受数值类型：不转换字符串，也不调用对象的 valueOf 等脚本代码。
-	milliseconds := math.NaN()
-	if goja.IsNumber(value) {
-		milliseconds = value.ToFloat()
+type clientFetchRequest struct {
+	path            string
+	method          string
+	headers         map[string]string
+	bodyString      *string
+	bodyBytes       *[]byte
+	bodyContentType string
+	timeout         time.Duration
+	signal          *abort.SignalState
+}
+
+// parseClientFetchRequest 在调用线程验证并复制请求参数，再交给异步网络任务。
+func parseClientFetchRequest(call goja.FunctionCall, rt *goja.Runtime) (clientFetchRequest, error) {
+	var argErr error
+	var path string
+	method := "GET"
+	headers := map[string]string{}
+	var bodyString *string
+	var bodyBytes *[]byte
+	var bodyContentType string     // 请求体自带的媒体类型（如 FormData 的 multipart boundary），调用方未显式设置 Content-Type 时使用
+	timeout := fetchDefaultTimeout // 只约束到收到响应头为止，不覆盖读取响应体的过程，与浏览器 fetch 的 timeout/signal 分离语义一致
+	var signal *abort.SignalState
+
+	if goja.IsString(call.Argument(0)) {
+		path = call.Argument(0).String()
+	} else {
+		argErr = fmt.Errorf("path required")
 	}
-	if math.IsNaN(milliseconds) || math.IsInf(milliseconds, 0) || milliseconds < 0 {
-		err = fmt.Errorf("timeout must be a non-negative finite number")
-		return
+	if argErr == nil && !strings.HasPrefix(path, "/") {
+		argErr = fmt.Errorf("path must start with /")
 	}
-
-	// 不足 1 纳秒的正数向上取整，避免变成表示不限时的 0；超出 time.Duration 范围时取最大值。
-	nanoseconds := math.Ceil(milliseconds * float64(time.Millisecond))
-	if nanoseconds >= math.MaxInt64 {
-		timeout = math.MaxInt64
-		return
-	}
-	timeout = time.Duration(nanoseconds)
-	return
-}
-
-// fetchStreamChunkSize 是 siyuan.client.fetch 流式读取响应体时每次向底层连接请求的字节数。
-const fetchStreamChunkSize = 32 * 1024
-
-// fetchResponseBody 管理一次 fetch 响应体的消费：response.body 的 ReadableStream 与 text()/json()/buffer()/
-// arrayBuffer()/bytes()/blob() 共享同一个只能读一次的底层字节源（resp.Body），哪个先开始读就"认领"它，
-// 其余路径都会得到"响应体已经被读取"的错误——与真实 fetch 的 bodyUsed 语义一致，而不是像本沙箱其它数据对象
-// 那样允许反复调用：响应体现在是真正流式到达、边读边释放的，不会先整体缓存一份供多次读取。claimed 只在
-// 事件循环线程上读写，不需要加锁。
-type fetchResponseBody struct {
-	resp    *req.Response
-	cancel  context.CancelFunc
-	claimed bool
-}
-
-// claim 第一次调用时把 claimed 置真并返回 true；此后调用返回 false。
-func (b *fetchResponseBody) claim() bool {
-	if b.claimed {
-		return false
-	}
-	b.claimed = true
-	return true
-}
-
-// finish 关闭底层连接并释放请求的 ctx；body 读完、出错或被取消后都应该调用一次。
-func (b *fetchResponseBody) finish() {
-	b.resp.Body.Close()
-	b.cancel()
-}
-
-// setFetchResponseBodyMethods 给 fetch 的响应对象设置 body 属性与 text()/json()/buffer()/arrayBuffer()/
-// bytes()/blob() 方法。body 是一个按需、分块读取 resp.Body 的 ReadableStream<Uint8Array>；六个数据方法里
-// 最先被调用的一个会把响应体整体读入内存后再转换成对应形式，和 body 的流式读取互斥，谁先开始读谁赢。
-func setFetchResponseBodyMethods(p *KernelPlugin, rt *goja.Runtime, response *goja.Object, body *fetchResponseBody) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("setFetchResponseBodyMethods: %v", r)
-		}
-	}()
-
-	lo.Must0(response.Set("body", newFetchResponseBodyStream(p, rt, body)))
-
-	contentType := body.resp.Header.Get("Content-Type")
-	for _, name := range []string{"text", "json", "buffer", "arrayBuffer", "bytes", "blob"} {
-		methodName := name
-		lo.Must0(response.Set(methodName, rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
-			promise, resolve, reject := rt.NewPromise()
-			if !body.claim() {
-				if rejectErr := reject(rt.NewTypeError("body stream already read")); rejectErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.client.fetch %s() reject: %v", p.Name, methodName, rejectErr)
+	if argErr == nil {
+		if init := call.Argument(1); isJsValueNotNull(init) {
+			if initObj := init.ToObject(rt); initObj != nil {
+				if m := initObj.Get("method"); goja.IsString(m) {
+					method = m.String()
 				}
-				return rt.ToValue(promise)
-			}
 
-			go func() {
-				data, readErr := io.ReadAll(body.resp.Body)
-				body.finish()
-
-				p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-					if readErr != nil {
-						if rejectErr := reject(rt.NewGoError(fmt.Errorf("failed to read response body: %w", readErr))); rejectErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.client.fetch %s() reject: %v", p.Name, methodName, rejectErr)
-						}
-						return
+				if h := initObj.Get("headers"); isJsValueNotNull(h) {
+					if exportErr := rt.ExportTo(h, &headers); exportErr != nil {
+						argErr = fmt.Errorf("failed to export headers: %w", exportErr)
 					}
-
-					// 复用既有数据对象的六个方法实现，避免在这里重复一遍 text/json/buffer/arrayBuffer/bytes/blob
-					// 各自的转换逻辑；data 已经是这次响应体专属的切片，不会被其它调用方共享或改写。
-					inner, innerErr := NewDataObject(p, rt, data, contentType)
-					if innerErr != nil {
-						if rejectErr := reject(rt.NewGoError(innerErr)); rejectErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.client.fetch %s() reject: %v", p.Name, methodName, rejectErr)
-						}
-						return
-					}
-					innerMethod, ok := goja.AssertFunction(inner.Get(methodName))
-					if !ok {
-						if rejectErr := reject(rt.NewTypeError("internal error: %s is not callable", methodName)); rejectErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.client.fetch %s() reject: %v", p.Name, methodName, rejectErr)
-						}
-						return
-					}
-					innerResult, callErr := innerMethod(inner)
-					if callErr != nil {
-						if rejectErr := reject(rt.NewGoError(callErr)); rejectErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.client.fetch %s() reject: %v", p.Name, methodName, rejectErr)
-						}
-						return
-					}
-					forwardPromise(rt, innerResult, resolve, reject)
-					return
-				}, nil)
-			}()
-
-			return rt.ToValue(promise)
-		})))
-	}
-	return
-}
-
-// newFetchResponseBodyStream 构造 response.body：按 fetchStreamChunkSize 分块、按需从 resp.Body 读取的
-// ReadableStream<Uint8Array>。第一次拉取数据时才会去抢 body 的"认领权"，抢输了（某个数据方法先拿到）就把
-// controller 错误化；拉到 EOF 时关闭底层连接并 close() controller；读取出错时同样关闭连接并 error()。
-// cancel() 时直接关闭底层连接，不再继续读取。highWaterMark 必须是 0：非 0 时 desiredSize>0 会让流一构造出来
-// 就主动 pull 一次，不等任何 reader 读取就先把响应体读掉，和 text()/blob() 等方法抢着认领 body；0 时只有
-// reader 真正调用 read() 之后才会触发第一次 pull。
-func newFetchResponseBodyStream(p *KernelPlugin, rt *goja.Runtime, body *fetchResponseBody) *goja.Object {
-	started := false
-	finished := false // 已经读到过 EOF/出错/被取消：这几种情况都不该再发起下一次网络读取或再 close()/error() 一次
-	return p.streamsHost.NewReadableStream(nil, func(controller goja.Value) goja.Value {
-		if finished {
-			return nil
-		}
-		if !started {
-			if !body.claim() {
-				finished = true
-				callControllerMethod(rt, controller, "error", rt.NewTypeError("body stream already read"))
-				return nil
-			}
-			started = true
-		}
-
-		// pull 算法要返回一个在这一块真正读完前都不落定的 Promise：readableController 用它的落定状态判断
-		// "这次拉取有没有结束"，如果提前返回已经落定的值（nil 会被当成 undefined，立即算结束），背压机制会
-		// 认为可以立刻再拉一次，导致还没读完上一块就对同一个 resp.Body 并发发起下一次 Read，彼此踩踏。
-		promise, resolve, _ := rt.NewPromise()
-		go func() {
-			buf := make([]byte, fetchStreamChunkSize)
-			n, readErr := body.resp.Body.Read(buf)
-			p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-				defer func() {
-					if resolveErr := resolve(goja.Undefined()); resolveErr != nil {
-						logging.LogErrorf("[plugin:%s] siyuan.client.fetch response.body pull resolve: %v", p.Name, resolveErr)
-					}
-				}()
-				if finished {
-					return
 				}
-				if n > 0 {
-					callControllerMethod(rt, controller, "enqueue", uint8ArrayOf(p, rt, buf[:n]))
+
+				if argErr == nil {
+					if b := initObj.Get("body"); isJsValueNotNull(b) {
+						if goja.IsString(b) {
+							bodyString = new(b.String())
+						} else if formData, ok := formdata.StateOf(b); ok {
+							// 在调用时完成编码，之后对 FormData 的修改不影响本次请求（与 fetch 规范一致）。
+							body, contentType := formData.EncodeMultipart()
+							bodyBytes = &body
+							bodyContentType = contentType
+						} else {
+							body := b.Export()
+							if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
+								// ArrayBuffer.Bytes() 指向 JS 引擎内存，异步发送前需复制，避免脚本后续修改与发送并发读写。
+								bodyBytes = new(bytes.Clone(arrayBuffer.Bytes()))
+							}
+						}
+					}
 				}
-				switch {
-				case readErr == io.EOF:
-					finished = true
-					body.finish()
-					callControllerMethod(rt, controller, "close")
-				case readErr != nil:
-					finished = true
-					body.finish()
-					callControllerMethod(rt, controller, "error", rt.NewGoError(readErr))
+
+				if argErr == nil {
+					if t := initObj.Get("timeout"); isJsValueNotNull(t) {
+						timeout, argErr = fetchTimeoutOf(t)
+					}
 				}
-				return
-			}, nil)
-		}()
-		return rt.ToValue(promise)
-	}, func(reason goja.Value) goja.Value {
-		finished = true
-		body.finish()
-		return nil
-	}, 0, nil)
-}
 
-// uint8ArrayOf 把 data 包装为 Uint8Array：data 已经是不会再被其它调用方共享或改写的独立切片，直接作为
-// ArrayBuffer 的底层存储，不需要再复制一次。
-func uint8ArrayOf(p *KernelPlugin, rt *goja.Runtime, data []byte) goja.Value {
-	value, err := p.formDataHost.NewUint8Array(rt, data)
-	if err != nil {
-		panic(err)
-	}
-	return value
-}
-
-// callControllerMethod 调用 ReadableStream controller 上的方法（enqueue/close/error），用于 Go 驱动的
-// pull/cancel 算法把结果交回 controller；方法不存在或调用失败只记录日志，不中断调用方。
-func callControllerMethod(rt *goja.Runtime, controller goja.Value, method string, args ...goja.Value) {
-	obj := controller.ToObject(rt)
-	fn, ok := goja.AssertFunction(obj.Get(method))
-	if !ok {
-		logging.LogErrorf("controller.%s is not a function", method)
-		return
-	}
-	if _, err := fn(obj, args...); err != nil {
-		logging.LogErrorf("controller.%s(): %v", method, err)
-	}
-}
-
-// forwardPromise 把 value（预期是一个 Promise）的落定结果转发给 resolve/reject；value 不是 Promise 时直接
-// 用它的值调用 resolve。
-func forwardPromise(rt *goja.Runtime, value goja.Value, resolve, reject func(any) error) {
-	promise, ok := value.Export().(*goja.Promise)
-	if !ok {
-		if err := resolve(value); err != nil {
-			logging.LogErrorf("forwardPromise resolve: %v", err)
-		}
-		return
-	}
-
-	object := rt.ToValue(promise).ToObject(rt)
-	then, ok := goja.AssertFunction(object.Get("then"))
-	if !ok {
-		if err := resolve(value); err != nil {
-			logging.LogErrorf("forwardPromise resolve: %v", err)
-		}
-		return
-	}
-	if _, err := then(object,
-		rt.ToValue(func(call goja.FunctionCall) goja.Value {
-			if err := resolve(call.Argument(0)); err != nil {
-				logging.LogErrorf("forwardPromise resolve: %v", err)
+				if argErr == nil {
+					if s := initObj.Get("signal"); isJsValueNotNull(s) {
+						signal, argErr = abort.SignalOf(rt, s, "signal")
+					}
+				}
 			}
-			return goja.Undefined()
-		}),
-		rt.ToValue(func(call goja.FunctionCall) goja.Value {
-			if err := reject(call.Argument(0)); err != nil {
-				logging.LogErrorf("forwardPromise reject: %v", err)
-			}
-			return goja.Undefined()
-		}),
-	); err != nil {
-		panic(err)
+		}
 	}
+
+	return clientFetchRequest{path: path, method: method, headers: headers, bodyString: bodyString,
+		bodyBytes: bodyBytes, bodyContentType: bodyContentType, timeout: timeout, signal: signal}, argErr
 }

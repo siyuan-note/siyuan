@@ -454,6 +454,16 @@ func TestPluginWorkflowPlanValidationAndEffects(t *testing.T) {
 	if !strings.Contains(prompt, "workflow.action=choose") || !strings.Contains(prompt, "No skips") || strings.Contains(prompt, "# SiYuan Plugin Development") {
 		t.Fatal("short official trigger is missing or eagerly loads body")
 	}
+	for _, instruction := range []string{
+		"create or modify SiYuan frontend plugins",
+		"BEFORE asking only materially missing details",
+		"workflow.action=plan before implementation",
+		"neither choice nor proposal authorizes installation or enabling",
+	} {
+		if !strings.Contains(prompt, instruction) {
+			t.Fatalf("plugin development prompt is missing %q", instruction)
+		}
+	}
 }
 
 func TestPluginWorkflowUnknownExecutionSurvivesNativeBoundary(t *testing.T) {

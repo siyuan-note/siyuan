@@ -1,4 +1,4 @@
-import {escapeHtml} from "../../../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {processSiYuanUri} from "../../../util/uri";
 import {highlightRender} from "../../../protyle/render/highlightRender";
 import {mathRender} from "../../../protyle/render/mathRender";
@@ -69,6 +69,7 @@ export const renderWelcomeHTML = (hasModel = true): string => {
         '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample1 || "") + '">' + (L.agentExample1 || "") + "</div>" +
         '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample2 || "") + '">' + (L.agentExample2 || "") + "</div>" +
         '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample3 || "") + '">' + (L.agentExample3 || "") + "</div>" +
+        '<div class="agent-welcome__example" data-text="' + escapeHtmlTextAndAttr(L.agentExample4 || "") + '">' + escapeHtmlTextAndAttr(L.agentExample4 || "") + "</div>" +
         "</div>" +
         "</div>";
 };

@@ -19,6 +19,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestSystemPromptIncludesFrontendPluginDevelopment(t *testing.T) {
+	if !strings.Contains(systemPrompt, "create or modify SiYuan frontend plugins through the tools provided") {
+		t.Fatal("system prompt does not describe frontend plugin development")
+	}
+}
+
 func TestTurnContextStaysInUserMessage(t *testing.T) {
 	const userMessage = "summarize this"
 	references := []Reference{{ID: "ref-block", Title: "Referenced block"}}

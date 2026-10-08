@@ -742,10 +742,16 @@ func UpsertBlockTree(tree *parse.Tree) {
 			if oldBt.Updated != n.IALAttr("updated") || oldBt.Type != TypeAbbr(n.Type.String()) || oldBt.Path != tree.Path || oldBt.BoxID != tree.Box || oldBt.HPath != tree.HPath {
 				children := ChildBlockNodes(n) // 需要考虑子块，因为一些操作（比如移动块）后需要同时更新子块
 				changedNodes = append(changedNodes, children...)
+				if n.IsContainerBlock() && n.Type != ast.NodeDocument {
+					return ast.WalkSkipChildren
+				}
 			}
 		} else {
 			children := ChildBlockNodes(n)
 			changedNodes = append(changedNodes, children...)
+			if n.IsContainerBlock() && n.Type != ast.NodeDocument {
+				return ast.WalkSkipChildren
+			}
 		}
 		return ast.WalkContinue
 	})

@@ -93,8 +93,8 @@ const rendererSource = () => {
         extract("util/hasClosest", ["hasClosestBlock", "hasClosestByAttribute", "hasClosestByClassName",
             "hasClosestByTag", "isBlockElement"]) +
         extract("wysiwyg/getBlock", ["getContenteditableElement", "isContainerBlock", "isNotEditBlock", "hasPreviousSibling"]) +
-        extract("util/selection", ["getEditorRange", "focusByRange", "getSelectionOffset", "selectIsEditor",
-            "focusByOffset", "searchNode", "setLastNodeRange", "setInsertWbrHTML", "focusByWbr"])
+        (extract("util/selectionOffsets", ["focusByRange", "getSelectionOffset", "selectIsEditor", "searchNode", "setLastNodeRange", "createRangeByOffsets", "getDOMOffset"]) +
+        extract("util/selection", ["getEditorRange", "focusByOffset", "setInsertWbrHTML", "focusByWbr"]))
             .replace("export const getEditorRange =", "const readEditorRange =") +
         "const getEditorRange = (element) => { editorRangeReads++; return readEditorRange(element); };" +
         extract("wysiwyg/keydown", ["keydown"]) +

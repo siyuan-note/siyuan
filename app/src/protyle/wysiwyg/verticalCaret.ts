@@ -1,4 +1,5 @@
-import {focusByRange, setFirstNodeRange, setLastNodeRange} from "../util/selection";
+import {setFirstNodeRange} from "../util/selection";
+import {focusByRange, setLastNodeRange} from "../util/selectionOffsets";
 import {
     getCodeTrailingZeroWidthLineLimit,
     getNavigableVerticalRects,

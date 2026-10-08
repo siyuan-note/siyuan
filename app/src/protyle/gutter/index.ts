@@ -38,7 +38,8 @@ import {
 } from "../wysiwyg/transaction";
 import {isEmptyParagraph} from "../wysiwyg/emptyTextBlock";
 import {removeBlockPreservingSelectionMode} from "../wysiwyg/remove";
-import {focusBlock, focusByRange, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
+import {focusBlock, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {getHeadingConversionElements} from "../wysiwyg/headingConversion";
 import {hideElements} from "../ui/hideElements";
 import {markGutterForFoldRestore} from "../ui/gutterVisibility";

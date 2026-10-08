@@ -1,7 +1,8 @@
 import {fetchSyncPost} from "../../util/fetch";
 import {markToolbarHotkey} from "./hotkey";
 import {Constants} from "../../constants";
-import {focusByRange, focusByWbr} from "../util/selection";
+import {focusByWbr} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {isDisabledFeature, writeText} from "../util/compatibility";
 import {isArrayEqual} from "../../util/functions";
 import {hasSameTextStyle} from "./Font";

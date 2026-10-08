@@ -33,7 +33,8 @@ import {
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
-import {focusBlock, focusByRange} from "../../util/selection";
+import {focusBlock} from "../../util/selection";
+import {focusByRange} from "../../util/selectionOffsets";
 import {showMessage} from "../../../dialog/message";
 import {previewAttrViewImages} from "../../preview/image";
 import {unicode2Emoji} from "../../../emoji";

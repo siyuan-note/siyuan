@@ -7,7 +7,7 @@ import {Constants} from "../../constants";
 import {getContenteditableElement, getEmbedGutterOperationContext, getLastBlock} from "../wysiwyg/getBlock";
 import {genEmptyElement, genHeadingElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
-import {focusByRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 /// #if !MOBILE
 import {moveResize} from "../../dialog/moveResize";
 /// #endif

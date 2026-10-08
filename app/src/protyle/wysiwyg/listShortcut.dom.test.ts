@@ -131,7 +131,8 @@ test("keyboard and gutter selection route all three mindmap list shortcuts to th
             clearBlockSelectionMode, getBlockOperationElements, getBlockSelectionStatusIDs} = (() => {${extract("blockSelection")}
             return {BLOCK_SELECTION_CLASS, getBlockSelectionModeElement, setBlockSelectionModeElement,
                 clearBlockSelectionMode, getBlockOperationElements, getBlockSelectionStatusIDs};})();`, extract("listContext"),
-        extract("../util/selection", ["getEditorRange", "focusBlock", "focusByRange"]),
+        (extract("../util/selectionOffsets", ["focusByRange"]) +
+        extract("../util/selection", ["getEditorRange", "focusBlock"])),
         extract("../gutter/index", ["restoreGutterRange"]),
         extract("verticalNavigation", ["focusAtomicRegion", "focusVerticalBlockSelection"]), extract("keydown"),
     ].join("\n"), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;

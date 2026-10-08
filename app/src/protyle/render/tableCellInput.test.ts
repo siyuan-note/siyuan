@@ -522,10 +522,10 @@ test("table cell editors wait for outer input and table menu Enter is consumed",
     const compile = (source: string) => transpileModule(source.replace(/^import [\s\S]*?;\r?\n/gm, "")
         .replace(/^export (?:type )?\{[\s\S]*?\}(?: from "[^"]+")?;\r?\n/gm, "")
         .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
-    const selection = createSourceFile("selection.ts", read("../util/selection.ts"), ScriptTarget.Latest, true);
+    const selection = createSourceFile("selection.ts", read("../util/selection.ts") + "\n" + read("../util/selectionOffsets.ts"), ScriptTarget.Latest, true);
     const selectionSource = selection.statements.filter(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(declaration =>
-            ["focusByWbr", "focusByOffset", "getSelectionOffset", "selectIsEditor", "searchNode", "setLastNodeRange"]
+            ["focusByWbr", "focusByOffset", "getSelectionOffset", "selectIsEditor", "searchNode", "setLastNodeRange", "getDOMOffset", "createRangeByOffsets"]
                 .includes(declaration.name.getText(selection))))
         .map(statement => statement.getText(selection)).join("\n");
     const source = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts",

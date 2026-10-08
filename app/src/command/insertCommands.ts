@@ -3,7 +3,7 @@ import {getEnglishCommandLabel} from "./english";
 import type {ICommandContextSnapshot, ICommandDefinition, TCommandKeymapPath} from "./types";
 import {getBuiltinSlashMenuItems} from "../protyle/hint/extend";
 import {isBuiltinInlineStyleVisible, type TBuiltinInlineStyleID} from "../protyle/toolbar/inlineStyle";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {isDisabledFeature, isInAndroid} from "../protyle/util/compatibility";
 import {getHostCapabilities} from "../util/hostCapabilities";
 /// #if MOBILE

@@ -2,7 +2,7 @@ import {getNotebookName, pathPosix} from "../util/pathName";
 import {Constants} from "../constants";
 import {Dialog} from "../dialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {genSearch, updateConfig} from "./util";
 import type {App} from "../index";
 import {cancelSearchRequest} from "./request";

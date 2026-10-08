@@ -1,7 +1,8 @@
 import {Constants} from "../../constants";
 import {getBlockRefAnchorText} from "../../util/newFile";
 import {isRangeInEditor, isSameRange} from "../../util/newFileSelection";
-import {focusByRange, getUndoFocusContext, restoreFocusContext} from "../util/selection";
+import {getUndoFocusContext, restoreFocusContext} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
 
 const getInputText = (range: Range) => stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");

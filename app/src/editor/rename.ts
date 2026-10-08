@@ -1,6 +1,6 @@
 import {showMessage} from "../dialog/message";
 import {openInputDialog} from "../dialog/inputDialog";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {removeEmbed} from "../protyle/wysiwyg/removeEmbed";
 import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/pathName";

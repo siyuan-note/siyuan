@@ -1,7 +1,8 @@
 import {isTableLikeView} from "./viewType";
 import {addDragFill, cellScrollIntoView} from "./cell";
 import {clearSelect} from "../../util/clear";
-import {focusBlock, focusByRange} from "../../util/selection";
+import {focusBlock} from "../../util/selection";
+import {focusByRange} from "../../util/selectionOffsets";
 import {getFirstBlock, getLastBlock, getNextBlock, getPreviousBlock} from "../../wysiwyg/getBlock";
 import {scrollCenter} from "../../../util/highlightById";
 import {focusEditableAtGoalX, TVerticalDirection} from "../../wysiwyg/verticalCaret";

@@ -12,13 +12,12 @@ import {
 } from "../util/hasClosest";
 import {
     focusBlock,
-    focusByRange,
     focusByWbr,
     getEditorRange,
-    getSelectionOffset,
     getSelectionPosition,
     getUndoFocusContext,
 } from "../util/selection";
+import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash, hintTag} from "./extend";
 import {createDailyNoteReference} from "./dailyNote";
 import {captureDailyNoteSelection, insertDailyNoteReference} from "./dailyNoteSelection";

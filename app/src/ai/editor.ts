@@ -2,10 +2,9 @@ import {fetchAIEditorSSE, IAIEditorMessage, TAIEditorSSEEvent} from "./editorSSE
 import {genUUID} from "../util/genID";
 import {
     focusByOffset,
-    getBlockRanges,
-    getSelectionOffset,
-    setLastNodeRange
+    getBlockRanges
 } from "../protyle/util/selection";
+import {getSelectionOffset, setLastNodeRange} from "../protyle/util/selectionOffsets";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {hasClosestByAttribute, hasClosestByTag, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {insertHTML} from "../protyle/util/insertHTML";

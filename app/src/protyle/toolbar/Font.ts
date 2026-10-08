@@ -1,6 +1,6 @@
 import {setStorageVal, updateHotkeyTip} from "../util/compatibility";
 import {ToolbarItem} from "./ToolbarItem";
-import {focusByRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {Constants} from "../../constants";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {updateBatchTransaction} from "../wysiwyg/transaction";

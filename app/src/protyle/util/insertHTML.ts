@@ -19,14 +19,12 @@ import {
 import {
     fixTableRange,
     focusBlock,
-    focusByRange,
     focusByWbr,
     getBlockRanges,
     getEditorRange,
-    getSelectionOffset,
     getUndoFocusContext,
-    setLastNodeRange,
 } from "./selection";
+import {focusByRange, getSelectionOffset, setLastNodeRange} from "./selectionOffsets";
 import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";

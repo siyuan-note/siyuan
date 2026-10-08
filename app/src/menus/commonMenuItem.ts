@@ -21,7 +21,8 @@ import {loadTemplateDirectories, openTemplateManager} from "../template/manager"
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
 import {bindAliasInput} from "./aliasInput";
-import {focusBlock, focusByRange, getEditorRange} from "../protyle/util/selection";
+import {focusBlock, getEditorRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 /// #if !MOBILE
 import {openAsset, openAssetInBackground, openBy} from "../editor/util";
 /// #endif

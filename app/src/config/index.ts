@@ -5,7 +5,7 @@ import {initSettingSearch, switchSettingTab} from "./search/dialog";
 import {bindSettingSaveDelegation} from "./setting/save";
 import {Dialog} from "../dialog";
 import {Constants} from "../constants";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {initSettingDrag} from "./setting/drag";
 /// #endif
 import {unmountBazaarTab, withMountedBazaar} from "./bazaarTab";

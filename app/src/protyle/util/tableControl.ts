@@ -7,7 +7,8 @@ import {updateTransaction} from "../wysiwyg/transaction";
 import {copyPlainText, encodeBase64, isMac, readClipboard} from "./compatibility";
 import {removeZWJ} from "./normalizeText";
 import {paste} from "./paste";
-import {focusByRange, getEditorRange, getUndoFocusContext} from "./selection";
+import {getEditorRange, getUndoFocusContext} from "./selection";
+import {focusByRange} from "./selectionOffsets";
 import {matchHotKey} from "./hotKey";
 import {
     buildTableGrid,

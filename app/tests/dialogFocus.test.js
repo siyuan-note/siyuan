@@ -256,7 +256,7 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
         "../util/functions": {isMobile: () => mobile},
         "../constants": {Constants: constants},
         "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
-        "../protyle/util/selection": {focusByRange: range => {
+        "../protyle/util/selectionOffsets": {focusByRange: range => {
             window.getSelection().removeAllRanges();
             window.getSelection().addRange(range);
         }},

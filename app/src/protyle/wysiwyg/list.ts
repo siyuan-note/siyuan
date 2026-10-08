@@ -1,4 +1,5 @@
-import {focusByRange, focusByWbr, getEditorRange, getUndoFocusContext} from "../util/selection";
+import {focusByWbr, getEditorRange, getUndoFocusContext} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
 import {genEmptyBlock} from "../../block/util";
 import * as dayjs from "dayjs";

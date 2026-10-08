@@ -2,10 +2,9 @@ import {escapeHtmlTextAndAttr} from "../../util/escape";
 import type {BlockQueryRequestInput} from "../../types/api";
 import {
     focusByOffset,
-    focusByRange,
     getEditorRange,
-    getSelectionOffset,
 } from "../util/selection";
+import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {fetchPost} from "../../util/fetch";
 import {replaceFileName, validateName} from "../../editor/rename";
 import {MenuItem} from "../../menus/Menu";

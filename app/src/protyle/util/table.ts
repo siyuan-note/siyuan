@@ -4,12 +4,11 @@ import {openInputDialog} from "../../dialog/inputDialog";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {
     focusBlock,
-    focusByRange,
     focusByWbr,
     getEditorRange,
-    getSelectionOffset,
     getUndoFocusContext,
 } from "./selection";
+import {focusByRange, getSelectionOffset} from "./selectionOffsets";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import {matchHotKey} from "./hotKey";
 import {isNotCtrl} from "./compatibility";

@@ -1,5 +1,5 @@
 import {fetchPost} from "../util/fetch";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";

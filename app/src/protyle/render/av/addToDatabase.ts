@@ -1,6 +1,6 @@
 import {openSearchAV} from "./relation";
 import {transaction} from "../../wysiwyg/transaction";
-import {focusByRange} from "../../util/selection";
+import {focusByRange} from "../../util/selectionOffsets";
 import {hasClosestBlock} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
 import {getAVFilteredTipContext} from "./filteredTip";

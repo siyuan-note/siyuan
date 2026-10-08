@@ -11,7 +11,7 @@ import {
 } from "./blockTypeCore";
 import {getEmbedGutterOperationContext} from "../wysiwyg/getBlock";
 import {turnsIntoOneTransaction, turnsIntoTransaction} from "../wysiwyg/transaction";
-import {focusByRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {closeSubElement} from "./subElementLifecycle";
 import {escapeHtml} from "../../util/escape";
 import {isMobile} from "../../util/functions";

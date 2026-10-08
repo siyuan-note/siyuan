@@ -9,12 +9,10 @@ import {getBlockInsertionContext} from "./blockInsertion";
 import {isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     focusBlock,
-    focusByRange,
     focusByWbr,
     getBlockElementsByRange,
     getBlockRanges,
     getEditorRange,
-    getSelectionOffset,
     getSelectionPosition,
     getUndoFocusContext,
     restoreFocusContext,
@@ -22,8 +20,8 @@ import {
     selectBlocksByRange,
     setFirstNodeRange,
     setInsertWbrHTML,
-    setLastNodeRange,
 } from "../util/selection";
+import {focusByRange, getSelectionOffset, setLastNodeRange} from "../util/selectionOffsets";
 import {selectTextToEditorBoundary} from "../util/selectionBoundary";
 import {
     getEmptySemanticInlineForDelete,

@@ -3,7 +3,7 @@ import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
 import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "./escape";
 import {isMobile} from "./functions";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Constants} from "../constants";
 import {getFileTreeDefaultIconAttr, getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 /// #if !BROWSER

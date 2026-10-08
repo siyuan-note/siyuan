@@ -474,10 +474,11 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     check.equal(updates, editableUpdates, "closing the editor invalidates menu callbacks");
     const selectionDependencies = {getContenteditableElement, isNotEditBlock: () => false, revealTabsForTarget: () => {}};
     const selectionAPI = new Function(...Object.keys(selectionDependencies), selectionSource +
-        "\nreturn {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, focusByOffset, getSelectionOffset, setLastNodeRange};")(
+        "\nreturn {captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, focusByOffset, getSelectionOffset, setLastNodeRange, createRangeByOffsets, focusByRange};")(
         ...Object.values(selectionDependencies)) as typeof import("./tableCellRichSelection") & typeof import("./selection");
     const renderDependencies = {
         isFoldedRenderContent: () => false,
+        getContenteditableElement,
         ...selectionAPI, Constants: {PROTYLE_CDN: ""}, setCodeTheme: () => {}, addScript: () => Promise.resolve(),
     };
     const render = new Function(...Object.keys(renderDependencies), highlightSource + "\nreturn highlightRender;")(
@@ -639,7 +640,7 @@ test("table cells insert code through slash and Enter without losing soft breaks
     const copySource = ["normalizeText.ts", "../wysiwyg/codeBlockUtil.ts", "../wysiwyg/codeBlock.ts", "../lite/codeActions.ts"]
         .map(file => compile(read(file))).join("\n") +
         "\nbindLiteCodeActions(host, fragment.protyle, {signal, canEdit, beforeChange, onChange: commit});";
-    const selectionSource = compile(read("selection.ts")) + "\n" + compile(read("tableCellRichSelection.ts"));
+    const selectionSource = compile(read("selectionOffsets.ts")) + "\n" + compile(read("selection.ts")) + "\n" + compile(read("tableCellRichSelection.ts"));
     const highlightSource = compile(read("../render/highlightRender.ts"));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cell-code-test-"));
     const script = path.join(temporary, "run.cjs");

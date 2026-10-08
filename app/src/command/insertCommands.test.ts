@@ -37,7 +37,7 @@ test("insert commands search and execute existing insertion actions at the saved
             {id: "template", value: "template-value"}, {id: "ref", value: "(("},
         ]},
         "../protyle/toolbar/inlineStyle": {isBuiltinInlineStyleVisible: () => true},
-        "../protyle/util/selection": {focusByRange: (range: unknown) => focused.push(range)},
+        "../protyle/util/selectionOffsets": {focusByRange: (range: unknown) => focused.push(range)},
         "../protyle/util/compatibility": {isDisabledFeature: () => false, isInAndroid: () => false},
         "../util/hostCapabilities": {getHostCapabilities: () => ({widgets: true, remoteKernel: false})},
         "../mobile/util/mobileAppUtil": {callMobileAppShowKeyboard: () => keyboards++},

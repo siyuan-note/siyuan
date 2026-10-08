@@ -9,7 +9,8 @@ import {blockRender} from "../render/blockRender";
 import {Constants} from "../../constants";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
-import {focusBlock, focusByRange, getEditorRange} from "../util/selection";
+import {focusBlock, getEditorRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {
     getContenteditableElement,

@@ -52,8 +52,8 @@ const runCases = async (sources, platform) => {
         "protyle/util/tableCellRichContext": {getTableCellRichContext: () => undefined},
         "editor/getIcon": {getIconByType: () => "iconParagraph"},
         "plugin/EventBusCore": {forEachPluginSubscriber() {}},
-        "protyle/util/selection": {
-            getSelectionPosition: () => ({top: 100, left: 0}),
+        "protyle/util/selection": {getSelectionPosition: () => ({top: 100, left: 0})},
+        "protyle/util/selectionOffsets": {
             focusByRange: range => {
                 editable.focus();
                 getSelection().removeAllRanges();

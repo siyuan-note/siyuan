@@ -4,7 +4,7 @@ import {stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
 import {Constants} from "../../constants";
 import {getFirstSelectedInlineMemoContent, isExactInlineMemoSelection} from "./inlineMemoSelection";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
-import {getSelectionOffset} from "../util/selection";
+import {getSelectionOffset} from "../util/selectionOffsets";
 
 export class InlineMemo extends ToolbarItem {
     public element: HTMLElement;

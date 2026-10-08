@@ -1,5 +1,5 @@
 import {Constants} from "../../constants";
-import {focusByRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {isCommittedTextInput} from "./compositionInput";
 import {bindTouchNavigation} from "./touchNavigation";
 

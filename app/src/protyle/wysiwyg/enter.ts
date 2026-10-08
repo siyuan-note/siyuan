@@ -1,5 +1,6 @@
 import {genEmptyElement, genHeadingElement, insertEmptyBlock} from "../../block/util";
-import {focusByRange, focusByWbr, getSelectionOffset, getUndoFocusContext, setLastNodeRange} from "../util/selection";
+import {focusByWbr, getUndoFocusContext} from "../util/selection";
+import {focusByRange, getSelectionOffset, setLastNodeRange} from "../util/selectionOffsets";
 import {
     getContenteditableElement, getParentBlock,
     getEmbedChildOperationContext,

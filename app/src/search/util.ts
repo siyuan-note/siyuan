@@ -51,7 +51,7 @@ import {getDefaultSubType, getDefaultType} from "./getDefault";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
 import {saveKeyList, toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "./toggleHistory";
 import {highlightById, scrollCenter} from "../util/highlightById";
-import {getSelectionOffset} from "../protyle/util/selection";
+import {getSelectionOffset} from "../protyle/util/selectionOffsets";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {electronUndo} from "../protyle/undo";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";

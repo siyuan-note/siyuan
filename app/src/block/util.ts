@@ -1,4 +1,5 @@
-import {focusByRange, focusByWbr, getEditorRange, getUndoFocusContext} from "../protyle/util/selection";
+import {focusByWbr, getEditorRange, getUndoFocusContext} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {
     getContenteditableElement,

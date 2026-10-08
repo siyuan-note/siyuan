@@ -1,5 +1,5 @@
 import {fetchWithAppId} from "../../util/fetchWithAppId";
-import {focusByRange} from "./selection";
+import {focusByRange} from "./selectionOffsets";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER

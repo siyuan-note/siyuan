@@ -17,7 +17,8 @@ import {
 import {processPasteCode, processRender} from "./processCode";
 import {getLocalFiles, getTextSiyuanFromTextHTML, isInHarmony, readClipboard, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
-import {focusByOffset, getEditorRange, getSelectionOffset, getUndoFocusContext} from "./selection";
+import {focusByOffset, getEditorRange, getUndoFocusContext} from "./selection";
+import {getSelectionOffset} from "./selectionOffsets";
 import {blockRender} from "../render/blockRender";
 import {highlightRender} from "../render/highlightRender";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";

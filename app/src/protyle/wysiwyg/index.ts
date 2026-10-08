@@ -34,18 +34,16 @@ import {
 import {
     focusBlock,
     focusByOffset,
-    focusByRange,
     focusByWbr,
     focusSideBlock,
     getBlockRangeSelectElements,
     getBlockRanges,
     getEditorRange,
-    getSelectionOffset,
     getUndoFocusContext,
     setFirstNodeRange,
     setInsertWbrHTML,
-    setLastNodeRange,
 } from "../util/selection";
+import {focusByRange, getSelectionOffset, setLastNodeRange} from "../util/selectionOffsets";
 import {Constants} from "../../constants";
 import {mergeTableCellContents} from "../util/tableCellRich";
 import {resolveDocumentBlockElement} from "../util/outlineBlock";

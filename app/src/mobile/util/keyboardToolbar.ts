@@ -8,7 +8,8 @@ import {
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
 import {getSuperBlockCommand} from "../../block/superBlock";
-import {focusByRange, getSelectionPosition} from "../../protyle/util/selection";
+import {getSelectionPosition} from "../../protyle/util/selection";
+import {focusByRange} from "../../protyle/util/selectionOffsets";
 import {getCurrentEditor as getDocumentEditor} from "../editor";
 import {getMobileToolbarPaddingElement, getMobileToolbarProtyle, getMobileToolbarUndo} from "../../protyle/lite/mobileToolbar";
 import {LocalUndo} from "../../protyle/undo";

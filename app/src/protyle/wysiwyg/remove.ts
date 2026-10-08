@@ -4,15 +4,13 @@ import {captureTabsRemoval} from "./tabsRemoval";
 import {
     focusBlock,
     focusByOffset,
-    focusByRange,
     focusByWbr,
     getBlockRanges,
     getEditorRange,
-    getSelectionOffset,
     getUndoFocusContext,
-    restoreFocusContext,
-    setLastNodeRange
+    restoreFocusContext
 } from "../util/selection";
+import {focusByRange, getSelectionOffset, setLastNodeRange} from "../util/selectionOffsets";
 import {
     fixAdjacentTags,
     getContenteditableElement,

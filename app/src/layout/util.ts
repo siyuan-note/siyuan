@@ -14,7 +14,7 @@ import {getAllEditor, getAllModels, getAllTabs, getAllWnds} from "./getAll";
 import {Asset} from "../asset";
 import {Search} from "../search";
 import {Dock} from "./dock";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {hideElements} from "../protyle/ui/hideElements";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";

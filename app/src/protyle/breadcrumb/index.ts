@@ -14,7 +14,8 @@ import {hasClosestBlock, hasTopClosestByClassName} from "../util/hasClosest";
 import {needSubscribe} from "../../util/needSubscribe";
 import {isMobile} from "../../util/functions";
 import {zoomOut} from "../../menus/protyle";
-import {focusByRange, getEditorRange} from "../util/selection";
+import {getEditorRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 import {saveLayout} from "../../layout/util";

@@ -1,6 +1,6 @@
 import type {FileTreeGetDocRequestInput} from "../../types/api";
 import {hasClosestBlock} from "../util/hasClosest";
-import {getSelectionOffset} from "../util/selection";
+import {getSelectionOffset} from "../util/selectionOffsets";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";

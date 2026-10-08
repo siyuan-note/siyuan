@@ -22,7 +22,8 @@ const sources = () => {
             extract("block/superBlock.ts", ["getSuperBlockCommand", "getSuperBlockCommandLayout", "getSuperBlockTailHeadings"]),
             extract("block/insertSuperBlock.ts", ["genEmptySuperBlock", "focusInsertedBlock", "insertSuperBlockChild", "createSuperBlockColumn"]),
             extract("protyle/wysiwyg/transaction.ts", ["turnsIntoOneTransaction"]),
-            extract("protyle/util/selection.ts", ["focusByWbr", "focusByRange"]),
+            (extract("protyle/util/selectionOffsets.ts", ["focusByRange"]) +
+        extract("protyle/util/selection.ts", ["focusByWbr"])),
             extract("protyle/wysiwyg/getBlock.ts", ["getContenteditableElement", "getParentBlock"]),
             extract("mobile/util/keyboardToolbar.ts", ["getSlashItem", "renderSlashMenu"]),
         ].join("\n"),

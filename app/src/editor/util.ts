@@ -11,7 +11,8 @@ import {getAssetExtension, getDisplayName, getDocDisplayName, isEncryptedBox, us
 import {Constants} from "../constants";
 import {Files} from "../layout/dock/Files";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {focusBlock, focusByOffset, focusByRange} from "../protyle/util/selection";
+import {focusBlock, focusByOffset} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {onGet} from "../protyle/util/onGet";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";

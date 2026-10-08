@@ -6,7 +6,7 @@ import {setStorageVal, updateHotkeyTip} from "../../../protyle/util/compatibilit
 import {isMobile} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {hasClosestByClassName} from "../../../protyle/util/hasClosest";
-import {focusByRange} from "../../../protyle/util/selection";
+import {focusByRange} from "../../../protyle/util/selectionOffsets";
 import {matchHotKey} from "../../../protyle/util/hotKey";
 import {captureCommandContext} from "../../../command/context";
 import {ensureCommandSystem, executeCommandById} from "../../../command/executor";

@@ -10,7 +10,8 @@ import {
 } from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 import {getTableCellVerticalAlignmentMenus, setTableCellStyle} from "../protyle/util/tableControl";
-import {focusBlock, focusByOffset, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
+import {focusBlock, focusByOffset, focusByWbr, getEditorRange, selectAll} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFoldTransient} from "../protyle/util/viewFold";
 import {
     deleteColumn,

@@ -6,7 +6,7 @@ const os = require("node:os");
 const rendererSource = () => {
     const ts = require("typescript");
     const read = name => readFileSync(path.join(__dirname, "../src/protyle", `${name}.ts`), "utf8");
-    const selection = ts.createSourceFile("selection.ts", read("util/selection"), ts.ScriptTarget.Latest, true);
+    const selection = ts.createSourceFile("selectionOffsets.ts", read("util/selectionOffsets"), ts.ScriptTarget.Latest, true);
     const focus = selection.statements.find(statement => ts.isVariableStatement(statement) &&
         statement.declarationList.declarations.some(declaration => declaration.name.getText(selection) === "focusByRange"));
     assert.ok(focus);

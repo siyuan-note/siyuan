@@ -24,9 +24,12 @@ const rendererModules = () => {
         import {getAtomicVerticalNavigationOwner} from "../wysiwyg/verticalNavigationState";
         import {getContenteditableElement} from "../wysiwyg/getBlock";
         import {hasClosestBlock} from "./hasClosest";\n` +
-        extract("util/selection", ["setFirstNodeRange", "setLastNodeRange", "focusByRange", "focusBlock", "getEditorRange"])
+        (extract("util/selectionOffsets", ["setLastNodeRange", "focusByRange"]) +
+        extract("util/selection", ["setFirstNodeRange", "focusBlock", "getEditorRange"]))
             .replace(/\/\/\/ #else[\s\S]*?\/\/\/ #endif/g, "");
     modules["util/hasClosest"] = readFileSync(path.join(root, "util/hasClosest.ts"), "utf8");
+    modules["util/selectionOffsets"] = "const revealTabsForTarget = () => {};\n" +
+        extract("util/selectionOffsets", ["focusByRange", "setLastNodeRange"]);
     modules["util/documentRange"] = readFileSync(path.join(root, "util/documentRange.ts"), "utf8");
     modules["wysiwyg/getBlock"] = 'import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";\n' +
         extract("wysiwyg/getBlock", ["getContenteditableElement", "isContainerBlock", "getNextBlock", "getPreviousBlock"]);
@@ -150,7 +153,8 @@ const rendererModules = () => {
     visitSelected(keydownSource);
     assert.ok(selectedBranch);
     modules["wysiwyg/blockSelection"] = readFileSync(path.join(root, "wysiwyg/blockSelection.ts"), "utf8");
-    modules["wysiwyg/selectedNavigationKeydown"] = `import {getEditorRange, focusByRange, setLastNodeRange} from "../util/selection";
+    modules["wysiwyg/selectedNavigationKeydown"] = `import {getEditorRange} from "../util/selection";
+        import {focusByRange, setLastNodeRange} from "../util/selectionOffsets";
         import {getAdjacentVerticalBlock, getAdjacentVisibleBlock} from "./verticalTarget";
         import {focusVerticalBlockSelection} from "./verticalNavigation";
         import {isDocumentBoundaryLoaded} from "../util/documentRange";

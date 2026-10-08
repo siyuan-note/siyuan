@@ -1,6 +1,7 @@
 import type {FileTreeGetDocRequestInput} from "../../types/api";
 import {cleanupDragIndicators, createListDragTarget} from "./listDragTarget";
-import {focusBlock, focusByRange, getRangeByPoint} from "./selection";
+import {focusBlock, getRangeByPoint} from "./selection";
+import {focusByRange} from "./selectionOffsets";
 import {
     getContenteditableElement,
     getNextBlockSibling,

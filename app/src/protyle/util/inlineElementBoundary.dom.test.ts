@@ -190,7 +190,8 @@ test("input and line breaks preserve semantic inline boundary ownership", {
         "util/inlineElementMarker"].map(name => [name, compile(read(name))]));
     const args = [sources, extract("wysiwyg/enter", ["enter", "softEnter", "listEnter", "removeEmptyNode"]) +
         extract("wysiwyg/list", ["genListItemElement"]),
-        extract("util/selection", ["getSelectionOffset", "focusByWbr"]),
+        (extract("util/selectionOffsets", ["getSelectionOffset"]) +
+        extract("util/selection", ["focusByWbr"])),
         extract("wysiwyg/getBlock", ["hasPreviousSibling", "hasNextSibling"])];
     const source = `const __name = value => value; (${browserCases.toString()})(${args.map(value => JSON.stringify(value)).join(",")})`;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-inline-boundary-test-"));

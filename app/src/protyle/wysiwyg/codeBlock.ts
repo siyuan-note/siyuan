@@ -1,5 +1,6 @@
 import {getContenteditableElement} from "./getBlock";
-import {focusByOffset, getSelectionOffset, getUndoFocusContext, setLastNodeRange} from "../util/selection";
+import {focusByOffset, getUndoFocusContext} from "../util/selection";
+import {getSelectionOffset, setLastNodeRange} from "../util/selectionOffsets";
 import {updateTransaction} from "./transaction";
 import {Constants} from "../../constants";
 import {

@@ -37,12 +37,14 @@ test("daily note insertion survives caret movement and repaint without overwriti
             },
             "../util/selection": {
                 getUndoFocusContext: (_editor: unknown, range: unknown) => ({id: range === caret ? "caret" : "original"}),
-                focusByRange: (range: typeof original) => { active = range; restoredCurrent = range.toString() === ""; },
                 restoreFocusContext: (_protyle: unknown, context: {id: string}) => {
                     if (scenario === "deleted") { return false; }
                     active = context.id === "caret" ? caret : {available: true, toString: () => originalText, cloneRange() { return {...this}; }};
                     return true;
                 },
+            },
+            "../util/selectionOffsets": {
+                focusByRange: (range: typeof original) => { active = range; restoredCurrent = range.toString() === ""; },
             },
         };
         const exported = {};

@@ -82,7 +82,7 @@ const setup = (mobile = false) => {
             turnsIntoTransaction: (options: Record<string, unknown>) => transactions.push(options),
             turnsIntoOneTransaction: (options: Record<string, unknown>) => transactions.push(options),
         },
-        "../util/selection": {focusByRange: () => state.restored++},
+        "../util/selectionOffsets": {focusByRange: () => state.restored++},
         "./subElementLifecycle": {closeSubElement: (): void => undefined},
         "../../util/escape": {escapeHtml: (value: string) => value},
         "../../util/functions": {isMobile: () => state.mobile},

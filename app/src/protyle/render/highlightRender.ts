@@ -1,9 +1,18 @@
 import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
-import {focusByOffset, getSelectionOffset} from "../util/selection";
+import {createRangeByOffsets, focusByRange, getSelectionOffset} from "../util/selectionOffsets";
+import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {setCodeTheme} from "./util";
 import {escapeHtml} from "../../util/escape";
 import {isFoldedRenderContent} from "./foldedContent";
+
+const focusCodeByOffset = (element: Element, start: number, end: number) => {
+    const range = createRangeByOffsets(getContenteditableElement(element) || element, start, end);
+    if (range) {
+        focusByRange(range);
+    }
+    return range;
+};
 
 export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, zoom = 1) => {
     let codeElements: NodeListOf<Element> | Element[];
@@ -121,9 +130,9 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
                         ignoreIllegals: true
                     }).value;
                 if (wbrElement && getSelection().rangeCount > 0) {
-                    focusByOffset(block, startIndex, startIndex);
+                    focusCodeByOffset(block, startIndex, startIndex);
                 } else if (codeSelection) {
-                    const range = focusByOffset(editable, codeSelection.start, codeSelection.end);
+                    const range = focusCodeByOffset(editable, codeSelection.start, codeSelection.end);
                     if (backward && range) {
                         selection.setBaseAndExtent(range.endContainer, range.endOffset, range.startContainer, range.startOffset);
                     }

@@ -3,7 +3,7 @@ import {setPosition} from "../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {readText, setStorageVal, writeText} from "../protyle/util/compatibility";
 import {getAllModels} from "../layout/getAll";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Constants} from "../constants";
 import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";

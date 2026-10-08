@@ -15,17 +15,16 @@ import {ToolbarItem} from "./ToolbarItem";
 import {
     fixTableRange,
     focusBlock,
-    focusByRange,
     focusByOffset,
     focusByWbr,
     getBlockRanges,
     getEditorRange,
-    getSelectionOffset,
     getSelectionPosition,
     getUndoFocusContext,
     IBlockRange,
     selectAll
 } from "../util/selection";
+import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {
     hasClosestBlock,
     hasClosestByAttribute,

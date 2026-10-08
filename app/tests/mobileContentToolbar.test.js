@@ -273,7 +273,8 @@ const runElectron = async () => {
             "window.expandAndroidWordSelection = expandAndroidWordSelection;",
             extract("protyle/wysiwyg/getBlock", ["getContenteditableElement"]),
             extract("protyle/ui/hideElements", ["hideElements"]),
-            extract("protyle/util/selection", ["selectIsEditor", "selectAll", "getSelectionOffset", "focusByRange", "getEditorRange"]),
+            (extract("protyle/util/selectionOffsets", ["selectIsEditor", "getSelectionOffset", "focusByRange"]) +
+        extract("protyle/util/selection", ["selectAll", "getEditorRange"])),
             "class ContentToolbar { private readonly LINE_HEIGHT = 32; render() {}\n" +
                 methods.map(method => method.getText(toolbarSource)).join("\n") + "\n}",
             "window.ContentToolbar = ContentToolbar; window.focusContentRange = focusByRange;",

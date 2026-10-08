@@ -79,10 +79,11 @@ test("startup preserves legacy and explicit sidebar choices in object and serial
     }
 });
 
-test("malformed legacy mobile preferences retain safe swipe access", () => {
+test("malformed legacy mobile preferences retain safe sidebar access", () => {
     for (const value of [null, "null", "invalid", "false", "{}", "[]"]) {
         const loaded = loadStorage({[MOBILE_BARS_CONFIG_KEY]: value})[MOBILE_BARS_CONFIG_KEY];
-        assert.deepEqual(resolveMobileSidebarConfig(loaded as Parameters<typeof resolveMobileSidebarConfig>[0]), {sidebarSwipe: true, sidebarButtons: false});
+        assert.deepEqual(resolveMobileSidebarConfig(loaded as Parameters<typeof resolveMobileSidebarConfig>[0]),
+            {sidebarSwipe: true, sidebarButtons: value === null}, String(value));
     }
 });
 

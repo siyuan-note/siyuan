@@ -185,10 +185,13 @@ func holdTransactionEncryptedBoxRequests(c *gin.Context, transactions []*model.T
 }
 
 func pushTransactions(app, session string, transactions []*model.Transaction) {
+	// 等待本批事务执行完毕，再读取变更文档和撤销状态并广播。
+	for _, tx := range transactions {
+		tx.WaitForCommit()
+	}
+
 	pushMode := util.PushModeBroadcastExcludeSelf
 	if 0 < len(transactions) && 0 < len(transactions[0].DoOperations) {
-		model.FlushTxQueue() // 等待文件写入完成，后续渲染才能读取到最新的数据
-
 		if shouldBroadcastAttrViewTransactions(transactions) {
 			pushMode = util.PushModeBroadcast
 		}
@@ -204,10 +207,6 @@ func pushTransactions(app, session string, transactions []*model.Transaction) {
 		rootIDs = append(rootIDs, tx.GetChangedRootIDs()...)
 	}
 	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
-
-	for _, tx := range transactions {
-		tx.WaitForCommit()
-	}
 
 	// 附带每个 rootID 的撤销/重做可用状态，供前端本地镜像同步（多窗口/多端按钮态）
 	// 必须在 WaitForCommit 之后读取，确保 Record 已完成，状态含最新条目

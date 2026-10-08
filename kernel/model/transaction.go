@@ -70,6 +70,8 @@ func FlushTxQueue() {
 // 与异步入队的 PerformTransactions 不同，这里直接持有 flushLock 串行执行 performTx，
 // 失败时返回原始错误（不转成推送消息），调用方可以保留待处理数据或回滚状态。
 func PerformTxSync(tx *Transaction) (err error) {
+	completion := tx.prepareCommitWait()
+	defer close(completion.done)
 	defer logging.Recover()
 	flushLock.Lock()
 	isFlushing.Store(true)
@@ -124,6 +126,9 @@ func flushQueue() {
 }
 
 func flushTx(tx *Transaction) {
+	if completion := tx.completion.Load(); completion != nil {
+		defer close(completion.done)
+	}
 	defer logging.Recover()
 
 	start := time.Now()
@@ -179,6 +184,7 @@ func PerformTransactions(transactions *[]*Transaction) {
 	defer txQueueLock.Unlock()
 	for _, tx := range *transactions {
 		tx.m = &sync.Mutex{}
+		tx.prepareCommitWait()
 		txQueue = append(txQueue, tx)
 	}
 	sort.SliceStable(txQueue, func(i, j int) bool {
@@ -189,6 +195,8 @@ func PerformTransactions(transactions *[]*Transaction) {
 // PerformTransactionSync 先执行已排队编辑，再同步执行事务并返回实际错误，同时发送事务错误通知。
 // 主动跳过的操作保持成功语义，结构校验或提交失败仍返回错误。
 func PerformTransactionSync(transaction *Transaction) (err error) {
+	completion := transaction.prepareCommitWait()
+	defer close(completion.done)
 	flushLock.Lock()
 	isFlushing.Store(true)
 	defer func() {
@@ -2706,6 +2714,10 @@ func (tx *Transaction) recordCrossTreeMoveRefRefresh(srcTree, targetTree *parse.
 	})
 }
 
+type transactionCompletion struct {
+	done chan struct{}
+}
+
 type Transaction struct {
 	Timestamp             int64        `json:"timestamp"`
 	DoOperations          []*Operation `json:"doOperations"`
@@ -2753,6 +2765,7 @@ type Transaction struct {
 	luteEngine *lute.Lute
 	m          *sync.Mutex
 	state      atomic.Int32 // 0: 初始化，1：未提交，:2: 已提交，3: 已回滚
+	completion atomic.Pointer[transactionCompletion]
 }
 
 func (tx *Transaction) GetChangedRootIDs() (ret []string) {
@@ -2786,7 +2799,19 @@ func (tx *Transaction) GetMutatedRootIDs() (ret []string) {
 	return
 }
 
+// 每次入队或同步执行前建立独立完成信号，执行入口在提交、回滚及后续处理结束后关闭。
+func (tx *Transaction) prepareCommitWait() *transactionCompletion {
+	completion := &transactionCompletion{done: make(chan struct{})}
+	tx.completion.Store(completion)
+	return completion
+}
+
 func (tx *Transaction) WaitForCommit() {
+	if completion := tx.completion.Load(); completion != nil {
+		<-completion.done
+		return
+	}
+	// 未经过执行入口的内部事务保留按执行状态等待的行为。
 	for {
 		if 1 == tx.state.Load() {
 			time.Sleep(10 * time.Millisecond)

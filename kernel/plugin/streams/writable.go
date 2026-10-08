@@ -196,21 +196,6 @@ func writableControllerGetChunkSize(h *Host, c *writableController, chunk goja.V
 	return c.sizeAlgorithm(chunk)
 }
 
-// NewWritableStream 是 Go 侧构造默认 WritableStream 的入口，供 kernel/plugin 的 Go 桥接代码使用。start/write/
-// close/abort 对应规范同名算法，均可为 nil（视为未提供）；返回值可以是任意值或一个 Promise（经 awaitResult
-// 等待）。sizeAlgorithm 为 nil 时使用默认的"每个 chunk 大小为 1"算法。调用方必须已经在 runtime 所在的事件
-// 循环线程上。
-func (h *Host) NewWritableStream(start, write func(arg goja.Value) goja.Value, close func() goja.Value,
-	abort func(reason goja.Value) goja.Value, highWaterMark float64, sizeAlgorithm func(goja.Value) float64) *goja.Object {
-	if sizeAlgorithm == nil {
-		sizeAlgorithm = defaultSizeAlgorithm
-	}
-	stream := &writableState{host: h, status: writableWritable}
-	object := h.newWritableStreamObject(stream)
-	setUpWritableStreamDefaultController(h, stream, orNoOp(start), orNoOp(write), close, orNoOp(abort), highWaterMark, sizeAlgorithm)
-	return object
-}
-
 // ──────────────────────────── WritableStreamDefaultController 内部算法 ────────────────────────────
 
 // setUpWritableStreamDefaultController 对应 SetUpWritableStreamDefaultController：本包不暴露 controller.signal

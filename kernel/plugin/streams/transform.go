@@ -266,13 +266,6 @@ func transformStreamDefaultSourcePullAlgorithm(stream *transformState) goja.Valu
 	return stream.backpressureChange.value(stream.host.rt)
 }
 
-// setUpTransformStreamDefaultController 对应 SetUpTransformStreamDefaultController。
-func setUpTransformStreamDefaultController(h *Host, stream *transformState,
-	transform func(chunk goja.Value) goja.Value, flush func() goja.Value, cancel func(reason goja.Value) goja.Value) {
-	controller := &transformController{host: h, stream: stream, transformAlgorithm: transform, flushAlgorithm: flush, cancelAlgorithm: cancel}
-	stream.controller = controller
-}
-
 // transformControllerDesiredSize 对应 controller.desiredSize：转发到 readable 侧 controller。
 func transformControllerDesiredSize(c *transformController) (float64, bool) {
 	return readableControllerDesiredSize(c.stream.readable.controller)
@@ -312,13 +305,4 @@ func transformControllerTerminate(h *Host, c *transformController) {
 	stream := c.stream
 	readableControllerClose(h, stream.readable.controller)
 	transformStreamErrorWritableAndUnblockWrite(h, stream, typeErrorf(h.rt, "TransformStream terminated"))
-}
-
-// NewTransformStream 是 Go 侧构造默认 TransformStream 的入口，供 kernel/plugin 的 Go 桥接代码使用（如把编码/
-// 压缩之类的转换实现为流）。transform/flush/cancel 对应规范同名算法，均可为 nil；transform 缺省时为恒等转换
-// （直接把 chunk 原样 enqueue 到 readable 侧）。
-func (h *Host) NewTransformStream(transform func(chunk, controller goja.Value) goja.Value, flush func(controller goja.Value) goja.Value,
-	cancel func(reason goja.Value) goja.Value, writableHWM, readableHWM float64,
-	writableSizeAlgorithm, readableSizeAlgorithm func(goja.Value) float64) *goja.Object {
-	return h.newTransformStreamObject(transform, flush, cancel, writableHWM, readableHWM, writableSizeAlgorithm, readableSizeAlgorithm, nil)
 }

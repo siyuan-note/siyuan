@@ -97,14 +97,6 @@ func newInterfaceConstructor(rt *goja.Runtime, name string, length int, prototyp
 	return constructor
 }
 
-// illegalConstructor 构造一个按 WebIDL 规范不可直接实例化的接口的构造函数：用 new 调用会抛出 TypeError，与
-// kernel/plugin/abort 的 AbortSignal 构造函数一致（goja 以 ConstructorCall 签名注册的函数本就只能通过 new 调用）。
-func illegalConstructor(rt *goja.Runtime, name string, prototype *goja.Object) *goja.Object {
-	return newInterfaceConstructor(rt, name, 0, prototype, func(goja.ConstructorCall) *goja.Object {
-		panic(rt.NewTypeError("Illegal constructor"))
-	})
-}
-
 // must 在 err 非 nil 时 panic；仅用于"失败说明调用方传参有编程错误"的内部断言场景（如重复定义同名属性），不用于
 // 可能来自脚本输入的失败路径。
 func must(err error) {

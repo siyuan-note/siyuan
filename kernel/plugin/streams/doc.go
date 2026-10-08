@@ -23,10 +23,9 @@
 // Blob/FormData/AbortController 的既有写法一致：实例用 rt.NewDynamicObject 包装 Go 状态，方法与访问器
 // 定义在每个 Host 构造时新建的共享原型上，不依赖 goja 的结构体字段名反射映射。
 //
-// Go 侧桥接（供 kernel/plugin 的 fetch 响应体、HTTP 服务流式响应等场景使用）见 Host.NewReadableStream/
-// NewWritableStream/NewTransformStream：Go 驱动的数据源把 start/pull/write/close/cancel/abort 实现为普通
-// Go 函数，返回值按与 JS 版本相同的方式经由 awaitResult 处理，真正跨线程的调度（开 goroutine 读取、通过
-// 事件循环的 RunOnLoop 回到 VM 线程）由调用方自己完成，本包只提供"已经在 VM 线程内"可以安全调用的操作。
+// Go 侧可读流桥接见 Host.NewReadableStream：数据源把 start/pull/cancel 实现为普通 Go 函数，返回值按与
+// JS 版本相同的方式经由 awaitResult 处理。跨线程调度（开 goroutine 读取、通过事件循环的 RunOnLoop 回到
+// VM 线程）由调用方完成，本包提供已在 VM 线程内可以安全调用的操作。可写流与转换流由插件脚本构造。
 //
 // # 参考
 //

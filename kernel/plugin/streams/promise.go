@@ -97,11 +97,3 @@ func asPromise(value goja.Value) (*goja.Promise, bool) {
 	p, ok := value.Export().(*goja.Promise)
 	return p, ok
 }
-
-// callOptional 调用可能为 nil 的 goja.Callable；fn 为 nil 时视为返回 undefined 的空操作，不调用 this/传参。
-func callOptional(fn goja.Callable, this goja.Value, args ...goja.Value) (result goja.Value, err error) {
-	if fn == nil {
-		return goja.Undefined(), nil
-	}
-	return fn(this, args...)
-}

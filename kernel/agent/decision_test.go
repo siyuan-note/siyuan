@@ -34,7 +34,7 @@ func TestDecisionCapabilityAvailabilityAndApproval(t *testing.T) {
 	kernelModel.Conf.AI.Decision.Profiles["typesafe"].APIKey = "key"
 	set := check(true)
 	registration := set.registration("decision")
-	if !tools.DecisionTool.AgentOnly || !needsCapabilityConfirm(registration, "evaluate", nil, false, nil) {
+	if required, _ := capabilityConfirmRequirement(registration, "evaluate", nil, false, nil); !tools.DecisionTool.AgentOnly || !required {
 		t.Fatal("decision bypassed data egress/cost confirmation")
 	}
 	kernelModel.Conf.AI.Decision.Enabled = false

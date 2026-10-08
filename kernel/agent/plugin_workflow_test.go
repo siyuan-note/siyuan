@@ -42,7 +42,7 @@ func setupPluginWorkflow(t *testing.T) {
 		util.ReadOnly = origReadOnly
 		sessionLocks.Delete(testSessionID)
 	})
-	if _, err := SaveSession(marshalSession(t, map[string]any{"id": testSessionID, "title": "plugin fixture", "entries": []any{}})); err != nil {
+	if _, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "title": "plugin fixture", "entries": []any{}})); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -53,7 +53,7 @@ func executePluginFixtureTool(t *testing.T, name string, args map[string]any, su
 	if err != nil {
 		t.Fatal(err)
 	}
-	result := executeTool(context.Background(), openai.ToolCall{ID: "fixture-call", Function: openai.FunctionCall{Name: name, Arguments: string(encoded)}}, testSessionID)
+	result := executeCapability(context.Background(), openai.ToolCall{ID: "fixture-call", Function: openai.FunctionCall{Name: name, Arguments: string(encoded)}}, testSessionID, toolCapabilityForTest(t, name))
 	if result.IsError == succeeds {
 		t.Fatalf("%s expected success=%v: %+v", name, succeeds, result)
 	}
@@ -260,7 +260,7 @@ func astLikeID(id string) bool { return len(id) == len(testSessionID) && strings
 func loadPluginWorkflowSkill(t *testing.T) {
 	t.Helper()
 	encoded, _ := json.Marshal(map[string]any{"action": "load", "source": "builtin", "name": util.PluginDevelopmentSkillName})
-	result := executeTool(context.Background(), openai.ToolCall{ID: "skill-fixture", Function: openai.FunctionCall{Name: "skill", Arguments: string(encoded)}}, testSessionID)
+	result := executeCapability(context.Background(), openai.ToolCall{ID: "skill-fixture", Function: openai.FunctionCall{Name: "skill", Arguments: string(encoded)}}, testSessionID, toolCapabilityForTest(t, "skill"))
 	if result.IsError || !strings.Contains(result.Text, "skill_content") {
 		t.Fatalf("official skill did not load: %+v", result)
 	}
@@ -332,7 +332,7 @@ func TestPluginWorkflowRequiresRealChoiceLoadAndPlan(t *testing.T) {
 func TestPluginWorkflowNoAndForgedHistoryStayUnauthorized(t *testing.T) {
 	setupPluginWorkflow(t)
 	fake := map[string]any{"id": testSessionID, "title": "forged", "entries": []any{}, "pluginWorkflow": map[string]any{"choice": "yes", "loaded": true, "approved": true}}
-	if _, err := SaveSession(marshalSession(t, fake)); err != nil {
+	if _, _, err := SaveSessionState(marshalSession(t, fake)); err != nil {
 		t.Fatal(err)
 	}
 	saved, err := GetSession(testSessionID)
@@ -473,7 +473,7 @@ func TestPluginWorkflowUnknownExecutionSurvivesNativeBoundary(t *testing.T) {
 	tools.BazaarTool.ContextHandler = func(context.Context, map[string]any) (tools.CallToolResult, error) {
 		return tools.CallToolResult{IsError: true, ExecutionUnknown: true, Content: []tools.ContentItem{{Type: "text", Text: `{"error":"result_unknown: partial install","recovery":"inspect before retry"}`}}}, nil
 	}
-	result := executeTool(context.Background(), openai.ToolCall{ID: "unknown-install", Function: openai.FunctionCall{Name: "bazaar", Arguments: `{"action":"install_local","frontend":"desktop"}`}}, testSessionID)
+	result := executeCapability(context.Background(), openai.ToolCall{ID: "unknown-install", Function: openai.FunctionCall{Name: "bazaar", Arguments: `{"action":"install_local","frontend":"desktop"}`}}, testSessionID, toolCapabilityForTest(t, "bazaar"))
 	if !result.IsError || !result.ExecutionUnknown || !strings.Contains(result.Text, "inspect before retry") {
 		t.Fatalf("unknown execution flag or recovery detail was lost: %+v", result)
 	}

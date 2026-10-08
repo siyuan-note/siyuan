@@ -67,7 +67,7 @@ func TestAgentInstructionsTurnSnapshot(t *testing.T) {
 		sessionID := ast.NewNodeID()
 		session := map[string]any{"id": sessionID, "title": "instructions", "createdAt": 1, "updatedAt": 1,
 			"entries": []any{map[string]any{"id": "user-1", "type": "user", "content": "test preferences"}}}
-		if _, err := SaveSession(marshalSession(t, session)); err != nil {
+		if _, _, err := SaveSessionState(marshalSession(t, session)); err != nil {
 			t.Fatal(err)
 		}
 		for event := range AgentChat(context.Background(), newTestOpenAIClient(server.URL), "openai", "test-model", "", 0,

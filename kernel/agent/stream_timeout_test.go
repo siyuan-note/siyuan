@@ -39,7 +39,7 @@ func TestStreamIdleTimeoutResetsAfterEachChunk(t *testing.T) {
 	defer server.Close()
 
 	client := newTestOpenAIClient(server.URL)
-	stream, _, cancel, err := createStreamWithRetry(context.Background(), client, testChatRequest(), 0, time.Second, 250*time.Millisecond, noRetryDelay, make(chan AgentEvent, 1))
+	stream, _, cancel, err := createProtocolStreamWithRetry(context.Background(), client, util.OpenAIProtocolChatCompletions, testChatRequest(), nil, 0, time.Second, 250*time.Millisecond, noRetryDelay, make(chan AgentEvent, 1))
 	if err != nil {
 		t.Fatalf("create stream failed: %v", err)
 	}
@@ -194,7 +194,7 @@ func TestStreamIdleTimeoutAfterPartialResponse(t *testing.T) {
 	defer server.Close()
 
 	client := newTestOpenAIClient(server.URL)
-	stream, _, cancel, err := createStreamWithRetry(context.Background(), client, testChatRequest(), 0, time.Second, 50*time.Millisecond, noRetryDelay, make(chan AgentEvent, 1))
+	stream, _, cancel, err := createProtocolStreamWithRetry(context.Background(), client, util.OpenAIProtocolChatCompletions, testChatRequest(), nil, 0, time.Second, 50*time.Millisecond, noRetryDelay, make(chan AgentEvent, 1))
 	if err != nil {
 		t.Fatalf("create stream failed: %v", err)
 	}
@@ -223,7 +223,7 @@ func TestCreateStreamRetriesFirstResponseTimeoutWithFreshContext(t *testing.T) {
 
 	events := make(chan AgentEvent, 2)
 	client := newTestOpenAIClient(server.URL)
-	stream, first, cancel, err := createStreamWithRetry(context.Background(), client, testChatRequest(), 1, time.Second, 50*time.Millisecond, noRetryDelay, events)
+	stream, first, cancel, err := createProtocolStreamWithRetry(context.Background(), client, util.OpenAIProtocolChatCompletions, testChatRequest(), nil, 1, time.Second, 50*time.Millisecond, noRetryDelay, events)
 	if err != nil {
 		t.Fatalf("create stream failed: %v", err)
 	}
@@ -258,7 +258,7 @@ func TestCreateStreamRequestTimeoutAndZeroRetries(t *testing.T) {
 	defer server.Close()
 
 	client := newTestOpenAIClient(server.URL)
-	_, _, cancel, err := createStreamWithRetry(context.Background(), client, testChatRequest(), 0, 50*time.Millisecond, time.Second, noRetryDelay, make(chan AgentEvent, 1))
+	_, _, cancel, err := createProtocolStreamWithRetry(context.Background(), client, util.OpenAIProtocolChatCompletions, testChatRequest(), nil, 0, 50*time.Millisecond, time.Second, noRetryDelay, make(chan AgentEvent, 1))
 	if cancel != nil {
 		cancel()
 	}
@@ -288,7 +288,7 @@ func TestCreateStreamRetriesRequestTimeoutWithFreshContext(t *testing.T) {
 	defer server.Close()
 
 	client := newTestOpenAIClient(server.URL)
-	stream, first, cancel, err := createStreamWithRetry(context.Background(), client, testChatRequest(), 1, 50*time.Millisecond, time.Second, noRetryDelay, make(chan AgentEvent, 2))
+	stream, first, cancel, err := createProtocolStreamWithRetry(context.Background(), client, util.OpenAIProtocolChatCompletions, testChatRequest(), nil, 1, 50*time.Millisecond, time.Second, noRetryDelay, make(chan AgentEvent, 2))
 	if err != nil {
 		t.Fatalf("create stream failed: %v", err)
 	}
@@ -321,7 +321,7 @@ func TestAgentChatPartialStreamTimeoutSavesInterruptedWithoutRetry(t *testing.T)
 		"updatedAt": int64(1),
 		"entries":   []any{map[string]any{"id": "user-1", "type": "user", "content": "hello"}},
 	}
-	if revision, err := SaveSession(marshalSession(t, session)); err != nil || revision != 1 {
+	if revision, _, err := SaveSessionState(marshalSession(t, session)); err != nil || revision != 1 {
 		t.Fatalf("save initial session failed: revision=%d, err=%v", revision, err)
 	}
 
@@ -374,7 +374,7 @@ func TestCreateStreamAcceptsEmptySuccessfulResponse(t *testing.T) {
 	defer server.Close()
 
 	client := newTestOpenAIClient(server.URL)
-	stream, _, cancel, err := createStreamWithRetry(context.Background(), client, testChatRequest(), 1, time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 1))
+	stream, _, cancel, err := createProtocolStreamWithRetry(context.Background(), client, util.OpenAIProtocolChatCompletions, testChatRequest(), nil, 1, time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 1))
 	if err != nil {
 		t.Fatalf("create stream failed: %v", err)
 	}

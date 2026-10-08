@@ -70,7 +70,7 @@ func TestAnthropicAgentToolHistoryRecovery(t *testing.T) {
 					return tools.CallToolResult{Content: []tools.ContentItem{{Type: "text", Text: "found"}}}, nil
 				}})
 			t.Cleanup(func() { tools.RemoveTool(toolName) })
-			_, err := SaveSession(marshalSession(t, map[string]any{"id": testSessionID, "title": "native",
+			_, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "title": "native",
 				"createdAt": 1, "updatedAt": 1, "entries": []any{map[string]any{"id": "user-1", "type": "user", "content": "use tool"}}}))
 			if err != nil {
 				t.Fatal(err)
@@ -142,7 +142,7 @@ func TestAnthropicAgentToolHistoryRecovery(t *testing.T) {
 			}
 			canonical["entries"] = append(canonical["entries"].([]any), map[string]any{"id": "user-2", "type": "user", "content": "continue"})
 			canonical["expectedRevision"] = int64(2)
-			if _, err = SaveSession(marshalSession(t, canonical)); err != nil {
+			if _, _, err = SaveSessionState(marshalSession(t, canonical)); err != nil {
 				t.Fatal(err)
 			}
 			run("user-2", 3, "continue", false)
@@ -231,14 +231,14 @@ func TestAnthropicCompactionPreservesRecentNativeHistory(t *testing.T) {
 		{ID: "assistant-2", Type: "assistant", Content: "recent answer", NativeContent: nativeHistoryContent("recent-signature", "recent answer")},
 		{ID: "user-3", Type: "user", Content: "continue"},
 	}
-	if _, err := SaveSession(marshalSession(t, map[string]any{"id": testSessionID, "title": "compact", "entries": entries})); err != nil {
+	if _, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "title": "compact", "entries": entries})); err != nil {
 		t.Fatal(err)
 	}
 	capabilities := currentCapabilitiesForTest(t)
 	checkpoint := entriesToAgentMessages(entries)
-	full := estimateProtocolRequestTokens("test", util.AnthropicProtocolMessages, checkpointMessagesToOpenAI(checkpoint, "English", nil), checkpoint, nil, capabilities.definitions)
+	full := estimateProtocolRequestTokens("test", util.AnthropicProtocolMessages, checkpointMessagesToOpenAIWithSummary(checkpoint, "English", nil, nil), checkpoint, nil, capabilities.definitions)
 	recent := entriesToAgentMessages(entries[2:])
-	base := estimateProtocolRequestTokens("test", util.AnthropicProtocolMessages, checkpointMessagesToOpenAI(recent, "English", nil), recent, nil, capabilities.definitions)
+	base := estimateProtocolRequestTokens("test", util.AnthropicProtocolMessages, checkpointMessagesToOpenAIWithSummary(recent, "English", nil, nil), recent, nil, capabilities.definitions)
 	limit := compactionTestContextLimit(t, full, base)
 	var requests atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -280,7 +280,7 @@ func TestAnthropicRegenerateUsesEditedHistory(t *testing.T) {
 		{ID: "user-2", Type: "user", Content: "obsolete prompt"},
 		{ID: "assistant-2", Type: "assistant", Content: "obsolete answer", NativeContent: nativeHistoryContent("obsolete-signature", "obsolete answer")},
 	}
-	if _, err := SaveSession(marshalSession(t, map[string]any{"id": testSessionID, "title": "regenerate", "entries": entries})); err != nil {
+	if _, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "title": "regenerate", "entries": entries})); err != nil {
 		t.Fatal(err)
 	}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -314,7 +314,7 @@ func TestAnthropicIncompleteToolDoesNotExecute(t *testing.T) {
 			return tools.CallToolResult{}, nil
 		}})
 	t.Cleanup(func() { tools.RemoveTool(toolName) })
-	if _, err := SaveSession(marshalSession(t, map[string]any{"id": testSessionID, "entries": []SessionEntry{
+	if _, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "entries": []SessionEntry{
 		{ID: "user-1", Type: "user", Content: "use tool"},
 	}})); err != nil {
 		t.Fatal(err)

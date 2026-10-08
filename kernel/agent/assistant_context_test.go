@@ -63,10 +63,6 @@ func TestResponsesContextPreservesEncryptedReasoningAndToolOutput(t *testing.T) 
 		t.Fatalf("Responses output was duplicated as a reconstructed message: %s", payload)
 	}
 
-	restored := entriesToAgentMessages(agentMessagesToEntries(messages))
-	if len(restored) != 1 || len(restored[0].ResponseOutput) != 2 || restored[0].ResponseOutputTokens != 42 {
-		t.Fatalf("Responses output was lost during entry persistence: %#v", restored)
-	}
 }
 
 func TestResponsesContextProjectsMessageWithIncompatibleID(t *testing.T) {
@@ -162,7 +158,7 @@ func TestAgentChatResponsesToolContextSurvivesCommit(t *testing.T) {
 		"updatedAt": int64(1),
 		"entries":   []any{map[string]any{"id": "user-1", "type": "user", "content": "use the tool"}},
 	}
-	if revision, err := SaveSession(marshalSession(t, session)); err != nil || revision != 1 {
+	if revision, _, err := SaveSessionState(marshalSession(t, session)); err != nil || revision != 1 {
 		t.Fatalf("save initial session failed: revision=%d, err=%v", revision, err)
 	}
 
@@ -313,7 +309,7 @@ func TestAgentChatResponsesToolContextSurvivesCommit(t *testing.T) {
 		"id": "user-2", "type": "user", "content": "continue",
 	})
 	canonical["expectedRevision"] = int64(2)
-	if revision, err = SaveSession(marshalSession(t, canonical)); err != nil || revision != 3 {
+	if revision, _, err = SaveSessionState(marshalSession(t, canonical)); err != nil || revision != 3 {
 		t.Fatalf("save Responses follow-up failed: revision=%d, err=%v", revision, err)
 	}
 
@@ -409,7 +405,7 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 		"updatedAt": int64(1),
 		"entries":   []any{map[string]any{"id": "user-1", "type": "user", "content": "use the tool"}},
 	}
-	if revision, err := SaveSession(marshalSession(t, session)); err != nil || revision != 1 {
+	if revision, _, err := SaveSessionState(marshalSession(t, session)); err != nil || revision != 1 {
 		t.Fatalf("save initial session failed: revision=%d, err=%v", revision, err)
 	}
 
@@ -497,7 +493,7 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 		"id": "user-2", "type": "user", "content": "continue",
 	})
 	canonical["expectedRevision"] = int64(2)
-	revision, err = SaveSession(marshalSession(t, canonical))
+	revision, _, err = SaveSessionState(marshalSession(t, canonical))
 	if err != nil || revision != 3 {
 		t.Fatalf("save follow-up user message failed: revision=%d, err=%v", revision, err)
 	}

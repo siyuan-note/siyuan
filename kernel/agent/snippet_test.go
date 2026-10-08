@@ -24,7 +24,7 @@ func TestSnippetWritesAlwaysRequireExplicitConfirmation(t *testing.T) {
 		}
 	}
 	for _, action := range []string{"list", "get"} {
-		if needsCapabilityConfirm(registration, action, nil, false, nil) {
+		if required, _ := capabilityConfirmRequirement(registration, action, nil, false, nil); required {
 			t.Fatalf("read %s unexpectedly requires confirmation", action)
 		}
 	}

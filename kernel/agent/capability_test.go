@@ -132,13 +132,13 @@ func TestCapabilityPolicyControlsExposureAndExecution(t *testing.T) {
 		Default: "allow",
 		Actions: map[string]string{"write": "confirm"},
 	}
-	if needsCapabilityConfirm(backendRegistration, "delete", nil, false, nil) {
+	if required, _ := capabilityConfirmRequirement(backendRegistration, "delete", nil, false, nil); required {
 		t.Fatal("capability auto approval was not applied")
 	}
-	if !needsCapabilityConfirm(backendRegistration, "write", nil, false, nil) {
+	if required, _ := capabilityConfirmRequirement(backendRegistration, "write", nil, false, nil); !required {
 		t.Fatal("action confirmation override was not applied")
 	}
-	if !needsCapabilityConfirm(backendRegistration, "write", nil, true, nil) {
+	if required, _ := capabilityConfirmRequirement(backendRegistration, "write", nil, true, nil); !required {
 		t.Fatal("explicit confirmation was bypassed by the session approval mode")
 	}
 
@@ -227,14 +227,14 @@ func TestExplicitCapabilityConfirmationOverridesRiskAndSessionApproval(t *testin
 		Runtime:   "kernel",
 		Tool:      tools.SearchTool,
 	}
-	if needsCapabilityConfirm(registration, "fulltext", nil, false, nil) {
+	if required, _ := capabilityConfirmRequirement(registration, "fulltext", nil, false, nil); required {
 		t.Fatal("risk-based local search unexpectedly required confirmation")
 	}
 	required, forced := capabilityConfirmRequirement(registration, "semantic", nil, false, nil)
 	if !required || forced {
 		t.Fatal("risk-based semantic search did not require confirmation")
 	}
-	if needsCapabilityConfirm(registration, "semantic", nil, true, nil) {
+	if required, _ := capabilityConfirmRequirement(registration, "semantic", nil, true, nil); required {
 		t.Fatal("session approval did not bypass risk-based confirmation")
 	}
 
@@ -250,7 +250,7 @@ func TestExplicitCapabilityConfirmationOverridesRiskAndSessionApproval(t *testin
 	if !required || !forced {
 		t.Fatal("session approval bypassed explicit capability confirmation")
 	}
-	if needsCapabilityConfirm(registration, "semantic", nil, false, nil) {
+	if required, _ := capabilityConfirmRequirement(registration, "semantic", nil, false, nil); required {
 		t.Fatal("action auto approval did not override capability confirmation")
 	}
 }

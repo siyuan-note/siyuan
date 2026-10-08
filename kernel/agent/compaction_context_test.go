@@ -116,7 +116,12 @@ func TestMessageCompactionSurvivesRecoveryAndInvalidatesEdits(t *testing.T) {
 		t.Fatal(err)
 	}
 	state.Summary = "progress"
-	entries := agentMessagesToEntries(messages)
+	entries := []SessionEntry{
+		{ID: "user", Type: "user", Content: "goal"},
+		{ID: "assistant", Type: "assistant", RoundID: "turn_0", ToolCalls: []AgentToolCall{
+			{ID: "call", State: "finished", Result: "complete result"},
+		}},
+	}
 	entries[1].ID = "runtime_changed_entry_id"
 	if !validRuntimeCompaction(entries, state) {
 		t.Fatal("recovered assistant entry ID invalidated a stable compaction")
@@ -201,7 +206,7 @@ func testAgentChatCompactsCurrentTurnWithoutLosingRecovery(t *testing.T, withVar
 	}
 	t.Cleanup(func() { tools.RemoveTool(toolName) })
 	kernelModel.Conf.AI.Agent.CapabilityPolicy = &conf.CapabilityPolicy{Default: "deny", Overrides: map[string]string{tools.CapabilityIDForTool(tool): "allow"}}
-	if _, err := SaveSession(marshalSession(t, map[string]any{"id": testSessionID, "title": "long task", "entries": []SessionEntry{{ID: "user", Type: "user", Content: rawGoal}}})); err != nil {
+	if _, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "title": "long task", "entries": []SessionEntry{{ID: "user", Type: "user", Content: rawGoal}}})); err != nil {
 		t.Fatal(err)
 	}
 	var modelRequests, summaryRequests atomic.Int32
@@ -285,7 +290,7 @@ func testAgentChatCompactsCurrentTurnWithoutLosingRecovery(t *testing.T, withVar
 	if err != nil || !validRuntimeCompaction(session.Entries, runtime.Compaction) {
 		t.Fatalf("recovered history could not reuse compaction: %+v %v", runtime, err)
 	}
-	if _, err = SaveSession(marshalSession(t, recovered)); err != nil {
+	if _, _, err = SaveSessionState(marshalSession(t, recovered)); err != nil {
 		t.Fatal(err)
 	}
 	canonical, err := GetSessionState(testSessionID, false)
@@ -293,7 +298,7 @@ func testAgentChatCompactsCurrentTurnWithoutLosingRecovery(t *testing.T, withVar
 		t.Fatalf("committing recovery lost original history: %+v %v", canonical, err)
 	}
 	canonical["entries"] = append(canonical["entries"].([]any), map[string]any{"id": "user-2", "type": "user", "content": "continue"})
-	revision, err := SaveSession(marshalSession(t, canonical))
+	revision, _, err := SaveSessionState(marshalSession(t, canonical))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -308,7 +313,7 @@ func testAgentChatCompactsCurrentTurnWithoutLosingRecovery(t *testing.T, withVar
 	if err != nil {
 		t.Fatal(err)
 	}
-	revision, err = SaveSession(marshalSession(t, recovered))
+	revision, _, err = SaveSessionState(marshalSession(t, recovered))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -377,7 +382,8 @@ func TestCompactionSummaryRejectsTruncatedOutput(t *testing.T) {
 		writeTestStreamDone(t, w, flusher)
 	}))
 	defer server.Close()
-	summary, _, _, err := createCompactionSummary(context.Background(), newTestOpenAIClient(server.URL), "test-model",
+	summary, _, _, err := createProtocolCompactionSummary(context.Background(), newTestOpenAIClient(server.URL), util.OpenAIProtocolChatCompletions,
+		"test-model",
 		"history", 512, 0, time.Second, time.Second, make(chan AgentEvent, 32))
 	if err == nil || summary != "" {
 		t.Fatalf("truncated summary was accepted: %q %v", summary, err)
@@ -394,12 +400,12 @@ func TestAgentChatReusesOnlyCompatibleCompaction(t *testing.T) {
 				{ID: "old-answer", Type: "assistant", Content: strings.Repeat("old result ", 12000)},
 				{ID: "current-user", Type: "user", Content: "continue"},
 			}
-			if _, err := SaveSession(marshalSession(t, map[string]any{"id": testSessionID, "title": "compatibility", "entries": entries})); err != nil {
+			if _, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "title": "compatibility", "entries": entries})); err != nil {
 				t.Fatal(err)
 			}
 			state, err := newRuntimeMessageCompaction(entriesToAgentMessages(entries), 2, "openai", "test-model", compactionScopeKey("openai", "test-model", "provider"))
 			if name == "legacy" {
-				state, err = newRuntimeCompaction(entries, 2, "original summary")
+				state, err = newRuntimeProtocolSummaryCompaction(entries, 2, "original summary", util.OpenAIProtocolChatCompletions)
 			}
 			if err != nil {
 				t.Fatal(err)
@@ -483,7 +489,7 @@ func testAgentChatNativeCompactsCurrentTurn(t *testing.T, failCompaction bool) {
 	}
 	t.Cleanup(func() { tools.RemoveTool(toolName) })
 	kernelModel.Conf.AI.Agent.CapabilityPolicy = &conf.CapabilityPolicy{Default: "deny", Overrides: map[string]string{tools.CapabilityIDForTool(tool): "allow"}}
-	if _, err := SaveSession(marshalSession(t, map[string]any{"id": testSessionID, "title": "native task", "entries": []SessionEntry{{ID: "user", Type: "user", Content: "complete task"}}})); err != nil {
+	if _, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "title": "native task", "entries": []SessionEntry{{ID: "user", Type: "user", Content: "complete task"}}})); err != nil {
 		t.Fatal(err)
 	}
 	var requests, compactions atomic.Int32
@@ -570,7 +576,7 @@ func TestAgentChatCanceledCompactionKeepsCurrentTurn(t *testing.T) {
 		{ID: "user", Type: "user", Content: "complete the task"},
 		{ID: "assistant", Type: "assistant", RoundID: "old-round", ToolCalls: []AgentToolCall{{ID: "already-executed", Name: "test", Result: result, State: "finished"}}},
 	}
-	if _, err := SaveSession(marshalSession(t, map[string]any{"id": testSessionID, "title": "interrupted compaction", "entries": entries})); err != nil {
+	if _, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "title": "interrupted compaction", "entries": entries})); err != nil {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithCancel(context.Background())

@@ -85,7 +85,7 @@ func TestAgentChatPreservesUnindexedParallelGeminiToolCalls(t *testing.T) {
 		"updatedAt": int64(1),
 		"entries":   []any{map[string]any{"id": "user-1", "type": "user", "content": "use both tools"}},
 	}
-	if revision, err := SaveSession(marshalSession(t, session)); err != nil || revision != 1 {
+	if revision, _, err := SaveSessionState(marshalSession(t, session)); err != nil || revision != 1 {
 		t.Fatalf("save initial session failed: revision=%d, err=%v", revision, err)
 	}
 

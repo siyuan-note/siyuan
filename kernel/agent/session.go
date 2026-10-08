@@ -312,11 +312,6 @@ func GetSessionState(id string, includeRuntime bool) (map[string]any, error) {
 	return session, nil
 }
 
-func SaveSession(data []byte) (int64, error) {
-	revision, _, err := SaveSessionState(data)
-	return revision, err
-}
-
 func SaveSessionState(data []byte) (int64, map[string]any, error) {
 	var meta sessionMeta
 	if err := gulu.JSON.UnmarshalJSON(data, &meta); err != nil || meta.ID == "" || !isValidSessionID(meta.ID) {

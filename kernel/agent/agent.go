@@ -1742,12 +1742,6 @@ func capabilityEffects(registration *capabilityRegistration, action string) mcpt
 	return effects
 }
 
-func needsCapabilityConfirm(registration *capabilityRegistration, action string, args map[string]any,
-	allowSession bool, alwaysAllow map[string]bool) bool {
-	required, _ := capabilityConfirmRequirement(registration, action, args, allowSession, alwaysAllow)
-	return required
-}
-
 func capabilityConfirmRequirement(registration *capabilityRegistration, action string, args map[string]any,
 	allowSession bool, alwaysAllow map[string]bool) (required, forced bool) {
 	if registration == nil {
@@ -2239,17 +2233,6 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 	return sb.String()
 }
 
-func buildInitialMessages(userMessage string, language string, references []Reference, editorCtx EditorContext, capabilities *capabilitySet, instructions ...string) []openai.ChatCompletionMessage {
-	messages := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, capabilities, instructions...)},
-		{Role: openai.ChatMessageRoleUser, Content: buildUserMessageContent(userMessage, references, cloneEditorContext(editorCtx), capabilities)},
-	}
-	if attachmentMessage, ok := buildAttachmentMessage(agentMessageAttachments(AgentMessage{Role: "user", Content: userMessage})); ok {
-		messages = append(messages, attachmentMessage)
-	}
-	return messages
-}
-
 // skillsSegmentTokens 估算 system prompt 中 <available_skills> 段（含引导句）的 token 数。
 // 该段在 buildSystemPrompt 内部拼成大字符串，这里独立重建同等内容计数，用于分类统计切出 skills 类。
 func skillsSegmentTokens(counter *tokenCounter) int {
@@ -2291,7 +2274,7 @@ func loadCheckpoint(sessionID string) *agentCheckpoint {
 
 // entriesToAgentMessages 把持久化的 entries 还原为 AgentMessage 视图。
 // 仅 user/assistant（含 reasoningContent/toolCalls）参与；thinking/confirm/snapshot 等仅供 UI 展示，
-// 因此不进入 LLM 上下文。配合 checkpointMessagesToOpenAI 即可重建 OpenAI 消息。
+// 因此不进入 LLM 上下文。配合 checkpointMessagesToOpenAIWithSummary 即可重建 OpenAI 消息。
 func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
 	var msgs []AgentMessage
 	for i := range entries {
@@ -2362,10 +2345,6 @@ func geminiToolCallProviderData(signature string) *AgentToolCallProviderData {
 	return &AgentToolCallProviderData{
 		Google: &AgentGoogleToolCallProviderData{ThoughtSignature: signature},
 	}
-}
-
-func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, capabilities *capabilitySet) []openai.ChatCompletionMessage {
-	return checkpointMessagesToOpenAIWithSummary(checkpointMsgs, language, capabilities, nil)
 }
 
 func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, language string, capabilities *capabilitySet, compaction *runtimeCompaction, instructions ...string) []openai.ChatCompletionMessage {
@@ -2600,66 +2579,10 @@ func responseOutputItemToInput(item json.RawMessage, fallback string) any {
 	}
 }
 
-// agentMessagesToEntries 把后端运行期累积的 AgentMessage 派生为最小 entries，
-// 用于中途崩溃恢复的 checkpoint 兜底（仅 user/assistant + reasoningContent/toolCalls，
-// 不含 thinking/confirm/snapshot —— 前端完成后会用完整 entries 覆盖）。
-func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
-	if len(msgs) == 0 {
-		return nil
-	}
-	entries := make([]SessionEntry, 0, len(msgs))
-	for i := range msgs {
-		m := &msgs[i]
-		switch m.Role {
-		case "user":
-			id := m.EntryID
-			if id == "" {
-				id = fmt.Sprintf("cp_%d", i)
-			}
-			var editorCtx *EditorContext
-			if m.EditorContext != nil {
-				editorCtx = cloneEditorContext(*m.EditorContext)
-			}
-			entries = append(entries, SessionEntry{
-				ID:            id,
-				Type:          "user",
-				Content:       m.Content,
-				References:    append([]Reference(nil), m.References...),
-				EditorContext: editorCtx,
-			})
-		case "assistant":
-			id := m.EntryID
-			if id == "" {
-				id = fmt.Sprintf("cp_%d", i)
-			}
-			e := SessionEntry{
-				ID:                   id,
-				Type:                 "assistant",
-				Content:              m.Content,
-				ReasoningCont:        m.ReasoningContent,
-				NativeContent:        util.CloneAIMessageContent(m.NativeContent),
-				ResponseOutput:       util.CloneOpenAIResponseOutput(m.ResponseOutput),
-				ResponseOutputTokens: m.ResponseOutputTokens,
-				RoundID:              m.RoundID,
-				ToolCalls:            m.ToolCalls,
-			}
-			entries = append(entries, e)
-		}
-	}
-	return entries
-}
-
 var (
 	errModelRequestTimeout    = errors.New("model request timeout")
 	errModelStreamIdleTimeout = errors.New("model stream idle timeout")
 )
-
-func createStreamWithRetry(ctx context.Context, client *util.AIClient, req openai.ChatCompletionRequest, maxRetries int,
-	requestTimeout, streamIdleTimeout time.Duration, retryDelay func(string, int) time.Duration,
-	ch chan<- AgentEvent) (*util.OpenAICompletionStream, openai.ChatCompletionStreamResponse, context.CancelFunc, error) {
-	return createProtocolStreamWithRetry(ctx, client, util.OpenAIProtocolChatCompletions, req, nil, maxRetries,
-		requestTimeout, streamIdleTimeout, retryDelay, ch)
-}
 
 func createProtocolStreamWithRetry(ctx context.Context, client *util.AIClient, protocol string,
 	req openai.ChatCompletionRequest, responseInput []any, maxRetries int, requestTimeout, streamIdleTimeout time.Duration,

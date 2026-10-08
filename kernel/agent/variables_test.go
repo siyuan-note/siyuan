@@ -32,7 +32,7 @@ func TestAgentChatResolvesSavedUserVariables(t *testing.T) {
 				"id": testSessionID, "title": "variables", "createdAt": int64(1), "updatedAt": int64(1),
 				"entries": []SessionEntry{{ID: "user-1", Type: "user", Content: raw}},
 			}
-			if _, err := SaveSession(marshalSession(t, session)); err != nil {
+			if _, _, err := SaveSessionState(marshalSession(t, session)); err != nil {
 				t.Fatal(err)
 			}
 			payloads := make(chan []openai.ChatCompletionMessage, 1)

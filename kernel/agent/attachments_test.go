@@ -90,11 +90,11 @@ func TestCheckpointRestoresUserMessageImage(t *testing.T) {
 		{Role: "user", Content: "What is the title?", EntryID: "user-2"},
 	}
 
-	initial := buildInitialMessages(checkpoint[0].Content, "English", nil, EditorContext{}, nil)
+	initial := checkpointMessagesToOpenAIWithSummary(checkpoint[:1], "English", nil, nil)
 	if len(initial) != 3 || !isAttachmentMessage(initial[2]) {
 		t.Fatalf("initial user image was not attached: %#v", initial)
 	}
-	messages := checkpointMessagesToOpenAI(checkpoint, "English", nil)
+	messages := checkpointMessagesToOpenAIWithSummary(checkpoint, "English", nil, nil)
 	if len(messages) != 5 || !isAttachmentMessage(messages[2]) {
 		t.Fatalf("user image was not restored after its message: %#v", messages)
 	}
@@ -295,8 +295,9 @@ func TestCreateImageCompatibleStreamDowngradesAndCaches(t *testing.T) {
 	defer server.Close()
 
 	call := func() {
-		stream, _, cancel, requestMessages, downgraded, unsupportedDetected, err := createImageCompatibleStream(
-			context.Background(), newTestOpenAIClient(server.URL), req, capabilityKey, false, 0,
+		stream, _, cancel, requestMessages, downgraded, unsupportedDetected, err := createProtocolImageCompatibleStream(
+			context.Background(), newTestOpenAIClient(server.URL), util.OpenAIProtocolChatCompletions,
+			req, nil, capabilityKey, false, 0,
 			time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 2),
 		)
 		if err != nil {
@@ -352,8 +353,9 @@ func TestCreateImageCompatibleStreamHandlesInitialSSEError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	stream, _, cancel, requestMessages, downgraded, unsupportedDetected, err := createImageCompatibleStream(
-		context.Background(), newTestOpenAIClient(server.URL), req, "", false, 0,
+	stream, _, cancel, requestMessages, downgraded, unsupportedDetected, err := createProtocolImageCompatibleStream(
+		context.Background(), newTestOpenAIClient(server.URL), util.OpenAIProtocolChatCompletions,
+		req, nil, "", false, 0,
 		time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 2),
 	)
 	if err != nil {
@@ -407,8 +409,9 @@ func TestCreateImageCompatibleStreamKeepsTurnDowngradedAfterFallbackError(t *tes
 	}))
 	defer server.Close()
 
-	_, _, _, _, downgraded, unsupportedDetected, err := createImageCompatibleStream(
-		context.Background(), newTestOpenAIClient(server.URL), req, "", false, 0,
+	_, _, _, _, downgraded, unsupportedDetected, err := createProtocolImageCompatibleStream(
+		context.Background(), newTestOpenAIClient(server.URL), util.OpenAIProtocolChatCompletions,
+		req, nil, "", false, 0,
 		time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 2),
 	)
 	if err == nil || !downgraded || !unsupportedDetected {
@@ -416,8 +419,9 @@ func TestCreateImageCompatibleStreamKeepsTurnDowngradedAfterFallbackError(t *tes
 			err, downgraded, unsupportedDetected)
 	}
 
-	stream, _, cancel, requestMessages, downgraded, repeatedDetection, err := createImageCompatibleStream(
-		context.Background(), newTestOpenAIClient(server.URL), req, "", unsupportedDetected, 0,
+	stream, _, cancel, requestMessages, downgraded, repeatedDetection, err := createProtocolImageCompatibleStream(
+		context.Background(), newTestOpenAIClient(server.URL), util.OpenAIProtocolChatCompletions,
+		req, nil, "", unsupportedDetected, 0,
 		time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 2),
 	)
 	if err != nil {
@@ -450,8 +454,9 @@ func TestCreateImageCompatibleStreamKeepsUnrelatedValidationError(t *testing.T) 
 	}))
 	defer server.Close()
 
-	_, _, _, requestMessages, downgraded, unsupportedDetected, err := createImageCompatibleStream(
-		context.Background(), newTestOpenAIClient(server.URL), req, "unrelated-error", false, 0,
+	_, _, _, requestMessages, downgraded, unsupportedDetected, err := createProtocolImageCompatibleStream(
+		context.Background(), newTestOpenAIClient(server.URL), util.OpenAIProtocolChatCompletions,
+		req, nil, "unrelated-error", false, 0,
 		time.Second, time.Second, noRetryDelay, make(chan AgentEvent, 2),
 	)
 	if err == nil || downgraded || unsupportedDetected || !containsImageInput(requestMessages) || requests.Load() != 1 {
@@ -487,7 +492,7 @@ func TestCheckpointRestoresAttachmentAfterToolResults(t *testing.T) {
 			Attachments: []AgentAttachment{testAgentAttachment()},
 		}},
 	}}
-	messages := checkpointMessagesToOpenAI(checkpoint, "English", nil)
+	messages := checkpointMessagesToOpenAIWithSummary(checkpoint, "English", nil, nil)
 	if len(messages) != 4 {
 		t.Fatalf("unexpected restored message count: %d", len(messages))
 	}
@@ -561,7 +566,7 @@ func TestCheckpointKeepsOnlyLatestAttachmentBatch(t *testing.T) {
 			}},
 		},
 	}
-	messages := checkpointMessagesToOpenAI(checkpoint, "English", nil)
+	messages := checkpointMessagesToOpenAIWithSummary(checkpoint, "English", nil, nil)
 	encoded, err := json.Marshal(messages)
 	if err != nil {
 		t.Fatal(err)
@@ -655,7 +660,7 @@ func TestAgentChatSendsToolAttachmentToCurrentModel(t *testing.T) {
 		"updatedAt": int64(1),
 		"entries":   []any{map[string]any{"id": "user-1", "type": "user", "content": "look at the image"}},
 	}
-	if revision, err := SaveSession(marshalSession(t, session)); err != nil || revision != 1 {
+	if revision, _, err := SaveSessionState(marshalSession(t, session)); err != nil || revision != 1 {
 		t.Fatalf("save initial session failed: revision=%d, err=%v", revision, err)
 	}
 

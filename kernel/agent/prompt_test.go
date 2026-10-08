@@ -35,7 +35,8 @@ func TestTurnContextStaysInUserMessage(t *testing.T) {
 		SelectedBlockIDs: []string{"selected-block"},
 	}
 
-	messages := buildInitialMessages(userMessage, "English", references, editorCtx, nil)
+	messages := checkpointMessagesToOpenAIWithSummary(
+		[]AgentMessage{newAgentUserMessage(userMessage, "user-1", references, editorCtx)}, "English", nil, nil)
 	if len(messages) != 2 {
 		t.Fatalf("unexpected message count: %d", len(messages))
 	}
@@ -158,7 +159,7 @@ func TestCheckpointMessagesKeepHistoricalTurnContexts(t *testing.T) {
 		newAgentUserMessage("second question", "user-2", nil, EditorContext{ActiveDocID: "doc-b"}),
 	}
 
-	messages := checkpointMessagesToOpenAI(checkpoint, "English", nil)
+	messages := checkpointMessagesToOpenAIWithSummary(checkpoint, "English", nil, nil)
 	if len(messages) != 4 {
 		t.Fatalf("unexpected message count: %d", len(messages))
 	}
@@ -173,7 +174,7 @@ func TestCheckpointMessagesKeepHistoricalTurnContexts(t *testing.T) {
 	}
 }
 
-func TestUserTurnContextSurvivesCheckpointRoundTrip(t *testing.T) {
+func TestUserTurnContextRestoresFromEntries(t *testing.T) {
 	editorCtx := &EditorContext{
 		ActiveDocID:     "round-trip-doc",
 		VisibleBlockIDs: []string{"visible-block"},
@@ -190,22 +191,18 @@ func TestUserTurnContextSurvivesCheckpointRoundTrip(t *testing.T) {
 	if len(checkpoint) != 1 || checkpoint[0].EditorContext == nil {
 		t.Fatalf("entry context was not restored into checkpoint: %#v", checkpoint)
 	}
-	roundTripped := agentMessagesToEntries(checkpoint)
-	if len(roundTripped) != 1 || roundTripped[0].EditorContext == nil {
-		t.Fatalf("checkpoint context was not persisted into entry: %#v", roundTripped)
-	}
-	if roundTripped[0].EditorContext.ActiveDocID != "round-trip-doc" ||
-		len(roundTripped[0].References) != 1 || roundTripped[0].References[0].ID != "round-trip-ref" {
-		t.Fatalf("turn context changed during checkpoint round trip: %#v", roundTripped[0])
+	if checkpoint[0].EditorContext.ActiveDocID != "round-trip-doc" ||
+		len(checkpoint[0].References) != 1 || checkpoint[0].References[0].ID != "round-trip-ref" {
+		t.Fatalf("turn context changed during checkpoint restoration: %#v", checkpoint[0])
 	}
 
 	checkpoint[0].EditorContext.VisibleBlockIDs[0] = "changed"
-	if editorCtx.VisibleBlockIDs[0] != "visible-block" || roundTripped[0].EditorContext.VisibleBlockIDs[0] != "visible-block" {
+	if editorCtx.VisibleBlockIDs[0] != "visible-block" {
 		t.Fatal("editor context slices were not cloned")
 	}
 }
 
-func TestAssistantContextSurvivesCheckpointRoundTrip(t *testing.T) {
+func TestAssistantContextRestoresFromEntries(t *testing.T) {
 	const argumentsJSON = "{\n  \"query\": \"SiYuan\",\n  \"limit\": 9007199254740993\n}"
 	entries := []SessionEntry{{
 		ID:            "assistant-1",
@@ -243,7 +240,7 @@ func TestAssistantContextSurvivesCheckpointRoundTrip(t *testing.T) {
 		t.Fatalf("thought signature was not restored into request state: %q", got)
 	}
 
-	messages := checkpointMessagesToOpenAI(checkpoint, "English", nil)
+	messages := checkpointMessagesToOpenAIWithSummary(checkpoint, "English", nil, nil)
 	if len(messages) != 3 {
 		t.Fatalf("unexpected rebuilt message count: %d", len(messages))
 	}
@@ -257,15 +254,6 @@ func TestAssistantContextSurvivesCheckpointRoundTrip(t *testing.T) {
 		t.Fatalf("tool result no longer matches the original call: %#v", messages[2])
 	}
 
-	roundTripped := agentMessagesToEntries(checkpoint)
-	if len(roundTripped) != 1 || roundTripped[0].ReasoningCont != entries[0].ReasoningCont ||
-		roundTripped[0].RoundID != entries[0].RoundID ||
-		len(roundTripped[0].ToolCalls) != 1 || roundTripped[0].ToolCalls[0].ID != "call-original" ||
-		roundTripped[0].ToolCalls[0].ArgumentsJSON != argumentsJSON ||
-		roundTripped[0].ToolCalls[0].ProviderData == nil || roundTripped[0].ToolCalls[0].ProviderData.Google == nil ||
-		roundTripped[0].ToolCalls[0].ProviderData.Google.ThoughtSignature != "thought-signature" {
-		t.Fatalf("assistant context changed during checkpoint round trip: %#v", roundTripped)
-	}
 }
 
 func TestAvailableSkillsSegmentEscapesMetadata(t *testing.T) {

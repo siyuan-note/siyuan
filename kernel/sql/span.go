@@ -25,6 +25,10 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
+// 标签候选条件使用确定性函数，部分索引不受搜索的 LIKE 大小写设置影响。
+const tagSpanIndexPredicate = "instr(lower(type), 'tag') > 0"
+const tagSpanPredicate = tagSpanIndexPredicate + " AND type LIKE '%tag%'"
+
 func escapeLikePattern(s string) string {
 	var b strings.Builder
 	b.Grow(len(s))
@@ -125,10 +129,10 @@ func QueryTagSpansByLabel(label string) (ret []*Span) {
 	var stmt string
 	var args []any
 	if "" != label {
-		stmt = "SELECT * FROM spans WHERE type LIKE '%tag%' AND content LIKE ? ESCAPE '\\' GROUP BY block_id"
+		stmt = "SELECT * FROM spans WHERE " + tagSpanPredicate + " AND content LIKE ? ESCAPE '\\' GROUP BY block_id"
 		args = append(args, "%"+escapeLikePattern(label)+"%")
 	} else {
-		stmt = "SELECT * FROM spans WHERE type LIKE '%tag%' AND content = '' GROUP BY block_id"
+		stmt = "SELECT * FROM spans WHERE " + tagSpanPredicate + " AND content = '' GROUP BY block_id"
 	}
 	rows, err := query(stmt, args...)
 	if err != nil {
@@ -149,14 +153,14 @@ func QueryTagSpansByKeyword(keyword string, limit int) (ret []*Span) {
 	var stmt string
 	var args []any
 	if len(keywords) == 0 {
-		stmt = "SELECT * FROM spans WHERE type LIKE '%tag%' AND content != '' GROUP BY markdown LIMIT " + strconv.Itoa(limit)
+		stmt = "SELECT * FROM spans WHERE " + tagSpanPredicate + " AND content != '' GROUP BY markdown LIMIT " + strconv.Itoa(limit)
 	} else {
 		var likes []string
 		for _, k := range keywords {
 			likes = append(likes, "content LIKE ? ESCAPE '\\'")
 			args = append(args, "%"+escapeLikePattern(k)+"%")
 		}
-		stmt = "SELECT * FROM spans WHERE type LIKE '%tag%' AND (" + strings.Join(likes, " AND ") + ") GROUP BY markdown LIMIT " + strconv.Itoa(limit)
+		stmt = "SELECT * FROM spans WHERE " + tagSpanPredicate + " AND (" + strings.Join(likes, " AND ") + ") GROUP BY markdown LIMIT " + strconv.Itoa(limit)
 	}
 	rows, err := query(stmt, args...)
 	if err != nil {
@@ -172,7 +176,7 @@ func QueryTagSpansByKeyword(keyword string, limit int) (ret []*Span) {
 }
 
 func QueryTagSpans(p string) (ret []*Span) {
-	stmt := "SELECT * FROM spans WHERE type LIKE '%tag%'"
+	stmt := "SELECT * FROM spans WHERE " + tagSpanPredicate
 	var args []any
 	if "" != p {
 		stmt += " AND path = ?"

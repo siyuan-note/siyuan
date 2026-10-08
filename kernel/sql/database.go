@@ -128,6 +128,9 @@ func initDatabase(forceRebuild bool) {
 			if err := ensureDocumentPathIndexes(db, true); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document path indexes failed: %s", err)
 			}
+			if err := ensureTagSpansIndex(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create tag spans index failed: %s", err)
+			}
 			if err := cleanupInvalidRefs(db); err != nil {
 				logging.LogErrorf("cleanup invalid refs failed: %s", err)
 			}
@@ -221,6 +224,9 @@ func initDBTables() {
 	_, err = db.Exec("CREATE INDEX idx_spans_root_id ON spans(root_id)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_spans_root_id] failed: %s", err)
+	}
+	if err = ensureTagSpansIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create tag spans index failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS assets")
@@ -1432,6 +1438,11 @@ func ensureBlocksDocHPathIndex(database *sql.DB) (err error) {
 	return
 }
 
+func ensureTagSpansIndex(database *sql.DB) (err error) {
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_spans_tag_path ON spans(path) WHERE " + tagSpanIndexPredicate)
+	return
+}
+
 func ensureRefsDefIndexes(database *sql.DB) (err error) {
 	if _, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_refs_def_block_id ON refs(def_block_id)"); err != nil {
 		return
@@ -2097,6 +2108,9 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		return
 	}
 	if err = ensureDocumentPathIndexes(boxDB, false); err != nil {
+		return
+	}
+	if err = ensureTagSpansIndex(boxDB); err != nil {
 		return
 	}
 	if err = cleanupInvalidRefs(boxDB); err != nil {

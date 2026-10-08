@@ -311,6 +311,24 @@ export const bindCardEvent = async (options: {
     }
     const countElement = options.element.querySelector('[data-type="count"]');
     const filterElement = options.element.querySelector('[data-type="filter"]');
+    let resetPending = false;
+    let resetRefresh: {card: ICard, onRefreshed: () => void};
+    const refreshResetCard = () => {
+        const refresh = resetRefresh;
+        resetPending = true;
+        return fetchPost("/api/riff/getRiffCardsByBlockIDs", {blockIDs: [refresh.card.blockID]}, response => {
+            const block = response.data.blocks.find(item => item.id === refresh.card.blockID);
+            if (!block?.riffCardID) {
+                showMessage(window.siyuan.languages.invalid, 3000, "error");
+                return;
+            }
+            refresh.card.cardID = block.riffCardID;
+            resetRefresh = undefined;
+            refresh.onRefreshed();
+        }).finally(() => {
+            resetPending = false;
+        });
+    };
     const fetchNewRound = () => {
         const currentCardType = filterElement.getAttribute("data-cardtype");
         const docId = filterElement.getAttribute("data-id");
@@ -339,6 +357,14 @@ export const bindCardEvent = async (options: {
         const target = event.target as HTMLElement;
         let type = "";
         const currentCard = options.cardsData.cards[index];
+        if (resetPending || (resetRefresh && resetRefresh.card === currentCard)) {
+            if (!resetPending) {
+                refreshResetCard();
+            }
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
         const docId = filterElement.getAttribute("data-id");
         if (typeof event.detail === "string") {
             if (["1", "j", "a"].includes(event.detail)) {
@@ -433,32 +459,40 @@ export const bindCardEvent = async (options: {
                         icon: "iconRefresh",
                         label: window.siyuan.languages.reset,
                         click() {
+                            resetPending = true;
+                            let refreshing: Promise<void>;
                             fetchPost("/api/riff/resetRiffCards", {
                                 type: filterElement.getAttribute("data-cardtype"),
                                 id: docId,
                                 deckID: Constants.QUICK_DECK_ID,
                                 blockIDs: [currentCard.blockID],
                             }, () => {
-                                const minLang = window.siyuan.languages._time["1m"].replace("%s", "");
-                                currentCard.lapses = 0;
-                                currentCard.lastReview = -62135596800000;
-                                currentCard.reps = 0;
-                                currentCard.state = 0;
-                                currentCard.nextDues = {
-                                    1: minLang,
-                                    2: minLang.replace("1", "5"),
-                                    3: minLang.replace("1", "10"),
-                                    4: window.siyuan.languages._time["1d"].replace("%s", "").replace("1", "6")
-                                };
-                                actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
-                                    if (btnIndex < 2) {
-                                        return;
-                                    }
-                                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
-                                });
-                                options.cardsData.unreviewedOldCardCount--;
-                                options.cardsData.unreviewedNewCardCount++;
-                                countElement.innerHTML = genCardCount(options.cardsData, index);
+                                resetRefresh = {card: currentCard, onRefreshed: () => {
+                                    const minLang = window.siyuan.languages._time["1m"].replace("%s", "");
+                                    currentCard.lapses = 0;
+                                    currentCard.lastReview = -62135596800000;
+                                    currentCard.reps = 0;
+                                    currentCard.state = 0;
+                                    currentCard.nextDues = {
+                                        1: minLang,
+                                        2: minLang.replace("1", "5"),
+                                        3: minLang.replace("1", "10"),
+                                        4: window.siyuan.languages._time["1d"].replace("%s", "").replace("1", "6")
+                                    };
+                                    actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
+                                        if (btnIndex < 2) {
+                                            return;
+                                        }
+                                        element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
+                                    });
+                                    options.cardsData.unreviewedOldCardCount--;
+                                    options.cardsData.unreviewedNewCardCount++;
+                                    countElement.innerHTML = genCardCount(options.cardsData, index);
+                                }};
+                                refreshing = refreshResetCard();
+                            }).finally(async () => {
+                                await refreshing;
+                                resetPending = false;
                             });
                         }
                     });

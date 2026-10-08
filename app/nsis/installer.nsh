@@ -91,6 +91,13 @@ stopSiYuanDone:
     Pop $R7
 FunctionEnd
 
+!ifndef BUILD_UNINSTALLER
+    # 安装阶段按进程名再次检查，避免安装目录前缀命中工作空间或安装器自身。
+    !macro customCheckAppRunning
+        Call StopSiYuanProcesses
+    !macroend
+!endif
+
 !macro preInit
     SetOutPath "$TEMP"
     ${IfNot} ${AtLeastWin10}

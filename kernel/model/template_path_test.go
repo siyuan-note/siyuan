@@ -45,6 +45,28 @@ func TestTemplatePathOperations(t *testing.T) {
 	}
 }
 
+func TestResolveTemplatePath(t *testing.T) {
+	previous := util.DataDir
+	util.DataDir = filepath.Join(t.TempDir(), "data")
+	t.Cleanup(func() { util.DataDir = previous })
+	base := filepath.Join(util.DataDir, "templates")
+	for _, name := range []string{"..foo.md", "nested/..foo.md", "nested/../..foo.md"} {
+		want := filepath.Join(base, name)
+		for _, path := range []string{name, want} {
+			got, err := ResolveTemplatePath(path)
+			if err != nil || got != want {
+				t.Fatalf("resolve %q: %q, %v; want %q", path, got, err, want)
+			}
+		}
+	}
+	for _, path := range []string{"", ".", "..", "../outside.md", "nested/../../outside.md", base,
+		filepath.Join(util.DataDir, "templates-sibling", "outside.md")} {
+		if _, err := ResolveTemplatePath(path); err == nil {
+			t.Fatalf("accepted escaped or root path %q", path)
+		}
+	}
+}
+
 func TestTemplatePathSymlinks(t *testing.T) {
 	previous := util.DataDir
 	util.DataDir = t.TempDir()

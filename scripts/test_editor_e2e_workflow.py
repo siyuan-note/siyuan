@@ -27,6 +27,21 @@ def snapshot_command():
 
 
 class EditorWorkflowTests(unittest.TestCase):
+    def test_nonblocking_steps_have_ids_and_always_report_outcomes(self):
+        for workflow in [CD, DESKTOP]:
+            sections = re.split(r"^  [\w-]+:\n", workflow, flags=re.M)
+            for section in sections:
+                if "continue-on-error: true" not in section:
+                    continue
+                for step in re.split(r"^      - ", section, flags=re.M)[1:]:
+                    if "continue-on-error: true" in step:
+                        self.assertRegex(step, r"(?m)^        id: [\w-]+$")
+                report = section.split("- name: Report non-blocking step outcomes\n", 1)[1]
+                self.assertIn("if: always()", report)
+                self.assertIn("WORKFLOW_STEPS: ${{ toJSON(steps) }}", report)
+                self.assertIn("scripts/report-workflow-outcomes.mjs", report)
+        self.assertIn("node source/scripts/report-workflow-outcomes.mjs", job("editor_e2e"))
+
     def test_builds_run_in_parallel_with_frontend_checks(self):
         for name in ["build", "build_macos_arm64", "build_android"]:
             dependencies = re.search(r"needs: \[(.*?)\]", job(name)).group(1).split(", ")
@@ -69,7 +84,8 @@ class EditorWorkflowTests(unittest.TestCase):
         self.assertIn('--workspace="$HOME/SiYuan-Testing"', editor)
         self.assertNotIn("continue-on-error: true\n        run: >-", editor)
         for name in ["Stop editor kernel", "Record editor outcome and collect logs", "Upload editor reports and logs"]:
-            self.assertIn(f"- name: {name}\n        if: always()", editor)
+            step = editor.split(f"- name: {name}\n", 1)[1].split("      - ", 1)[0]
+            self.assertIn("        if: always()", step)
         self.assertIn("NOT RUN (test prerequisites did not complete)", editor)
 
     @unittest.skipUnless(os.name == "posix" and all(shutil.which(tool) for tool in ["bash", "node", "tar", "shasum"]),

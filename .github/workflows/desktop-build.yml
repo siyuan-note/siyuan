@@ -130,6 +130,7 @@ jobs:
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
 
       - name: Upload raw ARM editor runtime
+        id: upload_raw_arm_editor_runtime
         if: steps.editor-runtime.outcome == 'success'
         continue-on-error: true
         uses: actions/upload-artifact@v7
@@ -141,6 +142,7 @@ jobs:
           retention-days: 2
 
       - name: Checkout siyuan-testing
+        id: checkout_siyuan_testing
         if: fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
         uses: actions/checkout@v6
@@ -150,6 +152,7 @@ jobs:
           path: ${{ github.workspace }}/siyuan-testing
 
       - name: Install End-to-End Test Dependencies
+        id: install_end_to_end_test_dependencies
         if: fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
         run: pnpm install --frozen-lockfile
@@ -167,6 +170,7 @@ jobs:
         working-directory: ${{ github.workspace }}/siyuan-testing
 
       - name: Start Kernel for End-to-End Tests
+        id: start_kernel_for_end_to_end_tests
         if: fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
         shell: bash
@@ -185,6 +189,7 @@ jobs:
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
 
       - name: Wait for End-to-End Test Kernels
+        id: wait_for_end_to_end_test_kernels
         if: fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
         shell: bash
@@ -223,6 +228,7 @@ jobs:
           done
 
       - name: Run End-to-End Tests
+        id: run_end_to_end_tests
         if: fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
         timeout-minutes: 50
@@ -268,6 +274,7 @@ jobs:
         working-directory: ${{ github.workspace }}/siyuan-testing
 
       - name: Stop End-to-End Test Kernels
+        id: stop_end_to_end_test_kernels
         if: always() && fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
         shell: bash
@@ -295,6 +302,7 @@ jobs:
           done
 
       - name: Collect End-to-End Test Logs
+        id: collect_end_to_end_test_logs
         if: always() && fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
         shell: bash
@@ -308,6 +316,7 @@ jobs:
           fi
 
       - name: Upload End-to-End Test Results
+        id: upload_end_to_end_test_results
         if: always() && fromJSON(inputs.config).e2e_shards != ''
         continue-on-error: true
         uses: actions/upload-artifact@v7
@@ -359,3 +368,9 @@ jobs:
             ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.tar.gz
             ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.deb
             ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.rpm
+
+      - name: Report non-blocking step outcomes
+        if: always()
+        env:
+          WORKFLOW_STEPS: ${{ toJSON(steps) }}
+        run: node "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/scripts/report-workflow-outcomes.mjs"

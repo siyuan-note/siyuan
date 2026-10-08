@@ -116,6 +116,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Report non-blocking step outcomes
+        if: always()
+        env:
+          WORKFLOW_STEPS: ${{ toJSON(steps) }}
+        run: node scripts/report-workflow-outcomes.mjs
+
   languages:
     name: Language validation
     needs: prepare
@@ -128,14 +134,26 @@ jobs:
         with:
           python-version: '3.x'
       - name: Test language validation
+        id: test_language_validation
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true
         run: python -m unittest discover -s scripts -p "test_check_lang_keys.py"
       - name: Check language keys and kernel placeholders
         run: python scripts/check-lang-keys.py
       - name: Test editor workflow safeguards
+        id: test_editor_workflow_safeguards
         continue-on-error: true
         run: python -m unittest discover -s scripts -p "test_editor_e2e_workflow.py"
+      - name: Test workflow outcome reporting
+        id: workflow_report_tests
+        continue-on-error: true
+        run: node --test scripts/test-report-workflow-outcomes.mjs
+
+      - name: Report non-blocking step outcomes
+        if: always()
+        env:
+          WORKFLOW_STEPS: ${{ toJSON(steps) }}
+        run: node scripts/report-workflow-outcomes.mjs
 
   contracts:
     name: API contracts and kernel tests
@@ -178,6 +196,7 @@ jobs:
       - name: Prepare native OCR verification resources
         run: python3 scripts/prepare-ocr.py --runtime linux-amd64 --build-worker
       - name: Test all kernel packages
+        id: test_all_kernel_packages
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true
         run: go test -tags "fts5 sqlcipher" ./... -count=1
@@ -186,6 +205,7 @@ jobs:
           SIYUAN_OCR_TEST_ASSETS: ${{ github.workspace }}/app/stage/ocr/models
           SIYUAN_OCR_TEST_LIBRARY: ${{ github.workspace }}/app/stage/ocr/runtime/linux-amd64/libonnxruntime.so
       - name: Test path fixtures with custom temporary directories
+        id: test_path_fixtures_with_custom_temporary_directories
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true
         run: go test -tags "fts5 sqlcipher" ./internal/testutil ./util ./model ./server -run 'Test(PublicDataDir|IsSensitivePath|.*Obsidian|RegisterStaticFileHandlers|StaticFile|WidgetResponseCacheControl|TemplatesAndExportRequireAdministrator|SnippetPublishAccess|PluginPublish|PublishFile)' -count=1
@@ -193,6 +213,12 @@ jobs:
         env:
           TMPDIR: /tmp
           GOTMPDIR: ${{ runner.temp }}
+
+      - name: Report non-blocking step outcomes
+        if: always()
+        env:
+          WORKFLOW_STEPS: ${{ toJSON(steps) }}
+        run: node scripts/report-workflow-outcomes.mjs
 
   frontend-tests:
     name: Frontend, Electron and packaging tests
@@ -208,6 +234,7 @@ jobs:
           go-version-file: kernel/go.mod
           cache-dependency-path: kernel/go.sum
       - name: Test Windows process helpers
+        id: test_windows_process_helpers
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true
         run: go test ./internal/elevator -count=1
@@ -221,6 +248,7 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: app
       - name: Test frontend, Electron and packaging scripts
+        id: test_frontend_electron_and_packaging_scripts
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true
         run: pnpm test
@@ -228,8 +256,15 @@ jobs:
       - name: Test OCR build and resource scripts
         run: python -m unittest discover -s scripts -p "test_*ocr*.py"
       - name: Test editor group selection
+        id: test_editor_group_selection
         continue-on-error: true
         run: node --test scripts/test-prepare-editor-e2e-groups.mjs
+
+      - name: Report non-blocking step outcomes
+        if: always()
+        env:
+          WORKFLOW_STEPS: ${{ toJSON(steps) }}
+        run: node scripts/report-workflow-outcomes.mjs
 
   build:
     name: ${{ matrix.config.name }}
@@ -408,6 +443,7 @@ jobs:
         working-directory: siyuan-testing
 
       - name: Stop editor kernel
+        id: stop_editor_kernel
         if: always()
         continue-on-error: true
         shell: bash
@@ -452,6 +488,7 @@ jobs:
           } | tee siyuan-testing/kernel-logs/outcome.txt >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload editor reports and logs
+        id: upload_editor_reports_and_logs
         if: always()
         continue-on-error: true
         uses: actions/upload-artifact@v7
@@ -465,6 +502,12 @@ jobs:
             siyuan-testing/kernel-logs
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Report non-blocking step outcomes
+        if: always()
+        env:
+          WORKFLOW_STEPS: ${{ toJSON(steps) }}
+        run: node source/scripts/report-workflow-outcomes.mjs
 
   build_android:
     runs-on: ubuntu-24.04

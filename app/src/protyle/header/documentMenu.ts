@@ -221,7 +221,7 @@ export const openDocumentMenu = (options: {
                 }
             }).element);
         }
-        const isCardMade = !!docInfo.ial[Constants.CUSTOM_RIFF_DECKS];
+        const isCardMade = (docInfo.ial[Constants.CUSTOM_RIFF_DECKS] || "").includes(Constants.QUICK_DECK_ID);
         if (!isEncryptedBox(notebookId)) {
             const riffCardMenu: IMenu[] = [{
                 id: "spaceRepetition",

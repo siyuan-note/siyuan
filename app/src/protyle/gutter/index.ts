@@ -1459,7 +1459,7 @@ export class Gutter {
                 id: "separator_quickMakeCard",
                 type: "separator"
             }).element);
-            const allCardsMade = !selectsElement.some(item => !item.hasAttribute(Constants.CUSTOM_RIFF_DECKS) && item.getAttribute("data-type") !== "NodeThematicBreak");
+            const allCardsMade = !selectsElement.some(item => !(item.getAttribute(Constants.CUSTOM_RIFF_DECKS) || "").includes(Constants.QUICK_DECK_ID) && item.getAttribute("data-type") !== "NodeThematicBreak");
             window.siyuan.menus.menu.append(new MenuItem({
                 id: allCardsMade ? "removeCard" : "quickMakeCard",
                 label: allCardsMade ? window.siyuan.languages.removeCard : window.siyuan.languages.quickMakeCard,
@@ -2982,7 +2982,7 @@ export class Gutter {
             }).element);
         }
         if (type !== "NodeThematicBreak" && !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
-            const isCardMade = nodeElement.hasAttribute(Constants.CUSTOM_RIFF_DECKS);
+            const isCardMade = (nodeElement.getAttribute(Constants.CUSTOM_RIFF_DECKS) || "").includes(Constants.QUICK_DECK_ID);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: isCardMade ? "removeCard" : "quickMakeCard",
                 icon: "iconRiffCard",

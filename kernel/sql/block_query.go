@@ -314,9 +314,11 @@ func queryDocTitles(searchIgnoreLines []string, boxIDs ...string) (ret []string)
 	return
 }
 
+const bookmarkBlockPredicate = "id IN (SELECT block_id FROM attributes WHERE name = 'bookmark' AND type = 'b')"
+
 func QueryBookmarkBlocks() (ret []*Block) {
-	sqlStmt := "SELECT * FROM blocks WHERE ial LIKE ?"
-	rows, err := query(sqlStmt, "%bookmark=%")
+	sqlStmt := "SELECT * FROM blocks WHERE " + bookmarkBlockPredicate
+	rows, err := query(sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return
@@ -338,8 +340,8 @@ type BookmarkLabelBlock struct {
 
 func QueryBookmarkLabelBlocks() (ret []*BookmarkLabelBlock) {
 	ret = []*BookmarkLabelBlock{}
-	sqlStmt := "SELECT ial, box, path FROM blocks WHERE ial LIKE ?"
-	rows, err := query(sqlStmt, "%bookmark=%")
+	sqlStmt := "SELECT ial, box, path FROM blocks WHERE " + bookmarkBlockPredicate
+	rows, err := query(sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return

@@ -131,6 +131,9 @@ func initDatabase(forceRebuild bool) {
 			if err := ensureTagSpansIndex(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create tag spans index failed: %s", err)
 			}
+			if err := ensureBookmarkAttributesIndex(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create bookmark attributes index failed: %s", err)
+			}
 			if err := cleanupInvalidRefs(db); err != nil {
 				logging.LogErrorf("cleanup invalid refs failed: %s", err)
 			}
@@ -257,6 +260,9 @@ func initDBTables() {
 	_, err = db.Exec("CREATE INDEX idx_attributes_root_id ON attributes(root_id)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_attributes_root_id] failed: %s", err)
+	}
+	if err = ensureBookmarkAttributesIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create bookmark attributes index failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS refs")
@@ -1443,6 +1449,11 @@ func ensureTagSpansIndex(database *sql.DB) (err error) {
 	return
 }
 
+func ensureBookmarkAttributesIndex(database *sql.DB) (err error) {
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_attributes_bookmark_block_id ON attributes(block_id) WHERE name = 'bookmark' AND type = 'b'")
+	return
+}
+
 func ensureRefsDefIndexes(database *sql.DB) (err error) {
 	if _, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_refs_def_block_id ON refs(def_block_id)"); err != nil {
 		return
@@ -2111,6 +2122,9 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		return
 	}
 	if err = ensureTagSpansIndex(boxDB); err != nil {
+		return
+	}
+	if err = ensureBookmarkAttributesIndex(boxDB); err != nil {
 		return
 	}
 	if err = cleanupInvalidRefs(boxDB); err != nil {

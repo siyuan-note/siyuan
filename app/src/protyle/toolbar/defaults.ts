@@ -8,6 +8,12 @@ interface IToolbarEntry {
     separator?: boolean;
 }
 
+export interface IToolbarCatalogEntry {
+    key: string;
+    label: string;
+    separator: boolean;
+}
+
 type TConfigurableToolbarItem = IMenuItem & {
     [toolbarEntryMetadata]?: {
         id: string;

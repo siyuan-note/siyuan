@@ -3,6 +3,7 @@ import type {Dialog} from "../../dialog";
 import type {IPluginReloadData} from "../../plugin/loader";
 import type {IGlobalPluginStateSnapshot} from "../../plugin/globalStateCoordinator";
 import type {TDockOrderSnapshot} from "../entryVisibility/dockOrder";
+import type {IToolbarCatalogEntry} from "../../protyle/toolbar/defaults";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -15,6 +16,7 @@ export interface ISettingsWindowHost {
     reload: () => Promise<void>;
     resetLayout: () => Promise<void>;
     getDockOrderSnapshot: () => TDockOrderSnapshot;
+    getEditorToolbarCatalogSnapshot: () => IToolbarCatalogEntry[];
     openBazaarPath: (type: TBazaarType, name: string, storage?: boolean) => void;
     exportLayout: (options: {cb: () => void; errorExit: boolean}) => Promise<void>;
     exit: (setCurrentWorkspace?: boolean) => Promise<void>;

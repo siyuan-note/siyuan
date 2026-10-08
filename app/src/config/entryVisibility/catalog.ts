@@ -4,6 +4,7 @@ import {
     DESKTOP_TOOLBAR_ENTRIES,
     getToolbarEntryId,
     getToolbarEntryLabel,
+    IToolbarCatalogEntry,
     MOBILE_TOOLBAR_NAMES,
     TOOLBAR_ENTRY_ROOT_PATH,
 } from "../../protyle/toolbar/defaults";
@@ -1314,13 +1315,12 @@ const toolbarCatalogNodeSignature = (item: IEntryCatalogNode, pluginLabels: Map<
 let toolbarCatalogSignature = JSON.stringify(toolbarBuiltinChildren.map((item) =>
     toolbarCatalogNodeSignature(item, new Map())));
 
-export const refreshToolbarCatalog = (items: Array<string | IMenuItem>) => {
+export const refreshToolbarCatalogEntries = (items: IToolbarCatalogEntry[]) => {
     const nodes = new Map(toolbarBuiltinNodeMap);
     const pluginLabels = new Map<string, string>();
     const actualOrder: string[] = [];
     items.forEach((item) => {
-        const menuItem = typeof item === "string" ? {name: item} : item;
-        const key = getToolbarEntryId(menuItem);
+        const key = item.key;
         if (!key || actualOrder.includes(key)) {
             return;
         }
@@ -1328,9 +1328,9 @@ export const refreshToolbarCatalog = (items: Array<string | IMenuItem>) => {
         if (nodes.has(key)) {
             return;
         }
-        const label = getToolbarEntryLabel(menuItem) || menuItem.tip || menuItem.name;
+        const label = item.label;
         pluginLabels.set(key, label);
-        nodes.set(key, menuItem.name === "|" ? separator(key) : node(key, literal(label)));
+        nodes.set(key, item.separator ? separator(key) : node(key, literal(label)));
     });
     const order = mergeEntryOrderPreservingUnknown(DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key), actualOrder);
     const children = normalizeToolbarCatalogSeparators([
@@ -1345,6 +1345,14 @@ export const refreshToolbarCatalog = (items: Array<string | IMenuItem>) => {
     toolbarCatalogSection.children = [...children, ...mobileToolbarContexts(children)];
     toolbarCatalogSignature = signature;
     rebuildCatalogIndexes();
+};
+
+export const refreshToolbarCatalog = (items: Array<string | IMenuItem>) => {
+    refreshToolbarCatalogEntries(items.map((item) => {
+        const menuItem = typeof item === "string" ? {name: item} : item;
+        return {key: getToolbarEntryId(menuItem), label: getToolbarEntryLabel(menuItem) || menuItem.tip || menuItem.name,
+            separator: menuItem.name === "|"};
+    }));
 };
 
 interface ISlashMenuCatalogPlugin {

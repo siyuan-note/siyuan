@@ -33,6 +33,7 @@ import {
     refreshSlashMenuCatalog,
     refreshTopBarCatalog,
     refreshToolbarCatalog,
+    refreshToolbarCatalogEntries,
     SLASH_MENU_ROOT_PATH,
     TOP_BAR_ROOT_PATH,
 } from "./catalog";
@@ -417,6 +418,24 @@ test("toolbar catalog follows plugin insertion slots and removes unloaded plugin
         refreshToolbarCatalog(defaults);
     }
     assert.equal(getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginKey}`), undefined);
+});
+
+test("toolbar catalog accepts plugin entries from the owner window snapshot", () => {
+    const pluginKey = getPluginToolbarEntryKey("owner", "action");
+    const defaults = getDefaultToolbar(false).map((item) => typeof item === "string" ? {name: item} : item);
+    try {
+        refreshToolbarCatalogEntries([
+            {key: "block-type", label: "Block type", separator: false},
+            {key: pluginKey, label: "Owner - Action", separator: false},
+            {key: "block-ref", label: "Block reference", separator: false},
+        ]);
+        const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH)
+            .filter(item => !item.key.startsWith("mobile-"));
+        assert.deepEqual(children.slice(0, 3).map(item => item.key), ["block-type", pluginKey, "block-ref"]);
+        assert.equal(getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginKey}`)?.label(), "Owner - Action");
+    } finally {
+        refreshToolbarCatalog(defaults);
+    }
 });
 
 test("dock catalog refreshes unique plugin docks and removes unloaded entries", () => {

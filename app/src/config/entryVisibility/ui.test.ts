@@ -44,6 +44,31 @@ test("entry settings show exit only on native tablets without changing the persi
     }
 });
 
+test("detached entry settings read the owner's plugin toolbar catalog", () => {
+    const code = transpileModule(readFileSync("src/config/entryVisibility/ui.ts", "utf8") +
+        "\nexports.refreshToolbar = refreshEditorToolbarCatalog;", {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    const exports = {} as {refreshToolbar: (plugins: unknown[]) => void};
+    const plugins = [{name: "local"}];
+    const owner = [{key: "plugin:owner:item", label: "Owner item", separator: false}];
+    const seen: Array<Array<{key: string}>> = [];
+    let host: {getEditorToolbarCatalogSnapshot: () => typeof owner} | undefined = {
+        getEditorToolbarCatalogSnapshot: () => owner,
+    };
+    runInNewContext(code, {exports, require: () => ({
+        getSettingsWindowHost: () => host,
+        getEditorToolbarCatalogSnapshot: (items: Array<{name: string}>) => [{key: items[0].name}],
+        refreshToolbarCatalogEntries: (items: Array<{key: string}>) => seen.push(items),
+        DOCK_ORDER_SCOPES_BY_SIDE: {},
+    })});
+    exports.refreshToolbar(plugins);
+    assert.equal(seen[0], owner);
+    host = undefined;
+    exports.refreshToolbar(plugins);
+    assert.equal(seen[1][0].key, "local");
+});
+
 const loadDockSnapshot = () => {
     const code = transpileModule(readFileSync("src/config/entryVisibility/ui.ts", "utf8") +
         "\nexports.snapshot = getProfileDockOrderSnapshot;", {

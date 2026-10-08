@@ -12,6 +12,7 @@ import {Constants} from "../../constants";
 import {hasPluginSetting} from "../../plugin";
 import {getWorkspaceName} from "../../util/processTitle";
 import {getDockEntryOrderSnapshot} from "../entryVisibility/dockOrder";
+import {getEditorToolbarCatalogSnapshot} from "../../protyle/toolbar/catalogSnapshot";
 import {hasNativeSettingTasks} from "./taskBlocker";
 import {openBazaarPath} from "../bazaar/openPath";
 import type {App} from "../../index";
@@ -107,6 +108,10 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
         reload: () => { assertActive(); return reloadUI(); },
         resetLayout: () => { assertActive(); return resetLayout(); },
         getDockOrderSnapshot: () => { assertActive(); return getDockEntryOrderSnapshot(); },
+        getEditorToolbarCatalogSnapshot: () => {
+            assertActive();
+            return getEditorToolbarCatalogSnapshot(app.plugins);
+        },
         openBazaarPath: (type, name, storage) => { assertActive(); openBazaarPath(type, name, storage); },
         exit: setCurrentWorkspace => { assertActive(); return exitSiYuan(setCurrentWorkspace); },
         plugin: plugin && {

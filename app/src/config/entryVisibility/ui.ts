@@ -15,6 +15,7 @@ import {
     refreshDockCatalog,
     refreshSlashMenuCatalog,
     refreshTopBarCatalog,
+    refreshToolbarCatalogEntries,
     TOP_BAR_ROOT_PATH,
     STATUS_BAR_ROOT_PATH,
 } from "./catalog";
@@ -51,6 +52,7 @@ import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
 import {getSettingsOwnerApp} from "../setting/windowContext";
 /// #if !MOBILE
 import {getSettingsWindowHost, isSettingsWindow} from "../setting/windowContext";
+import {getEditorToolbarCatalogSnapshot} from "../../protyle/toolbar/catalogSnapshot";
 /// #endif
 import {
     DOCK_ORDER_SCOPES,
@@ -580,8 +582,16 @@ const getProfileDockOrderSnapshot = (builtin: boolean) => {
     return builtin ? snapshot : getDefaultDockEntryOrderSnapshot(snapshot);
 };
 
+const refreshEditorToolbarCatalog = (plugins: NonNullable<ReturnType<typeof getSettingsOwnerApp>>["plugins"]) => {
+    /// #if !MOBILE
+    refreshToolbarCatalogEntries(getSettingsWindowHost()?.getEditorToolbarCatalogSnapshot() ||
+        getEditorToolbarCatalogSnapshot(plugins));
+    /// #endif
+};
+
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     const plugins = getSettingsOwnerApp()?.plugins || [];
+    refreshEditorToolbarCatalog(plugins);
     refreshTopBarCatalog(plugins);
     refreshDockCatalog(plugins);
     refreshSlashMenuCatalog(plugins);

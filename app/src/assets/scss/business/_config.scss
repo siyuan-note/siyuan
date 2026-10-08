@@ -777,6 +777,7 @@
       align-items: center;
       gap: 4px;
       vertical-align: middle;
+      white-space: nowrap;
     }
 
     &__panel {
@@ -889,6 +890,40 @@
 
       > [data-bazaar-index] {
         cursor: default;
+      }
+    }
+
+    // 桌面端已下载卡片：图标右侧分为上下两块，名称/描述在上、操作按钮在下，按钮不跨到图标下方
+    &__panel[data-type="downloaded"] .config-bazaar__content .b3-card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+
+      // 图标跨两行并垂直居中；同时去掉上下外边距，否则它会把第一行撑高、在描述下方留下空白
+      // 行是隐式的，跨行只能用 span 指定
+      > .b3-card__img {
+        align-self: center;
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        margin: 0 0 0 16px;
+      }
+
+      > .fn__flex-1 {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      > .b3-card__actions--right {
+        grid-column: 2;
+        grid-row: 2;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        min-width: 0;
+        row-gap: 4px;
+        padding: 0 16px 16px;
+
+        > .config-bazaar__publish-controls {
+          margin-right: auto;
+        }
       }
     }
 

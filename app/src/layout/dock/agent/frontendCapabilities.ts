@@ -92,24 +92,26 @@ export const unregisterCapability = (id: string, generation?: number) => {
     capabilityRegistry.delete(id);
 };
 
-/// #if !MOBILE
+let mobileFrontend = false;
+/// #if MOBILE
+mobileFrontend = true;
+/// #endif
+
 registerCapability({
     id: "native/frontend/open_setting",
     title: "Open settings",
-    description: "Open SiYuan settings and optionally filter settings by a search query.",
+    description: mobileFrontend ? "Open SiYuan settings and optionally provide a search query." :
+        "Open SiYuan settings and optionally filter settings by a search query.",
     inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
     source: "native",
     handler: async (args, app) => {
         const query = (args.query as string | undefined)?.trim();
+        /// #if !MOBILE
         const {openSetting} = await import("../../../config");
-        // 已有设置对话框时复用该实例，避免 openSetting() 销毁现有实例后返回待销毁的对象。
+        // 已有设置对话框时复用该实例，避免销毁现有实例后返回待销毁的对象。
         const existing = window.siyuan.dialogs.find(d => d.element.querySelector(".config__tab-container"));
-        let dialog = existing;
-        if (!dialog) {
-            dialog = openSetting(app);
-        }
+        const dialog = existing || openSetting(app);
         if (query) {
-            // 填充设置面板的内置搜索框并触发实时筛选。
             const input = dialog.element.querySelector(".config__side .b3-text-field") as HTMLInputElement;
             if (input) {
                 input.value = query;
@@ -118,13 +120,23 @@ registerCapability({
             return {result: `Opened the settings panel and filtered by "${query}".`};
         }
         return {result: "Opened the settings panel."};
+        /// #else
+        const [{hideMobileAgent, reopenMobileAgent}, {openMobileSetting}] = await Promise.all([
+            import("../../../mobile/agent/MobileAgentChat"),
+            import("../../../mobile/menu"),
+        ]);
+        hideMobileAgent();
+        openMobileSetting(app, undefined, reopenMobileAgent);
+        return {result: query ? `Opened mobile settings for "${query}".` : "Opened mobile settings."};
+        /// #endif
     },
 });
 
 registerCapability({
     id: "native/frontend/focus_block",
     title: "Focus block",
-    description: "Scroll a block already loaded in an editor into view and highlight it.",
+    description: mobileFrontend ? "Scroll a block already loaded in the current editor into view and highlight it." :
+        "Scroll a block already loaded in an editor into view and highlight it.",
     inputSchema: {type: "object", properties: {id: {type: "string"}}, required: ["id"], additionalProperties: false},
     source: "native",
     handler: async (args) => {
@@ -132,21 +144,32 @@ registerCapability({
         if (!id) {
             return {error: "missing required argument: id"};
         }
-        const {getAllEditor} = await import("../../getAll");
-        // 找到包含目标块的编辑器并滚动到该块。
         let blockEl: HTMLElement | null = null;
+        let editorScope = "any open editor";
+        /// #if !MOBILE
+        const {getAllEditor} = await import("../../getAll");
         for (const editor of getAllEditor()) {
-            const el = editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) as HTMLElement | null;
-            if (el) {
-                blockEl = el;
+            blockEl = editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+            if (blockEl) {
                 break;
             }
         }
+        /// #else
+        const [{getCurrentEditor}, {hideMobileAgent}] = await Promise.all([
+            import("../../../mobile/editor"),
+            import("../../../mobile/agent/MobileAgentChat"),
+        ]);
+        const editor = getCurrentEditor();
+        blockEl = editor?.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) || null;
+        editorScope = "the current editor";
+        if (blockEl) {
+            hideMobileAgent();
+        }
+        /// #endif
         if (!blockEl) {
-            return {error: `Block ${id} is not loaded in any open editor. Use open_document to open it first.`};
+            return {error: `Block ${id} is not loaded in ${editorScope}. Use open_document to open it first.`};
         }
         blockEl.scrollIntoView({behavior: "smooth", block: "center"});
-        // 短暂高亮目标块以便用户定位。
         blockEl.classList.add("protyle-wysiwyg--hl");
         setTimeout(() => blockEl?.classList.remove("protyle-wysiwyg--hl"), 2000);
         return {result: `Focused block ${id} in the active editor.`};
@@ -156,7 +179,8 @@ registerCapability({
 registerCapability({
     id: "native/frontend/open_document",
     title: "Open document",
-    description: "Open a SiYuan document by its block ID in the current app.",
+    description: mobileFrontend ? "Open a SiYuan document by its block ID in the mobile app." :
+        "Open a SiYuan document by its block ID in the current app.",
     inputSchema: {type: "object", properties: {id: {type: "string"}}, required: ["id"], additionalProperties: false},
     source: "native",
     handler: async (args, app) => {
@@ -165,11 +189,21 @@ registerCapability({
             return {error: "missing required argument: id"};
         }
         try {
+            /// #if !MOBILE
             const [{openFileById}, {Constants}] = await Promise.all([
                 import("../../../editor/util"),
                 import("../../../constants"),
             ]);
             await openFileById({app, id, action: [Constants.CB_GET_FOCUS]});
+            /// #else
+            const [{openMobileFileById}, {hideMobileAgent}, {Constants: mobileConstants}] = await Promise.all([
+                import("../../../mobile/editor"),
+                import("../../../mobile/agent/MobileAgentChat"),
+                import("../../../constants"),
+            ]);
+            hideMobileAgent();
+            openMobileFileById(app, id, [mobileConstants.CB_GET_FOCUS]);
+            /// #endif
             return {result: `Opened document ${id}.`};
         } catch (e) {
             return {error: `Failed to open document ${id}: ${(e as Error).message}`};
@@ -180,100 +214,20 @@ registerCapability({
 registerCapability({
     id: "native/frontend/open_search",
     title: "Open search",
-    description: "Open the SiYuan search interface and optionally fill in a query.",
+    description: mobileFrontend ? "Open the SiYuan mobile search interface and optionally fill in a query." :
+        "Open the SiYuan search interface and optionally fill in a query.",
     inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
     source: "native",
     handler: async (args, app) => {
         const query = (args.query as string | undefined)?.trim();
+        /// #if !MOBILE
         const [{openSearch}, {Constants}] = await Promise.all([
             import("../../../search/spread"),
             import("../../../constants"),
         ]);
         await openSearch({app, hotkey: Constants.DIALOG_GLOBALSEARCH, key: query});
         return {result: query ? `Opened search dialog with query "${query}".` : "Opened search dialog."};
-    },
-});
-/// #else
-registerCapability({
-    id: "native/frontend/open_setting",
-    title: "Open settings",
-    description: "Open SiYuan settings and optionally provide a search query.",
-    inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
-    source: "native",
-    handler: async (args, app) => {
-        const query = (args.query as string | undefined)?.trim();
-        const [{hideMobileAgent, reopenMobileAgent}, {openMobileSetting}] = await Promise.all([
-            import("../../../mobile/agent/MobileAgentChat"),
-            import("../../../mobile/menu"),
-        ]);
-        hideMobileAgent();
-        openMobileSetting(app, undefined, reopenMobileAgent);
-        return {result: query ? `Opened mobile settings for "${query}".` : "Opened mobile settings."};
-    },
-});
-
-registerCapability({
-    id: "native/frontend/focus_block",
-    title: "Focus block",
-    description: "Scroll a block already loaded in the current editor into view and highlight it.",
-    inputSchema: {type: "object", properties: {id: {type: "string"}}, required: ["id"], additionalProperties: false},
-    source: "native",
-    handler: async (args) => {
-        const id = args.id as string | undefined;
-        if (!id) {
-            return {error: "missing required argument: id"};
-        }
-        const [{getCurrentEditor}, {hideMobileAgent}] = await Promise.all([
-            import("../../../mobile/editor"),
-            import("../../../mobile/agent/MobileAgentChat"),
-        ]);
-        const editor = getCurrentEditor();
-        const block = editor?.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) as HTMLElement | null;
-        if (!block) {
-            return {error: `Block ${id} is not loaded in the current editor. Use open_document to open it first.`};
-        }
-        hideMobileAgent();
-        block.scrollIntoView({behavior: "smooth", block: "center"});
-        block.classList.add("protyle-wysiwyg--hl");
-        setTimeout(() => block.classList.remove("protyle-wysiwyg--hl"), 2000);
-        return {result: `Focused block ${id} in the active editor.`};
-    },
-});
-
-registerCapability({
-    id: "native/frontend/open_document",
-    title: "Open document",
-    description: "Open a SiYuan document by its block ID in the mobile app.",
-    inputSchema: {type: "object", properties: {id: {type: "string"}}, required: ["id"], additionalProperties: false},
-    source: "native",
-    handler: async (args, app) => {
-        const id = args.id as string | undefined;
-        if (!id) {
-            return {error: "missing required argument: id"};
-        }
-        try {
-            const [{openMobileFileById}, {hideMobileAgent}, {Constants}] = await Promise.all([
-                import("../../../mobile/editor"),
-                import("../../../mobile/agent/MobileAgentChat"),
-                import("../../../constants"),
-            ]);
-            hideMobileAgent();
-            openMobileFileById(app, id, [Constants.CB_GET_FOCUS]);
-            return {result: `Opened document ${id}.`};
-        } catch (e) {
-            return {error: `Failed to open document ${id}: ${(e as Error).message}`};
-        }
-    },
-});
-
-registerCapability({
-    id: "native/frontend/open_search",
-    title: "Open search",
-    description: "Open the SiYuan mobile search interface and optionally fill in a query.",
-    inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
-    source: "native",
-    handler: async (args, app) => {
-        const query = (args.query as string | undefined)?.trim();
+        /// #else
         const [{popSearch}, {hideMobileAgent}] = await Promise.all([
             import("../../../mobile/menu/search"),
             import("../../../mobile/agent/MobileAgentChat"),
@@ -288,6 +242,6 @@ registerCapability({
             }
         }
         return {result: query ? `Opened mobile search with query "${query}".` : "Opened mobile search."};
+        /// #endif
     },
 });
-/// #endif

@@ -23,6 +23,7 @@ import {openDocHistory} from "./doc";
 import {getRepoSnapshotRange, getRepoSnapshotType, initRepoPanel, updateRepoSelection} from "./repoPanel";
 import {repoSnapshotInRange} from "./repoRange";
 import {MenuItem} from "../menus/Menu";
+import {renderSnapshotActions} from "./snapshotActions";
 
 let historyEditor: Protyle;
 const repoPanelCleanup = new WeakMap<Element, () => void>();
@@ -175,103 +176,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         updateRepoSelection(element);
         return;
     }
-    let actionHTML = "";
-    /// #if MOBILE
-    if (type === "getCloudRepoTagSnapshots") {
-        actionHTML = `<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="downloadSnapshot">
-    <svg><use xlink:href="#iconDownload"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.download}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="downloadRollback">
-    <svg><use xlink:href="#iconUndo"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.downloadRollback}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="removeCloudRepoTagSnapshot">
-    <svg><use xlink:href="#iconTrashcan"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.remove}
-</span>
-<span class="fn__flex-1"></span>`;
-    } else if (type === "getCloudRepoSnapshots") {
-        actionHTML = `<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="downloadSnapshot">
-    <svg><use xlink:href="#iconDownload"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.download}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="downloadRollback">
-    <svg><use xlink:href="#iconUndo"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.downloadRollback}
-</span>
-<span class="fn__flex-1"></span>`;
-    } else if (type === "getRepoTagSnapshots") {
-        actionHTML = `<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="uploadSnapshot">
-    <svg><use xlink:href="#iconUpload"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.upload}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="rollback">
-    <svg><use xlink:href="#iconUndo"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.rollback}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="removeRepoTagSnapshot">
-    <svg><use xlink:href="#iconTrashcan"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.remove}
-</span>
-<span class="fn__flex-1"></span>`;
-    } else if (type === "getRepoSnapshots") {
-        actionHTML = `<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="genTag">
-    <svg><use xlink:href="#iconTag"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.tagSnapshot}
-</span>
-<span class="fn__flex-1"></span>
-<span class="b3-list-item__action" data-type="rollback">
-    <svg><use xlink:href="#iconUndo"></use></svg>
-    <span class="fn__space"></span>
-    ${window.siyuan.languages.rollback}
-</span>
-<span class="fn__flex-1"></span>`;
-    }
-    /// #else
-    if (type === "getCloudRepoTagSnapshots") {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadRollback" aria-label="${window.siyuan.languages.downloadRollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeCloudRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
-    } else if (type === "getCloudRepoSnapshots") {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadRollback" aria-label="${window.siyuan.languages.downloadRollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
-    } else if (type === "getRepoTagSnapshots") {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}"><svg><use xlink:href="#iconUpload"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
-    } else if (type === "getRepoSnapshots") {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="genTag" aria-label="${window.siyuan.languages.tagSnapshot}"><svg><use xlink:href="#iconTag"></use></svg></span>
-<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
-    }
-    /// #endif
-    if (["getRepoTagSnapshots", "getRepoSnapshots"].includes(type) && !window.siyuan.config.readonly) {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="editSnapshotMemo" aria-label="${window.siyuan.languages.editSnapshotMemo}"><svg><use xlink:href="#iconEdit"></use></svg></span>` + actionHTML;
-    }
-    if (isMobile()) {
-        actionHTML = actionHTML.replace(/class="b3-list-item__action([^"]*)" data-type="([^"]+)"/g,
-            (match, classes, action) => ["rollback", "downloadRollback"].includes(action) ? match :
-                `class="b3-list-item__action history__snapshot-menu-action${classes}" data-type="${action}"`);
-        actionHTML = actionHTML.replaceAll('<span class="fn__flex-1"></span>', "");
-    }
+    const actionHTML = renderSnapshotActions(type, window.siyuan.languages, isMobile(), window.siyuan.config.readonly);
     const memos = new Map<string, string>();
     snapshotMemos.set(element, memos);
     let repoHTML = "";

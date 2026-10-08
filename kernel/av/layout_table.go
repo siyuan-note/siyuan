@@ -176,9 +176,9 @@ func (table *Table) GetFields() (ret []Field) {
 }
 
 func (table *Table) GetField(id string) (ret Field, fieldIndex int) {
-	for _, column := range table.Columns {
+	for i, column := range table.Columns {
 		if column.ID == id {
-			return column, fieldIndex
+			return column, i
 		}
 	}
 	return nil, -1

@@ -1,5 +1,6 @@
 import {getAVRichTextBlockDOM, getAVRichTextLute, sanitizeAVRichTextBlockDOM, serializeAVRichTextBlockDOM} from "../render/av/richText";
-import {decodeTableCellRich, encodeTableCellRich, TABLE_CELL_RICH_ATTRIBUTE, TABLE_RICH_ATTRIBUTE} from "./tableCellRichValue";
+import {decodeTableCellRich, encodeTableCellRich, TABLE_CELL_RICH_ATTRIBUTE} from "./tableCellRichValue";
+import {Constants} from "../../constants";
 import {restoreInlineElementBoundaries} from "./inlineElementBoundary";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 import {getTableVirtualizationHTML, TABLE_VIRTUAL_ID} from "./tableVirtualizationDOM";
@@ -138,7 +139,7 @@ export const updateTableCellEditingValue = (cell: Element, value: {blockDOM: str
     if (cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE) || inline === null) {
         cell.removeAttribute(TABLE_CELL_INLINE_ATTRIBUTE);
         cell.setAttribute(TABLE_CELL_RICH_ATTRIBUTE, encodeTableCellRich(value.markdown));
-        cell.closest('[data-type="NodeTable"]')?.setAttribute(TABLE_RICH_ATTRIBUTE, "1");
+        cell.closest('[data-type="NodeTable"]')?.setAttribute(Constants.CUSTOM_SY_TABLE_RICH, "1");
     } else {
         cell.setAttribute(TABLE_CELL_INLINE_ATTRIBUTE, inline);
     }
@@ -187,7 +188,7 @@ export const renderTableCellRich = (cell: Element) => {
         `<table><thead><tr><th ${TABLE_CELL_RICH_ATTRIBUTE}="${encoded}"></th></tr></thead></table></div></div>`);
     cell.innerHTML = template.content.querySelector("th").innerHTML;
     cell.setAttribute("contenteditable", "false");
-    cell.closest('[data-type="NodeTable"]')?.setAttribute(TABLE_RICH_ATTRIBUTE, "1");
+    cell.closest('[data-type="NodeTable"]')?.setAttribute(Constants.CUSTOM_SY_TABLE_RICH, "1");
 };
 
 export const setTableCellRich = (cell: Element, content: string) => {
@@ -259,18 +260,18 @@ export const getTableBlockHTML = (table: Element) => {
 };
 
 export const retainTableCellRichMetadata = (html: string, changedHTML: string) => {
-    if (!changedHTML.includes(TABLE_RICH_ATTRIBUTE)) {
+    if (!changedHTML.includes(Constants.CUSTOM_SY_TABLE_RICH)) {
         return html;
     }
     const changed = document.createElement("template");
     changed.innerHTML = changedHTML;
     const original = document.createElement("template");
     original.innerHTML = html;
-    changed.content.querySelectorAll(`[data-type="NodeTable"][${TABLE_RICH_ATTRIBUTE}="1"]`).forEach(table => {
+    changed.content.querySelectorAll(`[data-type="NodeTable"][${Constants.CUSTOM_SY_TABLE_RICH}="1"]`).forEach(table => {
         const id = table.getAttribute("data-node-id");
         original.content.querySelectorAll('[data-type="NodeTable"]').forEach(previous => {
             if (previous.getAttribute("data-node-id") === id) {
-                previous.setAttribute(TABLE_RICH_ATTRIBUTE, "1");
+                previous.setAttribute(Constants.CUSTOM_SY_TABLE_RICH, "1");
             }
         });
     });

@@ -2,7 +2,9 @@ import {strict as assert} from "node:assert";
 import test from "node:test";
 import type {Transaction} from "../../types/api";
 import {getEditorTransaction} from "./transactionContract";
-import {operationsMayChangeHeadingNumbers, operationsMayChangeOutline} from "./headingNumberCore";
+Object.assign(globalThis, {SIYUAN_VERSION: "test", NODE_ENV: "test"});
+
+const {operationsMayChangeHeadingNumbers, operationsMayChangeOutline} = require("./headingNumberCore") as typeof import("./headingNumberCore");
 
 test("block reference swaps retain affected roots and invalidate the outline", () => {
     const response: Transaction = JSON.parse(`{"doOperations":[{

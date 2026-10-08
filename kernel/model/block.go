@@ -868,7 +868,7 @@ func swapBlockRefNodes(refNode, defNode *ast.Node, defID string, includeChildren
 			if includeChildren {
 				headingMode = "0"
 			}
-			embed.SetIALAttr("custom-heading-mode", headingMode)
+			embed.SetIALAttr(embedHeadingModeAttr, headingMode)
 		}
 		embed.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where id='" + defID + "'")})
 		originalRefNode.InsertBefore(embed)
@@ -1578,7 +1578,7 @@ func compareBlockKramdownIALAttrNames(a, b string) int {
 }
 
 func isSystemManagedBlockKramdownIALAttr(name string) bool {
-	return "custom-avs" == name || "custom-heading-mode" == name || embedHeadingLevelAttr == name || "custom-reminder-wechat" == name ||
+	return av.NodeAttrNameAvs == name || embedHeadingModeAttr == name || embedHeadingLevelAttr == name || reminderWechatAttr == name ||
 		strings.HasPrefix(name, "custom-riff-") || strings.HasPrefix(name, "custom-sy-")
 }
 

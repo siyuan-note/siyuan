@@ -1,6 +1,8 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {
+Object.assign(globalThis, {SIYUAN_VERSION: "test", NODE_ENV: "test"});
+
+const {
     buildHeadingNumberStyles,
     headingNumberNeedsLeadingTrim,
     headingNumberNeedsSpacing,
@@ -10,7 +12,7 @@ import {
     renderHeadingNumberElements,
     resolveHeadingNumberEnabled,
     transactionsMayChangeRootHeadingNumberSetting
-} from "./headingNumberCore";
+} = require("./headingNumberCore") as typeof import("./headingNumberCore");
 
 class TestElement {
     private attributes = new Map<string, string>();

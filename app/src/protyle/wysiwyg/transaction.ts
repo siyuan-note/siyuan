@@ -1443,7 +1443,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 item.querySelector(".protyle-attr--av")?.remove();
                 item.removeAttribute("custom-avs");
                 item.getAttributeNames().forEach(attr => {
-                    if (attr.startsWith("custom-sy-av-s-text-")) {
+                    if (attr.startsWith(Constants.CUSTOM_SY_AV_STATIC_TEXT)) {
                         item.removeAttribute(attr);
                     }
                 });

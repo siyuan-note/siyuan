@@ -40,6 +40,8 @@ import (
 	"golang.org/x/text/message"
 )
 
+const codeTabSpacesAttr = "custom-sy-code-tab-spaces"
+
 type Value struct {
 	ID         string  `json:"id,omitempty"`
 	KeyID      string  `json:"keyID,omitempty"`      // 字段 ID
@@ -1345,7 +1347,7 @@ func isAllowedValueTextRichBlockIAL(node *ast.Node, codeSettings bool) bool {
 				("true" != attr[1] && "false" != attr[1]) || node.Previous.IALAttr(attr[0]) != attr[1] {
 				return false
 			}
-		case "custom-sy-code-tab-spaces":
+		case codeTabSpacesAttr:
 			if !codeSettings || nil == node.Previous || ast.NodeCodeBlock != node.Previous.Type ||
 				node.Previous.IALAttr(attr[0]) != attr[1] {
 				return false
@@ -1442,7 +1444,7 @@ func valueTextRichBlockDOM2Kramdown(luteEngine *lute.Lute, blockDOM string) stri
 		}
 		if ast.NodeParagraph == node.Type && !singleEmptyParagraph && "" == strings.TrimSpace(strings.ReplaceAll(node.Content(), "\u200b", "")) ||
 			ast.NodeCodeBlock == node.Type && ("" != node.IALAttr("linewrap") || "" != node.IALAttr("ligatures") ||
-				"" != node.IALAttr("linenumber") || "" != node.IALAttr("custom-sy-code-tab-spaces")) {
+				"" != node.IALAttr("linenumber") || "" != node.IALAttr(codeTabSpacesAttr)) {
 			preserveBlockIDs = true
 			return ast.WalkStop
 		}

@@ -1,4 +1,5 @@
 import {escapeHtmlTextAndAttr} from "../../util/escape";
+import {Constants} from "../../constants";
 import {openInputDialog} from "../../dialog/inputDialog";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {
@@ -53,12 +54,12 @@ export const getOrCreateTableBody = (tableElement: HTMLTableElement) => {
 };
 
 export const isTableHeaderEnabled = (nodeElement: Element, type: "row" | "column") => {
-    return type === "row" ? nodeElement.getAttribute("custom-sy-table-header-row") !== "false" :
-        nodeElement.getAttribute("custom-sy-table-header-column") === "true";
+    return type === "row" ? nodeElement.getAttribute(Constants.CUSTOM_SY_TABLE_HEADER_ROW) !== "false" :
+        nodeElement.getAttribute(Constants.CUSTOM_SY_TABLE_HEADER_COLUMN) === "true";
 };
 
 const setTableHeaderEnabled = (nodeElement: Element, type: "row" | "column", enabled: boolean) => {
-    const attribute = `custom-sy-table-header-${type}`;
+    const attribute = type === "row" ? Constants.CUSTOM_SY_TABLE_HEADER_ROW : Constants.CUSTOM_SY_TABLE_HEADER_COLUMN;
     if (type === "row") {
         if (enabled) {
             nodeElement.removeAttribute(attribute);
@@ -74,7 +75,7 @@ const setTableHeaderEnabled = (nodeElement: Element, type: "row" | "column", ena
 
 export const toggleTableHeader = (protyle: IProtyle, nodeElement: Element, type: "row" | "column") => {
     const html = nodeElement.outerHTML;
-    const attribute = `custom-sy-table-header-${type}`;
+    const attribute = type === "row" ? Constants.CUSTOM_SY_TABLE_HEADER_ROW : Constants.CUSTOM_SY_TABLE_HEADER_COLUMN;
     if (isTableHeaderEnabled(nodeElement, type)) {
         if (type === "row") {
             nodeElement.setAttribute(attribute, "false");

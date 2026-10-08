@@ -83,7 +83,7 @@ func (tx *Transaction) doConvertList(op *Operation) *TxErr {
 			return fail(errors.New("invalid list conversion block"))
 		}
 		for parent := node; parent != nil; parent = parent.Parent {
-			if parent.IALAttr("custom-sy-readonly") == "true" || parent.Type == ast.NodeMindmapItem {
+			if parent.IALAttr(readonlyAttr) == "true" || parent.Type == ast.NodeMindmapItem {
 				return fail(errors.New("list conversion requires editable blocks"))
 			}
 		}
@@ -218,7 +218,7 @@ func convertListNodes(selected []*ast.Node, options apicontract.TransactionListC
 			}
 			readonly := false
 			ast.Walk(item, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if entering && n.IALAttr("custom-sy-readonly") == "true" {
+				if entering && n.IALAttr(readonlyAttr) == "true" {
 					readonly = true
 				}
 				return ast.WalkContinue

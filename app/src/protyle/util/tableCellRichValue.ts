@@ -1,5 +1,4 @@
 export const TABLE_CELL_RICH_ATTRIBUTE = "data-sy-table-cell-rich";
-export const TABLE_RICH_ATTRIBUTE = "custom-sy-table-rich";
 
 export interface TableCellRich {
     spec: 1;

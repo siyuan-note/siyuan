@@ -1,3 +1,5 @@
+import {Constants} from "../../constants";
+
 const HEADING_SELECTOR = '[data-node-id][data-type="NodeHeading"]';
 const HEADING_NUMBER_CLASS = "protyle-heading-number";
 const HEADING_NUMBER_ACTIVE_CLASS = "protyle-heading-number--active";
@@ -9,7 +11,6 @@ const HEADING_NUMBER_TRIM_START_PREFIXES = ["（"];
 const NUMBERED_HEADING_SELECTOR = `${HEADING_SELECTOR}[data-heading-number], ` +
     `${HEADING_SELECTOR} > [contenteditable][data-heading-number]`;
 const HEADING_CONTAINER_TYPES = new Set(["NodeDocument", "NodeList", "NodeListItem", "NodeSuperBlock"]);
-const CUSTOM_HEADING_NUMBER_ATTRIBUTE = "custom-sy-heading-number";
 let headingNumberMeasurements = new WeakMap<Element, {key: string, offset: string}>();
 
 export interface IHeadingNumberStyle {
@@ -238,8 +239,8 @@ const operationChangesHeadingNumberSetting = (operation: IOperation) => {
     if (operation.action !== "updateAttrs" || !operation.data || typeof operation.data !== "object") {
         return false;
     }
-    const oldValue = operation.data.old?.[CUSTOM_HEADING_NUMBER_ATTRIBUTE];
-    const newValue = operation.data.new?.[CUSTOM_HEADING_NUMBER_ATTRIBUTE];
+    const oldValue = operation.data.old?.[Constants.CUSTOM_SY_HEADING_NUMBER];
+    const newValue = operation.data.new?.[Constants.CUSTOM_SY_HEADING_NUMBER];
     return oldValue !== newValue;
 };
 

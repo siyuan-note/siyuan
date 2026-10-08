@@ -112,7 +112,7 @@ func SetBlockReminder(id, timed string) (err error) {
 		return
 	}
 
-	attrName := "custom-reminder-wechat"
+	attrName := reminderWechatAttr
 	if "0" == timed {
 		delete(attrs, attrName)
 		old := node.IALAttr(attrName)

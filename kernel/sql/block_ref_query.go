@@ -26,6 +26,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/search"
 )
 
@@ -228,7 +229,8 @@ func QueryBoundBlockAVIDsInBox(blockIDs, rootIDs []string, boxID string) (ret ma
 			for _, id := range batch {
 				args = append(args, id)
 			}
-			rows, queryErr := queryForBox(boxID, "SELECT id, ial FROM blocks WHERE "+column+" IN ("+placeholders+") AND instr(ial, 'custom-avs=') > 0", args...)
+			args = append(args, av.NodeAttrNameAvs+"=")
+			rows, queryErr := queryForBox(boxID, "SELECT id, ial FROM blocks WHERE "+column+" IN ("+placeholders+") AND instr(ial, ?) > 0", args...)
 			if nil != queryErr {
 				return queryErr
 			}
@@ -244,7 +246,7 @@ func QueryBoundBlockAVIDsInBox(blockIDs, rootIDs []string, boxID string) (ret ma
 				ialContent = strings.TrimPrefix(ialContent, "{:")
 				ialContent = strings.TrimSuffix(ialContent, "}")
 				for _, kv := range parse.Tokens2IAL([]byte(ialContent)) {
-					if 2 > len(kv) || "custom-avs" != kv[0] {
+					if 2 > len(kv) || av.NodeAttrNameAvs != kv[0] {
 						continue
 					}
 					for avID := range strings.SplitSeq(kv[1], ",") {

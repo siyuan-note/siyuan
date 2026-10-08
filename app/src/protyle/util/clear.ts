@@ -50,7 +50,7 @@ export const clearBlockElement = (element: Element, keepRefcount = false) => {
     element.querySelector(".protyle-attr--av")?.remove();
     element.removeAttribute("custom-avs");
     element.getAttributeNames().forEach(attr => {
-        if (attr.startsWith("custom-sy-av-s-text-")) {
+        if (attr.startsWith(Constants.CUSTOM_SY_AV_STATIC_TEXT)) {
             element.removeAttribute(attr);
         }
     });

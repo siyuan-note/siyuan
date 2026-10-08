@@ -648,7 +648,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
                 } else if (source === "av") {
                     let refText = name;
                     if (nodeElement) {
-                        refText = escapeHtml(item.ial["custom-sy-av-s-text-" + nodeElement.getAttribute("data-av-id")] || "") || refText;
+                        refText = escapeHtml(item.ial[Constants.CUSTOM_SY_AV_STATIC_TEXT + nodeElement.getAttribute("data-av-id")] || "") || refText;
                     }
                     value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
                 }

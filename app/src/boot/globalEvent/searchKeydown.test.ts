@@ -15,7 +15,7 @@ const runEnter = (targetId: string, method: number, resultType: string | undefin
     }};
     const dialog = {element: {contains: () => true, querySelector: (selector: string) => selector === "#searchList" ? {} : element},
         data: {method}, editors: {edit: {protyle: {}}}};
-    const dependencies = {matchHotKey: () => false, hasClosestByClassName: () => false, getKeysByLiElement: () => [], Constants: {KEYCODELIST: {}},
+    const dependencies = {matchHotKey: () => false, hasClosestByClassName: () => false, getKeysByLiElement: (): string[] => [], Constants: {KEYCODELIST: {}},
         replace: () => calls.push("replace"), newFile: () => calls.push("newFile"), openSearchEditor: () => calls.push("open")};
     const exports: Record<string, unknown> = {};
     runInNewContext(transpileModule(readFileSync(__dirname + "/searchKeydown.ts", "utf8"), {

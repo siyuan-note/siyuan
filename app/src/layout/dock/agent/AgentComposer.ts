@@ -354,7 +354,50 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     };
 
     const getBlockHTML = (): string => {
-        return fragment.getBlockHTML(resetEmbedBlocks);
+        return fragment.getBlockHTML((element) => {
+            resetEmbedBlocks(element);
+            // 仅清理消息边界的段落空白，保留内部空行和非文本内容。
+            const trimBoundary = (fromStart: boolean) => {
+                const trimNode = (node: Node): boolean => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        const pattern = fromStart ? `^[\\s${Constants.ZWSP}]+` : `[\\s${Constants.ZWSP}]+$`;
+                        node.textContent = (node.textContent || "").replace(new RegExp(pattern), "");
+                        return !node.textContent;
+                    }
+                    if (!(node instanceof HTMLElement)) {
+                        return false;
+                    }
+                    if (node.tagName === "BR") {
+                        node.remove();
+                        return true;
+                    }
+                    const types = (node.getAttribute("data-type") || "").split(" ").filter(Boolean);
+                    if (node.tagName !== "SPAN" || types.some(type =>
+                        !["strong", "em", "s", "u", "mark", "sup", "sub", "text"].includes(type))) {
+                        return false;
+                    }
+                    return trimChildren(node);
+                };
+                const trimChildren = (parent: HTMLElement): boolean => {
+                    const nodes = Array.from(parent.childNodes);
+                    if (!fromStart) {
+                        nodes.reverse();
+                    }
+                    return nodes.every(trimNode);
+                };
+                let block = fromStart ? element.firstElementChild : element.lastElementChild;
+                while (block?.getAttribute("data-type") === "NodeParagraph") {
+                    const content = block.querySelector<HTMLElement>('[contenteditable="true"]');
+                    if (!content || !trimChildren(content)) {
+                        break;
+                    }
+                    block.remove();
+                    block = fromStart ? element.firstElementChild : element.lastElementChild;
+                }
+            };
+            trimBoundary(true);
+            trimBoundary(false);
+        });
     };
 
     return {

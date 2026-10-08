@@ -1076,7 +1076,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 // isRollupFilterValueEmpty 判断汇总筛选是否缺少比较值，相对日期仅依赖相对时间配置。
 func isRollupFilterValueEmpty(filter *ViewFilter) bool {
 	valueType := filter.Value.Rollup.Contents[0].Type
-	if nil != filter.RelativeDate && (KeyTypeDate == valueType || KeyTypeCreated == valueType || KeyTypeUpdated == valueType) {
+	if nil != filter.RelativeDate && (IsDateKeyType(valueType)) {
 		return false
 	}
 	v := filter.Value.GetValByType(valueType)
@@ -1644,7 +1644,7 @@ func (filter *ViewFilter) IsValid() bool {
 
 func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *Value, allowNearItem bool) {
 	if nil != filter.Value {
-		if KeyTypeTemplate == filter.Value.Type || KeyTypeRollup == filter.Value.Type || KeyTypeUpdated == filter.Value.Type || KeyTypeCreated == filter.Value.Type {
+		if HasKeyGroup(filter.Value.Type, KeyGroupNoFilterDefault) {
 			// 所有生成的数据都不设置默认值
 			return nil, false
 		}

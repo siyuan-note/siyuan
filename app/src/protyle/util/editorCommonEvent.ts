@@ -1,3 +1,4 @@
+import {hasAVKeyGroup} from "../render/av/capabilities";
 import type {FileTreeGetDocRequestInput} from "../../types/api";
 import {cleanupDragIndicators, createListDragTarget} from "./listDragTarget";
 import {focusBlock, getRangeByPoint} from "./selection";
@@ -2683,7 +2684,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 模板渲染结果及无法回填的字段作为分组方式时不允许跨分组拖拽
                     // https://github.com/siyuan-note/siyuan/issues/15553
                     const isTCU = getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
-                        ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                        hasAVKeyGroup(bodyElement.getAttribute("data-dtype"), "renderAutoFill");
                     gutterTypes[2].split(",").find(item => {
                         const sourceGroupID = item ? item.split("@")[1] : "";
                         if (sourceGroupID !== groupID && isTCU) {
@@ -2707,7 +2708,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 模板渲染结果及无法回填的字段作为分组方式时不允许跨分组拖拽
                     // https://github.com/siyuan-note/siyuan/issues/15553
                     const isTCU = getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
-                        ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                        hasAVKeyGroup(bodyElement.getAttribute("data-dtype"), "renderAutoFill");
                     gutterTypes[2].split(",").find(item => {
                         const sourceGroupID = item ? item.split("@")[1] : "";
                         if (sourceGroupID !== groupID && isTCU) {

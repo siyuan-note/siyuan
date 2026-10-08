@@ -1,4 +1,4 @@
-import {getAVDefaultFilterOperator, hasAVCapability, hasAVScalarContent, isAVDateType, isAVTextType} from "./capabilities";
+import {getAVDefaultFilterOperator, getAVOfferedFilterOperators, hasAVCapability, hasAVScalarContent, isAVDateType, isAVNumericFilterCalcOperator, isAVTextType} from "./capabilities";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
@@ -379,59 +379,35 @@ export const convertGroupToFilter = (nodes: IAVFilter[], path: string): boolean 
 // getOperatorSelectByType 按值类型生成操作符 <select> 的 option HTML，标记当前 operator 为 selected。
 const getOperatorSelectByType = (type: TAVCol, currentOperator: string, isRollup: boolean): string => {
     const opt = (value: string, label: string) => `<option ${value === currentOperator ? "selected" : ""} value="${value}">${label}</option>`;
-    switch (type) {
-        case "checkbox":
-            return opt("=", window.siyuan.languages.filterOperatorIs) + opt("!=", window.siyuan.languages.filterOperatorIsNot);
-        case "block":
-        case "mAsset":
-        case "text":
-        case "url":
-        case "phone":
-        case "email":
-            return opt("=", window.siyuan.languages.filterOperatorIs) + opt("!=", window.siyuan.languages.filterOperatorIsNot) +
-                opt("Contains", window.siyuan.languages.filterOperatorContains) + opt("Does not contains", window.siyuan.languages.filterOperatorDoesNotContain) +
-                opt("Starts with", window.siyuan.languages.filterOperatorStartsWith) + opt("Ends with", window.siyuan.languages.filterOperatorEndsWith) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        case "template":
-            return opt("=", window.siyuan.languages.filterOperatorIs) + opt("!=", window.siyuan.languages.filterOperatorIsNot) +
-                opt("Contains", window.siyuan.languages.filterOperatorContains) + opt("Does not contains", window.siyuan.languages.filterOperatorDoesNotContain) +
-                opt("Starts with", window.siyuan.languages.filterOperatorStartsWith) + opt("Ends with", window.siyuan.languages.filterOperatorEndsWith) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty) +
-                opt(">", "&gt;") + opt("<", "&lt;") + opt(">=", "&GreaterEqual;") + opt("<=", "&le;");
-        case "date":
-        case "created":
-        case "updated":
-            return opt("=", window.siyuan.languages.filterOperatorIs) + opt(">", window.siyuan.languages.filterOperatorIsAfter) +
-                opt("<", window.siyuan.languages.filterOperatorIsBefore) + opt(">=", window.siyuan.languages.filterOperatorIsOnOrAfter) +
-                opt("<=", window.siyuan.languages.filterOperatorIsOnOrBefore) + opt("Is between", window.siyuan.languages.filterOperatorIsBetween) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        case "number":
-            return opt("=", "=") + opt("!=", "!=") + opt(">", "&gt;") + opt("<", "&lt;") +
-                opt(">=", "&GreaterEqual;") + opt("<=", "&le;") +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        case "mSelect":
-            return opt("Contains", window.siyuan.languages.filterOperatorContains) + opt("Does not contains", window.siyuan.languages.filterOperatorDoesNotContain) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        case "relation":
-            if (isRollup) {
-                return opt("Contains", window.siyuan.languages.filterOperatorContains) +
-                    opt("Does not contains", window.siyuan.languages.filterOperatorDoesNotContain) +
-                    opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) +
-                    opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-            }
-            return opt("Contains any item", window.siyuan.languages.filterOperatorContainsAnyItem) +
-                opt("Does not contain any item", window.siyuan.languages.filterOperatorDoesNotContainAnyItem) +
-                opt("Contains", window.siyuan.languages.filterOperatorContainsKeyword) +
-                opt("Does not contains", window.siyuan.languages.filterOperatorDoesNotContainKeyword) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) +
-                opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        case "select":
-            return opt("=", isRollup ? window.siyuan.languages.filterOperatorIs : window.siyuan.languages.filterOperatorContains) +
-                opt("!=", isRollup ? window.siyuan.languages.filterOperatorIsNot : window.siyuan.languages.filterOperatorDoesNotContain) +
-                opt("Is empty", window.siyuan.languages.filterOperatorIsEmpty) + opt("Is not empty", window.siyuan.languages.filterOperatorIsNotEmpty);
-        default:
-            return "";
+    const languages = window.siyuan.languages;
+    const labels: Partial<Record<TAVFilterOperator, string>> = {
+        "=": languages.filterOperatorIs,
+        "!=": languages.filterOperatorIsNot,
+        "Contains": languages.filterOperatorContains,
+        "Does not contains": languages.filterOperatorDoesNotContain,
+        "Starts with": languages.filterOperatorStartsWith,
+        "Ends with": languages.filterOperatorEndsWith,
+        "Is empty": languages.filterOperatorIsEmpty,
+        "Is not empty": languages.filterOperatorIsNotEmpty,
+        "Contains any item": languages.filterOperatorContainsAnyItem,
+        "Does not contain any item": languages.filterOperatorDoesNotContainAnyItem,
+        "Is between": languages.filterOperatorIsBetween,
+        ">": isAVDateType(type) ? languages.filterOperatorIsAfter : "&gt;",
+        "<": isAVDateType(type) ? languages.filterOperatorIsBefore : "&lt;",
+        ">=": isAVDateType(type) ? languages.filterOperatorIsOnOrAfter : "&GreaterEqual;",
+        "<=": isAVDateType(type) ? languages.filterOperatorIsOnOrBefore : "&le;",
+    };
+    if (type === "number") {
+        labels["="] = "=";
+        labels["!="] = "!=";
+    } else if (type === "select" && !isRollup) {
+        labels["="] = languages.filterOperatorContains;
+        labels["!="] = languages.filterOperatorDoesNotContain;
+    } else if (type === "relation" && !isRollup) {
+        labels.Contains = languages.filterOperatorContainsKeyword;
+        labels["Does not contains"] = languages.filterOperatorDoesNotContainKeyword;
     }
+    return getAVOfferedFilterOperators(type, isRollup).map(operator => opt(operator, labels[operator])).join("");
 };
 
 const rollupTargetColumns = new WeakMap<IAVColumn, IAVColumn>();
@@ -547,12 +523,7 @@ const resolveFilterValueType = (filter: IAVFilter, colData: IAVColumn): { type: 
     const rollup = filter.value?.rollup;
     const contentType = rollup?.contents?.[0]?.type as TAVCol;
     const calcOperator = colData.rollup?.calc?.operator;
-    const numberOperators = [
-        "Count all", "Count values", "Count unique values", "Count empty", "Count not empty",
-        "Percent empty", "Percent not empty", "Percent unique values", "Sum", "Average", "Median", "Min", "Max",
-        "Checked", "Unchecked", "Percent checked", "Percent unchecked",
-    ];
-    const resolvedType = numberOperators.includes(calcOperator)
+    const resolvedType = isAVNumericFilterCalcOperator(calcOperator)
         ? "number"
         : targetColumn?.type || contentType || "text";
     return {type: resolvedType, colData: targetColumn || colData, isRollup: true};

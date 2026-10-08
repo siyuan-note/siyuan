@@ -1,0 +1,74 @@
+{
+  "block": [
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "text": [
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "number": [
+    "<option  value=\"=\">=</option><option  value=\"!=\">!=</option><option  value=\">\">&gt;</option><option  value=\"<\">&lt;</option><option  value=\">=\">&GreaterEqual;</option><option  value=\"<=\">&le;</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option  value=\"=\">=</option><option  value=\"!=\">!=</option><option  value=\">\">&gt;</option><option  value=\"<\">&lt;</option><option  value=\">=\">&GreaterEqual;</option><option  value=\"<=\">&le;</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "date": [
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\">\">filterOperatorIsAfter</option><option  value=\"<\">filterOperatorIsBefore</option><option  value=\">=\">filterOperatorIsOnOrAfter</option><option  value=\"<=\">filterOperatorIsOnOrBefore</option><option  value=\"Is between\">filterOperatorIsBetween</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\">\">filterOperatorIsAfter</option><option  value=\"<\">filterOperatorIsBefore</option><option  value=\">=\">filterOperatorIsOnOrAfter</option><option  value=\"<=\">filterOperatorIsOnOrBefore</option><option  value=\"Is between\">filterOperatorIsBetween</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "select": [
+    "<option  value=\"=\">filterOperatorContains</option><option  value=\"!=\">filterOperatorDoesNotContain</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "mSelect": [
+    "<option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "url": [
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "email": [
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "phone": [
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "mAsset": [
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "template": [
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option><option  value=\">\">&gt;</option><option  value=\"<\">&lt;</option><option  value=\">=\">&GreaterEqual;</option><option  value=\"<=\">&le;</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option><option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Starts with\">filterOperatorStartsWith</option><option  value=\"Ends with\">filterOperatorEndsWith</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option><option  value=\">\">&gt;</option><option  value=\"<\">&lt;</option><option  value=\">=\">&GreaterEqual;</option><option  value=\"<=\">&le;</option>"
+  ],
+  "created": [
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\">\">filterOperatorIsAfter</option><option  value=\"<\">filterOperatorIsBefore</option><option  value=\">=\">filterOperatorIsOnOrAfter</option><option  value=\"<=\">filterOperatorIsOnOrBefore</option><option  value=\"Is between\">filterOperatorIsBetween</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\">\">filterOperatorIsAfter</option><option  value=\"<\">filterOperatorIsBefore</option><option  value=\">=\">filterOperatorIsOnOrAfter</option><option  value=\"<=\">filterOperatorIsOnOrBefore</option><option  value=\"Is between\">filterOperatorIsBetween</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "updated": [
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\">\">filterOperatorIsAfter</option><option  value=\"<\">filterOperatorIsBefore</option><option  value=\">=\">filterOperatorIsOnOrAfter</option><option  value=\"<=\">filterOperatorIsOnOrBefore</option><option  value=\"Is between\">filterOperatorIsBetween</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\">\">filterOperatorIsAfter</option><option  value=\"<\">filterOperatorIsBefore</option><option  value=\">=\">filterOperatorIsOnOrAfter</option><option  value=\"<=\">filterOperatorIsOnOrBefore</option><option  value=\"Is between\">filterOperatorIsBetween</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "checkbox": [
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option>",
+    "<option  value=\"=\">filterOperatorIs</option><option  value=\"!=\">filterOperatorIsNot</option>"
+  ],
+  "relation": [
+    "<option  value=\"Contains any item\">filterOperatorContainsAnyItem</option><option  value=\"Does not contain any item\">filterOperatorDoesNotContainAnyItem</option><option selected value=\"Contains\">filterOperatorContainsKeyword</option><option  value=\"Does not contains\">filterOperatorDoesNotContainKeyword</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>",
+    "<option selected value=\"Contains\">filterOperatorContains</option><option  value=\"Does not contains\">filterOperatorDoesNotContain</option><option  value=\"Is empty\">filterOperatorIsEmpty</option><option  value=\"Is not empty\">filterOperatorIsNotEmpty</option>"
+  ],
+  "rollup": [
+    "",
+    ""
+  ],
+  "lineNumber": [
+    "",
+    ""
+  ],
+  "unknown": [
+    "",
+    ""
+  ]
+}

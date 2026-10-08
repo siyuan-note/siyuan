@@ -5,6 +5,8 @@ import "sort"
 // KeyCapability 描述字段的基础能力，不参与属性视图的持久化。
 // 资源字段仅在设置显示模板后支持分组，关联汇总的默认算子按取值来源调整。
 type KeyCapability struct {
+	Groups          KeyGroup       `json:"groups"`
+	FilterProfile   FilterProfile  `json:"filterProfile"`
 	ValueKind       string         `json:"valueKind"`
 	Editable        bool           `json:"editable"`
 	Filterable      bool           `json:"filterable"`
@@ -15,39 +17,90 @@ type KeyCapability struct {
 }
 
 var keyCapabilities = map[KeyType]KeyCapability{
-	KeyTypeBlock: {order: 0, ValueKind: "text", Editable: true, Filterable: true,
+	KeyTypeBlock: {
+		Groups:        KeyGroupRichText | KeyGroupLink | KeyGroupScalarContent,
+		FilterProfile: FilterProfileText,
+		order:         0, ValueKind: "text", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorContains},
-	KeyTypeText: {order: 1, ValueKind: "text", Editable: true, Filterable: true,
+	KeyTypeText: {
+		Groups:        KeyGroupRichText | KeyGroupScalarContent | KeyGroupAttributePlaceholder | KeyGroupNewItemTemplate,
+		FilterProfile: FilterProfileText,
+		order:         1, ValueKind: "text", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorContains},
-	KeyTypeNumber: {order: 2, ValueKind: "number", Editable: true, Filterable: true,
+	KeyTypeNumber: {
+		Groups:        KeyGroupScalarContent | KeyGroupAttributePlaceholder | KeyGroupNewItemTemplate,
+		FilterProfile: FilterProfileNumber,
+		order:         2, ValueKind: "number", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorIsEqual},
-	KeyTypeDate: {order: 3, ValueKind: "date", Editable: true, Filterable: true,
+	KeyTypeDate: {
+		Groups:        KeyGroupAttributePlaceholder | KeyGroupNewItemTemplate,
+		FilterProfile: FilterProfileDate,
+		order:         3, ValueKind: "date", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorIsEqual},
-	KeyTypeSelect: {order: 4, ValueKind: "options", Editable: true, Filterable: true,
+	KeyTypeSelect: {
+		Groups:        KeyGroupRollupCell | KeyGroupNewItemTemplate,
+		FilterProfile: FilterProfileSelect,
+		order:         4, ValueKind: "options", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorIsEqual},
-	KeyTypeMSelect: {order: 5, ValueKind: "options", Editable: true, Filterable: true,
+	KeyTypeMSelect: {
+		Groups:        KeyGroupRollupCell | KeyGroupNewItemTemplate,
+		FilterProfile: FilterProfileMSelect,
+		order:         5, ValueKind: "options", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorContains},
-	KeyTypeURL: {order: 6, ValueKind: "text", Editable: true, Filterable: true,
+	KeyTypeURL: {
+		Groups:        KeyGroupLink | KeyGroupScalarContent | KeyGroupAttributePlaceholder | KeyGroupNewItemTemplate,
+		FilterProfile: FilterProfileText,
+		order:         6, ValueKind: "text", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorContains},
-	KeyTypeEmail: {order: 7, ValueKind: "text", Editable: true, Filterable: true,
+	KeyTypeEmail: {
+		Groups:        KeyGroupRichText | KeyGroupLink | KeyGroupScalarContent | KeyGroupAttributePlaceholder | KeyGroupNewItemTemplate,
+		FilterProfile: FilterProfileText,
+		order:         7, ValueKind: "text", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorContains},
-	KeyTypePhone: {order: 8, ValueKind: "text", Editable: true, Filterable: true,
+	KeyTypePhone: {
+		Groups:        KeyGroupRichText | KeyGroupLink | KeyGroupScalarContent | KeyGroupAttributePlaceholder | KeyGroupNewItemTemplate,
+		FilterProfile: FilterProfileText,
+		order:         8, ValueKind: "text", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorContains},
-	KeyTypeMAsset: {order: 9, ValueKind: "assets", Editable: true, Filterable: true,
+	KeyTypeMAsset: {
+		Groups:        KeyGroupScalarContent | KeyGroupRollupCell | KeyGroupNewItemTemplate | KeyGroupRenderDependentFilter,
+		FilterProfile: FilterProfileText,
+		order:         9, ValueKind: "assets", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorContains},
-	KeyTypeTemplate: {order: 10, ValueKind: "text", Editable: false, Filterable: true,
+	KeyTypeTemplate: {
+		Groups:        KeyGroupRichText | KeyGroupScalarContent | KeyGroupAttributePlaceholder | KeyGroupRollupCell | KeyGroupNoFilterDefault | KeyGroupRenderDependentFilter | KeyGroupRenderAutoFill | KeyGroupRollupAlwaysRender,
+		FilterProfile: FilterProfileTemplate,
+		order:         10, ValueKind: "text", Editable: false, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorContains},
-	KeyTypeCreated: {order: 11, ValueKind: "timestamp", Editable: false, Filterable: true,
+	KeyTypeCreated: {
+		Groups:        KeyGroupNoFilterDefault | KeyGroupRenderDependentFilter | KeyGroupSkipRowCopy | KeyGroupRenderAutoFill | KeyGroupRollupForeignRender,
+		FilterProfile: FilterProfileDate,
+		order:         11, ValueKind: "timestamp", Editable: false, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorIsEqual},
-	KeyTypeUpdated: {order: 12, ValueKind: "timestamp", Editable: false, Filterable: true,
+	KeyTypeUpdated: {
+		Groups:        KeyGroupNoFilterDefault | KeyGroupRenderDependentFilter | KeyGroupSkipRowCopy | KeyGroupRenderAutoFill | KeyGroupRollupForeignRender,
+		FilterProfile: FilterProfileDate,
+		order:         12, ValueKind: "timestamp", Editable: false, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorIsEqual},
-	KeyTypeCheckbox: {order: 13, ValueKind: "checkbox", Editable: true, Filterable: true,
+	KeyTypeCheckbox: {
+		Groups:        KeyGroupNewItemTemplate,
+		FilterProfile: FilterProfileCheckbox,
+		order:         13, ValueKind: "checkbox", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorIsEqual},
-	KeyTypeRelation: {order: 14, ValueKind: "relation", Editable: true, Filterable: true,
+	KeyTypeRelation: {
+		Groups:        KeyGroupRollupCell | KeyGroupNewItemTemplate | KeyGroupRollupForeignRender,
+		FilterProfile: FilterProfileRelation,
+		order:         14, ValueKind: "relation", Editable: true, Filterable: true,
 		Sortable: true, Groupable: true, DefaultOperator: FilterOperatorContainsAnyItem},
-	KeyTypeRollup: {order: 15, ValueKind: "rollup", Editable: false, Filterable: true,
+	KeyTypeRollup: {
+		Groups:        KeyGroupNoFilterDefault | KeyGroupRenderDependentFilter | KeyGroupSkipRowCopy,
+		FilterProfile: FilterProfileRollup,
+		order:         15, ValueKind: "rollup", Editable: false, Filterable: true,
 		Sortable: true, Groupable: false, DefaultOperator: FilterOperatorContains},
-	KeyTypeLineNumber: {order: 16, ValueKind: "lineNumber", Editable: false, Filterable: false,
+	KeyTypeLineNumber: {
+		Groups:        KeyGroupNone,
+		FilterProfile: FilterProfileNone,
+		order:         16, ValueKind: "lineNumber", Editable: false, Filterable: false,
 		Sortable: false, Groupable: false, DefaultOperator: ""},
 }
 

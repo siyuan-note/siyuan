@@ -2718,7 +2718,7 @@ func (r *ValueRollup) BuildContents(attrView *AttributeView, destKey *Key, relat
 
 		destVal := GetValue(attrView.KeyValues, destKey.ID, blockID)
 		if nil != context && nil != context.FurtherCollection &&
-			(KeyTypeTemplate == destKey.Type || KeyTypeUpdated == destKey.Type || KeyTypeCreated == destKey.Type || KeyTypeRollup == destKey.Type) {
+			(HasKeyGroup(destKey.Type, KeyGroupNoFilterDefault)) {
 			destVal = context.FurtherCollection.GetValue(blockID, destKey.ID)
 		}
 

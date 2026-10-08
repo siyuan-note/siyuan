@@ -272,7 +272,7 @@ func databaseValidateViewFilterNode(attrView *av.AttributeView, filter *av.ViewF
 		}
 		filterType = av.KeyTypeTemplate
 	}
-	if !databaseFilterOperatorAllowed(filterType, filter.Operator) {
+	if !av.IsFilterOperatorAllowed(filterType, filter.Operator) {
 		return fmt.Errorf("operator %q is not supported for field %s", filter.Operator, filter.Column)
 	}
 	if filter.Operator != av.FilterOperatorIsEmpty && filter.Operator != av.FilterOperatorIsNotEmpty &&
@@ -290,7 +290,7 @@ func databaseValidateViewFilterNode(attrView *av.AttributeView, filter *av.ViewF
 		dateType = filter.Value.Rollup.Contents[0].Type
 	}
 	if (nil != filter.RelativeDate || nil != filter.RelativeDate2 || filter.DateEndpoint != "") &&
-		dateType != av.KeyTypeDate && dateType != av.KeyTypeCreated && dateType != av.KeyTypeUpdated {
+		!av.IsDateKeyType(dateType) {
 		return fmt.Errorf("date options require a date field: %s", filter.Column)
 	}
 	if filter.DateEndpoint != "" && filter.DateEndpoint != av.DateEndpointStart && filter.DateEndpoint != av.DateEndpointEnd {
@@ -313,46 +313,6 @@ func databaseValidRelativeDate(value *av.RelativeDate) bool {
 		value.Direction >= av.RelativeDateDirectionBefore && value.Direction <= av.RelativeDateDirectionAfter
 }
 
-func databaseFilterOperatorAllowed(keyType av.KeyType, operator av.FilterOperator) bool {
-	if keyType == av.KeyTypeRollup {
-		switch operator {
-		case av.FilterOperatorIsEqual, av.FilterOperatorIsNotEqual, av.FilterOperatorIsGreater,
-			av.FilterOperatorIsGreaterOrEqual, av.FilterOperatorIsLess, av.FilterOperatorIsLessOrEqual,
-			av.FilterOperatorContains, av.FilterOperatorDoesNotContain, av.FilterOperatorContainsAnyItem,
-			av.FilterOperatorDoesNotContainAnyItem, av.FilterOperatorIsEmpty, av.FilterOperatorIsNotEmpty,
-			av.FilterOperatorStartsWith, av.FilterOperatorEndsWith, av.FilterOperatorIsBetween:
-			return true
-		}
-		return false
-	}
-	if operator == av.FilterOperatorIsEmpty || operator == av.FilterOperatorIsNotEmpty {
-		return keyType != av.KeyTypeCheckbox && keyType != av.KeyTypeLineNumber
-	}
-	switch keyType {
-	case av.KeyTypeCheckbox:
-		return operator == av.FilterOperatorIsEqual || operator == av.FilterOperatorIsNotEqual ||
-			operator == av.FilterOperatorIsTrue || operator == av.FilterOperatorIsFalse
-	case av.KeyTypeNumber:
-		return operator == "=" || operator == "!=" || operator == ">" || operator == ">=" || operator == "<" || operator == "<="
-	case av.KeyTypeDate, av.KeyTypeCreated, av.KeyTypeUpdated:
-		return operator == "=" || operator == ">" || operator == ">=" || operator == "<" || operator == "<=" || operator == av.FilterOperatorIsBetween
-	case av.KeyTypeSelect:
-		return operator == "=" || operator == "!="
-	case av.KeyTypeMSelect:
-		return operator == av.FilterOperatorContains || operator == av.FilterOperatorDoesNotContain
-	case av.KeyTypeRelation:
-		return operator == av.FilterOperatorContainsAnyItem || operator == av.FilterOperatorDoesNotContainAnyItem ||
-			operator == av.FilterOperatorContains || operator == av.FilterOperatorDoesNotContain
-	case av.KeyTypeBlock, av.KeyTypeText, av.KeyTypeURL, av.KeyTypeEmail, av.KeyTypePhone,
-		av.KeyTypeMAsset, av.KeyTypeTemplate:
-		return operator == "=" || operator == "!=" || operator == av.FilterOperatorContains ||
-			operator == av.FilterOperatorDoesNotContain || operator == av.FilterOperatorStartsWith ||
-			operator == av.FilterOperatorEndsWith || (keyType == av.KeyTypeTemplate &&
-			(operator == ">" || operator == ">=" || operator == "<" || operator == "<="))
-	}
-	return false
-}
-
 func databaseValidateViewSorts(attrView *av.AttributeView, sorts []*av.ViewSort) error {
 	for _, sort := range sorts {
 		if nil == sort {
@@ -371,7 +331,7 @@ func databaseValidateViewSorts(attrView *av.AttributeView, sorts []*av.ViewSort)
 		if sort.ValueSource == av.ValueSourceRendered && "" == strings.TrimSpace(key.RenderTemplate) {
 			return fmt.Errorf("rendered sorting requires a display template: %s", sort.Column)
 		}
-		if sort.DateEndpoint != "" && key.Type != av.KeyTypeDate && key.Type != av.KeyTypeCreated && key.Type != av.KeyTypeUpdated {
+		if sort.DateEndpoint != "" && !av.IsDateKeyType(key.Type) {
 			return fmt.Errorf("date endpoint requires a date field: %s", sort.Column)
 		}
 		if sort.DateEndpoint != "" && sort.DateEndpoint != av.DateEndpointStart && sort.DateEndpoint != av.DateEndpointEnd {
@@ -411,7 +371,11 @@ func databaseValidateViewGroup(attrView *av.AttributeView, view *av.View, group 
 		}
 		return nil
 	}
-	switch key.Type {
+	groupType := key.Type
+	if av.IsDateKeyType(groupType) {
+		groupType = av.KeyTypeDate
+	}
+	switch groupType {
 	case av.KeyTypeNumber:
 		if group.Method != av.GroupMethodValue && group.Method != av.GroupMethodRangeNum {
 			return errors.New("number group method must be value or number range")
@@ -419,7 +383,7 @@ func databaseValidateViewGroup(attrView *av.AttributeView, view *av.View, group 
 		if group.Method == av.GroupMethodRangeNum && (nil == group.Range || group.Range.NumStep <= 0 || group.Range.NumEnd < group.Range.NumStart) {
 			return errors.New("number range requires a positive step and ordered bounds")
 		}
-	case av.KeyTypeDate, av.KeyTypeCreated, av.KeyTypeUpdated:
+	case av.KeyTypeDate:
 		if group.Method < av.GroupMethodValue || group.Method > av.GroupMethodDateYear {
 			return errors.New("invalid date group method")
 		}

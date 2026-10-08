@@ -1,5 +1,5 @@
-import type {AVFilterOperator, AVKeyCapability, AVKeyType} from "../../../types/av";
-import {AV_KEY_CAPABILITIES, AV_KEY_TYPES} from "./capabilities.generated";
+import type {AVFilterOperator, AVKeyCapability, AVKeyGroup, AVKeyType} from "../../../types/av";
+import {AV_CALC_FILTER_NUMBER_OPERATORS, AV_FILTER_CAPABILITIES, AV_KEY_CAPABILITIES, AV_KEY_TYPES} from "./capabilities.generated";
 
 export const isAVKeyType = (type: string): type is AVKeyType =>
     Object.prototype.hasOwnProperty.call(AV_KEY_CAPABILITIES, type);
@@ -31,22 +31,34 @@ export const isAVTextType = (type: string | undefined | null) =>
 export const isAVReadonlyType = (type: string | undefined | null) =>
     getAVKeyCapability(type)?.editable === false;
 
-export const isAVRichTextType = (type: string | undefined | null) => isAVTextType(type) && type !== "url";
+export const hasAVKeyGroup = (type: string | undefined | null, group: AVKeyGroup) =>
+    getAVKeyCapability(type)?.groups?.includes(group) === true;
+
+export const isAVRichTextType = (type: string | undefined | null) => hasAVKeyGroup(type, "richText");
 
 export const isAVLinkType = (type: string | undefined | null) =>
-    isAVTextType(type) && type !== "text" && type !== "template";
+    hasAVKeyGroup(type, "link");
 
 export const hasAVScalarContent = (type: string | undefined | null) =>
-    isAVTextType(type) || type === "number" || type === "mAsset";
+    hasAVKeyGroup(type, "scalarContent");
 
 export const hasAVAttributePlaceholder = (type: string | undefined | null) =>
-    isAVTextType(type) && type !== "block" || type === "number" || type === "date";
+    hasAVKeyGroup(type, "attributePlaceholder");
 
 export const usesAVRollupCellRenderer = (type: string | undefined | null) =>
-    isAVSelectType(type) || type === "template" || type === "mAsset" || type === "relation";
+    hasAVKeyGroup(type, "rollupCell");
 
 export const isAVNewItemTemplateType = (type: string | undefined | null) =>
-    hasAVCapability(type, "editable") && type !== "block";
+    hasAVKeyGroup(type, "newItemTemplate");
+
+export const getAVOfferedFilterOperators = (type: string, isRollup = false): readonly AVFilterOperator[] => {
+    const profile = getAVKeyCapability(type)?.filterProfile;
+    const capability = profile && AV_FILTER_CAPABILITIES[profile];
+    return capability ? (isRollup && capability.offeredRollup || capability.offered) : [];
+};
+
+export const isAVNumericFilterCalcOperator = (operator: string | undefined) =>
+    AV_CALC_FILTER_NUMBER_OPERATORS.some(item => item === operator);
 
 export const getAVDefaultFilterOperator = (type: string, isRollup = false): AVFilterOperator | undefined => {
     if (type === "relation" && isRollup) {

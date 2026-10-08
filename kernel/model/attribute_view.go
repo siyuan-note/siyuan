@@ -784,8 +784,7 @@ func filterBranchMatchesDefaultValues(filter *av.ViewFilter, attrView *av.Attrib
 		// 显示模板结果无法在新增条目时根据存储值准确判断。
 		return true
 	}
-	switch keyValues.Key.Type {
-	case av.KeyTypeTemplate, av.KeyTypeRollup, av.KeyTypeMAsset, av.KeyTypeCreated, av.KeyTypeUpdated:
+	if av.HasKeyGroup(keyValues.Key.Type, av.KeyGroupRenderDependentFilter) {
 		// 这些字段的最终值需要在渲染阶段计算，此处无法根据存储值准确判断。
 		return true
 	}
@@ -2277,7 +2276,7 @@ func DuplicateAttributeViewRow(tx *Transaction, avID, previousItemID, srcRowID, 
 		if av.KeyTypeBlock == keyValues.Key.Type {
 			continue // 主键已处理
 		}
-		if av.KeyTypeRollup == keyValues.Key.Type || av.KeyTypeCreated == keyValues.Key.Type || av.KeyTypeUpdated == keyValues.Key.Type {
+		if av.HasKeyGroup(keyValues.Key.Type, av.KeyGroupSkipRowCopy) {
 			continue // 汇总/创建时间/更新时间字段在渲染或自动生成时处理，不复制
 		}
 
@@ -7558,18 +7557,15 @@ func AddAttributeViewKey(avID, blockID, keyID, keyName, keyType, keyIcon, previo
 
 func newAttributeViewKey(keyID, keyName, keyType, keyIcon string, dateFormat av.DateDisplayFormat) (ret *av.Key, err error) {
 	keyTyp := av.KeyType(keyType)
-	switch keyTyp {
-	case av.KeyTypeBlock:
+	if av.KeyTypeBlock == keyTyp {
 		return nil, errors.New("cannot add an attribute view block key")
-	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail,
-		av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox,
-		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
-	default:
+	}
+	if !av.IsKnownKeyType(keyTyp) {
 		return nil, fmt.Errorf("unsupported attribute view key type [%s]", keyType)
 	}
 
 	ret = av.NewKey(keyID, keyName, filterAttrViewIconValue(keyIcon), keyTyp)
-	if av.KeyTypeDate == keyTyp || av.KeyTypeCreated == keyTyp || av.KeyTypeUpdated == keyTyp {
+	if av.IsDateKeyType(keyTyp) {
 		if !dateFormat.IsValid() {
 			return nil, errors.New("invalid date display format")
 		}
@@ -7779,7 +7775,7 @@ func setAttributeViewColDateFormat(operation *Operation) (err error) {
 	}
 
 	colType := av.KeyType(operation.Typ)
-	if av.KeyTypeDate != colType && av.KeyTypeCreated != colType && av.KeyTypeUpdated != colType {
+	if !av.IsDateKeyType(colType) {
 		return errors.New("date display format is only available for date fields")
 	}
 	for _, keyValues := range attrView.KeyValues {
@@ -7809,10 +7805,7 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 
 	colType := av.KeyType(operation.Typ)
 	changeType := false
-	switch colType {
-	case av.KeyTypeBlock, av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail,
-		av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox,
-		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
+	if av.IsKnownKeyType(colType) {
 		for _, keyValues := range attrView.KeyValues {
 			if keyValues.Key.ID == operation.ID {
 				isPrimaryKey := av.KeyTypeBlock == keyValues.Key.Type

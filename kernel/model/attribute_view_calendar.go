@@ -18,7 +18,7 @@ func newAttributeViewCalendarLayout(attrView *av.AttributeView, fieldIDs []strin
 		LayoutTable: newAttributeViewListLayout(attrView, fieldIDs),
 		Settings:    av.CalendarSettings{WeekStart: 1},
 	}
-	for _, keyType := range []av.KeyType{av.KeyTypeDate, av.KeyTypeCreated, av.KeyTypeUpdated} {
+	for _, keyType := range av.DateKeyTypes() {
 		for _, keyValues := range attrView.KeyValues {
 			if keyValues.Key.Type == keyType {
 				ret.Settings.DateKeyID = keyValues.Key.ID

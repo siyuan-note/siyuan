@@ -2553,6 +2553,9 @@ func normalizeDocTitle(title string) string {
 }
 
 func readSortConfMap(confPath string) (map[string]int, error) {
+	sortConfRecoveryLock.Lock()
+	defer sortConfRecoveryLock.Unlock()
+
 	if !filelock.IsExist(confPath) {
 		return map[string]int{}, nil
 	}
@@ -2564,10 +2567,10 @@ func readSortConfMap(confPath string) (map[string]int, error) {
 	ret := map[string]int{}
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogWarnf("unmarshal sort conf [%s] failed: %s", confPath, err)
-		return nil, err
+		return recoverSortConfMap(confPath, data)
 	}
 	if ret == nil {
-		return nil, fmt.Errorf("invalid sort conf [%s]: expected an object", confPath)
+		return recoverSortConfMap(confPath, data)
 	}
 	return ret, nil
 }

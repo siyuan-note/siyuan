@@ -1170,7 +1170,7 @@ export class WYSIWYG {
             textPlain = textPlain || protyle.lute.BlockDOM2StdMd(externalBlockDOM).trimEnd();
             textPlain = removeZWJ(nbsp2space(textPlain)) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
-                .replace(new RegExp(Constants.ZWSP, "g"), "");
+                .replaceAll(Constants.ZWSP, "");
             let clipboardText = textPlain;
 
             if (!isInCodeBlock) {
@@ -2147,7 +2147,7 @@ export class WYSIWYG {
                     setTimeout(() => {
                         if (getSelection().rangeCount > 0) {
                             const range = getSelection().getRangeAt(0);
-                            if (stripSemanticMarkersFromRangeText(range).replace(new RegExp(Constants.ZWSP, "g"), "") !== "") {
+                            if (stripSemanticMarkersFromRangeText(range).replaceAll(Constants.ZWSP, "") !== "") {
                                 protyle.toolbar.render(protyle, range, {
                                     x: mouseUpEvent.clientX,
                                     y: mouseUpEvent.clientY,
@@ -3608,7 +3608,7 @@ export class WYSIWYG {
                 }
             }
             textPlain = removeZWJ(nbsp2space(textPlain)) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
-                .replace(new RegExp(Constants.ZWSP, "g"), "");
+                .replaceAll(Constants.ZWSP, "");
             if (!cutClipboardWritten) {
                 event.clipboardData.setData("text/plain", textPlain);
             }
@@ -5469,7 +5469,7 @@ export class WYSIWYG {
                     focusByRange(newRange);
                 }
                 /// #if !MOBILE
-                if (stripSemanticMarkersFromRangeText(newRange).replace(new RegExp(Constants.ZWSP, "g"), "") !== "") {
+                if (stripSemanticMarkersFromRangeText(newRange).replaceAll(Constants.ZWSP, "") !== "") {
                     const paintedRange = formatPainter.paint(protyle, newRange);
                     if (paintedRange) {
                         newRange = paintedRange;

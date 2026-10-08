@@ -721,7 +721,7 @@ export class Hint {
                     let blockRefHTML;
                     if (source === "av") {
                         // av 搜索时需要获取值 https://github.com/siyuan-note/siyuan/issues/12020
-                        let refText = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
+                        let refText = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replaceAll(Constants.ZWSP, "");
                         if (nodeElement) {
                             refText = escapeHtml(item.ial[Constants.CUSTOM_SY_AV_STATIC_TEXT + nodeElement.getAttribute("data-av-id")] || "") || refText;
                         }

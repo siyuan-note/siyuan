@@ -8,7 +8,7 @@ const isEmptyEditableBlock = (element: Element) => {
     }
     const contentElement = editableElement.cloneNode(true) as Element;
     contentElement.querySelectorAll("br, wbr").forEach(item => item.remove());
-    const text = contentElement.textContent.replace(new RegExp(Constants.ZWSP, "g"), "").trim();
+    const text = contentElement.textContent.replaceAll(Constants.ZWSP, "").trim();
     return text === "" && contentElement.childElementCount === 0;
 };
 

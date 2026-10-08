@@ -160,7 +160,7 @@ const isMarkdownInlineElement = (element: Element) => {
 };
 
 const sourcePartMarkdown = (protyle: IProtyle, range: Range, editableElement: Element) => {
-    const text = range.toString().replace(new RegExp(Constants.ZWSP, "g"), "");
+    const text = range.toString().replaceAll(Constants.ZWSP, "");
     let fragment: Node = range.cloneContents();
     let ancestor = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE ?
         range.commonAncestorContainer as Element : range.commonAncestorContainer.parentElement;

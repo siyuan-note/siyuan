@@ -315,7 +315,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
 
         // ↑ 翻历史：仅在空输入或已处于历史浏览时触发
         if (enableHistory && event.key === "ArrowUp" && !event.shiftKey) {
-            const isEmpty = (wysiwyg.element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim() === "";
+            const isEmpty = (wysiwyg.element.textContent || "").replaceAll(Constants.ZWSP, "").trim() === "";
             if ((history.isBrowsing() || isEmpty) && history.has()) {
                 event.preventDefault();
                 event.stopPropagation();

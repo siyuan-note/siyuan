@@ -25,7 +25,6 @@
 	"agentWelcomeLate4": "想給今天留個結尾？\n記下一件值得記住的事",
 	"agentWelcomeLate5": "有個想法想留給明天？\n先寫下最重要的一點",
 	"agentExample4": "幫我開發一個外掛",
-	"dailyNoteDateInvalid": "日期無效或有歧義，請輸入 YYYY-MM-DD 格式的完整日期",
 	"goToDocumentStart": "跳到文件開頭",
 	"goToDocumentEnd": "跳到文件結尾",
 	"agentBuiltinPluginDevelopmentDescription": "官方前端外掛開發流程：在使用者明確選擇後釐清缺漏需求、確認簡短方案、使用受管理的副本實作、驗證及封裝；安裝與啟用須另行授權",

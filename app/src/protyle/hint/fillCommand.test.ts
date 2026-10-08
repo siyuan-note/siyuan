@@ -16,7 +16,7 @@ const code = transpileModule(`class Hint { ${methods} } new Hint();`, {
     compilerOptions: {target: ScriptTarget.ES2020},
 }).outputText;
 
-test("daily note reference completion retains its range and ignores edited or removed input", () => {
+test("daily note completion retains its original insertion target while awaiting creation", () => {
     for (const scenario of ["valid", "edited", "removed"]) {
         let text = "[[2026-09-25";
         let inserted = false;
@@ -38,6 +38,13 @@ test("daily note reference completion retains its range and ignores edited or re
             hideElements() {}, hasClosestBlock: () => block, focusByRange() {},
             shouldCaptureHintUndoFocus, getUndoFocusContext: () => ({}),
             getBlockRefAnchorText: (title: string) => title,
+            captureDailyNoteSelection: () => ({original: true}),
+            insertDailyNoteReference: (_protyle: unknown, target: {original: boolean}, id: string, title: string) => {
+                assert.equal(target.original, true);
+                assert.equal(id, "existing");
+                assert.equal(title, "Daily title");
+                inserted = true;
+            },
             createDailyNoteReference: (_protyle: unknown, date: string, notebook: string,
                                       callback: (id: string, title: string) => void) => {
                 assert.equal(date, "2026-09-25");
@@ -54,7 +61,7 @@ test("daily note reference completion retains its range and ignores edited or re
             block.isConnected = false;
         }
         complete?.("existing", "Daily title");
-        assert.equal(inserted, scenario === "valid");
+        assert.equal(inserted, true);
     }
 });
 

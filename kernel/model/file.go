@@ -1462,58 +1462,15 @@ func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, 
 	}
 
 	boxConf := box.GetConf()
-	if "" == boxConf.DailyNoteSavePath || "/" == boxConf.DailyNoteSavePath {
-		err = errors.New(Conf.Language(49))
-		return
-	}
-
-	hPath, err := RenderGoTemplateAtInBox(boxConf.DailyNoteSavePath, now, box.ID)
+	hPath, existTree, err := resolveDailyNote(box, now, findByDate)
 	if err != nil {
 		return
 	}
 
-	FlushTxQueue()
-
-	hPath = util.TrimSpaceInPath(hPath)
-	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
 	date := now.Format("20060102")
-	if findByDate {
-		sql.FlushQueue()
-		var ids []string
-		ids, err = sql.QueryDailyNoteRootIDsInBox(box.ID, DailyNoteAttrPrefix+date, date)
-		if err != nil {
-			return
-		}
-		if len(ids) > 0 {
-			matchedPath := false
-			for _, id := range ids {
-				if existRoot != nil && existRoot.RootID == id {
-					matchedPath = true
-					break
-				}
-			}
-			if !matchedPath {
-				tree, loadErr := LoadTreeByBlockID(ids[0])
-				if loadErr != nil {
-					return "", false, loadErr
-				}
-				if tree.Box != box.ID || tree.Root.IALAttr(DailyNoteAttrPrefix+date) != date {
-					return "", false, ErrBlockNotFound
-				}
-				return tree.Path, true, nil
-			}
-		}
-	}
-	if nil != existRoot {
+	if existTree != nil {
 		existed = true
-		p = existRoot.Path
-
-		tree, loadErr := LoadTreeByBlockID(existRoot.RootID)
-		if nil != loadErr {
-			logging.LogWarnf("load tree by block id [%s] failed: %v", existRoot.RootID, loadErr)
-			err = loadErr
-			return
-		}
+		tree := existTree
 		p = tree.Path
 		if tree.Root.IALAttr(DailyNoteAttrPrefix+date) == "" {
 			tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)

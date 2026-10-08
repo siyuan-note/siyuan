@@ -27,7 +27,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
@@ -774,11 +773,8 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 	if request.Date == "" {
 		p, existed, err = model.CreateDailyNote(notebook)
 	} else {
-		var date time.Time
-		date, err = time.ParseInLocation("2006-01-02", request.Date, time.Local)
-		if err == nil && (date.Year() < 1 || date.Format("2006-01-02") != request.Date) {
-			err = fmt.Errorf("invalid daily note date [%s]", request.Date)
-		}
+		date, dateErr := parseDailyNoteDate(request.Date)
+		err = dateErr
 		if err == nil {
 			p, existed, err = model.CreateDailyNoteAt(notebook, date)
 		}

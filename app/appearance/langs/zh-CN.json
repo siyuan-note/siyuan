@@ -25,7 +25,6 @@
 	"agentWelcomeLate4": "想给今天留个结尾？\n记下一件值得记住的事",
 	"agentWelcomeLate5": "有个想法想留给明天？\n先写下最重要的一点",
 	"agentExample4": "帮我开发一个插件",
-	"dailyNoteDateInvalid": "日期无效或有歧义，请输入 YYYY-MM-DD 格式的完整日期",
 	"goToDocumentStart": "跳到文档开头",
 	"goToDocumentEnd": "跳到文档结尾",
 	"agentBuiltinPluginDevelopmentDescription": "官方前端插件开发流程：在用户明确选择后澄清缺失要求、确认简短方案、使用受管副本实现、验证和打包；安装与启用另行授权",

@@ -6,7 +6,7 @@
 		"id": "20210110181011-fbhoesf",
 		"title": "Daily notes",
 		"type": "doc",
-		"updated": "20261008101708"
+		"updated": "20261008172530"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613180619-15jwt8e",
-				"updated": "20261008101708"
+				"updated": "20261008172530"
 			},
 			"Children": [
 				{
@@ -205,7 +205,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261008101708-b7c9jyj",
-				"updated": "20261008101708"
+				"updated": "20261008172530"
 			},
 			"Children": [
 				{
@@ -269,12 +269,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261008101708-8o948mt",
-				"updated": "20261008101708"
+				"updated": "20261008172530"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Dates without a year use the current year, and candidates display the complete date. For ambiguous expressions such as "
+					"Data": "Dates without a year use the current year. Candidates display the actual document name or the name resolved from the creation template, the full path, and the target date. Existing daily note icons support hover previews. For ambiguous expressions such as "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -283,7 +283,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " or invalid dates, use "
+					"Data": " or invalid dates, no daily note candidate is shown. Use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -301,12 +301,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261008101708-3n0qxms",
-				"updated": "20261008101708"
+				"updated": "20261008172530"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Selecting a daily note candidate uses the last selected daily note notebook. If none is selected or that notebook is unavailable, you are asked to choose one. Canceling creates no document. Encrypted notebooks can reference daily notes only within the same notebook; ordinary notebooks cannot reference daily notes in encrypted notebooks."
+					"Data": "Candidates use the last selected daily note notebook. If none is selected or that notebook is unavailable, candidates show the full paths for available notebooks. Selecting a candidate saves its notebook as the daily note notebook. Leaving candidates unselected creates no document. Encrypted notebooks can reference daily notes only within the same notebook; ordinary notebooks cannot reference daily notes in encrypted notebooks."
 				}
 			]
 		},
@@ -315,12 +315,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261008101708-yprxiyp",
-				"updated": "20261008101708"
+				"updated": "20261008172530"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Typing and viewing candidates create no document. Selecting a candidate reuses the daily note for that date in the target notebook, including moved or renamed documents that retain their daily note date attribute. If none exists, the daily note settings are used to create it and insert a reference. The path template, now in the content template, and the daily note date attribute use the target date; actual creation and update timestamps retain the real operation time."
+					"Data": "Typing and viewing candidates create no document. Missing daily notes display New daily note and a calendar-plus icon. Moving the caret after a creation request does not cancel insertion at the original input position; modified or deleted input is not overwritten. Selecting a candidate reuses the daily note for that date in the target notebook, including moved or renamed documents that retain their daily note date attribute. If none exists, the daily note settings are used to create it and insert a reference. The path template, now in the content template, and the daily note date attribute use the target date; actual creation and update timestamps retain the real operation time."
 				}
 			]
 		},

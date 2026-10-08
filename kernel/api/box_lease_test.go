@@ -85,6 +85,10 @@ func TestContractDailyNoteNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
 
+func TestContractDailyNoteInfoNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
 func TestContractGetDocNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
@@ -197,7 +201,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	model.Conf = model.NewAppConf()
 	model.Conf.NotebookCrypto, model.Conf.Sync, model.Conf.FileTree = conf.NewNotebookCrypto(), conf.NewSync(), conf.NewFileTree()
 	model.Conf.Editor, model.Conf.Export, model.Conf.Search = conf.NewEditor(), conf.NewExport(), conf.NewSearch()
-	if t.Name() == "TestContractDailyNoteNotebookResponseLease" {
+	if t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
 		content, err := os.ReadFile(filepath.Join("..", "..", "app", "appearance", "langs", "en.json"))
 		if err != nil {
 			t.Fatal(err)
@@ -245,7 +249,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 			t.Fatal(err)
 		}
 		treenode.UpsertBlockTree(tree)
-		if t.Name() == "TestContractDailyNoteNotebookResponseLease" {
+		if t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
 			if _, err := model.Mount(boxID); err != nil {
 				t.Fatal(err)
 			}
@@ -260,6 +264,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.POST("/api/block/checkBlockRef", checkBlockRef)
 	engine.POST("/api/block/getDocInfo", getDocInfo)
 	engine.POST("/api/filetree/createDailyNote", createDailyNote)
+	engine.POST("/api/filetree/getDailyNoteInfo", getDailyNoteInfo)
 	engine.POST("/api/filetree/getDoc", getDoc)
 	engine.POST("/api/block/getTreeStat", getTreeStat)
 	engine.POST("/api/block/getBlockBreadcrumb", getBlockBreadcrumb)
@@ -316,6 +321,9 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		endpoint, typedQuery = "/api/block/getDocInfo", true
 	case "TestContractDailyNoteNotebookResponseLease":
 		endpoint, typedQuery = "/api/filetree/createDailyNote", true
+		args["date"] = "2024-02-29"
+	case "TestContractDailyNoteInfoNotebookResponseLease":
+		endpoint, typedQuery = "/api/filetree/getDailyNoteInfo", true
 		args["date"] = "2024-02-29"
 	case "TestContractGetDocNotebookResponseLease":
 		endpoint, typedQuery = "/api/filetree/getDoc", true
@@ -430,7 +438,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	if lockedBeforeResponse {
 		t.Fatalf("lock completed before plaintext response was sent: %s", writer.Body.String())
 	}
-	if t.Name() == "TestContractDailyNoteNotebookResponseLease" {
+	if t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, endpoint, strings.NewReader(string(requestBody))))
 		requireAPIContract(t, http.MethodPost, endpoint, recorder)

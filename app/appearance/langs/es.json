@@ -25,7 +25,6 @@
 	"agentWelcomeLate4": "¿Quieres darle un cierre al día?\nAnota algo que merezca la pena recordar",
 	"agentWelcomeLate5": "¿Tienes una idea que quieras guardar para mañana?\nEscribe primero lo más importante",
 	"agentExample4": "Ayúdame a desarrollar un complemento",
-	"dailyNoteDateInvalid": "Fecha no válida o ambigua; introduce una fecha completa con el formato YYYY-MM-DD",
 	"goToDocumentStart": "Ir al inicio del documento",
 	"goToDocumentEnd": "Ir al final del documento",
 	"agentBuiltinPluginDevelopmentDescription": "Flujo oficial de desarrollo de plugins de interfaz: tras tu aceptación explícita, se aclaran los requisitos pendientes, se confirma un plan breve y se implementa, valida y empaqueta en una copia gestionada; la instalación y la activación requieren autorización por separado",

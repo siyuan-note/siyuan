@@ -812,6 +812,8 @@ var DuplicateDocTree = define[FileTreeIDRequest, FileTreeDuplicateData]("duplica
 var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "/api/filetree/createDoc", JSONBody, ResponseOptions{}, "POST")
 var CreateDailyNote = define[FileTreeDailyNoteRequest, FileTreeCreateData]("createDailyNote", "/api/filetree/createDailyNote", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
+var GetDailyNoteInfo = define[DailyNoteInfoRequest, *DailyNoteInfo]("getDailyNoteInfo", "/api/filetree/getDailyNoteInfo", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
 // CreateDocWithMd 保留编辑器 Markdown 语法选项，并按 ImportStdMd 的规则自动转换标准脚注。
 // 请求字段、文档 ID 响应和笔记本权限规则不变；转义的脚注语法可用于保留字面文本。
 var CreateDocWithMd = define[FileTreeCreateMarkdownRequest, string]("createDocWithMd", "/api/filetree/createDocWithMd", JSONBody, ResponseOptions{}, "POST")

@@ -25,7 +25,6 @@
 	"agentWelcomeLate4": "Ingin memberi penutup untuk hari ini?\nCatat satu hal yang layak diingat",
 	"agentWelcomeLate5": "Ada ide yang ingin kamu simpan untuk besok?\nTulis dulu hal yang paling penting",
 	"agentExample4": "Bantu saya mengembangkan plugin",
-	"dailyNoteDateInvalid": "Tanggal tidak valid atau ambigu; masukkan tanggal lengkap dalam format YYYY-MM-DD",
 	"goToDocumentStart": "Ke awal dokumen",
 	"goToDocumentEnd": "Ke akhir dokumen",
 	"agentBuiltinPluginDevelopmentDescription": "Alur kerja resmi pengembangan plugin antarmuka: setelah Anda menyetujuinya secara eksplisit, perjelas kebutuhan yang belum lengkap, konfirmasi rencana singkat, implementasikan dalam salinan terkelola, validasi, dan kemas; pemasangan dan pengaktifan memerlukan izin terpisah",

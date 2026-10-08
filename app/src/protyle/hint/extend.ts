@@ -18,7 +18,6 @@ import {
     getSbChildBlockCount,
     getTopAloneElement
 } from "../wysiwyg/getBlock";
-import {replaceFileName} from "../../editor/rename";
 import {transaction} from "../wysiwyg/transaction";
 import {getAssetExtension, getAssetName, getDisplayName, isEncryptedBox} from "../../util/pathName";
 import {cancelSB, genEmptyElement, rebalanceSbWidth, refreshSbResize} from "../../block/util";
@@ -56,7 +55,7 @@ import {
 } from "../wysiwyg/blockSelection";
 import {countBlockWord} from "../../layout/status";
 import {genTemplateDocTreePlanHTML} from "../../template/docTree";
-import {getDailyNoteHint} from "./dailyNote";
+import {getDailyNoteHints} from "./dailyNote";
 
 const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
     infoStyle: "info",
@@ -605,20 +604,18 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
     if (protyle.lite && isEncryptedBox(protyle.notebookId)) {
         refParam.notebook = protyle.notebookId;
     }
+    const dailyNotes = source === "hint" ? getDailyNoteHints(key, protyle).catch((): IHintData[] => []) : Promise.resolve([] as IHintData[]);
     fetchPost("/api/search/searchRefBlock", refParam, (response) => {
-        createTarget.promise.then((hideConfiguredCreate) => {
+        Promise.all([createTarget.promise, dailyNotes]).then(([hideConfiguredCreate, dateHints]) => {
             if (!createTarget.isCurrent()) {
                 return;
             }
             const dataList: IHintData[] = [];
             let createItemCount = 0;
-            const dailyNote = source === "hint" ? getDailyNoteHint(key, protyle) : undefined;
-            if (dailyNote) {
-                dataList.push(dailyNote);
-                createItemCount++;
-            }
+            dataList.push(...dateHints);
+            createItemCount += dateHints.length;
             if (response.data.newDoc) {
-                const newFileName = Lute.UnEscapeHTMLStr(replaceFileName(response.data.k));
+                const newFileName = Lute.UnEscapeHTMLStr(response.data.k);
                 if (!hideConfiguredCreate) {
                     dataList.push({
                         value: `((newFile "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,

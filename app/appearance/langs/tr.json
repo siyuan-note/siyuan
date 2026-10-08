@@ -25,7 +25,6 @@
 	"agentWelcomeLate4": "Bugüne bir kapanış notu düşmek ister misin?\nHatırlamaya değer bir şeyi yaz",
 	"agentWelcomeLate5": "Yarına saklamak istediğin bir fikrin mi var?\nÖnce en önemli noktayı yaz",
 	"agentExample4": "Bir eklenti geliştirmeme yardım et",
-	"dailyNoteDateInvalid": "Geçersiz veya belirsiz tarih; YYYY-MM-DD biçiminde tam bir tarih girin",
 	"goToDocumentStart": "Belgenin başına git",
 	"goToDocumentEnd": "Belgenin sonuna git",
 	"agentBuiltinPluginDevelopmentDescription": "Resmî ön yüz eklentisi geliştirme süreci: açık onayınızın ardından eksik gereksinimler netleştirilir, kısa bir plan onaylanır ve yönetilen bir kopyada geliştirme, doğrulama ve paketleme yapılır; yükleme ve etkinleştirme için ayrı izin gerekir",

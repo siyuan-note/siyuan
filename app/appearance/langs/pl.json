@@ -25,7 +25,6 @@
 	"agentWelcomeLate4": "Chcesz dopisać zakończenie dzisiejszego dnia?\nZapisz jedną rzecz wartą zapamiętania",
 	"agentWelcomeLate5": "Masz pomysł, który chcesz zachować na jutro?\nZapisz najpierw to, co najważniejsze",
 	"agentExample4": "Pomóż mi opracować wtyczkę",
-	"dailyNoteDateInvalid": "Nieprawidłowa lub niejednoznaczna data; wpisz pełną datę w formacie YYYY-MM-DD",
 	"goToDocumentStart": "Przejdź do początku dokumentu",
 	"goToDocumentEnd": "Przejdź do końca dokumentu",
 	"agentBuiltinPluginDevelopmentDescription": "Oficjalny proces tworzenia wtyczek interfejsu: po wyraźnej zgodzie użytkownika następuje doprecyzowanie brakujących wymagań, zatwierdzenie krótkiego planu, implementacja w zarządzanej kopii, weryfikacja i przygotowanie pakietu; instalacja i aktywacja wymagają osobnej zgody",

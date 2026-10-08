@@ -21,6 +21,7 @@ import {
 } from "../util/selection";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash, hintTag} from "./extend";
 import {createDailyNoteReference} from "./dailyNote";
+import {captureDailyNoteSelection, insertDailyNoteReference} from "./dailyNoteSelection";
 import {
     getBlockRefAnchorText,
     getDocCreateTemplatePath,
@@ -949,22 +950,9 @@ ${genHintItemHTML(item)}
         }
         if (["[[", "【【"].includes(this.splitChar) && /^daily-note:\d{4}-\d{2}-\d{2}:[a-z0-9-]*$/.test(value)) {
             const [, date, notebookID] = value.split(":");
-            const savedRange = range.cloneRange();
-            const input = savedRange.toString();
+            const target = captureDailyNoteSelection(protyle, range);
             createDailyNoteReference(protyle, date, notebookID, (id, title) => {
-                if (!nodeElement.isConnected || savedRange.toString() !== input) {
-                    return;
-                }
-                protyle.toolbar.range = savedRange;
-                focusByRange(savedRange);
-                const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
-                    type: "id",
-                    color: `${id}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${getBlockRefAnchorText(title)}`
-                }, true, undoContext);
-                if (refElement[0]) {
-                    protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
-                    protyle.toolbar.range.collapse(false);
-                }
+                insertDailyNoteReference(protyle, target, id, title, refIsS, undoContext);
             });
             return;
         }

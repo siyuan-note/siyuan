@@ -25,7 +25,6 @@
 	"agentWelcomeLate4": "Möchtest du den Tag abrunden?\nHalte etwas fest, an das du dich erinnern möchtest",
 	"agentWelcomeLate5": "Möchtest du eine Idee für morgen festhalten?\nSchreib erst einmal das Wichtigste auf",
 	"agentExample4": "Hilf mir, ein Plugin zu entwickeln",
-	"dailyNoteDateInvalid": "Ungültiges oder mehrdeutiges Datum; bitte ein vollständiges Datum im Format YYYY-MM-DD eingeben",
 	"goToDocumentStart": "Zum Dokumentanfang springen",
 	"goToDocumentEnd": "Zum Dokumentende springen",
 	"agentBuiltinPluginDevelopmentDescription": "Offizieller Ablauf zur Entwicklung von Frontend-Plugins: Nach deiner ausdrücklichen Zustimmung werden fehlende Anforderungen geklärt, ein kurzer Plan bestätigt und die Umsetzung in einer verwalteten Kopie geprüft und paketiert; Installation und Aktivierung erfordern eine separate Genehmigung",

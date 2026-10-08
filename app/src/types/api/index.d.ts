@@ -888,6 +888,10 @@ export type DOMTextRequestInput = { "dom": string; };
 
 export type DailyNoteBlockRequestInput = { "data": string; "dataType": string; "notebook": string; };
 
+export type DailyNoteInfo = { "existed": boolean; "hPath": string; "id": string; "title": string; };
+
+export type DailyNoteInfoRequestInput = { "date"?: string | null; "notebook": string; };
+
 export type DeleteBlockRequestInput = { "id": string; };
 
 export type DiffDocVersionsRequestInput = { "left": DocVersionRefInput; "right": DocVersionRefInput; };
@@ -4128,6 +4132,11 @@ export interface APIPOSTRoutes {
     "/api/filetree/duplicateDocTree": {
         request: FileTreeIDRequestInput;
         response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getDailyNoteInfo": {
+        request: DailyNoteInfoRequestInput;
+        response: { "code": 0; "data": DailyNoteInfo | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/filetree/getDoc": {

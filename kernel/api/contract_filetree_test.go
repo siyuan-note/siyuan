@@ -80,6 +80,7 @@ func TestAPIContractFileTreeDailyNoteDate(t *testing.T) {
 	engine := gin.New()
 	const path = "/api/filetree/createDailyNote"
 	engine.POST(path, createDailyNote)
+	engine.POST("/api/filetree/getDailyNoteInfo", getDailyNoteInfo)
 	for _, entry := range []struct {
 		body string
 		code int
@@ -105,6 +106,12 @@ func TestAPIContractFileTreeDailyNoteDate(t *testing.T) {
 		}
 		if response.Code != entry.code {
 			t.Fatalf("unexpected daily note response for %s: %s", entry.body, recorder.Body.String())
+		}
+		preview := httptest.NewRecorder()
+		engine.ServeHTTP(preview, httptest.NewRequest("POST", "/api/filetree/getDailyNoteInfo", strings.NewReader(entry.body)))
+		requireAPIContract(t, "POST", "/api/filetree/getDailyNoteInfo", preview)
+		if err := json.Unmarshal(preview.Body.Bytes(), &response); err != nil || response.Code != entry.code {
+			t.Fatalf("unexpected preview response for %s: %s %v", entry.body, preview.Body.String(), err)
 		}
 	}
 }

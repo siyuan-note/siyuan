@@ -25,7 +25,6 @@
 	"agentWelcomeLate4": "오늘 하루를 마무리해 볼까요?\n기억해 둘 만한 일 하나를 적어 봐요",
 	"agentWelcomeLate5": "내일을 위해 남겨 둘 생각이 있나요?\n가장 중요한 것부터 적어 둬요",
 	"agentExample4": "플러그인 개발을 도와주세요",
-	"dailyNoteDateInvalid": "날짜가 올바르지 않거나 모호합니다. YYYY-MM-DD 형식으로 전체 날짜를 입력하세요",
 	"goToDocumentStart": "문서 시작으로 이동",
 	"goToDocumentEnd": "문서 끝으로 이동",
 	"agentBuiltinPluginDevelopmentDescription": "공식 프런트엔드 플러그인 개발 절차: 사용자가 명시적으로 선택한 후 누락된 요구 사항을 확인하고 간단한 계획에 합의한 뒤 관리되는 사본에서 구현, 검증 및 패키징을 수행하며, 설치와 활성화에는 별도의 승인이 필요합니다",

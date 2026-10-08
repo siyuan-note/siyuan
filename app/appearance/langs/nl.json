@@ -25,7 +25,6 @@
 	"agentWelcomeLate4": "Wil je de dag afronden?\nSchrijf één ding op dat het onthouden waard is",
 	"agentWelcomeLate5": "Heb je een idee dat je voor morgen wilt bewaren?\nSchrijf eerst het belangrijkste op",
 	"agentExample4": "Help me een plug-in te ontwikkelen",
-	"dailyNoteDateInvalid": "Ongeldige of onduidelijke datum; voer een volledige datum in de notatie YYYY-MM-DD in",
 	"goToDocumentStart": "Naar het begin van het document",
 	"goToDocumentEnd": "Naar het einde van het document",
 	"agentBuiltinPluginDevelopmentDescription": "Officiële werkwijze voor frontend-pluginontwikkeling: na je uitdrukkelijke toestemming worden ontbrekende vereisten verduidelijkt, wordt een kort plan bevestigd en wordt de plugin in een beheerde kopie geïmplementeerd, gevalideerd en verpakt; installatie en activering vereisen afzonderlijke toestemming",

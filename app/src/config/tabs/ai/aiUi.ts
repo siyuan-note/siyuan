@@ -8,6 +8,7 @@ import {escapeHtmlTextAndAttr, escapeHtml} from "../../../util/escape";
 import {aiConfigApi} from "./aiRuntime";
 import {openByMobile} from "../../../editor/openLink";
 import {canOpenExternalURL} from "../../../util/hostCapabilities";
+import {startMountedPolling} from "./mountedPolling";
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
@@ -160,17 +161,7 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
         });
     });
 
-    render();
-    const timer = window.setInterval(render, 3000);
-    // block 从 DOM 移除（设置页关闭/切换）时清理定时器，避免内存泄漏
-    const cleanup = () => {
-        if (!document.contains(block)) {
-            window.clearInterval(timer);
-            return;
-        }
-        window.requestAnimationFrame(cleanup);
-    };
-    window.requestAnimationFrame(cleanup);
+    startMountedPolling(block, render);
 };
 
 const mountModelTestButton = (root: HTMLElement, inputId: string, buttonId: string,
@@ -505,17 +496,7 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
             }
         });
     };
-    renderMcpStatus();
-    const statusTimer = window.setInterval(renderMcpStatus, 3000);
-    // 设置页关闭/切换时清理定时器，避免内存泄漏（与 embedding 轮询清理模式一致）。
-    const cleanupStatus = () => {
-        if (!document.contains(block)) {
-            window.clearInterval(statusTimer);
-            return;
-        }
-        window.requestAnimationFrame(cleanupStatus);
-    };
-    window.requestAnimationFrame(cleanupStatus);
+    startMountedPolling(block, renderMcpStatus);
 
     const getMcpServerName = (el: HTMLElement): string | undefined => {
         return el.closest<HTMLElement>("[data-mcp-server-name]")?.dataset.mcpServerName;

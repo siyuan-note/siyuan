@@ -503,6 +503,7 @@ const gutterSingle = () => [
 ];
 
 export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
+export const SLASH_MENU_FREQUENT_PATH = `${SLASH_MENU_ROOT_PATH}.frequent`;
 
 // 共享工具栏声明决定目录默认顺序，块类型位于首位，字体和字号位于外观之前。
 // 移动端操作按钮复用统一声明，复制和剪切由悬浮工具栏提供，显隐和排序使用已有配置标识。
@@ -538,6 +539,7 @@ const mobileToolbarContexts = (children: IEntryCatalogNode[]) => MOBILE_TOOLBAR_
 });
 
 const slashMenuBuiltinChildren = [
+    node("frequent", lang("slashMenuFrequent"), false),
     node("template", lang("template")),
     node("widget", lang("widget")),
     node("assets", lang("assets")),

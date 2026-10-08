@@ -5,8 +5,13 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 import * as dockOrder from "./dockOrder";
+import * as profileHelpers from "./profile";
+import * as orderHelpers from "./order";
 
-const loadEditor = (builtin = false, initialEnabled = true) => {
+const frequentPath = "editor.slash.menu.frequent";
+const rootPath = "editor.slash.menu";
+
+const loadEditor = (id = "custom", initialEnabled = true, mobile = false) => {
     const listeners: Record<string, (event: any) => void> = {};
     const search = {value: "", addEventListener: (_event: string, callback: typeof listeners.input) => {
         listeners.search = callback;
@@ -17,24 +22,31 @@ const loadEditor = (builtin = false, initialEnabled = true) => {
             ".b3-dialog__body": {innerHTML: ""},
             "[data-type='entry-browser']": browser,
             "[data-type='entry-search']": search,
+            "[data-type='entry-section']": {innerHTML: ""},
+            "[data-type='entry-mobile-options']": {innerHTML: ""},
             "[data-profile-field='name']": {focus() {}},
         }[selector]),
         addEventListener: (event: string, callback: typeof listeners.input) => { listeners[event] = callback; },
     };
-    const entries = [{key: "template", label: () => "Template"}, {key: "heading1", label: () => "Heading 1"}];
+    const entries = [{key: "frequent", label: () => "Frequently used"}, {key: "template", label: () => "Template"}, {key: "heading1", label: () => "Heading 1"}];
     const rootEntry = {key: "menu", label: () => "Slash menu", displayChildrenDirectly: true, children: entries};
     const sections = [{key: "editor.slash", label: () => "Slash menu", children: [rootEntry]}];
-    const config = {active: "custom", profiles: [{id: "custom", name: "Custom", entries: {}, orders: {}}]};
+    const config = {active: "custom", profiles: [{id: "custom", name: "Custom", entries: {[frequentPath]: initialEnabled, [rootPath]: !mobile},
+        orders: {[rootPath]: ["heading1", "template", "frequent"]}},
+        {id: "other", name: "Other", entries: {[frequentPath]: initialEnabled}, orders: {}}]};
     const siyuan = {languages: new Proxy({slashMenuFrequent: "Frequently used"}, {
         get: (target, key) => target[key as keyof typeof target] || String(key),
     }), config: {appearance: {entryVisibility: config}}};
-    let enabled = initialEnabled;
     let discardPrompts = 0;
     let allowDiscard = true;
-    const writes: boolean[] = [];
+    const writes: unknown[] = [];
+    let nextID = 0;
     const emptyDock = dockOrder.createDockEntryOrderSnapshot({});
     const dependencies = {
-        ...dockOrder,
+        ...dockOrder, ...profileHelpers, ...orderHelpers,
+        SLASH_MENU_FREQUENT_PATH: frequentPath,
+        genUUID: () => `new-${++nextID}`,
+        bindTouchOrder: () => () => {},
         SLASH_MENU_ROOT_PATH: "editor.slash.menu",
         ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple",
         entryCatalog: sections,
@@ -44,23 +56,26 @@ const loadEditor = (builtin = false, initialEnabled = true) => {
         getEditorToolbarCatalogSnapshot: (): [] => [],
         refreshToolbarCatalogEntries() {}, refreshTopBarCatalog() {}, refreshDockCatalog() {}, refreshSlashMenuCatalog() {},
         getDockEntryOrderSnapshot: () => emptyDock,
-        createEntryProfileSnapshot: () => ({}), createEntryOrderSnapshot: () => ({}),
-        isMobile: () => false,
+        createEntryProfileSnapshot: (template: string) => ({[frequentPath]: template === "full", [rootPath]: !mobile}),
+        createEntryOrderSnapshot: () => ({}),
+        getEntryPaths: () => [rootPath, frequentPath],
+        isEntryVisible: (path: string, stopAt?: string) => path === frequentPath
+            ? (stopAt === rootPath || !mobile) && siyuan.config.appearance.entryVisibility.profiles[0].entries[frequentPath]
+            : !mobile,
+        getConfiguredEntryVisibility: (path: string, stopAt?: string) => path === frequentPath
+            ? (stopAt === rootPath || !mobile) && siyuan.config.appearance.entryVisibility.profiles[0].entries[frequentPath]
+            : !mobile,
+        isMobile: () => mobile,
         isInMobileApp: () => false,
-        isFrequentSlashEnabled: () => enabled,
-        setFrequentSlashEnabled: (value: boolean) => { enabled = value; writes.push(value); },
         getHostCapabilities: () => ({importExport: false}),
         getEntryCatalogChildren: () => entries,
         getEntryCatalogPathChain: (_section: string, path: string) => [path],
-        getSavedEntryOrder: (): undefined => undefined,
-        resolveEntryOrder: (order: string[]) => order,
-        getProfileEntryVisibility: () => true,
         getEntryCatalogCustomDefaultVisibility: () => true,
         isEntryCatalogNodeConfigurable: () => true,
         isEntryOrderSortable: () => true,
         escapeAttr: (value: string) => value,
         escapeHtml: (value: string) => value,
-        saveEntryVisibility: (value: typeof config) => { siyuan.config.appearance.entryVisibility = value; },
+        saveEntryVisibility: (value: typeof config) => { siyuan.config.appearance.entryVisibility = value; writes.push(value); },
         confirmDialog: (_title: string, _text: string, callback: () => void) => {
             discardPrompts++;
             if (allowDiscard) callback();
@@ -70,85 +85,112 @@ const loadEditor = (builtin = false, initialEnabled = true) => {
     const code = transpileModule(source + `
 createEntryView = () => fixtureView;
 removeEntryView = () => { fixtureView.closed = true; };
-exports.open = openProfileEditor;`, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
-    const exports = {} as {open: (root: any, id: string) => void};
+exports.open = openProfileEditor;
+exports.create = createProfile;
+exports.duplicate = duplicateProfile;`, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
+    const exports = {} as {open: (root: any, id: string) => void;
+        create: (template: string, current?: boolean) => Config.IEntryVisibilityProfile;
+        duplicate: (profile: any) => Config.IEntryVisibilityProfile};
     runInNewContext(code, {exports, require: () => dependencies, window: {siyuan}, fixtureView: view});
     const root = {querySelector: (): null => null};
-    const open = () => { view.closed = false; exports.open(root, builtin ? "full" : "custom"); };
+    const open = () => { view.closed = false; exports.open(root, id); };
     open();
-    return {browser, view, writes, open,
+    return {browser, view, writes, open, create: exports.create, duplicate: exports.duplicate,
         config: () => siyuan.config.appearance.entryVisibility,
-        enabled: () => enabled,
+        enabled: () => siyuan.config.appearance.entryVisibility.profiles[0].entries[frequentPath],
         discardPrompts: () => discardPrompts,
         preventDiscard: () => { allowDiscard = false; },
-        externalChange: (value: boolean) => { enabled = value; },
-        toggle: (checked: boolean) => listeners.change({target: {dataset: {type: "slash-menu-frequent"}, checked}}),
+        toggle: (checked: boolean) => listeners.change({target: {dataset: {entryPath: frequentPath}, checked, matches: () => true}}),
+        template: (value: string) => listeners.change({target: {dataset: {profileField: "template"}, value, matches: () => false}}),
         rerender: () => listeners.search({}),
         search: (value: string) => { search.value = value; listeners.search({}); },
         action: (action: string) => listeners.click({target: {closest: (selector: string) =>
-            selector === "[data-action]" ? {dataset: {action}} : null}}),
+            selector === "[data-action]" ? {dataset: {action, entryParent: rootPath}} : null}}),
     };
 };
 
 const frequentRow = (html: string) => html.match(/<label[^>]*>\s*<span[^>]*>Frequently used<\/span>[\s\S]*?<\/label>/)?.[0];
 
-test("frequent slash setting uses the first compact row without profile or drag identifiers", () => {
-    const fixture = loadEditor();
-    const row = frequentRow(fixture.browser.innerHTML);
-    assert.ok(row);
-    assert.match(row, /config-entry-visibility__row--toggleable/);
-    assert.match(row, /class="b3-switch"[^>]*data-type="slash-menu-frequent"[^>]* checked/);
-    assert.doesNotMatch(row, /data-entry-|draggable|config-entry-visibility__drag|readonly|disabled/);
-    assert.ok(fixture.browser.innerHTML.indexOf(row) < fixture.browser.innerHTML.indexOf('data-entry-key="template"'));
-    assert.equal(fixture.writes.length, 0);
-});
-
-test("custom frequent slash changes are staged across rerenders and discarded on Cancel or Back", () => {
-    for (const action of ["cancel", "back"]) {
-        const fixture = loadEditor();
-        const profile = JSON.stringify(fixture.config());
+for (const mobile of [false, true]) {
+    test(`frequent is a pinned profile row on ${mobile ? "mobile" : "desktop"}`, () => {
+        const fixture = loadEditor("custom", true, mobile);
+        const row = frequentRow(fixture.browser.innerHTML);
+        assert.ok(row);
+        assert.match(row, /data-entry-path="editor.slash.menu.frequent"/);
+        assert.match(row, / checked/);
+        assert.doesNotMatch(row, /draggable|config-entry-visibility__drag|readonly|disabled/);
+        assert.ok(fixture.browser.innerHTML.indexOf(row) < fixture.browser.innerHTML.indexOf('data-entry-key="template"'));
+        fixture.action("reset-entry-order");
+        assert.ok(fixture.browser.innerHTML.indexOf(frequentRow(fixture.browser.innerHTML)) <
+            fixture.browser.innerHTML.indexOf('data-entry-key="template"'));
         fixture.toggle(false);
-        fixture.rerender();
-        assert.doesNotMatch(frequentRow(fixture.browser.innerHTML), / checked/);
-        assert.equal(fixture.enabled(), true);
-        assert.equal(fixture.writes.length, 0);
-        fixture.action(action);
-        assert.equal(fixture.discardPrompts(), 1);
-        assert.equal(fixture.view.closed, true);
-        assert.equal(JSON.stringify(fixture.config()), profile);
+        fixture.action("confirm");
+        assert.equal(fixture.enabled(), false);
+        assert.equal(fixture.config().profiles[1].entries[frequentPath], true);
+        assert.equal(fixture.writes.length, 1);
         fixture.open();
+        assert.doesNotMatch(frequentRow(fixture.browser.innerHTML), / checked/);
+    });
+
+    test(`built-in frequent defaults are readonly on ${mobile ? "mobile" : "desktop"}`, () => {
+        for (const id of ["simple", "full"]) {
+            const fixture = loadEditor(id, true, mobile);
+            const row = frequentRow(fixture.browser.innerHTML);
+            assert.match(row, /data-entry-readonly/);
+            assert.equal(/ checked/.test(row), id === "full");
+            fixture.toggle(id !== "full");
+            fixture.rerender();
+            assert.equal(/ checked/.test(frequentRow(fixture.browser.innerHTML)), id === "full");
+            fixture.action("cancel");
+            assert.equal(fixture.discardPrompts(), 0);
+            assert.equal(fixture.writes.length, 0);
+        }
+    });
+
+    test(`custom frequent drafts cancel and search correctly on ${mobile ? "mobile" : "desktop"}`, () => {
+        for (const action of ["cancel", "back"]) {
+            const fixture = loadEditor("custom", true, mobile);
+            const original = JSON.stringify(fixture.config());
+            fixture.toggle(false);
+            fixture.search("frequently used");
+            assert.ok(frequentRow(fixture.browser.innerHTML));
+            assert.doesNotMatch(fixture.browser.innerHTML, /data-entry-key="template"|config-entry-visibility__drag/);
+            assert.doesNotMatch(frequentRow(fixture.browser.innerHTML), / checked/);
+            fixture.search("");
+            fixture.rerender();
+            assert.doesNotMatch(frequentRow(fixture.browser.innerHTML), / checked/);
+            assert.equal(fixture.enabled(), true);
+            fixture.action(action);
+            assert.equal(fixture.discardPrompts(), 1);
+            assert.equal(fixture.view.closed, true);
+            assert.equal(fixture.writes.length, 0);
+            assert.equal(JSON.stringify(fixture.config()), original);
+            fixture.open();
+            assert.match(frequentRow(fixture.browser.innerHTML), / checked/);
+        }
+    });
+
+    test(`copy and template choices preserve frequent semantics on ${mobile ? "mobile" : "desktop"}`, () => {
+        const fixture = loadEditor("custom", true, mobile);
+        assert.equal(fixture.create("simple").entries[frequentPath], false);
+        assert.equal(fixture.create("full").entries[frequentPath], true);
+        assert.equal(fixture.create("full", true).entries[frequentPath], true);
+        const copy = fixture.duplicate(fixture.config().profiles[0]);
+        assert.equal(copy.entries[frequentPath], true);
+        copy.entries[frequentPath] = false;
+        assert.equal(fixture.enabled(), true);
+        fixture.template("simple");
+        assert.doesNotMatch(frequentRow(fixture.browser.innerHTML), / checked/);
+        fixture.template("full");
         assert.match(frequentRow(fixture.browser.innerHTML), / checked/);
-    }
-});
+        fixture.template("current");
+        assert.match(frequentRow(fixture.browser.innerHTML), / checked/);
+        fixture.action("cancel");
+        assert.equal(fixture.enabled(), true);
+    });
+}
 
-test("searching the frequent label finds its workspace switch without adding a profile entry", () => {
-    const fixture = loadEditor();
-    const profile = JSON.stringify(fixture.config());
-    fixture.toggle(false);
-    fixture.search("frequently used");
-    assert.ok(frequentRow(fixture.browser.innerHTML));
-    assert.doesNotMatch(fixture.browser.innerHTML, /data-entry-key="template"|config-entry-visibility__drag/);
-    assert.doesNotMatch(frequentRow(fixture.browser.innerHTML), / checked/);
-    fixture.search("");
-    assert.match(fixture.browser.innerHTML, /data-entry-key="template"/);
-    assert.doesNotMatch(frequentRow(fixture.browser.innerHTML), / checked/);
-    assert.equal(JSON.stringify(fixture.config()), profile);
-});
-
-test("custom frequent slash changes persist only with Confirm and stay out of profiles", () => {
-    const fixture = loadEditor();
-    const profile = JSON.stringify(fixture.config());
-    fixture.toggle(false);
-    fixture.action("confirm");
-    assert.deepEqual(fixture.writes, [false]);
-    assert.equal(fixture.enabled(), false);
-    assert.equal(fixture.view.closed, true);
-    assert.equal(JSON.stringify(fixture.config()), profile);
-    fixture.open();
-    assert.doesNotMatch(frequentRow(fixture.browser.innerHTML), / checked/);
-});
-
-test("declining discard preserves a pending frequent slash change until Confirm", () => {
+test("declining discard preserves a pending frequent profile change until Confirm", () => {
     const fixture = loadEditor();
     fixture.preventDiscard();
     fixture.toggle(false);
@@ -156,38 +198,8 @@ test("declining discard preserves a pending frequent slash change until Confirm"
     assert.equal(fixture.view.closed, false);
     assert.equal(fixture.writes.length, 0);
     fixture.action("confirm");
-    assert.deepEqual(fixture.writes, [false]);
-});
-
-test("unchanged or reverted custom settings do not overwrite a newer workspace preference", () => {
-    for (const reverted of [false, true]) {
-        const fixture = loadEditor();
-        if (reverted) {
-            fixture.toggle(false);
-            fixture.toggle(true);
-        }
-        fixture.externalChange(false);
-        fixture.action("confirm");
-        assert.equal(fixture.enabled(), false);
-        assert.equal(fixture.writes.length, 0);
-    }
-});
-
-test("built-in profile viewers apply the independent workspace switch immediately", () => {
-    const fixture = loadEditor(true);
-    const profile = JSON.stringify(fixture.config());
-    assert.doesNotMatch(frequentRow(fixture.browser.innerHTML), /readonly|disabled/);
-    assert.match(fixture.browser.innerHTML, /data-entry-readonly/);
-    fixture.toggle(false);
-    assert.deepEqual(fixture.writes, [false]);
-    fixture.rerender();
-    assert.doesNotMatch(frequentRow(fixture.browser.innerHTML), / checked/);
-    fixture.action("cancel");
-    assert.equal(fixture.discardPrompts(), 0);
-    assert.equal(fixture.view.closed, true);
-    assert.equal(JSON.stringify(fixture.config()), profile);
-    fixture.open();
-    assert.doesNotMatch(frequentRow(fixture.browser.innerHTML), / checked/);
+    assert.equal(fixture.enabled(), false);
+    assert.equal(fixture.writes.length, 1);
 });
 
 test("all bundled languages include a tab-indented frequent slash translation", () => {

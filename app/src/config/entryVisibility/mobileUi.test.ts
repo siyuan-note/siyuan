@@ -20,11 +20,11 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     let settingsWindow = false;
     const ownerSnapshot: Record<string, string[]> = {};
     let ownerReads = 0;
-    let frequentSlashEnabled = true;
+    const frequentPath = "editor.slash.menu.frequent";
     const cache: Record<string, Record<string, any>> = {};
     const noop = () => {};
     window.siyuan = {languages, mobile: {}, storage: {}, config: {editor: {codeTabSpaces: 4}, appearance: {
-        entryVisibility: {active: "custom", profiles: [{id: "custom", name: "Custom", entries: {}, orders: {}}]},
+        entryVisibility: {active: "custom", profiles: [{id: "custom", name: "Custom", entries: {[frequentPath]: true}, orders: {}}]},
     }}, layout: {}} as unknown as typeof window.siyuan;
     const load = (id: string): Record<string, any> => {
         if (cache[id]) {
@@ -33,7 +33,8 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         if (id === "config/entryVisibility/runtime") {
             return {
                 ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple", ENTRY_VISIBILITY_VERSION: 1,
-                createEntryProfileSnapshot: () => ({"editor.slash.menu": !mobile}), createEntryOrderSnapshot: () => ({}),
+                createEntryProfileSnapshot: (template: string) => ({"editor.slash.menu": !mobile,
+                    [frequentPath]: template === "full"}), createEntryOrderSnapshot: () => ({}),
                 getConfiguredEntryVisibility: () => true,
                 saveEntryVisibility: (config: Config.IEntryVisibility) => {
                     window.siyuan.config.appearance.entryVisibility = config;
@@ -48,8 +49,6 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
                 "dialog/confirmDialog": {confirmDialog: (_title: string, _text: string, callback: () => void) => callback()},
                 "dialog/message": {showMessage: noop},
                 "protyle/util/compatibility": {isInMobileApp: () => true},
-                "protyle/hint/frequentSlashStorage": {isFrequentSlashEnabled: () => frequentSlashEnabled,
-                    setFrequentSlashEnabled: (enabled: boolean) => { frequentSlashEnabled = enabled; }},
                 "protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: (): [] => []},
                 "config/setting/windowContext": {isSettingsWindow: () => settingsWindow,
                     getSettingsOwnerApp: () => window.siyuan.ws?.app,
@@ -106,15 +105,21 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
             const section = editor.querySelector<HTMLSelectElement>("[data-type='entry-section']");
             section.value = "editor.slash";
             section.dispatchEvent(new Event("change", {bubbles: true}));
-            const frequent = editor.querySelector<HTMLInputElement>("[data-type='slash-menu-frequent']");
-            check(frequent?.checked && !frequent.disabled, "Frequent slash defaults to on in every profile view");
+            const frequent = editor.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']");
+            check(frequent && frequent.checked === (id !== "simple") && !frequent.disabled,
+                "Frequent defaults to off in Simple and on in Full and this custom profile");
+            check(frequent.hasAttribute("data-entry-readonly") === (id !== "custom"),
+                "Built-in frequent switches must be read-only");
             frequent.click();
-            check(frequentSlashEnabled === (id === "custom"), "Only built-in views save the workspace switch immediately");
             if (id !== "custom") {
-                frequent.click();
+                check(frequent.checked === (id === "full"), "Clicking a built-in frequent switch must not change it");
+            } else {
+                check(!editor.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']").checked,
+                    "Custom frequent changes must update only the draft");
             }
+            check(config().profiles[0].entries[frequentPath], "Viewing or editing must preserve saved frequent preference");
             editor.querySelector<HTMLElement>("[data-action='cancel']").click();
-            check(frequentSlashEnabled, "Cancelling a custom draft does not change the workspace switch");
+            check(config().profiles[0].entries[frequentPath], "Cancelling a custom draft preserves its saved frequent preference");
         }
         check(JSON.stringify(config()) === saved, "Viewing and cancelling profiles must preserve saved preferences");
         root.querySelector<HTMLElement>("[data-profile-id='full'] [data-action='activate']").click();
@@ -180,18 +185,19 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         return "Narrow new and existing profiles passed";
     }
     selectSlash();
-    const frequent = view.querySelector<HTMLInputElement>("[data-type='slash-menu-frequent']");
+    const frequent = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']");
     check(frequent.checked, "Frequent slash defaults to on");
     const frequentRow = frequent.closest("label");
     check(frequentRow === frequentRow.parentElement.firstElementChild, "Frequent is the first compact slash row");
-    check(!frequentRow.hasAttribute("data-entry-row") && !frequentRow.querySelector(".config-entry-visibility__drag"),
-        "The workspace switch must not participate in profile sorting");
+    check(frequentRow.getAttribute("data-entry-path-row") === frequentPath &&
+        !frequentRow.querySelector(".config-entry-visibility__drag"),
+        "The frequent profile switch must stay pinned outside sorting");
     frequent.click();
-    check(frequentSlashEnabled, "Custom frequent changes must remain staged until confirmed");
+    check(config().profiles[0].entries[frequentPath], "Custom frequent changes must remain staged until confirmed");
     let enabled = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
     check(!enabled.checked, "Mobile slash defaults to off");
     enabled.click();
-    check(!view.querySelector<HTMLInputElement>("[data-type='slash-menu-frequent']").checked,
+    check(!view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']").checked,
         "Frequent switch draft must survive a list rerender");
     check(config().profiles[0].entries["editor.slash.menu"] !== true, "Total switch must remain a draft until confirmed");
     check(view.querySelectorAll("[data-type='entry-mobile-options'] input").length === 1, "Only one total switch is shown");
@@ -244,7 +250,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     send(browser, "pointerup", {clientX: -20, clientY: -20});
     check(!browser.querySelector(".config-entry-visibility__row--drop-after"), "Outside release clears drop target");
     view.querySelector<HTMLElement>("[data-action='confirm']").click();
-    check(!frequentSlashEnabled, "Confirm must save the independent frequent switch");
+    check(config().profiles[0].entries[frequentPath] === false, "Confirm must save frequent in the custom profile");
     const order = config().profiles[0].orders["editor.slash.menu"];
     check(config().profiles[0].entries["editor.slash.menu"] === true, "Confirm saves total switch in the profile");
     check(order.includes("plugin:missing:item"), "Unavailable plugin slots must survive sorting");
@@ -253,14 +259,14 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     selectSlash();
     enabled = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
     check(enabled.checked, "Reopening must preserve profile setting");
-    check(!view.querySelector<HTMLInputElement>("[data-type='slash-menu-frequent']").checked,
-        "Reopening must preserve the workspace frequent setting");
-    view.querySelector<HTMLInputElement>("[data-type='slash-menu-frequent']").click();
+    check(!view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']").checked,
+        "Reopening must preserve the profile frequent setting");
+    view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']").click();
     const search = view.querySelector<HTMLInputElement>("[data-type='entry-search']");
     search.value = languages.slashMenuFrequent;
     search.dispatchEvent(new Event("input", {bubbles: true}));
-    check(view.querySelector<HTMLInputElement>("[data-type='slash-menu-frequent']")?.checked,
-        "Searching the frequent label must reveal the pending workspace switch");
+    check(view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']")?.checked,
+        "Searching the frequent label must reveal the pending profile switch");
     check(!view.querySelector("[data-entry-key='template']"), "Frequent search must not include unrelated candidates");
     search.value = "heading1";
     search.dispatchEvent(new Event("input", {bubbles: true}));
@@ -273,7 +279,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     check(view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.heading1']").disabled,
         "Disabled menu must disable candidate controls");
     view.querySelector<HTMLElement>("[data-action='cancel']").click();
-    check(!frequentSlashEnabled, "Cancel must discard the staged frequent change");
+    check(config().profiles[0].entries[frequentPath] === false, "Cancel must discard the staged frequent change");
     check(config().profiles[0].entries["editor.slash.menu"] === true, "Cancel must discard the total switch change");
     view = open("full");
     selectSlash();
@@ -283,8 +289,11 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     enabled = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
     enabled.click();
     check(!enabled.checked, "Built-in total switch follows mobile default and remains read-only");
-    view.querySelector<HTMLInputElement>("[data-type='slash-menu-frequent']").click();
-    check(frequentSlashEnabled, "Built-in viewers must allow immediate workspace frequent changes");
+    const fullFrequent = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']");
+    check(fullFrequent.checked && fullFrequent.hasAttribute("data-entry-readonly"), "Full frequent must be on and read-only");
+    fullFrequent.click();
+    check(fullFrequent.checked, "Full frequent remains enabled after clicking");
+    check(config().profiles[0].entries[frequentPath] === false, "Built-in views must not change custom profiles");
     view.querySelector<HTMLElement>("[data-action='cancel']").click();
     mobile = false;
     delete window.siyuan.mobile;

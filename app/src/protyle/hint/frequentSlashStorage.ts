@@ -1,9 +1,12 @@
+import {SLASH_MENU_FREQUENT_PATH, SLASH_MENU_ROOT_PATH} from "../../config/entryVisibility/catalog";
+import {getConfiguredEntryVisibility} from "../../config/entryVisibility/runtime";
 import {Constants} from "../../constants";
 import {trackSettingSave} from "../../config/setting/pending";
 import {setStorageVal} from "../util/compatibility";
 import {normalizeSlashUsage, rankFrequentSlashItems} from "./frequentSlash";
 
-export const isFrequentSlashEnabled = () => window.siyuan.storage?.[Constants.LOCAL_SLASH_FREQUENT_ENABLED] !== false;
+export const isFrequentSlashEnabled = () =>
+    getConfiguredEntryVisibility(SLASH_MENU_FREQUENT_PATH, SLASH_MENU_ROOT_PATH);
 
 const writable = () => window.siyuan.storage && !window.siyuan.config.readonly && !window.siyuan.isPublish;
 
@@ -32,14 +35,6 @@ const persist = (key: string, value: unknown) => {
             saving = false;
         }
     })());
-};
-
-export const setFrequentSlashEnabled = (enabled: boolean) => {
-    if (!writable()) {
-        return;
-    }
-    window.siyuan.storage[Constants.LOCAL_SLASH_FREQUENT_ENABLED] = enabled;
-    void persist(Constants.LOCAL_SLASH_FREQUENT_ENABLED, enabled);
 };
 
 export const getFrequentSlashItems = <T>(items: T[], getKey: (item: T) => string): T[] =>

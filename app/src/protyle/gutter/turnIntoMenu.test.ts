@@ -55,7 +55,7 @@ test("saved conversion orders and visibility survive profile migration and defau
         const input = {name: "Custom", entries: {[`${path}.quote`]: false}, orders: {[path]: saved}};
         for (const version of [3, 4, 5, 6]) {
             const profile = normalizeEntryVisibilityImportProfile(input, version, {[path]: defaults});
-            assert.deepEqual(profile, input);
+            assert.deepEqual(profile, {...input, entries: {...input.entries, "editor.slash.menu.frequent": true}});
             assert.deepEqual(mergeEntryOrderPreservingUnknown(defaults, profile.orders[path]), saved);
             assert.deepEqual(resolveEntryOrder(defaults, profile.orders[path], new Set()),
                 saved.filter(key => key !== "plugin:example:item"));

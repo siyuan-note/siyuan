@@ -4,9 +4,16 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import * as catalog from "../../config/entryVisibility/catalog";
+import * as profileVisibility from "../../config/entryVisibility/profile";
 import * as frequentSlash from "./frequentSlash";
 
-const constants = {LOCAL_SLASH_FREQUENT_ENABLED: "enabled", LOCAL_SLASH_USAGE: "usage"};
+const constants = {LOCAL_SLASH_USAGE: "usage"};
+const frequentPath = "editor.slash.menu.frequent";
+const runtimeCompiled = transpileModule(
+    readFileSync(join(__dirname, "../../config/entryVisibility/runtime.ts"), "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
 const compiled = transpileModule(readFileSync(join(__dirname, "frequentSlashStorage.ts"), "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
@@ -17,7 +24,15 @@ const fixture = (values: Record<string, unknown> = {},
                  persist: (write: TWrite) => Promise<unknown> = () => Promise.resolve()) => {
     const writes: TWrite[] = [];
     const storage: Record<string, unknown> = structuredClone(values);
-    const siyuan = {storage, config: {readonly: false}, isPublish: false};
+    const config: Config.IEntryVisibility = {version: 6, active: "full", profiles: [
+        {id: "custom-on", name: "Enabled", entries: {[frequentPath]: true}, orders: {}},
+        {id: "custom-off", name: "Disabled", entries: {[frequentPath]: false}, orders: {}},
+    ]};
+    const siyuan = {storage, config: {readonly: false, appearance: {entryVisibility: config}}, isPublish: false};
+    const runtime = {} as typeof import("../../config/entryVisibility/runtime");
+    runInNewContext(runtimeCompiled, {
+        exports: runtime, window: {siyuan}, require: () => ({...catalog, ...profileVisibility}),
+    });
     const exports = {} as typeof import("./frequentSlashStorage");
     const settings = {} as typeof import("../../config/setting/pending");
     runInNewContext(transpileModule(readFileSync(join(__dirname, "../../config/setting/pending.ts"), "utf8"), {
@@ -30,6 +45,8 @@ const fixture = (values: Record<string, unknown> = {},
         require: (id: string) => {
             if (id === "../../constants") return {Constants: constants};
             if (id === "./frequentSlash") return frequentSlash;
+            if (id === "../../config/entryVisibility/runtime") return runtime;
+            if (id === "../../config/entryVisibility/catalog") return catalog;
             if (id === "../../config/setting/pending") return settings;
             assert.equal(id, "../util/compatibility");
             return {setStorageVal: (key: string, value: unknown) => {
@@ -39,36 +56,56 @@ const fixture = (values: Record<string, unknown> = {},
             }};
         },
     });
-    return {...exports, storage, writes, siyuan, settings};
+    return {...exports, storage, writes, siyuan, settings, config};
 };
 
 const settle = () => new Promise<void>(resolve => setImmediate(resolve));
 const entries = [{key: "code"}, {key: "heading1"}];
 const getKey = (entry: {key: string}) => entry.key;
 
-test("frequent slash defaults on and honors only an explicit false preference", () => {
-    for (const enabled of [undefined, null, true, "false", 0, {}, []]) {
-        assert.equal(fixture({enabled}).isFrequentSlashEnabled(), true);
+test("frequent slash follows the active profile and ignores the legacy global preference", () => {
+    for (const enabled of [undefined, null, true, false, "false", 0, {}, []]) {
+        const f = fixture({enabled});
+        for (const active of ["full", "simple", "custom-on", "custom-off"]) {
+            f.config.active = active;
+            assert.equal(f.isFrequentSlashEnabled(), active === "full" || active === "custom-on");
+        }
     }
-    assert.equal(fixture({enabled: false}).isFrequentSlashEnabled(), false);
 });
 
 test("disabled frequent slash preserves history and stops all execution writes", async () => {
     const f = fixture({usage: {code: 4, "plugin:uninstalled:item": 2}});
-    f.setFrequentSlashEnabled(false);
+    f.config.active = "custom-off";
     assert.equal(f.isFrequentSlashEnabled(), false);
     assert.equal(f.getFrequentSlashItems(entries, getKey).length, 0);
     f.recordSlashExecution("code");
     f.recordSlashExecution("heading1");
     await settle();
     assert.deepEqual(f.storage.usage, {code: 4, "plugin:uninstalled:item": 2});
-    assert.deepEqual(f.writes, [{key: "enabled", value: false}]);
-    f.setFrequentSlashEnabled(true);
+    assert.deepEqual(f.writes, []);
+    f.config.active = "custom-on";
     assert.deepEqual(f.getFrequentSlashItems(entries, getKey), [entries[0]]);
     f.recordSlashExecution("heading1");
     await settle();
     assert.deepEqual(f.storage.usage, {code: 4, "plugin:uninstalled:item": 2, heading1: 1});
     assert.equal(f.writes.filter(write => write.key === "usage").length, 1);
+});
+
+test("frequent slash remains usable by the keyboard toolbar when its slash parent is hidden", async () => {
+    const f = fixture({usage: {code: 2}});
+    f.config.active = "custom-on";
+    f.config.profiles[0].entries[catalog.SLASH_MENU_ROOT_PATH] = false;
+    assert.equal(f.isFrequentSlashEnabled(), true);
+    assert.deepEqual(f.getFrequentSlashItems(entries, getKey), [entries[0]]);
+    f.recordSlashExecution("code");
+    await settle();
+    assert.deepEqual(f.storage.usage, {code: 3});
+    f.config.profiles[0].entries[frequentPath] = false;
+    assert.equal(f.isFrequentSlashEnabled(), false);
+    f.recordSlashExecution("code");
+    await settle();
+    assert.deepEqual(f.storage.usage, {code: 3});
+    assert.equal(f.writes.length, 1);
 });
 
 test("usage records stable plugin identities independently and normalizes damaged storage", async () => {
@@ -111,29 +148,29 @@ test("usage safely records prototype-like own keys without changing object proto
     assert.equal(Object.prototype.hasOwnProperty.call({}, "usage"), false);
 });
 
-test("readonly, published, and missing storage contexts do not mutate or persist preferences", async () => {
+test("readonly, published, and missing storage contexts do not mutate or persist usage", async () => {
     for (const mode of ["readonly", "publish", "missing"]) {
         const f = fixture({usage: {code: 3}});
         if (mode === "readonly") f.siyuan.config.readonly = true;
         if (mode === "publish") f.siyuan.isPublish = true;
         if (mode === "missing") f.siyuan.storage = undefined;
-        f.setFrequentSlashEnabled(false);
+        f.config.active = "custom-off";
         f.recordSlashExecution("code");
         await settle();
         assert.deepEqual(f.storage, {usage: {code: 3}});
         assert.equal(f.writes.length, 0);
-        assert.equal(f.isFrequentSlashEnabled(), true);
+        assert.equal(f.isFrequentSlashEnabled(), false);
     }
 });
 
-test("ranking and counting read storage updates from other windows without cached preferences", async () => {
-    const f = fixture({enabled: false, usage: {code: 1}});
-    f.storage.enabled = true;
+test("ranking and counting read profile and storage updates without cached preferences", async () => {
+    const f = fixture({usage: {code: 1}});
+    f.config.active = "custom-on";
     f.storage.usage = {heading1: 6};
     assert.deepEqual(f.getFrequentSlashItems(entries, getKey), [entries[1]]);
     f.recordSlashExecution("heading1");
     assert.deepEqual(f.storage.usage, {heading1: 7});
-    f.storage.enabled = false;
+    f.config.active = "custom-off";
     f.recordSlashExecution("code");
     await settle();
     assert.deepEqual(f.storage.usage, {heading1: 7});
@@ -159,16 +196,16 @@ test("usage persistence serializes and coalesces snapshots so old writes cannot 
     assert.equal(f.writes.length, 2);
 });
 
-test("disabling while usage is saving preserves both pending counts and the separate preference", async () => {
+test("switching to a disabled profile while saving preserves pending counts", async () => {
     const release: Array<() => void> = [];
     const f = fixture({}, () => new Promise<void>(resolve => release.push(resolve)));
     f.recordSlashExecution("code");
     f.recordSlashExecution("code");
-    f.setFrequentSlashEnabled(false);
+    f.config.active = "custom-off";
     f.recordSlashExecution("heading1");
-    assert.equal(f.storage.enabled, false);
+    assert.equal(f.isFrequentSlashEnabled(), false);
     assert.deepEqual(f.storage.usage, {code: 2});
-    for (let index = 0; index < 3; index++) {
+    for (let index = 0; index < 2; index++) {
         await settle();
         assert.equal(f.writes.length, index + 1);
         release.shift()();
@@ -177,7 +214,6 @@ test("disabling while usage is saving preserves both pending counts and the sepa
     assert.deepEqual(f.writes, [
         {key: "usage", value: {code: 1}},
         {key: "usage", value: {code: 2}},
-        {key: "enabled", value: false},
     ]);
 });
 
@@ -201,11 +237,11 @@ test("failed persistence does not poison the queue or discard newer in-memory co
     assert.deepEqual(f.storage.usage, {code: 2});
 });
 
-test("settings close waits for the complete queued preference drain", async () => {
+test("settings close waits for the complete queued usage drain", async () => {
     const release: Array<() => void> = [];
     const f = fixture({}, () => new Promise<void>(resolve => release.push(resolve)));
-    f.setFrequentSlashEnabled(false);
-    f.setFrequentSlashEnabled(true);
+    f.recordSlashExecution("code");
+    f.recordSlashExecution("code");
     let flushed = false;
     const flush = f.settings.flushSettingSaves().then(() => { flushed = true; });
     await settle();
@@ -218,7 +254,7 @@ test("settings close waits for the complete queued preference drain", async () =
     release.shift()();
     await flush;
     assert.equal(flushed, true);
-    assert.deepEqual(f.writes, [{key: "enabled", value: false}, {key: "enabled", value: true}]);
+    assert.deepEqual(f.writes, [{key: "usage", value: {code: 1}}, {key: "usage", value: {code: 2}}]);
 });
 
 test("a rejected storage operation does not poison the drain or make settings flush reject", async () => {
@@ -251,7 +287,7 @@ test("the drain preserves failures already tracked by the storage request", asyn
     const f = fixture({}, () => f.settings.trackSettingSave(new Promise<void>((_resolve, rejectPromise) => {
         reject = rejectPromise;
     })));
-    f.setFrequentSlashEnabled(false);
+    f.recordSlashExecution("code");
     const flush = f.settings.flushSettingSaves();
     reject(new Error("request failed"));
     await assert.rejects(flush, /request failed/);

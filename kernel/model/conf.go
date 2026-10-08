@@ -345,6 +345,7 @@ func InitConf() {
 		Conf.Appearance.EntryVisibility = nil
 	}
 	Conf.Appearance.EntryVisibility = conf.NormalizeEntryVisibility(Conf.Appearance.EntryVisibility, entryVisibilityFallback)
+	migrateSlashFrequent(Conf.Appearance.EntryVisibility, getLocalStorageWithError)
 	var langOK bool
 	for _, l := range Conf.Langs {
 		if Conf.Lang == l.Name {

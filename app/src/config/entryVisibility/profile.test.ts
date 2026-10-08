@@ -20,6 +20,8 @@ import {
 import {getMobileToolbarContextPath} from "./mobileToolbarContext";
 import {mergeEntryOrderPreservingUnknown, resolveEntryOrder} from "./order";
 
+const frequentPath = "editor.slash.menu.frequent";
+
 test("mobile toolbar contexts expose relevant entries and hide caret references by default", () => {
     const input = getMobileToolbarContextPath(false);
     const selection = getMobileToolbarContextPath(true);
@@ -76,7 +78,9 @@ test("mobile context orders retain legacy plugin slots and reset independently",
     resetEntryProfileOrder(profile, input);
     assert.deepEqual(resolveEntryOrder(defaults, getSavedEntryOrder(profile, input, defaults), new Set()), defaults);
     assert.deepEqual(profile.orders["editor.toolbar"], legacy);
-    assert.deepEqual(normalizeEntryVisibilityImportProfile(profile, 6, {}), profile);
+    assert.deepEqual(normalizeEntryVisibilityImportProfile(profile, 6, {}), {
+        ...profile, entries: {[frequentPath]: true},
+    });
 });
 
 test("chart height migration retains shared visibility and plugin order", () => {
@@ -89,7 +93,7 @@ test("chart height migration retains shared visibility and plugin order", () => 
             "gutter.single": ["pluginBefore", "width", "height", "pluginAfter"],
             "gutter.single.chart": ["pluginBefore", "height", "update", "pluginAfter"],
         }}, 6, {});
-        assert.deepEqual(profile.entries, {"gutter.single.height": existing ?? false});
+        assert.deepEqual(profile.entries, {"gutter.single.height": existing ?? false, [frequentPath]: true});
         assert.deepEqual(profile.orders, {
             "gutter.single": ["pluginBefore", "width", "height", "pluginAfter"],
             "gutter.single.chart": ["pluginBefore", "update", "pluginAfter"],
@@ -102,7 +106,8 @@ test("task state imports match kernel migrations and remain stable on reimport",
     const fixtures = JSON.parse(readFileSync(resolve(process.cwd(), "../kernel/conf/testdata/task_status_menu.json"), "utf8"));
     for (const fixture of fixtures) {
         const profile = normalizeEntryVisibilityImportProfile({name: "Custom", ...fixture.input}, 5, {});
-        assert.deepEqual(profile, {name: "Custom", ...fixture.expected}, fixture.name);
+        assert.deepEqual(profile, {name: "Custom", ...fixture.expected,
+            entries: {...fixture.expected.entries, [frequentPath]: true}}, fixture.name);
         assert.deepEqual(normalizeEntryVisibilityImportProfile(profile, 6, {}), profile);
         assert.deepEqual(normalizeEntryVisibilityImportProfile(profile, 5, {}), profile);
     }
@@ -117,6 +122,7 @@ test("database submenu migration preserves visibility, order and plugin slots", 
     assert.deepEqual(profile.entries, {
         "gutter.single.database.exportCSV": false,
         "gutter.single.database.showDatabaseInFolder": true,
+        [frequentPath]: true,
     });
     assert.deepEqual(profile.orders, {
         "gutter.single": ["pluginBefore", "separator_exportCSV", "database", "pluginMiddle", "pluginAfter"],
@@ -214,7 +220,7 @@ test("legacy entry visibility imports require base without persisting it", () =>
     }, 2, {});
     assert.deepEqual(profile, {
         name: "Legacy",
-        entries: {visible: true, hidden: false},
+        entries: {visible: true, hidden: false, [frequentPath]: true},
         orders: {menu: ["known", "plugin"]},
     });
     assert.equal(normalizeEntryVisibilityImportProfile({
@@ -230,7 +236,7 @@ test("current entry visibility imports do not require base", () => {
         entries: {},
     }, 4, defaultOrders), {
         name: "Current",
-        entries: {},
+        entries: {[frequentPath]: true},
         orders: defaultOrders,
     });
 });
@@ -243,7 +249,7 @@ test("version 1 entry visibility imports use default orders", () => {
         entries: {},
     }, 1, defaultOrders), {
         name: "Version 1",
-        entries: {},
+        entries: {[frequentPath]: true},
         orders: defaultOrders,
     });
 });
@@ -261,7 +267,7 @@ test("version 3 entry visibility imports migrate the edit mode submenu", () => {
         },
     }, 3, {}), {
         name: "Legacy edit mode",
-        entries: {"document.more.editMode": false},
+        entries: {"document.more.editMode": false, [frequentPath]: true},
         orders: {},
     });
 });
@@ -276,7 +282,40 @@ test("version 3 entry visibility imports keep the merged mode entry when a legac
         },
     }, 3, {}), {
         name: "Partially visible edit mode",
-        entries: {"document.more.editMode": true},
+        entries: {"document.more.editMode": true, [frequentPath]: true},
         orders: {},
     });
+});
+
+test("legacy profile imports materialize the frequent default across every supported version", () => {
+    for (const version of [1, 2, 3, 4, 5, 6]) {
+        const input = {name: "Legacy", base: "simple", entries: {"editor.slash.menu": false}};
+        const profile = normalizeEntryVisibilityImportProfile(input, version, {});
+        assert.equal(profile.entries[frequentPath], true);
+        assert.equal(profile.entries["editor.slash.menu"], false);
+        assert.equal(Object.prototype.hasOwnProperty.call(input.entries, frequentPath), false);
+        const exported = JSON.parse(JSON.stringify({version: 6, profile}));
+        assert.deepEqual(normalizeEntryVisibilityImportProfile(exported.profile, exported.version, {}), profile);
+    }
+});
+
+test("frequent profile choices survive import and export without changing order or plugin entries", () => {
+    for (const enabled of [false, true]) {
+        const input = {name: "Custom", entries: {
+            [frequentPath]: enabled, "editor.slash.menu.plugin:example:item": false,
+        }, orders: {"editor.slash.menu": ["plugin:example:item", "template"]}};
+        const profile = normalizeEntryVisibilityImportProfile(input, 6, {});
+        assert.deepEqual(profile, input);
+        const exported = JSON.parse(JSON.stringify({version: 6, profile}));
+        assert.deepEqual(normalizeEntryVisibilityImportProfile(exported.profile, exported.version, {}), input);
+    }
+});
+
+test("invalid imported frequent values use the explicit default", () => {
+    for (const invalid of [null, "false", 0, {}, []]) {
+        const profile = normalizeEntryVisibilityImportProfile({
+            name: "Custom", entries: {[frequentPath]: invalid},
+        }, 6, {});
+        assert.deepEqual(profile.entries, {[frequentPath]: true});
+    }
 });

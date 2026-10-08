@@ -175,5 +175,6 @@ export const normalizeEntryVisibilityImportProfile = (
         migrateTaskStatusMenu({entries, orders});
     }
     migrateChartHeightMenu({entries, orders});
+    entries["editor.slash.menu.frequent"] ??= true;
     return {name: profile.name, entries, orders};
 };

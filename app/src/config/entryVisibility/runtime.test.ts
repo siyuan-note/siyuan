@@ -16,6 +16,63 @@ import {
     mergeDockEntryOrderSnapshot,
 } from "./dockOrder";
 
+test("frequent slash defaults and snapshots follow profiles on desktop and mobile", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/runtime.ts"), "utf8");
+    const compiled = transpileModule(source + "\nexports.writable = getWritableEntryProfile;", {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    const path = catalog.SLASH_MENU_FREQUENT_PATH;
+    const root = catalog.SLASH_MENU_ROOT_PATH;
+    try {
+        for (const mobile of [false, true]) {
+            for (const template of ["simple", "full"] as const) {
+                const config: Config.IEntryVisibility = {version: 6, active: template, profiles: []};
+                const window = {siyuan: {
+                    config: {appearance: {entryVisibility: config}},
+                    languages: {entryCustomProfile: "Custom"},
+                    ...(mobile ? {mobile: {}} : {}),
+                }};
+                Object.defineProperty(globalThis, "window", {configurable: true, value: window});
+                const runtime = {} as typeof import("./runtime") & {
+                    writable: (config: Config.IEntryVisibility) => Config.IEntryVisibilityProfile;
+                };
+                runInNewContext(compiled, {exports: runtime, window, require: () => ({
+                    ...catalog, ...profileVisibility, TOOLBAR_ENTRY_ROOT_PATH, genUUID: () => "custom",
+                })});
+                const enabled = template === "full";
+                assert.equal(runtime.getConfiguredEntryVisibility(path, root), enabled);
+                assert.equal(runtime.getConfiguredEntryVisibility(path), enabled && !mobile);
+                assert.equal(runtime.createEntryProfileSnapshot(template)[path], enabled);
+                const custom = runtime.writable(config);
+                assert.equal(custom.entries[path], enabled);
+                custom.entries[root] = false;
+                for (const visible of [false, true]) {
+                    custom.entries[path] = visible;
+                    assert.equal(runtime.getConfiguredEntryVisibility(path), false);
+                    assert.equal(runtime.getConfiguredEntryVisibility(path, root), visible);
+                }
+                const saved = JSON.stringify(custom);
+                config.active = "simple";
+                assert.equal(runtime.getConfiguredEntryVisibility(path, root), false);
+                config.active = "full";
+                assert.equal(runtime.getConfiguredEntryVisibility(path, root), true);
+                config.active = custom.id;
+                assert.equal(JSON.stringify(custom), saved);
+                assert.equal(runtime.getConfiguredEntryVisibility(path, root), true);
+                delete custom.entries[path];
+                assert.equal(runtime.getConfiguredEntryVisibility(path, root), true);
+            }
+        }
+    } finally {
+        if (descriptor) {
+            Object.defineProperty(globalThis, "window", descriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
+});
+
 test("daily note and flashcard presets preserve custom choices and mobile defaults", () => {
     const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/runtime.ts"), "utf8");
     const compiled = transpileModule(source + "\nexports.writable = getWritableEntryProfile;", {

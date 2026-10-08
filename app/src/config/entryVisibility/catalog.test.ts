@@ -554,10 +554,10 @@ test("slash menu catalog follows the built-in hint order", () => {
     const section = getEntryCatalogSection("editor.slash");
     assert.deepEqual(section?.children.map((item) => item.key), ["menu"]);
     const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
-    assert.deepEqual(children.map((item) => item.key), slashMenuBuiltinOrder);
-    assert.equal(children.filter((item) => item.type === "entry").length, 68);
+    assert.deepEqual(children.map((item) => item.key), ["frequent", ...slashMenuBuiltinOrder]);
+    assert.equal(children.filter((item) => item.type === "entry").length, 69);
     assert.equal(children.filter((item) => item.type === "separator").length, 5);
-    assert.equal(children.every((item) => item.simple), true);
+    assert.equal(children.filter(item => item.key !== "frequent").every((item) => item.simple), true);
 });
 
 test("slash menu catalog stays aligned with the built-in hint declarations", () => {

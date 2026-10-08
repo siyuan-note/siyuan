@@ -8,6 +8,8 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -32,6 +34,10 @@ func TestPluginDevelopmentRawPathGuard(t *testing.T) {
 		path := filepath.Join(WorkspaceDir, filepath.FromSlash(rel))
 		if !IsPluginDevelopmentRawPathForbidden(path, false) || !IsForbiddenAbsPath(path) {
 			t.Errorf("protected path accepted: %s", rel)
+		}
+		// Windows 别名路径只验证词法保护，实体夹具仍使用合法路径。
+		if runtime.GOOS == "windows" && (strings.Contains(rel, ":") || strings.Contains(rel, ". ")) {
+			continue
 		}
 		if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
 			t.Fatal(err)

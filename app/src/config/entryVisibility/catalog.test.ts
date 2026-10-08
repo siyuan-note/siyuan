@@ -244,16 +244,16 @@ test("top bar markup stays aligned with its configurable built-in catalog", () =
     assert.doesNotMatch(source, /id="drag"[^>]*data-topbar-entry/);
 });
 
-test("daily note and flashcard top bar entries default to visible only in the Simple profile", () => {
+test("desktop daily note and flashcard top bar entries are visible in both built-in profiles", () => {
     for (const key of ["barDailyNote", "barRiffCard"]) {
         const path = `${TOP_BAR_ROOT_PATH}.${key}`;
         const entry = getEntryCatalogNode(path)!;
         const defaultVisible = getEntryCatalogDefaultVisibility(path);
-        assert.equal(defaultVisible, false);
+        assert.equal(defaultVisible, true);
         assert.equal(entry.simpleDefaultVisible, true);
         assert.equal(getEntryCatalogCustomDefaultVisibility(path), false);
         assert.equal(getBuiltinProfileEntryVisibility("full", entry.simple, defaultVisible,
-            entry.simpleDefaultVisible), false);
+            entry.simpleDefaultVisible), true);
         assert.equal(getBuiltinProfileEntryVisibility("simple", entry.simple, defaultVisible,
             entry.simpleDefaultVisible), true);
     }
@@ -380,7 +380,8 @@ test("toolbar catalog follows the default toolbar declaration", () => {
     const familyIndex = children.findIndex(item => item.key === "font-family");
     assert.deepEqual(children.slice(familyIndex, familyIndex + 3).map(item => item.key),
         ["font-family", "font-size", "text"]);
-    assert.deepEqual(children.filter((item) => !item.simple).map(item => item.key), ["font-family", "font-size"]);
+    assert.deepEqual(children.filter((item) => !item.simple).map(item => item.key),
+        ["font-family", "font-size", "sup", "sub", "kbd", "inline-math"]);
 });
 
 test("inline text paste entries follow the menu order", () => {

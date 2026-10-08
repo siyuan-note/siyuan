@@ -514,7 +514,8 @@ const toolbarBuiltinChildren = [
             return separator(item.key);
         }
         const fontControl = ["font-family", "font-size"].includes(item.key);
-        return node(item.key, lang(item.lang), !fontControl, undefined, undefined,
+        const advancedFormat = ["sup", "sub", "kbd", "inline-math"].includes(item.key);
+        return node(item.key, lang(item.lang), !fontControl && !advancedFormat, undefined, undefined,
             fontControl ? {
                 defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
                 customDefaultVisible: false,
@@ -644,12 +645,12 @@ const statusBarCatalogSection: IEntryCatalogSection = {
 const topBarBuiltinChildren = [
     node("barSync", lang("syncNow")),
     node("barDailyNote", lang("dailyNote"), true, undefined, undefined, {
-        defaultVisible: () => false,
+        defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
         simpleDefaultVisible: true,
         customDefaultVisible: false,
     }),
     node("barRiffCard", lang("riffCard"), true, undefined, undefined, {
-        defaultVisible: () => false,
+        defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
         simpleDefaultVisible: true,
         customDefaultVisible: false,
     }),

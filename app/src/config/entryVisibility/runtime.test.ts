@@ -6,12 +6,160 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 import {resolveEntryOrder} from "./order";
 import {resetEntryProfileOrder} from "./profile";
+import * as catalog from "./catalog";
+import * as profileVisibility from "./profile";
+import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {
     DOCK_ORDER_SCOPES,
     getDefaultDockEntryOrderSnapshot,
     isDockOrderScope,
     mergeDockEntryOrderSnapshot,
 } from "./dockOrder";
+
+test("daily note and flashcard presets preserve custom choices and mobile defaults", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/runtime.ts"), "utf8");
+    const compiled = transpileModule(source + "\nexports.writable = getWritableEntryProfile;", {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    const paths = ["topBar.barDailyNote", "topBar.barRiffCard"];
+    try {
+        for (const mobile of [false, true]) {
+            const config: Config.IEntryVisibility = {version: 6, active: "full", profiles: []};
+            const window = {siyuan: {
+                config: {appearance: {entryVisibility: config}},
+                languages: {entryCustomProfile: "Custom"},
+                ...(mobile ? {mobile: {}} : {}),
+            }};
+            Object.defineProperty(globalThis, "window", {configurable: true, value: window});
+            const runtime = {} as typeof import("./runtime") & {
+                writable: (config: Config.IEntryVisibility) => Config.IEntryVisibilityProfile;
+            };
+            runInNewContext(compiled, {exports: runtime, window, require: () => ({
+                ...catalog, ...profileVisibility, TOOLBAR_ENTRY_ROOT_PATH, genUUID: () => "custom",
+            })});
+            for (const template of ["full", "simple"] as const) {
+                config.active = template;
+                const expected = template === "simple" || !mobile;
+                const snapshot = runtime.createEntryProfileSnapshot(template);
+                for (const path of paths) {
+                    assert.equal(runtime.getConfiguredEntryVisibility(path), expected);
+                    assert.equal(snapshot[path], expected);
+                }
+            }
+            config.active = "full";
+            const custom = runtime.writable(config);
+            for (const path of paths) {
+                assert.equal(custom.entries[path], !mobile);
+                for (const visible of [false, true]) {
+                    custom.entries[path] = visible;
+                    assert.equal(runtime.getConfiguredEntryVisibility(path), visible);
+                }
+                delete custom.entries[path];
+                assert.equal(runtime.getConfiguredEntryVisibility(path), false);
+            }
+            // 使用完整模板重置时采用当前默认值，不改写其他已保存方案。
+            custom.entries = runtime.createEntryProfileSnapshot("full");
+            for (const path of paths) {
+                assert.equal(runtime.getConfiguredEntryVisibility(path), !mobile);
+                custom.entries[path] = false;
+            }
+            const saved = JSON.stringify(custom);
+            config.active = "full";
+            for (const path of paths) {
+                assert.equal(runtime.getConfiguredEntryVisibility(path), !mobile);
+            }
+            config.active = custom.id;
+            for (const path of paths) {
+                assert.equal(runtime.getConfiguredEntryVisibility(path), false);
+            }
+            assert.equal(JSON.stringify(custom), saved);
+        }
+    } finally {
+        if (descriptor) {
+            Object.defineProperty(globalThis, "window", descriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
+});
+
+test("simple formatting defaults preserve color and full and custom toolbar choices", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/runtime.ts"), "utf8");
+    const compiled = transpileModule(source + "\nexports.writable = getWritableEntryProfile;", {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    const advanced = ["sup", "sub", "kbd", "inline-math"];
+    try {
+        for (const mobile of [false, true]) {
+            const root = mobile ? "editor.toolbar.mobile-selection" : "editor.toolbar";
+            const config: Config.IEntryVisibility = {version: 6, active: "simple", profiles: []};
+            const window = {siyuan: {
+                config: {appearance: {entryVisibility: config}},
+                languages: {entryCustomProfile: "Custom"},
+                ...(mobile ? {mobile: {}} : {}),
+            }};
+            Object.defineProperty(globalThis, "window", {configurable: true, value: window});
+            const runtime = {} as typeof import("./runtime") & {
+                writable: (config: Config.IEntryVisibility) => Config.IEntryVisibilityProfile;
+            };
+            runInNewContext(compiled, {exports: runtime, window, require: () => ({
+                ...catalog, ...profileVisibility, TOOLBAR_ENTRY_ROOT_PATH, genUUID: () => "custom",
+            })});
+            for (const template of ["simple", "full"] as const) {
+                config.active = template;
+                const snapshot = runtime.createEntryProfileSnapshot(template);
+                for (const key of advanced) {
+                    assert.equal(runtime.isEntryVisible(`${root}.${key}`), template === "full");
+                    assert.equal(snapshot[`${root}.${key}`], template === "full");
+                }
+                for (const key of ["text", "strong", "em", "u", "s", "mark", "code", "tag", "inline-memo"]) {
+                    assert.equal(runtime.isEntryVisible(`${root}.${key}`), true, `${template}: ${key}`);
+                    assert.equal(snapshot[`${root}.${key}`], true);
+                }
+            }
+            config.active = "simple";
+            const custom = runtime.writable(config);
+            for (const key of [...advanced, "text"]) {
+                const path = `${root}.${key}`;
+                assert.equal(custom.entries[path], key === "text");
+                for (const visible of [false, true]) {
+                    custom.entries[path] = visible;
+                    assert.equal(runtime.isEntryVisible(path), visible);
+                }
+                delete custom.entries[path];
+                if (mobile) {
+                    const legacy = `editor.toolbar.${key}`;
+                    for (const visible of [false, true]) {
+                        custom.entries[legacy] = visible;
+                        assert.equal(runtime.isEntryVisible(path), visible);
+                    }
+                    delete custom.entries[legacy];
+                }
+                assert.equal(runtime.isEntryVisible(path), true);
+                custom.entries[path] = false;
+            }
+            const saved = JSON.stringify(custom);
+            for (const template of ["simple", "full"] as const) {
+                config.active = template;
+                assert.equal(runtime.isEntryVisible(`${root}.text`), true);
+            }
+            config.active = custom.id;
+            assert.equal(JSON.stringify(custom), saved);
+            for (const key of [...advanced, "text"]) {
+                assert.equal(runtime.isEntryVisible(`${root}.${key}`), false);
+                assert.equal(catalog.getEntryCatalogNode(`editor.toolbar.mobile-input.${key}`), undefined);
+            }
+        }
+    } finally {
+        if (descriptor) {
+            Object.defineProperty(globalThis, "window", descriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
+});
 
 test("visibility edits on a built-in profile leave untouched orders following catalog updates", () => {
     const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/runtime.ts"), "utf8");

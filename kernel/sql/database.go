@@ -134,6 +134,9 @@ func initDatabase(forceRebuild bool) {
 			if err := ensureBookmarkAttributesIndex(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create bookmark attributes index failed: %s", err)
 			}
+			if err := ensureRecentUpdatedBlocksIndexes(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create recent updated block indexes failed: %s", err)
+			}
 			if err := cleanupInvalidRefs(db); err != nil {
 				logging.LogErrorf("cleanup invalid refs failed: %s", err)
 			}
@@ -200,6 +203,9 @@ func initDBTables() {
 
 	if err = ensureBlocksDocHPathIndex(db); err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document hpath index failed: %s", err)
+	}
+	if err = ensureRecentUpdatedBlocksIndexes(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create recent updated block indexes failed: %s", err)
 	}
 
 	if err = initFTSBlocks(); err != nil {
@@ -1444,6 +1450,15 @@ func ensureBlocksDocHPathIndex(database *sql.DB) (err error) {
 	return
 }
 
+// 最近更新查询只索引符合展示条件的段落和文档，按更新时间读取即可在达到限额后停止。
+func ensureRecentUpdatedBlocksIndexes(database *sql.DB) (err error) {
+	if _, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocks_recent_p ON blocks(updated DESC) WHERE type = 'p' AND length > 1"); err != nil {
+		return
+	}
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocks_recent_d ON blocks(updated DESC) WHERE type = 'd'")
+	return
+}
+
 func ensureTagSpansIndex(database *sql.DB) (err error) {
 	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_spans_tag_path ON spans(path) WHERE " + tagSpanIndexPredicate)
 	return
@@ -2113,6 +2128,9 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		}
 	}
 	if err = ensureBlocksDocHPathIndex(boxDB); err != nil {
+		return
+	}
+	if err = ensureRecentUpdatedBlocksIndexes(boxDB); err != nil {
 		return
 	}
 	if err = ensureRefsDefIndexes(boxDB); err != nil {

@@ -341,7 +341,7 @@ func checkEncryptedImportFlashcards(tree *parse.Tree, sourcePath string, encrypt
 	if "" == title {
 		title = filepath.Base(sourcePath)
 	}
-	return errors.New(fmt.Sprintf(Conf.Language(386), htmlstd.EscapeString(title)))
+	return fmt.Errorf(Conf.Language(386), htmlstd.EscapeString(title))
 }
 
 // importedBlockDocTitles 建立本次导入块 ID 到所属文档标题的映射，供闪卡卡片反查文档。
@@ -375,7 +375,7 @@ func checkEncryptedImportDeck(unzipRootPath string, trees map[string]*parse.Tree
 	if nil != loadErr || nil == deck {
 		// 牌组无法解析时仍要拒绝导入，此时无法指出具体文档，只报告包内牌组路径
 		logging.LogErrorf("load imported deck [%s] failed: %s", storageRiffDir, loadErr)
-		return errors.New(fmt.Sprintf(Conf.Language(385), filepath.ToSlash(filepath.Join("storage", "riff"))))
+		return fmt.Errorf(Conf.Language(385), filepath.ToSlash(filepath.Join("storage", "riff")))
 	}
 
 	var deckDocs []string
@@ -395,14 +395,14 @@ func checkEncryptedImportDeck(unzipRootPath string, trees map[string]*parse.Tree
 	}
 	if 0 == len(deckDocs) {
 		// 牌组存在但没有可定位的卡片，退回报告包内牌组路径
-		return errors.New(fmt.Sprintf(Conf.Language(385), filepath.ToSlash(filepath.Join("storage", "riff"))))
+		return fmt.Errorf(Conf.Language(385), filepath.ToSlash(filepath.Join("storage", "riff")))
 	}
 	deckDocs = gulu.Str.RemoveDuplicatedElem(deckDocs)
 	sort.Strings(deckDocs)
 	if 5 < len(deckDocs) {
 		deckDocs = append(deckDocs[:5], "...")
 	}
-	return errors.New(fmt.Sprintf(Conf.Language(385), htmlstd.EscapeString(strings.Join(deckDocs, ", "))))
+	return fmt.Errorf(Conf.Language(385), htmlstd.EscapeString(strings.Join(deckDocs, ", ")))
 }
 
 func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, sharedBlockIDs map[string]string,
@@ -954,7 +954,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			// 只有"目标笔记本未解锁导致拒绝写盘"才替换为提示解锁的文案，其余写盘错误原样上抛，避免归因错误。
 			// 相对路径的父目录名来自导入包，需与文档标题一样转义后再进入错误消息。
 			if errors.Is(err, errImportedTreeBoxLocked) {
-				err = errors.New(fmt.Sprintf(Conf.Language(388), htmlstd.EscapeString(finalRelPath)))
+				err = fmt.Errorf(Conf.Language(388), htmlstd.EscapeString(finalRelPath))
 			}
 			return
 		}

@@ -1108,31 +1108,20 @@ body.mobile-topbar--merged {
         }
       }
 
+      // 移动端已下载卡片：操作区跨整行铺满、图标只占第一行，两行网格结构见 business/_config.scss
       &__panel[data-type="downloaded"] .config-bazaar__content .b3-card {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
-
         > .b3-card__img {
-          grid-column: 1;
+          align-self: auto;
           grid-row: 1;
-        }
-
-        > .fn__flex-1 {
-          grid-column: 2;
-          grid-row: 1;
+          margin: 12px 0 12px 12px;
         }
 
         > .b3-card__actions--right {
           grid-column: 1 / -1;
-          grid-row: 2;
           max-width: none;
           min-height: 36px;
           padding: 4px 8px 8px 12px;
           width: 100%;
-
-          > .config-bazaar__publish-controls {
-            margin-right: auto;
-          }
         }
       }
 

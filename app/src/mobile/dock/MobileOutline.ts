@@ -438,7 +438,9 @@ export class MobileOutline extends Model {
         } else {
             let previousElement = getPreviousBlock(nodeElement);
             while (previousElement) {
-                if (previousElement.getAttribute("data-type") === "NodeHeading") {
+                if (previousElement.getAttribute("data-type") === "NodeHeading" &&
+                    !hasClosestByClassName(previousElement, "bq") &&
+                    !hasClosestByClassName(previousElement, "callout-content")) {
                     break;
                 } else {
                     previousElement = getPreviousBlock(previousElement);

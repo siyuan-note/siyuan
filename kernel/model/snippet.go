@@ -17,6 +17,7 @@
 package model
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -87,6 +88,11 @@ func loadSnippets() (ret []*conf.Snippet, err error) {
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal js snippets failed: %s", err)
 		return
+	}
+	for _, snippet := range ret {
+		if snippet == nil {
+			return nil, fmt.Errorf("invalid null snippet; original configuration preserved")
+		}
 	}
 
 	needRewrite := false

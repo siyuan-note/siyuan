@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20260926163337"
+		"updated": "20261008115720"
 	},
 	"Children": [
 		{
@@ -1175,6 +1175,63 @@
 				{
 					"Type": "NodeText",
 					"Data": "The snapshot covers workspace data, but not changes made to external systems by external MCP services or plugins. Regenerating an answer, stopping a task, or deleting a session also does not automatically undo completed write operations."
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-pkk1ilo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261008115720-pkk1ilo",
+				"updated": "20261008115720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "CSS/JS snippets"
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-m2rknxh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008115720-m2rknxh",
+				"updated": "20261008115720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ask the AI agent to list, read, create, update, enable, disable, or delete CSS/JS snippets. For example: “Create a disabled CSS snippet that increases the interface font size so I can review it.” Long snippet contents are read in pages."
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-p1ri8ae",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008115720-p1ri8ae",
+				"updated": "20261008115720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Every snippet change requires confirmation, even when session-wide or automatic approval is enabled. Review the proposed code and the current snippet shown in the confirmation card. New snippets are disabled and excluded from publishing by default. The agent preserves the global CSS/JS switches and existing publishing settings."
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-7g8jtun",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008115720-7g8jtun",
+				"updated": "20261008115720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enabling JavaScript or updating an enabled JavaScript snippet can execute code in connected windows. Disabling or deleting a snippet does not undo code that has already run; restarting the frontend may be necessary. If a snippet changes while you are reviewing it, the operation is rejected and the agent must read it again before requesting confirmation."
 				}
 			]
 		},

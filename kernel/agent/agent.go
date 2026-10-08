@@ -1214,6 +1214,18 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 							confirmationArgs["verifiedPackage"] = preview
 						}
 					}
+					if toolInputErr == nil && registration.ID == "native/backend/snippet" {
+						preview, previewErr := mcptools.AgentSnippetPreview(args)
+						if previewErr != nil {
+							toolInputErr = previewErr
+						} else if preview != nil {
+							confirmationArgs = make(map[string]any, len(args)+1)
+							for key, value := range args {
+								confirmationArgs[key] = value
+							}
+							confirmationArgs["currentSnippet"] = preview
+						}
+					}
 					if toolInputErr == nil {
 						requiresConfirm, forcedConfirm = capabilityConfirmRequirement(
 							registration, action, args, permissionController.allowSession.Load(), nil)
@@ -1701,6 +1713,10 @@ func capabilityConfirmRequirement(registration *capabilityRegistration, action s
 	allowSession bool, alwaysAllow map[string]bool) (required, forced bool) {
 	if registration == nil {
 		return false, false
+	}
+	// 代码片段写入可能执行脚本，逐次确认，不沿用会话或自动批准。
+	if registration.ID == "native/backend/snippet" && action != "list" && action != "get" {
+		return true, true
 	}
 	decision := capabilityApprovalDecision(registration, action, args)
 	if decision == conf.ApprovalDecisionConfirm {

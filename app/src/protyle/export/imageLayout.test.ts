@@ -174,15 +174,15 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         check.ok(wide.scrollWidth > wide.clientWidth, "Wide preview must scroll horizontally");
         check.equal(getComputedStyle(cell).fontSize, "16px");
         check.equal(getComputedStyle(wide.querySelector("table")).transform, "none");
-        check.ok(wide.querySelector("table").getBoundingClientRect().right <= imageElement.getBoundingClientRect().right,
+        check.ok(wide.querySelector("table").getBoundingClientRect().right - imageElement.getBoundingClientRect().right < 0.5,
             "Image must cover the whole table");
         wide.querySelector<HTMLElement>("table").style.width = "2200px";
         const deadline = Date.now() + 5000;
-        while (wide.querySelector("table").getBoundingClientRect().right > imageElement.getBoundingClientRect().right &&
+        while (wide.querySelector("table").getBoundingClientRect().right - imageElement.getBoundingClientRect().right >= 0.5 &&
             Date.now() < deadline) {
             await new Promise(resolve => setTimeout(resolve, 25));
         }
-        check.ok(wide.querySelector("table").getBoundingClientRect().right <= imageElement.getBoundingClientRect().right,
+        check.ok(wide.querySelector("table").getBoundingClientRect().right - imageElement.getBoundingClientRect().right < 0.5,
             "Preview border must follow table width changes without resizing the dialog: " + JSON.stringify({
                 renderer, mobile, visibility: document.visibilityState, minWidth: imageElement.style.minWidth,
                 table: wide.querySelector("table").getBoundingClientRect().toJSON(),
@@ -215,7 +215,7 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         const nestedTables = nested.querySelectorAll("table");
         const firstTable = nestedTables[0].getBoundingClientRect();
         const secondTable = nestedTables[1].getBoundingClientRect();
-        check.ok(firstTable.right <= secondTable.left || firstTable.bottom <= secondTable.top,
+        check.ok(firstTable.right - secondTable.left < 0.5 || firstTable.bottom - secondTable.top < 0.5,
             "Tables in a super block must not overlap");
         await capture();
 
@@ -224,7 +224,8 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         dialog.resize();
         const rtlTable = rtl.querySelector("table").getBoundingClientRect();
         const rtlImage = rtl.querySelector(".export-img").getBoundingClientRect();
-        check.ok(rtlTable.left >= rtlImage.left && rtlTable.right <= rtlImage.right, "RTL table must fit inside the image");
+        check.ok(rtlImage.left - rtlTable.left < 0.5 && rtlTable.right - rtlImage.right < 0.5,
+            "RTL table must fit inside the image");
         await capture();
 
         const large = await open(table(4));

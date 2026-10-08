@@ -229,11 +229,16 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 	if !isGlobal {
 		nodeSize = Conf.Graph.Local.NodeSize
 	}
+	linkTagSpans(*blocks, nodes, links, tagSpans, isGlobal, nodeSize)
+}
 
+func linkTagSpans(blocks []*Block, nodes *[]*GraphNode, links *[]*GraphLink, tagSpans []*sql.Span, isGlobal bool, nodeSize float64) {
 	// 构造标签节点
 	var tagNodes []*GraphNode
+	tagNodesByContent := make(map[string]*GraphNode, len(tagSpans))
+	tagSpansByBlock := make(map[string][]*sql.Span)
 	for _, tagSpan := range tagSpans {
-		if nil == tagNodeIn(tagNodes, tagSpan.Content) {
+		if nil == tagNodesByContent[tagSpan.Content] {
 			node := &GraphNode{
 				ID:    tagSpan.Content,
 				Label: tagSpan.Content,
@@ -242,27 +247,26 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 			}
 			*nodes = append(*nodes, node)
 			tagNodes = append(tagNodes, node)
+			tagNodesByContent[tagSpan.Content] = node
 		}
+		blockID := tagSpan.BlockID
+		if isGlobal {
+			blockID = tagSpan.RootID
+		}
+		tagSpansByBlock[blockID] = append(tagSpansByBlock[blockID], tagSpan)
 	}
 
-	// 连接标签和块
-	for _, block := range *blocks {
-		for _, tagSpan := range tagSpans {
-			if isGlobal { // 全局关系图将标签链接到文档块上
-				if block.RootID == tagSpan.RootID { // 局部关系图将标签链接到子块上
-					*links = append(*links, &GraphLink{
-						From: tagSpan.Content,
-						To:   block.RootID,
-					})
-				}
-			} else {
-				if block.ID == tagSpan.BlockID { // 局部关系图将标签链接到子块上
-					*links = append(*links, &GraphLink{
-						From: tagSpan.Content,
-						To:   block.ID,
-					})
-				}
-			}
+	// 按块查找标签，保持块顺序、标签顺序和重复连线。
+	for _, block := range blocks {
+		blockID := block.ID
+		if isGlobal { // 全局关系图将标签链接到文档块上。
+			blockID = block.RootID
+		}
+		for _, tagSpan := range tagSpansByBlock[blockID] {
+			*links = append(*links, &GraphLink{
+				From: tagSpan.Content,
+				To:   blockID,
+			})
 		}
 	}
 
@@ -274,7 +278,7 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 		}
 
 		for _, targetID := range ids[:len(ids)-1] {
-			if targetTag := tagNodeIn(tagNodes, targetID); nil != targetTag {
+			if targetTag := tagNodesByContent[targetID]; nil != targetTag {
 
 				*links = append(*links, &GraphLink{
 					From: tagNode.ID,
@@ -283,15 +287,6 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 			}
 		}
 	}
-}
-
-func tagNodeIn(tagNodes []*GraphNode, content string) *GraphNode {
-	for _, tagNode := range tagNodes {
-		if tagNode.Label == content {
-			return tagNode
-		}
-	}
-	return nil
 }
 
 func growTreeGraph(forwardlinks, backlinks *[]*Block, nodes *[]*GraphNode) {

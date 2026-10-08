@@ -10,11 +10,52 @@ package model
 
 import (
 	gosql "database/sql"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 )
+
+func TestLinkTagSpansPreservesGraph(t *testing.T) {
+	blocks := []*Block{{ID: "b1", RootID: "r1"}, {ID: "b2", RootID: "r1"}, {ID: "b3", RootID: "r2"}}
+	spans := []*sql.Span{
+		{Content: "a", Type: "tag strong", BlockID: "b1", RootID: "r1"},
+		{Content: "a", Type: "tag", BlockID: "b1", RootID: "r1"},
+		{Content: "a/b/c", Type: "tag", BlockID: "b2", RootID: "r1"},
+		{Content: "b", Type: "tag", BlockID: "b3", RootID: "r2"},
+		{Content: "orphan", Type: "tag", BlockID: "missing", RootID: "missing"},
+	}
+	for _, global := range []bool{false, true} {
+		nodes := []*GraphNode{{ID: "existing"}}
+		links := []*GraphLink{{From: "existing", To: "existing"}}
+		linkTagSpans(blocks, &nodes, &links, spans, global, 12)
+		wantNodes := []*GraphNode{{ID: "existing"},
+			{ID: "a", Label: "a", Type: "tag strong", Size: 12},
+			{ID: "a/b/c", Label: "a/b/c", Type: "tag", Size: 12},
+			{ID: "b", Label: "b", Type: "tag", Size: 12},
+			{ID: "orphan", Label: "orphan", Type: "tag", Size: 12}}
+		wantLinks := []*GraphLink{{From: "existing", To: "existing"},
+			{From: "a", To: "b1"}, {From: "a", To: "b1"}, {From: "a/b/c", To: "b2"}, {From: "b", To: "b3"},
+			{From: "a/b/c", To: "a"}, {From: "a/b/c", To: "b"}}
+		if global {
+			wantLinks = []*GraphLink{{From: "existing", To: "existing"},
+				{From: "a", To: "r1"}, {From: "a", To: "r1"}, {From: "a/b/c", To: "r1"},
+				{From: "a", To: "r1"}, {From: "a", To: "r1"}, {From: "a/b/c", To: "r1"}, {From: "b", To: "r2"},
+				{From: "a/b/c", To: "a"}, {From: "a/b/c", To: "b"}}
+		}
+		if !reflect.DeepEqual(nodes, wantNodes) || !reflect.DeepEqual(links, wantLinks) {
+			t.Fatalf("global=%v: nodes=%+v links=%+v", global, nodes, links)
+		}
+	}
+	var nodes []*GraphNode
+	var links []*GraphLink
+	linkTagSpans(nil, &nodes, &links, nil, false, 12)
+	if len(nodes) != 0 || len(links) != 0 {
+		t.Fatal("empty graph gained nodes or links")
+	}
+}
 
 func TestGraphSearchLiteralWildcards(t *testing.T) {
 	previous := Conf

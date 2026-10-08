@@ -53,11 +53,11 @@ func TestBookmarkIndexPreservesBlockFieldsAndLabels(t *testing.T) {
 	labels := []string{"R&amp;D", "&amp;lt;b&amp;gt;", "&quot;quoted&quot;", ""}
 	for i, label := range labels {
 		id := string(rune('a' + i))
-		ial := `{: bookmark="` + label + `"}`
+		ial := `{: custom-bookmark="wrong" bookmark="` + label + `"}`
 		if _, err := database.Exec("INSERT INTO blocks VALUES (?, '', ?, '', 'box', ?, '/doc', 'name', '', '', '', 'content', '', 'markdown', 8, 'p', '', ?, 0, '2026', '2027')", id, "root-"+id, "/"+id+".sy", ial); err != nil {
 			t.Fatal(err)
 		}
-		if _, err := database.Exec("INSERT INTO attributes VALUES (?, 'bookmark', ?, 'b', ?, ?, 'box', ?)", id, label, id, "root-"+id, "/"+id+".sy"); err != nil {
+		if _, err := database.Exec("INSERT INTO attributes VALUES (?, 'bookmark', ?, 'b', ?, ?, 'box', ?)", id, html.UnescapeString(label), id, "root-"+id, "/"+id+".sy"); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -102,8 +102,8 @@ func TestBookmarkIndexPreservesBlockFieldsAndLabels(t *testing.T) {
 	if actual := QueryBookmarkLabels(); !reflect.DeepEqual(actual, wantLabels) {
 		t.Fatalf("labels=%v want=%v", actual, wantLabels)
 	}
-	for _, columns := range []string{"*", "ial, box, path"} {
-		plan := queryPlanDetails(t, database, "SELECT "+columns+" FROM blocks WHERE "+bookmarkBlockPredicate)
+	for _, stmt := range []string{"SELECT * FROM blocks WHERE " + bookmarkBlockPredicate, bookmarkLabelBlocksQuery} {
+		plan := queryPlanDetails(t, database, stmt)
 		if !strings.Contains(plan, "idx_attributes_bookmark_block_id") || !strings.Contains(plan, "SEARCH blocks USING INDEX idx_blocks_id") {
 			t.Fatalf("bookmark query does not use indexed attribute lookup: %s", plan)
 		}

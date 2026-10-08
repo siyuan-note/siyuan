@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/vitess-sqlparser/sqlparser"
 	"github.com/emirpasic/gods/sets/hashset"
 	sqlparser2 "github.com/rqlite/sql"
@@ -315,6 +316,7 @@ func queryDocTitles(searchIgnoreLines []string, boxIDs ...string) (ret []string)
 }
 
 const bookmarkBlockPredicate = "id IN (SELECT block_id FROM attributes WHERE name = 'bookmark' AND type = 'b')"
+const bookmarkLabelBlocksQuery = "SELECT (SELECT value FROM attributes WHERE block_id = blocks.id AND name = 'bookmark' AND type = 'b' LIMIT 1), box, path FROM blocks WHERE " + bookmarkBlockPredicate
 
 func QueryBookmarkBlocks() (ret []*Block) {
 	sqlStmt := "SELECT * FROM blocks WHERE " + bookmarkBlockPredicate
@@ -340,7 +342,7 @@ type BookmarkLabelBlock struct {
 
 func QueryBookmarkLabelBlocks() (ret []*BookmarkLabelBlock) {
 	ret = []*BookmarkLabelBlock{}
-	sqlStmt := "SELECT ial, box, path FROM blocks WHERE " + bookmarkBlockPredicate
+	sqlStmt := bookmarkLabelBlocksQuery
 	rows, err := query(sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
@@ -348,13 +350,14 @@ func QueryBookmarkLabelBlocks() (ret []*BookmarkLabelBlock) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var ial, box, blockPath string
-		if err = rows.Scan(&ial, &box, &blockPath); err != nil {
+		var label, box, blockPath string
+		if err = rows.Scan(&label, &box, &blockPath); err != nil {
 			logging.LogErrorf("scan query rows failed: %s", err)
 			continue
 		}
-		if label := ialAttr(ial, "bookmark"); label != "" {
-			ret = append(ret, &BookmarkLabelBlock{Label: label, Box: box, Path: blockPath})
+		if label != "" {
+			// 标签按属性表取值，返回时保留既有 IAL 转义形式。
+			ret = append(ret, &BookmarkLabelBlock{Label: html.EscapeAttrVal(label), Box: box, Path: blockPath})
 		}
 	}
 	return

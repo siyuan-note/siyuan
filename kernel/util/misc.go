@@ -47,8 +47,6 @@ type Optional[T any] struct {
 
 func (o Optional[T]) IsZero() bool { return !o.Exists }
 
-func (o Optional[T]) IsNullValue() bool { return o.Exists && o.IsNull }
-
 func (o Optional[T]) HasValue() bool { return o.Exists && !o.IsNull }
 
 func (o *Optional[T]) UnmarshalJSON(data []byte) error {

@@ -2229,7 +2229,7 @@ func ExtractBoxIDFromHistoryPath(absPath string) string {
 
 // EncryptFile 用 fileKey（DEK 派生子密钥）加密 .sy 文档字节，AAD 绑定 boxID + 稳定文件基名（不含父目录）。
 // relativePath 会先经 filesys.SyAAD 提取稳定文件基名（<rootID>.sy）并校验合法性，
-// 与 filesys.encryptData/decryptData 共用同一 AAD 构造入口，保证加解密一致。
+// 与文件系统读写共用同一 AAD 构造入口，保证加解密一致。
 func EncryptFile(boxID, relativePath string, dek, plaintext []byte) ([]byte, error) {
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
 	defer zeroAndClear(fileKey)

@@ -450,26 +450,6 @@ func firstValidModelContextLength(values ...json.RawMessage) int {
 	return 0
 }
 
-func IsNetworkError(err error) bool {
-	msg := strings.ToLower(err.Error())
-	return strings.Contains(msg, "actively refused") ||
-		strings.Contains(msg, "connection refused") ||
-		strings.Contains(msg, "no such host") ||
-		strings.Contains(msg, "connection failed") ||
-		strings.Contains(msg, "hostname resolution") ||
-		strings.Contains(msg, "no address associated with hostname") ||
-		strings.Contains(msg, "request canceled while waiting for connection") ||
-		strings.Contains(msg, "exceeded while awaiting") ||
-		strings.Contains(msg, "context deadline exceeded") ||
-		strings.Contains(msg, "timeout") ||
-		strings.Contains(msg, "connection") ||
-		strings.Contains(msg, "refused") ||
-		strings.Contains(msg, "socket") ||
-		strings.Contains(msg, "eof") ||
-		strings.Contains(msg, "closed") ||
-		strings.Contains(msg, "network")
-}
-
 // embeddingHTTPClient 单例 HTTP 客户端，复用连接池并限制每主机最大连接数，
 // 避免 embedding 索引器在 API 不可用时新建大量连接形成连接风暴。
 // 单次请求超时由调用方用 context.WithTimeout 控制，client 本身不设全局 Timeout。

@@ -8092,47 +8092,6 @@ func (tx *Transaction) doUpdateAttrViewCells(operation *Operation) (ret *TxErr) 
 	return
 }
 
-func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []any) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
-	if err != nil {
-		return
-	}
-
-	var cells []*AttrViewCellUpdate
-	for _, value := range values {
-		v := value.(map[string]any)
-		keyID := v["keyID"].(string)
-		var itemID string
-		if _, ok := v["itemID"]; ok {
-			itemID = v["itemID"].(string)
-		} else if _, ok := v["rowID"]; ok {
-			// TODO 该参数将于 2026 年 12 月 1 日后删除
-			itemID = v["rowID"].(string)
-			msg := fmt.Sprintf("[%s] parameter [%s] is deprecated, visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
-				"/api/av/batchSetAttributeViewBlockAttrs", "rowID")
-			logging.LogWarn(msg)
-			err = errors.New(msg)
-			return
-		}
-		cells = append(cells, &AttrViewCellUpdate{KeyID: keyID, RowID: itemID, Data: v["value"]})
-	}
-	if err = preflightAttributeViewCellBindings(tx, attrView, cells); err != nil {
-		return
-	}
-	for _, cell := range cells {
-		_, err = updateAttributeViewValue(tx, attrView, cell.KeyID, cell.RowID, cell.Data, false)
-		if err != nil {
-			return
-		}
-	}
-	regenAttrViewGroups(attrView)
-	if err = av.SaveAttributeView(attrView); err != nil {
-		return
-	}
-	refreshRelatedSrcAvs(avID, tx)
-	return
-}
-
 func UpdateAttributeViewCell(tx *Transaction, avID, keyID, itemID string, valueData any) (val *av.Value, err error) {
 	return updateAttributeViewCellInBlock(tx, avID, "", keyID, itemID, valueData)
 }

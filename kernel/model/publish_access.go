@@ -432,11 +432,6 @@ func CheckBlockTreeMetadataAccessableByPublishAccess(c *gin.Context, publishAcce
 	return password == "" || CheckPublishAuthCookie(c, passwordID, password)
 }
 
-func CheckBlockIdDiscoverableByPublishAccessInBox(publishAccess PublishAccess, blockID, boxID string) bool {
-	bt := treenode.GetBlockTreeInBox(blockID, boxID)
-	return CheckBlockTreeDiscoverableByPublishAccess(publishAccess, bt)
-}
-
 func CheckBlockTreeDiscoverableByPublishAccess(publishAccess PublishAccess, bt *treenode.BlockTree) bool {
 	if bt == nil || IsEncryptedBoxDeniedByPublishAccess(bt.BoxID) {
 		return false

@@ -423,10 +423,6 @@ func attributeViewItemDocumentTemplate(attrView *av.AttributeView, saveMode stri
 	}
 }
 
-func resolveAttributeViewNewItemTemplate(blockID string, itemTemplate *av.NewItemTemplate, createdAt time.Time) (*NewItemTemplatePreview, error) {
-	return resolveAttributeViewNewItemTemplateWithFallback(blockID, itemTemplate, createdAt, "")
-}
-
 func resolveAttributeViewNewItemTemplateWithFallback(blockID string, itemTemplate *av.NewItemTemplate, createdAt time.Time,
 	primaryFallback string) (*NewItemTemplatePreview, error) {
 	boxID := ""

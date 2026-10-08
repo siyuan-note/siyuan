@@ -2475,7 +2475,6 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		elapsed.Seconds(),
 		mergeResult.ConflictCount(), len(mergeResult.Upserts), len(mergeResult.Removes))
 
-	//logSyncMergeResult(mergeResult)
 	themes, icons := appearanceChangedPackages(mergeResult)
 	refreshAppearancePackages(themes, icons)
 
@@ -2956,47 +2955,6 @@ func removeLANSyncTrafficStat(message string) string {
 		}
 	}
 	return message
-}
-
-func logSyncMergeResult(mergeResult *dejavu.MergeResult) {
-	if !mergeResult.DataChanged() {
-		return
-	}
-
-	conflictPaths := mergeResult.ConflictPaths()
-	if 0 < len(conflictPaths) {
-		logBuilder := bytes.Buffer{}
-		for i, path := range conflictPaths {
-			logBuilder.WriteString("  ")
-			logBuilder.WriteString(path)
-			if i < len(conflictPaths)-1 {
-				logBuilder.WriteString("\n")
-			}
-		}
-		logging.LogInfof("sync conflicts:\n%s", logBuilder.String())
-	}
-	if 0 < len(mergeResult.Upserts) {
-		logBuilder := bytes.Buffer{}
-		for i, f := range mergeResult.Upserts {
-			logBuilder.WriteString("  ")
-			logBuilder.WriteString(f.Path)
-			if i < len(mergeResult.Upserts)-1 {
-				logBuilder.WriteString("\n")
-			}
-		}
-		logging.LogInfof("sync merge upserts:\n%s", logBuilder.String())
-	}
-	if 0 < len(mergeResult.Removes) {
-		logBuilder := bytes.Buffer{}
-		for i, f := range mergeResult.Removes {
-			logBuilder.WriteString("  ")
-			logBuilder.WriteString(f.Path)
-			if i < len(mergeResult.Removes)-1 {
-				logBuilder.WriteString("\n")
-			}
-		}
-		logging.LogInfof("sync merge removes:\n%s", logBuilder.String())
-	}
 }
 
 func needFullReindex(upsertTrees int) bool {

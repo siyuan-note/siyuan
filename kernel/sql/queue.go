@@ -611,10 +611,6 @@ func UpsertTreeQueue(tree *parse.Tree) {
 	appendOperation(newOp)
 }
 
-func RenameTreeQueue(tree *parse.Tree) {
-	renameTreeQueue(tree, "rename")
-}
-
 // RenameDocQueue 及时更新文档标题，内容块的路径副本由独立后台任务补齐。
 func RenameDocQueue(tree *parse.Tree) {
 	renameTreeQueue(tree, "rename_doc")

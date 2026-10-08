@@ -95,12 +95,6 @@ var packageManifestNames = func() map[string]string {
 	return names
 }()
 
-// InstallPackage 安装集市包
-func InstallPackage(repoURL, repoHash, repoRef, installPath, systemID, pkgType, packageName string, update bool) error {
-	_, err := InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, systemID, pkgType, packageName, update, PackageInstallOptions{})
-	return err
-}
-
 // InstallPackageWithOptions 将在线包替换也纳入目标版本校验。
 func InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, systemID, pkgType, packageName string, update bool, options PackageInstallOptions) (*PackageInstallResult, error) {
 	if options.ExpectedInstalledRevision == "" {

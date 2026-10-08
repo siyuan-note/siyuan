@@ -567,11 +567,6 @@ func getAttributeViewNameByPathInBox(avJSONPath, boxID string) (ret string, err 
 	return
 }
 
-// GetAttributeViewNameByPath 从指定路径读取 AV 名称（不加密，普通 box 兼容入口）。
-func GetAttributeViewNameByPath(avJSONPath string) (ret string, err error) {
-	return getAttributeViewNameByPathInBox(avJSONPath, "")
-}
-
 // GetAttributeViewNameInBox 获取指定笔记本中的数据库名称。
 func GetAttributeViewNameInBox(avID, boxID string) (ret string, err error) {
 	avJSONPath, _ := FindAttributeViewPathInBox(avID, boxID)

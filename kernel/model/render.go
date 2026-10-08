@@ -244,10 +244,6 @@ func cleanRenderNode(node *ast.Node, visibleOnly bool) *ast.Node {
 	return nodes[0]
 }
 
-func renderCleanBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
-	return renderBlockDOMByNodes(cleanRenderNodes(nodes, false), luteEngine)
-}
-
 func renderVisibleBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 	return renderBlockDOMByNodes(cleanRenderNodes(nodes, true), luteEngine)
 }

@@ -56,10 +56,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func GetAssetImgSize(assetPath string) (width, height int) {
-	return GetAssetImgSizeInBox(assetPath, "")
-}
-
 func GetAssetImgSizeInBox(assetPath, boxID string) (width, height int) {
 	absPath, resolveErr := GetAssetAbsPathInBox(assetPath, boxID)
 	if resolveErr != nil || !filelock.IsExist(absPath) {
@@ -1451,10 +1447,6 @@ func getAssetAbsPath(relativePath string, includeEncrypted bool) (absPath string
 	return deferredAssetPath(relativePath, "", includeEncrypted)
 }
 
-func UploadAssets2Cloud(id string, ignorePushMsg bool) (count int, err error) {
-	return UploadAssets2CloudWithApp(id, ignorePushMsg, "")
-}
-
 // UploadAssets2CloudWithApp 将块资源上传提示限定到发起实例；空标识保留广播。
 func UploadAssets2CloudWithApp(id string, ignorePushMsg bool, app string) (count int, err error) {
 	if !IsSubscriber() {
@@ -1488,10 +1480,6 @@ func UploadAssets2CloudWithApp(id string, ignorePushMsg bool, app string) (count
 		return
 	}
 	return
-}
-
-func UploadAssets2CloudByAssetsPaths(assetPaths []string, ignorePushMsg bool) (count int, err error) {
-	return UploadAssets2CloudByAssetsPathsWithApp(assetPaths, ignorePushMsg, "")
 }
 
 // UploadAssets2CloudByAssetsPathsWithApp 在同一实例显示、更新和清除本次上传的提示。

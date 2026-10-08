@@ -2165,10 +2165,6 @@ func sqlQuoteJoin(items []string) string {
 	return strings.Join(quoted, ",")
 }
 
-func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	return searchBySQLInBox(stmt, beforeLen, page, pageSize, "")
-}
-
 // isTreeExcludedByPublishAccess 判断文档树是否命中发布访问排除的文档 ID。
 // 文档路径包含排除 ID 即视为不可见，覆盖被排除文档的整个子树。
 func isTreeExcludedByPublishAccess(tree *parse.Tree, excludeDocIDs []string) bool {
@@ -2180,7 +2176,7 @@ func isTreeExcludedByPublishAccess(tree *parse.Tree, excludeDocIDs []string) boo
 	return false
 }
 
-// searchBySQLInBox 与 searchBySQL 一致，但按 boxID 路由到加密 db 或全局 db。
+// searchBySQLInBox 按 boxID 选择加密或全局数据库，执行分页查询并统计匹配数量。
 func searchBySQLInBox(stmt string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	return searchBySQLInBoxContext(context.Background(), stmt, beforeLen, page, pageSize, boxID)
 }
@@ -2249,11 +2245,7 @@ func removeLimitClause(stmt string) string {
 	return stmt
 }
 
-func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []*Block) {
-	return fullTextSearchRefBlockInBox(keyword, beforeLen, onlyDoc, "")
-}
-
-// fullTextSearchRefBlockInBox 与 fullTextSearchRefBlock 一致，但按 boxID 路由到加密 db 或全局 db。
+// fullTextSearchRefBlockInBox 在指定笔记本内搜索可引用块，空 boxID 使用全局数据库。
 func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, boxID string) (ret []*Block) {
 	keyword = filterQueryInvisibleChars(keyword)
 
@@ -2378,10 +2370,6 @@ func extractID(content string) (ret string) {
 	return
 }
 
-func fullTextSearchByRegexp(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	return fullTextSearchByRegexpInBox(exp, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, "")
-}
-
 func fullTextSearchByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter
@@ -2404,10 +2392,6 @@ func fullTextSearchByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs, pat
 	return
 }
 
-func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
-	return fullTextSearchCountByRegexpInBox(exp, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, "")
-}
-
 func fullTextSearchCountByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, boxID string) (matchedBlockCount, matchedRootCount int) {
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter + ignoreFilter
@@ -2420,10 +2404,6 @@ func fullTextSearchCountByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs
 	matchedBlockCount = int(result[0]["matches"].(int64))
 	matchedRootCount = int(result[0]["docs"].(int64))
 	return
-}
-
-func fullTextSearchByFTS(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	return fullTextSearchByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, "")
 }
 
 func fullTextSearchByFTSInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
@@ -2703,10 +2683,6 @@ func hPathOnlyOrderBy() string {
 		"CASE WHEN matches.match_source = 1 THEN b.hpath END ASC"
 }
 
-func fullTextSearchCountByFTS(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
-	return fullTextSearchCountByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, "")
-}
-
 func fullTextSearchCountByFTSInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, boxID string) (matchedBlockCount, matchedRootCount int) {
 	table := "blocks_fts"
 
@@ -2724,10 +2700,6 @@ func fullTextSearchCountByFTSInBox(query, boxFilter, pathFilter string, boxArgs,
 	matchedBlockCount = int(result[0]["matches"].(int64))
 	matchedRootCount = int(result[0]["docs"].(int64))
 	return
-}
-
-func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string, orderBy, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	return fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, "", true)
 }
 
 func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string, orderBy, beforeLen, page, pageSize int, boxID string, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount int) {
@@ -2882,11 +2854,7 @@ func buildSearchDocumentLikeFilterWithHPath(contentField, hPathField string, key
 	return ret.String()
 }
 
-func highlightByFTS(query, typeFilter, id string) (ret []string) {
-	return highlightByFTSInBox(query, typeFilter, id, "")
-}
-
-// highlightByFTSInBox 与 highlightByFTS 一致，但按 boxID 路由到加密 db 或全局 db。
+// highlightByFTSInBox 按 boxID 选择加密或全局数据库，获取全文检索高亮片段。
 func highlightByFTSInBox(query, typeFilter, id, boxID string) (ret []string) {
 	query = strings.ReplaceAll(query, " ", " OR ")
 	const limit = 256
@@ -2941,11 +2909,7 @@ func highlightByFTSInBox(query, typeFilter, id, boxID string) (ret []string) {
 	return
 }
 
-func highlightByRegexp(query, typeFilter, id string) (ret []string) {
-	return highlightByRegexpInBox(query, typeFilter, id, "")
-}
-
-// highlightByRegexpInBox 与 highlightByRegexp 一致，但按 boxID 路由到加密 db 或全局 db。
+// highlightByRegexpInBox 按 boxID 选择加密或全局数据库，获取正则检索高亮片段。
 func highlightByRegexpInBox(query, typeFilter, id, boxID string) (ret []string) {
 	fieldFilter := fieldRegexp(query)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter

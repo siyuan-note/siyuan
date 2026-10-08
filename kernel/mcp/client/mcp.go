@@ -204,19 +204,6 @@ func (h *headerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 	return h.base.RoundTrip(clone)
 }
 
-func DisconnectMCP() {
-	mcpMu.Lock()
-	defer mcpMu.Unlock()
-	if mcpConnectCancel != nil {
-		mcpConnectCancel()
-		mcpConnectCancel = nil
-	}
-	mcpGeneration++
-	mcpConnecting = false
-	closeConnections(mcpConns)
-	mcpConns = nil
-}
-
 func connectServers(ctx context.Context, servers []conf.MCPServer, interactive map[string]bool, connected func(Connection) bool) {
 	for _, server := range servers {
 		if ctx.Err() != nil {

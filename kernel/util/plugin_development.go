@@ -189,11 +189,6 @@ func IsPluginDevelopmentRawPathForbidden(abs string, ancestors bool) bool {
 
 var pluginProjectLocks sync.Map
 
-// WithPluginProjectLock 串行化受管项目内的写入、冻结与恢复；不阻止不遵守协议的外部编辑器。
-func WithPluginProjectLock(taskID string, fn func() error) error {
-	return WithPluginProjectLockContext(context.Background(), taskID, fn)
-}
-
 func WithPluginProjectLockContext(ctx context.Context, taskID string, fn func() error) error {
 	value, _ := pluginProjectLocks.LoadOrStore(taskID, make(chan struct{}, 1))
 	lock := value.(chan struct{})

@@ -104,13 +104,6 @@ func UTF82GBK(src string) ([]byte, error) {
 	return io.ReadAll(transform.NewReader(bytes.NewReader([]byte(src)), GB18030.NewEncoder()))
 }
 
-// GBK2UTF8 transform GBK byte array into UTF8 string.
-func GBK2UTF8(src []byte) (string, error) {
-	GB18030 := simplifiedchinese.All[0]
-	bytes, err := io.ReadAll(transform.NewReader(bytes.NewReader(src), GB18030.NewDecoder()))
-	return string(bytes), err
-}
-
 const (
 	SortModeNameASC         = iota // 0：文件名字母升序
 	SortModeNameDESC               // 1：文件名字母降序

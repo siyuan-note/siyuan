@@ -22,7 +22,6 @@ import (
 	"database/sql"
 	"errors"
 	"math"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -184,38 +183,6 @@ func queryBlockIDByParentID(parentID string) (ret []string) {
 	return
 }
 
-func QueryBlockAliases(rootID string) (ret []string) {
-	sqlStmt := "SELECT alias FROM blocks WHERE root_id = ? AND alias != ''"
-	rows, err := query(sqlStmt, rootID)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	var aliasesRows []string
-	for rows.Next() {
-		var name string
-		rows.Scan(&name)
-		aliasesRows = append(aliasesRows, name)
-	}
-
-	for _, aliasStr := range aliasesRows {
-		aliases := strings.SplitSeq(aliasStr, ",")
-		for alias := range aliases {
-			var exist bool
-			for _, retAlias := range ret {
-				if retAlias == alias {
-					exist = true
-				}
-			}
-			if !exist {
-				ret = append(ret, alias)
-			}
-		}
-	}
-	return
-}
-
 func queryNames(searchIgnoreLines []string, boxIDs ...string) (ret []string) {
 	ret = []string{}
 	sqlStmt := "SELECT name FROM blocks WHERE name != ''"
@@ -343,22 +310,6 @@ func queryDocTitles(searchIgnoreLines []string, boxIDs ...string) (ret []string)
 	}
 	for _, v := range set.Values() {
 		ret = append(ret, v.(string))
-	}
-	return
-}
-
-func QueryBlockNamesByRootID(rootID string) (ret []string) {
-	sqlStmt := "SELECT DISTINCT name FROM blocks WHERE root_id = ? AND name != ''"
-	rows, err := query(sqlStmt, rootID)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var name string
-		rows.Scan(&name)
-		ret = append(ret, name)
 	}
 	return
 }
@@ -866,110 +817,6 @@ func selectBlocksRawStmtWithQuery(stmt string, page, limit int, boxID string, qu
 	for rows.Next() {
 		if block := scanBlockRows(rows); nil != block {
 			ret = append(ret, block)
-		}
-	}
-	return
-}
-
-func SelectBlocksRegex(stmt string, exp *regexp.Regexp, name, alias, memo, ial bool, page, pageSize int) (ret []*Block) {
-	rows, err := query(stmt)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", stmt, err)
-		return
-	}
-	defer rows.Close()
-	count := 0
-	for rows.Next() {
-		count++
-		if count <= (page-1)*pageSize {
-			continue
-		}
-
-		var block Block
-		if err := rows.Scan(&block.ID, &block.ParentID, &block.RootID, &block.Hash, &block.Box, &block.Path, &block.HPath, &block.Name, &block.Alias, &block.Memo, &block.Tag, &block.Content, &block.FContent, &block.Markdown, &block.Length, &block.Type, &block.SubType, &block.IAL, &block.Sort, &block.Created, &block.Updated); err != nil {
-			logging.LogErrorf("query scan field failed: %s\n%s", err, logging.ShortStack())
-			return
-		}
-
-		hitContent := exp.MatchString(block.Content)
-		hitName := name && exp.MatchString(block.Name)
-		hitAlias := alias && exp.MatchString(block.Alias)
-		hitMemo := memo && exp.MatchString(block.Memo)
-		hitIAL := ial && exp.MatchString(block.IAL)
-		if hitContent || hitName || hitAlias || hitMemo || hitIAL {
-			if hitContent {
-				block.Content = exp.ReplaceAllString(block.Content, "__@mark__${0}__mark@__")
-			}
-			if hitName {
-				block.Name = exp.ReplaceAllString(block.Name, "__@mark__${0}__mark@__")
-			}
-			if hitAlias {
-				block.Alias = exp.ReplaceAllString(block.Alias, "__@mark__${0}__mark@__")
-			}
-			if hitMemo {
-				block.Memo = exp.ReplaceAllString(block.Memo, "__@mark__${0}__mark@__")
-			}
-			if hitIAL {
-				block.IAL = exp.ReplaceAllString(block.IAL, "__@mark__${0}__mark@__")
-			}
-
-			ret = append(ret, &block)
-			if len(ret) >= pageSize {
-				break
-			}
-		}
-	}
-	return
-}
-
-// SelectBlocksRegexArgs 与 SelectBlocksRegex 行为一致，但通过绑定参数执行，
-// 绕开 sqlparser 解析（vitess 会把 "?" 改写为 ":vN" 导致占位失效），用于含用户可控参数的正则搜索。
-func SelectBlocksRegexArgs(stmt string, exp *regexp.Regexp, name, alias, memo, ial bool, page, pageSize int, args ...any) (ret []*Block) {
-	rows, err := query(stmt, args...)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", stmt, err)
-		return
-	}
-	defer rows.Close()
-	count := 0
-	for rows.Next() {
-		count++
-		if count <= (page-1)*pageSize {
-			continue
-		}
-
-		var block Block
-		if err := rows.Scan(&block.ID, &block.ParentID, &block.RootID, &block.Hash, &block.Box, &block.Path, &block.HPath, &block.Name, &block.Alias, &block.Memo, &block.Tag, &block.Content, &block.FContent, &block.Markdown, &block.Length, &block.Type, &block.SubType, &block.IAL, &block.Sort, &block.Created, &block.Updated); err != nil {
-			logging.LogErrorf("query scan field failed: %s\n%s", err, logging.ShortStack())
-			return
-		}
-
-		hitContent := exp.MatchString(block.Content)
-		hitName := name && exp.MatchString(block.Name)
-		hitAlias := alias && exp.MatchString(block.Alias)
-		hitMemo := memo && exp.MatchString(block.Memo)
-		hitIAL := ial && exp.MatchString(block.IAL)
-		if hitContent || hitName || hitAlias || hitMemo || hitIAL {
-			if hitContent {
-				block.Content = exp.ReplaceAllString(block.Content, "__@mark__${0}__mark@__")
-			}
-			if hitName {
-				block.Name = exp.ReplaceAllString(block.Name, "__@mark__${0}__mark@__")
-			}
-			if hitAlias {
-				block.Alias = exp.ReplaceAllString(block.Alias, "__@mark__${0}__mark@__")
-			}
-			if hitMemo {
-				block.Memo = exp.ReplaceAllString(block.Memo, "__@mark__${0}__mark@__")
-			}
-			if hitIAL {
-				block.IAL = exp.ReplaceAllString(block.IAL, "__@mark__${0}__mark@__")
-			}
-
-			ret = append(ret, &block)
-			if len(ret) >= pageSize {
-				break
-			}
 		}
 	}
 	return

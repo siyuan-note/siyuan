@@ -123,9 +123,6 @@ func NewSearch() *Search {
 	}
 }
 
-//go:fix inline
-func boolPtr(v bool) *bool { return new(v) }
-
 // HanSensitiveVal 返回 HanSensitive 的 bool 值；nil 视为 true（与既往行为一致）。
 func (s *Search) HanSensitiveVal() bool {
 	if s.HanSensitive == nil {

@@ -60,7 +60,7 @@ type AppConf struct {
 	Editor         *conf.Editor         `json:"editor"`         // 编辑器配置
 	Export         *conf.Export         `json:"export"`         // 导出配置
 	Graph          *conf.Graph          `json:"graph"`          // 关系图配置
-	UILayout       *conf.UILayout       `json:"uiLayout"`       // 界面布局。不要直接使用，使用 GetUILayout() 和 SetUILayout() 方法
+	UILayout       *conf.UILayout       `json:"uiLayout"`       // 界面布局，通过 SetUILayout 更新
 	UserData       string               `json:"userData"`       // 社区用户信息，对 User 加密存储
 	User           *conf.User           `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
 	ReadOnly       bool                 `json:"readonly"`       // 是否是以只读模式运行
@@ -211,12 +211,6 @@ func (conf *AppConf) SetAI(ai *conf.AI) {
 	conf.AI = ai
 	conf.m.Unlock()
 	conf.Save()
-}
-
-func (conf *AppConf) GetUILayout() *conf.UILayout {
-	conf.m.Lock()
-	defer conf.m.Unlock()
-	return conf.UILayout
 }
 
 func (conf *AppConf) SetUILayout(uiLayout *conf.UILayout) {

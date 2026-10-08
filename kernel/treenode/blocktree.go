@@ -211,25 +211,6 @@ func GetBlockTreesByTypeInBox(typ, boxID string) (ret []*BlockTree) {
 	return
 }
 
-func GetBlockTreeByBoxPath(boxID, path string) (ret *BlockTree) {
-	ret = &BlockTree{}
-	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND path = ?"
-	row := queryRowForBox(boxID, sqlStmt, boxID, path)
-	if row == nil {
-		return
-	}
-	err := row.Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
-	if err != nil {
-		ret = nil
-		if errors.Is(err, sql.ErrNoRows) {
-			return
-		}
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	return
-}
-
 func CountTrees() (ret int) {
 	sqlStmt := "SELECT COUNT(*) FROM blocktrees WHERE type = 'd'"
 	err := scanQueryRow(queryRow(sqlStmt), &ret)
@@ -557,22 +538,6 @@ func RemoveBlockTreesByRootID(boxID, rootID string) {
 		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
 		return
 	}
-}
-
-func CountBlockTreesByPathPrefix(boxID, pathPrefix string) (ret int) {
-	sqlStmt := "SELECT COUNT(*) FROM blocktrees WHERE path LIKE ? AND box_id = ?"
-	row := queryRowForBox(boxID, sqlStmt, pathPrefix+"%", boxID)
-	if row == nil {
-		return
-	}
-	err := row.Scan(&ret)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return 0
-		}
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-	}
-	return
 }
 
 func GetBlockTreesByPathPrefix(boxID, pathPrefix string) (ret []*BlockTree) {

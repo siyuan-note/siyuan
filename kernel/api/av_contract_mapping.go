@@ -917,20 +917,6 @@ func toContractAVKeyValues(value *av.KeyValues) *apicontract.AVKeyValues {
 		Values: avContractSlice(value.Values, func(value *av.Value) *apicontract.AVValue { return toContractAVValue(value) }),
 	}
 }
-func toContractAVViewData(value *av.ViewData) *apicontract.AVViewData {
-	if value == nil {
-		return nil
-	}
-	return &apicontract.AVViewData{
-		ID:               value.ID,
-		Icon:             value.Icon,
-		Name:             value.Name,
-		Desc:             value.Desc,
-		HideAttrViewName: value.HideAttrViewName,
-		Type:             string(value.Type),
-		PageSize:         value.PageSize,
-	}
-}
 func toContractAVNewItemTemplate(value *av.NewItemTemplate) *apicontract.AVNewItemTemplate {
 	if value == nil {
 		return nil

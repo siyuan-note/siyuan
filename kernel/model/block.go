@@ -1327,10 +1327,6 @@ func GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids []string, boxID string, acc
 	return
 }
 
-func resolveEmbedContent(n *ast.Node, luteEngine *lute.Lute) {
-	resolveEmbedContentInBox(n, luteEngine, "", nil)
-}
-
 // loadTreeForBlockDOM 按指定 box 加载树，空 box 不回退搜索已打开的加密笔记本。
 func loadTreeForBlockDOM(id, boxID string) *parse.Tree {
 	bt := treenode.GetBlockTreeInBox(id, boxID)

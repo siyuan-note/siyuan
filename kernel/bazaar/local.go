@@ -147,15 +147,6 @@ func extractLocalPackageWithHash(ctx context.Context, archivePath, expectedHash 
 	return
 }
 
-func extractLocalPackageArchive(archivePath, destination string) error {
-	reader, err := zip.OpenReader(archivePath)
-	if err != nil {
-		return errors.New("invalid marketplace package archive")
-	}
-	defer reader.Close()
-	return extractLocalPackageReader(&reader.Reader, destination)
-}
-
 func extractLocalPackageReader(reader *zip.Reader, destination string) error {
 	return extractLocalPackageReaderContext(context.Background(), reader, destination)
 }

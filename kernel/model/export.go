@@ -600,17 +600,6 @@ func ExportSystemLog() (zipPath string) {
 	return
 }
 
-// exportLockedByBlockID 由 docID/blockID 反查 boxID，判断其所属加密笔记本是否未解锁。
-// 未解锁返回 true（调用方应中止导出并返回空结果）；普通笔记本或已解锁返回 false。
-// 用于文档级导出入口的统一 guard，避免未解锁时读出密文或空结果。
-func exportLockedByBlockID(id string) bool {
-	bt := getExportBlockTree(id)
-	if nil == bt {
-		return false // 找不到块树，交给后续流程处理
-	}
-	return IsEncryptedBox(bt.BoxID) && !IsBoxUnlocked(bt.BoxID)
-}
-
 // withExportReadLockByBlockID 由 blockID 反查 boxID，若属于加密笔记本则全程持读锁执行 fn。
 // 持锁期间 LockBox（自动锁定）会阻塞等待，避免操作中途清 DEK/删导出目录导致部分明文写出。
 // 准入租约先于读锁取得，确保嵌套资源读取期间不会出现等待中的写锁。

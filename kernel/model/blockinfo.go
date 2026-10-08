@@ -437,10 +437,6 @@ type RefDefs struct {
 	DefIDs []string `json:"defIDs"`
 }
 
-func GetBlockRefs(defID string) (refDefs []*RefDefs, originalRefBlockIDs map[string]string) {
-	return GetBlockRefsInBox(defID, "")
-}
-
 // GetBlockRefsInBox 获取指定笔记本内的块引用关系。空 box 不回退搜索加密笔记本。
 func GetBlockRefsInBox(defID, boxID string) (refDefs []*RefDefs, originalRefBlockIDs map[string]string) {
 	refDefs = []*RefDefs{}
@@ -487,10 +483,6 @@ func queryBlockRefDefsInBox(bt *treenode.BlockTree, boxID string) (refDefs []*Re
 		}
 	}
 	return
-}
-
-func GetBlockRefIDsByFileAnnotationID(id string) []string {
-	return sql.QueryRefIDsByAnnotationID(id)
 }
 
 func GetBlockRefIDsByFileAnnotationIDInBox(id, boxID string) []string {

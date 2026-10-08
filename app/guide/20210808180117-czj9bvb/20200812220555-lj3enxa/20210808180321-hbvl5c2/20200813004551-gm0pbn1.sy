@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261008101123"
+		"updated": "20261008221006"
 	},
 	"Children": [
 		{
@@ -4272,7 +4272,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20261002230606"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
@@ -13672,7 +13672,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-xpgtzbg",
-				"updated": "20260910080119"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
@@ -13718,7 +13718,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20201227133317-v7clw0j",
-				"updated": "20260910080119"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
@@ -14421,7 +14421,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "单元格仅含一个普通段落：移到下一行同列，末行则在表格后插入段落；其他内容按当前类型编辑"
+									"Data": "在单元格内编辑：创建新段落、继续列表项或在代码块内换行"
 								}
 							]
 						},
@@ -14456,6 +14456,30 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Tab / Shift+Tab"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在单元格内的段落中插入软换行"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift+Enter"
 								}
 							]
 						}

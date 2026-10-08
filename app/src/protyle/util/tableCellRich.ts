@@ -155,9 +155,27 @@ export const getTableCellRichInline = (cell: Element) => {
 
 export const getTableCellRichPlainText = (cell: Element) => {
     const template = document.createElement("template");
-    template.innerHTML = getTableCellRichInline(cell);
-    template.content.querySelectorAll("br").forEach(br => br.replaceWith("\n"));
-    return getTextWithoutSemanticMarkers(template.content).replace(/\u200b/g, "").trim();
+    template.innerHTML = getTableCellRichBlockDOM(cell);
+    // 从源内容逐块投影文本，段落分隔保留空行，块内软换行和列表标记保持原样。
+    const projectedCell = document.createElement("td");
+    const projection = document.createElement("template");
+    let boundaryToken = "SYTABLECELLPARAGRAPHBOUNDARY";
+    while (template.innerHTML.includes(boundaryToken)) {
+        boundaryToken += "X";
+    }
+    // 嵌套段落的边界使用临时占位符补足空行，投影时仍保留完整列表结构。
+    template.content.querySelectorAll('[data-type="NodeListItem"] > [data-type="NodeParagraph"], ' +
+        '[data-type="NodeBlockquote"] > [data-type="NodeParagraph"]').forEach(block => {
+        if (block.nextElementSibling?.getAttribute("data-type")?.startsWith("Node")) {
+            block.querySelector('[contenteditable="true"]')?.appendChild(document.createTextNode(boundaryToken));
+        }
+    });
+    return Array.from(template.content.children).map(block => {
+        projectedCell.setAttribute(TABLE_CELL_RICH_ATTRIBUTE, encodeTableCellRich(serializeTableCellRich(block.outerHTML).markdown));
+        projection.innerHTML = getTableCellRichInline(projectedCell);
+        projection.content.querySelectorAll("br").forEach(br => br.replaceWith("\n"));
+        return getTextWithoutSemanticMarkers(projection.content).replace(/\u200b/g, "").split(boundaryToken).join("\n").trim();
+    }).join("\n\n").trim();
 };
 
 export const getTableCellPlainText = (cell: Element) => {

@@ -45,7 +45,7 @@ import {
 } from "../util/selection";
 import {focusByRange, getSelectionOffset, setLastNodeRange} from "../util/selectionOffsets";
 import {Constants} from "../../constants";
-import {mergeTableCellContents} from "../util/tableCellRich";
+import {getTableCellPlainText, mergeTableCellContents} from "../util/tableCellRich";
 import {resolveDocumentBlockElement} from "../util/outlineBlock";
 import {isMobile} from "../../util/functions";
 import {previewDocImage} from "../preview/image";
@@ -2927,7 +2927,7 @@ export class WYSIWYG {
                                 if (tableBlockElement) {
                                     let textPlain = "";
                                     selectedCellElements.forEach((item, index) => {
-                                        textPlain += item.textContent.trim() + "\t";
+                                        textPlain += getTableCellPlainText(item).trim() + "\t";
                                         if (!item.nextElementSibling || !selectedCellElements[index + 1] ||
                                             item.nextElementSibling !== selectedCellElements[index + 1]) {
                                             textPlain = textPlain.slice(0, -1) + "\n";

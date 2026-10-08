@@ -27,12 +27,23 @@ import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
 import {getTableCellEditorLute} from "../util/tableCellRichLute";
 import {setTableCellRichContext, setTableCellRichEventTarget} from "../util/tableCellRichContext";
 import {updateOutlineCurrentBlock} from "../util/outlineBlock";
-import {canEnterCodeBlock} from "../wysiwyg/codeBlockEnter";
 import {bindLiteCodeActions} from "../lite/codeActions";
 import {getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM} from "../util/tableVirtualizationDOM";
 
 let activeEditor: {cell: Element, finish: () => void, prepareSwitch: () => boolean} | undefined;
 let openingEditor: object | undefined;
+
+export const enterTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCellElement) => {
+    const currentCell = await openTableCellRichEditor(owner, cell);
+    const editor = currentCell?.querySelector(".table__cell-editor .protyle-wysiwyg");
+    const selection = getSelection();
+    if (!currentCell || owner.disabled || activeEditor?.cell !== currentCell || !editor?.contains(selection?.anchorNode) ||
+        !editor.contains(selection.focusNode)) {
+        return;
+    }
+    // 单元格挂载完成后，由内部编辑器处理回车和对应的内容结构。
+    editor.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", code: "Enter", bubbles: true, cancelable: true}));
+};
 
 export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCellElement[], type: string,
                                            textObj?: ITextOption) => {
@@ -94,7 +105,7 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
     }
     if (activeEditor?.cell === cell) {
         openingEditor = undefined;
-        return;
+        return cell;
     }
     const previousEditor = activeEditor;
     const preserveFocus = isMobile() && previousEditor?.cell.contains(document.activeElement) &&
@@ -113,6 +124,7 @@ export const openTableCellRichEditor = async (owner: IProtyle, cell: HTMLTableCe
     openingEditor = request;
     try {
         await mountTableCellRichEditor(request, retainedEditor, owner, cell, navigation, point, restoredSelection);
+        return openingEditor === request ? activeEditor?.cell : undefined;
     } finally {
         if (retainedEditor && openingEditor === request) {
             retainedEditor.finish();
@@ -514,16 +526,7 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
             }
             const target = range?.startContainer instanceof Element ? range.startContainer : range?.startContainer.parentElement;
             const inListOrCode = target?.closest('[data-type="NodeList"], [data-type="NodeCodeBlock"]');
-            const editable = target?.closest<HTMLElement>('[contenteditable="true"]');
-            const enterCode = event.key === "Enter" && !event.shiftKey &&
-                editable?.parentElement.getAttribute("data-type") === "NodeParagraph" &&
-                canEnterCodeBlock(editable,
-                    getSelectionOffset(editable, fragment.wysiwyg, range).start,
-                    window.siyuan.config.editor.markdown.codeBlockMiddleDot !== false);
-            const navigate = !inListOrCode && (event.key === "Tab" ||
-                (event.key === "Enter" && !event.shiftKey && !enterCode &&
-                    getTableCellInlineHTML(fragment.getBlockHTML()) !== null));
-            if (navigate) {
+            if (!inListOrCode && event.key === "Tab") {
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 finish();

@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261003234156"
+		"updated": "20261008221006"
 	},
 	"Children": [
 		{
@@ -3793,7 +3793,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-1bq55o9",
-				"updated": "20260910080119"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
@@ -3821,12 +3821,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908091355-rch0005",
-				"updated": "20260910080119"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "点击单元格即可编辑；新建表格后可直接输入，无需再次点击。单元格仅含一个普通段落时，"
+					"Data": "点击单元格即可编辑；新建表格后可直接输入，无需再次点击。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3835,16 +3835,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 移到下一行同列；表格末行则在表格后插入段落。"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 切换单元格，"
+					"Data": " 按正文编辑规则创建新段落、继续列表项或在代码块内换行。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3853,7 +3844,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 在单元格内换行。包含标题、多个段落等内容时，Enter 按当前内容类型在单元格内编辑；列表和代码块使用对应的换行和缩进操作。关闭提示后按 "
+					"Data": " 在段落内插入软换行。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 切换单元格；列表和代码块保留对应的缩进与取消缩进操作。关闭提示后按 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3862,7 +3871,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 或点击单元格外结束编辑，内容自动保存。"
+					"Data": " 或点击单元格外结束编辑，内容自动保存。将表格复制为文本时，会保留单元格内段落之间的空行。"
 				}
 			]
 		},

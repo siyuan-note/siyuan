@@ -7,11 +7,13 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {createSourceFile, isClassDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string, queueSource: string, editorSource: string, menuSource: string, transactionSource: string) => {
+const browserCases = async (source: string, queueSource: string, editorSource: string, menuSource: string,
+                            transactionSource: string, copyPlainSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const noop = () => {};
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
     const changes: {doOperations: IOperation[], undoOperations: IOperation[]}[] = [];
+    const enteredCells: Element[] = [];
     const focusByRange = (range: Range) => {
         getSelection().removeAllRanges();
         getSelection().addRange(range);
@@ -42,7 +44,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     const api = new Function(...Object.keys(dependencies), source + "\nreturn {input, insertRow, insertRowAbove, insertColumn, " +
         "getAgentLute, configureAVRichTextLute, getTableCellEditorLute, getAVRichTextLute, " +
         "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, " +
-        "setTableCellRich, getTableCellInlineHTML, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, " +
+        "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, " +
         "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
         "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM};")(...Object.values(dependencies)) as
         typeof import("../wysiwyg/input") & typeof import("../util/table") & typeof import("./setLute") &
@@ -120,6 +122,12 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
                 '<div class="protyle-toolbar"><svg><use href="#iconBold"></use></svg>Font family Font Size</div>' +
                 "<style>.protyle-content::highlight(search-mark-regression) {color: red;}</style>";
             const wysiwyg = host.querySelector<HTMLElement>(".protyle-wysiwyg");
+            wysiwyg.addEventListener("keydown", event => {
+                if (event.key === "Enter") {
+                    enteredCells.push(host.closest("th, td"));
+                    event.preventDefault();
+                }
+            });
             const hidden = document.createElement("div");
             hidden.className = "fn__none";
             api.updateTableCellContentLayout(host, options.initialBlockHTML);
@@ -154,8 +162,9 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     const transactionAPI = new Function(...Object.keys(transactionDependencies),
         transactionSource + "\nreturn {updateTransaction, promiseTransaction};")(...Object.values(transactionDependencies));
     editorDependencies.updateTransaction = transactionAPI.updateTransaction;
-    const open = new Function(...Object.keys(editorDependencies), editorSource + "\nreturn openTableCellRichEditor;")(
-        ...Object.values(editorDependencies)) as typeof import("./tableCellRichEditor").openTableCellRichEditor;
+    const {openTableCellRichEditor: open, enterTableCellRichEditor: enterCell} = new Function(...Object.keys(editorDependencies),
+        editorSource + "\nreturn {openTableCellRichEditor, enterTableCellRichEditor};")(
+        ...Object.values(editorDependencies)) as typeof import("./tableCellRichEditor");
     const noUI = (html: string) => check.doesNotMatch(html, /DesktopTabletMobile|Font family|Font Size|search-mark-regression|table__cell-editor/);
     const operationHTML = (operation: IOperation) => {
         check.ok(typeof operation.data === "string");
@@ -166,6 +175,54 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         element.remove();
         await tick();
     };
+
+    {
+        const {element, table} = fixture();
+        const cells = Array.from(table.querySelectorAll("th"));
+        api.setTableCellRich(cells[0], "first\n\nsecond");
+        cells[1].innerHTML = "third<br>fourth";
+        let copied = "";
+        new Function("selectedCellElements", "getTableCellPlainText", "copyPlainText", copyPlainSource)(
+            cells.slice(0, 2), api.getTableCellPlainText, (text: string) => { copied = text; });
+        check.equal(copied, "first\n\nsecond\tthird\nfourth", "the cell menu copies paragraph boundaries and ordinary soft breaks");
+        await finish(element);
+    }
+
+    // 未挂载的单元格等待外层输入完成后处理回车，表格替换后仍定位到当前单元格。
+    for (const replaceTable of [false, true]) {
+        const {owner, queue, element, table} = fixture();
+        const cell = table.querySelector("th");
+        let release: () => void;
+        queue.scheduleInput(async () => {
+            await new Promise<void>(resolve => { release = resolve; });
+            if (replaceTable) {
+                table.replaceWith(table.cloneNode(true));
+            }
+        });
+        enteredCells.length = 0;
+        const entering = enterCell(owner, cell);
+        check.equal(enteredCells.length, 0);
+        release();
+        await entering;
+        const current = owner.wysiwyg.element.querySelector("th");
+        check.deepEqual(enteredCells, [current]);
+        check.ok(current.querySelector(".table__cell-editor"));
+        await finish(element);
+    }
+    {
+        const {owner, queue, element, table} = fixture();
+        const releases: Array<() => void> = [];
+        queue.flushPendingInput = () => new Promise<void>(resolve => { releases.push(resolve); });
+        enteredCells.length = 0;
+        const entering = enterCell(owner, table.querySelector("th"));
+        const switching = open(owner, table.querySelectorAll("th")[1]);
+        releases[0]();
+        await entering;
+        releases[1]();
+        await switching;
+        check.equal(enteredCells.length, 0, "a cancelled Enter must not edit another cell");
+        await finish(element);
+    }
 
     let tableImageOwner: IProtyle;
     let imageMenus = 0;
@@ -547,6 +604,10 @@ test("table cell editors wait for outer input and table menu Enter is consumed",
         statement.declarationList.declarations.some(declaration =>
             ["updateTransaction", "promiseTransaction"].includes(declaration.name.getText(transactionFile))))
         .map(statement => statement.getText(transactionFile)).join("\n"));
+    const wysiwygSource = read("../wysiwyg/index.ts");
+    const copyEnd = wysiwygSource.indexOf("copyPlainText(textPlain.slice(0, -1));") + "copyPlainText(textPlain.slice(0, -1));".length;
+    const copyStart = wysiwygSource.lastIndexOf('let textPlain = "";', copyEnd);
+    const copyPlainSource = compile(wysiwygSource.substring(copyStart, copyEnd));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cell-input-test-"));
     const script = path.join(temporary, "run.cjs");
     const lutePath = path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js");
@@ -561,7 +622,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource]
+        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource]
             .map(value => JSON.stringify(value)).join(",") + ")")}));
         win.destroy();
         app.exit(0);

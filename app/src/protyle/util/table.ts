@@ -454,25 +454,10 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 
     if (!nodeElement.classList.contains("protyle-wysiwyg--select") && !hasClosestByClassName(nodeElement, "protyle-wysiwyg--select")) {
-        // enter 光标跳转到下一行同列
+        // 未进入编辑状态的单元格先挂载内部编辑器，再按正文规则处理回车。
         if (isNotCtrl(event) && !event.shiftKey && !event.altKey && event.key === "Enter") {
             event.preventDefault();
-            const trElement = cellElement.parentElement as HTMLTableRowElement;
-            if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
-                (trElement.parentElement.tagName === "THEAD" && !trElement.parentElement.nextElementSibling)) {
-                insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));
-                return true;
-            }
-            let nextElement = trElement.nextElementSibling as HTMLTableRowElement;
-            if (!nextElement) {
-                nextElement = trElement.parentElement.nextElementSibling.firstChild as HTMLTableRowElement;
-            }
-            if (!nextElement) {
-                return true;
-            }
-            range.selectNodeContents(nextElement.cells[getColIndex(cellElement)]);
-            range.collapse(true);
-            scrollCenter(protyle);
+            void import("../render/tableCellRichEditor").then(module => module.enterTableCellRichEditor(protyle, cellElement));
             return true;
         }
         // 表格后无内容时，按右键需新建空块

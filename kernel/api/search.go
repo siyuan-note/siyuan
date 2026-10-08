@@ -361,9 +361,41 @@ var fullTextSearchBlock = contractHandler(apicontract.FullTextSearchBlock, func(
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 			return apicontract.Failure[*apicontract.FullTextSearchBlockData](-1, err.Error())
 		}
-		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBoxWithHPathContext(c.Request.Context(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, notebook, searchHPath, excludeBoxIDs, excludeDocIDs)
+		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlock(model.BlockSearchOptions{
+			Context:       c.Request.Context(),
+			Query:         query,
+			Boxes:         boxes,
+			Paths:         paths,
+			Types:         types,
+			SubTypes:      subTypes,
+			Method:        method,
+			OrderBy:       orderBy,
+			GroupBy:       groupBy,
+			Page:          page,
+			PageSize:      pageSize,
+			BoxID:         notebook,
+			SearchHPath:   new(searchHPath),
+			ExcludeBoxIDs: excludeBoxIDs,
+			ExcludeDocIDs: excludeDocIDs,
+		})
 	} else {
-		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBoxWithHPathContext(c.Request.Context(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, "", searchHPath, excludeBoxIDs, excludeDocIDs)
+		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlock(model.BlockSearchOptions{
+			Context:       c.Request.Context(),
+			Query:         query,
+			Boxes:         boxes,
+			Paths:         paths,
+			Types:         types,
+			SubTypes:      subTypes,
+			Method:        method,
+			OrderBy:       orderBy,
+			GroupBy:       groupBy,
+			Page:          page,
+			PageSize:      pageSize,
+			BoxID:         "",
+			SearchHPath:   new(searchHPath),
+			ExcludeBoxIDs: excludeBoxIDs,
+			ExcludeDocIDs: excludeDocIDs,
+		})
 	}
 	if c.Request.Context().Err() != nil {
 		return apicontract.Success[*apicontract.FullTextSearchBlockData](nil)

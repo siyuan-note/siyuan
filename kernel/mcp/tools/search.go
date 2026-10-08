@@ -135,13 +135,32 @@ func fulltextSearch(args map[string]any) (CallToolResult, error) {
 		return sqlQuery(map[string]any{"stmt": query, "notebook": encryptedNotebook})
 	}
 	if encryptedNotebook != "" {
-		blocks, matchedCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBox(
-			query, notebooks, paths, types, subtypes, method, orderBy, groupBy, page, pageSize, encryptedNotebook,
-		)
+		blocks, matchedCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlock(model.BlockSearchOptions{
+			Query:    query,
+			Boxes:    notebooks,
+			Paths:    paths,
+			Types:    types,
+			SubTypes: subtypes,
+			Method:   method,
+			OrderBy:  orderBy,
+			GroupBy:  groupBy,
+			Page:     page,
+			PageSize: pageSize,
+			BoxID:    encryptedNotebook,
+		})
 	} else {
-		blocks, matchedCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlock(
-			query, notebooks, paths, types, subtypes, method, orderBy, groupBy, page, pageSize,
-		)
+		blocks, matchedCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlock(model.BlockSearchOptions{
+			Query:    query,
+			Boxes:    notebooks,
+			Paths:    paths,
+			Types:    types,
+			SubTypes: subtypes,
+			Method:   method,
+			OrderBy:  orderBy,
+			GroupBy:  groupBy,
+			Page:     page,
+			PageSize: pageSize,
+		})
 	}
 
 	if matchedCount == 0 {

@@ -667,7 +667,20 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 		// `Replace All` is no longer affected by pagination https://github.com/siyuan-note/siyuan/issues/8265
 		// 替换目标始终使用未分组的块级结果，分组仅影响搜索结果展示
 		// https://github.com/siyuan-note/siyuan/issues/10825
-		blocks, _, _, _, _ := FullTextSearchBlockInBoxWithHPath(keyword, boxes, paths, types, subTypes, method, 0, 0, 1, math.MaxInt, boxID, false)
+		blocks, _, _, _, _ := FullTextSearchBlock(BlockSearchOptions{
+			Query:       keyword,
+			Boxes:       boxes,
+			Paths:       paths,
+			Types:       types,
+			SubTypes:    subTypes,
+			Method:      method,
+			OrderBy:     0,
+			GroupBy:     0,
+			Page:        1,
+			PageSize:    math.MaxInt,
+			BoxID:       boxID,
+			SearchHPath: new(false),
+		})
 		for _, block := range blocks {
 			ids = append(ids, block.ID)
 		}
@@ -1575,32 +1588,48 @@ func mergeSamePreNext(n *ast.Node) {
 	}
 }
 
-// FullTextSearchBlock 搜索内容块。
-//
-// method：0：关键字，1：查询语法，2：SQL，3：正则表达式
-// orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
-// groupBy：0：不分组，1：按文档分组
-func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
-	return FullTextSearchBlockWithHPath(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, true)
+// BlockSearchOptions 汇总内容块搜索条件；未指定上下文时使用后台上下文，SearchHPath 缺省为 true。
+// BoxID 决定普通或加密笔记本的数据库路由，访问排除条件仍由调用方按请求权限提供。
+type BlockSearchOptions struct {
+	Context       context.Context
+	Query         string
+	Boxes         []string
+	Paths         []string
+	Types         map[string]bool
+	SubTypes      map[string]bool
+	Method        int
+	OrderBy       int
+	GroupBy       int
+	Page          int
+	PageSize      int
+	BoxID         string
+	SearchHPath   *bool
+	ExcludeBoxIDs []string
+	ExcludeDocIDs []string
 }
 
-// FullTextSearchBlockWithHPath 搜索内容块，并可控制是否搜索文档层级路径。
-func FullTextSearchBlockWithHPath(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
-	return FullTextSearchBlockInBoxWithHPath(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, "", searchHPath)
-}
+// FullTextSearchBlock 按同一组命名条件搜索内容块。
+// Method：0 为关键字，1 为查询语法，2 为 SQL，3 为正则表达式；GroupBy：0 不分组，1 按文档分组。
+// OrderBy：0 按块类型，1/2 按创建时间升/降序，3/4 按更新时间升/降序，5 按文档内内容顺序，6/7 按相关度升/降序。
+func FullTextSearchBlock(options BlockSearchOptions) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
+	ctx := options.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	query := options.Query
+	boxes := options.Boxes
+	paths := options.Paths
+	types := options.Types
+	subTypes := options.SubTypes
+	method := options.Method
+	orderBy := options.OrderBy
+	groupBy := options.GroupBy
+	page := options.Page
+	pageSize := options.PageSize
+	boxID := options.BoxID
+	searchHPath := options.SearchHPath == nil || *options.SearchHPath
+	excludeBoxIDs, excludeDocIDs := options.ExcludeBoxIDs, options.ExcludeDocIDs
 
-// FullTextSearchBlockInBox 与 FullTextSearchBlock 一致，但按 boxID 路由到加密 db 或全局 db。
-// 加密笔记本内搜索时传入 boxID，所有 sql/treenode 查询走加密 db；boxID 为空时 fall-through 全局 db。
-func FullTextSearchBlockInBox(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
-	return FullTextSearchBlockInBoxWithHPath(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, boxID, true)
-}
-
-// FullTextSearchBlockInBoxWithHPath 与 FullTextSearchBlockInBox 一致，并可控制是否搜索文档层级路径。
-func FullTextSearchBlockInBoxWithHPath(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
-	return FullTextSearchBlockInBoxWithHPathContext(context.Background(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, boxID, searchHPath, nil, nil)
-}
-
-func FullTextSearchBlockInBoxWithHPathContext(ctx context.Context, query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string, searchHPath bool, excludeBoxIDs, excludeDocIDs []string) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
 	ret = []*Block{}
 	if "" == query {
 		return

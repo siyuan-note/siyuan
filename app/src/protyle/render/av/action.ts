@@ -254,7 +254,7 @@ const getAVEditFieldMenuItems = (protyle: IProtyle, blockElement: HTMLElement): 
                     });
                 }
             }];
-        } else if (["mAsset", "relation"].includes(field.type) || (field.type === "mSelect" && !singleItem)) {
+        } else if ((field.type === "mAsset" || field.type === "relation") || (field.type === "mSelect" && !singleItem)) {
             item.type = "submenu";
             item.submenu = [{
                 iconHTML: "",

@@ -1,3 +1,4 @@
+import {hasAVCapability, isAVReadonlyType, isAVSelectType, isAVTimestampType} from "./capabilities";
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
@@ -146,7 +147,7 @@ export const getEditHTML = (options: {
     <span class="b3-menu__accelerator" style="margin-left: 0">${getColNameByType(colData.type)}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;
-    if (["mSelect", "select"].includes(colData.type)) {
+    if (isAVSelectType(colData.type)) {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
 <button class="b3-menu__item" data-type="nobg">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
@@ -214,7 +215,7 @@ export const getEditHTML = (options: {
     <span class="fn__space fn__flex-1"></span>
     <input data-type="fillSpecificTime" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.fillSpecificTime ? "checked" : ""}>
 </label>`;
-    } else if (["updated", "created"].includes(colData.type)) {
+    } else if (isAVTimestampType(colData.type)) {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
 <button class="b3-menu__item" data-type="dateFormat" data-format="${colData.dateFormat || ""}">
     <svg class="b3-menu__icon"><use xlink:href="#iconFormat"></use></svg>
@@ -227,7 +228,7 @@ export const getEditHTML = (options: {
     <input data-type="includeTime" type="checkbox" class="b3-switch b3-switch--menu" ${(!colData[colData.type as "updated"] || colData[colData.type as "updated"].includeTime) ? "checked" : ""}>
 </label>`;
     }
-    if (!["template", "rollup", "lineNumber", "created", "updated"].includes(colData.type)) {
+    if (!isAVReadonlyType(colData.type)) {
         const renderTemplate = colData.renderTemplate || "";
         html += `<button class="b3-menu__separator" data-id="separator_render_template"></button>
 <button class="b3-menu__item" data-type="nobg">
@@ -1159,7 +1160,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     menu.addSeparator({id: "separator_1"});
 
     // 行号类型不参与筛选和排序
-    if (type !== "lineNumber") {
+    if (hasAVCapability(type, "filterable")) {
         menu.addItem({
             id: "filter",
             icon: "iconFilter",

@@ -185,7 +185,7 @@ const runElectron = async () => {
     let exitCode = 0;
     try {
         const ts = require("typescript");
-        const sources = Object.fromEntries(["cell", "cellValue", "attributeValue", "blockIcon", "relationLayout"].map(name => ["./" + name,
+        const sources = Object.fromEntries(["cell", "cellValue", "attributeValue", "blockIcon", "relationLayout", "capabilities", "capabilities.generated"].map(name => ["./" + name,
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
         const relationSource = readFileSync(path.join(__dirname, "../src/protyle/render/av/relation.ts"), "utf8");

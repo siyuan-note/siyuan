@@ -1,3 +1,4 @@
+import {isAVDateType, isAVSelectType} from "../capabilities";
 import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
 import {getPublishAVView} from "../publishState";
@@ -32,7 +33,7 @@ interface IIds {
 const getKanbanTitleHTML = (group: IAVView, counter: number, draggable: boolean) => {
     let nameHTML = "";
     let optionMenuHTML = "";
-    if (["mSelect", "select"].includes(group.groupValue.type)) {
+    if (isAVSelectType(group.groupValue.type)) {
         group.groupValue.mSelect.forEach((item) => {
             nameHTML += `<span class="b3-chip" style="${getAVColorStyle(item)}">${escapeHtml(item.content)}</span>`;
         });
@@ -216,7 +217,7 @@ export const renderKanban = async (options: {
     const groupOptions = groupKey?.options || [];
     const queryEmbedElement = hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed");
     const groupDraggable = !options.protyle.disabled && !created && !snapshot && !queryEmbedElement &&
-        (view.group?.valueSource === "rendered" || !["created", "date", "updated"].includes(groupKey?.type));
+        (view.group?.valueSource === "rendered" || !isAVDateType(groupKey?.type));
     const groupConfig = escapeAttr(JSON.stringify(view.group));
     let bodyHTML = "";
     let isSelectGroup = false;
@@ -224,7 +225,7 @@ export const renderKanban = async (options: {
         if (group.groupHidden === 0) {
             let selectBg = "";
             if (group.fillColBackgroundColor) {
-                if (["mSelect", "select"].includes(group.groupValue.type)) {
+                if (isAVSelectType(group.groupValue.type)) {
                     isSelectGroup = true;
                 }
                 if (isSelectGroup) {

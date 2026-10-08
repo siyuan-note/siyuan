@@ -1,10 +1,11 @@
+import {isAVDateType} from "../capabilities";
 import {transaction} from "../../../wysiwyg/transaction";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {getColNameByType} from "../col";
 import {Menu} from "../../../../plugin/Menu";
 import {openViewSettingMenu} from "../viewSettingMenu";
 
-export const isCalendarDateColumn = (column: IAVColumn) => ["date", "created", "updated"].includes(column?.type);
+export const isCalendarDateColumn = (column: IAVColumn) => isAVDateType(column?.type);
 
 const getCalendarSettingItems = (view: IAVTable): Array<{
     key: keyof IAVCalendarSettings;

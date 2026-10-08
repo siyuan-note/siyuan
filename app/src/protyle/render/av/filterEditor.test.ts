@@ -1,3 +1,4 @@
+import * as capabilities from "./capabilities";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -11,10 +12,10 @@ test("selection conditions with the same path read only their own editor options
     }).outputText, {
         exports: methods,
         document: {querySelector: () => assert.fail("must not read another condition's options")},
-        require: (name: string) => ({
+        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "./view": {getFieldsByData: () => [{id: "choice", type: "mSelect"}]},
             "./cell": {genCellValue: (type: string, mSelect: IAVCellSelectValue[]) => ({type, mSelect})},
-        })[name] || {},
+        })[name] || {}),
     });
     for (const selected of [[], ["own option"]]) {
         const listeners = new Map<string, (event: unknown) => void>();
@@ -48,7 +49,7 @@ test("nested color conditions do not change the parent view filter, including ca
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {
         exports: methods,
-        require: (name: string) => name === "./view" ? {getFieldsByData: () => fields} : {},
+        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (name === "./view" ? {getFieldsByData: () => fields} : {}),
     });
     const createEditor = () => {
         const listeners = new Map<string, Array<(event: unknown) => void>>();

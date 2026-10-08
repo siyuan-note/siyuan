@@ -1,4 +1,5 @@
 import * as assert from "node:assert/strict";
+import * as capabilities from "./capabilities";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
@@ -204,6 +205,7 @@ const openInput = (positionByMenu = false) => {
     };
     const exports: {popTextCell?: (protyle: unknown, cells: unknown[], type: string, options: unknown) => void} = {};
     runInNewContext(popCompiled, {
+        ...capabilities,
         exports, isTableLikeView: () => true, hasClosestBlock: () => block, hasClosestByClassName: (): null => null,
         getComputedStyle: () => ({}), getStoredCellValueByElement: (): undefined => undefined,
         escapeAttr: (value: string) => value,

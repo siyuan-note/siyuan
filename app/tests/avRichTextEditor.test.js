@@ -29,6 +29,7 @@ const runCases = async (sources) => {
         },
         Lute: {UnEscapeHTMLStr: value => value, Caret: "caret"},
         replaceFileName: value => value,
+        getDailyNoteHints: async () => [],
         Constants: {ZWSP: "\u200b"},
     };
     const hintRef = new Function(...Object.keys(hintDependencies), "exports", sources.hintRef + "\nreturn exports.hintRef;")(
@@ -248,7 +249,7 @@ const runElectron = async () => {
     let exitCode = 0;
     try {
         const ts = require("typescript");
-        const sources = Object.fromEntries(["richTextEditor", "editorSession", "selectionState"].map(name => ["./" + name,
+        const sources = Object.fromEntries(["richTextEditor", "editorSession", "selectionState", "capabilities", "capabilities.generated"].map(name => ["./" + name,
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
         const hintSource = ts.createSourceFile("extend.ts", readFileSync(path.join(__dirname,

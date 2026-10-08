@@ -1,4 +1,5 @@
 import {Menu} from "../../../plugin/Menu";
+import {hasAVCapability} from "./capabilities";
 import {getColIconByType} from "./col";
 import {transaction} from "../../wysiwyg/transaction";
 import {setPosition} from "../../../util/setPosition";
@@ -21,8 +22,8 @@ export const addSort = (options: {
     fields.forEach((column) => {
         let hasSort = false;
 
-        // 如果该列是行号类型列，不允许添加排序
-        if (column.type === "lineNumber") {
+        // 根据字段能力排除不支持排序的列。
+        if (!hasAVCapability(column.type, "sortable")) {
             hasSort = true;
         } else {
             options.data.view.sorts.find((sort) => {

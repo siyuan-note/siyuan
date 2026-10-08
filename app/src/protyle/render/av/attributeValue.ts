@@ -1,3 +1,4 @@
+import {hasAVAttributePlaceholder, isAVLinkType, isAVTimestampType, usesAVRollupCellRenderer} from "./capabilities";
 import {escapeAriaLabel, escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {unicode2Emoji} from "../../../emoji";
 import {renderAVBlockIcon} from "./blockIcon";
@@ -213,7 +214,7 @@ export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = 
             break;
         case "rollup":
             value?.rollup?.contents?.forEach((item) => {
-                const rollupText = ["template", "select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ?
+                const rollupText = (usesAVRollupCellRenderer(item.type) || item.type === "checkbox") ?
                     genAVValueHTML(item) : genAVRollupHTML(item);
                 if (rollupText) {
                     html += rollupText.replace("fn__flex-1", "") + ",&nbsp;";
@@ -248,8 +249,8 @@ export const genAVAttributeRowHTML = (options: {
 }) => {
     const value = options.value;
     const storedValue = cloneAVCellValueSnapshot(value);
-    const textInputType = ["url", "email", "phone", "block"].includes(value.type);
-    const hasOwnPlaceholder = ["text", "number", "date", "url", "phone", "template", "email"].includes(value.type);
+    const textInputType = isAVLinkType(value.type);
+    const hasOwnPlaceholder = hasAVAttributePlaceholder(value.type);
     const checkClass = value.type === "checkbox" ? (value.checkbox.checked ? " av__cell-check" : " av__cell-uncheck") : "";
     return `<div class="block__icons av__row" data-id="${options.nodeID}" data-col-id="${options.keyID}" data-empty="${options.empty}" data-panel-visibility="${escapeAttr(options.attributePanelVisibility || "")}"${options.type === "block" ? ' data-primary="true"' : ""}>
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
@@ -262,6 +263,6 @@ data-options="${options.selectOptions ? escapeAttr(JSON.stringify(options.select
 data-date-format="${options.dateFormat || ""}"
 ${options.renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${hasOwnPlaceholder ? "" : `placeholder="${window.siyuan.languages.empty}"`}
-class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(value.type) ? " custom-attr__avvalue--readonly" : ""}${checkClass}">${genAVValueHTML(value, options.dateFormat, options.renderTemplate)}</div>
+class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${isAVTimestampType(value.type) ? " custom-attr__avvalue--readonly" : ""}${checkClass}">${genAVValueHTML(value, options.dateFormat, options.renderTemplate)}</div>
 </div>`;
 };

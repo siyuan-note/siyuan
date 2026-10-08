@@ -204,12 +204,12 @@ export class AVAttributePanel {
             return;
         }
         if (operation.action === "updateAttrViewCell" && operation.rowID && this.hasItem(operation.rowID) &&
-            (["block", "number"].includes(operation.data?.type) || this.hasRenderTemplate(avID))) {
+            ((operation.data?.type === "block" || operation.data?.type === "number") || this.hasRenderTemplate(avID))) {
             this.queueRefresh();
             return;
         }
         if (operation.action === "updateAttrViewCells" && operation.cellUpdates?.some(cell =>
-            this.hasItem(cell.rowID) && (["block", "number"].includes(cell.data?.type) ||
+            this.hasItem(cell.rowID) && ((cell.data?.type === "block" || cell.data?.type === "number") ||
                 this.hasRenderTemplate(avID)))) {
             this.queueRefresh();
             return;

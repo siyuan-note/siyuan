@@ -1,3 +1,4 @@
+import {hasAVScalarContent, isAVDateType, isAVReadonlyType, isAVRichTextType, isAVSelectType, isAVTextType, isAVTimestampType, usesAVRollupCellRenderer} from "./capabilities";
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
@@ -240,7 +241,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             content: parseFloat(value) || 0,
             isNotEmpty: !!value
         };
-    } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
+    } else if (isAVTextType(colType)) {
         const inputElement = cellElement.querySelector("input, textarea") as HTMLInputElement | HTMLTextAreaElement;
         const textElement = cellElement.querySelector(".av__celltext") as HTMLElement ||
             cellElement.querySelector(":scope > .fn__flex-1") as HTMLElement;
@@ -263,7 +264,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             });
         });
         cellValue.mSelect = mSelect;
-    } else if (["date", "created", "updated"].includes(colType)) {
+    } else if (isAVDateType(colType)) {
         cellValue[colType as "date"] = JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"));
     } else if (colType === "checkbox") {
         cellValue.checkbox = {
@@ -314,10 +315,10 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
 };
 
 const getCellValueContent = (value: IAVCellValue): string => {
-    if (["number", "text", "block", "url", "phone", "email", "template", "mAsset"].includes(value.type)) {
+    if (hasAVScalarContent(value.type)) {
         return value[value.type as "text"].content;
     }
-    if (["mSelect", "select"].includes(value.type)) {
+    if (isAVSelectType(value.type)) {
         return value.mSelect[0].content;
     }
     if (value.type === "rollup") {
@@ -329,7 +330,7 @@ const getCellValueContent = (value: IAVCellValue): string => {
     if (value.type === "relation") {
         return getCellValueContent(value.relation.contents[0]);
     }
-    if (["date", "created", "updated"].includes(value.type)) {
+    if (isAVDateType(value.type)) {
         return dayjs(value[value.type as "date"].content).format("YYYY-MM-DD HH:mm");
     }
     if (value.type === "lineNumber") {
@@ -349,7 +350,7 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
         type: colType,
     };
     if (colType === "number") {
-        if (["date", "created", "updated"].includes(value.type)) {
+        if (isAVDateType(value.type)) {
             newValue.number = {
                 content: value[value.type as "date"].content,
                 isNotEmpty: value[value.type as "date"].isNotEmpty
@@ -360,7 +361,7 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
                 isNotEmpty: true
             };
         }
-    } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
+    } else if (isAVTextType(colType)) {
         newValue[colType as "text"] = {
             content: getCellValueContent(value).toString()
         };
@@ -388,8 +389,8 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
             content,
             name: "",
         }];
-    } else if (["date", "created", "updated"].includes(colType)) {
-        if (["date", "created", "updated"].includes(value.type)) {
+    } else if (isAVDateType(colType)) {
+        if (isAVDateType(value.type)) {
             newValue[colType as "date"] = JSON.parse(JSON.stringify(value[value.type as "date"]));
         } else {
             newValue[colType as "date"] = {
@@ -423,7 +424,7 @@ export const genCellValue = (colType: TAVCol, value: string | any, dateFormat: T
                     isNotEmpty: true
                 }
             };
-        } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
+        } else if (isAVTextType(colType)) {
             cellValue = {
                 type: colType,
                 [colType]: {
@@ -445,7 +446,7 @@ export const genCellValue = (colType: TAVCol, value: string | any, dateFormat: T
                     checked: true
                 }
             };
-        } else if (["date", "created", "updated"].includes(colType)) {
+        } else if (isAVDateType(colType)) {
             cellValue = {
                 type: colType,
                 [colType]: parseDateValue(value, dateFormat)
@@ -664,7 +665,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     style = `style='${style}'`;
 
-    if (["text", "email", "phone", "block", "template"].includes(type)) {
+    if (isAVRichTextType(type)) {
         html = `<textarea ${style} spellcheck="false" class="b3-text-field"></textarea>`;
     } else if (type === "url") {
         const content = storedCellValue?.url?.content ?? cellElements[0].firstElementChild.getAttribute("data-href") ?? "";
@@ -677,7 +678,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         /// #if MOBILE
         activeBlur(true);
         /// #endif
-        if (["select", "mSelect"].includes(type)) {
+        if (isAVSelectType(type)) {
             if (blockElement.getAttribute("data-rendering") === "true") {
                 options?.destroyCallback?.();
                 return;
@@ -792,7 +793,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 return cellElements[0];
             }, contentElement || undefined);
         }
-        if (["text", "email", "phone", "block", "template"].includes(type)) {
+        if (isAVRichTextType(type)) {
             const storedContent = type === "template" ? undefined :
                 storedCellValue?.[type as "text"]?.content;
             inputElement.value = typeof storedContent === "string" ? storedContent :
@@ -1035,7 +1036,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         if (!type) {
             continue;
         }
-        const readonly = ["created", "updated", "template", "rollup", "lineNumber"].includes(type);
+        const readonly = isAVReadonlyType(type);
         const cellId = source.selectedCell?.cell.id || item?.dataset.id || "";
         const colId = source.selectedCell?.colID || (item ? getColId(item, viewType) : "");
         const renderedOldValue = source.selectedCell?.cell.value ||
@@ -1392,7 +1393,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         } else {
             text = `<span class="av__celltext">${cellValue ? escapeHtmlTextAndAttr(cellValue.text.content || "") : ""}</span>`;
         }
-    } else if (["email", "phone"].includes(cellValue.type)) {
+    } else if ((cellValue.type === "email" || cellValue.type === "phone")) {
         text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${cellValue ? escapeHtmlTextAndAttr(cellValue[cellValue.type as "email"].content || "") : ""}</span>`;
     } else if ("url" === cellValue.type) {
         text = renderCellURL(cellValue?.url?.content || "");
@@ -1434,14 +1435,14 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
             text += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${escapeHtml(formatDateDisplay(dataValue.content2, dateFormat, dataValue.isNotTime))}`;
         }
         text += "</span>";
-    } else if (["created", "updated"].includes(cellValue.type)) {
+    } else if (isAVTimestampType(cellValue.type)) {
         const dataValue = cellValue ? cellValue[cellValue.type as "date"] : null;
         text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
         if (dataValue && dataValue.isNotEmpty) {
             text += escapeHtml(dataValue.formattedContent || formatDateValue(dataValue, dateFormat));
         }
         text += "</span>";
-    } else if (["lineNumber"].includes(cellValue.type)) {
+    } else if (cellValue.type === "lineNumber") {
         // 渲染行号
         text = `<span class="av__celltext" data-value='${rowIndex + 1}'>${rowIndex + 1}</span>`;
     } else if (cellValue.type === "mAsset") {
@@ -1461,7 +1462,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     } else if (cellValue.type === "rollup") {
         let rollupType;
         cellValue?.rollup?.contents?.forEach((item) => {
-            const rollupText = ["template", "select", "mSelect", "mAsset", "relation"].includes(item.type) ? renderCell(item, rowIndex, showIcon, type, undefined, "", undefined, false) : renderRollup(item, showIcon);
+            const rollupText = usesAVRollupCellRenderer(item.type) ? renderCell(item, rowIndex, showIcon, type, undefined, "", undefined, false) : renderRollup(item, showIcon);
             if (rollupText) {
                 text += rollupText + (item.type === "checkbox" ? "" : ", ");
             }
@@ -1485,7 +1486,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
 
     if (showCopy && cellValue.type === "rollup" && text) {
         text += `<button class="av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.copy}" data-type="copy" data-rollup-value="${escapeAttr(encodeURIComponent(JSON.stringify(cellValue.rollup?.contents || [])))}"><svg><use xlink:href="#iconCopy"></use></svg></button>`;
-    } else if (showCopy && ((["text", "template", "url", "email", "phone", "date", "created", "updated"].includes(cellValue.type) && cellValue[cellValue.type as "url"]?.content) ||
+    } else if (showCopy && ((((isAVTextType(cellValue.type) && cellValue.type !== "block") || isAVDateType(cellValue.type)) && cellValue[cellValue.type as "url"]?.content) ||
         cellValue.type === "lineNumber" ||
         (cellValue.type === "number" && cellValue.number?.isNotEmpty) ||
         (cellValue.type === "block" && cellValue.block?.content))) {
@@ -1528,9 +1529,9 @@ export const getAVSelectedCellData = (blockElement: HTMLElement) => {
 
 const renderRollup = (cellValue: IAVCellValue, showIcon: boolean) => {
     let text = "";
-    if (["text"].includes(cellValue.type)) {
+    if (cellValue.type === "text") {
         text = cellValue ? escapeHtmlTextAndAttr(cellValue[cellValue.type as "text"].content || "") : "";
-    } else if (["email", "phone"].includes(cellValue.type)) {
+    } else if ((cellValue.type === "email" || cellValue.type === "phone")) {
         const emailContent = cellValue ? cellValue[cellValue.type as "email"].content : "";
         if (emailContent) {
             text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${escapeHtmlTextAndAttr(emailContent)}</span>`;
@@ -1550,7 +1551,7 @@ const renderRollup = (cellValue: IAVCellValue, showIcon: boolean) => {
         text = cellValue?.number.formattedContent || cellValue?.number.content.toString() || "";
     } else if (cellValue.type === "checkbox") {
         text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg><span class="fn__space"></span>`;
-    } else if (["date", "updated", "created"].includes(cellValue.type)) {
+    } else if (isAVDateType(cellValue.type)) {
         const dataValue = cellValue ? cellValue[cellValue.type as "date"] : null;
         if (dataValue.formattedContent) {
             text = dataValue.formattedContent;
@@ -1642,7 +1643,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
     const showIcon = activeElement.querySelector(".b3-menu__avemoji") ? true : false;
     Object.keys(newData).forEach((rowID, index) => {
         newData[rowID].forEach((item, cellIndex) => {
-            if (["rollup", "template", "created", "updated", "lineNumber"].includes(item.type) ||
+            if (isAVReadonlyType(item.type) ||
                 (item.type === "block" && item.element.getAttribute("data-detached") !== "true")) {
                 return;
             }
@@ -1699,7 +1700,7 @@ export const addDragFill = (cellElement: Element) => {
     cellElement.classList.add("av__cell--active");
     if (!cellElement.querySelector(".av__drag-fill")) {
         const cellType = cellElement.getAttribute("data-dtype") as TAVCol;
-        if (["template", "rollup", "lineNumber", "created", "updated"].includes(cellType)) {
+        if (isAVReadonlyType(cellType)) {
             return;
         }
         cellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);

@@ -205,6 +205,8 @@ pnpm test
 
 The generation command updates both this repository and `petal`; a separate generation run without `--petal` is unnecessary. The `--petal` path is relative to the generator's working directory, `kernel/`; the example refers to a sibling repository. CI checks only this repository's artifacts. Local synchronization across repositories uses this option to verify plugin declarations.
 
+The same generator also reads the field capability declarations in `kernel/av/capabilities.go` and writes `app/src/protyle/render/av/capabilities.generated.ts`, `app/src/types/av/index.d.ts`, and the corresponding `petal/types/av/index.d.ts`. Maintain field capabilities and the filter operator registry in the kernel, then regenerate these artifacts; do not hand-edit the generated field type or operator unions. Tests enumerate the typed Go constants to reject missing declarations and verify generated artifacts through the existing commands and full kernel suite.
+
 Run from `kernel/`:
 
 ```text

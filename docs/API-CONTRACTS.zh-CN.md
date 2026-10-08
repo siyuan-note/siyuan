@@ -189,6 +189,8 @@ pnpm test
 
 上述生成命令同时更新本仓库与 `petal`，无须再单独执行不带 `--petal` 的生成命令。`--petal` 路径相对于生成器的工作目录 `kernel/`，示例对应同级仓库。CI 只检查本仓库产物，而本地跨仓库同步须使用该参数核对插件声明。
 
+同一生成器还读取 `kernel/av/capabilities.go` 中的字段能力声明，输出 `app/src/protyle/render/av/capabilities.generated.ts`、`app/src/types/av/index.d.ts` 和对应的 `petal/types/av/index.d.ts`。字段能力和筛选算子清单在内核维护，修改后重新生成产物，不手工编辑生成的字段类型或算子联合类型。测试枚举 Go 类型常量，拒绝遗漏声明，并通过现有生成检查命令和内核全量测试核对生成产物。
+
 在 `kernel/` 下运行：
 
 ```text

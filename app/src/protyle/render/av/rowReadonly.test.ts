@@ -1,3 +1,4 @@
+import * as capabilities from "./capabilities";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -65,6 +66,8 @@ const createPanel = (mobile: boolean) => {
                 constructor(public type: string, options: {detail: unknown}) { this.detail = options.detail; }
             },
             require: (name: string) => {
+            if (name === "./capabilities" || name === "../capabilities") { return capabilities; }
+
                 if (name.endsWith("/blockAttr")) {
                     return {renderAVAttribute: (_element: unknown, _id: string, protyle: IProtyle) => rendered.push(protyle.disabled)};
                 }

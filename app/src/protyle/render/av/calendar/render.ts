@@ -1,3 +1,4 @@
+import {AV_DATE_TYPES} from "../capabilities";
 import {Constants} from "../../../../constants";
 import {setStorageVal} from "../../../util/compatibility";
 import * as dayjs from "dayjs";
@@ -405,7 +406,7 @@ export const renderCalendar = async (blockElement: HTMLElement, protyle: IProtyl
     let body = "";
     if (!dateColumn) {
         body = `<div class="av__calendar-empty"><svg><use xlink:href="#iconCalendar"></use></svg><p>${window.siyuan.languages.calendarSelectDateField}</p>
-            ${editable ? `<div class="av__calendar-setup">${getCalendarSettingsHTML(view)}</div><div class="av__calendar-create-fields">${(["date", "created", "updated"] as const).map(type => `<button class="b3-button b3-button--outline" data-calendar-create-field="${type}">${window.siyuan.languages.newCol} ${getColNameByType(type)}</button>`).join("")}</div>` : ""}</div>`;
+            ${editable ? `<div class="av__calendar-setup">${getCalendarSettingsHTML(view)}</div><div class="av__calendar-create-fields">${AV_DATE_TYPES.map(type => `<button class="b3-button b3-button--outline" data-calendar-create-field="${type}">${window.siyuan.languages.newCol} ${getColNameByType(type)}</button>`).join("")}</div>` : ""}</div>`;
     } else {
         for (let start = range.start; start < range.end; start = addCalendarDays(start, 7)) {
             const isoWeek = getISOWeekForCalendarRow(start);

@@ -1,11 +1,3 @@
-export const AV_PASTE_READONLY_TYPES = new Set<TAVCol>([
-    "created",
-    "updated",
-    "template",
-    "rollup",
-    "lineNumber",
-]);
-
 const isStrictNumber = (value: string) => {
     const trimmed = value.trim();
     if (!/^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/.test(trimmed)) {

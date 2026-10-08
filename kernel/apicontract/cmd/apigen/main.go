@@ -11,6 +11,7 @@ import (
 	"sort"
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/av"
 )
 
 func main() {
@@ -82,8 +83,12 @@ func run(root, petal, base string, check bool) error {
 		filepath.Join(root, "app", "src", "types", "api", "index.d.ts"): bundle.TypeScript(legacy),
 		filepath.Join(root, "kernel", "apicontract", "schema.json"):     append(jsonData, '\n'),
 	}
+	capabilityRuntime, capabilityTypes := av.CapabilityTypeScript()
+	artifacts[filepath.Join(root, "app", "src", "protyle", "render", "av", "capabilities.generated.ts")] = capabilityRuntime
+	artifacts[filepath.Join(root, "app", "src", "types", "av", "index.d.ts")] = capabilityTypes
 	if petal != "" {
 		artifacts[filepath.Join(petal, "types", "api", "index.d.ts")] = bundle.TypeScript(legacy)
+		artifacts[filepath.Join(petal, "types", "av", "index.d.ts")] = capabilityTypes
 	}
 	var paths []string
 	for path := range artifacts {

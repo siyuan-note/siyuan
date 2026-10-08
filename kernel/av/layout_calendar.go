@@ -69,7 +69,7 @@ func (r *CalendarRange) Location() (*time.Location, error) {
 }
 
 func IsCalendarDateType(keyType KeyType) bool {
-	return KeyTypeDate == keyType || KeyTypeCreated == keyType || KeyTypeUpdated == keyType
+	return IsDateKeyType(keyType)
 }
 
 var calendarTemplateTimePattern = regexp.MustCompile(`[ T](\d{2}):(\d{2})(?::(\d{2}))?$`)

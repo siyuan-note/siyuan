@@ -1,3 +1,4 @@
+import * as capabilities from "./capabilities";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -15,9 +16,9 @@ test("automation settings reject readonly, publishing and historical editors bef
         runInNewContext(compiled, {
             exports: methods,
             window: {siyuan: {config: {readonly: mode === "readonly"}, isPublish: mode === "publish"}},
-            require: (name: string) => name === "../../../util/fetch" ? {
+            require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (name === "../../../util/fetch" ? {
                 fetchSyncPost: () => assert.fail("protected editor fetched automation settings"),
-            } : {},
+            } : {}),
         });
         await methods.openAutomationMenu({protyle: {disabled: mode === "disabled", options: {
             history: {created: mode === "created" ? "history" : undefined, snapshot: mode === "snapshot" ? "snapshot" : undefined},
@@ -65,7 +66,7 @@ test("automation settings autosave changes with independent undo snapshots and k
         exports: methods,
         window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations", fields: "Fields", automationIncomplete: "Incomplete: ${1}"},
             menus: {menu: {remove() { menuVisible = false; }}}}},
-        require: (name: string) => ({
+        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "../../../plugin/Menu": {Menu: class {
                 addItem() {}
                 open() { menuVisible = true; }
@@ -75,7 +76,7 @@ test("automation settings autosave changes with independent undo snapshots and k
             "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[]) => {
                 transactions.push({perform, undo});
             }},
-        })[name] || {},
+        })[name] || {}),
     });
     await methods.openAutomationMenu({protyle: {options: {}} as IProtyle,
         blockElement: {dataset: {nodeId: "carrier"}} as unknown as HTMLElement, avID: "source",
@@ -152,13 +153,13 @@ test("empty automation settings persist an incomplete rule disabled on editing a
         exports: methods,
         Lute: {NewNodeID: () => "draft-rule"},
         window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations", fields: "Fields", automationIncomplete: "Incomplete: ${1}"}}},
-        require: (name: string) => ({
+        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "../../../util/escape": {escapeAttr: String, escapeHtml: String},
             "../../../util/fetch": {fetchSyncPost: async () => ({code: 0, data: {av: database}})},
             "../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[]) => {
                 transactions.push({perform, undo});
             }},
-        })[name] || {},
+        })[name] || {}),
     });
     await methods.openAutomationMenu({protyle: {options: {}} as IProtyle,
         blockElement: {dataset: {nodeId: "carrier"}} as unknown as HTMLElement, avID: "source",
@@ -210,10 +211,10 @@ test("leaving automation settings while loading does not replace the next page o
     runInNewContext(compiled, {
         exports: methods,
         window: {siyuan: {config: {}, languages: {databaseAutomations: "Automations"}}},
-        require: (name: string) => ({
+        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "../../../util/fetch": {fetchSyncPost: () => new Promise(resolve => { complete = resolve; })},
             "../../wysiwyg/transaction": {transaction: () => assert.fail("cancel submitted a transaction")},
-        })[name] || {},
+        })[name] || {}),
     });
     const pending = methods.openAutomationMenu({protyle: {options: {}} as IProtyle, blockElement: {} as HTMLElement,
         avID: "database", menuElement: menu as unknown as HTMLElement, onResize() {}});

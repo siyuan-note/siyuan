@@ -1,4 +1,5 @@
 import {openConditionalColorsMenu} from "./conditionalColorMenu";
+import {hasAVCapability} from "./capabilities";
 import {openAutomationMenu} from "./automation";
 import {isTableLikeView} from "./viewType";
 import {transaction} from "../../wysiwyg/transaction";
@@ -1117,7 +1118,7 @@ export const openMenuPanel = (options: {
                                 const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
                                 addFilterGroup(data, path);
                                 const fields = getFieldsByData(data);
-                                const blockField = fields.find(f => f.type === "block") || fields.find(f => f.type !== "lineNumber");
+                                const blockField = fields.find(f => f.type === "block") || fields.find(f => hasAVCapability(f.type, "filterable"));
                                 if (blockField) {
                                     let target: IAVFilter[];
                                     if ("" === path) {

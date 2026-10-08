@@ -1,3 +1,4 @@
+import {isAVSelectType} from "./capabilities";
 import {hasAVRenderTemplateResult} from "./cellValue";
 
 export const updateAVTableColumnWidths = (view: IAVTable, widths: Record<string, string>) => {
@@ -39,7 +40,7 @@ export const getAVColumnTextMeasurer = (blockElement: HTMLElement) => {
 export const getAVColumnFitWidth = (name: string, type: TAVCol, values: string[],
                                     measureText = getEstimatedTextWidth, extraWidths: number[] = []) => {
     const headerWidth = measureText(name) + 42;
-    const contentPadding = ["select", "mSelect"].includes(type) ? 32 : 20;
+    const contentPadding = isAVSelectType(type) ? 32 : 20;
     const contentWidth = values.reduce((width, value, index) =>
         Math.max(width, measureText(value) + contentPadding + (extraWidths[index] || 0)), 0);
     return `${Math.ceil(Math.min(480, Math.max(64, headerWidth, contentWidth)))}px`;
@@ -63,7 +64,7 @@ export const getAVRelationColumnWidth = (fitWidth: string, type: TAVCol, primary
     // 表头为字段图标、排序箭头和内边距预留空间。
     const width = Math.max(parseFloat(fitWidth) || 64, nameWidth + 62);
     const minWidth = primary ? 240 : 64;
-    const maxWidth = primary ? 400 : ["relation", "rollup", "mAsset"].includes(type) ? 200 : 160;
+    const maxWidth = primary ? 400 : (type === "relation" || type === "rollup" || type === "mAsset") ? 200 : 160;
     return `${Math.min(maxWidth, Math.max(minWidth, width))}px`;
 };
 

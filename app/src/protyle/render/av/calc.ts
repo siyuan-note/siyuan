@@ -1,3 +1,4 @@
+import {isAVDateType} from "./capabilities";
 import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
@@ -345,7 +346,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             }
         }
     }
-    if (["number", "template"].includes(type) || rollupIsNumber) {
+    if ((type === "number" || type === "template") || rollupIsNumber) {
         calcItem({
             menu,
             protyle,
@@ -412,7 +413,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             blockID,
             target: calcElement
         });
-    } else if (["date", "created", "updated"].includes(type)) {
+    } else if (isAVDateType(type)) {
         calcItem({
             menu,
             protyle,
@@ -524,7 +525,7 @@ export const getCalcValue = (column: IAVColumn) => {
     }
     let resultCalc: any = column.calc.result.number;
     if (column.calc.operator === "Earliest" || column.calc.operator === "Latest" ||
-        (column.calc.operator === "Range" && ["date", "created", "updated"].includes(column.type))) {
+        (column.calc.operator === "Range" && isAVDateType(column.type))) {
         resultCalc = column.calc.result[column.type as "date"];
     } else if (column.calc.operator === "Template") {
         // 自定义模板统计：数字输出走 number，文本输出走 text

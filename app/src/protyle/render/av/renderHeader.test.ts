@@ -1,3 +1,4 @@
+import * as capabilities from "./capabilities";
 import {before, describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
@@ -57,7 +58,7 @@ describe("database default item templates", () => {
             "./contextFilterState": {getContextFilterKeyID: () => ""},
         };
         runInNewContext(compiled, {
-            module, exports: module.exports, require: (id: string) => mocks[id] || {},
+            module, exports: module.exports, require: (id: string) => id === "./capabilities" || id === "../capabilities" ? capabilities : (mocks[id] || {}),
             window: {siyuan: {languages: {_kernel: {}}, config: {editor: {spellcheck: false}}}},
         });
         const data = {

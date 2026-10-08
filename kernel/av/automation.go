@@ -63,12 +63,7 @@ func (view *AttributeView) visitAutomationValues(visit func(*Value)) {
 
 // AutomationEditableKey 排除依赖渲染计算的字段，触发器只观察实际存储的值。
 func AutomationEditableKey(typ KeyType) bool {
-	switch typ {
-	case KeyTypeBlock, KeyTypeText, KeyTypeNumber, KeyTypeDate, KeyTypeSelect, KeyTypeMSelect,
-		KeyTypeURL, KeyTypeEmail, KeyTypePhone, KeyTypeCheckbox, KeyTypeRelation, KeyTypeMAsset:
-		return true
-	}
-	return false
+	return GetKeyCapability(typ).Editable
 }
 
 // MatchesAutomationFilters 按存储的关联 ID 判断空值，仅关键词条件需要读取关联条目的文本。

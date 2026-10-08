@@ -214,10 +214,14 @@ test("attribute panel field rules preserve global defaults and reveal hidden fie
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const css = compileString(readFileSync("src/assets/scss/business/_custom.scss", "utf8")).css;
-    const columnSource = transpileModule(readFileSync(path.resolve(__dirname, "col.ts"), "utf8")
+    const capabilitySource = transpileModule(["capabilities.generated.ts", "capabilities.ts"].map(file =>
+        readFileSync(path.resolve(__dirname, file), "utf8")
+            .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")).join("\n"),
+    {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const columnSource = capabilitySource + transpileModule(readFileSync(path.resolve(__dirname, "col.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
-    const blockSource = transpileModule(readFileSync(path.resolve(__dirname, "blockAttr.ts"), "utf8")
+    const blockSource = capabilitySource + transpileModule(readFileSync(path.resolve(__dirname, "blockAttr.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const menuSource = transpileModule(readFileSync("src/menus/Menu.ts", "utf8")

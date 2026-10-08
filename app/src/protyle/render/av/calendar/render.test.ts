@@ -1,3 +1,4 @@
+import * as capabilities from "../capabilities";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {join} from "node:path";
@@ -62,7 +63,7 @@ test("calendar refreshes the current view after composition and captures the lat
     runInNewContext(transpileModule(readFileSync(join(__dirname, "render.ts"), "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
     }).outputText, {
-        exports: api, require: (name: string) => modules[name] || {},
+        exports: api, require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (modules[name] || {}),
         window: {siyuan: {config: {lang: "en"}, languages: {}}}, document: {activeElement: input},
     });
     await api.renderCalendar(block as unknown as HTMLElement, {disabled: true, options: {}} as IProtyle,
@@ -116,7 +117,7 @@ test("calendar omits empty fields while preserving zero, unchecked boxes and ren
     runInNewContext(transpileModule(readFileSync(join(__dirname, "render.ts"), "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
     }).outputText, {
-        exports: api, require: (name: string) => modules[name] || {},
+        exports: api, require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (modules[name] || {}),
         window: {siyuan: {config: {lang: "en"}, languages: {}}}, document: {activeElement: null},
     });
     await assert.rejects(api.renderCalendar({querySelector: (): null => null, removeAttribute() {}} as unknown as HTMLElement,
@@ -159,7 +160,7 @@ test("calendar without a date field renders its setup instead of reading an abse
     runInNewContext(transpileModule(readFileSync(join(__dirname, "render.ts"), "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
     }).outputText, {
-        exports, require: (name: string) => modules[name] || {},
+        exports, require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (modules[name] || {}),
         window: {siyuan: {config: {lang: "en"}, languages: {calendarSelectDateField: "Select date field"}}},
         document: {activeElement: null},
     });
@@ -212,7 +213,7 @@ test("calendar refresh keeps selected event segments and blank clicks dismiss th
     runInNewContext(transpileModule(readFileSync(join(__dirname, "render.ts"), "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
     }).outputText, {
-        exports, require: (name: string) => modules[name] || {},
+        exports, require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (modules[name] || {}),
         window: {siyuan: {config: {lang: "en"}, languages: {}, menus: {menu: {remove() { menuClosed++; }}}}},
         document: {activeElement: null},
     });
@@ -289,7 +290,7 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
         runInNewContext(transpileModule(readFileSync(join(__dirname, "render.ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
         }).outputText, {
-            exports, require: (name: string) => modules[name] || {},
+            exports, require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (modules[name] || {}),
             window: {siyuan: {isPublish: mode === "publish", config: {lang: "en"}, languages: {},
                 menus: {menu: {remove() { menusClosed++; }}}},
             setTimeout: (callback: () => void) => { startDrag = callback; return 1; }, addEventListener() {}},
@@ -401,7 +402,7 @@ test("calendar edit-mode changes refresh controls and stale actions cannot creat
             "../../mobile/util/mobileBars": {pauseMobileBarsScroll: () => paused++},
         };
         const context = {
-            require: (name: string) => modules[name] || {},
+            require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (modules[name] || {}),
             window: {siyuan: {config: {lang: "en"}, languages: {}, menus: {menu: {remove() {}}},
                 mobile: {editor: mobile ? {protyle} : undefined}}},
             document: {activeElement: null as Element | null},

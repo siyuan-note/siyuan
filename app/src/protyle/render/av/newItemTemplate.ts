@@ -1,3 +1,4 @@
+import {isAVNewItemTemplateType, isAVSelectType} from "./capabilities";
 import {genFieldValue, getValueInputHTML, openFieldSelectMenu, getRelationOptions, renderRelationFieldValue, openFieldRelationMenu} from "./fieldValueEditor";
 import {getCalendarCreationDate} from "./calendar/state";
 import {Constants} from "../../../constants";
@@ -45,7 +46,7 @@ const getFieldsHTML = (fields: IAVColumn[], itemTemplate: IAVNewItemTemplate) =>
     const fieldValue = itemTemplate.fieldValues?.[column.id];
     const icon = column.icon ? unicode2Emoji(column.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`;
     const selected = fieldValue?.value?.mSelect?.map(item => item.content) || [];
-    const selectAttrs = ["select", "mSelect"].includes(column.type) ?
+    const selectAttrs = isAVSelectType(column.type) ?
         ` data-role="field-value" data-value-type="${column.type}" data-selected="${escapeAttr(JSON.stringify(selected))}"` : "";
     return `<div class="block__icons av__row" data-field-id="${column.id}">
     <div class="block__logo block__logo--icon" title="${escapeAttr(column.name)}">${icon}<span>${escapeHtml(column.name)}</span></div>
@@ -302,7 +303,7 @@ export const openNewItemTemplateDialog = (options: {
 }) => {
     const allFields = getFieldsByData(options.data);
     const primaryKey = allFields.find(item => item.type === "block");
-    const fields = allFields.filter(item => ["text", "number", "date", "select", "mSelect", "url", "email", "phone", "mAsset", "checkbox", "relation"].includes(item.type));
+    const fields = allFields.filter(item => isAVNewItemTemplateType(item.type));
     const templates = cloneTemplates(options.data.newItemTemplates);
     const fieldsByID = new Map(fields.map(item => [item.id, item]));
     templates.forEach(itemTemplate => {

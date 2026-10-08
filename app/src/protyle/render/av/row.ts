@@ -1,3 +1,4 @@
+import {isAVTimestampType} from "./capabilities";
 import {getConditionalItemStyle, getConditionalCellStyle} from "./conditionalColor";
 import {isTableLikeView} from "./viewType";
 import {updateFrozenColumns} from "./frozenColumns";
@@ -433,7 +434,7 @@ export const insertAttrViewBlockAnimation = (options: {
         previousElement = getPreviousTableRow(options.blockElement.querySelector(groupQuery + ".av__row--util"));
     }
     const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.groupID}"] `);
-    if (bodyElement && ["updated", "created"].includes(bodyElement.getAttribute("data-dtype")) &&
+    if (bodyElement && isAVTimestampType(bodyElement.getAttribute("data-dtype")) &&
         bodyElement.getAttribute("data-content") !== "_@today@_") {
         previousElement = getPreviousTableRow(
             options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__row--util'));

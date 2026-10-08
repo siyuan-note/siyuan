@@ -1,3 +1,4 @@
+import {isAVTextType} from "./capabilities";
 import {fetchPost} from "../../../util/fetch";
 import {addCol, getColIconByType} from "./col";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
@@ -714,7 +715,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
             event.stopPropagation();
             event.preventDefault();
             break;
-        } else if (["text", "url", "email", "phone", "block"].includes(type) &&
+        } else if ((isAVTextType(type) && type !== "template") &&
             (target.querySelector(":scope > .av__celltext--template, :scope > .av__cellprimary > .av__celltext--template") ||
                 (type === "text" && target.querySelector(":scope > .av__celltext")))) {
             popTextCell(protyle, [target], type as TAVCol);

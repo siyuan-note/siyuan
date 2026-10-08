@@ -1,3 +1,4 @@
+import {isAVReadonlyType} from "./capabilities";
 export interface IAVCellPoint {
     groupID: string;
     rowID: string;
@@ -211,7 +212,7 @@ export const restoreAVCellSelection = (blockElement: HTMLElement) => {
         }
         if (groupID === selection.focus.groupID && rowElement.dataset.id === selection.focus.rowID &&
             cellElement.dataset.colId === selection.focus.colID &&
-            !["template", "rollup", "lineNumber", "created", "updated"].includes(cellElement.dataset.dtype)) {
+            !isAVReadonlyType(cellElement.dataset.dtype)) {
             cellElement.insertAdjacentHTML("beforeend",
                 `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
         }

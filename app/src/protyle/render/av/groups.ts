@@ -1,3 +1,4 @@
+import {hasAVCapability, isAVDateType, isAVSelectType} from "./capabilities";
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
 import {escapeHtml} from "../../../util/escape";
@@ -41,7 +42,7 @@ export const setGroupMethod = async (options: {
     const groupByRendered = column?.type === "mAsset" && Boolean(column.renderTemplate?.trim());
     const data: Record<string, unknown> = column ? {
         field: options.fieldId,
-        method: column.type === "number" ? 1 : (["date", "updated", "created"].includes(column.type) ? 2 : 0),
+        method: column.type === "number" ? 1 : (isAVDateType(column.type) ? 2 : 0),
         order: 0,
         range: column.type === "number" ? {
             numStart: 0,
@@ -79,7 +80,7 @@ export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup, viewT
     ${(!group || !group.field) ? selectHTML : ""}
 </button>`;
     columns.forEach(item => {
-        if (["rollup", "lineNumber"].includes(item.type) || (item.type === "mAsset" && !item.renderTemplate?.trim())) {
+        if (!hasAVCapability(item.type, "groupable") || (item.type === "mAsset" && !item.renderTemplate?.trim())) {
             return;
         }
         html += `<button class="b3-menu__item" data-id="${item.id}" data-type="setGroupMethod">
@@ -201,7 +202,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
         column = columns.find(item => item.id === view.group.field);
         const groupByRendered = view.group.valueSource === "rendered";
         if (view.groups?.length > 0) {
-            const disabledDrag = !groupByRendered && ["date", "created", "updated"].includes(column.type);
+            const disabledDrag = !groupByRendered && isAVDateType(column.type);
             let showCount = 0;
             view.groups.forEach(item => {
                 if (item.groupHidden === 0) {
@@ -243,7 +244,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
         <option value="rendered" ${groupByRendered ? "selected" : ""}>${window.siyuan.languages.templateRenderedValue}</option>
     </select>
 </label>` : "";
-        html = `${valueSourceHTML}<button class="b3-menu__item${!groupByRendered && ["date", "updated", "created"].includes(column.type) ? "" : " fn__none"}" data-type="goGroupsDate">
+        html = `${valueSourceHTML}<button class="b3-menu__item${!groupByRendered && isAVDateType(column.type) ? "" : " fn__none"}" data-type="goGroupsDate">
     <span class="b3-menu__label">${window.siyuan.languages.date}</span>
     <span class="b3-menu__accelerator">${getLanguageByIndex(view.group.method, "date")}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
@@ -253,7 +254,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
     <span class="b3-menu__accelerator">${(view.group.range && typeof view.group.range.numStart === "number") ? `${view.group.range.numStart} - ${view.group.range.numEnd}` : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<button class="b3-menu__item${!groupByRendered && ["checkbox", "rollup", "mAsset"].includes(column.type) ? " fn__none" : ""}" data-type="goGroupsSort">
+<button class="b3-menu__item${!groupByRendered && (column.type === "checkbox" || column.type === "rollup" || column.type === "mAsset") ? " fn__none" : ""}" data-type="goGroupsSort">
     <span class="b3-menu__label">${window.siyuan.languages.sort}</span>
     <span class="b3-menu__accelerator">${getLanguageByIndex(view.group.order, "sort")}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
@@ -333,15 +334,15 @@ export const bindGroupsEvent = (options: {
             const column = getFieldsByData(options.data).find(item => item.id === options.data.view.group.field);
             const columnType = column?.type || "text";
             options.data.view.group.method = columnType === "number" ? 1 :
-                (["date", "updated", "created"].includes(columnType) ? 2 : 0);
+                (isAVDateType(columnType) ? 2 : 0);
             if (columnType === "number") {
                 options.data.view.group.range = {numStart: 0, numEnd: 1000, numStep: 100};
             }
-            if (["select", "mSelect"].includes(columnType)) {
+            if (isAVSelectType(columnType)) {
                 options.data.view.group.order = 3;
             } else if (columnType === "checkbox") {
                 options.data.view.group.order = 2;
-            } else if (["date", "updated", "created"].includes(columnType) &&
+            } else if (isAVDateType(columnType) &&
                 ![0, 1].includes(options.data.view.group.order)) {
                 options.data.view.group.order = 0;
             }
@@ -414,8 +415,8 @@ export const goGroupsSort = (options: {
     }
     const blockID = options.blockElement.getAttribute("data-node-id");
     const column = getFieldsByData(options.data).find(item => item.id === options.data.view.group.field);
-    (options.data.view.group.valueSource === "rendered" ? [2, 0, 1] : (["created", "date", "created", "updated"].includes(column.type) ? [0, 1] : (
-        ["mSelect", "select"].includes(column.type) ? [3, 2, 0, 1] : [2, 0, 1]
+    (options.data.view.group.valueSource === "rendered" ? [2, 0, 1] : (isAVDateType(column.type) ? [0, 1] : (
+        isAVSelectType(column.type) ? [3, 2, 0, 1] : [2, 0, 1]
     ))).forEach((item) => {
         const label = getLanguageByIndex(item, "sort");
         menu.addItem({

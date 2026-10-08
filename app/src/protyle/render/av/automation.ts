@@ -1,3 +1,4 @@
+import {hasAVCapability, isAVSelectType} from "./capabilities";
 import type {AVAttributeViewData, AVAutomationActionInput, AVAutomationRuleInput, AVAutomationValueInput} from "../../../types/api";
 import {Menu} from "../../../plugin/Menu";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
@@ -21,10 +22,9 @@ interface AutomationRule extends Omit<AVAutomationRuleInput, "actions" | "condit
     actions: AutomationAction[];
 }
 
-const editableTypes = ["block", "text", "number", "date", "select", "mSelect", "url", "email", "phone", "checkbox", "relation", "mAsset"];
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 const fieldsOf = (database: AVAttributeViewData): IAVColumn[] => (database?.keyValues || [])
-    .filter(item => item?.key && editableTypes.includes(item.key.type))
+    .filter(item => item?.key && hasAVCapability(item.key.type, "editable"))
     .map(item => ({...item.key, renderTemplate: ""}));
 
 const compatibleFields = (database: AVAttributeViewData, field: IAVColumn): IAVColumn[] => fieldsOf(database)
@@ -241,7 +241,7 @@ export const openAutomationMenu = async (options: {
     };
     const mountValue = (host: HTMLElement, field: IAVColumn, value: AutomationValue) => {
         const selected = value.value?.mSelect?.map(item => item.content) || [];
-        host.innerHTML = ["select", "mSelect"].includes(field.type) ?
+        host.innerHTML = isAVSelectType(field.type) ?
             `<button type="button" class="b3-button b3-button--cancel" data-role="field-value" data-value-type="${field.type}" data-selected="${escapeAttr(JSON.stringify(selected))}">${getSelectedOptionsHTML(field, selected) || lang.select}</button>` :
             getValueInputHTML(field, {mode: "static", value: value.value});
         const input = host.querySelector<HTMLElement>('[data-role="field-value"]');
@@ -269,7 +269,7 @@ export const openAutomationMenu = async (options: {
         } else if (field.type === "relation") {
             getRelationOptions(field, choices => renderRelationFieldValue(input, choices));
             input.addEventListener("click", () => openFieldRelationMenu(input, field));
-        } else if (["select", "mSelect"].includes(field.type)) {
+        } else if (isAVSelectType(field.type)) {
             input.addEventListener("click", () => openFieldSelectMenu(input, field));
         }
     };

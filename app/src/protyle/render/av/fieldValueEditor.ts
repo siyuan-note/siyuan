@@ -1,3 +1,4 @@
+import {isAVSelectType} from "./capabilities";
 import {Menu} from "../../../plugin/Menu";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
@@ -125,7 +126,7 @@ export const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFiel
         const checked = value?.checkbox?.checked || false;
         return `<button class="fn__flex-center" data-role="field-value" data-value-type="checkbox" aria-label="${escapeAttr(column.name || window.siyuan.languages.checkbox)}" aria-pressed="${checked}" type="button" style="background:transparent;border:0;color:inherit;padding:0"><svg class="av__checkbox"><use xlink:href="#icon${checked ? "Check" : "Uncheck"}"></use></svg></button>`;
     }
-    if (["select", "mSelect"].includes(column.type)) {
+    if (isAVSelectType(column.type)) {
         const selected = value?.mSelect?.map(item => item.content) || [];
         return getSelectedOptionsHTML(column, selected);
     }

@@ -40,7 +40,6 @@ import {getFieldIdByCellElement, getRowHTML} from "../render/av/row";
 import {setFold} from "./blockFold";
 import {removeFoldHeading} from "./heading";
 import {
-    AV_PASTE_READONLY_TYPES,
     compactAVCellOperations,
     getAVPasteCellValue,
     getAVPasteContentRowCount,
@@ -53,6 +52,7 @@ import {
     shouldShowAVPasteSkeleton,
     showAVPasteSkeleton,
 } from "../render/av/paste";
+import {isAVReadonlyType} from "../render/av/capabilities";
 import {getAVColumnFitWidth, getAVColumnTextMeasurer} from "../render/av/columnWidth";
 import {cloneAVCellValueSnapshot} from "../render/av/cellValue";
 import {Dialog} from "../../dialog";
@@ -380,7 +380,7 @@ const pasteAVMatrix = async (options: {
         const inferredType = options.header ? inferAVPasteColumnType(sourceCellValues) : "text";
         const currentColumn = availableColumns[sourceIndex];
         if (currentColumn) {
-            const readonly = AV_PASTE_READONLY_TYPES.has(currentColumn.type);
+            const readonly = isAVReadonlyType(currentColumn.type);
             const oldColumn = {...currentColumn};
             const nextName = options.header && headerName && !readonly ? headerName : currentColumn.name;
             const nextType = options.header && inferableKeyIDs.has(currentColumn.id) &&

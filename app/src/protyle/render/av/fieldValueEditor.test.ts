@@ -1,3 +1,4 @@
+import * as capabilities from "./capabilities";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -10,7 +11,7 @@ test("numeric field editors accept decimal steps and preserve decimal and empty 
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {
         exports: methods,
-        require: (name: string) => name === "../../../util/escape" ? {escapeAttr: String} : {},
+        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (name === "../../../util/escape" ? {escapeAttr: String} : {}),
     });
     const column = {type: "number"} as IAVColumn;
     for (const content of ["1.25", "-0.125", "1e-7", "0", ""]) {

@@ -146,7 +146,7 @@ const runElectron = async () => {
     let exitCode = 0;
     try {
         const ts = require("typescript");
-        const sources = Object.fromEntries(["blockAttr", "attributeValue", "cellValue", "blockIcon", "../../util/hasClosest"].map(name => [
+        const sources = Object.fromEntries(["blockAttr", "attributeValue", "cellValue", "blockIcon", "capabilities", "capabilities.generated", "../../util/hasClosest"].map(name => [
             name === "../../util/hasClosest" ? name : "./" + name,
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText,

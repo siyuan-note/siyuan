@@ -1,4 +1,5 @@
 import {isTableLikeView} from "./viewType";
+import {hasAVCapability} from "./capabilities";
 import {createEmptyAVValue} from "./attributeValue";
 import {popTextCell, renderCell, renderCellAttr, updateCellsValue} from "./cell";
 import {getAVData, getAVSelectedItemIDs} from "./virtualScroll";
@@ -8,27 +9,12 @@ import {cloneAVCellValueSnapshot} from "./cellValue";
 import {renderAVRichTextElements} from "./richText";
 import {openAVBindBlock} from "./bindBlock";
 
-const EDITABLE_FIELD_TYPES: TAVCol[] = [
-    "block",
-    "text",
-    "number",
-    "select",
-    "mSelect",
-    "date",
-    "checkbox",
-    "url",
-    "email",
-    "phone",
-    "mAsset",
-    "relation",
-];
-
 export const getEditableAVFields = (blockElement: HTMLElement) => {
     const data = getAVData(blockElement);
     if (!data) {
         return [];
     }
-    return getFieldsByData(data).filter((field) => EDITABLE_FIELD_TYPES.includes(field.type));
+    return getFieldsByData(data).filter((field) => hasAVCapability(field.type, "editable"));
 };
 
 const findItemCell = (view: IAVView, viewType: TAVView, itemID: string, fieldIndex: number): IAVCell | undefined => {

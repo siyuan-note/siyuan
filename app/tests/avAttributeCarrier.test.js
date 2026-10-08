@@ -213,7 +213,7 @@ const runElectron = async () => {
         const extract = (name, names) => {
             const text = readFileSync(path.join(root, name + ".ts"), "utf8");
             if (!names) {
-                return text;
+                return text.replace(/^import [\s\S]*?;\r?\n/gm, "");
             }
             const source = ts.createSourceFile(name, text, ts.ScriptTarget.Latest, true);
             const statements = source.statements.filter(statement => ts.isVariableStatement(statement) &&
@@ -222,7 +222,7 @@ const runElectron = async () => {
             return statements.map(statement => "export " + statement.getText(source).replace(/^export /, "")).join("\n");
         };
         // 执行实际渲染、菜单请求和事务组装函数，仅隔离网络、富文本显示与编辑器外壳。
-        const sources = [extract("cellValue"), extract("dragFillValue", ["rebindAVCellValue"]),
+        const sources = [extract("capabilities.generated"), extract("capabilities"), extract("cellValue"), extract("dragFillValue", ["rebindAVCellValue"]),
             extract("blockAttr", ["renderAVAttribute", "renderAttributeViewBacklinks"]),
             extract("openMenuPanel", ["openMenuPanel"]), extract("cell", ["updateCellsValue"]),
             extract("primaryFocus", ["focusDatabasePrimary"]),
@@ -238,7 +238,9 @@ const runElectron = async () => {
                 Object.assign(window, exports);
             }
         })()`);
-        await win.webContents.executeJavaScript(`(${runCases.toString()})()`);
+        const failure = await win.webContents.executeJavaScript(`Promise.resolve().then(() =>
+            (${runCases.toString()})()).then(() => null, error => error.stack || String(error))`);
+        assert.equal(failure, null);
         console.log("Attribute carrier cases passed");
     } catch (error) {
         console.error(error);

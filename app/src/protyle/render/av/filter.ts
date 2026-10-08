@@ -1,3 +1,4 @@
+import {getAVDefaultFilterOperator, hasAVCapability, hasAVScalarContent, isAVDateType, isAVTextType} from "./capabilities";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
@@ -36,18 +37,7 @@ const getSetFiltersOperation = (avID: string, blockID: string, data: IAVFilter[]
 };
 
 export const getDefaultOperatorByType = (type: TAVCol, isRollup = false) => {
-    if (type === "relation" && !isRollup) {
-        return "Contains any item";
-    }
-    if (["select", "number", "date", "created", "updated"].includes(type)) {
-        return "=";
-    }
-    if (["checkbox"].includes(type)) {
-        return "=";
-    }
-    if (["rollup", "relation", "mAsset", "text", "mSelect", "url", "block", "email", "phone", "template"].includes(type)) {
-        return "Contains";
-    }
+    return getAVDefaultFilterOperator(type, isRollup);
 };
 
 // getEditableFilters 返回可直接增删改的叶子/分组数组。
@@ -189,7 +179,7 @@ export const addFilter = (options: {
     }
     getFieldsByData(options.data).forEach((column) => {
         // 行号类型列不可筛选
-        if (column.type !== "lineNumber") {
+        if (hasAVCapability(column.type, "filterable")) {
             menu.addItem({
                 label: column.name,
                 iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,
@@ -295,7 +285,7 @@ export const getFiltersHTML = (data: IAV, single = false) => {
         const iconHTML = colData.icon
             ? unicode2Emoji(colData.icon, "b3-menu__icon", true)
             : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`;
-        const fieldOptions = fields.filter((f: IAVColumn) => f.type !== "lineNumber").map((f: IAVColumn) =>
+        const fieldOptions = fields.filter((f: IAVColumn) => hasAVCapability(f.type, "filterable")).map((f: IAVColumn) =>
             `<option value="${f.id}" ${f.id === node.column ? "selected" : ""}>${escapeHtml(f.name)}</option>`
         ).join("");
         const fieldSelect = `<select class="b3-select fn__flex-1 av__filter-field" data-type="fieldSelect" data-path="${path}">${fieldOptions}</select>`;
@@ -627,7 +617,7 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     let valueHTML = "";
     let extraHTML = ""; // 放在 valueContainer 外的附加 HTML（如 select 下拉面板，避免影响行宽）
     const filterValue = getFilterCellValue(filter);
-    if (["text", "url", "block", "email", "phone", "template"].includes(valueType)) {
+    if (isAVTextType(valueType)) {
         const content = valueType === "template" && filterValue && filterValue.type !== "template" ?
             getCellValueText(filterValue) : filterValue?.[valueType as "text"]?.content || "";
         valueHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1" value="${escapeFilterValue(content)}" data-type="filterValue" data-path="${path}">`;
@@ -640,7 +630,7 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     } else if (valueType === "checkbox") {
         const isChecked = filterValue?.checkbox?.checked;
         valueHTML = `<select class="b3-select" data-type="filterValue" data-path="${path}"><option value="true" ${isChecked ? "selected" : ""}>${window.siyuan.languages.checked}</option><option value="false" ${!isChecked ? "selected" : ""}>${window.siyuan.languages.unchecked}</option></select>`;
-    } else if (["date", "created", "updated"].includes(valueType)) {
+    } else if (isAVDateType(valueType)) {
         const dateHTML = genInlineDateHTML(filter, valueType, path);
         valueHTML = dateHTML.valueHTML;
         const endpointSelect = valueType === "date"
@@ -836,11 +826,11 @@ const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: s
             const input = rowElement.querySelector('[data-type="filterValue"]') as HTMLInputElement;
             newValue = input?.value ? genCellValue("relation", input.value) : genEmptyCellValue("relation");
         }
-    } else if (["text", "url", "block", "email", "phone", "template", "mAsset", "number"].includes(valueType)) {
+    } else if (hasAVScalarContent(valueType)) {
         const input = rowElement.querySelector('[data-type="filterValue"]') as HTMLInputElement;
         const val = input?.value || "";
         newValue = val ? genCellValue(valueType, val) : genEmptyCellValue(valueType);
-    } else if (["date", "created", "updated"].includes(valueType)) {
+    } else if (isAVDateType(valueType)) {
         // 修正点①：用 data-type 精确定位绝对日期 input
         const dateTypeSel = rowElement.querySelector('[data-type="dateType"]') as HTMLSelectElement;
         const isRelative = dateTypeSel?.value === "custom";
@@ -1148,7 +1138,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             const {type: valueType, isRollup} = resolveFilterValueType(filter, colData);
             const newOp = (target as HTMLSelectElement).value;
             const oldOp = filter.operator;
-            const structureChange = (["date", "created", "updated"].includes(valueType) &&
+            const structureChange = (isAVDateType(valueType) &&
                 ((newOp === "Is between") !== (oldOp === "Is between"))) ||
                 ((newOp === "Is empty" || newOp === "Is not empty") !== (oldOp === "Is empty" || oldOp === "Is not empty")) ||
                 (valueType === "relation" && (!isRollup || isRelationRollupColumn(colData)) &&

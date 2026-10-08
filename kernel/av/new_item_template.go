@@ -456,12 +456,7 @@ func normalizeNewItemTemplateValue(value *Value, key *Key) (*Value, error) {
 }
 
 func isNewItemTemplateEditableKeyType(keyType KeyType) bool {
-	switch keyType {
-	case KeyTypeText, KeyTypeNumber, KeyTypeDate, KeyTypeSelect, KeyTypeMSelect, KeyTypeURL, KeyTypeEmail,
-		KeyTypePhone, KeyTypeMAsset, KeyTypeCheckbox, KeyTypeRelation:
-		return true
-	}
-	return false
+	return GetKeyCapability(keyType).Editable && keyType != KeyTypeBlock
 }
 
 func cloneNewItemTemplate(itemTemplate *NewItemTemplate) *NewItemTemplate {

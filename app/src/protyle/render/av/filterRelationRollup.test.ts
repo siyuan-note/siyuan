@@ -1,3 +1,4 @@
+import * as capabilities from "./capabilities";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -16,7 +17,7 @@ const createEditor = () => {
         exports: methods,
         window: {siyuan: {languages: new Proxy({}, {get: (_, name) => String(name)})}},
         document: {createElement: () => ({style: {}, offsetWidth: 10}), body: {appendChild() {}, removeChild() {}}},
-        require: (name: string) => ({
+        require: (name: string) => name === "./capabilities" || name === "../capabilities" ? capabilities : (({
             "./view": {getFieldsByData: () => fields},
             "./col": {getColIconByType: () => "iconDatabase"},
             "../../../util/escape": {escapeAttr: String, escapeHtml: String},
@@ -27,7 +28,7 @@ const createEditor = () => {
                     id: "staff", type: "relation", relation: {avID: "employees-db"},
                 }}]}} : {rows: {values: [{blockID: "alice", block: {content: "Alice"}}]}}};
             }},
-        })[name] || {},
+        })[name] || {}),
     });
     const data = {view: {filters: [{column: rollup.id, operator: "Contains any item", value: {
         type: "rollup", rollup: {contents: [{type: "relation", relation: {blockIDs: ["alice"], contents: []}}]},

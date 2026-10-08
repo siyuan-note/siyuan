@@ -1,3 +1,4 @@
+import {isAVSelectType} from "./capabilities";
 import {renderCalendar} from "./calendar/render";
 import {isFoldedRenderContent} from "../foldedContent";
 import {getCalendarRequestRange} from "./calendar/state";
@@ -303,7 +304,7 @@ style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || 
 
 export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     let nameHTML = "";
-    if (["mSelect", "select"].includes(group.groupValue.type)) {
+    if (isAVSelectType(group.groupValue.type)) {
         group.groupValue.mSelect.forEach((item) => {
             nameHTML += `<span class="b3-chip" style="${getAVColorStyle(item)}">${escapeHtml(item.content)}</span>`;
         });

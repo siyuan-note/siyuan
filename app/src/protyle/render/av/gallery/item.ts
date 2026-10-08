@@ -1,3 +1,4 @@
+import {isAVTimestampType} from "../capabilities";
 import {genCellValue, getTypeByCellElement, renderCell, renderCellAttr} from "../cell";
 import {fetchPost} from "../../../../util/fetch";
 import {setPage} from "../row";
@@ -20,7 +21,7 @@ export const insertGalleryItemAnimation = (options: {
         sideItemElement = options.blockElement.querySelector(groupQuery + ".av__gallery-add").previousElementSibling;
     }
     const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.groupID}"] `);
-    if (bodyElement && ["updated", "created"].includes(bodyElement.getAttribute("data-dtype")) &&
+    if (bodyElement && isAVTimestampType(bodyElement.getAttribute("data-dtype")) &&
         bodyElement.getAttribute("data-content") !== "_@today@_") {
         sideItemElement = options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__gallery-add')?.previousElementSibling;
         if (!sideItemElement) {

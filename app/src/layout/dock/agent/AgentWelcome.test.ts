@@ -11,7 +11,7 @@ const compile = (name: string) => transpileModule(readFileSync(`src/layout/dock/
 const renderer = compile("AgentMessageRenderer");
 const chatSource = compile("AgentChat");
 const loadRenderer = (languages: Record<string, string>) => {
-    const exports = {} as {renderWelcomeHTML: (hasModel?: boolean) => string};
+    const exports = {} as {renderWelcomeHTML: (hasModel?: boolean, greetingKey?: string) => string};
     runInNewContext(renderer, {exports, require: () => ({escapeHtml, escapeHtmlTextAndAttr}), window: {siyuan: {languages}}});
     return exports.renderWelcomeHTML;
 };
@@ -37,6 +37,33 @@ test("plugin suggestion escapes its label and click payload", () => {
     assert.ok(html.includes('data-text="Develop a plugin for &quot;A&amp;B&quot; &lt;test&gt;">Develop a plugin for &quot;A&amp;B&quot; &lt;test&gt;</div>'));
 });
 
+test("dynamic greetings preserve two lines and escape localized text with and without a model", () => {
+    const render = loadRenderer({agentWelcomeFirst1: 'Hi <friend> & "you"\nLet\'s begin', agentWelcomeGreeting: "Fallback"});
+    for (const hasModel of [true, false]) {
+        assert.ok(render(hasModel, "agentWelcomeFirst1").includes(
+            '<div class="agent-welcome__greeting">' + escapeHtmlTextAndAttr('Hi <friend> & "you"\nLet\'s begin') + "</div>"));
+        assert.ok(render(hasModel, "missing").includes('class="agent-welcome__greeting">Fallback</div>'));
+    }
+});
+
+test("every locale supplies the complete two-line greeting groups", () => {
+    for (const file of readdirSync("appearance/langs").filter(file => file.endsWith(".json"))) {
+        const languages = JSON.parse(readFileSync(`appearance/langs/${file}`, "utf8"));
+        const render = loadRenderer(languages);
+        for (const group of ["First", "Return", "Morning", "Day", "Evening", "Late"]) {
+            const count = group === "First" || group === "Return" ? 2 : 5;
+            for (let i = 1; i <= count; i++) {
+                const key = `agentWelcome${group}${i}`;
+                assert.equal(typeof languages[key], "string", `${file}: ${key}`);
+                assert.equal(languages[key].split("\n").length, 2, `${file}: ${key}`);
+                assert.ok(languages[key].split("\n").every((line: string) => line.trim()), `${file}: ${key}`);
+                assert.ok(render(true, key).includes(escapeHtmlTextAndAttr(languages[key])), `${file}: ${key}`);
+                assert.ok(render(false, key).includes(escapeHtmlTextAndAttr(languages[key])), `${file}: ${key}`);
+            }
+        }
+    }
+});
+
 test("plugin suggestion uses the existing localized message sending path", async () => {
     const text = "帮我开发一个插件";
     const languages = {agentExample4: text};
@@ -60,6 +87,7 @@ test("plugin suggestion uses the existing localized message sending path", async
     const chat = Object.create(exports.AgentChat.prototype);
     Object.assign(chat, {
         modelOptions: [{id: "model"}], entries: [], composer: {},
+        welcomeGreeting: {getKey: () => ""},
         messagesContainer: {innerHTML: "", querySelectorAll: () => [example]},
         getSelectedModel: () => "model",
         beginSessionRun: () => ({sessionID: "session", controller: {signal: {}}}),

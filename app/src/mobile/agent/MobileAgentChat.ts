@@ -8,12 +8,41 @@ import {showMessage} from "../../dialog/message";
 import {sendNotification} from "../../plugin/platformUtils";
 import {isDisabledFeature} from "../../protyle/util/compatibility";
 import {openDock} from "../dock/util";
+import {MOBILE_SIDEBAR_SWIPING_CLASS} from "../util/touchPanelGesture";
 
 let app: App | undefined;
 let agentChat: AgentChat | undefined;
 let rootElement: HTMLElement | undefined;
 let detachedRoot: DocumentFragment | undefined;
 let unread: AgentChatNotification | undefined;
+let welcomeObserver: MutationObserver | undefined;
+let welcomePanel: HTMLElement | undefined;
+let welcomeSidebar: HTMLElement | undefined;
+
+const observeWelcomeVisibility = (panel: HTMLElement) => {
+    const sidebar = panel.closest(".side-panel") as HTMLElement | null;
+    if (!sidebar) {
+        return;
+    }
+    const update = () => {
+        const transform = sidebar.style.transform;
+        // 手势中的临时位移不改变访问状态；只响应确认展开、关闭和页签切换。
+        if (sidebar.classList.contains(MOBILE_SIDEBAR_SWIPING_CLASS) || (transform && transform !== "translateX(0px)")) {
+            return;
+        }
+        agentChat?.setWelcomeVisible(Boolean(rootElement?.isConnected) && transform === "translateX(0px)" &&
+            !panel.classList.contains("fn__none"));
+    };
+    if (welcomePanel !== panel || welcomeSidebar !== sidebar) {
+        welcomeObserver?.disconnect();
+        welcomePanel = panel;
+        welcomeSidebar = sidebar;
+        welcomeObserver = new MutationObserver(update);
+        welcomeObserver.observe(sidebar, {attributes: true, attributeFilter: ["style", "class"]});
+        welcomeObserver.observe(panel, {attributes: true, attributeFilter: ["class"]});
+    }
+    update();
+};
 
 const updateMenuStatus = () => {
     const item = document.getElementById("menuAgentChat");
@@ -92,6 +121,7 @@ export const activateMobileAgent = (currentApp: App, element: HTMLElement) => {
     if (rootElement?.parentElement !== element) {
         element.appendChild(rootElement!);
     }
+    observeWelcomeVisibility(element);
     unread = undefined;
     updateMenuStatus();
 };

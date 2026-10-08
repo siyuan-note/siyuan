@@ -59,6 +59,7 @@ import {getAgentDefaultModelID, getUsableAgentModels} from "./agentModel";
 import {AgentScrollStateMode, resolveAgentScrollState} from "./AgentScrollState";
 import {AgentSessionRun, AgentSessionRuns} from "./AgentSessionRuns";
 import {fullscreen} from "../../../protyle/breadcrumb/action";
+import {AgentWelcomeGreeting} from "./AgentWelcomeGreeting";
 
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
@@ -189,6 +190,8 @@ type AgentSessionRunViewState = {
 type ManagedAgentSessionRun = AgentSessionRun<PendingAgentInteraction, ISSEResult, AgentSessionRunViewState>;
 
 export class AgentChat extends Model {
+    private welcomeGreeting = new AgentWelcomeGreeting();
+    private welcomeObserver: IntersectionObserver;
     private host: AgentChatHost;
     private panelElement: HTMLElement;
     private messagesContainer: HTMLElement;
@@ -327,6 +330,27 @@ export class AgentChat extends Model {
             }
         });
         this.settingDialogObserver.observe(document.body, {childList: true, subtree: false});
+        // 桌面只观察聊天面板；移动端由侧栏确认展开状态驱动，避免将滑动预览记作打开。
+        if (!host.mobile) {
+            this.welcomeObserver = new IntersectionObserver(entries => {
+                const entry = entries[entries.length - 1];
+                this.setWelcomeVisible(entry.isIntersecting && entry.intersectionRatio >= 0.01 &&
+                    entry.intersectionRect.width > 0 && entry.intersectionRect.height > 0);
+            }, {threshold: 0.01});
+            this.welcomeObserver.observe(this.panelElement);
+        }
+    }
+
+    public destroy() {
+        this.welcomeObserver?.disconnect();
+        super.destroy();
+    }
+
+    public setWelcomeVisible(visible: boolean) {
+        if (this.welcomeGreeting.setVisible(visible, this.entries.length === 0) &&
+            this.messagesContainer.querySelector(".agent-welcome")) {
+            this.showWelcome();
+        }
     }
 
     private checkConfigChangedHandler = () => {
@@ -803,7 +827,7 @@ export class AgentChat extends Model {
     private showWelcome() {
         this.destroyEditingComposer();
         const hasModel = this.modelOptions.length > 0;
-        this.messagesContainer.innerHTML = renderWelcomeHTML(hasModel);
+        this.messagesContainer.innerHTML = renderWelcomeHTML(hasModel, this.welcomeGreeting.getKey(this.sessionId));
         if (!hasModel) {
             // 无模型：绑定「去配置」按钮，点击打开设置 - 人工智能面板。
             const goBtn = this.messagesContainer.querySelector(".agent-welcome__go-setting");

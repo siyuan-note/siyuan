@@ -896,7 +896,7 @@ func sortAttributeViewGroup(avID, blockID, previousGroupID, groupID string) (err
 			break
 		}
 	}
-	view.Groups = util.InsertElem(view.Groups, previousIndex, groupView)
+	view.Groups = slices.Insert(view.Groups, previousIndex, groupView)
 
 	for i, g := range view.Groups {
 		g.GroupSort = i
@@ -4825,7 +4825,7 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 			break
 		}
 	}
-	attrView.Views = util.InsertElem(attrView.Views, previousIndex, view)
+	attrView.Views = slices.Insert(attrView.Views, previousIndex, view)
 
 	if err = avSaveView(attrView, operation.BlockID); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
@@ -6812,7 +6812,7 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 					view.Calendar != nil && layout == view.Calendar.LayoutTable && av.LayoutTypeCalendar != view.LayoutType {
 					cloned.Hidden = true
 				}
-				layout.Columns = util.InsertElem(layout.Columns, i+1, cloned)
+				layout.Columns = slices.Insert(layout.Columns, i+1, cloned)
 				break
 			}
 		}
@@ -6826,7 +6826,7 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 					return
 				}
 				cloned.ID = copyKey.ID
-				view.Gallery.CardFields = util.InsertElem(view.Gallery.CardFields, i+1, cloned)
+				view.Gallery.CardFields = slices.Insert(view.Gallery.CardFields, i+1, cloned)
 				break
 			}
 		}
@@ -6840,7 +6840,7 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 					return
 				}
 				cloned.ID = copyKey.ID
-				view.Kanban.Fields = util.InsertElem(view.Kanban.Fields, i+1, cloned)
+				view.Kanban.Fields = slices.Insert(view.Kanban.Fields, i+1, cloned)
 				break
 			}
 		}
@@ -7304,7 +7304,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 							break
 						}
 					}
-					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
+					targetGroupView.GroupItemIDs = slices.Insert(targetGroupView.GroupItemIDs, previousIndex, itemID)
 				}
 
 				regenAttrViewGroups(attrView)
@@ -7315,7 +7315,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 						break
 					}
 				}
-				groupView.GroupItemIDs = util.InsertElem(groupView.GroupItemIDs, previousIndex, itemID)
+				groupView.GroupItemIDs = slices.Insert(groupView.GroupItemIDs, previousIndex, itemID)
 			}
 		}
 	} else {
@@ -7339,7 +7339,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 				break
 			}
 		}
-		view.ItemIDs = util.InsertElem(view.ItemIDs, previousIndex, itemID)
+		view.ItemIDs = slices.Insert(view.ItemIDs, previousIndex, itemID)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -7392,7 +7392,7 @@ func SortAttributeViewViewKey(avID, blockID, keyID, previousKeyID string) (err e
 				break
 			}
 		}
-		view.GetTableLayout().Columns = util.InsertElem(view.GetTableLayout().Columns, previousIndex, col)
+		view.GetTableLayout().Columns = slices.Insert(view.GetTableLayout().Columns, previousIndex, col)
 	case av.LayoutTypeGallery:
 		var field *av.ViewGalleryCardField
 		for i, cardField := range view.Gallery.CardFields {
@@ -7413,7 +7413,7 @@ func SortAttributeViewViewKey(avID, blockID, keyID, previousKeyID string) (err e
 				break
 			}
 		}
-		view.Gallery.CardFields = util.InsertElem(view.Gallery.CardFields, previousIndex, field)
+		view.Gallery.CardFields = slices.Insert(view.Gallery.CardFields, previousIndex, field)
 	case av.LayoutTypeKanban:
 		var field *av.ViewKanbanField
 		for i, kanbanField := range view.Kanban.Fields {
@@ -7434,7 +7434,7 @@ func SortAttributeViewViewKey(avID, blockID, keyID, previousKeyID string) (err e
 				break
 			}
 		}
-		view.Kanban.Fields = util.InsertElem(view.Kanban.Fields, previousIndex, field)
+		view.Kanban.Fields = slices.Insert(view.Kanban.Fields, previousIndex, field)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -7482,7 +7482,7 @@ func SortAttributeViewKey(avID, keyID, previousKeyID string) (err error) {
 			break
 		}
 	}
-	attrView.KeyIDs = util.InsertElem(attrView.KeyIDs, previousIndex, currentKeyID)
+	attrView.KeyIDs = slices.Insert(attrView.KeyIDs, previousIndex, currentKeyID)
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -7595,7 +7595,7 @@ func addAttributeViewKey(attrView *av.AttributeView, currentView *av.View, key *
 					break
 				}
 			}
-			view.Calendar.Columns = util.InsertElem(view.Calendar.Columns, index, column)
+			view.Calendar.Columns = slices.Insert(view.Calendar.Columns, index, column)
 		}
 		if nil != view.List {
 			hidden := nil == currentView || currentView.ID != view.ID || av.LayoutTypeList != currentView.LayoutType
@@ -7607,7 +7607,7 @@ func addAttributeViewKey(attrView *av.AttributeView, currentView *av.View, key *
 					break
 				}
 			}
-			view.List.Columns = util.InsertElem(view.List.Columns, index, column)
+			view.List.Columns = slices.Insert(view.List.Columns, index, column)
 		}
 		if nil != view.Table {
 			newField := &av.BaseField{ID: key.ID, Wrap: view.Table.WrapField}
@@ -8697,7 +8697,7 @@ func sortAttrViewBindingIDs(avIDs []string, avID, previousAvID string) (ret []st
 		}
 	}
 
-	ret = util.InsertElem(ret, previousIndex+1, avID)
+	ret = slices.Insert(ret, previousIndex+1, avID)
 	return
 }
 

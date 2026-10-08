@@ -878,7 +878,7 @@ func sortGroupViews(attrView *av.AttributeView, view *av.View) {
 			startIdx = 0
 		}
 		for _, g := range lastNext30Days {
-			relativeDateGroups = util.InsertElem(relativeDateGroups, startIdx, g)
+			relativeDateGroups = slices.Insert(relativeDateGroups, startIdx, g)
 		}
 
 		if av.GroupOrderDesc == view.Group.Order {

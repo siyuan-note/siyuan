@@ -42,8 +42,10 @@ func TestDatabaseViewActionsAndArguments(t *testing.T) {
 func TestDatabaseViewConfigurationValidation(t *testing.T) {
 	attrView := &av.AttributeView{KeyValues: []*av.KeyValues{
 		{Key: &av.Key{ID: "text", Type: av.KeyTypeText}},
+		{Key: &av.Key{ID: "rendered", Type: av.KeyTypeNumber, RenderTemplate: "{{.Number}}"}},
 		{Key: &av.Key{ID: "checkbox", Type: av.KeyTypeCheckbox}},
 		{Key: &av.Key{ID: "date", Type: av.KeyTypeDate}},
+		{Key: &av.Key{ID: "rollup", Type: av.KeyTypeRollup}},
 		{Key: &av.Key{ID: "select", Type: av.KeyTypeSelect}},
 	}}
 	valid := []*av.ViewFilter{{Combination: av.FilterCombinationAnd, Filters: []*av.ViewFilter{
@@ -57,10 +59,29 @@ func TestDatabaseViewConfigurationValidation(t *testing.T) {
 	if err := databaseValidateViewFilters(attrView, valid); nil != err {
 		t.Fatalf("nested filter should be valid: %v", err)
 	}
+	for _, rendered := range []*av.ViewFilter{
+		{Column: "rendered", ValueSource: av.ValueSourceRendered, Operator: av.FilterOperatorIsGreater,
+			Value: &av.Value{Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: "100"}}},
+		{Column: "rendered", ValueSource: av.ValueSourceRendered, Operator: av.FilterOperatorIsLessOrEqual,
+			Value: &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "100"}}},
+	} {
+		if err := databaseValidateViewFilters(attrView, []*av.ViewFilter{rendered}); nil != err {
+			t.Fatalf("rendered filter should match the frontend format: %v", err)
+		}
+	}
+	rollupDate := &av.ViewFilter{Column: "rollup", Operator: av.FilterOperatorIsBetween,
+		Value:        &av.Value{Type: av.KeyTypeRollup, Rollup: &av.ValueRollup{Contents: []*av.Value{{Type: av.KeyTypeDate}}}},
+		RelativeDate: &av.RelativeDate{Count: 7, Unit: av.RelativeDateUnitDay, Direction: av.RelativeDateDirectionAfter}}
+	if err := databaseValidateViewFilters(attrView, []*av.ViewFilter{rollupDate}); nil != err {
+		t.Fatalf("date rollup should allow relative dates: %v", err)
+	}
 	for _, invalid := range []*av.ViewFilter{
 		{Column: "missing", Operator: av.FilterOperatorContains},
 		{Column: "text", Operator: av.FilterOperatorIsBetween},
 		{Column: "text", Operator: av.FilterOperatorContains, Value: &av.Value{Type: av.KeyTypeNumber}},
+		{Column: "rollup", Operator: av.FilterOperatorIsBetween,
+			Value:        &av.Value{Type: av.KeyTypeRollup, Rollup: &av.ValueRollup{Contents: []*av.Value{{Type: av.KeyTypeNumber}}}},
+			RelativeDate: &av.RelativeDate{Count: 7, Unit: av.RelativeDateUnitDay, Direction: av.RelativeDateDirectionAfter}},
 		{Combination: "xor", Filters: valid},
 	} {
 		if err := databaseValidateViewFilters(attrView, []*av.ViewFilter{invalid}); nil == err {

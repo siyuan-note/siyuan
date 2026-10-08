@@ -201,7 +201,7 @@ func databaseValidateViewFilterNode(attrView *av.AttributeView, filter *av.ViewF
 		if "" == strings.TrimSpace(key.RenderTemplate) {
 			return fmt.Errorf("rendered filtering requires a display template: %s", filter.Column)
 		}
-		filterType = av.KeyTypeText
+		filterType = av.KeyTypeTemplate
 	}
 	if !databaseFilterOperatorAllowed(filterType, filter.Operator) {
 		return fmt.Errorf("operator %q is not supported for field %s", filter.Operator, filter.Column)
@@ -211,11 +211,17 @@ func databaseValidateViewFilterNode(attrView *av.AttributeView, filter *av.ViewF
 		return fmt.Errorf("filter value is required for field %s", filter.Column)
 	}
 	if nil != filter.Value && filter.Value.Type != "" && filter.Value.Type != key.Type &&
-		!(filter.ValueSource == av.ValueSourceRendered && filter.Value.Type == av.KeyTypeText) {
+		!(filter.ValueSource == av.ValueSourceRendered &&
+			(filter.Value.Type == av.KeyTypeTemplate || filter.Value.Type == av.KeyTypeText)) {
 		return fmt.Errorf("filter value type does not match field %s", filter.Column)
 	}
+	dateType := key.Type
+	if dateType == av.KeyTypeRollup && nil != filter.Value && nil != filter.Value.Rollup &&
+		0 < len(filter.Value.Rollup.Contents) && nil != filter.Value.Rollup.Contents[0] {
+		dateType = filter.Value.Rollup.Contents[0].Type
+	}
 	if (nil != filter.RelativeDate || nil != filter.RelativeDate2 || filter.DateEndpoint != "") &&
-		key.Type != av.KeyTypeDate && key.Type != av.KeyTypeCreated && key.Type != av.KeyTypeUpdated {
+		dateType != av.KeyTypeDate && dateType != av.KeyTypeCreated && dateType != av.KeyTypeUpdated {
 		return fmt.Errorf("date options require a date field: %s", filter.Column)
 	}
 	if filter.DateEndpoint != "" && filter.DateEndpoint != av.DateEndpointStart && filter.DateEndpoint != av.DateEndpointEnd {

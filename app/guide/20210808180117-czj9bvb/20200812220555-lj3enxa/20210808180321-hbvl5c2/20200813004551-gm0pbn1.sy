@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261007111840"
+		"updated": "20261008101123"
 	},
 	"Children": [
 		{
@@ -4287,7 +4287,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20261002202032"
+				"updated": "20261008101123"
 			},
 			"Children": [
 				{
@@ -4311,7 +4311,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20261002202032"
+				"updated": "20261008101123"
 			},
 			"Children": [
 				{
@@ -7433,7 +7433,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "滚动到顶部"
+									"Data": "光标移动到文档开头"
 								}
 							]
 						},
@@ -7479,8 +7479,53 @@
 							"Data": "td",
 							"Children": [
 								{
-									"Type": "NodeBr",
-									"Data": "br"
+									"Type": "NodeText",
+									"Data": "可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快捷键"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "编辑器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "通用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中追加 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Home"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或替换默认快捷键；绑定该键后将覆盖其行内导航行为"
 								}
 							]
 						}
@@ -7496,7 +7541,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "滚动到底部"
+									"Data": "光标移动到文档结尾"
 								}
 							]
 						},
@@ -7542,8 +7587,53 @@
 							"Data": "td",
 							"Children": [
 								{
-									"Type": "NodeBr",
-									"Data": "br"
+									"Type": "NodeText",
+									"Data": "可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快捷键"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "编辑器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "通用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中追加 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "End"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或替换默认快捷键；绑定该键后将覆盖其行内导航行为"
 								}
 							]
 						}

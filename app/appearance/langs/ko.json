@@ -1,4 +1,6 @@
 {
+	"goToDocumentStart": "문서 시작으로 이동",
+	"goToDocumentEnd": "문서 끝으로 이동",
 	"agentBuiltinPluginDevelopmentDescription": "공식 프런트엔드 플러그인 개발 절차: 사용자가 명시적으로 선택한 후 누락된 요구 사항을 확인하고 간단한 계획에 합의한 뒤 관리되는 사본에서 구현, 검증 및 패키징을 수행하며, 설치와 활성화에는 별도의 승인이 필요합니다",
 	"agentPluginRecoveryQuestion": "이전에 승인한 제안의 소스 체크포인트만 복원할까요? 복원해도 노트, 런타임 데이터 또는 기타 설정은 되돌아가지 않으며 추가 소스 변경이 허용되지 않습니다.",
 	"agentPluginFlowQuestion": "공식 플러그인 개발 절차를 사용할까요?",

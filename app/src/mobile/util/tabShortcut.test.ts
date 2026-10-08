@@ -16,7 +16,7 @@ it("does not consume the desktop tab menu binding on mobile", () => {
         "../../boot/globalEvent/commonHotkey": {filterHotkey: () => false},
         "../../protyle/util/hotKey": {matchHotKey: () => true},
         "../../command/executor": {execByCommand: () => calls.push("native")},
-        "../editor": {getCurrentEditor: () => ({protyle: {toolbar: {}}})},
+        "../editor": {getCurrentEditor: () => ({protyle: {toolbar: {}, element: {contains: () => false}}})},
         "../../command/shortcutRuntime": {dispatchPluginShortcut: () => calls.push("plugin")},
     };
     runInNewContext(source, {

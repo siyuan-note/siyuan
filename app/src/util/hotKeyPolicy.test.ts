@@ -40,6 +40,14 @@ describe("text input hotkey policy", () => {
         assert.equal(isReservedKeymap("⇧↩", ["general", "agentSend"]), true);
     });
 
+    it("allows configurable document boundary shortcuts", () => {
+        ["Home", "End", "⌘Home", "⌘End"].forEach(hotkey => {
+            assert.equal(isReservedKeymap(hotkey, ["editor", "general", "goToDocumentStart"]), false);
+            assert.equal(isDisallowedTextInputHotkey(hotkey), false);
+        });
+        assert.equal(isReservedKeymap("PageUp", ["editor", "general", "goToDocumentStart"]), true);
+    });
+
     it("clears only disallowed text input hotkeys", () => {
         assert.equal(clearDisallowedTextInputHotkey("⇧S"), "");
         assert.equal(clearDisallowedTextInputHotkey("⇧F1"), "⇧F1");

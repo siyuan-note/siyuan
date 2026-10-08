@@ -1,4 +1,6 @@
 {
+	"goToDocumentStart": "Prejsť na začiatok dokumentu",
+	"goToDocumentEnd": "Prejsť na koniec dokumentu",
 	"agentBuiltinPluginDevelopmentDescription": "Oficiálny postup vývoja doplnkov rozhrania: po výslovnom súhlase používateľa sa objasnia chýbajúce požiadavky, potvrdí stručný plán a v spravovanej kópii sa vykoná implementácia, overenie a vytvorenie balíka; inštalácia a aktivácia vyžadujú samostatné povolenie",
 	"agentPluginRecoveryQuestion": "Obnoviť iba kontrolný bod zdrojového kódu predtým schváleného návrhu? Obnova nevráti poznámky, údaje za behu ani iné nastavenia a nepovoľuje ďalšie zmeny zdrojového kódu.",
 	"agentPluginFlowQuestion": "Použiť oficiálny postup vývoja doplnkov?",

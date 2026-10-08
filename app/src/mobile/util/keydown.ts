@@ -5,6 +5,7 @@ import {getCurrentEditor} from "../editor";
 import {filterHotkey} from "../../boot/globalEvent/commonHotkey";
 import {captureShortcutContext, dispatchPluginShortcut} from "../../command/shortcutRuntime";
 import {logKeyboardDiagnostic} from "../../util/keyboardDiagnostic";
+import {handleDocumentBoundaryHotkey} from "../../protyle/util/documentBoundaryHotkey";
 
 export const mobileKeydown = (app: App, event: KeyboardEvent) => {
     logKeyboardDiagnostic("mobile-enter", event);
@@ -12,6 +13,10 @@ export const mobileKeydown = (app: App, event: KeyboardEvent) => {
     if (!event.key || event.defaultPrevented || filterHotkey(event, app)) {
         logKeyboardDiagnostic("mobile-stop", event, !event.key ? "missing-key" :
             event.defaultPrevented ? "default-prevented" : "filtered");
+        return;
+    }
+    const editor = getCurrentEditor();
+    if (editor?.protyle.element.contains(event.target as Node) && handleDocumentBoundaryHotkey(editor.protyle, event)) {
         return;
     }
     const matchGeneral = Object.keys(window.siyuan.config.keymap.general).sort().find((key) => {

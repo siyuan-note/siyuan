@@ -4,6 +4,7 @@ import {isProtyleListItemFragment} from "../runtimeCapabilities";
 import {toggleListMindmap} from "../render/listMindmap";
 import {hideElements} from "../ui/hideElements";
 import {isTabTextBoundary} from "./tabsBoundary";
+import {handleDocumentBoundaryHotkey} from "../util/documentBoundaryHotkey";
 import {getBlockInsertionContext} from "./blockInsertion";
 import {isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
@@ -323,6 +324,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 getSelection().getRangeAt(0).selectNodeContents(event.target);
             }
             event.stopPropagation();
+            return;
+        }
+        if (handleDocumentBoundaryHotkey(protyle, event)) {
             return;
         }
         // 只读正文和页签标题不执行正文编辑逻辑，保留默认行为并交给全局快捷键处理器。

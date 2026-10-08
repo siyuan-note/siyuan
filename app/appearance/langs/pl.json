@@ -1,4 +1,6 @@
 {
+	"goToDocumentStart": "Przejdź do początku dokumentu",
+	"goToDocumentEnd": "Przejdź do końca dokumentu",
 	"agentBuiltinPluginDevelopmentDescription": "Oficjalny proces tworzenia wtyczek interfejsu: po wyraźnej zgodzie użytkownika następuje doprecyzowanie brakujących wymagań, zatwierdzenie krótkiego planu, implementacja w zarządzanej kopii, weryfikacja i przygotowanie pakietu; instalacja i aktywacja wymagają osobnej zgody",
 	"agentPluginRecoveryQuestion": "Przywrócić tylko punkt kontrolny kodu wcześniej zatwierdzonego planu? Odzyskiwanie nie cofa notatek, danych wykonania ani innych ustawień i nie zezwala na dalsze zmiany kodu.",
 	"agentPluginFlowQuestion": "Użyć oficjalnego procesu tworzenia wtyczek?",

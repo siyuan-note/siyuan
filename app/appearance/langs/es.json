@@ -1,4 +1,6 @@
 {
+	"goToDocumentStart": "Ir al inicio del documento",
+	"goToDocumentEnd": "Ir al final del documento",
 	"agentBuiltinPluginDevelopmentDescription": "Flujo oficial de desarrollo de plugins de interfaz: tras tu aceptación explícita, se aclaran los requisitos pendientes, se confirma un plan breve y se implementa, valida y empaqueta en una copia gestionada; la instalación y la activación requieren autorización por separado",
 	"agentPluginRecoveryQuestion": "¿Restaurar solo el punto de control del código de la propuesta aprobada anteriormente? La recuperación no revierte notas, datos de ejecución ni otros ajustes, y no autoriza más cambios en el código.",
 	"agentPluginFlowQuestion": "¿Usar el flujo oficial de desarrollo de plugins?",

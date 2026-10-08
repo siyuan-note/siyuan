@@ -610,6 +610,8 @@ export abstract class Constants {
                 jumpToParent: {default: "⇧⌘J", custom: "⇧⌘J"},
                 moveToUp: {default: "⇧⌘↑", custom: "⇧⌘↑"},
                 moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"},
+                goToDocumentStart: {default: "⌘Home", custom: "⌘Home"},
+                goToDocumentEnd: {default: "⌘End", custom: "⌘End"},
                 selectToPageStart: {default: "⇧Home", custom: "⇧Home"},
                 selectToPageEnd: {default: "⇧End", custom: "⇧End"},
                 scrollPageUpWithoutMovingCaret: {default: "⌥PageUp", custom: "⌥PageUp"},

@@ -6,7 +6,6 @@ import {
     copyPlainText,
     isMac,
     isNotCtrl,
-    isOnlyMeta,
     updateHotkeyTip,
     writeText
 } from "../../protyle/util/compatibility";
@@ -44,7 +43,8 @@ import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
 import {deleteFiles} from "../../editor/deleteFile";
 import {escapeHtml} from "../../util/escape";
 import {syncGuide} from "../../sync/syncGuide";
-import {duplicateBlock, getStartEndElement, goEnd, goHome} from "../../protyle/wysiwyg/commonHotkey";
+import {duplicateBlock, getStartEndElement} from "../../protyle/wysiwyg/commonHotkey";
+import {handleDocumentBoundaryHotkey} from "../../protyle/util/documentBoundaryHotkey";
 import {getNextFileLi, getPreviousFileLi} from "../../protyle/wysiwyg/getBlock";
 import {Backlink} from "../../layout/dock/Backlink";
 /// #if !BROWSER
@@ -536,21 +536,8 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     if (target.tagName !== "TABLE" && ["INPUT", "TEXTAREA"].includes(target.tagName)) {
         return false;
     }
-    // ctrl+home 光标移动到顶
-    if (!event.altKey && !event.shiftKey && isOnlyMeta(event) && event.key === "Home") {
-        goHome(protyle);
-        hideElements(["select"], protyle);
-        event.stopPropagation();
-        event.preventDefault();
-        return;
-    }
-    // ctrl+end 光标移动到尾
-    if (!event.altKey && !event.shiftKey && isOnlyMeta(event) && event.key === "End") {
-        goEnd(protyle);
-        hideElements(["select"], protyle);
-        event.stopPropagation();
-        event.preventDefault();
-        return;
+    if (handleDocumentBoundaryHotkey(protyle, event)) {
+        return true;
     }
     if (range && matchHotKey(window.siyuan.config.keymap.editor.general.focusBreadcrumb, event)) {
         if (protyle.breadcrumb?.focus(range)) {

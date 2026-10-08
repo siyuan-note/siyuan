@@ -199,6 +199,7 @@ const historyFixture = (menuHidden = false) => {
     };
     const bind = compile(`${keydownDeclaration.getText(keydownSource)}\nexports.subject = keydown;`, {
         bindVerticalNavigationReset: (): void => undefined,
+        handleDocumentBoundaryHotkey: () => false,
         logKeyboardDiagnostic: (): void => undefined,
         getAVTemplateInteractiveElement: () => false,
         hasClosestByAttribute: () => false,

@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261007111840"
+		"updated": "20261008101123"
 	},
 	"Children": [
 		{
@@ -4293,7 +4293,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20261002202032"
+				"updated": "20261008101123"
 			},
 			"Children": [
 				{
@@ -4313,7 +4313,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20261002202032"
+				"updated": "20261008101123"
 			},
 			"Children": [
 				{
@@ -7477,7 +7477,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Scroll to the top"
+									"Data": "Move the cursor to the beginning of the document"
 								}
 							]
 						},
@@ -7520,7 +7520,58 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Customize in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "General"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; add "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Home"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or replace the default shortcut. Binding this key overrides its line navigation"
+								}
+							]
 						}
 					]
 				},
@@ -7534,7 +7585,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Scroll to the bottom"
+									"Data": "Move the cursor to the end of the document"
 								}
 							]
 						},
@@ -7581,7 +7632,58 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Customize in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "General"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; add "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "End"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or replace the default shortcut. Binding this key overrides its line navigation"
+								}
+							]
 						}
 					]
 				},

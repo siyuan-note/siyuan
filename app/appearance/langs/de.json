@@ -1,4 +1,6 @@
 {
+	"goToDocumentStart": "Zum Dokumentanfang springen",
+	"goToDocumentEnd": "Zum Dokumentende springen",
 	"agentBuiltinPluginDevelopmentDescription": "Offizieller Ablauf zur Entwicklung von Frontend-Plugins: Nach deiner ausdrücklichen Zustimmung werden fehlende Anforderungen geklärt, ein kurzer Plan bestätigt und die Umsetzung in einer verwalteten Kopie geprüft und paketiert; Installation und Aktivierung erfordern eine separate Genehmigung",
 	"agentPluginRecoveryQuestion": "Nur den Quellcode-Prüfpunkt des zuvor genehmigten Vorschlags wiederherstellen? Die Wiederherstellung setzt weder Notizen noch Laufzeitdaten oder andere Einstellungen zurück und erlaubt keine weiteren Quellcodeänderungen.",
 	"agentPluginFlowQuestion": "Den offiziellen Ablauf zur Plugin-Entwicklung verwenden?",

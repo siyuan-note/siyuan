@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261007111840"
+		"updated": "20261008101123"
 	},
 	"Children": [
 		{
@@ -4281,7 +4281,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20261002202032"
+				"updated": "20261008101123"
 			},
 			"Children": [
 				{
@@ -4301,7 +4301,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20261002202032"
+				"updated": "20261008101123"
 			},
 			"Children": [
 				{
@@ -7446,7 +7446,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "滾動到頂部"
+									"Data": "游標移動到文件開頭"
 								}
 							]
 						},
@@ -7492,8 +7492,53 @@
 							"Data": "td",
 							"Children": [
 								{
-									"Type": "NodeBr",
-									"Data": "br"
+									"Type": "NodeText",
+									"Data": "可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快速鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "編輯器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "通用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中新增 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Home"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或取代預設快捷鍵；綁定該鍵後將覆蓋其行內導覽行為"
 								}
 							]
 						}
@@ -7509,7 +7554,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "滾動到底部"
+									"Data": "游標移動到文件結尾"
 								}
 							]
 						},
@@ -7555,8 +7600,53 @@
 							"Data": "td",
 							"Children": [
 								{
-									"Type": "NodeBr",
-									"Data": "br"
+									"Type": "NodeText",
+									"Data": "可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快速鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "編輯器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "通用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中新增 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "End"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或取代預設快捷鍵；綁定該鍵後將覆蓋其行內導覽行為"
 								}
 							]
 						}

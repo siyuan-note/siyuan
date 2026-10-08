@@ -1300,6 +1300,8 @@ declare namespace Config {
         scrollPageUpWithoutMovingCaret?: IKey;
         selectToPageEnd?: IKey;
         selectToPageStart?: IKey;
+        goToDocumentStart?: IKey;
+        goToDocumentEnd?: IKey;
         showInFolder?: IKey;
         spaceRepetition?: IKey;
         switchReadonly?: IKey;

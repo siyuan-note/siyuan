@@ -433,14 +433,16 @@ export class MobileOutline extends Model {
         }
         if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
             !hasClosestByClassName(nodeElement, "bq") &&
-            !hasClosestByClassName(nodeElement, "callout-content")) {
+            !hasClosestByClassName(nodeElement, "callout-content") &&
+            !hasClosestByClassName(nodeElement, "tab-item")) {
             this.setCurrentById(nodeElement.getAttribute("data-node-id"));
         } else {
             let previousElement = getPreviousBlock(nodeElement);
             while (previousElement) {
                 if (previousElement.getAttribute("data-type") === "NodeHeading" &&
                     !hasClosestByClassName(previousElement, "bq") &&
-                    !hasClosestByClassName(previousElement, "callout-content")) {
+                    !hasClosestByClassName(previousElement, "callout-content") &&
+                    !hasClosestByClassName(previousElement, "tab-item")) {
                     break;
                 } else {
                     previousElement = getPreviousBlock(previousElement);

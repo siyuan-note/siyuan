@@ -15,7 +15,7 @@ for (const path of ["src/layout/dock/Outline.ts", "src/mobile/dock/MobileOutline
     }
     globalThis.Harness = Harness;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
 
-    for (const container of ["bq", "callout-content"]) {
+    for (const container of ["bq", "callout-content", "tab-item"]) {
         for (const caret of ["heading", "paragraph"]) {
             test(`${path}: ${caret} inside ${container} highlights the preceding outer heading`, async () => {
                 const outer = {id: "outer", type: "NodeHeading", container: "", previous: undefined as {id: string} | undefined};

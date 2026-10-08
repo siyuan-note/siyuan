@@ -782,16 +782,6 @@ export class MobileOutline extends Model {
     private showExpandLevelMenu() {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_OUTLINE_EXPAND_LEVEL);
-        for (let i = 1; i <= 6; i++) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: `heading${i}`,
-                icon: `iconH${i}`,
-                label: window.siyuan.languages[`heading${i}`],
-                current: window.siyuan.storage[Constants.LOCAL_OUTLINE].expandLevel === i,
-                click: () => this.expandToLevel(i)
-            }).element);
-        }
-        window.siyuan.menus.menu.append(new MenuItem({id: "separator_all", type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             id: "expandAll",
             icon: "iconExpand",
@@ -804,6 +794,15 @@ export class MobileOutline extends Model {
             label: window.siyuan.languages.foldAll,
             click: () => this.setAllExpanded(false)
         }).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_all", type: "separator"}).element);
+        for (let i = 1; i <= 6; i++) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: `heading${i}`,
+                icon: `iconH${i}`,
+                label: window.siyuan.languages[`heading${i}`],
+                click: () => this.expandToLevel(i)
+            }).element);
+        }
         window.siyuan.menus.menu.fullscreen("bottom");
         return window.siyuan.menus.menu;
     }

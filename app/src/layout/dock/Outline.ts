@@ -908,16 +908,6 @@ export class Outline extends Model {
     private showExpandLevelMenu(target: HTMLElement) {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_OUTLINE_EXPAND_LEVEL);
-        for (let i = 1; i <= 6; i++) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: `heading${i}`,
-                icon: `iconH${i}`,
-                label: window.siyuan.languages[`heading${i}`],
-                current: window.siyuan.storage[Constants.LOCAL_OUTLINE].expandLevel === i,
-                click: () => this.expandToLevel(i)
-            }).element);
-        }
-        window.siyuan.menus.menu.append(new MenuItem({id: "separator_all", type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             id: "expandAll",
             icon: "iconExpand",
@@ -932,6 +922,15 @@ export class Outline extends Model {
             accelerator: window.siyuan.config.keymap.editor.general.collapse.custom,
             click: () => this.setAllExpanded(false)
         }).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_all", type: "separator"}).element);
+        for (let i = 1; i <= 6; i++) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: `heading${i}`,
+                icon: `iconH${i}`,
+                label: window.siyuan.languages[`heading${i}`],
+                click: () => this.expandToLevel(i)
+            }).element);
+        }
         const rect = target.getBoundingClientRect();
         window.siyuan.menus.menu.popup({
             x: rect.left,

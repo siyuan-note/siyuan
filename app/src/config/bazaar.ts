@@ -724,7 +724,17 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 this._renderUpdatePanel();
                 if (preserveView) content.scrollTop = scrollTop;
             }
-        }, undefined, undefined, undefined, 30000);
+        }, undefined, undefined, undefined, 30000).finally(() => {
+            if (requestID !== this._updateRequestID || !this._isMountCurrent(mount) || !this.element?.isConnected ||
+                this._updateState !== "loading") {
+                return;
+            }
+            this._updateState = "error";
+            this._syncUpdateTabCounter();
+            if (this._isUpdatePanelActive()) {
+                this._renderUpdatePanel();
+            }
+        });
     },
     _renderUpdatePanel() {
         const contentElement = bazaar.element.querySelector("#configBazaarDownloaded");
@@ -1434,6 +1444,7 @@ type="checkbox">
         }
         bazaar._pluginEnablePending.add(item.name);
         bazaar._updateReadmePluginAction(item.name, undefined, true);
+        let pluginOperation: Promise<unknown>;
         fetchPost("/api/petal/setPetalEnabled", {
             packageName: item.name,
             enabled,
@@ -1441,9 +1452,6 @@ type="checkbox">
         }, response => {
             if (response.code !== 0) {
                 showMessage(response.msg);
-                bazaar._pluginEnablePending.delete(item.name);
-                bazaar._updateReadmePluginAction(item.name, item.enabled, false);
-                callback();
                 return;
             }
             item.enabled = enabled;
@@ -1452,24 +1460,25 @@ type="checkbox">
                 installed.enabled = enabled;
             }
             bazaar._updateReadmePluginAction(item.name, enabled, true);
-            const finish = () => {
-                bazaar._pluginEnablePending.delete(item.name);
-                bazaar._updateReadmePluginAction(item.name, enabled, false);
-                callback();
-            };
             if (!enabled) {
-                (getSettingsWindowHost()?.unloadPlugin(item.name) || unloadPlugin(app, item.name)).then(finish);
+                pluginOperation = getSettingsWindowHost()?.unloadPlugin(item.name) || unloadPlugin(app, item.name);
                 return;
             }
             if (window.siyuan.config.bazaar.petalDisabled) {
                 showMessage(window.siyuan.languages.pluginGlobalDisabledTip);
-                finish();
                 return;
             }
-            (getSettingsWindowHost()?.loadPlugin(response.data) || loadPlugin(app, response.data)).then(finish, (error) => {
+            pluginOperation = getSettingsWindowHost()?.loadPlugin(response.data) || loadPlugin(app, response.data);
+        }).finally(async () => {
+            try {
+                await pluginOperation;
+            } catch (error) {
                 console.error(error);
-                finish();
-            });
+            } finally {
+                bazaar._pluginEnablePending.delete(item.name);
+                bazaar._updateReadmePluginAction(item.name, item.enabled, false);
+                callback();
+            }
         });
     },
     _setPluginPublishEnabled(item: IBazaarItem, enabled: boolean, callback: () => void) {

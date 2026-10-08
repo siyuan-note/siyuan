@@ -98,6 +98,80 @@ const loadMethods = (names, dependencies = {}) => {
     return exports.bazaar;
 };
 
+test("plugin enable failure releases pending state and allows retry without a success callback", async () => {
+    const requests = [];
+    const updates = [];
+    let finishes = 0;
+    const bazaar = loadMethods(["_setPluginEnabled"], {
+        Constants: {SIYUAN_APPID: "app"}, console,
+        fetchPost: (_url, _data, callback) => {
+            const request = deferred();
+            requests.push({...request, callback});
+            return request.promise;
+        },
+    });
+    Object.assign(bazaar, {_pluginEnablePending: new Set(), _updateReadmePluginAction: (...args) => updates.push(args)});
+    const item = {name: "plugin", enabled: false};
+    bazaar._setPluginEnabled({}, item, true, () => finishes++);
+    requests[0].resolve();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(bazaar._pluginEnablePending.size, 0);
+    assert.equal(finishes, 1);
+    assert.equal(item.enabled, false);
+    assert.deepEqual(updates.at(-1), ["plugin", false, false]);
+    bazaar._setPluginEnabled({}, item, true, () => finishes++);
+    assert.equal(requests.length, 2);
+    requests[1].resolve();
+    await new Promise(resolve => setImmediate(resolve));
+});
+
+test("plugin switches remain pending until plugin loading completes even after the request finishes", async () => {
+    const request = deferred();
+    const loading = deferred();
+    let callback;
+    let finishes = 0;
+    const bazaar = loadMethods(["_setPluginEnabled"], {
+        Constants: {SIYUAN_APPID: "app"}, console,
+        getSettingsWindowHost: () => undefined,
+        loadPlugin: () => loading.promise,
+        fetchPost: (_url, _data, cb) => { callback = cb; return request.promise; },
+    });
+    Object.assign(bazaar, {_pluginEnablePending: new Set(), _updateReadmePluginAction: () => {}, _getPackageDetail: () => undefined});
+    bazaar._setPluginEnabled({}, {name: "plugin", enabled: false}, true, () => finishes++);
+    callback({code: 0, data: {}});
+    request.resolve();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(bazaar._pluginEnablePending.size, 1);
+    assert.equal(finishes, 0);
+    loading.resolve();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(bazaar._pluginEnablePending.size, 0);
+    assert.equal(finishes, 1);
+});
+
+test("a timed-out update check becomes retryable and cannot replace a newer request state", async () => {
+    const requests = [];
+    const bazaar = loadMethods(["_checkUpdate"], {
+        getFrontend: () => "desktop",
+        fetchPost: () => { const request = deferred(); requests.push(request); return request.promise; },
+    });
+    Object.assign(bazaar, {_updateState: "idle", _updateRequestID: 0, element: {isConnected: true},
+        _captureMount: () => 1, _isMountCurrent: () => true, _isUpdatePanelActive: () => true,
+        _syncUpdateTabCounter: () => {}, _renderUpdatePanel: () => {}});
+    const first = bazaar._checkUpdate();
+    const newer = bazaar._checkUpdate(true);
+    requests[0].resolve();
+    await first;
+    assert.equal(bazaar._updateState, "loading");
+    requests[1].resolve();
+    await newer;
+    assert.equal(bazaar._updateState, "error");
+    const retry = bazaar._checkUpdate();
+    assert.equal(requests.length, 3);
+    requests[2].resolve();
+    await retry;
+});
+
 test("package refresh waits for an installed-list request and preserves the selected view", async () => {
     const blocked = deferred();
     const calls = [];

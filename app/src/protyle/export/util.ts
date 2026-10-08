@@ -70,7 +70,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         <input id="watermark" class="b3-switch fn__flex-center" type="checkbox" ${window.siyuan.storage[Constants.LOCAL_EXPORTIMG].watermark ? "checked" : ""}>
     </label>
     <span class="fn__flex-1 export-img__space"></span>
-    <button data-type="cancel" disabled class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button data-type="cancel" class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button data-type="copy" disabled class="b3-button b3-button--text${copyOnly ? " fn__none" : ""}">${window.siyuan.languages.copyAsPNG}</button><div class="fn__space${copyOnly ? " fn__none" : ""}"></div>
     <button data-type="export" disabled class="b3-button b3-button--text${copyOnly ? " fn__none" : ""}">${window.siyuan.languages.exportFile}</button>
 </div>
@@ -102,15 +102,21 @@ export const exportImage = (id: string, copyOnly = false) => {
     let previewRevision = 0;
 
     const setActionDisabled = (disabled: boolean) => {
-        cancelButton.disabled = disabled;
+        cancelButton.disabled = disabled && outputting;
         copyButton.disabled = disabled;
         exportButton.disabled = disabled;
     };
     const uploadImageBlob = (blob: Blob) => {
         const formData = new ContractFormData({file: new File([blob], imageName, {type: blob.type}), type: "image/png"});
-        return new Promise<IWebSocketData>((resolve) => {
+        return new Promise<IWebSocketData>((resolve, reject) => {
+            let received = false;
             fetchPost("/api/export/exportAsFile", formData, (response) => {
+                received = true;
                 resolve(response);
+            }).finally(() => {
+                if (!received) {
+                    reject(new Error(window.siyuan.languages.exportFileSaveFailed));
+                }
             });
         });
     };
@@ -238,16 +244,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         if (!exportDialog.element.querySelector(".fn__loading")) {
             exportButton.parentElement.insertAdjacentHTML("afterend", '<div class="fn__loading"><img height="128px" width="128px" src="stage/loading-pure.svg"></div>');
         }
-        fetchPost("/api/export/exportPreviewHTML", {
-            id,
-            keepJSEmbed: true,
-            keepFold: foldElement.checked,
-            image: true,
-            addTitle: addTitleElement.checked,
-            customTitle: customTitleElement.value,
-        }, (response) => {
-            refreshPreview(response, revision);
-        });
+        requestPreview(revision);
     };
     addTitleElement.addEventListener("change", () => {
         customTitleElement.disabled = !addTitleElement.checked;
@@ -304,7 +301,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         }
     };
     const refreshPreview = async (response: IWebSocketData, revision: number) => {
-        if (revision !== previewRevision) {
+        if (revision !== previewRevision || !document.body.contains(exportDialog.element)) {
             return;
         }
         previewElement.innerHTML = sanitizeKernelHTML(response.data.content);
@@ -321,7 +318,7 @@ export const exportImage = (id: string, copyOnly = false) => {
             rootID: id,
             headingMode: window.siyuan.config.editor.headingEmbedMode,
         }, fetchSyncPost);
-        if (revision !== previewRevision) {
+        if (revision !== previewRevision || !document.body.contains(exportDialog.element)) {
             return;
         }
         previewElement.querySelectorAll(".code-block").forEach(item => {
@@ -333,7 +330,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         stopObservingLayout = observeExportImageLayout(exportDialog.element.querySelector(".export-img"));
 
         await updateWatermark();
-        if (revision !== previewRevision) {
+        if (revision !== previewRevision || !document.body.contains(exportDialog.element)) {
             return;
         }
         exportDialog.element.querySelector(".fn__loading")?.remove();
@@ -343,15 +340,34 @@ export const exportImage = (id: string, copyOnly = false) => {
             setActionDisabled(false);
         }
     };
-    fetchPost("/api/export/exportPreviewHTML", {
-        id,
-        keepJSEmbed: true,
-        keepFold: foldElement.checked,
-        image: true,
-        addTitle: addTitleElement.checked,
-        customTitle: customTitleElement.value,
-    }, (response) => {
-        imageName = response.data.name + ".png";
-        refreshPreview(response, 0);
-    });
+    const requestPreview = (revision: number) => {
+        let rendering: Promise<void>;
+        fetchPost("/api/export/exportPreviewHTML", {
+            id,
+            keepJSEmbed: true,
+            keepFold: foldElement.checked,
+            image: true,
+            addTitle: addTitleElement.checked,
+            customTitle: customTitleElement.value,
+        }, (response) => {
+            if (revision !== previewRevision || !document.body.contains(exportDialog.element)) {
+                return;
+            }
+            imageName = response.data.name + ".png";
+            rendering = refreshPreview(response, revision);
+        }).finally(async () => {
+            try {
+                await rendering;
+            } catch (error) {
+                console.error("Export preview error:", error);
+                showMessage(error instanceof Error ? error.message : window.siyuan.languages.exportFileSaveFailed, 7000, "error");
+            } finally {
+                if (revision === previewRevision && document.body.contains(exportDialog.element)) {
+                    exportDialog.element.querySelector(".fn__loading")?.remove();
+                    cancelButton.disabled = false;
+                }
+            }
+        });
+    };
+    requestPreview(0);
 };

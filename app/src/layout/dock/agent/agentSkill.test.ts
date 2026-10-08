@@ -16,6 +16,13 @@ const browserCases = async (source: string) => {
     let marked = "";
     const dependencies = {
         hintSlash: () => insertItems,
+        getFrequentSlashItems: (): IHintData[] => [],
+        getSlashEntryKey: (item: IHintData) => item.id || "",
+        escapeAttr: (text: string) => {
+            const element = document.createElement("div");
+            element.textContent = text;
+            return element.innerHTML.replaceAll('"', "&quot;");
+        },
         fetchPost: (_url: string, _data: unknown, callback: typeof requests[number]) => requests.push(callback),
         escapeHtml: (text: string) => {
             const element = document.createElement("div");

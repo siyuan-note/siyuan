@@ -462,8 +462,7 @@ func saveSessionContract(c *gin.Context, req apicontract.AISession) apicontract.
 			ret.Msg = runtimeErr.Error()
 			return apicontract.AISaveSession.WithHTTPStatus(contractFailure[apicontract.AISessionSaveData](ret), http.StatusInternalServerError)
 		}
-		// 旧前端没有 commitTurnID。流已真正结束后，从终止检查点补出提交标识；SaveSession 仍会
-		// 用 runtime 重建权威内容，因此不会信任旧前端可能不完整的流式快照。
+		// 未携带 commitTurnID 的前端在流结束后从终止检查点补出提交标识。
 		if commitTurnID == "" && c.GetHeader("X-SiYuan-Agent-Checkpoint") != "2" {
 			recoverableTurnID, runtimeErr := agent.RecoverableTurnID(meta.ID)
 			if runtimeErr != nil {

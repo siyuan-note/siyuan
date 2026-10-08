@@ -47,9 +47,11 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
                 "dialog/confirmDialog": {confirmDialog: (_title: string, _text: string, callback: () => void) => callback()},
                 "dialog/message": {showMessage: noop},
                 "protyle/util/compatibility": {isInMobileApp: () => true},
+                "protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: (): [] => []},
                 "config/setting/windowContext": {isSettingsWindow: () => settingsWindow,
                     getSettingsOwnerApp: () => window.siyuan.ws?.app,
-                    getSettingsWindowHost: () => ({getDockOrderSnapshot: () => { ownerReads++; return ownerSnapshot; }})},
+                    getSettingsWindowHost: () => ({getDockOrderSnapshot: () => { ownerReads++; return ownerSnapshot; },
+                        getEditorToolbarCatalogSnapshot: (): [] => []})},
             };
             check(id in mocks, `Missing module ${id}`);
             return mocks[id];

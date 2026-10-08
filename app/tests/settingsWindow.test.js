@@ -199,6 +199,7 @@ const runCases = async (sources) => {
         "../../plugin": pluginSettings,
         "../../util/processTitle": titles,
         "../entryVisibility/dockOrder": {getDockEntryOrderSnapshot: () => ({})},
+        "../../protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: () => []},
         "./taskBlocker": {hasNativeSettingTasks: () => false},
         "../bazaar/openPath": bazaarPath,
     });

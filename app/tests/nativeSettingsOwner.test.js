@@ -56,6 +56,7 @@ const setup = () => {
         "../../plugin": {hasPluginSetting: () => true},
         "../../util/processTitle": {getWorkspaceName: () => "Workspace"},
         "../entryVisibility/dockOrder": {getDockEntryOrderSnapshot: () => ({left: ["outline"]})},
+        "../../protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: () => []},
         "./taskBlocker": {hasNativeSettingTasks: () => nativeTask},
         "../bazaar/openPath": {openBazaarPath: record("openBazaarPath")},
     };

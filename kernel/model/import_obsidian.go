@@ -234,10 +234,12 @@ var (
 	errObsidianVaultMarkdownMissing = errors.New("Obsidian Vault has no readable Markdown")
 	errObsidianSourceChanged        = errors.New("Obsidian source file changed")
 
-	obsidianBlockIDPattern  = regexp.MustCompile(`(?m)(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$`)
-	obsidianQuotePattern    = regexp.MustCompile(`^((?:[ \t]*>[ \t]?)+)(.*)$`)
-	obsidianListItemPattern = regexp.MustCompile(`^([ \t]*(?:[-+*]|\d+[.)])[ \t]+)(.*)$`)
-	obsidianFootnotePattern = regexp.MustCompile(`(?m)\[\^[^\]\r\n]+\]`)
+	obsidianBlockIDPattern            = regexp.MustCompile(`(?m)(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$`)
+	obsidianQuotePattern              = regexp.MustCompile(`^((?:[ \t]*>[ \t]?)+)(.*)$`)
+	obsidianListItemPattern           = regexp.MustCompile(`^([ \t]*(?:[-+*]|\d+[.)])[ \t]+)(.*)$`)
+	obsidianFootnotePattern           = regexp.MustCompile(`(?m)\[\^[^\]\r\n]+\]`)
+	obsidianFootnoteDefinitionPattern = regexp.MustCompile(`(?m)^\[\^([^\]\r\n]+)\]:[ \t]*(.*?)[ \t]*\r?$`)
+	obsidianFootnoteReferencePattern  = regexp.MustCompile(`\[\^([^\]\r\n]+)\]`)
 )
 
 func StartObsidianVaultAnalysis(localPath string) (*ObsidianVaultTask, error) {
@@ -2038,8 +2040,7 @@ func parseObsidianImageSize(value string) (width, height int, ok bool) {
 func convertObsidianFootnotes(data []byte, stats *obsidianTransformStats) []byte {
 	scan := scanObsidianSource(data)
 	masked := maskObsidianProtected(data, scan.Protected)
-	definitionPattern := regexp.MustCompile(`(?m)^\[\^([^\]\r\n]+)\]:[ \t]*(.*?)[ \t]*\r?$`)
-	matches := definitionPattern.FindAllSubmatchIndex(masked, -1)
+	matches := obsidianFootnoteDefinitionPattern.FindAllSubmatchIndex(masked, -1)
 	if len(matches) == 0 {
 		return data
 	}
@@ -2058,8 +2059,7 @@ func convertObsidianFootnotes(data []byte, stats *obsidianTransformStats) []byte
 		definitions[label] = append(definitions[label], def)
 		orderedDefinitions = append(orderedDefinitions, def)
 	}
-	refPattern := regexp.MustCompile(`\[\^([^\]\r\n]+)\]`)
-	refMatches := refPattern.FindAllSubmatchIndex(masked, -1)
+	refMatches := obsidianFootnoteReferencePattern.FindAllSubmatchIndex(masked, -1)
 	var orderedLabels []string
 	seen := map[string]bool{}
 	for _, match := range refMatches {

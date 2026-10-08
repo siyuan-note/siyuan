@@ -33,6 +33,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+var iconHanPattern = regexp.MustCompile(`[\p{Han}]`)
+
 type ColorScheme struct {
 	Primary   string
 	Secondary string
@@ -617,7 +619,7 @@ func generateTypeEightSVG(color, content string) string {
 	}
 
 	// 动态变化字体大小
-	isChinese := regexp.MustCompile(`[\p{Han}]`).MatchString(content)
+	isChinese := iconHanPattern.MatchString(content)
 	var fontSize float64
 	if isChinese {
 		switch {

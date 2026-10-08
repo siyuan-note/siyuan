@@ -63,6 +63,12 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
+var (
+	importPrePattern            = regexp.MustCompile(`(?sU)<pre [^>]*>(.*)</pre>`)
+	importSVGPattern            = regexp.MustCompile(`(?i)<svg[^>]*>(.*?)</svg>`)
+	importEncodedNewlinePattern = regexp.MustCompile(`(?i)%0A`)
+)
+
 // GetImportAssetsDir 返回导入资源的落盘目录。普通笔记本复用已有本地目录，否则回退到全局目录。
 func GetImportAssetsDir(boxID, docDirLocalPath string) string {
 	globalAssetsDir := filepath.Join(util.DataDir, "assets")
@@ -115,7 +121,7 @@ func HTML2TreeWithOptions(htmlStr string, luteEngine *lute.Lute, boxID string,
 		case ast.NodeHTMLBlock:
 			if bytes.HasPrefix(n.Tokens, []byte("<pre ")) && bytes.HasSuffix(n.Tokens, []byte("</pre>")) {
 				if bytes.Contains(n.Tokens, []byte("data:image/svg+xml;base64")) {
-					matches := regexp.MustCompile(`(?sU)<pre [^>]*>(.*)</pre>`).FindSubmatch(n.Tokens)
+					matches := importPrePattern.FindSubmatch(n.Tokens)
 					if len(matches) >= 2 {
 						n.Tokens = matches[1]
 					}
@@ -2032,8 +2038,7 @@ func htmlBlock2Media(tree *parse.Tree) {
 }
 
 func processHTMLBlockSvgImg(n *ast.Node, assetDirPath, boxID string) {
-	re := regexp.MustCompile(`(?i)<svg[^>]*>(.*?)</svg>`)
-	matches := re.FindStringSubmatch(string(n.Tokens))
+	matches := importSVGPattern.FindStringSubmatch(string(n.Tokens))
 	if 1 >= len(matches) {
 		return
 	}
@@ -2068,8 +2073,7 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath, boxID string) {
 	}
 	typ = strings.ToLower(typ)
 	str := strings.TrimSpace(dest[sep+8:])
-	re := regexp.MustCompile(`(?i)%0A`)
-	str = re.ReplaceAllString(str, "\n")
+	str = importEncodedNewlinePattern.ReplaceAllString(str, "\n")
 	var decodeErr error
 	unbased, decodeErr := base64.StdEncoding.DecodeString(str)
 	if nil != decodeErr {

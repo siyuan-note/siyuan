@@ -66,14 +66,19 @@ func (o Optional[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o.Value)
 }
 
+var (
+	duplicateNamePattern = regexp.MustCompile(`^(.*) \((\d+)\)$`)
+	htmlCommentPattern   = regexp.MustCompile(`<!--[\s\S]*?-->`)
+	htmlTagPattern       = regexp.MustCompile(`<(/?)([a-zA-Z0-9]+)[^>]*?>`)
+)
+
 func GetDuplicateName(master string) (ret string) {
 	if "" == master {
 		return
 	}
 
 	ret = master + " (1)"
-	r := regexp.MustCompile(`^(.*) \((\d+)\)$`)
-	m := r.FindStringSubmatch(master)
+	m := duplicateNamePattern.FindStringSubmatch(master)
 	if nil == m || 3 > len(m) {
 		return
 	}
@@ -150,16 +155,14 @@ func HasUnclosedHtmlTag(htmlStr string) bool {
 	}
 
 	// 去除所有注释内容
-	commentRe := regexp.MustCompile(`<!--[\s\S]*?-->`)
-	htmlStr = commentRe.ReplaceAllString(htmlStr, "")
+	htmlStr = htmlCommentPattern.ReplaceAllString(htmlStr, "")
 
-	tagRe := regexp.MustCompile(`<(/?)([a-zA-Z0-9]+)[^>]*?>`)
 	selfClosing := map[string]bool{
 		"area": true, "base": true, "br": true, "col": true, "embed": true, "hr": true, "img": true,
 		"input": true, "link": true, "meta": true, "param": true, "source": true, "track": true, "wbr": true,
 	}
 	stack := []string{}
-	matches := tagRe.FindAllStringSubmatch(htmlStr, -1)
+	matches := htmlTagPattern.FindAllStringSubmatch(htmlStr, -1)
 	for _, m := range matches {
 		isClose := m[1] == "/"
 		tag := strings.ToLower(m[2])

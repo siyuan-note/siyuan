@@ -723,16 +723,15 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			title := node.IALAttr("title")
 			tags := node.IALAttr("tags")
 			if 0 == method {
-				if strings.Contains(title, keyword) {
-					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
-					renameRootTitles[node.ID] = strings.ReplaceAll(title, keyword, docTitleReplacement)
+				if newTitle, matched := replaceSearchText(title, method, keyword, strings.ReplaceAll(replacement, "/", "／"), r); matched {
+					renameRootTitles[node.ID] = newTitle
 					renameRoots = append(renameRoots, node)
 				}
 
-				if strings.Contains(tags, keyword) {
+				if newTags, matched := replaceSearchText(tags, method, keyword, strings.TrimSuffix(strings.TrimPrefix(replacement, "#"), "#"), r); matched {
 					replacement = strings.TrimPrefix(replacement, "#")
 					replacement = strings.TrimSuffix(replacement, "#")
-					tags = strings.ReplaceAll(tags, keyword, replacement)
+					tags = newTags
 					tags = strings.ReplaceAll(tags, editor.Zwsp, "")
 					node.SetIALAttr("tags", tags)
 					ReloadTag()
@@ -843,10 +842,10 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 						if replaceTypes["aTitle"] {
 							if 0 == method {
 								title := util.UnescapeHTML(n.TextMarkATitle)
-								if strings.Contains(title, escapedKey) {
-									n.TextMarkATitle = strings.ReplaceAll(title, escapedKey, replacement)
-								} else if strings.Contains(n.TextMarkATitle, keyword) {
-									n.TextMarkATitle = strings.ReplaceAll(title, keyword, replacement)
+								if content, matched := replaceSearchText(title, method, escapedKey, replacement, r); matched {
+									n.TextMarkATitle = content
+								} else if content, matched = replaceSearchText(title, method, keyword, replacement, r); matched {
+									n.TextMarkATitle = content
 								}
 							} else if 3 == method {
 								if nil != r && r.MatchString(n.TextMarkATitle) {
@@ -858,10 +857,10 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 						if replaceTypes["aHref"] {
 							if 0 == method {
 								href := util.UnescapeHTML(n.TextMarkAHref)
-								if strings.Contains(href, escapedKey) {
-									n.TextMarkAHref = strings.ReplaceAll(href, escapedKey, util.EscapeHTML(replacement))
-								} else if strings.Contains(href, keyword) {
-									n.TextMarkAHref = strings.ReplaceAll(href, keyword, strings.TrimSpace(replacement))
+								if content, matched := replaceSearchText(href, method, escapedKey, util.EscapeHTML(replacement), r); matched {
+									n.TextMarkAHref = content
+								} else if content, matched = replaceSearchText(href, method, keyword, strings.TrimSpace(replacement), r); matched {
+									n.TextMarkAHref = content
 								}
 							} else if 3 == method {
 								if nil != r && r.MatchString(n.TextMarkAHref) {
@@ -972,15 +971,7 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 							return ast.WalkContinue
 						}
 
-						if 0 == method {
-							if strings.Contains(n.TextMarkInlineMathContent, keyword) {
-								n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, keyword, replacement)
-							}
-						} else if 3 == method {
-							if nil != r && r.MatchString(n.TextMarkInlineMathContent) {
-								n.TextMarkInlineMathContent = r.ReplaceAllString(n.TextMarkInlineMathContent, replacement)
-							}
-						}
+						n.TextMarkInlineMathContent, _ = replaceSearchText(n.TextMarkInlineMathContent, method, keyword, replacement, r)
 
 						if "" == n.TextMarkInlineMathContent {
 							unlinks = append(unlinks, n)
@@ -990,16 +981,9 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 							return ast.WalkContinue
 						}
 
-						if 0 == method {
-							if strings.Contains(n.TextMarkInlineMemoContent, keyword) {
-								n.TextMarkInlineMemoContent = strings.ReplaceAll(n.TextMarkInlineMemoContent, keyword, replacement)
-								n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
-							}
-						} else if 3 == method {
-							if nil != r && r.MatchString(n.TextMarkInlineMemoContent) {
-								n.TextMarkInlineMemoContent = r.ReplaceAllString(n.TextMarkInlineMemoContent, replacement)
-								n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
-							}
+						if content, matched := replaceSearchText(n.TextMarkInlineMemoContent, method, keyword, replacement, r); matched {
+							n.TextMarkInlineMemoContent = content
+							n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 						}
 
 						if "" == n.TextMarkTextContent {
@@ -1086,15 +1070,15 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 			if strings.HasPrefix(replacement, "#") && strings.HasSuffix(replacement, "#") {
 				replacement = strings.TrimPrefix(replacement, "#")
 				replacement = strings.TrimSuffix(replacement, "#")
-			} else if n.TextMarkTextContent == keyword || n.TextMarkTextContent == escapedKey {
+			} else if equalSearchText(n.TextMarkTextContent, keyword) || equalSearchText(n.TextMarkTextContent, escapedKey) {
 				// 将标签转换为纯文本
 
 				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时直接转换
 					content := n.TextMarkTextContent
-					if strings.Contains(content, escapedKey) {
-						content = strings.ReplaceAll(content, escapedKey, replacement)
-					} else if strings.Contains(content, keyword) {
-						content = strings.ReplaceAll(content, keyword, replacement)
+					if replaced, matched := replaceSearchText(content, method, escapedKey, replacement, r); matched {
+						content = replaced
+					} else {
+						content, _ = replaceSearchText(content, method, keyword, replacement, r)
 					}
 					content = strings.ReplaceAll(content, editor.Zwsp, "")
 
@@ -1122,7 +1106,7 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 				// 存在其他类型时仅移除标签类型
 				n.TextMarkType = strings.ReplaceAll(n.TextMarkType, "tag", "")
 				n.TextMarkType = strings.TrimSpace(n.TextMarkType)
-			} else if strings.Contains(n.TextMarkTextContent, keyword) || strings.Contains(n.TextMarkTextContent, escapedKey) { // 标签包含了部分关键字的情况
+			} else { // 标签包含部分关键字时保留标签类型。
 				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时保持标签类型不变，仅替换标签部分内容
 					content, _ := replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 					content = strings.ReplaceAll(content, editor.Zwsp, "")
@@ -1143,13 +1127,39 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 // replaceEscapedTextMarkContent 在正文上匹配和展开捕获组，写回时统一转义，避免替换结果变成 HTML 标签。
 func replaceEscapedTextMarkContent(content string, method int, keyword, replacement string, r *regexp.Regexp) (string, bool) {
 	text := util.UnescapeHTML(content)
-	if 0 == method && strings.Contains(text, keyword) {
-		return util.EscapeHTML(strings.ReplaceAll(text, keyword, replacement)), true
-	}
-	if 3 == method && nil != r && r.MatchString(text) {
-		return util.EscapeHTML(r.ReplaceAllString(text, replacement)), true
+	if replaced, matched := replaceSearchText(text, method, keyword, replacement, r); matched {
+		return util.EscapeHTML(replaced), true
 	}
 	return content, false
+}
+
+// replaceSearchText 的文本匹配遵循大小写设置并按字面量替换，正则模式保持捕获组展开语义。
+func replaceSearchText(input string, method int, keyword, replacement string, r *regexp.Regexp) (string, bool) {
+	if method == 0 {
+		if !Conf.Search.CaseSensitive {
+			return replaceCaseInsensitiveText(input, keyword, replacement)
+		}
+		if strings.Contains(input, keyword) {
+			return strings.ReplaceAll(input, keyword, replacement), true
+		}
+	} else if method == 3 && r != nil && r.MatchString(input) {
+		return r.ReplaceAllString(input, replacement), true
+	}
+	return input, false
+}
+
+func replaceSearchTokens(input []byte, method int, keyword, replacement string, r *regexp.Regexp) ([]byte, bool) {
+	if content, matched := replaceSearchText(string(input), method, keyword, replacement, r); matched {
+		return []byte(content), true
+	}
+	return input, false
+}
+
+func equalSearchText(input, keyword string) bool {
+	if Conf.Search.CaseSensitive {
+		return input == keyword
+	}
+	return strings.EqualFold(input, keyword)
 }
 
 type replaceTextFragment struct {
@@ -1489,30 +1499,7 @@ func applyReplaceTextRunOutput(run *replaceTextRun, output []*ast.Node, skipNode
 // Supports replacing text elements with other elements https://github.com/siyuan-note/siyuan/issues/11058
 func replaceTextNode(text *ast.Node, method int, keyword string, replacement string, r *regexp.Regexp, luteEngine *lute.Lute) bool {
 	if 0 == method {
-		newContent := text.Tokens
-		if Conf.Search.CaseSensitive {
-			if bytes.Contains(text.Tokens, []byte(keyword)) {
-				newContent = bytes.ReplaceAll(text.Tokens, []byte(keyword), []byte(replacement))
-			}
-		} else {
-			if "" != strings.TrimSpace(keyword) {
-				// 当搜索结果中的文本元素包含大小写混合时替换失败
-				// Replace fails when search results contain mixed case in text elements https://github.com/siyuan-note/siyuan/issues/9171
-				keywords := strings.Split(keyword, " ")
-				// keyword 可能是 "foo Foo" 使用空格分隔的大小写命中情况，这里统一转换小写后去重
-				if 0 < len(keywords) {
-					var lowerKeywords []string
-					for _, k := range keywords {
-						lowerKeywords = append(lowerKeywords, strings.ToLower(k))
-					}
-					keyword = strings.Join(lowerKeywords, " ")
-				}
-			}
-
-			if bytes.Contains(bytes.ToLower(text.Tokens), []byte(keyword)) {
-				newContent = replaceCaseInsensitive(text.Tokens, []byte(keyword), []byte(replacement))
-			}
-		}
+		newContent, _ := replaceSearchTokens(text.Tokens, method, keyword, replacement, r)
 		if !bytes.Equal(newContent, text.Tokens) {
 			tree := parse.Inline("", newContent, luteEngine.ParseOptions)
 			if nil == tree.Root.FirstChild {
@@ -1557,15 +1544,7 @@ func replaceTextNode(text *ast.Node, method int, keyword string, replacement str
 }
 
 func replaceNodeTokens(n *ast.Node, method int, keyword string, replacement string, r *regexp.Regexp) {
-	if 0 == method {
-		if bytes.Contains(n.Tokens, []byte(keyword)) {
-			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))
-		}
-	} else if 3 == method {
-		if nil != r && r.MatchString(string(n.Tokens)) {
-			n.Tokens = []byte(r.ReplaceAllString(string(n.Tokens), replacement))
-		}
-	}
+	n.Tokens, _ = replaceSearchTokens(n.Tokens, method, keyword, replacement, r)
 }
 
 func mergeSamePreNext(n *ast.Node) {
@@ -3445,8 +3424,14 @@ func filterQueryInvisibleChars(query string) string {
 }
 
 func replaceCaseInsensitive(input, old, new []byte) []byte {
-	re := regexp.MustCompile("(?i)" + regexp.QuoteMeta(string(old)))
-	return re.ReplaceAllFunc(input, func([]byte) []byte {
-		return new
-	})
+	content, _ := replaceCaseInsensitiveText(string(input), string(old), string(new))
+	return []byte(content)
+}
+
+func replaceCaseInsensitiveText(input, keyword, replacement string) (string, bool) {
+	r := regexp.MustCompile("(?i)" + regexp.QuoteMeta(keyword))
+	if !r.MatchString(input) {
+		return input, false
+	}
+	return r.ReplaceAllStringFunc(input, func(string) string { return replacement }), true
 }

@@ -25,6 +25,25 @@ func TestReplaceCaseInsensitiveLiteralReplacement(t *testing.T) {
 	}
 }
 
+func TestReplaceSearchLiteralCaseFolding(t *testing.T) {
+	setSearchCaseSensitive(t, false)
+	for _, tc := range []struct{ input, keyword, want string }{
+		{"foo FOO", "foo", "$1<& $1<&"},
+		{"a.b A.B axb", "a.b", "$1<& $1<& axb"},
+		{"K k K", "k", "$1<& $1<& $1<&"},
+		{"Σ σ ς", "σ", "$1<& $1<& $1<&"},
+	} {
+		got, matched := replaceSearchText(tc.input, 0, tc.keyword, "$1<&", nil)
+		if !matched || got != tc.want {
+			t.Fatalf("literal fold: got %q, %v, want %q", got, matched, tc.want)
+		}
+		tokens, matched := replaceSearchTokens([]byte(tc.input), 0, tc.keyword, "$1<&", nil)
+		if !matched || string(tokens) != tc.want {
+			t.Fatalf("token fold: got %q, %v, want %q", tokens, matched, tc.want)
+		}
+	}
+}
+
 func TestReplaceTextNodeLiteralAndRegexReplacement(t *testing.T) {
 	engine := util.NewLute()
 	for _, tc := range []struct {

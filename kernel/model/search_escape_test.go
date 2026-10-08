@@ -10,6 +10,7 @@ import (
 )
 
 func TestReplaceTextMarkEscapedContent(t *testing.T) {
+	setSearchCaseSensitive(t, true)
 	engine := util.NewLute()
 	for _, mark := range []string{"em", "strong", "u", "s", "mark", "sup", "sub", "kbd", "text", "tag"} {
 		for _, tc := range []struct {

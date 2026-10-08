@@ -1,18 +1,18 @@
+import {afterRenderCards, captureAVCardRenderState, getAVCardHTML} from "../cardLayout";
 import {isAVDateType, isAVSelectType} from "../capabilities";
 import {isTableLikeView} from "../viewType";
 import {isAVRenderData} from "../renderData";
 import {getPublishAVView} from "../publishState";
 import {getReadonlyAVView} from "../readonlyState";
-import {hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
+import {hasClosestByAttribute} from "../../../util/hasClosest";
 import {getPageSize} from "../groups";
 import {fetchSyncPost} from "../../../../util/fetch";
 import {Constants} from "../../../../constants";
 import {avRender, genTabHeaderHTML} from "../render";
 import {replaceAVContainer} from "../container";
-import {afterRenderGallery, renderGallery} from "../gallery/render";
+import {renderGallery} from "../gallery/render";
 import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../../util/escape";
-import {getRowHTML} from "../row";
-import {getAVSelectedItemPoints, getBodyVirtualData} from "../virtualScroll";
+
 import {
     applyAVRenderContext,
     beginAVRender,
@@ -24,11 +24,6 @@ import {
 } from "../locate";
 import {getCardStyle} from "../gallery/style";
 import {getAVBackgroundColor, getAVColorStyle} from "../color";
-
-interface IIds {
-    groupId: string,
-    fieldId: string,
-}
 
 const getKanbanTitleHTML = (group: IAVView, counter: number, draggable: boolean) => {
     let nameHTML = "";
@@ -56,40 +51,6 @@ const getKanbanTitleHTML = (group: IAVView, counter: number, draggable: boolean)
 </div>`;
 };
 
-const getKanbanHTML = (data: IAVKanban, e: HTMLElement, virtualData: IAVVirtualData) => {
-    let galleryHTML = "";
-    // body
-    data.cards.find((item: IAVGalleryItem, rowIndex: number) => {
-        if (virtualData && typeof virtualData.renderedEnd === "number") {
-            if (rowIndex === 0) {
-                e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
-            }
-            if (rowIndex > virtualData.renderedEnd) {
-                return true;
-            }
-            if (rowIndex < virtualData.renderedStart) {
-                return;
-            }
-        } else if (data.pageSize > 100 && rowIndex > 99) {
-            e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
-            return true;
-        }
-        galleryHTML += getRowHTML({data, row: item, rowIndex: rowIndex + (virtualData?.rowOffset || 0), type: "kanban"});
-        return false;
-    });
-    galleryHTML += `<div class="av__gallery-add" data-type="av-add-bottom"><svg class="svg"><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>${window.siyuan.languages.newRow}</div>`;
-    return `<div class="av__gallery av__gallery--small">
-    ${virtualData?.topSpacerHeight ? `<div class="av__spacer" style="height: ${virtualData.topSpacerHeight}px;"></div>` : ""}${galleryHTML}
-</div>
-<div class="av__gallery-load${data.cardCount > data.cards.length ? "" : " fn__none"}">
-    <button class="b3-button av__button" data-type="av-load-more">
-        <svg><use xlink:href="#iconArrowDown"></use></svg>
-        <span>${window.siyuan.languages.loadMore}</span>
-        <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
-    </button>
-</div>`;
-};
-
 export const renderKanban = async (options: {
     blockElement: HTMLElement,
     protyle: IProtyle,
@@ -98,48 +59,8 @@ export const renderKanban = async (options: {
     data?: IAV,
 }) => {
     const renderToken = beginAVRender(options.blockElement);
-    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
-    const editIds: IIds[] = [];
-    options.blockElement.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
-        editIds.push({
-            groupId: (hasClosestByClassName(item, "av__body") as HTMLElement).dataset.groupId || "",
-            fieldId: item.parentElement.getAttribute("data-id"),
-        });
-    });
-    const selectItemIds: IIds[] = getAVSelectedItemPoints(options.blockElement).map(item => ({
-        groupId: item.groupID,
-        fieldId: item.itemID,
-    }));
-    const pageSizes: { [key: string]: string } = {};
-    const virtualData: { [key: string]: IAVVirtualData } = {};
-    options.blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
-        pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
-        if (item.dataset.avLocateWindow === "true") {
-            return;
-        }
-        if (!item.querySelector(".av__gallery-item") || options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
-            return;
-        }
-        // 守卫只保证至少 1 个 .av__gallery-item，但首行索引用 :not([data-type=ghost]) 过滤。
-        // body 内全是 ghost 占位行（插入动画进行中）时查询返回 null，需跳过避免解引用 null.getAttribute
-        const firstItem = item.querySelector(".av__gallery-item:not([data-type=ghost])") as HTMLElement;
-        if (!firstItem) {
-            return;
-        }
-        const firstItemIndex = parseInt(firstItem.getAttribute("data-index"));
-        virtualData[item.getAttribute("data-group-id")] = getBodyVirtualData(item, ".av__gallery-add", firstItemIndex);
-    });
-    const resetData = {
-        isSearching: searchInputElement && document.activeElement === searchInputElement,
-        query: searchInputElement?.textContent || "",
-        alignSelf: options.blockElement.style.alignSelf,
-        oldOffset: options.protyle.contentElement.scrollTop,
-        editIds,
-        selectItemIds,
-        pageSizes,
-        left: options.blockElement.querySelector(".av__kanban")?.scrollLeft,
-        virtualData
-    };
+    const resetData = captureAVCardRenderState(options, "kanban");
+    const virtualData = resetData.virtualData;
     if (options.blockElement.firstElementChild.innerHTML === "") {
         options.blockElement.style.alignSelf = "";
         options.blockElement.firstElementChild.outerHTML = `<div class="av__kanban fn__flex">
@@ -238,7 +159,7 @@ export const renderKanban = async (options: {
             }
             bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}" data-group-id="${group.id}" data-previous-group-id="${view.groups[groupIndex - 1]?.id || ""}" data-group-config="${groupConfig}"${selectBg}>
     ${getKanbanTitleHTML(group, group.cardCount, groupDraggable)}
-    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body">${getKanbanHTML(group, options.blockElement, virtualData[group.id])}</div>
+    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body">${getAVCardHTML("kanban", group, options.blockElement, virtualData[group.id])}</div>
 </div>`;
         }
     });
@@ -261,7 +182,7 @@ export const renderKanban = async (options: {
             kanbanElement.classList.remove("av__kanban--bg");
         }
     }
-    afterRenderGallery({
+    afterRenderCards({
         resetData,
         renderAll: options.renderAll,
         data,

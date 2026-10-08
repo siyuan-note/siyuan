@@ -1287,6 +1287,11 @@
           }
         }
 
+        &__desc {
+          // 无预览图时与右侧信息栏顶部（.item__header + .fn__flex-1）对齐：8px 上外边距 + 21px 头部高度 + 16px 下外边距
+          margin-top: 45px;
+        }
+
         &__preview {
           width: 100%;
           height: 50%;
@@ -1309,6 +1314,11 @@
             cursor: zoom-out;
           }
         }
+      }
+
+      // 有预览图时由预览图的下外边距提供与描述之间的间距
+      .item__preview + .item__desc {
+        margin-top: 0;
       }
     }
   }

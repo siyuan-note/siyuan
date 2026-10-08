@@ -1197,6 +1197,11 @@ body.mobile-topbar--merged {
             width: 100%;
           }
 
+          &__desc {
+            // 移动端信息区在描述上方，无需与信息栏对齐
+            margin-top: 0;
+          }
+
           &__preview {
             height: min(50vw, 180px);
             margin-bottom: 16px;

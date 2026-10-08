@@ -62,6 +62,7 @@ import {MobileOpenedFileSelection} from "./mobileOpenedFileSelection";
 import {insertMobileMultiSelectMenu, renderMultiSelectToolbar, updateMultiSelectToolbar} from "../util/multiSelectToolbar";
 import {PinnedDocs} from "../../layout/dock/PinnedDocs";
 import {ParentDocClick} from "../../layout/dock/parentDocClick";
+import {emitToPlugins} from "../../plugin/EventBusCore";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
@@ -707,6 +708,7 @@ export class MobileFiles extends Model {
                     break;
                 case "mount":
                     this.onMount(data);
+                    emitToPlugins("opened-notebook", data);
                     break;
                 case "createnotebook":
                     setNoteBook((notebooks) => {
@@ -728,6 +730,9 @@ export class MobileFiles extends Model {
                     break;
                 case "closeBox":
                 case "removeBox":
+                    this.onRemove(data);
+                    emitToPlugins("closed-notebook", data);
+                    break;
                 case "removeDoc":
                     this.onRemove(data);
                     break;

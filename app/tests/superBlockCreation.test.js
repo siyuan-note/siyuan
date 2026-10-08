@@ -58,6 +58,16 @@ const cases = async source => {
     const transaction = (_protyle, forward, backward) => submitted.push({forward, backward});
     const getEditorRange = () => protyle.toolbar.range;
     const deps = {
+        SLASH_MENU_ROOT_PATH: "mobile.slash",
+        hintSlash: () => [],
+        getFrequentSlashButtons: () => [],
+        getFrequentSlashItems: () => [],
+        prependFrequentSlashButtons: () => {},
+        escapeHtml: value => {
+            const element = document.createElement("div");
+            element.textContent = value;
+            return element.innerHTML;
+        },
         Constants,
         transaction,
         getEditorRange,

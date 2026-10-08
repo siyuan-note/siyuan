@@ -395,7 +395,7 @@ var blockDeleteCmd = &cobra.Command{
 			}},
 		}}
 		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
+		model.WaitForTransactions(transactions)
 
 		if bt != nil {
 			model.AppendPushReloadProtyleEntry(bt.RootID)

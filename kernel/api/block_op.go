@@ -102,7 +102,7 @@ var updateTaskListItemMarker = contractHandler(apicontract.UpdateTaskListItemMar
 	}
 
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 
 	broadcastTransactions(transactions)
 	return blockTransactionsResponse(transactions)
@@ -145,7 +145,7 @@ var batchUpdateTaskListItemMarker = contractHandler(apicontract.BatchUpdateTaskL
 	transactions := []*model.Transaction{tx}
 
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 
 	broadcastTransactions(transactions)
 	return blockTransactionsResponse(transactions)
@@ -187,7 +187,7 @@ var moveOutlineHeading = contractHandler(apicontract.MoveOutlineHeading, func(c 
 	}
 
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 
 	broadcastTransactions(transactions)
 	return blockTransactionsResponse(transactions)
@@ -232,7 +232,7 @@ var appendDailyNoteBlock = contractHandler(apicontract.AppendDailyNoteBlock, fun
 	}
 
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 
 	broadcastTransactions(transactions)
 	return blockTransactionsResponse(transactions)
@@ -277,7 +277,7 @@ var prependDailyNoteBlock = contractHandler(apicontract.PrependDailyNoteBlock, f
 	}
 
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 
 	broadcastTransactions(transactions)
 	return blockTransactionsResponse(transactions)
@@ -332,7 +332,7 @@ var unfoldBlock = contractHandler(apicontract.UnfoldBlock, func(c *gin.Context, 
 	}
 
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 
 	broadcastTransactions(transactions)
 	return apicontract.Success(apicontract.Null{})
@@ -387,7 +387,7 @@ var foldBlock = contractHandler(apicontract.FoldBlock, func(c *gin.Context, requ
 	}
 
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 
 	broadcastTransactions(transactions)
 	return apicontract.Success(apicontract.Null{})
@@ -566,7 +566,7 @@ var batchAppendBlock = contractHandler(apicontract.BatchAppendBlock, func(c *gin
 	}
 
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 
 	broadcastTransactions(transactions)
 	return blockTransactionsResponse(transactions)
@@ -609,7 +609,7 @@ var prependBlock = contractHandler(apicontract.PrependBlock, func(c *gin.Context
 	}
 
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 
 	broadcastTransactions(transactions)
 	return blockTransactionsResponse(transactions)
@@ -656,7 +656,7 @@ var batchPrependBlock = contractHandler(apicontract.BatchPrependBlock, func(c *g
 	}
 
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 
 	broadcastTransactions(transactions)
 	return blockTransactionsResponse(transactions)
@@ -774,7 +774,7 @@ var batchInsertBlock = contractHandler(apicontract.BatchInsertBlock, func(c *gin
 	}
 
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 
 	broadcastTransactions(transactions)
 	return blockTransactionsResponse(transactions)

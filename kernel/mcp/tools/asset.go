@@ -151,7 +151,7 @@ func assetCreateHTML(args map[string]any) (CallToolResult, error) {
 		}},
 	}}
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 	util.PushReloadProtyle(docBlockTree.RootID)
 
 	return CallToolResult{

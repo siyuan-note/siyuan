@@ -2495,7 +2495,7 @@ func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
 		return
 	}
 	PerformTransactions(&[]*Transaction{transaction})
-	FlushTxQueue()
+	transaction.WaitForCommit()
 	return
 }
 

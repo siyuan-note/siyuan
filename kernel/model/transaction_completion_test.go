@@ -70,6 +70,45 @@ func TestQueuedTransactionWaitForCommit(t *testing.T) {
 	requireTransactionFinished(t, waitForTransactionInTest(first))
 }
 
+func TestWaitForSubmittedTransactionBatch(t *testing.T) {
+	FlushTxQueue()
+	flushLock.Lock()
+	defer func() {
+		for _, tx := range takeQueuedTransactions() {
+			flushTx(tx)
+		}
+		flushLock.Unlock()
+	}()
+	first, second := &Transaction{Timestamp: 1}, &Transaction{Timestamp: 2}
+	transactions := []*Transaction{second, first}
+	PerformTransactions(&transactions)
+	done := make(chan struct{})
+	go func() { WaitForTransactions(transactions); close(done) }()
+	requireTransactionWaiting(t, done)
+	queued := takeQueuedTransactions()
+	defer func() {
+		for _, tx := range queued {
+			flushTx(tx)
+		}
+	}()
+	flushTx(queued[0])
+	queued = queued[1:]
+	requireTransactionWaiting(t, done)
+	flushTx(queued[0])
+	queued = nil
+	requireTransactionFinished(t, done)
+
+	// 后续事务尚未执行时，已完成批次和空批次仍能返回。
+	later := []*Transaction{{Timestamp: 3}}
+	PerformTransactions(&later)
+	completed, empty := make(chan struct{}), make(chan struct{})
+	go func() { WaitForTransactions(transactions); close(completed) }()
+	go func() { WaitForTransactions(nil); close(empty) }()
+	requireTransactionFinished(t, completed)
+	requireTransactionFinished(t, empty)
+	requireTransactionWaiting(t, waitForTransactionInTest(later[0]))
+}
+
 func TestTransactionCompletionOnAllExecutionExits(t *testing.T) {
 	fixture := setupStructureTransactionTest(t)
 	for _, mode := range []string{"sync", "queue", "sync-notify"} {

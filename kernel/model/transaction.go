@@ -66,6 +66,15 @@ func FlushTxQueue() {
 	}
 }
 
+// WaitForTransactions 等待已提交批次的写入、撤销记录和清理完成，不等待后续事务到达。
+func WaitForTransactions(transactions []*Transaction) {
+	diagnostic := util.WatchOperation("flush editing transactions", "wait for submitted transactions")
+	defer diagnostic.Finish()
+	for _, tx := range transactions {
+		tx.WaitForCommit()
+	}
+}
+
 // PerformTxSync 同步执行单笔事务并返回错误，供需要获知落盘结果的调用方使用。
 // 与异步入队的 PerformTransactions 不同，这里直接持有 flushLock 串行执行 performTx，
 // 失败时返回原始错误（不转成推送消息），调用方可以保留待处理数据或回滚状态。

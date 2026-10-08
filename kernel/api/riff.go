@@ -131,7 +131,7 @@ var removeRiffCards = contractHandler(apicontract.RemoveRiffCards, func(c *gin.C
 	}
 	transactions := []*model.Transaction{{DoOperations: []*model.Operation{{Action: "removeFlashcards", DeckID: request.DeckID, BlockIDs: blockIDs}}}}
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 	if request.DeckID != "" {
 		return apicontract.Success(deckData(model.Decks[request.DeckID]))
 	}
@@ -145,7 +145,7 @@ var addRiffCards = contractHandler(apicontract.AddRiffCards, func(c *gin.Context
 	}
 	transactions := []*model.Transaction{{DoOperations: []*model.Operation{{Action: "addFlashcards", DeckID: request.DeckID, BlockIDs: blockIDs}}}}
 	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	model.WaitForTransactions(transactions)
 	return apicontract.Success(deckData(model.Decks[request.DeckID]))
 })
 

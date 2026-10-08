@@ -3,6 +3,7 @@ package sql
 import (
 	gosql "database/sql"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -30,6 +31,7 @@ func TestQueryDailyNoteRoots(t *testing.T) {
 			for _, row := range [][]string{
 				{"b", "b", boxID, "custom-dailynote-20240229", "20240229"},
 				{"a", "a", boxID, "custom-dailynote-20240229", "20240229"},
+				{"a", "a", boxID, "custom-dailynote-20240229", "20240229"},
 				{"child", "a", boxID, "custom-dailynote-20240229", "20240229"},
 				{"other", "other", "another-box", "custom-dailynote-20240229", "20240229"},
 				{"wrong", "wrong", boxID, "custom-dailynote-20240229", "20240301"},
@@ -41,6 +43,19 @@ func TestQueryDailyNoteRoots(t *testing.T) {
 			ids, err := QueryDailyNoteRootIDsInBox(boxID, "custom-dailynote-20240229", "20240229")
 			if err != nil || !reflect.DeepEqual(ids, []string{"a", "b"}) {
 				t.Fatalf("unexpected date roots: %v %v", ids, err)
+			}
+			for range 2 {
+				if err = ensureDailyNoteAttributesIndex(testDB); err != nil {
+					t.Fatal(err)
+				}
+			}
+			indexedIDs, err := QueryDailyNoteRootIDsInBox(boxID, "custom-dailynote-20240229", "20240229")
+			if err != nil || !reflect.DeepEqual(indexedIDs, ids) {
+				t.Fatalf("index changed daily note roots: %v %v", indexedIDs, err)
+			}
+			plan := queryPlanDetails(t, testDB, "SELECT DISTINCT block_id FROM attributes WHERE box = ? AND name = ? AND value = ? AND block_id = root_id ORDER BY block_id", boxID, "custom-dailynote-20240229", "20240229")
+			if !strings.Contains(plan, "SEARCH attributes USING INDEX idx_attributes_name_value") {
+				t.Fatalf("daily note lookup did not use its index: %s", plan)
 			}
 			if _, err := testDB.Exec("DROP TABLE attributes"); err != nil {
 				t.Fatal(err)

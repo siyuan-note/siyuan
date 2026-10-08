@@ -134,6 +134,9 @@ func initDatabase(forceRebuild bool) {
 			if err := ensureBookmarkAttributesIndex(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create bookmark attributes index failed: %s", err)
 			}
+			if err := ensureDailyNoteAttributesIndex(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create daily note attributes index failed: %s", err)
+			}
 			if err := ensureRecentUpdatedBlocksIndexes(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create recent updated block indexes failed: %s", err)
 			}
@@ -269,6 +272,9 @@ func initDBTables() {
 	}
 	if err = ensureBookmarkAttributesIndex(db); err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create bookmark attributes index failed: %s", err)
+	}
+	if err = ensureDailyNoteAttributesIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create daily note attributes index failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS refs")
@@ -1469,6 +1475,11 @@ func ensureBookmarkAttributesIndex(database *sql.DB) (err error) {
 	return
 }
 
+func ensureDailyNoteAttributesIndex(database *sql.DB) (err error) {
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_attributes_name_value ON attributes(name, value)")
+	return
+}
+
 func ensureRefsDefIndexes(database *sql.DB) (err error) {
 	if _, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_refs_def_block_id ON refs(def_block_id)"); err != nil {
 		return
@@ -2143,6 +2154,9 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		return
 	}
 	if err = ensureBookmarkAttributesIndex(boxDB); err != nil {
+		return
+	}
+	if err = ensureDailyNoteAttributesIndex(boxDB); err != nil {
 		return
 	}
 	if err = cleanupInvalidRefs(boxDB); err != nil {

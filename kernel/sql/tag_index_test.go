@@ -78,9 +78,9 @@ func TestTagSpanIndexPreservesQueries(t *testing.T) {
 	}
 }
 
-func queryPlanDetails(t *testing.T, database *gosql.DB, stmt string) string {
+func queryPlanDetails(t *testing.T, database *gosql.DB, stmt string, args ...any) string {
 	t.Helper()
-	rows, err := database.Query("EXPLAIN QUERY PLAN " + stmt)
+	rows, err := database.Query("EXPLAIN QUERY PLAN "+stmt, args...)
 	if err != nil {
 		t.Fatal(err)
 	}

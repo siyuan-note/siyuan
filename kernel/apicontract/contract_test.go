@@ -2,11 +2,38 @@ package apicontract
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"strings"
 	"testing"
 )
+
+func TestContractTopLevelJSONErrorCompatibility(t *testing.T) {
+	endpoint := Endpoint[struct{}, Null]{definition: Definition{Path: "/test", Body: JSONBody}}
+	for _, body := range []string{"[]", "1", "true", `"text"`} {
+		var legacy map[string]any
+		legacyErr := json.NewDecoder(strings.NewReader(body)).Decode(&legacy)
+		_, err := endpoint.Decode(strings.NewReader(body))
+		want := fmt.Sprintf("Parses request [/test] failed: %s", legacyErr)
+		if err == nil || err.Error() != want {
+			t.Fatalf("body %s: got %v, want %s", body, err, want)
+		}
+		for _, decode := range []func(io.Reader, string) error{
+			func(reader io.Reader, path string) error { _, err := blockRequestFields(reader, path); return err },
+			func(reader io.Reader, path string) error {
+				_, err := decodeSettingConfig(reader, path, false)
+				return err
+			},
+			func(reader io.Reader, path string) error { _, err := syncRequestFields(reader, path); return err },
+		} {
+			if err := decode(strings.NewReader(body), "/test"); err == nil || err.Error() != want {
+				t.Fatalf("custom decoder body %s: got %v, want %s", body, err, want)
+			}
+		}
+	}
+}
 
 func TestRequestCompatibility(t *testing.T) {
 	for _, body := range []string{"", "null", "{}", "[]", "invalid", `{"flashcard":`, `{"flashcard":null}`} {

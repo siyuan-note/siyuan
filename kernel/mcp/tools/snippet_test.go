@@ -67,7 +67,7 @@ func TestSnippetToolPaginationAndPreview(t *testing.T) {
 	if len([]rune(page["content"].(string))) != 8000 || page["nextOffset"] != float64(8000) {
 		t.Fatal("content page is not bounded")
 	}
-	last := snippetToolResult(t, map[string]any{"action": "get", "id": "0", "offset": float64(8000)})
+	last := snippetToolResult(t, map[string]any{"action": "get", "id": "0", "offset": float64(8000), "revision": model.SnippetRevision(snippets[0])})
 	if last["content"] != strings.Repeat("字", 10) || last["truncated"] != false {
 		t.Fatal("Unicode paging lost content")
 	}
@@ -91,7 +91,9 @@ func TestSnippetToolSchemaAndEffects(t *testing.T) {
 	}
 	for _, args := range []map[string]any{
 		{"action": "enable", "id": "test"},
-		{"action": "update", "id": "test", "revision": strings.Repeat("a", 64), "name": "Test"},
+		{"action": "update", "id": "test", "revision": strings.Repeat("a", 64)},
+		{"action": "get", "id": "test", "offset": 1},
+		{"action": "replace", "id": "test", "revision": strings.Repeat("a", 64), "oldText": ""},
 		{"action": "create", "type": "html", "name": "Test", "content": ""},
 		{"action": "list", "offset": -1},
 		{"action": "list", "offset": 0.5},
@@ -101,7 +103,7 @@ func TestSnippetToolSchemaAndEffects(t *testing.T) {
 			t.Fatalf("invalid arguments accepted: %+v", args)
 		}
 	}
-	for _, action := range []string{"list", "get", "create", "update", "enable", "disable", "remove"} {
+	for _, action := range []string{"list", "get", "create", "update", "replace", "enable", "disable", "remove"} {
 		effects, ok := tool.EffectsFor(action)
 		if !ok || effects.LocalWrite != (action != "list" && action != "get") {
 			t.Fatalf("wrong effects: %s %+v", action, effects)
@@ -125,5 +127,24 @@ func TestSnippetToolRoundTripAndReadOnly(t *testing.T) {
 	result, err := snippetHandler(map[string]any{"action": "create", "type": "css", "name": "Test", "content": "body{}"})
 	if err != nil || !result.IsError {
 		t.Fatal("read-only write accepted")
+	}
+}
+
+func TestSnippetContentSearchAndPartialEdits(t *testing.T) {
+	original := &conf.Snippet{ID: "one", Name: "Calendar", Type: "css", Content: ".av__calendar{border:0}", Enabled: true}
+	setupSnippetToolTest(t, []*conf.Snippet{original})
+	list := snippetToolResult(t, map[string]any{"action": "list", "keyword": " .AV__CALENDAR "})
+	if list["total"] != float64(1) || strings.Contains(fmt.Sprint(list), "border:0") {
+		t.Fatal("content search failed or leaked code")
+	}
+	updated := snippetToolResult(t, map[string]any{"action": "update", "id": "one", "revision": model.SnippetRevision(original), "name": "Renamed"})["snippet"].(map[string]any)
+	patched := snippetToolResult(t, map[string]any{"action": "replace", "id": "one", "revision": updated["revision"], "oldText": "border:0", "newText": "outline:0"})["snippet"].(map[string]any)
+	read := snippetToolResult(t, map[string]any{"action": "get", "id": "one", "revision": patched["revision"]})
+	if read["content"] != ".av__calendar{outline:0}" || patched["name"] != "Renamed" || patched["enabled"] != true {
+		t.Fatal("partial edit changed unrelated fields")
+	}
+	result, err := snippetHandler(map[string]any{"action": "get", "id": "one", "offset": float64(1)})
+	if err != nil || !result.IsError {
+		t.Fatal("handler accepted unversioned continuation")
 	}
 }

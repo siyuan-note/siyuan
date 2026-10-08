@@ -17,6 +17,9 @@
 package model
 
 import (
+	"crypto/sha256"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -31,6 +34,17 @@ import (
 )
 
 var snippetsLock = sync.Mutex{}
+
+var ErrSnippetConflict = errors.New("snippet revision conflict")
+
+// SnippetsRevision 包含顺序和全部字段；缺失配置与空列表表示相同的初始状态。
+func SnippetsRevision(snippets []*conf.Snippet) string {
+	if snippets == nil {
+		snippets = []*conf.Snippet{}
+	}
+	data, _ := json.Marshal(snippets)
+	return fmt.Sprintf("%x", sha256.Sum256(data))
+}
 
 func RemoveSnippet(id string) (ret *conf.Snippet, err error) {
 	snippetsLock.Lock()
@@ -55,9 +69,19 @@ func RemoveSnippet(id string) (ret *conf.Snippet, err error) {
 	return
 }
 
-func SetSnippet(snippets []*conf.Snippet) (err error) {
+// SetSnippet 的可选版本参数用于全量保存的并发校验；省略时保留历史接口行为。
+func SetSnippet(snippets []*conf.Snippet, expectedRevision ...string) (err error) {
 	snippetsLock.Lock()
 	defer snippetsLock.Unlock()
+	if len(expectedRevision) > 0 {
+		current, loadErr := loadSnippets()
+		if loadErr != nil {
+			return loadErr
+		}
+		if expectedRevision[0] != SnippetsRevision(current) {
+			return ErrSnippetConflict
+		}
+	}
 
 	err = writeSnippetsConf(snippets)
 	if err == nil {

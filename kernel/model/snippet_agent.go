@@ -18,9 +18,18 @@ func SnippetRevision(snippet *conf.Snippet) string {
 	return fmt.Sprintf("%x", sha256.Sum256(data))
 }
 
+// AgentSnippetEdit 用字段是否出现区分保留原值和写入空内容。
+type AgentSnippetEdit struct {
+	Type    string  `json:"type"`
+	Name    *string `json:"name"`
+	Content *string `json:"content"`
+	OldText *string `json:"oldText"`
+	NewText *string `json:"newText"`
+}
+
 // MutateAgentSnippet 与已有全量保存共用锁，在校验版本后只修改指定片段，保留其他片段及顺序。
 // 新片段默认禁用且不在发布服务中加载，更新不隐式改变类型或执行范围。
-func MutateAgentSnippet(action, id, revision string, value *conf.Snippet) (*conf.Snippet, error) {
+func MutateAgentSnippet(action, id, revision string, value *AgentSnippetEdit) (*conf.Snippet, error) {
 	if util.ReadOnly || Conf == nil || Conf.ReadOnly {
 		return nil, fmt.Errorf("snippet changes are unavailable in read-only mode")
 	}
@@ -43,12 +52,10 @@ func MutateAgentSnippet(action, id, revision string, value *conf.Snippet) (*conf
 	}
 	var result *conf.Snippet
 	if action == "create" {
-		if value == nil || (value.Type != "css" && value.Type != "js") {
-			return nil, fmt.Errorf("type must be css or js")
+		if value == nil || value.Name == nil || value.Content == nil || (value.Type != "css" && value.Type != "js") {
+			return nil, fmt.Errorf("type, name and content are required")
 		}
-		copy := *value
-		copy.ID, copy.Enabled, copy.DisabledInPublish = ast.NewNodeID(), false, true
-		result = &copy
+		result = &conf.Snippet{ID: ast.NewNodeID(), Type: value.Type, Name: *value.Name, Content: *value.Content, DisabledInPublish: true}
 	} else {
 		if index < 0 {
 			return nil, fmt.Errorf("snippet not found; list snippets again")
@@ -60,10 +67,25 @@ func MutateAgentSnippet(action, id, revision string, value *conf.Snippet) (*conf
 		result = &copy
 		switch action {
 		case "update":
-			if value == nil {
-				return nil, fmt.Errorf("name and content are required")
+			if value == nil || (value.Name == nil && value.Content == nil) {
+				return nil, fmt.Errorf("name or content is required")
 			}
-			result.Name, result.Content = value.Name, value.Content
+			if value.Name != nil {
+				result.Name = *value.Name
+			}
+			if value.Content != nil {
+				result.Content = *value.Content
+			}
+		case "replace":
+			if value == nil || value.OldText == nil || value.NewText == nil || *value.OldText == "" ||
+				len(*value.OldText) > 65536 || len(*value.NewText) > 65536 {
+				return nil, fmt.Errorf("oldText must be nonempty; newText is required; each must be at most 65536 bytes")
+			}
+			start := strings.Index(result.Content, *value.OldText)
+			if start < 0 || strings.Contains(result.Content[start+1:], *value.OldText) {
+				return nil, fmt.Errorf("oldText must match exactly once; no changes made")
+			}
+			result.Content = result.Content[:start] + *value.NewText + result.Content[start+len(*value.OldText):]
 		case "enable":
 			result.Enabled = true
 		case "disable":
@@ -73,12 +95,17 @@ func MutateAgentSnippet(action, id, revision string, value *conf.Snippet) (*conf
 			return nil, fmt.Errorf("unknown snippet operation")
 		}
 	}
-	if action == "create" || action == "update" || action == "enable" {
+	contentChanged := action == "create" || index >= 0 && result.Content != snippets[index].Content
+	nameChanged := action == "create" || index >= 0 && result.Name != snippets[index].Name
+	if nameChanged && (strings.TrimSpace(result.Name) == "" || len(result.Name) > 256) {
+		return nil, fmt.Errorf("name must contain 1-256 bytes")
+	}
+	if contentChanged && action != "replace" && len(result.Content) > 65536 {
+		return nil, fmt.Errorf("replacement content must not exceed 65536 bytes; use replace for a local edit")
+	}
+	if contentChanged || action == "enable" {
 		if result.Type != "css" && result.Type != "js" {
 			return nil, fmt.Errorf("unsupported snippet type")
-		}
-		if strings.TrimSpace(result.Name) == "" || len(result.Name) > 256 || len(result.Content) > 65536 {
-			return nil, fmt.Errorf("name must contain 1-256 bytes; content must not exceed 65536 bytes")
 		}
 		content := strings.ToLower(result.Content)
 		if result.Type == "css" && (strings.Contains(content, "</style") || strings.Contains(content, "<script")) {

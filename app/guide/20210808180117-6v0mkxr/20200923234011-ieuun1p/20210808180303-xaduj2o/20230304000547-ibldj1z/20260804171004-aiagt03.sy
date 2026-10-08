@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261008115720"
+		"updated": "20261008125238"
 	},
 	"Children": [
 		{
@@ -1232,6 +1232,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "Enabling JavaScript or updating an enabled JavaScript snippet can execute code in connected windows. Disabling or deleting a snippet does not undo code that has already run; restarting the frontend may be necessary. If a snippet changes while you are reviewing it, the operation is rejected and the agent must read it again before requesting confirmation."
+				}
+			]
+		},
+		{
+			"ID": "20261008125238-rndmbrz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008125238-rndmbrz",
+				"updated": "20261008125238"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can search snippet names and code, rename a snippet without resending its code, or request a local replacement that matches the original text exactly once. Large existing snippets can still be enabled, renamed, and locally edited. Later pages of code require the same revision. If snippets change while the snippet dialog is open, saving is rejected and your draft is retained; copy your edits, reopen the dialog, and merge them with the latest snippets."
 				}
 			]
 		},

@@ -41487,6 +41487,16 @@
     "SetSnippetRequestInput": {
       "type": "object",
       "properties": {
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "snippets": {
           "type": "array",
           "items": {
@@ -48663,6 +48673,9 @@
     "SnippetsData": {
       "type": "object",
       "properties": {
+        "revision": {
+          "type": "string"
+        },
         "snippets": {
           "type": "array",
           "items": {

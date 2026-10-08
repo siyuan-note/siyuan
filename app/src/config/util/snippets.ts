@@ -1,5 +1,6 @@
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
+import {showMessage} from "../../dialog/message";
 import {isMobile, objEquals} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Constants} from "../../constants";
@@ -96,20 +97,26 @@ export const renderSnippet = (timeout = 0, isActive = () => true, beforeJS?: () 
 };
 
 export const openSnippets = () => {
-    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
-        let cssHTML = "";
-        let jsHTML = "";
-        response.data.snippets.forEach((item: ISnippet) => {
-            if (item.type === "css") {
-                cssHTML += genSnippet(item);
-            } else {
-                jsHTML += genSnippet(item);
-            }
-        });
-        const dialog = new Dialog({
-            width: isMobile() ? "100vw" : "50vw",
-            height: isMobile() ? "100vh" : "80vh",
-            content: `<div class="layout-tab-bar fn__flex fn__flex-shrink" style="${isMobile() ? "padding-right: 38px;" : ""}border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
+    fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, response => {
+        openSnippetDialog(response.data.snippets, response.data.revision);
+    });
+};
+
+const openSnippetDialog = (oldSnippets: ISnippet[], revision: string, draft = oldSnippets,
+                           settings = {...window.siyuan.config.snippet}, initialSettings = settings) => {
+    let cssHTML = "";
+    let jsHTML = "";
+    draft.forEach((item: ISnippet) => {
+        if (item.type === "css") {
+            cssHTML += genSnippet(item);
+        } else {
+            jsHTML += genSnippet(item);
+        }
+    });
+    const dialog = new Dialog({
+        width: isMobile() ? "100vw" : "50vw",
+        height: isMobile() ? "100vh" : "80vh",
+        content: `<div class="layout-tab-bar fn__flex fn__flex-shrink" style="${isMobile() ? "padding-right: 38px;" : ""}border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
     <div data-type="css" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">CSS</span><span class="fn__flex-1"></span></div>
     <div data-type="js" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">JS</span><span class="fn__flex-1"></span></div>
 </div>
@@ -122,7 +129,7 @@ export const openSnippets = () => {
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <input data-action="toggleCSS" class="b3-switch fn__flex-center" type="checkbox"${window.siyuan.config.snippet.enabledCSS ? " checked" : ""}>
+            <input data-action="toggleCSS" class="b3-switch fn__flex-center" type="checkbox"${settings.enabledCSS ? " checked" : ""}>
         </div>
         ${cssHTML}
     </div>
@@ -134,7 +141,7 @@ export const openSnippets = () => {
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <input data-action="toggleJS" class="b3-switch fn__flex-center" type="checkbox"${window.siyuan.config.snippet.enabledJS ? " checked" : ""}>
+            <input data-action="toggleJS" class="b3-switch fn__flex-center" type="checkbox"${settings.enabledJS ? " checked" : ""}>
         </div>
         ${jsHTML}
     </div>
@@ -143,81 +150,83 @@ export const openSnippets = () => {
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-            destroyCallback: (options) => {
-                if (options?.cancel === "true") {
-                    return;
-                }
-                setSnippet(dialog, response.data.snippets, removeIds, true);
+        destroyCallback: (options) => {
+            if (options?.cancel === "true") {
+                return;
             }
-        });
-        response.data.snippets.forEach((item: ISnippet) => {
-            const nameElement = (dialog.element.querySelector(`[data-id="${item.id}"] input.b3-text-field`) as HTMLInputElement);
-            nameElement.value = item.name;
-            const contentElement = dialog.element.querySelector(`[data-id="${item.id}"] textarea`) as HTMLTextAreaElement;
-            contentElement.textContent = item.content;
-        });
-        const removeIds: string[] = [];
-        dialog.element.setAttribute("data-key", Constants.DIALOG_SNIPPETS);
-        dialog.element.addEventListener("click", (event) => {
-            let target = event.target as HTMLElement;
-            while (target && target !== dialog.element) {
-                if (target.id === "addCodeSnippetCSS" || target.id === "addCodeSnippetJS") {
-                    target.parentElement.insertAdjacentHTML("afterend", genSnippet({
-                        type: target.id === "addCodeSnippetCSS" ? "css" : "js",
-                        name: "",
-                        content: "",
-                        enabled: true,
-                        disabledInPublish: false,
-                    }));
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (target.classList.contains("b3-button--cancel")) {
-                    dialog.destroy({cancel: "true"});
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (target.classList.contains("b3-button--text")) {
-                    setSnippet(dialog, response.data.snippets, removeIds);
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (target.classList.contains("item")) {
-                    if (target.getAttribute("data-type") === "css") {
-                        target.classList.add("item--focus");
-                        target.nextElementSibling.classList.remove("item--focus");
-                        target.parentElement.nextElementSibling.firstElementChild.classList.remove("fn__none");
-                        target.parentElement.nextElementSibling.lastElementChild.classList.add("fn__none");
-                    } else {
-                        target.classList.add("item--focus");
-                        target.previousElementSibling.classList.remove("item--focus");
-                        target.parentElement.nextElementSibling.firstElementChild.classList.add("fn__none");
-                        target.parentElement.nextElementSibling.lastElementChild.classList.remove("fn__none");
-                    }
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (target.dataset.action === "remove") {
-                    const itemElement = target.parentElement.parentElement;
-                    removeIds.push("#snippet" + (itemElement.getAttribute("data-type") === "css" ? "CSS" : "JS") + itemElement.getAttribute("data-id"));
-                    itemElement.remove();
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
+            setSnippet(dialog, oldSnippets, removeIds, revision, initialSettings, true);
+        }
+    });
+    const positions: Record<string, number> = {css: 0, js: 0};
+    draft.forEach((item: ISnippet) => {
+        const row = dialog.element.querySelectorAll(`[data-id][data-type="${item.type}"]`)[positions[item.type]++];
+        const nameElement = (row.querySelector("input.b3-text-field") as HTMLInputElement);
+        nameElement.value = item.name;
+        const contentElement = row.querySelector("textarea") as HTMLTextAreaElement;
+        contentElement.textContent = item.content;
+    });
+    const removeIds = oldSnippets.filter(item => !draft.some(entry => entry.id === item.id))
+        .map(item => `#snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`);
+    dialog.element.setAttribute("data-key", Constants.DIALOG_SNIPPETS);
+    dialog.element.addEventListener("click", (event) => {
+        let target = event.target as HTMLElement;
+        while (target && target !== dialog.element) {
+            if (target.id === "addCodeSnippetCSS" || target.id === "addCodeSnippetJS") {
+                target.parentElement.insertAdjacentHTML("afterend", genSnippet({
+                    type: target.id === "addCodeSnippetCSS" ? "css" : "js",
+                    name: "",
+                    content: "",
+                    enabled: true,
+                    disabledInPublish: false,
+                }));
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.classList.contains("b3-button--cancel")) {
+                dialog.destroy({cancel: "true"});
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.classList.contains("b3-button--text")) {
+                setSnippet(dialog, oldSnippets, removeIds, revision, initialSettings);
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.classList.contains("item")) {
+                if (target.getAttribute("data-type") === "css") {
+                    target.classList.add("item--focus");
+                    target.nextElementSibling.classList.remove("item--focus");
+                    target.parentElement.nextElementSibling.firstElementChild.classList.remove("fn__none");
+                    target.parentElement.nextElementSibling.lastElementChild.classList.add("fn__none");
+                } else {
+                    target.classList.add("item--focus");
+                    target.previousElementSibling.classList.remove("item--focus");
+                    target.parentElement.nextElementSibling.firstElementChild.classList.add("fn__none");
+                    target.parentElement.nextElementSibling.lastElementChild.classList.remove("fn__none");
                 }
-                target = target.parentElement;
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (target.dataset.action === "remove") {
+                const itemElement = target.parentElement.parentElement;
+                removeIds.push("#snippet" + (itemElement.getAttribute("data-type") === "css" ? "CSS" : "JS") + itemElement.getAttribute("data-id"));
+                itemElement.remove();
+                event.stopPropagation();
+                event.preventDefault();
+                break;
             }
+            target = target.parentElement;
+        }
+    });
+    dialog.element.querySelectorAll('[data-action="search"]').forEach((inputItem: HTMLInputElement) => {
+        inputItem.addEventListener("input", (event: KeyboardEvent) => {
+            if (event.isComposing) {
+                return;
+            }
+            filterSnippet(dialog, inputItem);
         });
-        dialog.element.querySelectorAll('[data-action="search"]').forEach((inputItem: HTMLInputElement) => {
-            inputItem.addEventListener("input", (event: KeyboardEvent) => {
-                if (event.isComposing) {
-                    return;
-                }
-                filterSnippet(dialog, inputItem);
-            });
-            inputItem.addEventListener("compositionend", () => {
-                filterSnippet(dialog, inputItem);
-            });
+        inputItem.addEventListener("compositionend", () => {
+            filterSnippet(dialog, inputItem);
         });
     });
 };
@@ -261,8 +270,39 @@ const genSnippet = (options: ISnippet) => {
 </div>`;
 };
 
-const setSnippetPost = (dialog: Dialog, snippets: ISnippet[], removeIds: string[]) => {
-    fetchPost("/api/snippet/setSnippet", {snippets: snippets.map(item => ({...item, id: item.id || ""}))}, () => {
+const savingSnippets = new WeakSet<Dialog>();
+const completedSnippetSaves = new WeakSet<Dialog>();
+
+const snippetSettings = (dialog: Dialog) => ({
+    enabledCSS: (dialog.element.querySelector('.b3-switch[data-action="toggleCSS"]') as HTMLInputElement).checked,
+    enabledJS: (dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement).checked,
+});
+
+const setSnippetPost = async (dialog: Dialog, snippets: ISnippet[], removeIds: string[], revision: string,
+                              oldSnippets: ISnippet[], initialSettings: ReturnType<typeof snippetSettings>) => {
+    if (savingSnippets.has(dialog)) return;
+    savingSnippets.add(dialog);
+    const settings = snippetSettings(dialog);
+    const restoreDraft = () => {
+        if (!dialog.element.isConnected) {
+            openSnippetDialog(oldSnippets, revision, readSnippetDraft(dialog), snippetSettings(dialog), initialSettings);
+        }
+    };
+    try {
+        // 缺少版本号时不退回无条件覆盖，保留草稿以便重新加载兼容的内核。
+        if (!revision) {
+            restoreDraft();
+            showMessage(window.siyuan.languages.snippetConflict, 0, "error");
+            return;
+        }
+        const response = await fetchSyncPost("/api/snippet/setSnippet", {
+            snippets: snippets.map(item => ({...item, id: item.id || ""})), revision,
+        }, undefined, false);
+        if (response.code !== 0) {
+            restoreDraft();
+            showMessage(response.msg === "snippet revision conflict" ? window.siyuan.languages.snippetConflict : response.msg, 0, "error");
+            return;
+        }
         let cssChanged = false;
         removeIds.forEach(item => {
             const rmElement = document.querySelector(item);
@@ -274,14 +314,20 @@ const setSnippetPost = (dialog: Dialog, snippets: ISnippet[], removeIds: string[
         if (cssChanged) {
             refreshHeadingNumberMeasurements();
         }
-        window.siyuan.config.snippet.enabledCSS = (dialog.element.querySelector('.b3-switch[data-action="toggleCSS"]') as HTMLInputElement).checked;
-        window.siyuan.config.snippet.enabledJS = (dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement).checked;
+        window.siyuan.config.snippet.enabledCSS = settings.enabledCSS;
+        window.siyuan.config.snippet.enabledJS = settings.enabledJS;
         fetchPost("/api/setting/setSnippet", window.siyuan.config.snippet);
+        completedSnippetSaves.add(dialog);
         dialog.destroy({cancel: "true"});
-    });
+    } catch (error) {
+        restoreDraft();
+        showMessage(String(error), 0, "error");
+    } finally {
+        savingSnippets.delete(dialog);
+    }
 };
 
-const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[], confirm = false) => {
+const readSnippetDraft = (dialog: Dialog): ISnippet[] => {
     const snippets: ISnippet[] = [];
     dialog.element.querySelectorAll("[data-id]").forEach((item) => {
         snippets.push({
@@ -293,17 +339,24 @@ const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[]
             enabled: (item.querySelector('.b3-switch[data-type="snippet"]') as HTMLInputElement).checked
         });
     });
+    return snippets;
+};
+
+const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[], revision: string,
+                    initialSettings: ReturnType<typeof snippetSettings>, confirm = false) => {
+    if (savingSnippets.has(dialog) || completedSnippetSaves.has(dialog)) return;
+    const snippets = readSnippetDraft(dialog);
     if (objEquals(oldSnippets, snippets) &&
-        window.siyuan.config.snippet.enabledCSS === (dialog.element.querySelector('.b3-switch[data-action="toggleCSS"]') as HTMLInputElement).checked &&
-        window.siyuan.config.snippet.enabledJS === (dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement).checked) {
+        initialSettings.enabledCSS === (dialog.element.querySelector('.b3-switch[data-action="toggleCSS"]') as HTMLInputElement).checked &&
+        initialSettings.enabledJS === (dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement).checked) {
         dialog.destroy({cancel: "true"});
     } else {
         if (confirm) {
             confirmDialog(window.siyuan.languages.save, window.siyuan.languages.snippetsTip, () => {
-                setSnippetPost(dialog, snippets, removeIds);
+                void setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings);
             });
         } else {
-            setSnippetPost(dialog, snippets, removeIds);
+            void setSnippetPost(dialog, snippets, removeIds, revision, oldSnippets, initialSettings);
         }
     }
 };

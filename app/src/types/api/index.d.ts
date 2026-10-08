@@ -1874,7 +1874,7 @@ export type SetSecretsRequestInput = { "items"?: Array<SettingSecretInput | null
 
 export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
 
-export type SetSnippetRequestInput = { "snippets": Array<SnippetInput>; };
+export type SetSnippetRequestInput = { "revision"?: string | null; "snippets": Array<SnippetInput>; };
 
 export type SetSyncLocalRequestInput = { "local": SyncLocalInput; };
 
@@ -2106,7 +2106,7 @@ export type Snippet = { "content": string; "disabledInPublish": boolean; "enable
 
 export type SnippetInput = { "content": string; "disabledInPublish"?: boolean | null; "enabled": boolean; "id": string; "name": string; "type": string; };
 
-export type SnippetsData = { "snippets": Array<Snippet | null>; };
+export type SnippetsData = { "revision"?: string; "snippets": Array<Snippet | null>; };
 
 export type SortAttributeViewKeyRequestInput = { "avID": string; "keyID": string; "previousKeyID": string; };
 

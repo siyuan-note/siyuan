@@ -1,8 +1,10 @@
 package model
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 
@@ -16,14 +18,14 @@ func TestAgentSnippetMutationsPreserveOtherEntriesAndFlags(t *testing.T) {
 	if err := SetSnippet([]*conf.Snippet{original}); err != nil {
 		t.Fatal(err)
 	}
-	created, err := MutateAgentSnippet("create", "", "", &conf.Snippet{Name: "Test", Type: "js", Content: "void 0;", Enabled: true})
+	created, err := MutateAgentSnippet("create", "", "", agentSnippetEdit(&conf.Snippet{Name: "Test", Type: "js", Content: "void 0;", Enabled: true}))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if created.ID == "" || created.Enabled || !created.DisabledInPublish {
 		t.Fatalf("unsafe defaults: %+v", created)
 	}
-	updated, err := MutateAgentSnippet("update", original.ID, SnippetRevision(original), &conf.Snippet{Name: "New", Content: "body{color:red}", Type: "js", DisabledInPublish: true})
+	updated, err := MutateAgentSnippet("update", original.ID, SnippetRevision(original), agentSnippetEdit(&conf.Snippet{Name: "New", Content: "body{color:red}", Type: "js", DisabledInPublish: true}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +56,7 @@ func TestAgentSnippetMutationsPreserveOtherEntriesAndFlags(t *testing.T) {
 
 func TestAgentSnippetConcurrentUpdatesRejectStaleRevision(t *testing.T) {
 	setupSyncMutationTest(t)
-	snippet, err := MutateAgentSnippet("create", "", "", &conf.Snippet{Name: "Test", Type: "css"})
+	snippet, err := MutateAgentSnippet("create", "", "", agentSnippetEdit(&conf.Snippet{Name: "Test", Type: "css"}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +65,7 @@ func TestAgentSnippetConcurrentUpdatesRejectStaleRevision(t *testing.T) {
 	var wg sync.WaitGroup
 	for _, content := range []string{"body{color:red}", "body{color:blue}"} {
 		wg.Go(func() {
-			_, err := MutateAgentSnippet("update", snippet.ID, revision, &conf.Snippet{Name: "Test", Content: content})
+			_, err := MutateAgentSnippet("update", snippet.ID, revision, agentSnippetEdit(&conf.Snippet{Name: "Test", Content: content}))
 			results <- err
 		})
 	}
@@ -82,7 +84,7 @@ func TestAgentSnippetConcurrentUpdatesRejectStaleRevision(t *testing.T) {
 
 func TestAgentSnippetFailuresPreserveConfiguration(t *testing.T) {
 	setupSyncMutationTest(t)
-	snippet, err := MutateAgentSnippet("create", "", "", &conf.Snippet{Name: "Test", Type: "css", Content: "body{}"})
+	snippet, err := MutateAgentSnippet("create", "", "", agentSnippetEdit(&conf.Snippet{Name: "Test", Type: "css", Content: "body{}"}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +96,7 @@ func TestAgentSnippetFailuresPreserveConfiguration(t *testing.T) {
 	for _, value := range []*conf.Snippet{
 		{Name: "Test", Content: "</STYLE>"}, {Name: "Test", Content: "<script>"}, {Name: " ", Content: "body{}"},
 	} {
-		if _, err = MutateAgentSnippet("update", snippet.ID, SnippetRevision(snippet), value); err == nil {
+		if _, err = MutateAgentSnippet("update", snippet.ID, SnippetRevision(snippet), agentSnippetEdit(value)); err == nil {
 			t.Fatal("invalid content accepted")
 		}
 	}
@@ -111,12 +113,120 @@ func TestAgentSnippetFailuresPreserveConfiguration(t *testing.T) {
 		if err = os.WriteFile(path, []byte(data), 0600); err != nil {
 			t.Fatal(err)
 		}
-		if _, err = MutateAgentSnippet("create", "", "", &conf.Snippet{Name: "New", Type: "css"}); err == nil {
+		if _, err = MutateAgentSnippet("create", "", "", agentSnippetEdit(&conf.Snippet{Name: "New", Type: "css"})); err == nil {
 			t.Fatal("corrupt configuration accepted")
 		}
 		after, err = os.ReadFile(path)
 		if err != nil || string(after) != data {
 			t.Fatal("corrupt configuration overwritten")
 		}
+	}
+}
+
+func agentSnippetEdit(value *conf.Snippet) *AgentSnippetEdit {
+	return &AgentSnippetEdit{Type: value.Type, Name: &value.Name, Content: &value.Content}
+}
+
+func TestAgentSnippetLargeContentAndUniqueReplacement(t *testing.T) {
+	setupSyncMutationTest(t)
+	large := strings.Repeat("/* existing code */", 5000) + ".target{border:0}"
+	snippet := &conf.Snippet{ID: "large", Name: strings.Repeat("n", 300), Type: "css", Content: large}
+	if err := SetSnippet([]*conf.Snippet{snippet}); err != nil {
+		t.Fatal(err)
+	}
+	snippet, err := MutateAgentSnippet("enable", snippet.ID, SnippetRevision(snippet), nil)
+	if err != nil || !snippet.Enabled || snippet.Content != large {
+		t.Fatalf("large existing enable: %v", err)
+	}
+	name := "Renamed"
+	snippet, err = MutateAgentSnippet("update", snippet.ID, SnippetRevision(snippet), &AgentSnippetEdit{Name: &name})
+	if err != nil || snippet.Name != name || snippet.Content != large {
+		t.Fatalf("rename rewrote code: %v", err)
+	}
+	oldText, newText := ".target{border:0}", ".target{outline:0}"
+	revision := SnippetRevision(snippet)
+	snippet, err = MutateAgentSnippet("replace", snippet.ID, revision, &AgentSnippetEdit{OldText: &oldText, NewText: &newText})
+	if err != nil || snippet.Content != strings.TrimSuffix(large, oldText)+newText || !snippet.Enabled {
+		t.Fatalf("local replacement: %v", err)
+	}
+	if _, err = MutateAgentSnippet("replace", snippet.ID, revision, &AgentSnippetEdit{OldText: &newText, NewText: &oldText}); err == nil {
+		t.Fatal("stale patch accepted")
+	}
+	tooLarge := strings.Repeat("x", 65537)
+	if _, err = MutateAgentSnippet("update", snippet.ID, SnippetRevision(snippet), &AgentSnippetEdit{Content: &tooLarge}); err == nil {
+		t.Fatal("oversized replacement accepted")
+	}
+	if _, err = MutateAgentSnippet("create", "", "", &AgentSnippetEdit{Type: "css", Name: &name, Content: &tooLarge}); err == nil {
+		t.Fatal("oversized creation accepted")
+	}
+	for _, content := range []string{"aaa", "aaXaa", "none"} {
+		snippet.Content = content
+		if err = SetSnippet([]*conf.Snippet{snippet}); err != nil {
+			t.Fatal(err)
+		}
+		oldText = "aa"
+		if _, err = MutateAgentSnippet("replace", snippet.ID, SnippetRevision(snippet), &AgentSnippetEdit{OldText: &oldText, NewText: &newText}); err == nil {
+			t.Fatalf("ambiguous/missing match accepted: %s", content)
+		}
+		stored, err := LoadSnippets()
+		if err != nil || stored[0].Content != content {
+			t.Fatal("failed replacement changed content")
+		}
+	}
+}
+
+func TestSnippetListRevisionProtectsAgentChanges(t *testing.T) {
+	setupSyncMutationTest(t)
+	old := []*conf.Snippet{{ID: "one", Name: "One", Type: "css", Content: "body{}"}}
+	if err := SetSnippet(old); err != nil {
+		t.Fatal(err)
+	}
+	revision := SnippetsRevision(old)
+	name, content := "Two", "a{}"
+	if _, err := MutateAgentSnippet("create", "", "", &AgentSnippetEdit{Type: "css", Name: &name, Content: &content}); err != nil {
+		t.Fatal(err)
+	}
+	if err := SetSnippet(old, revision); !errors.Is(err, ErrSnippetConflict) {
+		t.Fatalf("stale list accepted: %v", err)
+	}
+	current, err := LoadSnippets()
+	if err != nil || len(current) != 2 {
+		t.Fatal("agent-created entry was lost")
+	}
+	if err = SetSnippet(current, SnippetsRevision(current)); err != nil {
+		t.Fatal(err)
+	}
+	if err = SetSnippet(old); err != nil {
+		t.Fatal("legacy unconditional save no longer works")
+	}
+}
+
+func TestSnippetConcurrentDialogAndAgentSave(t *testing.T) {
+	setupSyncMutationTest(t)
+	initial := []*conf.Snippet{{ID: "one", Name: "Original", Type: "css", Content: "body{}"}}
+	if err := SetSnippet(initial); err != nil {
+		t.Fatal(err)
+	}
+	listRevision, itemRevision := SnippetsRevision(initial), SnippetRevision(initial[0])
+	results := make(chan error, 2)
+	var wg sync.WaitGroup
+	wg.Go(func() {
+		results <- SetSnippet([]*conf.Snippet{{ID: "one", Name: "Dialog", Type: "css", Content: "body{}"}}, listRevision)
+	})
+	wg.Go(func() {
+		name := "Agent"
+		_, err := MutateAgentSnippet("update", "one", itemRevision, &AgentSnippetEdit{Name: &name})
+		results <- err
+	})
+	wg.Wait()
+	close(results)
+	success := 0
+	for err := range results {
+		if err == nil {
+			success++
+		}
+	}
+	if success != 1 {
+		t.Fatalf("concurrent stale saves succeeded: %d", success)
 	}
 }

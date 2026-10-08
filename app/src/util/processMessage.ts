@@ -34,11 +34,20 @@ export const processMessage = (response: IWebSocketData) => {
     if ("msg" === response.cmd) {
         const id = showMessage(response.msg, response.data.closeTimeout, response.code === 0 ? "info" : "error", response.data.id);
         document.querySelector("#message #addMicrosoftDefenderExclusion")?.addEventListener("click", (event) => {
-            (event.target as HTMLElement).innerHTML = '<svg class="fn__rotate" style="margin-right: 0;"><use xlink:href="#iconRefresh"></use></svg>';
+            const button = event.currentTarget as HTMLButtonElement;
+            if (button.disabled) {
+                return;
+            }
+            const content = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<svg class="fn__rotate" style="margin-right: 0;"><use xlink:href="#iconRefresh"></use></svg>';
             fetchPost("/api/system/addMicrosoftDefenderExclusion", {}, () => {
                 hideMessage(id);
+            }).finally(() => {
+                button.disabled = false;
+                button.innerHTML = content;
             });
-        }, {once: true});
+        });
         document.querySelector("#message #ignoreAddMicrosoftDefenderExclusion")?.addEventListener("click", () => {
             hideMessage(id);
             fetchPost("/api/system/ignoreAddMicrosoftDefenderExclusion");

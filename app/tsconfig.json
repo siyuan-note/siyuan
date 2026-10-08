@@ -4,6 +4,7 @@
     "noImplicitAny": true,
     "module": "commonjs",
     "target": "es6",
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "typeRoots": [
       "./node_modules/@types"
     ],

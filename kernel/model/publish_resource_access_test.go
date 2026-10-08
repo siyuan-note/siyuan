@@ -17,15 +17,92 @@
 package model
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestCachedPublishResourceRechecksDocumentAndAuthorization(t *testing.T) {
+	const boxID, rootID = "20261008000000-box0001", "20261008000000-root001"
+	previousDataDir, previousDBPath := util.DataDir, util.BlockTreeDBPath
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	treenode.InitBlockTree(true)
+	if err := os.MkdirAll(filepath.Join(util.DataDir, boxID), 0755); err != nil {
+		t.Fatal(err)
+	}
+	cacheKey := boxID + "/" + rootID
+	t.Cleanup(func() {
+		forgetRuntimeEncryptedBox(boxID)
+		invalidateEncryptedPublishAccessCache()
+		publishResourceRefsCache.Delete(cacheKey)
+		treenode.CloseDatabase()
+		util.DataDir, util.BlockTreeDBPath = previousDataDir, previousDBPath
+	})
+	root := &ast.Node{Type: ast.NodeDocument, ID: rootID}
+	root.SetIALAttr("updated", "20261008000000")
+	tree := &parse.Tree{ID: rootID, Box: boxID, Path: "/" + rootID + ".sy", Root: root}
+	treenode.IndexBlockTree(tree)
+	bt := treenode.GetBlockTreeInBox(rootID, boxID)
+	publishResourceRefsCache.Store(cacheKey, &publishResourceRefs{
+		updated: bt.Updated, emojis: map[string]struct{}{"icon.png": {}}, widgets: map[string]struct{}{"example": {}},
+	})
+	newContext := func() *gin.Context {
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Request = httptest.NewRequest(http.MethodGet, "/emojis/icon.png", nil)
+		return c
+	}
+	c := newContext()
+	for _, widget := range []bool{false, true} {
+		resource := "icon.png"
+		if widget {
+			resource = "example"
+		}
+		if !checkResourceAccessableByPublishAccess(c, resource, nil, widget) {
+			t.Fatal("cached reference did not authorize the resource")
+		}
+		if checkResourceAccessableByPublishAccess(c, resource, PublishAccess{{ID: rootID, Disable: true}}, widget) {
+			t.Fatal("disabled document authorized a cached resource")
+		}
+		protected := PublishAccess{{ID: rootID, Password: "secret"}}
+		if checkResourceAccessableByPublishAccess(c, resource, protected, widget) {
+			t.Fatal("unauthorized reader reused cached access")
+		}
+		authorized := newContext()
+		authorized.Request.AddCookie(&http.Cookie{Name: "publish-auth-" + rootID, Value: util.SHA256Hash([]byte(rootID + "secret"))})
+		if !checkResourceAccessableByPublishAccess(authorized, resource, protected, widget) {
+			t.Fatal("authorized reader could not use cached references")
+		}
+		if checkResourceAccessableByPublishAccess(c, resource, protected, widget) {
+			t.Fatal("authorized request leaked permission to another reader")
+		}
+	}
+	markRuntimeEncryptedBox(boxID)
+	invalidateEncryptedPublishAccessCache()
+	if CheckEmojiAccessableByPublishAccess(c, "icon.png", nil) {
+		t.Fatal("encrypted notebook authorized a cached resource")
+	}
+	forgetRuntimeEncryptedBox(boxID)
+	invalidateEncryptedPublishAccessCache()
+	root.SetIALAttr("updated", "20261008000001")
+	treenode.UpsertBlockTree(tree)
+	if CheckEmojiAccessableByPublishAccess(c, "icon.png", nil) {
+		t.Fatal("changed document authorized a stale reference")
+	}
+	treenode.RemoveBlockTreesByRootID(boxID, rootID)
+	if CheckEmojiAccessableByPublishAccess(c, "icon.png", nil) {
+		t.Fatal("deleted document authorized a cached resource")
+	}
+}
 
 func TestPublishResourceURLPath(t *testing.T) {
 	tests := []struct {

@@ -80,6 +80,9 @@ func initDatabase(forceRebuild bool) {
 		if _, err := db.Exec("CREATE INDEX IF NOT EXISTS idx_blocktrees_box_id ON blocktrees(box_id)"); err != nil {
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create blocktree box index failed: %s", err)
 		}
+		if err := ensureBlockTreeTypeIndex(db); err != nil {
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create blocktree type index failed: %s", err)
+		}
 		if err := cleanupInvalidBlockTrees(db); err != nil {
 			logging.LogErrorf("cleanup invalid blocktrees failed: %s", err)
 		}
@@ -119,6 +122,14 @@ func initDBTables() {
 	if err = ensureHPathIndexes(db); err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create hpath indexes failed: %s", err)
 	}
+	if err = ensureBlockTreeTypeIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create blocktree type index failed: %s", err)
+	}
+}
+
+func ensureBlockTreeTypeIndex(database *sql.DB) (err error) {
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocktrees_type ON blocktrees(type)")
+	return
 }
 
 func cleanupInvalidBlockTrees(database *sql.DB) (err error) {
@@ -1010,6 +1021,9 @@ func initEncryptedBlockTreeTables(boxDB *sql.DB) (err error) {
 		}
 	}
 	if err = ensureHPathIndexes(boxDB); err != nil {
+		return
+	}
+	if err = ensureBlockTreeTypeIndex(boxDB); err != nil {
 		return
 	}
 	if err = cleanupInvalidBlockTrees(boxDB); err != nil {

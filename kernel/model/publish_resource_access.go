@@ -97,21 +97,47 @@ func CheckEmojiAccessableByPublishAccess(c *gin.Context, relativePath string, pu
 }
 
 func checkResourceAccessableByPublishAccess(c *gin.Context, resource string, publishAccess PublishAccess, widget bool) bool {
+	publishDisable := filterDisablePublishAccess(publishAccess)
+	// 缓存只提供引用候选，每次请求仍校验当前文档版本和发布权限。
+	found := false
+	publishResourceRefsCache.Range(func(key, value any) bool {
+		refs := value.(*publishResourceRefs)
+		if !refs.contains(resource, widget) {
+			return true
+		}
+		boxID, rootID, _ := strings.Cut(key.(string), "/")
+		bt := treenode.GetBlockTreeInBox(rootID, boxID)
+		if bt != nil && bt.Type == "d" && bt.Updated == refs.updated &&
+			getBlockTreePublishAccessStatus(c, publishAccess, publishDisable, bt) == PublishAccessAllowed {
+			found = true
+			return false
+		}
+		return true
+	})
+	if found {
+		return true
+	}
+
 	for _, bt := range treenode.GetBlockTreesByType("d") {
-		if !checkBlockTreeAccessableByPublishAccess(c, publishAccess, bt) {
+		if getBlockTreePublishAccessStatus(c, publishAccess, publishDisable, bt) != PublishAccessAllowed {
 			continue
 		}
 
 		refs := getPublishResourceRefs(bt)
-		if widget {
-			if _, ok := refs.widgets[resource]; ok {
-				return true
-			}
-		} else if _, ok := refs.emojis[resource]; ok {
+		if refs.contains(resource, widget) {
 			return true
 		}
 	}
 	return false
+}
+
+func (refs *publishResourceRefs) contains(resource string, widget bool) bool {
+	if widget {
+		_, ok := refs.widgets[resource]
+		return ok
+	}
+	_, ok := refs.emojis[resource]
+	return ok
 }
 
 func getPublishResourceRefs(bt *treenode.BlockTree) *publishResourceRefs {

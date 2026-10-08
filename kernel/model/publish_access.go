@@ -444,11 +444,14 @@ func CheckBlockTreeDiscoverableByPublishAccess(publishAccess PublishAccess, bt *
 }
 
 func GetBlockTreePublishAccessStatus(c *gin.Context, publishAccess PublishAccess, bt *treenode.BlockTree) PublishAccessStatus {
+	return getBlockTreePublishAccessStatus(c, publishAccess, filterDisablePublishAccess(publishAccess), bt)
+}
+
+func getBlockTreePublishAccessStatus(c *gin.Context, publishAccess, publishDisable PublishAccess, bt *treenode.BlockTree) PublishAccessStatus {
 	if bt == nil || IsEncryptedBoxDeniedByPublishAccess(bt.BoxID) {
 		return PublishAccessDenied
 	}
 
-	publishDisable := filterDisablePublishAccess(publishAccess)
 	if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable) {
 		return PublishAccessDenied
 	}

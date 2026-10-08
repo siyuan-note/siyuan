@@ -519,7 +519,7 @@ func UpdateBlockContentQueue(block *Block) {
 
 	newOp := &dbQueueOperation{block: block, inQueueTime: time.Now(), action: "update_block_content"}
 	for i, op := range operationQueue {
-		if "update_block_content" == op.action && op.block.ID == block.ID {
+		if "update_block_content" == op.action && op.recoveryEntry == nil && op.block.ID == block.ID && op.block.Box == block.Box {
 			operationQueue[i] = newOp
 			return
 		}

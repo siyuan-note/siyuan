@@ -31,7 +31,6 @@ import (
 	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/panjf2000/ants/v2"
@@ -393,44 +392,11 @@ func autoIndexEmbedBlock() {
 		embedBlocks = append(embedBlocks, sql.QueryEmptyContentEmbedBlocksInBox(boxID)...)
 	}
 	for i, embedBlock := range embedBlocks {
-		markdown := strings.TrimSpace(embedBlock.Markdown)
-		markdown = strings.TrimPrefix(markdown, "{{")
-		stmt := strings.TrimSuffix(markdown, "}}")
-
-		// 嵌入块的 Markdown 内容需要反转义
-		stmt = html.UnescapeString(stmt)
-		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-
-		// 需要移除首尾的空白字符以判断是否具有 //!js 标记
-		stmt = strings.TrimSpace(stmt)
-		if "" == stmt {
+		content, supported := sql.CalculateEmbedBlockContent(embedBlock)
+		if !supported {
 			continue
 		}
-		if strings.HasPrefix(stmt, "//!js") {
-			// https://github.com/siyuan-note/siyuan/issues/9648
-			// js 嵌入块不支持自动索引，由前端主动调用 /api/search/updateEmbedBlock 接口更新内容 https://github.com/siyuan-note/siyuan/issues/9736
-			continue
-		}
-
-		// 嵌入块脚本来自文档内容，属于不可信输入：执行前必须校验为单条只读查询，
-		// 不能用「是否包含 select 子串」代替，注释或子查询即可绕过
-		if err := sql.CheckReadonlyBlockQueryStatement(stmt, embedBlock.Box); nil != err {
-			logging.LogWarnf("skip non-readonly embed block [%s] script: %s", embedBlock.ID, err)
-			continue
-		}
-
-		var queryResultBlocks []*sql.Block
-		if IsEncryptedBox(embedBlock.Box) {
-			queryResultBlocks = sql.SelectBlocksRawStmtNoParseInBox(stmt, 102400, embedBlock.Box)
-		} else {
-			queryResultBlocks = sql.SelectBlocksRawStmtNoParse(stmt, 102400)
-		}
-		for _, block := range queryResultBlocks {
-			embedBlock.Content += block.Content
-		}
-		if "" == embedBlock.Content {
-			embedBlock.Content = "no query result"
-		}
+		embedBlock.Content = content
 		sql.UpdateBlockContentQueue(embedBlock)
 
 		if 63 <= i { // 一次任务中最多处理 64 个嵌入块，防止卡顿

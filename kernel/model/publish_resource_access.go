@@ -106,7 +106,7 @@ func checkResourceAccessableByPublishAccess(c *gin.Context, resource string, pub
 			return true
 		}
 		boxID, rootID, _ := strings.Cut(key.(string), "/")
-		bt := treenode.GetBlockTreeInBox(rootID, boxID)
+		bt := treenode.GetBlockTreeInExactBox(rootID, boxID)
 		if bt != nil && bt.Type == "d" && bt.Updated == refs.updated &&
 			getBlockTreePublishAccessStatus(c, publishAccess, publishDisable, bt) == PublishAccessAllowed {
 			found = true

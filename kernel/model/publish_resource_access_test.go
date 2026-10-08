@@ -98,9 +98,20 @@ func TestCachedPublishResourceRechecksDocumentAndAuthorization(t *testing.T) {
 	if CheckEmojiAccessableByPublishAccess(c, "icon.png", nil) {
 		t.Fatal("changed document authorized a stale reference")
 	}
+	publishResourceRefsCache.Store(cacheKey, &publishResourceRefs{
+		updated: root.IALAttr("updated"), emojis: map[string]struct{}{"icon.png": {}},
+	})
+	if !CheckEmojiAccessableByPublishAccess(c, "icon.png", nil) {
+		t.Fatal("current document reference could not authorize the resource")
+	}
 	treenode.RemoveBlockTreesByRootID(boxID, rootID)
 	if CheckEmojiAccessableByPublishAccess(c, "icon.png", nil) {
 		t.Fatal("deleted document authorized a cached resource")
+	}
+	tree.Box = "20261008000000-other01"
+	treenode.IndexBlockTree(tree)
+	if CheckEmojiAccessableByPublishAccess(c, "icon.png", nil) {
+		t.Fatal("another notebook reused the cached document reference")
 	}
 }
 

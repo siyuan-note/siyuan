@@ -11,6 +11,7 @@ const sources = () => {
         "layout/dock/agent/AgentMarkdownParser",
         "layout/dock/agent/AgentMarkdownWorker",
         "layout/dock/agent/AgentChat",
+        "layout/dock/agent/AgentWelcomeGreeting",
         "layout/dock/agent/AgentMessageRenderer",
         "layout/dock/agent/AgentScrollState",
         "layout/dock/agent/AgentReasoning",

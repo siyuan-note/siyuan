@@ -1388,7 +1388,7 @@ func SetDatabaseBlockVisibleViews(blockID, avID string, viewIDs []string) (err e
 		return errors.New("at least one visible view is required")
 	}
 
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := avParseView(avID, blockID)
 	if nil != err {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
@@ -1412,12 +1412,9 @@ func SetDatabaseBlockVisibleViews(blockID, avID string, viewIDs []string) (err e
 		return errors.New("at least one visible view is required")
 	}
 
-	node, tree, err := getNodeByBlockID(nil, blockID)
+	node, tree, err := getAttributeViewInstanceNode(attrView, blockID)
 	if nil != err {
 		return
-	}
-	if ast.NodeAttributeView != node.Type || node.AttributeViewID != avID {
-		return fmt.Errorf("block [%s] is not an instance of attribute view [%s]", blockID, avID)
 	}
 
 	err = setNodeAttrs(node, tree, map[string]string{
@@ -4792,7 +4789,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 
 func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 	avID := operation.AvID
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := avParseView(avID, operation.BlockID)
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", operation.AvID, err)
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -4805,6 +4802,9 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 	}
 	viewID := view.ID
 	previousViewID := operation.PreviousID
+	if "" != previousViewID && nil == attrView.GetView(previousViewID) {
+		return &TxErr{code: TxErrHandleAttributeView, id: avID, msg: av.ErrViewNotFound.Error()}
+	}
 	if viewID == previousViewID {
 		return
 	}
@@ -4827,7 +4827,7 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 	}
 	attrView.Views = util.InsertElem(attrView.Views, previousIndex, view)
 
-	if err = av.SaveAttributeView(attrView); err != nil {
+	if err = avSaveView(attrView, operation.BlockID); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}
 	}
@@ -5278,7 +5278,7 @@ func getKanbanPreferredGroupKey(attrView *av.AttributeView) (ret *av.Key) {
 func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) {
 	var err error
 	avID := operation.AvID
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := avParseView(avID, operation.BlockID)
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrHandleAttributeView, id: avID}
@@ -5292,7 +5292,7 @@ func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) 
 	}
 
 	view.Name = strings.TrimSpace(operation.Data.(string))
-	if err = av.SaveAttributeView(attrView); err != nil {
+	if err = avSaveView(attrView, operation.BlockID); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
 	}
@@ -5302,7 +5302,7 @@ func (tx *Transaction) doSetAttrViewViewName(operation *Operation) (ret *TxErr) 
 func (tx *Transaction) doSetAttrViewViewIcon(operation *Operation) (ret *TxErr) {
 	var err error
 	avID := operation.AvID
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := avParseView(avID, operation.BlockID)
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrHandleAttributeView, id: avID}
@@ -5316,7 +5316,7 @@ func (tx *Transaction) doSetAttrViewViewIcon(operation *Operation) (ret *TxErr) 
 	}
 
 	view.Icon = filterAttrViewIconValue(operation.Data.(string))
-	if err = av.SaveAttributeView(attrView); err != nil {
+	if err = avSaveView(attrView, operation.BlockID); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
 	}
@@ -5335,7 +5335,7 @@ func filterAttrViewIconValue(icon string) string {
 func (tx *Transaction) doSetAttrViewViewDesc(operation *Operation) (ret *TxErr) {
 	var err error
 	avID := operation.AvID
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := avParseView(avID, operation.BlockID)
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrHandleAttributeView, id: avID}
@@ -5349,7 +5349,7 @@ func (tx *Transaction) doSetAttrViewViewDesc(operation *Operation) (ret *TxErr) 
 	}
 
 	view.Desc = strings.TrimSpace(operation.Data.(string))
-	if err = av.SaveAttributeView(attrView); err != nil {
+	if err = avSaveView(attrView, operation.BlockID); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrHandleAttributeView, msg: err.Error(), id: avID}
 	}

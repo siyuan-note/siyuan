@@ -17,6 +17,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // GetAttributeViewViewTarget 根据数据库块和视图 ID 精确读取视图，避免回退到首个视图。
@@ -169,6 +170,83 @@ func RemoveAttributeViewView(avID, blockID, viewID string) error {
 	}
 	ReloadAttrView(avID)
 	return nil
+}
+
+// AttributeViewViewUpdate 仅修改已提供的视图元数据，空字符串保留清空语义。
+type AttributeViewViewUpdate struct {
+	Name *string
+	Icon *string
+	Desc *string
+}
+
+// UpdateAttributeViewView 通过现有事务修改指定视图的元数据。
+func UpdateAttributeViewView(avID, blockID, viewID string, update AttributeViewViewUpdate) error {
+	FlushTxQueue()
+	if _, _, err := GetAttributeViewViewTarget(avID, blockID, viewID); nil != err {
+		return err
+	}
+	var operations []*Operation
+	if nil != update.Name {
+		operations = append(operations, &Operation{Action: "setAttrViewViewName", AvID: avID, BlockID: blockID, ID: viewID, Data: *update.Name})
+	}
+	if nil != update.Icon {
+		icon := strings.TrimSpace(*update.Icon)
+		if "" != icon {
+			var valid bool
+			if icon, valid = util.FilterIconValue(icon); !valid {
+				return errors.New("invalid view icon")
+			}
+		}
+		operations = append(operations, &Operation{Action: "setAttrViewViewIcon", AvID: avID, BlockID: blockID, ID: viewID, Data: icon})
+	}
+	if nil != update.Desc {
+		operations = append(operations, &Operation{Action: "setAttrViewViewDesc", AvID: avID, BlockID: blockID, ID: viewID, Data: *update.Desc})
+	}
+	if 0 == len(operations) {
+		return errors.New("at least one of name, icon or desc is required")
+	}
+	if err := PerformTransactionSync(&Transaction{DoOperations: operations}); nil != err {
+		return err
+	}
+	ReloadAttrView(avID)
+	return nil
+}
+
+// MoveAttributeViewView 将指定视图移到前置视图之后，空前置 ID 表示移到首位。
+func MoveAttributeViewView(avID, blockID, viewID, previousViewID string) error {
+	FlushTxQueue()
+	attrView, _, err := GetAttributeViewViewTarget(avID, blockID, viewID)
+	if nil != err {
+		return err
+	}
+	if "" != previousViewID && nil == attrView.GetView(previousViewID) {
+		return av.ErrViewNotFound
+	}
+	op := &Operation{Action: "sortAttrViewView", AvID: avID, BlockID: blockID, ID: viewID, PreviousID: previousViewID}
+	if err = PerformTransactionSync(&Transaction{DoOperations: []*Operation{op}}); nil != err {
+		return err
+	}
+	ReloadAttrView(avID)
+	return nil
+}
+
+// SetAttributeViewBlockVisibleViews 通过现有事务保存指定数据库块的可见视图集合。
+func SetAttributeViewBlockVisibleViews(avID, blockID string, viewIDs []string) error {
+	FlushTxQueue()
+	if _, _, err := getAttributeViewViewCarrier(avID, blockID); nil != err {
+		return err
+	}
+	op := &Operation{Action: "setAttrViewBlockVisibleViews", AvID: avID, BlockID: blockID, ViewIDs: viewIDs}
+	return PerformTransactionSync(&Transaction{DoOperations: []*Operation{op}})
+}
+
+// GetDatabaseBlockVisibleViewIDs 读取指定数据库块的可见视图，并按数据库中的顺序返回。
+func GetDatabaseBlockVisibleViewIDs(attrView *av.AttributeView, blockID string) ([]string, error) {
+	node, _, err := getAttributeViewInstanceNode(attrView, blockID)
+	if nil != err {
+		return nil, err
+	}
+	return attrView.GetVisibleViewIDs(node.IALAttr(av.NodeAttrVisibleViewIDs)), nil
 }
 
 func getAttributeViewViewCarrier(avID, blockID string) (*av.AttributeView, *av.View, error) {

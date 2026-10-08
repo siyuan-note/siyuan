@@ -25,7 +25,7 @@ func databaseViewAction(action string, args map[string]any) (CallToolResult, err
 	if "" == id || "" == blockID {
 		return blockToolError("id and blockID are required")
 	}
-	if action != "view_add" && "" == viewID {
+	if action != "view_add" && action != "view_visibility_set" && "" == viewID {
 		return blockToolError("viewID is required")
 	}
 	_, release, err := beginBlockToolScope(args, action != "view_get", blockID)
@@ -50,6 +50,19 @@ func databaseViewAction(action string, args map[string]any) (CallToolResult, err
 		if nil == err {
 			return databaseSuccess(action, map[string]any{"id": id, "blockID": blockID, "viewID": viewID, "removed": true})
 		}
+	case "view_update":
+		var update model.AttributeViewViewUpdate
+		if update, err = databaseViewUpdateConfig(args); nil == err {
+			err = model.UpdateAttributeViewView(id, blockID, viewID, update)
+		}
+	case "view_move":
+		previousID, ok := args["previousID"].(string)
+		if !ok {
+			return blockToolError("previousID is required; use an empty string to move the view to the first position")
+		}
+		err = model.MoveAttributeViewView(id, blockID, viewID, previousID)
+	case "view_visibility_set":
+		return databaseViewVisibilitySet(args, id, blockID)
 	case "view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set":
 		err = databaseViewSet(action, args, id, blockID, viewID)
 	}
@@ -72,17 +85,73 @@ func databaseViewResult(action, id, blockID, viewID string) (CallToolResult, err
 	if nil == sorts {
 		sorts = []*av.ViewSort{}
 	}
+	visibleViewIDs, err := model.GetDatabaseBlockVisibleViewIDs(attrView, blockID)
+	if nil != err {
+		return blockToolError(err.Error())
+	}
+	metadata := model.NewAttributeViewMetadata(attrView)
 	return databaseSuccess(action, map[string]any{
-		"id":       id,
-		"blockID":  blockID,
-		"viewID":   view.ID,
-		"name":     view.Name,
-		"layout":   view.LayoutType,
-		"filters":  filters,
-		"sorts":    sorts,
-		"group":    view.Group,
-		"revision": model.AttributeViewViewConfigRevision(view),
-		"keys":     model.NewAttributeViewMetadata(attrView).Keys,
+		"id":             id,
+		"blockID":        blockID,
+		"viewID":         view.ID,
+		"name":           view.Name,
+		"icon":           view.Icon,
+		"desc":           view.Desc,
+		"layout":         view.LayoutType,
+		"filters":        filters,
+		"sorts":          sorts,
+		"group":          view.Group,
+		"revision":       model.AttributeViewViewConfigRevision(view),
+		"keys":           metadata.Keys,
+		"views":          metadata.Views,
+		"visibleViewIDs": visibleViewIDs,
+	})
+}
+
+func databaseViewUpdateConfig(args map[string]any) (model.AttributeViewViewUpdate, error) {
+	update := model.AttributeViewViewUpdate{}
+	for name, target := range map[string]**string{"name": &update.Name, "icon": &update.Icon, "desc": &update.Desc} {
+		if value, supplied := args[name]; supplied {
+			text, ok := value.(string)
+			if !ok {
+				return update, fmt.Errorf("%s must be a string", name)
+			}
+			*target = &text
+		}
+	}
+	if nil == update.Name && nil == update.Icon && nil == update.Desc {
+		return update, errors.New("at least one of name, icon or desc is required")
+	}
+	return update, nil
+}
+
+func databaseViewVisibilitySet(args map[string]any, id, blockID string) (CallToolResult, error) {
+	values, ok := args["viewIDs"].([]any)
+	if !ok || 0 == len(values) {
+		return blockToolError("viewIDs must be a non-empty array of view IDs")
+	}
+	viewIDs := make([]string, 0, len(values))
+	for _, value := range values {
+		viewID, valid := value.(string)
+		if !valid || "" == viewID {
+			return blockToolError("viewIDs must contain non-empty strings")
+		}
+		viewIDs = append(viewIDs, viewID)
+	}
+	if err := model.SetAttributeViewBlockVisibleViews(id, blockID, viewIDs); nil != err {
+		return blockToolError("view_visibility_set failed: " + err.Error())
+	}
+	attrView, _, err := model.GetAttributeViewViewTarget(id, blockID, viewIDs[0])
+	if nil != err {
+		return blockToolError(err.Error())
+	}
+	visibleViewIDs, err := model.GetDatabaseBlockVisibleViewIDs(attrView, blockID)
+	if nil != err {
+		return blockToolError(err.Error())
+	}
+	return databaseSuccess("view_visibility_set", map[string]any{
+		"id": id, "blockID": blockID, "views": model.NewAttributeViewMetadata(attrView).Views,
+		"visibleViewIDs": visibleViewIDs,
 	})
 }
 

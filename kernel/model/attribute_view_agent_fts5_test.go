@@ -7,9 +7,14 @@
 package model
 
 import (
+	"slices"
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestAttributeViewAgentViewLifecycleAndConfiguration(t *testing.T) {
@@ -118,5 +123,134 @@ func TestAttributeViewAgentViewLifecycleAndConfiguration(t *testing.T) {
 	}
 	if err = RemoveAttributeViewView(avID, blockID, originalID); nil == err {
 		t.Fatal("last view must be preserved")
+	}
+}
+
+func TestAttributeViewAgentViewMetadataOrderAndVisibility(t *testing.T) {
+	fixture, _, _, _ := setupAttributeViewItemsTest(t, false)
+	setAttributeViewListTestLangs()
+	created, err := CreateAttributeViewDatabase(fixture.sourceID, "", "", "Agent database", "Task", av.LayoutTypeTable, nil)
+	if nil != err {
+		t.Fatal(err)
+	}
+	avID, blockID, originalID := created.AvID, created.BlockID, created.ViewID
+	viewID, err := AddAttributeViewView(avID, blockID, "Gallery", av.LayoutTypeGallery)
+	if nil != err {
+		t.Fatal(err)
+	}
+	lastID, err := AddAttributeViewView(avID, blockID, "List", av.LayoutTypeList)
+	if nil != err {
+		t.Fatal(err)
+	}
+	mirrorID := ast.NewNodeID()
+	tree, err := LoadTreeByBlockID(blockID)
+	if nil != err {
+		t.Fatal(err)
+	}
+	mirror := util.NewLute().BlockDOM2Tree(databaseBlockTestDOM(mirrorID, avID, originalID, av.LayoutTypeTable)).Root.FirstChild
+	tree.Root.AppendChild(mirror)
+	if _, err = filesys.WriteTree(tree); nil != err {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+
+	name, icon, desc := "  Weekly tasks  ", "1f4c5", "  Current week  "
+	if err = UpdateAttributeViewView(avID, blockID, viewID, AttributeViewViewUpdate{Name: &name, Icon: &icon, Desc: &desc}); nil != err {
+		t.Fatal(err)
+	}
+	attrView, view, err := GetAttributeViewViewTarget(avID, mirrorID, viewID)
+	if nil != err || view.Name != "Weekly tasks" || view.Icon != icon || view.Desc != "Current week" {
+		t.Fatalf("metadata was not shared across mirrors: %+v, %v", view, err)
+	}
+	name = "This week"
+	if err = UpdateAttributeViewView(avID, blockID, viewID, AttributeViewViewUpdate{Name: &name}); nil != err {
+		t.Fatal(err)
+	}
+	_, view, err = GetAttributeViewViewTarget(avID, blockID, viewID)
+	if nil != err || view.Name != name || view.Icon != icon || view.Desc != "Current week" {
+		t.Fatalf("omitted metadata was changed: %+v, %v", view, err)
+	}
+	unsafeIcon := "javascript:alert(1)"
+	rejectedName := "Rejected name"
+	if err = UpdateAttributeViewView(avID, blockID, viewID, AttributeViewViewUpdate{Name: &rejectedName, Icon: &unsafeIcon}); nil == err {
+		t.Fatal("unsafe icon must be rejected before updating metadata")
+	}
+	_, view, err = GetAttributeViewViewTarget(avID, blockID, viewID)
+	if nil != err || view.Name != name || view.Icon != icon {
+		t.Fatalf("rejected update changed metadata: %+v, %v", view, err)
+	}
+	empty := ""
+	if err = UpdateAttributeViewView(avID, blockID, viewID, AttributeViewViewUpdate{Icon: &empty, Desc: &empty}); nil != err {
+		t.Fatal(err)
+	}
+	_, view, err = GetAttributeViewViewTarget(avID, blockID, viewID)
+	if nil != err || view.Name != name || view.Icon != "" || view.Desc != "" {
+		t.Fatalf("metadata clearing failed: %+v, %v", view, err)
+	}
+	if err = UpdateAttributeViewView(avID, blockID, viewID, AttributeViewViewUpdate{}); nil == err {
+		t.Fatal("empty update must be rejected")
+	}
+	if err = UpdateAttributeViewView(avID, fixture.sourceID, viewID, AttributeViewViewUpdate{Name: &name}); nil == err {
+		t.Fatal("non-carrier blocks must be rejected")
+	}
+	if err = UpdateAttributeViewView(avID, blockID, "missing-view", AttributeViewViewUpdate{Name: &name}); nil == err {
+		t.Fatal("missing views must be rejected")
+	}
+
+	assertOrder := func(expected []string) {
+		t.Helper()
+		stored, _, readErr := GetAttributeViewViewTarget(avID, mirrorID, viewID)
+		if nil != readErr {
+			t.Fatal(readErr)
+		}
+		var actual []string
+		for _, v := range stored.Views {
+			actual = append(actual, v.ID)
+		}
+		if !slices.Equal(expected, actual) {
+			t.Fatalf("unexpected shared view order: %v", actual)
+		}
+	}
+	if err = MoveAttributeViewView(avID, blockID, viewID, ""); nil != err {
+		t.Fatal(err)
+	}
+	assertOrder([]string{viewID, originalID, lastID})
+	if err = MoveAttributeViewView(avID, blockID, viewID, lastID); nil != err {
+		t.Fatal(err)
+	}
+	assertOrder([]string{originalID, lastID, viewID})
+	if err = MoveAttributeViewView(avID, blockID, viewID, "missing-view"); nil == err {
+		t.Fatal("missing predecessor must be rejected")
+	}
+	if err = MoveAttributeViewView(avID, blockID, viewID, viewID); nil != err {
+		t.Fatal(err)
+	}
+	assertOrder([]string{originalID, lastID, viewID})
+	if _, current, readErr := getAttributeViewViewCarrier(avID, blockID); nil != readErr || current.ID != lastID {
+		t.Fatalf("metadata or order changed the current view: %+v, %v", current, readErr)
+	}
+
+	for _, invalid := range [][]string{nil, {}, {"missing-view"}, {originalID, "missing-view"}} {
+		if err = SetAttributeViewBlockVisibleViews(avID, blockID, invalid); nil == err {
+			t.Fatalf("invalid visibility must be rejected: %v", invalid)
+		}
+	}
+	if err = SetAttributeViewBlockVisibleViews(avID, blockID, []string{viewID, originalID, viewID}); nil != err {
+		t.Fatal(err)
+	}
+	attrView, _, err = GetAttributeViewViewTarget(avID, blockID, viewID)
+	if nil != err {
+		t.Fatal(err)
+	}
+	visible, err := GetDatabaseBlockVisibleViewIDs(attrView, blockID)
+	if nil != err || !slices.Equal(visible, []string{originalID, viewID}) {
+		t.Fatalf("visibility was not normalized in database order: %v, %v", visible, err)
+	}
+	mirrorVisible, err := GetDatabaseBlockVisibleViewIDs(attrView, mirrorID)
+	if nil != err || !slices.Equal(mirrorVisible, []string{originalID, lastID, viewID}) || len(attrView.Views) != 3 {
+		t.Fatalf("visibility affected another mirror or deleted views: %v, %v", mirrorVisible, err)
+	}
+	if _, current, readErr := getAttributeViewViewCarrier(avID, blockID); nil != readErr || current.ID != lastID {
+		t.Fatalf("tab visibility changed the carrier's selected view: %+v, %v", current, readErr)
 	}
 }

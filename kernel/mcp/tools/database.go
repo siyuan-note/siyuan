@@ -29,7 +29,8 @@ import (
 
 var databaseActions = []string{
 	"create", "search", "get", "render", "keys", "key_add", "key_update", "key_set_template", "key_remove", "item_add", "item_remove", "item_update",
-	"view_get", "view_add", "view_duplicate", "view_remove", "view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set", "unused", "clean",
+	"view_get", "view_add", "view_duplicate", "view_remove", "view_update", "view_move", "view_visibility_set",
+	"view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set", "unused", "clean",
 }
 
 var databaseKeyTypes = []string{
@@ -44,31 +45,34 @@ type databaseToolOutput struct {
 
 var DatabaseTool = &Tool{
 	Name:        "database",
-	Description: "Attribute view (database) operations. Every successful call returns {action, data}. Actions: create(parentID, name?, primaryKeyName?, layout=table, keys?, previousID?, nextID?), search(keyword), get(id), render(id, viewID?, query?, page=1, pageSize=50), keys(id), key_add(id, name, type, icon?, prev?), key_update(id, keyID, config), key_set_template(id, keyID, template), key_remove(id, keyID, removeRelationDest?), item_add(id, blockID?, content?, viewID?, groupID?, previousID?, detached?, ignoreDefaultFill?), item_remove(id, itemIDs), item_update(id, keyID, itemID, value), view_get(id, blockID, viewID), view_add(id, blockID, layout?, name?), view_duplicate(id, blockID, viewID, name?), view_remove(id, blockID, viewID), view_filters_set(id, blockID, viewID, revision, filters), view_sorts_set(id, blockID, viewID, revision, sorts), view_group_set(id, blockID, viewID, revision, group), view_layout_set(id, blockID, viewID, revision, layout), unused(), clean(id?). Read view_get before replacing filters or sorts; preserve unmodified rules and pass its revision. An empty filters or sorts array clears that setting. The layout string is validated by the kernel. clean only removes unused databases returned by unused(); referenced databases are rejected.",
+	Description: "Attribute view (database) operations. Every successful call returns {action, data}. Actions: create(parentID, name?, primaryKeyName?, layout=table, keys?, previousID?, nextID?), search(keyword), get(id), render(id, viewID?, query?, page=1, pageSize=50), keys(id), key_add(id, name, type, icon?, prev?), key_update(id, keyID, config), key_set_template(id, keyID, template), key_remove(id, keyID, removeRelationDest?), item_add(id, blockID?, content?, viewID?, groupID?, previousID?, detached?, ignoreDefaultFill?), item_remove(id, itemIDs), item_update(id, keyID, itemID, value), view_get(id, blockID, viewID), view_add(id, blockID, layout?, name?), view_duplicate(id, blockID, viewID, name?), view_remove(id, blockID, viewID), view_update(id, blockID, viewID, name?, icon?, desc?), view_move(id, blockID, viewID, previousID), view_visibility_set(id, blockID, viewIDs), view_filters_set(id, blockID, viewID, revision, filters), view_sorts_set(id, blockID, viewID, revision, sorts), view_group_set(id, blockID, viewID, revision, group), view_layout_set(id, blockID, viewID, revision, layout), unused(), clean(id?). view_get returns metadata, ordered views and the carrier block's visibleViewIDs. view_update preserves omitted fields; empty icon or desc clears it. View metadata and order affect all mirrors; visibility affects only blockID and requires at least one visible view. Read view_get before replacing filters, sorts or visibleViewIDs, preserving unmodified entries. Pass its revision for filter, sort, group and layout changes. An empty filters or sorts array clears that setting. The layout string is validated by the kernel. clean only removes unused databases returned by unused(); referenced databases are rejected.",
 	EffectScope: EffectScopeLocal,
 	ActionEffects: map[string]ToolEffects{
-		"create":           {LocalWrite: true},
-		"search":           {LocalRead: true},
-		"get":              {LocalRead: true},
-		"render":           {LocalRead: true},
-		"keys":             {LocalRead: true},
-		"key_add":          {LocalWrite: true},
-		"key_update":       {LocalWrite: true},
-		"key_set_template": {LocalWrite: true},
-		"key_remove":       {LocalWrite: true},
-		"item_add":         {LocalWrite: true},
-		"item_remove":      {LocalWrite: true},
-		"item_update":      {LocalWrite: true},
-		"view_get":         {LocalRead: true},
-		"view_add":         {LocalWrite: true},
-		"view_duplicate":   {LocalWrite: true},
-		"view_remove":      {LocalWrite: true},
-		"view_filters_set": {LocalWrite: true},
-		"view_sorts_set":   {LocalWrite: true},
-		"view_group_set":   {LocalWrite: true},
-		"view_layout_set":  {LocalWrite: true},
-		"unused":           {LocalRead: true},
-		"clean":            {LocalWrite: true},
+		"create":              {LocalWrite: true},
+		"search":              {LocalRead: true},
+		"get":                 {LocalRead: true},
+		"render":              {LocalRead: true},
+		"keys":                {LocalRead: true},
+		"key_add":             {LocalWrite: true},
+		"key_update":          {LocalWrite: true},
+		"key_set_template":    {LocalWrite: true},
+		"key_remove":          {LocalWrite: true},
+		"item_add":            {LocalWrite: true},
+		"item_remove":         {LocalWrite: true},
+		"item_update":         {LocalWrite: true},
+		"view_get":            {LocalRead: true},
+		"view_add":            {LocalWrite: true},
+		"view_duplicate":      {LocalWrite: true},
+		"view_remove":         {LocalWrite: true},
+		"view_update":         {LocalWrite: true},
+		"view_move":           {LocalWrite: true},
+		"view_visibility_set": {LocalWrite: true},
+		"view_filters_set":    {LocalWrite: true},
+		"view_sorts_set":      {LocalWrite: true},
+		"view_group_set":      {LocalWrite: true},
+		"view_layout_set":     {LocalWrite: true},
+		"unused":              {LocalRead: true},
+		"clean":               {LocalWrite: true},
 	},
 	InputSchema: ToolSchema{
 		Type: "object",
@@ -79,11 +83,12 @@ var DatabaseTool = &Tool{
 			"id":             {Type: "string", Description: "Attribute view ID for database and view actions"},
 			"parentID":       {Type: "string", Description: "Parent block ID for the new database (for create)"},
 			"nextID":         {Type: "string", Description: "Next sibling block ID for positioning the new database (for create, optional)"},
-			"viewID":         {Type: "string", Description: "Exact view ID (required for view_get, view_duplicate, view_remove and view setting changes)"},
+			"viewID":         {Type: "string", Description: "Exact view ID (required for view_get, view_duplicate, view_remove, view_update, view_move and view setting changes)"},
+			"viewIDs":        {Type: "array", Description: "Complete visible view ID list for view_visibility_set on blockID; preserve other visible views from view_get and keep at least one", Items: &Property{Type: "string"}},
 			"query":          {Type: "string", Description: "Filter query (for render)"},
 			"page":           {Type: "integer", Description: "Page number (default 1)"},
 			"pageSize":       {Type: "integer", Description: "Results per page (default 50)"},
-			"name":           {Type: "string", Description: "Database name (create), key name (key_add), or new view name (view_add and view_duplicate)"},
+			"name":           {Type: "string", Description: "Database name (create), key name (key_add), or view name (view_add, view_duplicate and view_update)"},
 			"primaryKeyName": {Type: "string", Description: "Primary key field name (for create, optional)"},
 			"layout":         {Type: "string", Description: "Layout identifier for create, view_add or view_layout_set; the kernel validates supported types"},
 			"keys": {
@@ -99,20 +104,21 @@ var DatabaseTool = &Tool{
 				},
 			},
 			"type":               {Type: "string", Description: "Key type (for key_add)", Enum: databaseKeyTypes},
-			"icon":               {Type: "string", Description: "Key icon (for key_add, optional)"},
+			"icon":               {Type: "string", Description: "Key icon (key_add) or view icon (view_update); an empty string clears the view icon"},
+			"desc":               {Type: "string", Description: "View description for view_update; an empty string clears it, omission preserves it"},
 			"prev":               {Type: "string", Description: "Previous key ID for ordering (for key_add; omit to append)"},
 			"keyID":              {Type: "string", Description: "Key ID (for key_update, key_set_template, key_remove, item_update)"},
 			"template":           {Type: "string", Description: "Formula for key_set_template on an existing template field, e.g. .action{add .Number 1}; empty string clears it. Use keys to inspect field names and IDs, then render to verify results. Do not write calculated template cells with item_update"},
 			"config":             databaseKeyConfigProperty,
 			"removeRelationDest": {Type: "boolean", Description: "Also remove related data in linked databases (for key_remove, optional)"},
 			"blockID":            {Type: "string", Description: "Block ID to bind (item_add), or the database carrier block ID (view actions)"},
-			"revision":           {Type: "string", Description: "Revision from view_get, required for view setting changes"},
+			"revision":           {Type: "string", Description: "Revision from view_get, required for view_filters_set, view_sorts_set, view_group_set and view_layout_set"},
 			"filters":            {Type: "array", Description: "Complete native ViewFilter tree for view_filters_set. Use one root group with combination and/or and a filters child array; leaf nodes have column (key ID), operator and typed value. Date leaves can also use relativeDate and relativeDate2. Copy unchanged nodes from view_get; [] clears filters", Items: &Property{Type: "object"}},
 			"sorts":              {Type: "array", Description: "Complete ordered native ViewSort list for view_sorts_set. Each rule has column (key ID) and order ASC or DESC. Copy unchanged rules from view_get; [] clears sorts", Items: &Property{Type: "object"}},
 			"group":              {Type: "object", Description: "Native ViewGroup for view_group_set with field (key ID), method, order and hideEmpty; number/date fields support additional methods. {} clears grouping outside kanban"},
 			"content":            {Type: "string", Description: "Block column text content (for item_add, optional)"},
 			"groupID":            {Type: "string", Description: "Group ID for positioning (for item_add, optional)"},
-			"previousID":         {Type: "string", Description: "Previous sibling database block (for create) or previous item (for item_add, optional)"},
+			"previousID":         {Type: "string", Description: "Previous sibling database block (create), previous item (item_add), or previous view (view_move, required); an empty string moves the view to the first position"},
 			"detached":           {Type: "boolean", Description: "Create detached row (for item_add, optional)"},
 			"ignoreDefaultFill":  {Type: "boolean", Description: "Skip filling default values (for item_add, optional)"},
 			"itemID":             {Type: "string", Description: "Item ID (for item_update)"},
@@ -163,7 +169,8 @@ func databaseHandler(args map[string]any) (CallToolResult, error) {
 		return databaseItemRemove(args)
 	case "item_update":
 		return databaseItemUpdate(args)
-	case "view_get", "view_add", "view_duplicate", "view_remove", "view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set":
+	case "view_get", "view_add", "view_duplicate", "view_remove", "view_update", "view_move", "view_visibility_set",
+		"view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set":
 		return databaseViewAction(action, args)
 	case "unused":
 		return databaseUnused(args)

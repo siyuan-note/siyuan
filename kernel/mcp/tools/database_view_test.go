@@ -15,7 +15,8 @@ func TestDatabaseViewActionsAndArguments(t *testing.T) {
 	if nil != err {
 		t.Fatal(err)
 	}
-	for _, action := range []string{"view_add", "view_duplicate", "view_remove", "view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set"} {
+	for _, action := range []string{"view_add", "view_duplicate", "view_remove", "view_update", "view_move", "view_visibility_set",
+		"view_filters_set", "view_sorts_set", "view_group_set", "view_layout_set"} {
 		effects, ok := DatabaseTool.EffectsFor(action)
 		if !ok || !effects.LocalWrite {
 			t.Fatalf("%s must require write approval", action)
@@ -26,6 +27,9 @@ func TestDatabaseViewActionsAndArguments(t *testing.T) {
 	}
 	for _, args := range []map[string]any{
 		{"action": "view_add", "layout": "future-layout", "name": "New view"},
+		{"action": "view_update", "name": "New name", "icon": "", "desc": ""},
+		{"action": "view_move", "previousID": ""},
+		{"action": "view_visibility_set", "viewIDs": []any{"view-a"}},
 		{"action": "view_filters_set", "revision": "rev", "filters": []any{map[string]any{"combination": "and", "filters": []any{}}}},
 		{"action": "view_sorts_set", "revision": "rev", "sorts": []any{map[string]any{"column": "key", "order": "ASC"}}},
 		{"action": "view_group_set", "revision": "rev", "group": map[string]any{"field": "key", "hideEmpty": true}},
@@ -36,6 +40,22 @@ func TestDatabaseViewActionsAndArguments(t *testing.T) {
 	}
 	if err = validator.ValidateInput(map[string]any{"action": "view_filters_set", "filters": "[]"}); nil == err {
 		t.Fatal("string encoded filters must be rejected")
+	}
+}
+
+func TestDatabaseViewPartialUpdateArguments(t *testing.T) {
+	update, err := databaseViewUpdateConfig(map[string]any{"name": "Weekly tasks"})
+	if nil != err || nil == update.Name || *update.Name != "Weekly tasks" || nil != update.Icon || nil != update.Desc {
+		t.Fatalf("omitted fields must stay absent: %+v, %v", update, err)
+	}
+	update, err = databaseViewUpdateConfig(map[string]any{"icon": "", "desc": ""})
+	if nil != err || nil != update.Name || nil == update.Icon || *update.Icon != "" || nil == update.Desc || *update.Desc != "" {
+		t.Fatalf("explicit empty fields must preserve clearing semantics: %+v, %v", update, err)
+	}
+	for _, invalid := range []map[string]any{{}, {"name": nil}, {"icon": true}, {"desc": 1}} {
+		if _, err = databaseViewUpdateConfig(invalid); nil == err {
+			t.Fatalf("invalid update accepted: %+v", invalid)
+		}
 	}
 }
 

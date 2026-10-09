@@ -52,12 +52,12 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
         </label>
     </div>
     <div class="b3-label b3-label--inner fn__flex">
-        <label class="fn__flex-1">${escapeHtml(languages.latitude)}
-            <span class="fn__hr"></span><input class="b3-text-field fn__block" data-field="latitude" type="text" inputmode="decimal" spellcheck="false">
-        </label>
-        <div class="fn__space"></div>
         <label class="fn__flex-1">${escapeHtml(languages.longitude)}
             <span class="fn__hr"></span><input class="b3-text-field fn__block" data-field="longitude" type="text" inputmode="decimal" spellcheck="false">
+        </label>
+        <div class="fn__space"></div>
+        <label class="fn__flex-1">${escapeHtml(languages.latitude)}
+            <span class="fn__hr"></span><input class="b3-text-field fn__block" data-field="latitude" type="text" inputmode="decimal" spellcheck="false">
         </label>
     </div>
     <div class="b3-label b3-label--inner">
@@ -74,10 +74,11 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     <div class="b3-label b3-label--inner">
         <label>${escapeHtml(languages.coordinateOrder)}
             <span class="fn__hr"></span><select class="b3-select fn__block" data-field="coordinateOrder">
-                <option value="latitudeLongitude">${escapeHtml(languages.latitude)}, ${escapeHtml(languages.longitude)}</option>
                 <option value="longitudeLatitude">${escapeHtml(languages.longitude)}, ${escapeHtml(languages.latitude)}</option>
+                <option value="latitudeLongitude">${escapeHtml(languages.latitude)}, ${escapeHtml(languages.longitude)}</option>
             </select>
         </label>
+        <div class="b3-label__text">${escapeHtml(languages.coordinateOrderTip)}</div>
     </div>
     <div class="b3-label b3-label--inner">
         <label>${escapeHtml(languages.pasteCoordinates)}
@@ -108,7 +109,7 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     const longitudeInput = root.querySelector<HTMLInputElement>('[data-field="longitude"]');
     const systemInput = root.querySelector<HTMLSelectElement>('[data-field="coordinateSystem"]');
     const orderInput = root.querySelector<HTMLSelectElement>('[data-field="coordinateOrder"]');
-    orderInput.value = "latitudeLongitude";
+    orderInput.value = "longitudeLatitude";
     const pasteInput = root.querySelector<HTMLTextAreaElement>('[data-field="paste"]');
     const errorElement = root.querySelector<HTMLElement>('[data-role="error"]');
     const controls = root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>(
@@ -264,6 +265,11 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
         if (!hasSelectedSystem()) {
             setError(languages.selectCoordinateSystem);
             systemInput.focus();
+            return;
+        }
+        // 已确认的来源文本不按新默认顺序重新解释；修改文本或切换顺序后才重新导入。
+        if (pasteInput.value.trim() && pasteInput.value === parsedInput) {
+            setError();
             return;
         }
         const parsed = parsePaste();

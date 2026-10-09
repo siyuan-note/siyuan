@@ -11,7 +11,7 @@ import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 import {renderAVBlockIcon} from "./blockIcon";
 import {formatDateValue} from "./dateFormat";
 import {bindLunarDateEditor, getLunarDateHTML} from "./lunarDate";
-import {createAVLocationReplacement, getAVLocationText} from "./locationValue";
+import {createAVLocationReplacement, getAVLocationDisplayText} from "./locationValue";
 import {openAVLocationEditor} from "./locationEditor";
 
 export const getSelectedOptionNames = (element: HTMLElement) => {
@@ -138,7 +138,7 @@ export const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFiel
     if (column.type === "location") {
         const location = value ? value.location || {coordinateSystem: "unknown"} :
             {coordinateSystem: column.location?.defaultCoordinateSystem || "unknown"};
-        return `<button type="button" class="b3-button b3-button--cancel fn__flex-1" data-role="field-value" data-value-type="location" data-location="${escapeAttr(encodeURIComponent(JSON.stringify(location)))}">${escapeHtml(getAVLocationText(location) || window.siyuan.languages.empty)}</button>`;
+        return `<button type="button" class="b3-button b3-button--cancel fn__flex-1" data-role="field-value" data-value-type="location" data-location="${escapeAttr(encodeURIComponent(JSON.stringify(location)))}">${escapeHtml(getAVLocationDisplayText(location) || window.siyuan.languages.empty)}</button>`;
     }
     if (column.type === "checkbox") {
         const checked = value?.checkbox?.checked || false;
@@ -200,7 +200,7 @@ export const openFieldLocationEditor = (target: HTMLElement) => {
                 return;
             }
             target.dataset.location = encodeURIComponent(JSON.stringify(value));
-            target.textContent = getAVLocationText(value) || window.siyuan.languages.empty;
+            target.textContent = getAVLocationDisplayText(value) || window.siyuan.languages.empty;
             target.dispatchEvent(new Event("change", {bubbles: true}));
         },
     });

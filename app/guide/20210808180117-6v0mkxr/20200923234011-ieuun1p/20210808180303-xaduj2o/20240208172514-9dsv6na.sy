@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261009101102"
+		"updated": "20261009112101"
 	},
 	"Children": [
 		{
@@ -74,7 +74,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009034010-6kd9rk5",
-				"updated": "20261009101102"
+				"updated": "20261009112101"
 			},
 			"Children": [
 				{
@@ -88,12 +88,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-0yhiv8g",
-				"updated": "20261009101102"
+				"updated": "20261009111821"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Add a field of type Location, then click a cell to edit its name and coordinates. The name is optional. Enter both latitude and longitude in decimal degrees. Latitude ranges from -90 to 90 and longitude from -180 to 180; zero is a valid value. Leave both coordinates blank to save only a name. In the field settings, Default coordinate system for new input only presets new input; existing locations stay unchanged, each value can choose its own coordinate system, and copied or imported locations retain their saved coordinate system. Existing locations without a labeled coordinate system are preserved as saved; when editing, explicitly select the coordinate system actually used by their coordinates. Coordinates are not converted automatically."
+					"Data": "Add a field of type Location, then click a cell to edit its name and coordinates. The name is optional. Enter both longitude and latitude in decimal degrees. Longitude ranges from -180 to 180 and latitude from -90 to 90; zero is a valid value. Leave both coordinates blank to save only a name. In the field settings, Default coordinate system for new input only presets new input; existing locations stay unchanged, each value can choose its own coordinate system, and copied or imported locations retain their saved coordinate system. Existing locations without a labeled coordinate system are preserved as saved; when editing, explicitly select the coordinate system actually used by their coordinates. Coordinates are not converted automatically."
 				}
 			]
 		},
@@ -102,12 +102,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-h9vridq",
-				"updated": "20261009101102"
+				"updated": "20261009111821"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "To import coordinates, enter a pair such as 39.9042, 116.4074 in Paste coordinates and click Confirm. The default Coordinate order is latitude, longitude; if the source uses longitude, latitude, switch the order manually. SiYuan does not infer the order. A coordinate pair may be enclosed in ASCII parentheses. Choose WGS84 (OpenFreeMap), GCJ-02 (AMap, Tencent Maps), or BD-09 (Baidu Maps) for the coordinate system; changing this label does not convert coordinates. Imported text is retained unchanged as source metadata. Manually changing the coordinates or coordinate system clears that source text."
+					"Data": "To import coordinates, enter a pair such as 116.4074, 39.9042 in Paste coordinates and click Confirm. The default Coordinate order is longitude, latitude; if the source uses latitude, longitude, manually select latitude, longitude. SiYuan reads coordinates in the selected order and never infers or swaps the order automatically. This input accepts coordinate pairs only. A coordinate pair may be enclosed in ASCII parentheses. Choose WGS84 (OpenFreeMap), GCJ-02 (AMap, Tencent Maps), or BD-09 (Baidu Maps) for the coordinate system; changing this label does not convert coordinates. Imported text is retained unchanged as source metadata. Manually changing the coordinates or coordinate system clears that source text."
 				}
 			]
 		},
@@ -116,12 +116,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-dub50kq",
-				"updated": "20261009040533"
+				"updated": "20261009112101"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Click Save to apply edits or Cancel to discard them. Clear removes the location value. Text filters and sorting use the combined name, coordinates, and coordinate-system label. This field does not load maps or contact external location services."
+					"Data": "Click Save to apply edits or Cancel to discard them. Clear removes the location value. Text filters and sorting use the combined name, coordinates, and coordinate-system label. This field does not load maps or contact external location services. Coordinates are displayed in longitude, latitude order in the app. Plain-text copying and export keep latitude, longitude; to reuse those coordinates, paste only the pair into the location editor and explicitly select latitude, longitude. The complete copied or exported location text is not accepted as a coordinate pair. Structured database copying preserves named coordinate values. Named JSON fields and previously saved locations are unchanged."
 				},
 				{
 					"Type": "NodeText",

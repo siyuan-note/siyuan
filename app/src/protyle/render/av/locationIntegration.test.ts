@@ -35,13 +35,13 @@ const loadModule = <T>(file: string, extra: Record<string, unknown> = {}) => {
 
 const cell = loadModule<typeof import("./cell")>("cell");
 
-test("location cells render the same escaped canonical value in all layouts and row attributes", () => {
+test("location cells display longitude first in every layout, row attributes and rollups", () => {
     const value: IAVCellValue = {type: "location", location: {
         name: "<Home>", latitude: 0, longitude: 180, coordinateSystem: "wgs84", originalInput: "untrusted raw",
     }};
-    for (const type of ["table", "list", "gallery", "kanban"] as TAVView[]) {
+    for (const type of ["table", "list", "gallery", "kanban", "map"] as TAVView[]) {
         const html = cell.renderCell(value, 0, false, type);
-        assert.match(html, /&lt;Home&gt;; 0, 180 \[WGS84\]/);
+        assert.match(html, /&lt;Home&gt;; 180, 0 \[WGS84\]/);
         assert.doesNotMatch(html, /<Home>/);
         const data = /data-cell-value="([^"]+)"/.exec(html)?.[1];
         assert.deepEqual(JSON.parse(decodeURIComponent(data)), value);
@@ -49,10 +49,62 @@ test("location cells render the same escaped canonical value in all layouts and 
     }
     const attr = loadModule<typeof import("./attributeValue")>("attributeValue");
     const html = attr.genAVValueHTML(value);
-    assert.match(html, /&lt;Home>; 0, 180 \[WGS84\]/);
+    assert.match(html, /&lt;Home>; 180, 0 \[WGS84\]/);
     assert.match(html, /data-cell-value=/);
     const rollupHTML = cell.renderCell({type: "rollup", rollup: {contents: [value]}}, 0, false, "table");
-    assert.match(rollupHTML, /0, 180 \[WGS84\]/);
+    assert.match(rollupHTML, /180, 0 \[WGS84\]/);
+});
+
+test("location copies preserve canonical text for cells, nested leaves and templates", () => {
+    const first: IAVCellValue = {type: "location", location: {latitude: 20, longitude: 30, coordinateSystem: "wgs84"}};
+    const second: IAVCellValue = {type: "location", location: {name: "Other", latitude: 40, longitude: 50, coordinateSystem: "gcj02"}};
+    const makeLeaf = (value?: IAVCellValue, template = false) => ({
+        dataset: value ? {cellValue: encodeURIComponent(JSON.stringify(value))} : {},
+        textContent: template ? "Custom display" : value ? locationValue.getAVLocationDisplayText(value.location) : "Ordinary text",
+        matches: (selector: string) => selector === ".av__celltext" && !!value || template && selector === ".av__celltext--template",
+        querySelector: (): HTMLElement => null,
+        querySelectorAll: (): HTMLElement[] => [],
+        getAttribute: (): string => null,
+    });
+    const firstLeaf = makeLeaf(first);
+    const secondLeaf = makeLeaf(second);
+    const wrapper = (leaves: ReturnType<typeof makeLeaf>[]) => ({
+        ...makeLeaf(), querySelectorAll: () => leaves,
+    }) as unknown as HTMLElement;
+    assert.equal(cell.getCellText(firstLeaf as unknown as HTMLElement), "20, 30 [WGS84]");
+    assert.equal(cell.getCellText(wrapper([firstLeaf])), "20, 30 [WGS84]");
+    assert.equal(cell.getCellText(wrapper([firstLeaf, makeLeaf(), secondLeaf])), "20, 30 [WGS84], Ordinary text, Other; 40, 50 [GCJ-02]");
+    assert.equal(cell.getCellText(firstLeaf as unknown as HTMLElement, "display"), "30, 20 [WGS84]");
+    assert.equal(cell.getCellText(wrapper([firstLeaf, makeLeaf(), secondLeaf]), "display"), "30, 20 [WGS84], Ordinary text, Other; 50, 40 [GCJ-02]");
+    assert.equal(cell.getCellText(makeLeaf(first, true) as unknown as HTMLElement), "Custom display");
+    assert.equal(cell.getCellText(wrapper([makeLeaf(first, true)])), "Custom display");
+    assert.equal(cell.getCellText(wrapper([makeLeaf(first, true)]), "display"), "Custom display");
+    const attributeTemplate = {...makeLeaf(), dataset: firstLeaf.dataset, textContent: "Custom display"} as unknown as HTMLElement;
+    assert.equal(cell.getCellText(attributeTemplate), "Custom display");
+    assert.equal(cell.getCellText(attributeTemplate, "display"), "Custom display");
+    assert.equal(cell.getCellValueText(first), "20, 30 [WGS84]");
+    assert.equal(locationValue.parseAVLocationCoordinates(cell.getCellValueText(first), "wgs84", "longitudeLatitude"), undefined);
+    assert.throws(() => cell.genCellValue("location", cell.getCellValueText(first)));
+});
+
+test("location hover text explicitly uses display order instead of clipboard order", () => {
+    const source = readFileSync("src/block/popover.ts", "utf8");
+    assert.doesNotMatch(source, /getCellText\((?:aElement|cellElement)\)/);
+    assert.match(source, /escapeHtmlTextAndAttr\(getCellText\(aElement, "display"\)\)/);
+    assert.match(source, /getCellText\(cellElement, "display"\)/);
+});
+
+test("selected location copies keep structured values and latitude-first TSV independent of display", () => {
+    const value: IAVCellValue = {type: "location", location: {
+        name: "Office", latitude: 20, longitude: 30, coordinateSystem: "wgs84", originalInput: "20,30",
+    }};
+    const selected = [{rowID: "row", rowIndex: 0, cell: {value}, column: {type: "location"}},
+        {rowID: "row", rowIndex: 0, cell: {value}, column: {type: "location"}}] as import("./selectionState").IAVSelectedCell[];
+    const copied = cell.getAVCellData(selected);
+    assert.equal(copied.text, "Office; 20, 30 [WGS84]\tOffice; 20, 30 [WGS84]");
+    assert.deepEqual(JSON.parse(JSON.stringify(copied.json[0])), [value, value]);
+    assert.notEqual(copied.json[0][0].location, value.location);
+    assert.deepEqual(cell.genCellValue("location", copied.json[0][0].location).location, value.location);
 });
 
 test("location generic paste keeps place names and rejects coordinates without guessing", () => {
@@ -108,7 +160,7 @@ test("location update, clear, structured paste and undo send full replacement pa
         "../../../dialog/message": {showMessage: (message: string) => warnings.push(message)},
     });
     const block = {dataset: {avId: "av", nodeId: "block"}, getAttribute: () => "table"} as unknown as HTMLElement;
-    const oldLocation: IAVCellLocationValue = {name: "Old", latitude: 0, longitude: 0, coordinateSystem: "wgs84", originalInput: "0,0"};
+    const oldLocation: IAVCellLocationValue = {name: "Old", latitude: 20, longitude: 30, coordinateSystem: "wgs84", originalInput: "20,30"};
     const selected = (location?: IAVCellLocationValue): import("./selectionState").IAVSelectedCell[] => [{
         rowID: "row", colID: "key", groupID: "", colIndex: 0, rowIndex: 0,
         cell: {id: "value", color: "", bgColor: "", valueType: "location", value: {type: "location", location}},
@@ -136,6 +188,12 @@ test("location update, clear, structured paste and undo send full replacement pa
         assert.deepEqual(JSON.parse(JSON.stringify(undo.data.location)), oldLocation);
     }
     const fromEmpty = await update({type: "location", location: oldLocation}, {});
+    const pasted = fromEmpty.doOperations[0];
+    if (pasted.action === "updateAttrViewCell") {
+        assert.deepEqual(JSON.parse(JSON.stringify(pasted.data.location)), oldLocation);
+    } else {
+        assert.fail("expected structured location paste");
+    }
     const undo = fromEmpty.undoOperations[0];
     assert.equal(undo.action, "updateAttrViewCell");
     if (undo.action === "updateAttrViewCell") {
@@ -154,7 +212,7 @@ test("template and automation value buttons preserve the structured location unt
     const column = {type: "location"} as IAVColumn;
     const html = editor.getValueInputHTML(column, {mode: "static", value: {type: "location", location}});
     assert.match(html, /data-value-type="location"/);
-    assert.match(html, /-90, -180 \[GCJ-02\]/);
+    assert.match(html, /-180, -90 \[GCJ-02\]/);
     const input = {dataset: {location: encodeURIComponent(JSON.stringify(location))}} as unknown as HTMLElement;
     assert.deepEqual(JSON.parse(JSON.stringify(editor.genFieldValue(column, input))), {
         type: "location", location: locationValue.createAVLocationReplacement(location),

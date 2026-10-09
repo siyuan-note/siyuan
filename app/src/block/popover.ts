@@ -210,9 +210,9 @@ export const initBlockPopover = (app: App) => {
                     const desc = aElement.getAttribute("data-desc");
                     if (textElement.scrollWidth > textElement.clientWidth + 0.5 || desc) {
                         if (desc) {
-                            tip = `${getCellText(aElement)}<div class='ft__on-surface'>${escapeAriaLabel(desc)}</div>`;
+                            tip = `${getCellText(aElement, "display")}<div class='ft__on-surface'>${escapeAriaLabel(desc)}</div>`;
                         } else {
-                            tip = getCellText(aElement);
+                            tip = getCellText(aElement, "display");
                         }
                     }
                 } else {
@@ -229,7 +229,7 @@ export const initBlockPopover = (app: App) => {
                         !hasClosestByClassName(event.target, "block__icon")) {
                         aElement.style.overflow = "auto";
                         if (hasAVCellContentOverflow(aElement, richTextElement)) {
-                            tip = escapeHtmlTextAndAttr(getCellText(aElement));
+                            tip = escapeHtmlTextAndAttr(getCellText(aElement, "display"));
                         }
                         aElement.style.overflow = "";
                     }
@@ -257,7 +257,7 @@ export const initBlockPopover = (app: App) => {
                 if (cellElement && (cellElement.clientWidth + 0.5 < cellElement.scrollWidth ||
                         (textElement && textElement.clientWidth + 0.5 < textElement.scrollWidth))) {
                     tip = escapeHtmlTextAndAttr(cellElement.querySelector(".b3-menu__label")?.textContent ||
-                        getCellText(cellElement));
+                        getCellText(cellElement, "display"));
                     tooltipTarget = cellElement;
                     tooltipPositionOverride = "north";
                 }

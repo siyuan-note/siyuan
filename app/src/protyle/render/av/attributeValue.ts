@@ -13,7 +13,7 @@ import {
 import {getAVColorStyle} from "./color";
 import {getHostCapabilities} from "../../../util/hostCapabilities";
 import {getAVRichTextPreviewHTML, getAVTextSource} from "./richText";
-import {getAVLocationText} from "./locationValue";
+import {getAVLocationDisplayText} from "./locationValue";
 
 export {createEmptyAVValue} from "./cellValue";
 
@@ -94,7 +94,7 @@ const genAVRollupHTML = (value: IAVCellValue) => {
             html = escapeHtml(value.text.content);
             break;
         case "location":
-            html = escapeHtml(getAVLocationText(value.location));
+            html = escapeHtml(getAVLocationDisplayText(value.location));
             break;
         case "number":
             html = value.number.formattedContent || value.number.content.toString();
@@ -150,7 +150,7 @@ export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = 
             break;
         }
         case "location":
-            html = `<div class="av__celltext fn__flex-1" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(value))))}" placeholder="${window.siyuan.languages.empty}">${escapeHtml(getAVLocationText(value.location))}</div>`;
+            html = `<div class="av__celltext fn__flex-1" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(value))))}" placeholder="${window.siyuan.languages.empty}">${escapeHtml(getAVLocationDisplayText(value.location))}</div>`;
             break;
         case "number":
             html = `<span class="av__celltext" data-content="${value.number.isNotEmpty ? value.number.content : ""}" placeholder="${window.siyuan.languages.empty}">${value.number.formattedContent || (value.number.isNotEmpty ? value.number.content : "")}</span>`;

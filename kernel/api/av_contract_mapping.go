@@ -139,6 +139,7 @@ func toContractAVValue(value *av.Value) *apicontract.AVValue {
 		URL:               toContractAVValueURL(value.URL),
 		Email:             toContractAVValueEmail(value.Email),
 		Phone:             toContractAVValuePhone(value.Phone),
+		Location:          toContractAVValueLocation(value.Location),
 		MAsset:            avContractSlice(value.MAsset, func(value *av.ValueAsset) *apicontract.AVValueAsset { return toContractAVValueAsset(value) }),
 		Template:          toContractAVValueTemplate(value.Template),
 		Created:           toContractAVValueCreated(value.Created),
@@ -170,6 +171,7 @@ func fromContractAVValue(value *apicontract.AVValue) *av.Value {
 		URL:             fromContractAVValueURL(value.URL),
 		Email:           fromContractAVValueEmail(value.Email),
 		Phone:           fromContractAVValuePhone(value.Phone),
+		Location:        fromContractAVValueLocation(value.Location),
 		MAsset:          avContractSlice(value.MAsset, func(value *apicontract.AVValueAsset) *av.ValueAsset { return fromContractAVValueAsset(value) }),
 		Template:        fromContractAVValueTemplate(value.Template),
 		Created:         fromContractAVValueCreated(value.Created),
@@ -639,6 +641,7 @@ func toContractAVKey(value *av.Key) *apicontract.AVKey {
 		Relation:                 toContractAVRelation(value.Relation),
 		Rollup:                   toContractAVRollup(value.Rollup),
 		Date:                     toContractAVDate(value.Date),
+		Location:                 toContractAVLocation(value.Location),
 		Created:                  toContractAVCreated(value.Created),
 		Updated:                  toContractAVUpdated(value.Updated),
 	}
@@ -761,6 +764,7 @@ func toContractAVBaseInstanceField(value *av.BaseInstanceField) *apicontract.AVB
 		Relation:       toContractAVRelation(value.Relation),
 		Rollup:         toContractAVRollup(value.Rollup),
 		Date:           toContractAVDate(value.Date),
+		Location:       toContractAVLocation(value.Location),
 		Created:        toContractAVCreated(value.Created),
 		Updated:        toContractAVUpdated(value.Updated),
 	}
@@ -1348,4 +1352,31 @@ func toContractAVItemConditionalColors(value *av.ItemConditionalColors) *apicont
 		}
 	}
 	return result
+}
+
+func toContractAVValueLocation(value *av.ValueLocation) *apicontract.AVValueLocation {
+	if value == nil {
+		return nil
+	}
+	return &apicontract.AVValueLocation{
+		Name: value.Name, Latitude: value.Latitude, Longitude: value.Longitude,
+		CoordinateSystem: value.CoordinateSystem, OriginalInput: value.OriginalInput,
+	}
+}
+
+func fromContractAVValueLocation(value *apicontract.AVValueLocation) *av.ValueLocation {
+	if value == nil {
+		return nil
+	}
+	return &av.ValueLocation{
+		Name: value.Name, Latitude: value.Latitude, Longitude: value.Longitude,
+		CoordinateSystem: value.CoordinateSystem, OriginalInput: value.OriginalInput,
+	}
+}
+
+func toContractAVLocation(value *av.Location) *apicontract.AVLocation {
+	if value == nil {
+		return nil
+	}
+	return &apicontract.AVLocation{DefaultCoordinateSystem: value.DefaultCoordinateSystem}
 }

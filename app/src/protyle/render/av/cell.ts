@@ -64,7 +64,7 @@ import {getAVData, getAVPrimaryCell} from "./virtualScroll";
 import {AV_CELL_EDITOR_CLOSE_EVENT, getAVCellEditorOwner} from "./cellEditor";
 import {getAVBlockIconHTML, renderAVBlockIcon} from "./blockIcon";
 import {bindAVCellInputPosition} from "./cellInputPosition";
-import {createAVLocationFromText, createAVLocationReplacement, getAVLocationText, isAVLocationCoordinateInput, isAVLocationEmpty} from "./locationValue";
+import {createAVLocationFromText, createAVLocationReplacement, getAVLocationDisplayText, getAVLocationText, isAVLocationCoordinateInput, isAVLocationEmpty} from "./locationValue";
 import {openAVLocationEditor} from "./locationEditor";
 import {showMessage} from "../../../dialog/message";
 
@@ -194,9 +194,15 @@ const getStoredCellValueByElement = (cellElement: HTMLElement) => {
     }
 };
 
-export const getCellText = (cellElement: HTMLElement | false) => {
+export const getCellText = (cellElement: HTMLElement | false, purpose: "copy" | "display" = "copy") => {
     if (!cellElement) {
         return "";
+    }
+    const formatLocation = purpose === "display" ? getAVLocationDisplayText : getAVLocationText;
+    const ownValue = cellElement.dataset?.cellValue && cellElement.matches(".av__celltext") ?
+        getStoredCellValueByElement(cellElement) : undefined;
+    if (ownValue?.type === "location" && !cellElement.matches(".av__celltext--template")) {
+        return formatLocation(ownValue.location);
     }
     const richTextElement = cellElement.matches(".av__celltext--rich[data-cell-value]") ? cellElement :
         cellElement.querySelector<HTMLElement>(".av__celltext--rich[data-cell-value]");
@@ -208,7 +214,10 @@ export const getCellText = (cellElement: HTMLElement | false) => {
     const textElements = cellElement.querySelectorAll(".b3-chip, .av__celltext--ref, .av__celltext");
     if (textElements.length > 0) {
         textElements.forEach(item => {
-            if (item.querySelector(".av__cellicon")) {
+            const storedValue = (item as HTMLElement).dataset?.cellValue ? getStoredCellValueByElement(item as HTMLElement) : undefined;
+            if (storedValue?.type === "location" && !item.matches(".av__celltext--template")) {
+                cellText += formatLocation(storedValue.location) + ", ";
+            } else if (item.querySelector(".av__cellicon")) {
                 cellText += `${item.firstChild.textContent} → ${item.lastChild.textContent}, `;
             } else if (item.getAttribute("data-type") === "url") {
                 cellText = item.getAttribute("data-href") + ", ";
@@ -1479,7 +1488,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
             text = `<span class="av__celltext">${cellValue ? escapeHtmlTextAndAttr(cellValue.text.content || "") : ""}</span>`;
         }
     } else if (cellValue.type === "location") {
-        text = `<span class="av__celltext" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(cellValue))))}">${escapeHtmlTextAndAttr(getAVLocationText(cellValue.location))}</span>`;
+        text = `<span class="av__celltext" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(cellValue))))}">${escapeHtmlTextAndAttr(getAVLocationDisplayText(cellValue.location))}</span>`;
     } else if ((cellValue.type === "email" || cellValue.type === "phone")) {
         text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${cellValue ? escapeHtmlTextAndAttr(cellValue[cellValue.type as "email"].content || "") : ""}</span>`;
     } else if ("url" === cellValue.type) {
@@ -1583,6 +1592,9 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
 };
 
 export const getCellValueText = (value: IAVCellValue, column?: IAVColumn, rowIndex = 0) => {
+    if (value.type === "location" && !hasAVRenderTemplateResult(value, column?.renderTemplate)) {
+        return getAVLocationText(value.location);
+    }
     if (value.type === "text" && !hasAVRenderTemplateResult(value, column?.renderTemplate) &&
         getAVTextSource(value).kind === "rich") {
         return getAVTextCopyContent(value);

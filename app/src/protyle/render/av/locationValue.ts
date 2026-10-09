@@ -50,15 +50,22 @@ export const formatAVLocationCoordinate = (value: number) => {
     return (negative ? "-" : "") + expanded;
 };
 
-export const getAVLocationText = (location?: IAVCellLocationValue) => {
+const formatAVLocationText = (location?: IAVCellLocationValue, longitudeFirst = false) => {
     const name = location?.name?.trim() || "";
     if (!hasAVLocationCoordinates(location)) {
         return name;
     }
     const system = location.coordinateSystem || "unknown";
     const label = {unknown: "unknown", wgs84: "WGS84", gcj02: "GCJ-02", bd09: "BD-09"}[system] || "unknown";
-    return `${name ? name + "; " : ""}${formatAVLocationCoordinate(location.latitude)}, ${formatAVLocationCoordinate(location.longitude)} [${label}]`;
+    const coordinates = longitudeFirst ? [location.longitude, location.latitude] : [location.latitude, location.longitude];
+    return `${name ? name + "; " : ""}${coordinates.map(formatAVLocationCoordinate).join(", ")} [${label}]`;
 };
+
+// 复制、类型转换和内核导出保持既有的纬度、经度文本契约。
+export const getAVLocationText = (location?: IAVCellLocationValue) => formatAVLocationText(location);
+
+// 界面与编辑器统一按经度、纬度显示，不改变持久化值或文本交换格式。
+export const getAVLocationDisplayText = (location?: IAVCellLocationValue) => formatAVLocationText(location, true);
 
 // 事务按字段合并，删除旧坐标或来源时必须显式发送空值。
 export const createAVLocationReplacement = (location?: IAVCellLocationValue): IAVCellLocationValue => ({

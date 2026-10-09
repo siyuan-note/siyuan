@@ -5,6 +5,7 @@ import {
     createAVLocationFromText,
     createAVLocationReplacement,
     formatAVLocationCoordinate,
+    getAVLocationDisplayText,
     getAVLocationText,
     isAVLocationCoordinateInput,
     isAVLocationEmpty,
@@ -100,6 +101,21 @@ describe("database location values", () => {
         assert.equal(formatAVLocationCoordinate(1.234e-7), "0.0000001234");
         assert.equal(formatAVLocationCoordinate(1e21), "1000000000000000000000");
         assert.equal(formatAVLocationCoordinate(-0), "0");
+    });
+
+    it("displays longitude first while preserving canonical text, named fields and provenance", () => {
+        assert.equal(getAVLocationDisplayText(), "");
+        assert.equal(getAVLocationDisplayText({name: "  Office  "}), "Office");
+        for (const system of ["unknown", "wgs84", "gcj02", "bd09"] as const) {
+            const location = {name: "Office", latitude: 20, longitude: 30, coordinateSystem: system, originalInput: "20,30"};
+            const before = {...location};
+            const label = {unknown: "unknown", wgs84: "WGS84", gcj02: "GCJ-02", bd09: "BD-09"}[system];
+            assert.equal(getAVLocationDisplayText(location), `Office; 30, 20 [${label}]`);
+            assert.equal(getAVLocationText(location), `Office; 20, 30 [${label}]`);
+            assert.deepEqual(location, before);
+            assert.equal(parseAVLocationCoordinates(getAVLocationText(location), system, "longitudeLatitude"), undefined);
+        }
+        assert.equal(getAVLocationDisplayText({latitude: 1e-7, longitude: -1e-8}), "-0.00000001, 0.0000001 [unknown]");
     });
 
     it("excludes provenance from emptiness, display, and semantic equality", () => {

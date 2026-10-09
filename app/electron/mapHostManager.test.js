@@ -138,8 +138,12 @@ test("destroy aborts in-flight provider requests, clears session state and leave
     assert.equal(ses.cleanup.length, 5);
 });
 
-const setup = () => {
+const setup = (initialFault) => {
     let sequence = 0;
+    const faults = new Set(initialFault ? [initialFault] : []);
+    const fault = name => {
+        if (faults.has(name)) throw new Error("https://private.invalid/?key=secret " + name);
+    };
     const handlers = {}, sessions = [], views = [], channels = [], order = [], switches = new Map();
     const app = Object.assign(new EventEmitter(), {commandLine: {
         hasSwitch: name => switches.has(name), getSwitchValue: name => switches.get(name),
@@ -151,37 +155,53 @@ const setup = () => {
     const win = Object.assign(new EventEmitter(), {webContents: owner, destroyed: false, focused: true, children: [],
         isDestroyed() { return this.destroyed; }, isFocused() { return this.focused; },
         isVisible: () => true, isMinimized: () => false, getContentBounds: () => ({width: 1000, height: 800})});
-    win.contentView = {addChildView: view => win.children.push(view), removeChildView: view => { win.children = win.children.filter(item => item !== view); }};
+    win.contentView = {addChildView: view => { fault("attach"); win.children.push(view); },
+        removeChildView: view => { fault("detach"); win.children = win.children.filter(item => item !== view); }};
     const target = {origin};
     let initialized = true;
     const manager = createMapHostManager({app, appDir: "/app", getTarget: id => id === 1 ? target : undefined,
         isInitialized: () => initialized, readFile: async () => Buffer.from("asset"), randomID: () => (++sequence).toString(16).padStart(48, "0"),
         ipcMain: {handle: (name, handler) => { handlers[name] = handler; }, on: (name, handler) => { handlers[name] = handler; }},
         BrowserWindow: {fromWebContents: value => value === owner ? win : undefined},
-        session: {fromPartition(partition, options) { const ses = createSession(); Object.assign(ses, {partition, options}); sessions.push(ses); return ses; }},
+        session: {fromPartition(partition, options) {
+            fault("session");
+            const ses = createSession(); Object.assign(ses, {partition, options}); sessions.push(ses);
+            const setPermission = ses.setPermissionRequestHandler;
+            ses.setPermissionRequestHandler = value => { fault("router"); setPermission(value); };
+            return ses;
+        }},
         WebContentsView: class {
             constructor(options) {
+                fault("view");
                 this.options = options;
                 this.webContents = contents(100 + views.length);
                 Object.assign(this.webContents, {
-                    setWindowOpenHandler(handler) { this.openHandler = handler; order.push("openHandler"); },
+                    setWindowOpenHandler(handler) { fault("openHandler"); this.openHandler = handler; order.push("openHandler"); },
                     getURL() { return this.url; },
-                    async loadURL(url) { this.url = url; order.push("load"); },
-                    postMessage(...args) { this.transferred = args; },
+                    loadURL(url) {
+                        fault("loadSync"); this.url = url; order.push("load");
+                        return faults.has("loadAsync") ? Promise.reject(new Error("private load failure")) : Promise.resolve();
+                    },
+                    postMessage(...args) { fault("portTransfer"); this.transferred = args; },
                     setZoomFactor(zoom) { this.zoom = zoom; },
                     setBackgroundThrottling(value) { this.throttling = value; order.push("throttling:" + value); },
-                    stop() { this.stopped = true; },
+                    stop() { fault("stop"); this.stopped = true; },
                     close(options) { this.closeOptions = options; this.destroyed = true; this.emit("destroyed"); },
                 });
+                const on = this.webContents.on;
+                this.webContents.on = function (...args) { fault("listener"); return on.apply(this, args); };
                 views.push(this);
             }
             setVisible(value) { this.visible = value; }
-            setBounds(value) { this.bounds = value; }
+            setBounds(value) { fault("bounds"); this.bounds = value; }
         },
         MessageChannelMain: class {
             constructor() {
-                const port = () => Object.assign(new EventEmitter(), {sent: [], postMessage(value) { this.sent.push(structuredClone(value)); },
-                    start() { this.started = true; }, close() { this.closed = true; }});
+                fault("channel");
+                const port = () => Object.assign(new EventEmitter(), {sent: [],
+                    on(...args) { fault("portListener"); return EventEmitter.prototype.on.apply(this, args); },
+                    postMessage(value) { fault("portPost"); this.sent.push(structuredClone(value)); },
+                    start() { fault("portStart"); this.started = true; }, close() { this.closed = true; }});
                 this.port1 = port(); this.port2 = port(); channels.push(this);
             }
         },
@@ -191,7 +211,7 @@ const setup = () => {
     const command = data => handlers["siyuan-map-command"](event(), {...envelope, ...data});
     const reply = data => channels.at(-1).port1.emit("message", {data: {...envelope, ...data}});
     const load = () => views.at(-1).webContents.emit("did-finish-load");
-    return {manager, app, handlers, sessions, views, channels, order, switches, owner, win, target, event, create, command, reply, load,
+    return {manager, app, handlers, sessions, views, channels, order, switches, owner, win, target, event, create, command, reply, load, faults,
         setInitialized(value) { initialized = value; }};
 };
 
@@ -368,7 +388,7 @@ test("destroy and owner navigation close real contents, ports, requests and sess
 test("unsafe effective switches reject creation and duplicate instance IDs cannot replace a running host", () => {
     const s = setup(); s.switches.set("disable-web-security", "");
     assert.equal(s.create().error, "unsupportedEnvironment"); assert.equal(s.views.length, 0);
-    s.switches.clear(); s.create(); assert.equal(s.create().error, "hostUnavailable"); assert.equal(s.views.length, 1);
+    s.switches.clear(); s.create(); assert.equal(s.create().error, "hostLimitReached"); assert.equal(s.views.length, 1);
     s.manager.destroyAll();
 });
 
@@ -422,7 +442,7 @@ test("navigation, redirects, client certificates, login and renderer failure are
         assert.equal(prevented, true); assert.equal(answered, true);
     }
     wc.emit("render-process-gone"); assert.equal(wc.destroyed, true);
-    assert.equal(s.owner.sent[0][1].code, "hostUnavailable");
+    assert.equal(s.owner.sent[0][1].code, "hostRendererGone");
 });
 
 test("main-process provider fetch cannot select client certificates or authenticate, including null WebContents", async () => {
@@ -450,7 +470,128 @@ test("a closed runtime port destroys the map instead of retaining a live orphan 
     const s = setup(); s.create(); s.load();
     s.channels[0].port1.emit("close");
     assert.equal(s.views[0].webContents.destroyed, true);
-    assert.equal(s.owner.sent[0][1].code, "hostUnavailable");
+    assert.equal(s.owner.sent[0][1].code, "hostPortClosed");
+});
+
+test("bootstrap and SDK receive separate deadlines and duplicate bootstrap cannot extend SDK lifetime", t => {
+    t.mock.timers.enable({apis: ["setTimeout"]});
+    const s = setup(); s.create(); s.load();
+    t.mock.timers.tick(29000);
+    s.reply({type: "bootstrapReady"});
+    t.mock.timers.tick(39000);
+    assert.equal(s.views[0].webContents.destroyed, false, "both SDK phases retain their own 20-second budget");
+    assert.deepEqual(s.owner.sent, []);
+    s.reply({type: "bootstrapReady"});
+    t.mock.timers.tick(5999);
+    assert.equal(s.views[0].webContents.destroyed, false);
+    t.mock.timers.tick(1);
+    assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error", code: "hostSDKTimeout"}]);
+    assert.equal(s.views[0].webContents.destroyed, true);
+    assert.equal(s.channels[0].port1.closed, true);
+});
+
+test("document and bootstrap timeouts have distinct final codes and successful ready clears all deadlines", t => {
+    t.mock.timers.enable({apis: ["setTimeout"]});
+    for (const loaded of [false, true]) {
+        const s = setup(); s.create();
+        if (loaded) s.load();
+        t.mock.timers.tick(29999);
+        assert.deepEqual(s.owner.sent, []);
+        t.mock.timers.tick(1);
+        assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error",
+            code: loaded ? "hostBootstrapTimeout" : "hostDocumentLoadTimeout"}]);
+        assert.equal(s.views[0].webContents.destroyed, true);
+    }
+    const s = setup(); s.create(); s.load();
+    t.mock.timers.tick(29000); s.reply({type: "bootstrapReady"});
+    t.mock.timers.tick(39999); s.reply({type: "ready"});
+    t.mock.timers.tick(90000);
+    assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "ready"}]);
+    assert.equal(s.views[0].webContents.destroyed, false);
+    s.manager.destroyAll();
+});
+
+test("creation failures return fixed stage codes and release every resource already allocated", () => {
+    for (const [point, code] of [["session", "hostSetupFailed"], ["router", "hostSetupFailed"],
+        ["view", "hostSetupFailed"], ["openHandler", "hostSetupFailed"], ["listener", "hostSetupFailed"],
+        ["attach", "hostAttachFailed"], ["bounds", "hostAttachFailed"], ["loadSync", "hostAttachFailed"]]) {
+        const s = setup(point);
+        assert.deepEqual(s.create(), {...envelope, error: code}, point);
+        assert.equal(s.win.children.length, 0, point);
+        for (const ses of s.sessions) assert.equal(ses.cleanup.length, 5, point);
+        for (const view of s.views) {
+            assert.equal(view.webContents.destroyed, true, point);
+            assert.equal(view.webContents.eventNames().length, 0, point);
+        }
+        assert.equal(JSON.stringify(s.owner.sent).includes("secret"), false, point);
+        s.faults.clear();
+        assert.deepEqual(s.create(), envelope, "a failed instance must not occupy its slot: " + point);
+        s.manager.destroyAll();
+    }
+});
+
+test("load rejection and main-frame failure report document failure without waiting for the deadline", async () => {
+    const s = setup("loadAsync"); s.create();
+    await Promise.resolve();
+    assert.equal(s.owner.sent.at(-1)[1].code, "hostDocumentLoadFailed");
+    assert.equal(s.views[0].webContents.destroyed, true);
+    const f = setup(); f.create();
+    f.views[0].webContents.emit("did-fail-load", {}, -2, "secret", "https://private.invalid/?key=secret", false);
+    assert.deepEqual(f.owner.sent, []);
+    f.views[0].webContents.emit("did-fail-load", {}, -2, "secret", "https://private.invalid/?key=secret", true);
+    assert.equal(f.owner.sent.at(-1)[1].code, "hostDocumentLoadFailed");
+    assert.equal(JSON.stringify(f.owner.sent).includes("secret"), false);
+    assert.equal(f.views[0].webContents.destroyed, true);
+});
+
+test("unexpected document, reload, destruction and bootstrap rejection retain their final failure reason", () => {
+    const cases = [
+        ["hostDocumentMismatch", s => { s.views[0].webContents.url += "unexpected"; s.load(); }],
+        ["hostDocumentReloaded", s => { s.load(); s.load(); }],
+        ["hostDestroyed", s => { s.views[0].webContents.destroyed = true; s.views[0].webContents.emit("destroyed"); }],
+        ["hostBootstrapFailed", s => { s.load(); s.reply({type: "error", code: "hostUnavailable"}); }],
+        ["hostOperationFailed", s => { s.load(); s.reply({type: "bootstrapReady"}); s.reply({type: "error", code: "hostUnavailable"}); }],
+    ];
+    for (const [code, trigger] of cases) {
+        const s = setup(); s.create(); trigger(s);
+        assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error", code}]);
+        assert.equal(s.views[0].webContents.destroyed, true);
+        assert.equal(s.win.children.length, 0);
+        s.manager.destroyAll();
+        assert.equal(s.owner.sent.length, 1, "disposal must not manufacture another hostDestroyed failure");
+    }
+});
+
+test("port setup and message failures close both endpoints and preserve the fixed failure stage", () => {
+    for (const point of ["channel", "portListener", "portStart", "portTransfer"]) {
+        const s = setup(); s.create(); s.faults.add(point); s.load();
+        assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error", code: "hostPortSetupFailed"}], point);
+        assert.equal(s.views[0].webContents.destroyed, true, point);
+        for (const channel of s.channels) {
+            assert.equal(channel.port1.closed, true, point);
+            assert.equal(channel.port2.closed, true, point);
+        }
+    }
+    for (const ready of [false, true]) {
+        const s = setup(); s.create(); s.load();
+        if (ready) s.reply({type: "bootstrapReady"});
+        s.faults.add("portPost");
+        s.reply({type: ready ? "ready" : "bootstrapReady"});
+        assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error", code: "hostOperationFailed"}]);
+        assert.equal(s.views[0].webContents.destroyed, true);
+        assert.equal(s.views[0].webContents.throttling, false, "a failed post must not continue ready operations");
+    }
+});
+
+test("renderer closure still runs when detaching the view or stopping it throws", () => {
+    const s = setup(); s.create(); s.load();
+    s.faults.add("detach"); s.faults.add("stop");
+    s.channels[0].port1.emit("close");
+    assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error", code: "hostPortClosed"}]);
+    assert.equal(s.views[0].webContents.destroyed, true);
+    assert.equal(s.sessions[0].cleanup.length, 5);
+    assert.equal(s.channels[0].port1.closed, true);
+    assert.equal(s.channels[0].port2.closed, true);
 });
 
 test("main wiring removes only the process security bypass and never enables remote on map contents", () => {

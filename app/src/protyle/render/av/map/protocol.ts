@@ -7,8 +7,22 @@ export type AVMapTheme = "light" | "dark";
 export type AVMapCoordinateSystem = "wgs84" | "gcj02" | "bd09";
 export type AVMapLoadErrorCode = "sdkScriptLoadFailed" | "sdkCallbackTimeout" | "sdkGlobalMissing" |
     "mapCreationFailed" | "mapReadyTimeout";
+export type AVMapHostErrorCode = "hostLimitReached" | "hostSetupFailed" | "hostAttachFailed" |
+    "hostDocumentLoadFailed" | "hostDocumentLoadTimeout" | "hostDocumentReloaded" | "hostDocumentMismatch" |
+    "hostRendererGone" | "hostDestroyed" | "hostPortSetupFailed" | "hostPortClosed" | "hostBootstrapFailed" |
+    "hostBootstrapTimeout" | "hostSDKTimeout" | "hostOperationFailed" | "hostCreateRejected" |
+    "hostCreateInvalidResponse" | "hostReadyTimeout" | "hostOwnerSetupFailed";
 export type AVMapErrorCode = "unsupportedEnvironment" | "missingCredentials" | "invalidConfiguration" |
-    "hostUnavailable" | "sdkUnavailable" | "mapUnavailable" | AVMapLoadErrorCode;
+    "hostUnavailable" | "sdkUnavailable" | "mapUnavailable" | AVMapLoadErrorCode | AVMapHostErrorCode;
+
+const mapHostErrorCodes = new Set<AVMapHostErrorCode>([
+    "hostLimitReached", "hostSetupFailed", "hostAttachFailed", "hostDocumentLoadFailed", "hostDocumentLoadTimeout",
+    "hostDocumentReloaded", "hostDocumentMismatch", "hostRendererGone", "hostDestroyed", "hostPortSetupFailed",
+    "hostPortClosed", "hostBootstrapFailed", "hostBootstrapTimeout", "hostSDKTimeout", "hostOperationFailed",
+    "hostCreateRejected", "hostCreateInvalidResponse", "hostReadyTimeout", "hostOwnerSetupFailed",
+]);
+export const isAVMapHostErrorCode = (value: unknown): value is AVMapHostErrorCode =>
+    typeof value === "string" && mapHostErrorCodes.has(value as AVMapHostErrorCode);
 
 const mapLoadErrorCodes = new Set<AVMapLoadErrorCode>([
     "sdkScriptLoadFailed", "sdkCallbackTimeout", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout",
@@ -182,7 +196,8 @@ export const parseAVMapReply = (value: unknown, instanceID: string): AVMapReply 
         return {...envelope, type: "markerClick", id: input.id, revision: input.revision};
     }
     if (input.type === "error" && (["unsupportedEnvironment", "missingCredentials", "invalidConfiguration",
-        "hostUnavailable", "sdkUnavailable", "mapUnavailable"].includes(input.code as string) || isAVMapLoadErrorCode(input.code))) {
+        "hostUnavailable", "sdkUnavailable", "mapUnavailable"].includes(input.code as string) ||
+        isAVMapLoadErrorCode(input.code) || isAVMapHostErrorCode(input.code))) {
         return {...envelope, type: "error", code: input.code as AVMapErrorCode};
     }
 };

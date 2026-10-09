@@ -2,7 +2,7 @@ import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
 import {
     AV_MAP_ATTRIBUTION_LINKS, AV_MAP_MERCATOR_MAX_LATITUDE, AVMapLoadError, AVMapProvider, getAVMapLoadErrorCode,
-    isAVMapHandshake, isAVMapProjectionSupported,
+    isAVMapHandshake, isAVMapHostErrorCode, isAVMapProjectionSupported,
     parseAVMapCommand, parseAVMapReply, sanitizeAVMapCredentials, sanitizeAVMapPoints,
 } from "./protocol";
 
@@ -103,5 +103,23 @@ describe("isolated map protocol", () => {
         assert.equal(getAVMapLoadErrorCode(Object.assign(new Error("secret"), {code: "mapCreationFailed"})), undefined);
         assert.equal(getAVMapLoadErrorCode({code: "mapCreationFailed"}), undefined);
         assert.equal(getAVMapLoadErrorCode(Object.assign(new AVMapLoadError("mapCreationFailed"), {code: "secret"})), undefined);
+    });
+    it("preserves only fixed host failures across the owner and main process boundaries", () => {
+        const {parseMapReply} = require("../../../../../electron/mapHostPolicy");
+        for (const code of ["hostLimitReached", "hostSetupFailed", "hostAttachFailed", "hostDocumentLoadFailed",
+            "hostDocumentLoadTimeout", "hostDocumentReloaded", "hostDocumentMismatch", "hostRendererGone", "hostDestroyed",
+            "hostPortSetupFailed", "hostPortClosed", "hostBootstrapFailed", "hostBootstrapTimeout", "hostSDKTimeout",
+            "hostOperationFailed", "hostCreateRejected", "hostCreateInvalidResponse", "hostReadyTimeout", "hostOwnerSetupFailed"]) {
+            const reply = {version: 1, instanceID: "one", type: "error", code};
+            const input = {...reply, message: "https://private.invalid/?key=secret", stack: "secret"};
+            assert.equal(isAVMapHostErrorCode(code), true);
+            assert.deepEqual(parseAVMapReply(input, "one"), reply);
+            assert.deepEqual(parseMapReply(input, "one"), reply);
+            assert.equal(parseAVMapReply(input, "other"), undefined);
+        }
+        for (const code of ["hostSecret", "https://private.invalid/?key=secret", {}, null]) {
+            assert.equal(isAVMapHostErrorCode(code), false);
+            assert.equal(parseAVMapReply({version: 1, instanceID: "one", type: "error", code}, "one"), undefined);
+        }
     });
 });

@@ -33,12 +33,14 @@ const fixture = (warnings: unknown[][] = []) => {
     const listeners = new Map<string, (...args: any[]) => void>();
     const domListeners = new Map<string, () => void>();
     const frames = new Map<number, () => void>();
+    const timers = new Map<number, {callback: () => void; delay: number}>();
     let resolveCreate: (value: unknown) => void;
-    let now = 0, nextFrame = 0;
+    let rejectCreate: (value: unknown) => void;
+    let now = 0, nextFrame = 0, nextTimer = 0;
     const ipc = {
         invoke: (name: string, value: unknown) => {
             calls.push([name, value]);
-            return new Promise((resolve) => { resolveCreate = resolve; });
+            return new Promise((resolve, reject) => { resolveCreate = resolve; rejectCreate = reject; });
         },
         send: (name: string, value: unknown) => calls.push([name, value]),
         on: (name: string, fn: (...args: any[]) => void) => listeners.set(name, fn),
@@ -50,7 +52,11 @@ const fixture = (warnings: unknown[][] = []) => {
         addEventListener: (name: string, fn: () => void) => domListeners.set(name, fn),
         removeEventListener: (name: string) => domListeners.delete(name)};
     const scope = {crypto: webcrypto, innerWidth: 1000, innerHeight: 800, performance: {now: () => now},
-        setTimeout: () => 1, clearTimeout() {},
+        setTimeout: (callback: () => void, delay: number) => {
+            timers.set(++nextTimer, {callback, delay});
+            return nextTimer;
+        },
+        clearTimeout: (id: number) => timers.delete(id),
         requestAnimationFrame: (fn: () => void) => { frames.set(++nextFrame, fn); return nextFrame; },
         cancelAnimationFrame: (id: number) => frames.delete(id),
         addEventListener: (name: string, fn: () => void) => domListeners.set(name, fn),
@@ -58,7 +64,7 @@ const fixture = (warnings: unknown[][] = []) => {
         getComputedStyle: () => ({display: "block", visibility: "visible", opacity: "1", overflowX: "visible", overflowY: "visible",
             getPropertyValue: () => ""})};
     doc.defaultView = scope;
-    const container: any = {ownerDocument: doc, isConnected: true, parentElement: null,
+    const container: any = {ownerDocument: doc, isConnected: true, parentElement: null, closest: (): HTMLElement | null => null,
         getClientRects: () => [rect], getBoundingClientRect: () => rect, contains: (target: unknown) => target === container};
     const errors: string[] = [], clicks: unknown[] = [];
     let ready = 0;
@@ -67,11 +73,15 @@ const fixture = (warnings: unknown[][] = []) => {
         credentials: {apiKey: "do-not-send", extra: "private"}, onError: (value: string) => errors.push(value),
         onMarkerClick: (...args: unknown[]) => clicks.push(args), onReady: () => ready++});
     const instanceID = calls[0][1].instanceID;
-    return {host, calls, listeners, domListeners, frames, errors, clicks, doc, container, rect,
+    return {host, calls, listeners, domListeners, frames, timers, errors, clicks, doc, container, rect,
         ready: () => ready,
         reply: (value: object) => listeners.get("siyuan-map-reply")?.({}, {version: 1, instanceID, ...value}),
-        created: async () => {
-            resolveCreate({version: 1, instanceID});
+        rejected: async () => {
+            rejectCreate(new Error("https://private.invalid/?key=secret"));
+            await new Promise<void>((resolve) => setImmediate(resolve));
+        },
+        created: async (overrides: object = {}) => {
+            resolveCreate({version: 1, instanceID, ...overrides});
             await new Promise<void>((resolve) => setImmediate(resolve));
         },
         advance: (milliseconds = 150) => {
@@ -83,6 +93,49 @@ const fixture = (warnings: unknown[][] = []) => {
 };
 
 describe("desktop map transport", () => {
+    it("preserves fixed creation failures and never logs rejected IPC details", async () => {
+        for (const code of ["hostLimitReached", "hostSetupFailed", "hostAttachFailed"] as const) {
+            const warnings: unknown[][] = [];
+            const f = fixture(warnings);
+            await f.created({error: code, details: "https://private.invalid/?key=secret"});
+            assert.deepEqual(f.errors, [code]);
+            assert.deepEqual(warnings, [["Database map failed:", code]]);
+            assert.equal(f.timers.size, 0);
+        }
+        for (const response of [{version: 2}, {instanceID: "other"}, {error: "secret"}]) {
+            const f = fixture();
+            await f.created(response);
+            assert.deepEqual(f.errors, ["hostCreateInvalidResponse"]);
+        }
+        const warnings: unknown[][] = [];
+        const f = fixture(warnings);
+        await f.rejected();
+        assert.deepEqual(f.errors, ["hostCreateRejected"]);
+        assert.deepEqual(warnings, [["Database map failed:", "hostCreateRejected"]]);
+        assert.equal(f.listeners.size, 0);
+    });
+    it("lets main report a late SDK failure before the owner fallback and cleans the fallback", async () => {
+        const f = fixture();
+        assert.deepEqual([...f.timers.values()].map((timer) => timer.delay), [90000]);
+        f.reply({type: "error", code: "hostSDKTimeout"});
+        assert.deepEqual(f.errors, ["hostSDKTimeout"]);
+        assert.equal(f.timers.size, 0);
+        await f.created();
+        assert.equal(f.frames.size, 0, "late create must not revive a failed host");
+        const stalled = fixture();
+        const callback = [...stalled.timers.values()][0].callback;
+        callback();
+        assert.deepEqual(stalled.errors, ["hostReadyTimeout"]);
+        assert.equal(stalled.listeners.size, 0);
+        assert.equal(stalled.timers.size, 0);
+        await stalled.created();
+        assert.equal(stalled.frames.size, 0);
+        const disposed = fixture();
+        const late = [...disposed.timers.values()][0].callback;
+        disposed.host.destroy();
+        late();
+        assert.deepEqual(disposed.errors, []);
+    });
     it("logs only allowlisted diagnostics for the current instance and ignores provider text", () => {
         const warnings: unknown[][] = [];
         const f = fixture(warnings);
@@ -178,7 +231,7 @@ describe("desktop map transport", () => {
             f.advance();
             assert.equal(lastGeometry().visible, true);
             f.domListeners.get("scroll")();
-            assert.equal(lastGeometry().visible, false);
+            assert.equal(lastGeometry().visible, true);
             f.advance();
             assert.equal(lastGeometry().visible, true);
             f.doc.elementFromPoint = () => ({});
@@ -202,6 +255,125 @@ describe("desktop map transport", () => {
             assert.equal(f.domListeners.size, 0);
             assert.equal(disconnects, 2);
             assert.deepEqual(f.errors, []);
+        } finally {
+            f.host.destroy();
+            globalThis.MutationObserver = oldMutation;
+            globalThis.ResizeObserver = oldResize;
+        }
+    });
+    it("clips beneath its own fixed database tabs while retaining menu and unknown occlusion checks", async () => {
+        const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;
+        const callbacks: Array<() => void> = [];
+        class Observer {
+            constructor(callback: () => void) { callbacks.push(callback); }
+            observe() {}
+            disconnect() {}
+        }
+        globalThis.MutationObserver = Observer as any;
+        globalThis.ResizeObserver = Observer as any;
+        const f = fixture();
+        const lastGeometry = () => f.calls.filter(([name]) => name === "siyuan-map-geometry").at(-1)[1];
+        const tabsRect = {x: 10, y: 90, width: 400, height: 33};
+        const tabs = {getClientRects: () => [tabsRect], getBoundingClientRect: () => tabsRect};
+        const av = {querySelector: (selector: string) => {
+            assert.equal(selector, ":scope > .av__container > .av__header > .av__views--fixed");
+            return tabs;
+        }};
+        f.container.closest = (selector: string) => {
+            assert.equal(selector, ".av[data-type='NodeAttributeView']");
+            return av;
+        };
+        const getStyle = f.doc.defaultView.getComputedStyle;
+        f.doc.defaultView.getComputedStyle = (element: unknown) => ({...getStyle(element), position: element === tabs ? "fixed" : "static"});
+        f.rect.y = 60;
+        f.doc.elementFromPoint = (_x: number, y: number) => y >= tabsRect.y && y < tabsRect.y + tabsRect.height ? tabs : f.container;
+        try {
+            await f.created();
+            f.reply({type: "ready"});
+            f.advance();
+            assert.deepEqual(lastGeometry().bounds, {x: 10, y: 123, width: 400, height: 237});
+            assert.deepEqual(lastGeometry().logicalSize, {width: 400, height: 300});
+            assert.deepEqual(lastGeometry().crop, {x: 0, y: 63});
+            f.rect.y = 40;
+            f.domListeners.get("scroll")();
+            assert.deepEqual(lastGeometry().bounds, {x: 10, y: 123, width: 400, height: 217});
+            tabsRect.height += 5;
+            callbacks[0]();
+            assert.deepEqual(lastGeometry().bounds, {x: 10, y: 128, width: 400, height: 212});
+            assert.deepEqual(lastGeometry().crop, {x: 0, y: 88});
+            const menu = {contains: () => false, getClientRects: () => [f.rect],
+                getBoundingClientRect: () => ({x: 30, y: 160, width: 40, height: 40})};
+            f.doc.querySelectorAll = () => [menu];
+            callbacks[0]();
+            assert.equal(lastGeometry().visible, false);
+            f.doc.querySelectorAll = (): HTMLElement[] => [];
+            f.doc.elementFromPoint = () => ({});
+            callbacks[0]();
+            f.advance();
+            assert.equal(lastGeometry().visible, false, "other database bars and unknown overlays must still hide the map");
+            f.doc.elementFromPoint = () => f.container;
+            callbacks[0]();
+            f.advance();
+            assert.equal(lastGeometry().visible, true);
+        } finally {
+            f.host.destroy();
+            globalThis.MutationObserver = oldMutation;
+            globalThis.ResizeObserver = oldResize;
+        }
+    });
+    it("updates throughout continuous scrolling while hiding occlusion and stopping after disposal", async () => {
+        const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;
+        const callbacks: Array<() => void> = [];
+        class Observer {
+            constructor(callback: () => void) { callbacks.push(callback); }
+            observe() {}
+            disconnect() {}
+        }
+        globalThis.MutationObserver = Observer as any;
+        globalThis.ResizeObserver = Observer as any;
+        const f = fixture();
+        const geometryCalls = () => f.calls.filter(([name]) => name === "siyuan-map-geometry");
+        const lastGeometry = () => geometryCalls().at(-1)[1];
+        try {
+            f.rect.y = 180;
+            await f.created();
+            f.reply({type: "ready"});
+            f.advance();
+            const first = geometryCalls().length;
+            const scroll = f.domListeners.get("scroll");
+            for (let i = 0; i < 8; i++) {
+                f.rect.y -= 7;
+                scroll();
+                assert.equal(lastGeometry().bounds.y, f.rect.y);
+                f.advance(30);
+                f.rect.y -= 1;
+                callbacks[0]();
+                assert.equal(lastGeometry().bounds.y, f.rect.y, "layout mutations during scrolling must not restart hiding");
+            }
+            assert.ok(geometryCalls().slice(first).every(([, value]) => value.visible));
+            const menu = {contains: () => false, getClientRects: () => [f.rect], getBoundingClientRect: () => f.rect};
+            f.doc.querySelectorAll = () => [menu];
+            scroll();
+            assert.equal(lastGeometry().visible, false, "scrolling elsewhere must still hide a newly overlapping menu");
+            callbacks[0]();
+            assert.equal(lastGeometry().visible, false);
+            f.advance(30);
+            f.doc.querySelectorAll = (): HTMLElement[] => [];
+            f.doc.elementFromPoint = () => ({});
+            callbacks[0]();
+            assert.equal(lastGeometry().visible, false);
+            f.doc.elementFromPoint = () => f.container;
+            callbacks[0]();
+            assert.equal(lastGeometry().visible, true);
+            f.container.isConnected = false;
+            scroll();
+            assert.equal(lastGeometry().visible, false);
+            f.host.destroy();
+            const count = f.calls.length;
+            scroll();
+            callbacks[0]();
+            f.advance();
+            assert.equal(f.calls.length, count);
         } finally {
             f.host.destroy();
             globalThis.MutationObserver = oldMutation;

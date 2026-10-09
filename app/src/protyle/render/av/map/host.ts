@@ -98,13 +98,16 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
             return;
         }
         if (preparing && isAVMapBootstrapMessage(event.data, "bootstrapError", instanceID, nonce)) {
-            fail("hostUnavailable");
+            fail("hostBootstrapFailed");
             return;
         }
         if (!preparing || !isAVMapBootstrapMessage(event.data, "bootstrapReady", instanceID, nonce)) {
             return;
         }
         scope.removeEventListener("message", onMessage);
+        // SDK 脚本和地图初始化各有 20 秒预算，不能被之前的引导计时提前截断。
+        scope.clearTimeout(timeout);
+        timeout = scope.setTimeout(() => fail("hostSDKTimeout"), 45000);
         const channel = new MessageChannel();
         port = channel.port1;
         port.onmessage = (replyEvent) => {
@@ -199,10 +202,10 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
         iframe.title = options.title || "";
         iframe.style.cssText = "width:100%;height:100%;border:0;display:block";
         iframe.src = `/stage/map/wrapper.html?provider=${options.provider}#${instanceID}:${nonce}`;
-        iframe.addEventListener("error", () => fail("hostUnavailable"), {once: true});
+        iframe.addEventListener("error", () => fail("hostDocumentLoadFailed"), {once: true});
         scope.addEventListener("message", onMessage);
         scope.addEventListener("pagehide", destroy, {once: true});
-        timeout = scope.setTimeout(() => fail("hostUnavailable"), 30000);
+        timeout = scope.setTimeout(() => fail("hostBootstrapTimeout"), 30000);
         container.appendChild(iframe);
         if (typeof ResizeObserver !== "undefined") {
             observer = new ResizeObserver(host.resize);

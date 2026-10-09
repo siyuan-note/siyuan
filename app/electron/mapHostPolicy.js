@@ -97,7 +97,11 @@ const parseMapReply = (value, instanceID) => {
     }
     if (value.type === "error" && ["unsupportedEnvironment", "missingCredentials", "invalidConfiguration",
         "hostUnavailable", "sdkUnavailable", "mapUnavailable", "sdkScriptLoadFailed", "sdkCallbackTimeout",
-        "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout"].includes(value.code)) {
+        "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout", "hostLimitReached", "hostSetupFailed",
+        "hostAttachFailed", "hostDocumentLoadFailed", "hostDocumentLoadTimeout", "hostDocumentReloaded",
+        "hostDocumentMismatch", "hostRendererGone", "hostDestroyed", "hostPortSetupFailed", "hostPortClosed",
+        "hostBootstrapFailed", "hostBootstrapTimeout", "hostSDKTimeout", "hostOperationFailed", "hostCreateRejected",
+        "hostCreateInvalidResponse", "hostReadyTimeout", "hostOwnerSetupFailed"].includes(value.code)) {
         return {...base, type: "error", code: value.code};
     }
 };

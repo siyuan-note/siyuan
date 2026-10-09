@@ -27,7 +27,6 @@ import (
 	_ "image/gif"
 	"image/jpeg"
 	"image/png"
-	"io"
 	"io/fs"
 	"maps"
 	"net/url"
@@ -196,17 +195,6 @@ func importedSYRootIDs(importedDocs []*importedSYSortDoc) (ret []string) {
 			continue
 		}
 		ret = append(ret, doc.newID)
-	}
-	sort.Strings(ret)
-	return
-}
-
-func importedTreeRootIDs(trees []*parse.Tree, parentPath string) (ret []string) {
-	for _, tree := range trees {
-		if nil == tree || parentPath != path.Dir(tree.Path) {
-			continue
-		}
-		ret = append(ret, tree.ID)
 	}
 	sort.Strings(ret)
 	return
@@ -1541,6 +1529,28 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		return
 	}
 
+	spool := &markdownImportSpool{searchLinks: map[string]string{}}
+	if gulu.File.IsDir(localPath) {
+		spool, err = newMarkdownImportSpool()
+		if err != nil {
+			return err
+		}
+	}
+	defer spool.close()
+	stagedCount, stagedBytes := 0, 0
+	stageTree := func(tree *parse.Tree) error {
+		if err := spool.add(tree); err != nil {
+			return err
+		}
+		stagedCount++
+		stagedBytes += spool.entries[len(spool.entries)-1].rawSize
+		if stagedCount >= markdownImportBatchDocuments || stagedBytes >= markdownImportBatchBytes {
+			debug.FreeOSMemory()
+			stagedCount, stagedBytes = 0, 0
+		}
+		return nil
+	}
+
 	hPathsIDs := map[string]string{}
 	idPaths := map[string]string{}
 	moveIDs := map[string]string{}
@@ -1549,7 +1559,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		targetPaths := map[string]string{}
 		count := 0
 		// md 转换 sy
-		filelock.Walk(localPath, func(currentPath string, d fs.DirEntry, err error) error {
+		if err = filelock.Walk(localPath, func(currentPath string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
@@ -1642,7 +1652,9 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				}
 
 				tree = treenode.NewTree(boxID, targetPath, hPath, title)
-				importTrees = append(importTrees, tree)
+				if err := stageTree(tree); err != nil {
+					return err
+				}
 				return nil
 			}
 
@@ -1652,8 +1664,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 
 			data, readErr := os.ReadFile(currentPath)
 			if nil != readErr {
-				err = readErr
-				return io.EOF
+				return readErr
 			}
 
 			tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data, true)
@@ -1777,7 +1788,9 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			})
 
 			reassignIDUpdated(tree, id, updated)
-			importTrees = append(importTrees, tree)
+			if err := stageTree(tree); err != nil {
+				return err
+			}
 
 			hPathsIDs[tree.HPath] = tree.ID
 			idPaths[tree.ID] = tree.Path
@@ -1787,7 +1800,9 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				util.PushEndlessProgress(fmt.Sprintf(Conf.language(70), fmt.Sprintf("%s", tree.HPath)))
 			}
 			return nil
-		})
+		}); err != nil {
+			return err
+		}
 	} else { // 导入单个文件
 		fileName := filepath.Base(localPath)
 		if !strings.HasSuffix(fileName, ".md") && !strings.HasSuffix(fileName, ".markdown") {
@@ -1915,35 +1930,38 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		reassignIDUpdated(tree, id, updated)
 		// 兜底校验：禁止跨加密边界块引（导入的 Markdown 可能含跨边界引用）
 		degradeCrossBoundaryBlockRefs(tree.Root, tree.Box)
-		importTrees = append(importTrees, tree)
+		if err := stageTree(tree); err != nil {
+			return err
+		}
 	}
 
 	var importedRootIDs []string
-	if 0 < len(importTrees) {
-		for id, newID := range moveIDs {
-			for _, importTree := range importTrees {
-				importTree.ID = strings.ReplaceAll(importTree.ID, id, newID)
-				importTree.Path = strings.ReplaceAll(importTree.Path, id, newID)
+	if len(spool.entries) > 0 {
+		spool.movePaths(moveIDs)
+		for _, entry := range spool.entries {
+			if _, ok := idPaths[entry.id]; ok {
+				idPaths[entry.id] = entry.path
 			}
 		}
-
-		initSearchLinks()
-		convertMdHyperlinks2WikiLinks()
-		convertWikiLinksAndTags()
-		mergeTextAndHandlerNestedInlines()
-
-		for i, tree := range importTrees {
-			indexWriteTreeIndexQueue(tree)
-			if 0 == i%4 {
-				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", i, len(importTrees))+tree.HPath))
+		i := 0
+		if err = spool.finish(func(tree *parse.Tree) error {
+			if err := indexWriteTreeIndexQueue(tree); err != nil {
+				return err
 			}
+			if i%4 == 0 {
+				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", i, len(spool.entries))+tree.HPath))
+			}
+			i++
+			return nil
+		}, func() {
+			sql.FlushQueue()
+			debug.FreeOSMemory()
+		}); err != nil {
+			return err
 		}
 		refreshBoxDocInfoByBoxID(boxID)
 		util.PushClearProgress()
-
-		importedRootIDs = importedTreeRootIDs(importTrees, baseTargetPath)
-		importTrees = []*parse.Tree{}
-		searchLinks = map[string]string{}
+		importedRootIDs = spool.rootIDs(baseTargetPath)
 
 		// 按照路径排序 Improve sort when importing markdown files https://github.com/siyuan-note/siyuan/issues/11390
 		var hPaths []string
@@ -2375,84 +2393,71 @@ func domAttrValue(n *html.Node, attrName string) string {
 	return ""
 }
 
-var importTrees []*parse.Tree
-var searchLinks = map[string]string{}
-
-func initSearchLinks() {
-	for _, tree := range importTrees {
-		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || (ast.NodeDocument != n.Type && ast.NodeHeading != n.Type) {
-				return ast.WalkContinue
-			}
-
-			nodePath := tree.HPath + "#"
-			if ast.NodeHeading == n.Type {
-				nodePath += n.Text()
-			}
-
-			searchLinks[nodePath] = n.ID
+func addImportSearchLinks(tree *parse.Tree, searchLinks map[string]string) {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || (ast.NodeDocument != n.Type && ast.NodeHeading != n.Type) {
 			return ast.WalkContinue
-		})
-	}
+		}
+
+		nodePath := tree.HPath + "#"
+		if ast.NodeHeading == n.Type {
+			nodePath += n.Text()
+		}
+
+		searchLinks[nodePath] = n.ID
+		return ast.WalkContinue
+	})
 }
 
-func convertMdHyperlinks2WikiLinks() {
+func convertMdHyperlinks2WikiLinks(tree *parse.Tree) {
 	// Supports converting relative path hyperlinks into document block references after importing Markdown https://github.com/siyuan-note/siyuan/issues/13817
 
 	var unlinks []*ast.Node
-	for _, tree := range importTrees {
-		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || ast.NodeTextMark != n.Type {
-				return ast.WalkContinue
-			}
-
-			if "a" != n.TextMarkType {
-				return ast.WalkContinue
-			}
-
-			linkText := n.TextMarkTextContent
-			if "" == linkText {
-				return ast.WalkContinue
-			}
-			linkDest := n.TextMarkAHref
-			if "" == linkDest {
-				return ast.WalkContinue
-			}
-			if strings.HasPrefix(linkDest, "assets/") {
-				return ast.WalkContinue
-			}
-			if !strings.HasSuffix(linkDest, ".md") && !strings.HasSuffix(linkDest, ".markdown") {
-				return ast.WalkContinue
-			}
-			linkDest = strings.TrimSuffix(linkDest, ".md")
-			linkDest = strings.TrimSuffix(linkDest, ".markdown")
-
-			buf := bytes.Buffer{}
-			buf.WriteString("[[")
-			buf.WriteString(linkDest)
-			buf.WriteString("|")
-			buf.WriteString(linkText)
-			buf.WriteString("]]")
-
-			wikilinkNode := &ast.Node{Type: ast.NodeText, Tokens: buf.Bytes()}
-			n.InsertBefore(wikilinkNode)
-			unlinks = append(unlinks, n)
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeTextMark != n.Type {
 			return ast.WalkContinue
-		})
-	}
+		}
+
+		if "a" != n.TextMarkType {
+			return ast.WalkContinue
+		}
+
+		linkText := n.TextMarkTextContent
+		if "" == linkText {
+			return ast.WalkContinue
+		}
+		linkDest := n.TextMarkAHref
+		if "" == linkDest {
+			return ast.WalkContinue
+		}
+		if strings.HasPrefix(linkDest, "assets/") {
+			return ast.WalkContinue
+		}
+		if !strings.HasSuffix(linkDest, ".md") && !strings.HasSuffix(linkDest, ".markdown") {
+			return ast.WalkContinue
+		}
+		linkDest = strings.TrimSuffix(linkDest, ".md")
+		linkDest = strings.TrimSuffix(linkDest, ".markdown")
+
+		buf := bytes.Buffer{}
+		buf.WriteString("[[")
+		buf.WriteString(linkDest)
+		buf.WriteString("|")
+		buf.WriteString(linkText)
+		buf.WriteString("]]")
+
+		wikilinkNode := &ast.Node{Type: ast.NodeText, Tokens: buf.Bytes()}
+		n.InsertBefore(wikilinkNode)
+		unlinks = append(unlinks, n)
+		return ast.WalkContinue
+	})
 
 	for _, n := range unlinks {
 		n.Unlink()
 	}
 }
 
-func convertWikiLinksAndTags() {
-	for _, tree := range importTrees {
-		convertWikiLinksAndTags0(tree)
-	}
-}
-
-func convertWikiLinksAndTags0(tree *parse.Tree) {
+func convertWikiLinksAndTags(tree *parse.Tree, searchLinks map[string]string) {
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeText != n.Type {
 			return ast.WalkContinue
@@ -2490,7 +2495,7 @@ func convertWikiLinksAndTags0(tree *parse.Tree) {
 				link += "#" // 在结尾统一带上锚点方便后续查找
 			}
 
-			id := searchLinkID(link)
+			id := searchLinkID(link, searchLinks)
 			if "" == id {
 				start, end = end, length
 				continue
@@ -2544,7 +2549,7 @@ func convertTags(text string) (ret string) {
 	return string(tokens)
 }
 
-func searchLinkID(link string) (id string) {
+func searchLinkID(link string, searchLinks map[string]string) (id string) {
 	id = searchLinks[link]
 	if "" != id {
 		return
@@ -2559,37 +2564,33 @@ func searchLinkID(link string) (id string) {
 	return
 }
 
-func mergeTextAndHandlerNestedInlines() {
-	luteEngine := NewLute()
-	luteEngine.SetHTMLTag2TextMark(true)
-	for _, tree := range importTrees {
-		tree.MergeText()
+func mergeTextAndHandlerNestedInlines(tree *parse.Tree, luteEngine *lute.Lute) {
+	tree.MergeText()
 
-		var unlinkTextNodes []*ast.Node
-		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || ast.NodeText != n.Type {
-				return ast.WalkContinue
-			}
-
-			if nil == n.Tokens {
-				return ast.WalkContinue
-			}
-
-			t := parse.Inline("", n.Tokens, luteEngine.ParseOptions) // 使用行级解析
-			parse.NestedInlines2FlattedSpans(t, false)
-			var children []*ast.Node
-			for c := t.Root.FirstChild.FirstChild; nil != c; c = c.Next {
-				children = append(children, c)
-			}
-			for _, c := range children {
-				n.InsertBefore(c)
-			}
-			unlinkTextNodes = append(unlinkTextNodes, n)
+	var unlinkTextNodes []*ast.Node
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeText != n.Type {
 			return ast.WalkContinue
-		})
-
-		for _, node := range unlinkTextNodes {
-			node.Unlink()
 		}
+
+		if nil == n.Tokens {
+			return ast.WalkContinue
+		}
+
+		t := parse.Inline("", n.Tokens, luteEngine.ParseOptions) // 使用行级解析
+		parse.NestedInlines2FlattedSpans(t, false)
+		var children []*ast.Node
+		for c := t.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+			children = append(children, c)
+		}
+		for _, c := range children {
+			n.InsertBefore(c)
+		}
+		unlinkTextNodes = append(unlinkTextNodes, n)
+		return ast.WalkContinue
+	})
+
+	for _, node := range unlinkTextNodes {
+		node.Unlink()
 	}
 }

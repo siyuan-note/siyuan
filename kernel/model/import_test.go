@@ -30,7 +30,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/image/bmp"
 )
@@ -127,15 +126,13 @@ func TestImportedSYRootIDs(t *testing.T) {
 }
 
 func TestImportedTreeRootIDs(t *testing.T) {
-	trees := []*parse.Tree{
-		{ID: "root-b", Path: "/target/root-b.sy"},
-		nil,
-		{ID: "child", Path: "/target/root-b/child.sy"},
-		{ID: "root-a", Path: "/target/root-a.sy"},
-		{ID: "other", Path: "/other.sy"},
-	}
-
-	got := importedTreeRootIDs(trees, "/target")
+	spool := &markdownImportSpool{entries: []markdownImportEntry{
+		{id: "root-b", path: "/target/root-b.sy"},
+		{id: "child", path: "/target/root-b/child.sy"},
+		{id: "root-a", path: "/target/root-a.sy"},
+		{id: "other", path: "/other.sy"},
+	}}
+	got := spool.rootIDs("/target")
 	assertStringSlice(t, got, []string{"root-a", "root-b"})
 }
 

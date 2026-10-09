@@ -39,7 +39,7 @@ func TestLunarCalendarCoverage(t *testing.T) {
 		}
 		for day := 1; day <= month[3]; day++ {
 			want := lunarDate{month[0], month[1], day}
-			solar, ok := lunarToSolar(want, time.UTC)
+			solar, ok := lunarToSolar(want)
 			if !ok {
 				t.Fatalf("cannot convert %v", want)
 			}
@@ -54,7 +54,7 @@ func TestLunarCalendarCoverage(t *testing.T) {
 		}
 	}
 	for _, date := range []lunarDate{{2026, -6, 1}, {2025, -6, 30}, {2025, 1, 31}, {2100, 12, 2}, {1900, 1, 1}} {
-		if _, ok := lunarToSolar(date, time.UTC); ok {
+		if _, ok := lunarToSolar(date); ok {
 			t.Fatalf("invalid lunar date accepted: %v", date)
 		}
 	}
@@ -97,11 +97,11 @@ func TestLunarDateLocalizedRoundTrips(t *testing.T) {
 			setLunarTestLanguage(t, language)
 			parser := newCalendarTemplateDateParser(DateDisplayFormatLunar)
 			for _, lunar := range []lunarDate{{2025, 6, 1}, {2025, -6, 1}, {2026, 8, 15}} {
-				date, ok := lunarToSolar(lunar, time.Local)
+				date, ok := lunarToSolar(lunar)
 				if !ok {
 					t.Fatal(lunar)
 				}
-				date = date.Add(14*time.Hour + 7*time.Minute)
+				date = time.Date(date.Year(), date.Month(), date.Day(), 14, 7, 0, 0, time.Local)
 				text := formatDateDisplay(date.UnixMilli(), DateDisplayFormatLunar, false)
 				got := parser(text, time.Local)
 				if got == nil || got.Content != date.UnixMilli() {
@@ -112,6 +112,43 @@ func TestLunarDateLocalizedRoundTrips(t *testing.T) {
 			text := formatDateDisplay(original.UnixMilli(), DateDisplayFormatLunar, false)
 			if parsed := parser(text, time.Local); parsed == nil || parsed.Content != original.UnixMilli() {
 				t.Fatalf("legacy date lost outside lunar range: %q, %+v", text, parsed)
+			}
+		})
+	}
+}
+
+func TestLunarTemplateDateDaylightSaving(t *testing.T) {
+	setLunarTestLanguage(t, "en")
+	for _, test := range []struct {
+		zone                           string
+		year                           int
+		month                          time.Month
+		day, hour, minute, invalidHour int
+	}{
+		{"America/Sao_Paulo", 2018, time.November, 4, 12, 30, 0},
+		{"America/New_York", 2024, time.March, 10, 3, 30, 2},
+	} {
+		t.Run(test.zone, func(t *testing.T) {
+			location, err := time.LoadLocation(test.zone)
+			if err != nil {
+				t.Fatal(err)
+			}
+			original := time.Date(test.year, test.month, test.day, test.hour, test.minute, 17, 0, location)
+			lunar, ok := solarToLunar(original)
+			if !ok {
+				t.Fatal("date outside lunar range")
+			}
+			clock := original.Format("15:04:05")
+			parser := newCalendarTemplateDateParser(DateDisplayFormatLunar)
+			for _, dateText := range []string{formatLunarDate(lunar), original.Format("2006-01-02")} {
+				parsed := parser(dateText+" "+clock, location)
+				if parsed == nil || parsed.Content != original.UnixMilli() {
+					t.Fatalf("valid time did not round trip: %q, %+v", dateText+" "+clock, parsed)
+				}
+				invalidClock := time.Date(2000, 1, 1, test.invalidHour, 30, 0, 0, time.UTC).Format("15:04")
+				if parsed := parser(dateText+" "+invalidClock, location); parsed != nil {
+					t.Fatalf("nonexistent local time accepted: %q, %+v", dateText+" "+invalidClock, parsed)
+				}
 			}
 		})
 	}

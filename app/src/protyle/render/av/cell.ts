@@ -1185,6 +1185,10 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             cellValue = transformCellValue(type, newValue);
         } else {
             cellValue = genCellValue(type, newValue, column?.dateFormat);
+            // 非空文本解析失败时跳过该单元格，空文本和清空操作仍可删除日期。
+            if (type === "date" && typeof newValue === "string" && newValue.trim() && !cellValue.date.isNotEmpty) {
+                continue;
+            }
         }
         if (type === "block" && typeof cellValue.block.icon === "undefined") {
             cellValue.block.icon = oldValue.block.icon || "";

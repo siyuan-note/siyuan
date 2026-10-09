@@ -51,11 +51,11 @@ func solarToLunar(solar time.Time) (lunar lunarDate, ok bool) {
 	return lunarDate{month[0], month[1], day - month[2] + 1}, true
 }
 
-func lunarToSolar(lunar lunarDate, location *time.Location) (time.Time, bool) {
+// 只转换公历年月日，时区和具体时间由调用方校验，避免经过不存在的本地零点时改变日期。
+func lunarToSolar(lunar lunarDate) (time.Time, bool) {
 	for _, month := range lunarCalendar.Months {
 		if month[0] == lunar.year && month[1] == lunar.month && lunar.day > 0 && lunar.day <= month[3] {
-			civil := time.Unix(int64(month[2]+lunar.day-1)*86400, 0).UTC()
-			return time.Date(civil.Year(), civil.Month(), civil.Day(), 0, 0, 0, 0, location), true
+			return time.Unix(int64(month[2]+lunar.day-1)*86400, 0).UTC(), true
 		}
 	}
 	return time.Time{}, false
@@ -78,7 +78,7 @@ func formatLunarDate(lunar lunarDate) string {
 		"${day}", strings.Split(GetAttributeViewI18n("lunarDays"), "|")[lunar.day-1]).Replace(GetAttributeViewI18n("lunarDateTemplate"))
 }
 
-func newLunarDateParser() func(string, *time.Location) (time.Time, bool) {
+func newLunarDateParser() func(string) (time.Time, bool) {
 	names := make([]string, 0, 24)
 	monthValues := map[string]int{}
 	for month := 1; month <= 12; month++ {
@@ -100,12 +100,12 @@ func newLunarDateParser() func(string, *time.Location) (time.Time, bool) {
 		regexp.QuoteMeta("${month}"), "(?P<month>"+strings.Join(names, "|")+")",
 		regexp.QuoteMeta("${day}"), "(?P<day>"+strings.Join(dayNames, "|")+")").Replace(pattern)
 	parser := regexp.MustCompile("^" + pattern + "$")
-	return func(content string, location *time.Location) (time.Time, bool) {
+	return func(content string) (time.Time, bool) {
 		parts := parser.FindStringSubmatch(content)
 		if parts == nil {
 			return time.Time{}, false
 		}
 		year, _ := strconv.Atoi(parts[parser.SubexpIndex("year")])
-		return lunarToSolar(lunarDate{year, monthValues[parts[parser.SubexpIndex("month")]], dayValues[parts[parser.SubexpIndex("day")]]}, location)
+		return lunarToSolar(lunarDate{year, monthValues[parts[parser.SubexpIndex("month")]], dayValues[parts[parser.SubexpIndex("day")]]})
 	}
 }

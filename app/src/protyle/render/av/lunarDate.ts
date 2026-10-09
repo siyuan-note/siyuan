@@ -37,6 +37,7 @@ ${getEndpointHTML(value.isNotEmpty2 ? value.content2 : now, value.isNotTime, !va
 <button class="b3-menu__separator"></button>
 <label class="b3-menu__item"><span class="fn__flex-center">${lang.endDate}</span><span class="fn__space fn__flex-1"></span><input data-lunar-end type="checkbox" class="b3-switch b3-switch--menu"${value.hasEndDate ? " checked" : ""}></label>
 <label class="b3-menu__item"><span class="fn__flex-center">${lang.includeTime}</span><span class="fn__space fn__flex-1"></span><input data-lunar-include-time type="checkbox" class="b3-switch b3-switch--menu"${value.isNotTime ? "" : " checked"}></label>
+<div class="fn__flex"><span class="fn__flex-1"></span><button type="button" class="b3-button b3-button--text" data-lunar-confirm>${escapeHtml(lang.confirm)}</button></div>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="clearDate"><svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg><span class="b3-menu__label">${lang.clear}</span></button>
 </div></div>`;
@@ -133,6 +134,14 @@ export const bindLunarDateEditor = (options: {
             }
         }
     }));
+    options.menuElement.querySelector("[data-lunar-confirm]").addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        dirty = true;
+        if (submit()) {
+            options.close();
+        }
+    });
     options.menuElement.querySelector('[data-type="clearDate"]').addEventListener("click", event => {
         event.preventDefault();
         event.stopPropagation();

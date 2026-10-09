@@ -91,7 +91,7 @@ export const getCalendarDate = (value: IAVCellValue, format: TAVDateFormat = "")
     const time = /[ T](\d{2}):(\d{2})(?::(\d{2}))?$/.exec(content);
     const dateText = time ? content.slice(0, time.index) : content;
     for (const candidate of new Set<TAVDateFormat>(["", format, "full"])) {
-        const parsed = parseDateValue(dateText, candidate);
+        const parsed = parseDateValue(dateText, candidate, format === "lunar");
         if (!parsed.isNotEmpty || parsed.hasEndDate || !parsed.isNotTime) {
             continue;
         }

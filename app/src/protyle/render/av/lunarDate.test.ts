@@ -10,6 +10,43 @@ import {compileString} from "sass";
 
 const browserCases = (sources: Record<string, string>, language: Record<string, unknown>, data: unknown, css: string) => {
     const check: typeof assert = require("node:assert/strict");
+    // 只替代菜单外观和定位，保留独立菜单、移动端选择器及农历字段的真实事件处理。
+    class MenuSurface {
+        public removeCB?: () => void;
+        constructor(public element: HTMLElement) {
+            element.addEventListener("click", event => {
+                if (typeof event.detail === "string" && event.detail === "back") {
+                    this.remove();
+                }
+            });
+        }
+        remove() {
+            const callback = this.removeCB;
+            this.removeCB = undefined;
+            callback?.();
+            this.element.lastElementChild.innerHTML = "";
+            this.element.classList.add("fn__none");
+        }
+        popup() {
+            this.element.classList.remove("fn__none");
+        }
+        addItem(options: IMenu) {
+            const element = document.createElement(options.type === "empty" ? "div" : "button");
+            element.innerHTML = options.label;
+            this.element.lastElementChild.append(element);
+            options.bind?.(element);
+            if (options.click) {
+                element.addEventListener("click", (event: MouseEvent) => {
+                    const keepOpen = options.click(element, event);
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    if (!keepOpen) {
+                        this.remove();
+                    }
+                });
+            }
+        }
+    }
     const modules: Record<string, unknown> = {
         "../../../../../kernel/av/lunar_calendar_data.json": data,
         "./capabilities": {},
@@ -20,12 +57,18 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
             escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
         },
         "../../../dialog/message": {showMessage: () => {}},
+        "../menus/Menu": {Menu: MenuSurface},
     };
+    modules["../../util/escape"] = modules["../../../util/escape"];
     Object.assign(window, {siyuan: {languages: language}});
     for (const [name, source] of Object.entries(sources)) {
         const exports = {};
         new Function("require", "exports", source)((name: string) => modules[name], exports);
         modules["./" + name] = exports;
+        if (name === "pluginMenu") {
+            modules["../../../plugin/Menu"] = exports;
+            modules["../../plugin/Menu"] = exports;
+        }
     }
     const editor = modules["./lunarDate"] as typeof import("./lunarDate");
     const style = document.createElement("style");
@@ -111,6 +154,67 @@ const browserCases = (sources: Record<string, string>, language: Record<string, 
             check.equal(closeCount, before, "Enter on a select confirms its option without closing the editor");
         }
     }
+    mount({isNotEmpty: false, isNotTime: true}, true);
+    const beforeConfirm = closeCount;
+    menu.querySelector<HTMLButtonElement>("[data-lunar-confirm]").click();
+    submit();
+    check.equal(updates.length, 1, "confirm saves the prefilled date exactly once");
+    check.equal(updates[0].isNotEmpty, true);
+    check.equal(closeCount, beforeConfirm + 1);
+    mount(original, true);
+    select("year", "2026");
+    const beforeInvalid = closeCount;
+    menu.querySelector<HTMLButtonElement>("[data-lunar-confirm]").click();
+    check.equal(updates.length, 0, "invalid confirmation preserves the stored value");
+    check.equal(closeCount, beforeInvalid, "invalid confirmation keeps the editor open");
+
+    const commonMenu = document.createElement("div");
+    commonMenu.className = "b3-menu fn__none";
+    commonMenu.innerHTML = '<div class="b3-menu__title"><span class="b3-menu__label"></span></div><div class="b3-menu__items"></div>';
+    document.body.append(commonMenu);
+    Object.assign(window.siyuan, {menus: {menu: new MenuSurface(commonMenu)}});
+    const fieldEditor = modules["./fieldValueEditor"] as typeof import("./fieldValueEditor");
+    const mobileSelect = modules["./nativeSelect"] as typeof import("../../../mobile/util/nativeSelect");
+    const calendar = modules["./lunarCalendar"] as typeof import("./lunarCalendar");
+    mobileSelect.initMobileSelect();
+    const host = document.createElement("div");
+    host.innerHTML = fieldEditor.getValueInputHTML({id: "birthday", name: "Birthday", type: "date", dateFormat: "lunar"},
+        {mode: "static", value: {type: "date", date: {...original, isNotTime: true, hasEndDate: false}}});
+    document.body.append(host);
+    fieldEditor.bindFieldLunarDates(host);
+    const trigger = host.querySelector<HTMLButtonElement>("button");
+    trigger.click();
+    const parent = document.querySelector<HTMLElement>('[data-menu="true"]');
+    const choose = (part: string, label: string) => {
+        const select = parent.querySelector<HTMLSelectElement>(`[data-lunar-part="${part}"]`);
+        select.click();
+        const picker = mobileSelect.getMobileSelectMenuElement();
+        const choice = Array.from(picker.querySelectorAll<HTMLButtonElement>("button")).find(item => item.textContent === label);
+        check.ok(choice, "mobile date option exists");
+        choice.click();
+        check.equal(select.isConnected, true, "selecting a child menu preserves the parent form");
+        check.equal(parent.isConnected, true);
+        check.equal(picker.isConnected, false, "the option menu closes after selection");
+    };
+    choose("year", "2026");
+    choose("month", calendar.getLunarMonthLabel(8));
+    choose("day", calendar.getLunarDayLabel(15));
+    parent.querySelector<HTMLButtonElement>("[data-lunar-confirm]").click();
+    check.equal(parent.isConnected, false);
+    check.equal(JSON.parse(trigger.dataset.lunarValue).content, new Date(2026, 8, 25).valueOf());
+
+    trigger.click();
+    const reopened = document.querySelector<HTMLElement>('[data-menu="true"]');
+    reopened.querySelector<HTMLSelectElement>('[data-lunar-part="year"]').click();
+    const picker = mobileSelect.getMobileSelectMenuElement();
+    reopened.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    check.equal(reopened.isConnected, false);
+    check.equal(picker.isConnected, false, "closing the parent also removes its child menu");
+    check.equal(mobileSelect.getMobileSelectMenuElement(), undefined);
+    trigger.click();
+    const outsideClosed = document.querySelector<HTMLElement>('[data-menu="true"]');
+    document.body.click();
+    check.equal(outsideClosed.isConnected, false, "outside clicks still dismiss independent menus");
     return "Lunar date editor cases passed";
 };
 
@@ -122,6 +226,12 @@ test("lunar date controls preserve dates, validate selections, and fit narrow la
         transpileModule(readFileSync(path.join(__dirname, name + ".ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText]));
+    for (const [name, file] of Object.entries({pluginMenu: "src/plugin/Menu.ts",
+        nativeSelect: "src/mobile/util/nativeSelect.ts", fieldValueEditor: "src/protyle/render/av/fieldValueEditor.ts"})) {
+        sources[name] = transpileModule(readFileSync(file, "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText;
+    }
     const language = JSON.parse(readFileSync("appearance/langs/zh-CN.json", "utf8"));
     const data = JSON.parse(readFileSync("../kernel/av/lunar_calendar_data.json", "utf8"));
     const css = compileString(readFileSync("src/assets/scss/business/_av.scss", "utf8")).css;

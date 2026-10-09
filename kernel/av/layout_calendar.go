@@ -76,7 +76,7 @@ var calendarTemplateTimePattern = regexp.MustCompile(`[ T](\d{2}):(\d{2})(?::(\d
 
 // newCalendarTemplateDateParser 复用字段日期格式和当前语言的月份、日期模板，每次日历渲染只编译一次。
 func newCalendarTemplateDateParser(format DateDisplayFormat) func(string, *time.Location) *ValueDate {
-	var lunarParser func(string, *time.Location) (time.Time, bool)
+	var lunarParser func(string) (time.Time, bool)
 	if format == DateDisplayFormatLunar {
 		lunarParser = newLunarDateParser()
 	}
@@ -118,10 +118,10 @@ func newCalendarTemplateDateParser(format DateDisplayFormat) func(string, *time.
 		var date time.Time
 		found := false
 		if lunarParser != nil {
-			date, found = lunarParser(content, location)
+			date, found = lunarParser(content)
 		}
 		for _, layout := range layouts {
-			if parsed, err := time.ParseInLocation(layout, content, location); err == nil {
+			if parsed, err := time.ParseInLocation(layout, content, time.UTC); err == nil {
 				date = parsed
 				found = true
 				break
@@ -141,13 +141,14 @@ func newCalendarTemplateDateParser(format DateDisplayFormat) func(string, *time.
 					break
 				}
 			}
-			date = time.Date(year, time.Month(month), day, 0, 0, 0, 0, location)
+			date = time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 			if int(date.Month()) != month || date.Day() != day {
 				return nil
 			}
 		}
 		parsed := time.Date(date.Year(), date.Month(), date.Day(), hour, minute, second, 0, location)
-		if date.Year() < 1 || parsed.Day() != date.Day() || parsed.Hour() != hour || parsed.Minute() != minute || parsed.Second() != second {
+		if date.Year() < 1 || parsed.Year() != date.Year() || parsed.Month() != date.Month() || parsed.Day() != date.Day() ||
+			parsed.Hour() != hour || parsed.Minute() != minute || parsed.Second() != second {
 			return nil
 		}
 		return &ValueDate{Content: parsed.UnixMilli(), IsNotEmpty: true, IsNotTime: timeParts == nil}

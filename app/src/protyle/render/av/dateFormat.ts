@@ -50,7 +50,11 @@ export const formatDateValue = (value: IAVCellDateValue, format: TAVDateFormat =
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const parseFullDate = (value: string) => {
-    const tokens = window.siyuan.languages._attrView.dateFormatFullTemplate.split(/(\$\{year}|\$\{month}|\$\{day})/);
+    const template = typeof window === "undefined" ? undefined : window.siyuan?.languages?._attrView?.dateFormatFullTemplate;
+    if (!template) {
+        return;
+    }
+    const tokens = template.split(/(\$\{year}|\$\{month}|\$\{day})/);
     const captures: string[] = [];
     const months = getMonths();
     const pattern = tokens.map((token: string) => {
@@ -83,29 +87,24 @@ const parseFullDate = (value: string) => {
     };
 };
 
-const parseDateEndpoint = (value: string, format: TAVDateFormat): {content: number, isNotTime: boolean} | undefined => {
+const parseDateEndpoint = (value: string, format: TAVDateFormat, allowLunar: boolean): {content: number, isNotTime: boolean} | undefined => {
     const trimmed = value.trim();
     const timeMatch = trimmed.match(/\s+(\d{1,2}):(\d{2})$/);
     const hour = timeMatch ? Number(timeMatch[1]) : 0;
     const minute = timeMatch ? Number(timeMatch[2]) : 0;
     const dateText = timeMatch ? trimmed.substring(0, timeMatch.index).trim() : trimmed;
+    const lunar = allowLunar && parseLunarDate(dateText);
+    if (lunar) {
+        const content = lunarToSolar(lunar, hour, minute);
+        return content === undefined ? undefined : {content, isNotTime: !timeMatch};
+    }
     let year: number;
     let month: number;
     let day: number;
-    if (format === "lunar") {
-        const lunar = parseLunarDate(dateText);
-        if (!lunar) {
-            const suffix = ` (${window.siyuan.languages._attrView.lunarRange})`;
-            const solarText = dateText.endsWith(suffix) ? dateText.slice(0, -suffix.length) : dateText;
-            return /^\d{4}-\d{1,2}-\d{1,2}$/.test(solarText) ?
-                parseDateEndpoint(solarText + (timeMatch ? timeMatch[0] : ""), "") : undefined;
-        }
-        const content = lunar && lunarToSolar(lunar, hour, minute);
-        return content === undefined ? undefined : {content, isNotTime: !timeMatch};
-    } else if (format === "full") {
+    if (format === "lunar" || format === "full") {
         const parts = parseFullDate(dateText);
         if (!parts) {
-            return;
+            return parseDateEndpoint(value, "", allowLunar);
         }
         ({year, month, day} = parts);
     } else {
@@ -140,7 +139,14 @@ const parseDateEndpoint = (value: string, format: TAVDateFormat): {content: numb
             }
         }
         if (!match) {
-            return;
+            if (format !== "") {
+                return parseDateEndpoint(value, "", allowLunar);
+            }
+            const parts = parseFullDate(dateText);
+            if (!parts) {
+                return;
+            }
+            ({year, month, day} = parts);
         }
     }
     if (hour > 23 || minute > 59 || month < 1 || month > 12 || day < 1 || day > 31) {
@@ -156,14 +162,15 @@ const parseDateEndpoint = (value: string, format: TAVDateFormat): {content: numb
     return {content: parsed.valueOf(), isNotTime: !timeMatch};
 };
 
-export const parseDateValue = (value: string, format: TAVDateFormat = ""): IAVCellDateValue => {
-    const normalized = format === "lunar" ? value.replaceAll(` (${window.siyuan.languages._attrView.lunarRange})`, "") : value;
+export const parseDateValue = (value: string, format: TAVDateFormat = "", allowLunar = true): IAVCellDateValue => {
+    const range = typeof window === "undefined" ? undefined : window.siyuan?.languages?._attrView?.lunarRange;
+    const normalized = range && allowLunar ? value.replaceAll(` (${range})`, "") : value;
     const endpoints = normalized.split(/\s*→\s*|\s+[~-]\s+/);
     if (endpoints.length > 2) {
         return {content: null, isNotEmpty: false, content2: null, isNotEmpty2: false, hasEndDate: false, isNotTime: true};
     }
-    const start = parseDateEndpoint(endpoints[0], format);
-    const end = endpoints.length === 2 ? parseDateEndpoint(endpoints[1], format) : undefined;
+    const start = parseDateEndpoint(endpoints[0], format, allowLunar);
+    const end = endpoints.length === 2 ? parseDateEndpoint(endpoints[1], format, allowLunar) : undefined;
     if (!start || (endpoints.length === 2 && !end)) {
         return {content: null, isNotEmpty: false, content2: null, isNotEmpty2: false, hasEndDate: false, isNotTime: true};
     }

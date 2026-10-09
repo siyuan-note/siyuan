@@ -177,7 +177,7 @@ export const bindFieldLunarDates = (host: HTMLElement) => {
             },
         });
         const rect = target.getBoundingClientRect();
-        menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+        menu.open({x: rect.left, y: rect.bottom, h: rect.height, target});
     }));
 };
 

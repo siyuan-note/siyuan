@@ -4,6 +4,7 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {formatLunarDate, getLunarMonths, lunarToSolar, parseLunarDate, solarToLunar} from "./lunarCalendar";
 import {formatDateDisplay, parseDateValue} from "./dateFormat";
+import {getCalendarDate} from "./calendar/date";
 
 const languagesPath = join(__dirname, "../../../../appearance/langs");
 const setLanguage = (name: string) => Object.defineProperty(globalThis, "window", {
@@ -74,4 +75,76 @@ test("all localized lunar display and clipboard values round trip, including dat
 test("Gregorian clipboard dates remain accepted in lunar fields", () => {
     setLanguage("en.json");
     assert.equal(parseDateValue("2025-07-25 14:07", "lunar").content, new Date(2025, 6, 25, 14, 7).valueOf());
+});
+
+test("unambiguous lunar, localized Gregorian, and ISO clipboard dates cross field calendars", () => {
+    const formats: TAVDateFormat[] = ["", "full", "lunar", "month-day-year", "day-month-year", "year-month-day"];
+    for (const language of readdirSync(languagesPath).filter(name => name.endsWith(".json"))) {
+        setLanguage(language);
+        const start = new Date(2025, 6, 25, 14, 7).valueOf();
+        const end = new Date(2025, 6, 26, 15, 8).valueOf();
+        for (const source of ["", "full", "lunar"] as TAVDateFormat[]) {
+            const text = `${formatDateDisplay(start, source, false)} → ${formatDateDisplay(end, source, false)}`;
+            for (const target of formats) {
+                const parsed = parseDateValue(text, target);
+                assert.equal(parsed.content, start, `${language}: ${source} to ${target}`);
+                assert.equal(parsed.content2, end);
+                assert.equal(parsed.hasEndDate, true);
+                assert.equal(parsed.isNotTime, false);
+            }
+        }
+        const legacy = new Date(1800, 0, 2, 14, 7).valueOf();
+        assert.equal(parseDateValue(formatDateDisplay(legacy, "lunar", false), "full").content, legacy);
+    }
+    setLanguage("en.json");
+    assert.equal(parseDateValue("07/08/2025", "month-day-year").content, new Date(2025, 6, 8).valueOf());
+    assert.equal(parseDateValue("07/08/2025", "day-month-year").content, new Date(2025, 7, 7).valueOf());
+    assert.equal(parseDateValue("07/08/2025", "lunar").isNotEmpty, false);
+});
+
+test("lunar text validates the entered time rather than a nonexistent local midnight", () => {
+    const originalTimezone = process.env.TZ;
+    try {
+        process.env.TZ = "America/Sao_Paulo";
+        setLanguage("en.json");
+        const noon = new Date(2018, 10, 4, 12).valueOf();
+        const lunar = solarToLunar(noon);
+        assert.deepEqual(parseLunarDate(formatLunarDate(lunar)), lunar);
+        for (const format of ["lunar", "full", ""] as TAVDateFormat[]) {
+            assert.equal(parseDateValue(formatDateDisplay(noon, "lunar", false), format).content, noon);
+        }
+        assert.equal(parseDateValue(`${formatLunarDate(lunar)} 00:30`, "lunar").isNotEmpty, false);
+    } finally {
+        if (originalTimezone === undefined) {
+            delete process.env.TZ;
+        } else {
+            process.env.TZ = originalTimezone;
+        }
+    }
+});
+
+test("ISO date parsing retains its standalone behavior without a localized UI", () => {
+    const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Reflect.deleteProperty(globalThis, "window");
+    try {
+        assert.equal(parseDateValue("2026-09-01").content, new Date(2026, 8, 1).valueOf());
+        assert.equal(parseDateValue("2026-09-01 14:07").content, new Date(2026, 8, 1, 14, 7).valueOf());
+        assert.equal(parseDateValue("not a date").isNotEmpty, false);
+    } finally {
+        if (originalWindow) {
+            Object.defineProperty(globalThis, "window", originalWindow);
+        }
+    }
+});
+
+test("calendar templates preserve the field calendar rules while clipboard parsing permits conversion", () => {
+    setLanguage("en.json");
+    const content = new Date(2025, 6, 25, 14, 7).valueOf();
+    const value: IAVCellValue = {type: "date", date: {isNotEmpty: false}, hasRenderTemplate: true,
+        renderedContent: formatDateDisplay(content, "lunar", false)};
+    assert.equal(getCalendarDate(value, "lunar").content, content);
+    assert.equal(getCalendarDate(value, "full"), undefined);
+    assert.equal(parseDateValue(value.renderedContent, "full").content, content);
+    value.renderedContent = formatDateDisplay(new Date(1800, 0, 2).valueOf(), "lunar");
+    assert.equal(getCalendarDate(value, "full"), undefined);
 });

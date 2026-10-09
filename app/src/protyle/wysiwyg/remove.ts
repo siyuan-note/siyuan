@@ -18,6 +18,7 @@ import {
     getEmbedChildOperationParentID,
     getLastBlock,
     getNextBlock,
+    getNextBlockSibling,
     getParentBlock,
     getPreviousBlock,
     getPreviousBlockSibling,
@@ -1418,6 +1419,31 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     }
 
     let isCallout = blockElement.parentElement.classList.contains("callout-content");
+    const nextCalloutBlock = isCallout && getNextBlockSibling(blockElement);
+    if (type === "Backspace" && blockType === "NodeParagraph" && isCallout &&
+        !getPreviousBlockSibling(blockElement) && nextCalloutBlock &&
+        !hasMeaningfulContent(getContenteditableElement(blockElement))) {
+        // 删除提示块首个空段落时保留容器和后续内容，光标停留在提示块内。
+        const id = blockElement.getAttribute("data-node-id");
+        if (!await confirmRefRemoval(protyle, [id], [blockElement]) ||
+            nextCalloutBlock.parentElement !== blockElement.parentElement) {
+            return;
+        }
+        range.insertNode(document.createElement("wbr"));
+        transaction(protyle, [{
+            action: "delete",
+            id,
+        }], [{
+            action: "insert",
+            id,
+            data: blockElement.outerHTML,
+            parentID: getOperationParentID(blockElement, protyle.block.parentID),
+            context: {setRange: "true"},
+        }]);
+        blockElement.remove();
+        focusBlock(nextCalloutBlock);
+        return;
+    }
     if (type === "Delete") {
         const bqCaElement = hasClosestByClassName(blockElement, "bq") || hasClosestByClassName(blockElement, "callout");
         if (bqCaElement && getContenteditableElement(bqCaElement) === getContenteditableElement(blockElement)) {

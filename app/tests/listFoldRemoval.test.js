@@ -46,13 +46,18 @@ const rendererSource = () => {
         const isMobile = () => false, isHiddenTabContent = () => false;
         const getEmbedChildOperationContext = () => undefined;
         const getEmbedChildOperationParentID = () => undefined;
-        const confirmRefRemoval = async protyle => protyle.refConfirmed !== false;
+        const confirmRefRemoval = async (protyle, ids, elements, exactIDs = []) => {
+            (protyle.refChecks || (protyle.refChecks = [])).push({ids, exactIDs});
+            return protyle.refConfirmed !== false;
+        };
         const preventScroll = () => {}, mathRender = () => {}, scrollCenter = () => {};
         const hideElements = () => {};
         const lineNumberRender = () => {}, clearSelect = () => {}, revealTabsForTarget = () => {};
         const getTextWithoutSemanticMarkers = element => element.textContent;
         const getSemanticMarkerPrefixLengthForNode = () => 0;
         const getEditorRange = () => getSelection().rangeCount ? getSelection().getRangeAt(0) : document.createRange();
+        const cleanListMindmapHTML = html => html, cleanHeadingNumberHTML = html => html;
+        const cleanTableCellRichHTML = html => html, cleanBlockSelectionModeHTML = html => html;
         const hasViewFoldContext = protyle => !!protyle.viewFold;
         const setViewFold = (protyle, element, folded) => {
             protyle.viewChanges.push({id: element.getAttribute("data-node-id"), folded});
@@ -66,10 +71,12 @@ const rendererSource = () => {
         extract("wysiwyg/getBlock", ["getParentBlock", "getPreviousBlock", "getPreviousBlockSibling",
             "getNextBlockSibling", "getLastBlock", "getContenteditableElement", "isContainerBlock",
             "isNotEditBlock", "getTopEmptyElement", "hasPreviousSibling"]) +
-        (extract("util/selectionOffsets", ["focusByRange"]) +
+        (extract("util/selectionOffsets", ["focusByRange", "setLastNodeRange"]) +
         extract("util/selection", ["focusByWbr", "focusBlock", "setFirstNodeRange"])) +
-        extract("wysiwyg/list", ["getOrderedListStart"]) +
-        extract("../block/util", ["refreshSbResize"]) +
+        extract("wysiwyg/list", ["getOrderedListStart", "getOrderedListItemElements", "updateListOrder"]) +
+        extract("wysiwyg/listContext", ["getOrderedListMarkerUpdates"]) +
+        extract("../block/util", ["refreshSbResize", "genSBElement"]) +
+        extract("wysiwyg/transaction", ["updateTransaction", "turnsIntoOneTransaction", "refreshSbs"]) +
         extract("wysiwyg/verticalVisibility", ["getFoldedNavigationOwner"]) +
         extract("wysiwyg/remove", ["getOperationParentID", "removeBlock", "removeLi", "moveToPrevious", "hasMeaningfulContent"]) +
         extract("util/blockFold", ["applyFoldState", "toggleListFold"]) + `
@@ -150,6 +157,111 @@ const runCases = async () => {
     let cases = 0;
     const callout = (id, content) => `<div class="callout" data-type="NodeCallout" data-node-id="${nodeID(id)}"><div class="callout-info" contenteditable="false"><span class="callout-title" contenteditable="true">Note</span></div><div class="callout-content">${content}</div>${attr}</div>`;
     const superBlock = (layout, content) => `<div class="sb" data-type="NodeSuperBlock" data-node-id="${nodeID("super")}" data-sb-layout="${layout}">${content}${attr}</div>`;
+    for (const subtype of ["t", "u", "o"]) {
+        for (const confirmed of [true, false]) {
+            const {element, protyle} = setup(superBlock("col", paragraph("left-column", "left") +
+                list("direct-list", item("direct-empty", "") + item("direct-next", "2"))));
+            const directList = byID("direct-list");
+            directList.setAttribute("data-subtype", subtype);
+            directList.style.width = "calc(44% - 10px)";
+            directList.style.flex = "none";
+            const style = directList.getAttribute("style");
+            for (const [index, id] of ["direct-empty", "direct-next"].entries()) {
+                const listItem = byID(id);
+                listItem.setAttribute("data-subtype", subtype);
+                if (subtype === "o") {
+                    listItem.setAttribute("data-marker", `${index + 7}.`);
+                    listItem.firstElementChild.classList.add("protyle-action--order");
+                    listItem.firstElementChild.textContent = `${index + 7}.`;
+                }
+            }
+            const original = element.outerHTML;
+            const range = document.createRange();
+            range.selectNodeContents(getContenteditableElement(byID("direct-empty-text")));
+            range.collapse(true);
+            focusByRange(range);
+            protyle.refConfirmed = confirmed;
+            await removeBlock(protyle, byID("direct-empty-text"), range, "Backspace");
+            if (confirmed) {
+                assert.equal(byID("direct-empty"), null);
+                assert.equal(byID("direct-empty-text"), null);
+                assert.equal(protyle.transactions.length, 1);
+                assert.ok(byID("direct-next-text").contains(getSelection().anchorNode));
+                const operation = protyle.transactions[0];
+                assert.deepEqual(operation.doOperations.map(op => [op.action, op.id]), [["update", nodeID("direct-list")]]);
+                assert.equal(operation.undoOperations[0].id, nodeID("direct-list"));
+                directList.outerHTML = operation.undoOperations[0].data;
+                window.listFoldRemoval.focusByWbr(byID("direct-empty-text"), range);
+                assert.ok(byID("direct-empty-text").contains(getSelection().anchorNode));
+                if (subtype === "o") {
+                    assert.equal(byID("direct-empty").getAttribute("data-marker"), "7.");
+                    assert.equal(byID("direct-next").getAttribute("data-marker"), "8.");
+                }
+                byID("direct-list").outerHTML = operation.doOperations[0].data;
+                assert.equal(byID("direct-empty"), null);
+                if (subtype === "o") {
+                    assert.equal(byID("direct-next").getAttribute("data-marker"), "7.");
+                }
+            } else {
+                assert.equal(element.outerHTML, original, "cancelling removal must preserve the list and its item");
+                assert.equal(protyle.transactions.length, 0);
+            }
+            assert.deepEqual(protyle.refChecks[0].ids, [nodeID("direct-empty"), nodeID("direct-empty-text")]);
+            assert.deepEqual(protyle.refChecks[0].exactIDs, [nodeID("direct-empty")]);
+            assert.equal(byID("direct-list").getAttribute("style"), style);
+            assert.deepEqual(Array.from(byID("super").querySelectorAll(":scope > [data-node-id]")).map(e => e.getAttribute("data-node-id")),
+                [nodeID("left-column"), nodeID("direct-list")]);
+            assert.equal(element.querySelectorAll('[data-type="NodeSuperBlock"]').length, 1);
+            const ids = Array.from(element.querySelectorAll("[data-node-id]")).map(e => e.getAttribute("data-node-id"));
+            assert.equal(new Set(ids).size, ids.length, "deleting an empty item must not duplicate block IDs");
+            assert.equal(element.querySelectorAll("wbr").length, 0);
+            cases++;
+        }
+    }
+    for (const [text, children, type] of [
+        ["content", "", "Backspace"],
+        ['<span class="emoji"></span>', "", "Backspace"],
+        ['<span data-type="inline-math" data-content="x"></span>', "", "Backspace"],
+        ["", paragraph("direct-child", "child"), "Backspace"],
+        ["", "", "Delete"],
+    ]) {
+        const {element, protyle} = setup(superBlock("col", paragraph("left-column", "left") +
+            list("direct-list", item("direct-empty", text, children) + item("direct-next", "2"))));
+        byID("direct-list").style.width = "calc(44% - 10px)";
+        byID("direct-list").style.flex = "none";
+        const range = document.createRange();
+        range.selectNodeContents(getContenteditableElement(byID("direct-empty-text")));
+        range.collapse(true);
+        focusByRange(range);
+        await removeBlock(protyle, byID("direct-empty-text"), range, type);
+        assert.ok(byID("direct-empty-text"), "exiting a nonempty item or deleting forwards retains its paragraph");
+        const wrapper = byID("direct-list").parentElement;
+        assert.equal(wrapper.getAttribute("data-type"), "NodeSuperBlock");
+        assert.equal(wrapper.getAttribute("data-sb-layout"), "row");
+        assert.equal(wrapper.style.width, "calc(44% - 10px)");
+        assert.equal(getContenteditableElement(byID("direct-empty-text")).innerHTML, text);
+        if (children) {
+            assert.equal(byID("direct-child").parentElement, wrapper);
+        }
+        const ids = Array.from(element.querySelectorAll("[data-node-id]")).map(e => e.getAttribute("data-node-id"));
+        assert.equal(new Set(ids).size, ids.length);
+        assert.equal(element.querySelectorAll("wbr").length, 0);
+        cases++;
+    }
+    for (const layout of [undefined, "row"]) {
+        const content = list("direct-list", item("direct-empty", "") + item("direct-next", "2"));
+        const {element, protyle} = setup(layout ? superBlock(layout, content) : content);
+        const range = document.createRange();
+        range.selectNodeContents(getContenteditableElement(byID("direct-empty-text")));
+        range.collapse(true);
+        focusByRange(range);
+        await removeBlock(protyle, byID("direct-empty-text"), range, "Backspace");
+        assert.equal(byID("direct-empty-text").parentElement, layout ? byID("super") : element);
+        assert.equal(byID("direct-empty"), null);
+        assert.ok(byID("direct-next"));
+        assert.equal(element.querySelectorAll("wbr").length, 0);
+        cases++;
+    }
     for (const layout of ["col", "row"]) {
         for (const confirmed of [false, true]) {
             const {element, protyle} = setup(superBlock(layout,
@@ -457,7 +569,7 @@ if (process.versions.electron && process.type === "browser") {
             const {stdout} = await promisify(execFile)(require("electron"), [__filename, profile], {
                 env, windowsHide: true, timeout: 40000,
             });
-            assert.match(stdout, /21 Electron cases passed/);
+            assert.match(stdout, /34 Electron cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-list-fold-"));

@@ -1528,7 +1528,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         if (embedContext && !canRemoveLiInEmbed(blockElement, embedContext)) {
             return;
         }
-        removeLi(protyle, blockElement, range, type === "Delete");
+        await removeLi(protyle, blockElement, range, type === "Delete");
         return;
     }
     if (type === "Delete") {
@@ -1537,7 +1537,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             if (embedContext && !canRemoveLiInEmbed(liElement.firstElementChild.nextElementSibling, embedContext)) {
                 return;
             }
-            removeLi(protyle, liElement.firstElementChild.nextElementSibling, range, true);
+            await removeLi(protyle, liElement.firstElementChild.nextElementSibling, range, true);
             return;
         }
     }
@@ -1986,6 +1986,31 @@ const confirmRefRemoval = async (protyle: IProtyle, ids: string[], elements: Ele
 };
 
 const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, isDelete = false) => {
+    if (!isDelete && blockElement.getAttribute("data-type") === "NodeParagraph") {
+        const listItemElement = blockElement.parentElement;
+        const listElement = listItemElement.parentElement;
+        const nextListItem = getNextBlockSibling(listItemElement);
+        if (!getPreviousBlockSibling(listItemElement) && nextListItem &&
+            listElement.parentElement.classList.contains("sb") &&
+            listElement.parentElement.getAttribute("data-sb-layout") === "col" &&
+            !getNextBlockSibling(blockElement) && !hasMeaningfulContent(getContenteditableElement(blockElement))) {
+            // 横向超级块中的首个空列表项直接删除，保留列表及所在列的宽度。
+            const itemID = listItemElement.getAttribute("data-node-id");
+            if (!await confirmRefRemoval(protyle, [itemID, blockElement.getAttribute("data-node-id")],
+                [listItemElement], [itemID]) || listItemElement.parentElement !== listElement ||
+                nextListItem.parentElement !== listElement || blockElement.parentElement !== listItemElement) {
+                return;
+            }
+            range.insertNode(document.createElement("wbr"));
+            const html = listElement.outerHTML;
+            const start = getOrderedListStart(listElement);
+            listItemElement.remove();
+            updateListOrder(listElement, start);
+            updateTransaction(protyle, listElement, html);
+            focusBlock(nextListItem);
+            return;
+        }
+    }
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
         await listOutdent(protyle, [blockElement.parentElement], range, isDelete, blockElement);
         return;

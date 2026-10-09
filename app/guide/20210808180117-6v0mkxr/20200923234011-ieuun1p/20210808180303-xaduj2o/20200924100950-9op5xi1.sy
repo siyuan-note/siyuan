@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261009181520"
+		"updated": "20261009184321"
 	},
 	"Children": [
 		{
@@ -4293,7 +4293,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20261009181520"
+				"updated": "20261009184321"
 			},
 			"Children": [
 				{
@@ -10142,6 +10142,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261009184321-hm20nzc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009184321-hm20nzc",
+				"updated": "20261009184321"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Copying editor content or using Copy Markdown preserves task-list states such as [/] (In progress), [-] (Canceled) and custom markers. Markdown export keeps standard compatibility by converting nonstandard task markers to [X]."
 				}
 			]
 		},

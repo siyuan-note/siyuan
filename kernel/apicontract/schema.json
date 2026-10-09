@@ -23925,6 +23925,16 @@
             }
           ]
         },
+        "preserveTaskMarkers": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "refMode": {
           "anyOf": [
             {

@@ -1583,6 +1583,7 @@ if (response.code === 0 && response.data) {
   ```
 
     * `id`: エクスポートするドキュメントブロックのID
+    * `preserveTaskMarkers`：Markdown のコピー用の任意の真偽値です。`true` では `[/]` や `[-]` などのタスク記号を保持します。省略、`null`、`false` では標準 Markdown との互換性を保ち、非標準の記号を `[X]` に統一します
 * 戻り値
 
   ```json

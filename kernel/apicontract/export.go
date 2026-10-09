@@ -84,7 +84,9 @@ type ExportMarkdownContentOptions struct {
 	AdjustHeadingLevel bool     `json:"adjustHeadingLevel" api:"optional,nullable"`
 	ImgTag             bool     `json:"imgTag" api:"optional,nullable"`
 	AddTitle           *bool    `json:"addTitle" api:"optional"`
-	OptionsError       error    `json:"-"`
+	// PreserveTaskMarkers 供复制 Markdown 时保留任务状态标记；省略、null 或 false 时仍归一化为标准标记。
+	PreserveTaskMarkers bool  `json:"preserveTaskMarkers" api:"optional,nullable"`
+	OptionsError        error `json:"-"`
 }
 
 func (o ExportMarkdownContentOptions) Validate() error { return o.OptionsError }

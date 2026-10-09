@@ -407,9 +407,10 @@ var exportMdContent = contractHandler(apicontract.ExportMdContent, func(c *gin.C
 		MarkdownYFM:    new(yfm),
 		AddTitle:       new(addTitle),
 		Render: model.ExportRenderOptions{
-			FillCSSVar:         fillCSSVar,
-			AdjustHeadingLevel: adjustHeadingLevel,
-			ImgTag:             imgTag,
+			FillCSSVar:          fillCSSVar,
+			AdjustHeadingLevel:  adjustHeadingLevel,
+			ImgTag:              imgTag,
+			PreserveTaskMarkers: request.PreserveTaskMarkers,
 		},
 	})
 	return apicontract.Success(apicontract.ExportMarkdownContentData{HPath: hPath, Content: content})

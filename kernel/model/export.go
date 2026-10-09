@@ -3162,6 +3162,7 @@ func ExportMarkdownContent(id string, opts *ExportOptions) (hPath, exportedMd st
 			DefBlockIDs:                nil,
 			References:                 nil,
 			FillCSSVar:                 formatOpts.FillCSSVar,
+			PreserveTaskMarkers:        formatOpts.PreserveTaskMarkers,
 			BoxPaths:                   nil,
 			AVPublishFilter:            nil,
 		})
@@ -3261,7 +3262,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, exportOpts markdownExpo
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
 	luteEngine.RenderOptions.OmitTableCellIAL = true
-	luteEngine.SetExportNormalizeTaskListMarker(true)
+	luteEngine.SetExportNormalizeTaskListMarker(!exportOpts.PreserveTaskMarkers)
 	if "" != exportOpts.CloudAssetsBase {
 		luteEngine.RenderOptions.LinkBase = exportOpts.CloudAssetsBase
 	}

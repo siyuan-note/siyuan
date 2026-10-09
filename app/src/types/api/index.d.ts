@@ -992,7 +992,7 @@ export type ExportIDsRequestInput = { "ids": Array<string>; };
 
 export type ExportMarkdownContentData = { "content": string; "hPath": string; };
 
-export type ExportMarkdownContentRequestInput = { "addTitle"?: boolean | null; "adjustHeadingLevel"?: boolean | null; "embedMode"?: number | null; "fillCSSVar"?: boolean | null; "id": string; "imgTag"?: boolean | null; "refMode"?: number | null; "yfm"?: boolean | null; };
+export type ExportMarkdownContentRequestInput = { "addTitle"?: boolean | null; "adjustHeadingLevel"?: boolean | null; "embedMode"?: number | null; "fillCSSVar"?: boolean | null; "id": string; "imgTag"?: boolean | null; "preserveTaskMarkers"?: boolean | null; "refMode"?: number | null; "yfm"?: boolean | null; };
 
 export type ExportMarkdownHTMLRequestInput = { "id": string; "savePath"?: string | null; };
 

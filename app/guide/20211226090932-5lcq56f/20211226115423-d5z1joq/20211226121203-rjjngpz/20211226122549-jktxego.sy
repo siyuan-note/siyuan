@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261009181520"
+		"updated": "20261009184321"
 	},
 	"Children": [
 		{
@@ -4281,7 +4281,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20261009181520"
+				"updated": "20261009184321"
 			},
 			"Children": [
 				{
@@ -10119,6 +10119,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261009184321-0mvx2bd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009184321-0mvx2bd",
+				"updated": "20261009184321"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "複製編輯器內容或使用複製 Markdown 時，會保留任務列表的 [/]（進行中）、[-]（放棄）與自訂狀態標記。匯出 Markdown 時仍保持標準格式相容，將非標準任務標記統一為 [X]。"
 				}
 			]
 		},

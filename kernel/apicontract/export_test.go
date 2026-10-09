@@ -42,6 +42,19 @@ func TestExportOptionsAdmissionOrder(t *testing.T) {
 	}
 }
 
+func TestExportMarkdownTaskMarkerOption(t *testing.T) {
+	for _, extra := range []string{"", `,"preserveTaskMarkers":null`, `,"preserveTaskMarkers":false`, `,"preserveTaskMarkers":true`} {
+		request, err := ExportMdContent.Decode(strings.NewReader(`{"id":"id"` + extra + `}`))
+		if err != nil || request.Validate() != nil || request.PreserveTaskMarkers != strings.Contains(extra, "true") {
+			t.Fatalf("unexpected task marker option: %+v %v", request, err)
+		}
+	}
+	request, err := ExportMdContent.Decode(strings.NewReader(`{"id":"id","preserveTaskMarkers":"true"}`))
+	if err != nil || request.Validate() == nil {
+		t.Fatalf("task marker option validation must remain deferred: %+v %v", request, err)
+	}
+}
+
 func TestExportNotebookFiltering(t *testing.T) {
 	for _, body := range []string{`{}`, `{"notebooks":null}`, `{"notebooks":true}`, `{"notebooks":{}}`} {
 		request, err := ExportNotebooksSY.Decode(strings.NewReader(body))

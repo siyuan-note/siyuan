@@ -588,6 +588,7 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
                     refMode: 3,
                     embedMode: 1,
                     yfm: false,
+                    preserveTaskMarkers: true,
                     fillCSSVar: false,
                     adjustHeadingLevel: false
                 });

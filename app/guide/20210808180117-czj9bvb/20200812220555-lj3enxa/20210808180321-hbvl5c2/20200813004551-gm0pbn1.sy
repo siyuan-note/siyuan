@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261009181520"
+		"updated": "20261009184321"
 	},
 	"Children": [
 		{
@@ -4287,7 +4287,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20261009181520"
+				"updated": "20261009184321"
 			},
 			"Children": [
 				{
@@ -10130,6 +10130,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261009184321-8a1jenv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009184321-8a1jenv",
+				"updated": "20261009184321"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "复制编辑器内容或使用复制 Markdown 时，会保留任务列表的 [/]（进行中）、[-]（放弃）与自定义状态标记。导出 Markdown 时仍保持标准格式兼容，将非标准任务标记归一化为 [X]。"
 				}
 			]
 		},

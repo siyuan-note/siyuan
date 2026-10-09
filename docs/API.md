@@ -1591,6 +1591,7 @@ Block-writing APIs can return after their block-tree transaction is committed bu
   ```
 
     * `id`: ID of the doc block to export
+    * `preserveTaskMarkers`: Optional boolean for Markdown copying; `true` retains task markers such as `[/]` and `[-]`. Omitted, `null`, or `false` keeps standard Markdown normalization to `[X]` for nonstandard markers
 * Return value
 
   ```json

@@ -22,6 +22,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = json.loads(Path(__file__).with_name("ocr-assets.json").read_text(encoding="utf-8"))
 STAGE = ROOT / "app/stage/ocr"
+RUNTIME_STAMP = "onnxruntime-files.json"
 
 
 class WindowsDLL:
@@ -260,15 +261,47 @@ def download_ranges(entry, destination):
             future.result()
 
 
-def prepare_runtime(target, build_worker, prerequisites=None):
-    if prerequisites is None:
-        prerequisites = runtime_prerequisites(target, build_worker)
-    entry = MANIFEST["runtime"][target]
-    cache = Path(tempfile.gettempdir()) / "siyuan-ocr-assets" / entry["url"].rsplit("/", 1)[1]
-    download(entry, cache)
-    directory = STAGE / "runtime" / target
-    directory.mkdir(parents=True, exist_ok=True)
+def runtime_source(entry):
+    """记录已校验归档的来源摘要和主库名称，镜像地址不参与复用判断。"""
+    algorithm = "sha256" if "sha256" in entry else "sha512"
+    return {"algorithm": algorithm, "digest": entry[algorithm], "size": entry.get("size"), "library": entry["library"]}
+
+
+def record_runtime(entry, directory, names):
+    """解包成功后原子写入归档来源和产物摘要。"""
+    stamp = {"version": 1, "archive": runtime_source(entry),
+             "files": {name: digest(directory / name) for name in sorted(names)}}
+    handle, name = tempfile.mkstemp(prefix=RUNTIME_STAMP + "-", suffix=".tmp", dir=directory)
+    os.close(handle)
+    temporary = Path(name)
+    try:
+        temporary.write_text(json.dumps(stamp, indent=2) + "\n", encoding="utf-8")
+        os.replace(temporary, directory / RUNTIME_STAMP)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def runtime_is_verified(entry, directory):
+    """来源匹配且归档产物完整时允许复用，异常标记回退到归档校验和解包。"""
+    try:
+        stamp = json.loads((directory / RUNTIME_STAMP).read_text(encoding="utf-8"))
+        if not isinstance(stamp, dict) or stamp.get("version") != 1 or stamp.get("archive") != runtime_source(entry):
+            return False
+        files = stamp.get("files")
+        allowed = {entry["library"], "LICENSE", "ThirdPartyNotices.txt", "onnxruntime_providers_shared.dll"}
+        if not isinstance(files, dict) or entry["library"] not in files or not set(files).issubset(allowed):
+            return False
+        return all(isinstance(value, str) and (directory / name).is_file() and
+                   not (directory / name).is_symlink() and digest(directory / name) == value
+                   for name, value in files.items())
+    except (OSError, ValueError, TypeError):
+        return False
+
+
+def extract_runtime(entry, cache, directory):
+    """仅解包主库、共享库和许可证，返回本次归档产出的文件名。"""
     library = entry["library"]
+    written = {library}
     # 仅复制固定名称的库和许可证，归档路径不参与目标路径拼接。
     if zipfile.is_zipfile(cache):
         with zipfile.ZipFile(cache) as archive:
@@ -278,6 +311,7 @@ def prepare_runtime(target, build_worker, prerequisites=None):
             for name in files:
                 if name.rsplit("/", 1)[-1] in ("LICENSE", "ThirdPartyNotices.txt", "onnxruntime_providers_shared.dll"):
                     (directory / name.rsplit("/", 1)[-1]).write_bytes(archive.read(name))
+                    written.add(name.rsplit("/", 1)[-1])
     else:
         with tarfile.open(cache, "r:gz") as archive:
             files = [member for member in archive.getmembers() if member.isfile()]
@@ -291,6 +325,23 @@ def prepare_runtime(target, build_worker, prerequisites=None):
                 if member.name.rsplit("/", 1)[-1] in ("LICENSE", "ThirdPartyNotices.txt"):
                     with archive.extractfile(member) as source, (directory / member.name.rsplit("/", 1)[-1]).open("wb") as destination:
                         shutil.copyfileobj(source, destination)
+                    written.add(member.name.rsplit("/", 1)[-1])
+    return written
+
+
+def prepare_runtime(target, build_worker, prerequisites=None):
+    if prerequisites is None:
+        prerequisites = runtime_prerequisites(target, build_worker)
+    entry = MANIFEST["runtime"][target]
+    directory = STAGE / "runtime" / target
+    directory.mkdir(parents=True, exist_ok=True)
+    if runtime_is_verified(entry, directory):
+        print(f"Reusing verified OCR runtime: {target}")
+    else:
+        cache = Path(tempfile.gettempdir()) / "siyuan-ocr-assets" / entry["url"].rsplit("/", 1)[1]
+        download(entry, cache)
+        record_runtime(entry, directory, extract_runtime(entry, cache, directory))
+    # 本地依赖每次重新准备，复用归档产物不跳过 CRT 校验或工作进程构建。
     if target.startswith("windows-"):
         prepare_windows_crt(target, directory, prerequisites)
     if target.startswith("linux-") and build_worker:

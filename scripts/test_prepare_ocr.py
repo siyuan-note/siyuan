@@ -258,6 +258,109 @@ class ResourceTests(unittest.TestCase):
         with patch.object(prepare, "STAGE", self.root / "stage"), patch.object(prepare, "MANIFEST", {"runtime": {target: entry}}), patch.object(prepare.tempfile, "gettempdir", return_value=str(self.root / "cache")):
             prepare.prepare_runtime(target, False)
 
+    def runtime_archive(self):
+        archive = self.root / "runtime.tgz"
+        with tarfile.open(archive, "w:gz") as output:
+            for name, content in {"ort/lib/libonnxruntime.so.1": b"native", "ort/LICENSE": b"license"}.items():
+                member = tarfile.TarInfo(name)
+                member.size = len(content)
+                output.addfile(member, io.BytesIO(content))
+        return archive
+
+    def test_verified_runtime_reuses_artifacts_without_archive_cache(self):
+        archive = self.runtime_archive()
+        entry = {**self.entry(archive), "library": "libonnxruntime.so"}
+        with patch.object(prepare, "STAGE", self.root / "stage"), \
+                patch.object(prepare, "MANIFEST", {"runtime": {"linux-amd64": entry}}), \
+                patch.object(prepare.tempfile, "gettempdir", return_value=str(self.root / "cache")):
+            prepare.prepare_runtime("linux-amd64", False)
+            archive.unlink()
+            (self.root / "cache/siyuan-ocr-assets/runtime.tgz").unlink()
+            with patch.object(prepare, "download") as download:
+                prepare.prepare_runtime("linux-amd64", False)
+                download.assert_not_called()
+        directory = self.root / "stage/runtime/linux-amd64"
+        self.assertEqual((directory / "libonnxruntime.so").read_bytes(), b"native")
+        self.assertEqual((directory / "LICENSE").read_bytes(), b"license")
+
+    def test_runtime_reuse_rejects_changed_source_or_damaged_artifacts(self):
+        directory = self.root / "runtime"
+        directory.mkdir()
+        (directory / "library").write_bytes(b"native")
+        (directory / "LICENSE").write_bytes(b"license")
+        for algorithm in ("sha256", "sha512"):
+            entry = {"library": "library", algorithm: "a" * (64 if algorithm == "sha256" else 128), "size": 6}
+            prepare.record_runtime(entry, directory, {"library", "LICENSE"})
+            self.assertTrue(prepare.runtime_is_verified(entry, directory))
+            self.assertTrue(prepare.runtime_is_verified({**entry, "url": "https://mirror.invalid/archive"}, directory))
+            for changed in ({algorithm: "b" * len(entry[algorithm])}, {"size": 7}, {"library": "other"}):
+                self.assertFalse(prepare.runtime_is_verified({**entry, **changed}, directory))
+        (directory / "LICENSE").write_bytes(b"tampered")
+        self.assertFalse(prepare.runtime_is_verified(entry, directory))
+        (directory / "LICENSE").unlink()
+        self.assertFalse(prepare.runtime_is_verified(entry, directory))
+
+    def test_runtime_reuse_rejects_malformed_or_incomplete_stamps(self):
+        directory = self.root / "runtime"
+        directory.mkdir()
+        (directory / "library").write_bytes(b"native")
+        entry = {"library": "library", "sha256": "a" * 64}
+        self.assertFalse(prepare.runtime_is_verified(entry, directory))
+        for value in ("not json", "null", "[]", "{}"):
+            (directory / prepare.RUNTIME_STAMP).write_text(value, encoding="utf-8")
+            self.assertFalse(prepare.runtime_is_verified(entry, directory))
+        prepare.record_runtime(entry, directory, {"library"})
+        valid = json.loads((directory / prepare.RUNTIME_STAMP).read_text(encoding="utf-8"))
+        for files in (None, [], {}, {"LICENSE": "a" * 64}, {"library": None},
+                      {"library": prepare.digest(directory / "library"), "../outside": "a" * 64}):
+            with self.subTest(files=files):
+                stamp = {**valid, "files": files}
+                (directory / prepare.RUNTIME_STAMP).write_text(json.dumps(stamp), encoding="utf-8")
+                self.assertFalse(prepare.runtime_is_verified(entry, directory))
+
+    def test_damaged_runtime_is_restored_from_verified_archive(self):
+        archive = self.runtime_archive()
+        entry = {**self.entry(archive), "library": "libonnxruntime.so"}
+        with patch.object(prepare, "STAGE", self.root / "stage"), \
+                patch.object(prepare, "MANIFEST", {"runtime": {"linux-amd64": entry}}), \
+                patch.object(prepare.tempfile, "gettempdir", return_value=str(self.root / "cache")):
+            prepare.prepare_runtime("linux-amd64", False)
+            library = self.root / "stage/runtime/linux-amd64/libonnxruntime.so"
+            library.write_bytes(b"damaged")
+            prepare.prepare_runtime("linux-amd64", False)
+            self.assertEqual(library.read_bytes(), b"native")
+
+    def test_reused_windows_runtime_refreshes_crt(self):
+        source = self.crt_source()
+        archive = self.root / "runtime.zip"
+        with zipfile.ZipFile(archive, "w") as output:
+            output.writestr("ort/lib/onnxruntime.dll", windows_dll(imports={"MSVCP140.dll": ["cpp"]}))
+        entry = {**self.entry(archive), "library": "onnxruntime.dll"}
+        with patch.dict(os.environ, {"SIYUAN_OCR_VC_REDIST_DIR": str(source)}), \
+                patch.object(prepare, "STAGE", self.root / "stage"), \
+                patch.object(prepare, "MANIFEST", {"runtime": {"windows-amd64": entry}}), \
+                patch.object(prepare.tempfile, "gettempdir", return_value=str(self.root / "cache")):
+            prepare.prepare_runtime("windows-amd64", False)
+            dependency = self.root / "stage/runtime/windows-amd64/msvcp140.dll"
+            dependency.unlink()
+            with patch.object(prepare, "download") as download:
+                prepare.prepare_runtime("windows-amd64", False)
+                download.assert_not_called()
+            self.assertEqual(dependency.read_bytes(), (source / "msvcp140.dll").read_bytes())
+
+    def test_reused_linux_runtime_still_builds_worker(self):
+        archive = self.runtime_archive()
+        entry = {**self.entry(archive), "library": "libonnxruntime.so"}
+        with patch.object(prepare, "STAGE", self.root / "stage"), \
+                patch.object(prepare, "MANIFEST", {"runtime": {"linux-amd64": entry}}), \
+                patch.object(prepare.tempfile, "gettempdir", return_value=str(self.root / "cache")):
+            prepare.prepare_runtime("linux-amd64", False)
+            with patch.object(prepare, "download") as download, patch.object(prepare.subprocess, "run") as build:
+                prepare.prepare_runtime("linux-amd64", True, {"CC": "gcc"})
+                download.assert_not_called()
+                build.assert_called_once()
+                self.assertEqual(build.call_args.kwargs["env"], {"CC": "gcc"})
+
 
 class CompilerTests(unittest.TestCase):
     def test_selects_native_and_cross_compilers_without_inheriting_kernel_cc(self):

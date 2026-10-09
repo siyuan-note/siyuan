@@ -25,8 +25,9 @@ export const setSearchControlAvailability = (element: Element | null, enabled: b
     element.toggleAttribute("disabled", !enabled);
     element.setAttribute("aria-disabled", String(!enabled));
     const tip = methodUnavailable ? `${label} - ${window.siyuan.languages.searchControlUnavailable}` : label;
+    element.classList.add("ariaLabel");
     element.setAttribute("aria-label", tip);
-    element.setAttribute("title", tip);
+    element.removeAttribute("title");
 };
 
 export const updateSearchMethodControls = (element: Element, config: Config.IUILayoutTabSearchConfig,

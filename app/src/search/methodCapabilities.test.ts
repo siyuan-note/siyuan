@@ -31,7 +31,11 @@ const control = () => {
         attributes, classes,
         toggleAttribute: (name: string, force: boolean) => { if (force) { attributes[name] = ""; } else { delete attributes[name]; } },
         setAttribute: (name: string, value: string) => { attributes[name] = value; },
-        classList: {toggle: (name: string, force: boolean) => { if (force) { classes.add(name); } else { classes.delete(name); } }},
+        removeAttribute: (name: string) => { delete attributes[name]; },
+        classList: {
+            add: (name: string) => { classes.add(name); },
+            toggle: (name: string, force: boolean) => { if (force) { classes.add(name); } else { classes.delete(name); } },
+        },
     };
 };
 
@@ -52,7 +56,11 @@ for (const mobile of [true, false]) {
                 querySelector: (selector: string) => {
                     if (selector === ".toolbar") { return row; }
                     if (selector === "#searchExpand") { return expand; }
-                    if (!controls.has(selector)) { controls.set(selector, control()); }
+                    if (!controls.has(selector)) {
+                        const item = control();
+                        item.attributes.title = "native tooltip";
+                        controls.set(selector, item);
+                    }
                     return controls.get(selector);
                 },
                 querySelectorAll: () => [control(), row],
@@ -68,7 +76,9 @@ for (const mobile of [true, false]) {
             assert.equal(row.classes.has("fn__none"), true);
             assert.equal(controls.get(filter).attributes["aria-disabled"], "true");
             assert.equal(controls.get(include).attributes["aria-disabled"], "true");
-            assert.ok(controls.get(filter).attributes.title.endsWith("unavailable"));
+            assert.ok(controls.get(filter).attributes["aria-label"].endsWith("unavailable"));
+            assert.ok(Array.from(controls.values()).filter(item => "aria-disabled" in item.attributes)
+                .every(item => item.classes.has("ariaLabel") && !("title" in item.attributes)));
             config.method = 4;
             refresh();
             assert.equal(row.classes.has("fn__none"), true);
@@ -84,7 +94,9 @@ for (const mobile of [true, false]) {
             config.idPath = [];
             refresh();
             assert.equal(controls.get(include).attributes["aria-disabled"], "true");
-            assert.equal(controls.get(filter).attributes.title.includes("unavailable"), false);
+            assert.equal(controls.get(filter).attributes["aria-label"].includes("unavailable"), false);
+            assert.ok(Array.from(controls.values()).filter(item => "aria-disabled" in item.attributes)
+                .every(item => item.classes.has("ariaLabel") && !("title" in item.attributes)));
         } finally {
             globalThis.window = previousWindow;
             globalThis.document = previousDocument;

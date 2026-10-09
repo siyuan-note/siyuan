@@ -411,7 +411,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (type === "av-add-more" && !protyle.disabled) {
             const templateID = blockElement.querySelector<HTMLElement>(".av__header")?.dataset.defaultTemplateId;
-            if (templateID || blockElement.getAttribute("data-av-type") === "calendar") {
+            if (templateID || ["calendar", "map"].includes(viewType)) {
                 createAttributeViewItem({blockElement, protyle, templateID});
             } else {
                 insertRows({
@@ -522,7 +522,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 target.previousElementSibling?.getAttribute("data-id") || undefined;
             const groupID = bodyElement ? bodyElement.getAttribute("data-group-id") : "";
             const templateID = blockElement.querySelector<HTMLElement>(".av__header")?.dataset.defaultTemplateId;
-            if (templateID) {
+            if (templateID || viewType === "map") {
                 createAttributeViewItem({blockElement, protyle, templateID, position: {previousID, groupID}});
             } else {
                 insertRows({blockElement, protyle, count: 1, previousID, groupID});

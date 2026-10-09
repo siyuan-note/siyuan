@@ -7,7 +7,6 @@
   margin: 8px 0;
 }
 
-.av__map-settings,
 .av__map-actions {
   display: flex;
   flex-wrap: wrap;
@@ -15,16 +14,9 @@
   gap: 8px;
 }
 
-.av__map-setting {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 100%;
-
-  .b3-select {
-    min-width: 0;
-    max-width: min(240px, 50vw);
-  }
+.av__map-setting-value {
+  min-width: 0;
+  max-width: min(160px, 45vw);
 }
 
 .av__map-status,
@@ -36,13 +28,6 @@
 .av__map-canvas {
   width: 100%;
   height: clamp(240px, 50vh, 480px);
-}
-
-.av__map-records--hidden {
-  .av__row[data-id],
-  .av__spacer {
-    display: none;
-  }
 }
 
 .av__lunar-editor {
@@ -410,6 +395,13 @@
   max-width: 100%;
   margin-top: 4px !important;
   margin-bottom: 4px !important;
+
+  &[data-av-type="map"] > .av__container > .av__scroll {
+    .av__row[data-id],
+    .av__spacer {
+      display: none;
+    }
+  }
 
   &[data-av-type="list"],
   &[data-av-type="map"] {

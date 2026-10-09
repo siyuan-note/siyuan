@@ -181,7 +181,7 @@ export const getLayoutHTML = (data: IAV) => {
         return html + getCalendarSettingsHTML(data.view as IAVTable, true) + "</div>";
     }
     if (data.viewType === "map") {
-        html += getMapSettingsHTML(data.view as IAVTable, true);
+        html += getMapSettingsHTML(data.view as IAVTable);
     }
     return html + `<button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
         <span class="fn__flex-center">${window.siyuan.languages.entryNum}</span>

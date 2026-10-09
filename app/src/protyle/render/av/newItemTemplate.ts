@@ -665,7 +665,7 @@ export const createAttributeViewItem = (options: {
         }
         options.blockElement.removeAttribute("data-render");
         avRender(options.blockElement, options.protyle);
-        if (options.blockElement.dataset.avType === "calendar" && response.code === 0 &&
+        if (["calendar", "map"].includes(options.blockElement.dataset.avType) && response.code === 0 &&
             response.data && "itemID" in response.data) {
             void openDatabaseRowByData(options.protyle, {
                 avID: options.blockElement.dataset.avId, databaseBlockID: options.blockElement.dataset.nodeId,

@@ -180,6 +180,9 @@ const setup = (initialFault) => {
                     getURL() { return this.url; },
                     loadURL(url) {
                         fault("loadSync"); this.url = url; order.push("load");
+                        if (faults.has("earlyConsole")) {
+                            this.emit("console-message", {message: "Creating a worker from 'blob:null/private' violates the following Content Security Policy directive: \"worker-src 'none'\"."});
+                        }
                         return faults.has("loadAsync") ? Promise.reject(new Error("private load failure")) : Promise.resolve();
                     },
                     postMessage(...args) { fault("portTransfer"); this.transferred = args; },
@@ -344,6 +347,28 @@ test("known host diagnostics are bounded fixed codes and stop on disposal", () =
     s.manager.destroyAll();
     contents.emit("console-message", {message: "INVALID_USER_KEY"});
     assert.equal(s.owner.sent.length, 1);
+});
+
+test("CSP resources are captured before load, deduplicated by category and isolated from the map port", () => {
+    const s = setup("earlyConsole"); s.create();
+    assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "diagnostic", code: "cspWorker", resource: "blob"}]);
+    const contents = s.views[0].webContents;
+    const emit = url => contents.emit("console-message", {}, 2,
+        `Connecting to '${url}' violates the following Content Security Policy directive: "connect-src https://webapi.amap.com".`);
+    emit("https://g.alicdn.com/path?key=secret");
+    emit("https://g.alicdn.com/another?key=another-secret");
+    emit("blob:null/private");
+    for (let index = 0; index < 100; index++) emit(`https://unknown-${index}.invalid/secret`);
+    assert.deepEqual(s.owner.sent.map(entry => entry[1].resource), ["blob", "https:g.alicdn.com", "blob", "https:other"]);
+    assert.equal(JSON.stringify(s.owner.sent).includes("secret"), false);
+    const count = s.owner.sent.length;
+    s.load();
+    s.reply({type: "diagnostic", code: "cspWorker", resource: "https:g.alicdn.com"});
+    s.owner.emit("console-message", {message: "Content Security Policy worker-src 'none'"});
+    assert.equal(s.owner.sent.length, count, "only the known map contents can contribute diagnostics");
+    s.manager.destroyAll();
+    emit("https://fourier.taobao.com/private");
+    assert.equal(s.owner.sent.length, count);
 });
 
 test("provider routing reports fixed transport failures without logging requests", async () => {

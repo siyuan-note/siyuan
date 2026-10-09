@@ -10,6 +10,7 @@ import {scrollCenter} from "../../../util/highlightById";
 import {setAVCellAnchor, setAVItemAnchor} from "./rangeSelect";
 import {updateAVRowSelect} from "./virtualScroll";
 import {getAVLocateViewChange} from "./locateView";
+import {openMapRecord} from "./map/openRecord";
 import {applyAVColorPalette, getAVCustomColors} from "./color";
 import {getBacklinkScrollElement, revealBacklinkReference, scrollBacklinkTarget} from "./backlinkScroll";
 
@@ -24,6 +25,7 @@ const queuedLocateRequests = new Map<string, {
 }>();
 const renderTokens = new WeakMap<HTMLElement, symbol>();
 const renderedAVData = new WeakMap<HTMLElement, IAV>();
+const mapOpenTokens = new WeakMap<HTMLElement, symbol>();
 const highlightTokens = new WeakMap<HTMLElement, symbol>();
 const highlightStates = new WeakMap<HTMLElement, {element: HTMLElement, className: string, timer: number}>();
 
@@ -320,7 +322,7 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
     if (request.viewID && request.previousViewID !== undefined && request.viewID !== request.previousViewID) {
         clearSelect(["row", "galleryItem"], blockElement);
     }
-    if (data.viewType === "calendar") {
+    if (data.viewType === "calendar" || data.viewType === "map") {
         return;
     }
     const key = data.target.groupID || "all";
@@ -374,6 +376,41 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
     }
     if (data.target?.status !== "visible") {
         clearAVLocateRequest(blockElement, request);
+        return;
+    }
+    if (data.viewType === "map") {
+        clearAVLocateRequest(blockElement, request);
+        if (request.located) {
+            return;
+        }
+        // 预览只定位地图容器，明确打开条目的操作复用记录详情，不展开记录列表。
+        if (request.persistView === false) {
+            if (request.scroll !== false && !scrollBacklinkTarget(blockElement, blockElement)) {
+                scrollCenter(protyle, blockElement, "center");
+            }
+        } else {
+            const row = (data.view as IAVTable).rows.find(item => item.id === request.itemID);
+            const token = Symbol();
+            const renderToken = renderTokens.get(blockElement);
+            mapOpenTokens.set(blockElement, token);
+            const failed = () => {
+                if (blockElement.isConnected && mapOpenTokens.get(blockElement) === token &&
+                    renderTokens.get(blockElement) === renderToken && !getAVLocateRequest(blockElement) &&
+                    (!request.isValid || request.isValid()) && !request.messageShown) {
+                    request.messageShown = true;
+                    showMessage(window.siyuan.languages.databaseItemNotFound);
+                }
+            };
+            void Promise.resolve(openMapRecord(protyle, blockElement, row, request.keyID)).then(opened => {
+                if (!opened) {
+                    failed();
+                }
+            }).catch(failed).finally(() => {
+                if (mapOpenTokens.get(blockElement) === token) {
+                    mapOpenTokens.delete(blockElement);
+                }
+            });
+        }
         return;
     }
     const groupQuery = data.target.groupID ? `.av__body[data-group-id="${data.target.groupID}"]` : ".av__body";

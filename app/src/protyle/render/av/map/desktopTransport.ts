@@ -57,9 +57,21 @@ const mapDiagnosticCodes = new Set([
     "storageUnavailable", "webglUnavailable", "amapInvalidKey", "amapInvalidSecurityCode",
     "amapDomainMismatch", "amapPlatformMismatch",
 ]);
-const logMapDiagnostic = (code: unknown) => {
+const mapCSPDiagnosticCodes = new Set(["cspScript", "cspWorker", "cspConnect", "cspImage", "cspStyle", "cspEval", "cspWasm"]);
+const mapCSPResourceCodes = new Set([
+    "blob", "data", "inline", "eval", "wasm", "other",
+    "https:webapi.amap.com", "https:restapi.amap.com", "https:vdata.amap.com", "https:a.amap.com",
+    "https:g.alicdn.com", "https:fourier.taobao.com", "https:autonavi-tile", "https:other",
+    "http:webapi.amap.com", "http:restapi.amap.com", "http:vdata.amap.com", "http:a.amap.com",
+    "http:g.alicdn.com", "http:fourier.taobao.com", "http:autonavi-tile", "http:other",
+]);
+const logMapDiagnostic = (code: unknown, resource?: unknown) => {
     if (typeof code === "string" && mapDiagnosticCodes.has(code)) {
-        console.warn("Database map diagnostic:", code);
+        if (resource === undefined) {
+            console.warn("Database map diagnostic:", code);
+        } else if (mapCSPDiagnosticCodes.has(code) && typeof resource === "string" && mapCSPResourceCodes.has(resource)) {
+            console.warn("Database map diagnostic:", code, resource);
+        }
     }
 };
 
@@ -249,9 +261,9 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
         if (destroyed) {
             return;
         }
-        const diagnostic = value as {version?: unknown; instanceID?: unknown; type?: unknown; code?: unknown};
+        const diagnostic = value as {version?: unknown; instanceID?: unknown; type?: unknown; code?: unknown; resource?: unknown};
         if (diagnostic?.version === AV_MAP_PROTOCOL_VERSION && diagnostic.instanceID === instanceID && diagnostic.type === "diagnostic") {
-            logMapDiagnostic(diagnostic.code);
+            logMapDiagnostic(diagnostic.code, diagnostic.resource);
             return;
         }
         const reply = parseAVMapReply(value, instanceID);

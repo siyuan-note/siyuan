@@ -3985,7 +3985,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", then create a Map view and select a service and a Location field. Services are stored on the current device; each view saves only a service ID. On another device, explicitly add the same ID to restore the reference, or choose another service"
+					"Data": ", then create a Map view and choose a map service and Location field in its view settings. Map views do not show a record list; switch to a Table view to browse or edit records. Services are stored on the current device; each view saves only a service ID. On another device, explicitly add the same ID to restore the reference, or choose another service"
 				}
 			]
 		},
@@ -4041,7 +4041,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Map services use an external network connection. Only the selected service receives its runtime credentials, coordinates, and opaque record IDs; record titles and full contents are not passed to the map host. Browser SDK credentials are visible to the authorized browser and provider. Configuration exports omit map services and credentials; published pages and document exports retain records without a live map"
+					"Data": "Map services use an external network connection. Only the selected service receives its runtime credentials, coordinates, and opaque record IDs; record titles and full contents are not passed to the map host. Browser SDK credentials are visible to the authorized browser and provider. Configuration exports omit map services and credentials; published pages do not load a live map, and document exports retain a table of records"
 				}
 			]
 		},
@@ -4055,7 +4055,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The host follows the app theme. AMap also switches its basemap theme, and Baidu switches control appearance; OpenFreeMap and Tencent Maps currently retain their default basemap styles. Maps run in isolated Web pages. Desktop clients use a separate secure host; mobile clients require a matching app shell that restricts native bridges and navigation to trusted documents. Older shells or clients unable to establish these boundaries retain the record list. Desktop maps may hide briefly while scrolling or when menus and dialogs overlap them. When offline, unconfigured, incompatible with WebGL, or unable to load a provider, records remain available. Address search, geocoding, route planning, and clicking the map to write a location are not provided. Maps are also unavailable when authentication bypass is enabled; the record list remains accessible"
+					"Data": "The host follows the app theme. AMap also switches its basemap theme, and Baidu switches control appearance; OpenFreeMap and Tencent Maps currently retain their default basemap styles. Maps run in isolated Web pages. Desktop clients use a separate secure host; mobile clients require a matching app shell that restricts native bridges and navigation to trusted documents. Older shells or clients unable to establish these boundaries do not load maps. Desktop maps follow page scrolling and clip the area covered by sticky tabs. They may hide temporarily when menus or dialogs overlap them. When offline, unconfigured, incompatible with WebGL, or unable to load a provider, switch to a Table view to access records. Address search, geocoding, route planning, and clicking the map to write a location are not provided. Maps are also unavailable when authentication bypass is enabled; records remain accessible in a Table view"
 				}
 			]
 		},

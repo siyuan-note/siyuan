@@ -150,6 +150,27 @@ describe("desktop map transport", () => {
         const {mapDiagnosticCodes} = require("../../../../../electron/mapHostDiagnostics");
         for (const code of mapDiagnosticCodes) assert.ok(source.includes(`"${code}"`));
     });
+    it("validates CSP resource categories and never logs arbitrary resource values", () => {
+        const warnings: unknown[][] = [];
+        const f = fixture(warnings);
+        const {mapCSPResourceCodes, mapCSPDiagnosticCodes} = require("../../../../../electron/mapHostDiagnostics");
+        for (const resource of mapCSPResourceCodes) {
+            f.reply({type: "diagnostic", code: "cspConnect", resource, detail: "private-token"});
+        }
+        assert.deepEqual(warnings, mapCSPResourceCodes.map((resource: string) => ["Database map diagnostic:", "cspConnect", resource]));
+        for (const code of mapCSPDiagnosticCodes) assert.ok(source.includes(`"${code}"`));
+        for (const resource of ["https://webapi.amap.com/?key=secret", "https:private.invalid", "private-token", null,
+            {toString: () => "secret"}, ["blob"]]) {
+            f.reply({type: "diagnostic", code: "cspConnect", resource});
+        }
+        f.reply({type: "diagnostic", code: "storageUnavailable", resource: "blob"});
+        f.reply({type: "diagnostic", code: "cspWorker", resource: "blob", instanceID: "wrong"});
+        assert.equal(warnings.length, mapCSPResourceCodes.length);
+        f.host.destroy();
+        f.reply({type: "diagnostic", code: "cspWorker", resource: "data"});
+        assert.equal(warnings.length, mapCSPResourceCodes.length);
+        assert.equal(JSON.stringify(warnings).includes("secret"), false);
+    });
     it("logs only approved capability reason codes and never exception or response details", async () => {
         for (const reason of ["ownerUnavailable", "notMainFrame", "notInitialized", "unregisteredOwner", "invalidKernelOrigin",
             "originMismatch", "unsupportedDocument", "invalidDocument", "unsafeProcessSwitches"]) {

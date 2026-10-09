@@ -104,7 +104,7 @@ test("calendar header creation supplies the browsing date with and without a tem
                 const requests: {calendarDate?: number, templateID: string, viewID: string}[] = [];
                 let inserted = 0;
                 runInNewContext(compiled, {
-                    blockElement, getCalendarCreationDate,
+                    blockElement, getCalendarCreationDate, viewType: layout,
                     Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view"},
                     protyle: {app: {appId: "app"}, id: "editor"},
                     event: {preventDefault() {}, stopPropagation() {}},

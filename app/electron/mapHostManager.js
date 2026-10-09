@@ -5,7 +5,8 @@
 const path = require("node:path");
 const fs = require("node:fs/promises");
 const {randomBytes} = require("node:crypto");
-const {mapDiagnosticCodes, classifyMapConsoleMessage} = require("./mapHostDiagnostics");
+const {mapDiagnosticCodes, mapCSPDiagnosticCodes, mapCSPResourceCodes, classifyMapConsoleMessage,
+    classifyMapCSPResources} = require("./mapHostDiagnostics");
 const {
     hasUnsafeMapSwitches, normalizeMapOrigin, parseMapCreate, parseMapCommand, parseMapReply, parseMapGeometry,
     isAllowedMapProviderURL, getMapRequestPolicy, createMapContentSecurityPolicy,
@@ -308,10 +309,15 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         }
         let host, router, view, ses;
         let creationFailure = "hostSetupFailed";
-        const report = code => {
-            if (!host || host.destroyed || !mapDiagnosticCodes.includes(code) || host.diagnostics.has(code)) return;
-            host.diagnostics.add(code);
-            sendOwner(host, {version: 1, instanceID: init.instanceID, type: "diagnostic", code});
+        const report = (code, resource) => {
+            if (!host || host.destroyed || !mapDiagnosticCodes.includes(code) ||
+                resource !== undefined && (!mapCSPDiagnosticCodes.includes(code) || !mapCSPResourceCodes.includes(resource))) return;
+            // 两个有限白名单的组合去重，同一指令拒绝不同资源时也保留证据。
+            const key = code + ":" + (resource || "");
+            if (host.diagnostics.has(key)) return;
+            host.diagnostics.add(key);
+            sendOwner(host, {version: 1, instanceID: init.instanceID, type: "diagnostic", code,
+                ...(resource === undefined ? {} : {resource})});
         };
         try {
             ses = session.fromPartition("siyuan-map-" + randomID(), {cache: false});
@@ -336,7 +342,12 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             listen(host, contents, "login", (event, _details, _auth, callback) => { event.preventDefault(); callback(); });
             listen(host, contents, "certificate-error", (_event, _url, _error, _certificate, callback) => callback(false));
             listen(host, contents, "console-message", (event, _level, legacyMessage) => {
-                for (const code of classifyMapConsoleMessage(event?.message ?? legacyMessage)) report(code);
+                const message = event?.message ?? legacyMessage;
+                const resources = classifyMapCSPResources(message);
+                for (const code of classifyMapConsoleMessage(message)) {
+                    if (!resources.some(item => item.code === code)) report(code);
+                }
+                for (const {code, resource} of resources) report(code, resource);
             });
             listen(host, contents, "did-fail-load", (_event, _code, _description, _url, isMainFrame) => {
                 if (isMainFrame === false) return;

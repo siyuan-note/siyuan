@@ -1,8 +1,8 @@
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {fetchSyncPost} from "../../../../util/fetch";
-import {openDatabaseRowByData} from "../openDatabaseRow";
 import {getAVData} from "../virtualScroll";
-import {bindMapSettings, getMapSettingsHTML, loadMapServices} from "./settings";
+import {loadMapServices} from "./settings";
+import {openMapRecord} from "./openRecord";
 import {canLoadMapHost, destroyMap, getMapPoints, getMapSettings, registerMap} from "./state";
 import {createAVMapHost, isAVMapHostEnvironmentSupported} from "./host";
 import {createDesktopAVMapHost, isDesktopAVMapHostSupported} from "./desktopTransport";
@@ -11,19 +11,6 @@ import {AV_MAP_ATTRIBUTION_LINKS, AV_MAP_MAX_POINTS} from "./protocol";
 import {MAP_CONFIG_CHANGED_EVENT} from "../../../../config/mapRuntime";
 
 const getTheme = () => document.documentElement.getAttribute("data-theme-mode") === "dark" ? "dark" : "light";
-
-const openMapRecord = (protyle: IProtyle, blockElement: HTMLElement, row: IAVRow) => {
-    const primary = row.cells.find(cell => cell.valueType === "block" || cell.value?.type === "block");
-    if (!primary?.value) {
-        return;
-    }
-    return openDatabaseRowByData(protyle, {
-        avID: blockElement.dataset.avId, databaseBlockID: blockElement.dataset.nodeId, notebookID: protyle.notebookId,
-        itemID: row.id, valueID: primary.id || primary.value.id,
-        title: primary.value.block?.content || window.siyuan.languages.untitled,
-        boundBlockID: primary.value.block?.id, isDetached: !!primary.value.isDetached, focusPrimary: true,
-    });
-};
 
 export const refreshMapReadonly = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll<HTMLElement>('.av[data-av-type="map"]').forEach(block => {
@@ -41,7 +28,6 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
     if (!records) {
         return;
     }
-    records.classList.remove("av__map-records--hidden");
     const view = data.view as IAVTable;
     const settings = getMapSettings(view);
     const root = document.createElement("div");
@@ -50,8 +36,7 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
     root.setAttribute("aria-label", window.siyuan.languages.mapView);
     const pageText = window.siyuan.languages.mapPageScope.replace("${shown}", view.rows.length.toString())
         .replace("${total}", view.rowCount.toString());
-    root.innerHTML = `<div class="av__map-settings"></div>
-<div class="av__map-summary ft__smaller ft__on-surface">${escapeHtml(pageText)}</div>
+    root.innerHTML = `<div class="av__map-summary ft__smaller ft__on-surface">${escapeHtml(pageText)}</div>
 <div class="av__map-skipped ft__smaller ft__on-surface"></div>
 <div class="av__map-status ft__on-surface" role="status"></div>
 <div class="av__map-canvas fn__none"></div>
@@ -92,7 +77,6 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
         status.textContent = message;
         canvas.classList.add("fn__none");
         fitButton.classList.add("fn__none");
-        records.classList.remove("av__map-records--hidden");
     };
     retryButton.addEventListener("click", () => { void renderMap(blockElement, protyle, data); });
     if (window.siyuan.isPublish) {
@@ -111,10 +95,6 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
         if (!current()) {
             return;
         }
-        const settingsElement = root.querySelector<HTMLElement>(".av__map-settings");
-        settingsElement.innerHTML = getMapSettingsHTML(view, false, services);
-        bindMapSettings({protyle, blockElement, data, menuElement: settingsElement, services,
-            onChange: () => { void renderMap(blockElement, protyle, data); }});
         if (!settings.locationKeyID) {
             fallback(window.siyuan.languages.mapSelectLocationField);
             return;
@@ -193,7 +173,6 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
                 status.textContent = "";
                 attribution.classList.remove("fn__none");
                 fitButton.classList.remove("fn__none");
-                records.classList.toggle("av__map-records--hidden", !settings.showRecordList && data.target?.status !== "visible");
             },
             onError: () => fallback(navigator.onLine ? window.siyuan.languages.mapLoadError : window.siyuan.languages.mapOffline),
             onMarkerClick: (id, markerRevision) => {

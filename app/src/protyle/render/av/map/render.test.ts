@@ -75,7 +75,7 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
             calls.push(url);
             return options.runtime ? options.runtime() : {code: 0, data: {provider: "openfreemap"}};
         }},
-        "./settings": {getMapSettingsHTML: () => "settings", bindMapSettings() {}, loadMapServices: async () => {
+        "./settings": {loadMapServices: async () => {
             calls.push("/api/map/getConf");
             return [{id: "service", provider: "openfreemap", configured: true}];
         }},
@@ -100,6 +100,11 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
                 .createAVMapHost(container, configuration);
         },
     };
+    const openRecord = {} as typeof import("./openRecord");
+    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/map/openRecord.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
+    }).outputText, {exports: openRecord, require: (id: string) => modules[id] || {}, window: {siyuan: {languages}}});
+    modules["./openRecord"] = openRecord;
     runInNewContext(transpileModule(readFileSync("src/protyle/render/av/map/render.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {exports: methods, require: (id: string) => modules[id] || {},
@@ -114,13 +119,13 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
         status: () => root.querySelector(".av__map-status").textContent};
 };
 
-test("published maps render records without metadata, runtime credentials, or SDK calls", async () => {
+test("published maps render a status without inline settings, runtime credentials, or SDK calls", async () => {
     const scenario = setup({published: true});
     await scenario.render();
     assert.deepEqual(scenario.calls, []);
     assert.equal(scenario.hosts.length, 0);
     assert.equal(scenario.status(), "mapPublicFallback");
-    assert.equal(scenario.records.classes.has("av__map-records--hidden"), false);
+    assert.doesNotMatch(scenario.roots[0].innerHTML, /av__map-settings|data-map-setting|data-map-configure/);
 });
 
 test("unconfigured, unavailable host, offline and incompatible maps never request runtime credentials", async () => {
@@ -130,7 +135,6 @@ test("unconfigured, unavailable host, offline and incompatible maps never reques
         await scenario.render();
         assert.deepEqual(scenario.calls, ["/api/map/getConf"]);
         assert.equal(scenario.hosts.length, 0);
-        assert.equal(scenario.records.classes.has("av__map-records--hidden"), false);
     }
     const incompatible = setup();
     (incompatible.data.view as IAVTable).rows[0].cells[0].value.location.coordinateSystem = "unknown";
@@ -147,7 +151,7 @@ test("map sends only IDs and coordinates and opens the existing row detail for a
     assert.equal(JSON.stringify(host.points), JSON.stringify([{id: "row", longitude: 0, latitude: 0, coordinateSystem: "wgs84"}]));
     assert.doesNotMatch(JSON.stringify(host.options), /Private|primary-value|notebook/);
     host.options.onReady();
-    assert.equal(scenario.records.classes.has("av__map-records--hidden"), true);
+    assert.doesNotMatch(scenario.roots[0].innerHTML, /av__map-settings|data-map-setting|data-map-configure/);
     host.options.onMarkerClick("other", host.revision);
     host.options.onMarkerClick("row", host.revision - 1);
     assert.equal(scenario.opened.length, 0);
@@ -156,7 +160,6 @@ test("map sends only IDs and coordinates and opens the existing row detail for a
     scenario.events.get("offline")();
     assert.equal(host.destroyed, true);
     assert.equal(scenario.status(), "mapOffline");
-    assert.equal(scenario.records.classes.has("av__map-records--hidden"), false);
     host.options.onMarkerClick("row", host.revision);
     assert.equal(scenario.opened.length, 1);
     scenario.destroyMap();
@@ -194,7 +197,7 @@ test("stale runtime responses cannot mount a map after the view is removed", asy
     assert.equal(scenario.hosts.length, 0);
 });
 
-test("history and oversized loaded pages retain the list without fetching runtime credentials", async () => {
+test("history and oversized loaded pages report status without fetching runtime credentials", async () => {
     const history = setup();
     history.protyle.options.history = {created: "version"};
     await history.render();
@@ -206,7 +209,6 @@ test("history and oversized loaded pages retain the list without fetching runtim
     assert.deepEqual(scenario.calls, ["/api/map/getConf"]);
     assert.equal(scenario.status(), "mapTooManyMarkers");
     assert.equal(scenario.hosts.length, 0);
-    assert.equal(scenario.records.classes.has("av__map-records--hidden"), false);
 });
 
 test("rerendering a map destroys the old host and invalidates its callbacks", async () => {
@@ -230,5 +232,4 @@ test("authentication bypass reports its specific safe fallback without mounting 
     await scenario.render();
     assert.equal(scenario.status(), "mapAuthenticationBypass");
     assert.equal(scenario.hosts.length, 0);
-    assert.equal(scenario.records.classes.has("av__map-records--hidden"), false);
 });

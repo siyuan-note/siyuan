@@ -12,6 +12,7 @@ import {getAVData} from "./virtualScroll";
 import {resolveAVSelectedCell} from "./selectionState";
 import {beginAVEditorSession} from "./editorSession";
 import {updateOutlineCurrentBlock} from "../../util/outlineBlock";
+import {focusBlock} from "../../util/selection";
 import {
     configureAVRichTextLute,
     createAVRichTextValue,
@@ -203,7 +204,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     });
     ownerObserver.observe(document.body, {childList: true, subtree: true});
 
-    const finish = async (save: boolean) => {
+    const finish = async (save: boolean, restoreFocus = false) => {
         if (!save) {
             cancelled = true;
         }
@@ -234,6 +235,10 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             }
             endEditorSession();
             options.onDestroy?.();
+            if (restoreFocus && !mobile && !cancelled && !activeEditor && isOwnerConnected() &&
+                options.protyle.wysiwyg.element.contains(options.nodeElement)) {
+                focusBlock(options.nodeElement);
+            }
         }
     };
 
@@ -250,7 +255,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
             event.preventDefault();
             event.stopPropagation();
-            void finish(true);
+            void finish(true, true);
         }
     }, true);
     fragment.focus(true);

@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "वर्तमान खोज विधि में यह विकल्प उपलब्ध नहीं है",
 	"selectCoordinateSystem": "निर्देशांक प्रणाली चुनें",
 	"coordinateOrder": "निर्देशांक क्रम",
 	"coordinateSystemWGS84": "WGS84 (OpenFreeMap)",

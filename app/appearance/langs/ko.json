@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "현재 검색 방식에서는 이 옵션을 사용할 수 없습니다",
 	"selectCoordinateSystem": "좌표계를 선택하세요",
 	"coordinateOrder": "좌표 순서",
 	"coordinateSystemWGS84": "WGS84 (OpenFreeMap)",

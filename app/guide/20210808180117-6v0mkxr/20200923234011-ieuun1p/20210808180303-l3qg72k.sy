@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20260929000700"
+		"updated": "20261009182324"
 	},
 	"Children": [
 		{
@@ -36,6 +36,91 @@
 				{
 					"Type": "NodeText",
 					"Data": "Global search supports query syntax for advanced search, including AND/OR/NOT logic, type filtering, and field filtering. It also offers advanced features such as direct database table queries, index exclusion, and search exclusion, covering everything from simple keywords to complex conditions. The following sub-documents introduce each of these features in detail."
+				}
+			]
+		},
+		{
+			"ID": "20261009182324-t1r641c",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261009182324-t1r641c",
+				"updated": "20261009182324"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Controls by search method"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261009182324-1ulhib3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009182324-1ulhib3",
+				"updated": "20261009182324"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Keyword and query syntax searches support block-type, notebook and document-path filters, including child documents, as well as sorting, grouping and replacement. Content-order sorting is available only when grouping by document."
+				}
+			]
+		},
+		{
+			"ID": "20261009182324-49vls9t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009182324-49vls9t",
+				"updated": "20261009182324"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Regular expression search supports the same filters, grouping and replacement, plus type, creation-time and update-time sorting. Relevance sorting is unavailable; content-order sorting applies only within document groups."
+				}
+			]
+		},
+		{
+			"ID": "20261009182324-5ryxgkw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009182324-5ryxgkw",
+				"updated": "20261009182324"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SQL search uses the filters and result order written in the SQL statement. The panel's block-type and path filters, including the current-document scope and child-document option, do not apply. Replacement is unavailable. Grouping by document remains available; in grouped results, type, creation-time, update-time and content-order sorting remain available, but relevance sorting does not apply."
+				}
+			]
+		},
+		{
+			"ID": "20261009182324-seagl6e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009182324-seagl6e",
+				"updated": "20261009182324"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Semantic search supports block-type, notebook and document-path filters, including child documents. Results follow semantic relevance; panel sorting, grouping and replacement are unavailable."
+				}
+			]
+		},
+		{
+			"ID": "20261009182324-87b7poz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009182324-87b7poz",
+				"updated": "20261009182324"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Controls that do not apply to the selected method are disabled with an explanatory tooltip. SQL and semantic search hide the replacement row while keeping its text and expanded state, which are restored when returning to a method that supports replacement. Saving and resetting query conditions remain available."
 				}
 			]
 		},

@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "目前的搜尋方式不支援此選項",
 	"selectCoordinateSystem": "請選擇座標系",
 	"coordinateOrder": "座標順序",
 	"coordinateSystemWGS84": "WGS84（OpenFreeMap）",

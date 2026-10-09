@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "Unavailable for the current search method",
 	"selectCoordinateSystem": "Select a coordinate system",
 	"coordinateOrder": "Coordinate order",
 	"coordinateSystemWGS84": "WGS84 (OpenFreeMap)",

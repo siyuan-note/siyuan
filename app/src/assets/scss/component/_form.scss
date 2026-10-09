@@ -55,8 +55,13 @@
     right: 0;
     cursor: pointer;
 
-    &:hover {
+    &:hover:not([disabled]) {
       opacity: 1;
+    }
+
+    &[disabled] {
+      opacity: .38;
+      cursor: not-allowed;
     }
   }
 

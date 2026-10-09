@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "Niedostępne dla bieżącej metody wyszukiwania",
 	"selectCoordinateSystem": "Wybierz układ współrzędnych",
 	"coordinateOrder": "Kolejność współrzędnych",
 	"coordinateSystemWGS84": "WGS84 (OpenFreeMap)",

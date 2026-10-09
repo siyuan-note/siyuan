@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "ตัวเลือกนี้ไม่พร้อมใช้งานสำหรับวิธีค้นหาปัจจุบัน",
 	"selectCoordinateSystem": "โปรดเลือกระบบพิกัด",
 	"coordinateOrder": "ลำดับพิกัด",
 	"coordinateSystemWGS84": "WGS84 (OpenFreeMap)",

@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "Geçerli arama yöntemi için kullanılamaz",
 	"selectCoordinateSystem": "Bir koordinat sistemi seçin",
 	"coordinateOrder": "Koordinat sırası",
 	"coordinateSystemWGS84": "WGS84 (OpenFreeMap)",

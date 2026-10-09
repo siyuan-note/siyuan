@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "Nie je dostupné pre aktuálnu metódu vyhľadávania",
 	"selectCoordinateSystem": "Vyberte súradnicový systém",
 	"coordinateOrder": "Poradie súradníc",
 	"coordinateSystemWGS84": "WGS84 (OpenFreeMap)",

@@ -1,4 +1,5 @@
 import {closePanel} from "../util/closePanel";
+import {updateSearchMethodControls} from "../../search/methodCapabilities";
 import {buildSearchRequest} from "../../search/config";
 import {getAttr} from "../../search/attrs";
 import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
@@ -277,6 +278,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                                        currentId?: string,
                                        newId?: string
                                    }) => {
+    updateSearchMethodControls(element, config, true);
     if (rmCurrentCriteria) {
         element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
         element.querySelector("#searchList").innerHTML = "";
@@ -492,7 +494,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (type === "remove-path") {
+            } else if (type === "remove-path" && !target.hasAttribute("disabled")) {
                 config.idPath = [];
                 config.hPath = "";
                 element.querySelector("#searchPath").classList.add("fn__none");
@@ -545,7 +547,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (type === "path") {
+            } else if (type === "path" && !target.hasAttribute("disabled")) {
                 movePathTo({
                     cb: (toPath, toNotebook) => {
                         fetchPost("/api/filetree/getHPathsByPaths", {paths: toPath}, (response) => {
@@ -607,7 +609,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (type === "toggle-replace") {
+            } else if (type === "toggle-replace" && !target.hasAttribute("disabled")) {
                 if (window.siyuan.isPublish) {
                     return;
                 }

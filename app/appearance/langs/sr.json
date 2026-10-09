@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "Није доступно за тренутни начин претраге",
 	"selectCoordinateSystem": "Изаберите координатни систем",
 	"coordinateOrder": "Редослед координата",
 	"coordinateSystemWGS84": "WGS84 (OpenFreeMap)",

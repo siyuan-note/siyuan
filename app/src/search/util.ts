@@ -1,4 +1,5 @@
 import type {FileTreeGetDocRequestInput} from "../types/api";
+import {updateSearchMethodControls} from "./methodCapabilities";
 import {getAttr} from "./attrs";
 import type {APICallbackResponse, APIPOSTRoutes, BlockQueryRequestInput} from "../types/api";
 import {getAllModels} from "../layout/getAll";
@@ -486,7 +487,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.classList.contains("search__rmpath")) {
+            } else if (target.classList.contains("search__rmpath") && !target.hasAttribute("disabled")) {
                 invalidateSearchPathRequests(element);
                 config.idPath = [];
                 config.hPath = "";
@@ -520,7 +521,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.id === "searchPath") {
+            } else if (target.id === "searchPath" && !target.hasAttribute("disabled")) {
                 movePathTo({
                     cb: (toPath, toNotebook) => {
                         const isCurrentPathRequest = beginSearchPathRequest(element);
@@ -588,7 +589,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 config.page = 1;
                 inputEvent(element, config, edit, true);
                 break;
-            } else if (target.id === "searchReplace") {
+            } else if (target.id === "searchReplace" && !target.hasAttribute("disabled")) {
                 if (window.siyuan.isPublish) {
                     return;
                 }
@@ -749,7 +750,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.id === "searchFilter") {
+            } else if (target.id === "searchFilter" && !target.hasAttribute("disabled")) {
                 window.siyuan.menus.menu.remove();
                 filterMenu(config, () => {
                     config.page = 1;
@@ -1505,6 +1506,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                                currentId?: string,
                                newId?: string
                            }) => {
+    updateSearchMethodControls(element, config);
     if (rmCurrentCriteria) {
         element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
         element.querySelector("#searchList").innerHTML = "";

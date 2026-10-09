@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "当前搜索方式不支持此选项",
 	"selectCoordinateSystem": "请选择坐标系",
 	"coordinateOrder": "坐标顺序",
 	"coordinateSystemWGS84": "WGS84（OpenFreeMap）",

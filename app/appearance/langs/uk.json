@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "Недоступно для поточного методу пошуку",
 	"selectCoordinateSystem": "Виберіть систему координат",
 	"coordinateOrder": "Порядок координат",
 	"coordinateSystemWGS84": "WGS84 (OpenFreeMap)",

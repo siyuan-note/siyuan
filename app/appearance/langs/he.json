@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "האפשרות אינה זמינה בשיטת החיפוש הנוכחית",
 	"selectCoordinateSystem": "בחרו מערכת קואורדינטות",
 	"coordinateOrder": "סדר הקואורדינטות",
 	"coordinateSystemWGS84": "WGS84 (OpenFreeMap)",

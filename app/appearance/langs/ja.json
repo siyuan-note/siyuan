@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "現在の検索方法ではこの項目を利用できません",
 	"selectCoordinateSystem": "座標系を選択してください",
 	"coordinateOrder": "座標の順序",
 	"coordinateSystemWGS84": "WGS84（OpenFreeMap）",

@@ -1,4 +1,5 @@
 {
+	"searchControlUnavailable": "Tidak tersedia untuk metode pencarian saat ini",
 	"selectCoordinateSystem": "Pilih sistem koordinat",
 	"coordinateOrder": "Urutan koordinat",
 	"coordinateSystemWGS84": "WGS84 (OpenFreeMap)",

@@ -138,7 +138,7 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 		// 按当前连接是否为 TLS 标记 Secure；固定端口反代的明文连接不得标记，
 		// 否则浏览器不会在明文的 6806 端口上回传该 Cookie。
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
-		Secure:   util.SSL || util.IsSecureRequest(c.Request),
+		Secure:   util.SSL || util.IsTLSRequest(c.Request),
 		MaxAge:   maxAge,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,

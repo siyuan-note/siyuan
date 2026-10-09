@@ -476,7 +476,7 @@ func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
 		Path:   "/",
 		// 只有客户端连接确实使用 TLS 时才标记 Secure，与发布会话 Cookie 保持一致
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
-		Secure:   util.SSL || util.IsSecureRequest(c.Request),
+		Secure:   util.SSL || util.IsTLSRequest(c.Request),
 		HttpOnly: true,
 	})
 }

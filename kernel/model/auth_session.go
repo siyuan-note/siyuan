@@ -52,7 +52,7 @@ func applyAuthenticatedSession(c *gin.Context, workspaceSession *util.WorkspaceS
 		Path: "/",
 		// 与登录会话保持一致：只有客户端连接确实使用 TLS 时才标记 Secure
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
-		Secure:   util.SSL || util.IsSecureRequest(c.Request),
+		Secure:   util.SSL || util.IsTLSRequest(c.Request),
 		MaxAge:   maxAge,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,

@@ -19,12 +19,14 @@ package server
 import (
 	"crypto/tls"
 	"net/http"
+	"net/http/cookiejar"
 	"net/http/httptest"
 	"testing"
 
 	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -218,7 +220,12 @@ func TestTLSEnforceAddsHSTSOnlyForTLSRequests(t *testing.T) {
 
 // newSessionCookieSecureTestEngine 按 Serve 的顺序注册 TLS 强制中间件、会话中间件与登录路由，
 // 用于验证会话 Cookie 的 Secure 属性是否跟随实际连接。
-func newSessionCookieSecureTestEngine() *gin.Engine {
+func newSessionCookieSecureTestEngine(t *testing.T) *gin.Engine {
+	t.Helper()
+	previousWrongAuthCount := util.WrongAuthCount
+	util.WrongAuthCount = 0
+	t.Cleanup(func() { util.WrongAuthCount = previousWrongAuthCount })
+	model.Conf.AccessAuthCode = "test-access-code"
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()
 	store := cookie.NewStore([]byte("test-cookie-key"))
@@ -226,20 +233,14 @@ func newSessionCookieSecureTestEngine() *gin.Engine {
 	engine.Use(tlsEnforceMiddleware())
 	engine.Use(ginSessions.Sessions("siyuan", store))
 	engine.POST("/api/system/loginAuth", func(c *gin.Context) {
-		// 与 model.LoginAuth 中的写法保持一致
-		ginSessions.Default(c).Options(ginSessions.Options{
-			Path:     "/",
-			Secure:   util.SSL || util.IsSecureRequest(c.Request),
-			MaxAge:   60 * 60 * 24 * 30,
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode,
-		})
-		if err := ginSessions.Default(c).Save(); err != nil {
-			c.String(http.StatusInternalServerError, "save failed: %v", err)
-			return
-		}
-		c.String(http.StatusOK, "ok")
+		result := model.LoginAuth(c, apicontract.SystemLoginAuthRequest{AuthCode: "test-access-code", RememberMe: true})
+		c.JSON(http.StatusOK, result)
 	})
+	for _, path := range []string{"/stage/build/mobile/", "/stage/build/desktop/"} {
+		engine.GET(path, model.CheckAuth, func(c *gin.Context) {
+			c.Status(http.StatusNoContent)
+		})
+	}
 	return engine
 }
 
@@ -260,8 +261,9 @@ func TestSessionCookieSecureFollowsConnection(t *testing.T) {
 	}{
 		{name: "https connection", remoteAddr: "192.0.2.10:54321", serveTLS: true, host: "notes.example.com:6806", wantSecure: true},
 		{name: "plaintext connection", remoteAddr: "192.0.2.10:54321", host: "notes.example.com:6806", wantRedirect: true},
-		// 本机明文连接放行，且本机与内核自身的 HTTPS 回源等价，可以标记 Secure
-		{name: "plaintext loopback connection", remoteAddr: "127.0.0.1:54321", host: "127.0.0.1:6806", wantSecure: true},
+		// 本机 HTTP 会话必须能被不接受明文 Secure Cookie 的客户端回传。
+		{name: "plaintext loopback connection", remoteAddr: "127.0.0.1:54321", host: "127.0.0.1:6806", wantSecure: false},
+		{name: "plaintext ipv6 loopback connection", remoteAddr: "[::1]:54321", host: "[::1]:6806", wantSecure: false},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -275,7 +277,7 @@ func TestSessionCookieSecureFollowsConnection(t *testing.T) {
 			}
 
 			recorder := httptest.NewRecorder()
-			newSessionCookieSecureTestEngine().ServeHTTP(recorder, request)
+			newSessionCookieSecureTestEngine(t).ServeHTTP(recorder, request)
 
 			if test.wantRedirect {
 				if location := recorder.Header().Get("Location"); "" == location {
@@ -302,5 +304,40 @@ func TestSessionCookieSecureFollowsConnection(t *testing.T) {
 				t.Fatal("cookie HttpOnly = false, want true")
 			}
 		})
+	}
+}
+
+// 验证客户端按 Cookie 的传输限制保存登录会话后，移动端和桌面端均可完成认证。
+func TestLoopbackLoginSessionRoundTrip(t *testing.T) {
+	prepareTLSEnforceTest(t, true, true)
+	previousSSL := util.SSL
+	util.SSL = false
+	t.Cleanup(func() { util.SSL = previousSSL })
+	server := httptest.NewServer(newSessionCookieSecureTestEngine(t))
+	defer server.Close()
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := &http.Client{Jar: jar, CheckRedirect: func(*http.Request, []*http.Request) error {
+		return http.ErrUseLastResponse
+	}}
+	response, err := client.Post(server.URL+"/api/system/loginAuth", "application/json", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("login status = %d", response.StatusCode)
+	}
+	for _, path := range []string{"/stage/build/mobile/", "/stage/build/desktop/"} {
+		response, err = client.Get(server.URL + path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		response.Body.Close()
+		if response.StatusCode != http.StatusNoContent {
+			t.Fatalf("authenticated %s status = %d, want %d", path, response.StatusCode, http.StatusNoContent)
+		}
 	}
 }

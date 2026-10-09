@@ -7,7 +7,7 @@
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261009153000"
 	},
 	"Children": [
 		{
@@ -60,7 +60,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194307-cejt9yo",
-				"updated": "20260803171606"
+				"updated": "20261009153000"
 			},
 			"Children": [
 				{
@@ -89,7 +89,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614194307-ma2cl0h",
-				"updated": "20260614194412"
+				"updated": "20261009153000"
 			},
 			"Children": [
 				{
@@ -176,6 +176,62 @@
 								{
 									"Type": "NodeText",
 									"Data": "If a list or list item is set as a flashcard, the parent list is treated as the question, and child lists as answers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261009153000-kx73xij",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261009153000-kx73xij",
+						"updated": "20261009153000"
+					},
+					"Children": [
+						{
+							"ID": "20261009153000-e9izm4m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261009153000-e9izm4m",
+								"updated": "20261009153000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If a blockquote is set as a flashcard, the first child block is treated as the question, and the remaining child blocks as answers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261009153000-6bk07ae",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261009153000-6bk07ae",
+						"updated": "20261009153000"
+					},
+					"Children": [
+						{
+							"ID": "20261009153000-fgg3nok",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261009153000-fgg3nok",
+								"updated": "20261009153000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If a callout is set as a flashcard, the title is treated as the question, and its content as the answer"
 								}
 							]
 						}

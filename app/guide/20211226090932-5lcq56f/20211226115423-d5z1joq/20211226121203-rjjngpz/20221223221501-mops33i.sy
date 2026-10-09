@@ -7,7 +7,7 @@
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261009153000"
 	},
 	"Children": [
 		{
@@ -60,7 +60,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194439-33ewrfo",
-				"updated": "20260803163402"
+				"updated": "20261009153000"
 			},
 			"Children": [
 				{
@@ -89,7 +89,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614194439-s5vvtpl",
-				"updated": "20260614194452"
+				"updated": "20261009153000"
 			},
 			"Children": [
 				{
@@ -166,7 +166,7 @@
 					},
 					"Properties": {
 						"id": "20260614194439-v1a766t",
-						"updated": "20260614194439"
+						"updated": "20261009153000"
 					},
 					"Children": [
 						{
@@ -179,7 +179,63 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果將列表或者列表項設定為閃卡，則非子列表會被視問題，子列表會被視作答案"
+									"Data": "如果將列表或者列表項設定為閃卡，則非子列表會被視為問題，子列表會被視作答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261009153000-prz21u6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261009153000-prz21u6",
+						"updated": "20261009153000"
+					},
+					"Children": [
+						{
+							"ID": "20261009153000-6ldge0i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261009153000-6ldge0i",
+								"updated": "20261009153000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果將引述區塊設定為閃卡，則該引述區塊的第一個子區塊會被視作問題，其餘子區塊會被視作答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261009153000-zjixtzx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261009153000-zjixtzx",
+						"updated": "20261009153000"
+					},
+					"Children": [
+						{
+							"ID": "20261009153000-zgjou84",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261009153000-zgjou84",
+								"updated": "20261009153000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果將提示區塊設定為閃卡，則提示區塊的標題會被視作問題，內容會被視作答案"
 								}
 							]
 						}

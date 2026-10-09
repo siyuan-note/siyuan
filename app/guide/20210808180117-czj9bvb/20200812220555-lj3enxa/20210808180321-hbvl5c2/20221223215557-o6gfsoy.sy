@@ -7,7 +7,7 @@
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261009153000"
 	},
 	"Children": [
 		{
@@ -60,7 +60,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194151-l3dy84x",
-				"updated": "20260803163440"
+				"updated": "20261009153000"
 			},
 			"Children": [
 				{
@@ -89,7 +89,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614194151-47wr1nh",
-				"updated": "20260614194227"
+				"updated": "20261009153000"
 			},
 			"Children": [
 				{
@@ -166,7 +166,7 @@
 					},
 					"Properties": {
 						"id": "20260614194151-bw05va6",
-						"updated": "20260614194151"
+						"updated": "20261009153000"
 					},
 					"Children": [
 						{
@@ -179,7 +179,63 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果将列表或者列表项设置为闪卡，则非子列表会被视问题，子列表会被视作答案"
+									"Data": "如果将列表或者列表项设置为闪卡，则非子列表会被视为问题，子列表会被视作答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261009153000-hrs7o2y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261009153000-hrs7o2y",
+						"updated": "20261009153000"
+					},
+					"Children": [
+						{
+							"ID": "20261009153000-rzzq07r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261009153000-rzzq07r",
+								"updated": "20261009153000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果将引述块设置为闪卡，则该引述块的第一个子块会被视作问题，其余子块会被视作答案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261009153000-0g6dvb7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261009153000-0g6dvb7",
+						"updated": "20261009153000"
+					},
+					"Children": [
+						{
+							"ID": "20261009153000-d9i7qnu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261009153000-d9i7qnu",
+								"updated": "20261009153000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果将提示块设置为闪卡，则提示块的标题会被视作问题，内容会被视作答案"
 								}
 							]
 						}

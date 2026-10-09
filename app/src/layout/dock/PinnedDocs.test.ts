@@ -381,15 +381,15 @@ test("pin drop tips describe pinning and source moves, and self targets clear fe
     panel.list = {getBoundingClientRect: () => ({})};
     runtime.dragElement = {innerText: "source"};
     panel.previewDrop(10, 1);
-    assert.deepEqual(tips.at(-1), ["Document", "Pin", 10, 1]);
+    assert.deepEqual(tips.at(-1), ["Document", "Pin", 10, 1, "Target"]);
     source = true;
     row.dataset.pinRoot = "false";
     panel.previewDrop(10, 15, true);
-    assert.deepEqual(tips.at(-1), ["Document", "Into Target", 10, 15]);
+    assert.deepEqual(tips.at(-1), ["Document", "Into ${x}", 10, 15, "Target"]);
     panel.previewDrop(10, 1, true);
-    assert.deepEqual(tips.at(-1), ["Document", "Before Target", 10, 1]);
+    assert.deepEqual(tips.at(-1), ["Document", "Before ${x}", 10, 1, "Target"]);
     panel.previewDrop(10, 29, true);
-    assert.deepEqual(tips.at(-1), ["Document", "After Target", 10, 29]);
+    assert.deepEqual(tips.at(-1), ["Document", "After ${x}", 10, 29, "Target"]);
     for (source of [true, false]) {
         runtime.dragElement.innerText = "target";
         const count = highlights.length;

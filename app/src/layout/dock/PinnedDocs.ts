@@ -572,9 +572,8 @@ export class PinnedDocs {
         const position = this.dropTarget.position;
         const action = position.startsWith("pin") ? window.siyuan.languages.pinDoc :
             (position === "inside" ? window.siyuan.languages.dragTipMoveChild :
-                position === "before" ? window.siyuan.languages.dragTipMoveBefore : window.siyuan.languages.dragTipMoveAfter)
-                .replace("${x}", name);
-        showDragTip(window.siyuan.dragTitle || "", action, x, y);
+                position === "before" ? window.siyuan.languages.dragTipMoveBefore : window.siyuan.languages.dragTipMoveAfter);
+        showDragTip(window.siyuan.dragTitle || "", action, x, y, name);
         const scrollElement = source ? this.sourceTree : this.list;
         dragOverScroll({clientY: y} as MouseEvent, scrollElement.getBoundingClientRect(), scrollElement);
         return true;

@@ -38,6 +38,34 @@
   }
 }
 
+.drag-tip {
+  max-width: min(216px, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+
+  &__title,
+  &__target {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__action {
+    color: var(--b3-tooltips-second-color);
+    font-size: 12px;
+
+    &--target {
+      display: grid;
+      grid-template-columns: minmax(0, max-content) minmax(0, 1fr) minmax(0, max-content);
+    }
+  }
+
+  &__label {
+    color: var(--b3-tooltips-color);
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+}
+
 .b3-tooltips {
   position: relative;
   cursor: pointer;

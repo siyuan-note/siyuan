@@ -2,27 +2,27 @@
 // 通过 .drag-tip 类做全局单例，在编辑器和文档树两处 dragover 共用
 
 const dragTipState = {
-    rafId: 0, title: "", action: "", x: 0, y: 0,
+    rafId: 0, title: "", action: "", target: null as string | null, x: 0, y: 0,
     element: null as HTMLElement, titleElement: null as HTMLElement, actionElement: null as HTMLElement,
-    lastTitle: "", lastAction: "", width: 0, height: 0,
+    lastTitle: "", lastAction: "", lastTarget: null as string | null, width: 0, height: 0,
+    viewportWidth: 0, viewportHeight: 0,
     ghost: null as {width: number, height: number, offsetX: number, offsetY: number}
 };
 
 const getDragTipPosition = () => {
     const gap = 8;
     const pointerOffset = 16;
-    if (!dragTipState.ghost) {
-        return {
-            left: dragTipState.x,
-            top: dragTipState.y - dragTipState.height - pointerOffset
-        };
+    const ghost = dragTipState.ghost;
+    const anchorLeft = dragTipState.x - (ghost?.offsetX || 0);
+    const anchorTop = dragTipState.y - (ghost?.offsetY || 0);
+    let top = anchorTop - dragTipState.height - (ghost ? gap : pointerOffset);
+    // 上方空间不足时放到拖拽预览下方，并将提示框限制在视口内。
+    if (top < gap) {
+        top = anchorTop + (ghost?.height || 0) + (ghost ? gap : pointerOffset);
     }
-
-    const ghostLeft = dragTipState.x - dragTipState.ghost.offsetX;
-    const ghostTop = dragTipState.y - dragTipState.ghost.offsetY;
     return {
-        left: ghostLeft,
-        top: ghostTop - dragTipState.height - gap
+        left: Math.max(gap, Math.min(anchorLeft, window.innerWidth - dragTipState.width - gap)),
+        top: Math.max(gap, Math.min(top, window.innerHeight - dragTipState.height - gap))
     };
 };
 
@@ -46,10 +46,8 @@ const renderDragTip = () => {
             dragTipState.element.style.left = "0";
             dragTipState.titleElement = document.createElement("div");
             dragTipState.titleElement.className = "drag-tip__title";
-            dragTipState.titleElement.style.cssText = "max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--b3-tooltips-color);";
             dragTipState.actionElement = document.createElement("div");
             dragTipState.actionElement.className = "drag-tip__action";
-            dragTipState.actionElement.style.cssText = "max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--b3-tooltips-second-color);font-size:12px;";
             dragTipState.element.append(dragTipState.titleElement, dragTipState.actionElement);
             document.body.append(dragTipState.element);
         } else {
@@ -58,6 +56,7 @@ const renderDragTip = () => {
         }
         dragTipState.lastTitle = "";
         dragTipState.lastAction = "";
+        dragTipState.lastTarget = null;
         updateSize = true;
     }
     // 名称/文案变化才写 textContent，减少 DOM 写入
@@ -68,9 +67,32 @@ const renderDragTip = () => {
         dragTipState.titleElement.style.display = dragTipState.title ? "" : "none";
         updateSize = true;
     }
-    if (dragTipState.lastAction !== dragTipState.action) {
-        dragTipState.actionElement.textContent = dragTipState.action;
+    if (dragTipState.lastAction !== dragTipState.action || dragTipState.lastTarget !== dragTipState.target) {
+        const placeholder = dragTipState.action.indexOf("${x}");
+        const hasTarget = dragTipState.target !== null && placeholder !== -1;
+        dragTipState.actionElement.classList.toggle("drag-tip__action--target", hasTarget);
+        if (hasTarget) {
+            // 保留本地化模板的语序，仅缩略目标文字，完整显示操作和落点方向。
+            const prefix = document.createElement("span");
+            prefix.className = "drag-tip__label";
+            prefix.textContent = dragTipState.action.slice(0, placeholder);
+            const target = document.createElement("span");
+            target.className = "drag-tip__target";
+            target.textContent = dragTipState.target;
+            const suffix = document.createElement("span");
+            suffix.className = "drag-tip__label";
+            suffix.textContent = dragTipState.action.slice(placeholder + 4);
+            dragTipState.actionElement.replaceChildren(prefix, target, suffix);
+        } else {
+            dragTipState.actionElement.textContent = dragTipState.action;
+        }
         dragTipState.lastAction = dragTipState.action;
+        dragTipState.lastTarget = dragTipState.target;
+        updateSize = true;
+    }
+    if (dragTipState.viewportWidth !== window.innerWidth || dragTipState.viewportHeight !== window.innerHeight) {
+        dragTipState.viewportWidth = window.innerWidth;
+        dragTipState.viewportHeight = window.innerHeight;
         updateSize = true;
     }
     if (updateSize) {
@@ -96,13 +118,14 @@ export const clearDragTipGhost = () => {
     dragTipState.ghost = null;
 };
 
-export const showDragTip = (title: string, action: string, x: number, y: number) => {
+export const showDragTip = (title: string, action: string, x: number, y: number, target?: string) => {
     /// #if MOBILE
     // 移动端不显示拖拽提示
     return;
     /// #endif
     dragTipState.title = title;
     dragTipState.action = action;
+    dragTipState.target = target !== undefined && action.includes("${x}") ? target : null;
     dragTipState.x = x;
     dragTipState.y = y;
     // 合并到下一帧渲染，避免高频 dragover 下逐次写 DOM 造成卡顿
@@ -142,7 +165,10 @@ export const hideDragTip = () => {
     dragTipState.actionElement = null;
     dragTipState.lastTitle = "";
     dragTipState.lastAction = "";
+    dragTipState.lastTarget = null;
     dragTipState.width = 0;
     dragTipState.height = 0;
+    dragTipState.viewportWidth = 0;
+    dragTipState.viewportHeight = 0;
     hideCaretLine();
 };

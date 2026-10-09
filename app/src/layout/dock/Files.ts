@@ -738,11 +738,11 @@ export class Files extends Model {
                     const name = liElement.querySelector(".b3-list-item__text")?.textContent || "";
                     const title = window.siyuan.dragTitle || "";
                     if (liElement.classList.contains("dragover__top")) {
-                        showDragTip(title, window.siyuan.languages.dragTipMoveBefore.replace("${x}", name), event.clientX, event.clientY);
+                        showDragTip(title, window.siyuan.languages.dragTipMoveBefore, event.clientX, event.clientY, name);
                     } else if (liElement.classList.contains("dragover__bottom")) {
-                        showDragTip(title, window.siyuan.languages.dragTipMoveAfter.replace("${x}", name), event.clientX, event.clientY);
+                        showDragTip(title, window.siyuan.languages.dragTipMoveAfter, event.clientX, event.clientY, name);
                     } else if (liElement.classList.contains("dragover")) {
-                        showDragTip(title, window.siyuan.languages.dragTipMoveChild.replace("${x}", name), event.clientX, event.clientY);
+                        showDragTip(title, window.siyuan.languages.dragTipMoveChild, event.clientX, event.clientY, name);
                     } else {
                         hideDragTip();
                     }
@@ -754,13 +754,13 @@ export class Files extends Model {
                         const title = window.siyuan.dragTitle || "";
                         let action: string;
                         if (liElement.classList.contains("dragover__top")) {
-                            action = window.siyuan.languages.dragTip2DocBefore.replace("${x}", name);
+                            action = window.siyuan.languages.dragTip2DocBefore;
                         } else if (liElement.classList.contains("dragover__bottom")) {
-                            action = window.siyuan.languages.dragTip2DocAfter.replace("${x}", name);
+                            action = window.siyuan.languages.dragTip2DocAfter;
                         } else {
-                            action = window.siyuan.languages.dragTip2DocChild.replace("${x}", name);
+                            action = window.siyuan.languages.dragTip2DocChild;
                         }
-                        showDragTip(title, action, event.clientX, event.clientY);
+                        showDragTip(title, action, event.clientX, event.clientY, name);
                     }
                 }
                 event.preventDefault();

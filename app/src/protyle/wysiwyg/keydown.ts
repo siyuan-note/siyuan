@@ -1,4 +1,5 @@
 import type {BlockQueryRequestInput} from "../../types/api";
+import {handleReadonlyAttributeHotkey} from "../util/attributeHotkey";
 import {logKeyboardDiagnostic} from "../../util/keyboardDiagnostic";
 import {isProtyleListItemFragment} from "../runtimeCapabilities";
 import {toggleListMindmap} from "../render/listMindmap";
@@ -328,6 +329,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         // 只读正文和页签标题不执行正文编辑逻辑，保留默认行为并交给全局快捷键处理器。
+        if (handleReadonlyAttributeHotkey(protyle, event)) {
+            return true;
+        }
         if (protyle.disabled || event.target.closest(".tabs-header")) {
             return;
         }

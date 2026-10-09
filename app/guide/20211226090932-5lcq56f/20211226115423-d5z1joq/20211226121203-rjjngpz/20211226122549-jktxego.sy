@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261008221006"
+		"updated": "20261009181520"
 	},
 	"Children": [
 		{
@@ -4281,7 +4281,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20261008101123"
+				"updated": "20261009181520"
 			},
 			"Children": [
 				{
@@ -4301,7 +4301,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20261008101123"
+				"updated": "20261009181520"
 			},
 			"Children": [
 				{
@@ -5348,7 +5348,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選擇內容時為設定區塊命名"
+									"Data": "可編輯時將選取內容設為區塊命名；唯讀時開啟屬性面板供檢視，不修改區塊命名"
 								}
 							]
 						}

@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261008221006"
+		"updated": "20261009181520"
 	},
 	"Children": [
 		{
@@ -4287,7 +4287,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20261008101123"
+				"updated": "20261009181520"
 			},
 			"Children": [
 				{
@@ -4311,7 +4311,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20261008101123"
+				"updated": "20261009181520"
 			},
 			"Children": [
 				{
@@ -5335,7 +5335,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选择内容时为设置块命名"
+									"Data": "可编辑时将选中内容设置为块命名；只读时打开属性面板供查看，不修改块命名"
 								}
 							]
 						}

@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261008221006"
+		"updated": "20261009181520"
 	},
 	"Children": [
 		{
@@ -4293,7 +4293,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20261008101123"
+				"updated": "20261009181520"
 			},
 			"Children": [
 				{
@@ -4313,7 +4313,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20261008101123"
+				"updated": "20261009181520"
 			},
 			"Children": [
 				{
@@ -5379,7 +5379,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Set block name when selecting content"
+									"Data": "In editable mode, selected text is set as the block name; in read-only mode, opens the attribute panel for viewing without changing the block name"
 								}
 							]
 						}

@@ -57,6 +57,7 @@ test("readonly body and tab header preserve keyboard defaults and bubbling", asy
         bindVerticalNavigationReset: (): void => undefined,
         getAVTemplateInteractiveElement: () => false,
         hasClosestByAttribute: () => false,
+        handleReadonlyAttributeHotkey: () => false,
     });
     for (const [disabled, header] of [[true, false], [true, true], [false, true]]) {
         let listener: (event: any) => Promise<void>;

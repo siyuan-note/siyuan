@@ -470,7 +470,20 @@
     }
 
     const url = new URL(window.location)
-    toPath = url.searchParams.get("to") || "/"
+    // 仅允许跳转到同源地址，避免 javascript: 等伪协议在授权页执行
+    // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-fmj3-xc2f-6w4w
+    const safeRedirectTarget = (target) => {
+        try {
+            const resolved = new URL(target, window.location.origin);
+            if (resolved.origin !== window.location.origin) {
+                return "/";
+            }
+            return resolved.pathname + resolved.search + resolved.hash;
+        } catch (e) {
+            return "/";
+        }
+    };
+    toPath = safeRedirectTarget(url.searchParams.get("to") || "/");
 
     const exitSiYuan = () => {
         if (toPath.indexOf("/stage/build/app/window.html") > -1) {

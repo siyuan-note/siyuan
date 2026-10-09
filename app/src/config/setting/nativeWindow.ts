@@ -22,6 +22,7 @@ import type {TSettingTab} from "./tabs";
 export interface ISettingsCommand {
     tab?: TSettingTab;
     aiProvider?: "chatgpt";
+    missingMapServiceID?: string;
     readme?: {type: TBazaarType; from: "bazaar" | "downloaded"; resource: IBazaarItem};
 }
 

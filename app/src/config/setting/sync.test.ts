@@ -7,6 +7,25 @@ import {getAgentDefaultModelID, getUsableAgentModels} from "../../layout/dock/ag
 import {createNamespacePatchQueue} from "../util/namespacePatchQueue";
 import {mergeRecordByDottedPath} from "../util/dotPath";
 
+test("map notifications apply redacted services without replacing active drafts", async () => {
+    let notified = 0;
+    const config = {map: {services: [] as {id: string}[]}};
+    const next = {services: [{id: "other-device"}]};
+    const exports = {} as {refreshSettingConfig: (namespace: string) => Promise<void>};
+    runInNewContext(transpileModule(readFileSync("src/config/setting/sync.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText, {exports, window: {siyuan: {config}}, console, require: () => ({
+        notifyMapConfigChanged: () => { notified++; },
+        fetchSyncPost: async () => ({code: 0, data: {conf: {map: next}}}),
+        systemConfig: (value: unknown) => value, syncSettingTasks() {},
+        getSettingTabDefs: () => [{id: "map"}],
+        remountOpenSettingTab: () => assert.fail("map settings drafts must not be remounted"),
+    })});
+    await exports.refreshSettingConfig("map");
+    assert.equal(notified, 1);
+    assert.equal(config.map, next);
+});
+
 for (const mobile of [false, true]) {
     test(`namespace patch and its push read confirmed configuration once (mobile=${mobile})`, async () => {
         const {parse} = require("ifdef-loader/preprocessor");
@@ -32,7 +51,7 @@ for (const mobile of [false, true]) {
             require: () => ({fetchSyncPost, systemConfig: (value: unknown) => value,
                 objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
                 editorConfigApi: {apply: (value: typeof config.editor) => { config.editor = value; }},
-                syncSettingTasks() {}, getSettingTabDefs: () => [{id: "editor"}], remountOpenSettingTab: async () => {},
+                syncSettingTasks() {}, notifyMapConfigChanged() {}, getSettingTabDefs: () => [{id: "editor"}], remountOpenSettingTab: async () => {},
             })});
         const api = {} as {createConfigNamespaceApi: (options: {
             namespace: string; getConfig: () => typeof config.editor;
@@ -70,7 +89,7 @@ for (const mobile of [false, true]) {
                 systemConfig: (value: unknown) => value,
                 objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
                 editorConfigApi: {apply: (value: typeof config.editor) => { config.editor = value; }},
-                syncSettingTasks() {}, getSettingTabDefs: () => [{id: "editor"}], remountOpenSettingTab: async () => {},
+                syncSettingTasks() {}, notifyMapConfigChanged() {}, getSettingTabDefs: () => [{id: "editor"}], remountOpenSettingTab: async () => {},
             })});
             const saving = exports.refreshSettingConfigAfter("editor", async () => {
                 await new Promise<void>(resolve => { finishSave = resolve; });
@@ -103,7 +122,7 @@ test("settings notifications update runtime configuration and refresh the regist
         fetchSyncPost: async () => ({code: 0, data: {conf: {editor: {fontSize: 18}, keymap: {}, appearance: {}}}}),
         systemConfig: (value: unknown) => value, objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
         editorConfigApi: {apply: (value: {fontSize: number}) => { config.editor = value; }}, appearanceConfigApi: {},
-        syncSettingTasks() {}, remountOpenSettingTab: async (tab: string) => { remounted.push(tab); },
+        syncSettingTasks() {}, notifyMapConfigChanged() {}, remountOpenSettingTab: async (tab: string) => { remounted.push(tab); },
         getSettingTabDefs: () => [{id: "editor"}],
     };
     const exports = {} as {refreshSettingConfig: (namespace: string) => Promise<void>};
@@ -127,7 +146,7 @@ for (const mobile of [false, true]) {
             fetchSyncPost: async () => ({code: 0, data: {conf: config}}),
             systemConfig: (value: unknown) => value,
             objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
-            syncSettingTasks() {}, getSettingTabDefs: (): {id: string}[] => [],
+            syncSettingTasks() {}, notifyMapConfigChanged() {}, getSettingTabDefs: (): {id: string}[] => [],
             refreshMountedBazaar: () => { refreshed++; },
         })});
         await exports.refreshSettingConfig("editor");
@@ -158,7 +177,7 @@ for (const mobile of [false, true]) {
             objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
             editorConfigApi: {apply: () => assert.fail("OCR must not apply editor settings")},
             appearanceConfigApi: {apply: () => assert.fail("OCR must not apply appearance settings")},
-            syncSettingTasks() {}, getSettingTabDefs: () => [{id: "assets"}, {id: "ocr"}, {id: "appearance"}, {id: "editor"}],
+            syncSettingTasks() {}, notifyMapConfigChanged() {}, getSettingTabDefs: () => [{id: "assets"}, {id: "ocr"}, {id: "appearance"}, {id: "editor"}],
             notifyOCRChanged: () => { notifications++; },
             remountOpenSettingTab: async (tab: string) => { remounted.push(tab); },
         })});
@@ -222,7 +241,7 @@ for (const mobile of [false, true]) {
             fetchSyncPost: async () => ({code: 0, data: {conf: JSON.parse(JSON.stringify({...config, ai: next}))}}),
             systemConfig: (value: unknown) => value,
             objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
-            ...aiExports, syncSettingTasks() {}, refreshMountedBazaar() {}, remountOpenSettingTab: async () => {}, getSettingTabDefs: () => [{id: "ai"}],
+            ...aiExports, syncSettingTasks() {}, notifyMapConfigChanged() {}, refreshMountedBazaar() {}, remountOpenSettingTab: async () => {}, getSettingTabDefs: () => [{id: "ai"}],
         };
         const exports = {} as {refreshSettingConfig: (namespace?: string) => Promise<void>};
         runInNewContext(compile("src/config/setting/sync.ts"), {exports, require: () => dependencies, window: windowContext, console});
@@ -260,7 +279,7 @@ for (const mobile of [false, true]) {
             fetchSyncPost: async () => failed ? {code: -1} : {code: 0, data: {conf: JSON.parse(JSON.stringify(next))}},
             systemConfig: (value: unknown) => value,
             objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
-            syncSettingTasks() {}, refreshMountedBazaar() {}, processSync() {}, getSettingTabDefs: () => [{id: "app"}, {id: "access"}],
+            syncSettingTasks() {}, notifyMapConfigChanged() {}, refreshMountedBazaar() {}, processSync() {}, getSettingTabDefs: () => [{id: "app"}, {id: "access"}],
             remountOpenSettingTab: async (tab: string) => { remounted.push(tab); },
         })});
         await exports.refreshSettingConfig("system");
@@ -311,7 +330,7 @@ for (const mobile of [false, true]) {
             exports, window, console, require: () => ({
                 fetchSyncPost: async () => ({code: 0, data: {conf: {sync: {...next}}}}), systemConfig: (value: unknown) => value,
                 objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right),
-                syncSettingTasks() {}, processSync: () => { refreshes++; runtime.processSync(); },
+                syncSettingTasks() {}, notifyMapConfigChanged() {}, processSync: () => { refreshes++; runtime.processSync(); },
                 getSettingTabDefs: () => [{id: "sync"}], remountOpenSettingTab: async () => {},
             }),
         });

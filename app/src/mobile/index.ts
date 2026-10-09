@@ -206,6 +206,14 @@ class App {
             activeBlur();
         });
         fetchPost("/api/system/getConf", {}, async (confResponse) => {
+            try {
+                // 现代 Android 壳先完成可信主文档握手，再开放保持同步语义的原生接口。
+                await window.JSAndroid?.ready;
+            } catch (_error) {
+                console.error("Android native bridge initialization failed");
+                finishMobileStartup();
+                return;
+            }
             await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = systemConfig(confResponse.data.conf);

@@ -71,6 +71,8 @@ type ViewTableColumn struct {
 type Table struct {
 	*BaseInstance
 
+	Map                *MapSettings      `json:"map,omitempty"`
+	MapMarkerScope     string            `json:"mapMarkerScope,omitempty"` // 地图标记与当前返回页保持一致
 	Calendar           *CalendarSettings `json:"calendar,omitempty"`
 	CalendarRange      *CalendarRange    `json:"calendarRange,omitempty"`
 	CalendarTargetDate *int64            `json:"calendarTargetDate,omitempty"`

@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261009040533"
+		"updated": "20261009075700"
 	},
 	"Children": [
 		{
@@ -3939,6 +3939,123 @@
 				{
 					"Type": "NodeText",
 					"Data": "加密資料庫只能操作同一加密筆記本內的資料庫。請先解鎖相關筆記本；目標資料庫或欄位無法使用時，需要修正或暫停規則。複製資料庫後規則保留但處於暫停狀態，請檢查目標與關聯欄位後再啟用"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-7n1yzkx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261009050034-7n1yzkx",
+				"updated": "20261009075700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "地圖檢視"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-ctek3na",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-ctek3na",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "地圖"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中新增地圖服務，再建立地圖檢視並選擇服務和位置欄位。服務儲存在目前裝置，每個檢視僅儲存服務 ID；在其他裝置使用時，需明確新增相同 ID 恢復引用，或選擇另一項服務"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-ezfsjzw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-ezfsjzw",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "高德地圖需要 Web JS API Key 和安全金鑰，騰訊地圖需要 Key，百度地圖需要開通 JS API 權限的瀏覽器 AK，OpenFreeMap 不需要 Key。配置欄位已填寫不代表服務存取、商業資格、配額、網域限制或地區可用性已經驗證，使用前請向提供商確認"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-0pe5w4a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-0pe5w4a",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "地圖使用儲存的原始座標及其宣告的座標系：OpenFreeMap 使用 WGS84，高德和騰訊使用 GCJ-02，百度使用 BD-09 或其支援的 GCJ-02 標記選項。未知或不相容的座標系會計數並跳過，不猜測、不轉換，也不覆寫已儲存的值。OpenFreeMap 和高德地圖使用麥卡托投影，緯度超出 ±85.0511287798066° 的合法位置會保留原值並單獨計入投影不支援數量，不會靜默裁切"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-3r0lsdq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-3r0lsdq",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "篩選和排序同樣作用於地圖。標記只代表已載入的記錄，不代表整個資料庫；介面會說明已載入範圍及跳過的位置數量。標記過多時請縮小分頁或使用篩選。點擊標記開啟對應記錄，點擊地圖不會儲存座標"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-fadq3xu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-fadq3xu",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "地圖服務需要外部網路連線。隔離的地圖頁面只取得所選服務的執行階段憑據、座標和不含正文的記錄 ID，不接收記錄標題或完整內容。瀏覽器 SDK 憑據對獲授權的瀏覽器和提供商可見。配置匯出不包含地圖服務和憑據，發佈頁面和文件匯出保留記錄展示，不載入即時地圖"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-8jfc6yh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-8jfc6yh",
+				"updated": "20261009075700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "宿主配色跟隨應用程式主題；高德同時切換底圖主題，百度切換控制項主題，OpenFreeMap 和騰訊目前保留預設底圖樣式。地圖透過隔離的 Web 頁面執行；桌面客戶端使用獨立的安全宿主，行動客戶端需搭配支援可信主文件橋接與導覽限制的外殼。舊版外殼或無法建立隔離邊界時保留記錄清單。桌面地圖在捲動或選單、對話方塊遮擋時可能短暫隱藏。離線、未配置、WebGL 不相容或服務載入失敗時仍可存取記錄。本功能不提供地址搜尋、地理編碼、路線規劃或點擊地圖寫入位置。啟用鑑權繞過模式時也無法使用地圖，記錄清單仍可存取"
 				}
 			]
 		},

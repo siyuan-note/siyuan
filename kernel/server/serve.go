@@ -168,6 +168,7 @@ func Serve(fastMode bool, cookieKey string) {
 		SameSite: http.SameSiteLaxMode, // 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
 	})
 	ginServer.Use(sessions.Sessions("siyuan", sessionStore))
+	ginServer.Use(mapHostMiddleware())
 
 	serveDebug(ginServer)
 	serveAssets(ginServer)

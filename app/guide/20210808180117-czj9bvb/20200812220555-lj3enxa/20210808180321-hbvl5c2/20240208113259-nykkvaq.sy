@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261009040533"
+		"updated": "20261009075700"
 	},
 	"Children": [
 		{
@@ -3939,6 +3939,123 @@
 				{
 					"Type": "NodeText",
 					"Data": "加密数据库只能操作同一加密笔记本内的数据库。请先解锁相关笔记本；目标数据库或字段不可用时，需要修正规则或暂停规则。复制数据库后规则保留但处于暂停状态，请检查目标和关联字段后再启用"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-dfwj4cb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261009050034-dfwj4cb",
+				"updated": "20261009075700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "地图视图"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-dz1fw4j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-dz1fw4j",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "地图"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中添加地图服务，再创建地图视图并选择服务和位置字段。服务保存在当前设备，每个视图仅保存服务 ID；在其他设备上使用时，需明确添加相同 ID 恢复引用，或选择另一项服务"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-f3814by",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-f3814by",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "高德地图需要 Web JS API Key 和安全密钥，腾讯地图需要 Key，百度地图需要开通 JS API 权限的浏览器 AK，OpenFreeMap 不需要 Key。配置字段已填写不代表服务访问、商业资格、配额、域名限制或地区可用性已经验证，使用前请向提供商确认"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-lipfkdw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-lipfkdw",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "地图使用保存的原始坐标及其声明的坐标系：OpenFreeMap 使用 WGS84，高德和腾讯使用 GCJ-02，百度使用 BD-09 或其支持的 GCJ-02 标记选项。未知或不兼容的坐标系会计数并跳过，不猜测、不转换，也不覆盖已保存的值。OpenFreeMap 和高德地图使用墨卡托投影，纬度超出 ±85.0511287798066° 的合法位置会保留原值并单独计入投影不支持数量，不会静默裁切"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-ughi4hh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-ughi4hh",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "筛选和排序同样作用于地图。标记只代表已加载的记录，不代表整个数据库；界面会说明已加载范围及跳过的位置数量。标记过多时请缩小分页或使用筛选。点击标记打开对应记录，点击地图不会保存坐标"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-rrjk1eg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-rrjk1eg",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "地图服务需要外部网络连接。隔离的地图页面只获得选中服务的运行时凭据、坐标和不含正文的记录 ID，不接收记录标题或完整内容。浏览器 SDK 凭据对获授权的浏览器和提供商可见。配置导出不包含地图服务和凭据，发布页面和文档导出保留记录展示，不加载实时地图"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-wy69fcu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-wy69fcu",
+				"updated": "20261009075700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "宿主配色跟随应用主题；高德同时切换底图主题，百度切换控件主题，OpenFreeMap 和腾讯目前保留默认底图样式。地图通过隔离的 Web 页面运行；桌面客户端使用独立的安全宿主，移动客户端需配套支持可信主文档桥接和导航限制的外壳。旧版外壳或无法建立隔离边界时保留记录列表。桌面地图在滚动或菜单、对话框遮挡时可能短暂隐藏。离线、未配置、WebGL 不兼容或服务加载失败时仍可访问记录。本功能不提供地址搜索、地理编码、路线规划或点击地图写入位置。启用鉴权绕过模式时也无法使用地图，记录列表仍可访问"
 				}
 			]
 		},

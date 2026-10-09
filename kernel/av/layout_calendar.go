@@ -245,6 +245,9 @@ func FilterCalendarRows(calendar *Calendar, dateRange *CalendarRange, targetItem
 // TableLayouts 枚举所有暂存的行列布局，确保字段删除、颜色和模板更新覆盖未激活布局。
 func (view *View) TableLayouts() []*LayoutTable {
 	ret := []*LayoutTable{view.Table, view.List}
+	if nil != view.Map {
+		ret = append(ret, view.Map.LayoutTable)
+	}
 	if nil != view.Calendar {
 		ret = append(ret, view.Calendar.LayoutTable)
 	}

@@ -20,6 +20,9 @@ func systemConfPayload(value *model.AppConf) (result *apicontract.SystemAppConf,
 	if err == nil && result != nil && value.AI != nil && result.AI != nil {
 		result.AI.Decision = settingDecisionPayload(value.AI.Decision)
 	}
+	if err == nil && result != nil && value.Map != nil {
+		result.Map = mapConfPayload(value.Map)
+	}
 	return
 }
 

@@ -348,8 +348,8 @@ func databaseValidateViewGroup(attrView *av.AttributeView, view *av.View, group 
 		}
 		return nil
 	}
-	if view.LayoutType == av.LayoutTypeCalendar {
-		return errors.New("calendar views do not support grouping")
+	if view.LayoutType == av.LayoutTypeCalendar || view.LayoutType == av.LayoutTypeMap {
+		return fmt.Errorf("%s views do not support grouping", view.LayoutType)
 	}
 	key, err := attrView.GetKey(group.Field)
 	if nil != err || nil == key || key.Type == av.KeyTypeLineNumber || key.Type == av.KeyTypeRollup ||

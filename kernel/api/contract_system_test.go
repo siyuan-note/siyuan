@@ -60,6 +60,18 @@ func TestAPIContractSystemCompleteConfiguration(t *testing.T) {
 		if err := decoder.Decode(&sourceJSON); err != nil {
 			t.Fatal(err)
 		}
+		// 地图配置只返回元数据和凭据存在状态。
+		if source.Map != nil {
+			masked, marshalErr := json.Marshal(mapConfPayload(source.Map))
+			if marshalErr != nil {
+				t.Fatal(marshalErr)
+			}
+			var mapJSON any
+			if err := json.Unmarshal(masked, &mapJSON); err != nil {
+				t.Fatal(err)
+			}
+			sourceJSON.(map[string]any)["map"] = mapJSON
+		}
 		decoder = json.NewDecoder(bytes.NewReader(after))
 		decoder.UseNumber()
 		if err := decoder.Decode(&payloadJSON); err != nil {

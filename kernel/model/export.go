@@ -4983,8 +4983,8 @@ func exportRefTreesWithConfig(tree *parse.Tree, defBlockIDs *[]string, retTrees 
 
 func getAttrViewTable(attrView *av.AttributeView, view *av.View, query string) (ret *av.Table) {
 	switch view.LayoutType {
-	case av.LayoutTypeList:
-		// 列表复用行列导出，读取独立列表布局中的字段顺序和显隐设置。
+	case av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeMap:
+		// 复用行列导出，读取各布局的字段顺序和显隐设置，不加载地图服务。
 	case av.LayoutTypeGallery:
 		view.Table = av.NewLayoutTable()
 		for _, field := range view.Gallery.CardFields {

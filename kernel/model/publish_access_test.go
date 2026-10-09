@@ -1087,6 +1087,11 @@ func TestCheckAttributeViewBlockTreesAccessableByPublishAccess(t *testing.T) {
 }
 
 func TestFilterAttributeViewRelatedValuesByPublishAccess(t *testing.T) {
+	t.Run("table", func(t *testing.T) { testFilterAttributeViewRelatedValuesByPublishAccess(t, false) })
+	t.Run("map", func(t *testing.T) { testFilterAttributeViewRelatedValuesByPublishAccess(t, true) })
+}
+
+func testFilterAttributeViewRelatedValuesByPublishAccess(t *testing.T, mapped bool) {
 	const (
 		sourceAvID       = "20260726000100-source1"
 		targetAvID       = "20260726000101-target1"
@@ -1191,7 +1196,11 @@ func TestFilterAttributeViewRelatedValuesByPublishAccess(t *testing.T) {
 		},
 	}
 
-	filter.filterViewable(sourceAttrView, table)
+	var instance av.Viewable = table
+	if mapped {
+		instance = &av.Map{Table: table}
+	}
+	filter.filterViewable(sourceAttrView, instance)
 
 	filteredRelation := table.Rows[0].Cells[0].Value
 	if filteredRelation == relationValue {

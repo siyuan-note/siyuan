@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-// AVViewInstance 表示表格、列表、画廊或看板及其递归分组实例，列表复用表格的行列结构。
+// AVViewInstance 表示各布局及其递归分组实例，列表、日历和地图复用表格的行列结构。
 type AVViewInstance struct {
 	table   *AVTable
 	gallery *AVGallery
@@ -42,7 +42,7 @@ func avPayloadSchema(b *schemaBuilder, t reflect.Type, input bool) (*Schema, err
 	case reflect.TypeFor[AVTable](), reflect.TypeFor[AVTableColumn](), reflect.TypeFor[AVTableCell](),
 		reflect.TypeFor[AVGallery](), reflect.TypeFor[AVGalleryField](), reflect.TypeFor[AVGalleryFieldValue](),
 		reflect.TypeFor[AVKanban](), reflect.TypeFor[AVKanbanField](), reflect.TypeFor[AVKanbanFieldValue](),
-		reflect.TypeFor[AVLayoutCalendar](), reflect.TypeFor[AVLayoutTable](), reflect.TypeFor[AVViewTableColumn](), reflect.TypeFor[AVLayoutGallery](),
+		reflect.TypeFor[AVLayoutMap](), reflect.TypeFor[AVLayoutCalendar](), reflect.TypeFor[AVLayoutTable](), reflect.TypeFor[AVViewTableColumn](), reflect.TypeFor[AVLayoutGallery](),
 		reflect.TypeFor[AVViewGalleryCardField](), reflect.TypeFor[AVLayoutKanban](), reflect.TypeFor[AVViewKanbanField]():
 		return avEmbeddedPayloadSchema(b, t, input)
 	}

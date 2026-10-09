@@ -178,7 +178,7 @@ func RenderGroupViewWithSourceContext(attrView *av.AttributeView, view, groupVie
 	source *GroupViewRenderSource, ignoreRows bool, context *AttributeViewRenderContext) (ret av.Viewable) {
 	var err error
 	switch groupView.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeMap:
 		// 这里需要使用深拷贝，因为字段上可能会带有计算（FieldCalc），每个分组视图的计算结果都需要分别存储在不同的字段实例上
 		err = copier.CopyWithOption(&groupView.GetTableLayout().Columns, &view.GetTableLayout().Columns, copier.Option{DeepCopy: true})
 		groupView.GetTableLayout().ShowIcon = view.GetTableLayout().ShowIcon
@@ -218,7 +218,7 @@ func RenderGroupViewWithSourceContext(attrView *av.AttributeView, view, groupVie
 	if nil != err {
 		logging.LogErrorf("copy view fields [%s] to group [%s] failed: %s", view.ID, groupView.ID, err)
 		switch groupView.LayoutType {
-		case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+		case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeMap:
 			groupView.GetTableLayout().Columns = view.GetTableLayout().Columns
 		case av.LayoutTypeGallery:
 			groupView.Gallery.CardFields = view.Gallery.CardFields
@@ -289,8 +289,8 @@ func renderViewWithContext(attrView *av.AttributeView, view *av.View, query stri
 	renderedAttrViews[attrView.ID] = attrView
 	ret = renderView(attrView, view, query, &depth, renderedAttrViews, ignoreRows, deferTemplateValues, renderContext)
 
-	// 元数据、延迟模板和日历区间渲染不写入缓存，避免后续全集渲染读取到不完整条目。
-	if !ignoreRows && !deferTemplateValues && view.LayoutType != av.LayoutTypeCalendar {
+	// 元数据、延迟模板、日历和地图渲染不写入缓存，避免后续渲染读取已裁剪的条目。
+	if !ignoreRows && !deferTemplateValues && view.LayoutType != av.LayoutTypeCalendar && view.LayoutType != av.LayoutTypeMap {
 		attrView.RenderedViewables[ret.GetID()] = ret
 	}
 	renderedAttrViews[attrView.ID] = attrView
@@ -309,6 +309,13 @@ func renderView(attrView *av.AttributeView, view *av.View, query string, depth *
 	case av.LayoutTypeTable:
 		ret = renderAttributeViewTable(attrView, view, query, depth, cachedAttrViews, ignoreRows, deferTemplateValues,
 			renderContext)
+	case av.LayoutTypeMap:
+		table := renderAttributeViewTable(attrView, view, query, depth, cachedAttrViews, ignoreRows, deferTemplateValues, renderContext)
+		settings := view.Map.Settings
+		table.Map = &settings
+		table.MapMarkerScope = "page"
+		table.Group = nil
+		ret = &av.Map{Table: table}
 	case av.LayoutTypeCalendar:
 		table := renderAttributeViewTable(attrView, view, query, depth, cachedAttrViews, ignoreRows, deferTemplateValues, renderContext)
 		settings := view.Calendar.Settings

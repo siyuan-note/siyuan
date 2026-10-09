@@ -318,6 +318,7 @@ type View struct {
 	PageSize          int                     `json:"pageSize"`          // 每页条目数
 	LayoutType        LayoutType              `json:"type"`              // 当前布局类型
 	Table             *LayoutTable            `json:"table,omitempty"`   // 表格布局
+	Map               *LayoutMap              `json:"map,omitempty"`     // 地图布局
 	Calendar          *LayoutCalendar         `json:"calendar,omitempty"`
 	List              *LayoutList             `json:"list,omitempty"`    // 列表布局
 	Gallery           *LayoutGallery          `json:"gallery,omitempty"` // 卡片布局
@@ -348,7 +349,7 @@ type ViewData struct {
 }
 
 func (view *View) IsGroupView() bool {
-	return LayoutTypeCalendar != view.LayoutType && nil != view.Group && "" != view.Group.Field
+	return LayoutTypeCalendar != view.LayoutType && LayoutTypeMap != view.LayoutType && nil != view.Group && "" != view.Group.Field
 }
 
 // GetGroupValue 获取分组视图的分组值。
@@ -425,6 +426,7 @@ type LayoutType string
 const (
 	LayoutTypeTable    LayoutType = "table" // 属性视图类型 - 表格
 	LayoutTypeCalendar LayoutType = "calendar"
+	LayoutTypeMap      LayoutType = "map"
 	LayoutTypeList     LayoutType = "list"    // 属性视图类型 - 列表
 	LayoutTypeGallery  LayoutType = "gallery" // 属性视图类型 - 卡片
 	LayoutTypeKanban   LayoutType = "kanban"  // 属性视图类型 - 看板
@@ -1368,6 +1370,11 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 				column.ID = keyIDMap[column.ID]
 			}
 		}
+		if nil != view.Map {
+			if id := keyIDMap[view.Map.Settings.LocationKeyID]; id != "" {
+				view.Map.Settings.LocationKeyID = id
+			}
+		}
 		if nil != view.Calendar {
 			if id := keyIDMap[view.Calendar.Settings.DateKeyID]; id != "" {
 				view.Calendar.Settings.DateKeyID = id
@@ -1431,6 +1438,7 @@ var (
 	ErrInvalidColumnAlign     = errors.New("invalid column align")
 	ErrSpecTooNew             = errors.New("attribute view spec is too new")
 	ErrRichTextSpecMismatch   = errors.New("attribute view rich text requires storage spec 9")
+	ErrMapSpecMismatch        = errors.New("attribute view map requires storage spec 12")
 	ErrLocationSpecMismatch   = errors.New("attribute view location requires storage spec 11")
 	ErrFilterTooDeep          = errors.New("filter nesting depth exceeds the maximum allowed")
 )

@@ -47,6 +47,9 @@ func TestWriteRenderedDatabaseView(t *testing.T) {
 	if count := writeRenderedView(&output, attrView, table, false); count != 1 {
 		t.Fatalf("unexpected rendered item count: %d", count)
 	}
+	if databaseViewBase(&av.Map{Table: table}) != table.BaseInstance {
+		t.Fatal("map record metadata is missing")
+	}
 	result := output.String()
 	if !strings.Contains(result, "ITEM_ID") || !strings.Contains(result, stateKey.Name) ||
 		!strings.Contains(result, "20260806000000-item001") || !strings.Contains(result, "Todo") {

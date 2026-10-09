@@ -26,6 +26,13 @@ func cloneAttributeViewLayouts(target, source *av.View) (err error) {
 		}
 		target.List.ID = ast.NewNodeID()
 	}
+	if nil != source.Map {
+		target.Map = &av.LayoutMap{}
+		if err = copier.CopyWithOption(target.Map, source.Map, copier.Option{DeepCopy: true}); nil != err {
+			return
+		}
+		target.Map.ID = ast.NewNodeID()
+	}
 	if nil != source.Calendar {
 		target.Calendar = &av.LayoutCalendar{}
 		if err = copier.CopyWithOption(target.Calendar, source.Calendar, copier.Option{DeepCopy: true}); nil != err {
@@ -53,7 +60,7 @@ func cloneAttributeViewLayouts(target, source *av.View) (err error) {
 // attributeViewFieldIDs 按当前布局的字段顺序返回字段 ID。
 func attributeViewFieldIDs(view *av.View) (ret []string) {
 	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeMap:
 		if layout := view.GetTableLayout(); nil != layout {
 			for _, column := range layout.Columns {
 				ret = append(ret, column.ID)

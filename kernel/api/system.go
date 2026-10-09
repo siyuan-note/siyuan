@@ -452,14 +452,8 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 		return
 	}
 
-	data, err := gulu.JSON.MarshalJSON(model.Conf)
+	clonedConf, err := model.GetMaskedConf()
 	if err != nil {
-		logging.LogErrorf("export conf failed: %s", err)
-		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
-		return
-	}
-	clonedConf := &model.AppConf{}
-	if err = gulu.JSON.UnmarshalJSON(data, clonedConf); err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
 		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
 		return
@@ -518,6 +512,8 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 	clonedConf.Api = nil
 	clonedConf.Repo = nil
 	clonedConf.Secrets = nil
+	// 地图服务是本机配置；导入设置时保留本机服务列表，不随配置包迁移。
+	clonedConf.Map = nil
 	clonedConf.NotebookCrypto = nil
 	clonedConf.Onboarding = nil
 	clonedConf.Publish = nil
@@ -551,7 +547,7 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 		clonedConf.AI.MCP = nil
 	}
 
-	data, err = gulu.JSON.MarshalIndentJSON(clonedConf, "", "  ")
+	data, err := gulu.JSON.MarshalIndentJSON(clonedConf, "", "  ")
 	if err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
 		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())

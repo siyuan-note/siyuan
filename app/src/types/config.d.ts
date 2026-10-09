@@ -34,6 +34,8 @@ declare namespace Config {
          * reasoningEffort 独立控制手动和自动 AI OCR，空字符串沿用模型默认。
          */
         ocr: import("./api").SettingOCR;
+        /** 当前设备的地图服务摘要，不包含密钥；视图仅保存服务 ID。 */
+        map: import("./api").MapConfig;
         api: IAPI;
         appearance: IAppearance;
         bazaar: IBazaar;

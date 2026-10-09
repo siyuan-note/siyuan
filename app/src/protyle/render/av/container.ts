@@ -1,5 +1,8 @@
+import {destroyMap} from "./map/state";
+
 // 重建数据库容器时保留标签栏位置，仅在首次渲染或切换视图时滚动到目标标签。
 export const replaceAVContainer = (blockElement: HTMLElement, html: string) => {
+    destroyMap(blockElement);
     const selector = ":scope > .av__container > .av__header > .av__views > .layout-tab-bar";
     const previousTabBar = blockElement.querySelector<HTMLElement>(selector);
     const scrollLeft = previousTabBar?.scrollLeft || 0;

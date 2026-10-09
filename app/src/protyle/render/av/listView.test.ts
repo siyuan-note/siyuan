@@ -46,6 +46,15 @@ const createView = () => ({
 }) as IAVTable;
 
 describe("database list view", () => {
+    it("map record lists use list rendering and the same field selection plumbing", () => {
+        const data = createView();
+        const options = {data, row: data.rows[0], rowIndex: 0, pinIndex: 0};
+        assert.equal(getRowHTML({...options, type: "map"}), getRowHTML({...options, type: "list"}));
+        assert.equal(viewType.isTableLikeView("map"), true);
+        const selected = resolveAVSelectedCell({view: data, viewType: "map"} as IAV,
+            {groupID: "", rowID: "row", colID: "title"});
+        assert.equal(selected.cell.id, "title-value");
+    });
     it("renders the primary field without column widths or freezing and reveals selected properties", () => {
         const data = createView();
         const options = {data, row: data.rows[0], rowIndex: 0, pinIndex: 0, type: "list" as TAVView};

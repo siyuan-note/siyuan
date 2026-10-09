@@ -21,6 +21,8 @@ const {
     net,
     app,
     BrowserWindow,
+    WebContentsView,
+    MessageChannelMain,
     Notification,
     shell,
     session,
@@ -80,6 +82,7 @@ const {WindowWorkspaceRegistry, flushWindowWorkspaces} = require("./windowWorksp
 const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = require("./windowGeometry");
 const {createSettingsWindows} = require("./settingsWindows");
 const {createSettingsTaskBridge} = require("./settingsTasks");
+const {createMapHostManager} = require("./mapHostManager");
 const windowWorkspaces = new WindowWorkspaceRegistry();
 const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
 const {
@@ -753,7 +756,6 @@ if (isDevEnv && process.defaultApp && process.argv.length >= 2) {
 
 app.commandLine.appendSwitch("auto-detect", "false");
 if (!remoteKernelTarget) {
-    app.commandLine.appendSwitch("disable-web-security");
     app.commandLine.appendSwitch("no-proxy-server");
 }
 app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
@@ -2924,6 +2926,8 @@ const initRemoteKernel = async (target) => {
 };
 
 app.whenReady().then(() => {
+    createMapHostManager({app, ipcMain, session, BrowserWindow, WebContentsView, MessageChannelMain, appDir,
+        getTarget: id => getWindowKernelTarget(id), isInitialized: id => initializedWindowIds.has(id)});
     const startupStartedAt = Date.now();
     writeLog("app ready, preparing startup window");
     const appCrashInfo = readAppCrashInfo();

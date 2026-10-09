@@ -1,6 +1,10 @@
 package apicontract
 
 type AVTable struct {
+	Map *AVMapSettings `json:"map,omitempty" api:"optional"`
+	// 标记仅覆盖本次返回的行页；rowCount 为筛选后总数，不表示标记数量。
+	// 发布响应先对完整结果过滤访问权限，再计算可访问总数和分页，不返回过滤前的聚合结果。
+	MapMarkerScope string `json:"mapMarkerScope,omitempty" api:"optional,enum=page"`
 	// 仅日历布局返回字段绑定及一周起始日；创建、更新系统时间作为只读日期源。
 	Calendar *AVCalendarSettings `json:"calendar,omitempty" api:"optional"`
 	// 回显本次请求的日期范围，省略范围的请求不返回此字段。
@@ -442,7 +446,7 @@ type AVViewData struct {
 	Name             string `json:"name" api:"optional,nullable"`
 	Desc             string `json:"desc" api:"optional,nullable"`
 	HideAttrViewName bool   `json:"hideAttrViewName" api:"optional,nullable"`
-	Type             string `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban|calendar"`
+	Type             string `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban|calendar|map"`
 	PageSize         int    `json:"pageSize" api:"optional,nullable"`
 }
 
@@ -512,8 +516,9 @@ type AVView struct {
 	Filters           []*AVViewFilter           `json:"filters,omitempty" api:"optional,nullable"`
 	Sorts             []*AVViewSort             `json:"sorts,omitempty" api:"optional,nullable"`
 	PageSize          int                       `json:"pageSize" api:"optional,nullable"`
-	LayoutType        string                    `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban|calendar"`
+	LayoutType        string                    `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban|calendar|map"`
 	Table             *AVLayoutTable            `json:"table,omitempty" api:"optional,nullable"`
+	Map               *AVLayoutMap              `json:"map,omitempty" api:"optional,nullable"`
 	Calendar          *AVLayoutCalendar         `json:"calendar,omitempty" api:"optional,nullable"`
 	List              *AVLayoutTable            `json:"list,omitempty" api:"optional,nullable"`
 	Gallery           *AVLayoutGallery          `json:"gallery,omitempty" api:"optional,nullable"`
@@ -609,7 +614,7 @@ type AVAttributeViewFieldView struct {
 	ID     string `json:"id" api:"optional,nullable"`
 	Icon   string `json:"icon" api:"optional,nullable"`
 	Name   string `json:"name" api:"optional,nullable"`
-	Type   string `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban|calendar"`
+	Type   string `json:"type" api:"optional,nullable,enum=table|list|gallery|kanban|calendar|map"`
 	Hidden bool   `json:"hidden" api:"optional,nullable"`
 }
 
@@ -618,7 +623,7 @@ type AVAvSearchResult struct {
 	AvName     string              `json:"avName" api:"optional,nullable"`
 	ViewName   string              `json:"viewName" api:"optional,nullable"`
 	ViewID     string              `json:"viewID" api:"optional,nullable"`
-	ViewLayout string              `json:"viewLayout" api:"optional,nullable,enum=|table|list|gallery|kanban|calendar"`
+	ViewLayout string              `json:"viewLayout" api:"optional,nullable,enum=|table|list|gallery|kanban|calendar|map"`
 	BlockID    string              `json:"blockID" api:"optional,nullable"`
 	HPath      string              `json:"hPath" api:"optional,nullable"`
 	Matched    bool                `json:"matched,omitempty" api:"optional,nullable"`

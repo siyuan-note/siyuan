@@ -168,7 +168,7 @@ const insertAVPastePlaceholder = (bodyElement: HTMLElement, view: IAVTable, row:
         row,
         rowIndex,
         pinIndex: getAVPastePinIndex(bodyElement),
-        type: bodyElement.closest<HTMLElement>(".av")?.dataset.avType === "list" ? "list" : "table",
+        type: ["list", "map"].includes(bodyElement.closest<HTMLElement>(".av")?.dataset.avType) ? "list" : "table",
     }));
     const rowElement = bottomElement.previousElementSibling as HTMLElement;
     rowElement.classList.add(PLACEHOLDER_ROW_CLASS);
@@ -213,7 +213,7 @@ const syncAVPasteRowCells = (options: {
         row: options.row,
         rowIndex: options.rowIndex,
         pinIndex: getAVPastePinIndex(options.bodyElement),
-        type: options.bodyElement.closest<HTMLElement>(".av")?.dataset.avType === "list" ? "list" : "table",
+        type: ["list", "map"].includes(options.bodyElement.closest<HTMLElement>(".av")?.dataset.avType) ? "list" : "table",
     });
     options.columnIDs.forEach(columnID => {
         const nextCell = template.content.querySelector(`.av__cell[data-col-id="${columnID}"]`) as HTMLElement;

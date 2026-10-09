@@ -1,5 +1,6 @@
 import {isAVSelectType} from "./capabilities";
 import {bindCalendarSettings, getCalendarSettingsHTML} from "./calendar/settings";
+import {bindMapSettings, getMapSettingsHTML} from "./map/settings";
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
@@ -146,6 +147,11 @@ export const getLayoutHTML = (data: IAV) => {
                 <div class="fn__hr"></div>
                 <div>${window.siyuan.languages.calendarView}</div>
             </div>
+            <div data-type="set-layout" data-view-type="map" class="av__layout-item${data.viewType === "map" ? " av__layout-item--select" : ""}">
+                <svg><use xlink:href="#iconGlobe"></use></svg>
+                <div class="fn__hr"></div>
+                <div>${window.siyuan.languages.mapView}</div>
+            </div>
         </div>
     </button>
     <label class="b3-menu__item">
@@ -173,6 +179,9 @@ export const getLayoutHTML = (data: IAV) => {
     }
     if (data.viewType === "calendar") {
         return html + getCalendarSettingsHTML(data.view as IAVTable, true) + "</div>";
+    }
+    if (data.viewType === "map") {
+        html += getMapSettingsHTML(data.view as IAVTable, true);
     }
     return html + `<button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
         <span class="fn__flex-center">${window.siyuan.languages.entryNum}</span>
@@ -288,6 +297,10 @@ export const bindLayoutEvent = (options: {
     });
     if (options.data.viewType === "calendar") {
         bindCalendarSettings({...options, onChange: rerender});
+        return;
+    }
+    if (options.data.viewType === "map") {
+        bindMapSettings({...options, onChange: rerender});
         return;
     }
     if (isTableLikeView(options.data.viewType)) {

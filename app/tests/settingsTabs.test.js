@@ -59,7 +59,7 @@ for (const mobile of [false, true]) {
         const shells = exports.getSettingTabDefs();
         assert.deepEqual(Array.from(shells, shell => shell.id), [
             "editor", "file", "appearance", "bazaar", "flashcard", "ai", "secretsVariables", "assets",
-            "ocr", "export", "search", ...(mobile ? [] : ["keymap"]), "sync", "access", "app", "about",
+            "ocr", "map", "export", "search", ...(mobile ? [] : ["keymap"]), "sync", "access", "app", "about",
         ]);
         assert.equal(exports.getSettingTab("appearance"), appearance);
         assert.equal(exports.getSettingTabDefs(), shells);

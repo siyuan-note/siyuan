@@ -20,7 +20,7 @@ const takeMobileMenuReturnCallback = () => {
     return callback;
 };
 
-export const openMobileSetting = (app: App, tab?: TSettingTab, returnCallback?: () => void) => {
+export const openMobileSetting = (app: App, tab?: TSettingTab, returnCallback?: () => void, missingMapServiceID?: string) => {
     if (!tab) {
         popMenu();
         if (document.getElementById("menu")?.style.transform === "translateX(0px)") {
@@ -35,7 +35,7 @@ export const openMobileSetting = (app: App, tab?: TSettingTab, returnCallback?: 
     if (!settingTabDef || settingTabDef.hidden) {
         return;
     }
-    openSettingTab(app, settingTabDef, callback);
+    openSettingTab(app, settingTabDef, callback, missingMapServiceID);
 };
 
 export const popMenu = () => {

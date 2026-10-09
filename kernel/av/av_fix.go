@@ -26,10 +26,11 @@ import (
 )
 
 const (
-	CurrentSpec   = 11
+	CurrentSpec   = 12
 	PlainTextSpec = 8
 	RichTextSpec  = 9
 	LocationSpec  = 11
+	MapSpec       = 12
 )
 
 const MaxFilterNestingDepth = 3
@@ -49,8 +50,11 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec8(av)
 	upgradeSpec9(av)
 	upgradeSpec10(av)
-	if av.HasLocation() {
+	if av.Spec < LocationSpec && av.HasLocation() {
 		av.Spec = LocationSpec
+	}
+	if av.HasMap() {
+		av.Spec = MapSpec
 	}
 }
 
@@ -87,6 +91,9 @@ func CheckSpec(av *AttributeView) (err error) {
 		logging.LogErrorf("attribute view [%s] spec [%d] is newer than current [%d]", av.ID, av.Spec, CurrentSpec)
 		err = ErrSpecTooNew
 		return
+	}
+	if av.Spec < MapSpec && av.HasMap() {
+		return ErrMapSpecMismatch
 	}
 	if av.Spec < LocationSpec && av.HasLocation() {
 		return ErrLocationSpecMismatch

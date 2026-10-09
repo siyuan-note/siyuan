@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261009040533"
+		"updated": "20261009075700"
 	},
 	"Children": [
 		{
@@ -3939,6 +3939,123 @@
 				{
 					"Type": "NodeText",
 					"Data": "Encrypted databases can only act on databases in the same encrypted notebook. Unlock the notebook first. If a target database or field is unavailable, correct or pause the rule. Copying a database preserves its rules in a paused state; check their targets and relation fields before enabling them"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-byowtq3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261009050034-byowtq3",
+				"updated": "20261009075700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Map view"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-yqulacv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-yqulacv",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Add a map service in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Map"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", then create a Map view and select a service and a Location field. Services are stored on the current device; each view saves only a service ID. On another device, explicitly add the same ID to restore the reference, or choose another service"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-2ja6x7k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-2ja6x7k",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AMap requires a Web JS API key and security code, Tencent Maps requires a key, and Baidu Maps requires a browser AK with JS API access. OpenFreeMap requires no key. Filled configuration fields do not prove service access, commercial eligibility, quotas, domain restrictions, or regional availability. Confirm these with the provider before use"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-w0l8ys9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-w0l8ys9",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The map uses the original coordinates and their declared coordinate system: OpenFreeMap uses WGS84, AMap and Tencent Maps use GCJ-02, and Baidu Maps uses BD-09 or its supported GCJ-02 marker option. Unknown or incompatible systems are counted and skipped; the map never guesses, converts, or overwrites the saved values. OpenFreeMap and AMap use Web Mercator: latitudes beyond ±85.0511287798066° are valid stored coordinates but are skipped with a separate unsupported-projection count rather than silently clamped"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-kpnifml",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-kpnifml",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Filters and sorting also apply to the map. Markers represent only the loaded records, not the entire database. The displayed counts identify the loaded scope and skipped locations. If there are too many markers, use filters or a smaller page size. Click a marker to open its record; map clicks do not save coordinates"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-x0kdedj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-x0kdedj",
+				"updated": "20261009050034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Map services use an external network connection. Only the selected service receives its runtime credentials, coordinates, and opaque record IDs; record titles and full contents are not passed to the map host. Browser SDK credentials are visible to the authorized browser and provider. Configuration exports omit map services and credentials; published pages and document exports retain records without a live map"
+				}
+			]
+		},
+		{
+			"ID": "20261009050034-wflckkb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009050034-wflckkb",
+				"updated": "20261009075700"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The host follows the app theme. AMap also switches its basemap theme, and Baidu switches control appearance; OpenFreeMap and Tencent Maps currently retain their default basemap styles. Maps run in isolated Web pages. Desktop clients use a separate secure host; mobile clients require a matching app shell that restricts native bridges and navigation to trusted documents. Older shells or clients unable to establish these boundaries retain the record list. Desktop maps may hide briefly while scrolling or when menus and dialogs overlap them. When offline, unconfigured, incompatible with WebGL, or unable to load a provider, records remain available. Address search, geocoding, route planning, and clicking the map to write a location are not provided. Maps are also unavailable when authentication bypass is enabled; the record list remains accessible"
 				}
 			]
 		},

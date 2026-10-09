@@ -166,4 +166,4 @@ export const systemConfigCollections = (value: Pick<SystemAppConf, "keymap" | "u
 };
 
 export const systemConfig = (value: SystemAppConf, defaultLayout?: () => Config.IUiLayout): Config.IConf =>
-    ({...value, ...systemConfigCollections(value, defaultLayout)});
+    ({...value, map: value.map || {services: [], revision: ""}, ...systemConfigCollections(value, defaultLayout)});

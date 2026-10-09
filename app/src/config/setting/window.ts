@@ -95,9 +95,11 @@ const initialize = async () => {
     });
     let dialog: Dialog;
     let command: ISettingsCommand;
+    let commandRevision = 0;
     const applyCommand = async () => {
         if (!isActive() || !dialog || !command || host.plugin) return;
         const next = command;
+        const revision = ++commandRevision;
         command = undefined;
         if (next.tab) {
             const mounted = switchSettingTab(dialog.element, host.app, next.tab);
@@ -112,6 +114,12 @@ const initialize = async () => {
         if (next.tab === "ai" && next.aiProvider === "chatgpt") {
             const {openChatGPTProvider} = await import("../tabs/ai/aiProviderUi");
             if (isActive()) { openChatGPTProvider(); }
+        }
+        if (next.tab === "map" && next.missingMapServiceID) {
+            const {requestMapServiceConfiguration} = await import("../map");
+            if (isActive() && revision === commandRevision) {
+                requestMapServiceConfiguration(dialog.element.querySelector('.config__tab-container[data-name="map"]'), next.missingMapServiceID);
+            }
         }
         if (next.readme) {
             const {type, from, resource} = next.readme;

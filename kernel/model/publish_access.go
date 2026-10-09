@@ -576,7 +576,7 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 	ret = viewable
 
 	switch ret.GetType() {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeMap:
 		table := av.TableFromViewable(ret)
 		filteredRows := []*av.TableRow{}
 		for _, row := range table.Rows {
@@ -585,6 +585,10 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 			}
 		}
 		table.Rows = filteredRows
+		if ret.GetType() == av.LayoutTypeMap {
+			table.RowCount = len(filteredRows)
+			clearPublishedAttributeViewMapCalculations(ret.(*av.Map))
+		}
 		if ret.GetType() == av.LayoutTypeCalendar {
 			table.RowCount = len(filteredRows)
 			table.CalendarTargetDate = nil
@@ -737,7 +741,7 @@ func (filter *attributeViewPublishAccessFilter) filterViewable(attrView *av.Attr
 	}
 
 	switch viewable.GetType() {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeMap:
 		table := av.TableFromViewable(viewable)
 		filter.filterGroupValue(attrView, table.BaseInstance)
 		for _, row := range table.Rows {
@@ -749,6 +753,9 @@ func (filter *attributeViewPublishAccessFilter) filterViewable(attrView *av.Attr
 					continue
 				}
 				filter.filterBaseValue(attrView, row.ID, cell.BaseValue)
+				if av.LayoutTypeMap == viewable.GetType() {
+					filter.filterMapTemplateValue(attrView, row.ID, cell.BaseValue)
+				}
 			}
 		}
 		for _, group := range table.Groups {

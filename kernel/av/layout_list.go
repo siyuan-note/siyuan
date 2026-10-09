@@ -33,6 +33,9 @@ func NewLayoutList() *LayoutList {
 
 // GetTableLayout 返回当前布局使用的行列字段设置。
 func (view *View) GetTableLayout() *LayoutTable {
+	if LayoutTypeMap == view.LayoutType {
+		return view.Map.LayoutTable
+	}
 	if LayoutTypeCalendar == view.LayoutType {
 		return view.Calendar.LayoutTable
 	}
@@ -42,7 +45,7 @@ func (view *View) GetTableLayout() *LayoutTable {
 	return view.Table
 }
 
-// TableFromViewable 获取表格或列表实例的行列数据。
+// TableFromViewable 获取表格、列表、日历或地图实例的行列数据。
 func TableFromViewable(viewable Viewable) *Table {
 	switch instance := viewable.(type) {
 	case *Table:
@@ -51,12 +54,17 @@ func TableFromViewable(viewable Viewable) *Table {
 		return instance.Table
 	case *Calendar:
 		return instance.Table
+	case *Map:
+		return instance.Table
 	}
 	return nil
 }
 
 // ValidateListLayouts 校验列表布局的结构，拒绝损坏数据并保留原始文件。
 func (attrView *AttributeView) ValidateListLayouts() error {
+	if err := attrView.ValidateMapLayouts(); nil != err {
+		return err
+	}
 	if err := attrView.ValidateCalendarLayouts(); nil != err {
 		return err
 	}

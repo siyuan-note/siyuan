@@ -63,7 +63,7 @@ func CreateAttributeViewDatabase(parentID, previousID, nextID, name, primaryKeyN
 		layout = av.LayoutTypeTable
 	}
 	switch layout {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeGallery, av.LayoutTypeKanban:
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeMap, av.LayoutTypeGallery, av.LayoutTypeKanban:
 	default:
 		return nil, av.ErrWrongLayoutType
 	}

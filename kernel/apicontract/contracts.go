@@ -76,6 +76,10 @@ type ResponseOptions struct {
 
 var definitions []Definition
 
+var MapGetConf = define[EmptyRequest, *MapConfig]("getMapConf", "/api/map/getConf", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+var MapSetConf = define[MapSetConfRequest, *MapConfig]("setMapConf", "/api/map/setConf", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var MapGetRuntime = define[MapRuntimeRequest, *MapRuntime]("getMapRuntime", "/api/map/getRuntime", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
 // MCP OAuth 协议入口返回标准 OAuth JSON 或授权页面，不使用内核结果信封。
 var MCPOAuthResource = define[EmptyRequest, BinaryContent]("mcpOAuthResource", "/.well-known/oauth-protected-resource/mcp", PublicAccess, NoBody, mcpOAuthContentOptions(), "GET")
 var MCPOAuthResourceRoot = define[EmptyRequest, BinaryContent]("mcpOAuthResourceRoot", "/.well-known/oauth-protected-resource", PublicAccess, NoBody, mcpOAuthContentOptions(), "GET")

@@ -22,6 +22,7 @@ type SystemAppConf struct {
 	Search         *SettingSearch        `json:"search" api:"optional,nullable"`
 	Flashcard      *SettingFlashcard     `json:"flashcard" api:"optional,nullable"`
 	AI             *SettingAI            `json:"ai" api:"optional,nullable"`
+	Map            *MapConfig            `json:"map" api:"optional,nullable"`
 	OCR            *SettingOCR           `json:"ocr" api:"optional,nullable"`
 	Secrets        *SettingSecrets       `json:"secrets" api:"optional,nullable"`
 	Variables      *SettingVariables     `json:"variables" api:"optional,nullable"`

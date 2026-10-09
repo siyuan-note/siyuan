@@ -698,7 +698,14 @@
         } catch (e) {
             // console.log(e)
         }
-        if (window.JSAndroid && window.JSAndroid.getOIDCCallback) {
+        let androidBridgeReady = true
+        try {
+            await window.JSAndroid?.ready
+        } catch (_error) {
+            androidBridgeReady = false
+            console.error('Android native bridge initialization failed')
+        }
+        if (androidBridgeReady && window.JSAndroid && window.JSAndroid.getOIDCCallback) {
             const callbackURL = window.JSAndroid.getOIDCCallback()
             if (callbackURL) {
                 handleOIDCCallback(callbackURL)

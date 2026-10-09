@@ -56,7 +56,12 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 	}
 	data := apicontract.AVRenderData{AVArchiveRenderData: avArchiveRenderData(attrView, view), ContextFilter: toContractAVAttributeViewContextFilter(contextFilter), ContextFilterFields: avContractSlice(model.GetAttributeViewContextFilterFields(attrView, blockID), toContractAVAttributeViewContextFilterField), Target: toContractAVAttributeViewRenderTarget(target)}
 	if filter != nil {
-		view = filter(view)
+		if mapped, ok := view.(*av.Map); ok {
+			view, target = model.FilterAttributeViewMapForPublish(mapped, page, pageSize, target, filter)
+			data.Target = toContractAVAttributeViewRenderTarget(target)
+		} else {
+			view = filter(view)
+		}
 		if calendar, ok := view.(*av.Calendar); ok {
 			// 发布过滤后重新计算定位，避免返回不可访问条目的日期和行位置。
 			visibleTargetID := ""

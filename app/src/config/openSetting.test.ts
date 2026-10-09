@@ -16,18 +16,21 @@ const fixture = (browser = false, mobile = false) => {
         {BROWSER: browser, MOBILE: mobile}, false, true), ScriptTarget.ES2021, true);
     const declarations = index.statements.filter(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(item => ["openSetting", "openBazaarReadme"].includes(item.name.getText(index))));
-    const entry = {} as {openSetting: (app: unknown, tab?: string, options?: {aiProvider?: "chatgpt"}) => void;
+    const entry = {} as {openSetting: (app: unknown, tab?: string, options?: {aiProvider?: "chatgpt"; missingMapServiceID?: string}) => void;
         openBazaarReadme: (app: unknown, type: string, name: string, from: string) => Promise<void>};
     let native = false;
+    const root = {};
+    const dialog = {element: {getAttribute: () => "settings", querySelector: () => root}};
     runInNewContext(transpileModule(declarations.map(item => item.getText(index)).join("\n"),
         {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText, {
         exports: entry, isSettingsWindow: () => native,
         isBazaarAvailable: () => true, getHostCapabilities: () => ({documentImportExport: true}),
         openNativeSettings: (...args: unknown[]) => calls.push(["native", ...args]),
-        openSettingDialog: (...args: unknown[]) => calls.push(["dialog", ...args]),
+        openSettingDialog: (...args: unknown[]) => { calls.push(["dialog", ...args]); return dialog; },
         openMobileSetting: (...args: unknown[]) => calls.push(["mobile", ...args]),
         openChatGPTProvider: () => calls.push(["chatgpt"]),
-        window: {siyuan: {dialogs: [{element: {getAttribute: () => "settings"}}], config}},
+        requestMapServiceConfiguration: (...args: unknown[]) => calls.push(["map", ...args]),
+        window: {siyuan: {dialogs: [dialog], config}},
         Constants: {DIALOG_SETTING: "settings"}, switchSettingTab: (...args: unknown[]) => calls.push(["switch", ...args]),
         fetchSyncPost: async () => ({code: 0, data: {packages: [{name: "plugin"}]}}),
         getFrontend: () => "desktop", withMountedBazaar: async () => calls.push(["readme"]),
@@ -52,6 +55,23 @@ test("settings and marketplace readmes follow the current workspace preference",
     f.setNative();
     f.entry.openSetting(app, "app");
     assert.deepEqual(f.calls.map(item => item[0]), ["switch"]);
+});
+
+test("missing map service navigation preserves the ID in native, browser, and mobile settings", () => {
+    const f = fixture();
+    f.setPreference(true);
+    f.entry.openSetting({}, "map", {missingMapServiceID: "other-device"});
+    assert.equal(JSON.stringify(f.calls[0][2]), JSON.stringify({tab: "map", missingMapServiceID: "other-device"}));
+    f.calls.length = 0;
+    f.setPreference(false);
+    f.entry.openSetting({}, "map", {missingMapServiceID: "other-device"});
+    assert.deepEqual(f.calls.map(item => item[0]), ["dialog", "map"]);
+    assert.equal(f.calls[1][2], "other-device");
+    const mobile = fixture(true, true);
+    mobile.entry.openSetting({}, "map", {missingMapServiceID: "other-device"});
+    assert.equal(mobile.calls[0][4], "other-device");
+    const windowSource = readFileSync("src/config/setting/window.ts", "utf8");
+    assert.match(windowSource, /revision === commandRevision[\s\S]*?requestMapServiceConfiguration/);
 });
 
 test("only a truthy workspace preference opens the independent settings window", () => {

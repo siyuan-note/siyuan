@@ -339,6 +339,15 @@ func CheckAuth(c *gin.Context) {
 				return
 			}
 			if util.WorkspaceName == username && util.AuthCodeEquals(Conf.AccessAuthCode, password) {
+				// 浏览器可能自动附带缓存的 HTTP Basic 凭据，仍须校验请求来源。
+				// 不携带 Origin 和 Fetch Metadata 的普通接口客户端保持兼容。
+				if !util.IsSessionOriginAllowedRequest(c.Request) {
+					logging.LogWarnf("invalid Basic auth request origin [origin=%s, fetch-site=%s, ip=%s]",
+						c.GetHeader("Origin"), c.GetHeader("Sec-Fetch-Site"), c.ClientIP())
+					c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid request origin"})
+					c.Abort()
+					return
+				}
 				util.AuthThrottleReset(ip)
 				c.Set(RoleContextKey, RoleAdministrator)
 				c.Next()

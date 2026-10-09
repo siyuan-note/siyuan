@@ -117,6 +117,9 @@ func TestDatabaseViewConfigurationValidation(t *testing.T) {
 	if err := databaseValidateViewGroup(attrView, &av.View{LayoutType: av.LayoutTypeCalendar}, &av.ViewGroup{Field: "text"}); nil == err {
 		t.Fatal("calendar grouping accepted")
 	}
+	if err := databaseValidateViewGroup(attrView, &av.View{LayoutType: av.LayoutTypeMap}, &av.ViewGroup{Field: "text"}); nil == err {
+		t.Fatal("map grouping accepted")
+	}
 	if err := databaseValidateViewGroup(attrView, &av.View{LayoutType: av.LayoutTypeKanban}, &av.ViewGroup{}); nil == err {
 		t.Fatal("kanban grouping cleared")
 	}

@@ -1,5 +1,7 @@
 import {isAVSelectType} from "./capabilities";
 import {renderCalendar} from "./calendar/render";
+import {renderMap} from "./map/render";
+import {destroyMap} from "./map/state";
 import {isFoldedRenderContent} from "../foldedContent";
 import {getCalendarRequestRange} from "./calendar/state";
 import {isTableLikeView} from "./viewType";
@@ -206,7 +208,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
 
 const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualData,
                        reserveVirtualHeight = false) => {
-    const viewType = e.dataset.avType === "list" ? "list" : "table";
+    const viewType = e.dataset.avType === "list" || e.dataset.avType === "map" ? "list" : "table";
     let calcHTML = "";
     let contentHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     let freezeIndex = -1;
@@ -734,6 +736,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             setAVVisibleViewIDs(e, getAVVisibleViewIDs(e, data.views));
         }
         prepareAVLocate(e, data, resetData);
+        destroyMap(e);
         if (data.viewType === "calendar") {
             await renderCalendar(e, protyle, data, cb);
             continue;
@@ -773,6 +776,9 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             blockElement: e,
             resetData
         });
+        if (data.viewType === "map") {
+            await renderMap(e, protyle, data);
+        }
         // 历史兼容
         e.style.margin = "";
     }

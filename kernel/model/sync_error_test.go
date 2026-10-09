@@ -79,3 +79,19 @@ func TestFormatRepoCloudLockError(t *testing.T) {
 		}
 	}
 }
+
+func TestFormatRepoPermissionError(t *testing.T) {
+	previousConf, previousLangs := Conf, util.Langs
+	t.Cleanup(func() { Conf, util.Langs = previousConf, previousLangs })
+	Conf = &AppConf{Lang: "en", Sync: &conf.Sync{Provider: conf.ProviderS3}}
+	util.Langs = map[string]map[int]string{"en": {33: "check workspace permissions"}}
+	for _, message := range []string{"Access is denied.", "access is denied", "ACCESS IS DENIED", "permission denied"} {
+		t.Run(message, func(t *testing.T) {
+			err := &os.LinkError{Op: "rename", Old: "private.jpg.tmp", New: "private.jpg", Err: errors.New(message)}
+			want := "check workspace permissions (Provider: " + conf.ProviderToStr(conf.ProviderS3) + ")"
+			if got := formatRepoErrorMsg(err); got != want {
+				t.Fatalf("got %q, want %q", got, want)
+			}
+		})
+	}
+}

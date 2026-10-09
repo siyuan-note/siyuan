@@ -945,7 +945,7 @@ func formatRepoErrorMsg(err error) string {
 		msgLowerCase := strings.ToLower(msg)
 		if strings.Contains(msgLowerCase, "illegal byte sequence") {
 			msg = fmt.Sprintf(Conf.Language(397), msg)
-		} else if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {
+		} else if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msgLowerCase, "access is denied") {
 			msg = Conf.Language(33)
 		} else if strings.Contains(msgLowerCase, "region was not a valid") {
 			msg = Conf.language(254)

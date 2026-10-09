@@ -128,6 +128,10 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 			writeResponse(endpoint.DecodeFailure(err))
 			return
 		}
+		if err = model.LockRequestAfterDecode(c); err != nil {
+			writeResponse(endpoint.DecodeFailure(err))
+			return
+		}
 		writeResponse(handler(c, request))
 	}
 }

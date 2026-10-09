@@ -18,6 +18,8 @@ Generation checks inspect actual route and handler declarations to verify method
 
 ## Contracts and implementation
 
+For JSON routes subject to `ControlConcurrency`, requests pass authorization and admission checks, then `contractHandler` completes decoding and drains the remaining request body before acquiring the per-path business lock. This prevents queued bodies from exhausting an HTTP/2 connection's receive window. The outer middleware releases the lock after response handling and notebook lease cleanup. Preserve this ordering when adding adapters; raw streams and form uploads retain their existing concurrency paths.
+
 Module files under `kernel/apicontract/` define requests, responses, and endpoints; `contracts.go` collects them in the endpoint registry. The contract package is independent of kernel startup, databases, and persistence models, so the generator runs independently. API entry points bind endpoints through `contractHandler`; Go generic signatures constrain request parameters and successful return values. Constructors set response payloads rather than assigning directly to generic `ret.Data`. Existing helpers continue to validate business rules, and `contractFailure` preserves their error codes, messages, and supported error payloads.
 
 The generator produces `app/src/types/api/index.d.ts` and `kernel/apicontract/schema.json` from the same Go types. The schema contains shared `$defs` and each endpoint's request and response schemas. Tests validate actual HTTP responses against those same schemas. Type declarations do not validate JSON at runtime; handler tests in CI validate serialized results.

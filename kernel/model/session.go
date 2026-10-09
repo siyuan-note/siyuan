@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"image/color"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -495,9 +496,49 @@ func Activity(c *gin.Context) {
 }
 
 var (
-	requestingLock = sync.Mutex{}
-	requesting     = map[string]*sync.Mutex{}
+	requestingLock    = sync.Mutex{}
+	requesting        = map[string]*sync.Mutex{}
+	jsonRequestRoutes = func() map[string]bool {
+		routes := map[string]bool{}
+		for _, definition := range apicontract.Definitions() {
+			switch definition.Body {
+			case apicontract.JSONBody, apicontract.StructJSONBody, apicontract.LegacyOptionalBody:
+				for _, method := range definition.Methods {
+					routes[method+" "+definition.Path] = true
+				}
+			}
+		}
+		return routes
+	}()
 )
+
+const requestConcurrencyKey = "siyuan-request-concurrency"
+
+type requestConcurrency struct {
+	mutex  *sync.Mutex
+	locked bool
+}
+
+// LockRequestAfterDecode 接收剩余请求体后串行执行业务，避免排队请求占满 HTTP/2 连接接收窗口。
+// JSON 尾部数据沿用解码器的忽略语义；锁由外层中间件在响应和租约清理完成后释放。
+func LockRequestAfterDecode(c *gin.Context) error {
+	value, ok := c.Get(requestConcurrencyKey)
+	if !ok {
+		return nil
+	}
+	state := value.(*requestConcurrency)
+	if c.Request.Body != nil {
+		if _, err := io.Copy(io.Discard, c.Request.Body); err != nil {
+			return err
+		}
+	}
+	if err := c.Request.Context().Err(); err != nil {
+		return err
+	}
+	state.mutex.Lock()
+	state.locked = true
+	return c.Request.Context().Err()
+}
 
 func ControlConcurrency(c *gin.Context) {
 	if websocket.IsWebSocketUpgrade(c.Request) {
@@ -569,6 +610,19 @@ func ControlConcurrency(c *gin.Context) {
 		requesting[reqPath] = mutex
 	}
 	requestingLock.Unlock()
+
+	if jsonRequestRoutes[c.Request.Method+" "+c.FullPath()] || jsonRequestRoutes["ANY "+c.FullPath()] {
+		// 契约入口先完成鉴权和 JSON 解码，再申请本接口的写入锁。
+		state := &requestConcurrency{mutex: mutex}
+		c.Set(requestConcurrencyKey, state)
+		defer func() {
+			if state.locked {
+				mutex.Unlock()
+			}
+		}()
+		c.Next()
+		return
+	}
 
 	mutex.Lock()
 	defer mutex.Unlock()

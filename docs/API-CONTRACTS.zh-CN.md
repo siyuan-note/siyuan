@@ -18,6 +18,8 @@
 
 ## 契约与实现
 
+对于受 `ControlConcurrency` 控制的 JSON 接口，请求先通过鉴权和准入检查，再由 `contractHandler` 完成解码并接收剩余请求体，之后才获取按路径划分的业务锁，避免排队请求耗尽 HTTP/2 连接的接收窗口。外层中间件在响应处理和笔记本租约清理完成后释放锁。新增适配器必须保持这一顺序；原始数据流和表单上传保留既有的并发控制路径。
+
 `kernel/apicontract/` 下的各模块文件定义请求、响应和端点，`contracts.go` 将其汇总到端点注册表。契约包独立于内核启动、数据库和持久化模型，因此生成器可以单独运行。API 入口通过 `contractHandler` 绑定端点，请求参数和成功返回值受到 Go 泛型签名约束；响应载荷通过构造函数设置，不能直接给通用 `ret.Data` 赋值。业务校验继续使用现有辅助函数，`contractFailure` 保留其错误码、消息和已支持的错误载荷。
 
 生成器从同一组 Go 类型生成 `app/src/types/api/index.d.ts` 和 `kernel/apicontract/schema.json`。后者包含共享的 `$defs` 和每个端点的请求、响应 schema，测试使用同一套 schema 检查实际 HTTP 响应。类型声明不会在运行时验证 JSON，CI 中的处理函数测试负责验证序列化结果。

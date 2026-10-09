@@ -19,6 +19,7 @@ const createPanel = async (initial: Service[] = [service()], missingID?: string,
                            backend: Backend = {services: initial, version: 0}) => {
     let deferRead = deferInitial;
     let reads = 0;
+    const requests: string[] = [];
     const readRequests: Array<(response: unknown) => void> = [];
     const writes: Array<{services: Write[]; expectedRevision: string;
         resolve: (response: unknown) => void; reject: (error: Error) => void}> = [];
@@ -68,6 +69,7 @@ const createPanel = async (initial: Service[] = [service()], missingID?: string,
             showMessage: (message: string) => messages.push(message),
             confirmDialog: (_title: string, _text: string, confirm: () => void) => confirmations.push(confirm),
             fetchSyncPost: (url: string, data: {services: Write[]; expectedRevision: string}) => {
+                requests.push(url);
                 if (url === "/api/map/getConf") {
                     reads++;
                     if (deferRead) {
@@ -85,7 +87,7 @@ const createPanel = async (initial: Service[] = [service()], missingID?: string,
     await tick();
     const event = (id: string) => ({target: controls[id], stopPropagation() {}});
     return {
-        controls, writes, readRequests, messages, confirmations, close, config,
+        controls, writes, readRequests, requests, messages, confirmations, close, config,
         reads: () => reads, notify: () => notifications.get("map-change")?.(),
         deferRead: () => { deferRead = true; },
         updateServer: (services: Service[]) => { backend.services = services; backend.version++; },
@@ -182,6 +184,18 @@ test("changing providers away and back clears both old AMap credentials", async 
     assert.equal(p.writes[0].services[0].apiKey, "");
     assert.equal(p.writes[0].services[0].securityCode, "");
     await p.finishWrite(); await saving; p.close();
+});
+
+test("preconfigured OpenFreeMap is ready without a settings write or runtime request", async () => {
+    const p = await createPanel([{...service("builtin-openfreemap", "openfreemap"), name: "OpenFreeMap"}]);
+    assert.equal(p.controls.mapServiceSelect.value, "builtin-openfreemap");
+    assert.equal(p.controls.mapServiceName.value, "OpenFreeMap");
+    assert.equal(p.controls.mapServiceProvider.value, "openfreemap");
+    assert.equal(p.controls.mapAPIKeyRow.classList.contains("fn__none"), true);
+    assert.equal(p.controls.mapSecurityCodeRow.classList.contains("fn__none"), true);
+    assert.deepEqual(p.requests, ["/api/map/getConf"]);
+    assert.equal(p.writes.length, 0);
+    p.close();
 });
 
 test("OpenFreeMap writes no credentials and missing IDs are explicitly preserved", async () => {

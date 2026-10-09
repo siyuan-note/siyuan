@@ -26,7 +26,12 @@ type MapServiceInput struct {
 
 func normalizeMapConfig(config *conf.Map) *conf.Map {
 	if config == nil {
-		return conf.NewMap()
+		// 仅缺失配置时预置服务；已保存的空列表表示用户没有服务，不再自动补回。
+		// 内置服务使用稳定标识，使其他设备首次初始化后可以解析同步视图中的同一引用。
+		return &conf.Map{
+			Services: []*conf.MapService{{ID: "builtin-openfreemap", Name: "OpenFreeMap", Provider: conf.MapProviderOpenFreeMap}},
+			Revision: ast.NewNodeID(),
+		}
 	}
 	if config.Services == nil {
 		config.Services = []*conf.MapService{}

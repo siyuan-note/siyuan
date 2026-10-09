@@ -28,29 +28,164 @@ func mapTestConfig(t *testing.T) *AppConf {
 	oldDir, oldReadonly := util.ConfDir, util.ReadOnly
 	util.ConfDir, util.ReadOnly = t.TempDir(), false
 	t.Cleanup(func() { util.ConfDir, util.ReadOnly = oldDir, oldReadonly })
-	return NewAppConf()
+	app := NewAppConf()
+	app.Map = normalizeMapConfig(app.Map)
+	return app
 }
 
 func TestMapConfigDefaultsAndLegacyNil(t *testing.T) {
-	for _, body := range []string{`{}`, `{"map":null}`, `{"map":{}}`, `{"map":{"services":null}}`} {
+	var serviceID, previousRevision string
+	for _, body := range []string{`{}`, `{"map":null}`} {
 		app := NewAppConf()
 		if err := json.Unmarshal([]byte(body), app); err != nil {
 			t.Fatal(err)
 		}
 		app.Map = normalizeMapConfig(app.Map)
-		if app.Map.Services == nil || len(app.Map.Services) != 0 || app.Map.Revision != "" {
-			t.Fatalf("legacy configuration acquired a default service: %s", body)
+		if len(app.Map.Services) != 1 || app.Map.Revision == "" {
+			t.Fatalf("missing map configuration was not initialized: %s", body)
+		}
+		service := app.Map.Services[0]
+		if !conf.IsMapServiceID(service.ID) || service.Name != "OpenFreeMap" || service.Provider != conf.MapProviderOpenFreeMap ||
+			!service.Configured() || service.HasAPIKey() || service.HasSecurityCode() {
+			t.Fatalf("invalid default map service: %#v", service)
+		}
+		if serviceID != "" && serviceID != service.ID {
+			t.Fatal("default service reference differs across initializations")
+		}
+		serviceID = service.ID
+		if app.Map.Revision == previousRevision {
+			t.Fatal("separate initializations reused the same revision")
+		}
+		previousRevision = app.Map.Revision
+		before := app.Map
+		app.Map = normalizeMapConfig(app.Map)
+		if app.Map != before || len(app.Map.Services) != 1 {
+			t.Fatal("normalization repeated default initialization")
 		}
 		app.Map.DecryptCredentials()
+		runtime, err := app.GetMapRuntime(service.ID)
+		if err != nil || runtime.Provider != conf.MapProviderOpenFreeMap || runtime.APIKey != "" || runtime.SecurityCode != "" {
+			t.Fatal("default service did not resolve without credentials")
+		}
 		if _, err := app.GetMapRuntime("missing"); err == nil {
-			t.Fatal("empty configuration resolved a runtime")
+			t.Fatal("missing service reference fell back to the default")
 		}
 	}
+
+	for _, body := range []string{`{"map":{}}`, `{"map":{"services":null}}`, `{"map":{"services":[]}}`,
+		`{"map":{"services":[],"revision":"saved-empty"}}`, `{"map":{"revision":"saved-empty"}}`} {
+		app := NewAppConf()
+		if err := json.Unmarshal([]byte(body), app); err != nil {
+			t.Fatal(err)
+		}
+		revision := app.Map.Revision
+		app.Map = normalizeMapConfig(app.Map)
+		if app.Map.Services == nil || len(app.Map.Services) != 0 || app.Map.Revision != revision {
+			t.Fatalf("existing empty configuration was replaced: %s", body)
+		}
+	}
+
 	var config *conf.Map
 	config.EncryptCredentials()
 	config.DecryptCredentials()
-	if len(config.Masked().Services) != 0 {
+	if len(config.Masked().Services) != 0 || len(conf.NewMap().Services) != 0 {
 		t.Fatal("nil map configuration is not safely readable")
+	}
+}
+
+func TestMapConfigInitializationPreservesExistingServices(t *testing.T) {
+	for _, revision := range []string{"", "saved-revision"} {
+		app := NewAppConf()
+		app.Map = &conf.Map{Revision: revision, Services: []*conf.MapService{
+			{ID: "custom-free", Name: "My map", Provider: conf.MapProviderOpenFreeMap},
+			{ID: "another-free", Name: "Another map", Provider: conf.MapProviderOpenFreeMap},
+			{ID: "custom-key", Name: "Custom", Provider: conf.MapProviderAMap, APIKey: "fixture-key", SecurityCode: "fixture-code"},
+		}}
+		data, err := app.marshalForSave()
+		if err != nil {
+			t.Fatal(err)
+		}
+		stored := NewAppConf()
+		if err = json.Unmarshal(data, stored); err != nil {
+			t.Fatal(err)
+		}
+		stored.Map = normalizeMapConfig(stored.Map)
+		stored.Map.DecryptCredentials()
+		if !reflect.DeepEqual(stored.Map, app.Map) {
+			t.Fatal("initialization changed existing services, credentials, IDs, order, or revision")
+		}
+	}
+}
+
+func TestMapConfigDefaultPersistsAndDeletedDefaultStaysDeleted(t *testing.T) {
+	app := mapTestConfig(t)
+	initial := app.GetMap()
+	app.Save()
+	for range 2 {
+		data, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		app = NewAppConf()
+		if err = json.Unmarshal(data, app); err != nil {
+			t.Fatal(err)
+		}
+		app.Map = normalizeMapConfig(app.Map)
+		app.Map.DecryptCredentials()
+		if !reflect.DeepEqual(app.GetMap(), initial) {
+			t.Fatal("restart changed the default service or its revision")
+		}
+		app.Save()
+	}
+	deleted, err := app.SetMap([]MapServiceInput{}, initial.Revision)
+	if err != nil || len(deleted.Services) != 0 || deleted.Revision == initial.Revision {
+		t.Fatal("default service deletion failed")
+	}
+	for range 2 {
+		data, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		app = NewAppConf()
+		if err = json.Unmarshal(data, app); err != nil {
+			t.Fatal(err)
+		}
+		app.Map = normalizeMapConfig(app.Map)
+		if !reflect.DeepEqual(app.GetMap(), deleted) {
+			t.Fatal("restart restored the deleted default service")
+		}
+		if _, err = app.SetMap([]MapServiceInput{}, initial.Revision); err == nil || err.Error() != "mapSettingsConflict" {
+			t.Fatal("restart accepted a revision from before the default service was deleted")
+		}
+		app.Save()
+	}
+}
+
+func TestMapConfigSettingsResetPreservesServiceInitialization(t *testing.T) {
+	settingsResetTestEnvironment(t)
+	Conf.Map = normalizeMapConfig(Conf.Map)
+	for _, remove := range []bool{false, true} {
+		if remove {
+			if _, err := Conf.SetMap([]MapServiceInput{}, Conf.Map.Revision); err != nil {
+				t.Fatal(err)
+			}
+		}
+		before := Conf.GetMap()
+		if err := ResetSettings(); err != nil {
+			t.Fatal(err)
+		}
+		data, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		stored := NewAppConf()
+		if err = json.Unmarshal(data, stored); err != nil {
+			t.Fatal(err)
+		}
+		stored.Map = normalizeMapConfig(stored.Map)
+		if !reflect.DeepEqual(before, Conf.GetMap()) || !reflect.DeepEqual(before, stored.GetMap()) {
+			t.Fatal("settings reset changed map services or restored a deleted default")
+		}
 	}
 }
 

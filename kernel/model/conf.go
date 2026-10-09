@@ -100,7 +100,6 @@ func NewAppConf() *AppConf {
 	return &AppConf{
 		LogLevel: "debug",
 		OIDC:     conf.NewOIDC(),
-		Map:      conf.NewMap(),
 		m:        &sync.RWMutex{},
 		userLock: &sync.RWMutex{},
 	}

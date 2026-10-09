@@ -9,6 +9,8 @@ import (
 )
 
 // MapConfig 为脱敏配置，只提供服务标识、供应商和凭据存在状态，不返回凭据内容。
+// 启动时仅缺失或 null 的本机地图配置预置一项免密钥 OpenFreeMap；已有配置及删除后的空列表保持不变。
+// 初始化不会选择或创建地图视图，也不请求地图供应商。
 type MapConfig struct {
 	Services []*MapService `json:"services"`
 	Revision string        `json:"revision"`
@@ -25,7 +27,7 @@ type MapService struct {
 
 // MapSetConfRequest 整体替换最多 100 个本机服务，要求管理员和可写工作空间。
 // 空列表删除全部服务；不接受未知字段、null 或任意远程服务地址。
-// expectedRevision 必须与读取的 revision 一致；旧配置初始为空字符串。
+// expectedRevision 必须与读取的 revision 一致；未保存过版本号的已有配置保持空字符串。
 // 冲突返回 code=-1、msg=mapSettingsConflict，不修改服务和凭据；成功后生成新的独立版本号。
 type MapSetConfRequest struct {
 	Services         []MapServiceInput `json:"services"`

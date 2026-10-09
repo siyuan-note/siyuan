@@ -313,6 +313,44 @@ test("an initially hidden or zero-size DOM can finish bootstrap without exposing
     assert.equal(s.views[0].webContents.destroyed, true);
 });
 
+test("known host diagnostics are bounded fixed codes and stop on disposal", () => {
+    const s = setup(); s.create();
+    const contents = s.views[0].webContents;
+    const message = "Content Security Policy worker-src 'none'; https://secret.invalid/?key=private";
+    contents.emit("console-message", {message});
+    contents.emit("console-message", {message});
+    contents.emit("console-message", {message: "unclassified private detail"});
+    assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "diagnostic", code: "cspWorker"}]);
+    s.manager.destroyAll();
+    contents.emit("console-message", {message: "INVALID_USER_KEY"});
+    assert.equal(s.owner.sent.length, 1);
+});
+
+test("provider routing reports fixed transport failures without logging requests", async () => {
+    const diagnostics = [];
+    const {ses, router} = setupRouter({report: code => diagnostics.push(code)});
+    ses.before({url: "http://webapi.amap.com/maps?key=private"});
+    assert.deepEqual(diagnostics, ["providerInsecureRequest"]);
+    ses.fetch = async () => new Response("private body", {status: 403});
+    assert.equal((await ses.protocols.https(new Request("https://tiles.openfreemap.org/style?key=private"))).status, 403);
+    assert.equal(diagnostics.at(-1), "providerHTTPFailure");
+    ses.fetch = async () => { throw new Error("https://secret.invalid/?key=private"); };
+    await ses.protocols.https(new Request("https://tiles.openfreemap.org/style?key=private"));
+    assert.equal(diagnostics.at(-1), "providerNetworkFailure");
+    ses.fetch = async () => new Response(null, {status: 302, headers: {Location: "http://tiles.openfreemap.org/?key=private"}});
+    await ses.protocols.https(new Request("https://tiles.openfreemap.org/style"));
+    assert.equal(diagnostics.at(-1), "providerInsecureRequest");
+    ses.fetch = async () => new Response(new ReadableStream({pull(controller) { controller.error(new Error("private body failure")); }}));
+    const broken = await ses.protocols.https(new Request("https://tiles.openfreemap.org/style"));
+    await assert.rejects(broken.text());
+    assert.equal(diagnostics.at(-1), "providerNetworkFailure");
+    const count = diagnostics.length;
+    router.destroy();
+    ses.before({url: "http://webapi.amap.com/maps?key=private"});
+    assert.equal(diagnostics.length, count);
+    assert.equal(JSON.stringify(diagnostics).includes("private"), false);
+});
+
 test("destroy and owner navigation close real contents, ports, requests and session; stale events cannot resurrect", () => {
     const s = setup(); s.create(); s.load(); s.reply({type: "bootstrapReady"});
     s.owner.emit("did-start-navigation", {isMainFrame: true, isSameDocument: false});

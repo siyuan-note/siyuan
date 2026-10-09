@@ -5,6 +5,7 @@
 const path = require("node:path");
 const fs = require("node:fs/promises");
 const {randomBytes} = require("node:crypto");
+const {mapDiagnosticCodes, classifyMapConsoleMessage} = require("./mapHostDiagnostics");
 const {
     hasUnsafeMapSwitches, normalizeMapOrigin, parseMapCreate, parseMapCommand, parseMapReply, parseMapGeometry,
     isAllowedMapProviderURL, getMapRequestPolicy, createMapContentSecurityPolicy,
@@ -16,7 +17,7 @@ const withoutCredentials = (headers) => Object.fromEntries(Object.entries(header
     .filter(([name]) => !["cookie", "authorization", "proxy-authorization"].includes(name.toLowerCase())));
 
 // 此会话从不向任何内核发送网络请求，包括未设置密码的本机内核。
-const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.readFile, trackFetch = () => {}}) => {
+const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.readFile, trackFetch = () => {}, report = () => {}}) => {
     let destroyed = false;
     let documentRequested = false;
     const requests = new Set();
@@ -38,6 +39,10 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
         } else if (!destroyed && /^(blob:|data:)/.test(details.url)) {
             // 仅允许无网络权限的图片数据，以及本地预载后创建的 CSP worker。
             allowed = ["image", "other"].includes(details.resourceType);
+        }
+        if (!allowed && !destroyed) {
+            report(details.url.startsWith("http:") && !details.url.startsWith(origin + "/") ?
+                "providerInsecureRequest" : "providerRequestDenied");
         }
         callback({cancel: !allowed});
     });
@@ -63,6 +68,7 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
                 if (policy.document) headers["Content-Security-Policy"] = createMapContentSecurityPolicy(origin, provider);
                 return new Response(request.method === "HEAD" ? null : data, {headers});
             } catch (_error) {
+                report("assetUnavailable");
                 return new Response("Not Found", {status: 404});
             }
         }
@@ -87,7 +93,11 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
         try {
             let url = request.url;
             for (let redirects = 0; redirects <= 5; redirects++) {
-                if (destroyed || abort.signal.aborted || !isAllowedMapProviderURL(url, provider)) break;
+                if (destroyed || abort.signal.aborted) break;
+                if (!isAllowedMapProviderURL(url, provider)) {
+                    report(url.startsWith("http:") ? "providerInsecureRequest" : "providerRequestDenied");
+                    break;
+                }
                 if (activeURL) trackFetch(activeURL, -1);
                 activeURL = url;
                 trackFetch(activeURL, 1);
@@ -99,6 +109,7 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
                 }
                 const response = await ses.fetch(url, {method: request.method, headers, credentials: "omit",
                     cache: "no-store", redirect: "manual", bypassCustomProtocolHandlers: true, signal: abort.signal});
+                if (response.status >= 400) report("providerHTTPFailure");
                 if ([301, 302, 303, 307, 308].includes(response.status)) {
                     const location = response.headers.get("location");
                     await response.body?.cancel();
@@ -127,7 +138,10 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
                             const {done, value} = await reader.read();
                             if (destroyed || abort.signal.aborted) throw new Error("Map request closed");
                             if (done) { controller.close(); finish(); } else controller.enqueue(value);
-                        } catch (error) { controller.error(error); finish(); }
+                        } catch (error) {
+                            if (!destroyed && !abort.signal.aborted) report("providerNetworkFailure");
+                            controller.error(error); finish();
+                        }
                     },
                     async cancel() { abort.abort(); await reader.cancel().catch(() => {}); finish(); },
                 });
@@ -135,6 +149,7 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
             }
         } catch (_error) {
             // 服务商地址可能包含密钥，不记录请求地址或异常文本。
+            if (!destroyed && !abort.signal.aborted) report("providerNetworkFailure");
         }
         finish();
         return deniedResponse();
@@ -269,23 +284,28 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             return {version: 1, instanceID: init.instanceID, error: "hostUnavailable"};
         }
         const ses = session.fromPartition("siyuan-map-" + randomID(), {cache: false});
-        const router = createMapSessionRouter({ses, origin: owner.origin, provider: init.provider, appDir, readFile, trackFetch});
-        let view;
+        let host, router, view;
+        const report = code => {
+            if (!host || host.destroyed || !mapDiagnosticCodes.includes(code) || host.diagnostics.has(code)) return;
+            host.diagnostics.add(code);
+            sendOwner(host, {version: 1, instanceID: init.instanceID, type: "diagnostic", code});
+        };
         try {
+            router = createMapSessionRouter({ses, origin: owner.origin, provider: init.provider, appDir, readFile, trackFetch, report});
             view = new WebContentsView({webPreferences: {session: ses, sandbox: true, contextIsolation: true,
                 webSecurity: true, nodeIntegration: false, nodeIntegrationInSubFrames: false,
                 nodeIntegrationInWorker: false, webviewTag: false, allowRunningInsecureContent: false,
                 navigateOnDragDrop: false, safeDialogs: true, disableDialogs: true, devTools: false,
                 spellcheck: false, backgroundThrottling: false, preload: path.join(__dirname, "mapHostPreload.js")}});
         } catch (_error) {
-            router.destroy();
-            return {version: 1, instanceID: init.instanceID, error: "hostUnavailable"};
+            router?.destroy();
+            return {version: 1, instanceID: init.instanceID, error: "hostUnavailable", diagnostic: "hostSetupFailed"};
         }
         const contents = view.webContents;
         // 全局 web-contents-created 会安装外部打开链接处理器，必须在加载前替换为拒绝。
         contents.setWindowOpenHandler(() => ({action: "deny"}));
         mapContents.add(contents.id);
-        const host = {key, init, owner: event.sender, frame: event.senderFrame, win: owner.win, origin: owner.origin,
+        host = {key, init, owner: event.sender, frame: event.senderFrame, win: owner.win, origin: owner.origin, diagnostics: new Set(),
             view, router, listeners: [], ids: new Set(), revision: -1, loaded: false, ready: false, bootstrapped: false, destroyed: false};
         hosts.set(key, host);
         const denyNavigation = event => event.preventDefault();
@@ -295,6 +315,10 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         listen(host, contents, "select-client-certificate", (event, _url, _certificates, callback) => { event.preventDefault(); callback(); });
         listen(host, contents, "login", (event, _details, _auth, callback) => { event.preventDefault(); callback(); });
         listen(host, contents, "certificate-error", (_event, _url, _error, _certificate, callback) => callback(false));
+        listen(host, contents, "console-message", (event, _level, legacyMessage) => {
+            for (const code of classifyMapConsoleMessage(event?.message ?? legacyMessage)) report(code);
+        });
+        listen(host, contents, "did-fail-load", () => report("documentLoadFailed"));
         listen(host, contents, "render-process-gone", () => fail(host, "hostUnavailable"));
         listen(host, contents, "destroyed", () => destroy(host));
         listen(host, event.sender, "destroyed", () => destroy(host));
@@ -345,14 +369,17 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             port1.start();
             contents.postMessage("siyuan-map-port", {version: 1, instanceID: init.instanceID, nonce, provider: init.provider}, [port2]);
         });
-        host.timer = setTimeout(() => fail(host, "hostUnavailable"), 30000);
+        host.timer = setTimeout(() => {
+            report(host.bootstrapped ? "sdkTimeout" : "bootstrapTimeout");
+            fail(host, "hostUnavailable");
+        }, 30000);
         host.timer.unref?.();
         try {
             view.setVisible(false);
             // DOM 暂时不可见时也能完成初始化；此占位视图始终隐藏，不会覆盖编辑器。
             view.setBounds({x: 0, y: 0, width: 1, height: 1});
             owner.win.contentView.addChildView(view);
-            void contents.loadURL(entryURL).catch(() => fail(host, "hostUnavailable"));
+            void contents.loadURL(entryURL).catch(() => { report("documentLoadFailed"); fail(host, "hostUnavailable"); });
         } catch (_error) { fail(host, "hostUnavailable"); }
         return {version: 1, instanceID: init.instanceID};
     });

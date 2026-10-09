@@ -50,6 +50,19 @@ const capabilityFailureReasons = new Set([
     "originMismatch", "unsupportedDocument", "invalidDocument", "unsafeProcessSwitches",
 ]);
 
+const mapDiagnosticCodes = new Set([
+    "hostSetupFailed", "assetUnavailable", "documentLoadFailed", "bootstrapTimeout", "sdkTimeout",
+    "providerRequestDenied", "providerInsecureRequest", "providerHTTPFailure", "providerNetworkFailure",
+    "cspScript", "cspWorker", "cspConnect", "cspImage", "cspStyle", "cspEval", "cspWasm",
+    "storageUnavailable", "webglUnavailable", "amapInvalidKey", "amapInvalidSecurityCode",
+    "amapDomainMismatch", "amapPlatformMismatch",
+]);
+const logMapDiagnostic = (code: unknown) => {
+    if (typeof code === "string" && mapDiagnosticCodes.has(code)) {
+        console.warn("Database map diagnostic:", code);
+    }
+};
+
 export const isDesktopAVMapHostSupported = async (): Promise<boolean> => {
     const ipc = getIPC();
     if (!ipc) {
@@ -197,6 +210,7 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
     };
     const fail = (code: AVMapErrorCode) => {
         if (!destroyed) {
+            console.warn("Database map failed:", code);
             destroy();
             options.onError(code);
         }
@@ -208,6 +222,11 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
     };
     const onReply = (_event: unknown, value: unknown) => {
         if (destroyed) {
+            return;
+        }
+        const diagnostic = value as {version?: unknown; instanceID?: unknown; type?: unknown; code?: unknown};
+        if (diagnostic?.version === AV_MAP_PROTOCOL_VERSION && diagnostic.instanceID === instanceID && diagnostic.type === "diagnostic") {
+            logMapDiagnostic(diagnostic.code);
             return;
         }
         const reply = parseAVMapReply(value, instanceID);
@@ -273,6 +292,7 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
             return;
         }
         if (reply?.version !== AV_MAP_PROTOCOL_VERSION || reply.instanceID !== instanceID || reply.error) {
+            logMapDiagnostic(reply?.diagnostic);
             fail(reply?.error === "unsupportedEnvironment" ? "unsupportedEnvironment" : "hostUnavailable");
             return;
         }

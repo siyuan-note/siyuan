@@ -28,7 +28,7 @@ const load = (ipc: unknown, browser = false, warnings: unknown[][] = []) => {
     return result;
 };
 
-const fixture = () => {
+const fixture = (warnings: unknown[][] = []) => {
     const calls: Array<[string, any]> = [];
     const listeners = new Map<string, (...args: any[]) => void>();
     const domListeners = new Map<string, () => void>();
@@ -62,7 +62,7 @@ const fixture = () => {
         getClientRects: () => [rect], getBoundingClientRect: () => rect, contains: (target: unknown) => target === container};
     const errors: string[] = [], clicks: unknown[] = [];
     let ready = 0;
-    const api = load(ipc);
+    const api = load(ipc, false, warnings);
     const host = api.createDesktopAVMapHost(container, {provider: "openfreemap", theme: "light",
         credentials: {apiKey: "do-not-send", extra: "private"}, onError: (value: string) => errors.push(value),
         onMarkerClick: (...args: unknown[]) => clicks.push(args), onReady: () => ready++});
@@ -83,6 +83,20 @@ const fixture = () => {
 };
 
 describe("desktop map transport", () => {
+    it("logs only allowlisted diagnostics for the current instance and ignores provider text", () => {
+        const warnings: unknown[][] = [];
+        const f = fixture(warnings);
+        f.reply({type: "diagnostic", code: "cspWorker", detail: "https://secret.invalid/?key=private"});
+        f.reply({type: "diagnostic", code: "https://secret.invalid/?key=private"});
+        f.reply({type: "diagnostic", code: "cspScript", instanceID: "wrong"});
+        assert.deepEqual(warnings, [["Database map diagnostic:", "cspWorker"]]);
+        assert.deepEqual(f.errors, []);
+        f.host.destroy();
+        f.reply({type: "diagnostic", code: "cspScript"});
+        assert.equal(warnings.length, 1);
+        const {mapDiagnosticCodes} = require("../../../../../electron/mapHostDiagnostics");
+        for (const code of mapDiagnosticCodes) assert.ok(source.includes(`"${code}"`));
+    });
     it("logs only approved capability reason codes and never exception or response details", async () => {
         for (const reason of ["ownerUnavailable", "notMainFrame", "notInitialized", "unregisteredOwner", "invalidKernelOrigin",
             "originMismatch", "unsupportedDocument", "invalidDocument", "unsafeProcessSwitches"]) {

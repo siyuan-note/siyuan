@@ -3515,7 +3515,7 @@ ${preview.noteTypes.map((noteType) => `<li class="b3-list-item"><span class="b3-
 <ul class="b3-list b3-list--background card__v2-panel-list">
 ${preview.decks.map((deck) => `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(deck.name)}</span><span class="b3-list-item__meta">${deck.cardCount}</span></li>`).join("")}
 </ul>
-${preview.unsupported.length === 0 ? "" : `<div class="ft__warning">${preview.unsupported.map(escapeHtml).join("<br>")}</div>`}
+${preview.unsupported.length === 0 ? "" : `<div class="ft__error">${preview.unsupported.map(escapeHtml).join("<br>")}</div>`}
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.targetNotebook}</div>
 <select data-type="notebook" class="b3-select fn__block"${notebooks.length === 0 ? " disabled" : ""}>
 ${notebooks.map((notebook) => `<option value="${escapeAttr(notebook.id)}">${escapeHtml(notebook.name)}</option>`).join("")}

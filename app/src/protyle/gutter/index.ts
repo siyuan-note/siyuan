@@ -38,7 +38,8 @@ import {
 } from "../wysiwyg/transaction";
 import {isEmptyParagraph} from "../wysiwyg/emptyTextBlock";
 import {removeBlockPreservingSelectionMode} from "../wysiwyg/remove";
-import {focusBlock, focusByRange, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
+import {focusBlock, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {getHeadingConversionElements} from "../wysiwyg/headingConversion";
 import {hideElements} from "../ui/hideElements";
 import {markGutterForFoldRestore} from "../ui/gutterVisibility";
@@ -46,6 +47,7 @@ import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {toggleListMindmap} from "../render/listMindmap";
 import {getBlockHeightTarget, setBlockHeight} from "./height";
+import {orderGutterTurnIntoItems} from "./turnIntoMenu";
 import {
     getContenteditableElement,
     getEmbedGutterOperationContext,
@@ -125,6 +127,7 @@ import {
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
 import {getEmbedHeadingLevel, isHeadingEmbed, renderEmbedHeadings} from "../render/embedHeading";
 import {getBlockSelectionModeElement} from "../wysiwyg/blockSelection";
+import {getAutoListDirection} from "../render/autoDirection";
 import {
     getBacklinkGutterContentTop,
     getContainerGutterSpace,
@@ -144,6 +147,17 @@ import {hasTabsTasks} from "../render/tabsRender";
 const restoreGutterRange = (protyle: IProtyle) => {
     // 多选块菜单只操作选中的块，不恢复旧文本光标，避免编辑器滚动到光标位置。
     if (window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BLOCK_MULTI) {
+        return;
+    }
+    const mindmap = protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select > .mindmap-view")?.parentElement;
+    if (mindmap) {
+        // 整块操作使用正文编辑器焦点，避免画布拦截快捷键或恢复节点内的编辑选区。
+        protyle.wysiwyg.element.focus({preventScroll: true});
+        const range = document.createRange();
+        range.setStart(mindmap, 0);
+        range.collapse(true);
+        protyle.toolbar.range = range;
+        focusByRange(range);
         return;
     }
     const range = protyle.toolbar.range;
@@ -1113,9 +1127,7 @@ export class Gutter {
 
     private showMobileAppearance(protyle: IProtyle) {
         const toolbarElement = document.getElementById("keyboardToolbar");
-        const dynamicElements = toolbarElement.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
-        dynamicElements[0].classList.add("fn__none");
-        dynamicElements[1].classList.remove("fn__none");
+        toolbarElement.querySelector(".keyboard__dynamic").classList.remove("fn__none");
         toolbarElement.querySelector('.keyboard__action[data-type="text"]').classList.add("protyle-toolbar__item--current");
         toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
         toolbarElement.classList.remove("fn__none");
@@ -1216,7 +1228,7 @@ export class Gutter {
                 icon: "iconTurnInto",
                 label: window.siyuan.languages.turnInto,
                 type: "submenu",
-                submenu: turnIntoSubmenu
+                submenu: orderGutterTurnIntoItems(turnIntoSubmenu, item => item.id)
             }).element);
             if (headingLevel) {
                 const ids = selectsElement.map((item) => item.getAttribute("data-node-id"));
@@ -1271,7 +1283,7 @@ export class Gutter {
                     icon: "iconTurnInto",
                     label: window.siyuan.languages.turnInto,
                     type: "submenu",
-                    submenu,
+                    submenu: orderGutterTurnIntoItems(submenu, item => item.id),
                 }).element);
             }
         }
@@ -1807,6 +1819,7 @@ export class Gutter {
                     {menuId: "check", icon: "iconCheck", label: "check", type: "UL2TL"},
                 ].forEach(target => turnIntoSubmenu.push(this.turnsOneInto({
                     ...target, id, protyle, nodeElement, label: window.siyuan.languages[target.label],
+                    accelerator: window.siyuan.config.keymap.editor.insert[target.label].custom,
                 })));
             } else if (listSubtype === "o") {
                 turnIntoSubmenu.push(this.turnsOneInto({
@@ -1877,6 +1890,7 @@ export class Gutter {
                     id: "listMindmap",
                     icon: "iconMindmap",
                     label: window.siyuan.languages.mindmap,
+                    accelerator: window.siyuan.config.keymap.editor.insert.mindmap?.custom,
                     click() {
                         hideElements(["select"], protyle);
                         void toggleListMindmap(protyle, nodeElement as HTMLElement);
@@ -1996,7 +2010,7 @@ export class Gutter {
                 icon: "iconTurnInto",
                 label: window.siyuan.languages.turnInto,
                 type: "submenu",
-                submenu: turnIntoSubmenu
+                submenu: orderGutterTurnIntoItems(turnIntoSubmenu, item => item.id)
             }).element);
         }
         if (!isEmbedMenu && !protyle.disabled && !nodeElement.classList.contains("hr") &&
@@ -2439,15 +2453,18 @@ export class Gutter {
                     submenu,
                 }).element);
             }
-        } else if ((type === "NodeVideo" || type === "NodeAudio") && !protyle.disabled) {
-            window.siyuan.menus.menu.append(new MenuItem({id: "separator_VideoOrAudio", type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: type === "NodeVideo" ? "assetVideo" : "assetAudio",
-                type: "submenu",
-                icon: type === "NodeVideo" ? "iconVideo" : "iconRecord",
-                label: window.siyuan.languages.assets,
-                submenu: videoMenu(protyle, nodeElement, type)
-            }).element);
+        } else if (type === "NodeVideo" || type === "NodeAudio") {
+            const submenu = videoMenu(protyle, nodeElement, type);
+            if (submenu.some(item => !item.ignore && item.type !== "separator")) {
+                window.siyuan.menus.menu.append(new MenuItem({id: "separator_VideoOrAudio", type: "separator"}).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: type === "NodeVideo" ? "assetVideo" : "assetAudio",
+                    type: "submenu",
+                    icon: type === "NodeVideo" ? "iconVideo" : "iconRecord",
+                    label: window.siyuan.languages.assets,
+                    submenu
+                }).element);
+            }
         } else if (type === "NodeIFrame" && !protyle.disabled && !getHostCapabilities().remoteKernel) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_IFrame", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -3552,7 +3569,7 @@ export class Gutter {
             id: "copyAsPNG",
             iconHTML: "",
             label: window.siyuan.languages.copyAsPNG,
-            ignore: !getHostCapabilities().importExport,
+            ignore: !getHostCapabilities().documentImportExport,
             click() {
                 exportImage(id, true);
             }
@@ -3932,7 +3949,9 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
         // 脑图中的原始列表项已隐藏，使用可见面板定位列表块标。
         let rect = (mindmapElement || element).getBoundingClientRect();
         let marginHeight = 0;
-        const isRTL = window.siyuan.config.editor.rtl || getComputedStyle(element).direction === "rtl";
+        const autoListDirection = getAutoListDirection(element);
+        const isRTL = autoListDirection ? autoListDirection === "rtl" :
+            window.siyuan.config.editor.rtl || getComputedStyle(element).direction === "rtl";
         if (mindmapElement) {
             space = 0;
         } else if (listItem && !isRTL) {

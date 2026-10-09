@@ -3,6 +3,7 @@
 @use "wysiwyg" as *;
 @use "attr" as *;
 @use "mindmap-view" as *;
+@use "block-resize" as *;
 
 .protyle-lite-fragment .protyle-action__menu {
   display: none;
@@ -36,8 +37,23 @@
 
   &__down,
   &__up,
-  &__bar {
+  &__bar,
+  &__page {
     pointer-events: auto;
+  }
+
+  &__page {
+    position: absolute;
+    left: 50%;
+    bottom: 12%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__page-up {
+    transform: rotate(180deg);
   }
 
   svg {
@@ -113,6 +129,14 @@
         touch-action: none;
       }
     }
+  }
+}
+
+.protyle--page-scroll {
+  --b3-protyle-page-scroll-gutter: 64px;
+
+  @media (pointer: coarse) {
+    --b3-protyle-page-scroll-gutter: 84px;
   }
 }
 
@@ -477,7 +501,7 @@
   > .protyle-wysiwyg,
   > .sy__backlink--bottom {
     padding-left: var(--b3-protyle-padding-left);
-    padding-right: var(--b3-protyle-padding-right);
+    padding-right: max(var(--b3-protyle-padding-right), var(--b3-protyle-page-scroll-gutter, 0px));
   }
 
   > .protyle-top {
@@ -485,7 +509,7 @@
     .protyle-background__ia,
     .protyle-db-attr {
       margin-left: var(--b3-protyle-padding-left);
-      margin-right: var(--b3-protyle-padding-right);
+      margin-right: max(var(--b3-protyle-padding-right), var(--b3-protyle-page-scroll-gutter, 0px));
     }
   }
 }
@@ -1398,5 +1422,49 @@ table + .protyle-action__table {
     z-index: 3;
     background-color: var(--b3-theme-primary);
     pointer-events: none;
+  }
+}
+.image-ocr {
+  display: flex;
+  gap: 16px;
+  min-height: 0;
+
+  &__preview {
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+
+    img {
+      max-width: 100%;
+    }
+  }
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+    resize: none;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+
+    &__text {
+      min-height: 160px;
+    }
+  }
+}
+
+.img__name,
+.img__alt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow-wrap: anywhere;
+  white-space: break-spaces;
+
+  > span {
+    flex: 1;
+    width: 0;
   }
 }

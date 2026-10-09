@@ -40,12 +40,14 @@ interface ItemsSettingTabOptions<TId extends string = string> extends SettingTab
 
 interface PanelSettingTabOptions<TId extends string = string> extends SettingTabShell<TId> {
     searchStrings: () => string[];
-    mount: (root: HTMLElement, keywords?: string, app?: App) => void | Promise<void>;
+    mount: (root: HTMLElement, keywords?: string, app?: App, rebuild?: boolean) => void | Promise<void>;
 }
 
 type ControlSpecBase = {
     title: string;
     desc?: string;
+    /** 补充检索词，用于同时展示有依赖关系的设置项 */
+    keywords?: string[];
     save?: SaveFn;
     afterMount?: (root: HTMLElement) => void | Promise<void>;
     /** 搜索时动态判断条目是否可用 */
@@ -255,6 +257,7 @@ class SettingGroupBuilder<TId extends string> {
             kind: "full",
             rowParts,
             searchTitle: spec.title,
+            searchTexts: spec.keywords ? () => spec.keywords : undefined,
             searchAvailability: spec.searchAvailability,
             readValue: (el) => control.readValue(el),
             save: spec.save ?? this.tab.defaultSave?.bind(null, id),
@@ -512,10 +515,9 @@ export class SettingBuilder {
         let tabSearchIndex: readonly string[] | undefined;
         return {
             ...shell,
-            // panel 型 Tab 不支持 rebuild（无注册项可清），忽略该参数以对齐 SettingTab.mount 签名
-            mount: async (root, {keywords} = {}, app, _rebuild) => {
-                void _rebuild;
-                await mount(root, keywords, app);
+            // 面板自行处理配置刷新，保留搜索、展开等交互状态。
+            mount: async (root, {keywords} = {}, app, rebuild) => {
+                await mount(root, keywords, app, rebuild);
             },
             scanSearch: (keywords) => {
                 if (tabSearchTitle === undefined) {

@@ -17,6 +17,8 @@ const fixture = (tablet: boolean, alreadyZoomed = false, missingTarget = false) 
     const pending: Promise<void>[] = [];
     let focused = 0;
     let scrolled = 0;
+    let backlinksUpdated = 0;
+    const siyuan: any = {config: {editor: {dynamicLoadBlocks: 64, backlinkShowBottom: true}}};
     const target = {
         getBoundingClientRect: () => ({height: 20}),
         classList: {contains: () => false},
@@ -31,7 +33,7 @@ const fixture = (tablet: boolean, alreadyZoomed = false, missingTarget = false) 
         Constants: {
             CB_GET_HTML: "html", CB_GET_ALL: "all", CB_GET_FOCUS: "focus", CB_GET_UNUNDO: "unundo",
         },
-        window: {siyuan: {config: {editor: {dynamicLoadBlocks: 64, backlinkShowBottom: true}}}},
+        window: {siyuan},
         fetchPost: (_url: string, _data: any, callback: (data: any) => Promise<void>) => {
             pending.push(Promise.resolve(callback({data: {}})));
         },
@@ -57,6 +59,11 @@ const fixture = (tablet: boolean, alreadyZoomed = false, missingTarget = false) 
         loads,
         focused: () => focused,
         scrolled: () => scrolled,
+        backlinksUpdated: () => backlinksUpdated,
+        setMobileEditor: (primary = true) => {
+            siyuan.mobile = {editor: {protyle: primary ? protyle : {}},
+                docks: {backlink: {update: () => backlinksUpdated++}}};
+        },
         settle: () => Promise.all(pending),
         zoom: (options: any = {}) => exports.zoomOut({protyle, id: "target", ...options}),
     };
@@ -113,4 +120,25 @@ test("desktop breadcrumb navigation retains focus", () => {
     f.zoom();
     assert.equal(f.focused(), 1);
     assert.equal(f.scrolled(), 1);
+});
+
+test("mobile backlinks follow focus and exit-focus after rendering without dropping the caller callback", () => {
+    for (const id of ["target", "root"]) {
+        const f = fixture(true);
+        let callback = 0;
+        f.zoom({id, callback: () => callback++});
+        f.setMobileEditor();
+        assert.equal(f.backlinksUpdated(), 0);
+        f.loads[0].afterCB();
+        assert.equal(f.backlinksUpdated(), 1);
+        assert.equal(callback, 1);
+    }
+});
+
+test("secondary editor focus does not change the mobile main editor's backlinks", () => {
+    const f = fixture(true);
+    f.zoom();
+    f.setMobileEditor(false);
+    f.loads[0].afterCB();
+    assert.equal(f.backlinksUpdated(), 0);
 });

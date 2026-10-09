@@ -7,7 +7,7 @@
 		"id": "20230429114837-70asb4j",
 		"title": "术语表",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260930224728"
 	},
 	"Children": [
 		{
@@ -874,7 +874,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429114837-j6668qw",
-				"updated": "20230428210748"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -1092,7 +1092,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429114837-1fw1u07",
-				"updated": "20230428210813"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -1120,12 +1120,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429114837-idbctyn",
-				"updated": "20230429101947"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "通过钉住窗口还可以实现该窗口位于所有应用程序之上，以便用户更好的利用有限的屏幕空间。"
+					"Data": "通过置顶窗口还可以实现该窗口位于所有应用程序之上，以便用户更好的利用有限的屏幕空间。"
 				}
 			]
 		},

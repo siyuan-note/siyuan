@@ -22,7 +22,7 @@ import {getDisplayName, movePathTo} from "../util/pathName";
 import type {App} from "../index";
 import {resize} from "../protyle/util/resize";
 import {setStorageVal} from "../protyle/util/compatibility";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {updateCardHV} from "./util";
 import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
@@ -316,6 +316,24 @@ export const bindCardEvent = async (options: {
     }
     const countElement = options.element.querySelector('[data-type="count"]');
     const filterElement = options.element.querySelector('[data-type="filter"]');
+    let resetPending = false;
+    let resetRefresh: {card: ICard, onRefreshed: () => void};
+    const refreshResetCard = () => {
+        const refresh = resetRefresh;
+        resetPending = true;
+        return fetchPost("/api/riff/getRiffCardsByBlockIDs", {blockIDs: [refresh.card.blockID]}, response => {
+            const block = response.data.blocks.find(item => item.id === refresh.card.blockID);
+            if (!block?.riffCardID) {
+                showMessage(window.siyuan.languages.invalid, 3000, "error");
+                return;
+            }
+            refresh.card.cardID = block.riffCardID;
+            resetRefresh = undefined;
+            refresh.onRefreshed();
+        }).finally(() => {
+            resetPending = false;
+        });
+    };
     const fetchNewRound = () => {
         const currentCardType = filterElement.getAttribute("data-cardtype");
         const docId = filterElement.getAttribute("data-id");
@@ -345,6 +363,14 @@ export const bindCardEvent = async (options: {
         const target = event.target as HTMLElement;
         let type = "";
         const currentCard = options.cardsData.cards[index];
+        if (resetPending || (resetRefresh && resetRefresh.card === currentCard)) {
+            if (!resetPending) {
+                refreshResetCard();
+            }
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
         const docId = filterElement.getAttribute("data-id");
         if (typeof event.detail === "string") {
             if (["1", "j", "a"].includes(event.detail)) {
@@ -439,32 +465,40 @@ export const bindCardEvent = async (options: {
                         icon: "iconRefresh",
                         label: window.siyuan.languages.reset,
                         click() {
+                            resetPending = true;
+                            let refreshing: Promise<void>;
                             fetchPost("/api/riff/resetRiffCards", {
                                 type: filterElement.getAttribute("data-cardtype"),
                                 id: docId,
                                 deckID: Constants.QUICK_DECK_ID,
                                 blockIDs: [currentCard.blockID],
                             }, () => {
-                                const minLang = window.siyuan.languages._time["1m"].replace("%s", "");
-                                currentCard.lapses = 0;
-                                currentCard.lastReview = -62135596800000;
-                                currentCard.reps = 0;
-                                currentCard.state = 0;
-                                currentCard.nextDues = {
-                                    1: minLang,
-                                    2: minLang.replace("1", "5"),
-                                    3: minLang.replace("1", "10"),
-                                    4: window.siyuan.languages._time["1d"].replace("%s", "").replace("1", "6")
-                                };
-                                actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
-                                    if (btnIndex < 2) {
-                                        return;
-                                    }
-                                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
-                                });
-                                options.cardsData.unreviewedOldCardCount--;
-                                options.cardsData.unreviewedNewCardCount++;
-                                countElement.innerHTML = genCardCount(options.cardsData, index);
+                                resetRefresh = {card: currentCard, onRefreshed: () => {
+                                    const minLang = window.siyuan.languages._time["1m"].replace("%s", "");
+                                    currentCard.lapses = 0;
+                                    currentCard.lastReview = -62135596800000;
+                                    currentCard.reps = 0;
+                                    currentCard.state = 0;
+                                    currentCard.nextDues = {
+                                        1: minLang,
+                                        2: minLang.replace("1", "5"),
+                                        3: minLang.replace("1", "10"),
+                                        4: window.siyuan.languages._time["1d"].replace("%s", "").replace("1", "6")
+                                    };
+                                    actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
+                                        if (btnIndex < 2) {
+                                            return;
+                                        }
+                                        element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
+                                    });
+                                    options.cardsData.unreviewedOldCardCount--;
+                                    options.cardsData.unreviewedNewCardCount++;
+                                    countElement.innerHTML = genCardCount(options.cardsData, index);
+                                }};
+                                refreshing = refreshResetCard();
+                            }).finally(async () => {
+                                await refreshing;
+                                resetPending = false;
                             });
                         }
                     });
@@ -698,7 +732,8 @@ export const bindCardEvent = async (options: {
             return;
         }
         const revealState = getFlashcardRevealState(editor.protyle);
-        if (revealState.pendingGeneration === revealState.generation) {
+        if ((actionElements[0].classList.contains("fn__none") && actionElements[1].classList.contains("fn__none")) ||
+            revealState.pendingGeneration === revealState.generation) {
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -737,7 +772,7 @@ export const bindCardEvent = async (options: {
             }
             return;
         }
-        if ("-3" === type || (["1", "2", "3", "4"].includes(type) && actionElements[0].classList.contains("fn__none"))) {
+        if ("-3" === type || (["1", "2", "3", "4"].includes(type) && !actionElements[1].classList.contains("fn__none"))) {
             fetchPost(type === "-3" ? "/api/riff/skipReviewRiffCard" : "/api/riff/reviewRiffCard", {
                 deckID: currentCard.deckID,
                 cardID: currentCard.cardID,
@@ -798,14 +833,19 @@ const emitEvent = (card: ICard, type: string) => {
     });
 };
 
-export const openCard = (app: App, selectReviewSet = false) => {
+export const openCard = (app: App, selectReviewSet = false, openOnly = false) => {
     if (window.siyuan.config.readonly) {
+        return;
+    }
+    if (openOnly && window.siyuan.dialogs.some((item) =>
+        item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD ||
+        item.element.hasAttribute("data-flashcard-v2-review"))) {
         return;
     }
     fetchPost("/api/flashcard/getMigrationStatus", {}, (statusResponse) => {
         if (statusResponse.data.state === "Legacy") {
             fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
-                openCardByData(app, cardsResponse.data, "all");
+                openCardByData(app, cardsResponse.data, "all", undefined, undefined, openOnly);
             });
             return;
         }
@@ -817,14 +857,19 @@ export const openCard = (app: App, selectReviewSet = false) => {
     });
 };
 
-export const openCardByScope = (app: App, cardType: "doc" | "notebook", id: string, title: string) => {
+export const openCardByScope = (app: App, cardType: "doc" | "notebook", id: string, title: string, openOnly = false) => {
     if (window.siyuan.config.readonly) {
+        return;
+    }
+    if (openOnly && window.siyuan.dialogs.some((item) =>
+        item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD ||
+        item.element.hasAttribute("data-flashcard-v2-review"))) {
         return;
     }
     fetchPost("/api/flashcard/getMigrationStatus", {}, (statusResponse) => {
         if (statusResponse.data.state === "Legacy") {
             fetchDueCards(cardType, id, undefined, (cardsResponse) => {
-                openCardByData(app, cardsResponse.data, cardType, id, title);
+                openCardByData(app, cardsResponse.data, cardType, id, title, openOnly);
             });
             return;
         }
@@ -835,10 +880,13 @@ export const openCardByScope = (app: App, cardType: "doc" | "notebook", id: stri
     });
 };
 
-export const openCardByData = async (app: App, cardsData: ICardData, cardType: TCardType, id?: string, title?: string) => {
+export const openCardByData = async (app: App, cardsData: ICardData, cardType: TCardType, id?: string, title?: string,
+                                     openOnly = false) => {
     const exit = window.siyuan.dialogs.find(item => {
         if (item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD) {
-            item.destroy();
+            if (!openOnly) {
+                item.destroy();
+            }
             return true;
         }
     });
@@ -859,14 +907,16 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         width: isMobile() ? "100vw" : "80vw",
         height: isMobile() ? "100dvh" : "70vh",
         destroyCallback() {
-            if (editor) {
-                editor.destroy();
-                if (window.siyuan.mobile) {
+            try {
+                editor?.destroy();
+            } finally {
+                // 仅释放当前复习窗口的编辑器，保留销毁期间打开的其他编辑器。
+                if (editor && window.siyuan.mobile?.popEditor === editor) {
                     window.siyuan.mobile.popEditor = null;
                 }
-            }
-            if (lastRange) {
-                focusByRange(lastRange);
+                if (lastRange) {
+                    focusByRange(lastRange);
+                }
             }
         },
         resizeCallback(type: string) {

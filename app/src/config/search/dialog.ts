@@ -44,7 +44,7 @@ export const switchSettingTab = (
             search = {keywords, visibleItemIds, visibleGroupIds, unavailableItems};
         }
     }
-    void getSettingTab(tabId).mount(containerElement, search, app);
+    return getSettingTab(tabId).mount(containerElement, search, app);
 };
 
 const syncSettingSearch = (dialogElement: HTMLElement, app: App) => {

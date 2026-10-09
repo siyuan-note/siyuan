@@ -44,6 +44,7 @@ import {
 import {isBuiltinToolbarItemName} from "../protyle/toolbar/defaults";
 import {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "./topBarKey";
 import {applyTopBarEntryVisibility} from "../config/entryVisibility/runtime";
+import {getSettingsWindowHost, isSettingsWindow} from "../config/setting/windowContext";
 
 export type TPluginDataChangeReason = "sync" | "overwrite";
 
@@ -133,6 +134,7 @@ export class Plugin {
             writable: false,
         });
 
+        if (isSettingsWindow()) return;
         resolvePluginToolbar(this, []).forEach(toolbarItem => {
             if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
                 return;
@@ -179,7 +181,7 @@ export class Plugin {
     }
 
     public addToolbarItem(item: IMenuItem) {
-        if (isPluginDisposed(this)) {
+        if (isPluginDisposed(this) || isSettingsWindow()) {
             return;
         }
         if (typeof item?.name !== "string" || !item.name.trim() || item.name !== item.name.trim() ||
@@ -204,7 +206,7 @@ export class Plugin {
     }
 
     public addCommand(command: ICommand) {
-        if (isPluginDisposed(this)) {
+        if (isPluginDisposed(this) || isSettingsWindow()) {
             return;
         }
         if (typeof command.hotkey !== "string") {
@@ -254,7 +256,7 @@ export class Plugin {
         contextMenu?: (menu: subMenu) => void,
         callback?: (evt: MouseEvent) => void
     }) {
-        if (isPluginDisposed(this)) {
+        if (isPluginDisposed(this) || isSettingsWindow()) {
             return;
         }
         if (options.element && (isMobile() || isWindow())) {
@@ -386,7 +388,7 @@ export class Plugin {
         title: string,
         callback: (event: MouseEvent, protyle: IProtyle) => void,
     }) {
-        if (isPluginDisposed(this)) {
+        if (isPluginDisposed(this) || isSettingsWindow()) {
             return options.id;
         }
         options.icon = options.icon.trim();
@@ -409,7 +411,7 @@ export class Plugin {
         element: HTMLElement,
         position?: "right" | "left",
     }) {
-        if (isPluginDisposed(this)) {
+        if (isPluginDisposed(this) || isSettingsWindow()) {
             return options.element;
         }
         /// #if !MOBILE
@@ -429,6 +431,10 @@ export class Plugin {
 
     public openSetting() {
         if (isPluginDisposed(this) || !this.setting) {
+            return;
+        }
+        if (isSettingsWindow()) {
+            void getSettingsWindowHost()?.openPluginSetting(this.name).catch(error => console.error(error));
             return;
         }
         this.setting.open(this.displayName || this.name);
@@ -596,7 +602,7 @@ export class Plugin {
         update?: (this: Custom) => void,
         init: (this: Custom, custom: Custom) => void
     }) {
-        if (isPluginDisposed(this)) {
+        if (isPluginDisposed(this) || isSettingsWindow()) {
             return;
         }
         /// #if !MOBILE
@@ -663,7 +669,7 @@ export class Plugin {
             throw new Error("Agent capability name and description are required");
         }
         const id = "plugin/frontend/" + encodeURIComponent(this.name) + "/" + encodeURIComponent(name);
-        if (isPluginDisposed(this)) {
+        if (isPluginDisposed(this) || isSettingsWindow()) {
             return id;
         }
         if (!this.agentCapabilities.some((capability) => capability.id === id)) {
@@ -695,7 +701,7 @@ export class Plugin {
         update?: (this: Custom | MobileCustom) => void,
         init: (this: Custom | MobileCustom, custom: Custom | MobileCustom) => void
     }) {
-        if (isPluginDisposed(this)) {
+        if (isPluginDisposed(this) || isSettingsWindow()) {
             return;
         }
         const id = options.id || options.type;
@@ -766,7 +772,7 @@ export class Plugin {
         originalRefBlockIDs?: Record<string, string>,
         isBacklink: boolean,
     }) => {
-        if (isPluginDisposed(this)) {
+        if (isPluginDisposed(this) || isSettingsWindow()) {
             return;
         }
         window.siyuan.blockPanels.push(new BlockPanel({

@@ -77,6 +77,27 @@ func TestAuthThrottleBackoff(t *testing.T) {
 	}
 }
 
+func TestAuthThrottleSaturation(t *testing.T) {
+	key := "TestAuthThrottleSaturation"
+	resetAuthThrottleForTest(key)
+	t.Cleanup(func() { resetAuthThrottleForTest(key) })
+	for i := 1; i <= 1000; i++ {
+		AuthThrottleFail(key)
+		if i < 10 {
+			continue
+		}
+		if retryAfter := AuthThrottleCheck(key); retryAfter < authThrottleLockMaxSec || retryAfter > authThrottleLockMaxSec+1 {
+			t.Fatalf("lock lost its cap after %d failures: %d", i, retryAfter)
+		}
+	}
+	authThrottleLock.Lock()
+	count := authThrottles[key].FailCount
+	authThrottleLock.Unlock()
+	if count > 10 {
+		t.Fatalf("failure count was not saturated: %d", count)
+	}
+}
+
 // TestAuthThrottleWindowReset 验证窗口期外的陈旧失败计数被清零，避免误锁。
 func TestAuthThrottleWindowReset(t *testing.T) {
 	key := "TestAuthThrottleWindowReset"

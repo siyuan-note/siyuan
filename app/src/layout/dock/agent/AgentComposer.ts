@@ -112,7 +112,7 @@ const hintSkill = registerBuiltinSlashHint((key: string, protyle: IProtyle): IHi
             .map((s: Record<string, string>) => ({
                 value: '<span data-type="text" custom-agent-skill="true" contenteditable="false">' +
                     escapeHtml(s.name) + "</span> ",
-                html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic">' +
+                html: '<div class="b3-list-item__first" data-type="agent-skill"><svg class="b3-list-item__graphic">' +
                     '<use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">' +
                     escapeHtml(s.name) + "</span></div>" +
                     (s.description ? '<div class="b3-list-item__meta b3-list-item__showall">' + escapeHtml(s.description) + "</div>" : ""),
@@ -315,7 +315,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
 
         // ↑ 翻历史：仅在空输入或已处于历史浏览时触发
         if (enableHistory && event.key === "ArrowUp" && !event.shiftKey) {
-            const isEmpty = (wysiwyg.element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim() === "";
+            const isEmpty = (wysiwyg.element.textContent || "").replaceAll(Constants.ZWSP, "").trim() === "";
             if ((history.isBrowsing() || isEmpty) && history.has()) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -354,7 +354,50 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     };
 
     const getBlockHTML = (): string => {
-        return fragment.getBlockHTML(resetEmbedBlocks);
+        return fragment.getBlockHTML((element) => {
+            resetEmbedBlocks(element);
+            // 仅清理消息边界的段落空白，保留内部空行和非文本内容。
+            const trimBoundary = (fromStart: boolean) => {
+                const trimNode = (node: Node): boolean => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        const pattern = fromStart ? `^[\\s${Constants.ZWSP}]+` : `[\\s${Constants.ZWSP}]+$`;
+                        node.textContent = (node.textContent || "").replace(new RegExp(pattern), "");
+                        return !node.textContent;
+                    }
+                    if (!(node instanceof HTMLElement)) {
+                        return false;
+                    }
+                    if (node.tagName === "BR") {
+                        node.remove();
+                        return true;
+                    }
+                    const types = (node.getAttribute("data-type") || "").split(" ").filter(Boolean);
+                    if (node.tagName !== "SPAN" || types.some(type =>
+                        !["strong", "em", "s", "u", "mark", "sup", "sub", "text"].includes(type))) {
+                        return false;
+                    }
+                    return trimChildren(node);
+                };
+                const trimChildren = (parent: HTMLElement): boolean => {
+                    const nodes = Array.from(parent.childNodes);
+                    if (!fromStart) {
+                        nodes.reverse();
+                    }
+                    return nodes.every(trimNode);
+                };
+                let block = fromStart ? element.firstElementChild : element.lastElementChild;
+                while (block?.getAttribute("data-type") === "NodeParagraph") {
+                    const content = block.querySelector<HTMLElement>('[contenteditable="true"]');
+                    if (!content || !trimChildren(content)) {
+                        break;
+                    }
+                    block.remove();
+                    block = fromStart ? element.firstElementChild : element.lastElementChild;
+                }
+            };
+            trimBoundary(true);
+            trimBoundary(false);
+        });
     };
 
     return {

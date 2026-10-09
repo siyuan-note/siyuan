@@ -1,4 +1,5 @@
 import {addScript} from "../util/addScript";
+import {isFoldedRenderContent} from "./foldedContent";
 import {Constants} from "../../constants";
 import {genIconHTML} from "./util";
 import {hasClosestByClassName} from "../util/hasClosest";
@@ -13,6 +14,7 @@ export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
     } else {
         graphvizElements = element.querySelectorAll('[data-subtype="graphviz"]:not([data-render="true"])');
     }
+    graphvizElements = Array.from(graphvizElements).filter(item => !isFoldedRenderContent(item));
     if (graphvizElements.length === 0) {
         return;
     }

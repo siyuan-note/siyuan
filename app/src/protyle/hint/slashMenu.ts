@@ -3,7 +3,11 @@ import {reorderEntrySlots} from "../../config/entryVisibility/order";
 export type TSlashMenuItem = IHintData & {
     entryKey: string;
     showInLite?: boolean;
+    frequentEligible?: boolean;
 };
+
+export const getSlashEntryKey = (item: IHintData): string =>
+    "entryKey" in item && typeof item.entryKey === "string" ? item.entryKey : "";
 
 interface IResolveSlashMenuOptions {
     enabled: boolean;

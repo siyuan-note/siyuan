@@ -81,7 +81,7 @@ func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) a
 		ret.Msg = model.Conf.Language(193)
 		return contractFailure[apicontract.Null](ret)
 	}
-	client := util.NewAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name, model.ResolveAIProviderHeaders(selectedProvider))
+	client := model.NewAIProviderClient(selectedProvider, selectedModel.Name)
 
 	confirmTimeout := resolveAgentConfirmTimeout(model.Conf.AI.Agent.ConfirmTimeout)
 	maxRetries := model.Conf.AI.Agent.MaxRetries
@@ -328,7 +328,7 @@ func agentChatTitleContract(c *gin.Context, req apicontract.AITitleRequest) apic
 		ret.Msg = "no AI provider configured"
 		return contractFailure[string](ret)
 	}
-	client := util.NewAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name, model.ResolveAIProviderHeaders(selectedProvider))
+	client := model.NewAIProviderClient(selectedProvider, selectedModel.Name)
 
 	title := agent.GenerateTitle(client, selectedProvider.BaseURL, selectedProvider.Protocol, selectedModel.Name,
 		req.Message, req.Language)
@@ -462,8 +462,7 @@ func saveSessionContract(c *gin.Context, req apicontract.AISession) apicontract.
 			ret.Msg = runtimeErr.Error()
 			return apicontract.AISaveSession.WithHTTPStatus(contractFailure[apicontract.AISessionSaveData](ret), http.StatusInternalServerError)
 		}
-		// 旧前端没有 commitTurnID。流已真正结束后，从终止检查点补出提交标识；SaveSession 仍会
-		// 用 runtime 重建权威内容，因此不会信任旧前端可能不完整的流式快照。
+		// 未携带 commitTurnID 的前端在流结束后从终止检查点补出提交标识。
 		if commitTurnID == "" && c.GetHeader("X-SiYuan-Agent-Checkpoint") != "2" {
 			recoverableTurnID, runtimeErr := agent.RecoverableTurnID(meta.ID)
 			if runtimeErr != nil {
@@ -679,6 +678,12 @@ func lsSkillsContract(c *gin.Context, req apicontract.EmptyRequest) apicontract.
 
 var lsUserSkills = contractHandler(apicontract.AIListUserSkills, lsUserSkillsContract)
 
+var lsBuiltinSkills = contractHandler(apicontract.AIListBuiltinSkills, lsBuiltinSkillsContract)
+
+func lsBuiltinSkillsContract(c *gin.Context, req apicontract.EmptyRequest) apicontract.Response[[]apicontract.AIBuiltinSkillInfo] {
+	return apicontract.Success(aiBuiltinSkillsContract(util.DiscoverBuiltinSkills(model.DisabledBuiltinSkills())))
+}
+
 func lsUserSkillsContract(c *gin.Context, req apicontract.EmptyRequest) apicontract.Response[[]apicontract.AIUserSkillInfo] {
 	return apicontract.Success(aiUserSkillsContract(util.DiscoverUserSkills(model.EnabledUserSkills())))
 }
@@ -687,6 +692,10 @@ var getSkill = contractHandler(apicontract.AIGetSkill, getSkillContract)
 
 func getSkillContract(c *gin.Context, req apicontract.AISkillNameRequest) apicontract.Response[apicontract.AISkillData] {
 	ret := gulu.Ret.NewResult()
+	if req.Source != "" {
+		ret.Code, ret.Msg = -1, "official skill content requires a confirmed agent workflow"
+		return contractFailure[apicontract.AISkillData](ret)
+	}
 
 	content, err := util.ReadSkill(req.Name, model.EnabledUserSkills())
 	if err != nil {
@@ -702,6 +711,10 @@ var saveSkill = contractHandler(apicontract.AISaveSkill, saveSkillContract)
 
 func saveSkillContract(c *gin.Context, req apicontract.AISkillSaveRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
+	if req.Source != "" {
+		ret.Code, ret.Msg = -1, "only workspace skills can be modified"
+		return contractFailure[apicontract.Null](ret)
+	}
 
 	if err := util.SaveSkill(req.Name, req.Content); err != nil {
 		ret.Code = -1
@@ -715,6 +728,10 @@ var removeSkill = contractHandler(apicontract.AIRemoveSkill, removeSkillContract
 
 func removeSkillContract(c *gin.Context, req apicontract.AISkillNameRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
+	if req.Source != "" {
+		ret.Code, ret.Msg = -1, "only workspace skills can be modified"
+		return contractFailure[apicontract.Null](ret)
+	}
 
 	if err := util.RemoveSkill(req.Name); err != nil {
 		ret.Code = -1
@@ -728,6 +745,10 @@ var renameSkill = contractHandler(apicontract.AIRenameSkill, renameSkillContract
 
 func renameSkillContract(c *gin.Context, req apicontract.AISkillRenameRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
+	if req.Source != "" {
+		ret.Code, ret.Msg = -1, "only workspace skills can be modified"
+		return contractFailure[apicontract.Null](ret)
+	}
 
 	if err := util.RenameSkill(req.OldName, req.NewName); err != nil {
 		ret.Code = -1

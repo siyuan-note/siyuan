@@ -105,8 +105,12 @@ const openWindow = windowGeometry => {
     const start = source.indexOf('ipcMain.on("siyuan-open-window",');
     const end = source.indexOf('ipcMain.on("siyuan-open-workspace",', start);
     const calls = [];
+    const timers = new Set();
+    const ipcMain = new EventEmitter();
+    const pendingWindowIds = new Set();
     let options;
-    let open;
+    const windows = [];
+    let pathname = "/stage/build/app/window.html";
     class Window extends EventEmitter {
         static getFocusedWindow() {
             return {getBounds: () => ({x: 0, y: 0})};
@@ -114,7 +118,12 @@ const openWindow = windowGeometry => {
         constructor(value) {
             super();
             options = value;
-            this.webContents = {session: {setSpellCheckerLanguages: () => {}}};
+            windows.push(this);
+            this.destroyed = false;
+            this.webContents = Object.assign(new EventEmitter(), {id: 2,
+                session: {setSpellCheckerLanguages: () => {}},
+                setBackgroundThrottling: value => calls.push(["throttling", value]),
+            });
         }
         center() { calls.push("center"); }
         setPosition(x, y) { calls.push({x, y}); }
@@ -123,13 +132,14 @@ const openWindow = windowGeometry => {
         setFullScreen() { calls.push("fullscreen"); }
         setAlwaysOnTop() {}
         loadURL() {}
+        isDestroyed() { return this.destroyed; }
     }
     const workArea = {x: 1920, y: 0, width: 1280, height: 1000};
     runInNewContext(source.slice(start, end), {
-        ipcMain: {on: (_name, callback) => open = callback},
+        ipcMain, pendingWindowIds,
         BrowserWindow: Window, URL, process: {platform: "win32"},
         getWindowKernelTarget: () => ({origin: "http://127.0.0.1:6806", mode: "local"}),
-        windowWorkspaces: {get: () => undefined, associate: () => {}},
+        windowWorkspaces: {get: () => windows[0], associate: () => {}},
         screen: {
             ...screen,
             getDisplayNearestPoint: point => point.x === 2000 ? {id: 2, workArea} : {id: 1, size: {width: 1920, height: 1080}},
@@ -138,21 +148,94 @@ const openWindow = windowGeometry => {
         normalizeWindowGeometry, path: {join: () => "icon"}, appDir: "", appVer: "test",
         remote: {enable: () => {}}, bindSpellcheckContextMenu: () => {}, rememberWindowKernelTarget: () => {},
         windowNavigate: () => {},
+        showWindow: () => calls.push("show"), getWindowPathname: () => pathname, writeLog: () => {},
+        setTimeout: callback => { timers.add(callback); return callback; },
+        clearTimeout: timer => timers.delete(timer),
     });
-    open({sender: {id: 1}}, {
+    const open = () => ipcMain.emit("siyuan-open-window", {sender: {id: 1}}, {
         url: "http://127.0.0.1:6806/stage/build/app/window.html?windowWorkspace=20260924100000-abcdefg",
         windowGeometry,
     });
-    return {options, calls, workArea};
+    open();
+    const win = windows[0];
+    return {options, calls, workArea, win, ipcMain, timers, pendingWindowIds, open,
+        navigate: value => { pathname = value; win.webContents.emit("did-finish-load"); },
+        ready: () => ipcMain.emit("siyuan-window-ready", {sender: win.webContents}),
+    };
 };
 
 test("新窗口创建时使用保存边界，不被鼠标所在显示器覆盖", () => {
     const f = openWindow(state({maximized: true}));
     assert.deepEqual([f.options.x, f.options.y, f.options.width, f.options.height], [100, 80, 900, 700]);
-    assert.deepEqual(f.calls, ["maximize"]);
+    assert.deepEqual(f.calls, []);
+    f.win.emit("ready-to-show");
+    f.ready();
+    assert.deepEqual(f.calls, ["maximize", "show", ["throttling", true]]);
 });
 
 test("旧窗口布局继续使用默认窗口位置", () => {
     const f = openWindow(undefined);
     assert.deepEqual(f.calls, ["center", f.workArea]);
+});
+
+for (const rendererFirst of [true, false]) {
+    test(`新窗口等待自身内容和原生绘制就绪：rendererFirst=${rendererFirst}`, () => {
+        const f = openWindow(state());
+        assert.equal(f.options.show, false);
+        assert.equal(f.options.webPreferences.backgroundThrottling, false);
+        f.ipcMain.emit("siyuan-window-ready", {sender: {id: 99}});
+        f.navigate("/stage/build/app/window.html");
+        f.open();
+        assert.deepEqual(f.calls, []);
+        if (rendererFirst) f.ready();
+        else f.win.emit("ready-to-show");
+        assert.deepEqual(f.calls, []);
+        f.open();
+        assert.deepEqual(f.calls, []);
+        if (rendererFirst) f.win.emit("ready-to-show");
+        else f.ready();
+        assert.deepEqual(f.calls, ["show", ["throttling", true]]);
+        assert.equal(f.timers.size, 0);
+        assert.equal(f.ipcMain.listenerCount("siyuan-window-ready"), 0);
+        assert.equal(f.pendingWindowIds.size, 0);
+        f.ready();
+        f.win.emit("ready-to-show");
+        assert.deepEqual(f.calls, ["show", ["throttling", true]]);
+        f.open();
+        assert.equal(f.calls.at(-1), "show");
+    });
+}
+
+test("全屏窗口也等到内容绘制完成再恢复状态", () => {
+    const f = openWindow(state({fullscreen: true}));
+    assert.deepEqual(f.calls, []);
+    f.ready();
+    f.win.emit("ready-to-show");
+    assert.deepEqual(f.calls, ["fullscreen", "show", ["throttling", true]]);
+});
+
+test("跳转到认证页面后等待原生绘制完成并显示", () => {
+    const f = openWindow(state());
+    f.navigate("/check-auth");
+    assert.deepEqual(f.calls, []);
+    f.win.emit("ready-to-show");
+    assert.deepEqual(f.calls, ["show", ["throttling", true]]);
+});
+
+test("初始化超时可显示窗口，关闭窗口会清理等待资源", () => {
+    const f = openWindow(state());
+    [...f.timers][0]();
+    assert.deepEqual(f.calls, ["show", ["throttling", true]]);
+    assert.equal(f.ipcMain.listenerCount("siyuan-window-ready"), 0);
+    const closed = openWindow(state());
+    const timeout = [...closed.timers][0];
+    closed.win.destroyed = true;
+    closed.win.emit("closed");
+    closed.ready();
+    closed.win.emit("ready-to-show");
+    timeout();
+    assert.deepEqual(closed.calls, []);
+    assert.equal(closed.timers.size, 0);
+    assert.equal(closed.ipcMain.listenerCount("siyuan-window-ready"), 0);
+    assert.equal(closed.pendingWindowIds.size, 0);
 });

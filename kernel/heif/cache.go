@@ -126,7 +126,7 @@ func GetOrCreate(ctx context.Context, source []byte, options Options) (Result, e
 			return Result{Path: cachePath, ETag: etag}, nil
 		}
 
-		data, err := convert(ctx, source, options.Mode)
+		data, err := Convert(ctx, source, options.Mode)
 		if err != nil {
 			return Result{}, err
 		}

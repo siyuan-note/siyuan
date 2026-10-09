@@ -93,6 +93,72 @@ func TestAPIContractSettingMindmapCompatibility(t *testing.T) {
 	})
 }
 
+func TestAPIContractSettingFileTreeClickModeCompatibility(t *testing.T) {
+	compareSettingConfig(t, apicontract.SetFiletree, conf.NewFileTree, []string{
+		`{}`, `{"docIconClickMode":1,"parentDocTitleClickMode":2}`,
+		`{"docIconClickMode":0}`, `{"docIconClickMode":null}`, `{"DocIconClickMode":1}`,
+		`{"parentDocTitleClickMode":0}`, `{"parentDocTitleClickMode":1}`, `{"parentDocTitleClickMode":null}`,
+		`{"ParentDocTitleClickMode":2}`, `{"docIconClickMode":2}`, `{"parentDocTitleClickMode":3}`,
+		`{"docIconClickMode":"1"}`, `{"docIconClickMode":1.5}`, `{"parentDocTitleClickMode":true}`,
+		// 已废弃的布尔字段不再被读取
+		`{"docIconClickExpand":true}`, `{"parentDocClickExpand":true,"parentDocDoubleClickOpen":false}`,
+	})
+}
+
+func TestAPIContractSettingImageDisplayCompatibility(t *testing.T) {
+	compareSettingConfig(t, apicontract.SetEditor, conf.NewEditor, []string{
+		`{}`, `{"displayImgName":true}`, `{"displayImgName":false}`,
+		`{"displayImgName":null}`, `{"DisplayImgName":true}`, `{"displayImgName":"bad"}`,
+		`{"displayImgAlt":true}`, `{"displayImgAlt":false}`, `{"displayImgAlt":null}`,
+		`{"DisplayImgAlt":true}`, `{"displayImgAlt":"bad"}`,
+	})
+}
+
+func TestAPIContractSettingImageDisplayUpdates(t *testing.T) {
+	previousConf, previousReadOnly, previousMarkdown := model.Conf, util.ReadOnly, util.MarkdownSettings
+	model.Conf = model.NewAppConf()
+	model.Conf.Editor = conf.NewEditor()
+	util.ReadOnly = true
+	t.Cleanup(func() {
+		model.Conf, util.ReadOnly, util.MarkdownSettings = previousConf, previousReadOnly, previousMarkdown
+	})
+	for _, entry := range []struct {
+		body string
+		want bool
+	}{
+		{`{"displayImgName":true}`, true},
+		{`{}`, true},
+		{`{"displayImgName":false}`, false},
+		{`{"DisplayImgName":true}`, true},
+		{`{"displayImgName":null}`, false},
+	} {
+		code, message, data := settingContractRequest(t, "setEditor", setEditor, entry.body)
+		var response apicontract.SettingEditor
+		if err := json.Unmarshal(data, &response); err != nil {
+			t.Fatal(err)
+		}
+		if code != 0 || model.Conf.Editor.DisplayImgName != entry.want || response.DisplayImgName != entry.want {
+			t.Fatalf("image display update %s: code=%d message=%s data=%s", entry.body, code, message, data)
+		}
+	}
+	for _, entry := range []struct {
+		body string
+		want bool
+	}{
+		{`{"displayImgAlt":true}`, true}, {`{}`, true}, {`{"displayImgAlt":false}`, false},
+		{`{"DisplayImgAlt":true}`, true}, {`{"displayImgAlt":null}`, false},
+	} {
+		code, message, data := settingContractRequest(t, "setEditor", setEditor, entry.body)
+		var response apicontract.SettingEditor
+		if err := json.Unmarshal(data, &response); err != nil {
+			t.Fatal(err)
+		}
+		if code != 0 || model.Conf.Editor.DisplayImgAlt != entry.want || response.DisplayImgAlt != entry.want {
+			t.Fatalf("image tooltip text update %s: code=%d message=%s data=%s", entry.body, code, message, data)
+		}
+	}
+}
+
 func TestAPIContractSettingParserCompatibility(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	for _, body := range []string{"", `{`, `[]`, `false`, `{"unknown":1e1000}`, `{"app":1e1000,"app":1}`, `{"fontSize":16}{"extra":true}`} {
@@ -212,11 +278,33 @@ func compareSettingPayload[Source, Data any](t *testing.T, route string, convert
 		if err != nil {
 			t.Fatal(err)
 		}
+		// Decision 的旧字段只在响应中投影，持久化配置不重复存储凭证。
+		if ai, ok := any(source).(*conf.AI); ok && ai.Decision != nil {
+			var expected map[string]json.RawMessage
+			if err = json.Unmarshal(before, &expected); err != nil {
+				t.Fatal(err)
+			}
+			expected["decision"], err = json.Marshal(settingDecisionPayload(ai.Decision))
+			if err != nil {
+				t.Fatal(err)
+			}
+			before, err = json.Marshal(expected)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
 		after, err := json.Marshal(convert(source))
 		if err != nil {
 			t.Fatal(err)
 		}
-		if string(before) != string(after) {
+		var beforeValue, afterValue any
+		if err = json.Unmarshal(before, &beforeValue); err != nil {
+			t.Fatal(err)
+		}
+		if err = json.Unmarshal(after, &afterValue); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(beforeValue, afterValue) {
 			t.Fatalf("%s response mapping changed:\n%s\n%s", route, before, after)
 		}
 		if route == "" {

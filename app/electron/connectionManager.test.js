@@ -173,6 +173,7 @@ if (!process.versions.electron) {
                 window.siyuan = {languages: ${JSON.stringify(strings)}, config: {lang: "en"}, dialogs: [], zIndex: 1,
                     menus: {menu: {element: document.createElement("div"), remove() {}}}};
                 const modules = {
+                    "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
                     electron: require("electron"),
                     "../util/genID": {genUUID: () => "test-dialog"},
                     "./moveResize": {moveResize() {}},

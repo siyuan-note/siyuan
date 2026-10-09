@@ -78,7 +78,7 @@ const exportData = async () => {
 };
 
 export const openDataMigration = (options: IDataMigrationOptions = {}) => {
-    if (!getHostCapabilities().importExport) {
+    if (!getHostCapabilities().documentImportExport) {
         return;
     }
     const mode = options.mode || "manage";
@@ -90,7 +90,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         `<option value="${item.id}"${item.id === selectedNotebookID ? " selected" : ""}>${escapeHtml(item.name)}</option>`).join("");
     let nativeImportHTML = "";
     /// #if !BROWSER
-    nativeImportHTML = `<button class="b3-list-item fn__block" data-type="markdown-file"${notebooks.length === 0 ? " disabled" : ""}>
+    nativeImportHTML = getHostCapabilities().localFileSystem ? `<button class="b3-list-item fn__block" data-type="markdown-file"${notebooks.length === 0 ? " disabled" : ""}>
     <svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg>
     <span class="b3-list-item__text">Markdown ${window.siyuan.languages.doc}</span>
 </button>
@@ -101,7 +101,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
 <button class="b3-list-item fn__block" data-type="obsidian">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconObsidian"></use></svg>
     <span class="b3-list-item__text">Obsidian Vault</span>
-</button>`;
+</button>` : "";
     /// #endif
     const dialog = new Dialog({
         title: window.siyuan.languages.dataMigration,
@@ -114,14 +114,14 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
             <span class="b3-list-item__text">SiYuan .sy.zip</span>
             <input class="b3-form__upload" data-type="siyuan" type="file" accept="application/zip">
         </label>
-        <div class="b3-list-item b3-list-item--warning fn__flex-wrap data-migration__item">
+        ${getHostCapabilities().importExport ? `<div class="b3-list-item b3-list-item--warning fn__flex-wrap data-migration__item">
             <svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg>
             <span class="b3-list-item__text">Data.zip</span>
             <span class="data-migration__actions">
                 ${getImportButton("data", "application/zip")}
                 ${getExportButton("export-data", mode)}
             </span>
-        </div>
+        </div>` : ""}
     </div>
     <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.importFromMoreApps}</div>
@@ -135,7 +135,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         ${nativeImportHTML}
     </div>
     <div class="fn__hr"></div>
-    <div class="b3-label__text">${window.siyuan.languages.settingsAndSync}</div>
+    ${getHostCapabilities().importExport ? `<div class="b3-label__text">${window.siyuan.languages.settingsAndSync}</div>
     <div class="fn__hr"></div>
     <div class="b3-list b3-list--background">
         <div class="b3-list-item fn__flex-wrap data-migration__item">
@@ -169,7 +169,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
                 ${hasRepoKey ? `<button class="b3-button b3-button--outline" data-action="copy-key"><svg><use xlink:href="#iconCopy"></use></svg>${window.siyuan.languages.copy}</button>` : `<button class="b3-button b3-button--outline" data-action="import-key"><svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}</button>`}
             </span>
         </div>`}
-    </div>
+    </div>` : ""}
 </div>`,
         width: "560px",
     });

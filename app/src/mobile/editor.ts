@@ -23,7 +23,8 @@ import {restoreMobileTopBarLayout} from "./util/mobileTopBar";
 import {stickyRow} from "../protyle/render/av/row";
 import {invalidateTrackedRanges} from "../protyle/util/trackedRange";
 import {getActiveMobileSecondaryEditor} from "./util/secondaryEditors";
-import {closeMobileBacklinkSheets} from "./util/backlinkPanels";
+import {closeMobileEditorSheets} from "./util/MobileEditorDialog";
+import {invalidateMobileReferenceOpen} from "./util/openReference";
 import {closeAVCellEditor} from "../protyle/render/av/cellEditor";
 
 export const getCurrentEditor = () => {
@@ -69,7 +70,23 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                                    afterOpen?: (protyle: IProtyle) => void, forceReload = false,
                                    isValid: () => boolean = () => true, signal?: AbortSignal,
                                    scrollAttr?: IScrollAttr, updateRecent = true,
-                                   onFailure?: (invalid?: boolean) => void) => {
+                                   onFailure?: (invalid?: boolean, editorUnchanged?: boolean) => void, keepPanels = false) => {
+    invalidateMobileReferenceOpen();
+    const closing = closeMobileEditorSheets();
+    if (closing) {
+        void closing.then(() => {
+            if (isValid() && !signal?.aborted) {
+                loadMobileFileById(app, id, action, scrollPosition, notebookId, afterOpen, forceReload,
+                    isValid, signal, scrollAttr, updateRecent, onFailure, keepPanels);
+            } else {
+                onFailure?.(undefined, true);
+            }
+        }).catch(error => {
+            console.error(error);
+            onFailure?.(undefined, true);
+        });
+        return;
+    }
     let completed = false;
     let titleHidden = false;
     const complete = (protyle: IProtyle) => {
@@ -105,7 +122,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
         if (titleHidden && isValid() && window.siyuan.mobile.editor?.protyle.wysiwyg.element.childElementCount > 0) {
             setEditor();
         }
-        onFailure?.(invalid);
+        onFailure?.(invalid, !titleHidden);
     };
     if (!isValid()) {
         fail();
@@ -145,7 +162,9 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 protyle.block.id = protyle.block.rootID;
                 protyle.wysiwyg.element.setAttribute("data-doc-type", "NodeDocument");
             }
-            closePanel();
+            if (!keepPanels) {
+                closePanel();
+            }
             // 更新文档浏览时间
             const rootID = protyle.block.rootID;
             if (updateRecent) {
@@ -192,6 +211,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             rootId: data.data.rootID,
             notebookId: data.data.box,
             scrollPosition,
+            scrollAttr,
             action: actionList,
             render: {
                 scroll: true,
@@ -316,7 +336,9 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 return;
             }
         }
-        closePanel();
+        if (!keepPanels) {
+            closePanel();
+        }
     }, undefined, undefined, signal).then(() => {
         if (!blockInfoHandled) {
             fail();
@@ -327,7 +349,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
 export const openMobileFileById = (app: App, id: string, action: TProtyleAction[] = [Constants.CB_GET_HL],
                                    scrollPosition?: ScrollLogicalPosition, notebookId?: string,
                                    afterOpen?: (protyle: IProtyle) => void, forceReload = false) => {
-    const closing = closeMobileBacklinkSheets();
+    const closing = closeMobileEditorSheets();
     if (closing) {
         void closing.then(() => openMobileFileById(app, id, action, scrollPosition, notebookId, afterOpen, forceReload))
             .catch(error => console.error(error));
@@ -359,7 +381,7 @@ export const openMobileFileByIdInNewTab = (app: App, id: string,
                                            action: TProtyleAction[] = [Constants.CB_GET_HL],
                                            scrollPosition?: ScrollLogicalPosition, notebookId?: string,
                                            afterOpen?: (protyle: IProtyle) => void) => {
-    const closing = closeMobileBacklinkSheets();
+    const closing = closeMobileEditorSheets();
     if (closing) {
         void closing.then(() => openMobileFileByIdInNewTab(app, id, action, scrollPosition, notebookId, afterOpen))
             .catch(error => console.error(error));

@@ -135,10 +135,12 @@ const getZoomSubMenu = () => {
     return submenu;
 };
 
-export const workspaceMenu = async (app: App, rect: DOMRect) => {
+export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BAR_WORKSPACE) {
-        window.siyuan.menus.menu.remove();
+        if (!openOnly) {
+            window.siyuan.menus.menu.remove();
+        }
         return;
     }
     let remoteConnections: string[] = [];
@@ -432,7 +434,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
                     openHistory(app);
                 }
             }).element);
-            if (!window.siyuan.config.readonly && getHostCapabilities().importExport) {
+            if (!window.siyuan.config.readonly && getHostCapabilities().documentImportExport) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "dataMigration",
                     label: window.siyuan.languages.dataMigration,
@@ -512,6 +514,24 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
             }).element);
         }
         window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
+        if (openOnly) {
+            const menu = window.siyuan.menus.menu;
+            const activeElement = document.activeElement;
+            const currentElement = Array.from(menu.element.lastElementChild.children).find(item =>
+                item.classList.contains("b3-menu__item") &&
+                !item.classList.contains("b3-menu__item--readonly") &&
+                !item.hasAttribute("disabled") && item.getBoundingClientRect().height > 0) as HTMLElement;
+            currentElement?.classList.add("b3-menu__item--current");
+            currentElement?.focus({preventScroll: true});
+            currentElement?.scrollIntoView({block: "nearest"});
+            // 仅在焦点仍位于菜单内时恢复，避免菜单动作打开新界面后抢回原焦点。
+            menu.removeCB = () => {
+                if (activeElement instanceof HTMLElement && activeElement.isConnected &&
+                    menu.element.contains(document.activeElement)) {
+                    activeElement.focus({preventScroll: true});
+                }
+            };
+        }
     };
     if (getHostCapabilities().workspaces) {
         fetchPost("/api/system/getWorkspaces", {}, (response) => renderMenu(response.data));

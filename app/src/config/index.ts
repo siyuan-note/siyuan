@@ -5,7 +5,7 @@ import {initSettingSearch, switchSettingTab} from "./search/dialog";
 import {bindSettingSaveDelegation} from "./setting/save";
 import {Dialog} from "../dialog";
 import {Constants} from "../constants";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {initSettingDrag} from "./setting/drag";
 /// #endif
 import {unmountBazaarTab, withMountedBazaar} from "./bazaarTab";
@@ -17,14 +17,21 @@ import {isBazaarAvailable} from "../util/bazaarAvailability";
 import {getSettingTabDefs} from "./setting/tabs";
 import {clearAccessTabElement} from "./tabs/accessRuntime";
 import {clearSyncTabElement} from "./tabs/syncRuntime";
+import {openChatGPTProvider} from "./tabs/ai/aiProviderUi";
 import type {TSettingTab} from "./setting/tabs";
 import type {App} from "../index";
 import {unmountAssetsTab} from "./assets";
+import {unmountOCRTab} from "./ocr";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {unmountWorkspaceStorage} from "./tabs/workspaceStorage";
+/// #if !MOBILE
+import {openNativeSettings} from "./setting/nativeWindow";
+import {isSettingsWindow} from "./setting/windowContext";
+import {fitSettingsWindowDialog} from "./setting/windowDialog";
+/// #endif
 
 /// #if !MOBILE
-const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
+export const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
     window.siyuan.dialogs.find((item) => item.element.querySelector(".config__tab-container"))?.destroy();
     let range: Range;
     if (getSelection().rangeCount > 0) {
@@ -68,6 +75,8 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
             if (assetsRoot) {
                 unmountAssetsTab(assetsRoot);
             }
+            const ocrRoot = settingDialogRef.element?.querySelector<HTMLElement>('.config__tab-container[data-name="ocr"]');
+            if (ocrRoot) unmountOCRTab(ocrRoot);
             clearSyncTabElement();
             clearAccessTabElement();
             const appRoot = settingDialogRef.element?.querySelector<HTMLElement>('.config__tab-container[data-name="app"]');
@@ -77,10 +86,13 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
             if (range) {
                 focusByRange(range);
             }
+            if (isSettingsWindow()) {
+                window.close();
+            }
         },
     });
     settingDialogRef.element = dialog.element;
-    const disposeDrag = initSettingDrag(dialog.element);
+    const disposeDrag = isSettingsWindow() ? undefined : initSettingDrag(dialog.element);
     dialog.element.setAttribute("data-key", Constants.DIALOG_SETTING);
 
     const tabWrap = dialog.element.querySelector(".config__tab-wrap") as HTMLElement;
@@ -102,21 +114,51 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
         });
     });
     switchSettingTab(dialog.element, app, initialTab);
+    if (isSettingsWindow()) {
+        fitSettingsWindowDialog(dialog);
+    }
     return dialog;
 };
 /// #endif
 
-export const openSetting = (app: App, tab?: TSettingTab) => {
+export const openPluginSetting = (app: App) => {
+    /// #if MOBILE
+    openMobileSetting(app);
+    /// #else
+    return openSettingDialog(app);
+    /// #endif
+};
+
+export const openSetting = (app: App, tab?: TSettingTab, options?: {aiProvider?: "chatgpt"}) => {
+    const aiProvider = options?.aiProvider;
     if (tab === "bazaar" && !isBazaarAvailable()) {
         return;
     }
-    if (tab === "export" && !getHostCapabilities().importExport) {
+    if (tab === "export" && !getHostCapabilities().documentImportExport) {
         return;
     }
     /// #if MOBILE
     openMobileSetting(app, tab);
+    if (aiProvider === "chatgpt") { openChatGPTProvider(); }
     /// #else
-    return openSettingDialog(app, tab);
+    /// #if !BROWSER
+    // 是否在独立窗口中打开设置界面，仅桌面端 Electron 客户端生效
+    if (!isSettingsWindow() && window.siyuan.config.system.settingsWindow) {
+        void openNativeSettings(app, aiProvider ? {tab, aiProvider} : {tab});
+        return;
+    }
+    /// #endif
+    if (isSettingsWindow()) {
+        const dialog = window.siyuan.dialogs.find(item => item.element.getAttribute("data-key") === Constants.DIALOG_SETTING);
+        if (dialog) {
+            switchSettingTab(dialog.element, app, tab || "editor");
+            if (aiProvider === "chatgpt") { openChatGPTProvider(); }
+            return dialog;
+        }
+    }
+    const dialog = openSettingDialog(app, tab);
+    if (aiProvider === "chatgpt") { openChatGPTProvider(); }
+    return dialog;
     /// #endif
 };
 
@@ -164,6 +206,12 @@ export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemNa
         return;
     }
 
+    /// #if !BROWSER && !MOBILE
+    if (!isSettingsWindow() && window.siyuan.config.system.settingsWindow) {
+        await openNativeSettings(app, {tab: "bazaar", readme: {type: bazaarType, from, resource}});
+        return;
+    }
+    /// #endif
     openSetting(app, "bazaar");
     await withMountedBazaar(({bazaar, renderReadme}) => {
         bazaar.switchBazaarTab(app, bazaarType, from);

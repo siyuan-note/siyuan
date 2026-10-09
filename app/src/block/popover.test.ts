@@ -10,6 +10,8 @@ import {ScriptTarget, transpileModule} from "typescript";
 const browserCases = async (source: string) => {
     const check = require("node:assert/strict");
     const requests: ((response: unknown) => void)[] = [];
+    let tooltip = "";
+    const assetRequests: {path: string, signal: AbortSignal, receive: (response: unknown) => void}[] = [];
     class Panel {
         element = document.createElement("div");
         editors: {protyle: IProtyle}[] = [];
@@ -36,6 +38,15 @@ const browserCases = async (source: string) => {
         BlockPanel: Panel,
         fetchSyncPost: () => new Promise(resolve => requests.push(resolve)),
         hideTooltip: () => {},
+        showTooltip: (text: string) => { tooltip = text; },
+        fetchPost: (_url: string, body: {path: string}, receive: (response: unknown) => void,
+                    _before: unknown, _after: unknown, signal: AbortSignal) => {
+            assetRequests.push({path: body.path, receive, signal});
+        },
+        isLocalPath: (value: string) => value.startsWith("assets/"),
+        getAssetExtension: (value: string) => require("node:path").posix.extname(value),
+        getAssetName: (value: string) => require("node:path").posix.basename(value, require("node:path").posix.extname(value))
+            .replace(/-\d{14}-\w{7}$/, ""),
         Constants: {TIMEOUT_INPUT: 5},
         isTouchDevice: () => false,
         isEncryptedBox: () => false,
@@ -133,6 +144,54 @@ const browserCases = async (source: string) => {
     check.equal(window.siyuan.blockPanels.length, 1);
     check.equal(window.siyuan.config.editor.floatWindowMode, 0);
     check.equal(window.siyuan.config.editor.floatWindowDelay, 20);
+
+    const imageRoot = document.createElement("span");
+    imageRoot.className = "img";
+    const image = document.createElement("img");
+    image.title = "Caption %3Cem%3E & details";
+    image.alt = "<literal> description";
+    imageRoot.append(image);
+    document.body.append(imageRoot);
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(tooltip, "Caption %3Cem%3E &amp; details<br>&lt;literal> description");
+    check.equal(image.title, "Caption %3Cem%3E & details");
+    check.equal(image.alt, "<literal> description");
+    image.title = "";
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(tooltip, "&lt;literal> description");
+    image.title = image.alt;
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(tooltip, "&lt;literal> description");
+
+    image.title = "";
+    image.alt = "";
+    image.setAttribute("data-src", "assets/photo%20%3Cname%3E-20260930090000-abcdefg.png");
+    Object.defineProperties(image, {naturalWidth: {value: 1920}, naturalHeight: {value: 1080}});
+    image.style.width = "100px";
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(tooltip, 'photo &lt;name>.png<div class="fn__hr"></div>PNG · 1920 × 1080');
+    check.equal(assetRequests.length, 1);
+    assetRequests[0].receive({code: 0, data: {hSize: "2 MiB"}});
+    check.match(tooltip, /PNG · 1920 × 1080 · 2 MiB$/);
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    document.body.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(assetRequests[1].signal.aborted, true);
+    tooltip = "later target";
+    assetRequests[1].receive({code: 0, data: {hSize: "stale"}});
+    check.equal(tooltip, "later target");
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    const unavailable = tooltip;
+    assetRequests[2].receive({code: 1, data: null});
+    check.equal(tooltip, unavailable);
+    image.setAttribute("data-src", "https://example.com/photo.webp");
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.match(tooltip, /photo.webp.*WEBP · 1920 × 1080/);
+    check.equal(assetRequests.length, 3);
+    image.setAttribute("data-src", "assets/encrypted.png?box=encrypted");
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(assetRequests.length, 3);
+    check.equal(image.title, "");
+    check.equal(image.alt, "");
     return "Popover interaction cases passed";
 };
 
@@ -140,7 +199,7 @@ test("mindmap interaction cancels pending popovers and preserves hover preferenc
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 20000,
 }, async () => {
-    const source = ["../protyle/util/hasClosest.ts", "popover.ts"].map(file => transpileModule(
+    const source = ["../protyle/util/hasClosest.ts", "../util/escape.ts", "../protyle/render/imageTooltip.ts", "panelOwnership.ts", "popoverLifecycle.ts", "popover.ts"].map(file => transpileModule(
         readFileSync(path.join(__dirname, file), "utf8").replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}},
     ).outputText).join("\n");

@@ -33,6 +33,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+var iconHanPattern = regexp.MustCompile(`[\p{Han}]`)
+
 type ColorScheme struct {
 	Primary   string
 	Secondary string
@@ -181,7 +183,7 @@ var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Con
 	}
 
 	var fonts []*conf.EditorFont
-	if nil != model.Conf.Appearance {
+	if "8" == iconType && nil != model.Conf.Appearance {
 		fonts = model.Conf.Appearance.GlobalFontFamilies
 	}
 	svg = applyDynamicIconFont(svg, fonts)
@@ -617,7 +619,7 @@ func generateTypeEightSVG(color, content string) string {
 	}
 
 	// 动态变化字体大小
-	isChinese := regexp.MustCompile(`[\p{Han}]`).MatchString(content)
+	isChinese := iconHanPattern.MatchString(content)
 	var fontSize float64
 	if isChinese {
 		switch {

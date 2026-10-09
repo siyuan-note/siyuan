@@ -306,7 +306,7 @@ func documentStatHeadingMode(embed *ast.Node) (ret int) {
 	if nil == embed {
 		return
 	}
-	if customMode := embed.IALAttr("custom-heading-mode"); "" != customMode {
+	if customMode := embed.IALAttr(embedHeadingModeAttr); "" != customMode {
 		if mode, err := strconv.Atoi(customMode); nil == err && 0 <= mode && mode <= 2 {
 			ret = mode
 		}

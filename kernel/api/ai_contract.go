@@ -91,6 +91,14 @@ func aiUserSkillsContract(values []util.UserSkillInfo) []apicontract.AIUserSkill
 	}
 	return result
 }
+
+func aiBuiltinSkillsContract(values []util.BuiltinSkillInfo) []apicontract.AIBuiltinSkillInfo {
+	result := make([]apicontract.AIBuiltinSkillInfo, len(values))
+	for i, value := range values {
+		result[i] = apicontract.AIBuiltinSkillInfo(value)
+	}
+	return result
+}
 func aiSessionListContract(value *agent.SessionListResult) apicontract.AISessionList {
 	result := apicontract.AISessionList{Total: value.Total, Page: value.Page, PageSize: value.PageSize}
 	if value.Sessions != nil {

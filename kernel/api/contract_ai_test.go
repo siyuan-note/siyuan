@@ -137,7 +137,9 @@ func TestAPIContractAIResponses(t *testing.T) {
 	}{
 		{"/api/ai/testEmbeddingModel", "ignored", 200, "embedding model not configured"},
 		{"/api/ai/testRerankModel", "ignored", 200, "rerank model not configured"},
-		{"/api/ai/testDecisionModel", "ignored", 200, "decision model not configured"},
+		{"/api/ai/testDecisionModel", "", 200, "decision model not configured"},
+		{"/api/ai/testDecisionModel", `{}`, 200, "decision model not configured"},
+		{"/api/ai/testDecisionModel", "ignored", 200, "invalid character"},
 		{"/api/ai/agent/confirm", `{"confirmID":"expired"}`, 409, "agent confirmation expired"},
 		{"/api/ai/agent/question", `{"questionID":"expired"}`, 409, "agent question expired"},
 		{"/api/ai/agent/browserCapabilityResult", `{"callID":"expired","structuredContent":{"nested":[1,true,null]}}`, 409, "agent browser capability call expired"},

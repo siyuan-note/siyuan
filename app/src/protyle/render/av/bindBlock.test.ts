@@ -25,10 +25,12 @@ test("panel binding searches the primary text and anchors to the original field"
     assert.equal(selected, field);
     assert.equal(protyle.toolbar.range, range);
     assert.deepEqual(requests, [["Current title", protyle, "av"]]);
+    exports.openAVBindBlock(protyle, field, "Hidden primary");
+    assert.deepEqual(requests[1], ["Hidden primary", protyle, "av"]);
     protyle.disabled = true;
     exports.openAVBindBlock(protyle, field);
     protyle.disabled = false;
     protyle.options.history = {snapshot: "snapshot"} as IProtyle["options"]["history"];
     exports.openAVBindBlock(protyle, field);
-    assert.equal(requests.length, 1);
+    assert.equal(requests.length, 2);
 });

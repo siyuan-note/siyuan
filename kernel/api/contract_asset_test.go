@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -17,6 +18,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -263,5 +265,77 @@ func TestAssetUnusedScanFailureContract(t *testing.T) {
 	}
 	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || len(response.Data) != 1 || response.Data[0].Item != "assets/protected.png" {
 		t.Fatalf("successful scan changed response shape: %s, %v", recorder.Body.String(), err)
+	}
+}
+
+func TestAndroidNotificationAssetDeletionContract(t *testing.T) {
+	if os.Getenv("SIYUAN_TEST_ANDROID_NOTIFICATION_ASSET") != "1" {
+		command := exec.Command(os.Args[0], "-test.run=^TestAndroidNotificationAssetDeletionContract$", "-test.timeout=30s")
+		command.Env = append(os.Environ(), "SIYUAN_TEST_ANDROID_NOTIFICATION_ASSET=1")
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("notification asset subprocess failed: %v\n%s", err, output)
+		}
+		return
+	}
+	assets := setupAssetContractWorkspace(t)
+	model.Conf.FileTree, model.Conf.Search = conf.NewFileTree(), conf.NewSearch()
+	util.HistoryDir, util.TempDir, util.ConfDir = t.TempDir(), t.TempDir(), t.TempDir()
+	util.QueueDir = t.TempDir()
+	util.DBPath, util.HistoryDBPath = filepath.Join(util.TempDir, "siyuan.db"), filepath.Join(util.TempDir, "history.db")
+	util.AssetContentDBPath = filepath.Join(util.TempDir, "asset_content.db")
+	util.BlockTreeDBPath = filepath.Join(util.TempDir, "blocktree.db")
+	sql.InitDatabase(true)
+	sql.InitHistoryDatabase(true)
+	sql.InitAssetContentDatabase(true)
+	defer sql.CloseDatabase()
+	p := filepath.Join(assets, "android-notification-texts.txt")
+	content := []byte("notification title\n")
+	if err := os.WriteFile(p, content, 0644); err != nil {
+		t.Fatal(err)
+	}
+	engine := gin.New()
+	engine.POST("/api/asset/getUnusedAssets", getUnusedAssets)
+	engine.POST("/api/asset/removeUnusedAssets", removeUnusedAssets)
+	engine.POST("/api/asset/removeUnusedAsset", removeUnusedAsset)
+	call := func(endpoint, body string) *httptest.ResponseRecorder {
+		t.Helper()
+		url := "/api/asset/" + endpoint
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", url, strings.NewReader(body)))
+		requireAPIContract(t, "POST", url, recorder)
+		var response struct{ Code int }
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 {
+			t.Fatalf("%s failed: %s, %v", endpoint, recorder.Body.String(), err)
+		}
+		return recorder
+	}
+	for _, endpoint := range []string{"getUnusedAssets", "removeUnusedAssets"} {
+		recorder := call(endpoint, `{}`)
+		var response struct{ Data json.RawMessage }
+		want := "[]"
+		if endpoint == "removeUnusedAssets" {
+			want = `{"paths":[]}`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || !bytes.Equal(response.Data, []byte(want)) {
+			t.Fatalf("%s exposed the switch: %s, %v", endpoint, recorder.Body.String(), err)
+		}
+		if stored, err := os.ReadFile(p); err != nil || !bytes.Equal(stored, content) {
+			t.Fatalf("%s changed the switch: %q, %v", endpoint, stored, err)
+		}
+	}
+	recorder := call("removeUnusedAsset", `{"path":"assets/android-notification-texts.txt"}`)
+	var response struct{ Data apicontract.AssetPathData }
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Data.Path != p {
+		t.Fatalf("explicit deletion result differs: %s, %v", recorder.Body.String(), err)
+	}
+	if _, err := os.Stat(p); !os.IsNotExist(err) {
+		t.Fatalf("switch remains after explicit deletion: %v", err)
+	}
+	histories, err := filepath.Glob(filepath.Join(util.HistoryDir, "*-clean", "assets", "android-notification-texts.txt"))
+	if err != nil || len(histories) != 1 {
+		t.Fatalf("missing cleanup history: %v, %v", histories, err)
+	}
+	if stored, err := os.ReadFile(histories[0]); err != nil || !bytes.Equal(stored, content) {
+		t.Fatalf("history changed notification texts: %q, %v", stored, err)
 	}
 }

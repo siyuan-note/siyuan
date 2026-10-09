@@ -156,6 +156,32 @@ func TestRecoverIndexQueueLoadsTreesOnlyWhenExecuted(t *testing.T) {
 	}
 }
 
+func TestEmbedContentQueueRecoveryDescriptors(t *testing.T) {
+	prepareIndexQueueTest(t)
+	block := &Block{ID: "20261008000001-embed01", Box: "20261008000000-embed01", Content: "private derived content"}
+	UpdateBlockContentQueue(block)
+	entries := loadIndexQueue()
+	if len(entries) != 1 || entries[0].Action != "update_block_content" || entries[0].ID != block.ID || entries[0].Box != block.Box {
+		t.Fatalf("missing embed recovery descriptor: %#v", entries)
+	}
+	data, err := os.ReadFile(filepath.Join(util.QueueDir, "index.queue"))
+	if err != nil || bytes.Contains(data, []byte(block.Content)) {
+		t.Fatalf("derived content leaked to global recovery queue: %s, %v", data, err)
+	}
+	operationQueue = nil
+	recoverIndexQueue()
+	UpdateBlockContentQueue(block)
+	latest := *block
+	latest.Content = "new result"
+	UpdateBlockContentQueue(&latest)
+	other := *block
+	other.Box = "20261008000000-embed02"
+	UpdateBlockContentQueue(&other)
+	if len(operationQueue) != 3 || operationQueue[0].recoveryEntry == nil || operationQueue[1].block.Content != latest.Content || operationQueue[2].block.Box != other.Box {
+		t.Fatal("live embed update overwrote recovery or crossed notebook boundaries")
+	}
+}
+
 func TestClearIndexQueuePreservesRawTail(t *testing.T) {
 	prepareIndexQueueTest(t)
 	appendOperation(&dbQueueOperation{action: "delete_box", box: "committed"})

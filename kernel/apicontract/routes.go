@@ -7,15 +7,18 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
 )
 
 type Route struct {
-	Method  string `json:"method"`
-	Path    string `json:"path"`
-	Handler string `json:"handler"`
+	Method     string   `json:"method"`
+	Path       string   `json:"path"`
+	Handler    string   `json:"handler"`
+	Middleware []string `json:"-"`
+	Contract   string   `json:"-"`
 }
 
 func (r Route) Key() string { return r.Method + " " + r.Path }
@@ -36,6 +39,10 @@ func ExpandMethods(methods []string) []string {
 // ReadRoutes 读取实际路由及处理函数声明，防止契约与独立登记表各自漂移。
 func ReadRoutes(apiDir string) ([]Route, map[string]string, error) {
 	var routes []Route
+	definitionsByName := map[string]Definition{}
+	for _, definition := range Definitions() {
+		definitionsByName[definition.Name] = definition
+	}
 	bindings := map[string]string{}
 	endpointNames, err := readEndpointNames(filepath.Join(apiDir, "..", "apicontract", "contracts.go"))
 	if err != nil {
@@ -107,7 +114,35 @@ func ReadRoutes(apiDir string) ([]Route, map[string]string, error) {
 			}
 			pathValue, _ := strconv.Unquote(path.Value)
 			handler := ""
+			var middleware []string
+			contract := ""
 			switch value := call.Args[len(call.Args)-1].(type) {
+			case *ast.CallExpr:
+				function, ok := value.Fun.(*ast.Ident)
+				if !ok || function.Name != "contractRouteHandlers" || len(value.Args) != 2 ||
+					len(call.Args) != pathIndex+2 || !call.Ellipsis.IsValid() {
+					err = fmt.Errorf("unsupported API route handler: %s", pathValue)
+					return false
+				}
+				endpoint, endpointOK := value.Args[0].(*ast.SelectorExpr)
+				target, targetOK := value.Args[1].(*ast.Ident)
+				if !endpointOK || !targetOK {
+					err = fmt.Errorf("invalid contract route binding: %s", pathValue)
+					return false
+				}
+				pkg, packageOK := endpoint.X.(*ast.Ident)
+				if !packageOK || pkg.Name != "apicontract" {
+					err = fmt.Errorf("route must bind a declared contract: %s", pathValue)
+					return false
+				}
+				contract = endpointNames[endpoint.Sel.Name]
+				definition, found := definitionsByName[contract]
+				if !found || !definition.Authorization.Valid() {
+					err = fmt.Errorf("invalid route authorization: %s", pathValue)
+					return false
+				}
+				handler = target.Name
+				middleware = definition.Authorization.MiddlewareNames()
 			case *ast.Ident:
 				handler = value.Name
 			case *ast.SelectorExpr:
@@ -119,7 +154,22 @@ func ReadRoutes(apiDir string) ([]Route, map[string]string, error) {
 			default:
 				err = fmt.Errorf("unsupported API route handler: %s", pathValue)
 			}
-			routes = append(routes, Route{methodValue, pathValue, handler})
+			if contract == "" {
+				for _, argument := range call.Args[pathIndex+1 : len(call.Args)-1] {
+					selector, ok := argument.(*ast.SelectorExpr)
+					if !ok {
+						err = fmt.Errorf("unsupported route middleware: %s", pathValue)
+						return false
+					}
+					pkg, ok := selector.X.(*ast.Ident)
+					if !ok {
+						err = fmt.Errorf("unsupported route middleware: %s", pathValue)
+						return false
+					}
+					middleware = append(middleware, pkg.Name+"."+selector.Sel.Name)
+				}
+			}
+			routes = append(routes, Route{Method: methodValue, Path: pathValue, Handler: handler, Middleware: middleware, Contract: contract})
 			return true
 		})
 	}
@@ -136,6 +186,9 @@ func ReadRoutes(apiDir string) ([]Route, map[string]string, error) {
 func CheckRoutes(routes []Route, bindings map[string]string, legacy []Route) error {
 	typed := map[string]Definition{}
 	for _, definition := range Definitions() {
+		if !definition.Authorization.Valid() {
+			return fmt.Errorf("contract needs explicit authorization: %s", definition.Name)
+		}
 		for _, method := range definition.Methods {
 			typed[method+" "+definition.Path] = definition
 		}
@@ -150,6 +203,10 @@ func CheckRoutes(routes []Route, bindings map[string]string, legacy []Route) err
 	seen := map[string]bool{}
 	for _, route := range routes {
 		if definition, exists := typed[route.Key()]; exists {
+			if route.Contract != "" && route.Contract != definition.Name ||
+				!slices.Equal(route.Middleware, definition.Authorization.MiddlewareNames()) {
+				return fmt.Errorf("route authorization missing or mismatched: %s", route.Key())
+			}
 			if seen[route.Key()] {
 				return fmt.Errorf("duplicate typed route: %s", route.Key())
 			}

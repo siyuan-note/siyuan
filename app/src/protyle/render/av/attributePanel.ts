@@ -1,3 +1,4 @@
+import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import {renderAVAttribute} from "./blockAttr";
 import {
     cancelHeightAnimation,
@@ -19,6 +20,7 @@ const refreshActions = new Set<TOperation>([
     "duplicateAttrViewKey",
     "setAttrViewColIcon",
     "setAttrViewColDesc",
+    "setAttrViewColAttributePanelVisibility",
     "setAttrViewName",
     "setAttrViewCustomColors",
     "updateAttrViewColTemplate",
@@ -202,12 +204,12 @@ export class AVAttributePanel {
             return;
         }
         if (operation.action === "updateAttrViewCell" && operation.rowID && this.hasItem(operation.rowID) &&
-            (["block", "number"].includes(operation.data?.type) || this.hasRenderTemplate(avID))) {
+            ((operation.data?.type === "block" || operation.data?.type === "number") || this.hasRenderTemplate(avID))) {
             this.queueRefresh();
             return;
         }
         if (operation.action === "updateAttrViewCells" && operation.cellUpdates?.some(cell =>
-            this.hasItem(cell.rowID) && (["block", "number"].includes(cell.data?.type) ||
+            this.hasItem(cell.rowID) && ((cell.data?.type === "block" || cell.data?.type === "number") ||
                 this.hasRenderTemplate(avID)))) {
             this.queueRefresh();
             return;
@@ -247,7 +249,7 @@ export class AVAttributePanel {
     }
 
     public displayEmptyFields() {
-        if (!window.siyuan.config.editor.databaseAttrHideEmpty || this.showEmptyFields) {
+        if (this.showEmptyFields) {
             return;
         }
         this.showEmptyFields = true;
@@ -306,7 +308,7 @@ export class AVAttributePanel {
             }
             tabsElement.innerHTML = databaseElements.map(item => {
                 const title = item.querySelector(".custom-attr__avheader .block__logo span")?.textContent || window.siyuan.languages.database;
-                return `<button type="button" draggable="${!this.protyle.disabled}" class="item${item.dataset.avId === this.activeAvID ? " item--focus" : ""}" data-type="av-tab" data-id="${item.dataset.avId}"><span class="item__text">${Lute.EscapeHTMLStr(title)}</span></button>`;
+                return `<button type="button" draggable="${!this.protyle.disabled}" class="item${item.dataset.avId === this.activeAvID ? " item--focus" : ""}" data-type="av-tab" data-id="${item.dataset.avId}"><span class="item__text">${escapeHtmlTextAndAttr(title)}</span></button>`;
             }).join("");
             this.bindTabDrag(tabsElement);
         } else {
@@ -472,15 +474,21 @@ export class AVAttributePanel {
     private updateEmptyState() {
         this.element.dataset.readonly = String(Boolean(this.protyle.disabled));
         const hideEmpty = window.siyuan.config.editor.databaseAttrHideEmpty;
-        if (!hideEmpty) {
+        const hasHiddenFields = Boolean(this.bodyElement.querySelector(
+            '.av__row[data-panel-visibility="hide"], .av__row[data-panel-visibility="hide-empty"]'));
+        if (!hideEmpty && !hasHiddenFields) {
             this.showEmptyFields = false;
         }
+        this.element.classList.toggle("protyle-db-attr--show-all", this.showEmptyFields);
+        this.bodyElement.querySelectorAll<HTMLElement>(":scope > [data-av-id]").forEach(item => {
+            item.dataset.panelShowAll = String(this.showEmptyFields);
+        });
         updateEmptyState(this.element, hideEmpty && !this.showEmptyFields);
         const editElement = this.element.querySelector<HTMLElement>('[data-type="toggle-empty"]');
-        editElement?.classList.toggle("fn__none", !hideEmpty || this.collapsed);
-        editElement?.setAttribute("aria-label", window.siyuan.languages[
-            this.showEmptyFields ? "hideEmptyFields" : "displayEmptyFields"
-        ]);
+        editElement?.classList.toggle("fn__none", (!hideEmpty && !hasHiddenFields) || this.collapsed);
+        editElement?.setAttribute("aria-label", hasHiddenFields ? window.siyuan.languages.edit :
+            window.siyuan.languages[this.showEmptyFields ? "hideEmptyFields" : "displayEmptyFields"]);
+        editElement?.setAttribute("aria-pressed", String(this.showEmptyFields));
     }
 
     private hideByDisplayConfig() {

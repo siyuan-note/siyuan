@@ -4,6 +4,7 @@ import {getAttr} from "../../search/attrs";
 import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {Constants} from "../../constants";
+import {createKeyboardSearchTrace} from "../../util/keyboardDiagnostic";
 import {fetchPost} from "../../util/fetch";
 import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
@@ -44,7 +45,7 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
     if (window.siyuan.isPublish) {
         return;
     }
-    if (config.method === 2) {
+    if (config.method === 2 || config.method === 4) {
         showMessage(window.siyuan.languages._kernel[132]);
         return;
     }
@@ -204,7 +205,7 @@ ${getFileTreeIconHTML(getNotebookIcon(item.box), "notebook", "b3-list-item__grap
                 resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item" data-node-id="${childItem.id}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(childItem.type)}"></use></svg>
 ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text">${childItem.content}</span>
+<span class="b3-list-item__text${childItem.type === "NodeAttributeView" ? " search__av-content" : ""}">${childItem.content}</span>
 ${getAttr(childItem)}
 ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${childItem.tag.replace(/#/g, "")}</span>` : ""}
 </div>`;
@@ -223,7 +224,7 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
     <div class="b3-list-item__first">
         <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
         ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
-        <span class="b3-list-item__text">${item.content}</span>
+        <span class="b3-list-item__text${item.type === "NodeAttributeView" ? " search__av-content" : ""}">${item.content}</span>
         ${getAttr(item)}
     </div>
     <div class="fn__flex">
@@ -767,6 +768,8 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
 };
 
 export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConfig) => {
+    const trace = createKeyboardSearchTrace(searchConfig ? "search" : "globalSearch");
+    trace("search-enter");
     const config: Config.IUILayoutTabSearchConfig = JSON.parse(JSON.stringify(window.siyuan.storage[Constants.LOCAL_SEARCHDATA]));
     const currentEditor = getCurrentEditor();
     if (currentEditor && isEncryptedBox(currentEditor.protyle.notebookId)) {
@@ -917,6 +920,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
             updateSearchResult(config, element);
         }
     });
+    trace("dialog-created", "mobile");
 };
 
 const goAsset = () => {

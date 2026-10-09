@@ -73,6 +73,13 @@ export const sendAppSetting = (controlId: string, value: unknown) => {
             });
             break;
         }
+        case "system.settingsWindow": {
+            const settingsWindow = Boolean(value) as Config.ISystem["settingsWindow"];
+            fetchPost("/api/system/setSettingsWindow", {settingsWindow}, () => {
+                window.siyuan.config.system.settingsWindow = settingsWindow;
+            });
+            break;
+        }
         default:
             console.warn(`[config] sendAppSetting: unhandled controlId "${controlId}"`);
             break;

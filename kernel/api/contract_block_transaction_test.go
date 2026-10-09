@@ -106,6 +106,8 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 		t.Fatal(err)
 	}
 	treenode.UpsertBlockTree(tree)
+	testAPIContractInsertBlockAnchors(t, box.ID, docID, paragraphID)
+	testAPIContractNativeContainers(t, box.ID)
 	engine := gin.New()
 	engine.POST("/api/block/getBlockTreeInfos", getBlockTreeInfos)
 	infoRecorder := httptest.NewRecorder()
@@ -140,6 +142,8 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 	engine.POST("/api/block/getHeadingFoldTransaction", getHeadingFoldTransaction)
 	testAPIContractRemainingBlockQueries(t, engine, box.ID, docID, heading.ID)
 	testAPIContractMindmapMigration(t, engine, box.ID, docID)
+	testAPIContractListConversion(t, engine, docID)
+	testAPIContractTransactionCompletion(t, engine, docID, paragraphID)
 	for _, entry := range []struct {
 		path, id, scope string
 		code            int
@@ -207,6 +211,7 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 		}
 	}
 	testAPIContractBlockEdits(t, engine, box.ID, docID, heading.ID)
+	testAPIContractMoveBlock(t, engine, box.ID)
 }
 
 func testAPIContractBlockEdits(t *testing.T, engine *gin.Engine, boxID, docID, headingID string) {

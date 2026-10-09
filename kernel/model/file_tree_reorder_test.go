@@ -71,20 +71,21 @@ func TestDocTreeReorderEqualValuesPersist(t *testing.T) {
 	}
 }
 
-func TestDocTreeReorderRejectsUnreadableSort(t *testing.T) {
+func TestDocTreeReorderRecoversUnreadableSort(t *testing.T) {
 	f := setupFileOperationTest(t)
+	oldWorkspace := util.WorkspaceDir
+	util.WorkspaceDir = t.TempDir()
+	t.Cleanup(func() { util.WorkspaceDir = oldWorkspace })
 	confPath := filepath.Join(util.DataDir, f.box.ID, ".siyuan", "sort.json")
 	bad := []byte("invalid sort data")
 	if err := os.WriteFile(confPath, bad, 0644); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := ReorderDocTree([]string{f.sourceID}, f.targetID, "before", false, true); err == nil {
-		t.Fatal("invalid sort data was accepted")
+	if _, err := ReorderDocTree([]string{f.sourceID}, f.targetID, "before", false, true); err != nil {
+		t.Fatal(err)
 	}
-	actual, err := os.ReadFile(confPath)
-	if err != nil || string(actual) != string(bad) {
-		t.Fatalf("invalid sort data was overwritten: %s, %v", actual, err)
-	}
+	assertSortConfBackup(t, f.box.ID, bad)
+	assertSiblingCustomOrder(t, f.box.ID, "/", []string{f.sourceID, f.targetID})
 }
 
 func TestDocTreeReorderRejectsDescendantTargetsWithLocalizedMessage(t *testing.T) {

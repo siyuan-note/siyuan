@@ -49,6 +49,7 @@ type AttributeView struct {
 	Views             []*View            `json:"views"`                       // 视图
 	NewItemTemplates  []*NewItemTemplate `json:"newItemTemplates,omitempty"`  // 新增条目模板
 	DefaultTemplateID string             `json:"defaultTemplateID,omitempty"` // 默认新增条目模板 ID
+	Automations       *AutomationConfig  `json:"automations,omitempty"`
 	// CustomColorRenderContext 保存只读渲染期间的关联数据库调色板上下文。
 	CustomColorRenderContext *CustomColorRenderContext `json:"-"`
 	// 卡片封面位置，条目 ID -> 封面来源 -> 位置
@@ -177,11 +178,12 @@ const (
 
 // Key 描述了属性视图属性字段的基础结构。
 type Key struct {
-	ID   string  `json:"id"`   // 字段 ID
-	Name string  `json:"name"` // 字段名
-	Type KeyType `json:"type"` // 字段类型
-	Icon string  `json:"icon"` // 字段图标
-	Desc string  `json:"desc"` // 字段描述
+	ID                       string  `json:"id"`                                 // 字段 ID
+	Name                     string  `json:"name"`                               // 字段名
+	Type                     KeyType `json:"type"`                               // 字段类型
+	Icon                     string  `json:"icon"`                               // 字段图标
+	Desc                     string  `json:"desc"`                               // 字段描述
+	AttributePanelVisibility string  `json:"attributePanelVisibility,omitempty"` // 属性面板可见性，空值沿用全局设置
 
 	// 以下是某些列类型的特有属性
 
@@ -565,11 +567,6 @@ func getAttributeViewNameByPathInBox(avJSONPath, boxID string) (ret string, err 
 	return
 }
 
-// GetAttributeViewNameByPath 从指定路径读取 AV 名称（不加密，普通 box 兼容入口）。
-func GetAttributeViewNameByPath(avJSONPath string) (ret string, err error) {
-	return getAttributeViewNameByPathInBox(avJSONPath, "")
-}
-
 // GetAttributeViewNameInBox 获取指定笔记本中的数据库名称。
 func GetAttributeViewNameInBox(avID, boxID string) (ret string, err error) {
 	avJSONPath, _ := FindAttributeViewPathInBox(avID, boxID)
@@ -938,6 +935,9 @@ func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err e
 	}
 	if nil == err {
 		err = CheckSpec(ret)
+	}
+	if err == nil && ret.Automations != nil && ret.Automations.Spec != 1 {
+		err = fmt.Errorf("unsupported database automation specification [%d]", ret.Automations.Spec)
 	}
 	if nil == err {
 		err = ret.ValidateListLayouts()
@@ -1320,6 +1320,7 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 		}
 	}
 
+	ret.remapAutomationKeys(av.ID, keyIDMap)
 	oldKeyIDs = gulu.Str.RemoveDuplicatedElem(oldKeyIDs)
 	sorts := map[string]int{}
 	for i, k := range ret.KeyIDs {

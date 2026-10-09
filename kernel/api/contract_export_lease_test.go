@@ -68,7 +68,7 @@ func TestAPIContractExportNotebookResponseLease(t *testing.T) {
 	}
 	treenode.UpsertBlockTree(tree)
 	engine := gin.New()
-	engine.Use(boxLeaseMiddleware)
+	engine.Use(model.ControlConcurrency, boxLeaseMiddleware)
 	engine.POST("/api/export/exportTempContent", exportTempContent)
 	writer := &blockedBlockResponseWriter{ResponseRecorder: httptest.NewRecorder(), ready: make(chan []byte, 1), proceed: make(chan struct{})}
 	var release sync.Once

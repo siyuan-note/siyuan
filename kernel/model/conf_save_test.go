@@ -17,6 +17,7 @@
 package model
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
@@ -58,5 +59,46 @@ func TestSaveUsesEncryptedSnapshot(t *testing.T) {
 	}
 	if stored.MCPOAuth != app.MCPOAuth {
 		t.Fatalf("unexpected stored MCP OAuth data: %q", stored.MCPOAuth)
+	}
+}
+
+func TestGraphQuerySavesOnlyChangedConfiguration(t *testing.T) {
+	oldConfDir, oldReadOnly := util.ConfDir, util.ReadOnly
+	util.ConfDir, util.ReadOnly = t.TempDir(), false
+	t.Cleanup(func() { util.ConfDir, util.ReadOnly = oldConfDir, oldReadOnly })
+	app := NewAppConf()
+	app.Graph = appconf.NewGraph()
+	global, local := app.Graph.Global, app.Graph.Local
+	path := filepath.Join(util.ConfDir, "conf.json")
+	marker := []byte("unchanged graph query must not serialize configuration")
+	if err := os.WriteFile(path, marker, 0600); err != nil {
+		t.Fatal(err)
+	}
+	app.SaveGraphQueryConf(appconf.NewGlobalGraph(), appconf.NewLocalGraph())
+	data, err := os.ReadFile(path)
+	if err != nil || !bytes.Equal(data, marker) || app.Graph.Global != global || app.Graph.Local != local {
+		t.Fatalf("unchanged query saved or replaced configuration: %s, %v", data, err)
+	}
+	for _, globalQuery := range []bool{true, false} {
+		if globalQuery {
+			next := appconf.NewGlobalGraph()
+			next.MinRefs = 7
+			app.SaveGraphQueryConf(next, nil)
+		} else {
+			next := appconf.NewLocalGraph()
+			next.DailyNote = true
+			app.SaveGraphQueryConf(nil, next)
+		}
+		data, err = os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		stored := NewAppConf()
+		if err = gulu.JSON.UnmarshalJSON(data, stored); err != nil {
+			t.Fatal(err)
+		}
+		if stored.Graph.Global.MinRefs != 7 || stored.Graph.Local.DailyNote != !globalQuery {
+			t.Fatalf("graph change was not persisted: %+v", stored.Graph)
+		}
 	}
 }

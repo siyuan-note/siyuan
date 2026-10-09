@@ -1,6 +1,7 @@
 import {isInEmbedBlock} from "../util/hasClosest";
 import {isDocumentBoundaryLoaded} from "../util/documentRange";
-import {focusBlock, focusByRange} from "../util/selection";
+import {focusBlock} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {scrollCenter} from "../../util/highlightById";
 import {getContenteditableElement} from "./getBlock";
 import {focusEditableAtGoalX, getCaretGoalX, TVerticalDirection} from "./verticalCaret";

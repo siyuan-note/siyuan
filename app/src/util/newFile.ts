@@ -20,7 +20,8 @@ import {
     getNewDocTargetFromTree,
     isCurrentDocSubDocTarget
 } from "./parseNewDocTarget";
-import {focusByRange, selectAll} from "../protyle/util/selection";
+import {selectAll} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {
     createNewFileSelectionContext,
     isNewFileSelectionValid,

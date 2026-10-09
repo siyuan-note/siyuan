@@ -27,6 +27,13 @@ declare namespace Config {
         accessAuthCode: string;
         oidc: IOIDC;
         ai: IAI;
+        /**
+         * 当前设备的 OCR 设置；阈值只影响后续 PaddleOCR 识别，空值使用模型检测参数和 0.5 的识别阈值。
+         * provider 为 ai 时，手动和自动识别均使用独立的 aiModelId；失效时不回退到其他模型或提供商。
+         * 首次从本地提供商切换到 AI 时关闭自动识别，之后可以显式开启。
+         * reasoningEffort 独立控制手动和自动 AI OCR，空字符串沿用模型默认。
+         */
+        ocr: import("./api").SettingOCR;
         api: IAPI;
         appearance: IAppearance;
         bazaar: IBazaar;
@@ -161,6 +168,7 @@ declare namespace Config {
         capabilityPolicy: ICapabilityPolicy;
         skills: {
             userEnabled: string[];
+            builtinDisabled: string[];
         };
         approvalPolicy: {
             default: string;
@@ -194,15 +202,19 @@ declare namespace Config {
         outputFormat: string;
     }
 
-    /**
-     * 智能体决策模型配置，使用 TypeSafe System One 协议。
-     */
-    export interface IDecision {
-        enabled: boolean;
+    /** 独立保存的决策服务凭证和参数。 */
+    export interface IDecisionProfile {
         endpoint: string;
         apiKey: string;
         name: string;
         timeout: number;
+    }
+
+    /** 当前决策服务及各供应商独立配置；平铺字段仅兼容 TypeSafe 客户端。 */
+    export interface IDecision extends IDecisionProfile {
+        enabled: boolean;
+        provider: string;
+        profiles: Record<string, IDecisionProfile>;
     }
 
     /**
@@ -236,6 +248,9 @@ declare namespace Config {
      * AI provider configuration
      */
     export interface IProvider {
+        /** 账户认证只保存本机账户引用；省略时使用 API Key */
+        authType?: string;
+        accountID?: string;
         headers?: Record<string, string>;
         id: string;
         enabled: boolean;
@@ -304,7 +319,7 @@ declare namespace Config {
             light: {color: string; opacity: number};
             dark: {color: string; opacity: number};
         };
-        /** 全局默认字体，按优先级从高到低排列；动态图标也使用此列表和首选字重，字体由客户端解析 */
+        /** 全局默认字体，按优先级从高到低排列；动态文字图标使用此列表和首选字重，字体由客户端解析，日期类图标保留内置字体 */
         globalFontFamilies: IEditor["fontFamilies"];
         /**
          * Close button behavior
@@ -617,6 +632,10 @@ declare namespace Config {
          * Whether to display the network image mark
          */
         displayNetImgMark: boolean;
+        /** 全局显示图片文件名，默认关闭，不写入文档属性 */
+        displayImgName: boolean;
+        /** 全局在图片标题下显示提示文本，默认关闭，不写入文档属性 */
+        displayImgAlt: boolean;
         /**
          * Whether to show database attributes at the top of the document
          */
@@ -761,7 +780,7 @@ declare namespace Config {
          * Whether to enable RTL (left-to-right chirography) mode
          */
         rtl: boolean;
-        /** 默认关闭；自动判定段落和标题的文本方向，手动方向优先，不改变列表和表格布局 */
+        /** 默认关闭；自动判定段落和标题方向，各列表项独立调整标记和缩进，手动方向优先，表格列顺序不变 */
         autoDirection: boolean;
         /**
          * Whether to enable spell checking
@@ -908,13 +927,15 @@ declare namespace Config {
          */
         alwaysSelectOpenedFile: boolean;
         /**
-         * Whether clicking a document icon expands or collapses its child documents
+         * 桌面端单击文档图标的行为：0 修改图标，1 展开或折叠子文档；没有子文档时打开文档
+         * 桌面端笔记本图标始终用于修改图标；旧的布尔配置不迁移
          */
-        docIconClickExpand: boolean;
+        docIconClickMode: number;
         /**
-         * Whether clicking a parent document title expands or collapses its child documents
+         * 点击父文档标题的行为：0 打开文档，1 立即展开或折叠子文档，2 单击展开或折叠、双击打开父文档
+         * 取 2 时单击等待约 300 毫秒；没有子文档时直接打开；旧的布尔配置不迁移
          */
-        parentDocClickExpand: boolean;
+        parentDocTitleClickMode: number;
         /**
          * Whether to enable top-level notebook documents
          */
@@ -1287,6 +1308,8 @@ declare namespace Config {
         scrollPageUpWithoutMovingCaret?: IKey;
         selectToPageEnd?: IKey;
         selectToPageStart?: IKey;
+        goToDocumentStart?: IKey;
+        goToDocumentEnd?: IKey;
         showInFolder?: IKey;
         spaceRepetition?: IKey;
         switchReadonly?: IKey;
@@ -1353,6 +1376,8 @@ declare namespace Config {
         link?: IKey;
         mark?: IKey;
         memo?: IKey;
+        /** 插入思维导图或将当前列表转换为思维导图，默认未绑定。 */
+        mindmap?: IKey;
         ref?: IKey;
         strike?: IKey;
         sub?: IKey;
@@ -2089,6 +2114,10 @@ declare namespace Config {
          * Whether the current boot is in safe mode (disables code snippets, plugins, custom theme and icon)
          */
         safeMode: boolean;
+        /**
+         * 是否在独立窗口中打开设置界面，仅桌面 Electron 客户端生效，默认 false。
+         */
+        settingsWindow: boolean;
         /**
          * The absolute path of the workspace directory
          */

@@ -19,7 +19,7 @@ import {openModel} from "../mobile/menu/model";
 import {closeModel} from "../mobile/util/closePanel";
 import {loadMobileFileById} from "../mobile/editor";
 import {MenuItem} from "../menus/Menu";
-import {closeMobileBacklinkSheets} from "../mobile/util/backlinkPanels";
+import {closeMobileEditorSheets} from "../mobile/util/MobileEditorDialog";
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {isEncryptedBox} from "../util/pathName";
@@ -451,7 +451,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
                 return;
             }
             if (mobile) {
-                await closeMobileBacklinkSheets();
+                await closeMobileEditorSheets();
                 if (closed) {
                     return;
                 }

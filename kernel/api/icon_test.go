@@ -40,13 +40,13 @@ func TestAPIContractDynamicIconGlobalFonts(t *testing.T) {
 		{"escaped", []*conf.EditorFont{{Family: "A\"\\\n<&';font-weight:1", Weight: 500}}, `"A\22 \5c \a <&';font-weight:1", ` + fallback, "500"},
 	} {
 		for _, allowScript := range []bool{false, true} {
-			for iconType := 1; iconType <= 8; iconType++ {
-				t.Run(fmt.Sprintf("%s/type%d/script%t", test.name, iconType, allowScript), func(t *testing.T) {
+			for _, iconType := range []string{"1", "2", "3", "4", "5", "6", "7", "8", "", "unknown"} {
+				t.Run(fmt.Sprintf("%s/type%s/script%t", test.name, iconType, allowScript), func(t *testing.T) {
 					model.Conf.Appearance.GlobalFontFamilies = test.fonts
 					model.Conf.Editor.AllowSVGScript = allowScript
 					recorder := httptest.NewRecorder()
 					context, _ := gin.CreateTestContext(recorder)
-					context.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/icon/getDynamicIcon?type=%d&content=Text&date=2026-09-29&lang=en", iconType), nil)
+					context.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/icon/getDynamicIcon?type=%s&content=Text&date=2026-09-29&lang=en", iconType), nil)
 					getDynamicIcon(context)
 					requireAPIContract(t, http.MethodGet, "/api/icon/getDynamicIcon", recorder)
 					var svg struct {
@@ -60,7 +60,11 @@ func TestAPIContractDynamicIconGlobalFonts(t *testing.T) {
 					if err := xml.Unmarshal(recorder.Body.Bytes(), &svg); err != nil {
 						t.Fatal(err)
 					}
-					if svg.Family != test.family || svg.Weight != test.weight {
+					family, weight := fallback, "400"
+					if "8" == iconType {
+						family, weight = test.family, test.weight
+					}
+					if svg.Family != family || svg.Weight != weight {
 						t.Fatalf("unexpected font: %q / %q", svg.Family, svg.Weight)
 					}
 					if len(svg.Texts) == 0 {

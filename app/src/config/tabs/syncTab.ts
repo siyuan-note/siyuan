@@ -12,6 +12,58 @@ import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {getLANSyncSearchAvailability, getSyncProviderConfigKeywords} from "./syncUi";
 import {mountLANSyncStatus, mountSyncAssetDownloadMode, mountSyncProvider} from "./syncRuntime";
 import {openHistory} from "../../history/history";
+import {ensureLute} from "../../protyle/util/lute";
+/// #if !MOBILE && !BROWSER
+import {getSettingsWindowHost, isSettingsWindow} from "../setting/windowContext";
+/// #endif
+
+const mountSyncCloudBackup = (root: HTMLElement) => {
+    const button = root.querySelector<HTMLButtonElement>("#openCloudBackup");
+    if (!button) {
+        return;
+    }
+    let pending = false;
+    const isMounted = () => {
+        /// #if !MOBILE && !BROWSER
+        if (isSettingsWindow() && !getSettingsWindowHost()?.isActive()) {
+            return false;
+        }
+        /// #endif
+        const dialog = root.closest(`[data-key="${Constants.DIALOG_SETTING}"]`);
+        return !window.closed && root.isConnected && button.isConnected && root.contains(button) &&
+            (!dialog || dialog.classList.contains("b3-dialog--open"));
+    };
+    button.addEventListener("click", async () => {
+        if (pending || !isMounted()) {
+            return;
+        }
+        pending = true;
+        button.disabled = true;
+        try {
+            const dependencies: Promise<void>[] = [];
+            let luteOptions: {reloadOnFailure: boolean};
+            /// #if !MOBILE && !BROWSER
+            if (isSettingsWindow()) {
+                luteOptions = {reloadOnFailure: false};
+                dependencies.push(import("../setting/windowRuntime").then(runtime => runtime.refreshSettingsWindowNotebooks()));
+            }
+            /// #endif
+            dependencies.push(ensureLute(luteOptions));
+            await Promise.all(dependencies);
+            if (isMounted()) {
+                openHistory(window.siyuan.ws.app, "repo", true);
+            }
+        } catch (error) {
+            if (isMounted()) {
+                console.error("Could not initialize snapshot history", error);
+                showMessage(window.siyuan.languages._kernel["258"], 6000, "error");
+            }
+        } finally {
+            pending = false;
+            button.disabled = false;
+        }
+    });
+};
 
 const registerSyncGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("sync", window.siyuan.languages.configGroupSync);
@@ -111,11 +163,7 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
         </button>
     </div>
 </div>`,
-        afterMount: (root) => {
-            root.querySelector("#openCloudBackup")?.addEventListener("click", () => {
-                openHistory(window.siyuan.ws.app, "repo");
-            });
-        },
+        afterMount: mountSyncCloudBackup,
     });
 };
 

@@ -147,6 +147,7 @@ const setup = (mobile = false, detached = false, mounted = false) => {
         setTopBarContextMenu,
         isMobile: () => mobile,
         isWindow: () => detached,
+        isSettingsWindow: () => false,
         getPluginTopBarEntryKey,
         getLegacyPluginTopBarEntryKey,
         applyTopBarEntryVisibility: () => refreshes++,

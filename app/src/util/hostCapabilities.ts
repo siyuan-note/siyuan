@@ -11,6 +11,7 @@ export type THostCapabilities = {
     ownsKernel: boolean;
     localFileSystem: boolean;
     importExport: boolean;
+    documentImportExport: boolean;
     plugins: boolean;
     workspaces: boolean;
     customAppearance: boolean;
@@ -58,6 +59,7 @@ export const resolveHostCapabilities = (remoteKernel: boolean, connection: TKern
         ownsKernel,
         localFileSystem: !remoteKernel,
         importExport: !remoteKernel,
+        documentImportExport: true,
         plugins: !remoteKernel || trustedExtensions,
         workspaces: !remoteKernel,
         customAppearance: !remoteKernel || trustedExtensions,

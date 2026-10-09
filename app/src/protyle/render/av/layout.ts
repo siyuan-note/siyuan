@@ -1,3 +1,4 @@
+import {isAVSelectType} from "./capabilities";
 import {bindCalendarSettings, getCalendarSettingsHTML} from "./calendar/settings";
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
@@ -44,7 +45,7 @@ const getCardFullRowHTML = (view: IAVGallery | IAVKanban) => {
     });
     return `<div class="b3-menu__items">
     <button class="b3-menu__item" data-type="nobg">
-        <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-layout">
+        <span class="block__icon block__icon--menu-back" data-type="go-layout">
             <svg><use xlink:href="#iconLeft"></use></svg>
         </span>
         <span class="b3-menu__label ft__center">${window.siyuan.languages.fullRow}</span>
@@ -112,7 +113,7 @@ export const getLayoutHTML = (data: IAV) => {
     }
     html = `<div class="b3-menu__items">
     <button class="b3-menu__item" data-type="nobg">
-        <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-config">
+        <span class="block__icon block__icon--menu-back" data-type="go-config">
             <svg><use xlink:href="#iconLeft"></use></svg>
         </span>
         <span class="b3-menu__label ft__center">${window.siyuan.languages.layout}</span>
@@ -163,7 +164,7 @@ export const getLayoutHTML = (data: IAV) => {
         <span class="fn__space fn__flex-1"></span>
         <input data-type="toggle-entries-wrap" type="checkbox" class="b3-switch b3-switch--menu" ${view.wrapField ? "checked" : ""}>
     </label>`;
-    if (data.viewType === "kanban" && ["select", "mSelect"].includes(data.view.groups?.[0]?.groupValue?.type)) {
+    if (data.viewType === "kanban" && isAVSelectType(data.view.groups?.[0]?.groupValue?.type)) {
         html += `<label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.useBackground}</span>
     <span class="fn__space fn__flex-1"></span>

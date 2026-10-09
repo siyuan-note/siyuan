@@ -2,7 +2,7 @@
 
 [中文](SY-FORMAT.zh-CN.md)
 
-> Canonical Spec baseline: `2` for ordinary documents, `3` for documents containing tabs, `4` for documents using table-cell rich text; compatible readers may upgrade older or missing versions.
+> Canonical Spec baseline: `2` for ordinary documents, `3` for documents containing tabs, `4` for documents using table-cell rich text, `5` for documents containing mind map nodes; compatible readers may upgrade older or missing versions.
 > Verified against samples: `20200825162036-4dx365o.sy` (formatting elements), `20200905090211-2vixtlf.sy` (block types).
 > All conclusions are based on real samples and the current Lute / SiYuan kernel source. The cited samples contain a few known legacy artifacts; canonical write rules follow the current source when a sample differs.
 > This guide describes plaintext `.sy` JSON in an ordinary notebook, or the decrypted AST of an unlocked encrypted notebook. An encrypted notebook's on-disk `.sy` file is ciphertext and must not be edited as JSON.
@@ -71,7 +71,7 @@ Division of labor among the four paths:
 | Top-level key | Required | Meaning |
 |---|---|---|
 | `ID` | ✅ | Document block ID. **Equals the filename without `.sy`** |
-| `Spec` | ✅ | `"2"` for ordinary documents, `"3"` for tabs documents, `"4"` for documents using table-cell rich text; older or missing values are compatible input and may be upgraded |
+| `Spec` | ✅ | `"2"` for ordinary documents, `"3"` for tabs documents, `"4"` for documents using table-cell rich text, `"5"` for documents containing mind map nodes; older or missing values are compatible input and may be upgraded |
 | `Type` | ✅ | `"NodeDocument"` |
 | `Properties` | ✅ | Document-level IAL — see §8 |
 | `Children` | ✅ | Array of body child blocks; canonical files contain at least one block |
@@ -642,7 +642,7 @@ Canonical writers must not generate the following syntax or node families. Most 
 
 When generating or compatibly editing a `.sy` that SiYuan can load cleanly, verify item by item:
 
-1. ☐ Root `Type` = `"NodeDocument"`, `Spec` = `"2"`, `"3"` (tabs), or `"4"` (table-cell rich text), without lowering an existing version; root `ID` = filename (without `.sy`) and equals `Properties.id`
+1. ☐ Root `Type` = `"NodeDocument"`, `Spec` = `"2"`, `"3"` (tabs), `"4"` (table-cell rich text), or `"5"` (mind map nodes), without lowering an existing version; root `ID` = filename (without `.sy`) and equals `Properties.id`
 2. ☐ Root `Properties` contains `id`/`title`/`type:"doc"`/`updated`
 3. ☐ Every newly generated ID is fresh and workspace-wide unique; every canonical block has a 22-char `ID`, matching `Properties.id`, and a valid 14-digit `Properties.updated`
 4. ☐ Determine block status from `Type`, not from `ID`; do not add IDs to new inline/marker nodes, and only remove historical non-block IDs as field normalization without deleting the node

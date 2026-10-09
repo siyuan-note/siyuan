@@ -1363,7 +1363,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 		// 改进链滴剪藏 https://github.com/siyuan-note/siyuan/issues/13117
 		enableLuteInlineSyntax(luteEngine)
 	}
-	dom := luteEngine.Md2BlockDOM(md, false)
+	dom := markdownWithFootnotes2BlockDOM(luteEngine, md)
 	titleEmpty := false
 	if nil != arg {
 		if titleEmptyArg, ok := arg["titleEmpty"]; ok {
@@ -1443,6 +1443,15 @@ const (
 )
 
 func CreateDailyNote(boxID string) (p string, existed bool, err error) {
+	return createDailyNoteAt(boxID, time.Now(), false)
+}
+
+// CreateDailyNoteAt 按指定日期创建日记，复用日期属性指向的现有文档。
+func CreateDailyNoteAt(boxID string, date time.Time) (p string, existed bool, err error) {
+	return createDailyNoteAt(boxID, date, true)
+}
+
+func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, existed bool, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1453,31 +1462,16 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	}
 
 	boxConf := box.GetConf()
-	if "" == boxConf.DailyNoteSavePath || "/" == boxConf.DailyNoteSavePath {
-		err = errors.New(Conf.Language(49))
-		return
-	}
-
-	hPath, err := RenderGoTemplateInBox(boxConf.DailyNoteSavePath, box.ID)
+	hPath, existTree, err := resolveDailyNote(box, now, findByDate)
 	if err != nil {
 		return
 	}
 
-	FlushTxQueue()
-
-	hPath = util.TrimSpaceInPath(hPath)
-	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
-	if nil != existRoot {
+	date := now.Format("20060102")
+	if existTree != nil {
 		existed = true
-		p = existRoot.Path
-
-		tree, loadErr := LoadTreeByBlockID(existRoot.RootID)
-		if nil != loadErr {
-			logging.LogWarnf("load tree by block id [%s] failed: %v", existRoot.RootID, loadErr)
-			return
-		}
+		tree := existTree
 		p = tree.Path
-		date := time.Now().Format("20060102")
 		if tree.Root.IALAttr(DailyNoteAttrPrefix+date) == "" {
 			tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
 			if err = indexWriteTreeUpsertQueue(tree); err != nil {
@@ -1494,7 +1488,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 
 	if "" != boxConf.DailyNoteTemplatePath {
 		sql.FlushQueue()
-		if renderErr := applyDocContentTemplate(boxConf.DailyNoteTemplatePath, id); nil != renderErr {
+		if renderErr := applyDocContentTemplateAt(boxConf.DailyNoteTemplatePath, id, &now); nil != renderErr {
 			logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, renderErr)
 		}
 	}
@@ -1508,7 +1502,6 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 	p = tree.Path
-	date := time.Now().Format("20060102")
 	tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
 	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return
@@ -2078,10 +2071,13 @@ func RemoveDocs(paths []string) error {
 }
 
 func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	diagnostic := util.WatchOperation("remove document", "load document")
+	defer diagnostic.Finish()
 	ret, err = filesys.LoadTree(box.ID, p, luteEngine)
 	if err != nil || nil == ret {
 		return nil, ErrBlockNotFound
 	}
+	diagnostic.Stage("prepare local assets")
 	if !IsEncryptedBox(box.ID) {
 		assetParent := filepath.Dir(filepath.Join(util.DataDir, box.ID, p))
 		if err = EnsureAssetPrefixLocal(assetParent); err != nil {
@@ -2089,6 +2085,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		}
 	}
 
+	diagnostic.Stage("backup document history")
 	historyDir, err := getHistoryDir(HistoryOpDelete)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
@@ -2103,12 +2100,14 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	}
 
 	// 加密笔记本的 assets 不提升到全局
+	diagnostic.Stage("copy document assets")
 	if !IsEncryptedBox(box.ID) {
 		if err = copyDocAssetsToDataAssets(box.ID, p); err != nil {
 			return nil, err
 		}
 	}
 
+	diagnostic.Stage("collect child documents")
 	removeIDs := treenode.RootChildIDs(ret.ID)
 	dir := path.Dir(p)
 	childrenDir := path.Join(dir, ret.ID)
@@ -2121,6 +2120,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	}
 	existChildren := box.Exist(childrenDir)
 	if existChildren {
+		diagnostic.Stage("backup child document history")
 		absChildrenDir := filepath.Join(util.DataDir, ret.Box, childrenDir)
 		historyPath = filepath.Join(historyDir, ret.Box, childrenDir)
 		if err = filelock.Copy(absChildrenDir, historyPath); err != nil {
@@ -2128,10 +2128,12 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 			return
 		}
 	}
+	diagnostic.Stage("backup database bindings")
 	allRemoveRootIDs := []string{ret.ID}
 	allRemoveRootIDs = append(allRemoveRootIDs, removeIDs...)
 	allRemoveRootIDs = gulu.Str.RemoveDuplicatedElem(allRemoveRootIDs)
 	removeTrees := make([]*parse.Tree, 0, len(allRemoveRootIDs))
+	deletedBindings := map[string]map[string]struct{}{}
 	for _, rootID := range allRemoveRootIDs {
 		removeTree := ret
 		if rootID != ret.ID {
@@ -2145,13 +2147,33 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 			return
 		}
 		removeTrees = append(removeTrees, removeTree)
+		collectDeletedAttributeViewBlocks(removeTree.Root, true, deletedBindings)
 	}
+	boundDeletion := &Transaction{}
+	defer func() { boundDeletion.finishAttributeViewMutation(err != nil) }()
+	avBoxID := ""
+	if IsEncryptedBox(box.ID) {
+		avBoxID = box.ID
+	}
+	before, after, prepareErr := boundDeletion.prepareDeletedBoundAttributeViewBlocks(deletedBindings, avBoxID)
+	if prepareErr != nil {
+		return ret, prepareErr
+	}
+	diagnostic.Stage("index document history")
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+	diagnostic.Stage("remove database bindings")
+	if err = boundDeletion.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{boxID: avBoxID}, before, after); err != nil {
+		return
+	}
+	var nonEditorTx *Transaction
 	for _, removeTree := range removeTrees {
 		removedRootPaths[removeTree.ID] = removeTree.Path
-		syncDelete2AvBlock(removeTree.Root, removeTree, true, nil)
+		for _, id := range nonEditorTx.syncDelete2Block(removeTree.Root, removeTree) {
+			ReloadAttrView(id)
+		}
 	}
 
+	diagnostic.Stage("remove document files")
 	if existChildren {
 		if err = box.Remove(childrenDir); err != nil {
 			logging.LogErrorf("remove children dir [%s%s] failed: %s", box.ID, childrenDir, err)
@@ -2164,12 +2186,15 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		return
 	}
 	logging.LogInfof("removed doc [%s%s]", box.ID, p)
+	boundDeletion.finishAttributeViewMutation(false)
 	removedPins := map[string]bool{}
 	for rootID := range removedRootPaths {
 		removedPins[rootID] = true
 	}
+	diagnostic.Stage("update pinned documents")
 	maintainPinnedDocs(removedPins, "", "")
 
+	diagnostic.Stage("update document order")
 	box.removeSort(removeIDs)
 	if "/" != dir {
 		others, err := os.ReadDir(filepath.Join(util.DataDir, box.ID, dir))
@@ -2178,6 +2203,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		}
 	}
 
+	diagnostic.Stage("invalidate document caches")
 	for rootID, treePath := range removedRootPaths {
 		cache.RemoveTreeData(rootID)
 		cache.RemoveDocIAL(treePath)
@@ -2185,9 +2211,12 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	for _, blockTree := range removedBlockTrees {
 		cache.RemoveBlockIAL(blockTree.ID)
 	}
+	diagnostic.Stage("remove block tree index")
 	treenode.RemoveBlockTreesByPathPrefix(box.ID, childrenDir)
+	diagnostic.Stage("queue database index deletion")
 	sql.RemoveTreePathQueue(ret.Box, childrenDir)
 
+	diagnostic.Stage("notify document deletion")
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]any{
 		"ids": removeIDs,
@@ -2466,7 +2495,7 @@ func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
 		return
 	}
 	PerformTransactions(&[]*Transaction{transaction})
-	FlushTxQueue()
+	transaction.WaitForCommit()
 	return
 }
 
@@ -2481,6 +2510,9 @@ func normalizeDocTitle(title string) string {
 }
 
 func readSortConfMap(confPath string) (map[string]int, error) {
+	sortConfRecoveryLock.Lock()
+	defer sortConfRecoveryLock.Unlock()
+
 	if !filelock.IsExist(confPath) {
 		return map[string]int{}, nil
 	}
@@ -2492,10 +2524,10 @@ func readSortConfMap(confPath string) (map[string]int, error) {
 	ret := map[string]int{}
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogWarnf("unmarshal sort conf [%s] failed: %s", confPath, err)
-		return nil, err
+		return recoverSortConfMap(confPath, data)
 	}
 	if ret == nil {
-		return nil, fmt.Errorf("invalid sort conf [%s]: expected an object", confPath)
+		return recoverSortConfMap(confPath, data)
 	}
 	return ret, nil
 }

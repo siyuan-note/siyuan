@@ -60,7 +60,7 @@ type AppConf struct {
 	Editor         *conf.Editor         `json:"editor"`         // 编辑器配置
 	Export         *conf.Export         `json:"export"`         // 导出配置
 	Graph          *conf.Graph          `json:"graph"`          // 关系图配置
-	UILayout       *conf.UILayout       `json:"uiLayout"`       // 界面布局。不要直接使用，使用 GetUILayout() 和 SetUILayout() 方法
+	UILayout       *conf.UILayout       `json:"uiLayout"`       // 界面布局，通过 SetUILayout 更新
 	UserData       string               `json:"userData"`       // 社区用户信息，对 User 加密存储
 	User           *conf.User           `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
 	ReadOnly       bool                 `json:"readonly"`       // 是否是以只读模式运行
@@ -73,6 +73,7 @@ type AppConf struct {
 	Search         *conf.Search         `json:"search"`         // 搜索配置
 	Flashcard      *conf.Flashcard      `json:"flashcard"`      // 闪卡配置
 	AI             *conf.AI             `json:"ai"`             // 人工智能配置
+	OCR            *conf.OCR            `json:"ocr"`            // 本地图片文字识别
 	Secrets        *conf.Secrets        `json:"secrets"`        // 全局密钥库
 	Variables      *conf.Variables      `json:"variables"`      // 全局变量库
 	Bazaar         *conf.Bazaar         `json:"bazaar"`         // 集市配置
@@ -212,12 +213,6 @@ func (conf *AppConf) SetAI(ai *conf.AI) {
 	conf.Save()
 }
 
-func (conf *AppConf) GetUILayout() *conf.UILayout {
-	conf.m.Lock()
-	defer conf.m.Unlock()
-	return conf.UILayout
-}
-
 func (conf *AppConf) SetUILayout(uiLayout *conf.UILayout) {
 	conf.m.Lock()
 	defer conf.m.Unlock()
@@ -238,6 +233,10 @@ func (conf *AppConf) SetUser(user *conf.User) {
 
 func InitConf() {
 	initLang()
+	if err := recoverSettingsReset(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover settings reset failed: %s", err)
+		return
+	}
 
 	Conf = NewAppConf()
 	// 先回滚未提交的目录移动，即使配置文件丢失也必须在挂载和同步之前恢复。
@@ -346,6 +345,7 @@ func InitConf() {
 		Conf.Appearance.EntryVisibility = nil
 	}
 	Conf.Appearance.EntryVisibility = conf.NormalizeEntryVisibility(Conf.Appearance.EntryVisibility, entryVisibilityFallback)
+	migrateSlashFrequent(Conf.Appearance.EntryVisibility, getLocalStorageWithError)
 	var langOK bool
 	for _, l := range Conf.Langs {
 		if Conf.Lang == l.Name {
@@ -781,6 +781,7 @@ func InitConf() {
 		}()
 	}
 
+	Conf.OCR = normalizeOCRConfig(Conf.OCR, confFileExists)
 	if nil == Conf.AI {
 		Conf.AI = conf.NewAI()
 	} else {
@@ -901,6 +902,7 @@ func InitConf() {
 
 	go util.InitPandoc(Conf.Export.PandocBin)
 	go util.InitTesseract()
+	InitOCR()
 }
 
 func normalizeFileTreeDefaultIcon(fileTree *conf.FileTree, confFileExists bool) *conf.FileTree {
@@ -1032,24 +1034,33 @@ var exitLock = sync.Mutex{}
 // 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且新版本安装包已经准备就绪时，将安装包路径返回给桌面宿主
 // https://github.com/siyuan-note/siyuan/issues/10288
 func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, installPkgPath string) {
+	diagnostic := util.WatchOperationWithTiming("exit kernel", "wait for exit lock")
+	defer diagnostic.Finish()
 	exitLock.Lock()
 	defer exitLock.Unlock()
 
 	logging.LogInfof("exiting kernel [force=%v, setCurrentWorkspace=%v, execInstallPkg=%d]", force, setCurrentWorkspace, execInstallPkg)
-	defer stopLANSyncManager()
+	defer func() {
+		diagnostic.Stage("stop LAN sync manager")
+		stopLANSyncManager()
+	}()
 
+	diagnostic.Stage("flush editing transactions")
 	util.PushMsg(Conf.Language(95), 10000*60)
 	FlushTxQueue()
 
+	diagnostic.Stage("cancel purge")
 	cancelPurge()
 
 	if !force {
 		if OnKernelPluginsStop != nil {
+			diagnostic.Stage("stop kernel plugins")
 			OnKernelPluginsStop()
 		}
 
 		if Conf.Sync.Enabled && 3 != Conf.Sync.Mode &&
 			((IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider) || conf.ProviderSiYuan != Conf.Sync.Provider) {
+			diagnostic.Stage("exit sync")
 			syncData(true, false)
 			if 0 != ExitSyncSucc {
 				exitCode = 1
@@ -1062,15 +1073,19 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	}
 
 	// Close the user guide when exiting https://github.com/siyuan-note/siyuan/issues/10322
+	diagnostic.Stage("close user guide")
 	closeUserGuide()
 
 	// Improve indexing completeness when exiting https://github.com/siyuan-note/siyuan/issues/12039
+	diagnostic.Stage("flush database index")
 	sql.FlushQueue()
 
 	util.IsExiting.Store(true)
 	// 等待正在执行的路径批次退出，未完成任务保留在配置目录供下次启动恢复。
+	diagnostic.Stage("wait for path refresh")
 	hpathRefresh.Lock()
 	hpathRefresh.Unlock()
+	diagnostic.Stage("check install package")
 	newVerInstallPkgPath := getNewVerInstallPkgPath()
 	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {
 		if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 将新版本安装包交给桌面宿主执行
@@ -1084,6 +1099,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 		}
 	}
 
+	diagnostic.Stage("save configuration")
 	Conf.Close()
 	// 退出前关闭已打开的加密笔记本并推送 closeBox，让前端关闭对应的明文文档标签页，避免重启后泄密。
 	// 走 Unmount：落盘 Closed=true + 生成历史 + 锁定清 DEK + 广播 closeBox。
@@ -1091,18 +1107,26 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	// 放在 BroadcastByType("exit")（第 933 行）之前推送，随后的 time.Sleep(500ms) 留给前端处理事件。
 	for _, box := range Conf.GetOpenedBoxes() {
 		if IsEncryptedBox(box.ID) && !IsUserGuide(box.ID) {
+			diagnostic.Stage("unmount encrypted notebook " + box.ID)
 			Unmount(box.ID)
 		}
 	}
+	diagnostic.Stage("close databases")
 	closeFlashcardV2Store()
 	sql.CloseDatabase()
+	diagnostic.Stage("close push queue")
 	closePushQueue()
+	diagnostic.Stage("save asset texts")
 	util.SaveAssetsTexts()
+	diagnostic.Stage("clear workspace temp")
 	clearWorkspaceTemp(installPkgPath)
+	diagnostic.Stage("clear corrupted notebooks")
 	clearCorruptedNotebooks()
+	diagnostic.Stage("clear port file")
 	clearPortJSON()
 
 	if setCurrentWorkspace {
+		diagnostic.Stage("save workspace paths")
 		// 将当前工作空间放到工作空间列表的最后一个
 		// Open the last workspace by default https://github.com/siyuan-note/siyuan/issues/10570
 		workspacePaths, err := util.ReadWorkspacePaths()
@@ -1115,21 +1139,28 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 		}
 	}
 
+	diagnostic.Stage("unlock workspace")
 	util.UnlockWorkspace()
 
+	diagnostic.Stage("wait for frontend events")
 	time.Sleep(500 * time.Millisecond)
+	diagnostic.Stage("close sync websocket")
 	closeSyncWebSocket()
 
 	go func() {
+		diagnostic := util.WatchOperationWithTiming("exit kernel servers", "wait for exit response")
 		time.Sleep(500 * time.Millisecond)
 		logging.LogInfof("exited kernel")
 		if nil != util.WebSocketServer {
+			diagnostic.Stage("close frontend websockets")
 			util.WebSocketServer.Close()
 		}
 		if nil != util.HttpServer {
+			diagnostic.Stage("close HTTP server")
 			util.HttpServer.Close()
 		}
 		util.HttpServing = false
+		diagnostic.Finish()
 
 		if util.IsMobileContainer() {
 			return
@@ -1184,15 +1215,50 @@ func (conf *AppConf) Save() {
 	conf.m.Lock()
 	defer conf.m.Unlock()
 
-	plainData, err := gulu.JSON.MarshalJSON(conf)
+	conf.saveLocked()
+}
+
+// SaveGraphQueryConf 仅在查询携带的图配置变化时更新并保存，比较、赋值和序列化共用配置锁。
+func (appConf *AppConf) SaveGraphQueryConf(global *conf.GlobalGraph, local *conf.LocalGraph) {
+	appConf.m.Lock()
+	defer appConf.m.Unlock()
+	changed := false
+	if global != nil && !reflect.DeepEqual(appConf.Graph.Global, global) {
+		appConf.Graph.Global = global
+		changed = true
+	}
+	if local != nil && !reflect.DeepEqual(appConf.Graph.Local, local) {
+		appConf.Graph.Local = local
+		changed = true
+	}
+	if changed && !util.ReadOnly {
+		appConf.saveLocked()
+	}
+}
+
+func (conf *AppConf) saveLocked() {
+	newData, err := conf.marshalForSave()
 	if err != nil {
 		logging.LogErrorf("marshal conf failed: %s", err)
 		return
 	}
+	confPath := filepath.Join(util.ConfDir, "conf.json")
+	oldData, err := filelock.ReadFile(confPath)
+	if err == nil && bytes.Equal(newData, oldData) {
+		return
+	}
+	conf.save0(newData)
+}
+
+// marshalForSave 生成持久化副本，调用方持有配置锁，凭据仅在副本中加密。
+func (conf *AppConf) marshalForSave() ([]byte, error) {
+	plainData, err := gulu.JSON.MarshalJSON(conf)
+	if err != nil {
+		return nil, err
+	}
 	snapshot := NewAppConf()
 	if err = gulu.JSON.UnmarshalJSON(plainData, snapshot); err != nil {
-		logging.LogErrorf("copy conf failed: %s", err)
-		return
+		return nil, err
 	}
 	if snapshot.AI != nil {
 		snapshot.AI.EncryptAPIKeys()
@@ -1210,23 +1276,7 @@ func (conf *AppConf) Save() {
 		snapshot.System.UpdateChannel = ""
 	}
 
-	newData, err := gulu.JSON.MarshalIndentJSON(snapshot, "", "  ")
-	if err != nil {
-		logging.LogErrorf("marshal conf snapshot failed: %s", err)
-		return
-	}
-	confPath := filepath.Join(util.ConfDir, "conf.json")
-	oldData, err := filelock.ReadFile(confPath)
-	if err != nil {
-		conf.save0(newData)
-		return
-	}
-
-	if bytes.Equal(newData, oldData) {
-		return
-	}
-
-	conf.save0(newData)
+	return gulu.JSON.MarshalIndentJSON(snapshot, "", "  ")
 }
 
 func (conf *AppConf) save0(data []byte) {

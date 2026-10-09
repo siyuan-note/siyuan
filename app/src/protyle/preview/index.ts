@@ -1,5 +1,5 @@
 import {isOnlyMeta, writeText} from "../util/compatibility";
-import {focusByRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {openLink} from "../../editor/openLink";
 import {showMessage} from "../../dialog/message";
 import {previewDocImage} from "./image";

@@ -1,4 +1,7 @@
 import {Constants} from "./constants";
+import {refreshSettingConfig} from "./config/setting/sync";
+import {onAgentStreamingMarkdownStorageChanged} from "./config/tabs/ai/agentStreamingMarkdown";
+import {onPageScrollButtonsStorageChanged} from "./protyle/scroll/pageButtons";
 import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
 import {systemConfig} from "./config/systemConfig";
 import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
@@ -8,6 +11,7 @@ import "./util/iosWindowControls";
 import {Menus} from "./menus";
 import {Model} from "./layout/Model";
 import {loadDesktopHostConnection, onGetConfig} from "./boot/onGetConfig";
+import {exitAfterSettingsReset} from "./config/setting/reset";
 import {initBlockPopover} from "./block/popover";
 import {applyCloudUserState, onSetaccount} from "./config/tabs/accountUi";
 import {addScript, addScriptSync} from "./protyle/util/addScript";
@@ -94,6 +98,9 @@ export class App {
                         case "setAppearance":
                             appearanceConfigApi.apply(data.data);
                             break;
+                        case "settingChanged":
+                            void refreshSettingConfig(data.data.namespace);
+                            break;
                         case "refreshAppearance":
                             void refreshAppearance(data.data);
                             break;
@@ -168,19 +175,27 @@ export class App {
                         case "setLocalStorageVal":
                             if (window.siyuan.storage) {
                                 window.siyuan.storage[data.data.key] = data.data.val;
+                                onAgentStreamingMarkdownStorageChanged(data.data.key);
+                                onPageScrollButtonsStorageChanged(data.data.key);
                             }
                             break;
                         case "setLocalStorageVals":
                             Object.keys(data.data.keyVals).forEach((k) => {
                                 window.siyuan.storage[k] = data.data.keyVals[k];
+                                onAgentStreamingMarkdownStorageChanged(k);
+                                onPageScrollButtonsStorageChanged(k);
                             });
                             break;
                         case "removeLocalStorageVal":
                             delete window.siyuan.storage[data.data.key];
+                            onAgentStreamingMarkdownStorageChanged(data.data.key);
+                            onPageScrollButtonsStorageChanged(data.data.key);
                             break;
                         case "removeLocalStorageVals":
                             data.data.keys.forEach((k: string) => {
                                 delete window.siyuan.storage[k];
+                                onAgentStreamingMarkdownStorageChanged(k);
+                                onPageScrollButtonsStorageChanged(k);
                             });
                             break;
                         case "rename":
@@ -352,6 +367,7 @@ export class App {
                         /// #endif
                         window.siyuan.isReady = true;
                         mainWs.flushMainMessages();
+                        exitAfterSettingsReset();
                         fetchPost("/api/setting/getCloudUser", {});
                     });
                 });
@@ -361,7 +377,7 @@ export class App {
     }
 }
 
-installPluginStorageFetchAppId(window, Constants.SIYUAN_APPID, window.location.href);
+installPluginStorageFetchAppId(window, Constants.SIYUAN_APPID, document.baseURI, location.origin);
 const siyuanApp = new App();
 
 window.openFileByURL = (openURL) => {

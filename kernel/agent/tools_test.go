@@ -221,22 +221,35 @@ func TestExecuteToolPreservesModelAttachments(t *testing.T) {
 	})
 	t.Cleanup(func() { tools.RemoveTool(toolName) })
 
-	result := executeTool(context.Background(), openai.ToolCall{
+	result := executeCapability(context.Background(), openai.ToolCall{
 		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
-	}, "")
+	}, "", toolCapabilityForTest(t, toolName))
 	if result.Text != "attached" || result.IsError || len(result.ModelAttachments) != 1 ||
 		string(result.ModelAttachments[0].Data) != "image" {
 		t.Fatalf("model attachment was not preserved: %#v", result)
 	}
 }
 
-func TestValidateToolCallInputRejectsMissingActionBeforeConfirmation(t *testing.T) {
+func toolCapabilityForTest(t *testing.T, name string) *capabilityRegistration {
+	t.Helper()
+	tool, validator := tools.LookupToolWithValidator(name)
+	if tool == nil || validator == nil {
+		t.Fatalf("missing test capability: %s", name)
+	}
+	return &capabilityRegistration{
+		ID: tools.CapabilityIDForTool(tool), ModelName: tool.Name,
+		Source: tool.Source, Runtime: tool.Runtime, Tool: tool, Validator: validator,
+	}
+}
+
+func TestValidateCapabilityCallRejectsMissingActionBeforeConfirmation(t *testing.T) {
 	args := map[string]any{"id": "20260707184942-prjqwqo"}
-	if _, _, err := validateToolCallInput(t.Context(), "outline", args); err == nil {
+	registration := toolCapabilityForTest(t, "outline")
+	if err := validateCapabilityCall(t.Context(), registration, args); err == nil {
 		t.Fatal("outline without its required action must fail validation before confirmation")
 	}
 	args["action"] = "get"
-	if _, _, err := validateToolCallInput(t.Context(), "outline", args); err != nil {
+	if err := validateCapabilityCall(t.Context(), registration, args); err != nil {
 		t.Fatalf("valid outline arguments were rejected: %s", err)
 	}
 }
@@ -382,15 +395,15 @@ func TestQueryToolActionEffects(t *testing.T) {
 
 func TestBrowserCapabilityEffects(t *testing.T) {
 	native := &capabilityRegistration{ID: "native/frontend/open_search", ModelName: "frontend__open_search", Source: "native", Runtime: "browser"}
-	if needsCapabilityConfirm(native, "", nil, false, nil) || needsCapabilitySnapshot(native, "") {
+	if required, _ := capabilityConfirmRequirement(native, "", nil, false, nil); required || needsCapabilitySnapshot(native, "") {
 		t.Fatal("built-in browser capability must not require confirmation or create a snapshot")
 	}
 	pluginUnknown := &capabilityRegistration{ID: "plugin/frontend/example/run", ModelName: "frontend__plugin_run", Source: "plugin", Runtime: "browser"}
-	if !needsCapabilityConfirm(pluginUnknown, "", nil, false, nil) {
+	if required, _ := capabilityConfirmRequirement(pluginUnknown, "", nil, false, nil); !required {
 		t.Fatal("plugin browser capability with unknown effects must require confirmation")
 	}
 	pluginRead := &capabilityRegistration{ID: "plugin/frontend/example/read", ModelName: "frontend__plugin_read", Source: "plugin", Runtime: "browser", Effects: tools.ToolEffects{LocalRead: true}, EffectsDeclared: true}
-	if needsCapabilityConfirm(pluginRead, "", nil, false, nil) {
+	if required, _ := capabilityConfirmRequirement(pluginRead, "", nil, false, nil); required {
 		t.Fatal("plugin browser capability declared local-read-only must not require confirmation")
 	}
 	pluginActions := &capabilityRegistration{
@@ -400,12 +413,13 @@ func TestBrowserCapabilityEffects(t *testing.T) {
 			"write": {LocalWrite: true},
 		},
 	}
-	if needsCapabilityConfirm(pluginActions, "read", nil, false, nil) {
+	if required, _ := capabilityConfirmRequirement(pluginActions, "read", nil, false, nil); required {
 		t.Fatal("plugin browser action with explicit read effects must not require confirmation")
 	}
-	if !needsCapabilityConfirm(pluginActions, "write", nil, false, nil) ||
-		!needsCapabilityConfirm(pluginActions, "unknown", nil, false, nil) {
-		t.Fatal("plugin browser write or undeclared action must require confirmation")
+	for _, action := range []string{"write", "unknown"} {
+		if required, _ := capabilityConfirmRequirement(pluginActions, action, nil, false, nil); !required {
+			t.Fatal("plugin browser write or undeclared action must require confirmation")
+		}
 	}
 	for _, action := range []string{"html", "preview"} {
 		if needsConfirm("export", action, nil) || needsLocalSnapshot("export", action) {
@@ -643,9 +657,9 @@ func TestExecuteToolPropagatesUnknownExecution(t *testing.T) {
 	})
 	t.Cleanup(func() { tools.RemoveTool(toolName) })
 
-	result := executeTool(context.Background(), openai.ToolCall{
+	result := executeCapability(context.Background(), openai.ToolCall{
 		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
-	}, "")
+	}, "", toolCapabilityForTest(t, toolName))
 	if result.Text != "result unknown" || !result.IsError || !result.ExecutionUnknown {
 		t.Fatalf("unexpected tool result: %#v", result)
 	}
@@ -669,9 +683,9 @@ func TestExecuteToolRejectsInvalidStructuredOutput(t *testing.T) {
 	}
 	t.Cleanup(func() { tools.RemoveTool(toolName) })
 
-	result := executeTool(context.Background(), openai.ToolCall{
+	result := executeCapability(context.Background(), openai.ToolCall{
 		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
-	}, "")
+	}, "", toolCapabilityForTest(t, toolName))
 	if !result.IsError || !result.ExecutionUnknown || !strings.Contains(result.Text, "must not be retried automatically") {
 		t.Fatalf("unexpected tool result: %#v", result)
 	}
@@ -698,9 +712,9 @@ func TestExecuteToolCancellationMarksExecutionUnknown(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	resultCh := make(chan executedToolResult, 1)
 	go func() {
-		resultCh <- executeTool(ctx, openai.ToolCall{
+		resultCh <- executeCapability(ctx, openai.ToolCall{
 			Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
-		}, "")
+		}, "", toolCapabilityForTest(t, toolName))
 	}()
 	<-started
 	cancel()
@@ -725,9 +739,9 @@ func TestExecuteToolDoesNotStartAfterCancellation(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	result := executeTool(ctx, openai.ToolCall{
+	result := executeCapability(ctx, openai.ToolCall{
 		Function: openai.FunctionCall{Name: toolName, Arguments: `{}`},
-	}, "")
+	}, "", toolCapabilityForTest(t, toolName))
 	if invoked || result.Text == "" || !result.IsError || result.ExecutionUnknown {
 		t.Fatalf("pre-cancelled tool was handled incorrectly: invoked=%v, result=%#v", invoked, result)
 	}

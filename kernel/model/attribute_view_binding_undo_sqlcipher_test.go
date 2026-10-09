@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -71,9 +72,36 @@ func TestAttributeViewBindingEncryptedReplay(t *testing.T) {
 		}
 		treenode.UpsertBlockTree(tree)
 	}
+	// 对已有公历日期先按支持的密文格式写入，再验证历法设置不改变时间戳或认证读写。
+	lunarKey := av.NewKey("20261009120000-lunare1", "Birthday", "", av.KeyTypeDate)
+	lunarKey.DateFormat = av.DateDisplayFormatFull
+	lunarTimestamp := time.Date(2025, 7, 25, 14, 7, 35, 123000000, time.Local).UnixMilli()
+	before.KeyValues = append(before.KeyValues, &av.KeyValues{Key: lunarKey, Values: []*av.Value{
+		{ID: "20261009120000-lunare2", KeyID: lunarKey.ID, Type: av.KeyTypeDate,
+			Date: &av.ValueDate{Content: lunarTimestamp, IsNotEmpty: true}},
+	}})
 	if err := av.SaveAttributeView(before); err != nil {
 		t.Fatal(err)
 	}
+	for _, format := range []av.DateDisplayFormat{av.DateDisplayFormatLunar, av.DateDisplayFormatFull} {
+		if err = setAttributeViewColDateFormat(&Operation{AvID: before.ID, ID: lunarKey.ID, Typ: "date", Format: string(format)}); err != nil {
+			t.Fatal(err)
+		}
+		cache.ClearAVCache()
+		stored, readErr := av.ParseAttributeView(before.ID)
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		field := stored.KeyValues[len(stored.KeyValues)-1]
+		if field.Key.DateFormat != format || field.Values[0].Date.Content != lunarTimestamp {
+			t.Fatal("encrypted calendar switch changed the stored date")
+		}
+	}
+	key := before.KeyValues[2].Key
+	if err := setAttrViewColAttributePanelVisibility(&Operation{AvID: before.ID, ID: key.ID, Data: "hide"}); err != nil {
+		t.Fatal(err)
+	}
+	key.AttributePanelVisibility = "hide"
 	plainPath := filepath.Join(util.DataDir, "storage", "av", before.ID+".json")
 	if err := os.Remove(plainPath); err != nil {
 		t.Fatal(err)
@@ -85,6 +113,15 @@ func TestAttributeViewBindingEncryptedReplay(t *testing.T) {
 		if err := PerformTxSync(&Transaction{DoOperations: operations, isReplay: true}); err != nil {
 			t.Fatal(err)
 		}
+	}
+	cache.ClearAVCache()
+	persisted, err := av.ParseAttributeView(before.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	persistedKey, err := persisted.GetKey(key.ID)
+	if err != nil || persistedKey.AttributePanelVisibility != "hide" {
+		t.Fatalf("encrypted replay lost field visibility: %+v, %v", persistedKey, err)
 	}
 	path := filepath.Join(util.DataDir, boxID, "storage", "av", before.ID+".json")
 	ciphertext, err := os.ReadFile(path)
@@ -108,6 +145,12 @@ func TestAttributeViewBindingEncryptedReplay(t *testing.T) {
 				}
 			}
 			cache.ClearAVCache()
+			if err = setAttrViewColAttributePanelVisibility(&Operation{AvID: before.ID, ID: key.ID, Data: "always"}); err == nil {
+				t.Fatal("field visibility accepted inaccessible encrypted data")
+			}
+			if err = setAttributeViewColDateFormat(&Operation{AvID: before.ID, ID: lunarKey.ID, Typ: "date", Format: "lunar"}); err == nil {
+				t.Fatal("calendar setting accepted inaccessible encrypted data")
+			}
 			if err = PerformTxSync(&Transaction{DoOperations: cloneOperations(tx.UndoOperations), isReplay: true}); err == nil {
 				t.Fatal("binding replay accepted inaccessible encrypted data")
 			}

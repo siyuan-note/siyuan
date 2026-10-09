@@ -1,3 +1,31 @@
+.av__lunar-editor {
+  width: 340px;
+  max-width: 100%;
+}
+
+.av__lunar-date {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 8px 8px;
+}
+
+.av__lunar-date-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .b3-select {
+    flex: 1 1 70px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .b3-select[data-lunar-part="month"] {
+    flex: 2 1 130px;
+  }
+}
+
 // 单字段条件编辑器供筛选和条件颜色菜单共用。
 @mixin av-filter-editor {
   .b3-menu__item.av__filter-row {
@@ -950,7 +978,7 @@
     justify-content: flex-end;
     gap: 8px;
     padding: 8px;
-    border-top: 1px solid var(--b3-border-color);
+    border-bottom: 1px solid var(--b3-border-color);
     background: var(--b3-theme-surface);
   }
 
@@ -2048,6 +2076,12 @@
         max-width: calc(100vw - 32px);
       }
 
+      &.av__automation-panel:not(.b3-menu--fullscreen) {
+        width: 520px;
+        min-width: min(340px, calc(100vw - 32px));
+        max-width: calc(100vw - 32px);
+      }
+
       &__items {
         max-height: calc(100vh - 60px);
       }
@@ -2082,10 +2116,13 @@
 
       .block__icon:not([data-conditional-drag]) {
         line-height: 20px;
-        padding: 0 4px;
         font-size: 12px;
         align-self: center;
         opacity: 1;
+
+        &:not(.block__icon--menu-back) {
+          padding: 0 4px;
+        }
       }
 
       &__label {
@@ -2256,10 +2293,13 @@
 
     .block__icon:not([data-conditional-drag]) {
       line-height: 20px;
-      padding: 0 4px;
       font-size: 12px;
       align-self: center;
       opacity: 1;
+
+      &:not(.block__icon--menu-back) {
+        padding: 0 4px;
+      }
     }
   }
 
@@ -2760,6 +2800,28 @@ img.av__cellassetimg {
   .av__relation-table-cell {
     border-right: 1px solid var(--b3-border-color);
 
+    &[data-dtype="relation"] {
+      gap: 4px 12px;
+
+      > .av__cell--relation {
+        flex-shrink: 0;
+        margin-right: 0;
+      }
+
+      .av__celltext {
+        min-width: 0;
+      }
+
+      &[data-wrap="true"] {
+        flex-wrap: wrap;
+
+        .av__celltext {
+          overflow-wrap: anywhere;
+          white-space: normal;
+        }
+      }
+    }
+
     &:last-child {
       border-right: 0;
     }
@@ -2937,30 +2999,6 @@ img.av__cellassetimg {
     min-width: 0;
   }
 
-  .av__filter-rowinner,
-  .av__filter-date-config {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-  }
-
-  .av__filter-date-controls {
-    display: contents;
-  }
-
-  .av__filter-date-config {
-    order: 1;
-    flex-basis: 100%;
-  }
-
-  .av__filter-value {
-    order: 2;
-    flex-basis: 100%;
-    min-width: 0;
-  }
-
   .av__conditional-controls {
     grid-column: 1 / -1;
     display: flex;
@@ -2975,16 +3013,6 @@ img.av__cellassetimg {
       max-width: 100%;
       white-space: normal;
     }
-  }
-
-  .av__field-wrapper {
-    width: 128px;
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .b3-select {
-    max-width: 100%;
   }
 
   .av__conditional-swatch {
@@ -3010,5 +3038,103 @@ img.av__cellassetimg {
     .av__conditional-controls {
       grid-column: 2 / -1;
     }
+  }
+}
+.av__panel .av__conditional-colors,
+.av__panel .av__automation-filter {
+  .av__filter-rowinner,
+  .av__filter-date-config {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .av__filter-date-controls {
+    display: contents;
+  }
+
+  .av__filter-date-config {
+    order: 1;
+    flex-basis: 100%;
+  }
+
+  .av__filter-value {
+    order: 2;
+    flex-basis: 100%;
+    min-width: 0;
+  }
+
+  .av__field-wrapper {
+    width: 128px;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .b3-select {
+    max-width: 100%;
+  }
+}
+
+.av__automation {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  &-filter {
+    @include av-filter-editor;
+  }
+
+  &-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    min-height: 0;
+  }
+
+  &-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+
+    > .b3-menu__action {
+      flex-shrink: 0;
+      margin-left: 0;
+    }
+  }
+
+  &-action,
+  &-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    min-width: 0;
+  }
+
+  &-action:last-child {
+    margin-bottom: 0;
+  }
+
+  &-filter,
+  &-value {
+    flex: 1;
+    min-width: 160px;
+    max-width: 100%;
+  }
+
+  &-value {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .b3-select,
+  .b3-text-field {
+    min-width: 0;
+    max-width: 100%;
   }
 }

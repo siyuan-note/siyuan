@@ -1,3 +1,4 @@
+import {escapeHtmlTextAndAttr} from "../util/escape";
 import {Model} from "../layout/Model";
 import {Tab} from "../layout/Tab";
 import {Constants} from "../constants";
@@ -110,7 +111,7 @@ export class Asset extends Model {
         }
         const type = this.path.substr(this.path.lastIndexOf(".")).toLowerCase().split("?")[0];
         // 对资源路径进行 HTML 转义后再拼入 src 属性，避免路径中包含 " 等字符导致属性逃逸引发 XSS
-        const src = Lute.EscapeHTMLStr(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path);
+        const src = escapeHtmlTextAndAttr(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path);
         if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
             this.element.innerHTML = `<div class="asset"><img src="${src}"></div>`;
         } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {

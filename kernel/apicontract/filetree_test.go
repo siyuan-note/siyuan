@@ -125,6 +125,27 @@ func TestFileTreeHintAndDailyNoteConditions(t *testing.T) {
 	}
 }
 
+func TestDailyNoteDateContract(t *testing.T) {
+	for _, body := range []string{`{"notebook":"box"}`, `{"notebook":"box","date":null}`, `{"notebook":"box","date":""}`} {
+		request, err := CreateDailyNote.Decode(strings.NewReader(body))
+		if err != nil || request.Date != "" {
+			t.Fatalf("default date changed: %#v %v", request, err)
+		}
+	}
+	request, err := CreateDailyNote.Decode(strings.NewReader(`{"notebook":"box","date":"2026-09-25","app":false}`))
+	if err != nil || request.Date != "2026-09-25" {
+		t.Fatalf("explicit date not decoded: %#v %v", request, err)
+	}
+	if _, err := request.AppID(); err == nil {
+		t.Fatal("conditional app decoding changed")
+	}
+	for _, body := range []string{`{"notebook":"box","date":false}`, `{"notebook":"box","date":20260925}`} {
+		if _, err := CreateDailyNote.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("non-string date accepted: %s", body)
+		}
+	}
+}
+
 func TestFileTreeSortModeNullableAndInteger(t *testing.T) {
 	for _, entry := range []struct {
 		body  string

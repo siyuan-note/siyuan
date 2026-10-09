@@ -17,14 +17,17 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/chatgpt"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -234,8 +237,14 @@ func testModelContract(c *gin.Context, req apicontract.AIModelRequest) apicontra
 		return contractFailure[apicontract.AIModelTestData](ret)
 	}
 
-	available, matched, err := util.TestModel(
-		provider.APIKey, provider.BaseURL, provider.Protocol, req.Model, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
+	var available []string
+	var matched bool
+	if provider.AuthType == "chatgpt" {
+		available, matched, err = testChatGPTModel(c.Request.Context(), provider, req.Model)
+	} else {
+		available, matched, err = util.TestModel(
+			provider.APIKey, provider.BaseURL, provider.Protocol, req.Model, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
+	}
 	// 可用模型清单裁剪到前 50 条，避免响应体过大
 	if 50 < len(available) {
 		available = available[:50]
@@ -325,7 +334,20 @@ func listModelsContract(c *gin.Context, req apicontract.AIProviderRequest) apico
 		return contractFailure[apicontract.AIModelsData](ret)
 	}
 
-	metadata, err := util.ListProviderModels(provider.APIKey, provider.BaseURL, provider.Protocol, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
+	var metadata []util.AvailableModel
+	displayNames := map[string]string{}
+	if provider.AuthType == "chatgpt" {
+		var catalog []chatgpt.Model
+		ctx, cancel := context.WithTimeout(c.Request.Context(), time.Duration(provider.RequestTimeout)*time.Second)
+		defer cancel()
+		catalog, err = util.ChatGPTService().Models(ctx, provider.AccountID)
+		for _, item := range catalog {
+			metadata = append(metadata, util.AvailableModel{ID: item.ID})
+			displayNames[item.ID] = item.DisplayName
+		}
+	} else {
+		metadata, err = util.ListProviderModels(provider.APIKey, provider.BaseURL, provider.Protocol, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
+	}
 	models := make([]string, 0, len(metadata))
 	contextLengths := map[string]int{}
 	for _, item := range metadata {
@@ -336,7 +358,7 @@ func listModelsContract(c *gin.Context, req apicontract.AIProviderRequest) apico
 			}
 		}
 	}
-	result := apicontract.AIModelsData{Models: models, ContextLengths: contextLengths}
+	result := apicontract.AIModelsData{Models: models, ContextLengths: contextLengths, DisplayNames: displayNames}
 	if nil != err {
 		message := err.Error()
 		result.Msg = &message

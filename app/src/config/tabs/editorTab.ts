@@ -189,6 +189,14 @@ const bindDatabaseAttrSettingsVisibility = (root: HTMLElement) => {
 
 const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("blockFeatures", window.siyuan.languages.configGroupBlockFeatures);
+    group.switch("editor.displayImgName", {
+        title: window.siyuan.languages.displayImgName,
+        desc: window.siyuan.languages.displayImgNameTip,
+    });
+    group.switch("editor.displayImgAlt", {
+        title: window.siyuan.languages.displayImgAlt,
+        desc: window.siyuan.languages.displayImgAltTip,
+    });
     group.switch("editor.displayNetImgMark", {
         title: window.siyuan.languages.md7,
         desc: window.siyuan.languages.md8,

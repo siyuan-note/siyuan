@@ -63,6 +63,8 @@ test("only a calendar with an ordinary date source supplies the date of a new en
     }
     state.dateType = "date";
     assert.equal(getCalendarCreationDate(calendar), state.anchor);
+    state.dateHasTemplate = true;
+    assert.equal(getCalendarCreationDate(calendar), undefined);
     const table = block("view-a", "table");
     getCalendarState(table).dateType = "date";
     assert.equal(getCalendarCreationDate(table), undefined);

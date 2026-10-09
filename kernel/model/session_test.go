@@ -408,7 +408,7 @@ func TestCheckAuthLoopbackProxy(t *testing.T) {
 		}
 		c.Status(http.StatusNoContent)
 	})
-	for _, path := range []string{"/stage/build/desktop/", "/check-auth", "/assets/icon.png", "/api/system/exit", "/api/test"} {
+	for _, path := range []string{"/", "/stage/build/mobile/", "/stage/build/desktop/", "/check-auth", "/assets/icon.png", "/api/system/exit", "/api/test"} {
 		engine.Any(path, CheckAuth, func(c *gin.Context) {
 			if c.Request.URL.Path != "/check-auth" && !IsAdminRoleContext(c) {
 				t.Error("authenticated request has no administrator role")
@@ -441,7 +441,11 @@ func TestCheckAuthLoopbackProxy(t *testing.T) {
 		{name: "authenticated same-site request denied", method: http.MethodPost, path: "/api/system/exit", site: "same-site", authenticated: true, want: http.StatusUnauthorized},
 		{name: "authenticated same-site app navigation", method: http.MethodGet, path: "/stage/build/desktop/", site: "same-site", mode: "navigate", dest: "document", authenticated: true, want: http.StatusNoContent},
 		{name: "authenticated same-site API navigation denied", method: http.MethodGet, path: "/api/test", site: "same-site", mode: "navigate", dest: "document", authenticated: true, want: http.StatusUnauthorized},
-		{name: "authenticated cross-site app navigation denied", method: http.MethodGet, path: "/stage/build/desktop/", site: "cross-site", mode: "navigate", dest: "document", authenticated: true, want: http.StatusUnauthorized},
+		{name: "PWA navigation still requires login", method: http.MethodGet, path: "/", site: "cross-site", mode: "navigate", dest: "document", want: http.StatusFound},
+		{name: "authenticated PWA root navigation", method: http.MethodGet, path: "/", site: "cross-site", mode: "navigate", dest: "document", authenticated: true, want: http.StatusNoContent},
+		{name: "authenticated PWA mobile navigation", method: http.MethodGet, path: "/stage/build/mobile/", site: "cross-site", mode: "navigate", dest: "document", authenticated: true, want: http.StatusNoContent},
+		{name: "authenticated cross-site app navigation", method: http.MethodGet, path: "/stage/build/desktop/", site: "cross-site", mode: "navigate", dest: "document", authenticated: true, want: http.StatusNoContent},
+		{name: "authenticated cross-site API navigation denied", method: http.MethodGet, path: "/api/test", site: "cross-site", mode: "navigate", dest: "document", authenticated: true, want: http.StatusUnauthorized},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			request := httptest.NewRequest(test.method, test.path, nil)

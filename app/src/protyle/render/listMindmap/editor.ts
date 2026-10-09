@@ -11,13 +11,16 @@ import {bindLiteCodeActions} from "../../lite/codeActions";
 import {setMobileToolbarUndo} from "../../lite/mobileToolbar";
 import {getDefaultToolbar} from "../../toolbar/defaults";
 import {hideElements} from "../../ui/hideElements";
+import {uploadFiles} from "../../upload";
 import {matchHotKey} from "../../util/hotKey";
 import {processRender} from "../../util/processCode";
+import {initEditorTabs} from "../../wysiwyg/tabs";
 import {avRender} from "../av/render";
 import {blockRender} from "../blockRender";
 import {highlightRender} from "../highlightRender";
 import {cleanListMindmapHTML} from "./model";
 import type {ListMindmapNode} from "./model";
+import {finishListMindmaps} from "./index";
 
 interface ListMindmapEditorOptions {
     owner: IProtyle;
@@ -148,7 +151,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         initialBlockHTML,
         protyleOptions: {notebookId: owner.notebookId, toolbar, hint},
         runtimeCapabilities: {
-            upload: false, websocket: false, pluginExtensions: false,
+            upload: true, websocket: false, pluginExtensions: false,
             listItemFragment: true,
             getTransactionOwner: operations => {
                 const avIDs = new Set(Array.from(host.querySelectorAll<HTMLElement>(
@@ -170,6 +173,8 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             protyle.block.parentID = node.id;
             protyle.path = owner.path;
             setCustomBlockRootReady(element, true);
+            // 聚焦前同步页签可见性，避免光标进入尚未隐藏的非活动页签。
+            initEditorTabs(protyle);
             processRender(element);
             highlightRender(element);
             blockRender(protyle, element, undefined, options.onResize);
@@ -299,8 +304,16 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         if (finished) {
             return true;
         }
+        if (fragment.protyle.upload?.isUploading) {
+            showMessage(window.siyuan.languages.uploading);
+            return false;
+        }
         if (composing) {
             finishAfterComposition = true;
+            return false;
+        }
+        // 退出外层节点前先保存内层脑图，避免清理预览时遗漏尚未提交的正文。
+        if (!await finishListMindmaps(fragment.protyle)) {
             return false;
         }
         if (pendingSave) {
@@ -311,6 +324,10 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
                 return false;
             }
         } while (comparableContent(fragment.getBlockHTML()) !== lastHTML);
+        if (fragment.protyle.upload?.isUploading) {
+            showMessage(window.siyuan.languages.uploading);
+            return false;
+        }
         cleanup();
         return true;
     };
@@ -353,6 +370,10 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         .forEach(type => host.addEventListener(type, event => event.stopPropagation(), {signal}));
     host.addEventListener("keydown", event => event.stopPropagation(), {signal});
     host.addEventListener("keydown", event => {
+        if (event.target instanceof Element &&
+            fragment.wysiwyg.contains(event.target.closest(".mindmap-view"))) {
+            return;
+        }
         if (event.isComposing || composing) {
             return;
         }
@@ -456,5 +477,12 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             selection.addRange(range);
         }
     }
-    return {finish, destroy};
+    return {finish, destroy, pasteImages: (files: File[]) => {
+        if (finished || closing || !options.canEdit()) {
+            return;
+        }
+        fragment.focus(true);
+        fragment.protyle.toolbar.range = undefined;
+        uploadFiles(fragment.protyle, files, undefined, undefined, undefined, {source: "paste"});
+    }};
 };

@@ -144,7 +144,7 @@ interface IExportMdOptionsPayload {
 // exportMarkdownZip 为 Markdown .zip 导出入口：弹参数对话框，确认后按文档、文档集合或笔记本集合调用对应 API。
 // 单文档时先查询文档信息，若无子文档/关联文档则隐藏对应配置项，减少干扰。
 export const exportMarkdownZip = async(options: IExportMdOptions) => {
-    if (!getHostCapabilities().importExport) {
+    if (!getHostCapabilities().documentImportExport) {
         return;
     }
     let showSubDocs = true;

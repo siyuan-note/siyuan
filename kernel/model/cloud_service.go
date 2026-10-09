@@ -39,6 +39,12 @@ import (
 
 var ErrFailedToConnectCloudServer = errors.New("failed to connect cloud server")
 
+var (
+	shorthandAudioPattern = regexp.MustCompile("<audio.*>.*</audio>")
+	shorthandVideoPattern = regexp.MustCompile("<video.*>.*</video>")
+	shorthandFilePattern  = regexp.MustCompile("\\[文件]\\(.*\\)")
+)
+
 func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool, err error) {
 	user := Conf.GetUser()
 	if nil == user {
@@ -674,9 +680,6 @@ func GetCloudShorthands(page int) (result map[string]any, err error) {
 	}
 
 	luteEngine := NewLute()
-	audioRegexp := regexp.MustCompile("<audio.*>.*</audio>")
-	videoRegexp := regexp.MustCompile("<video.*>.*</video>")
-	fileRegexp := regexp.MustCompile("\\[文件]\\(.*\\)")
 	shorthands := result["data"].(map[string]any)["shorthands"].([]any)
 	for _, item := range shorthands {
 		shorthand := item.(map[string]any)
@@ -686,9 +689,9 @@ func GetCloudShorthands(page int) (result map[string]any, err error) {
 		shorthand["hCreated"] = hCreated.Format("2006-01-02 15:04")
 
 		desc := shorthand["shorthandDesc"].(string)
-		desc = audioRegexp.ReplaceAllString(desc, " 语音 ")
-		desc = videoRegexp.ReplaceAllString(desc, " 视频 ")
-		desc = fileRegexp.ReplaceAllString(desc, " 文件 ")
+		desc = shorthandAudioPattern.ReplaceAllString(desc, " 语音 ")
+		desc = shorthandVideoPattern.ReplaceAllString(desc, " 视频 ")
+		desc = shorthandFilePattern.ReplaceAllString(desc, " 文件 ")
 		desc = strings.ReplaceAll(desc, "\n\n", "")
 		desc = strings.TrimSpace(desc)
 		shorthand["shorthandDesc"] = desc

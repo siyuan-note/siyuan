@@ -1,6 +1,7 @@
-import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {hasAVAttributePlaceholder, isAVLinkType, isAVTimestampType, usesAVRollupCellRenderer} from "./capabilities";
+import {escapeAriaLabel, escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {unicode2Emoji} from "../../../emoji";
-import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
+import {renderAVBlockIcon} from "./blockIcon";
 import {getCompressURL} from "../../../util/image";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {formatDateDisplay, formatDateValue} from "./dateFormat";
@@ -23,20 +24,20 @@ export const getAVTemplateHTML = (content: string) => {
     return window.DOMPurify.sanitize(content);
 };
 
-export const genAVRelationHTML = (item: IAVCellValue, rowID: string, showIcon = true, attributePanel = false) => {
+export const genAVRelationHTML = (item: IAVCellValue, rowID: string, showIcon = true) => {
     if (!item?.block) {
         return "";
     }
     const useTemplate = hasAVRenderTemplateResult(item);
     const content = useTemplate ? getAVTemplateHTML(item.renderedContent || "") :
-        Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled);
+        escapeHtmlTextAndAttr(item.block.content || window.siyuan.languages.untitled);
     const templateClass = useTemplate ? " av__celltext--template" : "";
     const storedValue = escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(item))));
     const attributes = `data-row-id="${escapeAttr(rowID)}" data-relation-value="${storedValue}" class="av__cell--relation"`;
     if (item.isDetached) {
-        return `<span ${attributes}><span${showIcon ? "" : ' class="fn__none"'}><svg${attributePanel ? ' style="height: 26px"' : ""}><use xlink:href="#iconLine"></use></svg><span class="fn__space--5"></span></span><span class="av__celltext${templateClass}">${content}</span></span>`;
+        return `<span ${attributes}>${renderAVBlockIcon(item, showIcon)}<span class="av__celltext${templateClass}">${content}</span></span>`;
     }
-    return `<span ${attributes} data-block-id="${item.block.id}"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${escapeAttr(item.block.icon || "")}">${getFileTreeIconHTML(item.block.icon, "file")}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="${getAVBlockRefSubtype(item)}" class="av__celltext av__celltext--ref${templateClass}">${content}</span></span>`;
+    return `<span ${attributes} data-block-id="${item.block.id}">${renderAVBlockIcon(item, showIcon)}<span data-type="block-ref" data-id="${item.block.id}" data-subtype="${getAVBlockRefSubtype(item)}" class="av__celltext av__celltext--ref${templateClass}">${content}</span></span>`;
 };
 
 const AV_TEMPLATE_INTERACTIVE_SELECTOR = [
@@ -127,12 +128,12 @@ const genAVRollupHTML = (value: IAVCellValue) => {
 export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = "", renderTemplate?: string) => {
     if (hasAVRenderTemplateResult(value, renderTemplate)) {
         const storedValue = cloneAVCellValueSnapshot(value);
-        return `<div class="fn__flex-1 av__celltext--template" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(storedValue)))}" placeholder="${window.siyuan.languages.empty}">${getAVTemplateHTML(value.renderedContent || "")}</div>`;
+        return `${value.type === "block" ? renderAVBlockIcon(value) : ""}<div class="fn__flex-1 av__celltext--template" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(storedValue)))}" placeholder="${window.siyuan.languages.empty}">${getAVTemplateHTML(value.renderedContent || "")}</div>`;
     }
     let html = "";
     switch (value.type) {
         case "block":
-            html = `<input data-id="${value.block.id}" value="${escapeAttr(value.block.content)}" type="text" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
+            html = `${renderAVBlockIcon(value)}<input data-id="${value.block.id || ""}" value="${escapeAttr(value.block.content)}" type="text" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <button type="button" data-type="av-bind-document" class="block__icon block__icon--show fn__flex-center ariaLabel" aria-label="${value.isDetached || !value.block.id ? window.siyuan.languages.bind : window.siyuan.languages.rebind}"><svg><use xlink:href="#iconLink"></use></svg></button>`;
             break;
         case "text": {
@@ -205,7 +206,7 @@ export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = 
             break;
         case "relation":
             value?.relation?.contents?.forEach((item, index) => {
-                html += genAVRelationHTML(item, value.relation.blockIDs[index], true, true);
+                html += genAVRelationHTML(item, value.relation.blockIDs[index]);
             });
             if (html && html.endsWith(", ")) {
                 html = html.substring(0, html.length - 2);
@@ -213,7 +214,7 @@ export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = 
             break;
         case "rollup":
             value?.rollup?.contents?.forEach((item) => {
-                const rollupText = ["template", "select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ?
+                const rollupText = (usesAVRollupCellRenderer(item.type) || item.type === "checkbox") ?
                     genAVValueHTML(item) : genAVRollupHTML(item);
                 if (rollupText) {
                     html += rollupText.replace("fn__flex-1", "") + ",&nbsp;";
@@ -244,13 +245,14 @@ export const genAVAttributeRowHTML = (options: {
     renderTemplate?: string,
     value: IAVCellValue,
     empty: boolean,
+    attributePanelVisibility?: IAVColumn["attributePanelVisibility"],
 }) => {
     const value = options.value;
     const storedValue = cloneAVCellValueSnapshot(value);
-    const textInputType = ["url", "email", "phone", "block"].includes(value.type);
-    const hasOwnPlaceholder = ["text", "number", "date", "url", "phone", "template", "email"].includes(value.type);
+    const textInputType = isAVLinkType(value.type);
+    const hasOwnPlaceholder = hasAVAttributePlaceholder(value.type);
     const checkClass = value.type === "checkbox" ? (value.checkbox.checked ? " av__cell-check" : " av__cell-uncheck") : "";
-    return `<div class="block__icons av__row" data-id="${options.nodeID}" data-col-id="${options.keyID}" data-empty="${options.empty}"${options.type === "block" ? ' data-primary="true"' : ""}>
+    return `<div class="block__icons av__row" data-id="${options.nodeID}" data-col-id="${options.keyID}" data-empty="${options.empty}" data-panel-visibility="${escapeAttr(options.attributePanelVisibility || "")}"${options.type === "block" ? ' data-primary="true"' : ""}>
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
     <div class="block__logo block__logo--icon ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${escapeAriaLabel(options.name)}<div class='ft__on-surface'>${escapeAriaLabel(options.desc || "")}</div>">
         ${options.icon ? unicode2Emoji(options.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${options.typeIcon}"></use></svg>`}
@@ -261,6 +263,6 @@ data-options="${options.selectOptions ? escapeAttr(JSON.stringify(options.select
 data-date-format="${options.dateFormat || ""}"
 ${options.renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${hasOwnPlaceholder ? "" : `placeholder="${window.siyuan.languages.empty}"`}
-class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(value.type) ? " custom-attr__avvalue--readonly" : ""}${checkClass}">${genAVValueHTML(value, options.dateFormat, options.renderTemplate)}</div>
+class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${isAVTimestampType(value.type) ? " custom-attr__avvalue--readonly" : ""}${checkClass}">${genAVValueHTML(value, options.dateFormat, options.renderTemplate)}</div>
 </div>`;
 };

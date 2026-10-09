@@ -105,6 +105,7 @@ export const openAssetPicker = (options: AssetPickerOptions = {}): Promise<Asset
             try {
                 const response = await fetchSyncPost("/api/search/searchAsset", {
                     k: keyword,
+                    includeMetadata: true,
                     exts: options.exts || [],
                     match: options.match,
                     page,

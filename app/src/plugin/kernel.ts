@@ -1,3 +1,4 @@
+import {fetchWithAppId} from "../util/fetchWithAppId";
 import {fetchSyncPost} from "../util/fetch";
 
 import type {EventBus} from "./EventBus";
@@ -172,7 +173,7 @@ export class Kernel implements IKernelPlugin {
             if (this.#destroyed) {
                 throw new Error("Plugin lifecycle has ended");
             }
-            const response = await fetch(this.#rpcCallUrl, {
+            const response = await fetchWithAppId(this.#rpcCallUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body,

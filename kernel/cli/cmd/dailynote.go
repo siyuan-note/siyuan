@@ -92,7 +92,7 @@ var dailynoteAppendCmd = &cobra.Command{
 			}},
 		}}
 		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
+		model.WaitForTransactions(transactions)
 		model.AppendPushReloadProtyleEntry(parentID)
 		fmt.Println(parentID)
 		return nil
@@ -133,7 +133,7 @@ var dailynotePrependCmd = &cobra.Command{
 			}},
 		}}
 		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
+		model.WaitForTransactions(transactions)
 		model.AppendPushReloadProtyleEntry(parentID)
 		fmt.Println(parentID)
 		return nil

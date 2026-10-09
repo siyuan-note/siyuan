@@ -136,7 +136,7 @@ func TestResolveExportAssetPaths(t *testing.T) {
 
 			assetsOldNew, assetsNewOld := map[string]string{}, map[string]string{}
 			tree := &parse.Tree{Root: root}
-			removeAssetsID(tree, assetsOldNew, assetsNewOld)
+			removeAssetsID(tree, assetsOldNew, assetsNewOld, Conf.Export.RemoveAssetsID)
 
 			assets := getAssetsLinkDests(root, false)
 			if len(assets) != len(test.expected) {
@@ -213,7 +213,7 @@ func TestExportAssetEntityRename(t *testing.T) {
 			node := &ast.Node{Type: typ, Tokens: []byte(markup)}
 			root.AppendChild(node)
 			oldNew, newOld := map[string]string{}, map[string]string{}
-			removeAssetsID(&parse.Tree{Root: root}, oldNew, newOld)
+			removeAssetsID(&parse.Tree{Root: root}, oldNew, newOld, Conf.Export.RemoveAssetsID)
 			original := []string{"assets/a&b-20260724150608-42z1qwz.webm?x=1&y=2#part", "assets/a&amp;b-20260724150608-42z1qwz.png", "assets/second-20260724150608-42z1qwz.webm"}
 			want := append([]string(nil), original...)
 			if removeID {

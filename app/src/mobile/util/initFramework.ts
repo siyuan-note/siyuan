@@ -1,4 +1,5 @@
 import {Constants} from "../../constants";
+import {setTitleAutoDirection} from "../../protyle/render/autoDirection";
 import {openStandaloneDatabaseItemByURI} from "../../protyle/render/av/openStandaloneDatabaseItem";
 import {closeModel, closePanel} from "./closePanel";
 import {getCurrentEditor, openMobileFileById} from "../editor";
@@ -9,7 +10,8 @@ import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
 import {finishMobileStartup, setEmpty} from "./setEmpty";
-import {getOpenNotebookCount, parseUriInfo} from "../../util/pathName";
+import {getOpenNotebookCount, parseSiYuanUriInfo, parseUriInfo} from "../../util/pathName";
+import {processMobileSystemUri} from "./systemUri";
 import {popMenu} from "../menu";
 import {MobileFiles} from "../dock/MobileFiles";
 import {MobileOutline} from "../dock/MobileOutline";
@@ -369,8 +371,10 @@ export const initFramework = async (app: App, isStart: boolean) => {
     } else {
         await window.siyuan.mobile.tabs.removeMissingTabs();
     }
+    const systemURL = window.JSAndroid?.getBlockURL() || new URLSearchParams(window.location.search).get("url");
+    processMobileSystemUri(app, systemURL);
     if (getOpenNotebookCount() > 0) {
-        if (window.JSAndroid && window.openFileByURL(window.JSAndroid.getBlockURL())) {
+        if (window.JSAndroid && parseSiYuanUriInfo(systemURL) && window.openFileByURL(systemURL)) {
             return;
         }
         const info = parseUriInfo();
@@ -401,17 +405,31 @@ export const initFramework = async (app: App, isStart: boolean) => {
         if (isStart && window.siyuan.config.fileTree.tabStartupMode === 2) {
             return;
         }
-        if (await window.siyuan.mobile.tabs.restore()) {
+        const tabs = window.siyuan.mobile.tabs;
+        if (await tabs.restore()) {
+            return;
+        }
+        const canRestoreLegacy = () => window.siyuan.mobile.tabs === tabs && tabs.canRestoreLegacyDocument();
+        if (!canRestoreLegacy()) {
             return;
         }
         const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];
         fetchPost("/api/block/checkBlockExist", {id: localDoc?.id}, existResponse => {
+            if (!canRestoreLegacy()) {
+                return;
+            }
             if (existResponse.data) {
                 openMobileFileById(app, localDoc.id, [Constants.CB_GET_SCROLL]);
             } else {
                 fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
+                    if (!canRestoreLegacy()) {
+                        return;
+                    }
                     if (response.data.length !== 0) {
                         checkFold(response.data[0].id, (zoomIn) => {
+                            if (!canRestoreLegacy()) {
+                                return;
+                            }
                             openMobileFileById(app, response.data[0].id, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         });
                     } else {
@@ -431,6 +449,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
 
 const initEditorName = () => {
     const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
+    setTitleAutoDirection(inputElement, window.siyuan.config.editor.autoDirection);
     let titleSavePromise: Promise<unknown> = Promise.resolve();
     let titleSavedOnEnter: {rootID: string, value: string} | undefined;
     let enteringDocument = false;

@@ -32,6 +32,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
+	"golang.org/x/sync/semaphore"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -101,16 +102,27 @@ type ThemeInstallOptions struct {
 
 // LocalBazaarPackageInstallResult 描述本地集市包的识别和安装结果。
 type LocalBazaarPackageInstallResult struct {
-	PackageType   string `json:"packageType"`
-	PackageName   string `json:"packageName"`
-	MinAppVersion string `json:"minAppVersion,omitempty"`
-	Updated       bool   `json:"updated"`
+	PackageType       string `json:"packageType"`
+	PackageName       string `json:"packageName"`
+	MinAppVersion     string `json:"minAppVersion,omitempty"`
+	Updated           bool   `json:"updated"`
+	PackageHash       string `json:"packageHash,omitempty"`
+	InstalledRevision string `json:"installedRevision,omitempty"`
+	PreviousRevision  string `json:"previousRevision,omitempty"`
+}
+
+// LocalBazaarInstallOptions 保留旧调用形式，官方受管制品由工具层要求同时绑定这两个摘要。
+type LocalBazaarInstallOptions struct {
+	ExpectedPackageHash       string
+	ExpectedInstalledRevision string
+	Context                   context.Context
+	Recheck                   func() error
 }
 
 var (
 	ErrLocalBazaarPackageExists       = errors.New("marketplace package already exists")
 	ErrLocalBazaarPackageIncompatible = errors.New("marketplace package is incompatible")
-	localBazaarInstallLock            sync.Mutex
+	localBazaarInstallLock            = semaphore.NewWeighted(1)
 )
 
 // updatePackages 更新一组集市包；同类型批量更新时，安装后处理只执行一次
@@ -539,7 +551,8 @@ func installBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName strin
 	installedPkg, parseErr := bazaar.ParsePackageJSON(filepath.Join(installPath, jsonFileName))
 	meta.update = parseErr == nil && installedPkg != nil && installedPkg.Name == packageName
 
-	err = bazaar.InstallPackage(repoURL, repoHash, repoRef, installPath, Conf.System.ID, pkgType, packageName, meta.update)
+	options := bazaar.PackageInstallOptions{PrivateTemp: pkgType == "plugins"}
+	_, err = bazaar.InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, Conf.System.ID, pkgType, packageName, meta.update, options)
 	if err != nil {
 		err = fmt.Errorf(Conf.Language(46), packageName, err)
 	} else {
@@ -628,6 +641,12 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 		}
 		refreshAppearancePackages(nil, names)
 	}
+	pushBazaarChanged(pkgType)
+}
+
+// 集市包落盘并完成运行时处理后，通知所有前端更新本地安装状态。
+var pushBazaarChanged = func(pkgType string) {
+	util.BroadcastByType("main", "bazaarChanged", 0, "", []string{pkgType})
 }
 
 // InstallBazaarPackage 安装集市包，themeOptions 仅在 pkgType 为 "themes" 时生效
@@ -642,16 +661,42 @@ func InstallBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName strin
 
 // InstallLocalBazaarPackage 安装上传的本地集市包。
 func InstallLocalBazaarPackage(archivePath, frontend string, overwrite bool) (result *LocalBazaarPackageInstallResult, err error) {
-	pkgType, pkg, sourcePath, cleanup, err := bazaar.ExtractLocalPackage(archivePath)
+	return InstallLocalBazaarPackageWithOptions(archivePath, frontend, overwrite, LocalBazaarInstallOptions{})
+}
+
+func InstallLocalBazaarPackageWithOptions(archivePath, frontend string, overwrite bool, options LocalBazaarInstallOptions) (result *LocalBazaarPackageInstallResult, err error) {
+	ctx := options.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	check := func() error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if options.Recheck != nil {
+			if err := options.Recheck(); err != nil {
+				return err
+			}
+		}
+		return ctx.Err()
+	}
+	if err = check(); err != nil {
+		return nil, err
+	}
+	pkgType, pkg, sourcePath, packageHash, cleanup, err := bazaar.ExtractLocalPackageWithHashContext(ctx, archivePath, options.ExpectedPackageHash)
 	if err != nil {
 		return nil, err
 	}
 	defer cleanup()
+	if err = check(); err != nil {
+		return nil, err
+	}
 
 	result = &LocalBazaarPackageInstallResult{
 		PackageType:   pkgType,
 		PackageName:   pkg.Name,
 		MinAppVersion: pkg.MinAppVersion,
+		PackageHash:   packageHash,
 	}
 	installPath, _, err := getPackageInstallPath(pkgType, pkg.Name)
 	if err != nil {
@@ -668,8 +713,13 @@ func InstallLocalBazaarPackage(archivePath, frontend string, overwrite bool) (re
 		return result, ErrLocalBazaarPackageIncompatible
 	}
 
-	localBazaarInstallLock.Lock()
-	defer localBazaarInstallLock.Unlock()
+	if err = localBazaarInstallLock.Acquire(ctx, 1); err != nil {
+		return result, err
+	}
+	defer localBazaarInstallLock.Release(1)
+	if err = check(); err != nil {
+		return result, err
+	}
 	containsFile, statErr := bazaar.PackageDirContainsFile(installPath)
 	if statErr != nil && !os.IsNotExist(statErr) {
 		return result, statErr
@@ -678,8 +728,13 @@ func InstallLocalBazaarPackage(archivePath, frontend string, overwrite bool) (re
 	if result.Updated && !overwrite {
 		return result, ErrLocalBazaarPackageExists
 	}
-	if err = bazaar.InstallLocalPackage(sourcePath, installPath, pkgType, pkg.Name, result.Updated); err != nil {
-		return result, fmt.Errorf(Conf.Language(46), pkg.Name, err)
+	installOptions := bazaar.PackageInstallOptions{ExpectedInstalledRevision: options.ExpectedInstalledRevision, Context: ctx, Recheck: check}
+	installed, err := bazaar.InstallLocalPackageWithOptions(sourcePath, installPath, pkgType, pkg.Name, result.Updated, installOptions)
+	if installed != nil {
+		result.InstalledRevision, result.PreviousRevision = installed.InstalledRevision, installed.PreviousRevision
+	}
+	if err != nil {
+		return result, err
 	}
 	IncSyncIfNeeded(installPath)
 	finishInstall(pkgType, []batchInstallItem{{name: pkg.Name, meta: installMeta{update: result.Updated}}}, nil, false)
@@ -769,6 +824,7 @@ func UninstallPackage(pkgType, packageName string) error {
 	case "icons":
 		refreshAppearancePackages(nil, []string{packageName})
 	}
+	pushBazaarChanged(pkgType)
 
 	return nil
 }

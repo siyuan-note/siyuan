@@ -2,6 +2,22 @@ package apicontract
 
 import "encoding/json"
 
+// TransactionListConversion 转换完整列表或选中的列表项，保留首块 ID 和数据库条目身份。
+// 必须作为单笔、单操作事务提交；数据库绑定无法唯一迁移时整批拒绝，不改动文档或数据库。
+// type 为 heading、paragraph 或 remove，heading 的 level 为 1 至 6；recursively 仅展开同类型子列表。
+// blockIDs 为选中块，撤销快照由内核生成；兼容已有 .sy、数据库和加密笔记本格式。
+type TransactionListConversion struct {
+	Type        string `json:"type" api:"enum=heading|paragraph|remove"`
+	Level       int    `json:"level"`
+	Recursively bool   `json:"recursively"`
+}
+
+type TransactionListConversionResult struct {
+	RootIDs    []string `json:"rootIDs"`
+	RemovedIDs []string `json:"removedIDs"`
+	FocusID    string   `json:"focusID"`
+}
+
 type TransactionBlockSwap struct {
 	IncludeChildren bool `json:"includeChildren"`
 	OriginalToEmbed bool `json:"originalToEmbed"`

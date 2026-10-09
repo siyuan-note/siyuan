@@ -6,11 +6,14 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import * as insertPosition from "./insertPosition";
 import * as uploadResult from "./uploadResult";
+import * as fetchAppId from "../../util/fetchAppId";
 
 // 执行完整上传模块，替换网络、界面和插件等待，以控制文档切换发生的时刻。
-const createHarness = () => {
+const createHarness = (failLocalUpload = false) => {
     const results: Array<{status: string}> = [];
+    const completions: Array<Omit<IAssetUploadResult, "requestId" | "input"> | undefined> = [];
     const requests: Array<{id: string; respond(): void}> = [];
+    const headers = new Headers();
     let resolvePlugin: (prepared: unknown) => void;
     let onComplete = () => {};
     let confirm: (() => void) | undefined;
@@ -26,6 +29,9 @@ const createHarness = () => {
     };
     const response = {code: 0, data: {succMap: {"image.png": "assets/image.png"},
         succFiles: [{index: 0, name: "image.png", path: "assets/image.png"}]}};
+    const localResponse: {code: number; msg?: string; data: Pick<IAssetUploadResult, "succMap" | "succFiles" | "failedFiles">} =
+        failLocalUpload ? {code: -1, msg: "local asset path is not allowed",
+        data: {succMap: {}, succFiles: [], failedFiles: [{index: 0, name: "image.png", error: "denied"}]}} : response;
     class FormDataStub {
         values = new Map<string, unknown>();
         append(key: string, value: unknown) { this.values.set(key, value); }
@@ -38,6 +44,7 @@ const createHarness = () => {
         upload = {};
         onreadystatechange: () => void;
         open() {}
+        setRequestHeader(name: string, value: string) { headers.set(name, value); }
         send(form: FormDataStub) {
             requests.push({id: form.values.get("id") as string, respond: () => {
                 this.readyState = 4;
@@ -47,10 +54,11 @@ const createHarness = () => {
     }
     const mocks: Record<string, unknown> = {
         "./insertPosition": insertPosition,
+        "../../util/fetchAppId": fetchAppId,
         "./uploadResult": uploadResult,
         "../runtimeCapabilities": {isProtyleUploadDisabled: () => false},
         "../../util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: true})},
-        "../../constants": {Constants: {SIZE_UPLOAD_TIP_SIZE: 1024}},
+        "../../constants": {Constants: {SIZE_UPLOAD_TIP_SIZE: 1024, SIYUAN_APPID: "upload-window"}},
         "../../util/escape": {escapeHtml: (value: string) => value},
         "../../dialog/message": {showMessage: () => "message", hideMessage: () => {}},
         "../../dialog/confirmDialog": {confirmDialog: (_title: string, _msg: string, yes: () => void) => {
@@ -61,7 +69,7 @@ const createHarness = () => {
             }
         }},
         "../../util/fetch": {fetchSyncPost: (_url: string, data: {id: string}) =>
-            new Promise(resolve => requests.push({id: data.id, respond: () => resolve(response)}))},
+            new Promise(resolve => requests.push({id: data.id, respond: () => resolve(localResponse)}))},
         "./pluginEvent": {prepareAssetUpload: ({input}: {input: IAssetUploadInput}) => {
             const task = {input, startUpload() {}, complete(result: {status: string}) {
                 results.push(result);
@@ -81,7 +89,8 @@ const createHarness = () => {
     runInNewContext(compiled, {
         module, exports: module.exports, require: (name: string) => mocks[name] || {}, Promise,
         FormData: FormDataStub, XMLHttpRequest: XHRStub, DataTransferItem: class {},
-        document: {body: {contains: () => protyle.element.isConnected}},
+        location: {origin: "https://siyuan.test"},
+        document: {baseURI: "https://siyuan.test/stage/build/app/", body: {contains: () => protyle.element.isConnected}},
         window: {siyuan: {languages: {uploading: "uploading"}}}, console,
     });
     const api = module.exports as typeof import("./index");
@@ -94,10 +103,10 @@ const createHarness = () => {
                 () => { consumed++; }, undefined, options);
         } else {
             api.uploadLocalFiles([{path: "/image.png", size: 1}], protyle as unknown as IProtyle,
-                true, options, () => { consumed++; });
+                true, options, () => { consumed++; }, (_succeeded, result) => completions.push(result));
         }
     };
-    return {protyle, requests, results, start, resume: () => resolvePlugin(undefined),
+    return {protyle, requests, results, completions, start, headers, resume: () => resolvePlugin(undefined),
         delayConfirmation: () => { delayConfirmation = true; }, confirm: () => confirm(),
         consumed: () => consumed, onComplete: (callback: () => void) => { onComplete = callback; }};
 };
@@ -105,6 +114,18 @@ const createHarness = () => {
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
 describe("upload document binding", () => {
+    it("delivers failed local resource results to the completion callback", async () => {
+        const harness = createHarness(true);
+        harness.start("local-files");
+        harness.resume();
+        await settle();
+        harness.requests[0].respond();
+        await settle();
+        assert.equal(harness.consumed(), 0);
+        assert.equal(harness.completions[0].status, "failed");
+        assert.equal(harness.completions[0].failedFiles[0].index, 0);
+    });
+
     it("uploads lightweight document fragments to their owning document", async () => {
         const harness = createHarness();
         harness.protyle.lite = true;
@@ -178,5 +199,19 @@ describe("upload document binding", () => {
                 assert.equal(harness.consumed(), switchAt === "never" ? 1 : 0);
             });
         }
+    }
+});
+
+
+it("limits upload app headers to same-origin API URLs", async () => {
+    for (const url of ["/api/asset/upload", "../../../api/asset/upload", "/upload", "https://external.test/api/upload"]) {
+        const harness = createHarness();
+        harness.protyle.options.upload.url = url;
+        harness.start("files");
+        harness.resume();
+        await settle();
+        assert.equal(harness.requests.length, 1);
+        assert.equal(harness.headers.get(fetchAppId.SIYUAN_APP_ID_HEADER),
+            url.includes("/api/asset/upload") ? "upload-window" : null);
     }
 });

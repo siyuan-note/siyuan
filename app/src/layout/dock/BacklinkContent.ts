@@ -1,4 +1,3 @@
-import {normalizeAssetOpenConfig} from "../../editor/assetOpen";
 import {GlobalBacklinkList} from "./GlobalBacklinkList";
 import {bindPanelSearch} from "./panelSearch";
 import type {Tab} from "../Tab";
@@ -158,6 +157,7 @@ export class BacklinkContent extends Model {
     private listQueryKey = "";
     private renderedQueryKey = "";
     private indexChangeVersion = 0;
+    private indexRefreshTimer?: number;
     private pendingRootIDs = new Set<string>();
     private pendingFull = false;
     private ownerFocusoutListener?: (event: FocusEvent) => void;
@@ -789,9 +789,8 @@ export class BacklinkContent extends Model {
             } else {
                 window.siyuan.config.editor.backmentionSort = sortValue;
             }
-            fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
-                window.siyuan.config.editor = {...response.data, assetOpen: normalizeAssetOpenConfig(response.data.assetOpen)};
-            });
+            fetchPost("/api/setting/patch", {editor: type === "sort" ?
+                {backlinkSort: sortValue, backlinkGlobalSort: 0} : {backmentionSort: sortValue}});
             this.searchBacklinks();
         };
         window.siyuan.menus.menu.remove();
@@ -883,9 +882,7 @@ export class BacklinkContent extends Model {
                     click: () => {
                         window.siyuan.config.editor.backlinkBlockSort = mode;
                         window.siyuan.config.editor.backlinkGlobalSort = 0;
-                        fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
-                            window.siyuan.config.editor = {...response.data, assetOpen: normalizeAssetOpenConfig(response.data.assetOpen)};
-                        });
+                        fetchPost("/api/setting/patch", {editor: {backlinkBlockSort: mode, backlinkGlobalSort: 0}});
                         this.cancelContextRequests(this.tree.element, false);
                         if (this.globalList) {
                             this.searchBacklinks(true);
@@ -904,7 +901,7 @@ export class BacklinkContent extends Model {
                     label, iconHTML: "", checked: globalSort === index + 1,
                     click: () => {
                         window.siyuan.config.editor.backlinkGlobalSort = index + 1;
-                        fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
+                        fetchPost("/api/setting/patch", {editor: {backlinkGlobalSort: index + 1}});
                         this.searchBacklinks();
                     },
                 }).element);
@@ -1850,6 +1847,7 @@ export class BacklinkContent extends Model {
     }
 
     public prepareForBlock(blockId: string, rootId: string) {
+        this.clearIndexRefresh();
         if (!this.showingLoading) {
             this.saveStatus();
         }
@@ -1869,6 +1867,7 @@ export class BacklinkContent extends Model {
     }
 
     public switchBlock(blockId: string, rootId: string, notebookId: string) {
+        this.clearIndexRefresh();
         if (this.blockId) {
             this.saveStatus();
         }
@@ -1936,6 +1935,7 @@ export class BacklinkContent extends Model {
     }
 
     public refresh() {
+        this.clearIndexRefresh();
         if (!this.blockId) {
             return;
         }
@@ -1997,6 +1997,7 @@ export class BacklinkContent extends Model {
             return;
         }
         this.searchQueued = false;
+        this.clearIndexRefresh();
         this.setRequesting(true);
         // 解析当前反链面板所属 box：优先用已记录的 notebookId，首次为空时按 rootId 在已打开的编辑器里查找
         let notebookId = this.notebookId;
@@ -2109,15 +2110,15 @@ export class BacklinkContent extends Model {
                 this.pendingFull = false;
                 this.dirty = false;
             }
-            if (this.type === "bottom" && this.dirty) {
-                this.refreshIfVisible();
+            if (this.dirty) {
+                this.refreshAfterIndex();
             }
         }).finally(() => {
             if (responseHandled || !this.finishRequest(requestID) || blockId !== this.blockId) {
                 return;
             }
-            if (!this.runQueuedRequest() && this.type === "bottom" && this.dirty) {
-                this.refreshIfVisible();
+            if (!this.runQueuedRequest() && indexChangeVersion !== this.indexChangeVersion && this.dirty) {
+                this.refreshAfterIndex();
             }
         });
     }
@@ -2416,20 +2417,34 @@ export class BacklinkContent extends Model {
         }));
     }
 
+    private clearIndexRefresh() {
+        window.clearTimeout(this.indexRefreshTimer);
+        this.indexRefreshTimer = undefined;
+    }
+
     public refreshAfterIndex() {
-        if (this.destroyed || !this.blockId || !this.dirty || this.element.contains(document.activeElement) ||
-            hasAVEditorSession(this.element)) {
+        this.clearIndexRefresh();
+        if (this.destroyed || !this.blockId || !this.dirty) {
             return;
         }
-        if (this.type === "bottom") {
-            this.refreshIfVisible();
-        } else if (this.element.isConnected && this.element.getClientRects().length > 0) {
-            this.searchBacklinks();
-        }
+        // 连续索引更新合并到空闲时处理；请求期间只保留脏标记，完成后再安排下一次刷新。
+        this.indexRefreshTimer = window.setTimeout(() => {
+            this.indexRefreshTimer = undefined;
+            if (this.destroyed || this.requesting || !this.dirty || this.element.contains(document.activeElement) ||
+                hasAVEditorSession(this.element)) {
+                return;
+            }
+            if (this.type === "bottom") {
+                this.refreshIfVisible();
+            } else if (this.element.isConnected && this.element.getClientRects().length > 0) {
+                this.searchBacklinks();
+            }
+        }, 1000);
     }
 
     public refreshIfVisible(ignoreFocus = false) {
-        if (this.type !== "bottom" || !this.dirty) {
+        if (this.destroyed || this.type !== "bottom" || !this.dirty || this.requesting ||
+            (!ignoreFocus && this.indexRefreshTimer !== undefined)) {
             return;
         }
         if (!this.element.isConnected || this.ownerProtyle.element.getClientRects().length === 0) {
@@ -2473,6 +2488,7 @@ export class BacklinkContent extends Model {
         this.globalList?.destroy();
         this.globalList = undefined;
         this.destroyed = true;
+        this.clearIndexRefresh();
         this.viewStateGeneration++;
         this.clearReadingAnchorTimers();
         cancelHeightAnimation(this.tree.element);

@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {test} from "node:test";
 import {ScriptTarget, transpileModule} from "typescript";
+import {renderSnapshotActions} from "./snapshotActions";
 import {escapeHtml, escapeAttr} from "../util/escape";
 
 test("snapshot lists display all escaped tags and preserve tag-specific actions on desktop and mobile", () => {
@@ -25,6 +26,7 @@ test("snapshot lists display all escaped tags and preserve tag-specific actions 
         const list = {innerHTML: ""};
         const pane = {querySelector: (selector: string) => selector.includes("repoList") ? list : {getAttribute: () => "[]"}};
         const dependencies = {
+            renderSnapshotActions,
             window: {siyuan: {config: {}, languages: {tagSnapshot: "Tag snapshot"}}},
             isMobile: () => mobile, snapshotMemos: new WeakMap(), updateRepoSelection: () => {}, escapeHtml, escapeAttr,
         };

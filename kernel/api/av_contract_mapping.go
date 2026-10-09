@@ -621,21 +621,22 @@ func toContractAVKey(value *av.Key) *apicontract.AVKey {
 		return nil
 	}
 	return &apicontract.AVKey{
-		ID:             value.ID,
-		Name:           value.Name,
-		Type:           string(value.Type),
-		Icon:           value.Icon,
-		Desc:           value.Desc,
-		Options:        avContractSlice(value.Options, func(value *av.SelectOption) *apicontract.AVSelectOption { return toContractAVSelectOption(value) }),
-		NumberFormat:   string(value.NumberFormat),
-		DateFormat:     string(value.DateFormat),
-		Template:       value.Template,
-		RenderTemplate: value.RenderTemplate,
-		Relation:       toContractAVRelation(value.Relation),
-		Rollup:         toContractAVRollup(value.Rollup),
-		Date:           toContractAVDate(value.Date),
-		Created:        toContractAVCreated(value.Created),
-		Updated:        toContractAVUpdated(value.Updated),
+		AttributePanelVisibility: value.AttributePanelVisibility,
+		ID:                       value.ID,
+		Name:                     value.Name,
+		Type:                     string(value.Type),
+		Icon:                     value.Icon,
+		Desc:                     value.Desc,
+		Options:                  avContractSlice(value.Options, func(value *av.SelectOption) *apicontract.AVSelectOption { return toContractAVSelectOption(value) }),
+		NumberFormat:             string(value.NumberFormat),
+		DateFormat:               string(value.DateFormat),
+		Template:                 value.Template,
+		RenderTemplate:           value.RenderTemplate,
+		Relation:                 toContractAVRelation(value.Relation),
+		Rollup:                   toContractAVRollup(value.Rollup),
+		Date:                     toContractAVDate(value.Date),
+		Created:                  toContractAVCreated(value.Created),
+		Updated:                  toContractAVUpdated(value.Updated),
 	}
 }
 func toContractAVSelectOption(value *av.SelectOption) *apicontract.AVSelectOption {
@@ -916,20 +917,6 @@ func toContractAVKeyValues(value *av.KeyValues) *apicontract.AVKeyValues {
 		Values: avContractSlice(value.Values, func(value *av.Value) *apicontract.AVValue { return toContractAVValue(value) }),
 	}
 }
-func toContractAVViewData(value *av.ViewData) *apicontract.AVViewData {
-	if value == nil {
-		return nil
-	}
-	return &apicontract.AVViewData{
-		ID:               value.ID,
-		Icon:             value.Icon,
-		Name:             value.Name,
-		Desc:             value.Desc,
-		HideAttrViewName: value.HideAttrViewName,
-		Type:             string(value.Type),
-		PageSize:         value.PageSize,
-	}
-}
 func toContractAVNewItemTemplate(value *av.NewItemTemplate) *apicontract.AVNewItemTemplate {
 	if value == nil {
 		return nil
@@ -1005,6 +992,7 @@ func toContractAVAttributeViewData(value *model.AttributeViewData) *apicontract.
 			return toContractAVNewItemTemplate(value)
 		}),
 		DefaultTemplateID: value.DefaultTemplateID,
+		Automations:       toContractAVAutomationConfig(value.Automations),
 		CardCoverPositions: avContractMap(value.CardCoverPositions, func(value map[string]*av.CardCoverPosition) map[string]*apicontract.AVCardCoverPosition {
 			return avContractMap(value, func(value *av.CardCoverPosition) *apicontract.AVCardCoverPosition {
 				return toContractAVCardCoverPosition(value)

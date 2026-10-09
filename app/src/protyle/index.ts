@@ -59,8 +59,8 @@ import {
     refreshSearchPathAfterRename,
 } from "../search/path";
 import {syncSearchConfigHPath} from "../search/config";
-import {sanitizeKernelHTML} from "../util/hostCapabilities";
 /// #endif
+import {sanitizeKernelHTML} from "../util/hostCapabilities";
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
 import {setFoldById, zoomOut} from "../menus/protyle";
@@ -74,6 +74,7 @@ import {
 } from "./render/av/databaseRowRefresh";
 import {initEditorTabs} from "./wysiwyg/tabs";
 import {initListMindmaps} from "./render/listMindmap";
+import {initFoldedRender} from "./util/foldedRender";
 import {registerCustomBlockRoot} from "../plugin/customBlockRender";
 import {getTransactionOperations} from "../util/transactionOperations";
 import {
@@ -123,6 +124,7 @@ export class Protyle {
 
     public readonly version: string;
     public protyle: IProtyle;
+    private destroyed = false;
 
     /**
      * @param id 要挂载 Protyle 的元素或者元素 ID。
@@ -211,6 +213,7 @@ export class Protyle {
         this.protyle.undo = this.protyle.lite ? new LocalUndo() : new Undo();
         this.protyle.wysiwyg = new WYSIWYG(this.protyle);
         setAutoDirection(this.protyle.wysiwyg.element, window.siyuan.config.editor.autoDirection);
+        initFoldedRender(this.protyle);
         initEditorTabs(this.protyle);
         initListMindmaps(this.protyle);
         if (isProtyleCustomBlockRenderEnabled(this.protyle)) {
@@ -559,11 +562,15 @@ export class Protyle {
             getDocParam.notebook = this.protyle.notebookId;
         }
         fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
+            if (this.destroyed) {
+                return;
+            }
             onGet({
                 data: getResponse,
                 protyle: this.protyle,
                 action: mergedOptions.action,
                 scrollPosition: mergedOptions.scrollPosition,
+                isValid: () => !this.destroyed,
                 afterCB: () => {
                     this.afterOnGet(mergedOptions);
                 }
@@ -664,6 +671,7 @@ export class Protyle {
 
     /** 销毁编辑器 */
     public destroy() {
+        this.destroyed = true;
         /// #if MOBILE
         unregisterMobileSecondaryEditor(this);
         /// #endif

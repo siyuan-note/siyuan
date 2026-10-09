@@ -42,16 +42,7 @@ import (
 // errMsgSeeKernelLog 接在 API 错误提示末尾，引导用户查看内核日志以获取完整信息（避免在 Msg 暴露工作空间绝对路径）。
 const (
 	errMsgSeeKernelLog = ". For details, see the SiYuan kernel log."
-	siyuanAppIDHeader  = "X-SiYuan-App-ID"
 )
-
-// resolveFileAPIAppID 优先使用宿主统一注入的应用标识，同时兼容旧请求体中的 app。
-func resolveFileAPIAppID(c *gin.Context, bodyApp string) string {
-	if headerApp := c.GetHeader(siyuanAppIDHeader); headerApp != "" {
-		return headerApp
-	}
-	return bodyApp
-}
 
 // rejectEncryptedBoxPath 检查 absPath 是否落在加密笔记本目录下（含 symlink 绕过），是则返回 true。
 // 原始文件 API（getFile/putFile/copyFile/renameFile/removeFile）是绕过加密层的逃生口，
@@ -149,6 +140,9 @@ var globalCopyFiles = contractHandler(apicontract.GlobalCopyFiles, func(c *gin.C
 		}
 
 		absSrc, _ := filepath.Abs(src)
+		if util.IsPluginDevelopmentRawPathForbidden(absSrc, true) {
+			return apicontract.Failure[apicontract.Null](http.StatusForbidden, "managed plugin development files require their dedicated tools")
+		}
 
 		if util.IsSensitivePath(absSrc) {
 			logging.LogErrorf("refuse to copy sensitive file [%s]", src)
@@ -183,6 +177,9 @@ var globalCopyFiles = contractHandler(apicontract.GlobalCopyFiles, func(c *gin.C
 		return contractFailure[apicontract.Null](ret)
 	}
 	// 在 MkdirAll 前拒绝加密笔记本目录，避免在加密笔记本内创建明文目录
+	if util.IsPluginDevelopmentRawPathForbidden(destDir, false) {
+		return apicontract.Failure[apicontract.Null](http.StatusForbidden, "managed plugin development files require their dedicated tools")
+	}
 	if rejectEncryptedBoxPath(destDir) {
 		ret.Code = -1
 		ret.Msg = "copying encrypted notebook files is not supported via this API"
@@ -211,6 +208,9 @@ var globalCopyFiles = contractHandler(apicontract.GlobalCopyFiles, func(c *gin.C
 
 	for _, src := range srcs {
 		dest := filepath.Join(destDir, filepath.Base(src))
+		if util.IsPluginDevelopmentRawPathForbidden(dest, true) {
+			return apicontract.Failure[apicontract.Null](http.StatusForbidden, "managed plugin development files require their dedicated tools")
+		}
 		if rejectEncryptedBoxPath(dest) {
 			ret.Code = -3
 			ret.Msg = model.Conf.Language(321)
@@ -255,6 +255,9 @@ var workspaceCopyFiles = contractHandler(apicontract.WorkspaceCopyFiles, func(c 
 			ret.Msg = fmt.Sprintf("refuse to copy sensitive file [%s]", src)
 			return contractFailure[apicontract.Null](ret)
 		}
+		if util.IsPluginDevelopmentRawPathForbidden(absSrc, true) {
+			return apicontract.Failure[apicontract.Null](http.StatusForbidden, "managed plugin development files require their dedicated tools")
+		}
 		if rejectEncryptedBoxPath(absSrc) {
 			ret.Code = -3
 			ret.Msg = model.Conf.Language(321)
@@ -280,6 +283,9 @@ var workspaceCopyFiles = contractHandler(apicontract.WorkspaceCopyFiles, func(c 
 		return contractFailure[apicontract.Null](ret)
 	}
 	// 在 MkdirAll 前拒绝加密笔记本目录，避免在加密笔记本内创建明文目录
+	if util.IsPluginDevelopmentRawPathForbidden(destDir, false) {
+		return apicontract.Failure[apicontract.Null](http.StatusForbidden, "managed plugin development files require their dedicated tools")
+	}
 	if rejectEncryptedBoxPath(destDir) {
 		ret.Code = -1
 		ret.Msg = "copying encrypted notebook files is not supported via this API"
@@ -308,6 +314,9 @@ var workspaceCopyFiles = contractHandler(apicontract.WorkspaceCopyFiles, func(c 
 
 	for _, absSrc := range absSrcs {
 		dest := filepath.Join(destDir, filepath.Base(absSrc))
+		if util.IsPluginDevelopmentRawPathForbidden(dest, true) {
+			return apicontract.Failure[apicontract.Null](http.StatusForbidden, "managed plugin development files require their dedicated tools")
+		}
 		if rejectEncryptedBoxPath(dest) {
 			ret.Code = -3
 			ret.Msg = model.Conf.Language(321)
@@ -346,6 +355,9 @@ var copyFile = contractHandler(apicontract.CopyFile, func(c *gin.Context, reques
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
+	}
+	if util.IsPluginDevelopmentRawPathForbidden(src, true) || util.IsPluginDevelopmentRawPathForbidden(dest, true) {
+		return apicontract.Failure[apicontract.Null](http.StatusForbidden, "managed plugin development files require their dedicated tools")
 	}
 
 	// 加密笔记本的文件不允许通过原始文件 API 复制（src 读出密文/明文，dest 写入破坏加密存储）
@@ -459,6 +471,9 @@ var getFile = contractHandler(apicontract.GetFile, func(c *gin.Context, request 
 		return contractFailure[apicontract.BinaryContent](ret)
 	}
 	fileAbsPath = resolvedPath
+	if util.IsPluginDevelopmentRawPathForbidden(fileAbsPath, false) {
+		return apicontract.Failure[apicontract.BinaryContent](http.StatusForbidden, "managed plugin development state cannot be read through raw file APIs")
+	}
 
 	// REF: https://github.com/siyuan-note/siyuan/issues/11364
 	if !model.IsAdminRoleContext(c) {
@@ -565,6 +580,9 @@ var readDir = contractHandler(apicontract.ReadDirectory, func(c *gin.Context, re
 	}
 	// 加密笔记本的任何目录都不允许通过原始文件 API 枚举（不只 .sy）：
 	// 目录结构、文档 ID、随机化资产名和时间戳可能泄漏信息；合法读取走专用 API（已加密感知）
+	if util.IsPluginDevelopmentRawPathForbidden(dirAbsPath, false) {
+		return apicontract.Failure[[]apicontract.DirectoryEntry](http.StatusForbidden, "managed plugin development files require their dedicated tools")
+	}
 	if rejectEncryptedBoxPath(dirAbsPath) {
 		ret.Code = -3
 		ret.Msg = model.Conf.Language(321)
@@ -600,6 +618,9 @@ var readDir = contractHandler(apicontract.ReadDirectory, func(c *gin.Context, re
 	files := []apicontract.DirectoryEntry{}
 	for _, entry := range entries {
 		path := filepath.Join(dirAbsPath, entry.Name())
+		if util.IsPluginDevelopmentRawPathForbidden(path, false) {
+			continue
+		}
 		info, err = os.Stat(path)
 		if err != nil {
 			logging.LogErrorf("stat [%s] failed: %s", path, err)
@@ -629,6 +650,9 @@ var renameFile = contractHandler(apicontract.RenameFile, func(c *gin.Context, re
 		return contractFailure[apicontract.Null](ret)
 	}
 	// 加密笔记本的文件不允许通过原始文件 API 重命名（会破坏加密存储结构/跨 box 搬运密文）
+	if util.IsPluginDevelopmentRawPathForbidden(srcAbsPath, true) || util.IsPluginDevelopmentRawPathForbidden(destAbsPath, true) {
+		return apicontract.Failure[apicontract.Null](http.StatusForbidden, "managed plugin development files require their dedicated tools")
+	}
 	if rejectEncryptedBoxPath(srcAbsPath) || rejectEncryptedBoxPath(destAbsPath) {
 		ret.Code = -3
 		ret.Msg = model.Conf.Language(321)
@@ -703,7 +727,7 @@ var renameFile = contractHandler(apicontract.RenameFile, func(c *gin.Context, re
 var removeFile = contractHandler(apicontract.RemoveFile, func(c *gin.Context, request apicontract.RemoveFileRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
 	app, filePath := request.App, request.Path
-	app = resolveFileAPIAppID(c, app)
+	app = resolveRequestAppID(c, app)
 
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {
@@ -712,6 +736,9 @@ var removeFile = contractHandler(apicontract.RemoveFile, func(c *gin.Context, re
 		return contractFailure[apicontract.Null](ret)
 	}
 	// 加密笔记本的文件不允许通过原始文件 API 删除（破坏加密存储结构）
+	if util.IsPluginDevelopmentRawPathForbidden(fileAbsPath, true) {
+		return apicontract.Failure[apicontract.Null](http.StatusForbidden, "managed plugin development files require their dedicated tools")
+	}
 	if rejectEncryptedBoxPath(fileAbsPath) {
 		ret.Code = -3
 		ret.Msg = model.Conf.Language(321)
@@ -761,7 +788,7 @@ var putFile = contractHandler(apicontract.PutFile, func(c *gin.Context, request 
 
 	isDirStr := request.IsDir
 	isDir, _ := strconv.ParseBool(isDirStr)
-	app := resolveFileAPIAppID(c, request.App)
+	app := resolveRequestAppID(c, request.App)
 
 	var err error
 	filePath := request.Path
@@ -779,6 +806,9 @@ var putFile = contractHandler(apicontract.PutFile, func(c *gin.Context, request 
 	}
 
 	// 加密笔记本的任何文件都不允许通过原始文件 API 写入（不只 .sy）：
+	if util.IsPluginDevelopmentRawPathForbidden(fileAbsPath, true) {
+		return apicontract.Failure[apicontract.Null](http.StatusForbidden, "managed plugin development files require their dedicated tools")
+	}
 	// 明文写入会破坏密文格式或污染加密存储；合法写入走专用 API（已加密感知）
 	if rejectEncryptedBoxPath(fileAbsPath) {
 		ret.Code = -3

@@ -9,6 +9,7 @@ import {registerDatabaseRowRefresh} from "../protyle/render/av/databaseRowRefres
 import {focusDatabasePrimary} from "../protyle/render/av/primaryFocus";
 import {setPanelFocus} from "../layout/util";
 import {preserveAVBindingRange} from "../protyle/render/av/binding";
+import {inheritDatabaseRowReadonly} from "../protyle/render/av/rowReadonly";
 
 export const newDatabaseRowModel = (options: {
     app: App,
@@ -29,6 +30,7 @@ export const newDatabaseRowModel = (options: {
 }) => {
     let customModel: Custom;
     let contextProtyle: IProtyle;
+    let sourceProtyle: Partial<IProtyle>;
     let ghostProtyle: Protyle;
     let resizeObserver: ResizeObserver;
     let unregisterRefresh: () => void;
@@ -62,6 +64,10 @@ export const newDatabaseRowModel = (options: {
         const previousBodyElement = custom.element.querySelector<HTMLElement>(".protyle-db-row__body");
         if (!previousBodyElement || !contextProtyle) {
             return;
+        }
+        if (sourceProtyle) {
+            inheritDatabaseRowReadonly(contextProtyle, sourceProtyle);
+            sourceProtyle = undefined;
         }
         const data = custom.data as typeof options.data;
         const currentRenderVersion = ++renderVersion;
@@ -130,6 +136,9 @@ export const newDatabaseRowModel = (options: {
                 const title = (event as CustomEvent<string>).detail;
                 custom.data.title = title;
                 custom.tab.updateTitle(title);
+            });
+            custom.element.addEventListener("database-row-readonly", (event) => {
+                sourceProtyle = (event as CustomEvent<Partial<IProtyle>>).detail;
             });
             updateLayout(custom);
             resizeObserver = new ResizeObserver(() => updateLayout(custom));

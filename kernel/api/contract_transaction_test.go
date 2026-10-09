@@ -97,8 +97,16 @@ func TestTransactionContractMapping(t *testing.T) {
 	}
 	fixtures := []*model.Transaction{{Timestamp: 123, DoOperations: []*model.Operation{
 		{Action: "move", ID: "source", NextID: "next", PreviousID: "previous", ParentID: "parent", BlockIDs: []string{"child"}},
+		{Action: "convertList", ID: "document", BlockIDs: []string{"list"}, Data: apicontract.TransactionListConversion{Type: "heading", Level: 5},
+			RetData: apicontract.TransactionListConversionResult{RootIDs: []string{"document"}, RemovedIDs: []string{"list"}, FocusID: "paragraph"}},
 		{Action: "update", Data: "<div>content</div>", Context: map[string]any{"focusId": "block"}},
 		{Action: "updateAttrViewCell", Data: map[string]any{"text": nil}},
+		{Action: "setAttrViewAutomations", AvID: "database", Data: apicontract.AVAutomationConfig{Spec: 1,
+			Rules: []*apicontract.AVAutomationRule{{ID: "rule", Name: "Start", Enabled: true, Trigger: "changed", KeyID: "status",
+				Actions: []*apicontract.AVAutomationAction{{Type: "add", Target: "filtered", AvID: "logs",
+					Fields: map[string]*apicontract.AVAutomationValue{"date": {Mode: "currentTime"}}}},
+			}},
+		}},
 		{Action: "updateAttrViewCells", CellUpdates: []*model.AttrViewCellUpdate{{KeyID: "key", RowID: "item", Data: map[string]any{"number": map[string]any{"content": 1.5}}}}},
 		{Action: "insertAttrViewBlock", Srcs: []map[string]any{{"id": "block"}, {"id": "item", "isDetached": true, "content": ""}}, RetData: map[string]any{"insertedItemIDs": []string{"item"}, "existingItemIDs": []string{}}},
 		{Action: "plugin-custom", Data: map[string]any{"extension": []any{true, nil, "text", 1.5}}, RetData: map[string]any{"plugin": "result"}, Context: map[string]any{"plugin": map[string]any{"nested": true}}},
@@ -198,6 +206,7 @@ func TestTransactionContractEncryptedContextAdmission(t *testing.T) {
 	for _, operation := range []*model.Operation{
 		{Action: "plugin-custom", Context: map[string]any{"boxID": boxID}},
 		{Action: "update", ID: boxID},
+		{Action: "convertList", BlockIDs: []string{boxID}},
 		{Action: "insertAttrViewBlock", Srcs: []map[string]any{{"id": boxID}}},
 	} {
 		if err := holdTransactionEncryptedBoxRequests(context, []*model.Transaction{{DoOperations: []*model.Operation{operation}}}); err == nil {

@@ -54,7 +54,7 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mitchellh/go-ps v1.0.0
-	github.com/modelcontextprotocol/go-sdk v1.7.0
+	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/mssola/useragent v1.0.0
 	github.com/olahol/melody v1.4.0
 	github.com/open-spaced-repetition/go-fsrs/v3 v3.3.1
@@ -72,7 +72,7 @@ require (
 	github.com/sashabaranov/go-openai v1.42.0
 	github.com/shirou/gopsutil/v4 v4.26.7
 	github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17
-	github.com/siyuan-note/dejavu v0.0.0-20260926070613-82251b475bd4
+	github.com/siyuan-note/dejavu v0.0.0-20260929110133-2612bd536470
 	github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044
 	github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce
 	github.com/siyuan-note/filelock v0.0.0-20260831011452-393425122aaa
@@ -99,7 +99,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.9-0.20260926021905-c8cee1b0c658
+require github.com/88250/lute v1.7.9-0.20261002140020-0b744c047833
 
 require (
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect

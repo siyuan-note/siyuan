@@ -878,7 +878,7 @@ func sortGroupViews(attrView *av.AttributeView, view *av.View) {
 			startIdx = 0
 		}
 		for _, g := range lastNext30Days {
-			relativeDateGroups = util.InsertElem(relativeDateGroups, startIdx, g)
+			relativeDateGroups = slices.Insert(relativeDateGroups, startIdx, g)
 		}
 
 		if av.GroupOrderDesc == view.Group.Order {
@@ -992,6 +992,11 @@ func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av
 		}
 	}
 	if 0 == len(templateKeyIDs) && 0 == len(renderTemplateKeyIDs) {
+		return false
+	}
+	// 日历日期模板参与区间筛选和定位，必须在筛选条目之前完成计算。
+	if view.LayoutType == av.LayoutTypeCalendar && view.Calendar != nil &&
+		renderTemplateKeyIDs[view.Calendar.Settings.DateKeyID] {
 		return false
 	}
 

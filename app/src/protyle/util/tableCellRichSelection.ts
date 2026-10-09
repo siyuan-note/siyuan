@@ -1,4 +1,5 @@
-import {focusByOffset, focusByRange, getSelectionOffset} from "./selection";
+import {focusByOffset} from "./selection";
+import {focusByRange, getSelectionOffset} from "./selectionOffsets";
 
 const getCellEditables = (root: Element) => Array.from(root.querySelectorAll<HTMLElement>(
     '[data-type="NodeParagraph"] > [contenteditable]:not(.protyle-attr), ' +

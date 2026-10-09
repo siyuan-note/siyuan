@@ -128,6 +128,7 @@ const localDocumentPaths = new Set([
     "/check-auth",
     "/stage/build/app/",
     "/stage/build/app/window.html",
+    "/stage/build/app/settings.html",
 ]);
 const webRequestDestinations = new Map([
     ["mainframe", "document"],

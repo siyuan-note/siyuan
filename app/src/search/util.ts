@@ -50,8 +50,8 @@ import {getUnRefList, openSearchUnRef, unRefMoreMenu} from "./unRef";
 import {getDefaultSubType, getDefaultType} from "./getDefault";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
 import {saveKeyList, toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "./toggleHistory";
-import {highlightById} from "../util/highlightById";
-import {getSelectionOffset} from "../protyle/util/selection";
+import {highlightById, scrollCenter} from "../util/highlightById";
+import {getSelectionOffset} from "../protyle/util/selectionOffsets";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {electronUndo} from "../protyle/undo";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
@@ -67,6 +67,7 @@ import {
     syncSearchConfigHPath,
 } from "./config";
 import {beginSearchPathRequest, invalidateSearchPathRequests, refreshCurrentSearchPath} from "./path";
+import {beginSearchPreviewRequest, getSearchAVMatches, getSearchAVMatchesFromHTML, IAVSearchMatch, locateSearchAVPreview} from "./avPreview";
 
 const persistSearchConfig = (config: Config.IUILayoutTabSearchConfig) => {
     window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = resolvePersistedSearchConfig(
@@ -913,6 +914,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                         id: target.getAttribute("data-node-id"),
                                         config: searchType === "doc" ? config : null,
                                         value: searchType === "doc" ? searchInputElement.value : null,
+                                        matches: getSearchAVMatches(target),
                                     });
                                     if (shouldRestoreFocus(searchInputElement)) {
                                         searchInputElement.focus();
@@ -1238,7 +1240,14 @@ const renderNextSearchMark = (options: {
         });
         if (currentRange) {
             if (!currentRange.toString()) {
-                highlightById(options.edit.protyle, options.id, "center");
+                const itemElement = hasClosestByClassName(currentRange.startContainer, "av__row") ||
+                    hasClosestByClassName(currentRange.startContainer, "av__gallery-item") ||
+                    hasClosestByClassName(currentRange.startContainer, "av__calendar-item");
+                if (itemElement) {
+                    scrollCenter(options.edit.protyle, itemElement, "center");
+                } else {
+                    highlightById(options.edit.protyle, options.id, "center");
+                }
             } else {
                 scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect);
             }
@@ -1263,17 +1272,16 @@ const renderNextSearchMark = (options: {
     }
 };
 
-let articleId: string;
-
 export const getArticle = (options: {
     id: string,
     config?: Config.IUILayoutTabSearchConfig,
     edit: Protyle
     value?: string,
+    matches?: IAVSearchMatch[],
 }) => {
-    articleId = options.id;
+    const isCurrent = beginSearchPreviewRequest(options.edit.protyle);
     checkFold(options.id, (zoomIn) => {
-        if (articleId !== options.id) {
+        if (!isCurrent()) {
             return;
         }
         options.edit.protyle.scroll.lastScrollTop = 0;
@@ -1285,7 +1293,7 @@ export const getArticle = (options: {
             docInfoParam.notebook = options.edit.protyle.notebookId;
         }
         fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
-            if (articleId !== options.id) {
+            if (!isCurrent()) {
                 return;
             }
             const getDocParam: FileTreeGetDocRequestInput = {
@@ -1302,7 +1310,7 @@ export const getArticle = (options: {
                 getDocParam.notebook = options.edit.protyle.notebookId;
             }
             fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
-                if (articleId !== options.id) {
+                if (!isCurrent()) {
                     return;
                 }
                 options.edit.protyle.query = {
@@ -1317,11 +1325,34 @@ export const getArticle = (options: {
                 }
                 onGet({
                     updateReadonly: true,
+                    isValid: isCurrent,
                     data: getResponse,
                     protyle: options.edit.protyle,
                     action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
-                    afterCB() {
+                    afterAVRender: async () => {
                         if (getResponse.code !== 0) {
+                            return;
+                        }
+                        let preview: Awaited<ReturnType<typeof locateSearchAVPreview>>;
+                        try {
+                            preview = await locateSearchAVPreview({
+                                protyle: options.edit.protyle,
+                                id: options.id,
+                                method: options.config?.method ?? 0,
+                                keywords: getResponse.data.keywords,
+                                matches: options.matches,
+                                isCurrent,
+                            });
+                        } catch (error) {
+                            console.error(error);
+                        }
+                        if (!isCurrent()) {
+                            return;
+                        }
+                        if (preview?.unavailable) {
+                            options.edit.protyle.highlight.mark.clear();
+                            options.edit.protyle.highlight.markHL.clear();
+                            options.edit.protyle.highlight.ranges = [];
                             return;
                         }
                         const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
@@ -1329,10 +1360,18 @@ export const getArticle = (options: {
                             let observer: ResizeObserver;
                             searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
                                 const highlightKeys = () => {
+                                    if (!isCurrent()) {
+                                        observer?.disconnect();
+                                        return;
+                                    }
                                     const currentRange = options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex];
                                     if (options.edit.protyle.highlight.ranges.length > 0 && currentRange) {
                                         if (!currentRange.toString()) {
-                                            highlightById(options.edit.protyle, options.id, "center");
+                                            if (preview?.currentElement) {
+                                                scrollCenter(options.edit.protyle, preview.currentElement, "center");
+                                            } else {
+                                                highlightById(options.edit.protyle, options.id, "center");
+                                            }
                                         } else {
                                             scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect);
                                         }
@@ -1351,6 +1390,12 @@ export const getArticle = (options: {
                                 setTimeout(() => {
                                     observer.disconnect();
                                 }, Constants.TIMEOUT_COUNT);
+                            }, {
+                                rootElement: preview?.rootElement,
+                                currentElement: preview?.currentElement,
+                                ranges: preview?.ranges,
+                                excludeSelector: ".av__views [data-type=\"av-search\"], .av__selection-toolbar, .av__calendar-toolbar, .av__row--footer",
+                                isValid: isCurrent,
                             });
                         } else {
                             const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
@@ -1600,7 +1645,7 @@ ${getFileTreeIconHTML(getNotebookIcon(item.box), "notebook", "b3-list-item__grap
                 resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}" data-node-type="${childItem.type || ""}">
 <svg class="b3-list-item__graphic popover__block" data-id="${childItem.id}"><use xlink:href="#${getIconByType(childItem.type)}"></use></svg>
 ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text">${childItem.content}</span>
+<span class="b3-list-item__text${childItem.type === "NodeAttributeView" ? " search__av-content" : ""}">${childItem.content}</span>
 ${getAttr(childItem)}
 ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${childItem.tag.replace(/#/g, "")}</span>` : ""}
 ${countHTML}
@@ -1622,7 +1667,7 @@ ${countHTML}
             resultHTML += `<div data-type="search-item" class="b3-list-item" data-node-id="${item.id}" data-root-id="${item.rootID}" data-node-type="${item.type || ""}">
 <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
 ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text">${item.content}</span>
+<span class="b3-list-item__text${item.type === "NodeAttributeView" ? " search__av-content" : ""}">${item.content}</span>
 ${getAttr(item)}
 ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${item.tag.replace(/#/g, "")}</span>` : ""}
 <span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(escapeHtml(title))}">${title}</span>
@@ -1648,6 +1693,7 @@ ${countHTML}
             id: currentData.id,
             config,
             value: (element.querySelector("#searchInput") as HTMLInputElement).value,
+            matches: getSearchAVMatchesFromHTML(currentData.content),
         });
     } else {
         edit.protyle.element.classList.add("fn__none");

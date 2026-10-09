@@ -1,7 +1,11 @@
 import {Menu as SiyuanMenu} from "../menus/Menu";
 
+const independentMenus = new WeakMap<HTMLElement, Menu>();
+
 export class Menu {
     private menu: SiyuanMenu;
+    private parentMenu?: Menu;
+    private childMenus = new Set<Menu>();
     public isOpen: boolean;
     public element: HTMLElement;
 
@@ -37,8 +41,9 @@ export class Menu {
                 this.menu.element.setAttribute("data-name", id);
             }
             if (independent) {
+                independentMenus.set(this.element, this);
                 const closeEvent = (event: MouseEvent) => {
-                    if (!this.element.contains(event.target as Node)) {
+                    if (!this.contains(event.target as Node)) {
                         this.close();
                     }
                 };
@@ -54,6 +59,11 @@ export class Menu {
                 this.menu.removeCB = () => {
                     window.removeEventListener("click", closeEvent, true);
                     this.element.removeEventListener("keydown", keydownEvent);
+                    this.childMenus.forEach(menu => menu.close());
+                    this.childMenus.clear();
+                    this.parentMenu?.childMenus.delete(this);
+                    this.parentMenu = undefined;
+                    independentMenus.delete(this.element);
                     closeCB?.();
                     this.element.remove();
                 };
@@ -101,6 +111,17 @@ export class Menu {
         if (this.isOpen) {
             return;
         }
+        // 按触发控件记录菜单归属，点击派生菜单时保留父表单，父菜单关闭时清理子菜单。
+        if (independentMenus.has(this.element)) {
+            this.parentMenu?.childMenus.delete(this);
+            this.parentMenu = undefined;
+            const parentElement = options.target?.closest<HTMLElement>(".b3-menu");
+            const parentMenu = parentElement && independentMenus.get(parentElement);
+            if (parentMenu && parentMenu !== this && !this.contains(parentMenu.element)) {
+                this.parentMenu = parentMenu;
+                parentMenu.childMenus.add(this);
+            }
+        }
         this.menu.popup(options);
     }
 
@@ -113,5 +134,9 @@ export class Menu {
 
     close() {
         this.menu.remove();
+    }
+
+    private contains(target: Node): boolean {
+        return this.element.contains(target) || Array.from(this.childMenus).some(menu => menu.contains(target));
     }
 }

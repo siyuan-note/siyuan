@@ -106,6 +106,7 @@ const fixture = () => {
     return {
         root, blocks, editable, selection, ownerDocument, protyle, calls,
         render: (selectedElement?: TestElement) => restoreExports.restoreGutterBySelection(protyle, selectedElement),
+        restore: restoreExports.restoreGutterBySelection,
         resize: () => resizeExports.resize(protyle),
         clearGutter: (): void => { rendered = undefined; },
         rendered: () => rendered,
@@ -188,6 +189,72 @@ test("keyboard dismissal can leave focus on body while retaining this editor's s
     f.selection.focusNode = new TestElement();
     f.render();
     assert.equal(f.rendered(), undefined);
+});
+
+test("keyboard resize retains the completed block selection after the native caret is cleared", () => {
+    const f = fixture();
+    f.root.selected = [f.blocks[0], f.blocks[1]];
+    f.selection.focusNode = undefined;
+    f.ownerDocument.activeElement = f.ownerDocument.body;
+    f.render(f.blocks[0]);
+    f.resize();
+    f.flushTimers();
+    f.flushFrames();
+    assert.equal(f.rendered(), f.blocks[0]);
+    f.blocks[0].bottom = -1;
+    f.resize();
+    f.flushTimers();
+    f.flushFrames();
+    assert.equal(f.rendered(), f.blocks[1], "the visible selection supplies the gutter after another layout change");
+});
+
+test("native caret removal after a completed selection retains only the current editor's gutter", () => {
+    const f = fixture();
+    f.root.selected = [f.blocks[0], f.blocks[1]];
+    f.render();
+    f.selection.focusNode = undefined;
+    f.ownerDocument.activeElement = f.ownerDocument.body;
+    f.clearGutter();
+    f.render();
+    assert.equal(f.rendered(), f.blocks[0]);
+
+    const peerRoot = new TestElement(undefined, false, true);
+    peerRoot.ownerDocument = f.ownerDocument;
+    const peerBlock = new TestElement(peerRoot, true);
+    peerRoot.selected = [peerBlock];
+    const peerProtyle = {...f.protyle, wysiwyg: {element: peerRoot}};
+    f.restore(peerProtyle, peerBlock);
+    assert.equal(f.rendered(), peerBlock);
+    f.clearGutter();
+    f.render();
+    assert.equal(f.rendered(), undefined, "an inactive split editor cannot reclaim the gutter");
+    f.restore(peerProtyle);
+    assert.equal(f.rendered(), peerBlock);
+});
+
+test("clearing selection, hiding the editor, or moving focus invalidates retained ownership", () => {
+    const changes = [
+        (f: ReturnType<typeof fixture>): void => { f.root.selected = []; },
+        (f: ReturnType<typeof fixture>) => f.root.visible = false,
+        (f: ReturnType<typeof fixture>) => f.ownerDocument.activeElement = new TestElement(),
+        (f: ReturnType<typeof fixture>) => f.selection.focusNode = new TestElement(),
+    ];
+    changes.forEach(change => {
+        const f = fixture();
+        f.root.selected = [f.blocks[0], f.blocks[1]];
+        f.render();
+        f.selection.focusNode = undefined;
+        change(f);
+        f.clearGutter();
+        f.render();
+        assert.equal(f.rendered(), undefined);
+        f.root.visible = true;
+        f.root.selected = [f.blocks[0], f.blocks[1]];
+        f.ownerDocument.activeElement = f.ownerDocument.body;
+        f.selection.focusNode = undefined;
+        f.render();
+        assert.equal(f.rendered(), undefined, "the previous selection owner must not be resurrected");
+    });
 });
 
 test("restoration respects hidden editors, active drags, mobile multi-select, and disabled gutters", () => {

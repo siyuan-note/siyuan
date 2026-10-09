@@ -5,8 +5,8 @@ import {
     getFontFamilyDisplayName,
     getUniqueFontFamilies,
     IFontItem,
-    loadSystemFonts,
-} from "../../util/systemFont";
+} from "../../util/systemFontCore";
+import {loadAvailableFonts} from "../../util/availableFont";
 import {upDownHint} from "../../util/upDownHint";
 import {Constants} from "../../constants";
 import {getBlockRanges} from "../util/selection";
@@ -280,7 +280,7 @@ let loadedFontFamilies: IFontItem[] = [];
 const loadFontFamilies = async (currentFamily?: string) => {
     let fonts: IFontItem[] = [];
     try {
-        fonts = getUniqueFontFamilies(await loadSystemFonts());
+        fonts = getUniqueFontFamilies((await loadAvailableFonts()).fontItems);
     } catch (error) {
         console.warn("load system fonts failed", error);
     }

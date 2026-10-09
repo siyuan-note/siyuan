@@ -147,7 +147,16 @@ func TestExportEmbedFilteredByPublishAccess(t *testing.T) {
 		return checkBlockTreeAccessableByPublishAccess(c, publishAccess, bt)
 	}
 
-	markdown := ExportStdMarkdown(publicID, false, false, false, false, nil, accessChecker)
+	markdown := ExportStdMarkdown(publicID, &ExportOptions{
+		Render: ExportRenderOptions{
+			AssetsDestSpace2Underscore: false,
+			FillCSSVar:                 false,
+			AdjustHeadingLevel:         false,
+			ImgTag:                     false,
+			AVPublishFilter:            nil,
+			AccessCheckers:             []EmbedBlockAccessChecker{accessChecker},
+		},
+	})
 	if strings.Contains(markdown, canary) {
 		t.Fatalf("publish reader received private embed content: %s", markdown)
 	}
@@ -156,7 +165,15 @@ func TestExportEmbedFilteredByPublishAccess(t *testing.T) {
 		t.Fatalf("publish reader received private embed content in preview: %s", stdHTML)
 	}
 
-	adminMarkdown := ExportStdMarkdown(publicID, false, false, false, false, nil)
+	adminMarkdown := ExportStdMarkdown(publicID, &ExportOptions{
+		Render: ExportRenderOptions{
+			AssetsDestSpace2Underscore: false,
+			FillCSSVar:                 false,
+			AdjustHeadingLevel:         false,
+			ImgTag:                     false,
+			AVPublishFilter:            nil,
+		},
+	})
 	if !strings.Contains(adminMarkdown, canary) {
 		t.Fatalf("administrator export should include embed content: %s", adminMarkdown)
 	}

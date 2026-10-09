@@ -9,7 +9,8 @@ import {blockRender} from "../render/blockRender";
 import {Constants} from "../../constants";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
-import {focusBlock, focusByRange, getEditorRange} from "../util/selection";
+import {focusBlock, getEditorRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {
     getContenteditableElement,
@@ -18,7 +19,6 @@ import {
     getSbChildBlockCount,
     getTopAloneElement
 } from "../wysiwyg/getBlock";
-import {replaceFileName} from "../../editor/rename";
 import {transaction} from "../wysiwyg/transaction";
 import {getAssetExtension, getAssetName, getDisplayName, isEncryptedBox} from "../../util/pathName";
 import {cancelSB, genEmptyElement, rebalanceSbWidth, refreshSbResize} from "../../block/util";
@@ -56,6 +56,7 @@ import {
 } from "../wysiwyg/blockSelection";
 import {countBlockWord} from "../../layout/status";
 import {genTemplateDocTreePlanHTML} from "../../template/docTree";
+import {getDailyNoteHints} from "./dailyNote";
 
 const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
     infoStyle: "info",
@@ -200,7 +201,7 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         filter: [window.siyuan.languages.mindmap, "mindmap", "思维导图", "siweidaotu", "swdt", "脑图", "naotu", "nt"],
         id: "mindmap",
         value: `- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMindmap"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.mindmap}</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMindmap"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.mindmap}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.mindmap?.custom, "")}</div>`,
     }, {
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "note"],
         id: "calloutNote",
@@ -451,8 +452,13 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
     }];
 };
 
-export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, sourceOrHideConfiguredCreate: THintSource | boolean = false) => {
-    const enabled = getConfiguredEntryVisibility(SLASH_MENU_ROOT_PATH);
+export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle,
+                                                 sourceOrHideConfiguredCreate: THintSource | boolean = false,
+                                                 options: {visibilityRoot?: string} = {}) => {
+    // 加号面板由用户主动打开，复用插入项配置但不受输入斜杠的提示开关影响。
+    const visibilityRoot = options.visibilityRoot ||
+        (protyle.hint.element.closest("#keyboardToolbar") ? SLASH_MENU_ROOT_PATH : undefined);
+    const enabled = getConfiguredEntryVisibility(SLASH_MENU_ROOT_PATH, visibilityRoot);
     if (!enabled) {
         return [];
     }
@@ -461,6 +467,7 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
     const allList = builtinList.map<TSlashMenuItem>((item) => ({
         ...item,
         entryKey: item.id || "",
+        frequentEligible: key === "",
     }));
     let hasPlugin = false;
     if (areProtylePluginExtensionsEnabled(protyle)) {
@@ -472,6 +479,7 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
                     id: slash.id,
                     entryKey: getPluginSlashEntryKey(plugin.name, slash.id,
                         slash.html === "separator" ? "separator" : "entry"),
+                    frequentEligible: key === "",
                     value: `plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
                     html: slash.html
                 });
@@ -500,7 +508,7 @@ export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyl
         canUpload: !!(protyle.options.upload.handler || (protyle.options.upload.url && protyle.upload)),
         key,
         order: getEntryOrder(SLASH_MENU_ROOT_PATH),
-        visible: (entryKey) => getConfiguredEntryVisibility(getSlashMenuEntryPath(entryKey)),
+        visible: (entryKey) => getConfiguredEntryVisibility(getSlashMenuEntryPath(entryKey), visibilityRoot),
     });
 });
 
@@ -602,15 +610,18 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
     if (protyle.lite && isEncryptedBox(protyle.notebookId)) {
         refParam.notebook = protyle.notebookId;
     }
+    const dailyNotes = source === "hint" ? getDailyNoteHints(key, protyle).catch((): IHintData[] => []) : Promise.resolve([] as IHintData[]);
     fetchPost("/api/search/searchRefBlock", refParam, (response) => {
-        createTarget.promise.then((hideConfiguredCreate) => {
+        Promise.all([createTarget.promise, dailyNotes]).then(([hideConfiguredCreate, dateHints]) => {
             if (!createTarget.isCurrent()) {
                 return;
             }
             const dataList: IHintData[] = [];
             let createItemCount = 0;
+            dataList.push(...dateHints);
+            createItemCount += dateHints.length;
             if (response.data.newDoc) {
-                const newFileName = Lute.UnEscapeHTMLStr(replaceFileName(response.data.k));
+                const newFileName = Lute.UnEscapeHTMLStr(response.data.k);
                 if (!hideConfiguredCreate) {
                     dataList.push({
                         value: `((newFile "${newFileName}"${Constants.ZWSP}'${newFileName}${Lute.Caret}'))`,
@@ -633,14 +644,14 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
                 createItemCount++;
             }
             response.data.blocks.forEach((item: IBlock) => {
-                const name = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
+                const name = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replaceAll(Constants.ZWSP, "");
                 let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${name}</span>`;
                 if (source === "search") {
                     value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${key}${Constants.ZWSP}${name}</span>`;
                 } else if (source === "av") {
                     let refText = name;
                     if (nodeElement) {
-                        refText = escapeHtml(item.ial["custom-sy-av-s-text-" + nodeElement.getAttribute("data-av-id")] || "") || refText;
+                        refText = escapeHtml(item.ial[Constants.CUSTOM_SY_AV_STATIC_TEXT + nodeElement.getAttribute("data-av-id")] || "") || refText;
                     }
                     value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
                 }

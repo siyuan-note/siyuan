@@ -1,9 +1,9 @@
 import * as path from "path";
 import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
-import {escapeAriaLabel, escapeHtml} from "./escape";
+import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "./escape";
 import {isMobile} from "./functions";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Constants} from "../constants";
 import {getFileTreeDefaultIconAttr, getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 /// #if !BROWSER
@@ -21,6 +21,7 @@ import {expandFileTree} from "../layout/dock/fileTreeAnimation";
 import {getHostCapabilities} from "./hostCapabilities";
 import {highlightSearchText} from "./searchHighlight";
 import {addClearButton} from "./addClearButton";
+import {normalizeSiYuanUri} from "./normalizeSiYuanUri";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     if (!getHostCapabilities().localFileSystem) {
@@ -61,10 +62,11 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
     try {
         if (uri == null) return null;
 
-        const uriObj = uri instanceof URL ? uri : new URL(uri);
-        if (!isSiYuanUriProtocol(uriObj)) {
+        const parsedURI = uri instanceof URL ? uri : new URL(uri);
+        if (!isSiYuanUriProtocol(parsedURI)) {
             return null;
         }
+        const uriObj = normalizeSiYuanUri(parsedURI);
         if (uriObj.hostname === "blocks" && /^\/\d{14}-\w{7}/.test(uriObj.pathname)) {
             const avItemID = uriObj.searchParams.get("avItemID") || undefined;
             const avViewID = uriObj.searchParams.get("avViewID") || undefined;
@@ -160,7 +162,7 @@ export const getDocDisplayName = (name: string, titleEmpty?: boolean, escape?: b
     }
     const displayName = getDisplayName(name, true, true);
     if (escape) {
-        return Lute.EscapeHTMLStr(displayName);
+        return escapeHtmlTextAndAttr(displayName);
     }
     return displayName;
 };

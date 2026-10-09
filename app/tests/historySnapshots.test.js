@@ -26,6 +26,7 @@ const runCases = async (sources, css, mobile, dark) => {
     const files = [{id: "doc-file", path: "/notebook/project/document.sy"}, ...Array.from({length: 20}, (_, i) => ({id: "file-" + i, path: "/notebook/project/note-" + i + ".sy"}))];
     let nextID = 0;
     const stubs = {
+        "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "util/genID": {genUUID: () => String(++nextID)},
         "util/zIndex": {isAbove: () => false},
         "dialog/moveResize": {moveResize() {}},

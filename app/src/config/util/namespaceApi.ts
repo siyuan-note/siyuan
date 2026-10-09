@@ -1,5 +1,7 @@
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {createNamespacePatchQueue} from "./namespacePatchQueue";
+import {mergeRecordByDottedPath} from "./dotPath";
+import {refreshSettingConfigAfter} from "../setting/sync";
 
 export function createConfigNamespaceApi<TData>(options: {
     namespace: string;
@@ -33,7 +35,15 @@ export function createConfigNamespaceApi<TData>(options: {
             }
         });
     });
-    const patch = createNamespacePatchQueue({namespace, getConfig, submit});
+    const patch = createNamespacePatchQueue({namespace, getConfig, submit, submitPatch: async (path, value) => {
+        const changed = await refreshSettingConfigAfter(namespace, async () => {
+            const response = await fetchSyncPost("/api/setting/patch", {
+                [namespace]: mergeRecordByDottedPath({}, path, value),
+            });
+            return response.code === 0;
+        });
+        return changed ? getConfig() : undefined;
+    }});
 
     return {
         patch,

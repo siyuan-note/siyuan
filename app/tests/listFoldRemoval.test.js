@@ -65,7 +65,8 @@ const rendererSource = () => {
         extract("wysiwyg/getBlock", ["getParentBlock", "getPreviousBlock", "getPreviousBlockSibling",
             "getNextBlockSibling", "getLastBlock", "getContenteditableElement", "isContainerBlock",
             "isNotEditBlock", "getTopEmptyElement", "hasPreviousSibling"]) +
-        extract("util/selection", ["focusByRange", "focusByWbr"]) +
+        (extract("util/selectionOffsets", ["focusByRange"]) +
+        extract("util/selection", ["focusByWbr"])) +
         extract("wysiwyg/verticalVisibility", ["getFoldedNavigationOwner"]) +
         extract("wysiwyg/remove", ["getOperationParentID", "removeBlock"]) +
         extract("util/blockFold", ["applyFoldState", "toggleListFold"]) + `

@@ -103,6 +103,80 @@ func TestDecisionRejectsInvalidBatchBeforeRequest(t *testing.T) {
 	}
 }
 
+func TestDecisionBatchProviderSnapshotAndDisable(t *testing.T) {
+	for _, change := range []string{"switch", "edit", "disable", "deny"} {
+		t.Run(change, func(t *testing.T) {
+			var calls atomic.Int32
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Header.Get("Authorization") != "Bearer test-key" {
+					t.Error("batch mixed provider credentials")
+				}
+				if calls.Add(1) == 1 {
+					switch change {
+					case "switch":
+						model.Conf.AI.Decision.Provider = "openai"
+					case "edit":
+						model.Conf.AI.Decision.Profiles["typesafe"].APIKey = "changed-key"
+						model.Conf.AI.Decision.Profiles["typesafe"].Endpoint = "http://unused.invalid"
+					case "disable":
+						model.Conf.AI.Decision.Enabled = false
+					case "deny":
+						model.Conf.AI.Agent.CapabilityPolicy.Overrides["native/backend/decision"] = "deny"
+					}
+				}
+				io.WriteString(w, `{"model":"jev-test","answers":{"q":{"type":"noul","noul":0.1}}}`)
+			}))
+			defer server.Close()
+			configureDecisionTest(t, server.URL)
+			model.Conf.AI.Decision.Normalize()
+			result, err := decisionHandler(context.Background(), decisionArgs(t, `{"action":"evaluate","items":[{"id":"a","text":"first"},{"id":"b","text":"second"},{"id":"c","text":"third"}],"questions":[{"id":"q","type":"noul","instructions":"Relevant?"}]}`))
+			if err != nil {
+				t.Fatal(err)
+			}
+			var batch struct {
+				Items []decisionItemResult `json:"items"`
+			}
+			if err = json.Unmarshal([]byte(result.Content[0].Text), &batch); err != nil {
+				t.Fatal(err)
+			}
+			if change == "disable" || change == "deny" {
+				if calls.Load() != 1 || !result.IsError || batch.Items[0].Status != "completed" || batch.Items[1].Status != "error" || batch.Items[2].Status != "not_run" {
+					t.Fatalf("disabled batch continued: %+v calls=%d", batch, calls.Load())
+				}
+			} else if calls.Load() != 3 || result.IsError || batch.Items[2].Status != "completed" {
+				t.Fatalf("batch abandoned snapshot after profile change: %+v calls=%d", batch, calls.Load())
+			}
+		})
+	}
+}
+
+func TestDecisionOpenAIRefusalStopsBatch(t *testing.T) {
+	var calls atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if calls.Add(1) == 1 {
+			io.WriteString(w, `{"model":"gpt-6-luna","answers":[{"name":"q","type":"predicate","probability":0.2}],"usage":{"input_tokens":12,"output_tokens":0}}`)
+		} else {
+			io.WriteString(w, `{"model":"gpt-6-luna","answers":[{"name":"q","type":"refusal"}],"usage":{"input_tokens":12,"output_tokens":0}}`)
+		}
+	}))
+	defer server.Close()
+	configureDecisionTest(t, server.URL)
+	model.Conf.AI.Decision = &conf.Decision{Enabled: true, Provider: "openai", Profiles: map[string]*conf.DecisionProfile{"openai": {Endpoint: server.URL, APIKey: "key", Name: "gpt-6-luna", Timeout: 1}}}
+	result, err := decisionHandler(context.Background(), decisionArgs(t, `{"action":"evaluate","items":[{"id":"a","text":"first"},{"id":"b","text":"second"},{"id":"c","text":"third"}],"questions":[{"id":"q","type":"noul","instructions":"Relevant?"}]}`))
+	if err != nil || !result.IsError || calls.Load() != 2 {
+		t.Fatalf("refusal was retried or ignored: %+v %v", result, err)
+	}
+	var batch struct {
+		Items []decisionItemResult `json:"items"`
+	}
+	if err = json.Unmarshal([]byte(result.Content[0].Text), &batch); err != nil {
+		t.Fatal(err)
+	}
+	if batch.Items[0].Status != "completed" || batch.Items[1].Status != "error" || batch.Items[1].Result != nil || batch.Items[2].Status != "not_run" {
+		t.Fatalf("refusal changed partial result semantics: %+v", batch)
+	}
+}
+
 func TestDecisionBlockSources(t *testing.T) {
 	originalData, originalDB := util.DataDir, util.BlockTreeDBPath
 	util.DataDir = t.TempDir()

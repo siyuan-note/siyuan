@@ -35,6 +35,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+var outlineFontSizePattern = regexp.MustCompile("font-size:.*?;")
+
 func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 	if nil == heading {
 		return ""
@@ -60,7 +62,7 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 
 		if style := n.IALAttr("style"); "" != style {
 			if strings.Contains(style, "font-size") { // 大纲字号不应该跟随字体设置 https://github.com/siyuan-note/siyuan/issues/7202
-				style = regexp.MustCompile("font-size:.*?;").ReplaceAllString(style, "font-size: inherit;")
+				style = outlineFontSizePattern.ReplaceAllString(style, "font-size: inherit;")
 				n.SetIALAttr("style", style)
 			}
 		}
@@ -244,10 +246,6 @@ func cleanRenderNode(node *ast.Node, visibleOnly bool) *ast.Node {
 	return nodes[0]
 }
 
-func renderCleanBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
-	return renderBlockDOMByNodes(cleanRenderNodes(nodes, false), luteEngine)
-}
-
 func renderVisibleBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 	return renderBlockDOMByNodes(cleanRenderNodes(nodes, true), luteEngine)
 }
@@ -396,7 +394,7 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 
 					// 从嵌入块的 IAL 属性中解析 custom-heading-mode，使用全局配置作为默认值
 					blockHeadingMode := Conf.Editor.HeadingEmbedMode
-					if customHeadingMode := n.IALAttr("custom-heading-mode"); "" != customHeadingMode {
+					if customHeadingMode := n.IALAttr(embedHeadingModeAttr); "" != customHeadingMode {
 						if mode, err := strconv.Atoi(customHeadingMode); nil == err && (mode == 0 || mode == 1 || mode == 2) {
 							blockHeadingMode = mode
 						}

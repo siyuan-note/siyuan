@@ -44,6 +44,9 @@ const gNet = require("net");
 const childProcess = require("child_process");
 const remote = require("@electron/remote/main");
 const {probeRemoteKernelAuthentication} = require("./remoteKernelAuth");
+const {installKernelRequestLog} = require("./kernelRequestLog");
+const {saveRemoteExport} = require("./remoteExport");
+const remoteExportSenders = new WeakSet();
 const {createConnectionManager, getRemoteSession} = require("./connectionManager");
 const {connectionArgs, readConnections, closeConnectionWindows} = require("./connectionStore");
 const {
@@ -75,6 +78,8 @@ const {
 const {dispatchWindowMessage} = require("./windowMessaging");
 const {WindowWorkspaceRegistry, flushWindowWorkspaces} = require("./windowWorkspaces");
 const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = require("./windowGeometry");
+const {createSettingsWindows} = require("./settingsWindows");
+const {createSettingsTaskBridge} = require("./settingsTasks");
 const windowWorkspaces = new WindowWorkspaceRegistry();
 const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
 const {
@@ -123,6 +128,28 @@ const notebookSystemLock = createNotebookSystemLock({
 });
 const windowKernelTargets = new Map();
 const initializedWindowIds = new Set();
+const pendingWindowIds = new Set();
+createSettingsTaskBridge({
+    ipcMain,
+    getTarget: id => getWindowKernelTarget(id),
+    getWindows: origin => BrowserWindow.getAllWindows().filter(win =>
+        initializedWindowIds.has(win.webContents.id) && windowKernelTargets.get(win.webContents.id)?.origin === origin),
+});
+const settingsWindowPolicy = createSettingsWindows({
+    ipcMain,
+    screen,
+    icon: path.join(appDir, "stage", "icon-large.png"),
+    getTarget: id => getWindowKernelTarget(id),
+    show: win => showWindow(win),
+    log: message => writeLog(message),
+    initialize: (win, target) => {
+        remote.enable(win.webContents);
+        bindSpellcheckContextMenu(win.webContents);
+        rememberWindowKernelTarget(win, target);
+        win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
+        windowNavigate(win, "settings", target.origin, target.mode === "remote");
+    },
+});
 const pendingRemoteOpenURLs = [];
 const blockDragSessions = new Map();
 const blockDragWindowFocusOrder = new Map();
@@ -855,6 +882,7 @@ const windowNavigate = (currentWindow, windowType, kernelOrigin, remoteMode = fa
                 windowType === "app" && ["/stage/build/app/", "/check-auth"].includes(targetURL.pathname) ||
                 windowType === "app" && !remoteMode && targetURL.pathname === "/" ||
                 windowType === "window" && ["/stage/build/app/window.html", "/check-auth"].includes(targetURL.pathname) ||
+                windowType === "settings" && ["/stage/build/app/settings.html", "/check-auth"].includes(targetURL.pathname) ||
                 windowType === "export" && targetURL.pathname.startsWith("/export/temp/")
             )) {
                 return;
@@ -1486,7 +1514,7 @@ const installRemoteFrontendProtocol = (target) => {
         const isTargetOrigin = requestURL?.origin === target.origin;
         const requestPathname = requestURL?.pathname || "/";
         const localDocumentRequest = isTargetOrigin && (request.method === "GET" || request.method === "HEAD") &&
-            ["/check-auth", "/stage/build/app/", "/stage/build/app/window.html"].includes(requestURL.pathname);
+            ["/check-auth", "/stage/build/app/", "/stage/build/app/window.html", "/stage/build/app/settings.html"].includes(requestURL.pathname);
         const localResource = isTargetOrigin && (request.method === "GET" || request.method === "HEAD")
             ? getLocalRemoteResource(requestURL.pathname)
             : undefined;
@@ -1546,7 +1574,7 @@ const installRemoteFrontendProtocol = (target) => {
                 }
             }
             if (localDocumentRequest &&
-                ["/stage/build/app/", "/stage/build/app/window.html"].includes(requestURL.pathname)) {
+                ["/stage/build/app/", "/stage/build/app/window.html", "/stage/build/app/settings.html"].includes(requestURL.pathname)) {
                 try {
                     if (!await probeRemoteKernelAuthentication(net, remoteSession, requestURL.href)) {
                         const authURL = new URL("/check-auth", target.origin);
@@ -2256,7 +2284,7 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
             try {
                 const responseURL = new URL(details.url);
                 preserveRemoteDocumentCSP = responseURL.origin === kernelTarget.origin &&
-                    ["/check-auth", "/stage/build/app/", "/stage/build/app/window.html"].includes(responseURL.pathname);
+                    ["/check-auth", "/stage/build/app/", "/stage/build/app/window.html", "/stage/build/app/settings.html"].includes(responseURL.pathname);
             } catch (error) {
                 preserveRemoteDocumentCSP = false;
             }
@@ -2572,6 +2600,9 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             showLocalBootWindow();
         }
         const currentKernelPort = kernelPort;
+        const currentBootWindow = bootWindow;
+        let kernelExited = false;
+        const bootCanceled = () => kernelExited || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow;
         const cmds = ["serve", "--port", currentKernelPort, "--wd", appDir, "--attach-ui"];
         if (isDevEnv && workspaces.length === 0) {
             cmds.push("--mode", "dev");
@@ -2599,6 +2630,7 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             kernelProcesses.set(kernelPortKey, kernelProcess);
             writeLog("booted kernel process [pid=" + kernelProcess.pid + ", port=" + currentKernelPort + "]");
             kernelProcess.on("close", (code, signal) => {
+                kernelExited = true;
                 if (kernelProcesses.get(kernelPortKey) === kernelProcess) {
                     kernelProcesses.delete(kernelPortKey);
                 }
@@ -2634,7 +2666,9 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                     }
 
                     exitApp(currentKernelPort, errorWindowId);
-                    bootWindow.destroy();
+                    if (!currentBootWindow.isDestroyed()) {
+                        currentBootWindow.destroy();
+                    }
                     resolve(false);
                 }
             });
@@ -2661,6 +2695,10 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             }
         }
 
+        if (bootCanceled()) {
+            resolve(false);
+            return;
+        }
         if (0 === apiData.code) {
             writeLog("got kernel version [" + apiData.data + "]");
             if (!isDevEnv && apiData.data !== appVer) {
@@ -2670,11 +2708,21 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                 resolve(false);
             } else {
                 let progressing = false;
+                let progressFailures = 0;
+                const retryableProgressErrors = new Set([
+                    "net::ERR_CERT_DATABASE_CHANGED",
+                    "net::ERR_CERT_VERIFIER_CHANGED",
+                    "net::ERR_NETWORK_CHANGED",
+                ]);
                 const bootShowStart = Date.now();
                 // 启动超时兜底，防止内核异常时永久卡在 boot 轮询。数据同步、首次全量索引重建、
                 // 数据库版本变更触发的全表重建都发生在 SetBooted() 之前，会计入此循环，故给足余量
                 const bootTimeout = 300000;
                 while (!progressing) {
+                    if (bootCanceled()) {
+                        resolve(false);
+                        return;
+                    }
                     if (Date.now() - bootShowStart > bootTimeout) {
                         writeLog("boot progress timeout after " + bootTimeout + "ms, exiting boot");
                         showErrorWindow("启动超时", "Boot timeout",
@@ -2690,16 +2738,31 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                     try {
                         const progressResult = await net.fetch(getServer(currentKernelPort) + "/api/system/bootProgress");
                         const progressData = await progressResult.json();
+                        if (bootCanceled()) {
+                            resolve(false);
+                            return;
+                        }
+                        progressFailures = 0;
                         if (progressData.data.progress >= 100) {
                             // 内核完成后等待动画快进收尾（200ms）再进入主窗口
                             await sleep(200);
-                            resolve(currentKernelPort);
+                            resolve(bootCanceled() ? false : currentKernelPort);
                             progressing = true;
                         } else {
                             await sleep(100);
                         }
                     } catch (e) {
                         writeLog("get boot progress failed: " + e.message);
+                        if (bootCanceled()) {
+                            resolve(false);
+                            return;
+                        }
+                        // 只读启动查询在证书或网络配置变化后有限重试，不延长总启动期限。
+                        if (retryableProgressErrors.has(e.message) && ++progressFailures < 15) {
+                            writeLog("retrying boot progress [attempt=" + progressFailures + "/14]");
+                            await sleep(500);
+                            continue;
+                        }
                         requestKernelExit(currentKernelPort);
                         bootWindow.destroy();
                         resolve(false);
@@ -2922,6 +2985,7 @@ app.whenReady().then(() => {
     });
     // 前端菜单同步完成前也保留原生编辑操作，避免复制、粘贴依赖界面初始化成功。
     setStartupApplicationMenu();
+    installKernelRequestLog(session.defaultSession, {getTarget: getWindowKernelTarget, writeLog});
     // 仅本进程启动的本地内核允许自签名证书，远程内核始终使用系统信任链。
     session.defaultSession.setCertificateVerifyProc((request, callback) => {
         const kernelMode = remoteKernelTarget ? "remote" : "local";
@@ -3018,7 +3082,7 @@ app.whenReady().then(() => {
             trayMenuTemplate.splice(1, 0, {
                 label: mainWindow.isAlwaysOnTop() ? lang.cancelWindowTop : lang.setWindowTop, click: () => {
                     if (!mainWindow.isAlwaysOnTop()) {
-                        mainWindow.setAlwaysOnTop(true);
+                        mainWindow.setAlwaysOnTop(true, "pop-up-menu");
                     } else {
                         mainWindow.setAlwaysOnTop(false);
                     }
@@ -3169,6 +3233,33 @@ app.whenReady().then(() => {
             return getKernelConnection(getWindowKernelTarget(event.sender.id));
         }
         const remoteSender = getWindowKernelTarget(event.sender.id)?.mode === "remote";
+        if (data.cmd === "saveRemoteExport") {
+            if (!remoteSender || !initializedWindowIds.has(event.sender.id) ||
+                event.senderFrame !== event.sender.mainFrame || remoteExportSenders.has(event.sender)) {
+                return {status: "error"};
+            }
+            const controller = new AbortController();
+            const abort = () => controller.abort();
+            remoteExportSenders.add(event.sender);
+            event.sender.once("destroyed", abort);
+            try {
+                return await saveRemoteExport({
+                    uri: data.uri,
+                    origin: getWindowKernelTarget(event.sender.id).origin,
+                    choosePath: (defaultPath) => dialog.showSaveDialog(BrowserWindow.fromWebContents(event.sender), {
+                        defaultPath, properties: ["showOverwriteConfirmation"],
+                    }),
+                    fetch: (url, options) => event.sender.session.fetch(url, options),
+                    signal: controller.signal,
+                });
+            } catch (error) {
+                writeLog("save remote export failed: " + error.message);
+                return {status: "error"};
+            } finally {
+                event.sender.removeListener("destroyed", abort);
+                remoteExportSenders.delete(event.sender);
+            }
+        }
         if (remoteSender && ["beginRichClipboard", "completeRichClipboard", "cancelRichClipboard", "clipboardRead", "clipboardReadFiles"]
             .includes(data.cmd)) {
             writeLog("ignored local file clipboard processing in remote kernel mode");
@@ -3642,7 +3733,8 @@ app.whenReady().then(() => {
                 if (!currentWindow) {
                     return;
                 }
-                currentWindow.setAlwaysOnTop(true);
+                // Windows 置顶窗口使用不受任务栏后置限制的级别。
+                currentWindow.setAlwaysOnTop(true, "win32" === process.platform ? "pop-up-menu" : "floating");
                 break;
             case "clearCache":
                 event.sender.session.clearCache();
@@ -3784,7 +3876,9 @@ app.whenReady().then(() => {
             }
             const existingWindow = windowWorkspaces.get(kernelTarget.origin, workspaceID);
             if (existingWindow) {
-                showWindow(existingWindow);
+                if (!pendingWindowIds.has(existingWindow.webContents.id)) {
+                    showWindow(existingWindow);
+                }
                 return;
             }
         }
@@ -3794,7 +3888,7 @@ app.whenReady().then(() => {
         const geometry = workspaceID ? normalizeWindowGeometry(data.windowGeometry, screen) : undefined;
         const win = new BrowserWindow({
             title: "SiYuan",
-            show: true,
+            show: false,
             trafficLightPosition: {x: 8, y: 13},
             width: Math.floor(data.width || mainScreen.size.width * 0.7),
             height: Math.floor(data.height || mainScreen.size.height * 0.9),
@@ -3806,6 +3900,7 @@ app.whenReady().then(() => {
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",
             webPreferences: {
+                backgroundThrottling: false,
                 contextIsolation: false,
                 nodeIntegration: true,
                 nodeIntegrationInSubFrames: false,
@@ -3824,19 +3919,64 @@ app.whenReady().then(() => {
             windowWorkspaces.associate(win, kernelTarget.origin, workspaceID);
         }
 
-        if (geometry) {
-            if (data.windowGeometry.maximized) {
+        // 原生窗口和主题内容均完成绘制后再显示，最大化和全屏也延后到此时执行。
+        const windowId = win.webContents.id;
+        pendingWindowIds.add(windowId);
+        let painted = false;
+        let initialized = false;
+        const stopWaiting = () => {
+            clearTimeout(readyTimeout);
+            ipcMain.removeListener("siyuan-window-ready", onWindowReady);
+            pendingWindowIds.delete(windowId);
+        };
+        const revealWindow = () => {
+            if (!painted || !initialized || win.isDestroyed() || !pendingWindowIds.has(windowId)) {
+                return;
+            }
+            stopWaiting();
+            if (geometry && data.windowGeometry.maximized) {
                 win.maximize();
             }
-            if (data.windowGeometry.fullscreen) {
+            if (geometry && data.windowGeometry.fullscreen) {
                 win.setFullScreen(true);
             }
-        } else if (data.position) {
+            showWindow(win);
+            win.webContents.setBackgroundThrottling(true);
+        };
+        const onWindowReady = readyEvent => {
+            if (readyEvent.sender.id === windowId) {
+                initialized = true;
+                revealWindow();
+            }
+        };
+        ipcMain.on("siyuan-window-ready", onWindowReady);
+        win.once("ready-to-show", () => {
+            painted = true;
+            revealWindow();
+        });
+        win.webContents.on("did-finish-load", () => {
+            if (getWindowPathname(win) !== "/stage/build/app/window.html") {
+                initialized = true;
+                revealWindow();
+            }
+        });
+        // 初始化失败时显示窗口供用户处理，避免留下无法访问的隐藏窗口。
+        const readyTimeout = setTimeout(() => {
+            if (!win.isDestroyed()) {
+                writeLog("siyuan-window-ready timeout, force showing detached window");
+                painted = true;
+                initialized = true;
+                revealWindow();
+            }
+        }, 60000);
+        win.once("closed", stopWaiting);
+
+        if (!geometry && data.position) {
             win.setPosition(data.position.x, data.position.y);
-        } else {
+        } else if (!geometry) {
             win.center();
         }
-        win.setAlwaysOnTop(data.alwaysOnTop);
+        win.setAlwaysOnTop(data.alwaysOnTop, "win32" === process.platform ? "pop-up-menu" : "floating");
         win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
         win.webContents.session.setSpellCheckerLanguages(["en-US"]);
         win.loadURL(windowURL.href);
@@ -4495,6 +4635,10 @@ app.on("activate", () => {
 
 app.on("web-contents-created", (webContentsCreatedEvent, contents) => {
     contents.setWindowOpenHandler((details) => {
+        const settings = settingsWindowPolicy(contents, details);
+        if (settings) {
+            return settings;
+        }
         const kernelTarget = getWindowKernelTarget(contents.id);
         if (kernelTarget?.mode === "remote") {
             openExternalURL(details.url, true);

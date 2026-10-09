@@ -17,12 +17,13 @@
 package api
 
 import (
-	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"errors"
 	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
@@ -76,7 +77,11 @@ var getSnippet = contractHandler(apicontract.GetSnippet, func(c *gin.Context, re
 		snippets = []*conf.Snippet{}
 	}
 
-	return apicontract.Success(apicontract.SnippetsData{Snippets: snippetContracts(snippets)})
+	revision := ""
+	if !isPublish {
+		revision = model.SnippetsRevision(confSnippets)
+	}
+	return apicontract.Success(apicontract.SnippetsData{Snippets: snippetContracts(snippets), Revision: revision})
 })
 
 var setSnippet = contractHandler(apicontract.SetSnippet, func(c *gin.Context, request apicontract.SetSnippetRequest) apicontract.Response[apicontract.Null] {
@@ -98,10 +103,18 @@ var setSnippet = contractHandler(apicontract.SetSnippet, func(c *gin.Context, re
 		snippets = append(snippets, snippet)
 	}
 
-	err := model.SetSnippet(snippets)
+	var err error
+	if request.Revision == nil {
+		err = model.SetSnippet(snippets)
+	} else {
+		err = model.SetSnippet(snippets, *request.Revision)
+	}
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = "set snippet failed: " + err.Error()
+		if errors.Is(err, model.ErrSnippetConflict) {
+			ret.Msg = model.ErrSnippetConflict.Error()
+		}
 		return contractFailure[apicontract.Null](ret)
 	}
 

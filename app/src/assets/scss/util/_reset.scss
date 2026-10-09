@@ -12,6 +12,12 @@ html {
 // 声明当前配色方案，用于修正 iOS 深色模式下输入法候选词高亮项背景丢失等问题 https://github.com/siyuan-note/siyuan/issues/17894
 :root[data-theme-mode="dark"] {
   color-scheme: dark;
+
+  &[data-backend="ios"]:is([data-frontend="desktop"], [data-frontend="mobile"]) {
+    // iOS 深色模式下显式设置光标颜色，改善外接键盘输入法候选字的可见性。
+    // https://github.com/siyuan-note/siyuan/issues/20005
+    caret-color: var(--b3-theme-on-background);
+  }
 }
 
 :root[data-theme-mode="light"] {

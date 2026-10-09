@@ -261,8 +261,8 @@ test("undo replay restores recorded carets across paragraphs, table cells and em
             "isNotEditBlock", "isContainerBlock", "hasPreviousSibling"]) +
         extract("../wysiwyg/transaction.ts", ["updateBlock"]) +
         extract("../wysiwyg/transactionUpdate.ts", ["shouldDeferCodeBlockCaretRestore"]) +
-        extract("selection.ts", ["getSelectionOffset", "getUndoFocusContext", "restoreFocusContext", "restoreUndoFocus",
-            "focusByOffset", "focusByRange", "focusByWbr", "searchNode", "getDOMOffset", "setLastNodeRange"]);
+        extract("selectionOffsets.ts", ["getSelectionOffset", "focusByRange", "searchNode", "getDOMOffset", "setLastNodeRange", "createRangeByOffsets"]) +
+        extract("selection.ts", ["getUndoFocusContext", "restoreFocusContext", "restoreUndoFocus", "focusByOffset", "focusByWbr"]);
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cut-undo-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");

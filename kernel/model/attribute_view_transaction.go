@@ -21,17 +21,20 @@ import (
 	"strings"
 
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // 事务失败时恢复本次写入涉及的数据库和文档，租约保持到提交或回滚结束。
 type attributeViewRollback struct {
-	views  map[string]*av.AttributeView
-	trees  map[string]*parse.Tree
-	leases map[string]bool
+	views        map[string]*av.AttributeView
+	createdViews map[string]string
+	trees        map[string]*parse.Tree
+	leases       map[string]bool
 }
 
 func (tx *Transaction) readAttributeViewForMutation(avID, blockID, boxID string) (*av.AttributeView, error) {
@@ -133,6 +136,9 @@ func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
 	}
 	if rollback {
 		for key, original := range state.views {
+			if _, created := state.createdViews[key]; created {
+				continue
+			}
 			boxID, _, _ := strings.Cut(key, "/")
 			current, _ := av.ParseAttributeViewForIndexInBox(original.ID, boxID)
 			av.SetAVBoxID(original.ID, boxID)
@@ -140,6 +146,22 @@ func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
 				logging.LogErrorf("restore database [%s] after transaction failure: %s", original.ID, err)
 			} else {
 				syncAttributeViewRelationIndexes(current, original)
+			}
+		}
+		for key, filename := range state.createdViews {
+			boxID, id, _ := strings.Cut(key, "/")
+			view, _ := av.ParseAttributeViewForIndexInBox(id, boxID)
+			if err := filelock.Remove(filename); err != nil {
+				logging.LogErrorf("remove restored database [%s] after transaction failure: %s", id, err)
+			} else {
+				cache.RemoveAVDataInBox(id, boxID)
+			}
+			if view != nil {
+				for _, kv := range view.KeyValues {
+					if kv.Key.Relation != nil {
+						av.RemoveAvRel(id, kv.Key.Relation.AvID)
+					}
+				}
 			}
 		}
 		for _, tree := range state.trees {

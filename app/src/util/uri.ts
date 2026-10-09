@@ -16,11 +16,12 @@ import type {App} from "../index";
 import {openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
 import {openStandaloneDatabaseItemByURI} from "../protyle/render/av/openStandaloneDatabaseItem";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
+import {normalizeSiYuanUri, type ParsedSiYuanUri} from "./normalizeSiYuanUri";
 
 const bazaarTypes = new Set<TBazaarType>(["plugins", "themes", "icons", "templates", "widgets"]);
 
-const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
-    const blockInfo = parseSiYuanUriInfo(uriObj);
+const processSiYuanUriBlocks = (app: App, uriObj: ParsedSiYuanUri): boolean => {
+    const blockInfo = parseSiYuanUriInfo(uriObj.href);
     if (blockInfo != null) {
         const {id, focus} = blockInfo;
         window.siyuan.editorIsFullscreen = blockInfo.fullscreen;
@@ -70,7 +71,7 @@ const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
     return false;
 };
 
-const processSiYuanUriPlugins = (app: App, uriObj: URL): boolean => {
+const processSiYuanUriPlugins = (app: App, uriObj: ParsedSiYuanUri): boolean => {
     const pluginNameOrTabType: string | null = (() => {
         const name = uriObj.pathname.split("/")[1];
         if (!name) {
@@ -124,7 +125,7 @@ const processSiYuanUriPlugins = (app: App, uriObj: URL): boolean => {
     return true;
 };
 
-const processSiYuanUriBazaar = (app: App, uriObj: URL): boolean => {
+const processSiYuanUriBazaar = (app: App, uriObj: ParsedSiYuanUri): boolean => {
     if (!isBazaarAvailable()) {
         return false;
     }
@@ -162,12 +163,13 @@ const processSiYuanUriBazaar = (app: App, uriObj: URL): boolean => {
 };
 
 export const processSiYuanUri = (app: App, uri: string) => {
-    let uriObj: URL;
+    let uriObj: ParsedSiYuanUri;
     try {
-        uriObj = new URL(uri);
-        if (!isSiYuanUriProtocol(uriObj)) {
+        const parsedURI = new URL(uri);
+        if (!isSiYuanUriProtocol(parsedURI)) {
             return false;
         }
+        uriObj = normalizeSiYuanUri(parsedURI);
     } catch (error) {
         return false;
     }

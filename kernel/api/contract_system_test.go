@@ -45,9 +45,27 @@ func TestAPIContractSystemCompleteConfiguration(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		before, _ := json.Marshal(source)
-		after, _ := json.Marshal(payload)
-		if !bytes.Equal(before, after) {
+		before, err := json.Marshal(source)
+		if err != nil {
+			t.Fatal(err)
+		}
+		after, err := json.Marshal(payload)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// 配置字段顺序不属于 JSON 契约，递归比较字段和值。
+		var sourceJSON, payloadJSON any
+		decoder := json.NewDecoder(bytes.NewReader(before))
+		decoder.UseNumber()
+		if err := decoder.Decode(&sourceJSON); err != nil {
+			t.Fatal(err)
+		}
+		decoder = json.NewDecoder(bytes.NewReader(after))
+		decoder.UseNumber()
+		if err := decoder.Decode(&payloadJSON); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(sourceJSON, payloadJSON) {
 			t.Fatalf("complete configuration changed:\n%s\n%s", before, after)
 		}
 		body, err := json.Marshal(apicontract.Success(apicontract.SystemConfData{Conf: payload}))
@@ -200,6 +218,9 @@ func TestAPIContractSystemRawResponses(t *testing.T) {
 }
 
 func TestAPIContractSystemUploadErrors(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = model.NewAppConf()
+	t.Cleanup(func() { model.Conf = previousConf })
 	for _, test := range []struct {
 		route   string
 		handler gin.HandlerFunc

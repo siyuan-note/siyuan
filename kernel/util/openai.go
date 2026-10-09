@@ -289,6 +289,10 @@ func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int, headers 
 		MaxCompletionTokens: 1,
 		Temperature:         1,
 	}
+	if IsOpenAIResponsesProtocol(protocol) {
+		// Responses 的输出预算至少为 16，包含可能使用的推理 token。
+		request.MaxCompletionTokens = 16
+	}
 	if IsOpenAIResponsesProtocol(protocol) || IsAnthropicMessagesProtocol(protocol) {
 		request.Stream = true
 		var stream *OpenAICompletionStream
@@ -444,26 +448,6 @@ func firstValidModelContextLength(values ...json.RawMessage) int {
 		return int(parsed)
 	}
 	return 0
-}
-
-func IsNetworkError(err error) bool {
-	msg := strings.ToLower(err.Error())
-	return strings.Contains(msg, "actively refused") ||
-		strings.Contains(msg, "connection refused") ||
-		strings.Contains(msg, "no such host") ||
-		strings.Contains(msg, "connection failed") ||
-		strings.Contains(msg, "hostname resolution") ||
-		strings.Contains(msg, "no address associated with hostname") ||
-		strings.Contains(msg, "request canceled while waiting for connection") ||
-		strings.Contains(msg, "exceeded while awaiting") ||
-		strings.Contains(msg, "context deadline exceeded") ||
-		strings.Contains(msg, "timeout") ||
-		strings.Contains(msg, "connection") ||
-		strings.Contains(msg, "refused") ||
-		strings.Contains(msg, "socket") ||
-		strings.Contains(msg, "eof") ||
-		strings.Contains(msg, "closed") ||
-		strings.Contains(msg, "network")
 }
 
 // embeddingHTTPClient 单例 HTTP 客户端，复用连接池并限制每主机最大连接数，

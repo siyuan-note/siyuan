@@ -1,20 +1,24 @@
 import {Constants} from "../../constants";
 import {isEncryptedBox} from "../../util/pathName";
 import {preparePasteAssets} from "./pasteAssets";
+import {normalizePictureImages} from "./pictureImages";
 import {escapeHtml, escapeMarkdownPlainText} from "../../util/escape";
 import {getTableCellPlainText} from "./tableCellRich";
+import {getTableCellRichContext} from "./tableCellRichContext";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import type {IUploadInsertOptions} from "../upload";
 import {
     captureUploadDocument,
     createUploadInsertPosition,
     getAvailableUploadInsertRange,
+    isUploadDocumentAvailable,
     isUploadInsertPositionAvailable,
 } from "../upload/insertPosition";
 import {processPasteCode, processRender} from "./processCode";
 import {getLocalFiles, getTextSiyuanFromTextHTML, isInHarmony, readClipboard, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
-import {focusByOffset, getEditorRange, getSelectionOffset, getUndoFocusContext} from "./selection";
+import {focusByOffset, getEditorRange, getUndoFocusContext} from "./selection";
+import {getSelectionOffset} from "./selectionOffsets";
 import {blockRender} from "../render/blockRender";
 import {highlightRender} from "../render/highlightRender";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -43,7 +47,7 @@ import {
     type IHTMLEmbeddedAsset,
     validateHTMLEmbeddedAssetSizes,
 } from "../upload/htmlEmbeddedAssets";
-import {getCompleteAssetUploadPathsByInput} from "../upload/uploadResult";
+import {getAssetUploadPathsByInput, getCompleteAssetUploadPathsByInput} from "../upload/uploadResult";
 import {resolveLinkDest} from "../toolbar/util";
 import {updateTransaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
@@ -115,7 +119,7 @@ const pastePlainTextLink = (protyle: IProtyle, range: Range, text: string) => {
         return true;
     }
     const linkDest = resolveLinkDest(text, protyle.lute);
-    if (linkDest && (!restricted || getAVRichTextSafeURL(linkDest))) {
+    if (linkDest && (!restricted || getAVRichTextSafeURL(linkDest, !!getTableCellRichContext(protyle)))) {
         protyle.toolbar.range = range;
         protyle.toolbar.setInlineMark(protyle, "a", "range", {type: "a", color: linkDest});
         return true;
@@ -764,6 +768,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         siyuanHTML = siyuanHTML || clipboard.textSiyuan;
         textHTML = clipboard.textHtml;
     }
+    if (blockDOMSanitizer && !siyuanHTML && /<picture[\s>]/i.test(textHTML)) {
+        const template = document.createElement("template");
+        template.innerHTML = textHTML;
+        normalizePictureImages(template.content, getHTMLAssetSourceURL(textHTML));
+        textHTML = template.innerHTML;
+    }
     if (blockDOMSanitizer && !siyuanHTML && !isProtyleUploadDisabled(protyle)) {
         // 受限片段中的图片走附件上传，避免被后续纯文本降级丢弃。
         const isImage = (name: string) => Constants.SIYUAN_ASSETS_IMAGE.includes(
@@ -893,7 +903,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         // process word
         const doc = new DOMParser().parseFromString(textHTML, "text/html");
         // 在移除文档头之前解析来源，避免将网页根路径当成本地绝对路径。
-        resolveHTMLAssetURLs(doc, getHTMLAssetSourceURL(textHTML, doc.querySelector("base[href]")?.getAttribute("href")));
+        const sourceURL = getHTMLAssetSourceURL(textHTML, doc.querySelector("base[href]")?.getAttribute("href"));
+        normalizePictureImages(doc, sourceURL);
+        resolveHTMLAssetURLs(doc, sourceURL);
         if (doc.body && doc.body.innerHTML) {
             textHTML = doc.body.innerHTML;
         }
@@ -1324,6 +1336,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         if (isHTML) {
             const tempElement = document.createElement("div");
             tempElement.innerHTML = textHTML;
+            normalizePictureImages(tempElement);
             if (!getHostCapabilities().localFileSystem) {
                 removeHTMLLocalAssetPaths(collectHTMLLocalAssets(tempElement));
             }
@@ -1438,24 +1451,31 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 preparedHTML = true;
             }
             if (localAssets.length > 0) {
-                let localAssetPaths: string[] | undefined;
+                let localAssetResult: Omit<IAssetUploadResult, "requestId" | "input"> | undefined;
                 await new Promise<void>(resolve => {
                     uploadLocalFiles(localAssets.map(item => ({path: item.path, size: null})), protyle, true, {
                         ...assetUploadOptions,
                         requiredFileCount: localAssets.length,
                         fromHTMLPaste: true,
                     }, (_response, result) => {
-                        localAssetPaths = getCompleteAssetUploadPathsByInput(localAssets.length, result);
-                    }, () => resolve());
+                        localAssetResult = result;
+                    }, (_succeeded, result) => {
+                        localAssetResult = result || localAssetResult;
+                        resolve();
+                    });
                 });
-                if (!localAssetPaths) {
+                if (!localAssetResult || localAssetResult.status === "canceled" ||
+                    !isUploadDocumentAvailable(protyle, assetUploadOptions.document)) {
                     return;
                 }
                 range = restorePasteInsertRange();
                 if (!range) {
                     return;
                 }
-                applyHTMLLocalAssetPaths(localAssets, localAssetPaths);
+                applyHTMLLocalAssetPaths(localAssets, getAssetUploadPathsByInput(localAssets.length, localAssetResult));
+                if (localAssetResult.status !== "success") {
+                    showMessage(window.siyuan.languages.uploadError);
+                }
             }
             let embeddedAssets: IHTMLEmbeddedAsset[];
             try {

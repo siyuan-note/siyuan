@@ -641,9 +641,6 @@ export const getVisibleBuiltinColorIndexes = (type: Exclude<TBuiltinColorType, "
         .filter(index => isBuiltinInlineStyleVisible(type, index, data));
 };
 
-export const getVisibleBuiltinInlineStyleIDs = (data = getInlineStylesCache()) =>
-    BUILTIN_INLINE_STYLE_IDS.filter(id => isBuiltinInlineStyleVisible("style1", id, data));
-
 export const getOrderedStyleKeys = (type: TInlineStyleType, data = getInlineStylesCache()) =>
     normalizeInlineStyles(data).order[type];
 

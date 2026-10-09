@@ -41,6 +41,7 @@ let clientY: number;
 let xDiff: number;
 let yDiff: number;
 let time: number;
+let touchStartTimeStamp: number;
 let firstDirection: MobileSwipeDirection;
 let firstXY: "x" | "y";
 let lastClientX: number;    // 和起始方向不一致时，记录最后一次的 clientX
@@ -52,6 +53,7 @@ let preventSwipe = false;
 let longPressTimer: number;
 let longPressBlockElement: HTMLElement;
 let longPressTouchRange: Range;
+let blankTouchFocus: {editorElement: HTMLElement, editableElement: HTMLElement, range: Range};
 
 const sideMaskElement = document.querySelector(".side-mask") as HTMLElement;
 
@@ -79,6 +81,24 @@ const clearLongPress = () => {
     }
 };
 
+const blurEditorForSidebar = () => {
+    const editor = getCurrentEditor();
+    const selection = window.getSelection();
+    if (editor && selection?.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        if (editor.protyle.wysiwyg.element.contains(range.startContainer) &&
+            editor.protyle.wysiwyg.element.contains(range.endContainer)) {
+            // 保存正文编辑位置，清除原生光标，避免侧栏覆盖编辑器后光标仍显示在覆盖层上。
+            window.siyuan.mobile.touchRange = range.cloneRange();
+            selection.removeAllRanges();
+        }
+    }
+    if (editor?.protyle.wysiwyg.element.contains(document.activeElement)) {
+        (document.activeElement as HTMLElement).blur();
+    }
+    activeBlur(true);
+};
+
 const clearInvisibleEditorSelection = () => {
     const editor = getCurrentEditor();
     const selection = window.getSelection();
@@ -91,8 +111,9 @@ const clearInvisibleEditorSelection = () => {
         !editor.protyle.wysiwyg.element.contains(range.endContainer)) {
         return false;
     }
-    selection.removeAllRanges();
-    activeBlur();
+    // 空白选区折叠为光标，保持编辑焦点和键盘，避免长按或滚动中断输入。
+    selection.collapseToStart();
+    window.siyuan.mobile.touchRange = selection.getRangeAt(0).cloneRange();
     return true;
 };
 
@@ -138,6 +159,26 @@ export const handleTouchUp = () => {
     }
     longPressBlockElement = undefined;
     longPressTouchRange = undefined;
+    blankTouchFocus = undefined;
+};
+
+export const handleTouchContextMenu = (event: MouseEvent) => {
+    const saved = blankTouchFocus;
+    if (!saved || event.target !== saved.editorElement ||
+        getCurrentEditor()?.protyle.wysiwyg.element !== saved.editorElement ||
+        !saved.editableElement.isConnected || !saved.range.startContainer.isConnected ||
+        !saved.range.endContainer.isConnected ||
+        (document.activeElement !== document.body && document.activeElement !== saved.editableElement)) {
+        return;
+    }
+    blankTouchFocus = undefined;
+    // WebView 长按非编辑区域时会先失焦，在原生菜单阶段恢复本轮按下前的编辑位置。
+    event.preventDefault();
+    saved.editableElement.focus({preventScroll: true});
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(saved.range);
+    window.siyuan.mobile.touchRange = saved.range.cloneRange();
 };
 
 export const handleTouchSelectionChange = () => {
@@ -158,6 +199,8 @@ export const handleTouchEnd = (event: TouchEvent) => {
     }
     const target = event.target as HTMLElement;
     const currentTime = Date.now();
+    const touchDuration = Number.isFinite(event.timeStamp) && Number.isFinite(touchStartTimeStamp) ?
+        event.timeStamp - touchStartTimeStamp : currentTime - time;
     const editor = getCurrentEditor();
     if (!isInHarmony() && !isInAndroid()) {
         handleTouchUp();
@@ -190,7 +233,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
                 event.stopImmediatePropagation();
                 event.preventDefault();
             }
-        } else if (currentTime - time > Constants.TIMEOUT_LONGPRESS) {
+        } else if (touchDuration > Constants.TIMEOUT_LONGPRESS) {
             // 长按：多选已在按住满阈值时触发，此处取消定时器避免重复触发
             if (isIPhone() && !isChromeBrowser() && !window.siyuan.touchDragActive) {
                 target.dispatchEvent(new MouseEvent("contextmenu", {
@@ -271,6 +314,12 @@ export const handleTouchEnd = (event: TouchEvent) => {
     }
 
     const targetSidebar = getTargetSidebar(target);
+    if (target.closest(".agent-session-popup--mobile")) {
+        if (!scrollBlock && isXScroll && firstDirection === "toRight" && !reversing) {
+            window.siyuan.mobile.agentChatController?.handleBack();
+        }
+        return;
+    }
     if (scrollBlock) {
         if (targetSidebar) {
             popSidebar(targetSidebar, false);
@@ -310,6 +359,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
 };
 
 const resetTouchGesture = () => {
+    blankTouchFocus = undefined;
     isFirstMove = true;
     clientX = null;
     clientY = null;
@@ -345,6 +395,7 @@ export const handleTouchStart = (event: TouchEvent) => {
     updateSidebarSwipeState();
     resetTouchGesture();
     time = Date.now();
+    touchStartTimeStamp = event.timeStamp;
     longPressBlockElement = undefined;
     longPressTouchRange = undefined;
     const target = event.touches[0].target as HTMLElement;
@@ -355,7 +406,8 @@ export const handleTouchStart = (event: TouchEvent) => {
         return;
     }
     // 自行处理触摸的内容独占整轮手势，松手和取消时也不操作外层侧栏。
-    preventSwipe = !!hasClosestByAttribute(target, "data-prevent-swipe", null, true);
+    preventSwipe = !!target.closest(".av__widthdrag") ||
+        !!hasClosestByAttribute(target, "data-prevent-swipe", null, true);
     if (preventSwipe) {
         return;
     }
@@ -372,6 +424,17 @@ export const handleTouchStart = (event: TouchEvent) => {
         return;
     }
     const editor = getCurrentEditor();
+    const activeElement = document.activeElement as HTMLElement;
+    const selection = window.getSelection();
+    if (event.touches.length === 1 && editor && !editor.protyle.disabled &&
+        target === editor.protyle.wysiwyg.element && activeElement?.isContentEditable &&
+        target.contains(activeElement) && selection?.rangeCount > 0 &&
+        document.getElementById("keyboardToolbar")?.classList.contains("fn__none") === false) {
+        const range = selection.getRangeAt(0);
+        if (target.contains(range.startContainer) && target.contains(range.endContainer)) {
+            blankTouchFocus = {editorElement: target, editableElement: activeElement, range: range.cloneRange()};
+        }
+    }
     if (getSelection().rangeCount > 0 && hasClosestBlock(event.target as Element) &&
         editor && !editor.protyle.disabled && event.touches[0].clientY > window.innerHeight / 2 &&
         document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
@@ -537,6 +600,9 @@ export const handleTouchMove = (event: TouchEvent) => {
         if (hasClosestByAttribute(target, "id", "menu", true)) {
             return;
         }
+        if (target.closest(".agent-session-popup--mobile")) {
+            return;
+        }
         if (!getTargetSidebar(target) && !getMobileSidebarConfig().sidebarSwipe) {
             return;
         }
@@ -600,6 +666,7 @@ export const handleTouchMove = (event: TouchEvent) => {
                 scrollBlock = true;
                 return;
             }
+            blurEditorForSidebar();
             sideMaskElement.style.zIndex = (++window.siyuan.zIndex).toString();
             showPanelMask();
             const activeSidebar = getTargetSidebar(target) || openingSidebar;
@@ -607,6 +674,8 @@ export const handleTouchMove = (event: TouchEvent) => {
             getSidebarElement(activeSidebar).style.zIndex = (++window.siyuan.zIndex).toString();
             isFirstMove = false;
         }
+        // 侧栏接管横向手势后禁止浏览器沿触摸位置重新放置光标。
+        event.preventDefault();
         const windowWidth = window.innerWidth;
         const targetSidebar = getTargetSidebar(target);
         if (targetSidebar) {
@@ -620,7 +689,6 @@ export const handleTouchMove = (event: TouchEvent) => {
         getSidebarElement(otherSidebar)?.style.removeProperty("transform");
         const offset = getSidebarOpeningOffset(openingSidebar, xDiff, windowWidth);
         getSidebarElement(openingSidebar).style.transform = `translateX(${offset}px)`;
-        activeBlur();
         if (window.siyuan.mobile.editor) {
             window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "hidden";
         }

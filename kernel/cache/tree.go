@@ -42,10 +42,6 @@ func treeCacheKey(rootID, boxID string) string {
 	return boxID + "\x00" + rootID
 }
 
-func GetTreeData(rootID string) (raw []byte, ok bool) {
-	return GetTreeDataInBox(rootID, "")
-}
-
 func GetTreeDataInBox(rootID, boxID string) (raw []byte, ok bool) {
 	treeCacheKeysMu.Lock()
 	defer treeCacheKeysMu.Unlock()
@@ -60,10 +56,6 @@ func GetTreeDataInBox(rootID, boxID string) (raw []byte, ok bool) {
 		return nil, false
 	}
 	return e.raw, true
-}
-
-func SetTreeData(rootID string, raw []byte) {
-	SetTreeDataInBox(rootID, "", raw)
 }
 
 func SetTreeDataInBox(rootID, boxID string, raw []byte) {

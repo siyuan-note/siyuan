@@ -1,3 +1,5 @@
+import {fetchWithAppId} from "../../util/fetchWithAppId";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 import type {SettingTabBuilder} from "../setting/builder";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {ContractFormData} from "../../util/contractFormData";
@@ -101,7 +103,7 @@ const mountOIDCButton = (root: HTMLElement) => {
     }
     root.querySelector("#oidcConfig")?.addEventListener("click", () => {
         const config = window.siyuan.config.oidc;
-        const escape = (value: string) => Lute.EscapeHTMLStr(value);
+        const escape = (value: string) => escapeHtmlTextAndAttr(value);
         let destroyOIDCDialog: () => void = () => undefined;
         const dialog = new Dialog({
             title: window.siyuan.languages.oidcLogin,
@@ -540,7 +542,7 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
                         if (input.files && input.files[0]) {
                             const formData = new FormData();
                             formData.append("file", input.files[0]);
-                            fetch("/api/system/importTLSCABundle", {
+                            fetchWithAppId("/api/system/importTLSCABundle", {
                                 method: "POST",
                                 body: formData,
                             }).then(res => res.json()).then((response) => {

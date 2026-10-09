@@ -115,3 +115,64 @@ func TestTableCellRichRejectsUnsafeCustomInlineStyle(t *testing.T) {
 		}
 	}
 }
+
+func TestTableCellRichLocalLinks(t *testing.T) {
+	for _, target := range []string{
+		`D:\基线测试\测试文档1.docx`, `D:/基线测试/测试文档1.docx`, `D:\目录\`,
+		`file:///D:\基线测试\测试文档1.docx`, `file:///D:/基线测试/测试文档1.docx`,
+		`file:///tmp/test%20document.txt`, `file://server/share/document.txt`, `\\server\share\document.txt`,
+	} {
+		t.Run(target, func(t *testing.T) {
+			source := `<span data-type="a strong" data-href="` + target + `" data-title="title">anchor</span>`
+			rich := &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
+			for pass := 0; pass < 3; pass++ {
+				tree, err := ParseTableCellRich(rich)
+				if err != nil {
+					t.Fatal(err)
+				}
+				links := tree.Root.ChildrenByType(ast.NodeTextMark)
+				if len(links) != 1 || links[0].TextMarkAHref != target || links[0].TextMarkATitle != "title" ||
+					links[0].TextMarkTextContent != "anchor" || !links[0].IsTextMarkType("strong") {
+					t.Fatalf("local link changed: %s", rich.Content)
+				}
+				content, err := RenderTableCellRich(tree)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if pass > 0 && content != rich.Content {
+					t.Fatalf("table source is not stable: %q != %q", content, rich.Content)
+				}
+				rich.Content = content
+			}
+			if _, err := ParseValueTextRich(&ValueTextRich{Spec: ValueTextRichSpec,
+				Format: ValueTextRichFormatKramdown, Content: source}); err == nil {
+				t.Fatal("table local links must not expand the database rich text whitelist")
+			}
+		})
+	}
+}
+
+func TestTableCellRichRejectsUnsafeLocalLinksAndImages(t *testing.T) {
+	for _, target := range []string{
+		`javascript:alert(1)`, `javascript&colon;alert(1)`, `java%73cript:alert(1)`,
+		`data:text/html,payload`, `vbscript:payload`, `file:relative.txt`, `file://`,
+		`file://user@server/share/document.txt`, `file://server:123/share/document.txt`,
+		`D:relative.txt`, `D:\file%0a.txt`, `file:///tmp/file%00.txt`, "D:\\file\u200B.txt",
+		`https:\\example.com\document.txt`, `\\server`, "D:\\invalid\xff.txt", `D:\invalid%FF.txt`,
+	} {
+		source := `<span data-type="a" data-href="` + target + `">anchor</span>`
+		rich := &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
+		if _, err := ParseTableCellRich(rich); err == nil {
+			t.Fatalf("accepted unsafe table link: %q", target)
+		}
+		if rich.Content != source {
+			t.Fatal("rejected source must remain unchanged")
+		}
+	}
+	for _, target := range []string{`file:///tmp/image.png`, `D:/baseline/image.png`, `\\server\share\image.png`} {
+		rich := &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: `![image](` + target + `)`}
+		if _, err := ParseTableCellRich(rich); err == nil {
+			t.Fatalf("local link policy must not expand image sources: %q", target)
+		}
+	}
+}

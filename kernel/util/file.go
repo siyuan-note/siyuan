@@ -368,6 +368,8 @@ func FilterUploadFileName(name string) string {
 	return ret
 }
 
+var pdfAnnoPngPattern = regexp.MustCompile("-{0,1}P{0,1}[0-9]{0,4}-{0,1}[0-9]{1,3}-[0-9]{14}-[0-9a-zA-Z]{7}\\.png$")
+
 func TruncateLenFileName(name string) (ret string) {
 	// 插入资源文件时文件名长度最大限制 189 字节 https://github.com/siyuan-note/siyuan/issues/7099
 	ext := filepath.Ext(name)
@@ -381,9 +383,7 @@ func TruncateLenFileName(name string) (ret string) {
 		// PNG 图片可能是 PDF 标注的截图，包含页面和旋转角度（name--P1--270-id.png），所以允许的长度更短一些
 		// https://github.com/siyuan-note/siyuan/pull/16714#issuecomment-3737987302
 
-		pdfAnnoPngPattern := "-{0,1}P{0,1}[0-9]{0,4}-{0,1}[0-9]{1,3}-[0-9]{14}-[0-9a-zA-Z]{7}\\.png$"
-		regx := regexp.MustCompile(pdfAnnoPngPattern)
-		pdfAnnoPngPart = regx.FindString(name)
+		pdfAnnoPngPart = pdfAnnoPngPattern.FindString(name)
 		if "" != pdfAnnoPngPart {
 			maxLen -= len(pdfAnnoPngPart) + len(".png")
 			name = strings.TrimSuffix(name, pdfAnnoPngPart)

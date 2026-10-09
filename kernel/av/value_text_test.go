@@ -987,20 +987,20 @@ func TestValueTextRichLinkTargetPolicy(t *testing.T) {
 	for _, target := range allowed {
 		linkDest := &ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(target)}
 		textMark := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkAHref: target}
-		if !isAllowedValueTextRichNode(linkDest) {
+		if !isAllowedValueTextRichNode(linkDest, false) {
 			t.Fatalf("allowed classic link destination was rejected: %q", target)
 		}
-		if !isAllowedValueTextMark(textMark) {
+		if !isAllowedValueTextMark(textMark, false) {
 			t.Fatalf("allowed text mark link destination was rejected: %q", target)
 		}
 	}
 	for _, target := range blocked {
 		linkDest := &ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(target)}
 		textMark := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkAHref: target}
-		if isAllowedValueTextRichNode(linkDest) {
+		if isAllowedValueTextRichNode(linkDest, false) {
 			t.Fatalf("unsafe classic link destination was accepted: %q", target)
 		}
-		if isAllowedValueTextMark(textMark) {
+		if isAllowedValueTextMark(textMark, false) {
 			t.Fatalf("unsafe text mark link destination was accepted: %q", target)
 		}
 	}
@@ -1045,13 +1045,13 @@ func TestValueTextRichInlineMemoIsPlainText(t *testing.T) {
 	}
 	for _, content := range allowed {
 		node := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "inline-memo", TextMarkInlineMemoContent: content}
-		if !isAllowedValueTextMark(node) {
+		if !isAllowedValueTextMark(node, false) {
 			t.Fatalf("plain inline memo was rejected: %q", content)
 		}
 	}
 	for _, content := range blocked {
 		node := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "inline-memo", TextMarkInlineMemoContent: content}
-		if isAllowedValueTextMark(node) {
+		if isAllowedValueTextMark(node, false) {
 			t.Fatalf("active or ambiguous inline memo was accepted: %q", content)
 		}
 	}

@@ -1,7 +1,8 @@
 import {revealTabsForTarget} from "../protyle/render/tabsRender";
 import {resolveVisibleListMindmapBlock} from "../protyle/render/listMindmap/render";
 import {hasClosestBlock, isInEmbedBlock} from "../protyle/util/hasClosest";
-import {focusByRange, getEditorRange} from "../protyle/util/selection";
+import {getEditorRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {getStartScrollTop} from "./highlightPosition";
 import {isMobile} from "./functions";
 

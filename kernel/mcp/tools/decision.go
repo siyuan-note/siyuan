@@ -42,7 +42,7 @@ type decisionItemResult struct {
 
 var DecisionTool = &Tool{
 	Name:             "decision",
-	Description:      "Classify, filter, choose or score content using the configured TypeSafe System One decision model. Submit 1-32 independent items evaluated sequentially with shared questions. Use blockIDs (full Markdown, no truncation), optionally notebook for encrypted blocks, or text. For comparative choices put all related blocks in one item. Maximum 255 choices or 2-10 score levels. Noul returns P(yes), not a boolean. Stops on first failure; returns completed, error and not_run items. Sends content externally and may incur charges.",
+	Description:      "Classify, filter, choose or score content using the configured decision provider. Submit 1-32 independent items evaluated sequentially with shared questions. Use blockIDs (full Markdown, no truncation), optionally notebook for encrypted blocks, or text. For comparative choices put all related blocks in one item. Maximum 255 choices or 2-10 score levels. Noul returns P(yes), not a boolean. Stops on first failure; returns completed, error and not_run items. Sends content externally and may incur charges.",
 	AgentOnly:        true,
 	Available:        decisionAvailable,
 	ReadOnlyHint:     true,
@@ -86,8 +86,14 @@ func init() {
 }
 
 func decisionAvailable() bool {
+	return decisionEnabled() && model.Conf.AI.Decision.Configured()
+}
+
+// decisionEnabled 不读取活动供应商配置，已开始的批次使用独立的配置快照。
+func decisionEnabled() bool {
 	return !util.IsDisabledFeature("ai") && model.Conf != nil && model.Conf.AI != nil &&
-		model.Conf.AI.Decision.Configured() && model.Conf.AI.Decision.Enabled
+		model.Conf.AI.Decision != nil && model.Conf.AI.Decision.Enabled &&
+		(model.Conf.AI.Agent == nil || model.Conf.AI.Agent.CapabilityPolicy.Allows("native/backend/decision"))
 }
 
 func decisionBoxLeases(args map[string]any) []string {
@@ -126,16 +132,18 @@ func decisionHandler(ctx context.Context, args map[string]any) (CallToolResult, 
 		return blockToolError("encrypted notebook is locked, please unlock it first")
 	}
 	defer release()
-	config := *model.Conf.AI.Decision
-	options := util.DecisionOptions{Endpoint: config.Endpoint, APIKey: config.APIKey, Model: config.Name, Timeout: config.Timeout}
+	options, err := model.Conf.AI.Decision.ActiveOptions()
+	if err != nil {
+		return blockToolError(err.Error())
+	}
 	results := make([]decisionItemResult, 0, len(input.Items))
 	failed := false
 	for _, item := range input.Items {
 		entry := decisionItemResult{ID: item.ID, Status: "not_run"}
 		if !failed {
 			state, stateErr := decisionItemState(ctx, item, input.Context)
-			if stateErr == nil && !decisionAvailable() {
-				stateErr = errors.New("decision model is disabled or not configured")
+			if stateErr == nil && !decisionEnabled() {
+				stateErr = errors.New("decision model is disabled or not permitted")
 			}
 			if stateErr == nil {
 				entry.Result, stateErr = util.EvaluateDecision(ctx, options, state, questions)

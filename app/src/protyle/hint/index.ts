@@ -12,14 +12,18 @@ import {
 } from "../util/hasClosest";
 import {
     focusBlock,
-    focusByRange,
     focusByWbr,
     getEditorRange,
-    getSelectionOffset,
     getSelectionPosition,
     getUndoFocusContext,
 } from "../util/selection";
+import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash, hintTag} from "./extend";
+import {getSlashEntryKey, TSlashMenuItem} from "./slashMenu";
+import {getFrequentSlashItems, recordSlashExecution} from "./frequentSlashStorage";
+import {escapeAttr} from "../../util/escape";
+import {createDailyNoteReference} from "./dailyNote";
+import {captureDailyNoteSelection, insertDailyNoteReference} from "./dailyNoteSelection";
 import {
     getBlockRefAnchorText,
     getDocCreateTemplatePath,
@@ -37,6 +41,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
+import {renderIFrameResize} from "../render/iframeResize";
 import {spinListMindmapDOM} from "../render/listMindmap/create";
 import {mountNewListMindmap} from "../render/listMindmap";
 import {assetMenu, imgMenu} from "../../menus/protyle";
@@ -67,6 +72,7 @@ import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
 import {getAVBindingCell, getAVBindingOperations} from "../render/av/binding";
+import {bindCreatedAVDocument} from "../render/av/bindCreatedDocument";
 import {isRangeInEditor} from "../../util/newFileSelection";
 import {genCellValueByElement} from "../render/av/cell";
 import {setFold} from "../util/blockFold";
@@ -151,8 +157,9 @@ export class Hint {
                 return;
             }
             const btnElement = hasClosestByTag(eventTarget, "BUTTON");
-            if (btnElement && !btnElement.classList.contains("emojis__item") && !btnElement.classList.contains("emojis__type")) {
-                this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, false, this.source === "search" ? isNotCtrl(event) : isOnlyMeta(event));
+            if (btnElement && btnElement.hasAttribute("data-value") && !btnElement.classList.contains("emojis__item") && !btnElement.classList.contains("emojis__type")) {
+                this.fill(decodeURIComponent(btnElement.getAttribute("data-value")), protyle, false,
+                    this.source === "search" ? isNotCtrl(event) : isOnlyMeta(event), btnElement.dataset.slashEntryKey);
                 event.preventDefault();
                 event.stopPropagation(); // https://github.com/siyuan-note/siyuan/issues/3710
                 return;
@@ -549,6 +556,7 @@ export class Hint {
                 }
                 range.deleteContents();
                 range.collapse(true);
+                recordSlashExecution(item.closest<HTMLElement>("[data-slash-entry-key]")?.dataset.slashEntryKey);
                 uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
                     document: uploadDocument,
                     htmlAsIframe: event.target.dataset.uploadMode === "html-iframe",
@@ -563,6 +571,14 @@ export class Hint {
     }
 
     private getHTMLByData(data: IHintData[]) {
+        if (this.source === "hint") {
+            // 所有上下文过滤完成后再选常用项，保留原列表及搜索结果顺序。
+            const frequent = getFrequentSlashItems(data.filter(item => item.html !== "separator" &&
+                (item as TSlashMenuItem).frequentEligible === true), getSlashEntryKey);
+            if (frequent.length > 0) {
+                data = [...frequent, {html: "separator", entryKey: "__frequent_separator__"} as TSlashMenuItem, ...data];
+            }
+        }
         if (this.source === "hint" && this.element.closest("#keyboardToolbar")) {
             return getLiteSlashMenuHTML(data);
         }
@@ -577,7 +593,8 @@ export class Hint {
             if (hintData.html === "separator") {
                 hintsHTML += `<button data-id="${hintData.id || ""}" class="b3-menu__separator"></button>`;
             } else {
-                hintsHTML += `<button data-id="${hintData.id || ""}" style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${focusClass}" data-value="${encodeURIComponent(hintData.value)}">${hintData.html}</button>`;
+                const entryKey = getSlashEntryKey(hintData);
+                hintsHTML += `<button data-id="${hintData.id || ""}"${entryKey ? ` data-slash-entry-key="${escapeAttr(entryKey)}"` : ""} style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${focusClass}" data-value="${encodeURIComponent(hintData.value)}">${hintData.html}</button>`;
             }
         });
         return `${hintsHTML}</div>`;
@@ -704,9 +721,9 @@ export class Hint {
                     let blockRefHTML;
                     if (source === "av") {
                         // av 搜索时需要获取值 https://github.com/siyuan-note/siyuan/issues/12020
-                        let refText = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
+                        let refText = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replaceAll(Constants.ZWSP, "");
                         if (nodeElement) {
-                            refText = escapeHtml(item.ial["custom-sy-av-s-text-" + nodeElement.getAttribute("data-av-id")] || "") || refText;
+                            refText = escapeHtml(item.ial[Constants.CUSTOM_SY_AV_STATIC_TEXT + nodeElement.getAttribute("data-av-id")] || "") || refText;
                         }
                         blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
                     } else {
@@ -790,7 +807,16 @@ ${genHintItemHTML(item)}
         this.emojiBrowseMode = false;
     }
 
-    public fill(value: string, protyle: IProtyle, updateRange = true, refIsS = false) {
+    // 直接插入命令使用正文选区，不沿用候选面板的来源和触发位置。
+    public fillCommand(value: string, protyle: IProtyle, updateRange = true, slashEntryKey?: string) {
+        this.source = "hint";
+        this.splitChar = "/";
+        this.lastIndex = -1;
+        this.hashTagSearchElement = undefined;
+        this.fill(value, protyle, updateRange, false, slashEntryKey);
+    }
+
+    public fill(value: string, protyle: IProtyle, updateRange = true, refIsS = false, slashEntryKey?: string) {
         this.bindingDismissController?.abort();
         hideElements(["hint", "toolbar"], protyle);
         if (updateRange && this.source !== "av") {
@@ -847,6 +873,21 @@ ${genHintItemHTML(item)}
                     updateAttrViewCellAnimation(cellElement, nextValue);
                 }
             };
+            const bindingBlockID = nodeElement.dataset.nodeId;
+            const savedPrimaryValue = JSON.stringify(previousValue);
+            const bindCreatedDoc = async (id: string, title: string) => {
+                const bound = await bindCreatedAVDocument(protyle, {
+                    avID, itemID: previousID, documentID: id, blockID: bindingBlockID, previousValue,
+                    isValid: () => cellElement.isConnected && nodeElement.isConnected &&
+                        nodeElement.dataset.nodeId === bindingBlockID &&
+                        (panelCell ? rowElement.dataset.rowId : rowElement.dataset.id) === previousID &&
+                        JSON.stringify(genCellValueByElement("block", cellElement)) === savedPrimaryValue,
+                });
+                if (bound) {
+                    updatePreview({type: "block", isDetached: false,
+                        block: {content: title, id, icon: previousValue.block?.icon}});
+                }
+            };
             if (value.startsWith("((newFileAtPath ") && value.endsWith(`${Lute.Caret}'))`)) {
                 const fileNames = value.substring("((newFileAtPath \"".length, value.length - 4).split(`"${Constants.ZWSP}'`);
                 const name = fileNames.length === 1 ? fileNames[0] : fileNames[1];
@@ -872,16 +913,7 @@ ${genHintItemHTML(item)}
                             focusByRange(savedRange);
                         }
                     },
-                    onCreated(id, title) {
-                        const operations = getAVBindingOperations(avID, previousID, id, blockID,
-                            previousValue, {protyleID: protyle.id});
-                        transaction(protyle, operations.doOperations, operations.undoOperations);
-                        updatePreview({
-                            type: "block",
-                            isDetached: false,
-                            block: {content: title, id},
-                        });
-                    },
+                    onCreated: bindCreatedDoc,
                 });
                 return;
             }
@@ -894,21 +926,12 @@ ${genHintItemHTML(item)}
                 const fileNames = value.substring(prefix.length, value.length - 4).split(`"${Constants.ZWSP}'`);
                 const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
                 const newID = Lute.NewNodeID();
-                const bindNewDoc = () => {
-                    const operations = getAVBindingOperations(avID, previousID, newID, nodeElement.dataset.nodeId,
-                        previousValue, {protyleID: protyle.id});
-                    transaction(protyle, operations.doOperations, operations.undoOperations);
-                };
+                const bindNewDoc = () => bindCreatedDoc(newID, realFileName);
                 if (isNewSubDoc) {
                     newSubDocByRefHint(protyle, realFileName, bindNewDoc, newID);
                 } else {
                     newFileByRefHint(protyle, realFileName, bindNewDoc, newID);
                 }
-                updatePreview({
-                    type: "block",
-                    isDetached: false,
-                    block: {content: realFileName, id: newID}
-                });
             } else {
                 const sourceId = tempElement.getAttribute("data-id");
                 const operations = getAVBindingOperations(avID, previousID, sourceId, nodeElement.dataset.nodeId,
@@ -931,12 +954,20 @@ ${genHintItemHTML(item)}
             id = nodeElement.getAttribute("data-node-id");
         }
         const html = nodeElement.outerHTML;
-        const undoContext = shouldCaptureHintUndoFocus(this.splitChar, Constants.BLOCK_HINT_KEYS, protyle.lite, value) ?
+        const undoContext = shouldCaptureHintUndoFocus(this.splitChar, Constants.BLOCK_HINT_KEYS, value) ?
             getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
         // 自顶向下法新建文档后光标定位问题 https://github.com/siyuan-note/siyuan/issues/299
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
             focusByRange(range);
+        }
+        if (["[[", "【【"].includes(this.splitChar) && /^daily-note:\d{4}-\d{2}-\d{2}:[a-z0-9-]*$/.test(value)) {
+            const [, date, notebookID] = value.split(":");
+            const target = captureDailyNoteSelection(protyle, range);
+            createDailyNoteReference(protyle, date, notebookID, (id, title) => {
+                insertDailyNoteReference(protyle, target, id, title, refIsS, undoContext);
+            });
+            return;
         }
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newSubDoc ") &&
             value.endsWith(`${Lute.Caret}'))`)) {
@@ -1022,6 +1053,9 @@ ${genHintItemHTML(item)}
             blockRender(protyle, protyle.wysiwyg.element);
             return;
         } else if (this.splitChar === "/" || this.splitChar === "、") {
+            if (slashEntryKey && value !== Constants.ZWSP + 3) {
+                recordSlashExecution(slashEntryKey);
+            }
             // 精简模式的自定义候选按文本插入，内置候选执行命令；块引用保留本地事务和后续提示。
             if (protyle.lite && (Constants.BLOCK_HINT_KEYS.includes(value) ||
                 !isBuiltinSlashHint(protyle.options.hint.extend.find((item) => item.key === "/" && item.hint)?.hint,
@@ -1058,13 +1092,13 @@ ${genHintItemHTML(item)}
                 range.deleteContents();
                 this.fixImageCursor(range);
                 protyle.toolbar.showTpl(protyle, nodeElement, range);
-                updateTransaction(protyle, nodeElement, html);
+                updateTransaction(protyle, nodeElement, html, undoContext);
                 return;
             } else if (value === Constants.ZWSP + 1) {
                 range.deleteContents();
                 this.fixImageCursor(range);
                 protyle.toolbar.showWidget(protyle, nodeElement, range);
-                updateTransaction(protyle, nodeElement, html);
+                updateTransaction(protyle, nodeElement, html, undoContext);
                 return;
             } else if (value === Constants.ZWSP + 2) {
                 range.deleteContents();
@@ -1072,7 +1106,7 @@ ${genHintItemHTML(item)}
                 protyle.toolbar.range = range;
                 const rangePosition = getSelectionPosition(nodeElement, range);
                 assetMenu(protyle, {x: rangePosition.left, y: rangePosition.top + 26, w: 0, h: 26});
-                updateTransaction(protyle, nodeElement, html);
+                updateTransaction(protyle, nodeElement, html, undoContext);
                 return;
             } else if (value === Constants.ZWSP + 3) {
                 range.deleteContents();
@@ -1128,7 +1162,7 @@ ${genHintItemHTML(item)}
                 range.deleteContents();
                 this.fixImageCursor(range);
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");
-                updateTransaction(protyle, nodeElement, html);
+                updateTransaction(protyle, nodeElement, html, undoContext);
                 return;
             } else if (value.startsWith("plugin") && areProtylePluginExtensionsEnabled(protyle)) {
                 protyle.app.plugins.find((plugin) => {
@@ -1163,7 +1197,7 @@ ${genHintItemHTML(item)}
                     nodeElement = nodeElement.nextElementSibling as HTMLElement;
                     nodeElement.previousElementSibling.remove();
                     focusByWbr(nodeElement, range);
-                    updateTransaction(protyle, nodeElement, html);
+                    updateTransaction(protyle, nodeElement, html, undoContext);
                     let imgElement: HTMLElement = range.startContainer.childNodes[range.startOffset - 1] as HTMLElement || range.startContainer as HTMLElement;
                     if (imgElement && imgElement.nodeType !== 3 && imgElement.classList.contains("img")) {
                         // 已经找到图片
@@ -1218,7 +1252,7 @@ ${genHintItemHTML(item)}
                                 item.style.minWidth = "60px";
                             });
                         }
-                        updateTransaction(protyle, nodeElement, html);
+                        updateTransaction(protyle, nodeElement, html, undoContext);
                     } else {
                         // 保留空段落：原段落清空内容，新列表用 insert 操作
                         editableElement.textContent = "";
@@ -1234,7 +1268,8 @@ ${genHintItemHTML(item)}
                         }], [{
                             action: "update",
                             id: id,
-                            data: html
+                            data: html,
+                            context: undoContext,
                         }, {
                             action: "delete",
                             id: nodeElement.getAttribute("data-node-id")
@@ -1274,7 +1309,8 @@ ${genHintItemHTML(item)}
                         }], [{
                             action: "update",
                             id: id,
-                            data: html
+                            data: html,
+                            context: undoContext,
                         }, {
                             action: "delete",
                             id: newListId
@@ -1313,6 +1349,7 @@ ${genHintItemHTML(item)}
                         action: "delete"
                     }, {
                         data: html,
+                        context: undoContext,
                         id,
                         action: "update"
                     }];
@@ -1328,6 +1365,7 @@ ${genHintItemHTML(item)}
                 } else if (value.startsWith("```")) {
                     highlightRender(nodeElement);
                 } else if (value.startsWith("<iframe") || value.startsWith("<video") || value.startsWith("<audio")) {
+                    renderIFrameResize(nodeElement);
                     protyle.gutter.renderMenu(protyle, nodeElement);
                     const itemElement = window.siyuan.menus.menu.element.querySelector('[data-id="assetVideo"], [data-id="assetAudio"], [data-id="assetIFrame"]');
                     if (isMobile()) {
@@ -1410,7 +1448,8 @@ ${genHintItemHTML(item)}
                 if (mark === Constants.ZWSP + 3) {
                     (this.element.querySelector(".b3-list-item--focus input") as HTMLElement).click();
                 } else {
-                    this.fill(mark, protyle, true, isOnlyMeta(event));
+                    this.fill(mark, protyle, true, isOnlyMeta(event),
+                        (this.element.querySelector(".b3-list-item--focus") as HTMLElement).dataset.slashEntryKey);
                 }
             }
             event.preventDefault();

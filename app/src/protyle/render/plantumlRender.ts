@@ -1,4 +1,5 @@
 import {addScript} from "../util/addScript";
+import {isFoldedRenderContent} from "./foldedContent";
 import {Constants} from "../../constants";
 import {genIconHTML} from "./util";
 import {hasClosestByClassName} from "../util/hasClosest";
@@ -10,6 +11,7 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
     } else {
         plantumlElements = element.querySelectorAll('[data-subtype="plantuml"]:not([data-render="true"])');
     }
+    plantumlElements = Array.from(plantumlElements).filter(item => !isFoldedRenderContent(item));
     if (plantumlElements.length === 0) {
         return;
     }

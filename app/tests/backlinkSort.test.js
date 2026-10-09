@@ -58,8 +58,9 @@ test("anchor sorting is independent, persisted, and refreshes only backlink cont
     assert.equal(state.editor.backlinkBlockSort, 1);
     assert.equal(state.editor.backlinkSort, 3);
     assert.equal(state.editor.backmentionSort, 2);
-    assert.equal(state.requests[0].path, "/api/setting/setEditor");
-    assert.equal(state.requests[0].data.backlinkBlockSort, 1);
+    assert.equal(state.requests[0].path, "/api/setting/patch");
+    assert.deepEqual(JSON.parse(JSON.stringify(state.requests[0].data)),
+        {editor: {backlinkBlockSort: 1, backlinkGlobalSort: 0}});
     assert.equal(state.panel.contextRequestVersions[0], 1);
     assert.equal(state.panel.contextRequestVersions[1], 0);
     assert.equal(state.folded.contextDirty, true);
@@ -91,7 +92,8 @@ test("global sorting selects a flat mode and document sorting restores grouping"
     const header = state.menuItems.findIndex(item => item.label === "backlinkGlobalSort");
     state.menuItems[header + 1].click();
     assert.equal(state.editor.backlinkGlobalSort, 1);
-    assert.equal(state.requests[0].data.backlinkGlobalSort, 1);
+    assert.equal(state.requests[0].path, "/api/setting/patch");
+    assert.deepEqual(JSON.parse(JSON.stringify(state.requests[0].data)), {editor: {backlinkGlobalSort: 1}});
     state.panel.showSortMenu("sort", "3");
     assert.equal(state.menuItems.filter(item => item.checked).length, 1);
     assert.equal(state.menuItems[header + 1].checked, true);

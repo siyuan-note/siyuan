@@ -30,6 +30,8 @@ export type AIAgentToolCallProviderDataInput = { "google"?: AIAgentGoogleToolCal
 
 export type AIBrowserCapabilityResultRequestInput = { "callID"?: string | null; "isError"?: boolean | null; "result"?: string | null; "structuredContent"?: JSONValue | null; "structuredContentSet"?: boolean | null; };
 
+export type AIBuiltinSkillInfo = { "description": string; "digest": string; "enabled": boolean; "id": string; "name": string; "source": string; "version": string; };
+
 export type AICapabilityAction = { "effects"?: AIToolEffects; "name": string; };
 
 export type AICapabilityManifest = { "actions"?: Array<AICapabilityAction>; "agentOnly"?: boolean; "available": boolean; "description": string; "effects"?: AIToolEffects; "id": string; "name": string; "ownerId"?: string; "ownerName"?: string; "runtime": string; "source": string; "title"?: string; };
@@ -37,6 +39,8 @@ export type AICapabilityManifest = { "actions"?: Array<AICapabilityAction>; "age
 export type AIConfirmRequestInput = { "always"?: boolean | null; "approved"?: boolean | null; "confirmID"?: string | null; };
 
 export type AIDecisionTestData = { "matched": boolean; "msg"?: string; };
+
+export type AIDecisionTestRequestInput = { "profile"?: SettingDecisionProfileInput | null; "provider"?: string; };
 
 export type AIEditorAction = { "action": string; "id": string; "name": string; };
 
@@ -70,7 +74,7 @@ export type AIModelRequestInput = { "model": string; "provider"?: string | null;
 
 export type AIModelTestData = { "available": Array<string> | null; "matched": boolean; "msg"?: string; };
 
-export type AIModelsData = { "contextLengths": Record<string, number> | null; "models": Array<string> | null; "msg"?: string; };
+export type AIModelsData = { "contextLengths": Record<string, number> | null; "displayNames"?: Record<string, string>; "models": Array<string> | null; "msg"?: string; };
 
 export type AINativeContent = { "blocks": Array<JSONValue> | null; "protocol": string; "version": number; };
 
@@ -194,11 +198,11 @@ export type AISkillFileRequestInput = { "action": string; "content"?: string; "p
 
 export type AISkillInfo = { "description": string; "name": string; };
 
-export type AISkillNameRequestInput = { "name"?: string | null; };
+export type AISkillNameRequestInput = { "name"?: string | null; "source"?: string | null; };
 
-export type AISkillRenameRequestInput = { "newName"?: string | null; "oldName"?: string | null; };
+export type AISkillRenameRequestInput = { "newName"?: string | null; "oldName"?: string | null; "source"?: string | null; };
 
-export type AISkillSaveRequestInput = { "content"?: string | null; "name"?: string | null; };
+export type AISkillSaveRequestInput = { "content"?: string | null; "name"?: string | null; "source"?: string | null; };
 
 export type AITitleRequestInput = { "language"?: string | null; "message"?: string | null; "model"?: string | null; };
 
@@ -232,7 +236,7 @@ export type AVAttributeViewCustomColor = { "dark": AVAttributeViewColorTheme; "h
 
 export type AVAttributeViewCustomColorInput = { "dark"?: AVAttributeViewColorThemeInput | null; "hidden"?: boolean | null; "index"?: number | null; "light"?: AVAttributeViewColorThemeInput | null; };
 
-export type AVAttributeViewData = { "cardCoverPositions"?: Record<string, Record<string, AVCardCoverPosition | null> | null>; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID"?: string; "id": string; "keyIDs": Array<string> | null; "keyValues": Array<AVKeyValues | null> | null; "name": string; "newItemTemplates"?: Array<AVNewItemTemplate | null>; "spec": number; "viewID": string; "views": Array<AVView | null> | null; };
+export type AVAttributeViewData = { "automations"?: AVAutomationConfig; "cardCoverPositions"?: Record<string, Record<string, AVCardCoverPosition | null> | null>; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID"?: string; "id": string; "keyIDs": Array<string> | null; "keyValues": Array<AVKeyValues | null> | null; "name": string; "newItemTemplates"?: Array<AVNewItemTemplate | null>; "spec": number; "viewID": string; "views": Array<AVView | null> | null; };
 
 export type AVAttributeViewFieldView = { "hidden": boolean; "icon": string; "id": string; "name": string; "type": "table" | "list" | "gallery" | "kanban" | "calendar"; };
 
@@ -243,6 +247,22 @@ export type AVAttributeViewItemPosition = { "groups": Array<AVAttributeViewGroup
 export type AVAttributeViewRenderTarget = { "groupID"?: string; "index": number; "itemID": string; "offset": number; "pageSize": number; "status": "visible" | "filtered" | "itemNotFound" | "groupHidden"; };
 
 export type AVAttributeViewSearchTarget = { "avID": string; "boundBlockID": string; "databaseBlockID": string; "groupID"?: string; "isDetached": boolean; "itemID": string; "keywords": Array<string> | null; "matchedKeyID": string; "matchedValueID": string; "notebookID": string; "title": string; "valueID": string; "viewID"?: string; };
+
+export type AVAutomationAction = { "avID"?: string; "fields": Record<string, AVAutomationValue | null> | null; "filters"?: Array<AVViewFilter | null>; "relationKeyID"?: string; "target": "current" | "related" | "filtered"; "type": "add" | "edit"; };
+
+export type AVAutomationActionInput = { "avID"?: string; "fields": Record<string, AVAutomationValueInput | null>; "filters"?: Array<AVViewFilterInput | null>; "relationKeyID"?: string; "target": "current" | "related" | "filtered"; "type": "add" | "edit"; };
+
+export type AVAutomationConfig = { "rules": Array<AVAutomationRule | null> | null; "spec": 1; };
+
+export type AVAutomationConfigInput = { "rules": Array<AVAutomationRuleInput | null>; "spec": 1; };
+
+export type AVAutomationRule = { "actions": Array<AVAutomationAction | null> | null; "conditions"?: Array<AVViewFilter | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "trigger": "added" | "changed"; };
+
+export type AVAutomationRuleInput = { "actions": Array<AVAutomationActionInput | null>; "conditions"?: Array<AVViewFilterInput | null>; "enabled": boolean; "id": string; "keyID"?: string; "name": string; "trigger": "added" | "changed"; };
+
+export type AVAutomationValue = { "keyID"?: string; "mode": "static" | "source" | "currentTime" | "triggerItem"; "value"?: AVValue; };
+
+export type AVAutomationValueInput = { "keyID"?: string; "mode": "static" | "source" | "currentTime" | "triggerItem"; "value"?: AVValueInput | null; };
 
 export type AVAvSearchResult = { "avID": string; "avName": string; "blockID": string; "children"?: Array<AVAvSearchResult | null>; "hPath": string; "matched"?: boolean; "viewID": string; "viewLayout": "" | "table" | "list" | "gallery" | "kanban" | "calendar"; "viewName": string; };
 
@@ -302,7 +322,7 @@ export type AVGallery = { "cardAspectRatio": number; "cardAspectRatioValue": num
 
 export type AVGalleryCard = { "conditionalColors"?: AVItemConditionalColors; "coverContent": string; "coverPosition"?: AVCardCoverPosition; "coverURL": string; "id": string; "values": Array<AVGalleryFieldValue | null> | null; };
 
-export type AVGalleryField = { "calc": AVFieldCalc | null; "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"; "desc": string; "fullRow": boolean; "hidden": boolean; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; "wrap": boolean; } | ({ "fullRow": boolean; } & { "calc"?: never; "created"?: never; "date"?: never; "dateFormat"?: never; "desc"?: never; "hidden"?: never; "icon"?: never; "id"?: never; "name"?: never; "numberFormat"?: never; "options"?: never; "relation"?: never; "renderTemplate"?: never; "rollup"?: never; "template"?: never; "type"?: never; "updated"?: never; "wrap"?: never; });
+export type AVGalleryField = { "calc": AVFieldCalc | null; "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day" | "lunar"; "desc": string; "fullRow": boolean; "hidden": boolean; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; "wrap": boolean; } | ({ "fullRow": boolean; } & { "calc"?: never; "created"?: never; "date"?: never; "dateFormat"?: never; "desc"?: never; "hidden"?: never; "icon"?: never; "id"?: never; "name"?: never; "numberFormat"?: never; "options"?: never; "relation"?: never; "renderTemplate"?: never; "rollup"?: never; "template"?: never; "type"?: never; "updated"?: never; "wrap"?: never; });
 
 export type AVGalleryFieldValue = { "id": string; "value": AVValue | null; "valueType": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; } | (Record<string, never> & { "id"?: never; "value"?: never; "valueType"?: never; });
 
@@ -322,11 +342,11 @@ export type AVKanban = { "cardAspectRatio": number; "cardAspectRatioValue": numb
 
 export type AVKanbanCard = { "conditionalColors"?: AVItemConditionalColors; "coverContent": string; "coverPosition"?: AVCardCoverPosition; "coverURL": string; "id": string; "values": Array<AVKanbanFieldValue | null> | null; };
 
-export type AVKanbanField = { "calc": AVFieldCalc | null; "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"; "desc": string; "fullRow": boolean; "hidden": boolean; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; "wrap": boolean; } | ({ "fullRow": boolean; } & { "calc"?: never; "created"?: never; "date"?: never; "dateFormat"?: never; "desc"?: never; "hidden"?: never; "icon"?: never; "id"?: never; "name"?: never; "numberFormat"?: never; "options"?: never; "relation"?: never; "renderTemplate"?: never; "rollup"?: never; "template"?: never; "type"?: never; "updated"?: never; "wrap"?: never; });
+export type AVKanbanField = { "calc": AVFieldCalc | null; "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day" | "lunar"; "desc": string; "fullRow": boolean; "hidden": boolean; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; "wrap": boolean; } | ({ "fullRow": boolean; } & { "calc"?: never; "created"?: never; "date"?: never; "dateFormat"?: never; "desc"?: never; "hidden"?: never; "icon"?: never; "id"?: never; "name"?: never; "numberFormat"?: never; "options"?: never; "relation"?: never; "renderTemplate"?: never; "rollup"?: never; "template"?: never; "type"?: never; "updated"?: never; "wrap"?: never; });
 
 export type AVKanbanFieldValue = { "id": string; "value": AVValue | null; "valueType": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; } | (Record<string, never> & { "id"?: never; "value"?: never; "valueType"?: never; });
 
-export type AVKey = { "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"; "desc": string; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; };
+export type AVKey = { "attributePanelVisibility"?: "" | "always" | "hide-empty" | "hide"; "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day" | "lunar"; "desc": string; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; };
 
 export type AVKeyValues = { "key": AVKey | null; "values"?: Array<AVValue | null>; };
 
@@ -362,7 +382,13 @@ export type AVRelation = { "avID": string; "backKeyID": string; "candidateFilter
 
 export type AVRelationCandidateSortInput = { "column": string; "order": string; };
 
-export type AVRelationCandidatesData = { "blockIDs": Array<string> | null; "columns": Array<AVTableColumn | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "name": string; "notebookID": string; "rows": Array<AVTableRow | null> | null; "selectedRows": Array<AVTableRow | null> | null; "total": number; };
+export type AVRelationCandidatesData = { "blockIDs": Array<string> | null; "columns": Array<AVTableColumn | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "name": string; "newItemPreview"?: AVRelationItemPreview; "notebookID": string; "rows": Array<AVTableRow | null> | null; "selectedRows": Array<AVTableRow | null> | null; "total": number; };
+
+export type AVRelationItemCellInput = { "itemID": string; "relatedItemIDs": Array<string>; };
+
+export type AVRelationItemPreview = { "createdAt": number; "error"?: string; "hasPrimaryKeyTemplate"?: boolean; "inputPrimaryKey": string; "primaryKey": string; "templateID": string; };
+
+export type AVRelationItemPreviewInput = { "createdAt": number; "error"?: string | null; "hasPrimaryKeyTemplate"?: boolean | null; "inputPrimaryKey"?: string | null; "primaryKey": string; "templateID": string; };
 
 export type AVRelativeDate = { "count": number; "direction": number; "unit": number; };
 
@@ -400,7 +426,7 @@ export type AVTable = { "calendar"?: AVCalendarSettings; "calendarRange"?: AVCal
 
 export type AVTableCell = { "bgColor": string; "color": string; "id": string; "value": AVValue | null; "valueType": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; } | ({ "bgColor": string; "color": string; } & { "id"?: never; "value"?: never; "valueType"?: never; });
 
-export type AVTableColumn = { "align": "" | "left" | "center" | "right"; "calc": AVFieldCalc | null; "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"; "desc": string; "hidden": boolean; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "pin": boolean; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; "width": string; "wrap": boolean; } | ({ "align": "" | "left" | "center" | "right"; "pin": boolean; "width": string; } & { "calc"?: never; "created"?: never; "date"?: never; "dateFormat"?: never; "desc"?: never; "hidden"?: never; "icon"?: never; "id"?: never; "name"?: never; "numberFormat"?: never; "options"?: never; "relation"?: never; "renderTemplate"?: never; "rollup"?: never; "template"?: never; "type"?: never; "updated"?: never; "wrap"?: never; });
+export type AVTableColumn = { "align": "" | "left" | "center" | "right"; "calc": AVFieldCalc | null; "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day" | "lunar"; "desc": string; "hidden": boolean; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "pin": boolean; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; "width": string; "wrap": boolean; } | ({ "align": "" | "left" | "center" | "right"; "pin": boolean; "width": string; } & { "calc"?: never; "created"?: never; "date"?: never; "dateFormat"?: never; "desc"?: never; "hidden"?: never; "icon"?: never; "id"?: never; "name"?: never; "numberFormat"?: never; "options"?: never; "relation"?: never; "renderTemplate"?: never; "rollup"?: never; "template"?: never; "type"?: never; "updated"?: never; "wrap"?: never; });
 
 export type AVTableRow = { "cells": Array<AVTableCell | null> | null; "conditionalColors"?: AVItemConditionalColors; "id": string; };
 
@@ -676,7 +702,7 @@ export type BazaarLocalInstallResult = (BazaarLocalInstallData & { "reason"?: ne
 
 export type BazaarNotifications = { "browserCompatibility": boolean; "docTreeMaxList": boolean; "formatPainterTip"?: boolean; "selectAllIncompleteTip"?: boolean; "selectAllTip"?: boolean; "tagMaxList": boolean; "workspaceNotSSD": boolean; };
 
-export type BazaarPackage = { "alternatives"?: Array<string>; "author": string; "backends": Array<string> | null; "bazaarIncompatible"?: boolean; "bootAppearances"?: Array<string>; "current": boolean; "deprecated"?: boolean; "deprecatedReason"?: Record<string, string>; "description": Record<string, string> | null; "disabledInPublish": boolean; "disallowInstall": boolean; "disallowUpdate": boolean; "displayName": Record<string, string> | null; "downloads": number; "enabled"?: boolean; "frontends": Array<string> | null; "funding": BazaarFunding | null; "hInstallDate": string; "hInstallSize": string; "hSize": string; "hUpdated": string; "hasStorageData"?: boolean; "icon"?: string; "iconURL": string; "installSize": number; "installTime": number; "installed": boolean; "installedIncompatible"?: boolean; "invalidReason"?: "missing-manifest" | "invalid-manifest" | "name-mismatch"; "kernels": Array<string> | null; "keywords": Array<string> | null; "minAppVersion": string; "modes"?: Array<string> | null; "name": string; "openIssues": number; "outdated": boolean; "preferredDeprecatedReason"?: string; "preferredDesc": string; "preferredFunding": string; "preferredName": string; "preferredReadme": string; "preview"?: string; "previewURL": string; "rating"?: BazaarPackageRating; "ratingAvailable": boolean; "readme": Record<string, string> | null; "repoHash": string; "repoRef"?: string; "repoURL": string; "size": number; "stars": number; "updateRequiredMinAppVer"?: string; "updateTime": number; "updated": string; "url": string; "userDisabledInPublish"?: boolean; "version": string; };
+export type BazaarPackage = { "alternatives"?: Array<string>; "author": string; "backends": Array<string> | null; "bazaarIncompatible"?: boolean; "bootAppearances"?: Array<string>; "current": boolean; "deprecated"?: boolean; "deprecatedReason"?: Record<string, string>; "description": Record<string, string> | null; "disabledInPublish": boolean; "disallowInstall": boolean; "disallowUpdate": boolean; "displayName": Record<string, string> | null; "downloads": number; "enabled"?: boolean; "frontends": Array<string> | null; "funding": BazaarFunding | null; "hInstallDate": string; "hInstallSize": string; "hSize": string; "hUpdated": string; "hasStorageData"?: boolean; "icon"?: string; "iconURL": string; "installSize": number; "installTime": number; "installed": boolean; "installedIncompatible"?: boolean; "invalidReason"?: "missing-manifest" | "invalid-manifest" | "name-mismatch"; "kernels": Array<string> | null; "keywords": Array<string> | null; "minAppVersion": string; "modes"?: Array<string> | null; "name": string; "openIssues": number; "outdated": boolean; "preferredDeprecatedReason"?: string; "preferredDesc": string; "preferredFunding": string; "preferredName": string; "preferredReadme": string; "preview"?: string; "previewURL": string; "rating"?: BazaarPackageRating; "ratingAvailable": boolean; "readme": Record<string, string> | null; "repoHash": string; "repoRef"?: string; "repoURL": string; "settingsWindow"?: boolean; "size": number; "stars": number; "updateRequiredMinAppVer"?: string; "updateTime": number; "updated": string; "url": string; "userDisabledInPublish"?: boolean; "version": string; };
 
 export type BazaarPackageDetail = { "available": BazaarPackage | null; "installed": BazaarPackage | null; };
 
@@ -782,6 +808,20 @@ export type ChangeMasterPasswordRequestInput = { "newPassword": string; "oldPass
 
 export type ChangeSortNotebookRequestInput = { "notebooks": Array<string>; };
 
+export type ChatGPTAccount = { "connected": boolean; "email": string; "id": string; "name": string; "sharing": boolean; };
+
+export type ChatGPTAccountRequestInput = { "accountID"?: string; };
+
+export type ChatGPTLogin = { "id": string; "url": string; };
+
+export type ChatGPTLoginRequestInput = { "id": string; };
+
+export type ChatGPTLoginStatus = { "accountID": string; "error": string; "state": string; };
+
+export type ChatGPTLogoutResult = { "revoked": boolean; };
+
+export type ChatGPTTransferRequestInput = { "accountID"?: string; "data"?: string; "password": string; };
+
 export type CheckActivationCodeRequestInput = { "data": string; };
 
 export type CheckBlockRefRequestInput = { "deletedIDs"?: Array<string>; "exactIDs"?: Array<string>; "id"?: string | null; "ids"?: Array<string>; "notebook"?: string | null; "paths"?: Array<string>; "scope"?: string; };
@@ -816,6 +856,8 @@ export type CloudSyncDirsData = { "checkedSyncDir": string; "hSize": string; "sy
 
 export type CommitNotebookArchiveRequestInput = { "id": string; "saved": boolean; };
 
+export type ConfirmSettingsResetRequestInput = { "saved": boolean; "token": string; };
+
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
 export type ContinueImportSYRequestInput = { "notebook": string; "token": string; };
@@ -835,6 +877,8 @@ export type CreateAttributeViewItemDocsRequestInput = { "app"?: string | null; "
 export type CreateAttributeViewItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "calendarDate"?: number | null; "groupID"?: string | null; "previousID"?: string | null; "session"?: string | null; "templateID"?: string | null; "viewID"?: string | null; };
 
 export type CreateAttributeViewItemWithMarkdownRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "clippingHref"?: string | null; "groupID"?: string | null; "listDocTree"?: boolean | null; "markdown": string; "previousID"?: string | null; "session"?: string | null; "tags"?: string | null; "templateID": string; "title": string; "viewID"?: string | null; "withMath"?: boolean | null; };
+
+export type CreateAttributeViewRelationItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "cells": Array<AVRelationItemCellInput | null>; "keyID": string; "keyword"?: string | null; "preview": AVRelationItemPreviewInput | null; "session"?: string | null; "useInputName"?: boolean | null; };
 
 export type CreateDocHistoryRequestInput = { "id": string; };
 
@@ -869,6 +913,10 @@ export type DOMData = { "dom": string; };
 export type DOMTextRequestInput = { "dom": string; };
 
 export type DailyNoteBlockRequestInput = { "data": string; "dataType": string; "notebook": string; };
+
+export type DailyNoteInfo = { "existed": boolean; "hPath": string; "id": string; "title": string; };
+
+export type DailyNoteInfoRequestInput = { "date"?: string | null; "notebook": string; };
 
 export type DeleteBlockRequestInput = { "id": string; };
 
@@ -1012,7 +1060,7 @@ export type FileTreeCreateRequestInput = { "docCreateTemplatePath"?: string | nu
 
 export type FileTreeCreateSavePathData = { "box": string; "docCreateTemplatePath": string; "path": string; };
 
-export type FileTreeDailyNoteRequestInput = { "app"?: string | null; "notebook": string; };
+export type FileTreeDailyNoteRequestInput = { "app"?: string | null; "date"?: string | null; "notebook": string; };
 
 export type FileTreeDocFile = { "children"?: Array<FileTreeDocFile | null>; "id": string; };
 
@@ -1140,7 +1188,7 @@ export type GetAttributeViewPasteRowsRequestInput = { "avID": string; "blockID":
 
 export type GetAttributeViewPrimaryKeyValuesRequestInput = { "blockIDs"?: Array<string> | null; "id": string; "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; };
 
-export type GetAttributeViewRelationCandidatesRequestInput = { "avID"?: string | null; "id"?: string | null; "keyID"?: string | null; "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; "selectedBlockIDs"?: Array<string> | null; "sort"?: AVRelationCandidateSortInput | null; };
+export type GetAttributeViewRelationCandidatesRequestInput = { "avID"?: string | null; "blockID"?: string | null; "id"?: string | null; "includeNewItemPreview"?: boolean | null; "keyID"?: string | null; "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; "selectedBlockIDs"?: Array<string> | null; "sort"?: AVRelationCandidateSortInput | null; };
 
 export type GetAttributeViewRequestInput = { "id": string; };
 
@@ -1276,6 +1324,8 @@ export type ImportNotebookArchiveRequestInput = { "file": Blob; "key"?: Blob; "p
 
 export type ImportNotebookCryptoBackupRequestInput = { "file": Blob; "password"?: string; };
 
+export type ImportOCRModelsRequestInput = { "detector": Blob; "detectorConfig": Blob; "recognizer": Blob; "recognizerConfig": Blob; };
+
 export type ImportRepoKeyRequestInput = { "key": string; };
 
 export type ImportSYRequestInput = { "file"?: Blob; "notebook"?: string; "toPath"?: string; };
@@ -1350,7 +1400,7 @@ export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<N
 
 export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
 
-export type LoadPetalsRequestInput = { "frontend": string; };
+export type LoadPetalsRequestInput = { "frontend": string; "settingsWindow"?: boolean; };
 
 export type LoadedPlugin = { "methods": Array<PluginRPCMethod | null> | null; "name": string; "state": string; "stateCode": number; };
 
@@ -1394,49 +1444,49 @@ export type NetImageAssetsRequestInput = { "id": string; "url"?: string | null; 
 
 export type NetworkData = { "proxy": NetworkProxy | null; };
 
-export type NetworkEchoAttributeTypeAndValue = { "Type": Array<number> | null; "Value": null | string | number | boolean | Array<number> | (NetworkEchoRawValue & { "BitLength"?: never; }) | (NetworkEchoBitString & { "Class"?: never; "FullBytes"?: never; "IsCompound"?: never; "Tag"?: never; }); };
+export type NetworkEchoAttributeTypeAndValue = ({ "Type": Array<number> | null; "Value": null | string | number | boolean | Array<number> | (NetworkEchoRawValue & { "BitLength"?: never; }) | (NetworkEchoBitString & { "Class"?: never; "FullBytes"?: never; "IsCompound"?: never; "Tag"?: never; }); } & { [key: string]: JSONValue });
 
-export type NetworkEchoBitString = { "BitLength": number; "Bytes": string | null; };
+export type NetworkEchoBitString = ({ "BitLength": number; "Bytes": string | null; } & { [key: string]: JSONValue });
 
-export type NetworkEchoCertificate = { "AuthorityKeyId": string | null; "BasicConstraintsValid": boolean; "CRLDistributionPoints": Array<string> | null; "DNSNames": Array<string> | null; "EmailAddresses": Array<string> | null; "ExcludedDNSDomains": Array<string> | null; "ExcludedEmailAddresses": Array<string> | null; "ExcludedIPRanges": Array<NetworkEchoIPNet | null> | null; "ExcludedURIDomains": Array<string> | null; "ExtKeyUsage": Array<number> | null; "Extensions": Array<NetworkEchoExtension> | null; "ExtraExtensions": Array<NetworkEchoExtension> | null; "IPAddresses": Array<string> | null; "InhibitAnyPolicy": number; "InhibitAnyPolicyZero": boolean; "InhibitPolicyMapping": number; "InhibitPolicyMappingZero": boolean; "IsCA": boolean; "Issuer": NetworkEchoName; "IssuingCertificateURL": Array<string> | null; "KeyUsage": number; "MaxPathLen": number; "MaxPathLenZero": boolean; "NotAfter": string; "NotBefore": string; "OCSPServer": Array<string> | null; "PermittedDNSDomains": Array<string> | null; "PermittedDNSDomainsCritical": boolean; "PermittedEmailAddresses": Array<string> | null; "PermittedIPRanges": Array<NetworkEchoIPNet | null> | null; "PermittedURIDomains": Array<string> | null; "Policies": Array<string> | null; "PolicyIdentifiers": Array<Array<number> | null> | null; "PolicyMappings": Array<NetworkEchoPolicyMapping> | null; "PublicKey": null | string | (NetworkEchoRSAPublicKey & { "Curve"?: never; "G"?: never; "P"?: never; "Q"?: never; "X"?: never; "Y"?: never; }) | (NetworkEchoECDSAPublicKey & { "E"?: never; "G"?: never; "N"?: never; "P"?: never; "Q"?: never; }) | (NetworkEchoDSAPublicKey & { "Curve"?: never; "E"?: never; "N"?: never; "X"?: never; }); "PublicKeyAlgorithm": number; "Raw": string | null; "RawIssuer": string | null; "RawSubject": string | null; "RawSubjectPublicKeyInfo": string | null; "RawTBSCertificate": string | null; "RequireExplicitPolicy": number; "RequireExplicitPolicyZero": boolean; "SerialNumber": number | null; "Signature": string | null; "SignatureAlgorithm": number; "Subject": NetworkEchoName; "SubjectKeyId": string | null; "URIs": Array<NetworkEchoURL | null> | null; "UnhandledCriticalExtensions": Array<Array<number> | null> | null; "UnknownExtKeyUsage": Array<Array<number> | null> | null; "Version": number; };
+export type NetworkEchoCertificate = ({ "AuthorityKeyId": string | null; "BasicConstraintsValid": boolean; "CRLDistributionPoints": Array<string> | null; "DNSNames": Array<string> | null; "EmailAddresses": Array<string> | null; "ExcludedDNSDomains": Array<string> | null; "ExcludedEmailAddresses": Array<string> | null; "ExcludedIPRanges": Array<NetworkEchoIPNet | null> | null; "ExcludedURIDomains": Array<string> | null; "ExtKeyUsage": Array<number> | null; "Extensions": Array<NetworkEchoExtension> | null; "ExtraExtensions": Array<NetworkEchoExtension> | null; "IPAddresses": Array<string> | null; "InhibitAnyPolicy": number; "InhibitAnyPolicyZero": boolean; "InhibitPolicyMapping": number; "InhibitPolicyMappingZero": boolean; "IsCA": boolean; "Issuer": NetworkEchoName; "IssuingCertificateURL": Array<string> | null; "KeyUsage": number; "MaxPathLen": number; "MaxPathLenZero": boolean; "NotAfter": string; "NotBefore": string; "OCSPServer": Array<string> | null; "PermittedDNSDomains": Array<string> | null; "PermittedDNSDomainsCritical": boolean; "PermittedEmailAddresses": Array<string> | null; "PermittedIPRanges": Array<NetworkEchoIPNet | null> | null; "PermittedURIDomains": Array<string> | null; "Policies": Array<string> | null; "PolicyIdentifiers": Array<Array<number> | null> | null; "PolicyMappings": Array<NetworkEchoPolicyMapping> | null; "PublicKey": null | string | (NetworkEchoRSAPublicKey & { "Curve"?: never; "G"?: never; "P"?: never; "Q"?: never; "X"?: never; "Y"?: never; }) | (NetworkEchoECDSAPublicKey & { "E"?: never; "G"?: never; "N"?: never; "P"?: never; "Q"?: never; }) | (NetworkEchoDSAPublicKey & { "Curve"?: never; "E"?: never; "N"?: never; "X"?: never; }); "PublicKeyAlgorithm": number; "Raw": string | null; "RawIssuer": string | null; "RawSubject": string | null; "RawSubjectPublicKeyInfo": string | null; "RawTBSCertificate": string | null; "RequireExplicitPolicy": number; "RequireExplicitPolicyZero": boolean; "SerialNumber": number | null; "Signature": string | null; "SignatureAlgorithm": number; "Subject": NetworkEchoName; "SubjectKeyId": string | null; "URIs": Array<NetworkEchoURL | null> | null; "UnhandledCriticalExtensions": Array<Array<number> | null> | null; "UnknownExtKeyUsage": Array<Array<number> | null> | null; "Version": number; } & { [key: string]: JSONValue });
 
-export type NetworkEchoConnectionState = { "CipherSuite": number; "CurveID": number; "DidResume": boolean; "ECHAccepted": boolean; "HandshakeComplete": boolean; "HelloRetryRequest": boolean; "NegotiatedProtocol": string; "NegotiatedProtocolIsMutual": boolean; "OCSPResponse": string | null; "PeerCertificates": Array<NetworkEchoCertificate | null> | null; "ServerName": string; "SignedCertificateTimestamps": Array<string | null> | null; "TLSUnique": string | null; "VerifiedChains": Array<Array<NetworkEchoCertificate | null> | null> | null; "Version": number; };
+export type NetworkEchoConnectionState = ({ "CipherSuite": number; "CurveID": number; "DidResume": boolean; "ECHAccepted": boolean; "HandshakeComplete": boolean; "HelloRetryRequest": boolean; "NegotiatedProtocol": string; "NegotiatedProtocolIsMutual": boolean; "OCSPResponse": string | null; "PeerCertificates": Array<NetworkEchoCertificate | null> | null; "ServerName": string; "SignedCertificateTimestamps": Array<string | null> | null; "TLSUnique": string | null; "VerifiedChains": Array<Array<NetworkEchoCertificate | null> | null> | null; "Version": number; } & { [key: string]: JSONValue });
 
 export type NetworkEchoContext = { "ClientIP": string; "ContentType": string; "FullPath": string; "HandlerNames": Array<string> | null; "IsWebsocket": boolean; "Params": Array<NetworkEchoParam> | null; "RawData": string | null; "RemoteIP": string; };
 
-export type NetworkEchoCookie = { "Domain": string; "Expires": string; "HttpOnly": boolean; "MaxAge": number; "Name": string; "Partitioned": boolean; "Path": string; "Quoted": boolean; "Raw": string; "RawExpires": string; "SameSite": number; "Secure": boolean; "Unparsed": Array<string> | null; "Value": string; };
+export type NetworkEchoCookie = ({ "Domain": string; "Expires": string; "HttpOnly": boolean; "MaxAge": number; "Name": string; "Partitioned": boolean; "Path": string; "Quoted": boolean; "Raw": string; "RawExpires": string; "SameSite": number; "Secure": boolean; "Unparsed": Array<string> | null; "Value": string; } & { [key: string]: JSONValue });
 
-export type NetworkEchoCurveParams = { "B": number | null; "BitSize": number; "Gx": number | null; "Gy": number | null; "N": number | null; "Name": string; "P": number | null; };
+export type NetworkEchoCurveParams = ({ "B": number | null; "BitSize": number; "Gx": number | null; "Gy": number | null; "N": number | null; "Name": string; "P": number | null; } & { [key: string]: JSONValue });
 
-export type NetworkEchoDSAPublicKey = { "G": number | null; "P": number | null; "Q": number | null; "Y": number | null; };
+export type NetworkEchoDSAPublicKey = ({ "G": number | null; "P": number | null; "Q": number | null; "Y": number | null; } & { [key: string]: JSONValue });
 
 export type NetworkEchoData = { "Context": NetworkEchoContext; "Request": NetworkEchoRequest; "URL": NetworkEchoURLInfo; "User": NetworkEchoUser; };
 
-export type NetworkEchoECDSAPublicKey = { "Curve": (Record<string, never> & { "B"?: never; "BitSize"?: never; "Gx"?: never; "Gy"?: never; "N"?: never; "Name"?: never; "P"?: never; }) | NetworkEchoCurveParams | null; "X": number | null; "Y": number | null; };
+export type NetworkEchoECDSAPublicKey = ({ "Curve": (Record<string, never> & { "B"?: never; "BitSize"?: never; "Gx"?: never; "Gy"?: never; "N"?: never; "Name"?: never; "P"?: never; }) | NetworkEchoCurveParams | null; "X": number | null; "Y": number | null; } & { [key: string]: JSONValue });
 
-export type NetworkEchoExtension = { "Critical": boolean; "Id": Array<number> | null; "Value": string | null; };
+export type NetworkEchoExtension = ({ "Critical": boolean; "Id": Array<number> | null; "Value": string | null; } & { [key: string]: JSONValue });
 
 export type NetworkEchoFile = { "Content": string; "Filename": string; "Header": Record<string, Array<string> | null> | null; "Size": number; };
 
-export type NetworkEchoIPNet = { "IP": string; "Mask": string | null; };
+export type NetworkEchoIPNet = ({ "IP": string; "Mask": string | null; } & { [key: string]: JSONValue });
 
 export type NetworkEchoMultipart = { "File": Record<string, Array<NetworkEchoFile> | null> | null; "Value": Record<string, Array<string> | null> | null; };
 
-export type NetworkEchoName = { "CommonName": string; "Country": Array<string> | null; "ExtraNames": Array<NetworkEchoAttributeTypeAndValue> | null; "Locality": Array<string> | null; "Names": Array<NetworkEchoAttributeTypeAndValue> | null; "Organization": Array<string> | null; "OrganizationalUnit": Array<string> | null; "PostalCode": Array<string> | null; "Province": Array<string> | null; "SerialNumber": string; "StreetAddress": Array<string> | null; };
+export type NetworkEchoName = ({ "CommonName": string; "Country": Array<string> | null; "ExtraNames": Array<NetworkEchoAttributeTypeAndValue> | null; "Locality": Array<string> | null; "Names": Array<NetworkEchoAttributeTypeAndValue> | null; "Organization": Array<string> | null; "OrganizationalUnit": Array<string> | null; "PostalCode": Array<string> | null; "Province": Array<string> | null; "SerialNumber": string; "StreetAddress": Array<string> | null; } & { [key: string]: JSONValue });
 
 export type NetworkEchoParam = { "Key": string; "Value": string; };
 
-export type NetworkEchoParameters = { "G": number | null; "P": number | null; "Q": number | null; };
+export type NetworkEchoParameters = ({ "G": number | null; "P": number | null; "Q": number | null; } & { [key: string]: JSONValue });
 
-export type NetworkEchoPolicyMapping = { "IssuerDomainPolicy": string; "SubjectDomainPolicy": string; };
+export type NetworkEchoPolicyMapping = ({ "IssuerDomainPolicy": string; "SubjectDomainPolicy": string; } & { [key: string]: JSONValue });
 
-export type NetworkEchoRSAPublicKey = { "E": number; "N": number | null; };
+export type NetworkEchoRSAPublicKey = ({ "E": number; "N": number | null; } & { [key: string]: JSONValue });
 
-export type NetworkEchoRawValue = { "Bytes": string | null; "Class": number; "FullBytes": string | null; "IsCompound": boolean; "Tag": number; };
+export type NetworkEchoRawValue = ({ "Bytes": string | null; "Class": number; "FullBytes": string | null; "IsCompound": boolean; "Tag": number; } & { [key: string]: JSONValue });
 
 export type NetworkEchoRequest = { "Close": boolean; "ContentLength": number; "Cookies": Array<NetworkEchoCookie | null> | null; "Form": Record<string, Array<string> | null> | null; "Header": Record<string, Array<string> | null> | null; "Host": string; "Method": string; "MultipartForm": NetworkEchoMultipart | null; "PostForm": Record<string, Array<string> | null> | null; "Proto": string; "ProtoMajor": number; "ProtoMinor": number; "Referer": string; "RemoteAddr": string; "TLS": NetworkEchoConnectionState | null; "Trailer": Record<string, Array<string> | null> | null; "TransferEncoding": Array<string> | null; "URL": NetworkEchoURL | null; "UserAgent": string; };
 
-export type NetworkEchoURL = { "ForceQuery": boolean; "Fragment": string; "Host": string; "OmitHost": boolean; "Opaque": string; "Path": string; "RawFragment": string; "RawPath": string; "RawQuery": string; "Scheme": string; "User": NetworkEchoUserinfo | null; };
+export type NetworkEchoURL = ({ "ForceQuery": boolean; "Fragment": string; "Host": string; "OmitHost": boolean; "Opaque": string; "Path": string; "RawFragment": string; "RawPath": string; "RawQuery": string; "Scheme": string; "User": NetworkEchoUserinfo | null; } & { [key: string]: JSONValue });
 
 export type NetworkEchoURLInfo = { "EscapedFragment": string; "EscapedPath": string; "Hostname": string; "IsAbs": boolean; "Port": string; "Query": Record<string, Array<string> | null> | null; "Redacted": string; "RequestURI": string; "String": string; };
 
@@ -1492,6 +1542,18 @@ export type NotificationData = { "id": string; };
 
 export type NotificationRequestInput = { "msg": string; "timeout"?: number | null; };
 
+export type OCRAIModel = { "id": string; "name": string; "provider": string; };
+
+export type OCRConfigData = { "aiModels": Array<OCRAIModel> | null; "config": SettingOCR; "models": Array<OCRModel> | null; "providers": Array<OCRProviderState> | null; };
+
+export type OCRModel = { "builtIn": boolean; "id": string; "name": string; };
+
+export type OCRProviderState = { "available": boolean; "id": string; };
+
+export type OCRThresholds = { "box": number | null; "detection": number | null; "recognition": number | null; };
+
+export type OCRThresholdsInput = { "box": number | null; "detection": number | null; "recognition": number | null; };
+
 export type ObsidianAnalysisRequestInput = { "localPath": string; };
 
 export type ObsidianImportRequestInput = { "notebookName": string; "taskID": string; };
@@ -1520,11 +1582,13 @@ export type PandocData = { "path": string; };
 
 export type PandocRequestInput = { "args": Array<string>; "dir"?: string | null; };
 
+export type PatchSettingRequestInput = { "ai"?: SettingAIInput | null; "appearance"?: SettingAppearanceInput | null; "editor"?: SettingEditorInput | null; "export"?: SettingExportInput | null; "fileTree"?: SettingFileTreeInput | null; "flashcard"?: SettingFlashcardInput | null; "keymap"?: { [key: string]: JSONValue }; "search"?: SettingSearchInput | null; "secrets"?: SettingSecretsInput | null; "variables"?: SettingVariablesInput | null; };
+
 export type PerformSyncRequestInput = { "mobileSwitch"?: boolean | null; "upload"?: boolean; };
 
 export type PerformTransactionsRequestInput = { "app"?: string; "reqId": number; "session"?: string; "transactions": Array<TransactionInput | null>; };
 
-export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "userDisabledInPublish": boolean; "version": string; };
+export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "settingsWindow"?: boolean; "userDisabledInPublish": boolean; "version": string; };
 
 export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
 
@@ -1678,6 +1742,8 @@ export type ResetLocalGraphData = { "conf": LocalGraphConf; };
 
 export type ResetRiffCardsRequestInput = { "blockIDs"?: Array<string> | null; "deckID": string; "id": string; "type": string; };
 
+export type ResetSettingsRequestInput = { "exit"?: boolean; };
+
 export type ReviewRiffCardRequestInput = { "cardID": string; "deckID": string; "durationMS"?: number | null; "rating": number; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
 
 export type RichClipboardAssetInput = { "box"?: string; "index": number; "path": string; };
@@ -1732,7 +1798,7 @@ export type SearchAssetContentRequestInput = { "method"?: number | null; "orderB
 
 export type SearchAssetMatchInput = { "field"?: "name" | "path"; "mode": "prefix" | "suffix" | "regex"; "value": string; };
 
-export type SearchAssetRequestInput = { "exts"?: Array<string> | null; "k": string; "match"?: SearchAssetMatchInput | null; "page"?: number | null; "pageSize"?: number | null; };
+export type SearchAssetRequestInput = { "exts"?: Array<string> | null; "includeMetadata"?: boolean; "k": string; "match"?: SearchAssetMatchInput | null; "page"?: number | null; "pageSize"?: number | null; };
 
 export type SearchAttributeViewRelationKeyRequestInput = { "avID": string; "keyword": string; };
 
@@ -1822,13 +1888,13 @@ export type SetCriterionRequestInput = { "criterion": CriterionInput | null; };
 
 export type SetDatabaseBlockViewRequestInput = { "avID": string; "id": string; "viewID": string; };
 
-export type SetEditorRequestInput = { "allowHTMLBLockScript"?: boolean | null; "allowSVGScript"?: boolean | null; "assetOpen"?: SettingAssetOpenInput | null; "autoDirection"?: boolean | null; "backlinkBlockSort"?: number | null; "backlinkContainChildren"?: boolean | null; "backlinkExpandCount"?: number | null; "backlinkGlobalSort"?: number | null; "backlinkHideReference"?: boolean | null; "backlinkMentionExclude"?: string | null; "backlinkShowBottom"?: boolean | null; "backlinkSort"?: number | null; "backmentionExpandCount"?: number | null; "backmentionSort"?: number | null; "blockRefDynamicAnchorTextMaxLen"?: number | null; "checkBlockRef"?: boolean | null; "codeFontFamilies"?: Array<SettingEditorFontInput | null> | null; "codeLigatures"?: boolean | null; "codeLineWrap"?: boolean | null; "codeSyntaxHighlightLineNum"?: boolean | null; "codeTabSpaces"?: number | null; "cursorSurroundingLines"?: number | null; "databaseAttrClickMode"?: number | null; "databaseAttrHideEmpty"?: boolean | null; "databaseAttrShow"?: boolean | null; "databaseAttrUseTabs"?: boolean | null; "databaseAttrViewMode"?: number | null; "displayBookmarkIcon"?: boolean | null; "displayNetImgMark"?: boolean | null; "dragHTMLFileToIframe"?: boolean | null; "dynamicLoadBlocks"?: number | null; "embedBlockBreadcrumb"?: boolean | null; "emoji"?: Array<string> | null; "floatWindowDelay"?: number | null; "floatWindowMode"?: number | null; "fontFamilies"?: Array<SettingEditorFontInput | null> | null; "fontFamily"?: string | null; "fontFamilyDisplay"?: string | null; "fontSize"?: number | null; "fontSizeScrollZoom"?: boolean | null; "fontWeight"?: number | null; "fullWidth"?: boolean | null; "generateHistoryInterval"?: number | null; "hashTagSearch"?: boolean | null; "headingEmbedMode"?: number | null; "headingNumber"?: boolean | null; "headingNumberFormat"?: string | null; "historyRetentionDays"?: number | null; "justify"?: boolean | null; "katexMacros"?: string | null; "keepLoadedContent"?: boolean | null; "listItemDotNumberClickFocus"?: boolean | null; "listLogicalOutdent"?: boolean | null; "markdown"?: SettingMarkdownInput | null; "onlySearchForDoc"?: boolean | null; "pasteURLAutoConvert"?: boolean | null; "plantUMLServePath"?: string | null; "readOnly"?: boolean | null; "rtl"?: boolean | null; "spellcheck"?: boolean | null; "spellcheckLanguages"?: Array<string> | null; "virtualBlockRef"?: boolean | null; "virtualBlockRefExclude"?: string | null; "virtualBlockRefInclude"?: string | null; };
+export type SetEditorRequestInput = { "allowHTMLBLockScript"?: boolean | null; "allowSVGScript"?: boolean | null; "assetOpen"?: SettingAssetOpenInput | null; "autoDirection"?: boolean | null; "backlinkBlockSort"?: number | null; "backlinkContainChildren"?: boolean | null; "backlinkExpandCount"?: number | null; "backlinkGlobalSort"?: number | null; "backlinkHideReference"?: boolean | null; "backlinkMentionExclude"?: string | null; "backlinkShowBottom"?: boolean | null; "backlinkSort"?: number | null; "backmentionExpandCount"?: number | null; "backmentionSort"?: number | null; "blockRefDynamicAnchorTextMaxLen"?: number | null; "checkBlockRef"?: boolean | null; "codeFontFamilies"?: Array<SettingEditorFontInput | null> | null; "codeLigatures"?: boolean | null; "codeLineWrap"?: boolean | null; "codeSyntaxHighlightLineNum"?: boolean | null; "codeTabSpaces"?: number | null; "cursorSurroundingLines"?: number | null; "databaseAttrClickMode"?: number | null; "databaseAttrHideEmpty"?: boolean | null; "databaseAttrShow"?: boolean | null; "databaseAttrUseTabs"?: boolean | null; "databaseAttrViewMode"?: number | null; "displayBookmarkIcon"?: boolean | null; "displayImgAlt"?: boolean | null; "displayImgName"?: boolean | null; "displayNetImgMark"?: boolean | null; "dragHTMLFileToIframe"?: boolean | null; "dynamicLoadBlocks"?: number | null; "embedBlockBreadcrumb"?: boolean | null; "emoji"?: Array<string> | null; "floatWindowDelay"?: number | null; "floatWindowMode"?: number | null; "fontFamilies"?: Array<SettingEditorFontInput | null> | null; "fontFamily"?: string | null; "fontFamilyDisplay"?: string | null; "fontSize"?: number | null; "fontSizeScrollZoom"?: boolean | null; "fontWeight"?: number | null; "fullWidth"?: boolean | null; "generateHistoryInterval"?: number | null; "hashTagSearch"?: boolean | null; "headingEmbedMode"?: number | null; "headingNumber"?: boolean | null; "headingNumberFormat"?: string | null; "historyRetentionDays"?: number | null; "justify"?: boolean | null; "katexMacros"?: string | null; "keepLoadedContent"?: boolean | null; "listItemDotNumberClickFocus"?: boolean | null; "listLogicalOutdent"?: boolean | null; "markdown"?: SettingMarkdownInput | null; "onlySearchForDoc"?: boolean | null; "pasteURLAutoConvert"?: boolean | null; "plantUMLServePath"?: string | null; "readOnly"?: boolean | null; "rtl"?: boolean | null; "spellcheck"?: boolean | null; "spellcheckLanguages"?: Array<string> | null; "virtualBlockRef"?: boolean | null; "virtualBlockRefExclude"?: string | null; "virtualBlockRefInclude"?: string | null; };
 
 export type SetEntryVisibilityRequestInput = { "active"?: string | null; "profiles"?: Array<SettingEntryVisibilityProfileInput | null> | null; "version"?: number | null; };
 
 export type SetExportRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "docxTemplate"?: string | null; "fileAnnotationRefMode"?: number | null; "imageWatermarkDesc"?: string | null; "imageWatermarkStr"?: string | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "pandocBin"?: string | null; "pandocParams"?: string | null; "paragraphBeginningSpace"?: boolean | null; "pdfFooter"?: string | null; "pdfWatermarkDesc"?: string | null; "pdfWatermarkStr"?: string | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
 
-export type SetFiletreeRequestInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickExpand"?: boolean | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocClickExpand"?: boolean | null; "recentDocsMaxListCount"?: number | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
+export type SetFiletreeRequestInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
 
 export type SetFlashcardEditLaterRequestInput = { "cardID": string; "changedAt": number; "enabled": boolean; "expectedRevisionID"?: string; "note"?: string; "operationID": string; };
 
@@ -1862,7 +1928,7 @@ export type SetSecretsRequestInput = { "items"?: Array<SettingSecretInput | null
 
 export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
 
-export type SetSnippetRequestInput = { "snippets": Array<SnippetInput>; };
+export type SetSnippetRequestInput = { "revision"?: string | null; "snippets": Array<SnippetInput>; };
 
 export type SetSyncLocalRequestInput = { "local": SyncLocalInput; };
 
@@ -1874,19 +1940,23 @@ export type SetVariablesRequestInput = { "items"?: Array<SettingVariableInput | 
 
 export type SettingAI = { "agent": SettingAgent | null; "decision": SettingDecision | null; "editing": SettingEditing | null; "embedding": SettingEmbedding | null; "imageGeneration": SettingImageGeneration | null; "mcp": SettingMCP | null; "providers": Array<SettingProvider | null> | null; "rerank": SettingRerank | null; };
 
+export type SettingAIInput = { "agent"?: SettingAgentInput | null; "decision"?: SettingDecisionInput | null; "editing"?: SettingEditingInput | null; "embedding"?: SettingEmbeddingInput | null; "imageGeneration"?: SettingImageGenerationInput | null; "mcp"?: SettingMCPInput | null; "providers"?: Array<SettingProviderInput | null> | null; "rerank"?: SettingRerankInput | null; };
+
 export type SettingAgent = { "approvalPolicy": SettingApprovalPolicy | null; "capabilityPolicy": SettingCapabilityPolicy | null; "confirmTimeout": number; "maxCompletionTokens": number; "maxRetries": number; "maxToolCallRounds": number; "modelId": string; "sessionTimeout": number; "skills": SettingAgentSkills | null; "streamIdleTimeout": number; "temperature": number; };
 
 export type SettingAgentInput = { "approvalPolicy"?: SettingApprovalPolicyInput | null; "capabilityPolicy"?: SettingCapabilityPolicyInput | null; "confirmTimeout"?: number | null; "maxCompletionTokens"?: number | null; "maxRetries"?: number | null; "maxToolCallRounds"?: number | null; "modelId"?: string | null; "sessionTimeout"?: number | null; "skills"?: SettingAgentSkillsInput | null; "streamIdleTimeout"?: number | null; "temperature"?: number | null; };
 
-export type SettingAgentSkills = { "userEnabled": Array<string> | null; };
+export type SettingAgentSkills = { "builtinDisabled": Array<string> | null; "userEnabled": Array<string> | null; };
 
-export type SettingAgentSkillsInput = { "userEnabled"?: Array<string> | null; };
+export type SettingAgentSkillsInput = { "builtinDisabled"?: Array<string> | null; "userEnabled"?: Array<string> | null; };
 
 export type SettingAppearance = { "bodyGradient": SettingBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "darkThemes": Array<SettingAppearanceTheme | null> | null; "entryVisibility": SettingEntryVisibility | null; "globalFontFamilies": Array<SettingEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<SettingAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<SettingAppearanceTheme | null> | null; "mode": number; "modeOS": boolean; "notifications": SettingNotifications | null; "statusBar": SettingStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
 
 export type SettingAppearanceIcon = { "label": string; "name": string; };
 
 export type SettingAppearanceIconInput = { "label"?: string | null; "name"?: string | null; };
+
+export type SettingAppearanceInput = { "bodyGradient"?: SettingBodyGradientInput | null; "closeButtonBehavior"?: number | null; "codeBlockThemeDark"?: string | null; "codeBlockThemeLight"?: string | null; "darkThemes"?: Array<SettingAppearanceThemeInput | null> | null; "entryVisibility"?: SettingEntryVisibilityInput | null; "globalFontFamilies"?: Array<SettingEditorFontInput | null> | null; "hideStatusBar"?: boolean | null; "hideToolbar"?: boolean | null; "icon"?: string | null; "iconVer"?: string | null; "icons"?: Array<SettingAppearanceIconInput | null> | null; "lang"?: string | null; "lightThemes"?: Array<SettingAppearanceThemeInput | null> | null; "mode"?: number | null; "modeOS"?: boolean | null; "notifications"?: SettingNotificationsInput | null; "statusBar"?: SettingStatusBarInput | null; "themeDark"?: string | null; "themeJS"?: boolean | null; "themeLight"?: string | null; "themeVer"?: string | null; };
 
 export type SettingAppearanceTheme = { "frontends"?: Array<string>; "label": string; "name": string; };
 
@@ -1942,19 +2012,25 @@ export type SettingCapabilityPolicyInput = { "default"?: string | null; "overrid
 
 export type SettingCloudUserRequestInput = { "cached"?: boolean; "token"?: string | null; };
 
-export type SettingDecision = { "apiKey": string; "enabled": boolean; "endpoint": string; "name": string; "timeout": number; };
+export type SettingDecision = { "apiKey": string; "enabled": boolean; "endpoint": string; "name": string; "profiles": Record<string, SettingDecisionProfile | null> | null; "provider": string; "timeout": number; };
 
-export type SettingDecisionInput = { "apiKey"?: string | null; "enabled"?: boolean | null; "endpoint"?: string | null; "name"?: string | null; "timeout"?: number | null; };
+export type SettingDecisionInput = { "apiKey"?: string | null; "enabled"?: boolean | null; "endpoint"?: string | null; "name"?: string | null; "profiles"?: Record<string, SettingDecisionProfileInput | null> | null; "provider"?: string | null; "timeout"?: number | null; };
+
+export type SettingDecisionProfile = { "apiKey": string; "endpoint": string; "name": string; "timeout": number; };
+
+export type SettingDecisionProfileInput = { "apiKey": string; "endpoint": string; "name": string; "timeout": number; };
 
 export type SettingEditing = { "maxCompletionTokens": number; "maxHistoryMessages": number; "modelId": string; "temperature": number; };
 
 export type SettingEditingInput = { "maxCompletionTokens"?: number | null; "maxHistoryMessages"?: number | null; "modelId"?: string | null; "temperature"?: number | null; };
 
-export type SettingEditor = { "allowHTMLBLockScript": boolean; "allowSVGScript": boolean; "assetOpen": SettingAssetOpen | null; "autoDirection": boolean; "backlinkBlockSort": number; "backlinkContainChildren": boolean; "backlinkExpandCount": number; "backlinkGlobalSort": number; "backlinkHideReference": boolean; "backlinkMentionExclude": string; "backlinkShowBottom": boolean; "backlinkSort": number | null; "backmentionExpandCount": number; "backmentionSort": number | null; "blockRefDynamicAnchorTextMaxLen": number; "checkBlockRef": boolean | null; "codeFontFamilies": Array<SettingEditorFont | null> | null; "codeLigatures": boolean; "codeLineWrap": boolean; "codeSyntaxHighlightLineNum": boolean; "codeTabSpaces": number; "cursorSurroundingLines": number; "databaseAttrClickMode": number; "databaseAttrHideEmpty": boolean; "databaseAttrShow": boolean | null; "databaseAttrUseTabs": boolean | null; "databaseAttrViewMode": number; "displayBookmarkIcon": boolean; "displayNetImgMark": boolean; "dragHTMLFileToIframe": boolean; "dynamicLoadBlocks": number; "embedBlockBreadcrumb": boolean; "emoji": Array<string> | null; "floatWindowDelay": number | null; "floatWindowMode": number; "fontFamilies": Array<SettingEditorFont | null> | null; "fontFamily": string; "fontFamilyDisplay": string; "fontSize": number; "fontSizeScrollZoom": boolean; "fontWeight": number; "fullWidth": boolean; "generateHistoryInterval": number; "hashTagSearch": boolean | null; "headingEmbedMode": number; "headingNumber": boolean; "headingNumberFormat": string; "historyRetentionDays": number; "justify": boolean; "katexMacros": string; "keepLoadedContent": boolean; "listItemDotNumberClickFocus": boolean; "listLogicalOutdent": boolean; "markdown": SettingMarkdown | null; "onlySearchForDoc": boolean; "pasteURLAutoConvert": boolean; "plantUMLServePath": string; "readOnly": boolean; "rtl": boolean; "spellcheck": boolean; "spellcheckLanguages": Array<string> | null; "virtualBlockRef": boolean; "virtualBlockRefExclude": string; "virtualBlockRefInclude": string; };
+export type SettingEditor = { "allowHTMLBLockScript": boolean; "allowSVGScript": boolean; "assetOpen": SettingAssetOpen | null; "autoDirection": boolean; "backlinkBlockSort": number; "backlinkContainChildren": boolean; "backlinkExpandCount": number; "backlinkGlobalSort": number; "backlinkHideReference": boolean; "backlinkMentionExclude": string; "backlinkShowBottom": boolean; "backlinkSort": number | null; "backmentionExpandCount": number; "backmentionSort": number | null; "blockRefDynamicAnchorTextMaxLen": number; "checkBlockRef": boolean | null; "codeFontFamilies": Array<SettingEditorFont | null> | null; "codeLigatures": boolean; "codeLineWrap": boolean; "codeSyntaxHighlightLineNum": boolean; "codeTabSpaces": number; "cursorSurroundingLines": number; "databaseAttrClickMode": number; "databaseAttrHideEmpty": boolean; "databaseAttrShow": boolean | null; "databaseAttrUseTabs": boolean | null; "databaseAttrViewMode": number; "displayBookmarkIcon": boolean; "displayImgAlt": boolean; "displayImgName": boolean; "displayNetImgMark": boolean; "dragHTMLFileToIframe": boolean; "dynamicLoadBlocks": number; "embedBlockBreadcrumb": boolean; "emoji": Array<string> | null; "floatWindowDelay": number | null; "floatWindowMode": number; "fontFamilies": Array<SettingEditorFont | null> | null; "fontFamily": string; "fontFamilyDisplay": string; "fontSize": number; "fontSizeScrollZoom": boolean; "fontWeight": number; "fullWidth": boolean; "generateHistoryInterval": number; "hashTagSearch": boolean | null; "headingEmbedMode": number; "headingNumber": boolean; "headingNumberFormat": string; "historyRetentionDays": number; "justify": boolean; "katexMacros": string; "keepLoadedContent": boolean; "listItemDotNumberClickFocus": boolean; "listLogicalOutdent": boolean; "markdown": SettingMarkdown | null; "onlySearchForDoc": boolean; "pasteURLAutoConvert": boolean; "plantUMLServePath": string; "readOnly": boolean; "rtl": boolean; "spellcheck": boolean; "spellcheckLanguages": Array<string> | null; "virtualBlockRef": boolean; "virtualBlockRefExclude": string; "virtualBlockRefInclude": string; };
 
 export type SettingEditorFont = { "displayName": string; "family": string; "weight": number; };
 
 export type SettingEditorFontInput = { "displayName"?: string | null; "family"?: string | null; "weight"?: number | null; };
+
+export type SettingEditorInput = { "allowHTMLBLockScript"?: boolean | null; "allowSVGScript"?: boolean | null; "assetOpen"?: SettingAssetOpenInput | null; "autoDirection"?: boolean | null; "backlinkBlockSort"?: number | null; "backlinkContainChildren"?: boolean | null; "backlinkExpandCount"?: number | null; "backlinkGlobalSort"?: number | null; "backlinkHideReference"?: boolean | null; "backlinkMentionExclude"?: string | null; "backlinkShowBottom"?: boolean | null; "backlinkSort"?: number | null; "backmentionExpandCount"?: number | null; "backmentionSort"?: number | null; "blockRefDynamicAnchorTextMaxLen"?: number | null; "checkBlockRef"?: boolean | null; "codeFontFamilies"?: Array<SettingEditorFontInput | null> | null; "codeLigatures"?: boolean | null; "codeLineWrap"?: boolean | null; "codeSyntaxHighlightLineNum"?: boolean | null; "codeTabSpaces"?: number | null; "cursorSurroundingLines"?: number | null; "databaseAttrClickMode"?: number | null; "databaseAttrHideEmpty"?: boolean | null; "databaseAttrShow"?: boolean | null; "databaseAttrUseTabs"?: boolean | null; "databaseAttrViewMode"?: number | null; "displayBookmarkIcon"?: boolean | null; "displayImgAlt"?: boolean | null; "displayImgName"?: boolean | null; "displayNetImgMark"?: boolean | null; "dragHTMLFileToIframe"?: boolean | null; "dynamicLoadBlocks"?: number | null; "embedBlockBreadcrumb"?: boolean | null; "emoji"?: Array<string> | null; "floatWindowDelay"?: number | null; "floatWindowMode"?: number | null; "fontFamilies"?: Array<SettingEditorFontInput | null> | null; "fontFamily"?: string | null; "fontFamilyDisplay"?: string | null; "fontSize"?: number | null; "fontSizeScrollZoom"?: boolean | null; "fontWeight"?: number | null; "fullWidth"?: boolean | null; "generateHistoryInterval"?: number | null; "hashTagSearch"?: boolean | null; "headingEmbedMode"?: number | null; "headingNumber"?: boolean | null; "headingNumberFormat"?: string | null; "historyRetentionDays"?: number | null; "justify"?: boolean | null; "katexMacros"?: string | null; "keepLoadedContent"?: boolean | null; "listItemDotNumberClickFocus"?: boolean | null; "listLogicalOutdent"?: boolean | null; "markdown"?: SettingMarkdownInput | null; "onlySearchForDoc"?: boolean | null; "pasteURLAutoConvert"?: boolean | null; "plantUMLServePath"?: string | null; "readOnly"?: boolean | null; "rtl"?: boolean | null; "spellcheck"?: boolean | null; "spellcheckLanguages"?: Array<string> | null; "virtualBlockRef"?: boolean | null; "virtualBlockRefExclude"?: string | null; "virtualBlockRefInclude"?: string | null; };
 
 export type SettingEmbedding = { "apiKey": string; "baseURL": string; "dimensions": number; "enabled": boolean; "id": string; "name": string; "timeout": number; };
 
@@ -1972,9 +2048,15 @@ export type SettingEntryVisibilityProfileInput = { "entries"?: Record<string, bo
 
 export type SettingExport = { "addTitle": boolean; "blockEmbedMode": number; "blockRefMode": number; "blockRefTextLeft": string; "blockRefTextRight": string; "docxTemplate": string; "fileAnnotationRefMode": number; "imageWatermarkDesc": string; "imageWatermarkStr": string; "includeRelatedDocs": boolean; "includeSubDocs": boolean; "inlineMemo": boolean; "markdownYFM": boolean; "pandocBin": string; "pandocParams": string; "paragraphBeginningSpace": boolean; "pdfFooter": string; "pdfWatermarkDesc": string; "pdfWatermarkStr": string; "removeAssetsID": boolean; "tagCloseMarker": string; "tagOpenMarker": string; };
 
-export type SettingFileTree = { "allowCreateDeeper": boolean; "alwaysSelectOpenedFile": boolean; "boxDocEnabled": boolean | null; "closeTabOnDoubleClick": boolean; "closeTabsOnStart": boolean; "createDocAtTop": boolean | null; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "docIconClickExpand": boolean; "largeFileWarningSize": number; "maxListCount": number; "maxOpenTabCount": number; "noSplitScreenWhenOpenTab": boolean; "openFilesUseCurrentTab": boolean; "parentDocClickExpand": boolean; "recentDocsMaxListCount": number; "refCreateSaveBox": string; "refCreateSavePath": string; "removeDocWithoutConfirm": boolean; "shorthandSaveBox": string; "shorthandSavePath": string; "sort": number; "tabStartupMode": number | null; "useSVGDefaultIcon": boolean | null; "useSingleLineSave": boolean; };
+export type SettingExportInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "docxTemplate"?: string | null; "fileAnnotationRefMode"?: number | null; "imageWatermarkDesc"?: string | null; "imageWatermarkStr"?: string | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "pandocBin"?: string | null; "pandocParams"?: string | null; "paragraphBeginningSpace"?: boolean | null; "pdfFooter"?: string | null; "pdfWatermarkDesc"?: string | null; "pdfWatermarkStr"?: string | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+
+export type SettingFileTree = { "allowCreateDeeper": boolean; "alwaysSelectOpenedFile": boolean; "boxDocEnabled": boolean | null; "closeTabOnDoubleClick": boolean; "closeTabsOnStart": boolean; "createDocAtTop": boolean | null; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "docIconClickMode": number; "largeFileWarningSize": number; "maxListCount": number; "maxOpenTabCount": number; "noSplitScreenWhenOpenTab": boolean; "openFilesUseCurrentTab": boolean; "parentDocTitleClickMode": number; "recentDocsMaxListCount": number; "refCreateSaveBox": string; "refCreateSavePath": string; "removeDocWithoutConfirm": boolean; "shorthandSaveBox": string; "shorthandSavePath": string; "sort": number; "tabStartupMode": number | null; "useSVGDefaultIcon": boolean | null; "useSingleLineSave": boolean; };
+
+export type SettingFileTreeInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
 
 export type SettingFlashcard = { "ankiConnectEnabled": boolean; "ankiConnectLocalWithoutKey": boolean; "ankiConnectNotebook": string; "blockquote": boolean; "callout": boolean; "deck": boolean; "heading": boolean; "list": boolean; "mark": boolean; "maximumInterval": number; "newCardLimit": number; "openMode": number; "requestRetention": number; "reviewCardLimit": number; "reviewMode": number; "superBlock": boolean; "weights": string; };
+
+export type SettingFlashcardInput = { "ankiConnectEnabled"?: boolean | null; "ankiConnectLocalWithoutKey"?: boolean | null; "ankiConnectNotebook"?: string | null; "blockquote"?: boolean | null; "callout"?: boolean | null; "deck"?: boolean | null; "heading"?: boolean | null; "list"?: boolean | null; "mark"?: boolean | null; "maximumInterval"?: number | null; "newCardLimit"?: number | null; "openMode"?: number | null; "requestRetention"?: number | null; "reviewCardLimit"?: number | null; "reviewMode"?: number | null; "superBlock"?: boolean | null; "weights"?: string | null; };
 
 export type SettingIconRequestInput = { "icon": string; };
 
@@ -2006,13 +2088,17 @@ export type SettingNotifications = { "browserCompatibility": boolean; "docTreeMa
 
 export type SettingNotificationsInput = { "browserCompatibility"?: boolean | null; "docTreeMaxList"?: boolean | null; "formatPainterTip"?: boolean | null; "selectAllIncompleteTip"?: boolean | null; "selectAllTip"?: boolean | null; "tagMaxList"?: boolean | null; "workspaceNotSSD"?: boolean | null; };
 
+export type SettingOCR = { "aiModelId"?: string; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string; "thresholds"?: OCRThresholds; };
+
+export type SettingOCRInput = { "aiModelId"?: string | null; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string | null; "thresholds"?: OCRThresholdsInput | null; };
+
 export type SettingPetalDisabledData = { "dataChangePlugins": Array<string> | null; "globalPetalChanged": boolean; "globalPetalDisabled": boolean; "globalPetalEnabled": boolean; "globalPetalRevision": number; "reloadPlugins": Array<string> | null; "uninstallPlugins": Array<string> | null; "unloadPlugins": Array<string> | null; };
 
 export type SettingPetalDisabledRequestInput = { "petalDisabled": boolean; };
 
-export type SettingProvider = { "apiKey": string; "baseURL": string; "displayName"?: string; "enabled": boolean; "headers"?: Record<string, string>; "id": string; "models": Array<SettingModel | null> | null; "protocol"?: string; "requestTimeout": number; };
+export type SettingProvider = { "accountID"?: string; "apiKey": string; "authType"?: string; "baseURL": string; "displayName"?: string; "enabled": boolean; "headers"?: Record<string, string>; "id": string; "models": Array<SettingModel | null> | null; "protocol"?: string; "requestTimeout": number; };
 
-export type SettingProviderInput = { "apiKey"?: string | null; "baseURL"?: string | null; "displayName"?: string | null; "enabled"?: boolean | null; "headers"?: Record<string, string> | null; "id"?: string | null; "models"?: Array<SettingModelInput | null> | null; "protocol"?: string | null; "requestTimeout"?: number | null; };
+export type SettingProviderInput = { "accountID"?: string | null; "apiKey"?: string | null; "authType"?: string | null; "baseURL"?: string | null; "displayName"?: string | null; "enabled"?: boolean | null; "headers"?: Record<string, string> | null; "id"?: string | null; "models"?: Array<SettingModelInput | null> | null; "protocol"?: string | null; "requestTimeout"?: number | null; };
 
 export type SettingPublish = { "auth": SettingBasicAuth | null; "enable": boolean; "port": number; };
 
@@ -2024,17 +2110,25 @@ export type SettingRerankInput = { "apiKey"?: string | null; "candidateCount"?: 
 
 export type SettingSearch = { "alias": boolean; "audioBlock": boolean; "backlinkMentionAlias": boolean; "backlinkMentionAnchor": boolean; "backlinkMentionDoc": boolean; "backlinkMentionKeywordsLimit": number; "backlinkMentionName": boolean; "blockquote": boolean; "callout": boolean; "caseSensitive": boolean; "codeBlock": boolean; "customBlock": boolean | null; "databaseBlock": boolean; "document": boolean; "embedBlock": boolean; "hanSensitive": boolean | null; "heading": boolean; "htmlBlock": boolean; "ial": boolean; "iframeBlock": boolean; "indexAssetPath": boolean; "limit": number; "list": boolean; "listItem": boolean; "mathBlock": boolean; "memo": boolean; "mindmap": boolean | null; "mindmapItem": boolean | null; "name": boolean; "paragraph": boolean; "superBlock": boolean; "tabItem": boolean; "table": boolean; "tabs": boolean; "videoBlock": boolean; "virtualRefAlias": boolean; "virtualRefAnchor": boolean; "virtualRefDoc": boolean; "virtualRefName": boolean; "widgetBlock": boolean; };
 
+export type SettingSearchInput = { "alias"?: boolean | null; "audioBlock"?: boolean | null; "backlinkMentionAlias"?: boolean | null; "backlinkMentionAnchor"?: boolean | null; "backlinkMentionDoc"?: boolean | null; "backlinkMentionKeywordsLimit"?: number | null; "backlinkMentionName"?: boolean | null; "blockquote"?: boolean | null; "callout"?: boolean | null; "caseSensitive"?: boolean | null; "codeBlock"?: boolean | null; "customBlock"?: boolean | null; "databaseBlock"?: boolean | null; "document"?: boolean | null; "embedBlock"?: boolean | null; "hanSensitive"?: boolean | null; "heading"?: boolean | null; "htmlBlock"?: boolean | null; "ial"?: boolean | null; "iframeBlock"?: boolean | null; "indexAssetPath"?: boolean | null; "limit"?: number | null; "list"?: boolean | null; "listItem"?: boolean | null; "mathBlock"?: boolean | null; "memo"?: boolean | null; "mindmap"?: boolean | null; "mindmapItem"?: boolean | null; "name"?: boolean | null; "paragraph"?: boolean | null; "superBlock"?: boolean | null; "tabItem"?: boolean | null; "table"?: boolean | null; "tabs"?: boolean | null; "videoBlock"?: boolean | null; "virtualRefAlias"?: boolean | null; "virtualRefAnchor"?: boolean | null; "virtualRefDoc"?: boolean | null; "virtualRefName"?: boolean | null; "widgetBlock"?: boolean | null; };
+
 export type SettingSecret = { "allowedHosts": Array<string> | null; "name": string; "value": string; };
 
 export type SettingSecretInput = { "allowedHosts"?: Array<string> | null; "name"?: string | null; "value"?: string | null; };
 
 export type SettingSecrets = { "items": Array<SettingSecret | null> | null; };
 
+export type SettingSecretsInput = { "items"?: Array<SettingSecretInput | null> | null; };
+
 export type SettingSnpt = { "enabledCSS": boolean; "enabledJS": boolean; };
 
 export type SettingStatusBar = { "msgDataSyncDisabled": boolean; "msgTaskAssetDatabaseIndexCommitDisabled": boolean; "msgTaskDatabaseIndexCommitDisabled": boolean; "msgTaskHistoryDatabaseIndexCommitDisabled": boolean; "msgTaskHistoryGenerateFileDisabled": boolean; "version": number; };
 
 export type SettingStatusBarInput = { "msgDataSyncDisabled"?: boolean | null; "msgTaskAssetDatabaseIndexCommitDisabled"?: boolean | null; "msgTaskDatabaseIndexCommitDisabled"?: boolean | null; "msgTaskHistoryDatabaseIndexCommitDisabled"?: boolean | null; "msgTaskHistoryGenerateFileDisabled"?: boolean | null; "version"?: number | null; };
+
+export type SettingTask = { "active": boolean; "id": string; "message": string; "revision": number; };
+
+export type SettingTaskState = { "revision": number; "tasks": Array<SettingTask> | null; };
 
 export type SettingThemeRequestInput = { "appearanceMode"?: string | null; "modes"?: Array<number> | null; "theme"?: string | null; };
 
@@ -2047,6 +2141,10 @@ export type SettingVariable = { "name": string; "value": string; };
 export type SettingVariableInput = { "name"?: string | null; "value"?: string | null; };
 
 export type SettingVariables = { "items": Array<SettingVariable | null> | null; };
+
+export type SettingVariablesInput = { "items"?: Array<SettingVariableInput | null> | null; };
+
+export type SettingsWindowRequestInput = { "settingsWindow": boolean; };
 
 export type Shorthand = { "hCreated": string; "oId": string; "shorthandContent": string; "shorthandDesc": string; "shorthandFrom": number; "shorthandMd": string; "shorthandTitle": string; "shorthandURL": string; };
 
@@ -2062,7 +2160,7 @@ export type Snippet = { "content": string; "disabledInPublish": boolean; "enable
 
 export type SnippetInput = { "content": string; "disabledInPublish"?: boolean | null; "enabled": boolean; "id": string; "name": string; "type": string; };
 
-export type SnippetsData = { "snippets": Array<Snippet | null>; };
+export type SnippetsData = { "revision"?: string; "snippets": Array<Snippet | null>; };
 
 export type SortAttributeViewKeyRequestInput = { "avID": string; "keyID": string; "previousKeyID": string; };
 
@@ -2130,7 +2228,7 @@ export type SystemAPITokenRequestInput = { "token": string; };
 
 export type SystemAccessAuthCodeRequestInput = { "accessAuthCode": string; };
 
-export type SystemAppConf = { "accessAuthCode": string; "ai": SettingAI | null; "api": SystemAPI | null; "appearance": SettingAppearance | null; "bazaar": SettingBazaar | null; "cloudRegion": number; "cookieKey": string; "dataIndexState": number; "editor": SettingEditor | null; "export": SettingExport | null; "fileTree": SettingFileTree | null; "flashcard": SettingFlashcard | null; "graph": SystemGraph | null; "keymap": { [key: string]: JSONValue } | null; "lang": string; "langs": Array<SystemLang | null> | null; "logLevel": string; "mcpOAuth": string; "notebookCrypto": SystemNotebookCrypto | null; "oidc": SystemOIDC | null; "onboarding": SystemOnboarding | null; "publish": SettingPublish | null; "readonly": boolean; "repo": SystemRepo | null; "search": SettingSearch | null; "secrets": SettingSecrets | null; "serverAddrs": Array<string> | null; "showChangelog": boolean; "snippet": SettingSnpt | null; "stat": SystemStat | null; "sync": SystemSync | null; "system": SystemSystem | null; "tag": SystemTag | null; "uiLayout": { [key: string]: JSONValue } | null; "userData": string; "variables": SettingVariables | null; };
+export type SystemAppConf = { "accessAuthCode": string; "ai": SettingAI | null; "api": SystemAPI | null; "appearance": SettingAppearance | null; "bazaar": SettingBazaar | null; "cloudRegion": number; "cookieKey": string; "dataIndexState": number; "editor": SettingEditor | null; "export": SettingExport | null; "fileTree": SettingFileTree | null; "flashcard": SettingFlashcard | null; "graph": SystemGraph | null; "keymap": { [key: string]: JSONValue } | null; "lang": string; "langs": Array<SystemLang | null> | null; "logLevel": string; "mcpOAuth": string; "notebookCrypto": SystemNotebookCrypto | null; "ocr": SettingOCR | null; "oidc": SystemOIDC | null; "onboarding": SystemOnboarding | null; "publish": SettingPublish | null; "readonly": boolean; "repo": SystemRepo | null; "search": SettingSearch | null; "secrets": SettingSecrets | null; "serverAddrs": Array<string> | null; "showChangelog": boolean; "snippet": SettingSnpt | null; "stat": SystemStat | null; "sync": SystemSync | null; "system": SystemSystem | null; "tag": SystemTag | null; "uiLayout": { [key: string]: JSONValue } | null; "userData": string; "variables": SettingVariables | null; };
 
 export type SystemAppearanceData = { "appearance": SettingAppearance | null; };
 
@@ -2144,7 +2242,7 @@ export type SystemChangelogRequestInput = { "force"?: boolean | null; };
 
 export type SystemCheckUpdateRequestInput = { "showMsg": boolean; };
 
-export type SystemConfData = { "conf": SystemAppConf | null; "isPublish": boolean; "start": boolean; };
+export type SystemConfData = { "conf": SystemAppConf | null; "isPublish": boolean; "settingTasks"?: SettingTaskState; "start": boolean; };
 
 export type SystemCustomEmojiRequestInput = { "file"?: Blob; "name"?: string; "url"?: string; };
 
@@ -2171,6 +2269,14 @@ export type SystemGraph = { "global": SystemGlobalGraph | null; "local": SystemL
 export type SystemImportConfRequestInput = { "file"?: Array<Blob>; };
 
 export type SystemImportFileRequestInput = { "file"?: Blob; };
+
+export type SystemKeyboardLogEntryInput = { "command"?: string; "detail"?: string; "environment"?: SystemKeyboardLogEnvironmentInput | null; "event"?: number; "keyboard"?: SystemKeyboardLogEventInput | null; "responseCode"?: number | null; "seq": number; "stage": string; "time": number; };
+
+export type SystemKeyboardLogEnvironmentInput = { "frontend": string; "globalSearch": Array<string>; "platform": string; "search": Array<string>; "userAgent": string; "version": string; };
+
+export type SystemKeyboardLogEventInput = { "alt": boolean; "cancelBubble": boolean; "code": string; "composing": boolean; "ctrl": boolean; "defaultPrevented": boolean; "key": string; "keyCode": number; "matchGlobalSearch": boolean; "matchSearch": boolean; "meta": boolean; "repeat": boolean; "shift": boolean; "target": string; "trusted": boolean; };
+
+export type SystemKeyboardLogRequestInput = { "entries": Array<SystemKeyboardLogEntryInput>; "session": string; };
 
 export type SystemLANSync = { "enabled": boolean; "maxConcurrentReqs": number; };
 
@@ -2242,7 +2348,7 @@ export type SystemStat = { "assetsSize": number; "blockCount": number; "cAssetsS
 
 export type SystemSync = { "assetDownloadMode": number; "cloudName": string; "enabled": boolean; "generateConflictDoc": boolean; "interval": number; "lan": SystemLANSync | null; "local": SystemLocal | null; "mode": number; "perception": boolean; "provider": number; "s3": SystemS3 | null; "stat": string; "synced": number; "webdav": SystemWebDAV | null; };
 
-export type SystemSystem = { "appDir": string; "autoLaunch2": number; "confDir": string; "container": string; "dataDir": string; "disabledFeatures": Array<string> | null; "downloadInstallPkg": boolean; "encryptedNotebookFollowSystemLock": boolean; "homeDir": string; "id": string; "isMicrosoftStore": boolean; "kernelVersion": string; "lockScreenMode": number; "microsoftDefenderExcluded": boolean; "name": string; "networkProxy": SystemNetworkProxy | null; "networkServe": boolean; "networkServeTLS": boolean; "os": string; "osPlatform": string; "safeMode": boolean; "updateChannel"?: string; "workspaceDir": string; };
+export type SystemSystem = { "appDir": string; "autoLaunch2": number; "confDir": string; "container": string; "dataDir": string; "disabledFeatures": Array<string> | null; "downloadInstallPkg": boolean; "encryptedNotebookFollowSystemLock": boolean; "homeDir": string; "id": string; "isMicrosoftStore": boolean; "kernelVersion": string; "lockScreenMode": number; "microsoftDefenderExcluded": boolean; "name": string; "networkProxy": SystemNetworkProxy | null; "networkServe": boolean; "networkServeTLS": boolean; "os": string; "osPlatform": string; "safeMode": boolean; "settingsWindow": boolean; "updateChannel"?: string; "workspaceDir": string; };
 
 export type SystemTag = { "sort": number; };
 
@@ -2316,11 +2422,17 @@ export type TransactionInsertedItems = { "existingItemIDs": Array<string> | null
 
 export type TransactionInsertedItemsInput = { "existingItemIDs": Array<string>; "insertedItemIDs": Array<string>; };
 
+export type TransactionListConversionInput = { "level": number; "recursively": boolean; "type": "heading" | "paragraph" | "remove"; };
+
+export type TransactionListConversionResult = { "focusID": string; "removedIDs": Array<string> | null; "rootIDs": Array<string> | null; };
+
+export type TransactionListConversionResultInput = { "focusID": string; "removedIDs": Array<string>; "rootIDs": Array<string>; };
+
 export type TransactionNewItemTemplatesInput = { "defaultTemplateID"?: string | null; "templates"?: Array<AVNewItemTemplateInput | null> | null; };
 
-export type TransactionOperation = { "action": "updateAttrs"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionAttributeChangeInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "create"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "restoreCreatedDoc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeCreatedDoc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "update"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "insert"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "delete"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": BlockDeleteDataInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "move"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "swapBlockRef"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionBlockSwapInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": Array<string> | null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "moveOutlineHeading"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "append"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "appendInsert"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "prependInsert"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "foldHeading"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "unfoldHeading"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrs"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "doUpdateUpdated"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "addFlashcards"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeFlashcards"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewName"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewNewItemTemplates"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionNewItemTemplatesInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewConditionalColors"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVConditionalColorRuleInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewFilters"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVViewFilterInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewContextFilter"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColRelationFilters"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVViewFilterInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColRollupFilters"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVViewFilterInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewSorts"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVViewSortInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewPageSize"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColWidth"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColsWidth"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Record<string, string> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColAlign"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColWrap"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColHidden"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColPin"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColIcon"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColDesc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "insertAttrViewBlock"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": TransactionInsertedItems | null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeAttrViewBlock"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "addAttrViewCol"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewCol"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeAttrViewCol"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewRow"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": AVRowOrderChangeInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewCol"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewKey"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewBinding"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewCell"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": AVValueInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewCells"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColOptions"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVSelectOptionInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeAttrViewColOption"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColOption"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionOptionChangeInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColOptionDesc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionOptionDescriptionInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCustomColors"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionCustomColorsInput | Array<AVAttributeViewCustomColorInput | null> | null | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColCalc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": AVFieldCalcInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColNumberFormat"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColDateFormat"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "replaceAttrViewBlock"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": TransactionReplacedItem | null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColTemplate"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "addAttrViewView"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeAttrViewView"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": string | null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewViewName"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewViewIcon"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewViewDesc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "duplicateAttrViewView"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "duplicateAttrViewRow"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewView"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColRelation"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColRollup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionRollupInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "hideAttrViewName"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColDateFillCreated"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColDateFillSpecificTime"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCreatedIncludeTime"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewUpdatedIncludeTime"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "duplicateAttrViewKey"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCoverFrom"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCoverFromAssetKeyID"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardCoverPosition"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionCardCoverPositionInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardSize"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardWidth"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCalendar"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": AVCalendarSettingsInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardLayout"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColFullRow"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewFitImage"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewDisplayFieldName"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewDisplayEmptyFields"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewFillColBackgroundColor"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewShowIcon"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewWrapField"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "changeAttrViewLayout"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewBlockView"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewBlockVisibleViews"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardAspectRatio"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardAspectRatioValue"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewGroup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": AVViewGroupInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "hideAttrViewGroup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "hideAttrViewAllGroups"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "foldAttrViewGroup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "foldAttrViewGroups"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Record<string, boolean> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "syncAttrViewTableColWidth"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeAttrViewGroup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewGroup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": UnknownTransactionAction; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": JSONValue; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": JSONValue; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; };
+export type TransactionOperation = { "action": "updateAttrs"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionAttributeChangeInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "create"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "restoreCreatedDoc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeCreatedDoc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "update"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "insert"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "delete"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": BlockDeleteDataInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "move"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "swapBlockRef"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionBlockSwapInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": Array<string> | null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "convertList"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionListConversionInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": TransactionListConversionResult | null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "moveOutlineHeading"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "append"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "appendInsert"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "prependInsert"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "foldHeading"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "unfoldHeading"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrs"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "doUpdateUpdated"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "addFlashcards"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeFlashcards"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewName"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewNewItemTemplates"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionNewItemTemplatesInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewAutomations"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": AVAutomationConfigInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewConditionalColors"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVConditionalColorRuleInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewFilters"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVViewFilterInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewContextFilter"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColRelationFilters"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVViewFilterInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColRollupFilters"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVViewFilterInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewSorts"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVViewSortInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewPageSize"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColWidth"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColsWidth"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Record<string, string> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColAlign"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColWrap"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColHidden"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColPin"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColIcon"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColDesc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColAttributePanelVisibility"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "insertAttrViewBlock"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": TransactionInsertedItems | null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeAttrViewBlock"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "addAttrViewCol"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewCol"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeAttrViewCol"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewRow"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": AVRowOrderChangeInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewCol"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewKey"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewBinding"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewCell"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": AVValueInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewCells"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColOptions"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Array<AVSelectOptionInput | null> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeAttrViewColOption"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColOption"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionOptionChangeInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColOptionDesc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionOptionDescriptionInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCustomColors"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionCustomColorsInput | Array<AVAttributeViewCustomColorInput | null> | null | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColCalc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": AVFieldCalcInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColNumberFormat"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColDateFormat"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "replaceAttrViewBlock"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": TransactionReplacedItem | null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColTemplate"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "addAttrViewView"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeAttrViewView"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": string | null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewViewName"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewViewIcon"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewViewDesc"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "duplicateAttrViewView"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "duplicateAttrViewRow"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewView"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": string | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColRelation"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "updateAttrViewColRollup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionRollupInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "hideAttrViewName"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColDateFillCreated"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColDateFillSpecificTime"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCreatedIncludeTime"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewUpdatedIncludeTime"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "duplicateAttrViewKey"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCoverFrom"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCoverFromAssetKeyID"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardCoverPosition"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": TransactionCardCoverPositionInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardSize"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardWidth"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCalendar"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": AVCalendarSettingsInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardLayout"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewColFullRow"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewFitImage"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewDisplayFieldName"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewDisplayEmptyFields"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewFillColBackgroundColor"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewShowIcon"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewWrapField"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "changeAttrViewLayout"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewBlockView"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewBlockVisibleViews"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardAspectRatio"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewCardAspectRatioValue"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "setAttrViewGroup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": AVViewGroupInput | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "hideAttrViewGroup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": number | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "hideAttrViewAllGroups"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "foldAttrViewGroup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": boolean | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "foldAttrViewGroups"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": Record<string, boolean> | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "syncAttrViewTableColWidth"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "removeAttrViewGroup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": "sortAttrViewGroup"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; } | { "action": UnknownTransactionAction; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdate | null>; "context": TransactionContext; "data": JSONValue; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": JSONValue; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": Array<TransactionSourceFieldsInput | null> | null; "targetGroupID": string; "type": "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID": string; "viewIDs"?: Array<string>; };
 
-export type TransactionOperationRequest = { "action": "updateAttrs"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionAttributeChangeInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "create"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "restoreCreatedDoc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeCreatedDoc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "update"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "insert"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "delete"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: BlockDeleteDataInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "move"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "swapBlockRef"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionBlockSwapInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: Array<string> | null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "moveOutlineHeading"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "append"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "appendInsert"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "prependInsert"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "foldHeading"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "unfoldHeading"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrs"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "doUpdateUpdated"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "addFlashcards"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeFlashcards"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewName"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewNewItemTemplates"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionNewItemTemplatesInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewConditionalColors"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVConditionalColorRuleInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewFilters"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVViewFilterInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewContextFilter"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColRelationFilters"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVViewFilterInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColRollupFilters"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVViewFilterInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewSorts"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVViewSortInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewPageSize"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColWidth"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColsWidth"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Record<string, string> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColAlign"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColWrap"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColHidden"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColPin"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColIcon"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColDesc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "insertAttrViewBlock"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: TransactionInsertedItemsInput | null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeAttrViewBlock"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "addAttrViewCol"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewCol"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeAttrViewCol"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewRow"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: AVRowOrderChangeInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewCol"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewKey"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewBinding"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewCell"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: AVValueInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewCells"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColOptions"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVSelectOptionInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeAttrViewColOption"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColOption"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionOptionChangeInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColOptionDesc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionOptionDescriptionInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCustomColors"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionCustomColorsInput | Array<AVAttributeViewCustomColorInput | null> | null | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColCalc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: AVFieldCalcInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColNumberFormat"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColDateFormat"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "replaceAttrViewBlock"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: TransactionReplacedItemInput | null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColTemplate"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "addAttrViewView"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeAttrViewView"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: string | null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewViewName"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewViewIcon"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewViewDesc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "duplicateAttrViewView"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "duplicateAttrViewRow"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewView"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColRelation"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColRollup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionRollupInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "hideAttrViewName"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColDateFillCreated"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColDateFillSpecificTime"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCreatedIncludeTime"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewUpdatedIncludeTime"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "duplicateAttrViewKey"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCoverFrom"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCoverFromAssetKeyID"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardCoverPosition"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionCardCoverPositionInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardSize"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardWidth"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCalendar"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: AVCalendarSettingsInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardLayout"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColFullRow"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewFitImage"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewDisplayFieldName"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewDisplayEmptyFields"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewFillColBackgroundColor"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewShowIcon"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewWrapField"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "changeAttrViewLayout"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewBlockView"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewBlockVisibleViews"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardAspectRatio"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardAspectRatioValue"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewGroup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: AVViewGroupInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "hideAttrViewGroup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "hideAttrViewAllGroups"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "foldAttrViewGroup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "foldAttrViewGroups"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Record<string, boolean> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "syncAttrViewTableColWidth"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeAttrViewGroup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewGroup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": UnknownTransactionAction; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: JSONValue; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: JSONValue; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; };
+export type TransactionOperationRequest = { "action": "updateAttrs"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionAttributeChangeInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "create"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "restoreCreatedDoc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeCreatedDoc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "update"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "insert"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "delete"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: BlockDeleteDataInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "move"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "swapBlockRef"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionBlockSwapInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: Array<string> | null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "convertList"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionListConversionInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: TransactionListConversionResultInput | null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "moveOutlineHeading"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "append"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "appendInsert"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "prependInsert"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "foldHeading"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "unfoldHeading"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrs"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null | string | Array<string>; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "doUpdateUpdated"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "addFlashcards"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeFlashcards"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewName"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewNewItemTemplates"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionNewItemTemplatesInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewAutomations"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: AVAutomationConfigInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewConditionalColors"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVConditionalColorRuleInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewFilters"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVViewFilterInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewContextFilter"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColRelationFilters"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVViewFilterInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColRollupFilters"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVViewFilterInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewSorts"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVViewSortInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewPageSize"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColWidth"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColsWidth"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Record<string, string> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColAlign"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColWrap"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColHidden"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColPin"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColIcon"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColDesc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColAttributePanelVisibility"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "insertAttrViewBlock"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: TransactionInsertedItemsInput | null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeAttrViewBlock"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "addAttrViewCol"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewCol"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeAttrViewCol"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewRow"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: AVRowOrderChangeInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewCol"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewKey"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewBinding"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewCell"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: AVValueInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewCells"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColOptions"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Array<AVSelectOptionInput | null> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeAttrViewColOption"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColOption"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionOptionChangeInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColOptionDesc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionOptionDescriptionInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCustomColors"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionCustomColorsInput | Array<AVAttributeViewCustomColorInput | null> | null | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColCalc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: AVFieldCalcInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColNumberFormat"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColDateFormat"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "replaceAttrViewBlock"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: TransactionReplacedItemInput | null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColTemplate"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "addAttrViewView"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeAttrViewView"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: string | null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewViewName"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewViewIcon"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewViewDesc"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "duplicateAttrViewView"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "duplicateAttrViewRow"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewView"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: string | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColRelation"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "updateAttrViewColRollup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionRollupInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "hideAttrViewName"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColDateFillCreated"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColDateFillSpecificTime"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCreatedIncludeTime"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewUpdatedIncludeTime"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "duplicateAttrViewKey"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCoverFrom"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCoverFromAssetKeyID"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardCoverPosition"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: TransactionCardCoverPositionInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardSize"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardWidth"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCalendar"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: AVCalendarSettingsInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardLayout"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewColFullRow"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewFitImage"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewDisplayFieldName"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewDisplayEmptyFields"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewFillColBackgroundColor"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewShowIcon"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewWrapField"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "changeAttrViewLayout"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewBlockView"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewBlockVisibleViews"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardAspectRatio"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewCardAspectRatioValue"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "setAttrViewGroup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: AVViewGroupInput | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "hideAttrViewGroup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: number | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "hideAttrViewAllGroups"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "foldAttrViewGroup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: boolean | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "foldAttrViewGroups"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: Record<string, boolean> | null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "syncAttrViewTableColWidth"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "removeAttrViewGroup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": "sortAttrViewGroup"; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: null; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: null; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; } | { "action": UnknownTransactionAction; "avID"?: string | null; "backRelationKeyID"?: string | null; "blockID"?: string | null; "blockIDs"?: Array<string> | null; "cellUpdates"?: Array<TransactionCellUpdateInput | null> | null; "context"?: TransactionContext | null; "data"?: JSONValue; "deckID"?: string | null; "format"?: string | null; "groupID"?: string | null; "id"?: string | null; "ignoreDefaultFill"?: boolean | null; "isDetached"?: boolean | null; "isTwoWay"?: boolean | null; "keyID"?: string | null; "layout"?: string | null; "name"?: string | null; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; "removeDest"?: boolean | null; "retData"?: JSONValue; "rootID"?: string | null; "rowID"?: string | null; "srcIDs"?: Array<string> | null; "srcs"?: Array<TransactionSourceFieldsInput | null> | null; "targetGroupID"?: string | null; "type"?: "" | "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "viewID"?: string | null; "viewIDs"?: Array<string> | null; };
 
 export type TransactionOptionChangeInput = { "newColor": string; "newDesc": string; "newName": string; "oldColor"?: string | null; "oldName": string; };
 
@@ -2410,6 +2522,8 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "binary";
         contentVariants: [{"status":200,"contentType":"application/json"},{"status":400,"contentType":"application/json"},{"status":401,"contentType":"application/json"},{"status":404,"contentType":"application/json"},{"status":429,"contentType":"application/json"},{"status":500,"contentType":"application/json"}];
     };
@@ -2417,6 +2531,8 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "binary";
         contentVariants: [{"status":200,"contentType":"application/json"},{"status":400,"contentType":"application/json"},{"status":401,"contentType":"application/json"},{"status":404,"contentType":"application/json"},{"status":429,"contentType":"application/json"},{"status":500,"contentType":"application/json"}];
     };
@@ -2424,6 +2540,8 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "binary";
         contentVariants: [{"status":200,"contentType":"application/json"},{"status":400,"contentType":"application/json"},{"status":401,"contentType":"application/json"},{"status":404,"contentType":"application/json"},{"status":429,"contentType":"application/json"},{"status":500,"contentType":"application/json"}];
     };
@@ -2431,6 +2549,8 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "binary";
         contentVariants: [{"status":200,"contentType":"text/html"},{"status":400,"contentType":"text/html"},{"status":403,"contentType":"text/plain"}];
     };
@@ -2438,6 +2558,8 @@ export interface APIGETRoutes {
         request: DynamicIconRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
         output: "binary";
         emptyResponseStatuses: [500];
         contentVariants: [{"status":200,"contentType":"image/svg+xml"}];
@@ -2446,16 +2568,22 @@ export interface APIGETRoutes {
         request: Blob;
         response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "raw";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/network/echo/*path": {
         request: Blob;
         response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "raw";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/network/proxy": {
         request: Blob;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "raw";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
         output: "proxy";
         proxy: {"kind":"http","contentType":"application/octet-stream","upstreamStatuses":true};
     };
@@ -2463,26 +2591,36 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<LoadedPlugin | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/plugin/rpc": {
         request: LoadedPluginRequestInput;
         response: { "code": 0; "data": LoadedPlugin | null; "msg": string; } | { "code": -1 | 1 | 2 | 3 | 4; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/plugin/rpc/:name": {
         request: LoadedPluginRequestInput;
         response: { "code": 0; "data": LoadedPlugin | null; "msg": string; } | { "code": -1 | 1 | 2 | 3 | 4; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/system/bootProgress": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
     };
     "/api/system/bootProgressSSE": {
         request: EmptyRequestInput;
         response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "sse";
         sse: { events: { "": BootProgressData; }; };
     };
@@ -2490,12 +2628,16 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SettingBootAppearance | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         emptyResponseStatuses: [403];
     };
     "/api/system/getCaptcha": {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "binary";
         emptyResponseStatuses: [500];
         contentVariants: [{"status":200,"contentType":"image/png"}];
@@ -2504,6 +2646,8 @@ export interface APIGETRoutes {
         request: SystemOIDCCallbackRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "binary";
         contentVariants: [{"status":200,"contentType":"text/html"}];
     };
@@ -2511,11 +2655,15 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
     };
     "/es/broadcast/subscribe": {
         request: EmptyRequestInput;
         response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
         output: "sse";
         sse: { raw: {"eventNames":"dynamic","dataEncoding":"raw","id":true,"retry":true}; };
     };
@@ -2523,6 +2671,8 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
         output: "proxy";
         proxy: {"kind":"eventSource","contentType":"text/event-stream","upstreamStatuses":true};
     };
@@ -2530,6 +2680,8 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "binary";
         contentVariants: [{"status":200,"contentType":"text/html"},{"status":302,"contentType":"text/html"},{"status":400,"contentType":"text/html"}];
     };
@@ -2537,13 +2689,17 @@ export interface APIGETRoutes {
         request: Blob;
         response: Blob | JSONValue | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "raw";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         output: "pluginService";
-        pluginService: {"variants":[{"mode":"JSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"JSONP","statusPolicy":"plugin","mediaTypes":["application/javascript","application/json"],"payload":"jsonp-or-json","headersOverrideMedia":true},{"mode":"AsciiJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"IndentedJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"PureJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"SecureJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"secure-json","headersOverrideMedia":true},{"mode":"XML","statusPolicy":"plugin","mediaTypes":["application/xml"],"payload":"xml","headersOverrideMedia":true},{"mode":"YAML","statusPolicy":"plugin","mediaTypes":["application/yaml"],"payload":"yaml","headersOverrideMedia":true},{"mode":"TOML","statusPolicy":"plugin","mediaTypes":["application/toml"],"payload":"toml","headersOverrideMedia":true},{"mode":"ProtoBuf","statusPolicy":"plugin","mediaTypes":["application/x-protobuf"],"payload":"protobuf","headersOverrideMedia":true},{"mode":"file","statusPolicy":"file","mediaTypes":["dynamic"],"payload":"bytes","headersOverrideMedia":true},{"mode":"string","statusPolicy":"plugin","mediaTypes":["text/plain"],"payload":"text","headersOverrideMedia":true},{"mode":"raw","statusPolicy":"plugin","mediaTypes":["dynamic"],"payload":"bytes","headersOverrideMedia":true},{"mode":"redirect","statusPolicy":"redirect","mediaTypes":["text/html"],"payload":"redirect","headersOverrideMedia":true},{"mode":"proxy","statusPolicy":"proxy","mediaTypes":["upstream"],"payload":"bytes","headersOverrideMedia":true},{"mode":"empty","statusPolicy":"plugin","mediaTypes":["optional"],"payload":"none","headersOverrideMedia":true},{"mode":"websocket","statusPolicy":"websocket","mediaTypes":["upgrade-or-text"],"payload":"frames","headersOverrideMedia":false},{"mode":"sse","statusPolicy":"sse","mediaTypes":["text/event-stream"],"payload":"events","headersOverrideMedia":false},{"mode":"admission","statusPolicy":"admission","mediaTypes":["text/plain"],"payload":"text","headersOverrideMedia":true}],"admissionStatuses":[400,404,500,503],"webSocketFrames":["text","binary","close","ping","pong"],"sseEventNames":"dynamic","sseData":"json-or-text","sseEvent":{"type":"object","properties":{"data":{"$ref":"#/$defs/JSONValue"},"event":{"type":"string"},"id":{"type":"string"},"retry":{"type":"integer"}},"required":["data"],"additionalProperties":false}};
+        pluginService: {"variants":[{"mode":"JSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"JSONP","statusPolicy":"plugin","mediaTypes":["application/javascript","application/json"],"payload":"jsonp-or-json","headersOverrideMedia":true},{"mode":"AsciiJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"IndentedJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"PureJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"SecureJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"secure-json","headersOverrideMedia":true},{"mode":"XML","statusPolicy":"plugin","mediaTypes":["application/xml"],"payload":"xml","headersOverrideMedia":true},{"mode":"YAML","statusPolicy":"plugin","mediaTypes":["application/yaml"],"payload":"yaml","headersOverrideMedia":true},{"mode":"TOML","statusPolicy":"plugin","mediaTypes":["application/toml"],"payload":"toml","headersOverrideMedia":true},{"mode":"ProtoBuf","statusPolicy":"plugin","mediaTypes":["application/x-protobuf"],"payload":"protobuf","headersOverrideMedia":true},{"mode":"file","statusPolicy":"file","mediaTypes":["dynamic"],"payload":"bytes","headersOverrideMedia":true},{"mode":"string","statusPolicy":"plugin","mediaTypes":["text/plain"],"payload":"text","headersOverrideMedia":true},{"mode":"raw","statusPolicy":"plugin","mediaTypes":["dynamic"],"payload":"bytes","headersOverrideMedia":true},{"mode":"stream","statusPolicy":"plugin","mediaTypes":["dynamic"],"payload":"bytes","headersOverrideMedia":true},{"mode":"redirect","statusPolicy":"redirect","mediaTypes":["text/html"],"payload":"redirect","headersOverrideMedia":true},{"mode":"proxy","statusPolicy":"proxy","mediaTypes":["upstream"],"payload":"bytes","headersOverrideMedia":true},{"mode":"empty","statusPolicy":"plugin","mediaTypes":["optional"],"payload":"none","headersOverrideMedia":true},{"mode":"websocket","statusPolicy":"websocket","mediaTypes":["upgrade-or-text"],"payload":"frames","headersOverrideMedia":false},{"mode":"sse","statusPolicy":"sse","mediaTypes":["text/event-stream"],"payload":"events","headersOverrideMedia":false},{"mode":"admission","statusPolicy":"admission","mediaTypes":["text/plain"],"payload":"text","headersOverrideMedia":true}],"admissionStatuses":[400,404,500,503],"webSocketFrames":["text","binary","close","ping","pong"],"sseEventNames":"dynamic","sseData":"json-or-text","sseEvent":{"type":"object","properties":{"data":{"$ref":"#/$defs/JSONValue"},"event":{"type":"string"},"id":{"type":"string"},"retry":{"type":"integer"}},"required":["data"],"additionalProperties":false}};
     };
     "/ws/broadcast": {
         request: EmptyRequestInput;
         response: null | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
         output: "websocket";
         websocket: { incoming: Blob; outgoing: Blob; failureStatus: 0; raw: {"frames":[1,2,8,9,10],"upgradeErrorStatuses":[400,403,405,500],"emptyClosedResponse":true}; };
     };
@@ -2551,6 +2707,8 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
         output: "proxy";
         proxy: {"kind":"websocket","upstreamStatuses":false,"frames":["text","binary","close"]};
     };
@@ -2558,6 +2716,8 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: (PluginRPCFailure & { "code"?: never; "data"?: never; "msg"?: never; }) | ({ "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "error"?: never; "id"?: never; "jsonrpc"?: never; });
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         output: "websocket";
         websocket: { incoming: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>]; outgoing: (PluginRPCSuccess & { "error"?: never; "method"?: never; "params"?: never; }) | (PluginRPCFailure & { "method"?: never; "params"?: never; "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | (PluginRPCNotification & { "error"?: never; "id"?: never; "result"?: never; }); failureStatus: 404; };
     };
@@ -2565,6 +2725,8 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: (PluginRPCFailure & { "code"?: never; "data"?: never; "msg"?: never; }) | ({ "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "error"?: never; "id"?: never; "jsonrpc"?: never; });
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         output: "websocket";
         websocket: { incoming: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>]; outgoing: (PluginRPCSuccess & { "error"?: never; "method"?: never; "params"?: never; }) | (PluginRPCFailure & { "method"?: never; "params"?: never; "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | (PluginRPCNotification & { "error"?: never; "id"?: never; "result"?: never; }); failureStatus: 404; };
     };
@@ -2615,37 +2777,51 @@ export interface APIPOSTRoutes {
         request: CheckActivationCodeRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/account/deactivate": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/account/login": {
         request: AccountLoginRequestInput;
         response: { "code": 0; "data": AccountLoginData | null; "msg": string; } | { "code": -1 | 1 | 10; "data": { "closeTimeout": number; } | null | AccountLoginData | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/account/startFreeTrial": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/account/useActivationcode": {
         request: ActivationCodeRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/agent/browserCapabilityResult": {
         request: AIBrowserCapabilityResultRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         additionalErrorStatuses: [409];
     };
     "/api/ai/agent/chat": {
         request: AIAgentChatRequestInput;
         response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         output: "sse";
         additionalErrorStatuses: [409];
         sse: { events: { "browser_capability_call": AISSEBrowserCapabilityCall; "confirm": AISSEConfirm; "content": AISSEToken; "done": AISSETurn; "error": AISSEMessage; "interrupted": AISSEMessage; "permission": AIPermissionData; "question": AISSEQuestion; "reasoning": AISSEToken; "retry": AISSERetry; "snapshot": AISSESnapshot; "thinking": AISSEThinking; "tool_call": AISSEToolCall; "tool_result": AISSEToolResult; "turn": AISSETurn; "usage": AISSEUsage; }; };
@@ -2654,106 +2830,209 @@ export interface APIPOSTRoutes {
         request: AIConfirmRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         additionalErrorStatuses: [409];
     };
     "/api/ai/agent/getInstructions": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AIAgentInstructionsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/agent/getSession": {
         request: AISessionIDRequestInput;
         response: { "code": 0; "data": AISessionExtensionAISessionFields | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
         additionalErrorStatuses: [500];
     };
     "/api/ai/agent/getSkill": {
         request: AISkillNameRequestInput;
         response: { "code": 0; "data": AISkillData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    "/api/ai/agent/lsBuiltinSkills": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AIBuiltinSkillInfo> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/agent/lsSessions": {
         request: AISessionsRequestInput;
         response: { "code": 0; "data": AISessionList; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/agent/lsSkills": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AISkillInfo> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/agent/lsUserSkills": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AIUserSkillInfo> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/agent/manageSkills": {
         request: AISkillFileRequestInput;
         response: { "code": 0; "data": AISkillFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/agent/question": {
         request: AIQuestionRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         additionalErrorStatuses: [409];
     };
     "/api/ai/agent/removeSession": {
         request: AISessionIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         additionalErrorStatuses: [409,500];
     };
     "/api/ai/agent/removeSkill": {
         request: AISkillNameRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/agent/renameSkill": {
         request: AISkillRenameRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/agent/saveSession": {
         request: AISessionExtensionAISessionFieldsInput;
         response: { "code": 0; "data": AISessionSaveData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "revision"?: never; "session"?: never; }) | null | (AISessionSaveData & { "closeTimeout"?: never; }); "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         additionalErrorStatuses: [400,409,500];
     };
     "/api/ai/agent/saveSkill": {
         request: AISkillSaveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/agent/setInstructions": {
         request: AIAgentInstructionsSaveRequestInput;
         response: { "code": 0; "data": AIAgentInstructionsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/agent/setPermission": {
         request: AIPermissionRequestInput;
         response: { "code": 0; "data": AIPermissionData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/agent/title": {
         request: AITitleRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/chatGPT": {
         request: AIMessageRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/chatGPTWithAction": {
         request: AIActionRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    "/api/ai/chatgpt/accounts": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<ChatGPTAccount>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    "/api/ai/chatgpt/cancel": {
+        request: ChatGPTLoginRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/ai/chatgpt/export": {
+        request: ChatGPTTransferRequestInput;
+        response: { "code": 0; "data": ExportFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/ai/chatgpt/import": {
+        request: ChatGPTTransferRequestInput;
+        response: { "code": 0; "data": ChatGPTAccount; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/ai/chatgpt/logout": {
+        request: ChatGPTAccountRequestInput;
+        response: { "code": 0; "data": ChatGPTLogoutResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/ai/chatgpt/remove": {
+        request: ChatGPTAccountRequestInput;
+        response: { "code": 0; "data": ChatGPTLogoutResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/ai/chatgpt/start": {
+        request: ChatGPTAccountRequestInput;
+        response: { "code": 0; "data": ChatGPTLogin; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/ai/chatgpt/status": {
+        request: ChatGPTLoginRequestInput;
+        response: { "code": 0; "data": ChatGPTLoginStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/editor/chat": {
         request: AIEditorChatRequestInput;
         response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
         output: "sse";
         sse: { events: { "content": AISSEToken; "done": AISSEFinish; "error": AISSEMessage; "reasoning": AISSEToken; "start": AISSEStart; "truncated": AISSEMessage; }; };
     };
@@ -2761,1714 +3040,2440 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AIEditorAction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/editor/removeAction": {
         request: AIEditorActionIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/editor/saveAction": {
         request: AIEditorActionSaveRequestInput;
         response: { "code": 0; "data": AIEditorAction | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/embeddingStat": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AIEmbeddingStat | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/listModels": {
         request: AIProviderRequestInput;
         response: { "code": 0; "data": AIModelsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/lsCapabilities": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AICapabilityManifest> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/mcpEnvironmentVariables": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AIMCPEnvironmentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/mcpOAuthAuthorize": {
         request: AIMCPIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/mcpOAuthDisconnect": {
         request: AIMCPIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/mcpStatus": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AIMCPStatus> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    "/api/ai/ocr": {
+        request: AssetPathRequestInput;
+        response: { "code": 0; "data": AssetTextData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/reindexEmbedding": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/retryFailedEmbedding": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ai/testDecisionModel": {
-        request: EmptyRequestInput;
+        request: AIDecisionTestRequestInput;
         response: { "code": 0; "data": AIDecisionTestData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
-        body: "none";
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/testEmbeddingModel": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AIEmbeddingTestData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/testModel": {
         request: AIModelRequestInput;
         response: { "code": 0; "data": AIModelTestData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/ai/testRerankModel": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AIRerankTestData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/archive/unzip": {
         request: UnzipRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/archive/zip": {
         request: ZipRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/findAssetReferences": {
         request: FindAssetReferencesRequestInput;
         response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "items"?: never; "references"?: never; "skippedNotebooks"?: never; "unavailableAttributeViews"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/fullReindexAssetContent": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/getDocAssets": {
         request: AssetDocumentAssetsRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/asset/getDocImageAssets": {
         request: AssetDocumentRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/asset/getFileAnnotation": {
         request: AssetPathRequestInput;
         response: { "code": 0; "data": AssetAnnotationData; "msg": string; } | { "code": -1 | 1 | 403; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/asset/getImageOCRText": {
         request: AssetOCRTextRequestInput;
         response: { "code": 0; "data": AssetTextData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/getMissingAssets": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    "/api/asset/getOCRConfig": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": OCRConfigData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/asset/getUnusedAssets": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    "/api/asset/importOCRModels": {
+        request: ImportOCRModelsRequestInput;
+        response: { "code": 0; "data": OCRModel; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/insertCover": {
         request: InsertCoverRequestInput;
         response: { "code": 0; "data": AssetInsertCoverData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/insertLocalAssets": {
         request: InsertLocalAssetsRequestInput;
         response: { "code": 0; "data": AssetUploadData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "errFiles"?: never; "failedFiles"?: never; "succFiles"?: never; "succMap"?: never; }) | null | (AssetUploadData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/ocr": {
         request: AssetPathRequestInput;
         response: { "code": 0; "data": AssetOCRData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/relinkAsset": {
         request: RelinkAssetRequestInput;
         response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "items"?: never; "references"?: never; "skippedNotebooks"?: never; "unavailableAttributeViews"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/removeUnusedAsset": {
         request: AssetPathRequestInput;
         response: { "code": 0; "data": AssetPathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/removeUnusedAssets": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AssetPathsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/renameAsset": {
         request: RenameAssetRequestInput;
         response: { "code": 0; "data": AssetRenameData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/resolveAssetPath": {
         request: AssetPathRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/asset/setFileAnnotation": {
         request: SetAssetAnnotationRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/setImageOCRText": {
         request: SetAssetOCRTextRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/asset/setOCRConfig": {
+        request: SettingOCRInput;
+        response: { "code": 0; "data": SettingOCR; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/statAsset": {
         request: AssetPathRequestInput;
         response: { "code": 0; "data": AssetStatData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/asset/upload": {
         request: UploadAssetRequestInput;
         response: { "code": 0; "data": AssetUploadData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/uploadCloud": {
         request: AssetCloudUploadRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/asset/uploadCloudByAssetsPaths": {
         request: AssetPathsCloudUploadRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/attr/batchGetBlockAttrs": {
         request: BlockIDsRequestInput;
         response: { "code": 0; "data": Record<string, Record<string, string> | null>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/attr/batchSetBlockAttrs": {
         request: BatchSetBlockAttrsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/attr/getBlockAttrs": {
         request: BlockIDRequestInput;
         response: { "code": 0; "data": Record<string, string>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/attr/getBookmarkLabels": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/attr/resetBlockAttrs": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/attr/setBlockAttrs": {
         request: SetBlockAttrsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/addAttributeViewBlocks": {
         request: AddAttributeViewBlocksRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/addAttributeViewKey": {
         request: AddAttributeViewKeyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/appendAttributeViewDetachedBlocksWithValues": {
         request: AppendAttributeViewDetachedBlocksWithValuesRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/batchReplaceAttributeViewBlocks": {
         request: BatchReplaceAttributeViewBlocksRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/batchSetAttributeViewBlockAttrs": {
         request: BatchSetAttributeViewBlockAttrsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/changeAttrViewLayout": {
         request: ChangeAttrViewLayoutRequestInput;
         response: { "code": 0; "data": AVRenderResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | AVRenderResult; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/createAttributeViewItem": {
         request: CreateAttributeViewItemRequestInput;
         response: { "code": 0; "data": AVCreateItemResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemResult; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/createAttributeViewItemDocs": {
         request: CreateAttributeViewItemDocsRequestInput;
         response: { "code": 0; "data": AVCreateItemDocsResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemDocsResult; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/createAttributeViewItemWithMarkdown": {
         request: CreateAttributeViewItemWithMarkdownRequestInput;
         response: { "code": 0; "data": AVCreateItemResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemResult; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/av/createAttributeViewRelationItem": {
+        request: CreateAttributeViewRelationItemRequestInput;
+        response: { "code": 0; "data": AVCreateItemResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemResult; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/duplicateAttributeViewBlock": {
         request: DuplicateAttributeViewBlockRequestInput;
         response: { "code": 0; "data": AVDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/getAttributeView": {
         request: GetAttributeViewRequestInput;
         response: { "code": 0; "data": AVData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","writable"];
     };
     "/api/av/getAttributeViewAddingBlockDefaultValues": {
         request: GetAttributeViewAddingBlockDefaultValuesRequestInput;
         response: { "code": 0; "data": AVValuesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/av/getAttributeViewBacklinks": {
         request: GetAttributeViewBacklinksRequestInput;
         response: { "code": 0; "data": AVAttributeViewBacklinks | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/av/getAttributeViewBoundBlockIDsByItemIDs": {
         request: GetAttributeViewBoundBlockIDsByItemIDsRequestInput;
         response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/av/getAttributeViewCalendarUndated": {
         request: AVCalendarUndatedRequestInput;
         response: { "code": 0; "data": AVCalendarUndatedData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/getAttributeViewFieldViews": {
         request: GetAttributeViewFieldViewsRequestInput;
         response: { "code": 0; "data": AVFieldViewsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","writable"];
     };
     "/api/av/getAttributeViewFilterSort": {
         request: GetAttributeViewFilterSortRequestInput;
         response: { "code": 0; "data": AVFilterSortData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/getAttributeViewItemIDsByBoundIDs": {
         request: GetAttributeViewItemIDsByBoundIDsRequestInput;
         response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/av/getAttributeViewItemStatuses": {
         request: GetAttributeViewItemStatusesRequestInput;
         response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/getAttributeViewKeys": {
         request: GetAttributeViewKeysRequestInput;
         response: { "code": 0; "data": Array<AVBlockAttributeViewKeys | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/av/getAttributeViewKeysByAvID": {
         request: GetAttributeViewKeysByAvIDRequestInput;
         response: { "code": 0; "data": Array<AVKey | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/getAttributeViewKeysByID": {
         request: GetAttributeViewKeysByIDRequestInput;
         response: { "code": 0; "data": Array<AVKey | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","writable"];
     };
     "/api/av/getAttributeViewPasteRows": {
         request: GetAttributeViewPasteRowsRequestInput;
         response: { "code": 0; "data": AVPasteRowsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/getAttributeViewPrimaryKeyValues": {
         request: GetAttributeViewPrimaryKeyValuesRequestInput;
         response: { "code": 0; "data": AVPrimaryValuesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/getAttributeViewRelationCandidates": {
         request: GetAttributeViewRelationCandidatesRequestInput;
         response: { "code": 0; "data": AVRelationCandidatesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/getAttributeViewRowSort": {
         request: GetAttributeViewRowSortRequestInput;
         response: { "code": 0; "data": AVRowSortPreview; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/av/getAttributeViewSearchTarget": {
         request: GetAttributeViewSearchTargetRequestInput;
         response: { "code": 0; "data": AVAttributeViewSearchTarget | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","writable"];
     };
     "/api/av/getCurrentAttrViewImages": {
         request: GetCurrentAttrViewImagesRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/av/getMirrorDatabaseBlocks": {
         request: GetMirrorDatabaseBlocksRequestInput;
         response: { "code": 0; "data": RefDefsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/getUnusedAttributeViews": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/av/removeAttributeViewBlocks": {
         request: RemoveAttributeViewBlocksRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/removeAttributeViewKey": {
         request: RemoveAttributeViewKeyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/removeUnusedAttributeView": {
         request: RemoveUnusedAttributeViewRequestInput;
         response: { "code": 0; "data": AVIDData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/removeUnusedAttributeViews": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AVPathsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/renderAttributeView": {
         request: RenderAttributeViewRequestInput;
         response: { "code": 0; "data": AVRenderResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | AVRenderResult; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/av/renderHistoryAttributeView": {
         request: RenderHistoryAttributeViewRequestInput;
         response: { "code": 0; "data": AVArchiveRenderData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/av/renderSnapshotAttributeView": {
         request: RenderSnapshotAttributeViewRequestInput;
         response: { "code": 0; "data": AVArchiveRenderData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/av/searchAttributeView": {
         request: SearchAttributeViewRequestInput;
         response: { "code": 0; "data": AVSearchData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","writable"];
     };
     "/api/av/searchAttributeViewNonRelationKey": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/searchAttributeViewRelationKey": {
         request: SearchAttributeViewRelationKeyRequestInput;
         response: { "code": 0; "data": AVKeysData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/searchAttributeViewRollupDestKeys": {
         request: SearchAttributeViewRollupDestKeysRequestInput;
         response: { "code": 0; "data": AVKeysData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/setAttrViewContextFilter": {
         request: SetAttrViewContextFilterRequestInput;
         response: { "code": 0; "data": AVContextFilterData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/setAttrViewFilters": {
         request: SetAttrViewFiltersRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/setAttrViewGroup": {
         request: SetAttrViewGroupRequestInput;
         response: { "code": 0; "data": AVRenderResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | AVRenderResult; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/setAttrViewSorts": {
         request: SetAttrViewSortsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/setAttributeViewBlockAttr": {
         request: SetAttributeViewBlockAttrRequestInput;
         response: { "code": 0; "data": AVValueData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/setDatabaseBlockView": {
         request: SetDatabaseBlockViewRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/sortAttributeViewKey": {
         request: SortAttributeViewKeyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/sortAttributeViewViewKey": {
         request: SortAttributeViewViewKeyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/batchUpdatePackage": {
         request: BatchUpdatePackageRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/getBazaarIcon": {
         request: GetBazaarIconRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getBazaarPackage": {
         request: GetBazaarPackageRequestInput;
         response: { "code": 0; "data": BazaarPackageDetail; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getBazaarPackageREADME": {
         request: GetBazaarPackageREADMERequestInput;
         response: { "code": 0; "data": BazaarREADMEData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getBazaarPackageRating": {
         request: GetBazaarPackageRatingRequestInput;
         response: { "code": 0; "data": BazaarRatingResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarRatingResult; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getBazaarPackageRatings": {
         request: GetBazaarPackageRatingsRequestInput;
         response: { "code": 0; "data": BazaarRatingsData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getBazaarPackageUserRatings": {
         request: GetBazaarPackageUserRatingsRequestInput;
         response: { "code": 0; "data": BazaarUserRatingsResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarUserRatingsResult; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getBazaarPlugin": {
         request: GetBazaarPluginRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getBazaarTemplate": {
         request: GetBazaarTemplateRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getBazaarTheme": {
         request: GetBazaarThemeRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getBazaarWidget": {
         request: GetBazaarWidgetRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getInstalledIcon": {
         request: GetInstalledIconRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getInstalledPackageSize": {
         request: GetInstalledPackageSizeRequestInput;
         response: { "code": 0; "data": BazaarPackageSizeData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getInstalledPlugin": {
         request: GetInstalledPluginRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getInstalledTemplate": {
         request: GetInstalledTemplateRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getInstalledTheme": {
         request: GetInstalledThemeRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getInstalledWidget": {
         request: GetInstalledWidgetRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/getUpdatedPackage": {
         request: GetUpdatedPackageRequestInput;
         response: { "code": 0; "data": BazaarUpdatedData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/installBazaarIcon": {
         request: InstallBazaarIconRequestInput;
         response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/installBazaarPlugin": {
         request: InstallBazaarPluginRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/installBazaarTemplate": {
         request: InstallBazaarTemplateRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/installBazaarTheme": {
         request: InstallBazaarThemeRequestInput;
         response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/installBazaarWidget": {
         request: InstallBazaarWidgetRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/installLocalBazaarPackage": {
         request: InstallLocalBazaarPackageRequestInput;
         response: { "code": 0; "data": BazaarLocalInstallResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarLocalInstallResult; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/setBazaarPackageRating": {
         request: SetBazaarPackageRatingRequestInput;
         response: { "code": 0; "data": BazaarRatingResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarRatingResult; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/bazaar/uninstallBazaarIcon": {
         request: UninstallBazaarIconRequestInput;
         response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/uninstallBazaarPlugin": {
         request: UninstallBazaarPluginRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/uninstallBazaarTemplate": {
         request: UninstallBazaarTemplateRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/uninstallBazaarTheme": {
         request: UninstallBazaarThemeRequestInput;
         response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/uninstallBazaarWidget": {
         request: UninstallBazaarWidgetRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bazaar/updateBazaarPackage": {
         request: UpdateBazaarPackageRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/appendBlock": {
         request: AppendBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/appendDailyNoteBlock": {
         request: DailyNoteBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/appendHeadingChildren": {
         request: AppendHeadingChildrenRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/batchAppendBlock": {
         request: BatchParentBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/batchInsertBlock": {
         request: BatchInsertBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/batchPrependBlock": {
         request: BatchParentBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/batchUpdateBlock": {
         request: BatchUpdateBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/batchUpdateTaskListItemMarker": {
         request: BatchTaskListMarkerRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/checkBlockExist": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": boolean; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/checkBlockFold": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": BlockFoldData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/checkBlockRef": {
         request: CheckBlockRefRequestInput;
         response: { "code": 0; "data": boolean; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | boolean; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/checkBlocksExist": {
         request: CheckBlocksExistRequestInput;
         response: { "code": 0; "data": Record<string, boolean> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/deleteBlock": {
         request: DeleteBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/foldBlock": {
         request: BlockIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/getBlockBreadcrumb": {
         request: BlockBreadcrumbRequestInput;
         response: { "code": 0; "data": Array<BlockPath | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockBreadcrumbChildren": {
         request: BlockBreadcrumbChildrenRequestInput;
         response: { "code": 0; "data": BlockBreadcrumbChildren | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockDOM": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": BlockDOMData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockDOMWithEmbed": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": BlockDOMData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockDOMs": {
         request: BlocksQueryRequestInput;
         response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockDOMsWithEmbed": {
         request: BlocksQueryRequestInput;
         response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockDefIDsByRefText": {
         request: RefTextQueryRequestInput;
         response: { "code": 0; "data": RefDefsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockIndex": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": number; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockInfo": {
         request: BlockInfoRequestInput;
         response: { "code": 0; "data": BlockInfoData; "msg": string; } | { "code": -1 | 3; "data": { "closeTimeout": number; } | null | string; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockKramdown": {
         request: BlockKramdownRequestInput;
         response: { "code": 0; "data": BlockKramdownData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockKramdowns": {
         request: BlocksKramdownRequestInput;
         response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockRelevantIDs": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": BlockRelevantData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockSiblingID": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": BlockSiblingData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlockTreeInfos": {
         request: BlocksQueryRequestInput;
         response: { "code": 0; "data": Record<string, BlockTreeInfo | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlocksIndexes": {
         request: BlocksQueryRequestInput;
         response: { "code": 0; "data": Record<string, number> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getBlocksWordCount": {
         request: BlocksWordCountRequestInput;
         response: { "code": 0; "data": WordCountData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getChildBlocks": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": Array<ChildBlock | null>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/block/getContentWordCount": {
         request: ContentWordCountRequestInput;
         response: { "code": 0; "data": WordCountData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getDOMText": {
         request: DOMTextRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getDocBlocksOrders": {
         request: DocOrdersRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getDocHeadingLevelTransaction": {
         request: DocHeadingLevelRequestInput;
         response: { "code": 0; "data": DocHeadingLevelData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/getDocInfo": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": DocInfo | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getDocsInfo": {
         request: DocsInfoRequestInput;
         response: { "code": 0; "data": Array<DocInfo | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getHeadingChildrenDOM": {
         request: HeadingChildrenRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getHeadingChildrenIDs": {
         request: BlockIDRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getHeadingDeleteTransaction": {
         request: BlockIDRequestInput;
         response: { "code": 0; "data": BlockTransaction | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/block/getHeadingFoldTransaction": {
         request: HeadingFoldRequestInput;
         response: { "code": 0; "data": BlockTransaction | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/block/getHeadingInsertTransaction": {
         request: BlockIDRequestInput;
         response: { "code": 0; "data": BlockTransaction | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/block/getHeadingLevelTransaction": {
         request: HeadingLevelRequestInput;
         response: { "code": 0; "data": BlockTransaction | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/block/getOrderedListContinueStart": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": OrderedListStartData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/block/getRecentUpdatedBlocks": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<SearchBlock | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getRefIDs": {
         request: RefIDsRequestInput;
         response: { "code": 0; "data": RefIDsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getRefIDsByFileAnnotationID": {
         request: FileAnnotationRefRequestInput;
         response: { "code": 0; "data": RefDefsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getRefText": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getTailChildBlocks": {
         request: TailChildBlocksRequestInput;
         response: { "code": 0; "data": Array<ChildBlock | null>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/block/getTreeStat": {
         request: TreeStatRequestInput;
         response: { "code": 0; "data": TreeStatData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/getUnfoldedParentID": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": UnfoldedParentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/block/insertBlock": {
         request: InsertBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/migrateLegacyMindmaps": {
         request: MigrateLegacyMindmapsRequestInput;
         response: { "code": 0; "data": MigrateLegacyMindmapsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/moveBlock": {
         request: MoveBlockRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/moveOutlineHeading": {
         request: MoveBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/prependBlock": {
         request: PrependBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/prependDailyNoteBlock": {
         request: DailyNoteBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/setBlockReminder": {
         request: BlockReminderRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/swapBlockRef": {
         request: SwapBlockRefRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/transferBlockRef": {
         request: TransferBlockRefRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/unfoldBlock": {
         request: BlockIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/updateBlock": {
         request: UpdateBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/block/updateTaskListItemMarker": {
         request: TaskListMarkerRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bookmark/getBookmark": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<Bookmark | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/bookmark/removeBookmark": {
         request: RemoveBookmarkRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/bookmark/renameBookmark": {
         request: RenameBookmarkRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/broadcast/getChannelInfo": {
         request: BroadcastChannelRequestInput;
         response: { "code": 0; "data": BroadcastChannelData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/broadcast/getChannels": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": BroadcastChannelsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/broadcast/postMessage": {
         request: BroadcastMessageRequestInput;
         response: { "code": 0; "data": BroadcastChannelData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/broadcast/publish": {
         request: Record<string, Array<string | Blob>>;
         response: { "code": 0; "data": BroadcastPublishData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/clipboard/cleanupRichText": {
         request: CleanupRichTextRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/clipboard/preparePasteAssets": {
         request: PreparePasteAssetsRequestInput;
         response: { "code": 0; "data": Record<string, string>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/clipboard/prepareRichText": {
         request: PrepareRichTextRequestInput;
         response: { "code": 0; "data": RichClipboardPrepared | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/clipboard/readFilePaths": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<ClipboardFile>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/clipboard/writeFilePath": {
         request: ClipboardPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/cloud/getCloudSpace": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": CloudSpaceData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/cloud/setCloudReminder": {
         request: CloudReminderRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/convert/pandoc": {
         request: PandocRequestInput;
         response: { "code": 0; "data": PandocData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/export/copyExportFile": {
         request: CopyExportFileRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/export/export2Liandi": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/export/exportAsFile": {
         request: ExportAsFileRequestInput;
         response: { "code": 0; "data": ExportFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportAsciiDoc": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportAttributeView": {
         request: ExportAttributeViewRequestInput;
         response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportBrowserHTML": {
         request: ExportBrowserHTMLRequestInput;
         response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportCodeBlock": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportPathData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportData": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportDataInFolder": {
         request: ExportFolderRequestInput;
         response: { "code": 0; "data": ExportNameData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportDocx": {
         request: ExportDocxRequestInput;
         response: { "code": 0; "data": ExportPathData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportEPUB": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportHTML": {
         request: ExportHTMLRequestInput;
         response: { "code": 0; "data": ExportHTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportMd": {
         request: ExportMarkdownRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportMdContent": {
         request: ExportMarkdownContentRequestInput;
         response: { "code": 0; "data": ExportMarkdownContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportMdHTML": {
         request: ExportMarkdownHTMLRequestInput;
         response: { "code": 0; "data": ExportHTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportMds": {
         request: ExportDocumentsMarkdownRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportMediaWiki": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportNotebookMd": {
         request: ExportNotebookMarkdownRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportNotebookSY": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportNotebooksMd": {
         request: ExportNotebooksMarkdownRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportNotebooksSY": {
         request: ExportNotebooksRequestInput;
         response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportODT": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportOPML": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportOrgMode": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportPreviewHTML": {
         request: ExportPreviewHTMLRequestInput;
         response: { "code": 0; "data": ExportPreviewHTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportRTF": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportReStructuredText": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportResources": {
         request: ExportResourcesRequestInput;
         response: { "code": 0; "data": ExportPathData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | string; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportSY": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportSYs": {
         request: ExportIDsRequestInput;
         response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportTempContent": {
         request: ExportTempContentRequestInput;
         response: { "code": 0; "data": ExportURLData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/exportTextile": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/export/preview": {
         request: ExportIDRequestInput;
         response: { "code": 0; "data": ExportPreviewData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/export/processPDF": {
         request: ProcessPDFRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/extension/copy": {
         request: ({ "assets"?: string; "clipType"?: string; "dom": string; "href"?: string; "notebook"?: string; } & Record<string, string | Blob | Array<string | Blob>>);
         response: { "code": 0; "data": ExtensionCopyData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | ExtensionCopyData | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/file/copyFile": {
         request: CopyFileRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/file/getFile": {
         request: FilePathRequestInput;
         response: Blob | { "code": -1 | -3 | 403 | 404 | 409 | 500 | 503; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
         output: "binary";
     };
     "/api/file/getUniqueFilename": {
         request: FilePathRequestInput;
         response: { "code": 0; "data": FilePathData; "msg": string; } | { "code": -1 | -3; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/file/globalCopyFiles": {
         request: CopyFilesRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2 | -3 | 403; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/file/putFile": {
         request: PutFileRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -3 | 400 | 403 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "form";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/file/readDir": {
         request: ReadDirectoryRequestInput;
         response: { "code": 0; "data": Array<DirectoryEntry>; "msg": string; } | { "code": -1 | -3 | 403 | 404 | 409 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/file/removeFile": {
         request: RemoveFileRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -3 | 403 | 404 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/file/renameFile": {
         request: RenameFileRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -3 | 403 | 404 | 409 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/file/workspaceCopyFiles": {
         request: CopyFilesRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2 | -3 | 403; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/authFilePublishAccess": {
         request: FileTreeAuthPublishRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
         additionalErrorStatuses: [429];
     };
     "/api/filetree/changeSort": {
         request: FileTreeChangeSortRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/createDailyNote": {
         request: FileTreeDailyNoteRequestInput;
         response: { "code": 0; "data": FileTreeCreateData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/createDoc": {
         request: FileTreeCreateRequestInput;
         response: { "code": 0; "data": FileTreeCreateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/createDocWithMd": {
         request: FileTreeCreateMarkdownRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/doc2Heading": {
         request: FileTreeDocHeadingRequestInput;
         response: { "code": 0; "data": FileTreeDocHeadingData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/duplicateDoc": {
         request: FileTreeIDRequestInput;
         response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/duplicateDocTree": {
         request: FileTreeIDRequestInput;
         response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/filetree/getDailyNoteInfo": {
+        request: DailyNoteInfoRequestInput;
+        response: { "code": 0; "data": DailyNoteInfo | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/filetree/getDoc": {
         request: FileTreeGetDocRequestInput;
         response: { "code": 0; "data": FileTreeGetDocData; "msg": string; } | { "code": -1 | 1 | 3; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/getDocCreateSavePath": {
         request: FileTreeNotebookRequestInput;
         response: { "code": 0; "data": FileTreeCreateSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/getFullHPathByID": {
         request: FileTreeOptionalIDRequestInput;
         response: { "code": 0; "data": string | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/getHPathByID": {
         request: FileTreeIDRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/getHPathByPath": {
         request: FileTreePathRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/getHPathsByPaths": {
         request: FileTreePathsRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/getIDsByHPath": {
         request: FileTreeOptionalPathRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/getPathByID": {
         request: FileTreeTrimIDRequestInput;
         response: { "code": 0; "data": FileTreeDocPathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/getPinnedDocs": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<PinnedDoc>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/filetree/getPublishAccess": {
         request: FileTreePublishIDsRequestInput;
         response: { "code": 0; "data": FileTreePublishData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/getRefCreateSavePath": {
         request: FileTreeNotebookRequestInput;
         response: { "code": 0; "data": FileTreeSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/getShorthandSavePath": {
         request: FileTreeNotebookRequestInput;
         response: { "code": 0; "data": FileTreeSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/heading2Doc": {
         request: FileTreeHeadingDocRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/li2Doc": {
         request: FileTreeListItemDocRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/listDocTree": {
         request: FileTreePathRequestInput;
         response: { "code": 0; "data": FileTreeDocTreeData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/listDocsByPath": {
         request: FileTreeListRequestInput;
         response: { "code": 0; "data": FileTreeListData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/moveDocs": {
         request: FileTreeMoveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/moveDocsByID": {
         request: FileTreeMoveIDsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/moveLocalShorthands": {
         request: FileTreeNotebookRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/removeDoc": {
         request: FileTreePathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/removeDocByID": {
         request: FileTreeTrimIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/removeDocs": {
         request: FileTreePathsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/removeIndexes": {
         request: FileTreePathsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/renameDoc": {
         request: FileTreeRenameRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/renameDocByID": {
         request: FileTreeRenameIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/reorderDocs": {
         request: FileTreeReorderRequestInput;
         response: { "code": 0; "data": FileTreeReorderData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeReorderData | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/searchDocs": {
         request: FileTreeSearchRequestInput;
         response: { "code": 0; "data": Array<FileTreeSearchDoc | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/filetree/setDocSortMode": {
         request: FileTreeSortModeRequestInput;
         response: { "code": 0; "data": FileTreeSortModeData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeSortModeData | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/setPublishAccess": {
         request: FileTreeSetPublishRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/setSort": {
         request: FileTreeSetSortRequestInput;
         response: { "code": 0; "data": FileTreeSetSortData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeSetSortData | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/updatePinnedDocs": {
         request: UpdatePinnedDocsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/filetree/upsertIndexes": {
         request: FileTreePathsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/flashcard/ankiConnect": {
         request: AnkiConnectRequestInput;
         response: AnkiConnectResponse | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "directJSON";
     };
     "/api/flashcard/createQuickSources": {
         request: CreateQuickFlashcardSourcesRequestInput;
         response: { "code": 0; "data": QuickFlashcardSourcesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/flashcard/queryCards": {
         request: QueryFlashcardsRequestInput;
         response: { "code": 0; "data": QueryFlashcardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/flashcard/setCardEditLater": {
         request: SetFlashcardEditLaterRequestInput;
         response: { "code": 0; "data": FlashcardEditLaterData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/format/autoSpace": {
         request: TrimmedIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/format/netAssets2LocalAssets": {
         request: TrimmedIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/format/netImg2LocalAssets": {
         request: NetImageAssetsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/graph/getGraph": {
         request: GlobalGraphRequestInput;
         response: { "code": 0; "data": GlobalGraphResult | (GraphCorrelation & { "box"?: never; "conf"?: never; "links"?: never; "nodes"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | GlobalGraphResult | (GraphCorrelation & { "box"?: never; "conf"?: never; "links"?: never; "nodes"?: never; }); "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/graph/getLocalGraph": {
         request: LocalGraphRequestInput;
         response: { "code": 0; "data": LocalGraphResult | (GraphCorrelation & { "box"?: never; "conf"?: never; "id"?: never; "links"?: never; "nodes"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | LocalGraphResult | (GraphCorrelation & { "box"?: never; "conf"?: never; "id"?: never; "links"?: never; "nodes"?: never; }); "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/graph/resetGraph": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": ResetGraphData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/graph/resetLocalGraph": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": ResetLocalGraphData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/graph/setGraphConf": {
         request: SetGraphConfRequestInput;
         response: { "code": 0; "data": GlobalGraphConf | (LocalGraphConf & { "minRefs"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/history/clearWorkspaceHistory": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/history/createAssetHistory": {
         request: CreateAssetHistoryRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/history/createDocHistory": {
         request: CreateDocHistoryRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/history/diffDocVersions": {
         request: DiffDocVersionsRequestInput;
         response: { "code": 0; "data": DocVersionDiffResult | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/history/getDocHistoryContent": {
         request: DocHistoryContentRequestInput;
         response: { "code": 0; "data": DocHistoryContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/history/getDocHistorySnapshots": {
         request: DocHistorySnapshotsRequestInput;
         response: { "code": 0; "data": DocHistorySnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/history/getHistoryItems": {
         request: HistoryItemsRequestInput;
         response: { "code": 0; "data": HistoryItemsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/history/getNotebookHistory": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": NotebookHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/history/reindexHistory": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/history/rollbackAssetsHistory": {
         request: HistoryPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/history/rollbackAttributeViewHistory": {
         request: HistoryPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/history/rollbackDocHistory": {
         request: HistoryPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/history/rollbackNotebookHistory": {
         request: HistoryPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/history/searchHistory": {
         request: SearchHistoryRequestInput;
         response: { "code": 0; "data": SearchHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/import/cancelImportSY": {
         request: ImportTokenRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/import/cancelObsidianVaultTask": {
         request: ObsidianTaskRequestInput;
         response: { "code": 0; "data": ObsidianVaultTask | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | ObsidianVaultTask | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/import/continueImportSY": {
         request: ContinueImportSYRequestInput;
         response: { "code": 0; "data": ImportDocumentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/import/getObsidianVaultTask": {
         request: ObsidianTaskRequestInput;
         response: { "code": 0; "data": ObsidianVaultTask | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/import/importData": {
         request: ImportDataRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/import/importSY": {
         request: ImportSYRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/import/importSYAuto": {
         request: ImportSYRequestInput;
         response: { "code": 0; "data": (ImportAutoDocument & { "notebook"?: never; "notebooks"?: never; }) | (ImportAutoNotebook & { "notebooks"?: never; "token"?: never; }) | (ImportAutoNotebooks & { "notebook"?: never; "token"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | (ImportAutoDocument & { "notebook"?: never; "notebooks"?: never; }) | (ImportAutoNotebook & { "notebooks"?: never; "token"?: never; }) | (ImportAutoNotebooks & { "notebook"?: never; "token"?: never; }); "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/import/importSYNotebook": {
         request: ImportDataRequestInput;
         response: { "code": 0; "data": (ImportedNotebook & { "notebooks"?: never; }) | (ImportedNotebooks & { "notebook"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/import/importStdMd": {
         request: ImportMarkdownRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/import/importZipMd": {
         request: ImportZipMarkdownRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/import/startObsidianVaultAnalysis": {
         request: ObsidianAnalysisRequestInput;
         response: { "code": 0; "data": ObsidianVaultTask | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/import/startObsidianVaultImport": {
         request: ObsidianImportRequestInput;
         response: { "code": 0; "data": ObsidianVaultTask | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/inbox/getShorthand": {
         request: TrimmedIDRequestInput;
         response: { "code": 0; "data": Shorthand | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/inbox/getShorthands": {
         request: ShorthandsRequestInput;
         response: { "code": 0; "data": ShorthandsData | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/inbox/removeShorthands": {
         request: RemoveShorthandsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/lute/copyStdMarkdown": {
         request: CopyStdMarkdownRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/lute/html2BlockDOM": {
         request: HTMLClipboardRequestInput;
         response: { "code": 0; "data": string | HTMLClipboardPreflight; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/lute/md2html": {
         request: MarkdownHTMLRequestInput;
         response: { "code": 0; "data": HTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/lute/spinBlockDOM": {
         request: DOMTextRequestInput;
         response: { "code": 0; "data": DOMData; "msg": string; } | { "code": -1 | 413; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/lute/wpsPresentation2BlockDOM": {
         request: WPSPresentationRequestInput;
         response: { "code": 0; "data": WPSPresentationData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "converted"?: never; "dom"?: never; }) | null | (WPSPresentationData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/mcp/addOAuthClient": {
         request: MCPOAuthClientRequestInput;
         response: { "code": 0; "data": MCPOAuthClientSecret; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/mcp/getOAuth": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": MCPOAuthStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/mcp/removeOAuthClient": {
         request: MCPOAuthRemoveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/mcp/setOAuth": {
         request: MCPOAuthConfigInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/network/echo": {
         request: Blob;
         response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "raw";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/network/echo/*path": {
         request: Blob;
         response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "raw";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/network/forwardProxy": {
         request: NetworkForwardRequestInput;
         response: { "code": 0; "data": NetworkForwardData; "msg": string; } | { "code": -1 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 10; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/network/proxy": {
         request: Blob;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "raw";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
         output: "proxy";
         proxy: {"kind":"http","contentType":"application/octet-stream","upstreamStatuses":true};
     };
@@ -4476,221 +5481,309 @@ export interface APIPOSTRoutes {
         request: ChangeMasterPasswordRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/changeSortNotebook": {
         request: ChangeSortNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/closeNotebook": {
         request: CloseNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/commitNotebookArchive": {
         request: CommitNotebookArchiveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/createEncryptedNotebook": {
         request: CreateEncryptedNotebookRequestInput;
         response: { "code": 0; "data": CreateNotebookData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/createNotebook": {
         request: CreateNotebookRequestInput;
         response: { "code": 0; "data": CreateNotebookData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/disableEncryptedNotebooks": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/enableEncryptedNotebooks": {
         request: NotebookPasswordRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/exportNotebookCryptoBackup": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": NotebookCryptoBackupData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/getEncryptedNotebookStatus": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": EncryptedNotebookStatusData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/notebook/getNotebookArchiveCandidates": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": NotebookArchiveCandidatesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/getNotebookConf": {
         request: CloseNotebookRequestInput;
         response: { "code": 0; "data": NotebookConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/notebook/getNotebookInfo": {
         request: NotebookIDRequestInput;
         response: { "code": 0; "data": NotebookInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/notebook/importNotebookArchive": {
         request: ImportNotebookArchiveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/importNotebookCryptoBackup": {
         request: ImportNotebookCryptoBackupRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/lockEncryptedNotebooksOnSystemLock": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/lockNotebook": {
         request: NotebookIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/lsNotebooks": {
         request: ListNotebooksRequestInput;
         response: { "code": 0; "data": ListNotebooksData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "legacyOptional";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/notebook/openNotebook": {
         request: OpenNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/prepareNotebookArchive": {
         request: PrepareNotebookArchiveRequestInput;
         response: { "code": 0; "data": NotebookArchiveData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/removeNotebook": {
         request: NotebookIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/renameNotebook": {
         request: RenameNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/reorder": {
         request: ReorderNotebooksRequestInput;
         response: { "code": 0; "data": ReorderData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | ReorderData | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/setEncryptedNotebookFollowSystemLock": {
         request: EncryptedNotebookFollowSystemLockRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/setNotebookConf": {
         request: SetNotebookConfRequestInput;
         response: { "code": 0; "data": NotebookConf | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/setNotebookCryptoAutoLock": {
         request: NotebookCryptoAutoLockRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/setNotebookIcon": {
         request: SetNotebookIconRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/touchEncryptedNotebooks": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/notebook/unlockAndOpenNotebook": {
         request: UnlockNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/notebook/unlockNotebook": {
         request: UnlockNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/notification/pushErrMsg": {
         request: NotificationRequestInput;
         response: { "code": 0; "data": NotificationData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/notification/pushMsg": {
         request: NotificationRequestInput;
         response: { "code": 0; "data": NotificationData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/outline/getDocHeadingNumbers": {
         request: HeadingNumbersRequestInput;
         response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/outline/getDocOutline": {
         request: OutlineRequestInput;
         response: { "code": 0; "data": Array<SearchPath | null> | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/petal/getPluginPublishInfo": {
         request: PluginPublishRequestInput;
         response: { "code": 0; "data": PluginPublishInfo; "msg": string; } | { "code": -1 | 400 | 403 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/petal/loadPetals": {
         request: LoadPetalsRequestInput;
         response: { "code": 0; "data": Array<Petal | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/petal/loadPluginPublishData": {
         request: PluginPublishRequestInput;
         response: { "code": 0; "data": Record<string, null | string | number | boolean>; "msg": string; } | { "code": -1 | 400 | 403 | 404 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/petal/savePluginPublishData": {
         request: SavePluginPublishDataRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 400 | 403 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/petal/setPetalEnabled": {
         request: SetPetalEnabledRequestInput;
         response: { "code": 0; "data": Petal | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/petal/setPetalPublishEnabled": {
         request: SetPetalPublishEnabledRequestInput;
         response: { "code": 0; "data": Petal | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/petal/setPluginPublishDataGrant": {
         request: SetPluginPublishDataGrantRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 400 | 403 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/plugin/getLoadedPlugin": {
         request: LoadedPluginRequestInput;
         response: { "code": 0; "data": LoadedPlugin | null; "msg": string; } | { "code": -1 | 1 | 2 | 3 | 4; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/plugin/listLoadedPlugins": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<LoadedPlugin | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/plugin/rpc": {
         request: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>];
         response: (PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         output: "directJSON";
         noContent: true;
     };
@@ -4698,6 +5791,8 @@ export interface APIPOSTRoutes {
         request: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>];
         response: (PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         output: "directJSON";
         noContent: true;
     };
@@ -4705,1159 +5800,1656 @@ export interface APIPOSTRoutes {
         request: SQLQueryRequestInput;
         response: { "code": 0; "data": Array<Record<string, null | string | number | boolean> | null>; "limit": number; "msg": string; "truncated": boolean; } | ({ "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "limit"?: never; "truncated"?: never; });
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ref/getBacklink2": {
         request: BacklinkListRequestInput;
         response: { "code": 0; "data": (BacklinkList & { "refDefs"?: never; }) | (BacklinkRefDefs & { "backlinks"?: never; "backmentions"?: never; "box"?: never; "k"?: never; "linkRefsCount"?: never; "mentionsCount"?: never; "mk"?: never; "revision"?: never; "unchanged"?: never; }) | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | (BacklinkList & { "refDefs"?: never; }) | (BacklinkRefDefs & { "backlinks"?: never; "backmentions"?: never; "box"?: never; "k"?: never; "linkRefsCount"?: never; "mentionsCount"?: never; "mk"?: never; "revision"?: never; "unchanged"?: never; }) | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/ref/getBacklinkDoc": {
         request: BacklinkDocumentRequestInput;
         response: { "code": 0; "data": BacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/ref/getBackmentionDoc": {
         request: BackmentionDocumentRequestInput;
         response: { "code": 0; "data": BacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/ref/getGlobalBacklinkContexts": {
         request: GlobalBacklinkContextRequestInput;
         response: { "code": 0; "data": GlobalBacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/ref/getGlobalBacklinks": {
         request: GlobalBacklinkListRequestInput;
         response: { "code": 0; "data": GlobalBacklinkListData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/ref/refreshBacklink": {
         request: RefreshBacklinkRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/checkSnapshot": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": CheckSnapshotData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/checkoutRepo": {
         request: CheckoutRepoRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/createSnapshot": {
         request: CreateSnapshotRequestInput;
         response: { "code": 0; "data": CreateSnapshotData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/diffRepoSnapshots": {
         request: DiffRepoSnapshotsRequestInput;
         response: { "code": 0; "data": RepoDiffData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/repo/downloadCloudSnapshot": {
         request: DownloadCloudSnapshotRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/exportRepoFile": {
         request: ExportRepoFileRequestInput;
         response: { "code": 0; "data": RepoExportData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/repo/getCloudRepoSnapshots": {
         request: GetCloudRepoSnapshotsRequestInput;
         response: { "code": 0; "data": RepoCloudSnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/repo/getCloudRepoTagSnapshots": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": RepoCloudTagsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/repo/getRepoDocHistory": {
         request: GetRepoDocHistoryRequestInput;
         response: { "code": 0; "data": RepoDocHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/repo/getRepoFile": {
         request: GetRepoFileRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
         output: "binary";
     };
     "/api/repo/getRepoSnapshots": {
         request: GetRepoSnapshotsRequestInput;
         response: { "code": 0; "data": RepoSnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/repo/getRepoTagSnapshots": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": RepoTagsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/repo/importRepoKey": {
         request: ImportRepoKeyRequestInput;
         response: { "code": 0; "data": RepoKeyData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/initRepoKey": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": RepoKeyData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/initRepoKeyFromPassphrase": {
         request: InitRepoKeyFromPassphraseRequestInput;
         response: { "code": 0; "data": RepoKeyData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/openRepoSnapshotFile": {
         request: OpenRepoSnapshotFileRequestInput;
         response: { "code": 0; "data": RepoOpenFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/repo/purgeCloudRepo": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/purgeRepo": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/removeCloudRepoTagSnapshot": {
         request: RemoveCloudRepoTagSnapshotRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/removeRepoTagSnapshot": {
         request: RemoveRepoTagSnapshotRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/resetRepo": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/rollbackRepoSnapshotFile": {
         request: RollbackRepoSnapshotFileRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/searchRepoFile": {
         request: SearchRepoFileRequestInput;
         response: { "code": 0; "data": RepoSearchData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/repo/setRepoIndexRetentionDays": {
         request: SetRepoIndexRetentionDaysRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/repo/setRetentionIndexesDaily": {
         request: SetRetentionIndexesDailyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/repo/setSnapshotMemo": {
         request: SetSnapshotMemoRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/tagSnapshot": {
         request: TagSnapshotRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/repo/uploadCloudSnapshot": {
         request: UploadCloudSnapshotRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/riff/addRiffCards": {
         request: RiffDeckCardsRequestInput;
         response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/riff/batchSetRiffCardsDueTime": {
         request: SetRiffCardsDueRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/riff/createRiffDeck": {
         request: CreateRiffDeckRequestInput;
         response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/riff/getNotebookRiffCards": {
         request: RiffCardsRequestInput;
         response: { "code": 0; "data": RiffCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/riff/getNotebookRiffDueCards": {
         request: RiffNotebookDueCardsRequestInput;
         response: { "code": 0; "data": RiffDueCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/riff/getRiffCards": {
         request: RiffCardsRequestInput;
         response: { "code": 0; "data": RiffCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/riff/getRiffCardsByBlockIDs": {
         request: RiffBlockIDsRequestInput;
         response: { "code": 0; "data": RiffBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/riff/getRiffDecks": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<RiffDeck | null>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/riff/getRiffDueCards": {
         request: RiffDueCardsRequestInput;
         response: { "code": 0; "data": RiffDueCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/riff/getTreeRiffCards": {
         request: RiffCardsRequestInput;
         response: { "code": 0; "data": RiffCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/riff/getTreeRiffDueCards": {
         request: RiffTreeDueCardsRequestInput;
         response: { "code": 0; "data": RiffDueCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/riff/removeRiffCards": {
         request: RiffDeckCardsRequestInput;
         response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/riff/removeRiffDeck": {
         request: RiffDeckRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/riff/renameRiffDeck": {
         request: RenameRiffDeckRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/riff/resetRiffCards": {
         request: ResetRiffCardsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/riff/reviewRiffCard": {
         request: ReviewRiffCardRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/riff/skipReviewRiffCard": {
         request: RiffCardRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/search/findReplace": {
         request: FindReplaceRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/search/fullTextSearchAssetContent": {
         request: SearchAssetContentRequestInput;
         response: { "code": 0; "data": SearchAssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/search/fullTextSearchBlock": {
         request: FullTextSearchBlockRequestInput;
         response: { "code": 0; "data": FullTextSearchBlockData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/search/getAssetContent": {
         request: AssetContentRequestInput;
         response: { "code": 0; "data": AssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/search/getAssetContentByPath": {
         request: SearchPathRequestInput;
         response: { "code": 0; "data": AssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/search/getEmbedBlock": {
         request: GetEmbedBlockRequestInput;
         response: { "code": 0; "data": EmbedBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/search/listInvalidBlockRefs": {
         request: SearchPageRequestInput;
         response: { "code": 0; "data": SearchBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/search/removeTemplate": {
         request: SearchPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/search/searchAsset": {
         request: SearchAssetRequestInput;
         response: { "code": 0; "data": Array<SearchAsset | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/search/searchEmbedBlock": {
         request: SearchEmbedBlockRequestInput;
         response: { "code": 0; "data": EmbedBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/search/searchRefBlock": {
         request: SearchRefBlockRequestInput;
         response: { "code": 0; "data": SearchRefResult | (SearchRefCorrelation & { "blocks"?: never; "k"?: never; "newDoc"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | SearchRefResult | (SearchRefCorrelation & { "blocks"?: never; "k"?: never; "newDoc"?: never; }); "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/search/searchTag": {
         request: SearchTagRequestInput;
         response: { "code": 0; "data": SearchTagData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/search/searchTemplate": {
         request: SearchKeywordRequestInput;
         response: { "code": 0; "data": SearchTemplateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/search/searchWidget": {
         request: SearchKeywordRequestInput;
         response: { "code": 0; "data": SearchWidgetData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/search/semanticSearchBlock": {
         request: SearchBlockRequestInput;
         response: { "code": 0; "data": SearchBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/search/updateEmbedBlock": {
         request: UpdateEmbedBlockRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/setting/addVirtualBlockRefExclude": {
         request: VirtualBlockRefRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/addVirtualBlockRefInclude": {
         request: VirtualBlockRefRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/setting/confirmSettingsReset": {
+        request: ConfirmSettingsResetRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/getBootAppearances": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SettingBootAppearancesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/setting/getCloudUser": {
         request: SettingCloudUserRequestInput;
         response: { "code": 0; "data": SettingUser | null; "msg": string; } | { "code": -1 | 1 | 255; "data": { "closeTimeout": number; } | null | SettingUser | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/setting/getPandocBin": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/setting/getPublish": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SettingPublishData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/login2faCloudUser": {
         request: SettingLogin2faRequestInput;
         response: Login2faEnvelope | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         output: "directJSON";
     };
     "/api/setting/logoutCloudUser": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/setting/patch": {
+        request: PatchSettingRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/refreshVirtualBlockRef": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/setting/resetSettings": {
+        request: ResetSettingsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setAI": {
         request: SetAIRequestInput;
         response: { "code": 0; "data": SettingAI | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setAppearance": {
         request: SetAppearanceRequestInput;
         response: { "code": 0; "data": SettingAppearance | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setBazaar": {
         request: SetBazaarRequestInput;
         response: { "code": 0; "data": SettingBazaar | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setBazaarPetalDisabled": {
         request: SettingPetalDisabledRequestInput;
         response: { "code": 0; "data": SettingPetalDisabledData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setBootAppearance": {
         request: SettingBootAppearanceRequestInput;
         response: { "code": 0; "data": SettingBootAppearanceSelection | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setEditor": {
         request: SetEditorRequestInput;
         response: { "code": 0; "data": SettingEditor | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setEditorReadOnly": {
         request: EditorReadOnlyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setEmoji": {
         request: SettingEmojiRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setEntryVisibility": {
         request: SetEntryVisibilityRequestInput;
         response: { "code": 0; "data": SettingEntryVisibility | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setExport": {
         request: SetExportRequestInput;
         response: { "code": 0; "data": SettingExport | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setFiletree": {
         request: SetFiletreeRequestInput;
         response: { "code": 0; "data": SettingFileTree | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setFlashcard": {
         request: SetFlashcardRequestInput;
         response: { "code": 0; "data": SettingFlashcard | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setIcon": {
         request: SettingIconRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setKeymap": {
         request: SettingKeymapRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setPublish": {
         request: SetPublishRequestInput;
         response: { "code": 0; "data": SettingPublishData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setSearch": {
         request: SetSearchRequestInput;
         response: { "code": 0; "data": SettingSearch | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setSecrets": {
         request: SetSecretsRequestInput;
         response: { "code": 0; "data": SettingSecrets | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setSnippet": {
         request: SetConfSnippetRequestInput;
         response: { "code": 0; "data": SettingSnpt | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setTheme": {
         request: SettingThemeRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/setting/setVariables": {
         request: SetVariablesRequestInput;
         response: { "code": 0; "data": SettingVariables | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/snippet/getSnippet": {
         request: GetSnippetRequestInput;
         response: { "code": 0; "data": SnippetsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/snippet/removeSnippet": {
         request: TrimmedIDRequestInput;
         response: { "code": 0; "data": Snippet | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/snippet/setSnippet": {
         request: SetSnippetRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sqlite/flushTransaction": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/batchUpdateRecentDocCloseTime": {
         request: RecentDocsUpdateRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/storage/getCriteria": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<Criterion | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/storage/getInlineStyles": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": InlineStyles | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/storage/getLocalStorage": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": { [key: string]: JSONValue } | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/storage/getLocalStorageVal": {
         request: StorageKeyRequestInput;
         response: { "code": 0; "data": JSONValue; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/storage/getLocalStorageVals": {
         request: StorageKeysRequestInput;
         response: { "code": 0; "data": { [key: string]: JSONValue } | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/storage/getOutlineStorage": {
         request: OutlineStorageRequestInput;
         response: { "code": 0; "data": { [key: string]: JSONValue } | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/storage/getRecentDocs": {
         request: RecentDocsRequestInput;
         response: { "code": 0; "data": Array<RecentDoc | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "legacyOptional";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/storage/getViewState": {
         request: StorageKeyRequestInput;
         response: { "code": 0; "data": { [key: string]: JSONValue } | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/storage/patchViewState": {
         request: ViewStatePatchRequestInput;
         response: { "code": 0; "data": { [key: string]: JSONValue } | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/removeCriterion": {
         request: RemoveCriterionRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/removeLocalStorageVal": {
         request: StorageRemoveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/removeLocalStorageVals": {
         request: StorageRemoveKeysRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/removeOutlineStorage": {
         request: OutlineStorageRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/removeViewState": {
         request: StorageKeyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/setCriterion": {
         request: SetCriterionRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/setInlineStyles": {
         request: SetInlineStylesRequestInput;
         response: { "code": 0; "data": InlineStyles | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/setLocalStorage": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/setLocalStorageVal": {
         request: StorageSetRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/setLocalStorageVals": {
         request: StorageSetKeysRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/setOutlineStorage": {
         request: OutlineStorageSetRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/setWorkspaceAVPalette": {
         request: WorkspaceAVPaletteRequestInput;
         response: { "code": 0; "data": InlineStyles | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/storage/updateRecentDocCloseTime": {
         request: RecentDocUpdateRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/storage/updateRecentDocOpenTime": {
         request: RecentDocUpdateRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/storage/updateRecentDocViewTime": {
         request: RecentDocUpdateRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/sync/createCloudSyncDir": {
         request: SyncNameRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/exportSyncProviderS3": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SyncProviderExportData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/sync/exportSyncProviderWebDAV": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SyncProviderExportData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/sync/getBootSync": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/sync/getSyncInfo": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SyncInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/sync/getSyncLANStatus": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SyncLANStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/sync/importSyncProviderS3": {
         request: SyncProviderImportRequestInput;
         response: { "code": 0; "data": SyncS3Data; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "s3"?: never; }) | null | (SyncS3Data & { "closeTimeout"?: never; }); "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/importSyncProviderWebDAV": {
         request: SyncProviderImportRequestInput;
         response: { "code": 0; "data": SyncWebDAVData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "webdav"?: never; }) | null | (SyncWebDAVData & { "closeTimeout"?: never; }); "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/listCloudSyncDir": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": CloudSyncDirsData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/sync/performBootSync": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/performSync": {
         request: PerformSyncRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/removeCloudSyncDir": {
         request: SyncNameRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setCloudSyncDir": {
         request: SyncNameRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setSyncAssetDownloadMode": {
         request: SyncModeRequestInput;
         response: { "code": 0; "data": SyncAssetDownloadModeData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setSyncEnable": {
         request: SyncEnabledRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setSyncGenerateConflictDoc": {
         request: SyncEnabledRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setSyncInterval": {
         request: SyncIntervalRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setSyncLAN": {
         request: SyncLANRequestInput;
         response: { "code": 0; "data": SyncLANStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setSyncMode": {
         request: SyncModeRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setSyncPerception": {
         request: SyncEnabledRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setSyncProvider": {
         request: SyncProviderRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setSyncProviderLocal": {
         request: SetSyncLocalRequestInput;
         response: { "code": 0; "data": SyncLocalData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setSyncProviderS3": {
         request: SetSyncS3RequestInput;
         response: { "code": 0; "data": SyncS3Data; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/setSyncProviderWebDAV": {
         request: SetSyncWebDAVRequestInput;
         response: { "code": 0; "data": SyncWebDAVData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/addCustomEmoji": {
         request: SystemCustomEmojiRequestInput;
         response: { "code": 0; "data": SystemPathData; "msg": string; } | { "code": -1 | 400 | 413; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "form";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/addMicrosoftDefenderExclusion": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/system/appendKeyboardLog": {
+        request: SystemKeyboardLogRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/bootProgress": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
     };
     "/api/system/checkUpdate": {
         request: SystemCheckUpdateRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/checkWorkspaceDir": {
         request: SystemPathRequestInput;
         response: { "code": 0; "data": SystemWorkspaceCheckData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/clearTempFiles": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/createWorkspaceDir": {
         request: SystemPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/currentTime": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": number; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
     };
     "/api/system/dismissOnboarding": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemOnboarding | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/ensureOnboarding": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemOnboarding | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/exit": {
         request: SystemExitRequestInput;
         response: { "code": 0; "data": SystemExitData; "msg": string; } | { "code": -1 | 1 | 2; "data": ({ "closeTimeout": number; } & { "installPkgPath"?: never; }) | null | SystemExitData; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/exportConf": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemExportConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/exportLog": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/exportTLSCABundle": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemPathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/exportTLSCACert": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemPathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/getChangelog": {
         request: SystemChangelogRequestInput;
         response: { "code": 0; "data": SystemChangelogData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "legacyOptional";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/system/getConf": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/system/getCustomFonts": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<SystemCustomFont | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/system/getEmojiConf": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<SystemEmojiGroup | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/system/getMobileWorkspaces": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/getNetwork": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": NetworkData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/getRuntimeInfo": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemRuntimeInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/getSysFonts": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<SystemFont | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/getWorkspaceInfo": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": WorkspaceInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/getWorkspaceStorage": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": WorkspaceStorageData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/getWorkspaces": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<SystemWorkspace | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/system/ignoreAddMicrosoftDefenderExclusion": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/importConf": {
         request: SystemImportConfRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/importCustomFont": {
         request: SystemImportFileRequestInput;
         response: { "code": 0; "data": SystemCustomFont | null; "msg": string; } | { "code": -1 | 400 | 413; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/importTLSCABundle": {
         request: SystemImportFileRequestInput;
         response: { "code": 0; "data": SystemMessageData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/loginAuth": {
         request: SystemLoginAuthRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
     };
     "/api/system/logoutAuth": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
     };
     "/api/system/oidc/mobileCallback": {
         request: SystemOIDCMobileRequestInput;
         response: { "code": 0; "data": SystemOIDCMobileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
     };
     "/api/system/oidc/poll": {
         request: SystemOIDCPollRequestInput;
         response: { "code": 0; "data": SystemOIDCPollData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
     };
     "/api/system/oidc/start": {
         request: SystemOIDCStartRequestInput;
         response: { "code": 0; "data": SystemOIDCStartData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
     };
     "/api/system/oidc/validate": {
         request: SystemOIDCRequestInput;
         response: { "code": 0; "data": SystemOIDCStartData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/oidc/validateActivate": {
         request: SystemOIDCPollRequestInput;
         response: { "code": 0; "data": SystemOIDCActivateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/oidc/validateCancel": {
         request: SystemOIDCPollRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
     };
     "/api/system/oidc/validatePoll": {
         request: SystemOIDCPollRequestInput;
         response: { "code": 0; "data": SystemOIDCValidatePollData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
     };
     "/api/system/rebuildDataIndex": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/reloadUI": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/removeCustomFont": {
         request: SystemRemoveCustomFontRequestInput;
         response: { "code": 0; "data": SystemRemoveCustomFontData; "msg": string; } | { "code": -1 | 400 | 404; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/removeWorkspaceDir": {
         request: SystemPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/removeWorkspaceDirPhysically": {
         request: SystemPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setAPIToken": {
         request: SystemAPITokenRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setAccessAuthCode": {
         request: SystemAccessAuthCodeRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setAppearanceMode": {
         request: SystemAppearanceModeRequestInput;
         response: { "code": 0; "data": SystemAppearanceData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setAutoLaunch": {
         request: AutoLaunchRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setDownloadInstallPkg": {
         request: DownloadInstallPkgRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setFollowSystemLockScreen": {
         request: LockScreenRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setNetworkProxy": {
         request: NetworkProxyInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setNetworkServe": {
         request: NetworkServeRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setNetworkServeTLS": {
         request: NetworkServeTLSRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setOIDC": {
         request: SystemOIDCRequestInput;
         response: { "code": 0; "data": SystemOIDC | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/system/setSettingsWindow": {
+        request: SettingsWindowRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setUILayout": {
         request: SystemUILayoutRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setUpdateChannel": {
         request: UpdateChannelRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/setWorkspaceDir": {
         request: SystemPathRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/uiproc": {
         request: SystemUIProcessRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
         emptyResponseStatuses: [200];
     };
     "/api/system/vacuumDataIndex": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/version": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
     };
     "/api/tag/getTag": {
         request: GetTagRequestInput;
         response: { "code": 0; "data": Array<TagData | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/tag/removeTag": {
         request: RemoveTagRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/tag/renameTag": {
         request: RenameTagRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/template/docSaveAsTemplate": {
         request: SaveTemplateRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/template/getDocSaveAsTemplateInfo": {
         request: TemplateDocumentRequestInput;
         response: { "code": 0; "data": TemplateDocumentInfo; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/template/manage": {
         request: TemplateFileRequestInput;
         response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | (TemplateFileRevision & { "content"?: never; "path"?: never; "sourceDocID"?: never; }) | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/template/render": {
         request: RenderTemplateRequestInput;
         response: { "code": 0; "data": RenderTemplateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/template/renderSprig": {
         request: RenderSprigRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/transactions": {
         request: PerformTransactionsRequestInput;
         response: { "code": 0; "data": Array<Transaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/transactions/clearHistory": {
         request: TransactionClearHistoryRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/transactions/redo": {
         request: TransactionHistoryRequestInput;
         response: { "code": 0; "data": (TransactionHistoryEmpty & { "doOperations"?: never; "failed"?: never; "isUndo"?: never; "msg"?: never; "mutatedRootIDs"?: never; "undoOperations"?: never; }) | (TransactionHistoryFailure & { "canRedo"?: never; "canUndo"?: never; "doOperations"?: never; "isUndo"?: never; "mutatedRootIDs"?: never; "undoOperations"?: never; }) | (TransactionHistoryApplied & { "failed"?: never; "msg"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/transactions/undo": {
         request: TransactionHistoryRequestInput;
         response: { "code": 0; "data": (TransactionHistoryEmpty & { "doOperations"?: never; "failed"?: never; "isUndo"?: never; "msg"?: never; "mutatedRootIDs"?: never; "undoOperations"?: never; }) | (TransactionHistoryFailure & { "canRedo"?: never; "canUndo"?: never; "doOperations"?: never; "isUndo"?: never; "mutatedRootIDs"?: never; "undoOperations"?: never; }) | (TransactionHistoryApplied & { "failed"?: never; "msg"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/transactions/undoState": {
         request: TransactionUndoStateRequestInput;
         response: { "code": 0; "data": TransactionUndoState; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated"];
     };
     "/api/ui/reloadAttributeView": {
         request: BlockIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ui/reloadFiletree": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ui/reloadIcon": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ui/reloadProtyle": {
         request: BlockIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ui/reloadTag": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ui/reloadTheme": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/ui/reloadUI": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/oauth/mcp/consent": {
         request: MCPOAuthConsentRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "form";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "binary";
         contentVariants: [{"status":302,"contentType":"text/html"},{"status":400,"contentType":"text/html"}];
     };
@@ -5865,6 +7457,8 @@ export interface APIPOSTRoutes {
         request: MCPOAuthTokenRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "form";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "binary";
         contentVariants: [{"status":200,"contentType":"application/json"},{"status":400,"contentType":"application/json"},{"status":401,"contentType":"application/json"},{"status":404,"contentType":"application/json"},{"status":429,"contentType":"application/json"},{"status":500,"contentType":"application/json"}];
     };
@@ -5872,6 +7466,8 @@ export interface APIPOSTRoutes {
         request: MCPOAuthTokenRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "form";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
         output: "binary";
         contentVariants: [{"status":200,"contentType":"application/json"},{"status":400,"contentType":"application/json"},{"status":401,"contentType":"application/json"},{"status":404,"contentType":"application/json"},{"status":429,"contentType":"application/json"},{"status":500,"contentType":"application/json"}];
     };
@@ -5879,8 +7475,10 @@ export interface APIPOSTRoutes {
         request: Blob;
         response: Blob | JSONValue | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "raw";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
         output: "pluginService";
-        pluginService: {"variants":[{"mode":"JSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"JSONP","statusPolicy":"plugin","mediaTypes":["application/javascript","application/json"],"payload":"jsonp-or-json","headersOverrideMedia":true},{"mode":"AsciiJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"IndentedJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"PureJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"SecureJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"secure-json","headersOverrideMedia":true},{"mode":"XML","statusPolicy":"plugin","mediaTypes":["application/xml"],"payload":"xml","headersOverrideMedia":true},{"mode":"YAML","statusPolicy":"plugin","mediaTypes":["application/yaml"],"payload":"yaml","headersOverrideMedia":true},{"mode":"TOML","statusPolicy":"plugin","mediaTypes":["application/toml"],"payload":"toml","headersOverrideMedia":true},{"mode":"ProtoBuf","statusPolicy":"plugin","mediaTypes":["application/x-protobuf"],"payload":"protobuf","headersOverrideMedia":true},{"mode":"file","statusPolicy":"file","mediaTypes":["dynamic"],"payload":"bytes","headersOverrideMedia":true},{"mode":"string","statusPolicy":"plugin","mediaTypes":["text/plain"],"payload":"text","headersOverrideMedia":true},{"mode":"raw","statusPolicy":"plugin","mediaTypes":["dynamic"],"payload":"bytes","headersOverrideMedia":true},{"mode":"redirect","statusPolicy":"redirect","mediaTypes":["text/html"],"payload":"redirect","headersOverrideMedia":true},{"mode":"proxy","statusPolicy":"proxy","mediaTypes":["upstream"],"payload":"bytes","headersOverrideMedia":true},{"mode":"empty","statusPolicy":"plugin","mediaTypes":["optional"],"payload":"none","headersOverrideMedia":true},{"mode":"websocket","statusPolicy":"websocket","mediaTypes":["upgrade-or-text"],"payload":"frames","headersOverrideMedia":false},{"mode":"sse","statusPolicy":"sse","mediaTypes":["text/event-stream"],"payload":"events","headersOverrideMedia":false},{"mode":"admission","statusPolicy":"admission","mediaTypes":["text/plain"],"payload":"text","headersOverrideMedia":true}],"admissionStatuses":[400,404,500,503],"webSocketFrames":["text","binary","close","ping","pong"],"sseEventNames":"dynamic","sseData":"json-or-text","sseEvent":{"type":"object","properties":{"data":{"$ref":"#/$defs/JSONValue"},"event":{"type":"string"},"id":{"type":"string"},"retry":{"type":"integer"}},"required":["data"],"additionalProperties":false}};
+        pluginService: {"variants":[{"mode":"JSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"JSONP","statusPolicy":"plugin","mediaTypes":["application/javascript","application/json"],"payload":"jsonp-or-json","headersOverrideMedia":true},{"mode":"AsciiJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"IndentedJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"PureJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"json","headersOverrideMedia":true},{"mode":"SecureJSON","statusPolicy":"plugin","mediaTypes":["application/json"],"payload":"secure-json","headersOverrideMedia":true},{"mode":"XML","statusPolicy":"plugin","mediaTypes":["application/xml"],"payload":"xml","headersOverrideMedia":true},{"mode":"YAML","statusPolicy":"plugin","mediaTypes":["application/yaml"],"payload":"yaml","headersOverrideMedia":true},{"mode":"TOML","statusPolicy":"plugin","mediaTypes":["application/toml"],"payload":"toml","headersOverrideMedia":true},{"mode":"ProtoBuf","statusPolicy":"plugin","mediaTypes":["application/x-protobuf"],"payload":"protobuf","headersOverrideMedia":true},{"mode":"file","statusPolicy":"file","mediaTypes":["dynamic"],"payload":"bytes","headersOverrideMedia":true},{"mode":"string","statusPolicy":"plugin","mediaTypes":["text/plain"],"payload":"text","headersOverrideMedia":true},{"mode":"raw","statusPolicy":"plugin","mediaTypes":["dynamic"],"payload":"bytes","headersOverrideMedia":true},{"mode":"stream","statusPolicy":"plugin","mediaTypes":["dynamic"],"payload":"bytes","headersOverrideMedia":true},{"mode":"redirect","statusPolicy":"redirect","mediaTypes":["text/html"],"payload":"redirect","headersOverrideMedia":true},{"mode":"proxy","statusPolicy":"proxy","mediaTypes":["upstream"],"payload":"bytes","headersOverrideMedia":true},{"mode":"empty","statusPolicy":"plugin","mediaTypes":["optional"],"payload":"none","headersOverrideMedia":true},{"mode":"websocket","statusPolicy":"websocket","mediaTypes":["upgrade-or-text"],"payload":"frames","headersOverrideMedia":false},{"mode":"sse","statusPolicy":"sse","mediaTypes":["text/event-stream"],"payload":"events","headersOverrideMedia":false},{"mode":"admission","statusPolicy":"admission","mediaTypes":["text/plain"],"payload":"text","headersOverrideMedia":true}],"admissionStatuses":[400,404,500,503],"webSocketFrames":["text","binary","close","ping","pong"],"sseEventNames":"dynamic","sseData":"json-or-text","sseEvent":{"type":"object","properties":{"data":{"$ref":"#/$defs/JSONValue"},"event":{"type":"string"},"id":{"type":"string"},"retry":{"type":"integer"}},"required":["data"],"additionalProperties":false}};
     };
 }
 

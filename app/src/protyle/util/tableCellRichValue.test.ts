@@ -4,6 +4,22 @@ import {decodeTableCellRich, encodeTableCellRich} from "./tableCellRichValue";
 import {configureAVRichTextLute} from "../render/av/richTextValue";
 
 describe("table cell rich text wire format", () => {
+    it("copies styled table cells as standard Markdown without internal attributes", () => {
+        if (typeof Lute === "undefined") {
+            require("../../../stage/protyle/js/lute/lute.min.js");
+        }
+        const lute = Lute.New();
+        lute.SetProtyleWYSIWYG(true);
+        lute.SetKramdownIAL(true);
+        const html = '<div data-type="NodeTable"><div contenteditable="true"><table><thead><tr>' +
+            '<th style="text-align: left;">Header</th></tr></thead><tbody><tr>' +
+            '<td style="text-align: center;"><strong>value</strong></td></tr></tbody></table></div></div>';
+        const markdown = lute.BlockDOM2StdMd(html);
+        assert.match(markdown, /\*\*value\*\*/);
+        assert.doesNotMatch(markdown, /\{:\s|text-align|style=/);
+        assert.match(lute.BlockDOM2Md(html), /text-align: center/);
+    });
+
     it("preserves Unicode, literal Markdown, pipes, and line breaks without changing the source", () => {
         const source = "- **文本** 🧪\n\n```go\na | b\nc\n```\n\n\\*literal\\*";
         const encoded = encodeTableCellRich(source);

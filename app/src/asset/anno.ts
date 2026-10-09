@@ -3,13 +3,13 @@ import {setPosition} from "../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {readText, setStorageVal, writeText} from "../protyle/util/compatibility";
 import {getAllModels} from "../layout/getAll";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Constants} from "../constants";
 import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {escapeAttr, escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {filesize} from "filesize";
 import md5 from "blueimp-md5";
 import {getRectImageName, hideRectResizeHandles, moveRectBounds, resizeRectBounds} from "./rectAnnotationResize";
@@ -436,17 +436,8 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 processed = true;
                 break;
             } else if (type === "remove") {
-                const urlPath = pdf.appConfig.file.replace(location.origin, "").substr(1);
-                const config = getConfig(pdf);
                 const id = rectElement.getAttribute("data-node-id");
-                delete config[id];
-                getRectElementsByNodeId(element, id).forEach(item => {
-                    item.remove();
-                });
-                fetchPost("/api/asset/setFileAnnotation", {
-                    path: urlPath + ".sya",
-                    data: JSON.stringify(config),
-                });
+                removeAnno(pdf, element, id);
                 hideToolbar(element);
                 event.preventDefault();
                 event.stopPropagation();
@@ -725,7 +716,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
         }
     });
     // eslint-disable-next-line no-control-regex
-    const content = Lute.EscapeHTMLStr(rangeContents.textContent.replace(/[\x00]|\n/g, ""));
+    const content = escapeHtmlTextAndAttr(rangeContents.textContent.replace(/[\x00]|\n/g, ""));
     const startPage = pdf.pdfViewer.getPageView(startIndex);
     const startPageRect = startPage.canvas.getClientRects()[0];
     const startViewport = startPage.viewport;
@@ -892,7 +883,8 @@ export const getPdfInstance = (element: HTMLElement) => {
 
 export const getHighlight = (element: HTMLElement) => {
     const pdfInstance: any = getPdfInstance(element);
-    if (!pdfInstance) {
+    // 未引用资源预览仍注册实例以支持键盘操作，但不访问批注文件。
+    if (!pdfInstance || pdfInstance.appConfig.previewOnly) {
         return;
     }
     element.parentElement.querySelector(":scope > .pdf__rects")?.remove();
@@ -1151,6 +1143,45 @@ async function getRectImgData(pdfObj: any, pageNumber: number, position: number[
     });
     return {blob, rotation: totalRotation, displayWidth};
 }
+
+const removeAnno = (pdf: any, element: HTMLElement, id: string) => {
+    const file = pdf.appConfig.file;
+    const urlPath = file.replace(location.origin, "").substr(1);
+    const isCurrent = () => element.isConnected && getRegisteredPdfInstance(element) === pdf && pdf.appConfig.file === file;
+    const remove = () => {
+        if (!isCurrent()) {
+            return;
+        }
+        const config = getConfig(pdf);
+        if (!config?.[id]) {
+            return;
+        }
+        delete config[id];
+        getRectElementsByNodeId(element, id).forEach(item => {
+            item.remove();
+        });
+        fetchPost("/api/asset/setFileAnnotation", {
+            path: urlPath + ".sya",
+            data: JSON.stringify(config),
+        });
+    };
+    fetchPost("/api/block/getRefIDsByFileAnnotationID", {
+        id,
+        notebook: new URL(file, location.origin).searchParams.get("box") || "",
+    }, (response) => {
+        if (response.code !== 0 || !isCurrent()) {
+            return;
+        }
+        const count = response.data.refDefs.length;
+        if (count > 0) {
+            confirmDialog(window.siyuan.languages.deleteOpConfirm,
+                window.siyuan.languages.pdfAnnotationDeleteRefConfirm.replace("${x}", count.toString()), remove,
+                undefined, true);
+        } else {
+            remove();
+        }
+    });
+};
 
 const setConfig = (pdf: any, id: string, data: IPdfAnno) => {
     const config = getConfig(pdf);

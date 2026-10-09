@@ -235,18 +235,20 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false, tab
             const name = attribute.name.toLowerCase();
             const imageAttribute = images && ["src", "data-src", "alt", "title", "loading"].includes(name) &&
                 (element.tagName === "IMG" || element.classList.contains("img"));
+            const linkTitleAttribute = tableCellCustomInline && name === "data-title" &&
+                (element.dataset.type || "").split(" ").includes("a");
             const codeAttribute = images && element.dataset.type === "NodeCodeBlock" &&
                 (["linewrap", "ligatures", "linenumber"].includes(name) && ["true", "false"].includes(attribute.value) ||
                     name === Constants.CUSTOM_SY_CODE_TAB_SPACES &&
                     CODE_TAB_SPACE_VALUES.some(value => value.toString() === attribute.value));
-            if ((!AV_RICH_TEXT_EDITOR_ALLOWED_ATTRIBUTES.includes(name) && !imageAttribute && !codeAttribute) ||
+            if ((!AV_RICH_TEXT_EDITOR_ALLOWED_ATTRIBUTES.includes(name) && !imageAttribute && !linkTitleAttribute && !codeAttribute) ||
                 name === "xlink:href" && !attribute.value.startsWith("#icon")) {
                 element.removeAttribute(attribute.name);
             }
         });
     });
     template.content.querySelectorAll<HTMLElement>('[data-type~="a"][data-href]').forEach((element) => {
-        const href = getAVRichTextSafeURL(element.dataset.href);
+        const href = getAVRichTextSafeURL(element.dataset.href, tableCellCustomInline);
         if (href) {
             element.dataset.href = href;
         } else {

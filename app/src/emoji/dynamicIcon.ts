@@ -21,7 +21,8 @@ export const refreshDynamicIcons = () => {
         } catch {
             return;
         }
-        if (url.origin !== window.location.origin || !url.pathname.endsWith("/api/icon/getDynamicIcon")) {
+        if (url.origin !== window.location.origin || !url.pathname.endsWith("/api/icon/getDynamicIcon") ||
+            url.searchParams.get("type") !== "8") {
             return;
         }
         // 刷新标记仅用于重新请求图片，选择图标时移除，不写入图标属性。

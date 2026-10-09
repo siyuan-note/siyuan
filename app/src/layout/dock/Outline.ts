@@ -572,21 +572,28 @@ export class Outline extends Model {
         }
     }
 
+    public invalidateCurrent() {
+        this.currentRequestID++;
+    }
+
     public async setCurrent(nodeElement: HTMLElement) {
         const requestID = ++this.currentRequestID;
         if (!nodeElement) {
+            this.setCurrentById("");
             return;
         }
         if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
             !hasClosestByClassName(nodeElement, "bq") &&
-            !hasClosestByClassName(nodeElement, "callout-content")) {
+            !hasClosestByClassName(nodeElement, "callout-content") &&
+            !hasClosestByClassName(nodeElement, "tab-item")) {
             this.setCurrentById(nodeElement.getAttribute("data-node-id"));
         } else {
             let previousElement = getPreviousBlock(nodeElement);
             while (previousElement) {
                 if (previousElement.getAttribute("data-type") === "NodeHeading" &&
                     !hasClosestByClassName(previousElement, "bq") &&
-                    !hasClosestByClassName(previousElement, "callout-content")) {
+                    !hasClosestByClassName(previousElement, "callout-content") &&
+                    !hasClosestByClassName(previousElement, "tab-item")) {
                     break;
                 } else {
                     previousElement = getPreviousBlock(previousElement);
@@ -619,12 +626,8 @@ export class Outline extends Model {
                     if (!isCurrent()) {
                         return;
                     }
-                    response.data.reverse().find((item: IBreadcrumb) => {
-                        if (item.type === "NodeHeading") {
-                            this.setCurrentById(item.id);
-                            return true;
-                        }
-                    });
+                    const heading = response.data.reverse().find((item: IBreadcrumb) => item.type === "NodeHeading");
+                    this.setCurrentById(heading?.id || "");
                 });
             }
         }
@@ -755,6 +758,11 @@ export class Outline extends Model {
 
     public saveExpendIds() {
         if (window.siyuan.config.readonly || window.siyuan.isPublish) {
+            return;
+        }
+
+        // 未打开文档时没有标题状态可持久化
+        if (!this.blockId) {
             return;
         }
 
@@ -900,16 +908,6 @@ export class Outline extends Model {
     private showExpandLevelMenu(target: HTMLElement) {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_OUTLINE_EXPAND_LEVEL);
-        for (let i = 1; i <= 6; i++) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: `heading${i}`,
-                icon: `iconH${i}`,
-                label: window.siyuan.languages[`heading${i}`],
-                current: window.siyuan.storage[Constants.LOCAL_OUTLINE].expandLevel === i,
-                click: () => this.expandToLevel(i)
-            }).element);
-        }
-        window.siyuan.menus.menu.append(new MenuItem({id: "separator_all", type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             id: "expandAll",
             icon: "iconExpand",
@@ -924,6 +922,15 @@ export class Outline extends Model {
             accelerator: window.siyuan.config.keymap.editor.general.collapse.custom,
             click: () => this.setAllExpanded(false)
         }).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_all", type: "separator"}).element);
+        for (let i = 1; i <= 6; i++) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: `heading${i}`,
+                icon: `iconH${i}`,
+                label: window.siyuan.languages[`heading${i}`],
+                click: () => this.expandToLevel(i)
+            }).element);
+        }
         const rect = target.getBoundingClientRect();
         window.siyuan.menus.menu.popup({
             x: rect.left,

@@ -131,6 +131,7 @@ func (av *AttributeView) visitPersistedValues(visit func(*Value)) {
 			}
 		}
 	}
+	av.visitAutomationValues(visitValue)
 }
 
 func visitKeyValues(key *Key, visitValue func(*Value)) {

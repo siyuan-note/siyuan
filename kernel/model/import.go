@@ -63,6 +63,12 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
+var (
+	importPrePattern            = regexp.MustCompile(`(?sU)<pre [^>]*>(.*)</pre>`)
+	importSVGPattern            = regexp.MustCompile(`(?i)<svg[^>]*>(.*?)</svg>`)
+	importEncodedNewlinePattern = regexp.MustCompile(`(?i)%0A`)
+)
+
 // GetImportAssetsDir 返回导入资源的落盘目录。普通笔记本复用已有本地目录，否则回退到全局目录。
 func GetImportAssetsDir(boxID, docDirLocalPath string) string {
 	globalAssetsDir := filepath.Join(util.DataDir, "assets")
@@ -115,7 +121,7 @@ func HTML2TreeWithOptions(htmlStr string, luteEngine *lute.Lute, boxID string,
 		case ast.NodeHTMLBlock:
 			if bytes.HasPrefix(n.Tokens, []byte("<pre ")) && bytes.HasSuffix(n.Tokens, []byte("</pre>")) {
 				if bytes.Contains(n.Tokens, []byte("data:image/svg+xml;base64")) {
-					matches := regexp.MustCompile(`(?sU)<pre [^>]*>(.*)</pre>`).FindSubmatch(n.Tokens)
+					matches := importPrePattern.FindSubmatch(n.Tokens)
 					if len(matches) >= 2 {
 						n.Tokens = matches[1]
 					}
@@ -335,7 +341,7 @@ func checkEncryptedImportFlashcards(tree *parse.Tree, sourcePath string, encrypt
 	if "" == title {
 		title = filepath.Base(sourcePath)
 	}
-	return errors.New(fmt.Sprintf(Conf.Language(386), htmlstd.EscapeString(title)))
+	return fmt.Errorf(Conf.Language(386), htmlstd.EscapeString(title))
 }
 
 // importedBlockDocTitles 建立本次导入块 ID 到所属文档标题的映射，供闪卡卡片反查文档。
@@ -369,7 +375,7 @@ func checkEncryptedImportDeck(unzipRootPath string, trees map[string]*parse.Tree
 	if nil != loadErr || nil == deck {
 		// 牌组无法解析时仍要拒绝导入，此时无法指出具体文档，只报告包内牌组路径
 		logging.LogErrorf("load imported deck [%s] failed: %s", storageRiffDir, loadErr)
-		return errors.New(fmt.Sprintf(Conf.Language(385), filepath.ToSlash(filepath.Join("storage", "riff"))))
+		return fmt.Errorf(Conf.Language(385), filepath.ToSlash(filepath.Join("storage", "riff")))
 	}
 
 	var deckDocs []string
@@ -389,14 +395,14 @@ func checkEncryptedImportDeck(unzipRootPath string, trees map[string]*parse.Tree
 	}
 	if 0 == len(deckDocs) {
 		// 牌组存在但没有可定位的卡片，退回报告包内牌组路径
-		return errors.New(fmt.Sprintf(Conf.Language(385), filepath.ToSlash(filepath.Join("storage", "riff"))))
+		return fmt.Errorf(Conf.Language(385), filepath.ToSlash(filepath.Join("storage", "riff")))
 	}
 	deckDocs = gulu.Str.RemoveDuplicatedElem(deckDocs)
 	sort.Strings(deckDocs)
 	if 5 < len(deckDocs) {
 		deckDocs = append(deckDocs[:5], "...")
 	}
-	return errors.New(fmt.Sprintf(Conf.Language(385), htmlstd.EscapeString(strings.Join(deckDocs, ", "))))
+	return fmt.Errorf(Conf.Language(385), htmlstd.EscapeString(strings.Join(deckDocs, ", ")))
 }
 
 func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, sharedBlockIDs map[string]string,
@@ -948,7 +954,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			// 只有"目标笔记本未解锁导致拒绝写盘"才替换为提示解锁的文案，其余写盘错误原样上抛，避免归因错误。
 			// 相对路径的父目录名来自导入包，需与文档标题一样转义后再进入错误消息。
 			if errors.Is(err, errImportedTreeBoxLocked) {
-				err = errors.New(fmt.Sprintf(Conf.Language(388), htmlstd.EscapeString(finalRelPath)))
+				err = fmt.Errorf(Conf.Language(388), htmlstd.EscapeString(finalRelPath))
 			}
 			return
 		}
@@ -1650,7 +1656,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				return io.EOF
 			}
 
-			tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data)
+			tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data, true)
 			if nil == tree {
 				logging.LogErrorf("parse tree [%s] failed", currentPath)
 				return nil
@@ -1798,7 +1804,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		if err != nil {
 			return err
 		}
-		tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data)
+		tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data, true)
 		if nil == tree {
 			msg := fmt.Sprintf("parse tree [%s] failed", localPath)
 			logging.LogError(msg)
@@ -1983,12 +1989,16 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 	return
 }
 
-func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdated string) {
+func parseStdMd(markdown []byte, footnotes bool) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdated string) {
 	luteEngine := util.NewStdLute()
+	luteEngine.SetFootnotes(footnotes)
 	luteEngine.SetYamlFrontMatter(true) // 解析 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/10878
 	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
 	if nil == ret {
 		return
+	}
+	if footnotes {
+		convertMarkdownFootnotes(ret)
 	}
 	parse.NormalizeInlineHTMLTextStyles(ret)
 	normalizeImportedHTMLTextStyles(ret)
@@ -2028,8 +2038,7 @@ func htmlBlock2Media(tree *parse.Tree) {
 }
 
 func processHTMLBlockSvgImg(n *ast.Node, assetDirPath, boxID string) {
-	re := regexp.MustCompile(`(?i)<svg[^>]*>(.*?)</svg>`)
-	matches := re.FindStringSubmatch(string(n.Tokens))
+	matches := importSVGPattern.FindStringSubmatch(string(n.Tokens))
 	if 1 >= len(matches) {
 		return
 	}
@@ -2064,8 +2073,7 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath, boxID string) {
 	}
 	typ = strings.ToLower(typ)
 	str := strings.TrimSpace(dest[sep+8:])
-	re := regexp.MustCompile(`(?i)%0A`)
-	str = re.ReplaceAllString(str, "\n")
+	str = importEncodedNewlinePattern.ReplaceAllString(str, "\n")
 	var decodeErr error
 	unbased, decodeErr := base64.StdEncoding.DecodeString(str)
 	if nil != decodeErr {
@@ -2315,11 +2323,13 @@ func htmlBlock2Inline(tree *parse.Tree) {
 }
 
 func reassignIDUpdated(tree *parse.Tree, rootID, updated string) {
+	blockIDs := map[string]string{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || "" == n.ID {
 			return ast.WalkContinue
 		}
 
+		oldID := n.ID
 		n.ID = ast.NewNodeID()
 		if ast.NodeDocument == n.Type && "" != rootID {
 			n.ID = rootID
@@ -2334,6 +2344,16 @@ func reassignIDUpdated(tree *parse.Tree, rootID, updated string) {
 			}
 		} else {
 			n.SetIALAttr("updated", util.TimeFromID(n.ID))
+		}
+		blockIDs[oldID] = n.ID
+		return ast.WalkContinue
+	})
+	// 导入时为块分配新 ID，同时更新文档内脚注等块引用的目标。
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && treenode.IsBlockRef(n) {
+			if id := blockIDs[n.TextMarkBlockRefID]; id != "" {
+				n.TextMarkBlockRefID = id
+			}
 		}
 		return ast.WalkContinue
 	})

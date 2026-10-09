@@ -1,0 +1,81 @@
+import {IMAGE_OCR_MENU} from "../menus/declarations/imageOCRMenu";
+import {createDeclaredMenu} from "../menus/declarations/menuDeclaration";
+import * as assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import test from "node:test";
+import {ScriptTarget, transpileModule} from "typescript";
+
+const source = transpileModule(readFileSync("src/asset/imageOCRAvailability.ts", "utf8")
+    .replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""), {
+    compilerOptions: {target: ScriptTarget.ES2020},
+}).outputText;
+const availability = new Function("isEncryptedBox", source + "\nreturn getImageOCRAvailability;")(
+    (id: string) => id === "encrypted",
+);
+
+test("OCR recognition requires local unencrypted assets, including scoped notebook sources", () => {
+    for (const path of ["assets/image.png", "assets/image.PNG?box=ordinary&style=thumb#preview"]) {
+        assert.deepEqual(availability(path, "ordinary"), {text: true, local: true, ai: true});
+    }
+    for (const path of ["https://example.com/image.png", "file:///image.png", "data:image/png;base64,AA", "", null]) {
+        assert.deepEqual(availability(path, "ordinary"), {text: true, local: false, ai: false});
+    }
+    for (const [path, notebookId] of [
+        ["assets/image.png", "encrypted"],
+        ["assets/image.png?style=thumb&box=encrypted#preview", "ordinary"],
+        ["assets/image.png?box=%65ncrypted", "ordinary"],
+    ]) {
+        assert.deepEqual(availability(path, notebookId), {text: false, local: false, ai: false});
+    }
+});
+
+test("AI OCR advertises only native or convertible image formats", () => {
+    for (const extension of ["png", "jpg", "jpeg", "gif", "webp", "bmp", "tif", "tiff", "heic", "heif"]) {
+        assert.equal(availability(`assets/image.${extension.toUpperCase()}?box=ordinary#preview`, "ordinary").ai, true);
+    }
+    for (const extension of ["svg", "avif", "ico", "pdf", "png.exe"]) {
+        assert.deepEqual(availability(`assets/image.${extension}`, "ordinary"), {text: true, local: true, ai: false});
+    }
+});
+
+test("shared image menus hide unavailable recognition and its separator while retaining text actions", () => {
+    const factorySource = transpileModule(readFileSync("src/menus/imageOCRMenu.ts", "utf8")
+        .replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""), {
+        compilerOptions: {target: ScriptTarget.ES2020},
+    }).outputText;
+    const factory = new Function("window", "createDeclaredMenu", "IMAGE_OCR_MENU", "getImageOCRAvailability",
+        "getImageOCRStatus", "isDisabledFeature", `${factorySource}\nreturn createImageOCRMenu;`);
+    const getMenu = (path: string, notebookId: string, disabled = false, provider = "paddleocr") => {
+        const config = {siyuan: {languages: {}, config: {ocr: {provider}}}};
+        const previous = Object.getOwnPropertyDescriptor(globalThis, "window");
+        Object.defineProperty(globalThis, "window", {configurable: true, value: config});
+        try {
+            return factory(config, createDeclaredMenu, IMAGE_OCR_MENU, availability, async () => false, () => disabled)(
+                {getAttribute: () => path}, notebookId,
+            );
+        } finally {
+            if (previous) {
+                Object.defineProperty(globalThis, "window", previous);
+            } else {
+                Reflect.deleteProperty(globalThis, "window");
+            }
+        }
+    };
+    const visibleItems = (path: string, notebookId: string, disabled = false, provider = "paddleocr") => {
+        const menu = getMenu(path, notebookId, disabled, provider);
+        return menu.ignore ? [] : menu.submenu.filter((item: {ignore?: boolean}) => !item.ignore)
+            .map((item: {id: string}) => item.id);
+    };
+    const modelMenu = getMenu("assets/image.png", "ordinary");
+    assert.equal(modelMenu.submenu.find((item: {id: string}) => item.id === "reOCR").icon, "iconOCR");
+    assert.deepEqual(visibleItems("https://example.com/image.png", "ordinary"), ["ocrResult", "copyOCRText"]);
+    assert.deepEqual(visibleItems("assets/image.png?box=encrypted", "ordinary"), []);
+    assert.deepEqual(visibleItems("assets/image.png", "encrypted"), []);
+    assert.deepEqual(visibleItems("assets/image.svg", "ordinary"), ["ocrResult", "copyOCRText", "separator_reOCR", "reOCR"]);
+    assert.deepEqual(visibleItems("assets/image.heic", "ordinary"), ["ocrResult", "copyOCRText", "separator_reOCR", "reOCR", "reAIOCR"]);
+    assert.deepEqual(visibleItems("assets/image.png", "ordinary", true), ["ocrResult", "copyOCRText", "separator_reOCR", "reOCR"]);
+    assert.deepEqual(visibleItems("assets/image.png", "ordinary", false, "tesseract"), ["ocrResult", "copyOCRText", "separator_reOCR", "reOCR", "reAIOCR"]);
+    assert.deepEqual(visibleItems("assets/image.png", "ordinary", false, "ai"), ["ocrResult", "copyOCRText", "separator_reOCR", "reAIOCR"]);
+    assert.deepEqual(visibleItems("assets/image.svg", "ordinary", false, "ai"), ["ocrResult", "copyOCRText"]);
+    assert.deepEqual(visibleItems("assets/image.png", "ordinary", true, "ai"), ["ocrResult", "copyOCRText"]);
+});

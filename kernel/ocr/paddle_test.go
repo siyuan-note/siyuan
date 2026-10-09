@@ -1,0 +1,167 @@
+package ocr
+
+import (
+	"context"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/png"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/siyuan-note/logging"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/gofont/goregular"
+	"golang.org/x/image/font/opentype"
+	"golang.org/x/image/math/fixed"
+)
+
+func TestPaddleAvailabilityLogsFailuresAndRecovery(t *testing.T) {
+	root := t.TempDir()
+	logPath := filepath.Join(root, "ocr.log")
+	originalLogPath := logging.LogPath
+	logging.SetLogPath(logPath)
+	t.Cleanup(func() { logging.SetLogPath(originalLogPath) })
+	cfg := PaddleConfig{Worker: filepath.Join(root, "worker"), Library: filepath.Join(root, "runtime"), Directory: root}
+	for _, path := range []string{cfg.Worker, "det/inference.onnx", "det/inference.yml", "rec/inference.onnx", "rec/inference.yml"} {
+		if !filepath.IsAbs(path) {
+			path = filepath.Join(root, path)
+		}
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte("fixture"), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	provider := &PaddleProvider{Config: func() PaddleConfig { return cfg }}
+	assertUnavailable := func(wantLogs int, path string) {
+		t.Helper()
+		for range 2 {
+			if provider.Available() {
+				t.Fatal("provider with missing resources must be unavailable")
+			}
+		}
+		data, err := os.ReadFile(logPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Count(string(data), "PaddleOCR is unavailable:") != wantLogs || !strings.Contains(string(data), path) {
+			t.Fatalf("expected %d warnings including %q, got:\n%s", wantLogs, path, data)
+		}
+	}
+	assertUnavailable(1, cfg.Library)
+	if err := os.WriteFile(cfg.Library, []byte("fixture"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if !provider.Available() {
+		t.Fatal("provider with all resources must recover")
+	}
+	if err := os.Remove(cfg.Library); err != nil {
+		t.Fatal(err)
+	}
+	assertUnavailable(2, cfg.Library)
+	cfg.Library = cfg.Worker
+	model := filepath.Join(root, "rec", "inference.yml")
+	if err := os.Remove(model); err != nil {
+		t.Fatal(err)
+	}
+	assertUnavailable(3, model)
+}
+
+func TestCTCBlankAndRepeatedCharacters(t *testing.T) {
+	data := []float32{0, .9, 0, 0, .8, 0, .9, 0, 0, 0, .7, 0, 0, 0, .8}
+	text, confidence, err := decodeCTC(tensor{data, []int64{1, 5, 3}}, []string{"", "字", " "})
+	if err != nil || text != "字字 " || confidence < .79 || confidence > .81 {
+		t.Fatalf("text=%q confidence=%f err=%v", text, confidence, err)
+	}
+	if _, _, err = decodeCTC(tensor{data, []int64{1, 5, 3}}, []string{"", "字"}); err == nil {
+		t.Fatal("mismatched dictionary was accepted")
+	}
+}
+
+func TestDetectorRejectsUnexpectedShape(t *testing.T) {
+	if _, err := detectBoxes(tensor{make([]float32, 16), []int64{1, 2, 2, 4}}, 40, 40, modelConfig{}); err == nil {
+		t.Fatal("unexpected detector channels were accepted")
+	}
+}
+
+// TestNativePaddleOCR 在配置模型、原生库和样例图后执行，整个过程不启动界面或内核服务器。
+func TestNativePaddleOCR(t *testing.T) {
+	assets, library, fixture := os.Getenv("SIYUAN_OCR_TEST_ASSETS"), os.Getenv("SIYUAN_OCR_TEST_LIBRARY"), os.Getenv("SIYUAN_OCR_TEST_IMAGE")
+	if assets == "" || library == "" {
+		t.Skip("native OCR resources are not configured")
+	}
+	expected := os.Getenv("SIYUAN_OCR_TEST_EXPECT")
+	if fixture == "" {
+		fixture = filepath.Join(t.TempDir(), "ocr.png")
+		typeface, err := opentype.Parse(goregular.TTF)
+		if err != nil {
+			t.Fatal(err)
+		}
+		face, err := opentype.NewFace(typeface, &opentype.FaceOptions{Size: 40, DPI: 72, Hinting: font.HintingFull})
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer face.Close()
+		img := image.NewRGBA(image.Rect(0, 0, 500, 100))
+		draw.Draw(img, img.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
+		drawer := font.Drawer{Dst: img, Src: image.NewUniform(color.Black), Face: face, Dot: fixed.P(20, 65)}
+		drawer.DrawString("SiYuan OCR 123")
+		file, err := os.Create(fixture)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = png.Encode(file, img); err != nil {
+			file.Close()
+			t.Fatal(err)
+		}
+		if err = file.Close(); err != nil {
+			t.Fatal(err)
+		}
+		expected = "SiYuan OCR 123"
+	}
+	for _, size := range []string{"tiny"} {
+		t.Run(size, func(t *testing.T) {
+			config := PaddleConfig{Library: library, Directory: filepath.Join(assets, size)}
+			provider := &PaddleProvider{Config: func() PaddleConfig { return config }}
+			defer provider.Close()
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+			rows, err := provider.Recognize(ctx, fixture)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var text strings.Builder
+			for _, row := range rows {
+				text.WriteString(row["text"])
+				t.Log(row["text"])
+			}
+			if text.Len() == 0 {
+				t.Fatal("native OCR returned no text")
+			}
+			if expected != "" && !strings.Contains(text.String(), expected) {
+				t.Fatalf("missing expected text %q in %q", expected, text.String())
+			}
+			detector, recognizer := provider.detector, provider.recognizer
+			zero := 0.0
+			config.Thresholds.Recognition = &zero
+			unfiltered, err := provider.Recognize(ctx, fixture)
+			if err != nil || len(unfiltered) < len(rows) {
+				t.Fatalf("lowering recognition threshold lost text: %v", err)
+			}
+			if provider.detector != detector || provider.recognizer != recognizer {
+				t.Fatal("changing thresholds recreated native sessions")
+			}
+			config.Thresholds = Thresholds{}
+			restored, err := provider.Recognize(ctx, fixture)
+			if err != nil || !reflect.DeepEqual(rows, restored) {
+				t.Fatalf("reset did not restore original recognition: %v", err)
+			}
+		})
+	}
+}

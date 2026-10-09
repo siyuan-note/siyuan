@@ -24,7 +24,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -38,6 +37,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+var documentBaseNameReplacer = strings.NewReplacer("\r\n", "", "\r", "", "\n", "", "\u2028", "", "\u2029", "", "\t", "", "/", "")
 
 var moveLocalShorthands = contractHandler(apicontract.MoveLocalShorthands, moveLocalShorthandsContract)
 
@@ -764,7 +765,21 @@ func createDailyNoteContract(c *gin.Context, request apicontract.FileTreeDailyNo
 	ret := gulu.Ret.NewResult()
 
 	notebook := request.Notebook
-	p, existed, err := model.CreateDailyNote(notebook)
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+		return apicontract.Failure[apicontract.FileTreeCreateData](-1, model.Conf.Language(314))
+	}
+	var p string
+	var existed bool
+	var err error
+	if request.Date == "" {
+		p, existed, err = model.CreateDailyNote(notebook)
+	} else {
+		date, dateErr := parseDailyNoteDate(request.Date)
+		err = dateErr
+		if err == nil {
+			p, existed, err = model.CreateDailyNoteAt(notebook, date)
+		}
+	}
 	if err != nil {
 		if errors.Is(err, model.ErrBoxNotFound) {
 			ret.Code = 1
@@ -824,8 +839,7 @@ func createDocWithMdContract(c *gin.Context, request apicontract.FileTreeCreateM
 
 	baseName := path.Base(hPath)
 	dir := path.Dir(hPath)
-	r, _ := regexp.Compile("\r\n|\r|\n|\u2028|\u2029|\t|/")
-	baseName = r.ReplaceAllString(baseName, "")
+	baseName = documentBaseNameReplacer.Replace(baseName)
 	if 512 < utf8.RuneCountInString(baseName) {
 		baseName = gulu.Str.SubStr(baseName, 512)
 	}

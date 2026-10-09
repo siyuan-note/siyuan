@@ -17,6 +17,7 @@
 package tools
 
 import (
+	"context"
 	"fmt"
 	"html"
 	"path/filepath"
@@ -28,7 +29,7 @@ import (
 
 var SkillTool = &Tool{
 	Name:        "skill",
-	Description: "Skill operations: load(name) loads Skill instructions; load(name/resource-path) loads a bundled text resource; save(name, content), install(url), remove(name), rename(name, new_name), list().\n\n" + skillListDesc(),
+	Description: "Skill operations: load(name) loads Skill instructions; load(name/resource-path) loads a bundled text resource; save(name, content), install(url), remove(name), rename(name, new_name), list(). Explicit source=builtin selects immutable official skills and requires the server-confirmed workflow choice before load.\n\n" + skillListDesc(),
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -40,6 +41,7 @@ var SkillTool = &Tool{
 			"content":  {Type: "string", Description: "SKILL.md full content with YAML frontmatter (for save)"},
 			"url":      {Type: "string", Description: "Skill source for install: 'owner/repo' shorthand (e.g. Tencent/WeChatReading), a full GitHub URL, a raw SKILL.md URL, or a release zip URL"},
 			"new_name": {Type: "string", Description: "New skill name (for rename)"},
+			"source":   {Type: "string", Description: "Omit for existing workspace/user resolution. Use builtin only for official list/load; builtin load requires a real workflow choice", Enum: []string{"builtin"}},
 		},
 		Required: []string{"action"},
 	},
@@ -53,7 +55,8 @@ var SkillTool = &Tool{
 		"rename":  {LocalWrite: true},
 		"list":    {LocalRead: true},
 	},
-	Handler: skillHandler,
+	Handler:        skillHandler,
+	ContextHandler: skillContextHandler,
 }
 
 func init() {
@@ -61,7 +64,25 @@ func init() {
 }
 
 func skillHandler(args map[string]any) (CallToolResult, error) {
+	return skillContextHandler(context.Background(), args)
+}
+
+func skillContextHandler(ctx context.Context, args map[string]any) (CallToolResult, error) {
+	source, valid := args["source"].(string)
+	if args["source"] != nil && (!valid || source != "" && source != "builtin") {
+		return skillError("unknown skill source"), nil
+	}
 	action, _ := args["action"].(string)
+	if source == "builtin" {
+		switch action {
+		case "load", "":
+			return skillLoadBuiltin(ctx, args)
+		case "list":
+			return skillBuiltinList(), nil
+		default:
+			return skillError("builtin skills are read-only"), nil
+		}
+	}
 	switch action {
 	case "load", "":
 		return skillLoad(args)
@@ -80,6 +101,54 @@ func skillHandler(args map[string]any) (CallToolResult, error) {
 		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [load, save, install, remove, rename, list]"}},
 		IsError: true,
 	}, nil
+}
+
+func skillError(message string) CallToolResult {
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: message}}, IsError: true}
+}
+
+func skillLoadBuiltin(ctx context.Context, args map[string]any) (CallToolResult, error) {
+	name, _ := args["name"].(string)
+	root, resource, _ := strings.Cut(name, "/")
+	if root != util.PluginDevelopmentSkillName {
+		return skillError("exact builtin skill name is required"), nil
+	}
+	operation := "read"
+	if resource == "" || resource == "SKILL.md" {
+		operation = "load"
+	}
+	if _, err := util.RequirePluginDevelopment(ctx, operation); err != nil {
+		return skillError(err.Error()), nil
+	}
+	loaded, err := util.LoadBuiltinSkill(name, model.DisabledBuiltinSkills())
+	if err != nil {
+		return skillError(err.Error()), nil
+	}
+	if loaded.ResourcePath == "" {
+		text := formatSkillContent(loaded)
+		if len(text) >= util.MaxToolOutputChars {
+			return skillError("builtin skill output exceeds the tool output limit"), nil
+		}
+		// 成功读取后才记录激活；内置正文不执行用户变量替换，摘要始终对应原文。
+		if _, err = util.RequirePluginDevelopment(ctx, "loaded"); err != nil {
+			return skillError(err.Error()), nil
+		}
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: text}}}, nil
+	}
+	text := formatSkillResource(loaded)
+	if len(text) >= util.MaxToolOutputChars {
+		return skillError("builtin skill resource output exceeds the tool output limit"), nil
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: text}}}, nil
+}
+
+func skillBuiltinList() CallToolResult {
+	var text strings.Builder
+	text.WriteString("official skills (source=builtin; workflow choice required before load):\n")
+	for _, info := range util.DiscoverBuiltinSkills(model.DisabledBuiltinSkills()) {
+		fmt.Fprintf(&text, "- %s: %s (id=%s, version=%s, digest=%s, enabled=%t)\n", info.Name, info.Description, info.ID, info.Version, info.Digest, info.Enabled)
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: text.String()}}}
 }
 
 func skillLoad(args map[string]any) (CallToolResult, error) {
@@ -117,6 +186,7 @@ func formatSkillContent(loaded *util.SkillLoadResult) string {
 	var sb strings.Builder
 	sb.WriteString(`<skill_content name="`)
 	sb.WriteString(html.EscapeString(loaded.Name))
+	sb.WriteString(skillMetadataAttributes(loaded))
 	sb.WriteString("\">\n\n")
 	sb.WriteString(loaded.Content)
 
@@ -148,10 +218,21 @@ func formatSkillContent(loaded *util.SkillLoadResult) string {
 
 func formatSkillResource(loaded *util.SkillLoadResult) string {
 	return `<skill_resource skill="` + html.EscapeString(loaded.Name) + `" path="` +
-		html.EscapeString(loaded.ResourcePath) + "\">\n\n" + loaded.Content + "\n\n</skill_resource>"
+		html.EscapeString(loaded.ResourcePath) + skillMetadataAttributes(loaded) + "\">\n\n" + loaded.Content + "\n\n</skill_resource>"
+}
+
+func skillMetadataAttributes(loaded *util.SkillLoadResult) string {
+	if loaded.Source != "builtin" {
+		return ""
+	}
+	return `" source="builtin" id="` + html.EscapeString(loaded.ID) + `" version="` +
+		html.EscapeString(loaded.Version) + `" digest="` + html.EscapeString(loaded.Digest)
 }
 
 func workspaceSkillLocation(skillDir string) string {
+	if skillDir == "" {
+		return ""
+	}
 	location, err := filepath.Rel(util.WorkspaceDir, skillDir)
 	if err != nil {
 		return ""

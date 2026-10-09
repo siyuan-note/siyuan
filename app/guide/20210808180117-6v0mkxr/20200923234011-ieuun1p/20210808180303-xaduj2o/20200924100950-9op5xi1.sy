@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260928175046"
+		"updated": "20261008221006"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260928091747-wub2unw",
-				"updated": "20260928175046"
+				"updated": "20261002013053"
 			},
 			"Children": [
 				{
@@ -63,6 +63,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " cannot be set as a shortcut."
+				}
+			]
+		},
+		{
+			"ID": "20261002010621-zd9bn2e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002010621-zd9bn2e",
+				"updated": "20261002013053"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The shortcuts for the command palette, recent documents, data history, flashcard review, inline appearance, main menu, and tab list open their panels. Pressing the shortcut again keeps the panel open. Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to close it; if an editor popup is visible, Esc closes that popup first. In flashcard content, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " selects blocks. Hold "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to focus the review buttons, then press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to close the dialog."
 				}
 			]
 		},
@@ -4224,7 +4274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260928091724"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
@@ -4243,7 +4293,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20260928091724"
+				"updated": "20261008101123"
 			},
 			"Children": [
 				{
@@ -4263,7 +4313,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20260902224242"
+				"updated": "20261008101123"
 			},
 			"Children": [
 				{
@@ -4812,7 +4862,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "A text selection spanning multiple blocks copies the corresponding block embed list, just like selecting those blocks"
+								}
+							]
 						}
 					]
 				},
@@ -7421,7 +7477,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Scroll to the top"
+									"Data": "Move the cursor to the beginning of the document"
 								}
 							]
 						},
@@ -7464,7 +7520,58 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Customize in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "General"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; add "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Home"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or replace the default shortcut. Binding this key overrides its line navigation"
+								}
+							]
 						}
 					]
 				},
@@ -7478,7 +7585,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Scroll to the bottom"
+									"Data": "Move the cursor to the end of the document"
 								}
 							]
 						},
@@ -7525,7 +7632,58 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Customize in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "General"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; add "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "End"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or replace the default shortcut. Binding this key overrides its line navigation"
+								}
+							]
 						}
 					]
 				},
@@ -9993,7 +10151,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260928091724-mshqwvb",
-				"updated": "20260928091724"
+				"updated": "20260930171029"
 			},
 			"Children": [
 				{
@@ -10048,12 +10206,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260927164841-clwu05c",
-				"updated": "20260928175046"
+				"updated": "20260930171029"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In custom profiles, use the category selector to switch between the toolbar and slash menu. Drag the six-dot handle on the left of an item to change its order, or use its switch to change visibility. Drag near the list edge to scroll. Clear the search before sorting, and confirm to save the profile. Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices."
+					"Data": "In custom profiles, use the category selector to switch between the toolbar and slash menu. Drag the six-dot handle on the left of an item to change its order, or use its switch to change visibility. Drag near the list edge to scroll. Clear the search before sorting, and confirm to save the profile. Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices. New profiles based on Simple or Full follow the default order as versions change until you customize a level. Based on Current and duplicate preserve existing custom orders. Clear the search and use the reset icon in a column or dock group title to reset that level. To reset every level, use the refresh icon labeled Reset all orders on the right of the Position column title on desktop, or the Reset all orders button at the bottom on mobile. Confirm to save; Cancel discards the changes. Resetting order preserves visibility and dock placement, and reset levels continue to follow future default order changes."
 				}
 			]
 		},
@@ -10063,7 +10221,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-d0mxz1p",
-				"updated": "20260811122156"
+				"updated": "20261002202250"
 			},
 			"Children": [
 				{
@@ -10087,7 +10245,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-v6ksqnu",
-				"updated": "20260811122156"
+				"updated": "20261002202250"
 			},
 			"Children": [
 				{
@@ -11336,6 +11494,10 @@
 								{
 									"Type": "NodeText",
 									"Data": "See below for related shortcuts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; the configured shortcut also converts a selected mind map block to this list type"
 								}
 							]
 						}
@@ -11381,6 +11543,10 @@
 								{
 									"Type": "NodeText",
 									"Data": "See below for related shortcuts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; the configured shortcut also converts a selected mind map block to this list type"
 								}
 							]
 						}
@@ -11453,6 +11619,69 @@
 								{
 									"Type": "NodeText",
 									"Data": "See below for related shortcuts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; the configured shortcut also converts a selected mind map block to this list type"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mind map block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Unassigned"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Insert a mind map, or convert the selected list or the list containing the caret; configure in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
 								}
 							]
 						}
@@ -12757,7 +12986,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20260926152753"
+				"updated": "20261003225941"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -12772,7 +13001,7 @@
 			"Type": "NodeTable",
 			"Properties": {
 				"id": "20260921105011-3srqnh0",
-				"updated": "20260925094732",
+				"updated": "20261003225941",
 				"colgroup": "|"
 			},
 			"TableAligns": [
@@ -13259,6 +13488,65 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Fold/expand sibling branches under the same parent by clicking a node's fold button"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt+Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌥Click"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260930234403-5eh3gn8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930234403-5eh3gn8",
+				"updated": "20260930234403"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Paste an image with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+V / ⌘V"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " while editing a node, or after selecting a node to append it to the end of its visible content. Wait for an active upload to finish before leaving node editing."
 				}
 			]
 		},
@@ -13272,7 +13560,39 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "While selecting a summary range, use the up and down arrow keys to select the last sibling node, Enter to confirm, and Esc to cancel. While editing summary text, Enter saves and Esc cancels. Delete or Backspace removes the selected summary."
+					"Data": "In the summary batch preview, Enter creates all groups in one undoable operation and Esc cancels. While selecting a summary range, use the up and down arrow keys to select the last sibling node, Enter to confirm, and Esc to cancel. While editing summary text, Enter saves and Esc cancels. Delete or Backspace removes the selected summary."
+				}
+			]
+		},
+		{
+			"ID": "20261001015635-5eooc5g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001015635-5eooc5g",
+				"updated": "20261001015635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a mind map resize handle has keyboard focus, use the arrow keys to adjust its width or height by 10 px, or hold "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " with an arrow key for 1 px steps. These keys apply only to the focused resize handle. Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " during a drag to cancel resizing."
 				}
 			]
 		},
@@ -13282,7 +13602,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-jeh8w1g",
-				"updated": "20260910080119"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
@@ -13328,7 +13648,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20210106154319-otreidg",
-				"updated": "20260910080119"
+				"updated": "20261008221006"
 			},
 			"Children": [
 				{
@@ -14031,7 +14351,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "A single ordinary paragraph: next row in the same column, or a paragraph after the last row; other content follows its block type"
+									"Data": "Edit within the cell: create a paragraph, continue a list item, or insert a line break in code"
 								}
 							]
 						},
@@ -14070,6 +14390,30 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Insert a soft line break within a paragraph in the cell"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift+Enter"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -14079,7 +14423,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250423105026-c1t0rqo",
-				"updated": "20260811122156"
+				"updated": "20261002230606"
 			},
 			"Children": [
 				{
@@ -14152,7 +14496,7 @@
 			"Properties": {
 				"colgroup": "min-width: 60px;|min-width: 60px;",
 				"id": "20250423105026-6g9hmgk",
-				"updated": "20260811122156"
+				"updated": "20261002224733"
 			},
 			"Children": [
 				{
@@ -14239,6 +14583,92 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Insert indentation at the caret, or indent selected lines"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Outdent the current line or selected lines: remove one leading tab or up to the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Number of Tab Spaces"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " setting in leading spaces (up to 4 when set to 0)"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift+Tab"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261002230606-fd59093",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002230606-fd59093",
+				"updated": "20261002230606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a code block has no individual "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Number of Tab Spaces"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " setting, indenting or outdenting detects consistent indentation from at least two nonblank lines and saves it for that block. Tabs or the smallest space indent of 2, 4, 6, or 8 spaces are recognized; other space indents must be multiples of that width. Mixed indentation or insufficient evidence falls back to the global setting. An explicit block setting takes precedence. Detection does not reformat existing code."
 				}
 			]
 		},
@@ -17244,7 +17674,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002135-5dfw1yo",
-				"updated": "20260922150640"
+				"updated": "20261007111840"
 			},
 			"Children": [
 				{
@@ -17258,12 +17688,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922150640-l6dnc3c",
-				"updated": "20260923212237"
+				"updated": "20261007111840"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "When “Click parent document title to expand or collapse child documents” is enabled, click or tap a parent title in the document tree or pinned documents to expand or collapse its children after a short delay. Double-click or double-tap the title to open the parent document without changing its expansion state. Documents without children still open with one click or tap"
+					"Data": "With "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Clicking a document icon"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Clicking a parent document title"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " set, the document tree and pinned documents decide the click action: the expand-only choice expands or collapses immediately, while the double-click choice opens the parent on a double-click or double-tap without changing its expansion state and makes a single click or tap wait about 300 ms; the parent can still be opened from its document menu. A title without child documents still opens directly; clicking a document icon opens an openable document or otherwise changes the icon; a notebook icon always only changes the icon"
 				}
 			]
 		},

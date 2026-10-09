@@ -169,7 +169,9 @@ func setKernelPluginsEnabled(enabled bool) {
 	}
 }
 
-var setAI = contractHandler(apicontract.SetAI, func(c *gin.Context, request apicontract.SetAIRequest) (ret apicontract.Response[*apicontract.SettingAI]) {
+var setAI = contractHandler(apicontract.SetAI, serializeSetting("ai", applyAISetting))
+
+func applyAISetting(c *gin.Context, request apicontract.SetAIRequest) (ret apicontract.Response[*apicontract.SettingAI]) {
 	if err := request.ConfigError(); err != nil {
 		return apicontract.Failure[*apicontract.SettingAI](-1, err.Error())
 	}
@@ -182,6 +184,13 @@ var setAI = contractHandler(apicontract.SetAI, func(c *gin.Context, request apic
 	if err = gulu.JSON.UnmarshalJSON(param, ai); err != nil {
 		ret = apicontract.Failure[*apicontract.SettingAI](-1, err.Error())
 		return
+	}
+	if model.Conf.AI != nil {
+		if ai.Decision == nil {
+			ai.Decision = model.Conf.AI.Decision.Clone()
+		} else {
+			ai.Decision.MergePrevious(model.Conf.AI.Decision)
+		}
 	}
 	if ai.MCP != nil {
 		for _, server := range ai.MCP.Servers {
@@ -242,7 +251,7 @@ var setAI = contractHandler(apicontract.SetAI, func(c *gin.Context, request apic
 
 	ret = apicontract.Success(settingAIPayload(model.Conf.AI))
 	return
-})
+}
 
 func preserveMCPServerIDs(oldServers, newServers []conf.MCPServer) {
 	oldIDsByName := make(map[string]string, len(oldServers))
@@ -256,7 +265,9 @@ func preserveMCPServerIDs(oldServers, newServers []conf.MCPServer) {
 	}
 }
 
-var setSecrets = contractHandler(apicontract.SetSecrets, func(c *gin.Context, request apicontract.SetSecretsRequest) (ret apicontract.Response[*apicontract.SettingSecrets]) {
+var setSecrets = contractHandler(apicontract.SetSecrets, serializeSetting("secrets", applySecretsSetting))
+
+func applySecretsSetting(c *gin.Context, request apicontract.SetSecretsRequest) (ret apicontract.Response[*apicontract.SettingSecrets]) {
 	if err := request.ConfigError(); err != nil {
 		return apicontract.Failure[*apicontract.SettingSecrets](-1, err.Error())
 	}
@@ -277,9 +288,11 @@ var setSecrets = contractHandler(apicontract.SetSecrets, func(c *gin.Context, re
 
 	ret = apicontract.Success(settingSecretsPayload(model.Conf.Secrets))
 	return
-})
+}
 
-var setVariables = contractHandler(apicontract.SetVariables, func(c *gin.Context, request apicontract.SetVariablesRequest) (ret apicontract.Response[*apicontract.SettingVariables]) {
+var setVariables = contractHandler(apicontract.SetVariables, serializeSetting("variables", applyVariablesSetting))
+
+func applyVariablesSetting(c *gin.Context, request apicontract.SetVariablesRequest) (ret apicontract.Response[*apicontract.SettingVariables]) {
 	if err := request.ConfigError(); err != nil {
 		return apicontract.Failure[*apicontract.SettingVariables](-1, err.Error())
 	}
@@ -300,7 +313,7 @@ var setVariables = contractHandler(apicontract.SetVariables, func(c *gin.Context
 
 	ret = apicontract.Success(settingVariablesPayload(model.Conf.Variables))
 	return
-})
+}
 
 func reconnectStdioMCPWithEnvironment() {
 	if model.Conf.AI == nil || model.Conf.AI.MCP == nil {
@@ -322,7 +335,9 @@ func stdioMCPServerIDsWithEnvironment(servers []conf.MCPServer) []string {
 	return serverIDs
 }
 
-var setFlashcard = contractHandler(apicontract.SetFlashcard, func(c *gin.Context, request apicontract.SetFlashcardRequest) (ret apicontract.Response[*apicontract.SettingFlashcard]) {
+var setFlashcard = contractHandler(apicontract.SetFlashcard, serializeSetting("flashcard", applyFlashcardSetting))
+
+func applyFlashcardSetting(c *gin.Context, request apicontract.SetFlashcardRequest) (ret apicontract.Response[*apicontract.SettingFlashcard]) {
 	if err := request.ConfigError(); err != nil {
 		return apicontract.Failure[*apicontract.SettingFlashcard](-1, err.Error())
 	}
@@ -354,9 +369,11 @@ var setFlashcard = contractHandler(apicontract.SetFlashcard, func(c *gin.Context
 
 	ret = apicontract.Success(settingFlashcardPayload(flashcard))
 	return
-})
+}
 
-var setEditor = contractHandler(apicontract.SetEditor, func(c *gin.Context, request apicontract.SetEditorRequest) (ret apicontract.Response[*apicontract.SettingEditor]) {
+var setEditor = contractHandler(apicontract.SetEditor, serializeSetting("editor", applyEditorSetting))
+
+func applyEditorSetting(c *gin.Context, request apicontract.SetEditorRequest) (ret apicontract.Response[*apicontract.SettingEditor]) {
 	if err := request.ConfigError(); err != nil {
 		return apicontract.Failure[*apicontract.SettingEditor](-1, err.Error())
 	}
@@ -378,6 +395,12 @@ var setEditor = contractHandler(apicontract.SetEditor, func(c *gin.Context, requ
 	}
 	if !request.HasField("codeFontFamilies") {
 		editor.CodeFontFamilies = model.Conf.Editor.CodeFontFamilies
+	}
+	if !request.HasFieldFold("displayImgName") {
+		editor.DisplayImgName = model.Conf.Editor.DisplayImgName
+	}
+	if !request.HasFieldFold("displayImgAlt") {
+		editor.DisplayImgAlt = model.Conf.Editor.DisplayImgAlt
 	}
 	editor.NormalizeFontFamilies()
 
@@ -432,9 +455,11 @@ var setEditor = contractHandler(apicontract.SetEditor, func(c *gin.Context, requ
 
 	ret = apicontract.Success(settingEditorPayload(model.Conf.Editor))
 	return
-})
+}
 
-var setExport = contractHandler(apicontract.SetExport, func(c *gin.Context, request apicontract.SetExportRequest) (ret apicontract.Response[*apicontract.SettingExport]) {
+var setExport = contractHandler(apicontract.SetExport, serializeSetting("export", applyExportSetting))
+
+func applyExportSetting(c *gin.Context, request apicontract.SetExportRequest) (ret apicontract.Response[*apicontract.SettingExport]) {
 	if err := request.ConfigError(); err != nil {
 		return apicontract.FailureWithTimeout[*apicontract.SettingExport](-1, err.Error(), 5000)
 	}
@@ -465,7 +490,7 @@ var setExport = contractHandler(apicontract.SetExport, func(c *gin.Context, requ
 
 	ret = apicontract.Success(settingExportPayload(model.Conf.Export))
 	return
-})
+}
 
 var getPandocBin = contractHandler(apicontract.GetPandocBin, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[string] {
 	pandocRuntime := util.GetPandocRuntime()
@@ -479,7 +504,9 @@ var getPandocBin = contractHandler(apicontract.GetPandocBin, func(c *gin.Context
 	return apicontract.Success(pandocRuntime.BinPath)
 })
 
-var setFiletree = contractHandler(apicontract.SetFiletree, func(c *gin.Context, request apicontract.SetFiletreeRequest) (ret apicontract.Response[*apicontract.SettingFileTree]) {
+var setFiletree = contractHandler(apicontract.SetFiletree, serializeSetting("fileTree", applyFiletreeSetting))
+
+func applyFiletreeSetting(c *gin.Context, request apicontract.SetFiletreeRequest) (ret apicontract.Response[*apicontract.SettingFileTree]) {
 	if err := request.ConfigError(); err != nil {
 		return apicontract.Failure[*apicontract.SettingFileTree](-1, err.Error())
 	}
@@ -530,6 +557,12 @@ var setFiletree = contractHandler(apicontract.SetFiletree, func(c *gin.Context, 
 	if 32 < fileTree.MaxOpenTabCount {
 		fileTree.MaxOpenTabCount = 32
 	}
+	if 0 > fileTree.DocIconClickMode || 1 < fileTree.DocIconClickMode {
+		fileTree.DocIconClickMode = 0
+	}
+	if 0 > fileTree.ParentDocTitleClickMode || 2 < fileTree.ParentDocTitleClickMode {
+		fileTree.ParentDocTitleClickMode = 0
+	}
 	if nil == fileTree.TabStartupMode {
 		fileTree.TabStartupMode = new(int)
 		if fileTree.CloseTabsOnStart {
@@ -562,9 +595,11 @@ var setFiletree = contractHandler(apicontract.SetFiletree, func(c *gin.Context, 
 
 	ret = apicontract.Success(settingFileTreePayload(model.Conf.FileTree))
 	return
-})
+}
 
-var setSearch = contractHandler(apicontract.SetSearch, func(c *gin.Context, request apicontract.SetSearchRequest) (ret apicontract.Response[*apicontract.SettingSearch]) {
+var setSearch = contractHandler(apicontract.SetSearch, serializeSetting("search", applySearchSetting))
+
+func applySearchSetting(c *gin.Context, request apicontract.SetSearchRequest) (ret apicontract.Response[*apicontract.SettingSearch]) {
 	if err := request.ConfigError(); err != nil {
 		return apicontract.Failure[*apicontract.SettingSearch](-1, err.Error())
 	}
@@ -628,9 +663,11 @@ var setSearch = contractHandler(apicontract.SetSearch, func(c *gin.Context, requ
 	}
 	ret = apicontract.Success(settingSearchPayload(s))
 	return
-})
+}
 
-var setKeymap = contractHandler(apicontract.SetKeymap, func(c *gin.Context, request apicontract.SettingKeymapRequest) apicontract.Response[apicontract.Null] {
+var setKeymap = contractHandler(apicontract.SetKeymap, applyKeymapSetting)
+
+func applyKeymapSetting(c *gin.Context, request apicontract.SettingKeymapRequest) apicontract.Response[apicontract.Null] {
 	param, err := gulu.JSON.MarshalJSON(request.Data)
 	if err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
@@ -642,9 +679,11 @@ var setKeymap = contractHandler(apicontract.SetKeymap, func(c *gin.Context, requ
 	model.Conf.Keymap = keymap
 	model.Conf.Save()
 	return apicontract.Success(apicontract.Null{})
-})
+}
 
-var setAppearance = contractHandler(apicontract.SetAppearance, func(c *gin.Context, request apicontract.SetAppearanceRequest) (ret apicontract.Response[*apicontract.SettingAppearance]) {
+var setAppearance = contractHandler(apicontract.SetAppearance, serializeSetting("appearance", applyAppearanceSetting))
+
+func applyAppearanceSetting(c *gin.Context, request apicontract.SetAppearanceRequest) (ret apicontract.Response[*apicontract.SettingAppearance]) {
 	if err := request.ConfigError(); err != nil {
 		return apicontract.Failure[*apicontract.SettingAppearance](-1, err.Error())
 	}
@@ -686,7 +725,7 @@ var setAppearance = contractHandler(apicontract.SetAppearance, func(c *gin.Conte
 	ret = apicontract.Success(settingAppearancePayload(model.Conf.Appearance))
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
 	return
-})
+}
 
 var getBootAppearances = contractHandler(apicontract.GetBootAppearances, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.SettingBootAppearancesData] {
 	appearances := model.GetBootAppearances()

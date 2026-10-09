@@ -523,7 +523,7 @@ body.mobile-keyboard--open {
     min-width: 18px;
     height: 18px;
     padding: 0 2px;
-    border: 1.25px solid currentColor;
+    border: 1.5px solid currentColor;
     border-radius: 4px;
     color: var(--b3-theme-on-surface-light);
     font-size: 10px;
@@ -559,6 +559,10 @@ body.mobile-topbar--merged {
     top: 0;
     transform: none;
   }
+}
+
+.protyle-wysiwyg video {
+  max-height: var(--mobile-video-max-height, 90vh);
 }
 
 .mobile-keyboard--open .mobile-bottom-bar,
@@ -1104,31 +1108,20 @@ body.mobile-topbar--merged {
         }
       }
 
+      // 移动端已下载卡片：操作区跨整行铺满、图标只占第一行，两行网格结构见 business/_config.scss
       &__panel[data-type="downloaded"] .config-bazaar__content .b3-card {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
-
         > .b3-card__img {
-          grid-column: 1;
+          align-self: auto;
           grid-row: 1;
-        }
-
-        > .fn__flex-1 {
-          grid-column: 2;
-          grid-row: 1;
+          margin: 12px 0 12px 12px;
         }
 
         > .b3-card__actions--right {
           grid-column: 1 / -1;
-          grid-row: 2;
           max-width: none;
           min-height: 36px;
           padding: 4px 8px 8px 12px;
           width: 100%;
-
-          > .config-bazaar__publish-controls {
-            margin-right: auto;
-          }
         }
       }
 
@@ -1204,6 +1197,11 @@ body.mobile-topbar--merged {
             width: 100%;
           }
 
+          &__desc {
+            // 移动端信息区在描述上方，无需与信息栏对齐
+            margin-top: 0;
+          }
+
           &__preview {
             height: min(50vw, 180px);
             margin-bottom: 16px;
@@ -1272,6 +1270,7 @@ body.mobile-topbar--merged {
     &__list {
       overflow: auto;
       flex: 1;
+      position: relative;
     }
 
     &__preview {
@@ -1283,6 +1282,7 @@ body.mobile-topbar--merged {
       flex: 1;
       padding: 8px;
       background-color: var(--b3-theme-background);
+      border-top: 1px solid var(--b3-border-color);
     }
   }
 }
@@ -1392,6 +1392,7 @@ body.mobile-topbar--merged {
     border: 0;
     color: var(--b3-theme-on-surface);
 
+    &[data-type="block-type"],
     &[data-type="font-family"],
     &[data-type="font-size"] {
       padding: 0 8px;
@@ -1463,6 +1464,10 @@ body.mobile-topbar--merged {
       color: var(--b3-theme-on-background);
       min-height: 50px;
       text-align: left;
+
+      &--full {
+        width: calc(100% - 8px);
+      }
     }
 
     &-icon {
@@ -1531,6 +1536,11 @@ body.mobile-topbar--merged {
 }
 
 .b3-menu {
+  &__item {
+    min-height: 40px;
+    align-items: center;
+  }
+
   &__scrim {
     background-color: transparent;
   }
@@ -1818,6 +1828,26 @@ body.mobile-topbar--merged {
   }
 }
 
+.mobile-reference-dialog {
+  .mobile-reference-sheet {
+    // 按键盘上方的可见视口保留原文区域，不随键盘自动扩展到全屏。
+    max-height: 60%;
+  }
+
+  .b3-dialog__body {
+    box-sizing: border-box;
+  }
+
+  .mobile-reference-editor {
+    min-height: 0;
+  }
+
+  &--compact .b3-dialog__header {
+    // 窄小视口中将空间留给正文，标题仍为对话框提供无障碍名称。
+    display: none;
+  }
+}
+
 .mobile-backlinks-dialog {
   .mobile-backlinks-content {
     flex: 0 1 auto;
@@ -1985,20 +2015,24 @@ body.mobile-topbar--merged {
 }
 
 .av__cell[data-dtype="block"]:not(.av__cell--header) {
-  padding-right: 77px;
+  // 按钮留白放在内容内层，避免外层内边距撑大窄列，导致表头与正文错位。
+  & > .av__cellprimary {
+    display: block;
+    padding-right: 69px;
+  }
 
   & > .av__row-actions {
     opacity: 1;
     pointer-events: auto;
   }
 
-  &[data-align="center"] {
-    padding-left: 77px;
+  &[data-align="center"] > .av__cellprimary {
+    padding-left: 69px;
   }
 
-  &[data-align="right"] {
-    padding-left: 77px;
-    padding-right: 8px;
+  &[data-align="right"] > .av__cellprimary {
+    padding-left: 69px;
+    padding-right: 0;
   }
 }
 

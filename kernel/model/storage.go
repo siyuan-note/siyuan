@@ -39,9 +39,14 @@ import (
 var localStorageLock = sync.Mutex{}
 
 func GetLocalStorage() (ret map[string]any) {
+	ret, _ = getLocalStorageWithError()
+	return
+}
+
+func getLocalStorageWithError() (map[string]any, error) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
-	return getLocalStorage()
+	return readLocalStorage()
 }
 
 func SetLocalStorage(val map[string]any) (err error) {
@@ -80,14 +85,18 @@ func RemoveLocalStorageVals(keys []string) (err error) {
 }
 
 func getLocalStorage() (ret map[string]any) {
+	ret, _ = readLocalStorage()
+	return
+}
+
+func readLocalStorage() (ret map[string]any, err error) {
 	// When local.json is corrupted, clear the file to avoid being unable to enter the main interface https://github.com/siyuan-note/siyuan/issues/7911
 	ret = map[string]any{}
 	lsPath := filepath.Join(util.DataDir, "storage/local.json")
-	if !filelock.IsExist(lsPath) {
-		return
-	}
-
 	data, err := filelock.ReadFile(lsPath)
+	if os.IsNotExist(err) {
+		return ret, nil
+	}
 	if err != nil {
 		logging.LogErrorf("read storage [local] failed: %s", err)
 		return

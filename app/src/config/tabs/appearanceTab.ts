@@ -1,5 +1,3 @@
-import {normalizeAssetOpenConfig} from "../../editor/assetOpen";
-import {normalizeBodyGradient} from "../../util/bodyGradient";
 /// #if !BROWSER
 import * as path from "path";
 import {useShell} from "../../util/pathName";
@@ -32,15 +30,13 @@ import {upDownHint} from "../../util/upDownHint";
 import {isThemeFrontendSupported} from "../../util/themeCompatibility";
 import {setEditorFontSize} from "../../util/editorFontSize";
 import {
-    ICustomFont,
     invalidateCustomFonts,
-    supportsCustomFonts,
-    loadCustomFonts,
     registerCustomFont,
     unregisterCustomFont
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
-import {IFontItem, loadSystemFonts} from "../../util/systemFont";
+import {IFontItem} from "../../util/systemFontCore";
+import {loadAvailableFonts} from "../../util/availableFont";
 import {observeFontPreview} from "../../util/fontPreview";
 import {
     shouldShowBootAppearanceSetting,
@@ -55,6 +51,7 @@ import {genMobileBarsSettingHTML, mountMobileBarsSetting} from "../../mobile/uti
 /// #endif
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
 import {genBodyGradientHtml, mountBodyGradient} from "./bodyGradient";
+import {isPageScrollButtonsEnabled, setPageScrollButtonsEnabled} from "../../protyle/scroll/pageButtons";
 
 interface IBootAppearanceListData {
     appearances: IBootAppearanceListItem[];
@@ -82,19 +79,6 @@ const getEditorFontDisplay = (fonts: IFontItem[]) =>
 
 const isCodeFont = (font: Pick<IFontItem, "spacing">) =>
     font.spacing === "monospace" || font.spacing === "dual" || font.spacing === "character-cell";
-
-const loadAvailableFonts = async () => {
-    const customFontSupported = supportsCustomFonts();
-    const [systemFonts, customFonts] = await Promise.all([
-        loadSystemFonts(),
-        customFontSupported ? loadCustomFonts() : Promise.resolve([] as ICustomFont[])
-    ]);
-    return {
-        customFontSupported,
-        customFonts,
-        fontItems: [...customFonts, ...systemFonts],
-    };
-};
 
 const genFontConfigHtml = (configKey: FontFamiliesConfigKey, title: string, description: string) => {
     const fonts = getConfiguredFonts(getFontConfig(), configKey);
@@ -336,22 +320,9 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
             refreshOpenMenu?.();
         };
         if (globalFont) {
-            const appearance = {
-                ...window.siyuan.config.appearance,
-                globalFontFamilies: configuredFonts,
-            };
-            fetchPost("/api/setting/setAppearance", appearance, response => {
-                appearanceConfigApi.apply({...response.data, lang: appearance.lang, bodyGradient: normalizeBodyGradient(response.data.bodyGradient)});
-                refreshFonts();
-            });
+            void appearanceConfigApi.patch("globalFontFamilies", configuredFonts, refreshFonts);
         } else {
-            fetchPost("/api/setting/setEditor", {
-                ...window.siyuan.config.editor,
-                [configKey]: configuredFonts,
-            }, response => {
-                editorConfigApi.apply({...response.data, assetOpen: normalizeAssetOpenConfig(response.data.assetOpen)});
-                refreshFonts();
-            });
+            void editorConfigApi.patch(configKey, configuredFonts, refreshFonts);
         }
     };
     bindSelectedFontList(selectedListElement, () => selectedFonts, persistFonts, (chip, index, event) => {
@@ -910,6 +881,13 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
 const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("controls", window.siyuan.languages.configGroupControls);
 
+    group.switch("pageScrollButtons", {
+        title: window.siyuan.languages.showPageScrollButtons,
+        desc: window.siyuan.languages.showPageScrollButtonsTip,
+        readConfig: isPageScrollButtonsEnabled,
+        save: (value) => setPageScrollButtonsEnabled(value === true),
+    });
+
     /// #if MOBILE
     group.slot({
         key: "mobileSidebarAccess",
@@ -1166,10 +1144,7 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
                 if (objEquals(statusBar, window.siyuan.config.appearance.statusBar)) {
                     return;
                 }
-                fetchPost("/api/setting/setAppearance", {
-                    ...window.siyuan.config.appearance,
-                    statusBar
-                });
+                void appearanceConfigApi.patch("statusBar", statusBar);
             }
         });
     });
@@ -1227,10 +1202,7 @@ const mountAppearanceSetNotifications = (root: HTMLElement) => {
                 if (objEquals(notifications, window.siyuan.config.appearance.notifications)) {
                     return;
                 }
-                fetchPost("/api/setting/setAppearance", {
-                    ...window.siyuan.config.appearance,
-                    notifications
-                });
+                void appearanceConfigApi.patch("notifications", notifications);
             }
         });
     });

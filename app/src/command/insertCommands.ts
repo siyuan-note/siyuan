@@ -3,7 +3,7 @@ import {getEnglishCommandLabel} from "./english";
 import type {ICommandContextSnapshot, ICommandDefinition, TCommandKeymapPath} from "./types";
 import {getBuiltinSlashMenuItems} from "../protyle/hint/extend";
 import {isBuiltinInlineStyleVisible, type TBuiltinInlineStyleID} from "../protyle/toolbar/inlineStyle";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {isDisabledFeature, isInAndroid} from "../protyle/util/compatibility";
 import {getHostCapabilities} from "../util/hostCapabilities";
 /// #if MOBILE
@@ -28,7 +28,7 @@ const BUILTIN_STYLES: Record<string, TBuiltinInlineStyleID> = {
 const SPECIAL_LABELS: Record<string, string> = {
     html: "HTML", flowChart: "Flow Chart", graph: "Graph", mermaid: "Mermaid", UML: "UML",
 };
-const INSERT_KEYMAP_IDS = new Set(["ref", "list", "orderedList", "check", "quote", "code", "table"]);
+const INSERT_KEYMAP_IDS = new Set(["ref", "list", "orderedList", "check", "mindmap", "quote", "code", "table"]);
 
 const keymapPath = (id: string): TCommandKeymapPath | undefined => {
     if (/^heading[1-6]$/.test(id)) {
@@ -120,10 +120,8 @@ const executeInsert = (context: ICommandContextSnapshot, id: string) => {
         return;
     }
     protyle.toolbar.range = context.range.cloneRange();
-    protyle.hint.splitChar = "/";
-    protyle.hint.lastIndex = -1;
     focusByRange(protyle.toolbar.range);
-    protyle.hint.fill(item.value, protyle, false);
+    protyle.hint.fillCommand(item.value, protyle, false);
     if ((context.environment === "mobile" || context.environment === "browser-mobile") &&
         (id === "ref" || id === "blockEmbed")) {
         /// #if MOBILE

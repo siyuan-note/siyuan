@@ -159,6 +159,8 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 			}
 			fmt.Fprintf(&output, "    %s: {\n        request: %s;\n        response: %s;\n        body: %s;\n",
 				quote(endpoint.Path), b.typeScript(endpoint.Request), b.typeScript(endpoint.Response), quote(string(endpoint.Body)))
+			authorization, _ := json.Marshal(endpoint.Authorization)
+			fmt.Fprintf(&output, "        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */\n        authorization?: readonly %s;\n", authorization)
 			if endpoint.Output != "" {
 				fmt.Fprintf(&output, "        output: %s;\n", quote(string(endpoint.Output)))
 			}

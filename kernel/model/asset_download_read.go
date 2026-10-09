@@ -187,7 +187,7 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			}
 			trees[blockID] = selectExportTree(tree, block)
 		} else {
-			exportRefTrees(tree, &[]string{}, trees)
+			exportRefTreesWithConfig(tree, &[]string{}, trees, resolveExportOptions(nil))
 		}
 	}
 	// 查询嵌入的资源属于导出依赖，按笔记本边界展开并去重，避免循环嵌入反复读取。
@@ -219,7 +219,7 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			order := []string{}
 			footnotes := map[string]*refAsFootnotes{}
 			depth := 0
-			collectFootnotesDefs0(tree, tree.Root, &order, footnotes, &depth)
+			collectFootnotesDefs0(tree, tree.Root, &order, footnotes, &depth, nil)
 			defs, defsErr := resolveFootnotesDefs(&order, footnotes, tree, map[string]bool{},
 				Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight, false)
 			if defsErr != nil {
@@ -254,7 +254,7 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 							trees[block.ID] = selectExportTree(embedded, bt)
 						}
 					} else {
-						exportRefTrees(embedded, &[]string{}, trees)
+						exportRefTreesWithConfig(embedded, &[]string{}, trees, resolveExportOptions(nil))
 					}
 				}
 			}

@@ -16,6 +16,7 @@ type AIClient struct {
 	*openai.Client
 	baseURL       string
 	anthropicHTTP *http.Client
+	ChatGPT       bool
 }
 
 // AIMessageContent 保存供应商原生内容，显示文本与恢复上下文分别使用各自的表示。

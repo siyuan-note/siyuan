@@ -42,6 +42,17 @@ func notebookConfContract(value *conf.BoxConf) *apicontract.NotebookConf {
 // contractHandler 将请求绑定和响应类型与注册契约关联，业务入口继续使用现有中间件。
 func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, Data],
 	handler func(*gin.Context, Request) apicontract.Response[Data], beforeDecode ...func(*gin.Context) *apicontract.Response[Data]) gin.HandlerFunc {
+	if namespace := additionalSettingNamespace(endpoint.Definition().Path); namespace != "" {
+		handler = serializeSetting(namespace, handler)
+	}
+	if endpoint.Definition().Path == "/api/system/getConf" || settingsResetWritePath(endpoint.Definition().Path) {
+		read := handler
+		handler = func(c *gin.Context, request Request) apicontract.Response[Data] {
+			settingMutationMu.Lock()
+			defer settingMutationMu.Unlock()
+			return read(c, request)
+		}
+	}
 	return func(c *gin.Context) {
 		writeResponse := func(response apicontract.Response[Data]) {
 			if after := response.AfterWrite(); after != nil {
@@ -117,8 +128,24 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 			writeResponse(endpoint.DecodeFailure(err))
 			return
 		}
+		if err = model.LockRequestAfterDecode(c); err != nil {
+			writeResponse(endpoint.DecodeFailure(err))
+			return
+		}
 		writeResponse(handler(c, request))
 	}
+}
+
+// settingsResetWritePath 让重置事务与布局、本地偏好及关系图配置写入互斥，不改变这些接口的通知语义。
+func settingsResetWritePath(path string) bool {
+	switch path {
+	case "/api/system/setUILayout", "/api/storage/setLocalStorage", "/api/storage/setLocalStorageVal",
+		"/api/storage/setLocalStorageVals", "/api/storage/removeLocalStorageVal", "/api/storage/removeLocalStorageVals",
+		"/api/setting/setBootAppearance", "/api/graph/setGraphConf", "/api/graph/resetGraph", "/api/graph/resetLocalGraph",
+		"/api/graph/getGraph", "/api/graph/getLocalGraph":
+		return true
+	}
+	return false
 }
 
 // contractFailure 保留既有业务校验的错误码和消息，并限制其错误载荷形态。

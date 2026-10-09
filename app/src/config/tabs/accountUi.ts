@@ -456,7 +456,6 @@ const bindAccountAuthForm = (
                     showMessage(userResponse.msg);
                     return;
                 }
-                window.dispatchEvent(new CustomEvent("siyuan-login-success"));
             });
         } else if (mode === "deactivate") {
             confirmDeactivateAccount();
@@ -567,7 +566,7 @@ const renderAccount = (accountSettingsRoot: Element) => {
 };
 
 export const applyCloudUserState = (user: TCloudUser | null, userName = "", accountSettingsRoot?: Element) => {
-    setCloudUser(user, userName);
+    const loggedIn = setCloudUser(user, userName);
     const root = accountSettingsRoot || syncTabElement;
     if (root) {
         renderAccount(root);
@@ -575,6 +574,9 @@ export const applyCloudUserState = (user: TCloudUser | null, userName = "", acco
     }
     onSetaccount();
     processSync();
+    if (loggedIn) {
+        window.dispatchEvent(new CustomEvent("siyuan-login-success"));
+    }
 };
 
 const genVIPIconHTML = (className = "") =>

@@ -1,3 +1,4 @@
+import {isAVDateType, isAVSelectType, isAVTextType} from "./capabilities";
 import type {IAVSelectedCell} from "./selectionState";
 
 // 按行和字段同步已加载的数据，供后续编辑读取，不依赖选区或单元格是否已渲染。
@@ -52,19 +53,19 @@ export const cellValueIsEmpty = (value: IAVCellValue, useRenderedContent = false
     if (value.type === "checkbox") {
         return false;
     }
-    if (["text", "block", "url", "phone", "email", "template"].includes(value.type)) {
+    if (isAVTextType(value.type)) {
         return !value[value.type as "text"]?.content;
     }
     if (value.type === "number") {
         return value.number ? !value.number.isNotEmpty : true;
     }
-    if (["mSelect", "mAsset", "select"].includes(value.type)) {
+    if ((isAVSelectType(value.type) || value.type === "mAsset")) {
         if (value[(value.type === "select" ? "mSelect" : value.type) as "mSelect"]?.length > 0) {
             return false;
         }
         return true;
     }
-    if (["date", "created", "updated"].includes(value.type)) {
+    if (isAVDateType(value.type)) {
         return !value[value.type as "date"]?.isNotEmpty &&
             !value[value.type as "date"]?.isNotEmpty2;
     }
@@ -91,7 +92,7 @@ export const genEmptyAVCellValue = (colType: TAVCol): IAVCellValue => {
             content: 0,
             isNotEmpty: false,
         };
-    } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
+    } else if (isAVTextType(colType)) {
         cellValue[colType as "text"] = {
             content: "",
         };
@@ -99,7 +100,7 @@ export const genEmptyAVCellValue = (colType: TAVCol): IAVCellValue => {
         cellValue.mSelect = [];
     } else if (colType === "mAsset") {
         cellValue.mAsset = [];
-    } else if (["date", "created", "updated"].includes(colType)) {
+    } else if (isAVDateType(colType)) {
         cellValue[colType as "date"] = {
             content: null,
             isNotEmpty: false,

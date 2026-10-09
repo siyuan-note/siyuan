@@ -125,6 +125,24 @@ func initDatabase(forceRebuild bool) {
 			if err := ensureRefsDefIndexes(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create refs definition indexes failed: %s", err)
 			}
+			if err := ensureDocumentPathIndexes(db, true); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document path indexes failed: %s", err)
+			}
+			if err := ensureTagSpansIndex(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create tag spans index failed: %s", err)
+			}
+			if err := ensureBookmarkAttributesIndex(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create bookmark attributes index failed: %s", err)
+			}
+			if err := ensureDailyNoteAttributesIndex(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create daily note attributes index failed: %s", err)
+			}
+			if err := ensureFileAnnotationRefIndex(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create file annotation reference index failed: %s", err)
+			}
+			if err := ensureRecentUpdatedBlocksIndexes(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create recent updated block indexes failed: %s", err)
+			}
 			if err := cleanupInvalidRefs(db); err != nil {
 				logging.LogErrorf("cleanup invalid refs failed: %s", err)
 			}
@@ -192,6 +210,9 @@ func initDBTables() {
 	if err = ensureBlocksDocHPathIndex(db); err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document hpath index failed: %s", err)
 	}
+	if err = ensureRecentUpdatedBlocksIndexes(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create recent updated block indexes failed: %s", err)
+	}
 
 	if err = initFTSBlocks(); err != nil {
 		if isRecoverableDBFileError(err) {
@@ -218,6 +239,9 @@ func initDBTables() {
 	_, err = db.Exec("CREATE INDEX idx_spans_root_id ON spans(root_id)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_spans_root_id] failed: %s", err)
+	}
+	if err = ensureTagSpansIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create tag spans index failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS assets")
@@ -249,6 +273,12 @@ func initDBTables() {
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_attributes_root_id] failed: %s", err)
 	}
+	if err = ensureBookmarkAttributesIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create bookmark attributes index failed: %s", err)
+	}
+	if err = ensureDailyNoteAttributesIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create daily note attributes index failed: %s", err)
+	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS refs")
 	if err != nil {
@@ -270,6 +300,9 @@ func initDBTables() {
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create table [refs] failed: %s", err)
 	}
+	if err = ensureFileAnnotationRefIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create file annotation reference index failed: %s", err)
+	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS block_embeddings")
 	if err != nil {
@@ -282,6 +315,9 @@ func initDBTables() {
 	_, err = db.Exec("CREATE INDEX idx_block_embeddings_root_id ON block_embeddings(root_id)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_block_embeddings_root_id] failed: %s", err)
+	}
+	if err = ensureDocumentPathIndexes(db, true); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document path indexes failed: %s", err)
 	}
 }
 
@@ -1338,32 +1374,34 @@ func batchDeleteByRootIDs(tx *sql.Tx, rootIDs []string, context map[string]any) 
 
 func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 	// external content 模式下 FTS 行需按 rowid 删除，必须先删 FTS 再删 blocks。
-	stmt := "DELETE FROM blocks_fts WHERE rowid IN (SELECT rowid FROM blocks WHERE box = ? AND path LIKE ?)"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	condition, args := documentPathPrefixCondition("path", boxID, pathPrefix)
+	stmt := "DELETE FROM blocks_fts WHERE rowid IN (SELECT rowid FROM blocks WHERE " + condition + ")"
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM blocks WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	stmt = "DELETE FROM blocks WHERE " + condition
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM spans WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	stmt = "DELETE FROM spans WHERE " + condition
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM assets WHERE box = ? AND docpath LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	assetCondition, assetArgs := documentPathPrefixCondition("docpath", boxID, pathPrefix)
+	stmt = "DELETE FROM assets WHERE " + assetCondition
+	if err = execStmtTx(tx, stmt, assetArgs...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM refs WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	stmt = "DELETE FROM refs WHERE " + condition
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM file_annotation_refs WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	stmt = "DELETE FROM file_annotation_refs WHERE " + condition
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
-	stmt = "DELETE FROM attributes WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+	stmt = "DELETE FROM attributes WHERE " + condition
+	if err = execStmtTx(tx, stmt, args...); err != nil {
 		return
 	}
 	ClearCache()
@@ -1424,6 +1462,35 @@ func ensureBlocksDocHPathIndex(database *sql.DB) (err error) {
 	return
 }
 
+// 最近更新查询只索引符合展示条件的段落和文档，按更新时间读取即可在达到限额后停止。
+func ensureRecentUpdatedBlocksIndexes(database *sql.DB) (err error) {
+	if _, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocks_recent_p ON blocks(updated DESC) WHERE type = 'p' AND length > 1"); err != nil {
+		return
+	}
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocks_recent_d ON blocks(updated DESC) WHERE type = 'd'")
+	return
+}
+
+func ensureTagSpansIndex(database *sql.DB) (err error) {
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_spans_tag_path ON spans(path) WHERE " + tagSpanIndexPredicate)
+	return
+}
+
+func ensureBookmarkAttributesIndex(database *sql.DB) (err error) {
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_attributes_bookmark_block_id ON attributes(block_id) WHERE name = 'bookmark' AND type = 'b'")
+	return
+}
+
+func ensureDailyNoteAttributesIndex(database *sql.DB) (err error) {
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_attributes_name_value ON attributes(name, value)")
+	return
+}
+
+func ensureFileAnnotationRefIndex(database *sql.DB) (err error) {
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_file_annotation_refs_annotation_id ON file_annotation_refs(annotation_id)")
+	return
+}
+
 func ensureRefsDefIndexes(database *sql.DB) (err error) {
 	if _, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_refs_def_block_id ON refs(def_block_id)"); err != nil {
 		return
@@ -1439,20 +1506,28 @@ func cleanupInvalidRefs(database *sql.DB) (err error) {
 }
 
 func CloseDatabase() {
+	diagnostic := util.WatchOperationWithTiming("close databases", "close index queue")
+	defer diagnostic.Finish()
 	closeIndexQueue()
 	// 退出时删除所有已打开的加密 db 文件：加密索引可由 box.Index() 全量重建，
 	// 文件无需持久化，删除可避免重启后残留旧索引数据导致下次解锁叠加重复行。
+	diagnostic.Stage("remove encrypted indexes")
 	RemoveAllEncryptedDBFiles()
+	diagnostic.Stage("remove encrypted block tree indexes")
 	treenode.RemoveAllEncryptedBlockTreeDBFiles()
+	diagnostic.Stage("close block database")
 	if err := db.Close(); err != nil {
 		logging.LogErrorf("close database failed: %s", err)
 	}
+	diagnostic.Stage("close history database")
 	if err := historyDB.Close(); err != nil {
 		logging.LogErrorf("close history database failed: %s", err)
 	}
+	diagnostic.Stage("close asset content database")
 	if err := assetContentDB.Close(); err != nil {
 		logging.LogErrorf("close asset content database failed: %s", err)
 	}
+	diagnostic.Stage("close block tree database")
 	treenode.CloseDatabase()
 	logging.LogInfof("closed database")
 }
@@ -2077,7 +2152,25 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 	if err = ensureBlocksDocHPathIndex(boxDB); err != nil {
 		return
 	}
+	if err = ensureRecentUpdatedBlocksIndexes(boxDB); err != nil {
+		return
+	}
 	if err = ensureRefsDefIndexes(boxDB); err != nil {
+		return
+	}
+	if err = ensureDocumentPathIndexes(boxDB, false); err != nil {
+		return
+	}
+	if err = ensureTagSpansIndex(boxDB); err != nil {
+		return
+	}
+	if err = ensureBookmarkAttributesIndex(boxDB); err != nil {
+		return
+	}
+	if err = ensureDailyNoteAttributesIndex(boxDB); err != nil {
+		return
+	}
+	if err = ensureFileAnnotationRefIndex(boxDB); err != nil {
 		return
 	}
 	if err = cleanupInvalidRefs(boxDB); err != nil {

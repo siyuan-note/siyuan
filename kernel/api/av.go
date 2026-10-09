@@ -43,6 +43,7 @@ var removeUnusedAttributeView = contractHandler(apicontract.RemoveUnusedAttribut
 })
 
 var removeUnusedAttributeViews = contractHandler(apicontract.RemoveUnusedAttributeViews, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.AVPathsData] {
+	defer beginSettingTask("clearAllAV")()
 	return apicontract.Success(apicontract.AVPathsData{Paths: model.RemoveUnusedAttributeViews()})
 })
 
@@ -51,7 +52,7 @@ var getUnusedAttributeViews = contractHandler(apicontract.GetUnusedAttributeView
 	total := len(values)
 	if total > 512 {
 		values = values[:512]
-		util.PushMsg(fmt.Sprintf(model.Conf.Language(279), total, 512), 5000)
+		util.PushMsgWithApp(resolveRequestAppID(c, ""), fmt.Sprintf(model.Conf.Language(279), total, 512), 5000)
 	}
 	return apicontract.Success(assetUnusedItems(values))
 })
@@ -211,11 +212,16 @@ var getAttributeViewRelationCandidates = contractHandler(apicontract.GetAttribut
 	if avID == "" {
 		avID = request.ID
 	}
+	if request.IncludeNewItemPreview || request.BlockID != "" {
+		if err := holdAttributeViewRequest(c, request.BlockID, avID); err != nil {
+			return apicontract.Failure[apicontract.AVRelationCandidatesData](-1, err.Error())
+		}
+	}
 	var candidateSort *av.ViewSort
 	if request.Sort != nil {
 		candidateSort = &av.ViewSort{Column: request.Sort.Column, Order: av.SortOrder(request.Sort.Order)}
 	}
-	name, blockIDs, colors, columns, selectedRows, rows, total, err := model.GetAttributeViewRelationCandidates(avID, request.KeyID, request.Keyword, avNonemptyStrings(request.SelectedBlockIDs), avPage(request.Page, 1), avPage(request.PageSize, -1), candidateSort)
+	name, blockIDs, colors, columns, selectedRows, rows, total, err := model.GetAttributeViewRelationCandidates(avID, request.KeyID, request.Keyword, avNonemptyStrings(request.SelectedBlockIDs), avPage(request.Page, 1), avPage(request.PageSize, -1), candidateSort, request.BlockID)
 	if err != nil {
 		return apicontract.Failure[apicontract.AVRelationCandidatesData](-1, err.Error())
 	}
@@ -225,7 +231,14 @@ var getAttributeViewRelationCandidates = contractHandler(apicontract.GetAttribut
 			notebookID = tree.BoxID
 		}
 	}
-	return apicontract.Success(apicontract.AVRelationCandidatesData{Name: name, BlockIDs: blockIDs, CustomColors: avContractSlice(colors, toContractAVAttributeViewCustomColor), NotebookID: notebookID, Columns: avContractSlice(columns, toContractAVTableColumn), SelectedRows: avContractSlice(selectedRows, toContractAVTableRow), Rows: avContractSlice(rows, toContractAVTableRow), Total: total})
+	data := apicontract.AVRelationCandidatesData{Name: name, BlockIDs: blockIDs, CustomColors: avContractSlice(colors, toContractAVAttributeViewCustomColor), NotebookID: notebookID, Columns: avContractSlice(columns, toContractAVTableColumn), SelectedRows: avContractSlice(selectedRows, toContractAVTableRow), Rows: avContractSlice(rows, toContractAVTableRow), Total: total}
+	if request.IncludeNewItemPreview {
+		preview := model.PreviewAttributeViewRelationItem(avID, request.BlockID, request.KeyID, request.Keyword)
+		data.NewItemPreview = &apicontract.AVRelationItemPreview{TemplateID: preview.TemplateID,
+			PrimaryKey: preview.PrimaryKey, CreatedAt: preview.CreatedAt, Error: preview.Error,
+			HasPrimaryKeyTemplate: preview.HasPrimaryKeyTemplate, InputPrimaryKey: preview.InputPrimaryKey}
+	}
+	return apicontract.Success(data)
 })
 
 var appendAttributeViewDetachedBlocksWithValues = contractHandler(apicontract.AppendAttributeViewDetachedBlocksWithValues, func(c *gin.Context, request apicontract.AppendAttributeViewDetachedBlocksWithValuesRequest) apicontract.Response[apicontract.Null] {
@@ -258,7 +271,9 @@ var addAttributeViewBlocks = contractHandler(apicontract.AddAttributeViewBlocks,
 		}
 		srcs = append(srcs, src)
 	}
-	if err := model.AddAttributeViewBlock(nil, srcs, request.AvID, request.BlockID, request.ViewID, request.GroupID, request.PreviousID, request.IgnoreDefaultFill); err != nil {
+	if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "insertAttrViewBlock", Srcs: srcs,
+		AvID: request.AvID, BlockID: request.BlockID, ViewID: request.ViewID, GroupID: request.GroupID,
+		PreviousID: request.PreviousID, IgnoreDefaultFill: request.IgnoreDefaultFill}}); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	model.ReloadAttrView(request.AvID)
@@ -353,6 +368,36 @@ var getAttributeViewFieldViews = contractHandler(apicontract.GetAttributeViewFie
 var createAttributeViewItem = contractHandler(apicontract.CreateAttributeViewItem, func(c *gin.Context, request apicontract.CreateAttributeViewItemRequest) apicontract.Response[apicontract.AVCreateItemResult] {
 	value, err := model.CreateAttributeViewItem(request.AvID, request.BlockID, request.ViewID, request.TemplateID, request.PreviousID, request.GroupID, request.CalendarDate)
 	return createAVItemResponse(value, err, request.App, request.Session)
+})
+
+var createAttributeViewRelationItem = contractHandler(apicontract.CreateAttributeViewRelationItem, func(c *gin.Context, request apicontract.CreateAttributeViewRelationItemRequest) apicontract.Response[apicontract.AVCreateItemResult] {
+	if err := holdEncryptedBlockRequests(c, "", []string{request.BlockID}, false); err != nil {
+		return apicontract.Failure[apicontract.AVCreateItemResult](-1, err.Error())
+	}
+	if err := holdAttributeViewRequest(c, request.BlockID, request.AvID); err != nil {
+		return apicontract.Failure[apicontract.AVCreateItemResult](-1, err.Error())
+	}
+	var preview *model.AttributeViewRelationItemPreview
+	if request.Preview != nil {
+		preview = &model.AttributeViewRelationItemPreview{TemplateID: request.Preview.TemplateID,
+			PrimaryKey: request.Preview.PrimaryKey, CreatedAt: request.Preview.CreatedAt, Error: request.Preview.Error}
+	}
+	var cells []*model.AttributeViewRelationItemCell
+	for _, cell := range request.Cells {
+		if cell == nil {
+			return apicontract.Failure[apicontract.AVCreateItemResult](-1, "invalid relation item cell")
+		}
+		cells = append(cells, &model.AttributeViewRelationItemCell{ItemID: cell.ItemID, RelatedItemIDs: cell.RelatedItemIDs})
+	}
+	result, err := model.CreateAttributeViewRelationItem(request.AvID, request.BlockID, request.KeyID, request.Keyword, cells, preview, request.UseInputName)
+	if err != nil {
+		if errors.Is(err, model.ErrBoxNotFound) {
+			return apicontract.CreateAttributeViewRelationItem.FailureWithData(1, "", apicontract.NewAVCreateItemResultError(apicontract.AVUnavailableNotebook{UnavailableNotebook: true}))
+		}
+		return apicontract.Failure[apicontract.AVCreateItemResult](-1, err.Error())
+	}
+	pushTransactions(request.App, request.Session, []*model.Transaction{result.Transaction})
+	return apicontract.Success(apicontract.NewAVCreateItemResult(*toContractAVCreateAttributeViewItemResult(result)))
 })
 
 var createAttributeViewItemWithMarkdown = contractHandler(apicontract.CreateAttributeViewItemWithMarkdown, func(c *gin.Context, request apicontract.CreateAttributeViewItemWithMarkdownRequest) apicontract.Response[apicontract.AVCreateItemResult] {
@@ -561,27 +606,34 @@ var setAttributeViewBlockAttr = contractHandler(apicontract.SetAttributeViewBloc
 		logging.LogWarn(msg)
 		return apicontract.Failure[apicontract.AVValueData](-1, msg)
 	}
-	value, err := model.UpdateAttributeViewCell(nil, request.AvID, request.KeyID, itemID, request.Value)
+	if err := model.PerformAttributeViewOperations([]*model.Operation{{Action: "updateAttrViewCell", AvID: request.AvID,
+		KeyID: request.KeyID, RowID: itemID, Data: request.Value}}); err != nil {
+		return apicontract.Failure[apicontract.AVValueData](-1, err.Error())
+	}
+	view, err := av.ParseAttributeView(request.AvID)
 	if err != nil {
 		return apicontract.Failure[apicontract.AVValueData](-1, err.Error())
 	}
+	value := view.GetValue(request.KeyID, itemID)
 	model.ReloadAttrView(request.AvID)
 	return apicontract.Success(apicontract.AVValueData{Value: toContractAVValue(value)})
 })
 
 var batchSetAttributeViewBlockAttrs = contractHandler(apicontract.BatchSetAttributeViewBlockAttrs, func(c *gin.Context, request apicontract.BatchSetAttributeViewBlockAttrsRequest) apicontract.Response[apicontract.Null] {
-	values := make([]any, len(request.Values))
+	operations := make([]*model.Operation, len(request.Values))
 	for i, value := range request.Values {
-		fields := map[string]any{"keyID": value.KeyID, "value": value.Value}
+		itemID := ""
 		if value.ItemID != nil {
-			fields["itemID"] = *value.ItemID
+			itemID = *value.ItemID
+		} else if value.RowID != nil {
+			msg := fmt.Sprintf("[%s] parameter [%s] is deprecated, visit [https://github.com/siyuan-note/siyuan/issues/15727] for details", c.Request.RequestURI, "rowID")
+			logging.LogWarn(msg)
+			return apicontract.Failure[apicontract.Null](-1, msg)
 		}
-		if value.RowID != nil {
-			fields["rowID"] = *value.RowID
-		}
-		values[i] = fields
+		operations[i] = &model.Operation{Action: "updateAttrViewCell", AvID: request.AvID, KeyID: value.KeyID,
+			RowID: itemID, Data: value.Value}
 	}
-	if err := model.BatchUpdateAttributeViewCells(nil, request.AvID, values); err != nil {
+	if err := model.PerformAttributeViewOperations(operations); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	model.ReloadAttrView(request.AvID)

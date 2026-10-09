@@ -1,3 +1,4 @@
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {MenuItem} from "../../menus/Menu";
 import {Constants} from "../../constants";
 import {genTagList, renameTag} from "../../util/noRelyPCFunction";
@@ -22,7 +23,7 @@ interface IOpenDocTagMenuOptions {
 }
 
 const copyTag = async (protyle: IProtyle, tag: string) => {
-    const canonicalHTML = buildSemanticInlineHTML("tag", Lute.EscapeHTMLStr(tag));
+    const canonicalHTML = buildSemanticInlineHTML("tag", escapeHtmlTextAndAttr(tag));
     const textSiyuan = transformSemanticInlineHTML(canonicalHTML, "legacy");
     const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${removeZWJ(protyle.lute.BlockDOM2HTML(textSiyuan))}`;
     try {

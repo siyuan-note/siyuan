@@ -18,6 +18,7 @@ import {getUnRefList} from "../../search/unRef";
 import {toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "../../search/toggleHistory";
 import {Protyle} from "../../protyle";
 import {getKeysByLiElement} from "../../search/menu";
+import {getSearchAVMatches} from "../../search/avPreview";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export const searchKeydown = (app: App, event: KeyboardEvent) => {
@@ -85,6 +86,10 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         // 不能返回 true，否则历史菜单无法使用快捷键
         return false;
+    }
+    if (searchType === "doc" && targetId === "replaceInput" && event.key === "Enter") {
+        replace(element, config, edit, false);
+        return true;
     }
     let currentList: HTMLElement = listElement.querySelector(".b3-list-item--focus");
     if (!currentList) {
@@ -275,6 +280,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 config,
                 value: searchInputElement.value,
                 edit,
+                matches: getSearchAVMatches(currentList),
             });
         } else {
             getArticle({
@@ -312,6 +318,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 config,
                 value: searchInputElement.value,
                 edit,
+                matches: getSearchAVMatches(currentList),
             });
         } else if (searchType === "unRef") {
             getArticle({

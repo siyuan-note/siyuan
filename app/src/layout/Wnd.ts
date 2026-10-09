@@ -41,7 +41,8 @@ import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
 import {getFrontend} from "../util/functions";
 import {hideAllElements} from "../protyle/ui/hideElements";
-import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
+import {focusByOffset} from "../protyle/util/selection";
+import {getSelectionOffset} from "../protyle/util/selectionOffsets";
 import {Custom} from "./dock/Custom";
 import type {App} from "../index";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
@@ -867,7 +868,9 @@ export class Wnd {
         }
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
             window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TAB_LIST) {
-            window.siyuan.menus.menu.remove();
+            if (!focus) {
+                window.siyuan.menus.menu.remove();
+            }
             return;
         }
         window.siyuan.menus.menu.remove();

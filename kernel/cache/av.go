@@ -43,6 +43,8 @@ var avCacheKeys = map[string]map[string]struct{}{}
 var avCacheKeysLock sync.Mutex
 
 var avDataVersion uint64
+
+// 失效后的版本令牌保留到全量清理，以拒绝尚未完成的原始数据准入和搜索结果写入。
 var avDataVersions = map[string]uint64{}
 var avSearchDataCache = map[string]*avSearchDataEntry{}
 var avSearchDataCacheLock sync.RWMutex
@@ -62,11 +64,17 @@ func GetAVDataInBox(avID, boxID string) (raw []byte, ok bool) {
 }
 
 func GetAVDataWithVersionInBox(avID, boxID string) (raw []byte, version uint64, ok bool) {
-	v, _ := avCache.Get(avCacheKey(avID, boxID))
+	avSearchDataCacheLock.RLock()
+	defer avSearchDataCacheLock.RUnlock()
+	key := avCacheKey(avID, boxID)
+	v, _ := avCache.Get(key)
 	if nil == v {
 		return
 	}
 	entry := v.(*avCacheEntry)
+	if entry.version != avDataVersions[key] {
+		return
+	}
 	return entry.raw, entry.version, true
 }
 
@@ -135,7 +143,6 @@ func RemoveAVData(avID string) {
 	delete(avCacheKeys, avID)
 	avCacheKeysLock.Unlock()
 
-	avCache.Del(avID)
 	avCache.Del(avCacheKey(avID, ""))
 	for key := range keys {
 		avCache.Del(key)

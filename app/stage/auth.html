@@ -4,7 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <title>{{.l6}}</title>
+    <script>
+        // 在正文解析前确定主题，避免认证页先绘制浅色背景。
+        if ({{.appearanceModeOS}} && window.matchMedia("(prefers-color-scheme: dark)").matches || {{.appearanceMode}} === 1) {
+            document.documentElement.classList.add("dark");
+        }
+    </script>
     <style>
+        html {
+            background-color: #fff;
+        }
+
+        html.dark {
+            background-color: #1e1e1e;
+        }
+
         body {
             margin: 0;
             display: flex;
@@ -24,7 +38,7 @@
             background-color: var(--b3-theme-background);
         }
 
-        .dark {
+        .dark body {
             --b3-theme-on-surface: #9aa0a6;
             --b3-protyle-code-background: rgba(240, 246, 252, .15);
             --b3-protyle-inline-link-color: #8ab4f8;
@@ -655,11 +669,7 @@
     }
 
     const init = async () => {
-        let isDark = false
-        if ({{.appearanceModeOS}} && window.matchMedia('(prefers-color-scheme: dark)').matches || {{.appearanceMode}} ===1) {
-            document.body.classList.add('dark')
-            isDark = true
-        }
+        const isDark = document.documentElement.classList.contains('dark')
         // 同步外观到原生壳：让 iOS 顶/底条与认证页背景一致
         if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.changeStatusBar) {
             window.webkit.messageHandlers.changeStatusBar.postMessage((isDark ? "#1e1e1e" : "#fff") + " " + (isDark ? 1 : 0))

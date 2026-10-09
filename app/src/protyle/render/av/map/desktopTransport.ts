@@ -154,16 +154,20 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
             geometry({visible: false});
         }
     };
-    const tick = () => {
-        if (destroyed) {
-            return;
-        }
+    const checkGeometry = () => {
         const next = readGeometry(container);
         const key = JSON.stringify(next);
         if (key !== lastGeometry) {
             lastGeometry = key;
             invalidate();
         }
+        return next;
+    };
+    const tick = () => {
+        if (destroyed) {
+            return;
+        }
+        const next = checkGeometry();
         if (!next.visible || scope.performance.now() >= stableAfter) {
             geometry(next);
         }
@@ -278,7 +282,12 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
         // BrowserWindow focus is enforced in main. DOM blur also fires when the map view gains focus.
         scope.addEventListener("focus", invalidate);
         container.ownerDocument.addEventListener("visibilitychange", invalidate);
-        observer = new MutationObserver(invalidate);
+        observer = new MutationObserver(() => {
+            // 悬停提示和块标也会改变 DOM；仅地图几何或遮挡变化需要隐藏原生视图。
+            if (!destroyed) {
+                checkGeometry();
+            }
+        });
         observer.observe(container.ownerDocument.documentElement, {childList: true, subtree: true,
             attributes: true, attributeFilter: ["class", "style", "hidden", "open"]});
         resizeObserver = new ResizeObserver(invalidate);

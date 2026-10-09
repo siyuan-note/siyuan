@@ -58,7 +58,7 @@ const confirmWeakPassword = (password: string, confirm: () => void) => {
 };
 
 const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
-    const group = tab.group("authentication", window.siyuan.languages.authentication);
+    const group = tab.group("authentication", window.siyuan.languages.configGroupSignInTokens);
     const onWeb = isBrowser() && !isInMobileApp();
 
     if (!window.siyuan.config.readonly && !onWeb) {

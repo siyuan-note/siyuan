@@ -20,7 +20,7 @@ const registerExportReferencesGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.includeRelatedDocsTip,
     });
     group.select("export.blockRefMode", {
-        title: window.siyuan.languages.ref,
+        title: window.siyuan.languages.exportBlockRefMode,
         desc: window.siyuan.languages.export11,
         options: [
             {value: 2, label: window.siyuan.languages.export2},

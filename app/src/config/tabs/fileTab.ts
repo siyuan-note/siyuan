@@ -81,16 +81,6 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.selectOpen,
         desc: window.siyuan.languages.fileTree2,
     });
-    /// #if !MOBILE
-    group.switch("fileTree.openFilesUseCurrentTab", {
-        title: window.siyuan.languages.fileTree7,
-        desc: window.siyuan.languages.fileTree8,
-    });
-    group.switch("fileTree.noSplitScreenWhenOpenTab", {
-        title: window.siyuan.languages.noSplitScreenWhenOpenTab,
-        desc: window.siyuan.languages.noSplitScreenWhenOpenTabTip,
-    });
-    /// #endif
 };
 
 const registerTabStartupGroup = (tab: SettingTabBuilder) => {
@@ -114,6 +104,16 @@ const registerTabStartupGroup = (tab: SettingTabBuilder) => {
             {value: 2, label: window.siyuan.languages.tabStartupClose},
         ],
     });
+    /// #if !MOBILE
+    group.switch("fileTree.openFilesUseCurrentTab", {
+        title: window.siyuan.languages.fileTree7,
+        desc: window.siyuan.languages.fileTree8,
+    });
+    group.switch("fileTree.noSplitScreenWhenOpenTab", {
+        title: window.siyuan.languages.noSplitScreenWhenOpenTab,
+        desc: window.siyuan.languages.noSplitScreenWhenOpenTabTip,
+    });
+    /// #endif
 };
 
 const registerFileNewDocumentGroup = (tab: SettingTabBuilder) => {

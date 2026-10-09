@@ -12,7 +12,7 @@ import {unmountBazaarTab, withMountedBazaar} from "./bazaarTab";
 import {fetchSyncPost} from "../util/fetch";
 import {getFrontend} from "../util/functions";
 import {showMessage} from "../dialog/message";
-import {escapeHtml} from "../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {isBazaarAvailable} from "../util/bazaarAvailability";
 import {getSettingTabDefs} from "./setting/tabs";
 import {clearAccessTabElement} from "./tabs/accessRuntime";
@@ -42,7 +42,7 @@ export const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") 
     const tabPanels: string[] = [];
     for (const def of getSettingTabDefs()) {
         const isActive = def.id === initialTab;
-        tabListItems.push(`<li data-name="${def.id}" tabindex="0" role="button" class="b3-list-item${isActive ? " b3-list-item--focus" : ""}${def.hidden ? " fn__none" : ""}"><svg class="b3-list-item__graphic"><use xlink:href="#${def.icon}"></use></svg><span class="b3-list-item__text">${def.title}</span></li>`);
+        tabListItems.push(`<li data-name="${def.id}" title="${escapeHtmlTextAndAttr(def.title)}" tabindex="0" role="button" class="b3-list-item${isActive ? " b3-list-item--focus" : ""}${def.hidden ? " fn__none" : ""}"><svg class="b3-list-item__graphic"><use xlink:href="#${def.icon}"></use></svg><span class="b3-list-item__text">${def.title}</span></li>`);
         tabPanels.push(`<div class="config__tab-container${isActive ? "" : " fn__none"}" data-name="${def.id}"></div>`);
     }
     const settingDialogRef: {element?: HTMLElement} = {};

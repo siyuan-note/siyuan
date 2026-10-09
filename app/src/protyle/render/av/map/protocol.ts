@@ -5,8 +5,40 @@ export const AV_MAP_MERCATOR_MAX_LATITUDE = 85.0511287798066;
 export type AVMapProvider = "openfreemap" | "amap" | "tencent" | "baidu";
 export type AVMapTheme = "light" | "dark";
 export type AVMapCoordinateSystem = "wgs84" | "gcj02" | "bd09";
+export type AVMapLoadErrorCode = "sdkScriptLoadFailed" | "sdkCallbackTimeout" | "sdkGlobalMissing" |
+    "mapCreationFailed" | "mapReadyTimeout";
+export type AVMapHostErrorCode = "hostLimitReached" | "hostSetupFailed" | "hostAttachFailed" |
+    "hostDocumentLoadFailed" | "hostDocumentLoadTimeout" | "hostDocumentReloaded" | "hostDocumentMismatch" |
+    "hostRendererGone" | "hostDestroyed" | "hostPortSetupFailed" | "hostPortClosed" | "hostBootstrapFailed" |
+    "hostBootstrapTimeout" | "hostSDKTimeout" | "hostOperationFailed" | "hostCreateRejected" |
+    "hostCreateInvalidResponse" | "hostReadyTimeout" | "hostOwnerSetupFailed";
 export type AVMapErrorCode = "unsupportedEnvironment" | "missingCredentials" | "invalidConfiguration" |
-    "hostUnavailable" | "sdkUnavailable" | "mapUnavailable";
+    "hostUnavailable" | "sdkUnavailable" | "mapUnavailable" | AVMapLoadErrorCode | AVMapHostErrorCode;
+
+const mapHostErrorCodes = new Set<AVMapHostErrorCode>([
+    "hostLimitReached", "hostSetupFailed", "hostAttachFailed", "hostDocumentLoadFailed", "hostDocumentLoadTimeout",
+    "hostDocumentReloaded", "hostDocumentMismatch", "hostRendererGone", "hostDestroyed", "hostPortSetupFailed",
+    "hostPortClosed", "hostBootstrapFailed", "hostBootstrapTimeout", "hostSDKTimeout", "hostOperationFailed",
+    "hostCreateRejected", "hostCreateInvalidResponse", "hostReadyTimeout", "hostOwnerSetupFailed",
+]);
+export const isAVMapHostErrorCode = (value: unknown): value is AVMapHostErrorCode =>
+    typeof value === "string" && mapHostErrorCodes.has(value as AVMapHostErrorCode);
+
+const mapLoadErrorCodes = new Set<AVMapLoadErrorCode>([
+    "sdkScriptLoadFailed", "sdkCallbackTimeout", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout",
+]);
+const isAVMapLoadErrorCode = (value: unknown): value is AVMapLoadErrorCode =>
+    typeof value === "string" && mapLoadErrorCodes.has(value as AVMapLoadErrorCode);
+
+// 内部加载阶段只保留固定错误码，不保存 SDK 原始异常、地址或凭据。
+export class AVMapLoadError extends Error {
+    constructor(readonly code: AVMapLoadErrorCode) {
+        super("Map loading failed");
+    }
+}
+
+export const getAVMapLoadErrorCode = (error: unknown): AVMapLoadErrorCode | undefined =>
+    error instanceof AVMapLoadError && isAVMapLoadErrorCode(error.code) ? error.code : undefined;
 
 // 父页面仅展示固定官方署名链接，不接受隔离框架返回的 URL 或 HTML。
 export const AV_MAP_ATTRIBUTION_LINKS: Readonly<Record<AVMapProvider, ReadonlyArray<{label: string; href: string}>>> = {
@@ -163,8 +195,9 @@ export const parseAVMapReply = (value: unknown, instanceID: string): AVMapReply 
     if (input.type === "markerClick" && isAVMapIdentifier(input.id) && isAVMapRevision(input.revision)) {
         return {...envelope, type: "markerClick", id: input.id, revision: input.revision};
     }
-    if (input.type === "error" && ["unsupportedEnvironment", "missingCredentials", "invalidConfiguration",
-        "hostUnavailable", "sdkUnavailable", "mapUnavailable"].includes(input.code as string)) {
+    if (input.type === "error" && (["unsupportedEnvironment", "missingCredentials", "invalidConfiguration",
+        "hostUnavailable", "sdkUnavailable", "mapUnavailable"].includes(input.code as string) ||
+        isAVMapLoadErrorCode(input.code) || isAVMapHostErrorCode(input.code))) {
         return {...envelope, type: "error", code: input.code as AVMapErrorCode};
     }
 };

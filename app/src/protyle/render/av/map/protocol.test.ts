@@ -1,7 +1,8 @@
 import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
 import {
-    AV_MAP_ATTRIBUTION_LINKS, AV_MAP_MERCATOR_MAX_LATITUDE, AVMapProvider, isAVMapHandshake, isAVMapProjectionSupported,
+    AV_MAP_ATTRIBUTION_LINKS, AV_MAP_MERCATOR_MAX_LATITUDE, AVMapLoadError, AVMapProvider, getAVMapLoadErrorCode,
+    isAVMapHandshake, isAVMapHostErrorCode, isAVMapProjectionSupported,
     parseAVMapCommand, parseAVMapReply, sanitizeAVMapCredentials, sanitizeAVMapPoints,
 } from "./protocol";
 
@@ -89,6 +90,36 @@ describe("isolated map protocol", () => {
         assert.equal(isAVMapHandshake(handshake, "hello", "instance", "nonce"), true);
         for (const invalid of [{nonce: "old"}, {instanceID: "other"}, {version: 0}, {type: "connect"}]) {
             assert.equal(isAVMapHandshake({...handshake, ...invalid}, "hello", "instance", "nonce"), false);
+        }
+    });
+    it("admits only fixed loading stages and never treats arbitrary SDK exceptions as controlled errors", () => {
+        for (const code of ["sdkScriptLoadFailed", "sdkCallbackTimeout", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout"] as const) {
+            const error = new AVMapLoadError(code);
+            assert.equal(getAVMapLoadErrorCode(error), code);
+            assert.equal(error.message, "Map loading failed");
+            const reply = {version: 1, instanceID: "one", type: "error", code};
+            assert.deepEqual(parseAVMapReply({...reply, message: "https://sdk.invalid?key=secret", stack: "secret"}, "one"), reply);
+        }
+        assert.equal(getAVMapLoadErrorCode(Object.assign(new Error("secret"), {code: "mapCreationFailed"})), undefined);
+        assert.equal(getAVMapLoadErrorCode({code: "mapCreationFailed"}), undefined);
+        assert.equal(getAVMapLoadErrorCode(Object.assign(new AVMapLoadError("mapCreationFailed"), {code: "secret"})), undefined);
+    });
+    it("preserves only fixed host failures across the owner and main process boundaries", () => {
+        const {parseMapReply} = require("../../../../../electron/mapHostPolicy");
+        for (const code of ["hostLimitReached", "hostSetupFailed", "hostAttachFailed", "hostDocumentLoadFailed",
+            "hostDocumentLoadTimeout", "hostDocumentReloaded", "hostDocumentMismatch", "hostRendererGone", "hostDestroyed",
+            "hostPortSetupFailed", "hostPortClosed", "hostBootstrapFailed", "hostBootstrapTimeout", "hostSDKTimeout",
+            "hostOperationFailed", "hostCreateRejected", "hostCreateInvalidResponse", "hostReadyTimeout", "hostOwnerSetupFailed"]) {
+            const reply = {version: 1, instanceID: "one", type: "error", code};
+            const input = {...reply, message: "https://private.invalid/?key=secret", stack: "secret"};
+            assert.equal(isAVMapHostErrorCode(code), true);
+            assert.deepEqual(parseAVMapReply(input, "one"), reply);
+            assert.deepEqual(parseMapReply(input, "one"), reply);
+            assert.equal(parseAVMapReply(input, "other"), undefined);
+        }
+        for (const code of ["hostSecret", "https://private.invalid/?key=secret", {}, null]) {
+            assert.equal(isAVMapHostErrorCode(code), false);
+            assert.equal(parseAVMapReply({version: 1, instanceID: "one", type: "error", code}, "one"), undefined);
         }
     });
 });

@@ -15,6 +15,11 @@ const deniedResponse = () => new Response("Forbidden", {status: 403,
     headers: {"Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store"}});
 const withoutCredentials = (headers) => Object.fromEntries(Object.entries(headers || {})
     .filter(([name]) => !["cookie", "authorization", "proxy-authorization"].includes(name.toLowerCase())));
+const clearMapSession = ses => {
+    for (const method of ["closeAllConnections", "clearStorageData", "clearAuthCache", "clearCache", "clearHostResolverCache"]) {
+        try { void Promise.resolve(ses[method]()).catch(() => {}); } catch (_error) { /* 继续清理其他会话状态。 */ }
+    }
+};
 
 // 此会话从不向任何内核发送网络请求，包括未设置密码的本机内核。
 const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.readFile, trackFetch = () => {}, report = () => {}}) => {
@@ -164,8 +169,7 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
             for (const request of requests) request.abort();
             requests.clear();
             // Electron 没有 Session.destroy；清理状态后仍保留拒绝处理器，阻止残留请求恢复访问。
-            void Promise.allSettled([ses.closeAllConnections(), ses.clearStorageData(), ses.clearAuthCache(),
-                ses.clearCache(), ses.clearHostResolverCache()]);
+            clearMapSession(ses);
         },
     };
 };
@@ -215,7 +219,9 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         if (host && host.origin === owner.origin && host.frame === event.senderFrame) return host;
     };
     const sendOwner = (host, reply) => {
-        if (!host.destroyed && !host.owner.isDestroyed()) host.owner.send("siyuan-map-reply", reply);
+        if (!host.destroyed && !host.owner.isDestroyed()) {
+            try { host.owner.send("siyuan-map-reply", reply); } catch (_error) { destroy(host); }
+        }
     };
     const hide = host => {
         host.geometry = undefined;
@@ -234,24 +240,41 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         for (const port of [host.port, host.transferredPort]) {
             try { port?.close(); } catch (_error) { /* 端口已转移或关闭。 */ }
         }
-        if (!host.win.isDestroyed()) host.win.contentView.removeChildView(host.view);
+        try {
+            if (!host.win.isDestroyed()) host.win.contentView.removeChildView(host.view);
+        } catch (_error) { /* 移除失败也必须关闭渲染器。 */ }
         // 移除视图不会销毁 WebContents，必须实际关闭 SDK 渲染器。
         if (!host.view.webContents.isDestroyed()) {
-            host.view.webContents.stop();
-            host.view.webContents.close({waitForBeforeUnload: false});
+            try { host.view.webContents.stop(); } catch (_error) { /* 仍尝试关闭。 */ }
+            try { host.view.webContents.close({waitForBeforeUnload: false}); } catch (_error) { /* 渲染器可能已关闭。 */ }
         }
         mapContents.delete(host.view.webContents.id);
     };
     const fail = (host, code) => {
+        if (!host || host.destroyed) return;
         sendOwner(host, {version: 1, instanceID: host.init.instanceID, type: "error", code});
         destroy(host);
     };
+    const setDeadline = (host, milliseconds) => {
+        clearTimeout(host.timer);
+        host.timer = setTimeout(() => {
+            const code = !host.loaded ? "hostDocumentLoadTimeout" : host.bootstrapped ? "hostSDKTimeout" : "hostBootstrapTimeout";
+            fail(host, code);
+        }, milliseconds);
+        host.timer.unref?.();
+    };
     const listen = (host, emitter, name, listener) => {
-        emitter.on(name, listener);
-        host.listeners.push([emitter, name, listener]);
+        const guarded = (...args) => {
+            if (host.destroyed) return;
+            try { listener(...args); } catch (_error) { fail(host, "hostOperationFailed"); }
+        };
+        host.listeners.push([emitter, name, guarded]);
+        emitter.on(name, guarded);
     };
     const post = (host, message) => {
-        if (!host.destroyed && host.port) host.port.postMessage(message);
+        if (!host.destroyed && host.port) {
+            try { host.port.postMessage(message); } catch (_error) { fail(host, "hostOperationFailed"); }
+        }
     };
     const applyGeometry = host => {
         const geometry = host.geometry;
@@ -281,106 +304,121 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         if (hasUnsafeMapSwitches(app.commandLine)) return {version: 1, instanceID: init.instanceID, error: "unsupportedEnvironment"};
         const key = event.sender.id + ":" + init.instanceID;
         if (hosts.has(key) || hosts.size >= 32 || [...hosts.values()].filter(host => host.owner === event.sender).length >= 8) {
-            return {version: 1, instanceID: init.instanceID, error: "hostUnavailable"};
+            return {version: 1, instanceID: init.instanceID, error: "hostLimitReached"};
         }
-        const ses = session.fromPartition("siyuan-map-" + randomID(), {cache: false});
-        let host, router, view;
+        let host, router, view, ses;
+        let creationFailure = "hostSetupFailed";
         const report = code => {
             if (!host || host.destroyed || !mapDiagnosticCodes.includes(code) || host.diagnostics.has(code)) return;
             host.diagnostics.add(code);
             sendOwner(host, {version: 1, instanceID: init.instanceID, type: "diagnostic", code});
         };
         try {
+            ses = session.fromPartition("siyuan-map-" + randomID(), {cache: false});
             router = createMapSessionRouter({ses, origin: owner.origin, provider: init.provider, appDir, readFile, trackFetch, report});
             view = new WebContentsView({webPreferences: {session: ses, sandbox: true, contextIsolation: true,
                 webSecurity: true, nodeIntegration: false, nodeIntegrationInSubFrames: false,
                 nodeIntegrationInWorker: false, webviewTag: false, allowRunningInsecureContent: false,
                 navigateOnDragDrop: false, safeDialogs: true, disableDialogs: true, devTools: false,
                 spellcheck: false, backgroundThrottling: false, preload: path.join(__dirname, "mapHostPreload.js")}});
-        } catch (_error) {
-            router?.destroy();
-            return {version: 1, instanceID: init.instanceID, error: "hostUnavailable", diagnostic: "hostSetupFailed"};
-        }
-        const contents = view.webContents;
-        // 全局 web-contents-created 会安装外部打开链接处理器，必须在加载前替换为拒绝。
-        contents.setWindowOpenHandler(() => ({action: "deny"}));
-        mapContents.add(contents.id);
-        host = {key, init, owner: event.sender, frame: event.senderFrame, win: owner.win, origin: owner.origin, diagnostics: new Set(),
-            view, router, listeners: [], ids: new Set(), revision: -1, loaded: false, ready: false, bootstrapped: false, destroyed: false};
-        hosts.set(key, host);
-        const denyNavigation = event => event.preventDefault();
-        for (const name of ["will-navigate", "will-frame-navigate", "will-redirect", "will-attach-webview"]) {
-            listen(host, contents, name, denyNavigation);
-        }
-        listen(host, contents, "select-client-certificate", (event, _url, _certificates, callback) => { event.preventDefault(); callback(); });
-        listen(host, contents, "login", (event, _details, _auth, callback) => { event.preventDefault(); callback(); });
-        listen(host, contents, "certificate-error", (_event, _url, _error, _certificate, callback) => callback(false));
-        listen(host, contents, "console-message", (event, _level, legacyMessage) => {
-            for (const code of classifyMapConsoleMessage(event?.message ?? legacyMessage)) report(code);
-        });
-        listen(host, contents, "did-fail-load", () => report("documentLoadFailed"));
-        listen(host, contents, "render-process-gone", () => fail(host, "hostUnavailable"));
-        listen(host, contents, "destroyed", () => destroy(host));
-        listen(host, event.sender, "destroyed", () => destroy(host));
-        listen(host, event.sender, "render-process-gone", () => destroy(host));
-        listen(host, event.sender, "did-start-navigation", details => {
-            if (details.isMainFrame && !details.isSameDocument) destroy(host);
-        });
-        for (const name of ["resize", "hide", "minimize", "enter-full-screen", "leave-full-screen"]) {
-            listen(host, owner.win, name, () => hide(host));
-        }
-        listen(host, owner.win, "blur", () => view.setVisible(false));
-        for (const name of ["focus", "show", "restore"]) listen(host, owner.win, name, () => applyGeometry(host));
-        listen(host, event.sender, "zoom-changed", () => hide(host));
-        const nonce = randomID();
-        const entryURL = owner.origin + "/stage/map/index.html?provider=" + init.provider + "#" + init.instanceID + ":" + nonce;
-        listen(host, contents, "did-finish-load", () => {
-            if (host.destroyed) return;
-            if (host.loaded || contents.getURL() !== entryURL) { fail(host, "hostUnavailable"); return; }
-            host.loaded = true;
-            // 初始隐藏的 renderer 必须显式唤醒产帧，否则 SDK 的 load 会等待显示，而显示又等待 ready。
-            contents.setBackgroundThrottling(false);
-            applyGeometry(host);
-            const {port1, port2} = new MessageChannelMain();
-            host.port = port1;
-            host.transferredPort = port2;
-            port1.on("message", ({data}) => {
-                if (host.destroyed) return;
-                const reply = parseMapReply(data, init.instanceID);
-                if (!reply) return;
-                if (reply.type === "bootstrapReady" && !host.bootstrapped) {
-                    host.bootstrapped = true;
-                    post(host, init);
-                    init.credentials = {};
-                } else if (reply.type === "ready" && host.bootstrapped && !host.ready) {
-                    host.ready = true;
-                    clearTimeout(host.timer);
-                    if (host.points) post(host, host.points);
-                    post(host, {version: 1, instanceID: init.instanceID, type: "theme", theme: init.theme});
-                    if (host.pendingFit) post(host, {version: 1, instanceID: init.instanceID, type: "fit"});
-                    applyGeometry(host);
-                    contents.setBackgroundThrottling(true);
-                    sendOwner(host, reply);
-                } else if (reply.type === "markerClick" && host.ready && reply.revision === host.revision && host.ids.has(reply.id)) {
-                    sendOwner(host, reply);
-                } else if (reply.type === "error") fail(host, reply.code);
+            const contents = view.webContents;
+            host = {key, init, owner: event.sender, frame: event.senderFrame, win: owner.win, origin: owner.origin, diagnostics: new Set(),
+                view, router, listeners: [], ids: new Set(), revision: -1, loaded: false, ready: false, bootstrapped: false, destroyed: false};
+            hosts.set(key, host);
+            // 全局 web-contents-created 会安装外部打开链接处理器，必须在加载前替换为拒绝。
+            contents.setWindowOpenHandler(() => ({action: "deny"}));
+            mapContents.add(contents.id);
+            const denyNavigation = event => event.preventDefault();
+            for (const name of ["will-navigate", "will-frame-navigate", "will-redirect", "will-attach-webview"]) {
+                listen(host, contents, name, denyNavigation);
+            }
+            listen(host, contents, "select-client-certificate", (event, _url, _certificates, callback) => { event.preventDefault(); callback(); });
+            listen(host, contents, "login", (event, _details, _auth, callback) => { event.preventDefault(); callback(); });
+            listen(host, contents, "certificate-error", (_event, _url, _error, _certificate, callback) => callback(false));
+            listen(host, contents, "console-message", (event, _level, legacyMessage) => {
+                for (const code of classifyMapConsoleMessage(event?.message ?? legacyMessage)) report(code);
             });
-            port1.on("close", () => fail(host, "hostUnavailable"));
-            port1.start();
-            contents.postMessage("siyuan-map-port", {version: 1, instanceID: init.instanceID, nonce, provider: init.provider}, [port2]);
-        });
-        host.timer = setTimeout(() => {
-            report(host.bootstrapped ? "sdkTimeout" : "bootstrapTimeout");
-            fail(host, "hostUnavailable");
-        }, 30000);
-        host.timer.unref?.();
-        try {
+            listen(host, contents, "did-fail-load", (_event, _code, _description, _url, isMainFrame) => {
+                if (isMainFrame === false) return;
+                report("documentLoadFailed");
+                fail(host, "hostDocumentLoadFailed");
+            });
+            listen(host, contents, "render-process-gone", () => fail(host, "hostRendererGone"));
+            listen(host, contents, "destroyed", () => fail(host, "hostDestroyed"));
+            listen(host, event.sender, "destroyed", () => destroy(host));
+            listen(host, event.sender, "render-process-gone", () => destroy(host));
+            listen(host, event.sender, "did-start-navigation", details => {
+                if (details.isMainFrame && !details.isSameDocument) destroy(host);
+            });
+            for (const name of ["resize", "hide", "minimize", "enter-full-screen", "leave-full-screen"]) {
+                listen(host, owner.win, name, () => hide(host));
+            }
+            listen(host, owner.win, "blur", () => view.setVisible(false));
+            for (const name of ["focus", "show", "restore"]) listen(host, owner.win, name, () => applyGeometry(host));
+            listen(host, event.sender, "zoom-changed", () => hide(host));
+            const nonce = randomID();
+            const entryURL = owner.origin + "/stage/map/index.html?provider=" + init.provider + "#" + init.instanceID + ":" + nonce;
+            listen(host, contents, "did-finish-load", () => {
+                if (host.destroyed) return;
+                try {
+                    if (host.loaded) { fail(host, "hostDocumentReloaded"); return; }
+                    if (contents.getURL() !== entryURL) { fail(host, "hostDocumentMismatch"); return; }
+                    host.loaded = true;
+                    // 初始隐藏的 renderer 必须显式唤醒产帧，否则 SDK 的 load 会等待显示，而显示又等待 ready。
+                    contents.setBackgroundThrottling(false);
+                    applyGeometry(host);
+                    const {port1, port2} = new MessageChannelMain();
+                    host.port = port1;
+                    host.transferredPort = port2;
+                    port1.on("message", ({data}) => {
+                        if (host.destroyed) return;
+                        const reply = parseMapReply(data, init.instanceID);
+                        if (!reply) return;
+                        try {
+                            if (reply.type === "bootstrapReady" && !host.bootstrapped) {
+                                host.bootstrapped = true;
+                                // SDK 脚本和地图完成分别最多等待 20 秒，启动耗时不占用这两个阶段的预算。
+                                setDeadline(host, 45000);
+                                post(host, init);
+                                init.credentials = {};
+                            } else if (reply.type === "ready" && host.bootstrapped && !host.ready) {
+                                host.ready = true;
+                                clearTimeout(host.timer);
+                                if (host.points) post(host, host.points);
+                                post(host, {version: 1, instanceID: init.instanceID, type: "theme", theme: init.theme});
+                                if (host.pendingFit) post(host, {version: 1, instanceID: init.instanceID, type: "fit"});
+                                if (host.destroyed) return;
+                                applyGeometry(host);
+                                if (host.destroyed) return;
+                                contents.setBackgroundThrottling(true);
+                                sendOwner(host, reply);
+                            } else if (reply.type === "markerClick" && host.ready && reply.revision === host.revision && host.ids.has(reply.id)) {
+                                sendOwner(host, reply);
+                            } else if (reply.type === "error") {
+                                fail(host, reply.code === "hostUnavailable" ?
+                                    host.bootstrapped ? "hostOperationFailed" : "hostBootstrapFailed" : reply.code);
+                            }
+                        } catch (_error) { fail(host, "hostOperationFailed"); }
+                    });
+                    port1.on("close", () => fail(host, "hostPortClosed"));
+                    port1.start();
+                    contents.postMessage("siyuan-map-port", {version: 1, instanceID: init.instanceID, nonce, provider: init.provider}, [port2]);
+                } catch (_error) { fail(host, "hostPortSetupFailed"); }
+            });
+            setDeadline(host, 30000);
+            creationFailure = "hostAttachFailed";
             view.setVisible(false);
             // DOM 暂时不可见时也能完成初始化；此占位视图始终隐藏，不会覆盖编辑器。
             view.setBounds({x: 0, y: 0, width: 1, height: 1});
             owner.win.contentView.addChildView(view);
-            void contents.loadURL(entryURL).catch(() => { report("documentLoadFailed"); fail(host, "hostUnavailable"); });
-        } catch (_error) { fail(host, "hostUnavailable"); }
+            void contents.loadURL(entryURL).catch(() => { report("documentLoadFailed"); fail(host, "hostDocumentLoadFailed"); });
+        } catch (_error) {
+            init.credentials = {};
+            if (host) fail(host, creationFailure);
+            else if (router) router.destroy();
+            else if (ses) clearMapSession(ses);
+            return {version: 1, instanceID: init.instanceID, error: creationFailure};
+        }
         return {version: 1, instanceID: init.instanceID};
     });
     ipcMain.on("siyuan-map-command", (event, value) => {
@@ -401,10 +439,12 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
     ipcMain.on("siyuan-map-geometry", (event, value) => {
         const host = getHost(event, value);
         if (!host) return;
-        const geometry = parseMapGeometry(value, host.owner.getZoomFactor(), host.win.getContentBounds());
-        if (!geometry?.visible) { hide(host); return; }
-        host.geometry = geometry;
-        applyGeometry(host);
+        try {
+            const geometry = parseMapGeometry(value, host.owner.getZoomFactor(), host.win.getContentBounds());
+            if (!geometry?.visible) { hide(host); return; }
+            host.geometry = geometry;
+            applyGeometry(host);
+        } catch (_error) { fail(host, "hostOperationFailed"); }
     });
     ipcMain.on("siyuan-map-destroy", (event, value) => destroy(getHost(event, value)));
     app.on("before-quit", () => [...hosts.values()].forEach(destroy));

@@ -51,6 +51,8 @@ describe("map host boundary", () => {
         const attributes: Record<string, string> = {};
         const listeners = new Map<string, (event?: unknown) => void>();
         const transfers: any[] = [];
+        const timers = new Map<number, {callback: () => void; delay: number}>();
+        let nextTimer = 0;
         const iframe = {
             src: "", style: {}, removed: false, credentialless: false,
             contentWindow: {postMessage: (...args: any[]) => transfers.push(args)},
@@ -60,7 +62,11 @@ describe("map host boundary", () => {
         const scope = {
             location: {protocol: "https:", origin: "https://fixture.invalid"}, navigator: {userAgent: "Chromium"}, crypto: webcrypto,
             HTMLIFrameElement: {prototype: {credentialless: false}},
-            clearTimeout() {}, setTimeout() { return 1; },
+            clearTimeout(id: number) { timers.delete(id); },
+            setTimeout(callback: () => void, delay: number) {
+                timers.set(++nextTimer, {callback, delay});
+                return nextTimer;
+            },
             addEventListener: (name: string, listener: (event?: unknown) => void) => listeners.set(name, listener),
             removeEventListener: (name: string) => listeners.delete(name),
         };
@@ -73,6 +79,7 @@ describe("map host boundary", () => {
         });
         cleanups.push(host.destroy);
         await new Promise<void>((resolve) => setImmediate(resolve));
+        assert.deepEqual([...timers.values()].map((timer) => timer.delay), [30000]);
         assert.equal(attributes.sandbox, "allow-scripts allow-same-origin");
         assert.equal(iframe.credentialless, true);
         assert.equal(iframe.src.split("#")[0], "/stage/map/wrapper.html?provider=openfreemap");
@@ -94,6 +101,8 @@ describe("map host boundary", () => {
         assert.deepEqual(transfers[0][0], {version: 1, instanceID, nonce, type: "prepare", nativeBoundary: false});
         onMessage({...handshake, data: {...handshake.data, type: "bootstrapReady"}});
         assert.equal(channels.length, 1);
+        assert.deepEqual([...timers.values()].map((timer) => timer.delay), [45000],
+            "bootstrap completion starts a fresh budget covering both 20-second SDK phases");
         assert.equal(listeners.has("message"), false);
         onMessage(handshake);
         assert.equal(channels.length, 1);
@@ -106,6 +115,7 @@ describe("map host boundary", () => {
         assert.equal(ready, 0);
         reply({type: "ready"});
         reply({type: "ready"});
+        assert.equal(timers.size, 0, "ready clears the SDK deadline");
         assert.equal(ready, 1);
         assert.deepEqual(port.messages.find((message) => message.type === "setPoints").points, [point]);
         assert.equal(port.messages.filter((message) => message.type === "fit").length, 1);

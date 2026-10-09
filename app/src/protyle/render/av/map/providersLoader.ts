@@ -1,4 +1,4 @@
-import {AVMapInit, AVMapProvider} from "./protocol";
+import {AVMapInit, AVMapLoadError, AVMapLoadErrorCode, AVMapProvider, getAVMapLoadErrorCode} from "./protocol";
 import {AVMapAdapter, AVMapAdapterCallbacks, createAVMapAdapter} from "./providers";
 
 const SDK_CALLBACK = "__siyuanMapSDKReady";
@@ -16,10 +16,17 @@ const preparedAssets = new WeakMap<Window, AVMapPreparedAssets>();
 
 const loadScript = (scope: Window, source: string, signal: AbortSignal, callback = false): Promise<void> => {
     return new Promise((resolve, reject) => {
-        const script = scope.document.createElement("script");
+        let script: HTMLScriptElement;
+        try {
+            script = scope.document.createElement("script");
+        } catch (_error) {
+            reject(new AVMapLoadError("sdkScriptLoadFailed"));
+            return;
+        }
         const globals = scope as unknown as Record<string, any>;
         let settled = false;
-        const finish = (success: boolean) => {
+        let callbackInstalled = false;
+        const finish = (success: boolean, code?: AVMapLoadErrorCode) => {
             if (settled) {
                 return;
             }
@@ -28,32 +35,37 @@ const loadScript = (scope: Window, source: string, signal: AbortSignal, callback
             script.onload = null;
             script.onerror = null;
             signal.removeEventListener("abort", abort);
-            if (callback) {
+            if (callbackInstalled) {
                 delete globals[SDK_CALLBACK];
             }
             if (success) {
                 resolve();
             } else {
                 script.remove();
-                reject(new Error("sdkUnavailable"));
+                reject(code ? new AVMapLoadError(code) : new Error("sdkUnavailable"));
             }
         };
         const abort = () => finish(false);
-        const timer = scope.setTimeout(() => finish(false), 20000);
+        const timer = scope.setTimeout(() => finish(false, callback ? "sdkCallbackTimeout" : "sdkScriptLoadFailed"), 20000);
         signal.addEventListener("abort", abort, {once: true});
-        if (callback) {
-            globals[SDK_CALLBACK] = () => finish(true);
-        } else {
-            script.onload = () => finish(true);
-        }
-        script.onerror = () => finish(false);
-        script.src = source;
-        script.referrerPolicy = "strict-origin-when-cross-origin";
-        script.async = true;
-        if (signal.aborted) {
-            finish(false);
-        } else {
-            scope.document.head.appendChild(script);
+        try {
+            if (callback) {
+                globals[SDK_CALLBACK] = () => finish(true);
+                callbackInstalled = true;
+            } else {
+                script.onload = () => finish(true);
+            }
+            script.onerror = () => finish(false, "sdkScriptLoadFailed");
+            script.src = source;
+            script.referrerPolicy = "strict-origin-when-cross-origin";
+            script.async = true;
+            if (signal.aborted) {
+                finish(false);
+            } else {
+                scope.document.head.appendChild(script);
+            }
+        } catch (_error) {
+            finish(false, "sdkScriptLoadFailed");
         }
     });
 };
@@ -162,13 +174,16 @@ export const loadAVMapAdapter = async (init: AVMapInit, container: HTMLElement,
             await loadScript(scope, scriptURL.href, signal, true);
             sdk = globals[provider === "amap" ? "AMap" : provider === "tencent" ? "TMap" : "BMap"];
         }
-        if (signal.aborted || !sdk) {
+        if (signal.aborted) {
             throw new Error("sdkUnavailable");
+        }
+        if (!sdk) {
+            throw new AVMapLoadError("sdkGlobalMissing");
         }
         let adapter: AVMapAdapter;
         await new Promise<void>((resolve, reject) => {
             let settled = false;
-            const finish = (success: boolean) => {
+            const finish = (success: boolean, code?: AVMapLoadErrorCode) => {
                 if (settled) {
                     return;
                 }
@@ -181,12 +196,12 @@ export const loadAVMapAdapter = async (init: AVMapInit, container: HTMLElement,
                     try {
                         adapter?.destroy();
                     } finally {
-                        reject(new Error("mapUnavailable"));
+                        reject(code ? new AVMapLoadError(code) : new Error("mapUnavailable"));
                     }
                 }
             };
             const abort = () => finish(false);
-            const timer = scope.setTimeout(abort, 20000);
+            const timer = scope.setTimeout(() => finish(false, "mapReadyTimeout"), 20000);
             signal.addEventListener("abort", abort, {once: true});
             try {
                 adapter = createAVMapAdapter(provider, sdk, container, {...callbacks,
@@ -198,7 +213,7 @@ export const loadAVMapAdapter = async (init: AVMapInit, container: HTMLElement,
                     finish(false);
                 }
             } catch (_error) {
-                finish(false);
+                finish(false, "mapCreationFailed");
             }
         });
         const destroy = adapter.destroy;
@@ -210,8 +225,12 @@ export const loadAVMapAdapter = async (init: AVMapInit, container: HTMLElement,
             }
         };
         return adapter;
-    } catch (_error) {
+    } catch (error) {
         assets.destroy();
+        const code = getAVMapLoadErrorCode(error);
+        if (code) {
+            throw new AVMapLoadError(code);
+        }
         throw new Error("sdkUnavailable");
     }
 };

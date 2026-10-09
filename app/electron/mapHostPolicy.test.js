@@ -68,6 +68,29 @@ test("point count is bounded and provider coordinate systems remain consistent",
     assert.equal(parseMapCommand({...envelope, type: "setPoints", revision: 0, points}, instanceID, "amap").points.length, 0);
 });
 
+test("map loading failures retain only fixed stage codes across the desktop boundary", () => {
+    for (const code of ["sdkScriptLoadFailed", "sdkCallbackTimeout", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout"]) {
+        assert.deepEqual(parseMapReply({...envelope, type: "error", code, message: "https://private.invalid/?key=secret",
+            stack: "secret"}, instanceID), {...envelope, type: "error", code});
+    }
+    assert.equal(parseMapReply({...envelope, type: "error", code: "https://private.invalid/?key=secret"}, instanceID), undefined);
+});
+
+test("host failure replies preserve fixed reasons and reject invented or foreign failure codes", () => {
+    for (const code of ["hostLimitReached", "hostSetupFailed", "hostAttachFailed", "hostDocumentLoadFailed",
+        "hostDocumentLoadTimeout", "hostDocumentReloaded", "hostDocumentMismatch", "hostRendererGone", "hostDestroyed",
+        "hostPortSetupFailed", "hostPortClosed", "hostBootstrapFailed", "hostBootstrapTimeout", "hostSDKTimeout",
+        "hostOperationFailed", "hostCreateRejected", "hostCreateInvalidResponse", "hostReadyTimeout", "hostOwnerSetupFailed"]) {
+        const reply = {...envelope, type: "error", code};
+        assert.deepEqual(parseMapReply({...reply, error: "private", url: "https://private.invalid/?key=secret"}, instanceID), reply);
+        assert.equal(parseMapReply(reply, "other"), undefined);
+        assert.equal(parseMapReply({...reply, version: 2}, instanceID), undefined);
+    }
+    for (const code of ["hostSecret", "hostLimitReached\nprivate", "https://private.invalid/?key=secret", null, {}]) {
+        assert.equal(parseMapReply({...envelope, type: "error", code}, instanceID), undefined);
+    }
+});
+
 test("map creation fails closed for effective process security bypasses", () => {
     const commandLine = switches => ({hasSwitch: name => switches.has(name), getSwitchValue: name => switches.get(name)});
     assert.equal(hasUnsafeMapSwitches(commandLine(new Map())), false);

@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
 import {connectAVMapRuntime, startAVMapRuntime} from "./hostRuntime";
 import {AVMapAdapter, AVMapAdapterCallbacks} from "./providers";
+import {AVMapLoadError} from "./protocol";
 
 const tick = () => new Promise<void>((resolve) => setImmediate(resolve));
 const fixture = () => {
@@ -89,6 +90,31 @@ describe("isolated map runtime lifecycle", () => {
             async () => { throw new Error("https://sdk.invalid?key=secret"); });
         await send({type: "init", provider: "openfreemap", credentials: {}, theme: "light"});
         assert.deepEqual(replies, [{version: 1, instanceID: "one", type: "error", code: "sdkUnavailable"}]);
+    });
+    it("preserves only controlled loading stages without passing exception fields to the owner", async () => {
+        for (const code of ["sdkScriptLoadFailed", "sdkCallbackTimeout", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout"] as const) {
+            const {port, replies, send} = fixture();
+            startAVMapRuntime(port as unknown as MessagePort, "one", "amap", {} as HTMLElement,
+                async () => { throw Object.assign(new AVMapLoadError(code), {message: "https://sdk.invalid?key=secret"}); });
+            await send({type: "init", provider: "amap", credentials: {apiKey: "fixture-key", securityCode: "fixture-code"}, theme: "light"});
+            assert.deepEqual(replies, [{version: 1, instanceID: "one", type: "error", code}]);
+        }
+        const {port, replies, send} = fixture();
+        startAVMapRuntime(port as unknown as MessagePort, "one", "openfreemap", {} as HTMLElement,
+            async () => { throw Object.assign(new Error("https://sdk.invalid?key=secret"), {code: "mapCreationFailed"}); });
+        await send({type: "init", provider: "openfreemap", credentials: {}, theme: "light"});
+        assert.deepEqual(replies, [{version: 1, instanceID: "one", type: "error", code: "sdkUnavailable"}]);
+    });
+    it("does not report a provider rejection caused by teardown", async () => {
+        const {port, replies, send} = fixture();
+        startAVMapRuntime(port as unknown as MessagePort, "one", "openfreemap", {} as HTMLElement,
+            async (_init, _container, _callbacks, signal) => new Promise<AVMapAdapter>((_resolve, reject) => {
+                signal.addEventListener("abort", () => reject(new AVMapLoadError("mapReadyTimeout")), {once: true});
+            }));
+        const pending = send({type: "init", provider: "openfreemap", credentials: {}, theme: "light"});
+        await send({type: "destroy"});
+        await pending;
+        assert.deepEqual(replies, []);
     });
 });
 

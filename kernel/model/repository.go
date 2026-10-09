@@ -56,6 +56,7 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/heif"
@@ -2643,6 +2644,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 	removePluginDirSet, removeWidgetDirSet := hashset.New(), hashset.New()
 	unloadPluginSet, uninstallPluginSet := hashset.New(), hashset.New()
+	// 插件目录内有文件被删除时先记为更新，遍历结束后按“目录是否仍含文件”再决定是否卸载
+	pendingPluginUninstallNames := hashset.New()
 	for _, file := range mergeResult.Removes {
 		removes = append(removes, file.Path)
 		if file.Path == "/storage/pinned-docs.json" {
@@ -2691,9 +2694,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if strings.HasPrefix(file.Path, "/plugins/") {
 			if parts := strings.Split(file.Path, "/"); 2 < len(parts) {
 				needReloadPlugin = true
-				// 删除插件目录：卸载
-				uninstallPluginSet.Add(parts[2])
-				removePluginDirSet.Add(parts[2])
+				// 删除插件目录内的文件：先按更新处理，遍历结束后按目录是否仍含文件决定是否卸载
+				reloadPluginSet.Add(parts[2])
+				pendingPluginUninstallNames.Add(parts[2])
 			}
 		}
 
@@ -2719,6 +2722,23 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if strings.Contains(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
 			cache.RemoveAVData(strings.TrimSuffix(filepath.Base(file.Path), ".json"))
 			changedAttributeViewPaths[file.Path] = true
+		}
+	}
+
+	// 插件目录内有文件被删除不代表插件被卸载：仅当目录不再包含实际文件时才视为卸载，
+	// 否则按更新重载，避免更新过程中的文件改名被误判为卸载
+	for _, name := range pendingPluginUninstallNames.Values() {
+		pluginName := name.(string)
+		pluginDir := filepath.Join(util.DataDir, "plugins", pluginName)
+		containsFile, statErr := bazaar.PackageDirContainsFile(pluginDir)
+		if statErr != nil && !errors.Is(statErr, os.ErrNotExist) {
+			logging.LogWarnf("check plugin dir [%s] failed: %s", pluginDir, statErr)
+			continue
+		}
+		if errors.Is(statErr, os.ErrNotExist) || !containsFile {
+			// 插件目录已消失或不再包含文件：卸载
+			uninstallPluginSet.Add(pluginName)
+			removePluginDirSet.Add(pluginName)
 		}
 	}
 

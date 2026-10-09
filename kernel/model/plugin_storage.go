@@ -117,12 +117,17 @@ func removeEmptyDirectoryTree(dirPath string) (removed bool, err error) {
 	if err != nil {
 		return false, err
 	}
+	var metadataPaths []string
 	for _, entry := range entries {
 		isDir, infoErr := isRegularDirectoryEntry(entry)
 		if infoErr != nil {
 			return false, infoErr
 		}
 		if !isDir {
+			if util.IsSystemMetadataFile(entry.Name()) {
+				metadataPaths = append(metadataPaths, filepath.Join(dirPath, entry.Name()))
+				continue
+			}
 			return false, nil
 		}
 		childRemoved, removeErr := removeEmptyDirectoryTree(filepath.Join(dirPath, entry.Name()))
@@ -131,6 +136,12 @@ func removeEmptyDirectoryTree(dirPath string) (removed bool, err error) {
 		}
 		if !childRemoved {
 			return false, nil
+		}
+	}
+	// 目录仅剩系统元数据文件时，先删除它们再删除目录
+	for _, metadataPath := range metadataPaths {
+		if err = os.Remove(metadataPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return false, err
 		}
 	}
 	if err = os.Remove(dirPath); errors.Is(err, os.ErrNotExist) {

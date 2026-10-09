@@ -2853,7 +2853,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 func removeEmptyPackageDirs(basePath string, dirNames *hashset.Set) {
 	for _, dirName := range dirNames.Values() {
 		dirPath := filepath.Join(basePath, dirName.(string))
-		if err := gulu.File.RemoveEmptyDirs(dirPath); err != nil && !os.IsNotExist(err) {
+		if _, err := removeEmptyDirectoryTree(dirPath); err != nil && !os.IsNotExist(err) {
 			logging.LogWarnf("remove empty marketplace package directory [%s] failed: %s", dirPath, err)
 		}
 	}

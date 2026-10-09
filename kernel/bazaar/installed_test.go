@@ -201,6 +201,33 @@ func TestPackageDirContainsFile(t *testing.T) {
 	}
 }
 
+// TestPackageDirContainsFileIgnoresDSStore 校验判空忽略 .DS_Store，但仍会计入真实文件。
+func TestPackageDirContainsFileIgnoresDSStore(t *testing.T) {
+	root := t.TempDir()
+
+	if err := os.WriteFile(filepath.Join(root, ".DS_Store"), nil, 0644); err != nil {
+		t.Fatal(err)
+	}
+	containsFile, err := PackageDirContainsFile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if containsFile {
+		t.Fatal("expected a directory with only .DS_Store not to contain files")
+	}
+
+	if err = os.WriteFile(filepath.Join(root, "plugin.json"), []byte("{}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	containsFile, err = PackageDirContainsFile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !containsFile {
+		t.Fatal("expected a real file to count as an actual file")
+	}
+}
+
 func TestIsValidInstalledPackageRequiresExactName(t *testing.T) {
 	if !IsValidInstalledPackage(&Package{Name: "plugin-sample"}, "plugin-sample") {
 		t.Fatal("expected an exact package name match to be valid")

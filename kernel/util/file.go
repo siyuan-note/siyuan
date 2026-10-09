@@ -119,6 +119,13 @@ func IsSymlinkPath(absPath string) bool {
 	return 0 != fi.Mode()&os.ModeSymlink
 }
 
+// IsSystemMetadataFile 判断是否为操作系统自动生成的元数据文件（如 macOS 的 .DS_Store），
+// 这类文件不属于业务数据，判空与清理时应忽略
+func IsSystemMetadataFile(name string) bool {
+	return name == ".DS_Store"
+}
+
+// IsEmptyDir 判断目录是否为空，忽略系统元数据文件（如 .DS_Store）
 func IsEmptyDir(p string) bool {
 	if !gulu.File.IsDir(p) {
 		return false
@@ -128,7 +135,36 @@ func IsEmptyDir(p string) bool {
 	if err != nil {
 		return false
 	}
-	return 1 > len(files)
+	for _, file := range files {
+		if !IsSystemMetadataFile(file.Name()) {
+			return false
+		}
+	}
+	return true
+}
+
+// RemoveEmptyDir 删除仅含系统元数据文件（如 .DS_Store）的目录；若目录仍含业务文件则保留不动
+func RemoveEmptyDir(p string) (err error) {
+	entries, err := os.ReadDir(p)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return
+	}
+	for _, entry := range entries {
+		if IsSystemMetadataFile(entry.Name()) {
+			if err = os.Remove(filepath.Join(p, entry.Name())); err != nil && !os.IsNotExist(err) {
+				return
+			}
+			continue
+		}
+		return nil
+	}
+	if err = os.Remove(p); os.IsNotExist(err) {
+		return nil
+	}
+	return
 }
 
 func IsSymlink(dir fs.DirEntry) bool {

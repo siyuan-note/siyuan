@@ -66,12 +66,16 @@ func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 }
 
 // PackageDirContainsFile 判断集市包目录中是否递归包含实际文件。
+// 忽略 macOS 自动生成的 .DS_Store，它不代表包内存在有效文件。
 func PackageDirContainsFile(dirPath string) (bool, error) {
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
 		return false, err
 	}
 	for _, entry := range entries {
+		if util.IsSystemMetadataFile(entry.Name()) {
+			continue
+		}
 		if !entry.IsDir() {
 			return true, nil
 		}

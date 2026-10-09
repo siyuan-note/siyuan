@@ -18,7 +18,6 @@ package model
 
 import (
 	"errors"
-	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -196,7 +195,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 			return
 		}
 
-		if removeErr := os.Remove(subDir); nil != removeErr { // 移除空文件夹不会有副作用
+		if removeErr := util.RemoveEmptyDir(subDir); nil != removeErr { // 移除空文件夹不会有副作用
 			logging.LogWarnf("remove empty dir [%s] failed: %s", subDir, removeErr)
 		}
 	}

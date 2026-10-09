@@ -934,7 +934,7 @@ func clearTempDir(dir string, count *int, size *int64) {
 	}
 
 	if util.IsEmptyDir(dir) {
-		os.Remove(dir)
+		util.RemoveEmptyDir(dir)
 	}
 	return
 }

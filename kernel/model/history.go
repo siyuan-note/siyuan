@@ -822,7 +822,9 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 		case HistoryTypeDoc:
 			stmt += table + " MATCH '{title content}:(" + query + ")'"
 		case HistoryTypeDocID:
-			stmt += " id = '" + query + "'"
+			// id 为等值比较，仅需按 SQL 字符串字面量转义单引号，不能使用面向 FTS 的 stringQuery
+			// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-4hjx-84f6-gr7c
+			stmt += " id = '" + strings.ReplaceAll(query, "'", "''") + "'"
 		case HistoryTypeAsset:
 			stmt += table + " MATCH '{title content}:(" + query + ")'"
 		case HistoryTypeDatabase:
@@ -833,7 +835,13 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 	}
 
 	if op = strings.TrimSpace(op); op != "" && op != "all" {
-		stmt += " AND op = '" + op + "'"
+		if !gulu.Str.Contains(op, validOps) {
+			// 白名单外的 op 取值直接判为空结果，避免拼入 SQL
+			// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-4hjx-84f6-gr7c
+			stmt += " AND 1=0"
+		} else {
+			stmt += " AND op = '" + op + "'"
+		}
 	}
 
 	if "%" != box && !ast.IsNodeIDPattern(box) {

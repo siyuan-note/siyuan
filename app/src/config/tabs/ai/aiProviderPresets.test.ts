@@ -69,6 +69,14 @@ describe("AI provider presets", () => {
         }
     });
 
+    it("registers Atlas Cloud as an aggregator with Responses support", () => {
+        const preset = PROVIDER_PRESETS.find((item) => item.id === "atlascloud");
+        assert.equal(preset?.baseURL, "https://api.atlascloud.ai/v1");
+        assert.equal(preset?.category, "aggregator");
+        assert.equal(findProviderPreset("https://api.atlascloud.ai/v1/")?.id, "atlascloud");
+        assert.equal(getResponsesSupport("https://api.atlascloud.ai/v1"), "supported");
+    });
+
     it("preserves custom endpoints and providers without protocol-specific addresses", () => {
         for (const baseURL of [
             "https://gateway.example.com/deepseek/v1", "https://api.deepseek.com/custom",

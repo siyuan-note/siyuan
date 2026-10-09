@@ -353,7 +353,7 @@ func initDBConnection() {
 	dsn := util.DBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
 		"&_secure_delete=OFF" +
-		"&_cache_size=-128000" +
+		util.SQLitePageCacheDSN() +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
 		"&_case_sensitive_like=OFF"
@@ -402,7 +402,7 @@ func initHistoryDBConnection() {
 	dsn := util.HistoryDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
 		"&_secure_delete=OFF" +
-		"&_cache_size=-128000" +
+		util.SQLitePageCacheDSN() +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
 		"&_case_sensitive_like=OFF"
@@ -473,7 +473,7 @@ func initAssetContentDBConnection() {
 	dsn := util.AssetContentDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
 		"&_secure_delete=OFF" +
-		"&_cache_size=-128000" +
+		util.SQLitePageCacheDSN() +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
 		"&_case_sensitive_like=OFF"
@@ -2036,7 +2036,7 @@ func OpenEncryptedDB(boxID string, dek []byte) (err error) {
 	defer clear(contentKey)
 	// SQLCipher DSN：_key=x'<hex>' 让 go-sqlite3 执行 PRAGMA key；其余 PRAGMA 与全局 siyuan.db 对齐
 	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_secure_delete=OFF" +
-		"&_cache_size=-128000&_busy_timeout=7000&_ignore_check_constraints=ON" +
+		util.SQLitePageCacheDSN() + "&_busy_timeout=7000&_ignore_check_constraints=ON" +
 		"&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(contentKey) + "'"
 	boxDB, err := sql.Open("sqlite3_extended", dsn)
 	if err != nil {

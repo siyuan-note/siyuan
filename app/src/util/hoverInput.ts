@@ -1,3 +1,6 @@
+import {isInIOS} from "../protyle/util/compatibility";
+import {bindTouchActivation} from "./touchActivation";
+
 let initialized = false;
 
 export const isTouchHoverInput = () => document.body.classList.contains("body--touch-input");
@@ -8,6 +11,9 @@ export const initHoverInput = () => {
         return;
     }
     initialized = true;
+    if (isInIOS()) {
+        bindTouchActivation(window);
+    }
     document.body.classList.toggle("body--touch-input", window.matchMedia("(hover: none)").matches);
     const update = (event: PointerEvent) => {
         if (["mouse", "touch", "pen"].includes(event.pointerType)) {

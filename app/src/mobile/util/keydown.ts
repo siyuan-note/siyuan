@@ -4,15 +4,11 @@ import {matchHotKey} from "../../protyle/util/hotKey";
 import {getCurrentEditor} from "../editor";
 import {filterHotkey} from "../../boot/globalEvent/commonHotkey";
 import {captureShortcutContext, dispatchPluginShortcut} from "../../command/shortcutRuntime";
-import {logKeyboardDiagnostic} from "../../util/keyboardDiagnostic";
 import {handleDocumentBoundaryHotkey} from "../../protyle/util/documentBoundaryHotkey";
 
 export const mobileKeydown = (app: App, event: KeyboardEvent) => {
-    logKeyboardDiagnostic("mobile-enter", event);
     // 移动端输入框默认填充无 event.key
     if (!event.key || event.defaultPrevented || filterHotkey(event, app)) {
-        logKeyboardDiagnostic("mobile-stop", event, !event.key ? "missing-key" :
-            event.defaultPrevented ? "default-prevented" : "filtered");
         return;
     }
     const editor = getCurrentEditor();

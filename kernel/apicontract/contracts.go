@@ -1101,7 +1101,6 @@ var SystemEnsureOnboarding = define[EmptyRequest, *SystemOnboarding]("ensureOnbo
 var SystemExit = define[SystemExitRequest, SystemExitData]("exit", "/api/system/exit", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2}, DataOnError: true}, "POST")
 var SystemExportConf = define[EmptyRequest, SystemExportConfData]("exportConf", "/api/system/exportConf", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportLog = define[EmptyRequest, SystemZipData]("exportLog", "/api/system/exportLog", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
-var SystemAppendKeyboardLog = define[SystemKeyboardLogRequest, Null]("appendKeyboardLog", "/api/system/appendKeyboardLog", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var SystemExportTLSCABundle = define[EmptyRequest, SystemPathData]("exportTLSCABundle", "/api/system/exportTLSCABundle", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemExportTLSCACert = define[EmptyRequest, SystemPathData]("exportTLSCACert", "/api/system/exportTLSCACert", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemGetChangelog = define[SystemChangelogRequest, SystemChangelogData]("getChangelog", "/api/system/getChangelog", AuthenticatedAccess, LegacyOptionalBody, ResponseOptions{}, "POST")

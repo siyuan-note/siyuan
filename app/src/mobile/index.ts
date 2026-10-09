@@ -79,7 +79,6 @@ import {initializeEnglishCommandTranslations} from "../command/english";
 import {loadLanguages} from "../boot/loadLanguages";
 import {scrollInputIntoView} from "./util/visibleViewport";
 import {installPluginStorageFetchAppId} from "../util/fetchAppId";
-import {initKeyboardDiagnostics} from "../util/keyboardDiagnostic";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -287,7 +286,6 @@ class App {
                 setWebViewFocusable();
             });
             // 移动端删除键 https://github.com/siyuan-note/siyuan/issues/9259
-            initKeyboardDiagnostics("mobile");
             window.addEventListener("keydown", (event) => {
                 mobileKeydown(siyuanApp, event);
                 if (getSelection().rangeCount > 0) {

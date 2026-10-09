@@ -19,14 +19,14 @@ import {initHarmonyTextSelectionMenu} from "../../util/harmonyTextSelectionMenu"
 import {clearDragTipGhost, hideDragTip} from "../../protyle/util/dragTip";
 import {formatPainter} from "../../protyle/toolbar/FormatPainter";
 import {SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE} from "../../protyle/toolbar/subElementLifecycle";
-import {initKeyboardDiagnostics} from "../../util/keyboardDiagnostic";
 import {initHoverInput} from "../../util/hoverInput";
+import {bindGutterPointerLeave} from "./gutterPointerLeave";
+import {isInIOS} from "../../protyle/util/compatibility";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`.toLowerCase();
 
 export const initWindowEvent = (app: App) => {
     initHoverInput();
-    initKeyboardDiagnostics("desktop");
     initHarmonyTextSelectionMenu();
     let lastEncryptedNotebookTouch = 0;
     const touchEncryptedNotebooks = () => {
@@ -44,7 +44,7 @@ export const initWindowEvent = (app: App) => {
     window.addEventListener("keydown", touchEncryptedNotebooks);
     document.addEventListener("touchstart", touchEncryptedNotebooks, {passive: true});
 
-    document.body.addEventListener("mouseleave", () => {
+    bindGutterPointerLeave(document.body, () => {
         if (window.siyuan.layout.leftDock) {
             window.siyuan.layout.leftDock.hideDockByHover();
             window.siyuan.layout.rightDock.hideDockByHover();
@@ -55,7 +55,7 @@ export const initWindowEvent = (app: App) => {
             item.innerHTML = "";
         });
         hideTooltip();
-    });
+    }, !!isInIOS());
 
     window.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
         windowMouseMove(event);

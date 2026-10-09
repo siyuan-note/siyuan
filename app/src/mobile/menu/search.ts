@@ -1,18 +1,19 @@
 import {closePanel} from "../util/closePanel";
 import {updateSearchMethodControls} from "../../search/methodCapabilities";
-import {buildSearchRequest} from "../../search/config";
+import {buildSearchRequest, refreshSearchConfigHPath} from "../../search/config";
+import {resolveCurrentSearchHPath} from "../../search/path";
+import {focusSearchInput} from "../../search/focus";
 import {getAttr} from "../../search/attrs";
 import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {Constants} from "../../constants";
-import {createKeyboardSearchTrace} from "../../util/keyboardDiagnostic";
 import {fetchPost} from "../../util/fetch";
 import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
 import {openModel} from "./model";
 import {getDisplayName, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix} from "../../util/pathName";
 import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
-import {isDisabledFeature, setStorageVal} from "../../protyle/util/compatibility";
+import {isDisabledFeature, isInIOS, setStorageVal} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
@@ -769,9 +770,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
     return () => clearTimeout(focusTimeout);
 };
 
-export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConfig) => {
-    const trace = createKeyboardSearchTrace(searchConfig ? "search" : "globalSearch");
-    trace("search-enter");
+export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConfig, focusInput = false) => {
     const config: Config.IUILayoutTabSearchConfig = JSON.parse(JSON.stringify(window.siyuan.storage[Constants.LOCAL_SEARCHDATA]));
     const currentEditor = getCurrentEditor();
     if (currentEditor && isEncryptedBox(currentEditor.protyle.notebookId)) {
@@ -811,6 +810,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
     });
 
     let destroySearchEvent: (() => void) | undefined;
+    let destroyed = false;
     openModel({
         title: `<div class="toolbar__search">
     <span data-menu="true" class="toolbar__icon toolbar__icon--history" data-type="history">
@@ -906,6 +906,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
      <div class="fn__loading"><img width="120px" src="/stage/loading-pure.svg"></div>
 </div>`,
         destroyCallback() {
+            destroyed = true;
             destroySearchEvent?.();
             activeBlur(true);
             cancelSearchRequest(document.getElementById("modelMain"));
@@ -919,10 +920,23 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
                 toggleSearchHistory(document.querySelector("#model"), config, undefined, element);
             });
             destroySearchEvent = initSearchEvent(app, element, config);
+            if (focusInput && isInIOS()) {
+                focusSearchInput(document.querySelector("#toolbarSearch"));
+                // 快捷键先同步打开搜索，路径名称随后补全，保留用户已经切换的搜索范围。
+                void refreshSearchConfigHPath({
+                    config,
+                    resolveHPath: resolveCurrentSearchHPath,
+                    isCurrent: () => !destroyed && element.isConnected,
+                    render: hPath => {
+                        const pathElement = element.querySelector("#searchPath");
+                        pathElement.classList.remove("fn__none");
+                        pathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
+                    },
+                });
+            }
             updateSearchResult(config, element);
         }
     });
-    trace("dialog-created", "mobile");
 };
 
 const goAsset = () => {

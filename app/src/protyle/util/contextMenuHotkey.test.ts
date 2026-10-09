@@ -114,7 +114,6 @@ test("mobile leaves unhandled context menu shortcuts available to plugin dispatc
         window: {siyuan: {config: {keymap: {general: {openContextMenu: {custom: "⌘/"}}}}}},
         filterHotkey: () => false,
         matchHotKey: () => { throw new Error("Context menu must be handled locally"); },
-        logKeyboardDiagnostic: () => {},
         captureShortcutContext: () => ({}),
         dispatchPluginShortcut: () => { dispatched++; },
     });

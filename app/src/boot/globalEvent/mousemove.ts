@@ -142,9 +142,11 @@ export const windowMouseMove = (event: MouseEvent) => {
 
     // gutter
     const eventPath0 = event.composedPath()[0] as HTMLElement;
-    if (eventPath0 && eventPath0.nodeType !== 3 && eventPath0.classList.contains("protyle-wysiwyg") && eventPath0.style.paddingLeft) {
+    if (eventPath0 && eventPath0.nodeType !== 3 && eventPath0.classList.contains("protyle-wysiwyg")) {
         // 光标在编辑器右边也需要进行显示
-        const mouseElement = document.elementFromPoint(eventPath0.getBoundingClientRect().left + parseInt(eventPath0.style.paddingLeft) + 13, event.clientY);
+        // 平板布局的边距可能来自样式表，按实际内容边界寻找鼠标所在行的块。
+        const paddingLeft = parseFloat(getComputedStyle(eventPath0).paddingLeft) || 0;
+        const mouseElement = document.elementFromPoint(eventPath0.getBoundingClientRect().left + paddingLeft + 13, event.clientY);
         const blockElement = hasClosestBlock(mouseElement);
         if (blockElement) {
             const targetBlockElement = getRightBlock(blockElement, blockElement.getBoundingClientRect().left + 1, event.clientY);

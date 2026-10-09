@@ -11,7 +11,6 @@ import {isMac, isNotCtrl, isOnlyMeta} from "../../protyle/util/compatibility";
 import {showPopover} from "../../block/popover";
 import {clearDisallowedKeymapItems} from "../../util/hotKeyPolicy";
 import {getHostCapabilities} from "../../util/hostCapabilities";
-import {logKeyboardDiagnostic} from "../../util/keyboardDiagnostic";
 
 const matchKeymap = (keymap: Config.IKeys, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -200,8 +199,6 @@ export const syncAppMenuShortcuts = (suspended = false) => {
 export const filterHotkey = (event: KeyboardEvent, app: App) => {
     // https://github.com/siyuan-note/siyuan/issues/9848 忘记为什么要阻止了 .av__mask 的情况，测了下没问题就先移除
     if (document.getElementById("progress") || document.getElementById("errorLog") || event.isComposing) {
-        logKeyboardDiagnostic("filter-stop", event, document.getElementById("progress") ? "progress" :
-            document.getElementById("errorLog") ? "error-log" : "composing");
         return true;
     }
     const target = event.target as HTMLElement;
@@ -221,7 +218,6 @@ export const filterHotkey = (event: KeyboardEvent, app: App) => {
             cardElement = document.querySelector(`.layout__wnd--active div[data-key="${Constants.DIALOG_OPENCARD}"]:not(.fn__none)`);
         }
         if (cardElement) {
-            logKeyboardDiagnostic("filter-stop", event, "card-key");
             event.preventDefault();
             cardElement.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
             return true;
@@ -234,7 +230,6 @@ export const filterHotkey = (event: KeyboardEvent, app: App) => {
         Constants.KEYCODELIST[event.keyCode] !== "PageDown" &&
         event.key !== "Home" && event.key !== "End" &&
         !/^F\d{1,2}$/.test(event.key) && event.key.indexOf("Arrow") === -1 && event.key !== "Enter" && event.key !== "Backspace" && event.key !== "Delete") {
-        logKeyboardDiagnostic("filter-stop", event, "plain-key");
         return true;
     }
 

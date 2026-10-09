@@ -24,8 +24,9 @@ const browserCases = async (source: string) => {
     const dependencies = {
         Constants: {KEYCODELIST: {27: "Escape", 38: "↑", 74: "J", 76: "L"}, MENU_BLOCK_MULTI: "multi",
             CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap"},
-        bindVerticalNavigationReset: noop, logKeyboardDiagnostic: noop, getAVTemplateInteractiveElement: noop,
+        bindVerticalNavigationReset: noop, getAVTemplateInteractiveElement: noop,
         handleDocumentBoundaryHotkey: noop,
+        handleReadonlyAttributeHotkey: () => false,
         prepareVerticalNavigation: noop, avKeydown: noop, fixTable: noop, commonHotkey: noop,
         countBlockWord: noop, clearAtomicFocus: noop,
         setInsertWbrHTML: noop, getAtomicVerticalNavigationOwner: noop, revealTabsForTarget: noop,

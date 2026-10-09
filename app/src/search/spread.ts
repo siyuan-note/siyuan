@@ -13,8 +13,8 @@ import {
     setSearchConfigTemporaryPath,
 } from "./config";
 import {beginSearchPathRequest} from "./path";
-import {isDisabledFeature} from "../protyle/util/compatibility";
-import {createKeyboardSearchTrace} from "../util/keyboardDiagnostic";
+import {isDisabledFeature, isInIOS} from "../protyle/util/compatibility";
+import {focusSearchInput} from "./focus";
 
 let openSearchVersion = 0;
 
@@ -24,15 +24,15 @@ export const openSearch = async (options: {
     key?: string,
     notebookId?: string,
     notebookIds?: string[],
-    searchPath?: string
+    searchPath?: string,
+    focusInput?: boolean,
 }) => {
-    const trace = createKeyboardSearchTrace(options.hotkey === Constants.DIALOG_SEARCH ? "search" :
-        options.hotkey === Constants.DIALOG_GLOBALSEARCH ? "globalSearch" : "");
-    trace("search-enter");
     if (window.siyuan.isPublish && options.hotkey === Constants.DIALOG_REPLACE) {
         return;
     }
     const version = ++openSearchVersion;
+    const selection = getSelection();
+    const range = selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : undefined;
     const existingSearchDialog = window.siyuan.dialogs.find((item) => item.element.querySelector("#searchList"));
     const existingSearchElement = existingSearchDialog?.element.querySelector(".b3-dialog__body");
     const isCurrentPathRequest = existingSearchElement ? beginSearchPathRequest(existingSearchElement) : undefined;
@@ -46,18 +46,15 @@ export const openSearch = async (options: {
     } else if (options.notebookId) {
         hPath = getNotebookName(options.notebookId);
         idPath.push(options.notebookId);
-        if (options.searchPath && options.searchPath !== "/") {
-            trace("path-start");
+        if (options.searchPath && options.searchPath !== "/" && isInIOS() && options.focusInput) {
+            // 外接键盘打开搜索时同步切换输入焦点，路径名称由 genSearch 的异步刷新补全。
+            idPath[0] = pathPosix().join(idPath[0], options.searchPath);
+        } else if (options.searchPath && options.searchPath !== "/") {
             const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
                 notebook: options.notebookId,
                 path: options.searchPath.endsWith(".sy") ? options.searchPath : options.searchPath + ".sy"
-            }).catch(error => {
-                trace("path-error", "exception");
-                throw error;
             });
-            trace("path-result", typeof response.data === "string" ? "string" : "invalid-data", response.code);
             if (version !== openSearchVersion || (isCurrentPathRequest && !isCurrentPathRequest())) {
-                trace("path-stale");
                 return;
             }
             if (response.code !== 0 || typeof response.data !== "string") {
@@ -128,16 +125,10 @@ export const openSearch = async (options: {
             } else if (options.hotkey === Constants.DIALOG_SEARCH) {
                 const toPath = item.editors.edit.protyle.path;
                 const toNotebook = item.editors.edit.protyle.notebookId;
-                trace("path-start");
-                let received = false;
                 fetchPost("/api/filetree/getHPathsByPaths", {paths: [toPath]}, (response) => {
-                    received = true;
-                    trace("path-result", Array.isArray(response.data) && typeof response.data[0] === "string" ?
-                        "string-array" : "invalid-data", response.code);
                     if (version !== openSearchVersion || !item.element.isConnected ||
                         item.element.getAttribute("data-key") !== Constants.DIALOG_SEARCH ||
                         (isCurrentPathRequest && !isCurrentPathRequest())) {
-                        trace("path-stale");
                         return;
                     }
                     if (!Array.isArray(response.data) || typeof response.data[0] !== "string") {
@@ -155,22 +146,16 @@ export const openSearch = async (options: {
                         storageConfig: replaceSearchConfigPath(
                             currentData, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]),
                     });
-                }).finally(() => {
-                    if (!received) {
-                        trace("path-error", "exception");
-                    }
                 });
             }
             return true;
         }
     });
     if (exitDialog) {
-        trace("dialog-reused");
+        if (options.focusInput) {
+            focusSearchInput(existingSearchElement.querySelector("#searchInput"));
+        }
         return;
-    }
-    let range: Range;
-    if (getSelection().rangeCount > 0) {
-        range = getSelection().getRangeAt(0);
     }
     const dialog = new Dialog({
         positionId: options.hotkey,
@@ -200,5 +185,7 @@ export const openSearch = async (options: {
         dialog.destroy({focus: "false"});
     });
     dialog.data = config;
-    trace("dialog-created");
+    if (options.focusInput) {
+        focusSearchInput(dialog.element.querySelector("#searchInput"));
+    }
 };

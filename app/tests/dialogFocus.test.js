@@ -336,6 +336,186 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
     }
 };
 
+const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSource) => {
+    const assert = require("node:assert/strict");
+    const tick = () => new Promise(resolve => setTimeout(resolve, 20));
+    const constants = {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_SEARCH: "search",
+        LOCAL_SEARCHDATA: "search", LOCAL_DIALOGPOSITION: "positions"};
+    window.siyuan = {dialogs: [], zIndex: 1, config: {}, storage: {search: {}, positions: {}},
+        menus: {menu: {element: document.createElement("div"), remove() {}}}};
+    const editor = document.createElement("div");
+    editor.className = "protyle-wysiwyg";
+    editor.contentEditable = "true";
+    editor.textContent = "before after";
+    const other = document.createElement("input");
+    document.body.append(editor, other);
+    const placeCaret = () => {
+        editor.focus();
+        getSelection().setBaseAndExtent(editor.firstChild, 7, editor.firstChild, 7);
+    };
+    let resolvePath;
+    let rejectPath;
+    let ios = true;
+    let mobileOpened = false;
+    window.webkit = {messageHandlers: {finishKeyboardComposition: {postMessage: async () => true}}};
+    const modules = {
+        "../util/genID": {genUUID: () => String(Math.random())},
+        "../util/zIndex": {isAbove: () => false},
+        "./moveResize": {moveResize() {}},
+        "../util/functions": {isMobile: () => false},
+        "../constants": {Constants: constants},
+        "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
+        "../protyle/util/compatibility": {isInIOS: () => ios, isDisabledFeature: () => false},
+        "../protyle/util/selectionOffsets": {focusByRange: range => {
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+        }},
+        "../util/fetch": {fetchSyncPost: () => new Promise((resolve, reject) => {
+            resolvePath = resolve;
+            rejectPath = reject;
+        })},
+        "../util/pathName": {getNotebookName: () => "Notebook", pathPosix: () => ({join: (...parts) => parts.join("/")})},
+        "./config": {hasExplicitSearchScope: () => true, setSearchConfigTemporaryPath() {}},
+        "./request": {cancelSearchRequest() {}},
+        "./util": {genSearch: (_app, _config, element) => {
+            element.innerHTML = '<input id="searchInput" value="previous query"><div id="searchList"></div>';
+            return {edit: {destroy() {}}, unRefEdit: {destroy() {}}};
+        }},
+        "../boot/globalEvent/command/global": {globalCommand: () => false},
+        "../boot/globalEvent/command/protyle": {onlyProtyleCommand: () => false},
+        "../mobile/menu/search": {popSearch: (_app, config, focusInput) => {
+            assert.equal(document.activeElement, editor);
+            assert.equal(focusInput, true);
+            assert.deepEqual(config.idPath, ["box//doc.sy"]);
+            mobileOpened = true;
+        }},
+    };
+    const load = source => {
+        const exports = {};
+        new Function("require", "exports", source)(name => modules[name] || {}, exports);
+        return exports;
+    };
+    modules["../dialog"] = load(dialogSource);
+    modules["./focus"] = modules["../search/focus"] = load(focusSource);
+    const {openSearch} = load(searchSource);
+    const mobile = load(mobileSource);
+    const search = () => openSearch({app: {}, hotkey: "search", notebookId: "box", searchPath: "/doc.sy"});
+    const mobileSearch = () => mobile.executeLegacyNativeCommand("search", {
+        app: {}, source: "shortcut", focus: "editor", range: getSelection().getRangeAt(0),
+        protyle: {notebookId: "box", path: "/doc.sy"},
+    });
+    for (const start of [search]) {
+        for (const failure of ["invalid", "network", "changed-focus"]) {
+            placeCaret();
+            const pending = start();
+            assert.equal(document.activeElement, editor);
+            if (failure === "changed-focus") {
+                other.focus();
+            }
+            if (failure === "network") {
+                rejectPath(new Error("offline"));
+                await assert.rejects(pending, /offline/);
+            } else {
+                resolvePath({code: -1, data: null});
+                await pending;
+            }
+            assert.equal(document.activeElement, failure === "changed-focus" ? other : editor);
+            if (failure !== "changed-focus") {
+                assert.equal(getSelection().anchorOffset, 7);
+            }
+            assert.equal(editor.textContent, "before after");
+        }
+    }
+    placeCaret();
+    const pending = search();
+    assert.equal(document.activeElement, editor);
+    assert.equal(window.siyuan.dialogs.length, 0);
+    // 异步期间原生选区可以变化，关闭搜索仍需恢复按键时的位置。
+    getSelection().collapse(editor.firstChild, 0);
+    resolvePath({code: 0, data: "/Document"});
+    await pending;
+    const dialog = window.siyuan.dialogs[0];
+    assert.ok(dialog.element.contains(document.activeElement));
+    dialog.destroy();
+    await tick();
+    assert.equal(document.activeElement, editor);
+    assert.equal(getSelection().anchorOffset, 7);
+    assert.equal(editor.textContent, "before after");
+
+    // iOS 外接键盘必须在按键事件内接管焦点，不能等待路径名称接口。
+    placeCaret();
+    const keyboardPending = openSearch({app: {}, hotkey: "search", notebookId: "box",
+        searchPath: "/doc.sy", focusInput: true});
+    assert.equal(window.siyuan.dialogs.length, 1);
+    const keyboardDialog = window.siyuan.dialogs[0];
+    assert.equal(document.activeElement.id, "searchInput");
+    assert.deepEqual(keyboardDialog.data.idPath, ["box//doc.sy"]);
+    assert.equal(document.activeElement.selectionStart, 0);
+    assert.equal(document.activeElement.selectionEnd, "previous query".length);
+    const input = document.activeElement;
+    const compositionCalls = [];
+    window.webkit.messageHandlers.finishKeyboardComposition.postMessage = async data => {
+        compositionCalls.push(data);
+        if (data === "") {
+            // WKWebView 结束原生会话会通知 blur，但仍保留网页 activeElement。
+            input.dispatchEvent(new FocusEvent("blur"));
+        }
+        return true;
+    };
+    let inputs = 0;
+    input.addEventListener("input", () => inputs++);
+    input.value = "f";
+    input.dispatchEvent(new InputEvent("input", {bubbles: true, isComposing: true}));
+    assert.equal(inputs, 0);
+    input.dispatchEvent(new KeyboardEvent("keyup", {key: "Meta"}));
+    await tick();
+    assert.equal(input.value, "previous query");
+    assert.equal(document.activeElement, input);
+    assert.deepEqual(compositionCalls, ["", "restore"]);
+    input.dispatchEvent(new KeyboardEvent("keydown", {key: "n"}));
+    input.value = "new query";
+    input.dispatchEvent(new InputEvent("input", {bubbles: true, isComposing: true}));
+    assert.equal(input.value, "new query");
+    assert.equal(inputs, 1);
+    // 原生回调返回前用户继续输入时，不覆盖新输入，也不继续拦截组词事件。
+    let finishComposition;
+    window.webkit.messageHandlers.finishKeyboardComposition.postMessage = () => new Promise(resolve => {
+        finishComposition = resolve;
+    });
+    modules["./focus"].focusSearchInput(input);
+    input.value = "p";
+    input.dispatchEvent(new InputEvent("input", {bubbles: true, isComposing: true}));
+    input.dispatchEvent(new KeyboardEvent("keyup", {key: "Meta"}));
+    input.dispatchEvent(new KeyboardEvent("keydown", {key: "n"}));
+    input.value = "newer query";
+    input.dispatchEvent(new InputEvent("input", {bubbles: true, isComposing: true}));
+    finishComposition(true);
+    await tick();
+    assert.equal(input.value, "newer query");
+    assert.equal(inputs, 2);
+    await keyboardPending;
+    keyboardDialog.destroy();
+    await tick();
+    assert.equal(document.activeElement, editor);
+    assert.equal(getSelection().anchorOffset, 7);
+
+    placeCaret();
+    const mobilePending = mobileSearch();
+    assert.equal(document.activeElement, editor);
+    await mobilePending;
+    assert.equal(mobileOpened, true);
+
+    ios = false;
+    placeCaret();
+    const desktopPending = search();
+    assert.equal(document.activeElement, editor);
+    resolvePath({code: -1, data: null});
+    await desktopPending;
+    assert.equal(document.activeElement, editor);
+    editor.remove();
+    other.remove();
+};
+
 if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow, ipcMain} = require("electron");
     app.setPath("userData", process.argv[2]);
@@ -365,6 +545,15 @@ if (process.versions.electron && process.type === "browser") {
             await win.webContents.executeJavaScript(
                 `(${runPositionCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(positionSource)}, ${JSON.stringify(dialogCSS)})`);
             const {parse} = require("ifdef-loader/preprocessor");
+            const compileSearch = (file, mobile = false) => ts.transpileModule(parse(
+                fs.readFileSync(path.join(__dirname, "../src", file), "utf8"),
+                {MOBILE: mobile, BROWSER: true}, false, true), {
+                compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+            }).outputText;
+            await win.webContents.executeJavaScript(`(${runSearchCases.toString()})(
+                ${JSON.stringify(source)}, ${JSON.stringify(compileSearch("search/focus.ts"))},
+                ${JSON.stringify(compileSearch("search/spread.ts"))},
+                ${JSON.stringify(compileSearch("command/nativeRuntime.ts", true))})`);
             const cardSource = fs.readFileSync(path.join(__dirname, "../src/card/openCard.ts"), "utf8");
             for (const mobile of [false, true]) {
                 const compiled = ts.transpileModule(parse(cardSource, {MOBILE: mobile, BROWSER: true}, false, true), {

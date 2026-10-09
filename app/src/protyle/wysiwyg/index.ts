@@ -12,6 +12,7 @@ import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
 import {isCommittedTextInput} from "./compositionInput";
 import {bindIOSTouchCaret} from "./touchCaret";
+import {clearTouchBlockSelection} from "./touchBlockSelection";
 import {isDirectMathClick} from "../util/mathClick";
 import {
     beforePaste,
@@ -3926,7 +3927,8 @@ export class WYSIWYG {
             }
         });
 
-        this.element.addEventListener("pointerdown", () => {
+        this.element.addEventListener("pointerdown", (event: PointerEvent) => {
+            clearTouchBlockSelection(protyle, event);
             if (getSelection().rangeCount > 0) {
                 beforeContextmenuRange = getSelection().getRangeAt(0);
             } else {

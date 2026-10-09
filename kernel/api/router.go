@@ -170,7 +170,6 @@ func registerSystemRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/dismissOnboarding", contractRouteHandlers(apicontract.SystemDismissOnboarding, dismissOnboarding)...)
 	ginServer.Handle("POST", "/api/system/checkUpdate", contractRouteHandlers(apicontract.SystemCheckUpdate, checkUpdate)...)
 	ginServer.Handle("POST", "/api/system/exportLog", contractRouteHandlers(apicontract.SystemExportLog, exportLog)...)
-	ginServer.Handle("POST", "/api/system/appendKeyboardLog", contractRouteHandlers(apicontract.SystemAppendKeyboardLog, appendKeyboardLog)...)
 	ginServer.Handle("POST", "/api/system/getChangelog", contractRouteHandlers(apicontract.SystemGetChangelog, getChangelog)...)
 	ginServer.Handle("POST", "/api/system/getNetwork", contractRouteHandlers(apicontract.GetNetwork, getNetwork)...)
 	ginServer.Handle("POST", "/api/system/exportConf", contractRouteHandlers(apicontract.SystemExportConf, exportConf)...)

@@ -22,7 +22,7 @@ body {margin:0}.file-tree {position:absolute;top:40px;left:40px;width:232px}
 </div><span class="b3-tooltips" aria-label="More">More</span></div>
 <div id="tooltip" class="tooltip fn__none"></div>`;
     const input = {} as typeof import("../util/hoverInput");
-    new Function("exports", sources[0])(input);
+    new Function("exports", "require", sources[0])(input, () => ({isInIOS: () => false}));
     let pluginShows = 0;
     const tooltip = {} as typeof import("./tooltip");
     window.DOMPurify = {sanitize: (value: string) => value} as typeof window.DOMPurify;

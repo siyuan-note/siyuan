@@ -1,5 +1,4 @@
 import type {BlockQueryRequestInput} from "../../types/api";
-import {logKeyboardDiagnostic} from "../../util/keyboardDiagnostic";
 import {isAbove} from "../../util/zIndex";
 import {stripSemanticMarkersFromRangeText} from "../../protyle/util/inlineElementMarker";
 import {
@@ -1307,9 +1306,7 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
 
 let switchDialog: Dialog;
 export const windowKeyDown = (app: App, event: KeyboardEvent) => {
-    logKeyboardDiagnostic("window-enter", event);
     if (event.defaultPrevented || filterHotkey(event, app)) {
-        logKeyboardDiagnostic("window-stop", event, event.defaultPrevented ? "default-prevented" : "filtered");
         return;
     }
     if (switchDialog &&
@@ -1320,7 +1317,6 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     if (searchKeydown(app, event)) {
-        logKeyboardDiagnostic("window-stop", event, "search-keydown");
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -1328,13 +1324,11 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
 
     const isTabWindow = isWindow();
     if (bindMenuKeydown(event)) {
-        logKeyboardDiagnostic("window-stop", event, "menu-keydown");
         event.preventDefault();
         return;
     }
 
     if (bindAVPanelKeydown(event)) {
-        logKeyboardDiagnostic("window-stop", event, "av-panel");
         event.preventDefault();
         return;
     }
@@ -1355,7 +1349,6 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     // 只读正文无法获得焦点，跨块选区的 Esc 不应按上一次活动面板分派。
     if (!readonlyBlockSelection && !shortcutTarget.closest("input, textarea, .b3-menu, .av__panel, .av__mask")) {
         if (shortcutTarget.closest(".protyle") && editKeydown(app, event)) {
-            logKeyboardDiagnostic("window-stop", event, "editor-handled");
             return;
         }
         if (!isTabWindow && shortcutTarget.closest(".sy__file") && fileTreeKeydown(app, event)) {

@@ -9,7 +9,7 @@ import {fetchSyncPost} from "../util/fetch";
 import {globalCommand} from "../boot/globalEvent/command/global";
 import {onlyProtyleCommand} from "../boot/globalEvent/command/protyle";
 import type {ICommandContextSnapshot} from "./types";
-import {createKeyboardSearchTrace} from "../util/keyboardDiagnostic";
+import {isInIOS} from "../protyle/util/compatibility";
 /// #if MOBILE
 import {popSearch} from "../mobile/menu/search";
 /// #else
@@ -29,6 +29,18 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
     const range = context.range;
     const fileLiElements = context.fileTree?.elements;
 
+    /// #if MOBILE
+    if (!isFileFocus && protyle && isInIOS() && openOnly && ["search", "replace"].includes(command)) {
+        popSearch(app, {
+            page: 1,
+            hasReplace: command === "replace",
+            hPath: getNotebookName(protyle.notebookId),
+            idPath: [pathPosix().join(protyle.notebookId, protyle.path)],
+        }, true);
+        return;
+    }
+    /// #endif
+
     if (!isFileFocus && protyle && onlyProtyleCommand({
         command,
         previousRange: range,
@@ -43,9 +55,10 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
         (isMobile() && !document.getElementById("empty")?.classList.contains("fn__none"))) {
         if (command === "replace") {
             /// #if MOBILE
-            popSearch(app, {hasReplace: true, page: 1});
+            popSearch(app, {hasReplace: true, page: 1}, openOnly);
             /// #else
             openSearch({
+                focusInput: openOnly,
                 app,
                 hotkey: Constants.DIALOG_REPLACE,
                 key: range?.toString() || "",
@@ -53,9 +66,10 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
             /// #endif
         } else if (command === "search") {
             /// #if MOBILE
-            popSearch(app, {hasReplace: false, page: 1});
+            popSearch(app, {hasReplace: false, page: 1}, openOnly);
             /// #else
             openSearch({
+                focusInput: openOnly,
                 app,
                 hotkey: Constants.DIALOG_SEARCH,
                 key: range?.toString() || "",
@@ -84,6 +98,7 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                 });
                 /// #else
                 openSearch({
+                    focusInput: openOnly,
                     app,
                     hotkey: Constants.DIALOG_REPLACE,
                     key: range?.toString() || "",
@@ -102,6 +117,7 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                 const isFile = fileLiElements[0].getAttribute("data-type") === "navigation-file";
                 if (isFile) {
                     openSearch({
+                        focusInput: openOnly,
                         app,
                         hotkey: Constants.DIALOG_REPLACE,
                         notebookId,
@@ -109,6 +125,7 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                     });
                 } else {
                     openSearch({
+                        focusInput: openOnly,
                         app,
                         hotkey: Constants.DIALOG_REPLACE,
                         notebookId,
@@ -120,17 +137,10 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
         case "search":
             if (!isFileFocus) {
                 /// #if MOBILE
-                const trace = createKeyboardSearchTrace("search");
-                trace("search-enter");
-                trace("path-start");
                 const response = await fetchSyncPost("/api/filetree/getHPathByPath", {
                     notebook: protyle.notebookId,
                     path: protyle.path.endsWith(".sy") ? protyle.path : protyle.path + ".sy",
-                }).catch(error => {
-                    trace("path-error", "exception");
-                    throw error;
                 });
-                trace("path-result", typeof response.data === "string" ? "string" : "invalid-data", response.code);
                 if (response.code !== 0 || typeof response.data !== "string") {
                     return;
                 }
@@ -140,9 +150,9 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                     hPath: pathPosix().join(getNotebookName(protyle.notebookId), response.data),
                     idPath: [pathPosix().join(protyle.notebookId, protyle.path)],
                 });
-                trace("dialog-created", "mobile");
                 /// #else
                 openSearch({
+                    focusInput: openOnly,
                     app,
                     hotkey: Constants.DIALOG_SEARCH,
                     key: range?.toString() || "",
@@ -161,6 +171,7 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                 const isFile = fileLiElements[0].getAttribute("data-type") === "navigation-file";
                 if (isFile) {
                     openSearch({
+                        focusInput: openOnly,
                         app,
                         hotkey: Constants.DIALOG_SEARCH,
                         notebookId,
@@ -168,6 +179,7 @@ export const executeLegacyNativeCommand = async (command: string, context: IComm
                     });
                 } else {
                     openSearch({
+                        focusInput: openOnly,
                         app,
                         hotkey: Constants.DIALOG_SEARCH,
                         notebookId,

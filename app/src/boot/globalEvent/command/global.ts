@@ -74,7 +74,7 @@ export const globalCommand = (command: string, app: App, range?: Range, openOnly
             popMenu();
             return true;
         case "globalSearch":
-            popSearch(app);
+            popSearch(app, undefined, openOnly);
             return true;
         case "recentDocs":
             getRecentDocs(app);
@@ -109,6 +109,7 @@ export const globalCommand = (command: string, app: App, range?: Range, openOnly
             openSearch({
                 app,
                 hotkey: Constants.DIALOG_GLOBALSEARCH,
+                focusInput: openOnly,
                 key: getSelectionText(range)
             });
             return true;

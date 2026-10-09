@@ -151,6 +151,7 @@ interface Window {
     webkit: {
         nativeCallbacks: { [key: string]: (id: number) => void },
         messageHandlers: {
+            finishKeyboardComposition?: { postMessage: (data: string) => Promise<boolean> }
             saveExportFile: { postMessage: (url: string) => void }
             saveExportFileV2?: { postMessage: (data: {uri: string, requestID: string}) => void }
             openLink: { postMessage: (url: string) => void }
@@ -1679,14 +1680,14 @@ interface ISiYuanUriBlockInfo {
 
     /**
      * 是否聚焦该块
-     * 
+     *
      * @defaultValue false
      */
     focus: boolean;
 
     /**
      * 是否全屏显示该块
-     * 
+     *
      * @defaultValue false
      */
     fullscreen: boolean;

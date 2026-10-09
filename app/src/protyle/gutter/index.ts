@@ -683,7 +683,12 @@ export class Gutter {
                 (item as HTMLElement).style.display = "none";
             });
         };
-        this.element.addEventListener("mouseleave", (event: MouseEvent & { target: HTMLInputElement }) => {
+        this.element.addEventListener("pointerdown", () => window.clearTimeout(hidePlusTimeout), {passive: true});
+        this.element.addEventListener("pointerleave", (event: PointerEvent & { target: HTMLInputElement }) => {
+            // 鼠标悬停后可能收到模拟触摸，保留按下时的命中元素直到点击完成。
+            if (event.pointerType !== "mouse") {
+                return;
+            }
             // 鼠标移向框线或+号时不隐藏（它们定位在容器外侧，移出容器几何范围会触发 mouseleave）
             const related = event.relatedTarget as HTMLElement;
             if (related && (related.classList.contains("protyle-gutters__line") || related.classList.contains("protyle-gutters__plus"))) {
@@ -700,9 +705,8 @@ export class Gutter {
         });
         // 双元素交互：悬浮块标显示框线（贴边不动），悬浮框线显示+号（独立元素外偏定位）
         this.element.addEventListener("pointermove", (event: PointerEvent & { target: HTMLElement }) => {
-            // 仅鼠标悬浮显示插入控件，避免触摸合成的鼠标事件让透明框线覆盖块标。
+            // 触摸不改变已有悬停控件，避免按下与松开命中不同元素而丢失点击。
             if (event.pointerType !== "mouse") {
-                hideInsert();
                 return;
             }
             const lineBefore = this.element.querySelector('.protyle-gutters__line[data-type="gutterLineBefore"]') as HTMLElement;

@@ -30,7 +30,6 @@ import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {sendAppSetting} from "./appRuntime";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {genWorkspaceStorageHtml, mountWorkspaceStorage} from "./workspaceStorage";
-import {flushKeyboardDiagnostics} from "../../util/keyboardDiagnostic";
 
 /// #if MOBILE
 const registerAppWorkspaceGroup = (tab: SettingTabBuilder) => {
@@ -589,8 +588,7 @@ const registerAppMaintenanceGroup = (tab: SettingTabBuilder) => {
             label: window.siyuan.languages.export,
             icon: "iconUpload",
             afterMount: (root) => {
-                root.querySelector("#exportLog")?.addEventListener("click", async () => {
-                    await flushKeyboardDiagnostics();
+                root.querySelector("#exportLog")?.addEventListener("click", () => {
                     fetchPost("/api/system/exportLog", {}, (response) => {
                         void saveExportFile(response.data.zip);
                     });

@@ -82,6 +82,36 @@ body {margin:0}.file-tree {position:absolute;top:40px;left:40px;width:232px}
     }
     touch("pointerover", "pen");
     check.equal(input.isTouchHoverInput(), false, "pen hover remains available");
+    tooltip.showTooltip('<a id="tipLink" href="#test">Open</a><button id="tipButton">Action</button>' +
+        '<input id="tipInput" value="Editable">', more, "memo", new MouseEvent("mouseover"));
+    check.equal(tip.classList.contains("tooltip--interactive"), true);
+    check.equal(tip.classList.contains("tooltip--hover"), false);
+    let linkClicks = 0;
+    let buttonClicks = 0;
+    document.getElementById("tipLink").addEventListener("click", event => {
+        event.preventDefault();
+        linkClicks++;
+    });
+    document.getElementById("tipButton").addEventListener("click", () => { buttonClicks++; });
+    await new Promise(resolve => setTimeout(resolve, 500));
+    for (const id of ["tipLink", "tipButton", "tipInput"]) {
+        const element = document.getElementById(id);
+        check.equal(tooltip.isInteractiveTooltipTarget(element), true);
+        const rect = element.getBoundingClientRect();
+        await require("electron").ipcRenderer.invoke("tap", rect.left + rect.width / 2, rect.top + rect.height / 2);
+        await new Promise(resolve => setTimeout(resolve, 30));
+        check.notEqual(getComputedStyle(tip).display, "none");
+    }
+    check.equal(linkClicks, 1, "a touch tap follows the link once");
+    check.equal(buttonClicks, 1, "a touch tap activates the button once");
+    check.equal(document.activeElement.id, "tipInput", "touch can focus the tooltip input");
+    tooltip.showTooltip('<a href="#test">Interactive</a>', more, "memo", new MouseEvent("mouseover"));
+    check.equal(tip.classList.contains("tooltip--interactive"), true, "interactive content remains available in touch mode");
+    tooltip.hideTooltip();
+    check.equal(tooltip.isInteractiveTooltipTarget(tip.firstElementChild), false, "hidden tooltips are not interactive targets");
+    touch("pointerover", "mouse");
+    tooltip.showTooltip("Plain", more, undefined, new MouseEvent("mouseover"));
+    check.equal(tip.classList.contains("tooltip--interactive"), false, "plain content clears the interactive state");
     touch("pointermove", "touch");
     assertTouch();
     return "Touch hover input cases passed";
@@ -111,6 +141,11 @@ app.whenReady().then(async () => {
         await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled:true});
         ipcMain.handle("hover", (_event, x, y) => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent",
             {type:"mouseMoved",x,y}));
+        ipcMain.handle("tap", async (_event, x, y) => {
+            await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent",
+                {type:"touchStart",touchPoints:[{x,y}]});
+            await win.webContents.debugger.sendCommand("Input.dispatchTouchEvent", {type:"touchEnd",touchPoints:[]});
+        });
         const result = await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
             browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(css) + ")")});
         if (result !== "Touch hover input cases passed") {throw new Error(result);}

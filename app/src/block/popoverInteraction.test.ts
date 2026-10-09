@@ -92,6 +92,7 @@ const createHarness = (android = false) => {
         return false;
     };
     let touch = false;
+    let tooltipHides = 0;
     const globals = {
         window: {siyuan, JSAndroid: android ? {} : undefined, setTimeout: setTimer, addEventListener() {}},
         document: {
@@ -128,7 +129,11 @@ const createHarness = (android = false) => {
         "../util/pathName": {isEncryptedBox: () => false, isLocalPath: () => false,
             parseSiYuanUriInfo: (href: string) => ({id: href.split("/").pop()})},
         "../protyle/render/av/cellOverflow": {shouldMeasureAVCellContentOverflow: () => false},
-        "../dialog/tooltip": {hideTooltip() {}, showTooltip() {}},
+        "../dialog/tooltip": {
+            hideTooltip: () => { tooltipHides++; }, showTooltip() {},
+            isInteractiveTooltipTarget: (target: TestElement) => Boolean(closest(target,
+                item => item.classes.has("tooltip--interactive") && !item.classes.has("fn__none"))),
+        },
         "../constants": {Constants: {TIMEOUT_INPUT: 5}},
         "../util/functions": {isTouchDevice: () => touch},
         "../util/hoverInput": {isTouchHoverInput: () => touch},
@@ -168,6 +173,7 @@ const createHarness = (android = false) => {
     };
     return {element, ref, fire, advance, api, lifecycle, panels, requests, siyuan, handlers, open, close,
         pendingTimers: () => timers.size,
+        tooltipHides: () => tooltipHides,
         setTouch: (value: boolean) => { touch = value; }};
 };
 
@@ -185,6 +191,21 @@ test("touch-generated mouseover does not schedule hover timers and cancels pendi
     h.setTouch(false);
     h.fire("mouseover");
     assert.ok(h.pendingTimers() > 0);
+});
+
+test("touching an interactive tooltip preserves its content and cancels hover timers", () => {
+    const h = createHarness();
+    h.fire("mouseover");
+    assert.ok(h.pendingTimers() > 0);
+    const tooltip = h.element({}, ["tooltip", "tooltip--interactive"]);
+    const link = h.element({}, [], tooltip);
+    const hides = h.tooltipHides();
+    h.setTouch(true);
+    h.fire("mouseover", link);
+    assert.equal(h.pendingTimers(), 0);
+    assert.equal(h.tooltipHides(), hides);
+    h.fire("mouseover", h.ref);
+    assert.equal(h.tooltipHides(), hides + 1);
 });
 
 test("clicks cancel pending previews until actual motion, including within the same target", async () => {

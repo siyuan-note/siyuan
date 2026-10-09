@@ -2,6 +2,15 @@ import {isMobile} from "../util/functions";
 import {emitToPlugins, forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {initHoverInput, isTouchHoverInput} from "../util/hoverInput";
 
+const INTERACTIVE_TOOLTIP_SELECTOR = "a, button, input, select, textarea, [contenteditable='true'], [tabindex], [role='button']";
+
+// 已显示的交互提示保留内部操作，不因切换输入源而提前关闭。
+export const isInteractiveTooltipTarget = (target: EventTarget | null) => {
+    const tooltip = document.getElementById("tooltip");
+    return target instanceof Node && Boolean(tooltip?.classList.contains("tooltip--interactive")) &&
+        !tooltip.classList.contains("fn__none") && tooltip.contains(target);
+};
+
 // 无编辑器的窗口复用提示框渲染，不注册块预览事件。
 export const initTooltips = () => {
     initHoverInput();
@@ -38,8 +47,15 @@ export const showTooltip = (
     space: number = 0.5,
     positionOverride?: string,
 ) => {
-    if (isMobile() || !message || (isTouchHoverInput() && event && tooltipClass !== "error")) {
+    if (isMobile() || !message) {
         return;
+    }
+    if (isTouchHoverInput() && event && tooltipClass !== "error") {
+        const content = document.createElement("div");
+        content.innerHTML = window.DOMPurify.sanitize(message);
+        if (!content.querySelector(INTERACTIVE_TOOLTIP_SELECTOR)) {
+            return;
+        }
     }
     const messageElement = document.getElementById("tooltip");
     const showDetail = {
@@ -80,12 +96,14 @@ export const showTooltip = (
         return;
     }
     messageElement.className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
-    messageElement.classList.toggle("tooltip--hover", !!event && tooltipClass !== "error");
     messageElement.innerHTML = window.DOMPurify.sanitize(message);
+    const interactive = Boolean(messageElement.querySelector(INTERACTIVE_TOOLTIP_SELECTOR));
+    messageElement.classList.toggle("tooltip--interactive", interactive);
+    messageElement.classList.toggle("tooltip--hover", !!event && tooltipClass !== "error" && !interactive);
     // 避免原本的 top 和 left 影响计算
     messageElement.removeAttribute("style");
     // 普通提示不拦截目标点击，包含链接或控件的提示仍可交互。
-    if (!messageElement.querySelector("a, button, input, select, textarea, [contenteditable='true'], [tabindex], [role='button']")) {
+    if (!interactive) {
         messageElement.style.pointerEvents = "none";
     }
     const position = positionOverride || target.getAttribute("data-position");

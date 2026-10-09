@@ -2,7 +2,7 @@ import {BlockPanel} from "./Panel";
 import {isAbove} from "../util/zIndex";
 import {hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {hideTooltip, showTooltip} from "../dialog/tooltip";
+import {hideTooltip, isInteractiveTooltipTarget, showTooltip} from "../dialog/tooltip";
 import {isEncryptedBox, isLocalPath, parseSiYuanUriInfo} from "../util/pathName";
 import type {App} from "../index";
 import {Constants} from "../constants";
@@ -141,6 +141,12 @@ export const initBlockPopover = (app: App) => {
     // 编辑器内容块引用/backlinks/tag/bookmark/套娃中使用
     document.addEventListener("mouseover", (event: MouseEvent & { target: HTMLElement, path: HTMLElement[] }) => {
         logAndroidInputEvent(event);
+        if (isTouchHoverInput() && isInteractiveTooltipTarget(event.target)) {
+            cancelPopoverTimers();
+            tooltipAbortController?.abort();
+            tooltipAbortController = null;
+            return;
+        }
         if (!waitForMove) {
             pointerX = event.clientX;
             pointerY = event.clientY;

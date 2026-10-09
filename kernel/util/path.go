@@ -458,7 +458,8 @@ func IsSensitivePath(p string) bool {
 		return true
 	}
 	// 仅对工作空间外的路径解析符号链接，防止用符号链接绕过黑名单指向敏感目标。
-	if gulu.File.IsSubPath(WorkspaceDir, p) {
+	// 归属判断与后续黑名单匹配都使用归一化后的形式，避免命名空间别名被当作工作空间外的路径。
+	if gulu.File.IsSubPath(WorkspaceDir, resolveNamespaceAlias(p)) {
 		return false
 	}
 	resolved := ResolveLongestExistingParent(p)
@@ -481,6 +482,74 @@ func IsSensitiveHTMLAssetPath(p string) bool {
 	return isSensitivePath(p, true) || isSensitivePath(ResolveLongestExistingParent(p), true)
 }
 
+// resolveNamespaceAlias 把 Windows 路径命名空间别名归一化为常规 Win32 路径，供黑名单匹配与工作空间归属判断使用。
+//
+// 扩展长度前缀 `\\?\`（含 `\\?\UNC\`）与设备命名空间前缀 `\\.\` 经 filepath.Clean 后原样保留，
+// 既无法命中按前缀比较的黑名单，也会被文件系统归属判断当作工作空间外的路径，从而绕过敏感路径保护。
+// 本机管理共享（`\\localhost\<盘符>$\...` 或 `\\<本机主机名>\<盘符>$\...`）指向本地卷，同样归一化为盘符路径。
+func resolveNamespaceAlias(p string) string {
+	if runtime.GOOS != "windows" || p == "" {
+		return p
+	}
+
+	// 仅剥离 `\\?\` 与 `\\.\` 前缀，保留其后的 `UNC\` 标记，以便下面还原 UNC 根路径
+	for _, prefix := range []string{`\\?\`, `\\.\`} {
+		if strings.HasPrefix(p, prefix) {
+			p = p[len(prefix):]
+			break
+		}
+	}
+	if strings.HasPrefix(p, `UNC\`) {
+		p = `\\` + p[len(`UNC\`):]
+	}
+
+	cleaned := filepath.Clean(p)
+	if strings.HasPrefix(cleaned, `\\`) {
+		// 仅当主机名是本机且共享名就是盘符时才等价于本地卷，其余 UNC 路径一律按常规路径匹配黑名单
+		if drive, prefixLen := localAdminShareDrive(cleaned); drive != "" {
+			// 用盘符替换主机名与共享名（形如 `\\主机名\D$`），其余路径保持原样
+			rest := cleaned[2+prefixLen:]
+			if !strings.HasPrefix(rest, `\`) {
+				rest = `\` + rest
+			}
+			return drive + rest
+		}
+	}
+	return cleaned
+}
+
+// localAdminShareDrive 判断 UNC 路径是否指向本机管理共享，是则返回对应的盘符与「主机名\共享名」的长度，否则返回空串。
+func localAdminShareDrive(p string) (drive string, prefixLen int) {
+	rest := p[2:]
+	sep := strings.Index(rest, `\`)
+	if sep < 0 {
+		return "", 0
+	}
+
+	host := rest[:sep]
+	rest = rest[sep+1:]
+	shareSep := strings.Index(rest, `\`)
+	share := rest
+	if 0 <= shareSep {
+		share = rest[:shareSep]
+	}
+	if len(share) != 2 || share[1] != '$' || !isASCIILetter(share[0]) {
+		return "", 0
+	}
+
+	if !strings.EqualFold(host, "localhost") {
+		hostname, err := os.Hostname()
+		if err != nil || "" == hostname || !strings.EqualFold(host, hostname) {
+			return "", 0
+		}
+	}
+	return strings.ToUpper(share[:1]) + ":", sep + 1 + len(share)
+}
+
+func isASCIILetter(b byte) bool {
+	return 'a' <= b && b <= 'z' || 'A' <= b && b <= 'Z'
+}
+
 func isHTMLAssetUserPath(p string) bool {
 	for _, root := range []string{os.TempDir(), HomeDir, systemHomeDir} {
 		if root == "" {
@@ -495,6 +564,7 @@ func isHTMLAssetUserPath(p string) bool {
 
 // isSensitivePath 执行敏感性黑名单匹配，必要时解析工作空间路径，但不解析目标路径。
 func isSensitivePath(p string, htmlAsset bool) bool {
+	p = resolveNamespaceAlias(p)
 	toCheckPathLower := filepath.Clean(strings.ToLower(p))
 	toCheckNameLower := filepath.Base(toCheckPathLower)
 	workspaceDir := WorkspaceDir

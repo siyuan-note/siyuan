@@ -16,13 +16,9 @@
   gap: 8px;
 
   .b3-select {
-    flex: 1 1 70px;
+    flex: 0 1 auto;
     min-width: 0;
     max-width: 100%;
-  }
-
-  .b3-select[data-lunar-part="month"] {
-    flex: 2 1 130px;
   }
 }
 

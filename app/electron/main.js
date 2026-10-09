@@ -758,7 +758,9 @@ app.commandLine.appendSwitch("auto-detect", "false");
 if (!remoteKernelTarget) {
     app.commandLine.appendSwitch("no-proxy-server");
 }
-app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
+// 同源窗口共享渲染进程，按来源隔离以保留不同端口工作空间之间的进程隔离。
+app.commandLine.appendSwitch("process-per-site");
+app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport,OriginKeyedProcessesByDefault");
 app.commandLine.appendSwitch("xdg-portal-required-version", "4");
 // 本地 HTTPS 页面加载 HTTP 外链图时，禁止自动升级为 HTTPS
 app.commandLine.appendSwitch("disable-features", "AutoupgradeMixedContent");

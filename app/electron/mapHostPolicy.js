@@ -149,7 +149,8 @@ const createMapContentSecurityPolicy = (origin, provider) => {
         styles += " " + assets + "maplibre-gl.css";
         workers = "blob:";
     } else if (provider === "amap") {
-        scripts += " https://webapi.amap.com";
+        scripts += " https://webapi.amap.com https://restapi.amap.com";
+        workers = "blob:";
         connect = "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com";
         images += " https://webapi.amap.com https://a.amap.com https://*.is.autonavi.com";
     } else if (provider === "tencent") {

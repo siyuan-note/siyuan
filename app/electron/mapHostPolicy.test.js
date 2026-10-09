@@ -114,6 +114,27 @@ test("bootstrap CSP has sandbox isolation and only fixed local assets plus the s
     assert.throws(() => createMapContentSecurityPolicy("http://example.com/a", "openfreemap"));
 });
 
+test("AMap permits only its named REST script and blob workers without expanding network access", () => {
+    const csp = createMapContentSecurityPolicy(origin, "amap");
+    const directives = Object.fromEntries(csp.split(";").filter(value => value.trim()).map(value => {
+        const [name, ...sources] = value.trim().split(/\s+/);
+        return [name, sources];
+    }));
+    assert.deepEqual(directives["script-src"], [origin + "/stage/build/map/host.js", "https://webapi.amap.com", "https://restapi.amap.com"]);
+    assert.deepEqual(directives["worker-src"], ["blob:"]);
+    assert.deepEqual(directives["connect-src"], ["https://webapi.amap.com", "https://restapi.amap.com", "https://vdata.amap.com"]);
+    assert.deepEqual(directives["frame-src"], ["'none'"]);
+    assert.deepEqual(directives.sandbox, ["allow-scripts"]);
+    for (const value of ["https://unknown.example/a", "http://restapi.amap.com/a", origin + "/api/system/getConf", "file:///tmp/a"]) {
+        assert.equal(getMapRequestPolicy(value, "GET", origin, "amap"), undefined);
+    }
+    for (const provider of ["tencent", "baidu"]) {
+        const policy = createMapContentSecurityPolicy(origin, provider);
+        assert.match(policy, /worker-src 'none'/);
+        assert.ok(!policy.includes("restapi.amap.com"));
+    }
+});
+
 test("native geometry converts CSS to DIP, crops inward, and denies off-window or malformed bounds", () => {
     const value = {visible: true, bounds: {x: 10.2, y: 20, width: 200, height: 100},
         logicalSize: {width: 400, height: 200}, crop: {x: 40, y: 30}};

@@ -52,6 +52,37 @@ func TestMapHostPolicy(t *testing.T) {
 	}
 }
 
+func TestMapHostAMapRestrictedWorkersAndScripts(t *testing.T) {
+	policy, ok := mapHostPolicy("localhost:6806", "amap")
+	if !ok {
+		t.Fatal("AMap policy unavailable")
+	}
+	directives := map[string]string{}
+	for _, part := range strings.Split(policy, ";") {
+		fields := strings.Fields(part)
+		if len(fields) > 0 {
+			directives[fields[0]] = strings.Join(fields[1:], " ")
+		}
+	}
+	for name, want := range map[string]string{
+		"script-src":  "localhost:6806/stage/build/map/host.js https://webapi.amap.com https://restapi.amap.com",
+		"worker-src":  "blob:",
+		"connect-src": "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com",
+		"frame-src":   "'none'",
+		"sandbox":     "allow-scripts",
+	} {
+		if directives[name] != want {
+			t.Fatalf("unexpected %s: %s", name, directives[name])
+		}
+	}
+	for _, provider := range []string{"tencent", "baidu"} {
+		other, _ := mapHostPolicy("localhost:6806", provider)
+		if !strings.Contains(other, "worker-src 'none'") || strings.Contains(other, "restapi.amap.com") {
+			t.Fatalf("AMap permissions leaked into %s", provider)
+		}
+	}
+}
+
 func TestMapHostStaticIsolationHeaders(t *testing.T) {
 	old := util.WorkingDir
 	oldBypass := util.SiYuanAccessAuthCodeBypass

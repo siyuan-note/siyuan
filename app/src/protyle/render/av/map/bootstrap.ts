@@ -15,7 +15,8 @@ export const getAVMapLockedPolicy = (provider: AVMapProvider): string => {
             workers = "blob:";
             break;
         case "amap":
-            scripts = "https://webapi.amap.com";
+            scripts = "https://webapi.amap.com https://restapi.amap.com";
+            workers = "blob:";
             connect = "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com";
             images += " https://webapi.amap.com https://a.amap.com https://*.is.autonavi.com";
             break;
@@ -31,7 +32,7 @@ export const getAVMapLockedPolicy = (provider: AVMapProvider): string => {
             break;
     }
     return `default-src 'none'; script-src ${scripts}; connect-src ${connect}; img-src ${images}; ` +
-        `style-src 'unsafe-inline'; font-src 'none'; worker-src ${workers}; child-src ${workers}; ` +
+        `style-src 'unsafe-inline'; font-src 'none'; worker-src ${workers}; child-src ${provider === "openfreemap" ? workers : "'none'"}; ` +
         "frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
 };
 

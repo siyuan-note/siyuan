@@ -169,6 +169,7 @@ const setup = () => {
                     async loadURL(url) { this.url = url; order.push("load"); },
                     postMessage(...args) { this.transferred = args; },
                     setZoomFactor(zoom) { this.zoom = zoom; },
+                    setBackgroundThrottling(value) { this.throttling = value; order.push("throttling:" + value); },
                     stop() { this.stopped = true; },
                     close(options) { this.closeOptions = options; this.destroyed = true; this.emit("destroyed"); },
                 });
@@ -259,6 +260,7 @@ test("geometry is invisible before ready, uses owner zoom, and hides on invalid 
         logicalSize: {width: 400, height: 300}, crop: {x: 30, y: 40}};
     s.handlers["siyuan-map-geometry"](s.event(), geometry);
     assert.equal(s.views[0].visible, false);
+    assert.deepEqual(s.views[0].bounds, {x: 13, y: 25, width: 249, height: 125});
     s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
     assert.equal(s.views[0].visible, true);
     assert.deepEqual(s.views[0].bounds, {x: 13, y: 25, width: 249, height: 125});
@@ -268,6 +270,47 @@ test("geometry is invisible before ready, uses owner zoom, and hides on invalid 
     s.handlers["siyuan-map-geometry"](s.event(), {...geometry, bounds: {...geometry.bounds, width: 10000}});
     assert.equal(s.views[0].visible, false);
     s.manager.destroyAll();
+});
+
+test("hidden bootstrap receives nonzero bounds and rendering frames without becoming visible", () => {
+    const s = setup(); s.create();
+    const view = s.views[0];
+    assert.equal(view.options.webPreferences.backgroundThrottling, false);
+    assert.deepEqual(view.bounds, {x: 0, y: 0, width: 1, height: 1});
+    assert.equal(view.visible, false);
+    const geometry = {...envelope, visible: true, bounds: {x: 10, y: 20, width: 200, height: 100},
+        logicalSize: {width: 400, height: 300}, crop: {x: 30, y: 40}};
+    s.handlers["siyuan-map-geometry"](s.event(), geometry);
+    assert.deepEqual(view.bounds, geometry.bounds);
+    assert.equal(view.webContents.sent.length, 0, "viewport waits for the preload to exist");
+    s.load();
+    assert.equal(view.webContents.throttling, false);
+    assert.equal(view.visible, false);
+    assert.deepEqual(view.webContents.sent[0], ["siyuan-map-viewport", {logicalSize: geometry.logicalSize, crop: geometry.crop}]);
+    s.reply({type: "bootstrapReady"});
+    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: false});
+    s.reply({type: "ready"});
+    assert.equal(view.visible, false, "a menu or hidden DOM during bootstrap must still hide the native view");
+    assert.equal(view.webContents.throttling, true, "normal throttling resumes after bootstrap");
+    s.handlers["siyuan-map-geometry"](s.event(), geometry);
+    assert.equal(view.visible, true);
+    s.manager.destroyAll();
+    assert.equal(view.webContents.destroyed, true);
+});
+
+test("an initially hidden or zero-size DOM can finish bootstrap without exposing the placeholder", () => {
+    const s = setup(); s.create(); s.load();
+    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: true, bounds: {x: 0, y: 0, width: 0, height: 0},
+        logicalSize: {width: 0, height: 0}, crop: {x: 0, y: 0}});
+    assert.deepEqual(s.views[0].bounds, {x: 0, y: 0, width: 1, height: 1});
+    assert.equal(s.views[0].webContents.throttling, false);
+    s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
+    assert.equal(s.views[0].visible, false);
+    assert.equal(s.views[0].webContents.throttling, true);
+    s.manager.destroyAll();
+    s.load();
+    assert.equal(s.views[0].visible, false);
+    assert.equal(s.views[0].webContents.destroyed, true);
 });
 
 test("destroy and owner navigation close real contents, ports, requests and session; stale events cannot resurrect", () => {

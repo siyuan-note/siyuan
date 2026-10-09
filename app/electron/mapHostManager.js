@@ -240,14 +240,17 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
     };
     const applyGeometry = host => {
         const geometry = host.geometry;
-        if (!geometry?.visible || !host.ready || host.destroyed) return;
-        if (!host.win.isFocused() || !host.win.isVisible() || host.win.isMinimized()) {
+        if (!geometry?.visible || host.destroyed) return;
+        // SDK 初始化也需要非零尺寸；设置已校验的几何不等于允许显示原生视图。
+        host.view.webContents.setZoomFactor(geometry.zoom);
+        host.view.setBounds(geometry.bounds);
+        if (host.loaded) {
+            host.view.webContents.send("siyuan-map-viewport", {logicalSize: geometry.logicalSize, crop: geometry.crop});
+        }
+        if (!host.ready || !host.win.isFocused() || !host.win.isVisible() || host.win.isMinimized()) {
             host.view.setVisible(false);
             return;
         }
-        host.view.webContents.setZoomFactor(geometry.zoom);
-        host.view.setBounds(geometry.bounds);
-        host.view.webContents.send("siyuan-map-viewport", {logicalSize: geometry.logicalSize, crop: geometry.crop});
         host.view.setVisible(true);
         post(host, {version: 1, instanceID: host.init.instanceID, type: "resize"});
     };
@@ -273,7 +276,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
                 webSecurity: true, nodeIntegration: false, nodeIntegrationInSubFrames: false,
                 nodeIntegrationInWorker: false, webviewTag: false, allowRunningInsecureContent: false,
                 navigateOnDragDrop: false, safeDialogs: true, disableDialogs: true, devTools: false,
-                spellcheck: false, preload: path.join(__dirname, "mapHostPreload.js")}});
+                spellcheck: false, backgroundThrottling: false, preload: path.join(__dirname, "mapHostPreload.js")}});
         } catch (_error) {
             router.destroy();
             return {version: 1, instanceID: init.instanceID, error: "hostUnavailable"};
@@ -283,7 +286,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         contents.setWindowOpenHandler(() => ({action: "deny"}));
         mapContents.add(contents.id);
         const host = {key, init, owner: event.sender, frame: event.senderFrame, win: owner.win, origin: owner.origin,
-            view, router, listeners: [], ids: new Set(), revision: -1, ready: false, bootstrapped: false, destroyed: false};
+            view, router, listeners: [], ids: new Set(), revision: -1, loaded: false, ready: false, bootstrapped: false, destroyed: false};
         hosts.set(key, host);
         const denyNavigation = event => event.preventDefault();
         for (const name of ["will-navigate", "will-frame-navigate", "will-redirect", "will-attach-webview"]) {
@@ -307,11 +310,13 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         listen(host, event.sender, "zoom-changed", () => hide(host));
         const nonce = randomID();
         const entryURL = owner.origin + "/stage/map/index.html?provider=" + init.provider + "#" + init.instanceID + ":" + nonce;
-        let loaded = false;
         listen(host, contents, "did-finish-load", () => {
             if (host.destroyed) return;
-            if (loaded || contents.getURL() !== entryURL) { fail(host, "hostUnavailable"); return; }
-            loaded = true;
+            if (host.loaded || contents.getURL() !== entryURL) { fail(host, "hostUnavailable"); return; }
+            host.loaded = true;
+            // 初始隐藏的 renderer 必须显式唤醒产帧，否则 SDK 的 load 会等待显示，而显示又等待 ready。
+            contents.setBackgroundThrottling(false);
+            applyGeometry(host);
             const {port1, port2} = new MessageChannelMain();
             host.port = port1;
             host.transferredPort = port2;
@@ -330,6 +335,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
                     post(host, {version: 1, instanceID: init.instanceID, type: "theme", theme: init.theme});
                     if (host.pendingFit) post(host, {version: 1, instanceID: init.instanceID, type: "fit"});
                     applyGeometry(host);
+                    contents.setBackgroundThrottling(true);
                     sendOwner(host, reply);
                 } else if (reply.type === "markerClick" && host.ready && reply.revision === host.revision && host.ids.has(reply.id)) {
                     sendOwner(host, reply);
@@ -343,6 +349,8 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         host.timer.unref?.();
         try {
             view.setVisible(false);
+            // DOM 暂时不可见时也能完成初始化；此占位视图始终隐藏，不会覆盖编辑器。
+            view.setBounds({x: 0, y: 0, width: 1, height: 1});
             owner.win.contentView.addChildView(view);
             void contents.loadURL(entryURL).catch(() => fail(host, "hostUnavailable"));
         } catch (_error) { fail(host, "hostUnavailable"); }

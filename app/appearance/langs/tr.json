@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "Önceki ekran",
+	"pageScrollDown": "Sonraki ekran",
+	"showPageScrollButtons": "Ekranlık kaydırma düğmelerini göster",
+	"showPageScrollButtonsTip": "İmleci hareket ettirmeden bir ekran yukarı veya aşağı kaydırmak için düzenleyicinin sağ alt kısmında düğmeler göster",
 	"slashMenuFrequent": "Sık kullanılanlar",
 	"snippetConflict": "Kod parçacıkları değişti. Taslağınız kaydedilmedi. Düzenlemelerinizi kopyalayın, ardından iletişim kutusunu yeniden açarak güncel parçacıklarla birleştirin.",
 	"agentWelcomeFirst1": "Merhaba, tanıştığımıza sevindim\nBir fikirle başlayalım",

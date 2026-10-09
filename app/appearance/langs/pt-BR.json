@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "Tela anterior",
+	"pageScrollDown": "Próxima tela",
+	"showPageScrollButtons": "Mostrar botões de rolagem por tela",
+	"showPageScrollButtonsTip": "Mostrar botões no canto inferior direito do editor para rolar uma tela para cima ou para baixo sem mover o cursor",
 	"slashMenuFrequent": "Usados com frequência",
 	"snippetConflict": "Os trechos foram alterados. Seu rascunho não foi salvo. Copie suas alterações e reabra a caixa de diálogo para mesclá-las com os trechos mais recentes.",
 	"agentWelcomeFirst1": "Oi, que bom te conhecer\nVamos começar com uma ideia",

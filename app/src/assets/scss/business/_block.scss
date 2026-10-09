@@ -141,6 +141,14 @@
       margin-left: -4px;
     }
 
+    &--touch {
+      @media (pointer: coarse) {
+        min-width: 44px;
+        min-height: 44px;
+        justify-content: center;
+      }
+    }
+
     svg {
       height: 16px;
       width: 16px;

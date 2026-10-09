@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "Previous screen",
+	"pageScrollDown": "Next screen",
+	"showPageScrollButtons": "Show page scroll buttons",
+	"showPageScrollButtonsTip": "Show buttons at the lower right of the editor to scroll up or down one screen without moving the cursor",
 	"slashMenuFrequent": "Frequently used",
 	"snippetConflict": "Snippets have changed. Your draft was not saved. Copy your edits, then reopen the dialog to merge them with the latest snippets.",
 	"agentWelcomeFirst1": "Hi, it's nice to meet you\nLet's start with an idea",

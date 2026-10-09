@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "Vorig scherm",
+	"pageScrollDown": "Volgend scherm",
+	"showPageScrollButtons": "Knoppen voor scrollen per scherm tonen",
+	"showPageScrollButtonsTip": "Rechtsonder in de editor knoppen tonen om één scherm omhoog of omlaag te scrollen zonder de cursor te verplaatsen",
 	"slashMenuFrequent": "Veelgebruikt",
 	"snippetConflict": "De fragmenten zijn gewijzigd. Je concept is niet opgeslagen. Kopieer je wijzigingen en open het dialoogvenster opnieuw om ze met de nieuwste fragmenten samen te voegen.",
 	"agentWelcomeFirst1": "Hoi, leuk je te ontmoeten\nLaten we met een idee beginnen",

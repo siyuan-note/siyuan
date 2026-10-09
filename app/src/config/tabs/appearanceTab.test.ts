@@ -28,10 +28,13 @@ for (const mobile of [true, false]) {
         });
         const groups: string[] = [];
         const slots: Array<{key: string; html: () => string; afterMount: () => void}> = [];
+        const switches: Array<{id: string; spec: {title: string; readConfig?: () => boolean; save?: unknown}}> = [];
         const group = new Proxy({}, {
             get: (_, method) => (...args: unknown[]) => {
                 if (method === "slot") {
                     slots.push(args[0] as typeof slots[number]);
+                } else if (method === "switch") {
+                    switches.push({id: args[0] as string, spec: args[1] as typeof switches[number]["spec"]});
                 }
             },
         });
@@ -48,6 +51,11 @@ for (const mobile of [true, false]) {
         assert.equal(slots.some(item => item.key === "mobileBottomBar"), mobile);
         assert.equal(slots.some(item => item.key === "mobileBarsAutoHide"), mobile);
         assert.equal(slots.some(item => item.key === "mobileSidebarAccess"), mobile);
+        const pageScrollSwitch = switches.find(item => item.id === "pageScrollButtons");
+        assert.ok(pageScrollSwitch);
+        assert.equal(pageScrollSwitch.spec.title, "showPageScrollButtons");
+        assert.equal(typeof pageScrollSwitch.spec.readConfig, "function");
+        assert.equal(typeof pageScrollSwitch.spec.save, "function");
     });
 }
 

@@ -56,6 +56,13 @@ const loadZoom = (value: unknown) => {
     return zoom;
 };
 
+test("startup preserves the optional page scroll button preference", () => {
+    assert.notEqual(loadStorage({})[Constants.LOCAL_PAGE_SCROLL_BUTTONS], true);
+    for (const enabled of [false, true]) {
+        assert.equal(loadStorage({[Constants.LOCAL_PAGE_SCROLL_BUTTONS]: enabled})[Constants.LOCAL_PAGE_SCROLL_BUTTONS], enabled);
+    }
+});
+
 test("fresh or reset mobile preferences enable sidebar buttons alongside swipe", () => {
     const first = loadStorage({})[MOBILE_BARS_CONFIG_KEY];
     const second = loadStorage({})[MOBILE_BARS_CONFIG_KEY];

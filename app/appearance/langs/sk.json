@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "Predchádzajúca obrazovka",
+	"pageScrollDown": "Nasledujúca obrazovka",
+	"showPageScrollButtons": "Zobraziť tlačidlá posúvania o jednu obrazovku",
+	"showPageScrollButtonsTip": "Zobraziť v pravom dolnom rohu editora tlačidlá na posunutie o jednu obrazovku nahor alebo nadol bez presunu kurzora",
 	"slashMenuFrequent": "Často používané",
 	"snippetConflict": "Úryvky sa zmenili. Koncept nebol uložený. Skopírujte svoje úpravy a znovu otvorte dialóg, aby ste ich zlúčili s najnovšími úryvkami.",
 	"agentWelcomeFirst1": "Ahoj, teší ma\nZačnime jedným nápadom",

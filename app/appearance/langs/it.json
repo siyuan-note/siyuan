@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "Schermata precedente",
+	"pageScrollDown": "Schermata successiva",
+	"showPageScrollButtons": "Mostra i pulsanti di scorrimento per schermata",
+	"showPageScrollButtonsTip": "Mostra pulsanti in basso a destra nell’editor per scorrere una schermata verso l’alto o il basso senza spostare il cursore",
 	"slashMenuFrequent": "Usati di frequente",
 	"snippetConflict": "Gli snippet sono cambiati. La bozza non è stata salvata. Copia le modifiche e riapri la finestra di dialogo per unirle agli snippet aggiornati.",
 	"agentWelcomeFirst1": "Ciao, è un piacere conoscerti\nCominciamo da un’idea",

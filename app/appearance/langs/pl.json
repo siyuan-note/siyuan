@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "Poprzedni ekran",
+	"pageScrollDown": "Następny ekran",
+	"showPageScrollButtons": "Pokaż przyciski przewijania o jeden ekran",
+	"showPageScrollButtonsTip": "Pokaż w prawym dolnym rogu edytora przyciski przewijania o jeden ekran w górę lub w dół bez przesuwania kursora",
 	"slashMenuFrequent": "Często używane",
 	"snippetConflict": "Fragmenty kodu zostały zmienione. Szkic nie został zapisany. Skopiuj swoje zmiany, a następnie ponownie otwórz okno, aby połączyć je z aktualnymi fragmentami.",
 	"agentWelcomeFirst1": "Cześć, miło cię poznać\nZacznijmy od jednego pomysłu",

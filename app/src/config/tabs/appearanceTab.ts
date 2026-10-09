@@ -51,6 +51,7 @@ import {genMobileBarsSettingHTML, mountMobileBarsSetting} from "../../mobile/uti
 /// #endif
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
 import {genBodyGradientHtml, mountBodyGradient} from "./bodyGradient";
+import {isPageScrollButtonsEnabled, setPageScrollButtonsEnabled} from "../../protyle/scroll/pageButtons";
 
 interface IBootAppearanceListData {
     appearances: IBootAppearanceListItem[];
@@ -879,6 +880,13 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
 
 const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("controls", window.siyuan.languages.configGroupControls);
+
+    group.switch("pageScrollButtons", {
+        title: window.siyuan.languages.showPageScrollButtons,
+        desc: window.siyuan.languages.showPageScrollButtonsTip,
+        readConfig: isPageScrollButtonsEnabled,
+        save: (value) => setPageScrollButtonsEnabled(value === true),
+    });
 
     /// #if MOBILE
     group.slot({

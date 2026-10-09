@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "Écran précédent",
+	"pageScrollDown": "Écran suivant",
+	"showPageScrollButtons": "Afficher les boutons de défilement par écran",
+	"showPageScrollButtonsTip": "Afficher en bas à droite de l’éditeur des boutons pour faire défiler le texte d’un écran vers le haut ou le bas sans déplacer le curseur",
 	"slashMenuFrequent": "Fréquemment utilisés",
 	"snippetConflict": "Les extraits ont changé. Votre brouillon n’a pas été enregistré. Copiez vos modifications, puis rouvrez la boîte de dialogue pour les fusionner avec les derniers extraits.",
 	"agentWelcomeFirst1": "Salut, ravi de faire ta connaissance\nCommençons par une idée",

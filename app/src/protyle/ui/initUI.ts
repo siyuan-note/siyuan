@@ -379,6 +379,10 @@ export const setPadding = (protyle: IProtyle) => {
     const responsivePadding = protyle.contentElement.dataset.paddingMode === "responsive";
     let paddingLeft = protyle.options.backlinkData ? 24 : padding.left;
     let paddingRight = protyle.options.backlinkData ? 16 : padding.right;
+    if (protyle.element.classList.contains("protyle--page-scroll")) {
+        paddingRight = Math.max(paddingRight, parseFloat(getComputedStyle(protyle.element)
+            .getPropertyValue("--b3-protyle-page-scroll-gutter")) || 0);
+    }
     const backlinkBottomElement = protyle.contentElement.querySelector(".sy__backlink--bottom") as HTMLElement;
     const backlinkBottomVisible = backlinkBottomElement &&
         !backlinkBottomElement.classList.contains("fn__none") &&

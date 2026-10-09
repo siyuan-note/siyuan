@@ -44,6 +44,9 @@ const fixture = (deferSnippetScripts = false) => {
         getHostCapabilities: () => ({customAppearance: true}),
         ensureLute: async () => { calls.push({type: "lute"}); },
         onAgentStreamingMarkdownStorageChanged: (key: string) => calls.push({type: "storage", value: key}),
+        onPageScrollButtonsStorageChanged: (key: string) => {
+            if (key === "page-buttons") calls.push({type: "page-buttons", value: storage[key]});
+        },
         genNotebookOption: (id: string, _box: string, shorthand: boolean, filter: (notebook: unknown) => boolean) => {
             calls.push({type: "options", value: {id, shorthand, filter}});
             return '<option value="">Current</option><option value="a">Renamed</option>';
@@ -190,6 +193,17 @@ test("settings receive all zoom storage messages without persistence or owner to
     f.setActive(false);
     send("setLocalStorageVal", {key: "zoom", val: 1.25});
     assert.equal(f.storage.zoom, undefined);
+});
+
+test("settings propagate page scroll preferences after all storage message variants", () => {
+    const f = fixture();
+    const send = (cmd: string, data: unknown) => f.runtime.handleMessage({cmd, data} as IWebSocketData);
+    send("setLocalStorageVal", {key: "page-buttons", val: true});
+    send("removeLocalStorageVal", {key: "page-buttons"});
+    send("setLocalStorageVals", {keyVals: {"page-buttons": false}});
+    send("removeLocalStorageVals", {keys: ["page-buttons"]});
+    assert.deepEqual(f.calls.filter(call => call.type === "page-buttons").map(call => call.value),
+        [true, undefined, false, undefined]);
 });
 
 test("snippets assign configuration first and wait for Lute before rendering JS", async () => {

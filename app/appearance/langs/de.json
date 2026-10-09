@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "Vorheriger Bildschirm",
+	"pageScrollDown": "Nächster Bildschirm",
+	"showPageScrollButtons": "Schaltflächen zum seitenweisen Scrollen anzeigen",
+	"showPageScrollButtonsTip": "Unten rechts im Editor Schaltflächen anzeigen, die eine Bildschirmhöhe nach oben oder unten scrollen, ohne den Cursor zu bewegen",
 	"slashMenuFrequent": "Häufig verwendet",
 	"snippetConflict": "Die Snippets wurden geändert. Ihr Entwurf wurde nicht gespeichert. Kopieren Sie Ihre Änderungen und öffnen Sie den Dialog erneut, um sie mit den aktuellen Snippets zusammenzuführen.",
 	"agentWelcomeFirst1": "Hallo, schön, dich kennenzulernen\nFangen wir mit einer Idee an",

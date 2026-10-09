@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "Layar sebelumnya",
+	"pageScrollDown": "Layar berikutnya",
+	"showPageScrollButtons": "Tampilkan tombol gulir per layar",
+	"showPageScrollButtonsTip": "Tampilkan tombol di kanan bawah editor untuk menggulir satu layar ke atas atau ke bawah tanpa memindahkan kursor",
 	"slashMenuFrequent": "Sering digunakan",
 	"snippetConflict": "Cuplikan telah berubah. Draf Anda belum disimpan. Salin perubahan Anda, lalu buka kembali dialog untuk menggabungkannya dengan cuplikan terbaru.",
 	"agentWelcomeFirst1": "Hai, senang berkenalan denganmu\nMari mulai dari sebuah ide",

@@ -37,8 +37,22 @@
 
   &__down,
   &__up,
-  &__bar {
+  &__bar,
+  &__page {
     pointer-events: auto;
+  }
+
+  &__page {
+    position: absolute;
+    right: 16px;
+    bottom: 12%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__page-up {
+    transform: rotate(180deg);
   }
 
   svg {
@@ -114,6 +128,14 @@
         touch-action: none;
       }
     }
+  }
+}
+
+.protyle--page-scroll {
+  --b3-protyle-page-scroll-gutter: 64px;
+
+  @media (pointer: coarse) {
+    --b3-protyle-page-scroll-gutter: 84px;
   }
 }
 
@@ -478,7 +500,7 @@
   > .protyle-wysiwyg,
   > .sy__backlink--bottom {
     padding-left: var(--b3-protyle-padding-left);
-    padding-right: var(--b3-protyle-padding-right);
+    padding-right: max(var(--b3-protyle-padding-right), var(--b3-protyle-page-scroll-gutter, 0px));
   }
 
   > .protyle-top {
@@ -486,7 +508,7 @@
     .protyle-background__ia,
     .protyle-db-attr {
       margin-left: var(--b3-protyle-padding-left);
-      margin-right: var(--b3-protyle-padding-right);
+      margin-right: max(var(--b3-protyle-padding-right), var(--b3-protyle-page-scroll-gutter, 0px));
     }
   }
 }

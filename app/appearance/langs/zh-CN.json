@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "上一屏",
+	"pageScrollDown": "下一屏",
+	"showPageScrollButtons": "显示翻屏按钮",
+	"showPageScrollButtonsTip": "在编辑器右下侧显示向上、向下翻一屏的按钮，翻屏时保持光标位置",
 	"slashMenuFrequent": "常用",
 	"snippetConflict": "代码片段已发生变化，草稿尚未保存。请复制当前修改，重新打开对话框后与最新片段合并。",
 	"agentWelcomeFirst1": "嗨，很高兴见到你\n从一个想法开始吧",

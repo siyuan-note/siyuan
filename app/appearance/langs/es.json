@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "Pantalla anterior",
+	"pageScrollDown": "Pantalla siguiente",
+	"showPageScrollButtons": "Mostrar botones de desplazamiento por pantalla",
+	"showPageScrollButtonsTip": "Mostrar botones en la parte inferior derecha del editor para desplazarse una pantalla hacia arriba o abajo sin mover el cursor",
 	"slashMenuFrequent": "Uso frecuente",
 	"snippetConflict": "Los fragmentos han cambiado. El borrador no se guardó. Copia tus cambios y vuelve a abrir el diálogo para combinarlos con los fragmentos más recientes.",
 	"agentWelcomeFirst1": "Hola, qué gusto conocerte\nEmpecemos con una idea",

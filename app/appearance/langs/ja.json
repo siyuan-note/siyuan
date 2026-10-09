@@ -1,4 +1,8 @@
 {
+	"pageScrollUp": "前の画面",
+	"pageScrollDown": "次の画面",
+	"showPageScrollButtons": "画面単位のスクロールボタンを表示",
+	"showPageScrollButtonsTip": "エディターの右下に、カーソルを移動せずに画面単位で上下にスクロールするボタンを表示",
 	"slashMenuFrequent": "よく使う項目",
 	"snippetConflict": "スニペットが変更されたため、下書きは保存されませんでした。編集内容をコピーしてからダイアログを開き直し、最新のスニペットに反映してください。",
 	"agentWelcomeFirst1": "こんにちは、はじめまして\nひとつのアイデアから始めましょう",

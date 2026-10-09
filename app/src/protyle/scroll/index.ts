@@ -21,6 +21,8 @@ import {getScrollIndexFromPointer} from "./slider";
 import {refreshSyntheticDragTarget} from "../../util/touchDragBridge";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {getKeymapBindings} from "../../util/keymapBindings";
+import {scrollPageWithLoading} from "./page";
+import {isPageScrollButtonsEnabled, PAGE_SCROLL_BUTTONS_CHANGED_EVENT} from "./pageButtons";
 
 export class Scroll {
     public element: HTMLElement;
@@ -46,8 +48,42 @@ export class Scroll {
 </div>
 <div class="protyle-scroll__down ariaLabel">
     <svg><use xlink:href="#iconDown"></use></svg>
+</div>
+<div class="protyle-scroll__page fn__none">
+    <button type="button" data-direction="up" class="block__icon block__icon--show block__icon--touch ariaLabel" data-position="west">
+        <svg class="protyle-scroll__page-up"><use xlink:href="#iconArrowDown"></use></svg>
+    </button>
+    <button type="button" data-direction="down" class="block__icon block__icon--show block__icon--touch ariaLabel" data-position="west">
+        <svg><use xlink:href="#iconArrowDown"></use></svg>
+    </button>
 </div>`;
         this.updateHotkeyLabels();
+
+        const pageElement = this.parentElement.querySelector<HTMLElement>(".protyle-scroll__page");
+        const updatePageButtons = () => {
+            const enabled = !!protyle.options.render.scroll && isPageScrollButtonsEnabled();
+            pageElement.classList.toggle("fn__none", !enabled);
+            const changed = protyle.element.classList.contains("protyle--page-scroll") !== enabled;
+            protyle.element.classList.toggle("protyle--page-scroll", enabled);
+            if (changed && protyle.contentElement) {
+                protyle.getInstance().resize();
+            }
+        };
+        pageElement.addEventListener(PAGE_SCROLL_BUTTONS_CHANGED_EVENT, updatePageButtons);
+        updatePageButtons();
+        // 阻止鼠标和触屏按下时转移焦点，保留正文选区并避免唤起软键盘。
+        pageElement.addEventListener("pointerdown", event => {
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        pageElement.addEventListener("click", event => {
+            event.stopPropagation();
+            const button = (event.target as Element).closest<HTMLButtonElement>("button[data-direction]");
+            if (!button || pageElement.classList.contains("fn__none")) {
+                return;
+            }
+            scrollPageWithLoading(protyle, button.dataset.direction === "up" ? "up" : "down");
+        });
 
         this.element = this.parentElement.querySelector(".protyle-scroll__bar");
         this.element.classList.add("fn__none");
@@ -139,6 +175,7 @@ export class Scroll {
         beforeApply?: () => void,
         onFinish?: (success: boolean) => void,
         size?: number,
+        suppressFocus?: boolean,
     }) {
         const anchorElement = mode === 1 ?
             protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
@@ -180,6 +217,7 @@ export class Scroll {
             onGet({
                 data: getResponse,
                 protyle,
+                suppressFocus: options?.suppressFocus,
                 action: [
                     mode === 1 ? Constants.CB_GET_BEFORE : Constants.CB_GET_APPEND,
                     Constants.CB_GET_UNCHANGEID
@@ -342,10 +380,12 @@ export class Scroll {
         [
             {selector: ".protyle-scroll__up", key: "goToDocumentStart"},
             {selector: ".protyle-scroll__down", key: "goToDocumentEnd"},
-        ].forEach(({selector, key}) => {
+            {selector: '.protyle-scroll__page [data-direction="up"]', key: "scrollPageUpWithoutMovingCaret", label: "pageScrollUp"},
+            {selector: '.protyle-scroll__page [data-direction="down"]', key: "scrollPageDownWithoutMovingCaret", label: "pageScrollDown"},
+        ].forEach(({selector, key, label}) => {
             const hotkeys = getKeymapBindings(keymap[key]).map(updateHotkeyTip).join(" / ");
             this.parentElement.querySelector(selector).setAttribute("aria-label",
-                window.siyuan.languages[key] + (hotkeys ? " " + hotkeys : ""));
+                window.siyuan.languages[label || key] + (hotkeys ? " " + hotkeys : ""));
         });
     }
 

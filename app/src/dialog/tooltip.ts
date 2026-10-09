@@ -1,9 +1,14 @@
 import {isMobile} from "../util/functions";
 import {emitToPlugins, forEachPluginSubscriber} from "../plugin/EventBusCore";
+import {initHoverInput, isTouchHoverInput} from "../util/hoverInput";
 
 // 无编辑器的窗口复用提示框渲染，不注册块预览事件。
 export const initTooltips = () => {
+    initHoverInput();
     document.addEventListener("mouseover", (event: MouseEvent) => {
+        if (isTouchHoverInput()) {
+            return;
+        }
         const target = (event.target as Element).closest(".ariaLabel");
         if (target && !target.classList.contains("b3-tooltips")) {
             let message = target.getAttribute("aria-label") || "";
@@ -33,7 +38,7 @@ export const showTooltip = (
     space: number = 0.5,
     positionOverride?: string,
 ) => {
-    if (isMobile() || !message) {
+    if (isMobile() || !message || (isTouchHoverInput() && event && tooltipClass !== "error")) {
         return;
     }
     const messageElement = document.getElementById("tooltip");
@@ -75,6 +80,7 @@ export const showTooltip = (
         return;
     }
     messageElement.className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
+    messageElement.classList.toggle("tooltip--hover", !!event && tooltipClass !== "error");
     messageElement.innerHTML = window.DOMPurify.sanitize(message);
     // 避免原本的 top 和 left 影响计算
     messageElement.removeAttribute("style");

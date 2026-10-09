@@ -131,6 +131,7 @@ const createHarness = (android = false) => {
         "../dialog/tooltip": {hideTooltip() {}, showTooltip() {}},
         "../constants": {Constants: {TIMEOUT_INPUT: 5}},
         "../util/functions": {isTouchDevice: () => touch},
+        "../util/hoverInput": {isTouchHoverInput: () => touch},
         "../protyle/wysiwyg/listContext": {isListItemActionElement: () => false},
         "../util/zIndex": {isAbove: () => false},
     }) as unknown as typeof import("./popover");
@@ -166,8 +167,25 @@ const createHarness = (android = false) => {
         lifecycle.setPopoverMenuOpen(menu as unknown as HTMLElement, false);
     };
     return {element, ref, fire, advance, api, lifecycle, panels, requests, siyuan, handlers, open, close,
+        pendingTimers: () => timers.size,
         setTouch: (value: boolean) => { touch = value; }};
 };
+
+test("touch-generated mouseover does not schedule hover timers and cancels pending previews", async () => {
+    const h = createHarness();
+    h.fire("mouseover");
+    assert.ok(h.pendingTimers() > 0);
+    h.setTouch(true);
+    const more = h.element({"aria-label": "More"}, ["ariaLabel"]);
+    h.fire("mouseover", more);
+    assert.equal(h.pendingTimers(), 0);
+    await h.advance();
+    assert.equal(h.requests.length, 0);
+    assert.equal(h.panels.length, 0);
+    h.setTouch(false);
+    h.fire("mouseover");
+    assert.ok(h.pendingTimers() > 0);
+});
 
 test("clicks cancel pending previews until actual motion, including within the same target", async () => {
     for (const button of [0, 1, 2]) {

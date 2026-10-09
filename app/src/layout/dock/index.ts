@@ -33,6 +33,7 @@ import {resolveDockPanelVisibility} from "./panelVisibility";
 import {syncDockEntryOrders} from "../../config/entryVisibility/runtime";
 import {isWindow} from "../../util/functions";
 import {bindPanelTransitionGuard} from "../../util/panelTransition";
+import {isTouchHoverInput} from "../../util/hoverInput";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 const DEFAULT_DOCK_SIZE = 232;
@@ -546,7 +547,7 @@ export class Dock {
     public showDockByHover() {
         window.clearTimeout(this.hideDockTimeout);
         this.hideDockTimeout = 0;
-        if (!this.panelVisible || this.showDockTimeout || !this.isFloating() ||
+        if (isTouchHoverInput() || !this.panelVisible || this.showDockTimeout || !this.isFloating() ||
             this.layout.element.style.opacity === "1") {
             return;
         }
@@ -559,7 +560,7 @@ export class Dock {
     public hideDockByHover() {
         window.clearTimeout(this.showDockTimeout);
         this.showDockTimeout = 0;
-        if (!this.panelVisible || this.hideDockTimeout || !this.isFloating() ||
+        if (isTouchHoverInput() || !this.panelVisible || this.hideDockTimeout || !this.isFloating() ||
             this.layout.element.style.opacity === "0") {
             return;
         }

@@ -181,6 +181,16 @@
   }
 }
 
+.body--touch-input {
+  .tooltip--hover {
+    display: none;
+  }
+
+  .b3-tooltips::after {
+    content: none;
+  }
+}
+
 @media screen and (max-width: 520px) {
   .b3-tooltips::after {
     content: none;

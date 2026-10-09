@@ -7,7 +7,8 @@ import * as ts from "typescript";
 import {resolveDockPanelVisibility} from "./panelVisibility";
 
 const loadDockPrototype = (frames: Array<() => void>, document: object, adjustLayout: () => void,
-                           resizeTabs: () => void) => {
+                           resizeTabs: () => void, isTouchHoverInput = () => false,
+                           timers: Array<() => void> = []) => {
     const exports: {Dock?: {prototype: object}} = {};
     const source = ts.transpileModule(readFileSync(join(__dirname, "index.ts"), "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
@@ -15,7 +16,7 @@ const loadDockPrototype = (frames: Array<() => void>, document: object, adjustLa
     runInNewContext(source, {
         exports,
         document,
-        window: {setTimeout: () => 0},
+        window: {setTimeout: (callback: () => void) => timers.push(callback), clearTimeout() {}},
         requestAnimationFrame: (callback: () => void) => frames.push(callback),
         require: (name: string) => {
             if (name === "../util") {
@@ -31,13 +32,35 @@ const loadDockPrototype = (frames: Array<() => void>, document: object, adjustLa
                 return {resolveDockPanelVisibility};
             }
             if (name.endsWith("/constants")) {
-                return {Constants: {TIMEOUT_TRANSITION: 200}};
+                return {Constants: {TIMEOUT_TRANSITION: 200, TIMEOUT_DOCK_TOGGLE: 150}};
+            }
+            if (name.endsWith("/hoverInput")) {
+                return {isTouchHoverInput};
             }
             return {};
         },
     });
     return exports.Dock.prototype;
 };
+
+it("touch compatibility hover skips dock timers while mouse hover remains available", () => {
+    let touch = true;
+    const timers: Array<() => void> = [];
+    const prototype = loadDockPrototype([], {}, () => {}, () => {}, () => touch, timers);
+    const style = {opacity: "0"};
+    const dock = Object.assign(Object.create(prototype), {
+        panelVisible: true, showDockTimeout: 0, hideDockTimeout: 0,
+        layout: {element: {style}}, isFloating: () => true,
+    }) as {showDockByHover(): void, hideDockByHover(): void};
+    dock.showDockByHover();
+    dock.hideDockByHover();
+    assert.equal(timers.length, 0);
+    touch = false;
+    dock.showDockByHover();
+    style.opacity = "1";
+    dock.hideDockByHover();
+    assert.equal(timers.length, 2);
+});
 
 describe("dock panel opening", () => {
     it("shows a panel after responsive layout changes it to floating", () => {

@@ -413,6 +413,24 @@ html[data-frontend="browser-desktop"] {
   }
 }
 
+// 触摸操作直接显示文档面板按钮，避免悬停显现动画延迟点击。
+.body--touch-input .sy__file {
+  .block__icons:not(.protyle-wysiwyg *) .block__icon:not(.backlinkList__toggle) {
+    display: flex;
+    opacity: 1;
+    transition: none;
+  }
+
+  .block__icons:not(.protyle-wysiwyg *) .block__icon[disabled]:not(.backlinkList__toggle) {
+    opacity: .38;
+  }
+
+  .block__icons:not(.protyle-wysiwyg *) .fn__space {
+    display: block;
+    transition: none;
+  }
+}
+
 .body--windows .sy__file .b3-list-item__icon {
   font-size: 16px;
 }

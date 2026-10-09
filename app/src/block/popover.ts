@@ -22,6 +22,7 @@ import {
     setPopoverCancellationHandler,
 } from "./popoverLifecycle";
 import {isBlockPanelTargetAvailable} from "./panelOwnership";
+import {isTouchHoverInput} from "../util/hoverInput";
 /// #if !MOBILE
 import {getInstanceById} from "../layout/util";
 import {Editor} from "../editor";
@@ -144,9 +145,12 @@ export const initBlockPopover = (app: App) => {
             pointerX = event.clientX;
             pointerY = event.clientY;
         }
-        if (!window.siyuan.config || !window.siyuan.menus ||
+        if (isTouchHoverInput() || !window.siyuan.config || !window.siyuan.menus ||
             // 拖拽时禁止
             isPopoverSuspended()) {
+            cancelPopoverTimers();
+            tooltipAbortController?.abort();
+            tooltipAbortController = null;
             hideTooltip();
             return;
         }
@@ -326,7 +330,7 @@ export const initBlockPopover = (app: App) => {
                             if (signal.aborted) {
                                 return;
                             }
-                            showTooltip(escapeLessThans(response.data), tab.headElement);
+                            showTooltip(escapeLessThans(response.data), tab.headElement, undefined, event);
                             tab.headElement.setAttribute("aria-label", escapeLessThans(response.data));
                             if (tooltipAbortController === capturedController) {
                                 tooltipAbortController = null;
@@ -350,7 +354,7 @@ export const initBlockPopover = (app: App) => {
                     }
                     const boxData = response.data.boxInfo;
                     const tip = `${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`;
-                    showTooltip(tip, notebookItemElement as Element);
+                    showTooltip(tip, notebookItemElement as Element, undefined, event);
                     (notebookItemElement as HTMLElement).setAttribute("aria-label", tip);
                     if (tooltipAbortController === capturedController) {
                         tooltipAbortController = null;

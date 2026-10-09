@@ -161,12 +161,16 @@ func Serve(fastMode bool, cookieKey string) {
 
 	sessionStore = cookie.NewStore([]byte(cookieKey))
 	sessionStore.Options(sessions.Options{
-		Path:   "/",
-		Secure: util.SSL,
-		//MaxAge:   60 * 60 * 24 * 7, // 默认是 Session
+		Path: "/",
+		// Secure 属性逐请求按连接修正，见 tlsEnforceMiddleware
+		Secure:   util.SSL,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode, // 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
 	})
+	// TLS 强制中间件必须在会话中间件之前：跳转要发生在会话保存之前，
+	// 否则明文响应仍会携带未标记 Secure 的会话 Cookie
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
+	ginServer.Use(tlsEnforceMiddleware())
 	ginServer.Use(sessions.Sessions("siyuan", sessionStore))
 	ginServer.Use(mapHostMiddleware())
 
@@ -229,6 +233,17 @@ func Serve(fastMode bool, cookieKey string) {
 		certPath = ""
 	}
 
+	// 用户开启「启用 HTTPS」后网络服务必须真正强制加密传输，因此这里先把策略定下来：
+	// 证书不可用时不能静默退回明文，否则等于开关没生效却仍然宣称已加密。
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
+	tlsRequired := model.Conf.System.NetworkServeTLS && model.Conf.System.NetworkServe
+	util.SetTLSRequired(tlsRequired)
+	if tlsRequired && "" == certPath {
+		logging.LogErrorf("network serve TLS is enabled but no TLS certificate is available, "+
+			"plaintext HTTP requests from other hosts will be rejected [err=%s]", certErr)
+		go notifyTLSCertUnavailable()
+	}
+
 	if "" != certPath {
 		util.ServerURL, err = url.Parse("https://127.0.0.1:" + port)
 	} else {
@@ -243,9 +258,10 @@ func Serve(fastMode bool, cookieKey string) {
 		rewritePortJSON(pid, port)
 	}
 
-	useTLS := model.Conf.System.NetworkServeTLS && model.Conf.System.NetworkServe
+	useTLS := tlsRequired && "" != certPath
 	if useTLS {
-		logging.LogInfof("kernel [pid=%s] http server [%s] is booting (TLS will be enabled on fixed port proxy)", pid, host+":"+port)
+		logging.LogInfof("kernel [pid=%s] http server [%s] is booting (TLS enforced, "+
+			"plaintext requests from other hosts are redirected)", pid, host+":"+port)
 	} else if "" != certPath {
 		logging.LogInfof("kernel [pid=%s] http server [%s] is booting (local HTTPS + HTTP/2 enabled)", pid, host+":"+port)
 	} else {

@@ -117,6 +117,50 @@ func IsLocalHost(host string) bool {
 	}
 }
 
+// IsTLSRequest 判断这条客户端连接是否使用 TLS。
+//
+// 内核在同一端口上通过 cmux 同时承载 HTTP 与 HTTPS，入站方向由 request.TLS 区分；
+// 固定端口反代以 HTTPS 回源内核，由它写入的 ClientTLSHeader 标记客户端侧的真实连接方式。
+// 该头部仅在直连对端为本机时采信，避免调用方伪造 https 让 Cookie 被错误标记为 Secure。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
+func IsTLSRequest(request *http.Request) bool {
+	if nil == request {
+		return false
+	}
+	if nil != request.TLS {
+		return true
+	}
+	return ClientTLSHeaderValue == request.Header.Get(ClientTLSHeader) && IsLocalHost(request.RemoteAddr)
+}
+
+// IsValidRedirectHost 校验 Host 是否为可以直接拼接跳转地址的合法 authority。
+//
+// 仅接受 host 或 host:port 形式，拒绝凭据、路径、查询、片段与空白字符，
+// 避免被污染的 Host 让 HTTPS 跳转指向站外地址。
+func IsValidRedirectHost(host string) bool {
+	if "" == host || host != strings.TrimSpace(host) || strings.ContainsAny(host, "/\\?#@,; \t\r\n") {
+		return false
+	}
+
+	hostname, port, err := net.SplitHostPort(host)
+	if err != nil {
+		// 不含端口时按纯主机名处理，但要排除 "host:" 这类残留冒号的写法
+		if strings.Contains(host, ":") {
+			return false
+		}
+		hostname, port = host, ""
+	}
+	if "" == hostname || (strings.Contains(host, ":") && "" == port) {
+		return false
+	}
+	if "" != port {
+		if portNum, portErr := strconv.Atoi(port); nil != portErr || 1 > portNum || 65535 < portNum {
+			return false
+		}
+	}
+	return true
+}
+
 func IsLocalOrigin(origin string) bool {
 	if u, err := url.Parse(origin); err == nil {
 		return IsLocalHostname(u.Hostname())

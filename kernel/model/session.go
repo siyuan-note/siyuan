@@ -134,8 +134,11 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 		maxAge = 60 * 60 * 24 * 30 // 30 days
 	}
 	ginSessions.Default(c).Options(ginSessions.Options{
-		Path:     "/",
-		Secure:   util.SSL,
+		Path: "/",
+		// 按当前连接是否为 TLS 标记 Secure；固定端口反代的明文连接不得标记，
+		// 否则浏览器不会在明文的 6806 端口上回传该 Cookie。
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
+		Secure:   util.SSL || util.IsSecureRequest(c.Request),
 		MaxAge:   maxAge,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,

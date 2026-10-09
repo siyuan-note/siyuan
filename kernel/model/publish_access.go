@@ -470,11 +470,13 @@ func checkBlockTreeAccessableByPublishAccess(c *gin.Context, publishAccess Publi
 func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
 	authCookie := util.SHA256Hash([]byte(ID + password))
 	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "publish-auth-" + ID,
-		Value:    authCookie,
-		MaxAge:   24 * 60 * 60,
-		Path:     "/",
-		Secure:   util.SSL,
+		Name:   "publish-auth-" + ID,
+		Value:  authCookie,
+		MaxAge: 24 * 60 * 60,
+		Path:   "/",
+		// 只有客户端连接确实使用 TLS 时才标记 Secure，与发布会话 Cookie 保持一致
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
+		Secure:   util.SSL || util.IsSecureRequest(c.Request),
 		HttpOnly: true,
 	})
 }

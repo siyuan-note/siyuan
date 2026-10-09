@@ -49,8 +49,10 @@ func applyAuthenticatedSession(c *gin.Context, workspaceSession *util.WorkspaceS
 		maxAge = 60 * 60 * 24 * 30
 	}
 	ginSessions.Default(c).Options(ginSessions.Options{
-		Path:     "/",
-		Secure:   util.SSL,
+		Path: "/",
+		// 与登录会话保持一致：只有客户端连接确实使用 TLS 时才标记 Secure
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
+		Secure:   util.SSL || util.IsSecureRequest(c.Request),
 		MaxAge:   maxAge,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,

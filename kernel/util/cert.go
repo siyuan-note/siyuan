@@ -57,6 +57,7 @@ func GetOrCreateTLSCert() (certPath, keyPath string, err error) {
 
 	if hasTLSCertManager(certPath, keyPath) {
 		logging.LogInfof("using active TLS certificate manager for [%s]", ConfDir)
+		MarkTLSEnforced()
 		return certPath, keyPath, nil
 	}
 
@@ -71,6 +72,7 @@ func GetOrCreateTLSCert() (certPath, keyPath string, err error) {
 	if gulu.File.IsExist(certPath) && gulu.File.IsExist(keyPath) {
 		if validateCert(certPath) {
 			logging.LogInfof("using existing TLS certificates from [%s]", ConfDir)
+			MarkTLSEnforced()
 			return certPath, keyPath, nil
 		}
 		logging.LogInfof("existing TLS certificates are invalid or expired, regenerating...")
@@ -89,6 +91,7 @@ func GetOrCreateTLSCert() (certPath, keyPath string, err error) {
 	}
 
 	logging.LogInfof("generated TLS certificates at [%s]", ConfDir)
+	MarkTLSEnforced()
 	return certPath, keyPath, nil
 }
 

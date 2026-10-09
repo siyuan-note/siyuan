@@ -1543,8 +1543,8 @@
   }
 
   &__layout {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
     width: 100%;
     margin: 8px 0;
@@ -1555,7 +1555,9 @@
       text-align: center;
       color: var(--b3-theme-on-surface);
       font-size: 12px;
-      flex: 1;
+      min-width: 0;
+      white-space: normal;
+      overflow-wrap: anywhere;
       cursor: pointer;
       transition: var(--b3-transition);
       display: flex;

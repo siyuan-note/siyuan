@@ -44,7 +44,7 @@ export const mountMapTab = (root: HTMLElement) => {
 export const registerMapTab = (tab: SettingTabBuilder) => {
     const lang = window.siyuan.languages;
     const field = (id: string, title: string, control: string, description?: string) =>
-        `<div class="b3-label config-item">${genConfigItemMainHtml(`<label for="${id}">${title}</label>`, description)}
+        `<div class="b3-label b3-label--inner config-item">${genConfigItemMainHtml(`<label for="${id}">${title}</label>`, description)}
 <div class="fn__hr--small"></div>${control}</div>`;
     const input = (id: string, password = false) =>
         `<input id="${id}" class="b3-text-field fn__block" type="${password ? "password" : "text"}" autocomplete="off" spellcheck="false"${password ? "" : ' maxlength="128"'} disabled>`;
@@ -65,7 +65,8 @@ ${field("mapServiceProvider", lang.mapProvider, `<select id="mapServiceProvider"
 <div id="mapAPIKeyRow">${field("mapAPIKey", lang.apiKey, `${input("mapAPIKey", true)}<div class="fn__hr--small"></div><label class="fn__flex"><span class="fn__flex-1">${lang.mapClearCredential}</span><input id="mapClearAPIKey" type="checkbox" class="b3-switch" disabled></label>`, lang.mapCredentialsTip)}</div>
 <div id="mapSecurityCodeRow">${field("mapSecurityCode", lang.mapSecurityCode, `${input("mapSecurityCode", true)}<div class="fn__hr--small"></div><label class="fn__flex"><span class="fn__flex-1">${lang.mapClearCredential}</span><input id="mapClearSecurityCode" type="checkbox" class="b3-switch" disabled></label>`, lang.mapCredentialsTip)}</div>
 <div class="fn__hr"></div><div class="fn__flex">
-<button id="mapServiceDelete" class="b3-button b3-button--remove" disabled>${lang.delete}</button><span class="fn__flex-1"></span>
+<span class="fn__flex-1"></span>
+<button id="mapServiceDelete" class="b3-button b3-button--remove" disabled>${lang.delete}</button><span class="fn__space"></span>
 <button id="mapServiceCancel" class="b3-button b3-button--cancel" disabled>${lang.cancel}</button><span class="fn__space"></span>
 <button id="mapServiceSave" class="b3-button b3-button--text" disabled>${lang.save}</button>
 </div></div><div class="fn__hr"></div>

@@ -124,7 +124,8 @@ test("Map settings share desktop/mobile order, existing icon, searchable control
     assert.ok(rows[0].keywords.includes("mapProductionTip"));
     const html = rows[0].html();
     assert.doesNotMatch(html, /mapServiceID/);
-    assert.match(html, /<div class="fn__flex">\s*<button id="mapServiceDelete"[^>]*>[^<]*<\/button><span class="fn__flex-1"><\/span>\s*<button id="mapServiceCancel"[^>]*>[^<]*<\/button><span class="fn__space"><\/span>\s*<button id="mapServiceSave"/);
+    assert.equal((html.match(/class="b3-label b3-label--inner config-item"/g) || []).length, 4);
+    assert.match(html, /<div class="fn__flex">\s*<span class="fn__flex-1"><\/span>\s*<button id="mapServiceDelete"[^>]*>[^<]*<\/button><span class="fn__space"><\/span>\s*<button id="mapServiceCancel"[^>]*>[^<]*<\/button><span class="fn__space"><\/span>\s*<button id="mapServiceSave"/);
     assert.equal((html.match(/type="password" autocomplete="off"/g) || []).length, 2);
     assert.doesNotMatch(html, /value=".*apiKey/i);
     const tabs = readFileSync("src/config/setting/tabs.ts", "utf8");

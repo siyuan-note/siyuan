@@ -68,6 +68,14 @@ test("point count is bounded and provider coordinate systems remain consistent",
     assert.equal(parseMapCommand({...envelope, type: "setPoints", revision: 0, points}, instanceID, "amap").points.length, 0);
 });
 
+test("map loading failures retain only fixed stage codes across the desktop boundary", () => {
+    for (const code of ["sdkScriptLoadFailed", "sdkCallbackTimeout", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout"]) {
+        assert.deepEqual(parseMapReply({...envelope, type: "error", code, message: "https://private.invalid/?key=secret",
+            stack: "secret"}, instanceID), {...envelope, type: "error", code});
+    }
+    assert.equal(parseMapReply({...envelope, type: "error", code: "https://private.invalid/?key=secret"}, instanceID), undefined);
+});
+
 test("map creation fails closed for effective process security bypasses", () => {
     const commandLine = switches => ({hasSwitch: name => switches.has(name), getSwitchValue: name => switches.get(name)});
     assert.equal(hasUnsafeMapSwitches(commandLine(new Map())), false);

@@ -96,7 +96,8 @@ const parseMapReply = (value, instanceID) => {
         return {...base, type: value.type, id: value.id, revision: value.revision};
     }
     if (value.type === "error" && ["unsupportedEnvironment", "missingCredentials", "invalidConfiguration",
-        "hostUnavailable", "sdkUnavailable", "mapUnavailable"].includes(value.code)) {
+        "hostUnavailable", "sdkUnavailable", "mapUnavailable", "sdkScriptLoadFailed", "sdkCallbackTimeout",
+        "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout"].includes(value.code)) {
         return {...base, type: "error", code: value.code};
     }
 };

@@ -1,7 +1,8 @@
 import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
 import {
-    AV_MAP_ATTRIBUTION_LINKS, AV_MAP_MERCATOR_MAX_LATITUDE, AVMapProvider, isAVMapHandshake, isAVMapProjectionSupported,
+    AV_MAP_ATTRIBUTION_LINKS, AV_MAP_MERCATOR_MAX_LATITUDE, AVMapLoadError, AVMapProvider, getAVMapLoadErrorCode,
+    isAVMapHandshake, isAVMapProjectionSupported,
     parseAVMapCommand, parseAVMapReply, sanitizeAVMapCredentials, sanitizeAVMapPoints,
 } from "./protocol";
 
@@ -90,5 +91,17 @@ describe("isolated map protocol", () => {
         for (const invalid of [{nonce: "old"}, {instanceID: "other"}, {version: 0}, {type: "connect"}]) {
             assert.equal(isAVMapHandshake({...handshake, ...invalid}, "hello", "instance", "nonce"), false);
         }
+    });
+    it("admits only fixed loading stages and never treats arbitrary SDK exceptions as controlled errors", () => {
+        for (const code of ["sdkScriptLoadFailed", "sdkCallbackTimeout", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout"] as const) {
+            const error = new AVMapLoadError(code);
+            assert.equal(getAVMapLoadErrorCode(error), code);
+            assert.equal(error.message, "Map loading failed");
+            const reply = {version: 1, instanceID: "one", type: "error", code};
+            assert.deepEqual(parseAVMapReply({...reply, message: "https://sdk.invalid?key=secret", stack: "secret"}, "one"), reply);
+        }
+        assert.equal(getAVMapLoadErrorCode(Object.assign(new Error("secret"), {code: "mapCreationFailed"})), undefined);
+        assert.equal(getAVMapLoadErrorCode({code: "mapCreationFailed"}), undefined);
+        assert.equal(getAVMapLoadErrorCode(Object.assign(new AVMapLoadError("mapCreationFailed"), {code: "secret"})), undefined);
     });
 });

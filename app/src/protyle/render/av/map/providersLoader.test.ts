@@ -1,14 +1,20 @@
 import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
-import {AVMapInit, AVMapProvider} from "./protocol";
+import {AVMapInit, AVMapLoadError, AVMapLoadErrorCode, AVMapProvider} from "./protocol";
 import {loadAVMapAdapter} from "./providersLoader";
 import {getAVMapLockedPolicy, prepareAVMapBootstrap} from "./bootstrap";
 
-const fixture = (ready = true, scriptError = false) => {
+const fixture = (ready = true, scriptError = false,
+                 options: {skipCallback?: boolean; missingSDK?: boolean; mapError?: boolean; appendError?: boolean} = {}) => {
     const requested: any[] = [];
     let destroyed = 0;
     class FakeMap {
-        constructor() { requested.push({mapCreated: true}); }
+        constructor() {
+            requested.push({mapCreated: true});
+            if (options.mapError) {
+                throw new Error("https://fixture.invalid?key=private");
+            }
+        }
         on(type: string, callback: () => void) {
             if (ready && ["load", "complete", "tilesloaded"].includes(type)) {
                 queueMicrotask(callback);
@@ -36,7 +42,7 @@ const fixture = (ready = true, scriptError = false) => {
         removeEventListener() {}
     }, MarkerStyle: class {}, LatLng: class {}, Point: class {}, setWorkerUrl: (url: string) => requested.push({worker: url})};
     const scope: any = {
-        setTimeout, clearTimeout, AMap: sdk, TMap: sdk, BMap: sdk, maplibregl: sdk,
+        setTimeout, clearTimeout, maplibregl: sdk,
         BMAP_COORD_BD09: "official-bd09", BMAP_COORD_GCJ02: "official-gcj02",
         fetch: async (url: string, options: unknown) => {
             requested.push({url, options});
@@ -53,14 +59,23 @@ const fixture = (ready = true, scriptError = false) => {
                 queueMicrotask(() => element.onload?.());
             }
             if (element.tag === "script") {
+                if (options.appendError) {
+                    throw new Error("https://fixture.invalid?key=private");
+                }
                 queueMicrotask(() => {
                     if (scriptError) {
                         element.onerror?.(new Error("https://fixture.invalid?key=private"));
                         return;
                     }
-                    const callback = new URL(element.src, "https://fixture.invalid").searchParams.get("callback");
+                    const url = new URL(element.src, "https://fixture.invalid");
+                    const callback = url.searchParams.get("callback");
                     if (callback) {
-                        scope[callback]?.();
+                        if (!options.skipCallback) {
+                            if (!options.missingSDK) {
+                                scope[{"webapi.amap.com": "AMap", "map.qq.com": "TMap", "api.map.baidu.com": "BMap"}[url.hostname]] = sdk;
+                            }
+                            scope[callback]?.();
+                        }
                     } else {
                         element.onload?.();
                     }
@@ -158,7 +173,64 @@ describe("isolated provider loading", () => {
         const {container, destroyed} = fixture(true, true);
         await prepareAVMapBootstrap(container.ownerDocument.defaultView, "amap", new AbortController().signal);
         await assert.rejects(loadAVMapAdapter(init("amap"), container, {onMarkerClick() {}, onError() {}},
-            new AbortController().signal), {message: "sdkUnavailable"});
+            new AbortController().signal), {code: "sdkScriptLoadFailed", message: "Map loading failed"});
+        assert.equal(destroyed(), 0);
+    });
+    it("retains distinct script, callback, SDK global, map construction and ready timeout failures", async () => {
+        const cases: Array<{code: AVMapLoadErrorCode; ready?: boolean;
+            options: {skipCallback?: boolean; missingSDK?: boolean; mapError?: boolean; appendError?: boolean};
+            timeout?: boolean; callbackAssignmentError?: boolean}> = [
+            {code: "sdkScriptLoadFailed", options: {appendError: true}},
+            {code: "sdkScriptLoadFailed", options: {}, callbackAssignmentError: true},
+            {code: "sdkCallbackTimeout", options: {skipCallback: true}, timeout: true},
+            {code: "sdkGlobalMissing", options: {missingSDK: true}},
+            {code: "mapCreationFailed", options: {mapError: true}},
+            {code: "mapReadyTimeout", ready: false, options: {}, timeout: true},
+        ];
+        for (const item of cases) {
+            const {scope, container, destroyed} = fixture(item.ready, false, item.options);
+            const timers = new Map<number, () => void>();
+            let timerID = 0;
+            scope.setTimeout = (callback: () => void) => { timers.set(++timerID, callback); return timerID; };
+            scope.clearTimeout = (id: number) => timers.delete(id);
+            const signal = new AbortController().signal;
+            await prepareAVMapBootstrap(scope, "amap", signal);
+            if (item.callbackAssignmentError) {
+                Object.defineProperty(scope, "__siyuanMapSDKReady", {
+                    set() { throw new Error("https://fixture.invalid?key=private"); },
+                });
+            }
+            const pending = loadAVMapAdapter(init("amap"), container, {onMarkerClick() {}, onError() {}}, signal);
+            const rejected = assert.rejects(pending, (error: unknown) => {
+                assert.ok(error instanceof AVMapLoadError);
+                assert.equal(error.code, item.code);
+                assert.equal(error.message, "Map loading failed");
+                assert.equal(JSON.stringify(error).includes("private"), false);
+                return true;
+            });
+            await new Promise<void>((resolve) => setImmediate(resolve));
+            if (item.timeout) {
+                assert.equal(timers.size, 1);
+                timers.values().next().value();
+            }
+            await rejected;
+            assert.equal(timers.size, 0);
+            assert.equal(scope.__siyuanMapSDKReady, undefined);
+            assert.equal(destroyed(), item.code === "mapReadyTimeout" ? 1 : 0);
+        }
+    });
+    it("does not report an aborted SDK callback wait as a load failure or timeout", async () => {
+        const {scope, container, destroyed} = fixture(true, false, {skipCallback: true});
+        const abort = new AbortController();
+        await prepareAVMapBootstrap(scope, "amap", abort.signal);
+        const pending = loadAVMapAdapter(init("amap"), container, {onMarkerClick() {}, onError() {}}, abort.signal);
+        abort.abort();
+        await assert.rejects(pending, (error: unknown) => {
+            assert.ok(error instanceof Error && !(error instanceof AVMapLoadError));
+            assert.equal(error.message, "sdkUnavailable");
+            return true;
+        });
+        assert.equal(scope.__siyuanMapSDKReady, undefined);
         assert.equal(destroyed(), 0);
     });
     it("prepares local files before locking and only creates a worker blob/map after locking", async () => {

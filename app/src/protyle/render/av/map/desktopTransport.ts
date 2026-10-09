@@ -45,13 +45,29 @@ const getIPC = () => {
     /// #endif
 };
 
+const capabilityFailureReasons = new Set([
+    "ownerUnavailable", "notMainFrame", "notInitialized", "unregisteredOwner", "invalidKernelOrigin",
+    "originMismatch", "unsupportedDocument", "invalidDocument", "unsafeProcessSwitches",
+]);
+
 export const isDesktopAVMapHostSupported = async (): Promise<boolean> => {
-    try {
-        const reply = await getIPC()?.invoke("siyuan-map-capability");
-        return reply?.version === AV_MAP_PROTOCOL_VERSION && reply.supported === true;
-    } catch (_error) {
+    const ipc = getIPC();
+    if (!ipc) {
         return false;
     }
+    try {
+        const reply = await ipc.invoke("siyuan-map-capability");
+        if (reply?.version === AV_MAP_PROTOCOL_VERSION && reply.supported === true) {
+            return true;
+        }
+        // 主进程返回值也仅按固定码记录，避免日志输出任意异常、URL 或凭据。
+        const reason = reply?.version === AV_MAP_PROTOCOL_VERSION && capabilityFailureReasons.has(reply.reason) ?
+            reply.reason : "unsupportedCapability";
+        console.warn("Database map host unavailable:", reason);
+    } catch (_error) {
+        console.warn("Database map host unavailable:", "capabilityUnavailable");
+    }
+    return false;
 };
 
 const readGeometry = (container: HTMLElement): MapGeometry => {

@@ -6,7 +6,7 @@ import * as ts from "typescript";
 import * as protocol from "./protocol";
 
 const source = readFileSync(__dirname + "/desktopTransport.ts", "utf8");
-const load = (ipc: unknown, browser = false) => {
+const load = (ipc: unknown, browser = false, warnings: unknown[][] = []) => {
     // Exercise the same compile-time branches as webpack without importing Electron into Node.
     let keep = true;
     const code = source.split("\n").filter((line) => {
@@ -22,9 +22,9 @@ const load = (ipc: unknown, browser = false) => {
         assert.equal(browser, false, "browser must not import Electron");
         return {ipcRenderer: ipc};
     };
-    new Function("require", "exports", ts.transpileModule(code, {
+    new Function("require", "exports", "console", ts.transpileModule(code, {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
-    }).outputText)(requireModule, result);
+    }).outputText)(requireModule, result, {warn: (...values: unknown[]) => warnings.push(values)});
     return result;
 };
 
@@ -83,6 +83,26 @@ const fixture = () => {
 };
 
 describe("desktop map transport", () => {
+    it("logs only approved capability reason codes and never exception or response details", async () => {
+        for (const reason of ["ownerUnavailable", "notMainFrame", "notInitialized", "unregisteredOwner", "invalidKernelOrigin",
+            "originMismatch", "unsupportedDocument", "invalidDocument", "unsafeProcessSwitches"]) {
+            const warnings: unknown[][] = [];
+            assert.equal(await load({invoke: async () => ({version: 1, supported: false, reason,
+                url: "https://private.invalid/?token=secret", credentials: "secret"})}, false, warnings)
+                .isDesktopAVMapHostSupported(), false);
+            assert.deepEqual(warnings, [["Database map host unavailable:", reason]]);
+        }
+        const warnings: unknown[][] = [];
+        assert.equal(await load({invoke: async () => ({version: 1, supported: false, reason: "secret"})}, false, warnings)
+            .isDesktopAVMapHostSupported(), false);
+        assert.equal(await load({invoke: async () => { throw new Error("secret"); }}, false, warnings)
+            .isDesktopAVMapHostSupported(), false);
+        assert.deepEqual(warnings, [["Database map host unavailable:", "unsupportedCapability"],
+            ["Database map host unavailable:", "capabilityUnavailable"]]);
+        const browserWarnings: unknown[][] = [];
+        assert.equal(await load(undefined, true, browserWarnings).isDesktopAVMapHostSupported(), false);
+        assert.deepEqual(browserWarnings, []);
+    });
     it("clips CSS rectangles, preserves full logical size and never multiplies by display scale", () => {
         const compute = load({}).computeDesktopAVMapGeometry;
         assert.deepEqual(compute({x: -20.5, y: 30, width: 200, height: 100},

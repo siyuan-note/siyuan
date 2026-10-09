@@ -295,9 +295,9 @@ test("capability is credential-free and only supports trusted owners with safe p
     const s = setup();
     const capability = s.handlers["siyuan-map-capability"];
     assert.deepEqual(capability(s.event()), {version: 1, supported: true});
-    assert.deepEqual(capability({...s.event(), senderFrame: {}}), {version: 1, supported: false});
+    assert.deepEqual(capability({...s.event(), senderFrame: {}}), {version: 1, supported: false, reason: "notMainFrame"});
     s.switches.set("no-sandbox", "");
-    assert.deepEqual(capability(s.event()), {version: 1, supported: false});
+    assert.deepEqual(capability(s.event()), {version: 1, supported: false, reason: "unsafeProcessSwitches"});
     assert.equal(s.views.length, 0);
 });
 
@@ -367,4 +367,29 @@ test("main wiring removes only the process security bypass and never enables rem
     assert.ok(!manager.includes("remote.enable"));
     assert.ok(!manager.includes("executeJavaScript"));
     assert.ok(!manager.includes("session.defaultSession"));
+});
+
+
+test("capability reports bounded reasons for every owner rejection without weakening creation", () => {
+    const cases = [
+        ["ownerUnavailable", (_s, event) => { event.sender = undefined; }],
+        ["ownerUnavailable", s => { s.owner.destroyed = true; }],
+        ["notMainFrame", (_s, event) => { event.senderFrame = {url: "https://private.invalid/secret"}; }],
+        ["notInitialized", s => s.setInitialized(false)],
+        ["unregisteredOwner", s => { s.owner.id = 2; }],
+        ["invalidKernelOrigin", s => { s.target.origin = "https://private.invalid/secret"; }],
+        ["ownerUnavailable", (_s, event) => { event.sender = {...event.sender}; }],
+        ["ownerUnavailable", s => { s.win.destroyed = true; }],
+        ["originMismatch", s => { s.owner.mainFrame.url = "https://private.invalid/stage/build/app/?token=secret"; }],
+        ["unsupportedDocument", s => { s.owner.mainFrame.url = origin + "/check-auth?token=secret"; }],
+        ["invalidDocument", s => { s.owner.mainFrame.url = "invalid secret"; }],
+    ];
+    for (const [reason, change] of cases) {
+        const s = setup(), event = s.event();
+        change(s, event);
+        assert.deepEqual(s.handlers["siyuan-map-capability"](event), {version: 1, supported: false, reason});
+        assert.throws(() => s.handlers["siyuan-map-create"](event, {...envelope, provider: "openfreemap", theme: "light"}));
+        assert.equal(s.views.length, 0);
+        s.manager.destroyAll();
+    }
 });

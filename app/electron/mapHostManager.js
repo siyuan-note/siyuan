@@ -172,19 +172,27 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
     app.on("login", (event, contents, details, _authInfo, callback) => {
         if (!contents && isMapAuthentication(contents, details.url)) { event.preventDefault(); callback(); }
     });
-    const trustedOwner = event => {
-        if (!event?.sender || event.sender.isDestroyed() || event.senderFrame !== event.sender.mainFrame ||
-            !isInitialized(event.sender.id)) return;
+    // 返回固定诊断码，不暴露地址、启动参数值或地图凭据；所有宿主入口复用相同信任检查。
+    const inspectOwner = event => {
+        if (!event?.sender || event.sender.isDestroyed()) return {reason: "ownerUnavailable"};
+        if (event.senderFrame !== event.sender.mainFrame) return {reason: "notMainFrame"};
+        if (!isInitialized(event.sender.id)) return {reason: "notInitialized"};
         const target = getTarget(event.sender.id);
-        const origin = normalizeMapOrigin(target?.origin);
+        if (!target) return {reason: "unregisteredOwner"};
+        const origin = normalizeMapOrigin(target.origin);
+        if (!origin) return {reason: "invalidKernelOrigin"};
         const win = BrowserWindow.fromWebContents(event.sender);
-        if (!origin || !win || win.isDestroyed()) return;
+        if (!win || win.isDestroyed()) return {reason: "ownerUnavailable"};
         try {
             const url = new URL(event.senderFrame.url);
-            if (url.origin !== origin || !["/stage/build/app/", "/stage/build/app/window.html"].includes(url.pathname)) return;
-        } catch (_error) { return; }
-        return {win, origin};
+            if (url.origin !== origin) return {reason: "originMismatch"};
+            if (!["/stage/build/app/", "/stage/build/app/window.html"].includes(url.pathname)) {
+                return {reason: "unsupportedDocument"};
+            }
+        } catch (_error) { return {reason: "invalidDocument"}; }
+        return {owner: {win, origin}};
     };
+    const trustedOwner = event => inspectOwner(event).owner;
     const getHost = (event, value) => {
         const owner = trustedOwner(event);
         if (!owner || value?.version !== 1 || typeof value.instanceID !== "string") return;
@@ -243,8 +251,11 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         host.view.setVisible(true);
         post(host, {version: 1, instanceID: host.init.instanceID, type: "resize"});
     };
-    ipcMain.handle("siyuan-map-capability", event => ({version: 1,
-        supported: !!trustedOwner(event) && !hasUnsafeMapSwitches(app.commandLine)}));
+    ipcMain.handle("siyuan-map-capability", event => {
+        const result = inspectOwner(event);
+        const reason = result.reason || (hasUnsafeMapSwitches(app.commandLine) ? "unsafeProcessSwitches" : undefined);
+        return reason ? {version: 1, supported: false, reason} : {version: 1, supported: true};
+    });
     ipcMain.handle("siyuan-map-create", (event, value) => {
         const owner = trustedOwner(event);
         const init = parseMapCreate(value);

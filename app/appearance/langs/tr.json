@@ -2736,6 +2736,15 @@
 		"quit": "Uygulamadan çık"
 	},
 	"_attrView": {
+		"dateCalendar": "Takvim",
+		"solarCalendar": "Miladi",
+		"lunarCalendar": "Çin ay takvimi",
+		"lunarLeapMonth": "Artık ${month}",
+		"lunarMonths": "ay 1|ay 2|ay 3|ay 4|ay 5|ay 6|ay 7|ay 8|ay 9|ay 10|ay 11|ay 12",
+		"lunarDays": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30",
+		"lunarDateTemplate": "Çin ay takvimi ${year}, ${month}, gün ${day}",
+		"lunarRange": "Ay takvimi tarih aralığı: 1901-02-19 - 2100-12-31",
+		"lunarInvalid": "Ay takvimi tarihi veya saat geçersiz; yeniden seçin",
 		"calendar": "Takvim",
 		"list": "Liste",
 		"dateFormat": "Tarih biçimi",

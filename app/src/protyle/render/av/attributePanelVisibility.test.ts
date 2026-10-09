@@ -8,13 +8,14 @@ import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 import {compileString} from "sass";
 
-const browserCases = (source: string, css: string, columnSource: string, blockSource: string, menuSource: string) => {
+const browserCases = (source: string, css: string, columnSource: string, blockSource: string, menuSource: string, calendarSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const config = {editor: {databaseAttrShow: true, databaseAttrHideEmpty: false, databaseAttrViewMode: 0, databaseAttrUseTabs: false}};
     Object.assign(window, {siyuan: {config, languages: {
         database: "Database", edit: "Edit", displayEmptyFields: "Show", hideEmptyFields: "Hide",
         default: "Default", attributePanelVisibility: "Database panel field visibility",
         alwaysShow: "Always show", hideWhenEmpty: "Hide when empty", alwaysHide: "Always hide",
+        _attrView: {dateCalendar: "Calendar", solarCalendar: "Gregorian", lunarCalendar: "Chinese lunar"},
     }}});
     const Panel = new Function("cancelHeightAnimation", source + "\nreturn AVAttributePanel;")(() => {});
     const style = document.createElement("style");
@@ -68,16 +69,22 @@ const browserCases = (source: string, css: string, columnSource: string, blockSo
     let submenuShown = 0;
     let mobileChoices: IMenu[] = [];
     Object.assign(window.siyuan, {menus: {menu: {remove() {}, showSubMenu() { submenuShown++; }}}});
-    const Item = new Function("updateMenuItemGroupClasses", menuSource + "\nreturn MenuItem;")(() => {});
+    const Item = new Function("updateMenuItemGroupClasses", "updateHotkeyTip", menuSource + "\nreturn MenuItem;")(() => {}, (tip: string) => tip);
     class MobileMenu {
         public addItem(item: IMenu) { mobileChoices.push(item); }
         public open() {}
     }
-    const columns = new Function("getFieldsByData", "escapeAttr", "escapeHtml", "escapeAriaLabel", "bindRollupData", "transaction", "MenuItem", "Menu", "isMobile",
+    const bindCalendar = new Function("MenuItem", "Menu", "isMobile", "setDateFieldFormat",
+        calendarSource + "\nreturn bindDateCalendarMenu;")(Item, MobileMenu, () => mobile,
+        (_protyle: IProtyle, avID: string, id: string, type: string, format: string, oldFormat: string) => {
+            transactions.push([[{action: "setAttrViewColDateFormat", avID, id, type, format}],
+                [{action: "setAttrViewColDateFormat", avID, id, type, format: oldFormat}]]);
+        });
+    const columns = new Function("getFieldsByData", "escapeAttr", "escapeHtml", "escapeAriaLabel", "bindRollupData", "transaction", "MenuItem", "Menu", "isMobile", "bindDateCalendarMenu", "getLabelByDateFormat",
         columnSource + "\nreturn {getEditHTML, bindEditEvent};")(
         (data: IAV) => (data.view as IAVTable).columns, escape, escape, escape, () => {},
         (_protyle: IProtyle, operations: IOperation[], undo: IOperation[]) => transactions.push([operations, undo]),
-        Item, MobileMenu, () => mobile);
+        Item, MobileMenu, () => mobile, bindCalendar, (format: string) => format);
     for (const visibility of [undefined, "always", "hide-empty", "hide"]) {
         const field = {id: "key", name: "Notes", type: "text", attributePanelVisibility: visibility};
         const data = {id: "database", viewType: "table", view: {columns: [field]}};
@@ -146,6 +153,44 @@ const browserCases = (source: string, css: string, columnSource: string, blockSo
         check.equal(menuElement.querySelector('[data-type="attributePanelVisibility"]'), null);
         menuElement.remove();
     }
+    for (const mobileMode of [false, true]) {
+        mobile = mobileMode;
+        for (const previous of ["day-month-year", "lunar"]) {
+            const field = {id: "birthday", name: "Birthday", type: "date", dateFormat: previous};
+            const data = {id: "database", viewType: "table", view: {columns: [field]}};
+            const menuElement = document.createElement("div");
+            document.body.append(menuElement);
+            const options = {data, colId: field.id, isCustomAttr: true, menuElement};
+            menuElement.innerHTML = columns.getEditHTML(options);
+            columns.bindEditEvent(options);
+            const parent = menuElement.querySelector<HTMLButtonElement>('[data-type="dateCalendar"]');
+            check.equal(parent.querySelector("select"), null);
+            const buttons = Array.from(parent.querySelectorAll<HTMLButtonElement>(".b3-menu__submenu .b3-menu__item"));
+            check.deepEqual(buttons.map(button => button.querySelector(".b3-menu__label").textContent), ["Gregorian", "Chinese lunar"]);
+            check.equal(buttons.findIndex(button => !!button.querySelector(".b3-menu__checked")), previous === "lunar" ? 1 : 0);
+            check.equal(menuElement.querySelector('[data-type="dateFormat"]').classList.contains("fn__none"), previous === "lunar");
+            const shown = submenuShown;
+            parent.dispatchEvent(new MouseEvent("mouseenter"));
+            if (mobile) {
+                check.equal(submenuShown, shown);
+                mobileChoices = [];
+                parent.click();
+                check.equal(mobileChoices.length, 2);
+                mobileChoices[previous === "lunar" ? 0 : 1].click(parent, new MouseEvent("click"));
+            } else {
+                check.equal(submenuShown, shown + 1);
+                parent.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowRight", bubbles: true}));
+                check.equal(document.activeElement, buttons[0]);
+                buttons[previous === "lunar" ? 0 : 1].click();
+            }
+            check.deepEqual(transactions.at(-1), [[{
+                action: "setAttrViewColDateFormat", avID: "database", id: "birthday", type: "date",
+                format: previous === "lunar" ? "full" : "lunar",
+            }], [{action: "setAttrViewColDateFormat", avID: "database", id: "birthday", type: "date", format: previous}]]);
+            menuElement.remove();
+        }
+    }
+    mobile = false;
     const tables = ["database-a", "database-b"].map(avID => ({
         avID, avName: avID, blockIDs: ["document"],
         keyValues: [
@@ -227,9 +272,12 @@ test("attribute panel field rules preserve global defaults and reveal hidden fie
     const menuSource = transpileModule(readFileSync("src/menus/Menu.ts", "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const calendarSource = transpileModule(readFileSync(path.resolve(__dirname, "dateCalendarMenu.ts"), "utf8")
+        .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-panel-visibility-test-"));
     const script = path.join(temporary, "run.cjs");
-    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + "," + JSON.stringify(blockSource) + "," + JSON.stringify(menuSource) + ")";
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + "," + JSON.stringify(blockSource) + "," + JSON.stringify(menuSource) + "," + JSON.stringify(calendarSource) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {

@@ -6,7 +6,7 @@
 		"id": "20260613155453-n1se73o",
 		"title": "字段类型",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261009120841"
 	},
 	"Children": [
 		{
@@ -2053,7 +2053,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-n6oj93a",
-				"updated": "20260613155453"
+				"updated": "20261009120841"
 			},
 			"Children": [
 				{
@@ -2071,12 +2071,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-xsf0r9j",
-				"updated": "20260613155453"
+				"updated": "20261009120841"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "用于存储日期或日期时间。"
+					"Data": "用于存储日期或日期时间，支持公历和农历。"
 				}
 			]
 		},

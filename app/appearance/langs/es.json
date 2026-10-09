@@ -2736,6 +2736,15 @@
 		"quit": "Salir de la aplicación"
 	},
 	"_attrView": {
+		"dateCalendar": "Calendario",
+		"solarCalendar": "Gregoriano",
+		"lunarCalendar": "Lunar chino",
+		"lunarLeapMonth": "${month} intercalar",
+		"lunarMonths": "Mes 1|Mes 2|Mes 3|Mes 4|Mes 5|Mes 6|Mes 7|Mes 8|Mes 9|Mes 10|Mes 11|Mes 12",
+		"lunarDays": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30",
+		"lunarDateTemplate": "Calendario lunar chino ${year}, ${month}, día ${day}",
+		"lunarRange": "Fechas lunares: 1901-02-19 - 2100-12-31",
+		"lunarInvalid": "Fecha lunar u hora no válida; vuelve a seleccionar",
 		"calendar": "Calendario",
 		"list": "Lista",
 		"dateFormat": "Formato de fecha",

@@ -2736,6 +2736,15 @@
 		"quit": "Ukončiť aplikáciu"
 	},
 	"_attrView": {
+		"dateCalendar": "Kalendár",
+		"solarCalendar": "Gregoriánsky",
+		"lunarCalendar": "Čínsky lunárny",
+		"lunarLeapMonth": "Priestupný ${month}",
+		"lunarMonths": "mesiac 1|mesiac 2|mesiac 3|mesiac 4|mesiac 5|mesiac 6|mesiac 7|mesiac 8|mesiac 9|mesiac 10|mesiac 11|mesiac 12",
+		"lunarDays": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30",
+		"lunarDateTemplate": "Čínsky lunárny kalendár ${year}, ${month}, deň ${day}",
+		"lunarRange": "Rozsah lunárnych dátumov: 1901-02-19 - 2100-12-31",
+		"lunarInvalid": "Neplatný lunárny dátum alebo čas; vyberte znova",
 		"calendar": "Kalendár",
 		"list": "Zoznam",
 		"dateFormat": "Formát dátumu",

@@ -6,7 +6,7 @@
 		"id": "20260613155453-sncbsow",
 		"title": "フィールドタイプ",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261009120841"
 	},
 	"Children": [
 		{
@@ -2053,7 +2053,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-u24im6o",
-				"updated": "20260613155453"
+				"updated": "20261009120841"
 			},
 			"Children": [
 				{
@@ -2071,12 +2071,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-gge1qu8",
-				"updated": "20260613155453"
+				"updated": "20261009120841"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "日付または日時の保存に使用します。"
+					"Data": "日付または日時の保存に使用します。グレゴリオ暦と旧暦（中国暦）に対応しています。"
 				}
 			]
 		},

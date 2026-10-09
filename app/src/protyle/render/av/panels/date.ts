@@ -5,7 +5,8 @@ import { updateCellsValue } from "../cell";
 import type { IAVPanelDescriptor } from "./types";
 export const datePanel: IAVPanelDescriptor = {
     render: context => {
-        context.html = getDateHTML(context.options.cellElements);
+        const colId = getColId(context.options.cellElements[0], context.data.viewType);
+        context.html = getDateHTML(context.options.cellElements, context.fields.find(field => field.id === colId)?.dateFormat || "");
         return true;
     },
     bind: context => {
@@ -16,6 +17,7 @@ export const datePanel: IAVPanelDescriptor = {
             cellElements: context.options.cellElements,
             blockElement: context.options.blockElement,
             requireExplicitChange: context.options.requireExplicitChange,
+            format: context.fields.find(field => field.id === getColId(context.options.cellElements[0], context.data.viewType))?.dateFormat || "",
         });
     },
     actions: {

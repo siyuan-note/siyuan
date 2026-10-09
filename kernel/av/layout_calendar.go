@@ -76,6 +76,10 @@ var calendarTemplateTimePattern = regexp.MustCompile(`[ T](\d{2}):(\d{2})(?::(\d
 
 // newCalendarTemplateDateParser 复用字段日期格式和当前语言的月份、日期模板，每次日历渲染只编译一次。
 func newCalendarTemplateDateParser(format DateDisplayFormat) func(string, *time.Location) *ValueDate {
+	var lunarParser func(string, *time.Location) (time.Time, bool)
+	if format == DateDisplayFormatLunar {
+		lunarParser = newLunarDateParser()
+	}
 	layouts := []string{"2006-1-2"}
 	switch format {
 	case DateDisplayFormatMonthDayYear:
@@ -108,8 +112,14 @@ func newCalendarTemplateDateParser(format DateDisplayFormat) func(string, *time.
 			second, _ = strconv.Atoi(timeParts[3])
 			content = strings.TrimSpace(content[:len(content)-len(timeParts[0])])
 		}
+		if lunarParser != nil {
+			content = strings.TrimSuffix(content, " ("+GetAttributeViewI18n("lunarRange")+")")
+		}
 		var date time.Time
 		found := false
+		if lunarParser != nil {
+			date, found = lunarParser(content, location)
+		}
 		for _, layout := range layouts {
 			if parsed, err := time.ParseInLocation(layout, content, location); err == nil {
 				date = parsed

@@ -2736,6 +2736,15 @@
 		"quit": "Quitter le programme"
 	},
 	"_attrView": {
+		"dateCalendar": "Calendrier",
+		"solarCalendar": "Grégorien",
+		"lunarCalendar": "Lunaire chinois",
+		"lunarLeapMonth": "${month} intercalaire",
+		"lunarMonths": "Mois 1|Mois 2|Mois 3|Mois 4|Mois 5|Mois 6|Mois 7|Mois 8|Mois 9|Mois 10|Mois 11|Mois 12",
+		"lunarDays": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30",
+		"lunarDateTemplate": "Calendrier lunaire chinois ${year}, ${month}, jour ${day}",
+		"lunarRange": "Plage des dates lunaires : 1901-02-19 - 2100-12-31",
+		"lunarInvalid": "Date lunaire ou heure invalide ; veuillez sélectionner à nouveau",
 		"calendar": "Calendrier",
 		"list": "Liste",
 		"dateFormat": "Format de date",

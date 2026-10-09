@@ -2736,6 +2736,15 @@
 		"quit": "Keluar aplikasi"
 	},
 	"_attrView": {
+		"dateCalendar": "Kalender",
+		"solarCalendar": "Gregorian",
+		"lunarCalendar": "Lunar Tionghoa",
+		"lunarLeapMonth": "${month} kabisat",
+		"lunarMonths": "Bulan 1|Bulan 2|Bulan 3|Bulan 4|Bulan 5|Bulan 6|Bulan 7|Bulan 8|Bulan 9|Bulan 10|Bulan 11|Bulan 12",
+		"lunarDays": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30",
+		"lunarDateTemplate": "Kalender lunar Tionghoa ${year}, ${month}, hari ${day}",
+		"lunarRange": "Rentang tanggal lunar: 1901-02-19 - 2100-12-31",
+		"lunarInvalid": "Tanggal lunar atau waktu tidak valid; pilih kembali",
 		"calendar": "Kalender",
 		"list": "Daftar",
 		"dateFormat": "Format tanggal",

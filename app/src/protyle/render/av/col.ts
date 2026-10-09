@@ -11,6 +11,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {getPropertiesHTML} from "./panels/properties";
 import {getLabelByNumberFormat} from "./number";
 import {getDefaultDateFormat, getLabelByDateFormat} from "./dateFormat";
+import {bindDateCalendarMenu} from "./dateCalendarMenu";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation, updateAttrViewColAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
@@ -201,7 +202,8 @@ export const getEditHTML = (options: {
             getRollupHTML({data: options.data, colData});
     } else if (colData.type === "date") {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
-<button class="b3-menu__item" data-type="dateFormat" data-format="${colData.dateFormat || ""}">
+<button class="b3-menu__item" data-type="dateCalendar"><svg class="b3-menu__icon"><use xlink:href="#iconMode"></use></svg><span class="b3-menu__label">${window.siyuan.languages._attrView.dateCalendar}</span><span class="b3-menu__accelerator">${colData.dateFormat === "lunar" ? window.siyuan.languages._attrView.lunarCalendar : window.siyuan.languages._attrView.solarCalendar}</span><svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg></button>
+<button class="b3-menu__item${colData.dateFormat === "lunar" ? " fn__none" : ""}" data-type="dateFormat" data-format="${colData.dateFormat || ""}">
     <svg class="b3-menu__icon"><use xlink:href="#iconFormat"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages._attrView.dateFormat}</span>
     <span class="b3-menu__accelerator">${getLabelByDateFormat(colData.dateFormat)}</span>
@@ -303,6 +305,7 @@ export const bindEditEvent = (options: {
     const avID = options.data.id;
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
+    bindDateCalendarMenu(options.protyle, avID, colData, options.menuElement);
     const visibilityElement = options.menuElement.querySelector('[data-type="attributePanelVisibility"]');
     if (visibilityElement) {
         const choices: Array<[IAVColumn["attributePanelVisibility"], string]> = [

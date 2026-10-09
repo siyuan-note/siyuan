@@ -5,7 +5,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchSyncPost} from "../../../util/fetch";
 import {transaction} from "../../wysiwyg/transaction";
 import {bindInlineFilterEvents, genEmptyFilterValue, getFiltersHTML} from "./filter";
-import {genFieldValue, getRelationOptions, getSelectedOptionsHTML, getValueInputHTML, openFieldRelationMenu, openFieldSelectMenu, renderRelationFieldValue} from "./fieldValueEditor";
+import {bindFieldLunarDates, genFieldValue, getRelationOptions, getSelectedOptionsHTML, getValueInputHTML, openFieldRelationMenu, openFieldSelectMenu, renderRelationFieldValue} from "./fieldValueEditor";
 import {openSearchAV} from "./relation";
 
 interface AutomationValue extends Omit<AVAutomationValueInput, "value"> {
@@ -245,6 +245,7 @@ export const openAutomationMenu = async (options: {
             `<button type="button" class="b3-button b3-button--cancel" data-role="field-value" data-value-type="${field.type}" data-selected="${escapeAttr(JSON.stringify(selected))}">${getSelectedOptionsHTML(field, selected) || lang.select}</button>` :
             getValueInputHTML(field, {mode: "static", value: value.value});
         const input = host.querySelector<HTMLElement>('[data-role="field-value"]');
+        bindFieldLunarDates(host);
         const update = () => {
             if (input instanceof HTMLInputElement && !input.checkValidity()) {
                 input.reportValidity();

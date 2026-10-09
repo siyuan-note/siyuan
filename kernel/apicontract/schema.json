@@ -8126,7 +8126,8 @@
                 "full",
                 "month-day-year",
                 "day-month-year",
-                "year-month-day"
+                "year-month-day",
+                "lunar"
               ]
             },
             "desc": {
@@ -8828,7 +8829,8 @@
                 "full",
                 "month-day-year",
                 "day-month-year",
-                "year-month-day"
+                "year-month-day",
+                "lunar"
               ]
             },
             "desc": {
@@ -9014,7 +9016,8 @@
             "full",
             "month-day-year",
             "day-month-year",
-            "year-month-day"
+            "year-month-day",
+            "lunar"
           ]
         },
         "desc": {
@@ -11662,7 +11665,8 @@
                 "full",
                 "month-day-year",
                 "day-month-year",
-                "year-month-day"
+                "year-month-day",
+                "lunar"
               ]
             },
             "desc": {

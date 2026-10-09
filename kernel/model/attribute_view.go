@@ -7569,6 +7569,9 @@ func newAttributeViewKey(keyID, keyName, keyType, keyIcon string, dateFormat av.
 		if !dateFormat.IsValid() {
 			return nil, errors.New("invalid date display format")
 		}
+		if dateFormat == av.DateDisplayFormatLunar && keyTyp != av.KeyTypeDate {
+			return nil, errors.New("lunar calendar is only available for date fields")
+		}
 		ret.DateFormat = dateFormat
 	}
 	if av.KeyTypeRollup == keyTyp {
@@ -7777,6 +7780,9 @@ func setAttributeViewColDateFormat(operation *Operation) (err error) {
 	colType := av.KeyType(operation.Typ)
 	if !av.IsDateKeyType(colType) {
 		return errors.New("date display format is only available for date fields")
+	}
+	if format == av.DateDisplayFormatLunar && colType != av.KeyTypeDate {
+		return errors.New("lunar calendar is only available for date fields")
 	}
 	for _, keyValues := range attrView.KeyValues {
 		if keyValues.Key.ID == operation.ID && keyValues.Key.Type == colType {

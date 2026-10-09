@@ -220,14 +220,16 @@ type AVKey struct {
 	Desc                     string            `json:"desc" api:"optional,nullable"`
 	Options                  []*AVSelectOption `json:"options,omitempty" api:"optional,nullable"`
 	NumberFormat             string            `json:"numberFormat" api:"optional,nullable"`
-	DateFormat               string            `json:"dateFormat,omitempty" api:"optional,nullable,enum=|full|month-day-year|day-month-year|year-month-day"`
-	Template                 string            `json:"template" api:"optional,nullable"`
-	RenderTemplate           string            `json:"renderTemplate,omitempty" api:"optional,nullable"`
-	Relation                 *AVRelation       `json:"relation,omitempty" api:"optional,nullable"`
-	Rollup                   *AVRollup         `json:"rollup,omitempty" api:"optional,nullable"`
-	Date                     *AVDate           `json:"date,omitempty" api:"optional,nullable"`
-	Created                  *AVCreated        `json:"created,omitempty" api:"optional,nullable"`
-	Updated                  *AVUpdated        `json:"updated,omitempty" api:"optional,nullable"`
+	// lunar 为日期字段的整列农历录入与显示设置，时间戳保持不变，旧格式及空值仍使用公历。
+	// 离线对照表覆盖公历 1901-02-19 至 2100-12-31，范围外的旧值保留并显示范围提示。
+	DateFormat     string      `json:"dateFormat,omitempty" api:"optional,nullable,enum=|full|month-day-year|day-month-year|year-month-day|lunar"`
+	Template       string      `json:"template" api:"optional,nullable"`
+	RenderTemplate string      `json:"renderTemplate,omitempty" api:"optional,nullable"`
+	Relation       *AVRelation `json:"relation,omitempty" api:"optional,nullable"`
+	Rollup         *AVRollup   `json:"rollup,omitempty" api:"optional,nullable"`
+	Date           *AVDate     `json:"date,omitempty" api:"optional,nullable"`
+	Created        *AVCreated  `json:"created,omitempty" api:"optional,nullable"`
+	Updated        *AVUpdated  `json:"updated,omitempty" api:"optional,nullable"`
 }
 
 type AVSelectOption struct {
@@ -288,24 +290,25 @@ type AVTableColumn struct {
 }
 
 type AVBaseInstanceField struct {
-	ID             string            `json:"id" api:"optional,nullable"`
-	Name           string            `json:"name" api:"optional,nullable"`
-	Type           string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
-	Icon           string            `json:"icon" api:"optional,nullable"`
-	Wrap           bool              `json:"wrap" api:"optional,nullable"`
-	Hidden         bool              `json:"hidden" api:"optional,nullable"`
-	Desc           string            `json:"desc" api:"optional,nullable"`
-	Calc           *AVFieldCalc      `json:"calc" api:"optional,nullable"`
-	Options        []*AVSelectOption `json:"options,omitempty" api:"optional,nullable"`
-	NumberFormat   string            `json:"numberFormat" api:"optional,nullable"`
-	DateFormat     string            `json:"dateFormat,omitempty" api:"optional,nullable,enum=|full|month-day-year|day-month-year|year-month-day"`
-	Template       string            `json:"template" api:"optional,nullable"`
-	RenderTemplate string            `json:"renderTemplate,omitempty" api:"optional,nullable"`
-	Relation       *AVRelation       `json:"relation,omitempty" api:"optional,nullable"`
-	Rollup         *AVRollup         `json:"rollup,omitempty" api:"optional,nullable"`
-	Date           *AVDate           `json:"date,omitempty" api:"optional,nullable"`
-	Created        *AVCreated        `json:"created,omitempty" api:"optional,nullable"`
-	Updated        *AVUpdated        `json:"updated,omitempty" api:"optional,nullable"`
+	ID           string            `json:"id" api:"optional,nullable"`
+	Name         string            `json:"name" api:"optional,nullable"`
+	Type         string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
+	Icon         string            `json:"icon" api:"optional,nullable"`
+	Wrap         bool              `json:"wrap" api:"optional,nullable"`
+	Hidden       bool              `json:"hidden" api:"optional,nullable"`
+	Desc         string            `json:"desc" api:"optional,nullable"`
+	Calc         *AVFieldCalc      `json:"calc" api:"optional,nullable"`
+	Options      []*AVSelectOption `json:"options,omitempty" api:"optional,nullable"`
+	NumberFormat string            `json:"numberFormat" api:"optional,nullable"`
+	// lunar 按字段启用农历，单元格继续返回原始毫秒时间戳；范围与兼容语义见 AVKey.DateFormat。
+	DateFormat     string      `json:"dateFormat,omitempty" api:"optional,nullable,enum=|full|month-day-year|day-month-year|year-month-day|lunar"`
+	Template       string      `json:"template" api:"optional,nullable"`
+	RenderTemplate string      `json:"renderTemplate,omitempty" api:"optional,nullable"`
+	Relation       *AVRelation `json:"relation,omitempty" api:"optional,nullable"`
+	Rollup         *AVRollup   `json:"rollup,omitempty" api:"optional,nullable"`
+	Date           *AVDate     `json:"date,omitempty" api:"optional,nullable"`
+	Created        *AVCreated  `json:"created,omitempty" api:"optional,nullable"`
+	Updated        *AVUpdated  `json:"updated,omitempty" api:"optional,nullable"`
 }
 
 type AVTableRow struct {

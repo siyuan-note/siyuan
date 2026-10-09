@@ -27,7 +27,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "common-menu-open" | "common-menu-closed"
 type TAVView = "table" | "list" | "gallery" | "kanban" | "calendar";
 type TAVAlign = "" | "left" | "center" | "right"
-type TAVDateFormat = "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"
+type TAVDateFormat = "" | "full" | "month-day-year" | "day-month-year" | "year-month-day" | "lunar"
 type TAVCol = import("./av").AVKeyType;
 type TAVFilterOperator = import("./av").AVFilterOperator;
 

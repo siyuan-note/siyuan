@@ -2736,6 +2736,15 @@
 		"quit": "Applicatie afsluiten"
 	},
 	"_attrView": {
+		"dateCalendar": "Kalender",
+		"solarCalendar": "Gregoriaans",
+		"lunarCalendar": "Chinese maankalender",
+		"lunarLeapMonth": "Schrikkel${month}",
+		"lunarMonths": "maand 1|maand 2|maand 3|maand 4|maand 5|maand 6|maand 7|maand 8|maand 9|maand 10|maand 11|maand 12",
+		"lunarDays": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30",
+		"lunarDateTemplate": "Chinese maankalender ${year}, ${month}, dag ${day}",
+		"lunarRange": "Datumbereik maankalender: 1901-02-19 - 2100-12-31",
+		"lunarInvalid": "Ongeldige maankalenderdatum of tijd; selecteer opnieuw",
 		"calendar": "Kalender",
 		"list": "Lijst",
 		"dateFormat": "Datumnotatie",

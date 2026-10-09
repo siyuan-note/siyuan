@@ -13,6 +13,14 @@ const refreshDatabaseAttributePanels = (protyle: IProtyle, avID: string) => {
     });
 };
 
+export const setDateFieldFormat = (protyle: IProtyle, avID: string, colId: string,
+                                   type: "date" | "created" | "updated", format: TAVDateFormat, oldFormat: TAVDateFormat) => {
+    transaction(protyle, [{action: "setAttrViewColDateFormat", id: colId, avID, format, type}],
+        [{action: "setAttrViewColDateFormat", id: colId, avID, format: oldFormat, type}], {
+            callback: () => refreshDatabaseAttributePanels(protyle, avID),
+        });
+};
+
 export const formatDate = (options: {
     avPanelElement: Element,
     element: HTMLElement,
@@ -30,21 +38,7 @@ export const formatDate = (options: {
             label: getLabelByDateFormat(format),
             accelerator: format === "full" ? formatDateDisplay(Date.now(), format) : undefined,
             click() {
-                transaction(options.protyle, [{
-                    action: "setAttrViewColDateFormat",
-                    id: options.colId,
-                    avID: options.avID,
-                    format,
-                    type: options.type,
-                }], [{
-                    action: "setAttrViewColDateFormat",
-                    id: options.colId,
-                    avID: options.avID,
-                    format: options.oldFormat,
-                    type: options.type,
-                }], {
-                    callback: () => refreshDatabaseAttributePanels(options.protyle, options.avID),
-                });
+                setDateFieldFormat(options.protyle, options.avID, options.colId, options.type, format, options.oldFormat);
                 options.avPanelElement.remove();
             }
         });

@@ -1,4 +1,5 @@
 import {isAVDateType} from "./capabilities";
+import {formatLunarDate, lunarToSolar, parseLunarDate, solarToLunar} from "./lunarCalendar";
 const pad = (value: number) => value.toString().padStart(2, "0");
 
 const getMonths = (): string[] => window.siyuan.languages._attrView.dateMonths.split("|");
@@ -12,7 +13,10 @@ export const formatDateDisplay = (content: number, format: TAVDateFormat = "", i
     const month = date.getMonth() + 1;
     const day = date.getDate();
     let formatted: string;
-    if (format === "full") {
+    if (format === "lunar") {
+        const lunar = solarToLunar(content);
+        formatted = lunar ? formatLunarDate(lunar) : `${year.toString().padStart(4, "0")}-${pad(month)}-${pad(day)} (${window.siyuan.languages._attrView.lunarRange})`;
+    } else if (format === "full") {
         formatted = window.siyuan.languages._attrView.dateFormatFullTemplate
             .replaceAll("${year}", year.toString())
             .replaceAll("${month}", getMonths()[month - 1] || date.toLocaleString(undefined, {month: "long"}))
@@ -79,7 +83,7 @@ const parseFullDate = (value: string) => {
     };
 };
 
-const parseDateEndpoint = (value: string, format: TAVDateFormat) => {
+const parseDateEndpoint = (value: string, format: TAVDateFormat): {content: number, isNotTime: boolean} | undefined => {
     const trimmed = value.trim();
     const timeMatch = trimmed.match(/\s+(\d{1,2}):(\d{2})$/);
     const hour = timeMatch ? Number(timeMatch[1]) : 0;
@@ -88,7 +92,17 @@ const parseDateEndpoint = (value: string, format: TAVDateFormat) => {
     let year: number;
     let month: number;
     let day: number;
-    if (format === "full") {
+    if (format === "lunar") {
+        const lunar = parseLunarDate(dateText);
+        if (!lunar) {
+            const suffix = ` (${window.siyuan.languages._attrView.lunarRange})`;
+            const solarText = dateText.endsWith(suffix) ? dateText.slice(0, -suffix.length) : dateText;
+            return /^\d{4}-\d{1,2}-\d{1,2}$/.test(solarText) ?
+                parseDateEndpoint(solarText + (timeMatch ? timeMatch[0] : ""), "") : undefined;
+        }
+        const content = lunar && lunarToSolar(lunar, hour, minute);
+        return content === undefined ? undefined : {content, isNotTime: !timeMatch};
+    } else if (format === "full") {
         const parts = parseFullDate(dateText);
         if (!parts) {
             return;
@@ -143,7 +157,8 @@ const parseDateEndpoint = (value: string, format: TAVDateFormat) => {
 };
 
 export const parseDateValue = (value: string, format: TAVDateFormat = ""): IAVCellDateValue => {
-    const endpoints = value.split(/\s*→\s*|\s+[~-]\s+/);
+    const normalized = format === "lunar" ? value.replaceAll(` (${window.siyuan.languages._attrView.lunarRange})`, "") : value;
+    const endpoints = normalized.split(/\s*→\s*|\s+[~-]\s+/);
     if (endpoints.length > 2) {
         return {content: null, isNotEmpty: false, content2: null, isNotEmpty2: false, hasEndDate: false, isNotTime: true};
     }
@@ -164,6 +179,9 @@ export const parseDateValue = (value: string, format: TAVDateFormat = ""): IAVCe
 };
 
 export const getLabelByDateFormat = (format: TAVDateFormat = "") => {
+    if (format === "lunar") {
+        return window.siyuan.languages._attrView.lunarCalendar;
+    }
     if (format === "full") {
         return window.siyuan.languages._attrView.fullDate;
     }

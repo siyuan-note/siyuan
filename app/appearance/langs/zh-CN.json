@@ -2736,6 +2736,15 @@
 		"quit": "退出程序"
 	},
 	"_attrView": {
+		"dateCalendar": "历法",
+		"solarCalendar": "公历",
+		"lunarCalendar": "农历",
+		"lunarLeapMonth": "闰${month}",
+		"lunarMonths": "正月|二月|三月|四月|五月|六月|七月|八月|九月|十月|冬月|腊月",
+		"lunarDays": "初一|初二|初三|初四|初五|初六|初七|初八|初九|初十|十一|十二|十三|十四|十五|十六|十七|十八|十九|二十|廿一|廿二|廿三|廿四|廿五|廿六|廿七|廿八|廿九|三十",
+		"lunarDateTemplate": "农历 ${year}年${month}${day}",
+		"lunarRange": "农历日期范围：1901-02-19 - 2100-12-31",
+		"lunarInvalid": "农历日期或时间无效，请重新选择",
 		"calendar": "日历",
 		"list": "列表",
 		"dateFormat": "日期格式",

@@ -9,6 +9,8 @@ import {getAVColorStyle} from "./color";
 import {createAVPlainTextEditValue} from "./richTextValue";
 import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 import {renderAVBlockIcon} from "./blockIcon";
+import {formatDateValue} from "./dateFormat";
+import {bindLunarDateEditor, getLunarDateHTML} from "./lunarDate";
 
 export const getSelectedOptionNames = (element: HTMLElement) => {
     try {
@@ -76,6 +78,9 @@ export const genFieldValue = (column: IAVColumn, input: HTMLElement, previousVal
         case "number":
             return {type: column.type, number: {content: Number(content), isNotEmpty: content !== ""}};
         case "date":
+            if (column.dateFormat === "lunar") {
+                return {type: "date", date: JSON.parse(input.dataset.lunarValue)};
+            }
             return {
                 type: column.type,
                 date: {
@@ -122,6 +127,10 @@ export const genFieldValue = (column: IAVColumn, input: HTMLElement, previousVal
 
 export const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFieldValue) => {
     const value = fieldValue?.value;
+    if (column.type === "date" && column.dateFormat === "lunar") {
+        const date = value?.date || {isNotEmpty: false, isNotTime: !column.date?.fillSpecificTime};
+        return `<button type="button" class="b3-button b3-button--cancel${fieldValue?.mode === "currentTime" ? " fn__none" : ""}" data-role="field-value" data-value-type="lunarDate" data-lunar-value="${escapeAttr(JSON.stringify(date))}">${escapeHtml(formatDateValue(date, "lunar") || window.siyuan.languages.select)}</button>`;
+    }
     if (column.type === "checkbox") {
         const checked = value?.checkbox?.checked || false;
         return `<button class="fn__flex-center" data-role="field-value" data-value-type="checkbox" aria-label="${escapeAttr(column.name || window.siyuan.languages.checkbox)}" aria-pressed="${checked}" type="button" style="background:transparent;border:0;color:inherit;padding:0"><svg class="av__checkbox"><use xlink:href="#icon${checked ? "Check" : "Uncheck"}"></use></svg></button>`;
@@ -142,6 +151,34 @@ export const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFiel
     const hiddenClass = column.type === "date" && fieldValue?.mode === "currentTime" ? " fn__none" : "";
     const max = column.type === "date" ? ` max="${column.date?.fillSpecificTime ? "9999-12-31 23:59" : "9999-12-31"}"` : "";
     return `<input class="b3-text-field b3-text-field--text fn__flex-1${hiddenClass}" data-role="field-value" type="${inputType}"${column.type === "number" ? ' step="any"' : ""}${max} value="${escapeAttr(getFieldText(value))}">`;
+};
+
+export const bindFieldLunarDates = (host: HTMLElement) => {
+    host.querySelectorAll<HTMLElement>('[data-value-type="lunarDate"]').forEach(target => target.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const value: IAVCellDateValue = JSON.parse(target.dataset.lunarValue);
+        let submit: () => void;
+        const menu = new Menu("av-field-lunar-date", () => submit?.(), true);
+        menu.addItem({
+            type: "empty",
+            label: getLunarDateHTML(value),
+            bind: element => {
+                element.classList.add("b3-menu__custom");
+                submit = bindLunarDateEditor({
+                    value, menuElement: element, requireExplicitChange: true,
+                    update: date => {
+                        target.dataset.lunarValue = JSON.stringify(date);
+                        target.textContent = formatDateValue(date, "lunar") || window.siyuan.languages.select;
+                        target.dispatchEvent(new Event("change", {bubbles: true}));
+                    },
+                    close: () => menu.close(),
+                });
+            },
+        });
+        const rect = target.getBoundingClientRect();
+        menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+    }));
 };
 
 export const openFieldSelectMenu = (target: HTMLElement, column: IAVColumn) => {

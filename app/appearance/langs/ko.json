@@ -2736,6 +2736,15 @@
 		"quit": "애플리케이션 종료"
 	},
 	"_attrView": {
+		"dateCalendar": "달력 체계",
+		"solarCalendar": "양력",
+		"lunarCalendar": "중국 음력",
+		"lunarLeapMonth": "윤${month}",
+		"lunarMonths": "1월|2월|3월|4월|5월|6월|7월|8월|9월|10월|11월|12월",
+		"lunarDays": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30",
+		"lunarDateTemplate": "음력 ${year}년 ${month} ${day}일",
+		"lunarRange": "음력 날짜 범위: 1901-02-19 - 2100-12-31",
+		"lunarInvalid": "음력 날짜 또는 시간이 올바르지 않습니다. 다시 선택하세요",
 		"calendar": "달력",
 		"list": "목록",
 		"dateFormat": "날짜 형식",

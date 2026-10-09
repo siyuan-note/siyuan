@@ -2383,12 +2383,13 @@ const (
 	DateDisplayFormatMonthDayYear DateDisplayFormat = "month-day-year"
 	DateDisplayFormatDayMonthYear DateDisplayFormat = "day-month-year"
 	DateDisplayFormatYearMonthDay DateDisplayFormat = "year-month-day"
+	DateDisplayFormatLunar        DateDisplayFormat = "lunar"
 )
 
 func (format DateDisplayFormat) IsValid() bool {
 	switch format {
 	case DateDisplayFormatDefault, DateDisplayFormatFull, DateDisplayFormatMonthDayYear,
-		DateDisplayFormatDayMonthYear, DateDisplayFormatYearMonthDay:
+		DateDisplayFormatDayMonthYear, DateDisplayFormatYearMonthDay, DateDisplayFormatLunar:
 		return true
 	}
 	return false
@@ -2398,6 +2399,12 @@ func formatDateDisplay(content int64, format DateDisplayFormat, isNotTime bool) 
 	contentTime := time.UnixMilli(content)
 	var formatted string
 	switch format {
+	case DateDisplayFormatLunar:
+		if lunar, ok := solarToLunar(contentTime); ok {
+			formatted = formatLunarDate(lunar)
+		} else {
+			formatted = contentTime.Format("2006-01-02") + " (" + GetAttributeViewI18n("lunarRange") + ")"
+		}
 	case DateDisplayFormatFull:
 		months := strings.Split(GetAttributeViewI18n("dateMonths"), "|")
 		month := contentTime.Month().String()

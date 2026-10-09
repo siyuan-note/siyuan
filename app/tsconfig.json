@@ -3,6 +3,7 @@
     "outDir": "./src/types/dist",
     "noImplicitAny": true,
     "module": "commonjs",
+    "resolveJsonModule": true,
     "target": "es6",
     "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "typeRoots": [

@@ -1,3 +1,31 @@
+.av__lunar-editor {
+  width: 340px;
+  max-width: 100%;
+}
+
+.av__lunar-date {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 8px 8px;
+}
+
+.av__lunar-date-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .b3-select {
+    flex: 1 1 70px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .b3-select[data-lunar-part="month"] {
+    flex: 2 1 130px;
+  }
+}
+
 // 单字段条件编辑器供筛选和条件颜色菜单共用。
 @mixin av-filter-editor {
   .b3-menu__item.av__filter-row {

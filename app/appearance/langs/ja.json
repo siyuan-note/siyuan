@@ -2736,6 +2736,15 @@
 		"quit": "アプリケーションを終了"
 	},
 	"_attrView": {
+		"dateCalendar": "暦",
+		"solarCalendar": "グレゴリオ暦",
+		"lunarCalendar": "旧暦（中国暦）",
+		"lunarLeapMonth": "閏${month}",
+		"lunarMonths": "1月|2月|3月|4月|5月|6月|7月|8月|9月|10月|11月|12月",
+		"lunarDays": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30",
+		"lunarDateTemplate": "旧暦 ${year}年${month}${day}日",
+		"lunarRange": "旧暦の日付範囲：1901-02-19 - 2100-12-31",
+		"lunarInvalid": "旧暦の日付または時刻が無効です。選び直してください",
 		"calendar": "カレンダー",
 		"list": "リスト",
 		"dateFormat": "日付形式",

@@ -1,5 +1,5 @@
 import {isAVNewItemTemplateType, isAVSelectType} from "./capabilities";
-import {genFieldValue, getValueInputHTML, openFieldSelectMenu, getRelationOptions, renderRelationFieldValue, openFieldRelationMenu} from "./fieldValueEditor";
+import {bindFieldLunarDates, genFieldValue, getValueInputHTML, openFieldSelectMenu, getRelationOptions, renderRelationFieldValue, openFieldRelationMenu} from "./fieldValueEditor";
 import {getCalendarCreationDate} from "./calendar/state";
 import {Constants} from "../../../constants";
 import {Dialog} from "../../../dialog";
@@ -435,7 +435,8 @@ export const openNewItemTemplateDialog = (options: {
                 }
             });
         });
-        hostElement.querySelectorAll<HTMLElement>('[data-role="field-value"][data-value-type]').forEach(item => item.addEventListener("click", (event) => {
+        bindFieldLunarDates(hostElement);
+        hostElement.querySelectorAll<HTMLElement>('[data-role="field-value"][data-value-type]:not([data-value-type="lunarDate"])').forEach(item => item.addEventListener("click", (event) => {
             event.preventDefault();
             event.stopPropagation();
             if (item.dataset.valueType === "checkbox") {

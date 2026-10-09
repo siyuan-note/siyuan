@@ -44,8 +44,9 @@
 
   &__page {
     position: absolute;
-    right: 16px;
+    left: 50%;
     bottom: 12%;
+    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     gap: 8px;

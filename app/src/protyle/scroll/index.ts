@@ -50,10 +50,10 @@ export class Scroll {
     <svg><use xlink:href="#iconDown"></use></svg>
 </div>
 <div class="protyle-scroll__page fn__none">
-    <button type="button" data-direction="up" class="block__icon block__icon--show block__icon--touch ariaLabel" data-position="west">
+    <button type="button" data-direction="up" class="block__icon block__icon--show block__icon--touch block__icon--subtle ariaLabel" data-position="west">
         <svg class="protyle-scroll__page-up"><use xlink:href="#iconArrowDown"></use></svg>
     </button>
-    <button type="button" data-direction="down" class="block__icon block__icon--show block__icon--touch ariaLabel" data-position="west">
+    <button type="button" data-direction="down" class="block__icon block__icon--show block__icon--touch block__icon--subtle ariaLabel" data-position="west">
         <svg><use xlink:href="#iconArrowDown"></use></svg>
     </button>
 </div>`;

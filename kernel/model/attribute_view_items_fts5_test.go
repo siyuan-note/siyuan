@@ -453,6 +453,7 @@ func setupAttributeViewItemsTest(t *testing.T, bound bool) (*fileOperationTestFi
 		`{"type":"url","url":{"content":"https://example.com"}}`,
 		`{"type":"email","email":{"content":"test@example.com"}}`,
 		`{"type":"phone","phone":{"content":"12345"}}`,
+		`{"type":"location","location":{"name":"Home","latitude":0,"longitude":120,"coordinateSystem":"gcj02","originalInput":"source"}}`,
 	} {
 		var value av.Value
 		if err := json.Unmarshal([]byte(payload), &value); err != nil {

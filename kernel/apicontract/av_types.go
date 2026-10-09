@@ -52,7 +52,7 @@ type AVValue struct {
 	ID              string           `json:"id,omitempty" api:"optional,nullable"`
 	KeyID           string           `json:"keyID,omitempty" api:"optional,nullable"`
 	BlockID         string           `json:"blockID,omitempty" api:"optional,nullable"`
-	Type            string           `json:"type,omitempty" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
+	Type            string           `json:"type,omitempty" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|location|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
 	IsDetached      bool             `json:"isDetached,omitempty" api:"optional,nullable"`
 	CreatedAt       int64            `json:"createdAt,omitempty" api:"optional,nullable"`
 	UpdatedAt       int64            `json:"updatedAt,omitempty" api:"optional,nullable"`
@@ -64,6 +64,7 @@ type AVValue struct {
 	URL             *AVValueURL      `json:"url,omitempty" api:"optional,nullable"`
 	Email           *AVValueEmail    `json:"email,omitempty" api:"optional,nullable"`
 	Phone           *AVValuePhone    `json:"phone,omitempty" api:"optional,nullable"`
+	Location        *AVValueLocation `json:"location,omitempty" api:"optional,nullable"`
 	MAsset          []*AVValueAsset  `json:"mAsset,omitempty" api:"optional,nullable"`
 	Template        *AVValueTemplate `json:"template,omitempty" api:"optional,nullable"`
 	Created         *AVValueCreated  `json:"created,omitempty" api:"optional,nullable"`
@@ -143,6 +144,22 @@ type AVValuePhone struct {
 	Content string `json:"content" api:"optional,nullable"`
 }
 
+// AVValueLocation 保存单个位置的原始坐标，不执行坐标系转换。
+// API 使用具名成员；界面、粘贴和文本导出统一为“纬度, 经度”，不接受无标签的坐标数组。
+// 纬度和经度必须同时为空或同时提供，范围分别为 [-90,90] 和 [-180,180]，零是有效坐标。
+// 更新时省略成员保留原值，显式 null 同时清空两个坐标；名称可以独立存在。
+// 坐标系省略或为空时按 unknown 处理，不推断 WGS84；其他非枚举值会被拒绝。
+// 后续地图适配必须显式选择坐标顺序与转换规则，未知坐标系不能直接视为 WGS84。
+// 位置字段的文本筛选条件放在 AVValue.Text.Content，不将搜索词解析成坐标。
+type AVValueLocation struct {
+	Name             string   `json:"name,omitempty" api:"optional,nullable"`
+	Latitude         *float64 `json:"latitude,omitempty" api:"optional,nullable"`
+	Longitude        *float64 `json:"longitude,omitempty" api:"optional,nullable"`
+	CoordinateSystem string   `json:"coordinateSystem,omitempty" api:"optional,nullable,enum=|unknown|wgs84|gcj02|bd09"`
+	// 来源文本不参与判空、筛选和排序。仅修改名称时保留；修改坐标或有效坐标系时若省略则清空。
+	OriginalInput string `json:"originalInput,omitempty" api:"optional,nullable"`
+}
+
 type AVValueAsset struct {
 	Type    string `json:"type" api:"optional,nullable,enum=file|image"`
 	Name    string `json:"name" api:"optional,nullable"`
@@ -215,7 +232,7 @@ type AVKey struct {
 	AttributePanelVisibility string            `json:"attributePanelVisibility,omitempty" api:"optional,nullable,enum=|always|hide-empty|hide"`
 	ID                       string            `json:"id" api:"optional,nullable"`
 	Name                     string            `json:"name" api:"optional,nullable"`
-	Type                     string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
+	Type                     string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|location|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
 	Icon                     string            `json:"icon" api:"optional,nullable"`
 	Desc                     string            `json:"desc" api:"optional,nullable"`
 	Options                  []*AVSelectOption `json:"options,omitempty" api:"optional,nullable"`
@@ -228,6 +245,7 @@ type AVKey struct {
 	Relation       *AVRelation `json:"relation,omitempty" api:"optional,nullable"`
 	Rollup         *AVRollup   `json:"rollup,omitempty" api:"optional,nullable"`
 	Date           *AVDate     `json:"date,omitempty" api:"optional,nullable"`
+	Location       *AVLocation `json:"location,omitempty" api:"optional,nullable"`
 	Created        *AVCreated  `json:"created,omitempty" api:"optional,nullable"`
 	Updated        *AVUpdated  `json:"updated,omitempty" api:"optional,nullable"`
 }
@@ -237,6 +255,12 @@ type AVSelectOption struct {
 	Color         string                `json:"color" api:"optional,nullable"`
 	Desc          string                `json:"desc" api:"optional,nullable"`
 	ResolvedColor *AVAttributeViewColor `json:"resolvedColor,omitempty" api:"optional,nullable"`
+}
+
+// AVLocation 的默认坐标系仅供新录入使用，不改变任何已存位置或复制、导入的值。
+// 每个 AVValueLocation 的坐标系独立保存，显式 unknown 不是等待应用默认值的空值。
+type AVLocation struct {
+	DefaultCoordinateSystem string `json:"defaultCoordinateSystem,omitempty" api:"optional,nullable,enum=|unknown|wgs84|gcj02|bd09"`
 }
 
 type AVRelation struct {
@@ -292,7 +316,7 @@ type AVTableColumn struct {
 type AVBaseInstanceField struct {
 	ID           string            `json:"id" api:"optional,nullable"`
 	Name         string            `json:"name" api:"optional,nullable"`
-	Type         string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
+	Type         string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|location|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
 	Icon         string            `json:"icon" api:"optional,nullable"`
 	Wrap         bool              `json:"wrap" api:"optional,nullable"`
 	Hidden       bool              `json:"hidden" api:"optional,nullable"`
@@ -307,6 +331,7 @@ type AVBaseInstanceField struct {
 	Relation       *AVRelation `json:"relation,omitempty" api:"optional,nullable"`
 	Rollup         *AVRollup   `json:"rollup,omitempty" api:"optional,nullable"`
 	Date           *AVDate     `json:"date,omitempty" api:"optional,nullable"`
+	Location       *AVLocation `json:"location,omitempty" api:"optional,nullable"`
 	Created        *AVCreated  `json:"created,omitempty" api:"optional,nullable"`
 	Updated        *AVUpdated  `json:"updated,omitempty" api:"optional,nullable"`
 }
@@ -326,7 +351,7 @@ type AVTableCell struct {
 type AVBaseValue struct {
 	ID        string   `json:"id" api:"optional,nullable"`
 	Value     *AVValue `json:"value" api:"optional,nullable"`
-	ValueType string   `json:"valueType" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
+	ValueType string   `json:"valueType" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|location|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
 }
 
 type AVGallery struct {

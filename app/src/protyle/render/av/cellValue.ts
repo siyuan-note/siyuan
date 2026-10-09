@@ -1,5 +1,18 @@
 import {isAVDateType, isAVSelectType, isAVTextType} from "./capabilities";
 import type {IAVSelectedCell} from "./selectionState";
+import {createAVLocationReplacement, isAVLocationEmpty} from "./locationValue";
+
+// 编辑器按条目和原始字段验证目标，包含隐藏字段以及批量代理未携带分组标识的情况。
+export const hasAVCachedCellType = (view: IAVView, rowID: string, colID: string, type: TAVCol): boolean => {
+    const columns = (view as IAVTable).columns || (view as IAVGallery).fields || [];
+    const index = columns.findIndex(column => column.id === colID && column.type === type);
+    const items: Array<IAVRow | IAVGalleryItem> = (view as IAVTable).rows || (view as IAVGallery).cards || [];
+    if (index >= 0 && items.some(item => item.id === rowID &&
+        !!("cells" in item ? item.cells : item.values)[index])) {
+        return true;
+    }
+    return view.groups?.some(group => hasAVCachedCellType(group, rowID, colID, type)) || false;
+};
 
 // 按行和字段同步已加载的数据，供后续编辑读取，不依赖选区或单元格是否已渲染。
 export const updateAVCachedCellValue = (view: IAVView, rowID: string, colID: string, value: IAVCellValue) => {
@@ -31,6 +44,7 @@ export const createEmptyAVValue = (keyID: string, type: TAVCol, blockID?: string
     url: {content: ""},
     phone: {content: ""},
     email: {content: ""},
+    ...(type === "location" ? {location: createAVLocationReplacement()} : {}),
     template: {content: ""},
     date: {isNotEmpty: false, isNotEmpty2: false},
     created: {isNotEmpty: false},
@@ -52,6 +66,9 @@ export const cellValueIsEmpty = (value: IAVCellValue, useRenderedContent = false
     }
     if (value.type === "checkbox") {
         return false;
+    }
+    if (value.type === "location") {
+        return isAVLocationEmpty(value.location);
     }
     if (isAVTextType(value.type)) {
         return !value[value.type as "text"]?.content;
@@ -87,7 +104,9 @@ export const genEmptyAVCellValue = (colType: TAVCol): IAVCellValue => {
     const cellValue: IAVCellValue = {
         type: colType,
     };
-    if (colType === "number") {
+    if (colType === "location") {
+        cellValue.location = createAVLocationReplacement();
+    } else if (colType === "number") {
         cellValue.number = {
             content: 0,
             isNotEmpty: false,
@@ -136,6 +155,8 @@ export const cloneAVCellValueSnapshot = (value: IAVCellValue): IAVCellValue => {
         snapshot.mSelect = [];
     } else if (snapshot.type === "mAsset" && !snapshot.mAsset) {
         snapshot.mAsset = [];
+    } else if (snapshot.type === "location") {
+        snapshot.location = createAVLocationReplacement(snapshot.location);
     }
     return snapshot;
 };

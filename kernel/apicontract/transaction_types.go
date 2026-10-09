@@ -72,7 +72,7 @@ type TransactionOperationFields struct {
 	Srcs              []*TransactionSource     `json:"srcs" api:"optional,nullable"`
 	IsDetached        bool                     `json:"isDetached" api:"optional,nullable"`
 	Name              string                   `json:"name" api:"optional,nullable"`
-	Typ               string                   `json:"type" api:"optional,nullable,enum=|block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
+	Typ               string                   `json:"type" api:"optional,nullable,enum=|block|text|number|date|select|mSelect|url|email|phone|location|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
 	Format            string                   `json:"format" api:"optional,nullable"`
 	KeyID             string                   `json:"keyID" api:"optional,nullable"`
 	RowID             string                   `json:"rowID" api:"optional,nullable"`

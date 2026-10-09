@@ -26,9 +26,10 @@ import (
 )
 
 const (
-	CurrentSpec   = 10
+	CurrentSpec   = 11
 	PlainTextSpec = 8
 	RichTextSpec  = 9
+	LocationSpec  = 11
 )
 
 const MaxFilterNestingDepth = 3
@@ -48,6 +49,9 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec8(av)
 	upgradeSpec9(av)
 	upgradeSpec10(av)
+	if av.HasLocation() {
+		av.Spec = LocationSpec
+	}
 }
 
 // upgradeSpec10 仅为包含列表或日历配置的数据库升级，保留其他数据库的旧版兼容性。
@@ -83,6 +87,9 @@ func CheckSpec(av *AttributeView) (err error) {
 		logging.LogErrorf("attribute view [%s] spec [%d] is newer than current [%d]", av.ID, av.Spec, CurrentSpec)
 		err = ErrSpecTooNew
 		return
+	}
+	if av.Spec < LocationSpec && av.HasLocation() {
+		return ErrLocationSpecMismatch
 	}
 	if av.Spec < RichTextSpec && av.HasRichText() {
 		logging.LogErrorf("attribute view [%s] rich text requires spec [%d], current is [%d]", av.ID, RichTextSpec, av.Spec)

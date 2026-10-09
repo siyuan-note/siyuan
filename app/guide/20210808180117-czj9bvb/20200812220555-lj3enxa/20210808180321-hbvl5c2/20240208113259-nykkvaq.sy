@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261007101857"
+		"updated": "20261009040533"
 	},
 	"Children": [
 		{
@@ -65,6 +65,94 @@
 				{
 					"Type": "NodeText",
 					"Data": "在文档顶部、数据库条目页或块属性对话框的数据库属性面板中点击字段名，可以将“数据库面板字段可见性”设置为“始终显示”“空白时隐藏”或“始终隐藏”。“默认”保留面板原有的显示设置，其中文档顶部面板沿用全局隐藏空字段设置。规则对该数据库的属性面板生效，不影响数据库各视图的字段显隐。点击面板的编辑按钮可以临时展开隐藏字段，编辑字段值或修改显示规则。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-m7nwg3o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261009034010-m7nwg3o",
+				"updated": "20261009040533"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "位置字段"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-8ihp92l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-8ihp92l",
+				"updated": "20261009035322"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "添加类型为「位置」的字段后，点击单元格编辑名称和坐标。名称可留空。纬度和经度须成对填写，使用十进制度数。纬度范围为 -90 到 90，经度范围为 -180 到 180，零是有效值。将两个坐标都留空时，可仅保存名称。字段设置中的「新录入默认坐标系」仅用于新录入的位置；已有位置（包括「未知」）保持不变，每个值仍可单独选择坐标系，复制或导入的位置保留其已保存的坐标系。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-grvs8hv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-grvs8hv",
+				"updated": "20261009034224"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "导入坐标时，在「粘贴坐标」中输入 39.9042, 116.4074 这样的坐标对，再点击「确定」。顺序为纬度、经度，思源不会自动交换两者。坐标系可选择「未知」、WGS84、GCJ-02 或 BD-09；此标记不进行坐标转换。导入的原始文本会原样保留为来源信息，手动修改坐标或坐标系会清除该来源文本。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-kag8uox",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-kag8uox",
+				"updated": "20261009040533"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击「保存」应用修改，点击「取消」放弃修改，「清空」会移除位置值。文本过滤和排序使用名称、坐标及坐标系标记组合后的文本。此字段不加载地图，也不调用外部位置服务。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "也可按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS 上为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）保存，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 取消。使用包含「位置」字段的数据库前，请将所有设备上的思源更新到兼容版本；旧版内核无法打开此类数据库。"
 				}
 			]
 		},

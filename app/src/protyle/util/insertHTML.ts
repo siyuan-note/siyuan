@@ -26,6 +26,8 @@ import {
 } from "./selection";
 import {focusByRange, getSelectionOffset, setLastNodeRange} from "./selectionOffsets";
 import {Constants} from "../../constants";
+import {showMessage} from "../../dialog/message";
+import {createAVLocationReplacement, isAVLocationCoordinateInput} from "../render/av/locationValue";
 import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 import {updateAttrViewCellAnimation, updateAVName} from "../render/av/action";
@@ -358,6 +360,20 @@ const pasteAVMatrix = async (options: {
         return;
     }
     const availableColumns = visibleColumns.slice(startColumnIndex);
+    const requiresLocationEditor = availableColumns.some((column, index) => column.type === "location" &&
+        !(options.header && inferableKeyIDs.has(column.id)) && options.values.some(row => {
+            const value = row[index];
+            if (typeof value === "undefined") {
+                return false;
+            }
+            const pasteValue = getAVPasteValueForType(value, "location");
+            const text = typeof pasteValue === "string" ? pasteValue : pasteValue.type === "text" ? pasteValue.text?.content : "";
+            return isAVLocationCoordinateInput(text || "");
+        }));
+    if (requiresLocationEditor) {
+        showMessage(window.siyuan.languages.locationPasteInEditor, 6000, "error");
+        return;
+    }
     const usedNames = new Set(options.columns.map(column => column.name));
     const changedCellColumnIDs = new Set<string>();
     const targetColumns: IAVPasteTargetColumn[] = [];
@@ -588,6 +604,9 @@ const pasteAVMatrix = async (options: {
                     if (hasCellUpdate && !isNewRow && !targetColumn.isNew) {
                         const originalValue = originalCellValues.get(`${pasteRows[i].id}:${targetColumn.column.id}`);
                         if (originalValue) {
+                            if (originalValue.type === "location") {
+                                originalValue.location = createAVLocationReplacement(originalValue.location);
+                            }
                             cellUndoOperations.push({
                                 action: "updateAttrViewCell",
                                 id: originalValue.id || cellElement.dataset.id,

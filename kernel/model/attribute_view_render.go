@@ -1410,12 +1410,8 @@ func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string
 		return
 	}
 
-	attrView = av.NewAttributeView(avID)
-	if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
-		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-		return
-	}
-	if err = av.CheckSpec(attrView); nil != err {
+	attrView, err = parseHistoricalAttributeViewData(avID, data)
+	if nil != err {
 		return
 	}
 	var snapshotColors []*av.AttributeViewCustomColor
@@ -1513,12 +1509,8 @@ func RenderHistoryAttributeView(avID, viewID, carrierViewID, query string, page,
 		return
 	}
 
-	attrView = av.NewAttributeView(avID)
-	if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
-		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-		return
-	}
-	if err = av.CheckSpec(attrView); nil != err {
+	attrView, err = parseHistoricalAttributeViewData(avID, data)
+	if nil != err {
 		return
 	}
 	attrView.CustomColorRenderContext = newHistoryAttributeViewCustomColorRenderContext(source.historyDir)
@@ -1526,6 +1518,21 @@ func RenderHistoryAttributeView(avID, viewID, carrierViewID, query string, page,
 
 	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, query, page, pageSize, groupPaging, false, false, nil, "", calendarRanges...)
 	return
+}
+
+// 历史和仓库快照完成认证后共用字段校验，不重写历史源数据。
+func parseHistoricalAttributeViewData(avID string, data []byte) (*av.AttributeView, error) {
+	view := av.NewAttributeView(avID)
+	if err := gulu.JSON.UnmarshalJSON(data, view); nil != err {
+		return nil, err
+	}
+	if err := av.CheckSpec(view); nil != err {
+		return nil, err
+	}
+	if err := view.NormalizeLocations(); nil != err {
+		return nil, err
+	}
+	return view, nil
 }
 
 func decryptHistoricalAttributeView(boxID, avID string, data []byte) ([]byte, error) {

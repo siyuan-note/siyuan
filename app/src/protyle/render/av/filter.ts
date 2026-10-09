@@ -592,6 +592,8 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
         const content = valueType === "template" && filterValue && filterValue.type !== "template" ?
             getCellValueText(filterValue) : filterValue?.[valueType as "text"]?.content || "";
         valueHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1" value="${escapeFilterValue(content)}" data-type="filterValue" data-path="${path}">`;
+    } else if (valueType === "location") {
+        valueHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1" value="${escapeFilterValue(filterValue?.text?.content || "")}" data-type="filterValue" data-path="${path}">`;
     } else if (valueType === "mAsset") {
         const content = filterValue?.mAsset?.[0]?.content || "";
         valueHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1" value="${escapeFilterValue(content)}" data-type="filterValue" data-path="${path}">`;
@@ -797,6 +799,9 @@ const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: s
             const input = rowElement.querySelector('[data-type="filterValue"]') as HTMLInputElement;
             newValue = input?.value ? genCellValue("relation", input.value) : genEmptyCellValue("relation");
         }
+    } else if (valueType === "location") {
+        const input = rowElement.querySelector<HTMLInputElement>('[data-type="filterValue"]');
+        newValue = {type: "location", text: {content: input?.value || ""}};
     } else if (hasAVScalarContent(valueType)) {
         const input = rowElement.querySelector('[data-type="filterValue"]') as HTMLInputElement;
         const val = input?.value || "";

@@ -1917,6 +1917,7 @@ if (response.code === 0 && response.data) {
 | `url`       | URL                    |
 | `email`     | メール                 |
 | `phone`     | 電話                   |
+| `location` | 位置 |
 | `mAsset`    | アセット               |
 | `template`  | テンプレート           |
 | `created`   | 作成日時               |
@@ -2341,11 +2342,16 @@ if (response.code === 0 && response.data) {
 | `url`      | `{"url": {"content": "https://siyuan.com"}}`                                                                         |
 | `email`    | `{"email": {"content": "a@b.com"}}`                                                                                  |
 | `phone`    | `{"phone": {"content": "1234567890"}}`                                                                               |
+| `location` | `{"location":{"name":"Home","latitude":0,"longitude":0,"coordinateSystem":"unknown","originalInput":"0, 0"}}` |
 | `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
 
 > ⚠️ `itemID` は**アイテム ID**、つまり[レンダリング](#レンダリング)が返すアイテムの `id` です。表形式では `rows[].id`、ギャラリーとカンバンでは `cards[].id` であり、グループ化が有効な場合は `groups[]` 内の対応するビューインスタンスにあります。また、主キー値の `value.blockID` とも同じです。紐づくアイテムの場合、紐づくブロック ID は主キー値の `value.block.id` にあります。両者は異なる概念であり、同一であると仮定してはいけません。誤った ID を渡すと、値はレンダリングされたセルに現れない孤立データとして保存されます。
 
 リッチテキストでは、`text.rich.content` が正規の Kramdown ソースです。カーネルはサポート対象の構造を検証して `text.content` のプレーンテキスト表現を生成するため、呼び出し側が指定したプレーンテキスト表現は無視されます。既存の API クライアントとの互換性を保つため、`text.rich` を省略した場合、`text.content` が変わっていなければ保存済みのリッチテキストを維持し、変わっていればプレーンテキストで置き換えます。プレーンテキスト表現が同じ場合でも、`"rich": null` を送信すると書式を明示的に削除できます。リッチテキストを含むデータベースはストレージ仕様 9 を使用するため、それより前のデータベース仕様だけをサポートするカーネルでは開けません。
+
+`location` の `name` は省略できます。`latitude` と `longitude` は両方とも省略または null にするか、それぞれ [-90, 90] と [-180, 180] の範囲内の有限数値を指定します。ゼロは有効な座標です。`coordinateSystem` は `unknown`、`wgs84`、`gcj02`、`bd09` に対応し、省略または空の場合は不明として扱います。座標は変換せずに保存します。`originalInput` は入力元のテキストを保持し、フィルターと並べ替えには使用しません。更新時に省略したメンバーは既存の値を保持します。位置を消去するには `{"location":null}` を送信するか、名前を空にして両方の座標を null にします。座標または有効な座標系が変わると、省略された `originalInput` は自動的に消去されます。明示的に指定した入力元のテキストは保持されます。テキストフィルターは `{"type":"location","text":{"content":"検索語"}}` を使用し、名前、座標、座標系を照合します。位置フィールドはデータベースのストレージ仕様 11 を使用するため、古いカーネルでは開けません。位置フィールドを使用しないデータベースの仕様は変わりません。
+
+フィールドの任意の `location.defaultCoordinateSystem` 設定は、新しい手動入力にのみ既定の座標系を提供します。保存済みの各位置は `unknown` を含む独自の座標系を保持し、設定の変更で既存、コピー、インポートされた値は書き換わりません。API 書き込みで値の座標系を省略した場合も不明を意味し、入力元と無関係な可能性があるフィールドの既定値は継承しません。
 
 * `/api/av/setAttributeViewBlockAttr`
 * パラメータ
@@ -2700,7 +2706,7 @@ if (response.code === 0 && response.data) {
     * `avID`: データベース ID
     * `keyID`: 新しいフィールドの ID。`Lute.NewNodeID()` で生成された有効なノード ID（14 桁のタイムスタンプ + `-` + 7 文字のランダム英数字、例：`20240118120204-abc1234`）である必要があります
     * `keyName`: フィールドの表示名
-    * `keyType`: フィールドタイプ——`text`、`number`、`date`、`select`、`mSelect`、`url`、`email`、`phone`、`mAsset`、`template`、`created`、`updated`、`checkbox`、`relation`、`rollup`、`lineNumber` のいずれか。`block`（主キー）はこのエンドポイントから追加できません
+    * `keyType`: フィールドタイプ——`text`、`number`、`date`、`select`、`mSelect`、`url`、`email`、`phone`、`location`、`mAsset`、`template`、`created`、`updated`、`checkbox`、`relation`、`rollup`、`lineNumber` のいずれか。`block`（主キー）はこのエンドポイントから追加できません
     * `keyIcon`: 任意のフィールドアイコン（emoji または空文字列）
     * `previousKeyID`: このフィールド ID の後に新しい列を挿入。空文字列の場合はレイアウトのデフォルト位置（テーブルは先頭、ギャラリー/カンバンは末尾）を使用
 * 戻り値

@@ -8200,7 +8200,7 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 	} else {
 		val = context.values[keyID][itemID]
 	}
-	if nil != val {
+	if nil != val && av.KeyTypeLocation != keyValues.Key.Type {
 		val.Type = keyValues.Key.Type
 	}
 
@@ -8211,7 +8211,7 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 	}
 
 	valueID := val.ID
-	valueType := val.Type
+	valueType := keyValues.Key.Type
 	valueCreatedAt := val.CreatedAt
 	oldText := val.Text
 
@@ -8230,8 +8230,8 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		return
 	}
 	updatedVal := val
-	// 文本和主键值先在副本上合并和校验，避免校验失败污染原值，并保留部分更新语义。
-	if av.KeyTypeText == valueType || av.KeyTypeBlock == valueType {
+	// 文本、位置和主键值先在副本上合并和校验，避免校验失败污染原值，并保留部分更新语义。
+	if av.KeyTypeText == valueType || av.KeyTypeBlock == valueType || av.KeyTypeLocation == valueType {
 		updatedVal = val.Clone()
 		if nil == updatedVal {
 			err = fmt.Errorf("clone attribute view text value [%s] failed", valueID)
@@ -8272,6 +8272,12 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		if err = updatedVal.Text.NormalizeRichContent(); nil != err {
 			return
 		}
+	}
+	if av.KeyTypeLocation == valueType {
+		if err = updatedVal.Location.Normalize(); nil != err {
+			return
+		}
+		normalizeAttributeViewLocationProvenance(val.Location, updatedVal.Location, data)
 	}
 	if updatedVal != val {
 		*val = *updatedVal

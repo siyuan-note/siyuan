@@ -94,9 +94,10 @@ const setup = (readonly = false) => {
     const viewport = {top: 0, bottom: 800};
     const document = {activeElement: new ElementMock(), createElement: () => new ElementMock(),
         querySelectorAll: (selector: string) => {
-            assert.ok([".av__mask", ".av__mask:not(.av__richtext-mask)"].includes(selector));
+            assert.ok([".av__mask, [data-av-location-editor]",
+                ".av__mask:not(.av__richtext-mask), [data-av-location-editor]"].includes(selector));
             return cellMasks.filter(mask => mask.isConnected &&
-                (selector === ".av__mask" || !mask.classList.contains("av__richtext-mask")));
+                (selector.startsWith(".av__mask,") || !mask.classList.contains("av__richtext-mask")));
         }};
     const window = Object.assign(new EventTargetMock(), {
         innerHeight: 800,

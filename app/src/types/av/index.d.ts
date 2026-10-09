@@ -1,6 +1,6 @@
 // 此文件由内核字段能力声明生成，请运行 pnpm run api:generate 更新。
 
-export type AVKeyType = "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber";
+export type AVKeyType = "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber" | "location";
 export type AVFilterOperator = "=" | "!=" | ">" | ">=" | "<" | "<=" | "Contains" | "Does not contains" | "Contains any item" | "Does not contain any item" | "Is empty" | "Is not empty" | "Starts with" | "Ends with" | "Is between" | "Is true" | "Is false";
 
 export type AVKeyGroup = "none" | "richText" | "link" | "scalarContent" | "attributePlaceholder" | "rollupCell" | "newItemTemplate" | "noFilterDefault" | "renderDependentFilter" | "skipRowCopy" | "renderAutoFill" | "rollupAlwaysRender" | "rollupForeignRender";
@@ -20,7 +20,7 @@ export interface AVKeyCapability {
     readonly groups?: readonly AVKeyGroup[];
     /** 用于选择接受与呈现的算子集合，保留旧调用方构造基础能力对象的兼容性 */
     readonly filterProfile?: AVFilterProfile;
-    readonly valueKind: "assets" | "checkbox" | "date" | "lineNumber" | "number" | "options" | "relation" | "rollup" | "text" | "timestamp";
+    readonly valueKind: "assets" | "checkbox" | "date" | "lineNumber" | "location" | "number" | "options" | "relation" | "rollup" | "text" | "timestamp";
     readonly editable: boolean;
     readonly filterable: boolean;
     readonly sortable: boolean;

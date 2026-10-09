@@ -9,7 +9,7 @@ import (
 )
 
 func TestNestedRollupRefreshWithoutRenderingIntermediate(t *testing.T) {
-	for _, typ := range []av.KeyType{av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeBlock} {
+	for _, typ := range []av.KeyType{av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeBlock, av.KeyTypeLocation} {
 		for _, stale := range []bool{false, true} {
 			for _, levels := range []int{3, 4} {
 				t.Run(fmt.Sprintf("%s/stale=%v/levels=%d", typ, stale, levels), func(t *testing.T) {
@@ -34,6 +34,8 @@ func TestNestedRollupRefreshWithoutRenderingIntermediate(t *testing.T) {
 								value.Number.Content = float64(update*10 + row + 1)
 							case av.KeyTypeBlock:
 								value.Block.Content = fmt.Sprintf("updated-%d-%d", update, row)
+							case av.KeyTypeLocation:
+								value.Location.Name = fmt.Sprintf("updated-%d-%d", update, row)
 							}
 						}
 						collection := renderNestedRollupTestView(t, outer, cache)
@@ -349,6 +351,8 @@ func newNestedRollupTestLeaf(typ av.KeyType) (*av.AttributeView, *av.Key) {
 		value := &av.Value{ID: block.BlockID + "-value", KeyID: key.ID, BlockID: block.BlockID, Type: typ}
 		if typ == av.KeyTypeNumber {
 			value.Number = &av.ValueNumber{Content: float64(row + 1), IsNotEmpty: true}
+		} else if typ == av.KeyTypeLocation {
+			value.Location = &av.ValueLocation{Name: fmt.Sprintf("fresh-%d", row), CoordinateSystem: "unknown", OriginalInput: "source"}
 		} else {
 			value.Text = &av.ValueText{Content: fmt.Sprintf("fresh-%d", row)}
 		}

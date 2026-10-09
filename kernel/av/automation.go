@@ -149,6 +149,10 @@ func ValidateAutomationFilters(view *AttributeView, filters []*ViewFilter) error
 		if filter.Value == nil || filter.Value.Type != key.Type || filter.ValueSource != "" && filter.ValueSource != ValueSourceStored {
 			return fmt.Errorf("invalid automation condition value [%s]", filter.Column)
 		}
+		if KeyTypeLocation == key.Type && (!IsFilterOperatorAllowed(key.Type, filter.Operator) ||
+			filter.Operator != FilterOperatorIsEmpty && filter.Operator != FilterOperatorIsNotEmpty && nil == filter.Value.Text) {
+			return fmt.Errorf("invalid automation location condition [%s]", filter.Column)
+		}
 		switch filter.Operator {
 		case FilterOperatorIsEqual, FilterOperatorIsNotEqual, FilterOperatorIsGreater, FilterOperatorIsGreaterOrEqual,
 			FilterOperatorIsLess, FilterOperatorIsLessOrEqual, FilterOperatorContains, FilterOperatorDoesNotContain,
@@ -192,6 +196,10 @@ func NormalizeAutomationValue(value *Value) *Value {
 	case KeyTypeEmail:
 		if value.Email == nil {
 			value.Email = &ValueEmail{}
+		}
+	case KeyTypeLocation:
+		if value.Location == nil {
+			value.Location = &ValueLocation{}
 		}
 	case KeyTypePhone:
 		if value.Phone == nil {

@@ -542,7 +542,7 @@ func init() {
 
 	databaseKeyAddCmd.Flags().String("av", "", "attribute view ID (required)")
 	databaseKeyAddCmd.Flags().String("name", "", "key name (required)")
-	databaseKeyAddCmd.Flags().String("type", "", "key type (required): text/number/date/select/mSelect/url/email/phone/mAsset/template/created/updated/checkbox/relation/rollup/lineNumber")
+	databaseKeyAddCmd.Flags().String("type", "", "key type (required): text/number/date/select/mSelect/url/email/phone/location/mAsset/template/created/updated/checkbox/relation/rollup/lineNumber")
 	databaseKeyAddCmd.Flags().String("icon", "", "key icon (optional)")
 	databaseKeyAddCmd.Flags().String("prev", "", "previous key ID for ordering (optional)")
 

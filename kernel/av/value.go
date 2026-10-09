@@ -60,6 +60,7 @@ type Value struct {
 	URL      *ValueURL      `json:"url,omitempty"`
 	Email    *ValueEmail    `json:"email,omitempty"`
 	Phone    *ValuePhone    `json:"phone,omitempty"`
+	Location *ValueLocation `json:"location,omitempty"`
 	MAsset   []*ValueAsset  `json:"mAsset,omitempty"`
 	Template *ValueTemplate `json:"template,omitempty"`
 	Created  *ValueCreated  `json:"created,omitempty"`
@@ -139,6 +140,8 @@ func (value *Value) String(format bool) string {
 			return ""
 		}
 		return strings.TrimSpace(value.Email.Content)
+	case KeyTypeLocation:
+		return value.Location.String()
 	case KeyTypePhone:
 		if nil == value.Phone {
 			return ""
@@ -276,6 +279,8 @@ func (value *Value) IsBlank() bool {
 			return true
 		}
 		return "" == strings.TrimSpace(value.Email.Content)
+	case KeyTypeLocation:
+		return value.Location.IsEmpty()
 	case KeyTypePhone:
 		if nil == value.Phone {
 			return true
@@ -354,6 +359,8 @@ func (value *Value) IsEmpty() bool {
 			return true
 		}
 		return "" == value.Email.Content
+	case KeyTypeLocation:
+		return value.Location.IsEmpty()
 	case KeyTypePhone:
 		if nil == value.Phone {
 			return true
@@ -407,6 +414,8 @@ func (value *Value) SetValByType(typ KeyType, val any) {
 		value.URL = val.(*ValueURL)
 	case KeyTypeEmail:
 		value.Email = val.(*ValueEmail)
+	case KeyTypeLocation:
+		value.Location = val.(*ValueLocation)
 	case KeyTypePhone:
 		value.Phone = val.(*ValuePhone)
 	case KeyTypeMAsset:
@@ -452,6 +461,8 @@ func (value *Value) GetValByType(typ KeyType) (ret any) {
 		return value.URL
 	case KeyTypeEmail:
 		return value.Email
+	case KeyTypeLocation:
+		return value.Location
 	case KeyTypePhone:
 		return value.Phone
 	case KeyTypeMAsset:
@@ -3295,6 +3306,8 @@ func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType, k
 		ret.URL = &ValueURL{}
 	case KeyTypeEmail:
 		ret.Email = &ValueEmail{}
+	case KeyTypeLocation:
+		ret.Location = &ValueLocation{}
 	case KeyTypePhone:
 		ret.Phone = &ValuePhone{}
 	case KeyTypeMAsset:

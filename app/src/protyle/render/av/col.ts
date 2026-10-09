@@ -1,5 +1,6 @@
 import {hasAVCapability, isAVReadonlyType, isAVSelectType, isAVTimestampType} from "./capabilities";
 import {isTableLikeView} from "./viewType";
+import {bindLocationDefaultCoordinateSystem} from "./locationColumn";
 import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
 import {MenuItem} from "../../../menus/Menu";
@@ -161,6 +162,12 @@ export const getEditHTML = (options: {
         colData.options.forEach(item => {
             html += getColOptionHTML(item);
         });
+    } else if (colData.type === "location") {
+        html += `<button class="b3-menu__separator" data-id="separator_2"></button>
+<button class="b3-menu__item" data-type="locationDefaultCoordinateSystem">
+    <span class="b3-menu__label">${window.siyuan.languages.defaultCoordinateSystem}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>`;
     } else if (colData.type === "number") {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
 <button class="b3-menu__item" data-type="numberFormat" data-format="${colData.numberFormat}">
@@ -286,6 +293,7 @@ export const getEditHTML = (options: {
     ${genUpdateColItem("url", colData.type)}
     ${genUpdateColItem("email", colData.type)}
     ${genUpdateColItem("phone", colData.type)}
+    ${genUpdateColItem("location", colData.type)}
     ${genUpdateColItem("template", colData.type)}
     ${genUpdateColItem("relation", colData.type)}
     ${genUpdateColItem("rollup", colData.type)}
@@ -306,6 +314,21 @@ export const bindEditEvent = (options: {
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
     bindDateCalendarMenu(options.protyle, avID, colData, options.menuElement);
+    if (colData.type === "location") {
+        bindLocationDefaultCoordinateSystem({
+            menuElement: options.menuElement,
+            column: colData,
+            onChange: system => {
+                const previous = colData.location?.defaultCoordinateSystem || "unknown";
+                transaction(options.protyle, [{
+                    action: "setAttrViewColLocationDefaultCoordinateSystem", id: colId, avID, data: system,
+                }], [{
+                    action: "setAttrViewColLocationDefaultCoordinateSystem", id: colId, avID, data: previous,
+                }]);
+                colData.location = {...colData.location, defaultCoordinateSystem: system};
+            },
+        });
+    }
     const visibilityElement = options.menuElement.querySelector('[data-type="attributePanelVisibility"]');
     if (visibilityElement) {
         const choices: Array<[IAVColumn["attributePanelVisibility"], string]> = [
@@ -697,6 +720,7 @@ export const getColNameByType = (type: TAVCol) => {
         case "date":
         case "phone":
         case "email":
+        case "location":
         case "template":
             return window.siyuan.languages[type];
         case "mSelect":
@@ -751,6 +775,8 @@ export const getColIconByType = (type: TAVCol) => {
             return "iconEmail";
         case "phone":
             return "iconPhone";
+        case "location":
+            return "iconPin";
         case "template":
             return "iconMath";
         case "checkbox":
@@ -2092,6 +2118,46 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             });
             blockElement.setAttribute("updated", newUpdated);
         }
+    });
+    menu.addItem({
+        id: "location",
+        icon: "iconPin",
+        label: window.siyuan.languages.location,
+        click() {
+            const id = Lute.NewNodeID();
+            const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+                name: window.siyuan.languages.location,
+                avID,
+                type: "location",
+                id,
+                previousID,
+            }, {
+                action: "doUpdateUpdated",
+                id: blockId,
+                data: newUpdated,
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }, {
+                action: "doUpdateUpdated",
+                id: blockId,
+                data: blockElement.getAttribute("updated"),
+            }]);
+            addAttrViewColAnimation({
+                blockElement,
+                protyle,
+                type: "location",
+                name: window.siyuan.languages.location,
+                id,
+                previousID,
+            });
+            blockElement.setAttribute("updated", newUpdated);
+        },
     });
     menu.addItem({
         id: "template",

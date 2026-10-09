@@ -125,6 +125,27 @@
     "Starts with": false,
     "invalid": false
   },
+  "location": {
+    "": false,
+    "!=": true,
+    "\u003c": false,
+    "\u003c=": false,
+    "=": true,
+    "\u003e": false,
+    "\u003e=": false,
+    "Contains": true,
+    "Contains any item": false,
+    "Does not contain any item": false,
+    "Does not contains": true,
+    "Ends with": true,
+    "Is between": false,
+    "Is empty": true,
+    "Is false": false,
+    "Is not empty": true,
+    "Is true": false,
+    "Starts with": true,
+    "invalid": false
+  },
   "mAsset": {
     "": false,
     "!=": true,

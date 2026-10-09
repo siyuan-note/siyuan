@@ -50,7 +50,10 @@ func TestAVRelationItemNameChoiceCompatibility(t *testing.T) {
 }
 
 func TestAVValuePatchPresence(t *testing.T) {
-	for _, patch := range []string{`{}`, `{"text":{}}`, `{"text":{"content":""}}`, `{"text":null}`, `{"TEXT":{"CONTENT":"x"},"unknown":{"keep":true}}`} {
+	for _, patch := range []string{`{}`, `{"text":{}}`, `{"text":{"content":""}}`, `{"text":null}`, `{"TEXT":{"CONTENT":"x"},"unknown":{"keep":true}}`,
+		`{"location":{}}`, `{"location":null}`, `{"location":{"name":"Home"}}`,
+		`{"location":{"latitude":null,"longitude":null}}`,
+		`{"location":{"latitude":0,"longitude":0,"coordinateSystem":"unknown","originalInput":" 0.0, +0 "}}`} {
 		request, err := SetAttributeViewBlockAttr.Decode(strings.NewReader(`{"avID":"av","keyID":"key","itemID":"item","value":` + patch + `}`))
 		if err != nil {
 			t.Fatal(err)
@@ -80,6 +83,46 @@ func TestAVValuePatchPresence(t *testing.T) {
 	}
 	if _, err := SetAttributeViewBlockAttr.Decode(strings.NewReader(`{"avID":"av","keyID":"key","value":{"number":{"content":"invalid"}}}`)); err == nil {
 		t.Fatal("invalid fixed value structure accepted")
+	}
+}
+
+func TestAVLocationContract(t *testing.T) {
+	for _, patch := range []string{
+		`{"location":{"latitude":"0","longitude":0}}`,
+		`{"location":{"latitude":0,"longitude":false}}`,
+		`{"location":{"originalInput":123}}`,
+	} {
+		if _, err := SetAttributeViewBlockAttr.Decode(strings.NewReader(`{"avID":"av","keyID":"key","value":` + patch + `}`)); err == nil {
+			t.Fatalf("invalid location structure accepted: %s", patch)
+		}
+	}
+	filters, err := SetAttrViewFilters.Decode(strings.NewReader(`{"avID":"av","blockID":"block","data":[{"column":"key","operator":"Contains","value":{"type":"location","text":{"content":"Home"}}}]}`))
+	if err != nil || len(filters.Data) != 1 || filters.Data[0].Value.Text.Content != "Home" {
+		t.Fatalf("location text filter: %+v %v", filters, err)
+	}
+	bundle, err := BuildBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, value := range []string{
+		`{"type":"location","location":{"name":"Home","latitude":0,"longitude":0,"coordinateSystem":"wgs84","originalInput":"0,0"}}`,
+		`{"type":"location","location":{"name":"Home"}}`,
+		`{"type":"location"}`,
+		`{"type":"rollup","rollup":{"contents":[{"type":"location","location":{"latitude":-90,"longitude":180,"coordinateSystem":"unknown"}}]}}`,
+	} {
+		body := []byte(`{"code":0,"msg":"","data":{"values":{"key":` + value + `}}}`)
+		if err := bundle.ValidateResponse("POST", "/api/av/getAttributeViewAddingBlockDefaultValues", body); err != nil {
+			t.Fatalf("location response rejected: %s %v", value, err)
+		}
+	}
+	keyData, err := json.Marshal(map[string]any{"code": 0, "msg": "", "data": []*AVKey{{
+		ID: "location-key", Type: "location", Location: &AVLocation{DefaultCoordinateSystem: "gcj02"},
+	}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := bundle.ValidateResponse("POST", "/api/av/getAttributeViewKeysByID", keyData); err != nil {
+		t.Fatalf("location field settings rejected: %v", err)
 	}
 }
 

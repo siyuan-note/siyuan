@@ -38,6 +38,7 @@ import {
     genRelationAVCellValue,
     getAVBlockRefSubtype,
     getConvertedEmptyAVCellValue,
+    hasAVCachedCellType,
     hasAVRenderTemplateResult,
     updateAVCachedCellValue,
 } from "./cellValue";
@@ -60,9 +61,12 @@ import {
 } from "./richText";
 import {openAVRichTextEditor} from "./richTextEditor";
 import {getAVData, getAVPrimaryCell} from "./virtualScroll";
-import {AV_CELL_EDITOR_CLOSE_EVENT} from "./cellEditor";
+import {AV_CELL_EDITOR_CLOSE_EVENT, getAVCellEditorOwner} from "./cellEditor";
 import {getAVBlockIconHTML, renderAVBlockIcon} from "./blockIcon";
 import {bindAVCellInputPosition} from "./cellInputPosition";
+import {createAVLocationFromText, createAVLocationReplacement, getAVLocationText, isAVLocationCoordinateInput, isAVLocationEmpty} from "./locationValue";
+import {openAVLocationEditor} from "./locationEditor";
+import {showMessage} from "../../../dialog/message";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -227,6 +231,8 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             cellValue.mAsset = [];
         } else if ((colType === "mSelect" || colType === "select") && !cellValue.mSelect) {
             cellValue.mSelect = [];
+        } else if (colType === "location") {
+            cellValue.location = createAVLocationReplacement(cellValue.location);
         }
         return cellValue;
     }
@@ -234,7 +240,9 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         type: colType,
         id: cellElement.dataset.id,
     };
-    if (colType === "number") {
+    if (colType === "location") {
+        cellValue.location = createAVLocationReplacement();
+    } else if (colType === "number") {
         const value = (cellElement.querySelector("input") as HTMLInputElement)?.value ||
             cellElement.querySelector(".av__celltext")?.getAttribute("data-content");
         cellValue.number = {
@@ -315,6 +323,9 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
 };
 
 const getCellValueContent = (value: IAVCellValue): string => {
+    if (value.type === "location") {
+        return getAVLocationText(value.location);
+    }
     if (hasAVScalarContent(value.type)) {
         return value[value.type as "text"].content;
     }
@@ -322,7 +333,7 @@ const getCellValueContent = (value: IAVCellValue): string => {
         return value.mSelect[0].content;
     }
     if (value.type === "rollup") {
-        return getCellValueContent(value.relation.contents[0]);
+        return value.rollup?.contents?.[0] ? getCellValueContent(value.rollup.contents[0]) : "";
     }
     if (value.type === "checkbox") {
         return value.checkbox.checked ? "true" : "false";
@@ -349,7 +360,9 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
     const newValue: IAVCellValue = {
         type: colType,
     };
-    if (colType === "number") {
+    if (colType === "location") {
+        newValue.location = createAVLocationFromText(getCellValueContent(value) || "");
+    } else if (colType === "number") {
         if (isAVDateType(value.type)) {
             newValue.number = {
                 content: value[value.type as "date"].content,
@@ -416,7 +429,9 @@ export const genCellValue = (colType: TAVCol, value: string | any, dateFormat: T
         [colType === "select" ? "mSelect" : colType]: value as IAVCellDateValue
     };
     if (typeof value === "string" && value) {
-        if (colType === "number") {
+        if (colType === "location") {
+            cellValue = {type: colType, location: createAVLocationFromText(value)};
+        } else if (colType === "number") {
             cellValue = {
                 type: colType,
                 number: {
@@ -470,6 +485,9 @@ export const genCellValue = (colType: TAVCol, value: string | any, dateFormat: T
         }
     } else if (typeof value === "undefined" || !value) {
         cellValue = genEmptyAVCellValue(colType);
+    }
+    if (colType === "location") {
+        cellValue.location = createAVLocationReplacement(cellValue.location);
     }
     if (colType === "block") {
         if (typeof value === "object" && value && value.id) {
@@ -617,7 +635,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (!type) {
         type = getTypeByCellElement(cellElements[0]);
     }
-    if (type === "updated" || type === "created" || document.querySelector(".av__mask")) {
+    if (type === "updated" || type === "created" || document.querySelector(".av__mask, [data-av-location-editor]")) {
         options?.destroyCallback?.();
         return;
     }
@@ -636,6 +654,55 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     let html = "";
     const cssStyle = getComputedStyle(cellElements[0]);
     const storedCellValue = getStoredCellValueByElement(cellElements[0]);
+    if (type === "location") {
+        const ownerElement = getAVCellEditorOwner(blockElement);
+        const avID = blockElement.dataset.avId;
+        const blockID = blockElement.dataset.nodeId;
+        const rootID = protyle.block.rootID;
+        const locationCells: IAVSelectedCell[] = cellElements.map(element => {
+            const value = cloneAVCellValueSnapshot(genCellValueByElement("location", element));
+            return {
+                groupID: element.closest<HTMLElement>(".av__body")?.dataset.groupId || "",
+                rowID: getFieldIdByCellElement(element, viewType),
+                colID: getColId(element, viewType),
+                rowIndex: 0,
+                colIndex: -1,
+                cell: {id: value.id || element.dataset.id || "", color: "", bgColor: "", value, valueType: "location"},
+                column: {id: getColId(element, viewType), type: "location"} as IAVColumn,
+            };
+        });
+        const isCurrentTarget = () => {
+            if (!blockElement.isConnected || !ownerElement.contains(blockElement) ||
+                blockElement.dataset.avId !== avID || blockElement.dataset.nodeId !== blockID ||
+                protyle.block.rootID !== rootID) {
+                return false;
+            }
+            const data = getAVData(blockElement);
+            return locationCells.every(item => data ?
+                hasAVCachedCellType(data.view, item.rowID, item.colID, "location") :
+                !!blockElement.querySelector(`[data-row-id="${item.rowID}"][data-col-id="${item.colID}"][data-type="location"]`));
+        };
+        if (!options?.keepMenuOpen) {
+            window.siyuan.menus.menu.remove();
+        }
+        openAVLocationEditor({
+            value: (storedCellValue || genCellValueByElement(type, cellElements[0])).location,
+            ownerElement,
+            avBlockID: blockID,
+            isValid: isCurrentTarget,
+            onSave: async value => {
+                if (!isCurrentTarget() || protyle.disabled || window.siyuan.config.readonly || window.siyuan.isPublish ||
+                    protyle.options.history?.created || protyle.options.history?.snapshot) {
+                    return;
+                }
+                const batchCells = cellElements[0].dataset.avBatchOriginalValue ? cellElements : undefined;
+                await updateCellsValue(protyle, blockElement, value, batchCells, undefined, undefined,
+                    false, false, false, locationCells);
+            },
+            onDestroy: options?.destroyCallback,
+        });
+        return;
+    }
     const hasRenderedTemplate = cellElements[0].matches(".av__celltext--template") ||
         Boolean(cellElements[0].querySelector(":scope > .av__celltext--template, :scope > .av__cellprimary > .av__celltext--template"));
     if (type === "text" && !hasRenderedTemplate) {
@@ -1046,6 +1113,9 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             continue;
         }
         const oldValue = cloneAVCellValueSnapshot(sourceOldValue);
+        if (oldValue.type === "location") {
+            oldValue.location = createAVLocationReplacement(oldValue.location);
+        }
         if (type === "block") {
             oldValue.block.icon = oldValue.block.icon || "";
         }
@@ -1074,6 +1144,14 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             continue;
         }
         let newValue = value;
+        if (type === "location" && (typeof newValue === "string" ||
+            (newValue?.type && newValue.type !== "location" && !cellValueIsEmpty(newValue)))) {
+            const content = typeof newValue === "string" ? newValue : getCellValueContent(newValue) || "";
+            if (isAVLocationCoordinateInput(content)) {
+                showMessage(window.siyuan.languages.locationPasteInEditor, 6000, "error");
+                continue;
+            }
+        }
         // relation 为全部更新，以下类型为添加
         if (type === "mAsset") {
             if (Array.isArray(value)) {
@@ -1189,6 +1267,9 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             if (type === "date" && typeof newValue === "string" && newValue.trim() && !cellValue.date.isNotEmpty) {
                 continue;
             }
+        }
+        if (cellValue.type === "location") {
+            cellValue.location = createAVLocationReplacement(cellValue.location);
         }
         if (type === "block" && typeof cellValue.block.icon === "undefined") {
             cellValue.block.icon = oldValue.block.icon || "";
@@ -1397,6 +1478,8 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         } else {
             text = `<span class="av__celltext">${cellValue ? escapeHtmlTextAndAttr(cellValue.text.content || "") : ""}</span>`;
         }
+    } else if (cellValue.type === "location") {
+        text = `<span class="av__celltext" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(cellValue))))}">${escapeHtmlTextAndAttr(getAVLocationText(cellValue.location))}</span>`;
     } else if ((cellValue.type === "email" || cellValue.type === "phone")) {
         text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${cellValue ? escapeHtmlTextAndAttr(cellValue[cellValue.type as "email"].content || "") : ""}</span>`;
     } else if ("url" === cellValue.type) {
@@ -1491,7 +1574,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     if (showCopy && cellValue.type === "rollup" && text) {
         text += `<button class="av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.copy}" data-type="copy" data-rollup-value="${escapeAttr(encodeURIComponent(JSON.stringify(cellValue.rollup?.contents || [])))}"><svg><use xlink:href="#iconCopy"></use></svg></button>`;
     } else if (showCopy && ((((isAVTextType(cellValue.type) && cellValue.type !== "block") || isAVDateType(cellValue.type)) && cellValue[cellValue.type as "url"]?.content) ||
-        cellValue.type === "lineNumber" ||
+        cellValue.type === "lineNumber" || (cellValue.type === "location" && !isAVLocationEmpty(cellValue.location)) ||
         (cellValue.type === "number" && cellValue.number?.isNotEmpty) ||
         (cellValue.type === "block" && cellValue.block?.content))) {
         text += `<button class="av__cell-action ariaLabel" type="button" data-position="4north" aria-label="${window.siyuan.languages.copy}" data-type="copy"><svg><use xlink:href="#iconCopy"></use></svg></button>`;

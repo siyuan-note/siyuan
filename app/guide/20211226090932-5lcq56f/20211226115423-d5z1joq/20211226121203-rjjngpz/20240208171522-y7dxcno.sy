@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261007101857"
+		"updated": "20261009040533"
 	},
 	"Children": [
 		{
@@ -65,6 +65,94 @@
 				{
 					"Type": "NodeText",
 					"Data": "在文件頂部、資料庫項目頁或區塊屬性對話方塊的資料庫屬性面板中點選欄位名稱，可以將「資料庫面板欄位可見性」設為「始終顯示」「空白時隱藏」或「始終隱藏」。「預設」保留面板原有的顯示設定，其中文件頂部面板沿用全域隱藏空欄位設定。規則對該資料庫的屬性面板生效，不影響資料庫各檢視的欄位顯隱。點選面板的編輯按鈕可以暫時展開隱藏欄位，編輯欄位值或修改顯示規則。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-5oq6h7a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261009034010-5oq6h7a",
+				"updated": "20261009040533"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "位置欄位"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-m2e4n60",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-m2e4n60",
+				"updated": "20261009035322"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新增類型為「位置」的欄位後，點擊儲存格編輯名稱和座標。名稱可留空。緯度和經度須成對填寫，使用十進位度數。緯度範圍為 -90 到 90，經度範圍為 -180 到 180，零是有效值。將兩個座標都留空時，可僅保存名稱。欄位設定中的「新輸入預設座標系」僅用於新輸入的位置；既有位置（包括「未知」）保持不變，每個值仍可單獨選擇座標系，複製或匯入的位置保留其已保存的座標系。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-ue87c6m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-ue87c6m",
+				"updated": "20261009034224"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "匯入座標時，在「貼上座標」中輸入 39.9042, 116.4074 這樣的座標對，再點擊「確定」。順序為緯度、經度，思源不會自動交換兩者。座標系可選擇「未知」、WGS84、GCJ-02 或 BD-09；此標記不進行座標轉換。匯入的原始文字會原樣保留為來源資訊，手動修改座標或座標系會清除該來源文字。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-g7jsd2p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-g7jsd2p",
+				"updated": "20261009040533"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊「保存」套用修改，點擊「取消」放棄修改，「清空」會移除位置值。文字過濾和排序使用名稱、座標及座標系標記組合後的文字。此欄位不載入地圖，也不呼叫外部位置服務。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "也可按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS 上為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）保存，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 取消。使用包含「位置」欄位的資料庫前，請將所有裝置上的思源更新到相容版本；舊版核心無法開啟此類資料庫。"
 				}
 			]
 		},

@@ -5,7 +5,8 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchSyncPost} from "../../../util/fetch";
 import {transaction} from "../../wysiwyg/transaction";
 import {bindInlineFilterEvents, genEmptyFilterValue, getFiltersHTML} from "./filter";
-import {bindFieldLunarDates, genFieldValue, getRelationOptions, getSelectedOptionsHTML, getValueInputHTML, openFieldRelationMenu, openFieldSelectMenu, renderRelationFieldValue} from "./fieldValueEditor";
+import {bindFieldLunarDates, genFieldValue, getRelationOptions, getSelectedOptionsHTML, getValueInputHTML, openFieldRelationMenu, openFieldSelectMenu, renderRelationFieldValue, openFieldLocationEditor} from "./fieldValueEditor";
+import {createAVLocationReplacement} from "./locationValue";
 import {openSearchAV} from "./relation";
 
 interface AutomationValue extends Omit<AVAutomationValueInput, "value"> {
@@ -23,6 +24,10 @@ interface AutomationRule extends Omit<AVAutomationRuleInput, "actions" | "condit
 }
 
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+const newFieldValue = (field: IAVColumn): IAVCellValue => field.type === "location" ? {
+    type: "location",
+    location: createAVLocationReplacement({coordinateSystem: field.location?.defaultCoordinateSystem || "unknown"}),
+} : genEmptyFilterValue(field).value;
 const fieldsOf = (database: AVAttributeViewData): IAVColumn[] => (database?.keyValues || [])
     .filter(item => item?.key && hasAVCapability(item.key.type, "editable"))
     .map(item => ({...item.key, renderTemplate: ""}));
@@ -267,6 +272,8 @@ export const openAutomationMenu = async (options: {
                 update();
                 save();
             });
+        } else if (field.type === "location") {
+            input.addEventListener("click", () => openFieldLocationEditor(input));
         } else if (field.type === "relation") {
             getRelationOptions(field, choices => renderRelationFieldValue(input, choices));
             input.addEventListener("click", () => openFieldRelationMenu(input, field));
@@ -402,7 +409,7 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
             if (value.mode === "source") {
                 value.keyID = compatibleFields(database, field)[0]?.id;
             } else if (value.mode === "static" && !value.value) {
-                value.value = genEmptyFilterValue(field).value;
+                value.value = newFieldValue(field);
             }
         } else if (target.matches("[data-source-field]")) {
             action.fields[target.closest<HTMLElement>("[data-field-id]").dataset.fieldId].keyID = target.value;
@@ -461,7 +468,7 @@ ${field ? `<div class="av__automation-row"><select class="b3-select" data-mode a
                 break;
             case "add-field":
                 chooseField(target, fieldsOf(databases.get(targetID(action))).filter(field => !action.fields[field.id]), field => {
-                    action.fields[field.id] = {mode: "static", value: genEmptyFilterValue(field).value};
+                    action.fields[field.id] = {mode: "static", value: newFieldValue(field)};
                     save();
                     void render();
                 });

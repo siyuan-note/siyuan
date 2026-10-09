@@ -18,6 +18,9 @@ func isolateImportedAttributeViewBindings(data []byte, importedBlockIDs map[stri
 	if err := av.CheckSpec(&attrView); err != nil {
 		return nil, err
 	}
+	if err := attrView.NormalizeLocations(); err != nil {
+		return nil, err
+	}
 	var root map[string]json.RawMessage
 	if err := json.Unmarshal(data, &root); err != nil {
 		return nil, err
@@ -35,6 +38,10 @@ func isolateImportedAttributeViewBindings(data []byte, importedBlockIDs map[stri
 			return nil, err
 		}
 		if key.Type != av.KeyTypeBlock {
+			continue
+		}
+		if _, exists := kv["values"]; !exists {
+			// 空主键值可由 omitempty 合法省略，不补写字段，保持原始 JSON。
 			continue
 		}
 		var values []map[string]json.RawMessage

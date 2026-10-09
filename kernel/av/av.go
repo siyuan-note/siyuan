@@ -166,6 +166,7 @@ const (
 	KeyTypeURL        KeyType = "url"        // URL
 	KeyTypeEmail      KeyType = "email"      // Email
 	KeyTypePhone      KeyType = "phone"      // 电话
+	KeyTypeLocation   KeyType = "location"   // 位置
 	KeyTypeMAsset     KeyType = "mAsset"     // 资源
 	KeyTypeTemplate   KeyType = "template"   // 模板
 	KeyTypeCreated    KeyType = "created"    // 创建时间
@@ -209,7 +210,8 @@ type Key struct {
 	Rollup *Rollup `json:"rollup,omitempty"` // 汇总信息
 
 	// 日期
-	Date *Date `json:"date,omitempty"` // 日期设置
+	Date     *Date     `json:"date,omitempty"`     // 日期设置
+	Location *Location `json:"location,omitempty"` // 新输入位置的默认坐标系
 
 	// 创建时间
 	Created *Created `json:"created,omitempty"` // 创建时间设置
@@ -945,6 +947,9 @@ func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err e
 	if nil == err {
 		err = ret.NormalizeRichText()
 	}
+	if nil == err {
+		err = ret.NormalizeLocations()
+	}
 	return
 }
 
@@ -961,6 +966,9 @@ func SaveAttributeViewIfUnchanged(av *AttributeView, original []byte) error {
 }
 
 func saveAttributeView(av *AttributeView, original []byte) (err error) {
+	if av.Spec > CurrentSpec {
+		return ErrSpecTooNew
+	}
 	if !ast.IsNodeIDPattern(av.ID) {
 		err = ErrInvalidAttributeViewID
 		logging.LogErrorf("save attribute view failed: %s", err)
@@ -972,6 +980,9 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		}
 	}()
 
+	if err = av.NormalizeLocations(); nil != err {
+		return
+	}
 	if err = av.ValidateListLayouts(); nil != err {
 		return
 	}
@@ -1420,6 +1431,7 @@ var (
 	ErrInvalidColumnAlign     = errors.New("invalid column align")
 	ErrSpecTooNew             = errors.New("attribute view spec is too new")
 	ErrRichTextSpecMismatch   = errors.New("attribute view rich text requires storage spec 9")
+	ErrLocationSpecMismatch   = errors.New("attribute view location requires storage spec 11")
 	ErrFilterTooDeep          = errors.New("filter nesting depth exceeds the maximum allowed")
 )
 

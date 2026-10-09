@@ -11,6 +11,8 @@ import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 import {renderAVBlockIcon} from "./blockIcon";
 import {formatDateValue} from "./dateFormat";
 import {bindLunarDateEditor, getLunarDateHTML} from "./lunarDate";
+import {createAVLocationReplacement, getAVLocationText} from "./locationValue";
+import {openAVLocationEditor} from "./locationEditor";
 
 export const getSelectedOptionNames = (element: HTMLElement) => {
     try {
@@ -104,6 +106,8 @@ export const genFieldValue = (column: IAVColumn, input: HTMLElement, previousVal
             return {type: column.type, email: {content}};
         case "phone":
             return {type: column.type, phone: {content}};
+        case "location":
+            return {type: "location", location: createAVLocationReplacement(JSON.parse(decodeURIComponent(input.dataset.location || "%7B%7D")))};
         case "mAsset":
             return {
                 type: column.type,
@@ -130,6 +134,11 @@ export const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFiel
     if (column.type === "date" && column.dateFormat === "lunar") {
         const date = value?.date || {isNotEmpty: false, isNotTime: !column.date?.fillSpecificTime};
         return `<button type="button" class="b3-button b3-button--cancel${fieldValue?.mode === "currentTime" ? " fn__none" : ""}" data-role="field-value" data-value-type="lunarDate" data-lunar-value="${escapeAttr(JSON.stringify(date))}">${escapeHtml(formatDateValue(date, "lunar") || window.siyuan.languages.select)}</button>`;
+    }
+    if (column.type === "location") {
+        const location = value ? value.location || {coordinateSystem: "unknown"} :
+            {coordinateSystem: column.location?.defaultCoordinateSystem || "unknown"};
+        return `<button type="button" class="b3-button b3-button--cancel fn__flex-1" data-role="field-value" data-value-type="location" data-location="${escapeAttr(encodeURIComponent(JSON.stringify(location)))}">${escapeHtml(getAVLocationText(location) || window.siyuan.languages.empty)}</button>`;
     }
     if (column.type === "checkbox") {
         const checked = value?.checkbox?.checked || false;
@@ -179,6 +188,22 @@ export const bindFieldLunarDates = (host: HTMLElement) => {
         const rect = target.getBoundingClientRect();
         menu.open({x: rect.left, y: rect.bottom, h: rect.height, target});
     }));
+};
+
+export const openFieldLocationEditor = (target: HTMLElement) => {
+    openAVLocationEditor({
+        value: JSON.parse(decodeURIComponent(target.dataset.location || "%7B%7D")),
+        ownerElement: target,
+        avBlockID: target.closest<HTMLElement>("[data-node-id]")?.dataset.nodeId,
+        onSave: value => {
+            if (!target.isConnected) {
+                return;
+            }
+            target.dataset.location = encodeURIComponent(JSON.stringify(value));
+            target.textContent = getAVLocationText(value) || window.siyuan.languages.empty;
+            target.dispatchEvent(new Event("change", {bubbles: true}));
+        },
+    });
 };
 
 export const openFieldSelectMenu = (target: HTMLElement, column: IAVColumn) => {

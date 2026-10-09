@@ -73,7 +73,7 @@ func TestFilterCapabilityAcceptedBaseline(t *testing.T) {
 
 func TestKeyGroupPhaseBehavior(t *testing.T) {
 	groups := map[KeyGroup][]KeyType{
-		KeyGroupNoFilterDefault:       {KeyTypeTemplate, KeyTypeRollup, KeyTypeCreated, KeyTypeUpdated},
+		KeyGroupNoFilterDefault:       {KeyTypeTemplate, KeyTypeRollup, KeyTypeCreated, KeyTypeUpdated, KeyTypeLocation},
 		KeyGroupRenderDependentFilter: {KeyTypeTemplate, KeyTypeRollup, KeyTypeMAsset, KeyTypeCreated, KeyTypeUpdated},
 		KeyGroupSkipRowCopy:           {KeyTypeRollup, KeyTypeCreated, KeyTypeUpdated},
 		KeyGroupRenderAutoFill:        {KeyTypeTemplate, KeyTypeCreated, KeyTypeUpdated},

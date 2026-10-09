@@ -311,6 +311,9 @@ func equalAutomationValues(left, right *av.Value) bool {
 			return nil
 		}
 		value = value.Clone()
+		if value.Type == av.KeyTypeLocation {
+			return value.String(false)
+		}
 		value.ID, value.KeyID, value.BlockID = "", "", ""
 		value.CreatedAt, value.UpdatedAt = 0, 0
 		value.RenderedContent, value.HasRenderTemplate = "", false
@@ -527,6 +530,15 @@ func automationValuePatch(value *av.Value) map[string]any {
 	if _, ok := ret[field]; !ok {
 		ret[field] = nil
 	}
+	if av.KeyTypeLocation == value.Type {
+		location := value.Location
+		if nil == location {
+			location = &av.ValueLocation{}
+		}
+		ret[field] = map[string]any{"name": location.Name, "latitude": location.Latitude,
+			"longitude": location.Longitude, "coordinateSystem": location.CoordinateSystem,
+			"originalInput": location.OriginalInput}
+	}
 	for _, key := range []string{"id", "keyID", "blockID", "createdAt", "updatedAt", "renderedContent", "hasRenderTemplate"} {
 		delete(ret, key)
 	}
@@ -607,6 +619,9 @@ func (tx *Transaction) doSetAttrViewAutomations(op *Operation) *TxErr {
 	}
 	if config.Spec != 1 || len(config.Rules) > 100 {
 		return fail(fmt.Errorf("unsupported automation configuration"))
+	}
+	if err = (&av.AttributeView{Automations: &config}).NormalizeLocations(); nil != err {
+		return fail(err)
 	}
 	_, boxID := av.FindAttributeViewPath(view.ID)
 	seen := map[string]bool{}

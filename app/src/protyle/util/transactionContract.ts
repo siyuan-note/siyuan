@@ -41,6 +41,7 @@ const transactionActions: Record<IOperation["action"], true> = {
     "setAttrViewColIcon": true,
     "setAttrViewColDesc": true,
     "setAttrViewColAttributePanelVisibility": true,
+    "setAttrViewColLocationDefaultCoordinateSystem": true,
     "insertAttrViewBlock": true,
     "removeAttrViewBlock": true,
     "addAttrViewCol": true,

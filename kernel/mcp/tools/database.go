@@ -34,7 +34,7 @@ var databaseActions = []string{
 }
 
 var databaseKeyTypes = []string{
-	"text", "number", "date", "select", "mSelect", "url", "email", "phone", "mAsset", "template", "created", "updated",
+	"text", "number", "date", "select", "mSelect", "url", "email", "phone", "location", "mAsset", "template", "created", "updated",
 	"checkbox", "relation", "rollup", "lineNumber",
 }
 

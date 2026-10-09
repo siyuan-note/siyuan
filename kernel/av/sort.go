@@ -346,6 +346,18 @@ func (value *Value) compare(other *Value, optionSort map[string]int, dateEndpoin
 			}
 			return strings.Compare(value.Email.Content, other.Email.Content)
 		}
+	case KeyTypeLocation:
+		left, right := value.String(false), other.String(false)
+		if left == right {
+			return 0
+		}
+		if "" == left {
+			return 1
+		}
+		if "" == right {
+			return -1
+		}
+		return strings.Compare(left, right)
 	case KeyTypePhone:
 		if nil != value.Phone && nil != other.Phone {
 			if "" == value.Phone.Content {

@@ -2,7 +2,7 @@
 
 import type {AVKeyType, AVKeyCapability, AVFilterProfile, AVFilterCapability, AVCalcOperator} from "../../../types/av";
 
-export const AV_KEY_TYPES: readonly AVKeyType[] = ["block","text","number","date","select","mSelect","url","email","phone","mAsset","template","created","updated","checkbox","relation","rollup","lineNumber"];
+export const AV_KEY_TYPES: readonly AVKeyType[] = ["block","text","number","date","select","mSelect","url","email","phone","mAsset","template","created","updated","checkbox","relation","rollup","lineNumber","location"];
 
 export const AV_KEY_CAPABILITIES: Readonly<Record<AVKeyType, AVKeyCapability>> = {
     "block": {"groups":["richText","link","scalarContent"],"filterProfile":"text","valueKind":"text","editable":true,"filterable":true,"sortable":true,"groupable":true,"defaultOperator":"Contains"},
@@ -22,6 +22,7 @@ export const AV_KEY_CAPABILITIES: Readonly<Record<AVKeyType, AVKeyCapability>> =
     "relation": {"groups":["rollupCell","newItemTemplate","rollupForeignRender"],"filterProfile":"relation","valueKind":"relation","editable":true,"filterable":true,"sortable":true,"groupable":true,"defaultOperator":"Contains any item"},
     "rollup": {"groups":["noFilterDefault","renderDependentFilter","skipRowCopy"],"filterProfile":"rollup","valueKind":"rollup","editable":false,"filterable":true,"sortable":true,"groupable":false,"defaultOperator":"Contains"},
     "lineNumber": {"groups":["none"],"filterProfile":"none","valueKind":"lineNumber","editable":false,"filterable":false,"sortable":false,"groupable":false,"defaultOperator":""},
+    "location": {"groups":["attributePlaceholder","rollupCell","newItemTemplate","noFilterDefault"],"filterProfile":"text","valueKind":"location","editable":true,"filterable":true,"sortable":true,"groupable":false,"defaultOperator":"Contains"},
 };
 
 export const AV_FILTER_CAPABILITIES: Readonly<Record<AVFilterProfile, AVFilterCapability>> = {

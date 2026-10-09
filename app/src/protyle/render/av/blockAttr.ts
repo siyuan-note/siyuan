@@ -157,6 +157,9 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     createEmptyAVValue(item.key.id, item.key.type, primaryValue?.blockID),
                     item.values?.[0] || {}
                 );
+                if (item.key.type === "location" && !item.values?.[0]) {
+                    value.location.coordinateSystem = item.key.location?.defaultCoordinateSystem || "unknown";
+                }
                 innerHTML += genAVAttributeRowHTML({
                     nodeID: id,
                     avID: table.avID,
@@ -719,6 +722,11 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
             (target.querySelector(":scope > .av__celltext--template, :scope > .av__cellprimary > .av__celltext--template") ||
                 (type === "text" && target.querySelector(":scope > .av__celltext")))) {
             popTextCell(protyle, [target], type as TAVCol);
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (type === "location") {
+            popTextCell(protyle, [target], "location");
             event.stopPropagation();
             event.preventDefault();
             break;

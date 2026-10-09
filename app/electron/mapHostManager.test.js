@@ -169,6 +169,7 @@ const setup = () => {
                     async loadURL(url) { this.url = url; order.push("load"); },
                     postMessage(...args) { this.transferred = args; },
                     setZoomFactor(zoom) { this.zoom = zoom; },
+                    setBackgroundThrottling(value) { this.throttling = value; order.push("throttling:" + value); },
                     stop() { this.stopped = true; },
                     close(options) { this.closeOptions = options; this.destroyed = true; this.emit("destroyed"); },
                 });
@@ -259,6 +260,7 @@ test("geometry is invisible before ready, uses owner zoom, and hides on invalid 
         logicalSize: {width: 400, height: 300}, crop: {x: 30, y: 40}};
     s.handlers["siyuan-map-geometry"](s.event(), geometry);
     assert.equal(s.views[0].visible, false);
+    assert.deepEqual(s.views[0].bounds, {x: 13, y: 25, width: 249, height: 125});
     s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
     assert.equal(s.views[0].visible, true);
     assert.deepEqual(s.views[0].bounds, {x: 13, y: 25, width: 249, height: 125});
@@ -268,6 +270,85 @@ test("geometry is invisible before ready, uses owner zoom, and hides on invalid 
     s.handlers["siyuan-map-geometry"](s.event(), {...geometry, bounds: {...geometry.bounds, width: 10000}});
     assert.equal(s.views[0].visible, false);
     s.manager.destroyAll();
+});
+
+test("hidden bootstrap receives nonzero bounds and rendering frames without becoming visible", () => {
+    const s = setup(); s.create();
+    const view = s.views[0];
+    assert.equal(view.options.webPreferences.backgroundThrottling, false);
+    assert.deepEqual(view.bounds, {x: 0, y: 0, width: 1, height: 1});
+    assert.equal(view.visible, false);
+    const geometry = {...envelope, visible: true, bounds: {x: 10, y: 20, width: 200, height: 100},
+        logicalSize: {width: 400, height: 300}, crop: {x: 30, y: 40}};
+    s.handlers["siyuan-map-geometry"](s.event(), geometry);
+    assert.deepEqual(view.bounds, geometry.bounds);
+    assert.equal(view.webContents.sent.length, 0, "viewport waits for the preload to exist");
+    s.load();
+    assert.equal(view.webContents.throttling, false);
+    assert.equal(view.visible, false);
+    assert.deepEqual(view.webContents.sent[0], ["siyuan-map-viewport", {logicalSize: geometry.logicalSize, crop: geometry.crop}]);
+    s.reply({type: "bootstrapReady"});
+    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: false});
+    s.reply({type: "ready"});
+    assert.equal(view.visible, false, "a menu or hidden DOM during bootstrap must still hide the native view");
+    assert.equal(view.webContents.throttling, true, "normal throttling resumes after bootstrap");
+    s.handlers["siyuan-map-geometry"](s.event(), geometry);
+    assert.equal(view.visible, true);
+    s.manager.destroyAll();
+    assert.equal(view.webContents.destroyed, true);
+});
+
+test("an initially hidden or zero-size DOM can finish bootstrap without exposing the placeholder", () => {
+    const s = setup(); s.create(); s.load();
+    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: true, bounds: {x: 0, y: 0, width: 0, height: 0},
+        logicalSize: {width: 0, height: 0}, crop: {x: 0, y: 0}});
+    assert.deepEqual(s.views[0].bounds, {x: 0, y: 0, width: 1, height: 1});
+    assert.equal(s.views[0].webContents.throttling, false);
+    s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
+    assert.equal(s.views[0].visible, false);
+    assert.equal(s.views[0].webContents.throttling, true);
+    s.manager.destroyAll();
+    s.load();
+    assert.equal(s.views[0].visible, false);
+    assert.equal(s.views[0].webContents.destroyed, true);
+});
+
+test("known host diagnostics are bounded fixed codes and stop on disposal", () => {
+    const s = setup(); s.create();
+    const contents = s.views[0].webContents;
+    const message = "Content Security Policy worker-src 'none'; https://secret.invalid/?key=private";
+    contents.emit("console-message", {message});
+    contents.emit("console-message", {message});
+    contents.emit("console-message", {message: "unclassified private detail"});
+    assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "diagnostic", code: "cspWorker"}]);
+    s.manager.destroyAll();
+    contents.emit("console-message", {message: "INVALID_USER_KEY"});
+    assert.equal(s.owner.sent.length, 1);
+});
+
+test("provider routing reports fixed transport failures without logging requests", async () => {
+    const diagnostics = [];
+    const {ses, router} = setupRouter({report: code => diagnostics.push(code)});
+    ses.before({url: "http://webapi.amap.com/maps?key=private"});
+    assert.deepEqual(diagnostics, ["providerInsecureRequest"]);
+    ses.fetch = async () => new Response("private body", {status: 403});
+    assert.equal((await ses.protocols.https(new Request("https://tiles.openfreemap.org/style?key=private"))).status, 403);
+    assert.equal(diagnostics.at(-1), "providerHTTPFailure");
+    ses.fetch = async () => { throw new Error("https://secret.invalid/?key=private"); };
+    await ses.protocols.https(new Request("https://tiles.openfreemap.org/style?key=private"));
+    assert.equal(diagnostics.at(-1), "providerNetworkFailure");
+    ses.fetch = async () => new Response(null, {status: 302, headers: {Location: "http://tiles.openfreemap.org/?key=private"}});
+    await ses.protocols.https(new Request("https://tiles.openfreemap.org/style"));
+    assert.equal(diagnostics.at(-1), "providerInsecureRequest");
+    ses.fetch = async () => new Response(new ReadableStream({pull(controller) { controller.error(new Error("private body failure")); }}));
+    const broken = await ses.protocols.https(new Request("https://tiles.openfreemap.org/style"));
+    await assert.rejects(broken.text());
+    assert.equal(diagnostics.at(-1), "providerNetworkFailure");
+    const count = diagnostics.length;
+    router.destroy();
+    ses.before({url: "http://webapi.amap.com/maps?key=private"});
+    assert.equal(diagnostics.length, count);
+    assert.equal(JSON.stringify(diagnostics).includes("private"), false);
 });
 
 test("destroy and owner navigation close real contents, ports, requests and session; stale events cannot resurrect", () => {

@@ -143,13 +143,10 @@ func initDBConnection() {
 	util.LogDatabaseSize(util.BlockTreeDBPath)
 	dsn := util.BlockTreeDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
-		"&_mmap_size=4294967296" +
 		"&_secure_delete=OFF" +
 		"&_cache_size=-128000" +
-		"&_page_size=32768" +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY" +
 		"&_case_sensitive_like=OFF"
 	var err error
 	db, err = sql.Open("sqlite3_extended", dsn)
@@ -940,9 +937,9 @@ func OpenEncryptedBlockTreeDB(boxID string, dek []byte) (err error) {
 	dbPath := util.EncryptedBlockTreeDBPath(boxID)
 	blocktreeKey := util.DeriveSubKey(dek, "siyuan/sqlcipher/blocktree")
 	defer clear(blocktreeKey)
-	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_mmap_size=4294967296&_secure_delete=OFF" +
-		"&_cache_size=-128000&_page_size=32768&_busy_timeout=7000&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(blocktreeKey) + "'"
+	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_secure_delete=OFF" +
+		"&_cache_size=-128000&_busy_timeout=7000&_ignore_check_constraints=ON" +
+		"&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(blocktreeKey) + "'"
 	boxDB, err := sql.Open("sqlite3_extended", dsn)
 	if err != nil {
 		return err

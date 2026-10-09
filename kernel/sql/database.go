@@ -352,13 +352,10 @@ func initDBConnection() {
 	util.LogDatabaseSize(util.DBPath)
 	dsn := util.DBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
-		"&_mmap_size=4294967296" +
 		"&_secure_delete=OFF" +
 		"&_cache_size=-128000" +
-		"&_page_size=32768" +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY" +
 		"&_case_sensitive_like=OFF"
 	var err error
 	db, err = sql.Open("sqlite3_extended", dsn)
@@ -404,13 +401,10 @@ func initHistoryDBConnection() {
 	util.LogDatabaseSize(util.HistoryDBPath)
 	dsn := util.HistoryDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
-		"&_mmap_size=4294967296" +
 		"&_secure_delete=OFF" +
 		"&_cache_size=-128000" +
-		"&_page_size=32768" +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY" +
 		"&_case_sensitive_like=OFF"
 	var err error
 	historyDB, err = sql.Open("sqlite3_extended", dsn)
@@ -478,13 +472,10 @@ func initAssetContentDBConnection() {
 	util.LogDatabaseSize(util.AssetContentDBPath)
 	dsn := util.AssetContentDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
-		"&_mmap_size=4294967296" +
 		"&_secure_delete=OFF" +
 		"&_cache_size=-128000" +
-		"&_page_size=32768" +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY" +
 		"&_case_sensitive_like=OFF"
 	var err error
 	assetContentDB, err = sql.Open("sqlite3_extended", dsn)
@@ -2044,9 +2035,9 @@ func OpenEncryptedDB(boxID string, dek []byte) (err error) {
 	contentKey := util.DeriveSubKey(dek, "siyuan/sqlcipher/content")
 	defer clear(contentKey)
 	// SQLCipher DSN：_key=x'<hex>' 让 go-sqlite3 执行 PRAGMA key；其余 PRAGMA 与全局 siyuan.db 对齐
-	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_mmap_size=4294967296&_secure_delete=OFF" +
-		"&_cache_size=-128000&_page_size=32768&_busy_timeout=7000&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(contentKey) + "'"
+	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_secure_delete=OFF" +
+		"&_cache_size=-128000&_busy_timeout=7000&_ignore_check_constraints=ON" +
+		"&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(contentKey) + "'"
 	boxDB, err := sql.Open("sqlite3_extended", dsn)
 	if err != nil {
 		return err

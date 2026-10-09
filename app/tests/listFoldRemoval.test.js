@@ -46,12 +46,13 @@ const rendererSource = () => {
         const isMobile = () => false, isHiddenTabContent = () => false;
         const getEmbedChildOperationContext = () => undefined;
         const getEmbedChildOperationParentID = () => undefined;
-        const confirmRefRemoval = async () => true;
+        const confirmRefRemoval = async protyle => protyle.refConfirmed !== false;
         const preventScroll = () => {}, mathRender = () => {}, scrollCenter = () => {};
         const hideElements = () => {};
         const lineNumberRender = () => {}, clearSelect = () => {}, revealTabsForTarget = () => {};
         const getTextWithoutSemanticMarkers = element => element.textContent;
         const getSemanticMarkerPrefixLengthForNode = () => 0;
+        const getEditorRange = () => getSelection().rangeCount ? getSelection().getRangeAt(0) : document.createRange();
         const hasViewFoldContext = protyle => !!protyle.viewFold;
         const setViewFold = (protyle, element, folded) => {
             protyle.viewChanges.push({id: element.getAttribute("data-node-id"), folded});
@@ -66,9 +67,11 @@ const rendererSource = () => {
             "getNextBlockSibling", "getLastBlock", "getContenteditableElement", "isContainerBlock",
             "isNotEditBlock", "getTopEmptyElement", "hasPreviousSibling"]) +
         (extract("util/selectionOffsets", ["focusByRange"]) +
-        extract("util/selection", ["focusByWbr"])) +
+        extract("util/selection", ["focusByWbr", "focusBlock", "setFirstNodeRange"])) +
+        extract("wysiwyg/list", ["getOrderedListStart"]) +
+        extract("../block/util", ["refreshSbResize"]) +
         extract("wysiwyg/verticalVisibility", ["getFoldedNavigationOwner"]) +
-        extract("wysiwyg/remove", ["getOperationParentID", "removeBlock"]) +
+        extract("wysiwyg/remove", ["getOperationParentID", "removeBlock", "removeLi", "moveToPrevious", "hasMeaningfulContent"]) +
         extract("util/blockFold", ["applyFoldState", "toggleListFold"]) + `
         ${extract("wysiwyg/transaction", ["canSyncListFoldInPlace", "syncBlockAttrs"])}
         export const syncEmbeddedAttrs = (protyle, operation) => {
@@ -145,6 +148,84 @@ const runCases = async () => {
         });
     });
     let cases = 0;
+    const callout = (id, content) => `<div class="callout" data-type="NodeCallout" data-node-id="${nodeID(id)}"><div class="callout-info" contenteditable="false"><span class="callout-title" contenteditable="true">Note</span></div><div class="callout-content">${content}</div>${attr}</div>`;
+    const superBlock = (layout, content) => `<div class="sb" data-type="NodeSuperBlock" data-node-id="${nodeID("super")}" data-sb-layout="${layout}">${content}${attr}</div>`;
+    for (const layout of ["col", "row"]) {
+        for (const confirmed of [false, true]) {
+            const {element, protyle} = setup(superBlock(layout,
+                callout("left-callout", paragraph("left-content", "left")) +
+                callout("right-callout", list("right-list", item("empty-item", "") + item("remaining-item", "2")))));
+            const range = document.createRange();
+            range.selectNodeContents(getContenteditableElement(byID("empty-item-text")));
+            range.collapse(true);
+            focusByRange(range);
+            const leftHTML = byID("left-callout").outerHTML;
+            const remainingHTML = byID("remaining-item").outerHTML;
+            await removeBlock(protyle, byID("empty-item-text"), range, "Backspace");
+            assert.equal(byID("empty-item"), null);
+            assert.equal(byID("empty-item-text").parentElement, byID("right-callout").querySelector(".callout-content"));
+            protyle.refConfirmed = confirmed;
+            const before = element.outerHTML;
+            await removeBlock(protyle, byID("empty-item-text"), range, "Backspace");
+            if (confirmed) {
+                assert.equal(byID("empty-item-text"), null);
+                assert.equal(protyle.transactions.length, 2);
+                const operation = protyle.transactions[1];
+                assert.deepEqual(operation.doOperations.map(op => [op.action, op.id]), [["delete", nodeID("empty-item-text")]]);
+                const undo = operation.undoOperations[0];
+                assert.equal(undo.action, "insert");
+                assert.equal(undo.parentID, nodeID("right-callout"));
+                assert.equal(undo.context.setRange, "true");
+                assert.ok(undo.data.includes("<wbr>"));
+                assert.ok(byID("remaining-item-text").contains(getSelection().anchorNode));
+                const content = byID("right-callout").querySelector(".callout-content");
+                content.insertAdjacentHTML("afterbegin", undo.data);
+                window.listFoldRemoval.focusByWbr(byID("empty-item-text"), range);
+                assert.ok(byID("empty-item-text").contains(getSelection().anchorNode));
+                assert.equal(byID("empty-item-text").parentElement, content);
+                await removeBlock(protyle, byID("empty-item-text"), range, "Backspace");
+                assert.equal(byID("empty-item-text"), null);
+            } else {
+                assert.equal(element.outerHTML, before, "cancelled deletion must preserve the callout and its paragraph");
+                assert.equal(protyle.transactions.length, 1);
+            }
+            assert.equal(byID("left-callout").outerHTML, leftHTML);
+            assert.equal(byID("remaining-item").outerHTML, remainingHTML);
+            assert.deepEqual(Array.from(byID("super").querySelectorAll(":scope > [data-node-id]")).map(e => e.getAttribute("data-node-id")),
+                [nodeID("left-callout"), nodeID("right-callout")]);
+            assert.equal(element.querySelectorAll('[data-type="NodeSuperBlock"]').length, 1);
+            assert.equal(element.querySelectorAll("wbr").length, 0);
+            cases++;
+        }
+    }
+    for (const text of ["content", '<span class="emoji"></span>', '<span data-type="inline-math" data-content="x"></span>']) {
+        const {element, protyle} = setup(superBlock("col",
+            callout("left-callout", paragraph("left-content", "left")) +
+            callout("right-callout", paragraph("leading", text) + paragraph("following", "2"))));
+        const range = document.createRange();
+        range.selectNodeContents(getContenteditableElement(byID("leading")));
+        range.collapse(true);
+        focusByRange(range);
+        await removeBlock(protyle, byID("leading"), range, "Backspace");
+        assert.equal(byID("leading").parentElement, byID("super"), "nonempty paragraphs still exit the callout");
+        assert.equal(getContenteditableElement(byID("leading")).innerHTML, text);
+        assert.equal(byID("following").parentElement, byID("right-callout").querySelector(".callout-content"));
+        assert.equal(protyle.transactions[0].doOperations[0].action, "move");
+        assert.equal(element.querySelectorAll("wbr").length, 0);
+        cases++;
+    }
+    {
+        const {protyle} = setup(callout("single-callout", paragraph("only", "")));
+        const range = document.createRange();
+        range.selectNodeContents(getContenteditableElement(byID("only")));
+        range.collapse(true);
+        focusByRange(range);
+        await removeBlock(protyle, byID("only"), range, "Backspace");
+        assert.equal(byID("single-callout"), null, "the only paragraph can still exit and remove its callout");
+        assert.ok(byID("only"));
+        assert.deepEqual(protyle.transactions[0].doOperations.map(op => op.action), ["move", "delete"]);
+        cases++;
+    }
     for (const trailing of [false, true]) {
         for (const outerFolded of [false, true]) {
             const hidden = list("third", item("third-1", "child one") + item("third-2", "child two"));
@@ -376,7 +457,7 @@ if (process.versions.electron && process.type === "browser") {
             const {stdout} = await promisify(execFile)(require("electron"), [__filename, profile], {
                 env, windowsHide: true, timeout: 40000,
             });
-            assert.match(stdout, /13 Electron cases passed/);
+            assert.match(stdout, /21 Electron cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-list-fold-"));

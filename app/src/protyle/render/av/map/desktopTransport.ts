@@ -50,6 +50,19 @@ const capabilityFailureReasons = new Set([
     "originMismatch", "unsupportedDocument", "invalidDocument", "unsafeProcessSwitches",
 ]);
 
+const mapDiagnosticCodes = new Set([
+    "hostSetupFailed", "assetUnavailable", "documentLoadFailed", "bootstrapTimeout", "sdkTimeout",
+    "providerRequestDenied", "providerInsecureRequest", "providerHTTPFailure", "providerNetworkFailure",
+    "cspScript", "cspWorker", "cspConnect", "cspImage", "cspStyle", "cspEval", "cspWasm",
+    "storageUnavailable", "webglUnavailable", "amapInvalidKey", "amapInvalidSecurityCode",
+    "amapDomainMismatch", "amapPlatformMismatch",
+]);
+const logMapDiagnostic = (code: unknown) => {
+    if (typeof code === "string" && mapDiagnosticCodes.has(code)) {
+        console.warn("Database map diagnostic:", code);
+    }
+};
+
 export const isDesktopAVMapHostSupported = async (): Promise<boolean> => {
     const ipc = getIPC();
     if (!ipc) {
@@ -154,16 +167,20 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
             geometry({visible: false});
         }
     };
-    const tick = () => {
-        if (destroyed) {
-            return;
-        }
+    const checkGeometry = () => {
         const next = readGeometry(container);
         const key = JSON.stringify(next);
         if (key !== lastGeometry) {
             lastGeometry = key;
             invalidate();
         }
+        return next;
+    };
+    const tick = () => {
+        if (destroyed) {
+            return;
+        }
+        const next = checkGeometry();
         if (!next.visible || scope.performance.now() >= stableAfter) {
             geometry(next);
         }
@@ -193,6 +210,7 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
     };
     const fail = (code: AVMapErrorCode) => {
         if (!destroyed) {
+            console.warn("Database map failed:", code);
             destroy();
             options.onError(code);
         }
@@ -204,6 +222,11 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
     };
     const onReply = (_event: unknown, value: unknown) => {
         if (destroyed) {
+            return;
+        }
+        const diagnostic = value as {version?: unknown; instanceID?: unknown; type?: unknown; code?: unknown};
+        if (diagnostic?.version === AV_MAP_PROTOCOL_VERSION && diagnostic.instanceID === instanceID && diagnostic.type === "diagnostic") {
+            logMapDiagnostic(diagnostic.code);
             return;
         }
         const reply = parseAVMapReply(value, instanceID);
@@ -269,6 +292,7 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
             return;
         }
         if (reply?.version !== AV_MAP_PROTOCOL_VERSION || reply.instanceID !== instanceID || reply.error) {
+            logMapDiagnostic(reply?.diagnostic);
             fail(reply?.error === "unsupportedEnvironment" ? "unsupportedEnvironment" : "hostUnavailable");
             return;
         }
@@ -278,7 +302,12 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
         // BrowserWindow focus is enforced in main. DOM blur also fires when the map view gains focus.
         scope.addEventListener("focus", invalidate);
         container.ownerDocument.addEventListener("visibilitychange", invalidate);
-        observer = new MutationObserver(invalidate);
+        observer = new MutationObserver(() => {
+            // 悬停提示和块标也会改变 DOM；仅地图几何或遮挡变化需要隐藏原生视图。
+            if (!destroyed) {
+                checkGeometry();
+            }
+        });
         observer.observe(container.ownerDocument.documentElement, {childList: true, subtree: true,
             attributes: true, attributeFilter: ["class", "style", "hidden", "open"]});
         resizeObserver = new ResizeObserver(invalidate);

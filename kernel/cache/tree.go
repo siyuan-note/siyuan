@@ -17,20 +17,30 @@
 package cache
 
 import (
+	"bytes"
 	"sync"
 
 	"github.com/dgraph-io/ristretto"
+	"github.com/klauspost/compress/zstd"
 )
 
 type treeCacheEntry struct {
 	raw        []byte
+	compressed bool
+	rawSize    int
 	generation uint64
 }
 
+const treeCacheMaxCost = 1024 * 1024 * 200
+
 var (
+	treeCacheEncoder, _ = zstd.NewWriter(nil, zstd.WithEncoderLevel(zstd.SpeedFastest),
+		zstd.WithEncoderConcurrency(1), zstd.WithWindowSize(512*1024))
+	treeCacheDecoder, _ = zstd.NewReader(nil, zstd.WithDecoderConcurrency(1),
+		zstd.WithDecoderMaxMemory(treeCacheMaxCost), zstd.WithDecodeAllCapLimit(true))
 	treeCache, _ = ristretto.NewCache(&ristretto.Config{
 		NumCounters: 100000,
-		MaxCost:     1024 * 1024 * 200,
+		MaxCost:     treeCacheMaxCost,
 		BufferItems: 64,
 	})
 	treeCacheKeys       = map[string]map[string]uint64{}
@@ -44,36 +54,69 @@ func treeCacheKey(rootID, boxID string) string {
 
 func GetTreeDataInBox(rootID, boxID string) (raw []byte, ok bool) {
 	treeCacheKeysMu.Lock()
-	defer treeCacheKeysMu.Unlock()
 	key := treeCacheKey(rootID, boxID)
 	v, _ := treeCache.Get(key)
 	if nil == v {
+		treeCacheKeysMu.Unlock()
 		return nil, false
 	}
 	e := v.(*treeCacheEntry)
 	// 异步准入可能保留较早的写入，只接受当前版本，否则交由调用方读取源文件。
 	if e.generation != treeCacheKeys[rootID][key] {
+		treeCacheKeysMu.Unlock()
 		return nil, false
 	}
-	return e.raw, true
+	treeCacheKeysMu.Unlock()
+	if e.compressed {
+		var err error
+		raw, err = treeCacheDecoder.DecodeAll(e.raw, make([]byte, 0, e.rawSize))
+		if err != nil || len(raw) != e.rawSize {
+			return nil, false
+		}
+	} else {
+		raw = bytes.Clone(e.raw)
+	}
+	// 解码期间可能发生写入或笔记本锁定，返回前再次检查当前版本。
+	treeCacheKeysMu.Lock()
+	defer treeCacheKeysMu.Unlock()
+	if e.generation != treeCacheKeys[rootID][key] {
+		return nil, false
+	}
+	return raw, true
 }
 
 func SetTreeDataInBox(rootID, boxID string, raw []byte) {
 	if raw == nil {
 		return
 	}
+	if len(raw) >= treeCacheMaxCost {
+		RemoveTreeDataInBox(rootID, boxID)
+		return
+	}
+	entry := &treeCacheEntry{rawSize: len(raw)}
+	// 小文档不压缩；只有实际减少驻留字节时才保存压缩结果。
+	if len(raw) >= 1024 && treeCacheEncoder != nil && treeCacheDecoder != nil {
+		compressed := treeCacheEncoder.EncodeAll(raw, nil)
+		if len(compressed) < len(raw) {
+			entry.raw = bytes.Clone(compressed)
+			entry.compressed = true
+		}
+	}
+	if !entry.compressed {
+		entry.raw = bytes.Clone(raw)
+	}
 	key := treeCacheKey(rootID, boxID)
 	treeCacheKeysMu.Lock()
 	defer treeCacheKeysMu.Unlock()
 	treeCacheGeneration++
-	entry := &treeCacheEntry{raw: raw, generation: treeCacheGeneration}
+	entry.generation = treeCacheGeneration
 	keys := treeCacheKeys[rootID]
 	if keys == nil {
 		keys = map[string]uint64{}
 		treeCacheKeys[rootID] = keys
 	}
 	keys[key] = entry.generation
-	treeCache.Set(key, entry, int64(len(raw)))
+	treeCache.Set(key, entry, int64(cap(entry.raw))+64)
 }
 
 func RemoveTreeData(rootID string) {

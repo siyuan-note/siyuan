@@ -28,7 +28,7 @@ const load = (ipc: unknown, browser = false, warnings: unknown[][] = []) => {
     return result;
 };
 
-const fixture = () => {
+const fixture = (warnings: unknown[][] = []) => {
     const calls: Array<[string, any]> = [];
     const listeners = new Map<string, (...args: any[]) => void>();
     const domListeners = new Map<string, () => void>();
@@ -62,7 +62,7 @@ const fixture = () => {
         getClientRects: () => [rect], getBoundingClientRect: () => rect, contains: (target: unknown) => target === container};
     const errors: string[] = [], clicks: unknown[] = [];
     let ready = 0;
-    const api = load(ipc);
+    const api = load(ipc, false, warnings);
     const host = api.createDesktopAVMapHost(container, {provider: "openfreemap", theme: "light",
         credentials: {apiKey: "do-not-send", extra: "private"}, onError: (value: string) => errors.push(value),
         onMarkerClick: (...args: unknown[]) => clicks.push(args), onReady: () => ready++});
@@ -74,8 +74,8 @@ const fixture = () => {
             resolveCreate({version: 1, instanceID});
             await new Promise<void>((resolve) => setImmediate(resolve));
         },
-        advance: () => {
-            now += 150;
+        advance: (milliseconds = 150) => {
+            now += milliseconds;
             const pending = [...frames.values()];
             frames.clear();
             pending.forEach((fn) => fn());
@@ -83,6 +83,20 @@ const fixture = () => {
 };
 
 describe("desktop map transport", () => {
+    it("logs only allowlisted diagnostics for the current instance and ignores provider text", () => {
+        const warnings: unknown[][] = [];
+        const f = fixture(warnings);
+        f.reply({type: "diagnostic", code: "cspWorker", detail: "https://secret.invalid/?key=private"});
+        f.reply({type: "diagnostic", code: "https://secret.invalid/?key=private"});
+        f.reply({type: "diagnostic", code: "cspScript", instanceID: "wrong"});
+        assert.deepEqual(warnings, [["Database map diagnostic:", "cspWorker"]]);
+        assert.deepEqual(f.errors, []);
+        f.host.destroy();
+        f.reply({type: "diagnostic", code: "cspScript"});
+        assert.equal(warnings.length, 1);
+        const {mapDiagnosticCodes} = require("../../../../../electron/mapHostDiagnostics");
+        for (const code of mapDiagnosticCodes) assert.ok(source.includes(`"${code}"`));
+    });
     it("logs only approved capability reason codes and never exception or response details", async () => {
         for (const reason of ["ownerUnavailable", "notMainFrame", "notInitialized", "unregisteredOwner", "invalidKernelOrigin",
             "originMismatch", "unsupportedDocument", "invalidDocument", "unsafeProcessSwitches"]) {
@@ -188,6 +202,60 @@ describe("desktop map transport", () => {
             assert.equal(f.domListeners.size, 0);
             assert.equal(disconnects, 2);
             assert.deepEqual(f.errors, []);
+        } finally {
+            f.host.destroy();
+            globalThis.MutationObserver = oldMutation;
+            globalThis.ResizeObserver = oldResize;
+        }
+    });
+    it("keeps unrelated hover mutations visible while geometry and occlusion changes hide immediately", async () => {
+        const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;
+        const callbacks: Array<() => void> = [];
+        class Observer {
+            constructor(callback: () => void) { callbacks.push(callback); }
+            observe() {}
+            disconnect() {}
+        }
+        globalThis.MutationObserver = Observer as any;
+        globalThis.ResizeObserver = Observer as any;
+        const f = fixture();
+        const geometryCalls = () => f.calls.filter(([name]) => name === "siyuan-map-geometry");
+        const lastGeometry = () => geometryCalls().at(-1)[1];
+        try {
+            await f.created();
+            f.reply({type: "ready"});
+            f.advance();
+            assert.equal(lastGeometry().visible, true);
+            const count = geometryCalls().length;
+            for (let i = 0; i < 5; i++) {
+                callbacks[0]();
+                f.advance(30);
+            }
+            assert.equal(geometryCalls().length, count, "unrelated gutter and tooltip mutations must not hide the map");
+            f.rect.x += 10;
+            callbacks[0]();
+            assert.equal(lastGeometry().visible, false, "a real geometry change hides before the next animation frame");
+            f.advance(119);
+            assert.equal(lastGeometry().visible, false);
+            callbacks[0]();
+            f.advance(1);
+            assert.equal(lastGeometry().visible, true, "unrelated mutations must not restart the stability delay");
+            assert.equal(lastGeometry().bounds.x, f.rect.x);
+            const menu = {contains: () => false, getClientRects: () => [f.rect],
+                getBoundingClientRect: () => ({...f.rect, width: 5, height: 5})};
+            f.doc.querySelectorAll = () => [menu];
+            callbacks[0]();
+            assert.equal(lastGeometry().visible, false, "an overlapping menu hides immediately even with unchanged bounds");
+            f.doc.querySelectorAll = (): HTMLElement[] => [];
+            callbacks[0]();
+            f.advance(119);
+            assert.equal(lastGeometry().visible, false);
+            f.advance(1);
+            assert.equal(lastGeometry().visible, true);
+            f.host.destroy();
+            const destroyedCount = f.calls.length;
+            callbacks[0]();
+            assert.equal(f.calls.length, destroyedCount, "queued mutations cannot reactivate a destroyed host");
         } finally {
             f.host.destroy();
             globalThis.MutationObserver = oldMutation;

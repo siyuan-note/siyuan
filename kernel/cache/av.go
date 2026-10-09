@@ -24,7 +24,7 @@ import (
 )
 
 var avCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 1000,
+	NumCounters: 100000,
 	MaxCost:     1024 * 1024 * 200,
 	BufferItems: 64,
 })

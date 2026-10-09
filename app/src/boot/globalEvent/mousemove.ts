@@ -2,6 +2,7 @@ import {getAllEditor, getAllModels} from "../../layout/getAll";
 import {isWindow} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../../protyle/util/hasClosest";
 import {getColIndex} from "../../protyle/util/table";
+import {isContainerGutterBridge} from "../../protyle/gutter/container";
 
 export const getTableResizeBounds = (tableElement: HTMLTableElement) => {
     const captionElement = tableElement.querySelector("caption");
@@ -150,11 +151,18 @@ export const windowMouseMove = (event: MouseEvent) => {
             if (!targetBlockElement) {
                 return;
             }
+            const renderGutter = (protyle: IProtyle) => {
+                // 鼠标经过编辑器留白移向子块块标时，使用实际坐标保留当前块标。
+                if (!isContainerGutterBridge(protyle.gutter.element, targetBlockElement, eventPath0,
+                    event.clientX, event.clientY, button => protyle.gutter.getNodeElement(protyle, button))) {
+                    protyle.gutter.render(protyle, targetBlockElement, mouseElement);
+                }
+            };
             const allModels = getAllModels();
             let findNode = false;
             allModels.editor.find(item => {
                 if (item.editor.protyle.wysiwyg.element === eventPath0) {
-                    item.editor.protyle.gutter.render(item.editor.protyle, targetBlockElement, mouseElement);
+                    renderGutter(item.editor.protyle);
                     findNode = true;
                     return true;
                 }
@@ -163,7 +171,7 @@ export const windowMouseMove = (event: MouseEvent) => {
                 window.siyuan.blockPanels.find(item => {
                     item.editors.find(eItem => {
                         if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                            eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, mouseElement);
+                            renderGutter(eItem.protyle);
                             findNode = true;
                             return true;
                         }
@@ -177,7 +185,7 @@ export const windowMouseMove = (event: MouseEvent) => {
                 allModels.backlink.find(item => {
                     item.editors.find(eItem => {
                         if (eItem.protyle.wysiwyg.element === eventPath0) {
-                            eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, mouseElement);
+                            renderGutter(eItem.protyle);
                             findNode = true;
                             return true;
                         }

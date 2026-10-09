@@ -2,7 +2,7 @@
 export const isContainerGutterBridge = (gutter: HTMLElement, container: HTMLElement, target: HTMLElement,
                                        x: number, y: number, getBlock: (button: HTMLElement) => Element) => {
     if (gutter.classList.contains("fn__none") ||
-        !["NodeBlockquote", "NodeCallout", "NodeSuperBlock"].includes(container.dataset.type) ||
+        !["NodeBlockquote", "NodeCallout", "NodeSuperBlock", "NodeBlockQueryEmbed"].includes(container.dataset.type) ||
         target.closest(".callout-info")) {
         return false;
     }

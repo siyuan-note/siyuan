@@ -50,7 +50,7 @@ export const registerMapTab = (tab: SettingTabBuilder) => {
         `<input id="${id}" class="b3-text-field fn__block" type="${password ? "password" : "text"}" autocomplete="off" spellcheck="false"${password ? "" : ' maxlength="128"'} disabled>`;
     tab.group("services", lang.mapServices).slot({
         key: "mapServices",
-        keywords: [lang.mapSettings, lang.mapServices, lang.mapServiceID, lang.mapServiceIDTip, lang.mapServiceName,
+        keywords: [lang.mapSettings, lang.mapServices, lang.mapServiceName,
             lang.mapProvider, lang.mapSecurityCode, lang.apiKey, lang.mapCredentialsTip, lang.mapRenderingTip,
             lang.mapProductionTip, ...providers.map(providerName)],
         html: () => `<div id="mapSettings" class="b3-label config-item">
@@ -61,14 +61,13 @@ ${genConfigItemMainHtml(lang.mapServices, lang.mapServicesTip)}
 </div><div class="fn__hr--small"></div><div id="mapServiceStatus" class="b3-label__text" role="status"></div>
 <div id="mapServiceEditor" class="fn__none">
 ${field("mapServiceName", lang.mapServiceName, input("mapServiceName"))}
-${field("mapServiceID", lang.mapServiceID, input("mapServiceID"), lang.mapServiceIDTip)}
 ${field("mapServiceProvider", lang.mapProvider, `<select id="mapServiceProvider" class="b3-select fn__block" disabled>${providers.map(provider => `<option value="${provider}">${escapeHtml(providerName(provider))}</option>`).join("")}</select>`)}
 <div id="mapAPIKeyRow">${field("mapAPIKey", lang.apiKey, `${input("mapAPIKey", true)}<div class="fn__hr--small"></div><label class="fn__flex"><span class="fn__flex-1">${lang.mapClearCredential}</span><input id="mapClearAPIKey" type="checkbox" class="b3-switch" disabled></label>`, lang.mapCredentialsTip)}</div>
 <div id="mapSecurityCodeRow">${field("mapSecurityCode", lang.mapSecurityCode, `${input("mapSecurityCode", true)}<div class="fn__hr--small"></div><label class="fn__flex"><span class="fn__flex-1">${lang.mapClearCredential}</span><input id="mapClearSecurityCode" type="checkbox" class="b3-switch" disabled></label>`, lang.mapCredentialsTip)}</div>
 <div class="fn__hr"></div><div class="fn__flex">
-<button id="mapServiceSave" class="b3-button b3-button--text" disabled>${lang.save}</button><span class="fn__space"></span>
-<button id="mapServiceCancel" class="b3-button b3-button--cancel" disabled>${lang.cancel}</button><span class="fn__flex-1"></span>
-<button id="mapServiceDelete" class="b3-button b3-button--remove" disabled>${lang.delete}</button>
+<button id="mapServiceDelete" class="b3-button b3-button--remove" disabled>${lang.delete}</button><span class="fn__flex-1"></span>
+<button id="mapServiceCancel" class="b3-button b3-button--cancel" disabled>${lang.cancel}</button><span class="fn__space"></span>
+<button id="mapServiceSave" class="b3-button b3-button--text" disabled>${lang.save}</button>
 </div></div><div class="fn__hr"></div>
 <div class="b3-label__text">${lang.mapRenderingTip}</div><div class="fn__hr--small"></div>
 <div class="b3-label__text">${lang.mapProductionTip}</div><div class="fn__hr--small"></div>
@@ -84,6 +83,7 @@ export const mountMapSettings = (root: HTMLElement): (() => void) => {
     let closed = false;
     let data: MapConfig;
     let selectedID = "";
+    let draftID = "";
     let creating = false;
     let dirty = false;
     let busy = false;
@@ -113,7 +113,6 @@ export const mountMapSettings = (root: HTMLElement): (() => void) => {
         get<HTMLButtonElement>("mapServiceCancel").disabled = busy || loading || !dirty;
         get<HTMLButtonElement>("mapServiceDelete").disabled = locked || dirty || creating || !current();
         get<HTMLButtonElement>("mapServiceRetry").disabled = busy || loading;
-        get<HTMLInputElement>("mapServiceID").readOnly = !creating;
         get("mapServiceEditor").classList.toggle("fn__none", !creating && !current());
         get("mapAPIKeyRow").classList.toggle("fn__none", provider === "openfreemap");
         get("mapSecurityCodeRow").classList.toggle("fn__none", provider !== "amap");
@@ -123,14 +122,14 @@ export const mountMapSettings = (root: HTMLElement): (() => void) => {
     const renderDraft = (service?: MapService, missingID?: string) => {
         revision++;
         selectedID = service?.id || "";
+        draftID = service?.id || missingID || "";
         creating = !service && missingID !== undefined;
         dirty = creating;
         providerChanged = false;
         clearCredentials();
         get<HTMLInputElement>("mapServiceName").value = service?.name || "";
-        get<HTMLInputElement>("mapServiceID").value = service?.id || missingID || "";
         get<HTMLSelectElement>("mapServiceProvider").value = service?.provider || "openfreemap";
-        ["mapServiceName", "mapServiceID"].forEach(id => get<HTMLInputElement>(id).setCustomValidity(""));
+        get<HTMLInputElement>("mapServiceName").setCustomValidity("");
         get<HTMLInputElement>("mapAPIKey").placeholder = service?.hasAPIKey ? lang.mapCredentialSaved : "";
         get<HTMLInputElement>("mapSecurityCode").placeholder = service?.hasSecurityCode ? lang.mapCredentialSaved : "";
         const select = get<HTMLSelectElement>("mapServiceSelect");
@@ -234,14 +233,16 @@ export const mountMapSettings = (root: HTMLElement): (() => void) => {
         }
     };
     const save = async () => {
-        const id = get<HTMLInputElement>("mapServiceID");
         const name = get<HTMLInputElement>("mapServiceName");
         const provider = providers.find(item => item === get<HTMLSelectElement>("mapServiceProvider").value);
-        id.setCustomValidity(!/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(id.value) ||
-            creating && data.services.some(service => service.id === id.value) ? lang.mapServiceIDInvalid : "");
+        if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(draftID) ||
+            creating && data.services.some(service => service.id === draftID)) {
+            get("mapServiceStatus").textContent = lang.mapServiceIDInvalid;
+            return;
+        }
         name.setCustomValidity(name.value.trim() ? "" : lang.mapServiceNameRequired);
-        if (!id.reportValidity() || !name.reportValidity() || !provider) return;
-        const service: MapServiceWrite = {id: id.value, name: name.value.trim(), provider};
+        if (!name.reportValidity() || !provider) return;
+        const service: MapServiceWrite = {id: draftID, name: name.value.trim(), provider};
         if (provider !== "openfreemap") {
             const apiKey = get<HTMLInputElement>("mapAPIKey").value;
             if (get<HTMLInputElement>("mapClearAPIKey").checked) service.apiKey = "";
@@ -259,7 +260,7 @@ export const mountMapSettings = (root: HTMLElement): (() => void) => {
     root.addEventListener("input", event => {
         if (closed || busy || loading || !data || window.siyuan.config.readonly) return;
         const target = event.target as HTMLInputElement;
-        if (!["mapServiceID", "mapServiceName", "mapAPIKey", "mapSecurityCode"].includes(target.id)) return;
+        if (!["mapServiceName", "mapAPIKey", "mapSecurityCode"].includes(target.id)) return;
         target.setCustomValidity("");
         dirty = true;
         updateControls();

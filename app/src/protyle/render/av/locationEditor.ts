@@ -46,36 +46,44 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
         title: escapeHtml(languages.location),
         width: mobile ? "100vw" : "480px",
         content: `<div class="b3-dialog__content">
-    <label class="b3-label b3-label--inner fn__block">${escapeHtml(languages.locationName)}
-        <div class="fn__hr"></div><input class="b3-text-field fn__block" data-field="name" type="text">
-    </label>
-    <div class="fn__flex">
-        <label class="b3-label b3-label--inner fn__flex-1">${escapeHtml(languages.latitude)}
-            <div class="fn__hr"></div><input class="b3-text-field fn__block" data-field="latitude" type="text" inputmode="decimal" spellcheck="false">
-        </label>
-        <div class="fn__space"></div>
-        <label class="b3-label b3-label--inner fn__flex-1">${escapeHtml(languages.longitude)}
-            <div class="fn__hr"></div><input class="b3-text-field fn__block" data-field="longitude" type="text" inputmode="decimal" spellcheck="false">
+    <div class="b3-label b3-label--inner">
+        <label>${escapeHtml(languages.locationName)}
+            <span class="fn__hr"></span><input class="b3-text-field fn__block" data-field="name" type="text">
         </label>
     </div>
-    <label class="b3-label b3-label--inner fn__block">${escapeHtml(languages.coordinateSystem)}
-        <div class="fn__hr"></div><select class="b3-select fn__block" data-field="coordinateSystem">
-            <option value="" disabled>${escapeHtml(languages.selectCoordinateSystem)}</option>
-            <option value="wgs84">${escapeHtml(languages.coordinateSystemWGS84)}</option>
-            <option value="gcj02">${escapeHtml(languages.coordinateSystemGCJ02)}</option>
-            <option value="bd09">${escapeHtml(languages.coordinateSystemBD09)}</option>
-        </select>
+    <div class="b3-label b3-label--inner fn__flex">
+        <label class="fn__flex-1">${escapeHtml(languages.latitude)}
+            <span class="fn__hr"></span><input class="b3-text-field fn__block" data-field="latitude" type="text" inputmode="decimal" spellcheck="false">
+        </label>
+        <div class="fn__space"></div>
+        <label class="fn__flex-1">${escapeHtml(languages.longitude)}
+            <span class="fn__hr"></span><input class="b3-text-field fn__block" data-field="longitude" type="text" inputmode="decimal" spellcheck="false">
+        </label>
+    </div>
+    <div class="b3-label b3-label--inner">
+        <label>${escapeHtml(languages.coordinateSystem)}
+            <span class="fn__hr"></span><select class="b3-select fn__block" data-field="coordinateSystem">
+                <option value="" disabled>${escapeHtml(languages.selectCoordinateSystem)}</option>
+                <option value="wgs84">${escapeHtml(languages.coordinateSystemWGS84)}</option>
+                <option value="gcj02">${escapeHtml(languages.coordinateSystemGCJ02)}</option>
+                <option value="bd09">${escapeHtml(languages.coordinateSystemBD09)}</option>
+            </select>
+        </label>
         <div class="b3-label__text">${escapeHtml(languages.coordinateSystemTip)}</div>
-    </label>
-    <label class="b3-label b3-label--inner fn__block">${escapeHtml(languages.coordinateOrder)}
-        <div class="fn__hr"></div><select class="b3-select fn__block" data-field="coordinateOrder">
-            <option value="latitudeLongitude">${escapeHtml(languages.latitude)}, ${escapeHtml(languages.longitude)}</option>
-            <option value="longitudeLatitude">${escapeHtml(languages.longitude)}, ${escapeHtml(languages.latitude)}</option>
-        </select>
-    </label>
-    <label class="b3-label b3-label--inner fn__block">${escapeHtml(languages.pasteCoordinates)}
-        <div class="fn__hr"></div><textarea class="b3-text-field fn__block" data-field="paste" rows="2" spellcheck="false"></textarea>
-    </label>
+    </div>
+    <div class="b3-label b3-label--inner">
+        <label>${escapeHtml(languages.coordinateOrder)}
+            <span class="fn__hr"></span><select class="b3-select fn__block" data-field="coordinateOrder">
+                <option value="latitudeLongitude">${escapeHtml(languages.latitude)}, ${escapeHtml(languages.longitude)}</option>
+                <option value="longitudeLatitude">${escapeHtml(languages.longitude)}, ${escapeHtml(languages.latitude)}</option>
+            </select>
+        </label>
+    </div>
+    <div class="b3-label b3-label--inner">
+        <label>${escapeHtml(languages.pasteCoordinates)}
+            <span class="fn__hr"></span><textarea class="b3-text-field fn__block" data-field="paste" rows="2" spellcheck="false"></textarea>
+        </label>
+    </div>
     <button type="button" class="b3-button b3-button--outline" data-action="parse">${escapeHtml(languages.confirm)}</button>
     <div class="ft__error fn__none" style="margin-top:8px" data-role="error" role="alert" aria-live="polite"></div>
 </div>

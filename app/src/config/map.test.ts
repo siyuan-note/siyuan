@@ -26,7 +26,7 @@ const createPanel = async (initial: Service[] = [service()], missingID?: string,
     const confirmations: Array<() => void> = [];
     const listeners = new Map<string, (event: unknown) => Promise<void> | void>();
     const notifications = new Map<string, () => void>();
-    const fields = ["mapServiceName", "mapServiceID", "mapAPIKey", "mapSecurityCode", "mapClearAPIKey", "mapClearSecurityCode"];
+    const fields = ["mapServiceName", "mapAPIKey", "mapSecurityCode", "mapClearAPIKey", "mapClearSecurityCode"];
     const buttons = ["mapServiceAdd", "mapServiceSave", "mapServiceCancel", "mapServiceDelete", "mapServiceRetry"];
     const selects = ["mapServiceSelect", "mapServiceProvider"];
     const controls = Object.fromEntries([...fields, ...buttons, ...selects,
@@ -119,9 +119,12 @@ test("Map settings share desktop/mobile order, existing icon, searchable control
         genConfigItemMainHtml: (title: string, desc: string) => `${title} ${desc}`,
     })});
     exports.registerMapTab(tab);
-    assert.ok(rows[0].keywords.includes("mapServiceIDTip"));
+    assert.equal(rows[0].keywords.includes("mapServiceIDTip"), false);
+    assert.equal(rows[0].keywords.includes("mapServiceID"), false);
     assert.ok(rows[0].keywords.includes("mapProductionTip"));
     const html = rows[0].html();
+    assert.doesNotMatch(html, /mapServiceID/);
+    assert.match(html, /<div class="fn__flex">\s*<button id="mapServiceDelete"[^>]*>[^<]*<\/button><span class="fn__flex-1"><\/span>\s*<button id="mapServiceCancel"[^>]*>[^<]*<\/button><span class="fn__space"><\/span>\s*<button id="mapServiceSave"/);
     assert.equal((html.match(/type="password" autocomplete="off"/g) || []).length, 2);
     assert.doesNotMatch(html, /value=".*apiKey/i);
     const tabs = readFileSync("src/config/setting/tabs.ts", "utf8");
@@ -182,8 +185,7 @@ test("changing providers away and back clears both old AMap credentials", async 
 
 test("OpenFreeMap writes no credentials and missing IDs are explicitly preserved", async () => {
     const p = await createPanel([service()], "other-device-id");
-    assert.equal(p.controls.mapServiceID.value, "other-device-id");
-    assert.equal(p.controls.mapServiceID.readOnly, false);
+    assert.equal(p.controls.mapServiceID, undefined);
     assert.equal(p.controls.mapServiceProvider.value, "openfreemap");
     assert.equal(p.controls.mapServiceStatus.textContent, "mapMissingServiceTip");
     assert.equal(p.writes.length, 0);
@@ -193,13 +195,37 @@ test("OpenFreeMap writes no credentials and missing IDs are explicitly preserved
     await p.finishWrite(); await saving; p.close();
 });
 
-test("service ID validation rejects duplicates, unsafe characters, and overlong IDs", async () => {
+test("new services receive an internal ID and cancelled drafts leave existing IDs unchanged", async () => {
     const p = await createPanel();
-    p.click("mapServiceAdd"); p.input("mapServiceName", "New");
-    for (const id of ["one", "bad id", "-bad", "<unsafe>", "a".repeat(129), ""]) {
-        p.input("mapServiceID", id); await p.click("mapServiceSave");
-        assert.equal(p.controls.mapServiceID.validationMessage, "mapServiceIDInvalid");
+    await p.click("mapServiceAdd");
+    assert.equal(p.controls.mapServiceID, undefined);
+    p.input("mapServiceName", "Cancelled");
+    await p.click("mapServiceCancel");
+    assert.equal(p.writes.length, 0);
+    assert.equal(p.controls.mapServiceName.value, "one");
+    await p.click("mapServiceAdd");
+    await p.click("mapServiceSave");
+    assert.equal(p.controls.mapServiceName.validationMessage, "mapServiceNameRequired");
+    assert.equal(p.writes.length, 0);
+    p.input("mapServiceName", "New");
+    const saving = p.click("mapServiceSave"); await tick();
+    assert.deepEqual(Array.from(p.writes[0].services, item => item.id), ["one", "new-stable-id"]);
+    await p.finishWrite(); await saving;
+    assert.equal(p.controls.mapServiceSelect.value, "new-stable-id");
+    p.close();
+});
+
+test("internal service ID validation rejects collisions and unsafe requested IDs", async () => {
+    for (const id of ["bad id", "-bad", "<unsafe>", "a".repeat(129)]) {
+        const p = await createPanel([service()], id);
+        p.input("mapServiceName", "New"); await p.click("mapServiceSave");
+        assert.equal(p.controls.mapServiceStatus.textContent, "mapServiceIDInvalid");
+        assert.equal(p.writes.length, 0);
+        p.close();
     }
+    const p = await createPanel([service("new-stable-id")]);
+    await p.click("mapServiceAdd"); p.input("mapServiceName", "New"); await p.click("mapServiceSave");
+    assert.equal(p.controls.mapServiceStatus.textContent, "mapServiceIDInvalid");
     assert.equal(p.writes.length, 0);
     p.close();
 });
@@ -319,12 +345,18 @@ test("closing during submitted save clears secrets and ignores the late UI resul
 
 test("newer missing-service requests survive loading and never overwrite a dirty draft", async () => {
     const p = await createPanel([service()], "old-id", true);
-    p.request("latest-id"); p.readRequests[0]({code: 0, data: {services: [service()]}}); await tick();
-    assert.equal(p.controls.mapServiceID.value, "latest-id");
+    p.request("latest-id"); p.readRequests[0]({code: 0, data: {services: [service()], revision: "revision-0"}}); await tick();
     p.input("mapServiceName", "Draft"); p.request("third-id");
     assert.equal(p.controls.mapServiceName.value, "Draft");
     assert.deepEqual(p.messages, ["mapSaveOrCancel"]);
-    await p.click("mapServiceCancel"); assert.equal(p.controls.mapServiceID.value, "third-id"); p.close();
+    const saving = p.click("mapServiceSave"); await tick();
+    assert.equal(p.writes[0].services[1].id, "latest-id");
+    await p.finishWrite(); await saving;
+    assert.equal(p.controls.mapServiceName.value, "");
+    p.input("mapServiceName", "Newer request");
+    const nextSave = p.click("mapServiceSave"); await tick();
+    assert.equal(p.writes[1].services[2].id, "third-id");
+    await p.finishWrite(1); await nextSave; p.close();
 });
 
 test("delete confirmation is invalidated by closing or newer edits", async () => {

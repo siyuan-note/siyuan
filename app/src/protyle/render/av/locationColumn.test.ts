@@ -86,7 +86,7 @@ test("location default CRS lists explicit systems and providers on desktop and m
     }
 });
 
-test("location field menus reuse the existing globe icon without changing pin actions", () => {
+test("location field menus use a map marker without changing pin or coordinate system actions", () => {
     const source = readFileSync("src/protyle/render/av/col.ts", "utf8");
     const start = source.indexOf("export const getColIconByType =");
     const end = source.indexOf("const addAttrViewColAnimation =", start);
@@ -94,10 +94,45 @@ test("location field menus reuse the existing globe icon without changing pin ac
     runInNewContext(transpileModule(source.slice(start, end), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
     }).outputText, {exports: api});
-    assert.equal(api.getColIconByType("location"), "iconGlobe");
-    assert.match(source, /id: "location",\s*icon: "iconGlobe"/);
+    assert.equal(api.getColIconByType("location"), "iconMapPin");
+    assert.match(source, /id: "location",\s*icon: "iconMapPin"/);
     assert.match(source, /icon: isFreeze \? "iconUnpin" : "iconPin"/);
-    assert.match(readFileSync("appearance/icons/litheness/icon.js", "utf8"), /<symbol id="iconGlobe"/);
+    const icons = readFileSync("appearance/icons/litheness/icon.js", "utf8");
+    const marker = icons.match(/<symbol id="iconMapPin"[^>]*>[\s\S]*?<\/symbol>/)?.[0];
+    assert.ok(marker);
+    assert.match(marker, /viewBox="0 0 24 24"/);
+    assert.match(marker, /stroke="currentColor" stroke-width="1.7"/);
+    assert.match(marker, /<circle cx="12" cy="10" r="3"/);
+    assert.match(readFileSync("appearance/icons/index.html", "utf8"), /#iconGlobe[\s\S]*?#iconMapPin[\s\S]*?#iconPublish/);
+
+    const renderSource = readFileSync("src/protyle/render/av/render.ts", "utf8");
+    const renderStart = renderSource.indexOf("const getTableHTMLs =");
+    const renderEnd = renderSource.indexOf("export const getGroupTitleHTML =", renderStart);
+    const renderAPI = {} as {getTableHTMLs: (data: unknown, element: unknown) => string};
+    runInNewContext(transpileModule("export " + renderSource.slice(renderStart, renderEnd), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+    }).outputText, {
+        exports: renderAPI,
+        getColIconByType: api.getColIconByType,
+        escapeAttr: (value: string) => value || "",
+        escapeHtml: (value: string) => value || "",
+        unicode2Emoji: (value: string) => `custom-icon-${value}`,
+        getCalcValue: () => "",
+        window: {siyuan: {languages: {}}},
+    });
+    for (const avType of ["table", "list", "map"]) {
+        for (const icon of ["", "1f4cd"]) {
+            const html = renderAPI.getTableHTMLs({
+                columns: [{id: "location", type: "location", name: "Location", icon}], rows: [], rowCount: 0,
+            }, {dataset: {avType}});
+            if (icon) {
+                assert.match(html, /custom-icon-1f4cd/);
+                assert.doesNotMatch(html, /#iconMapPin/);
+            } else {
+                assert.match(html, /class="av__cellheadericon"><use xlink:href="#iconMapPin"/);
+            }
+        }
+    }
 });
 
 test("location default CRS setting constructs symmetric do and undo operations", () => {

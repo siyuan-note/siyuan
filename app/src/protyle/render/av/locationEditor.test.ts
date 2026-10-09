@@ -137,6 +137,17 @@ const createEditor = (options: {
 };
 
 describe("database location editor", () => {
+    it("uses shared block form groups with one aligned coordinate row on desktop and mobile", () => {
+        for (const mobile of [false, true]) {
+            const editor = createEditor({mobile});
+            assert.equal((editor.markup.match(/<div class="b3-label b3-label--inner(?: fn__flex)?">/g) || []).length, 5);
+            assert.doesNotMatch(editor.markup, /<label class="b3-label/);
+            assert.match(editor.markup, /<div class="b3-label b3-label--inner fn__flex">\s*<label class="fn__flex-1">latitude/);
+            assert.match(editor.markup, /<label class="fn__flex-1">longitude/);
+            assert.match(editor.markup, /data-field="paste"[^>]*><\/textarea>\s*<\/label>\s*<\/div>\s*<button[^>]*data-action="parse"/);
+        }
+    });
+
     it("requires an explicit real CRS without relabeling old unspecified coordinates", async () => {
         const value = {latitude: 25.04, longitude: 102.42, coordinateSystem: "unknown" as const};
         const editor = createEditor({value, unspecifiedSystem: true});

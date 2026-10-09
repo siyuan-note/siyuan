@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "Questa pagina contiene più di ${limit} posizioni. Usa i filtri o riduci la dimensione della pagina per visualizzare la mappa",
 	"defaultCoordinateSystem": "Sistema di coordinate predefinito per nuovi inserimenti",
 	"defaultCoordinateSystemTip": "Si applica solo ai nuovi inserimenti; le posizioni esistenti restano invariate e le coordinate non vengono convertite",
-	"locationPasteInEditor": "Incolla le coppie di coordinate nell’editor della posizione; l’ordine predefinito è longitudine, latitudine. Verifica il sistema di coordinate e seleziona l’ordine manualmente; non viene mai invertito automaticamente",
+	"locationPasteInEditor": "Inserisci longitudine e latitudine separatamente nell’editor della posizione e verifica il sistema di coordinate",
 	"location": "Posizione",
 	"locationName": "Nome (facoltativo)",
 	"latitude": "Latitudine",

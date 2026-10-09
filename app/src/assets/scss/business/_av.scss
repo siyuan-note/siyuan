@@ -398,6 +398,7 @@
 
   &[data-av-type="map"] > .av__container > .av__scroll {
     .av__row[data-id],
+    .av__row--util,
     .av__spacer {
       display: none;
     }

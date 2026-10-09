@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "This page has more than ${limit} locations. Use filters or a smaller page size to display the map",
 	"defaultCoordinateSystem": "Default coordinate system for new input",
 	"defaultCoordinateSystemTip": "Applies only to new input; existing locations stay unchanged and coordinates are not converted",
-	"locationPasteInEditor": "Paste coordinate pairs in the location editor; the default is longitude, latitude. Check the coordinate system and select the order manually; it is never swapped automatically",
+	"locationPasteInEditor": "Enter longitude and latitude separately in the location editor and confirm the coordinate system",
 	"location": "Location",
 	"locationName": "Name (optional)",
 	"latitude": "Latitude",

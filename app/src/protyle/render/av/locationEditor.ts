@@ -13,7 +13,6 @@ import {
     formatAVLocationCoordinate,
     isAVLocationCoordinateSystem,
     parseAVLocationCoordinate,
-    parseAVLocationCoordinates,
     validateAVLocation,
 } from "./locationValue";
 
@@ -35,7 +34,6 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     const mobile = isMobile();
     const languages = window.siyuan.languages;
     let originalInput = initial.originalInput;
-    let parsedInput: string | undefined;
     let saving = false;
     let closing = false;
     let composing = false;
@@ -71,21 +69,6 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
         </label>
         <div class="b3-label__text">${escapeHtml(languages.coordinateSystemTip)}</div>
     </div>
-    <div class="b3-label b3-label--inner">
-        <label>${escapeHtml(languages.coordinateOrder)}
-            <span class="fn__hr"></span><select class="b3-select fn__block" data-field="coordinateOrder">
-                <option value="longitudeLatitude">${escapeHtml(languages.longitude)}, ${escapeHtml(languages.latitude)}</option>
-                <option value="latitudeLongitude">${escapeHtml(languages.latitude)}, ${escapeHtml(languages.longitude)}</option>
-            </select>
-        </label>
-        <div class="b3-label__text">${escapeHtml(languages.coordinateOrderTip)}</div>
-    </div>
-    <div class="b3-label b3-label--inner">
-        <label>${escapeHtml(languages.pasteCoordinates)}
-            <span class="fn__hr"></span><textarea class="b3-text-field fn__block" data-field="paste" rows="2" spellcheck="false"></textarea>
-        </label>
-    </div>
-    <button type="button" class="b3-button b3-button--outline" data-action="parse">${escapeHtml(languages.confirm)}</button>
     <div class="ft__error fn__none" style="margin-top:8px" data-role="error" role="alert" aria-live="polite"></div>
 </div>
 <div class="b3-dialog__action">
@@ -108,24 +91,16 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     const latitudeInput = root.querySelector<HTMLInputElement>('[data-field="latitude"]');
     const longitudeInput = root.querySelector<HTMLInputElement>('[data-field="longitude"]');
     const systemInput = root.querySelector<HTMLSelectElement>('[data-field="coordinateSystem"]');
-    const orderInput = root.querySelector<HTMLSelectElement>('[data-field="coordinateOrder"]');
-    orderInput.value = "longitudeLatitude";
-    const pasteInput = root.querySelector<HTMLTextAreaElement>('[data-field="paste"]');
     const errorElement = root.querySelector<HTMLElement>('[data-role="error"]');
-    const controls = root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>(
-        "input, select, textarea, button");
+    const controls = root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>(
+        "input, select, button");
     nameInput.value = initial.name || "";
     latitudeInput.value = initial.latitude == null ? "" : formatAVLocationCoordinate(initial.latitude);
     longitudeInput.value = initial.longitude == null ? "" : formatAVLocationCoordinate(initial.longitude);
-    pasteInput.value = initial.originalInput || "";
-    parsedInput = pasteInput.value;
     // 旧值未注明坐标系时保留空选项，必须明确选择，不能打开即重标。
     systemInput.value = initial.coordinateSystem && initial.coordinateSystem !== "unknown" &&
         isAVLocationCoordinateSystem(initial.coordinateSystem) ? initial.coordinateSystem : "";
     const hasSelectedSystem = () => systemInput.value !== "unknown" && isAVLocationCoordinateSystem(systemInput.value);
-    const parsePaste = () => parseAVLocationCoordinates(pasteInput.value,
-        systemInput.value as IAVCellLocationValue["coordinateSystem"],
-        orderInput.value === "longitudeLatitude" ? "longitudeLatitude" : "latitudeLongitude");
 
     const setError = (message = "") => {
         errorElement.textContent = message;
@@ -163,17 +138,6 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
             if (!hasSelectedSystem()) {
                 setError(languages.selectCoordinateSystem);
                 systemInput.focus();
-                return;
-            }
-            // 未确认的导入文本不能在保存时被静默丢弃，错误输入也保持原样可编辑。
-            if (pasteInput.value.trim() && pasteInput.value !== parsedInput) {
-                const valid = parsePaste();
-                setError(valid ? `${languages.pasteCoordinates}: ${languages.confirm}` : languages.invalidCoordinates);
-                if (valid) {
-                    root.querySelector<HTMLButtonElement>('[data-action="parse"]').focus();
-                } else {
-                    pasteInput.focus();
-                }
                 return;
             }
             value = {name: nameInput.value.trim(), coordinateSystem: systemInput.value as IAVCellLocationValue["coordinateSystem"]};
@@ -221,19 +185,10 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
 
     const clearProvenance = () => {
         originalInput = undefined;
-        if (pasteInput.value === parsedInput) {
-            pasteInput.value = "";
-            parsedInput = undefined;
-        }
         setError();
     };
     [latitudeInput, longitudeInput].forEach(input => input.addEventListener("input", clearProvenance));
     systemInput.addEventListener("change", clearProvenance);
-    orderInput.addEventListener("change", () => {
-        // 切换顺序不改已有坐标，只让当前粘贴文本重新等待确认。
-        parsedInput = undefined;
-        setError();
-    });
     root.addEventListener("compositionstart", () => composing = true);
     root.addEventListener("compositionend", () => composing = false);
     root.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -258,32 +213,6 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     root.addEventListener(AV_CELL_EDITOR_CLOSE_EVENT, () => dialog.destroy());
     root.querySelector('[data-action="clear"]').addEventListener("click", () => void submit(true));
     root.querySelector('[data-action="save"]').addEventListener("click", () => void submit());
-    root.querySelector('[data-action="parse"]').addEventListener("click", () => {
-        if (saving || closing || composing) {
-            return;
-        }
-        if (!hasSelectedSystem()) {
-            setError(languages.selectCoordinateSystem);
-            systemInput.focus();
-            return;
-        }
-        // 已确认的来源文本不按新默认顺序重新解释；修改文本或切换顺序后才重新导入。
-        if (pasteInput.value.trim() && pasteInput.value === parsedInput) {
-            setError();
-            return;
-        }
-        const parsed = parsePaste();
-        if (!parsed) {
-            setError(languages.invalidCoordinates);
-            pasteInput.focus();
-            return;
-        }
-        latitudeInput.value = formatAVLocationCoordinate(parsed.latitude);
-        longitudeInput.value = formatAVLocationCoordinate(parsed.longitude);
-        originalInput = parsed.originalInput;
-        parsedInput = pasteInput.value;
-        setError();
-    });
     if (mobile) {
         disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
     } else {

@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "当前页面的位置超过 ${limit} 个，请使用筛选或减小每页记录数以显示地图",
 	"defaultCoordinateSystem": "新录入默认坐标系",
 	"defaultCoordinateSystemTip": "仅用于新录入；已有位置保持不变，不转换坐标",
-	"locationPasteInEditor": "请在位置编辑器中粘贴坐标对，默认顺序为经度、纬度；请确认坐标系并手动选择顺序，不会自动交换",
+	"locationPasteInEditor": "请在位置编辑器中分别填写经度和纬度，并确认坐标系",
 	"location": "位置",
 	"locationName": "名称（可选）",
 	"latitude": "纬度",

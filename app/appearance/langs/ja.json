@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "このページには ${limit} 件を超える位置があります。フィルターを使用するか、ページあたりの件数を減らして地図を表示してください",
 	"defaultCoordinateSystem": "新規入力の既定の座標系",
 	"defaultCoordinateSystemTip": "新規入力にのみ適用されます。既存の位置は変わらず、座標も変換されません",
-	"locationPasteInEditor": "位置エディターに座標の組を貼り付けてください。既定の順序は経度、緯度です。座標系を確認し、順序は手動で選択してください。順序は自動で入れ替わりません",
+	"locationPasteInEditor": "位置エディターで経度と緯度を別々に入力し、座標系を確認してください",
 	"location": "位置",
 	"locationName": "名前（任意）",
 	"latitude": "緯度",

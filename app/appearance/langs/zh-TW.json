@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "目前頁面的位置超過 ${limit} 個，請使用篩選或減少每頁記錄數以顯示地圖",
 	"defaultCoordinateSystem": "新輸入預設座標系",
 	"defaultCoordinateSystemTip": "僅用於新輸入；既有位置保持不變，不轉換座標",
-	"locationPasteInEditor": "請在位置編輯器中貼上座標對，預設順序為經度、緯度；請確認座標系並手動選擇順序，不會自動交換",
+	"locationPasteInEditor": "請在位置編輯器中分別填寫經度和緯度，並確認座標系",
 	"location": "位置",
 	"locationName": "名稱（選填）",
 	"latitude": "緯度",

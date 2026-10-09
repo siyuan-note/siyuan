@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "Táto stránka obsahuje viac ako ${limit} polôh. Na zobrazenie mapy použite filtre alebo menšiu veľkosť stránky",
 	"defaultCoordinateSystem": "Predvolený súradnicový systém pre nové údaje",
 	"defaultCoordinateSystemTip": "Platí iba pre nové údaje; existujúce polohy zostanú nezmenené a súradnice sa neprepočítajú",
-	"locationPasteInEditor": "Dvojice súradníc vkladajte v editore polohy; predvolené poradie je dĺžka, šírka. Skontrolujte súradnicový systém a poradie vyberte ručne; nikdy sa nemení automaticky",
+	"locationPasteInEditor": "Zemepisnú dĺžku a zemepisnú šírku zadajte v editore polohy samostatne a overte súradnicový systém",
 	"location": "Poloha",
 	"locationName": "Názov (voliteľný)",
 	"latitude": "Zemepisná šírka",

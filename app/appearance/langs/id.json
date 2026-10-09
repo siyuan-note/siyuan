@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "Halaman ini memiliki lebih dari ${limit} lokasi. Gunakan filter atau ukuran halaman yang lebih kecil untuk menampilkan peta",
 	"defaultCoordinateSystem": "Sistem koordinat bawaan untuk masukan baru",
 	"defaultCoordinateSystemTip": "Hanya berlaku untuk masukan baru; lokasi yang ada tidak berubah dan koordinat tidak dikonversi",
-	"locationPasteInEditor": "Tempel pasangan koordinat di editor lokasi; urutan bawaan adalah bujur, lintang. Periksa sistem koordinat dan pilih urutan secara manual; urutan tidak pernah ditukar otomatis",
+	"locationPasteInEditor": "Masukkan bujur dan lintang secara terpisah di editor lokasi dan pastikan sistem koordinatnya benar",
 	"location": "Lokasi",
 	"locationName": "Nama (opsional)",
 	"latitude": "Lintang",

@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "Bu sayfada ${limit} konumdan fazla konum var. Haritayı göstermek için filtreleri kullanın veya sayfa boyutunu küçültün",
 	"defaultCoordinateSystem": "Yeni girişler için varsayılan koordinat sistemi",
 	"defaultCoordinateSystemTip": "Yalnızca yeni girişlere uygulanır; mevcut konumlar değişmez ve koordinatlar dönüştürülmez",
-	"locationPasteInEditor": "Koordinat çiftlerini konum düzenleyicisine yapıştırın; varsayılan sıra boylam, enlemdir. Koordinat sistemini kontrol edin ve sırayı elle seçin; sıra hiçbir zaman otomatik değiştirilmez",
+	"locationPasteInEditor": "Konum düzenleyicisinde boylam ve enlemi ayrı ayrı girin ve koordinat sistemini doğrulayın",
 	"location": "Konum",
 	"locationName": "Ad (isteğe bağlı)",
 	"latitude": "Enlem",

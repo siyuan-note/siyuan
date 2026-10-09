@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "Ta strona zawiera więcej niż ${limit} lokalizacji. Użyj filtrów lub zmniejsz rozmiar strony, aby wyświetlić mapę",
 	"defaultCoordinateSystem": "Domyślny układ współrzędnych dla nowych wpisów",
 	"defaultCoordinateSystemTip": "Dotyczy tylko nowych wpisów; istniejące lokalizacje pozostają bez zmian, a współrzędne nie są przeliczane",
-	"locationPasteInEditor": "Wklej pary współrzędnych w edytorze lokalizacji; domyślna kolejność to długość, szerokość geograficzna. Sprawdź układ współrzędnych i wybierz kolejność ręcznie; nigdy nie jest zmieniana automatycznie",
+	"locationPasteInEditor": "Wprowadź długość i szerokość geograficzną osobno w edytorze lokalizacji i sprawdź układ współrzędnych",
 	"location": "Lokalizacja",
 	"locationName": "Nazwa (opcjonalna)",
 	"latitude": "Szerokość geograficzna",

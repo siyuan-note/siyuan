@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "이 페이지의 위치가 ${limit}개를 초과합니다. 지도를 표시하려면 필터를 사용하거나 페이지 크기를 줄이세요",
 	"defaultCoordinateSystem": "새 입력의 기본 좌표계",
 	"defaultCoordinateSystemTip": "새 입력에만 적용되며 기존 위치는 변경되지 않고 좌표도 변환되지 않습니다",
-	"locationPasteInEditor": "위치 편집기에 좌표 쌍을 붙여넣으세요. 기본 순서는 경도, 위도입니다. 좌표계를 확인하고 순서를 직접 선택하세요. 순서는 자동으로 바뀌지 않습니다",
+	"locationPasteInEditor": "위치 편집기에서 경도와 위도를 각각 입력하고 좌표계를 확인하세요",
 	"location": "위치",
 	"locationName": "이름(선택 사항)",
 	"latitude": "위도",

@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "Esta página tem mais de ${limit} localizações. Use filtros ou reduza o tamanho da página para exibir o mapa",
 	"defaultCoordinateSystem": "Sistema de coordenadas padrão para novas entradas",
 	"defaultCoordinateSystemTip": "Aplica-se apenas a novas entradas; as localizações existentes não mudam e as coordenadas não são convertidas",
-	"locationPasteInEditor": "Cole os pares de coordenadas no editor de localização; a ordem padrão é longitude, latitude. Verifique o sistema de coordenadas e selecione a ordem manualmente; ela nunca é invertida automaticamente",
+	"locationPasteInEditor": "Insira a longitude e a latitude separadamente no editor de localização e confirme o sistema de coordenadas",
 	"location": "Localização",
 	"locationName": "Nome (opcional)",
 	"latitude": "Latitude",

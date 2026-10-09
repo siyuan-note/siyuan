@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "Deze pagina heeft meer dan ${limit} locaties. Gebruik filters of verklein de paginagrootte om de kaart weer te geven",
 	"defaultCoordinateSystem": "Standaardcoördinatenstelsel voor nieuwe invoer",
 	"defaultCoordinateSystemTip": "Geldt alleen voor nieuwe invoer; bestaande locaties blijven ongewijzigd en coördinaten worden niet geconverteerd",
-	"locationPasteInEditor": "Plak coördinatenparen in de locatie-editor; de standaardvolgorde is lengtegraad, breedtegraad. Controleer het coördinatenstelsel en kies de volgorde handmatig; deze wordt nooit automatisch omgewisseld",
+	"locationPasteInEditor": "Voer lengtegraad en breedtegraad afzonderlijk in de locatie-editor in en controleer het coördinatenstelsel",
 	"location": "Locatie",
 	"locationName": "Naam (optioneel)",
 	"latitude": "Breedtegraad",

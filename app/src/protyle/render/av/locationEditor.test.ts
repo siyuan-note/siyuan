@@ -41,9 +41,9 @@ const createEditor = (options: {
     alreadyOpen?: boolean;
     save?: (value: IAVCellLocationValue) => Promise<void>;
 } = {}) => {
-    const fields = Object.fromEntries(["name", "latitude", "longitude", "coordinateSystem", "coordinateOrder", "paste"]
+    const fields = Object.fromEntries(["name", "latitude", "longitude", "coordinateSystem"]
         .map(name => [name, new Control()]));
-    const buttons = Object.fromEntries(["save", "clear", "cancel", "parse"].map(name => [name, new Control()]));
+    const buttons = Object.fromEntries(["save", "clear", "cancel"].map(name => [name, new Control()]));
     const container = new Control();
     const error = new Control();
     const lifecycle: string[] = [];
@@ -140,14 +140,12 @@ describe("database location editor", () => {
     it("uses shared block form groups with one aligned coordinate row on desktop and mobile", () => {
         for (const mobile of [false, true]) {
             const editor = createEditor({mobile});
-            assert.equal((editor.markup.match(/<div class="b3-label b3-label--inner(?: fn__flex)?">/g) || []).length, 5);
+            assert.equal((editor.markup.match(/<div class="b3-label b3-label--inner(?: fn__flex)?">/g) || []).length, 3);
             assert.doesNotMatch(editor.markup, /<label class="b3-label/);
             assert.match(editor.markup, /<div class="b3-label b3-label--inner fn__flex">\s*<label class="fn__flex-1">longitude/);
             assert.match(editor.markup, /<label class="fn__flex-1">latitude/);
-            assert.equal(editor.fields.coordinateOrder.value, "longitudeLatitude");
-            assert.match(editor.markup, /<option value="longitudeLatitude">longitude, latitude<\/option>\s*<option value="latitudeLongitude">latitude, longitude<\/option>/);
-            assert.match(editor.markup, /class="b3-label__text">coordinateOrderTip/);
-            assert.match(editor.markup, /data-field="paste"[^>]*><\/textarea>\s*<\/label>\s*<\/div>\s*<button[^>]*data-action="parse"/);
+            assert.doesNotMatch(editor.markup, /coordinateOrder|pasteCoordinates|textarea|data-action="parse"/);
+            assert.match(editor.markup, /data-action="save"/);
         }
     });
 
@@ -170,83 +168,18 @@ describe("database location editor", () => {
         assert.equal(editor.saved[0].longitude, value.longitude);
     });
 
-    it("defaults to longitude-first imports on desktop and mobile without guessing", async () => {
-        for (const mobile of [false, true]) {
-            for (const [source, latitude, longitude] of [["(102.42,25.04)", 25.04, 102.42], ["20,30", 30, 20]] as const) {
-                const editor = createEditor({mobile});
-                editor.fields.paste.value = source;
-                editor.buttons.parse.dispatch("click");
-                editor.buttons.parse.dispatch("click");
-                assert.equal(editor.fields.latitude.value, String(latitude));
-                assert.equal(editor.fields.longitude.value, String(longitude));
-                editor.buttons.save.dispatch("click");
-                await editor.settle();
-                assert.deepEqual(editor.saved[0], {name: "", latitude, longitude, coordinateSystem: "wgs84", originalInput: source});
-            }
-        }
-    });
-
-    it("keeps latitude-first input as an explicit choice without automatic swapping", async () => {
-        const editor = createEditor();
-        editor.fields.paste.value = "25.04,102.42";
-        editor.buttons.parse.dispatch("click");
-        assert.equal(editor.error.textContent, "invalidCoordinates");
-        assert.equal(editor.fields.paste.value, "25.04,102.42");
-        assert.equal(editor.fields.latitude.value, "");
-        editor.fields.coordinateOrder.value = "latitudeLongitude";
-        editor.fields.coordinateOrder.dispatch("change");
-        editor.buttons.parse.dispatch("click");
-        assert.equal(editor.fields.latitude.value, "25.04");
-        assert.equal(editor.fields.longitude.value, "102.42");
-        editor.buttons.save.dispatch("click");
-        await editor.settle();
-        assert.equal(editor.saved[0].originalInput, "25.04,102.42");
-    });
-
-    it("does not reinterpret saved source text under the new default order on reopen", async () => {
+    it("opens saved coordinates without reinterpreting legacy source text on desktop and mobile", async () => {
         for (const mobile of [false, true]) {
             for (const coordinateSystem of ["wgs84", "gcj02", "bd09"] as const) {
                 const value = {latitude: 20, longitude: 30, originalInput: "20,30", coordinateSystem};
                 const editor = createEditor({value, mobile});
-                editor.buttons.parse.dispatch("click");
-                editor.buttons.parse.dispatch("click");
                 assert.equal(editor.fields.latitude.value, "20");
                 assert.equal(editor.fields.longitude.value, "30");
-                assert.equal(editor.fields.paste.value, value.originalInput);
                 editor.buttons.save.dispatch("click");
                 await editor.settle();
                 assert.deepEqual(editor.saved, []);
             }
         }
-    });
-
-    it("rejects copied canonical text instead of interpreting it with the new default order", async () => {
-        for (const name of [undefined, "Office"]) {
-            const editor = createEditor({value: {latitude: 10, longitude: 40}});
-            const copied = locationValue.getAVLocationText({name, latitude: 20, longitude: 30, coordinateSystem: "wgs84"});
-            editor.fields.paste.value = copied;
-            editor.buttons.parse.dispatch("click");
-            assert.equal(editor.error.textContent, "invalidCoordinates");
-            assert.equal(editor.fields.paste.value, copied);
-            assert.equal(editor.fields.latitude.value, "10");
-            assert.equal(editor.fields.longitude.value, "40");
-            editor.buttons.save.dispatch("click");
-            await editor.settle();
-            assert.deepEqual(editor.saved, []);
-        }
-    });
-
-    it("changing import order requires confirmation without changing existing coordinates", async () => {
-        const editor = createEditor({value: {latitude: 30, longitude: 20, originalInput: "20,30"}});
-        editor.fields.coordinateOrder.value = "latitudeLongitude";
-        editor.fields.coordinateOrder.dispatch("change");
-        editor.buttons.save.dispatch("click");
-        await editor.settle();
-        assert.equal(editor.saved.length, 0);
-        assert.equal(editor.fields.latitude.value, "30");
-        editor.buttons.parse.dispatch("click");
-        assert.equal(editor.fields.latitude.value, "20");
-        assert.equal(editor.fields.longitude.value, "30");
     });
 
     it("does not create overlapping editors on repeated open events", () => {
@@ -280,7 +213,8 @@ describe("database location editor", () => {
 
     it("keeps raw invalid coordinate input visible after Save", async () => {
         const editor = createEditor();
-        for (const [latitude, longitude] of [["oops", "0"], ["0", ""], ["91", "0"], ["0", "181"], ["1e2", "0"]]) {
+        for (const [latitude, longitude] of [["oops", "0"], ["0", ""], ["91", "0"], ["0", "181"], ["1e2", "0"],
+            ["0", "20,30"], ["20,30 [WGS84]", "0"]]) {
             editor.fields.latitude.value = latitude;
             editor.fields.longitude.value = longitude;
             editor.buttons.save.dispatch("click");
@@ -318,15 +252,18 @@ describe("database location editor", () => {
         }
     });
 
-    it("preserves exact provenance when only the name changes", async () => {
-        const initial = {name: "Old", latitude: 0, longitude: 0, originalInput: " 0.00, +0 "};
-        const editor = createEditor({value: initial});
-        assert.equal(editor.fields.paste.value, initial.originalInput);
-        editor.fields.name.value = "New";
-        editor.buttons.save.dispatch("click");
-        await editor.settle();
-        assert.deepEqual(editor.saved, [{...initial, name: "New", coordinateSystem: "wgs84"}]);
-        assert.equal(initial.name, "Old");
+    it("preserves exact legacy provenance when only the name changes", async () => {
+        for (const mobile of [false, true]) {
+            for (const originalInput of [" 0.00, +0 ", "unparsed legacy source"]) {
+                const initial = {name: "Old", latitude: 0, longitude: 0, originalInput};
+                const editor = createEditor({value: initial, mobile});
+                editor.fields.name.value = "New";
+                editor.buttons.save.dispatch("click");
+                await editor.settle();
+                assert.deepEqual(editor.saved, [{...initial, name: "New", coordinateSystem: "wgs84"}]);
+                assert.equal(initial.name, "Old");
+            }
+        }
     });
 
     it("clears provenance on manual coordinates or CRS changes", async () => {
@@ -338,41 +275,11 @@ describe("database location editor", () => {
             await editor.settle();
             assert.equal(editor.saved.length, 1);
             assert.equal(editor.saved[0].originalInput, "");
-            assert.equal(editor.fields.paste.value, "");
         }
     });
 
-    it("keeps failed imports and existing coordinates untouched, then saves an exact re-paste", async () => {
-        const editor = createEditor({value: {latitude: 0, longitude: 0, originalInput: "0,0"}});
-        editor.fields.paste.value = "31,121";
-        editor.buttons.parse.dispatch("click");
-        assert.equal(editor.error.textContent, "invalidCoordinates");
-        assert.equal(editor.fields.paste.value, "31,121");
-        assert.equal(editor.fields.latitude.value, "0");
-        assert.equal(editor.fields.longitude.value, "0");
-        editor.buttons.save.dispatch("click");
-        await editor.settle();
-        assert.equal(editor.saved.length, 0);
-        assert.equal(editor.lifecycle.includes("destroy"), false);
-        const source = " +0.00, 0.000\n";
-        editor.fields.paste.value = source;
-        editor.buttons.parse.dispatch("click");
-        editor.buttons.save.dispatch("click");
-        await editor.settle();
-        assert.equal(editor.saved.length, 1);
-        assert.equal(editor.saved[0].originalInput, source);
-        assert.equal(editor.fields.paste.value, source);
-    });
-
-    it("keeps valid pending imports until explicitly confirmed and removes both old coordinates", async () => {
+    it("removes both old coordinates and source text when both coordinate fields are cleared", async () => {
         const editor = createEditor({value: {name: "Office", latitude: 31, longitude: 121, originalInput: "31,121"}});
-        editor.fields.paste.value = "0,0";
-        editor.buttons.save.dispatch("click");
-        await editor.settle();
-        assert.equal(editor.saved.length, 0);
-        assert.equal(editor.buttons.parse.focused, true);
-        assert.equal(editor.fields.paste.value, "0,0");
-        editor.fields.paste.value = "";
         editor.fields.latitude.value = "";
         editor.fields.longitude.value = "";
         editor.fields.latitude.dispatch("input");

@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "Diese Seite enthält mehr als ${limit} Standorte. Filter verwenden oder die Seitengröße verkleinern, um die Karte anzuzeigen",
 	"defaultCoordinateSystem": "Standardkoordinatensystem für neue Eingaben",
 	"defaultCoordinateSystemTip": "Gilt nur für neue Eingaben; vorhandene Standorte bleiben unverändert und Koordinaten werden nicht umgerechnet",
-	"locationPasteInEditor": "Koordinatenpaare im Standorteditor einfügen; standardmäßig gilt Längengrad, Breitengrad. Koordinatensystem prüfen und Reihenfolge manuell auswählen; sie wird nie automatisch vertauscht",
+	"locationPasteInEditor": "Längengrad und Breitengrad im Standorteditor getrennt eingeben und das Koordinatensystem überprüfen",
 	"location": "Standort",
 	"locationName": "Name (optional)",
 	"latitude": "Breitengrad",

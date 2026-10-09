@@ -57,7 +57,7 @@
 	"mapTooManyMarkers": "Cette page comporte plus de ${limit} localisations. Utilisez des filtres ou réduisez la taille des pages pour afficher la carte",
 	"defaultCoordinateSystem": "Système de coordonnées par défaut des nouvelles saisies",
 	"defaultCoordinateSystemTip": "S’applique uniquement aux nouvelles saisies ; les lieux existants restent inchangés et les coordonnées ne sont pas converties",
-	"locationPasteInEditor": "Collez les paires de coordonnées dans l’éditeur de lieu ; l’ordre par défaut est longitude, latitude. Vérifiez le système de coordonnées et choisissez l’ordre manuellement ; il n’est jamais inversé automatiquement",
+	"locationPasteInEditor": "Saisissez la longitude et la latitude séparément dans l’éditeur de lieu et vérifiez le système de coordonnées",
 	"location": "Lieu",
 	"locationName": "Nom (facultatif)",
 	"latitude": "Latitude",

@@ -562,6 +562,43 @@ func isHTMLAssetUserPath(p string) bool {
 	return false
 }
 
+// sensitiveHomeDotEntries 是家目录下默认敏感的凭据条目，按名称前缀匹配。
+// .env 使用前缀匹配，以覆盖 .env.local、.env.production 等派生文件。
+var sensitiveHomeDotEntries = []string{
+	".env",
+	".ssh", ".config", ".bashrc", ".zshrc", ".profile", ".git-credentials", ".netrc", ".pgpass",
+	".kube", ".docker", ".gnupg", ".aws", ".azure", ".npmrc", ".pypirc",
+}
+
+// sensitiveHomeEntry 是家目录下的敏感条目，按名称前缀匹配。
+type sensitiveHomeEntry struct {
+	name string
+	// exemptSystemTemp 表示该条目放行系统临时目录：Windows 的 AppData\Local 下即系统临时目录，
+	// 而剪贴板及 HTML 粘贴的本地资源允许取自该目录。
+	exemptSystemTemp bool
+}
+
+// platformSensitiveHomeEntries 是家目录下按平台附加的敏感条目：macOS 的用户资源库包含钥匙串等凭据，
+// Windows 的漫游与本地应用数据包含各类 CLI 与桌面应用的凭据。
+var platformSensitiveHomeEntries = map[string][]sensitiveHomeEntry{
+	"darwin":  {{name: "Library"}},
+	"windows": {{name: filepath.Join("AppData", "Roaming")}, {name: filepath.Join("AppData", "Local"), exemptSystemTemp: true}},
+}
+
+// isSystemTempPath 判断小写路径是否位于系统临时目录中。
+func isSystemTempPath(lowerPath string) bool {
+	for _, root := range []string{os.TempDir(), SystemTempDir} {
+		if root == "" {
+			continue
+		}
+		root = strings.ToLower(filepath.Clean(root))
+		if lowerPath == root || strings.HasPrefix(lowerPath, root+string(filepath.Separator)) {
+			return true
+		}
+	}
+	return false
+}
+
 // isSensitivePath 执行敏感性黑名单匹配，必要时解析工作空间路径，但不解析目标路径。
 func isSensitivePath(p string, htmlAsset bool) bool {
 	p = resolveNamespaceAlias(p)
@@ -643,8 +680,8 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 	}
 
 	// 用户家目录下的敏感目录与凭据文件（小写比较）。
-	// 覆盖常见凭据 dotfile，防止通过 globalCopyFiles 等接受工作空间外绝对路径的接口把内核用户
-	// 家目录下的凭据复制进工作空间后外泄：Git push token、HTTP/API 凭据、Postgres 密码、
+	// 覆盖常见凭据 dotfile、dotenv 配置文件与平台应用数据目录，防止接受工作空间外绝对路径的接口
+	// 把内核用户家目录下的凭据复制进工作空间后外泄：Git push token、HTTP/API 凭据、Postgres 密码、
 	// K8s/Docker/容器仓库配置、GPG 私钥环、云厂商 CLI 凭据、包管理器 token 等。
 	homeDirs := []string{HomeDir}
 	// 自定义配置主目录不能使系统用户主目录中的凭据失去保护。
@@ -671,14 +708,23 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 		}
 	}
 	for _, homeDir := range homeDirs {
-		for _, name := range []string{
-			".ssh", ".config", ".bashrc", ".zshrc", ".profile", ".git-credentials", ".netrc", ".pgpass",
-			".kube", ".docker", ".gnupg", ".aws", ".azure", ".npmrc", ".pypirc",
-		} {
+		for _, name := range sensitiveHomeDotEntries {
 			for _, checkPath := range homeCheckPaths {
 				if strings.HasPrefix(checkPath, strings.ToLower(filepath.Join(homeDir, name))) {
 					return true
 				}
+			}
+		}
+		for _, entry := range platformSensitiveHomeEntries[runtime.GOOS] {
+			prefix := strings.ToLower(filepath.Join(homeDir, entry.name))
+			for _, checkPath := range homeCheckPaths {
+				if !strings.HasPrefix(checkPath, prefix) {
+					continue
+				}
+				if entry.exemptSystemTemp && isSystemTempPath(checkPath) {
+					continue
+				}
+				return true
 			}
 		}
 	}

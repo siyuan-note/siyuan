@@ -53,6 +53,9 @@ import {activeBlur} from "../mobile/util/keyboardToolbar";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
+        if (inputElement.readOnly) {
+            return;
+        }
         fetchPost("/api/attr/setBlockAttrs", {
             id,
             attrs: {[inputElement.dataset.name]: inputElement.value}
@@ -209,6 +212,8 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
             });
         }
     }
+    const readonly = Boolean(window.siyuan.config.readonly || protyle?.disabled || (!protyle &&
+        (attrs[Constants.CUSTOM_SY_READONLY] === "true" || window.siyuan.config.editor.readOnly)));
     Object.keys(attrs).forEach(item => {
         if (Constants.CUSTOM_RIFF_DECKS === item || item.startsWith("custom-sy-")) {
             return;
@@ -318,6 +323,9 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
     const disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
     /// #endif
     dialog.element.setAttribute("data-key", Constants.DIALOG_ATTR);
+    dialog.element.querySelectorAll<HTMLElement>(".custom-attr").forEach(item => {
+        item.dataset.readonly = String(readonly);
+    });
     (dialog.element.querySelector('.b3-text-field[data-name="bookmark"]') as HTMLInputElement).value = attrs.bookmark || "";
     (dialog.element.querySelector('.b3-text-field[data-name="name"]') as HTMLInputElement).value = attrs.name || "";
     const aliasInput = bindAliasInput(dialog.element.querySelector("[data-alias-input]"), attrs.alias || "", {
@@ -326,6 +334,7 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         removeLabel: window.siyuan.languages.remove,
         placeholder: window.siyuan.languages.attrAliasTip,
         spellcheck: window.siyuan.config.editor.spellcheck,
+        readonly,
         save: async (alias) => {
             try {
                 const response = await fetchSyncPost("/api/attr/setBlockAttrs", {id: attrs.id, attrs: {alias}});
@@ -356,6 +365,11 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         }
         while (target !== dialog.element) {
             const type = target.dataset.action;
+            if (readonly && ["remove", "bookmark", "addCustom"].includes(type)) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             if (target.classList.contains("item--full")) {
                 target.parentElement.querySelector(".item--focus").classList.remove("item--focus");
                 target.classList.add("item--focus");
@@ -451,13 +465,14 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         }
     });
     dialog.element.querySelectorAll(".b3-text-field[data-name]").forEach((item: HTMLInputElement) => {
-        if (!isMobile() && focusName !== "av" && focusName !== "custom" && focusName === item.getAttribute("data-name")) {
+        item.readOnly = item.readOnly || readonly;
+        if (!readonly && !isMobile() && focusName !== "av" && focusName !== "custom" && focusName === item.getAttribute("data-name")) {
             item.focus();
         }
         bindAttrInput(item, attrs.id);
     });
     if (focusName === "alias") {
-        if (!isMobile()) {
+        if (!readonly && !isMobile()) {
             aliasInput.focus();
         }
     } else if (focusName === "av") {

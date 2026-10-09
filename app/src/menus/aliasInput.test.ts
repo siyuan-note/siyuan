@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {parseAliases, updateAliases} from "./aliasInput";
+import {bindAliasInput, parseAliases, updateAliases} from "./aliasInput";
 
 describe("alias input", () => {
     it("splits ASCII commas, trims whitespace and keeps distinct aliases in order", () => {
@@ -30,4 +30,54 @@ describe("alias input", () => {
         const value = '<img src=x onerror="alert(1)"> & "quoted"';
         assert.deepEqual(updateAliases([], value), [value]);
     });
+});
+
+it("readonly aliases preserve text without editing, deletion, focus or drag handlers taking action", async () => {
+    const calls: string[] = [];
+    interface IFakeAliasElement {
+        children: IFakeAliasElement[];
+        textContent: string;
+        className: string;
+        events: Record<string, (event: unknown) => void>;
+        classList: {toggle: () => void, contains: () => boolean};
+        append: (child: IFakeAliasElement) => void;
+        replaceChildren: () => void;
+        setAttribute: () => void;
+        addEventListener: (type: string, callback: (event: unknown) => void) => void;
+        focus: () => void;
+    }
+    const makeElement = (): IFakeAliasElement => ({
+        children: [],
+        textContent: "",
+        className: "",
+        events: {} as Record<string, (event: unknown) => void>,
+        classList: {toggle() {}, contains: () => true},
+        append(child: IFakeAliasElement) { this.children.push(child); },
+        replaceChildren() { this.children = []; },
+        setAttribute() {},
+        addEventListener(type: string, callback: (event: unknown) => void) { this.events[type] = callback; },
+        focus: () => calls.push("focus"),
+    });
+    const list = makeElement();
+    const input = makeElement();
+    const add = {...makeElement(), querySelector: () => ({textContent: ""})};
+    const element = {innerHTML: "", querySelector: (selector: string) => selector === ".b3-chips" ? list :
+        selector === "button" ? add : input};
+    const previousDocument = globalThis.document;
+    globalThis.document = {createElement: makeElement} as unknown as Document;
+    try {
+        const aliases = bindAliasInput(element as unknown as HTMLElement, "first,<literal>", {
+            readonly: true, addLabel: "add", removeLabel: "remove", placeholder: "alias", spellcheck: false,
+            save: async () => { calls.push("save"); return true; },
+        });
+        assert.deepEqual(list.children.map(chip => chip.children.map(text => text.textContent)), [["first"], ["<literal>"]]);
+        assert.ok(list.children.every(chip => Object.keys(chip.events).length === 0));
+        list.events.pointerdown({});
+        add.events.click({});
+        aliases.focus();
+        assert.equal(await aliases.commit(), true);
+        assert.deepEqual(calls, []);
+    } finally {
+        globalThis.document = previousDocument;
+    }
 });

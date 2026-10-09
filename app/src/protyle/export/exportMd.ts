@@ -62,7 +62,7 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
     ${row(window.siyuan.languages.removeAssetsID, window.siyuan.languages.removeAssetsIDTip, bool("removeAssetsID"))}
     <!-- 其他 -->
     ${row(window.siyuan.languages.export31, window.siyuan.languages.export32, bool("inlineMemo"))}
-    ${row(window.siyuan.languages.ref, window.siyuan.languages.export11,
+    ${row(window.siyuan.languages.exportBlockRefMode, window.siyuan.languages.export11,
         select("blockRefMode", [
             {value: 2, label: window.siyuan.languages.export2},
             {value: 3, label: window.siyuan.languages.export3},

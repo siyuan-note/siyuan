@@ -43,7 +43,7 @@ const getThresholdFields = () => [
 
 export const registerOCRTab = (tab: SettingTabBuilder) => {
     const languages = window.siyuan.languages;
-    tab.group("general", "OCR").slot({
+    tab.group("general", languages.configGroupOCREngine).slot({
         key: "ocrAuto",
         keywords: [languages.ocrAuto, languages.ocrAutoTip],
         html: () => genSwitchRow("ocrAuto", languages.ocrAuto, languages.ocrAutoTip, false),

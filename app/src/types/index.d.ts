@@ -128,7 +128,7 @@ interface Window {
             displayMode: boolean;
             output: string;
             macros: IObject;
-            trust: boolean;
+            trust: boolean | ((context: {command: string; url?: string; protocol?: string}) => boolean);
             strict: (errorCode: string) => "ignore" | "warn";
         }): string;
     };

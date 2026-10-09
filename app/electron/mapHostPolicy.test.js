@@ -71,6 +71,7 @@ test("point count is bounded and provider coordinate systems remain consistent",
 test("map creation fails closed for effective process security bypasses", () => {
     const commandLine = switches => ({hasSwitch: name => switches.has(name), getSwitchValue: name => switches.get(name)});
     assert.equal(hasUnsafeMapSwitches(commandLine(new Map())), false);
+    assert.equal(hasUnsafeMapSwitches(commandLine(new Map([["allow-file-access-from-files", ""]]))), false);
     for (const name of unsafeMapSwitches) assert.equal(hasUnsafeMapSwitches(commandLine(new Map([[name, ""]]))), true, name);
     for (const value of ["IsolateOrigins", "Other, SitePerProcess", "OutOfBlinkCors:trial", "SitePerProcess<Experiment"]) {
         assert.equal(hasUnsafeMapSwitches(commandLine(new Map([["disable-features", value]]))), true);

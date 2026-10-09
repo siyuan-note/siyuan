@@ -19,10 +19,12 @@ const providerHosts = Object.freeze({
     tencent: ["map.qq.com", "apis.map.qq.com", "*.map.qq.com"],
     baidu: ["api.map.baidu.com", "*.map.bdimg.com", "*.bdimg.com", "*.map.baidu.com"],
 });
+// Electron 默认启用 allow-file-access-from-files；地图仅加载 HTTP(S) 文档，并由独立会话拒绝文件协议。
+// 该开关只影响文件来源文档，不应误判为此地图宿主的安全绕过。
 const unsafeMapSwitches = Object.freeze([
     "disable-web-security", "allow-running-insecure-content", "disable-site-isolation-for-policy",
     "disable-site-isolation-trials", "no-sandbox", "disable-setuid-sandbox", "disable-seccomp-filter-sandbox",
-    "single-process", "allow-file-access-from-files", "allow-universal-access-from-files",
+    "single-process", "allow-universal-access-from-files",
     "ignore-certificate-errors", "ignore-certificate-errors-spki-list", "ignore-ssl-errors",
     "ignore-ssl-errors-with-hosts", "allow-insecure-localhost",
 ]);

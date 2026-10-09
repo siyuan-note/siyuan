@@ -301,6 +301,20 @@ test("capability is credential-free and only supports trusted owners with safe p
     assert.equal(s.views.length, 0);
 });
 
+test("Electron's default file-access switch permits the HTTP map host while file access stays denied", async () => {
+    const s = setup();
+    s.switches.set("allow-file-access-from-files", "");
+    assert.deepEqual(s.handlers["siyuan-map-capability"](s.event()), {version: 1, supported: true});
+    assert.deepEqual(s.create(), envelope);
+    const ses = s.sessions[0];
+    assert.equal((await ses.protocols.file(new Request("file:///etc/passwd"))).status, 403);
+    assert.equal(ses.before({url: "file:///etc/passwd", resourceType: "mainFrame"}).cancel, true);
+    assert.equal(ses.before({url: "file:///etc/passwd", resourceType: "xhr"}).cancel, true);
+    s.owner.mainFrame.url = "file:///app/index.html";
+    assert.equal(s.handlers["siyuan-map-capability"](s.event()).supported, false);
+    s.manager.destroyAll();
+});
+
 test("geometry updates cannot show a map in an unfocused window and focus restores fresh geometry", () => {
     const s = setup(); s.create(); s.load(); s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
     s.win.focused = false; s.win.emit("blur");

@@ -776,7 +776,7 @@ export const getColIconByType = (type: TAVCol) => {
         case "phone":
             return "iconPhone";
         case "location":
-            return "iconPin";
+            return "iconGlobe";
         case "template":
             return "iconMath";
         case "checkbox":
@@ -2121,7 +2121,7 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
     });
     menu.addItem({
         id: "location",
-        icon: "iconPin",
+        icon: "iconGlobe",
         label: window.siyuan.languages.location,
         click() {
             const id = Lute.NewNodeID();

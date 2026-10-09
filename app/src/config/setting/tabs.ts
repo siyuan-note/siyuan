@@ -95,7 +95,7 @@ const createSettingTabs = () => {
         }, registerOCRTab),
         map: setting.tab({
             id: "map",
-            icon: "iconPin",
+            icon: "iconGlobe",
             title: () => window.siyuan.languages.mapSettings,
             afterMount: mountMapTab,
         }, registerMapTab),

@@ -70,7 +70,9 @@ export const createAVLocationReplacement = (location?: IAVCellLocationValue): IA
 });
 
 export const isAVLocationCoordinateInput = (text: string) => {
-    const parts = text.split(",").map(part => part.trim());
+    const trimmed = text.trim();
+    const unwrapped = trimmed.startsWith("(") && trimmed.endsWith(")") ? trimmed.slice(1, -1) : trimmed;
+    const parts = unwrapped.split(",").map(part => part.trim());
     return (parts.length > 1 && parts.some(part => part !== "") &&
         parts.every(part => part === "" || coordinateInput.test(part))) || canonicalInput.test(text);
 };
@@ -92,17 +94,20 @@ export const parseAVLocationCoordinate = (text: string) => {
     return Number.isFinite(number) ? number : undefined;
 };
 
-// 仅用于明确标注“纬度, 经度”的导入入口，不尝试交换坐标或解析地图服务链接。
+// 只按用户明确选择的顺序解析，不根据范围猜测顺序或解析地图服务链接。
 export const parseAVLocationCoordinates = (text: string,
-                                          coordinateSystem: IAVCellLocationValue["coordinateSystem"] = "unknown"):
+                                          coordinateSystem: IAVCellLocationValue["coordinateSystem"] = "unknown",
+                                          order: "latitudeLongitude" | "longitudeLatitude" = "latitudeLongitude"):
     IAVCellLocationValue | undefined => {
     coordinateSystem = coordinateSystem || "unknown";
-    const parts = text.split(",");
+    const trimmed = text.trim();
+    const unwrapped = trimmed.startsWith("(") && trimmed.endsWith(")") ? trimmed.slice(1, -1) : trimmed;
+    const parts = unwrapped.split(",");
     if (parts.length !== 2 || !isAVLocationCoordinateSystem(coordinateSystem)) {
         return undefined;
     }
-    const latitude = parseAVLocationCoordinate(parts[0]);
-    const longitude = parseAVLocationCoordinate(parts[1]);
+    const latitude = parseAVLocationCoordinate(parts[order === "longitudeLatitude" ? 1 : 0]);
+    const longitude = parseAVLocationCoordinate(parts[order === "longitudeLatitude" ? 0 : 1]);
     const value = {latitude, longitude, coordinateSystem, originalInput: text};
     return hasAVLocationCoordinates(value) ? value : undefined;
 };

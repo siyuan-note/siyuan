@@ -35,12 +35,13 @@ class Control {
 
 const createEditor = (options: {
     value?: IAVCellLocationValue;
+    unspecifiedSystem?: boolean;
     mobile?: boolean;
     isValid?: () => boolean;
     alreadyOpen?: boolean;
     save?: (value: IAVCellLocationValue) => Promise<void>;
 } = {}) => {
-    const fields = Object.fromEntries(["name", "latitude", "longitude", "coordinateSystem", "paste"]
+    const fields = Object.fromEntries(["name", "latitude", "longitude", "coordinateSystem", "coordinateOrder", "paste"]
         .map(name => [name, new Control()]));
     const buttons = Object.fromEntries(["save", "clear", "cancel", "parse"].map(name => [name, new Control()]));
     const container = new Control();
@@ -114,7 +115,7 @@ const createEditor = (options: {
         },
     });
     const dialog = methods.openAVLocationEditor({
-        value: options.value,
+        value: options.unspecifiedSystem ? options.value : {coordinateSystem: "wgs84", ...options.value},
         ownerElement: owner as HTMLElement,
         avBlockID: "database-block",
         isValid: options.isValid,
@@ -136,6 +137,54 @@ const createEditor = (options: {
 };
 
 describe("database location editor", () => {
+    it("requires an explicit real CRS without relabeling old unspecified coordinates", async () => {
+        const value = {latitude: 25.04, longitude: 102.42, coordinateSystem: "unknown" as const};
+        const editor = createEditor({value, unspecifiedSystem: true});
+        assert.equal(editor.fields.coordinateSystem.value, "");
+        assert.doesNotMatch(editor.markup, /<option value="unknown">/);
+        editor.buttons.save.dispatch("click");
+        await editor.settle();
+        assert.equal(editor.saved.length, 0);
+        assert.equal(editor.error.textContent, "selectCoordinateSystem");
+        assert.equal(value.coordinateSystem, "unknown");
+        editor.fields.coordinateSystem.value = "gcj02";
+        editor.fields.coordinateSystem.dispatch("change");
+        editor.buttons.save.dispatch("click");
+        await editor.settle();
+        assert.equal(editor.saved[0].coordinateSystem, "gcj02");
+        assert.equal(editor.saved[0].latitude, value.latitude);
+        assert.equal(editor.saved[0].longitude, value.longitude);
+    });
+
+    it("parses parenthesized longitude-first input only after explicit order selection", async () => {
+        const editor = createEditor();
+        editor.fields.paste.value = "(102.42,25.04)";
+        editor.buttons.parse.dispatch("click");
+        assert.equal(editor.error.textContent, "invalidCoordinates");
+        assert.equal(editor.fields.paste.focused, true);
+        assert.equal(editor.fields.latitude.value, "");
+        editor.fields.coordinateOrder.value = "longitudeLatitude";
+        editor.fields.coordinateOrder.dispatch("change");
+        editor.buttons.parse.dispatch("click");
+        assert.equal(editor.fields.latitude.value, "25.04");
+        assert.equal(editor.fields.longitude.value, "102.42");
+        editor.buttons.save.dispatch("click");
+        await editor.settle();
+        assert.equal(editor.saved[0].originalInput, "(102.42,25.04)");
+    });
+
+    it("changing import order requires confirmation without changing existing coordinates", async () => {
+        const editor = createEditor({value: {latitude: 20, longitude: 30, originalInput: "20,30"}});
+        editor.fields.coordinateOrder.value = "longitudeLatitude";
+        editor.fields.coordinateOrder.dispatch("change");
+        editor.buttons.save.dispatch("click");
+        await editor.settle();
+        assert.equal(editor.saved.length, 0);
+        assert.equal(editor.fields.latitude.value, "20");
+        editor.buttons.parse.dispatch("click");
+        assert.equal(editor.fields.latitude.value, "30");
+    });
+
     it("does not create overlapping editors on repeated open events", () => {
         const editor = createEditor({alreadyOpen: true});
         assert.equal(editor.dialog, undefined);
@@ -187,7 +236,7 @@ describe("database location editor", () => {
         editor.fields.name.value = "New";
         editor.buttons.save.dispatch("click");
         await editor.settle();
-        assert.deepEqual(editor.saved, [{...initial, name: "New", coordinateSystem: "unknown"}]);
+        assert.deepEqual(editor.saved, [{...initial, name: "New", coordinateSystem: "wgs84"}]);
         assert.equal(initial.name, "Old");
     });
 
@@ -241,7 +290,7 @@ describe("database location editor", () => {
         editor.buttons.save.dispatch("click");
         await editor.settle();
         assert.deepEqual(editor.saved, [{name: "Office", latitude: null, longitude: null,
-            coordinateSystem: "unknown", originalInput: ""}]);
+            coordinateSystem: "wgs84", originalInput: ""}]);
     });
 
     it("opens very small stored decimal coordinates without invalid exponent notation", async () => {
@@ -357,10 +406,10 @@ describe("database location editor", () => {
 
     it("requires an explicit valid coordinate system instead of silently guessing", async () => {
         const editor = createEditor({value: {coordinateSystem: "custom" as IAVCellLocationValue["coordinateSystem"]}});
-        assert.equal(editor.fields.coordinateSystem.value, "custom");
+        assert.equal(editor.fields.coordinateSystem.value, "");
         editor.buttons.save.dispatch("click");
         await editor.settle();
-        assert.equal(editor.error.textContent, "invalidCoordinateSystem");
+        assert.equal(editor.error.textContent, "selectCoordinateSystem");
         assert.equal(editor.saved.length, 0);
     });
 });

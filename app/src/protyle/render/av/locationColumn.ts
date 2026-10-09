@@ -11,9 +11,11 @@ export const bindLocationDefaultCoordinateSystem = (options: {
     if (!target) {
         return;
     }
+    const languages = window.siyuan.languages;
     const systems: Array<[IAVCellLocationValue["coordinateSystem"], string]> = [
-        ["unknown", window.siyuan.languages.coordinateSystemUnknown], ["wgs84", "WGS84"],
-        ["gcj02", "GCJ-02"], ["bd09", "BD-09"],
+        ["wgs84", languages.coordinateSystemWGS84],
+        ["gcj02", languages.coordinateSystemGCJ02],
+        ["bd09", languages.coordinateSystemBD09],
     ];
     const items: IMenu[] = systems.map(([system, label]) => ({
         label,
@@ -26,10 +28,15 @@ export const bindLocationDefaultCoordinateSystem = (options: {
             options.menuElement.closest(".av__panel")?.remove();
         },
     }));
-    const item = new MenuItem({icon: "iconPin", label: window.siyuan.languages.defaultCoordinateSystem, submenu: items});
+    const item = new MenuItem({
+        icon: "iconGlobe",
+        label: languages.defaultCoordinateSystem,
+        action: "iconInfo",
+        actionLabel: languages.defaultCoordinateSystemTip,
+        submenu: items,
+    });
     target.replaceWith(item.element);
     item.element.dataset.type = "locationDefaultCoordinateSystem";
-    item.element.setAttribute("title", window.siyuan.languages.defaultCoordinateSystemTip);
     const submenu = item.element.querySelector<HTMLElement>(".b3-menu__submenu");
     const show = () => {
         item.element.classList.add("b3-menu__item--show");

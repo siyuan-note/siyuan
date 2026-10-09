@@ -125,7 +125,7 @@ test("Map settings share desktop/mobile order, existing icon, searchable control
     assert.equal((html.match(/type="password" autocomplete="off"/g) || []).length, 2);
     assert.doesNotMatch(html, /value=".*apiKey/i);
     const tabs = readFileSync("src/config/setting/tabs.ts", "utf8");
-    assert.match(tabs, /ocr: setting\.tab\([\s\S]*?map: setting\.tab\([\s\S]*?icon: "iconPin"[\s\S]*?registerMapTab\),\s*export:/);
+    assert.match(tabs, /ocr: setting\.tab\([\s\S]*?map: setting\.tab\([\s\S]*?icon: "iconGlobe"[\s\S]*?registerMapTab\),\s*export:/);
     assert.match(readFileSync("src/mobile/menu/settingPanel.ts", "utf8"), /tabId === "map"[\s\S]*?unmountMapTab\(root\)/);
     assert.match(readFileSync("src/config/index.ts", "utf8"), /if \(mapRoot\) unmountMapTab\(mapRoot\)/);
 });

@@ -169,12 +169,57 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     check.equal(prefixed.firstElementChild.querySelector('[contenteditable="true"]').textContent, "first\n\nsecond");
     check.ok(prefixed.querySelector('[data-type="strong"]'));
     const plain = parse(paragraph("first\n\nsecond<wbr>"));
-    check.equal(plain.childElementCount, 1);
-    check.equal(plain.querySelector('[contenteditable="true"]').textContent, "first\n\nsecond");
+    check.equal(plain.childElementCount, 2);
+    check.deepEqual(Array.from(plain.children).map(block =>
+        block.querySelector('[contenteditable="true"]').textContent), ["first", "second"]);
+    for (const separator of ["\n\n", "\n\n\n", "\n \t\n"]) {
+        const divided = parse(paragraph("first" + separator + "second<wbr>"));
+        check.equal(divided.childElementCount, 2, separator);
+        check.deepEqual(Array.from(divided.children).map(block =>
+            block.querySelector('[contenteditable="true"]').textContent), ["first", "second"]);
+        check.ok(divided.lastElementChild.querySelector("wbr"), "the caret follows the paragraph split");
+        const stored = document.createElement("td");
+        api.updateTableCellEditingValue(stored, api.serializeTableCellRich(divided.innerHTML));
+        const reopened = document.createElement("div");
+        reopened.innerHTML = api.getTableCellRichBlockDOM(stored);
+        check.equal(reopened.childElementCount, 2, "the paragraph boundary survives save and reopen");
+    }
+    const singleBreak = parse(paragraph("first\nsecond<wbr>"));
+    check.equal(singleBreak.childElementCount, 1);
+    check.equal(singleBreak.querySelector('[contenteditable="true"]').textContent, "first\nsecond");
+    const storedSoftBreaks = document.createElement("td");
+    const storedSource = api.encodeTableCellRich("first<br /><br />second");
+    storedSoftBreaks.setAttribute("data-sy-table-cell-rich", storedSource);
+    const restoredSoftBreaks = parse(api.getTableCellRichBlockDOM(storedSoftBreaks));
+    check.equal(restoredSoftBreaks.childElementCount, 1, "reading existing soft breaks does not split paragraphs");
+    check.equal(restoredSoftBreaks.querySelector('[contenteditable="true"]').textContent, "first\n\nsecond");
+    api.updateTableCellEditingValue(storedSoftBreaks, api.serializeTableCellRich(restoredSoftBreaks.innerHTML));
+    check.equal(storedSoftBreaks.getAttribute("data-sy-table-cell-rich"), storedSource);
+    for (const source of ["```go\nfirst\n\nsecond\n```", "$$\nfirst\n\nsecond\n$$"]) {
+        const holder = document.createElement("div");
+        holder.innerHTML = base.Md2BlockDOM(source);
+        const editable = holder.querySelector('[contenteditable="true"]');
+        const mathSource = holder.firstElementChild.getAttribute("data-content");
+        (editable || holder.firstElementChild).insertAdjacentHTML("beforeend", "<wbr>");
+        const preserved = parse(holder.innerHTML);
+        check.equal(preserved.childElementCount, 1, "code and math retain their internal blank lines");
+        if (editable) {
+            check.match(preserved.querySelector('[contenteditable="true"]').textContent, /first\n\nsecond/);
+        } else {
+            check.equal(preserved.firstElementChild.getAttribute("data-content"), mathSource);
+        }
+    }
+    const formatted = parse(paragraph('<span data-type="strong">first</span>\n\n<span data-type="em">second<wbr></span>'));
+    check.equal(formatted.childElementCount, 2);
+    check.equal(formatted.firstElementChild.querySelector('[data-type="strong"]').textContent, "first");
+    check.equal(formatted.lastElementChild.querySelector('[data-type="em"]').textContent, "second");
+    const listParagraphs = parse(base.Md2BlockDOM("- first").replace("first", "first\n\nsecond<wbr>"));
+    check.equal(listParagraphs.querySelectorAll('[data-type="NodeListItem"]').length, 1);
+    check.equal(listParagraphs.querySelectorAll('[data-type="NodeParagraph"]').length, 2);
     for (const [line, type] of [["# Heading", "NodeHeading"], ["- item", "NodeList"], ["[] task", "NodeList"]]) {
         const converted = parse(paragraph("first\n\n" + line + "<wbr>"));
         check.ok(converted.querySelector(`[data-type="${type}"] wbr`), line);
-        check.equal(converted.firstElementChild.querySelector('[contenteditable="true"]').textContent, "first\n");
+        check.equal(converted.firstElementChild.querySelector('[contenteditable="true"]').textContent, "first");
     }
     const literal = parse(paragraph('<span data-type="text">```js\n```</span><wbr>'));
     check.equal(literal.querySelector('[data-type="NodeCodeBlock"]'), null);

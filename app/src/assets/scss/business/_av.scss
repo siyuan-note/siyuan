@@ -7,13 +7,6 @@
   margin: 8px 0;
 }
 
-.av__map-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
 .av__map-setting-value {
   min-width: 0;
   max-width: min(160px, 45vw);

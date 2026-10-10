@@ -41,17 +41,12 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
 <div class="av__map-status ft__on-surface" role="status"></div>
 <div class="av__map-canvas fn__none"></div>
 <div class="ft__smaller fn__none" data-map-attribution></div>
-<div class="av__map-actions">
-    <button type="button" class="b3-button b3-button--outline fn__none" data-map-fit>${window.siyuan.languages.mapFitMarkers}</button>
-    <button type="button" class="block__icon block__icon--show ariaLabel" data-map-retry aria-label="${escapeAttr(window.siyuan.languages.refresh)}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
-</div>`;
+`;
     records.before(root);
     ["click", "keydown", "pointerdown"].forEach(type => root.addEventListener(type, event => event.stopPropagation()));
     const status = root.querySelector<HTMLElement>(".av__map-status");
     const canvas = root.querySelector<HTMLElement>(".av__map-canvas");
     const attribution = root.querySelector<HTMLElement>("[data-map-attribution]");
-    const fitButton = root.querySelector<HTMLButtonElement>("[data-map-fit]");
-    const retryButton = root.querySelector<HTMLButtonElement>("[data-map-retry]");
     let host: AVMapHost;
     let themeObserver: MutationObserver;
     let resizeObserver: ResizeObserver;
@@ -76,16 +71,12 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
         attribution.classList.add("fn__none");
         status.textContent = message;
         canvas.classList.add("fn__none");
-        fitButton.classList.add("fn__none");
     };
-    retryButton.addEventListener("click", () => { void renderMap(blockElement, protyle, data); });
     if (window.siyuan.isPublish) {
-        retryButton.classList.add("fn__none");
         fallback(window.siyuan.languages.mapPublicFallback);
         return;
     }
     if (protyle.options.history?.created || protyle.options.history?.snapshot) {
-        retryButton.classList.add("fn__none");
         fallback(window.siyuan.languages.mapUnsupportedClient);
         return;
     }
@@ -172,7 +163,6 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
                 }
                 status.textContent = "";
                 attribution.classList.remove("fn__none");
-                fitButton.classList.remove("fn__none");
             },
             onError: () => fallback(navigator.onLine ? window.siyuan.languages.mapLoadError : window.siyuan.languages.mapOffline),
             onMarkerClick: (id, markerRevision) => {
@@ -182,7 +172,6 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
             },
         });
         host.setPoints(points, activeRevision);
-        fitButton.addEventListener("click", () => host?.fit());
         themeObserver = new MutationObserver(() => host?.setTheme(getTheme()));
         themeObserver.observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme-mode"]});
         resizeObserver = new ResizeObserver(() => host?.resize());

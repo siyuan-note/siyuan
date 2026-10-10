@@ -125,7 +125,7 @@ test("published maps render a status without inline settings, runtime credential
     assert.deepEqual(scenario.calls, []);
     assert.equal(scenario.hosts.length, 0);
     assert.equal(scenario.status(), "mapPublicFallback");
-    assert.doesNotMatch(scenario.roots[0].innerHTML, /av__map-settings|data-map-setting|data-map-configure/);
+    assert.doesNotMatch(scenario.roots[0].innerHTML, /av__map-settings|data-map-setting|data-map-configure|av__map-actions|data-map-fit|data-map-retry/);
 });
 
 test("unconfigured, unavailable host, offline and incompatible maps never request runtime credentials", async () => {
@@ -151,7 +151,7 @@ test("map sends only IDs and coordinates and opens the existing row detail for a
     assert.equal(JSON.stringify(host.points), JSON.stringify([{id: "row", longitude: 0, latitude: 0, coordinateSystem: "wgs84"}]));
     assert.doesNotMatch(JSON.stringify(host.options), /Private|primary-value|notebook/);
     host.options.onReady();
-    assert.doesNotMatch(scenario.roots[0].innerHTML, /av__map-settings|data-map-setting|data-map-configure/);
+    assert.doesNotMatch(scenario.roots[0].innerHTML, /av__map-settings|data-map-setting|data-map-configure|av__map-actions|data-map-fit|data-map-retry/);
     host.options.onMarkerClick("other", host.revision);
     host.options.onMarkerClick("row", host.revision - 1);
     assert.equal(scenario.opened.length, 0);

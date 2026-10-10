@@ -44,11 +44,18 @@ var removeUnusedAttributeView = contractHandler(apicontract.RemoveUnusedAttribut
 
 var removeUnusedAttributeViews = contractHandler(apicontract.RemoveUnusedAttributeViews, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.AVPathsData] {
 	defer beginSettingTask("clearAllAV")()
-	return apicontract.Success(apicontract.AVPathsData{Paths: model.RemoveUnusedAttributeViews()})
+	paths, err := model.RemoveUnusedAttributeViews()
+	if err != nil {
+		return apicontract.Failure[apicontract.AVPathsData](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.AVPathsData{Paths: paths})
 })
 
 var getUnusedAttributeViews = contractHandler(apicontract.GetUnusedAttributeViews, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
-	values := model.UnusedAttributeViews(true)
+	values, err := model.UnusedAttributeViews(true)
+	if err != nil {
+		return apicontract.Failure[[]*apicontract.AssetUnusedItem](-1, err.Error())
+	}
 	total := len(values)
 	if total > 512 {
 		values = values[:512]

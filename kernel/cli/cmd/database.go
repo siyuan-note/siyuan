@@ -192,7 +192,10 @@ var databaseUnusedCmd = &cobra.Command{
 	Use:   "unused",
 	Short: "List unused databases",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		items := model.UnusedAttributeViews(true)
+		items, err := model.UnusedAttributeViews(true)
+		if err != nil {
+			return err
+		}
 		switch outputFormat {
 		case "json":
 			return printJSON(map[string]any{"count": len(items), "items": items})
@@ -224,11 +227,17 @@ var databaseCleanCmd = &cobra.Command{
 		}
 
 		if dryRun {
+			if _, err := model.UnusedAttributeViews(false); err != nil {
+				return err
+			}
 			fmt.Println("[dry-run] Would clean unused databases")
 			return nil
 		}
 
-		removed := model.RemoveUnusedAttributeViews()
+		removed, err := model.RemoveUnusedAttributeViews()
+		if err != nil {
+			return err
+		}
 		fmt.Printf("%d database(s) cleaned\n", len(removed))
 		return nil
 	},

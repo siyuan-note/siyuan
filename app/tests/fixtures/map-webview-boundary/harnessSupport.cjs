@@ -4,41 +4,19 @@ const http = require("node:http");
 const os = require("node:os");
 const path = require("node:path");
 const {randomBytes} = require("node:crypto");
-const {createMapSessionRouter, MAP_HOST_BOOTSTRAP_TIMEOUT, MAP_HOST_READY_TIMEOUT} = require("../../../electron/mapHostManager");
-const {hasUnsafeMapSwitches, mapHostFiles, parseMapReply} = require("../../../electron/mapHostPolicy");
+const {createMapHostManager} = require("../../../electron/mapHostManager");
+const {hasUnsafeMapSwitches, mapHostFiles} = require("../../../electron/mapHostPolicy");
 
 const appDir = path.resolve(__dirname, "../../..");
-const preload = path.join(appDir, "electron/mapHostPreload.js");
 const ownerPreferences = Object.freeze({nodeIntegration: true, nodeIntegrationInSubFrames: false,
     nodeIntegrationInWorker: false, webviewTag: true, webSecurity: false, contextIsolation: false,
     autoplayPolicy: "user-gesture-required"});
-const guestPreferences = Object.freeze({sandbox: true, contextIsolation: true, webSecurity: true,
-    nodeIntegration: false, nodeIntegrationInSubFrames: false, nodeIntegrationInWorker: false,
-    webviewTag: false, allowRunningInsecureContent: false, plugins: false, experimentalFeatures: false,
-    navigateOnDragDrop: false, disablePopups: true, safeDialogs: true, disableDialogs: true,
-    spellcheck: false, backgroundThrottling: false, autoplayPolicy: "user-gesture-required"});
+const {MAP_WEBVIEW_PREFERENCES: guestPreferences, getMapWebviewPreferenceMismatch: getGuestPreferenceMismatch} =
+    require("../../../electron/mapWebviewHost");
 // Electron 44 的 getLastWebPreferences 只回传此固定子集，不包含 preload 等构造参数。
 const reportedPreferenceKeys = Object.freeze(["sandbox", "contextIsolation", "webSecurity", "nodeIntegration",
     "nodeIntegrationInSubFrames", "nodeIntegrationInWorker", "webviewTag", "allowRunningInsecureContent",
     "experimentalFeatures", "disablePopups", "safeDialogs", "disableDialogs"]);
-const getGuestPreferenceMismatch = actual => reportedPreferenceKeys.find(name => actual?.[name] !== guestPreferences[name]);
-
-// 仅供独立原型使用；渲染器不能指定偏好或预载脚本。
-const hardenAttachment = (event, preferences, params, expected) => {
-    const unsafe = ["preload", "webpreferences", "nodeintegration", "nodeintegrationinsubframes",
-        "disablewebsecurity", "allowpopups", "plugins", "blinkfeatures", "disableblinkfeatures",
-        "useragent", "httpreferrer"].some(name => !!params[name]);
-    if (expected.used || event.sender !== expected.owner || params.src !== expected.src ||
-        params.partition !== expected.partition || unsafe) {
-        event.preventDefault();
-        return false;
-    }
-    expected.used = true;
-    for (const name of Object.keys(preferences)) delete preferences[name];
-    Object.assign(preferences, guestPreferences, {preload, session: expected.session, partition: expected.partition});
-    return true;
-};
-
 const checkRealAssets = (directory = appDir) => {
     for (const [relative] of Object.values(mapHostFiles)) {
         try {
@@ -110,19 +88,16 @@ const createHarness = async ({profile, mode = "real", automate = false} = {}) =>
     if (typeof profile !== "string" || !path.isAbsolute(profile) || !["real", "synthetic"].includes(mode)) {
         throw new Error("An isolated profile and fixed fixture mode are required");
     }
-    const {app, BrowserWindow, MessageChannelMain, session} = require("electron");
+    const {app, BrowserWindow, WebContentsView, MessageChannelMain, ipcMain, session} = require("electron");
     if (hasUnsafeMapSwitches(app.commandLine)) throw new Error("Unsafe process switches are prohibited");
     if (mode === "real") checkRealAssets();
     app.setPath("userData", profile);
     await app.whenReady();
     const syntheticFiles = mode === "synthetic" ? createSyntheticFiles() : undefined;
-    const instanceID = randomBytes(24).toString("hex"), nonce = randomBytes(24).toString("hex");
-    const partition = "map-webview-fixture-" + instanceID;
-    const ses = session.fromPartition(partition, {cache: false});
-    let win, owner, guest, router, port, expected, timer, ready = false, closed = false, loaded = false, isolating = false;
+    const instanceID = randomBytes(24).toString("hex");
+    let win, owner, guest, manager, src, partition, startupTimer, closed = false, isolating = false;
     let resolveReady, rejectReady;
     const readiness = new Promise((resolve, reject) => { resolveReady = resolve; rejectReady = reject; });
-    // 事件可能在 createHarness 等待就绪前失败。
     void readiness.catch(() => {});
     const evidence = {privateRequests: 0, guestNetworkRequests: 0, defaultHeaderCalls: 0,
         defaultGuestHeaderCalls: 0, rejectedAttachments: 0, attached: 0, replies: [], diagnostics: []};
@@ -136,141 +111,72 @@ const createHarness = async ({profile, mode = "real", automate = false} = {}) =>
             response.writeHead(403).end();
             return;
         }
-        // 复现真实默认会话删除 CSP 的行为，不改生产入口。
         response.setHeader("Content-Security-Policy", "default-src 'none'");
         response.setHeader("Content-Type", resource[1]);
         response.end(fs.readFileSync(path.join(__dirname, resource[0])));
     });
-    const fail = (code, detail = {}) => {
-        if (closed) return;
-        if (owner && !owner.isDestroyed()) owner.send("map-webview-fixture-state", {type: "error", code});
-        const error = new Error("Map fixture failure");
-        error.code = code;
-        error.netError = detail.netError;
-        error.preference = detail.preference;
-        rejectReady(error);
-        if (ready) void destroy();
-    };
-    const send = value => { if (port && !closed) port.postMessage({version: 1, instanceID, ...value}); };
     const onCreated = (_event, contents) => {
-        if (contents.getType() !== "webview") return;
-        if (closed || guest || !expected?.used || contents.hostWebContents !== owner || contents.session !== ses) {
-            contents.close({waitForBeforeUnload: false});
-            return;
-        }
-        guest = contents;
-        // 此事件早于首次 loadURL；did-attach-webview 仅用于复核，不能承担首次防护。
-        contents.setWindowOpenHandler(() => ({action: "deny"}));
-        for (const name of ["will-navigate", "will-frame-navigate", "will-redirect", "will-attach-webview"]) {
-            contents.on(name, event => event.preventDefault());
-        }
-        contents.on("will-prevent-unload", event => event.preventDefault());
-        contents.on("select-client-certificate", (event, _url, _certificates, callback) => { event.preventDefault(); callback(); });
-        contents.on("login", (event, _details, _auth, callback) => { event.preventDefault(); callback(); });
-        contents.on("certificate-error", (_event, _url, _error, _certificate, callback) => callback(false));
-        contents.on("console-message", (event, _level, legacyMessage) => {
-            const message = event?.message ?? legacyMessage;
-            if (!ready && typeof message === "string" && message.includes("frame-ancestors")) fail("documentCSPBlocked");
-        });
-        contents.on("did-navigate", (_event, url) => { if (url !== expected.src) fail("hostDocumentMismatch"); });
-        contents.on("did-navigate-in-page", () => fail("hostDocumentMismatch"));
-        contents.on("render-process-gone", () => fail("hostRendererGone"));
-        contents.on("destroyed", () => { if (!closed) fail("hostDestroyed"); });
-        contents.on("did-fail-load", (_event, code, _description, _url, isMainFrame) => {
-            if (isMainFrame && code !== -3) fail("hostDocumentLoadFailed", {netError: code});
-        });
-        contents.on("did-finish-load", () => {
-            if (loaded || contents.getURL() !== expected.src) { fail("hostDocumentMismatch"); return; }
-            loaded = true;
-            const channel = new MessageChannelMain();
-            port = channel.port1;
-            port.on("message", event => {
-                const reply = parseMapReply(event.data, instanceID);
-                if (!reply || closed) return;
-                if (reply.type === "bootstrapReady" && !ready) {
-                    clearTimeout(timer);
-                    timer = setTimeout(() => fail("hostSDKTimeout"), MAP_HOST_READY_TIMEOUT);
-                    send({type: "init", provider: "openfreemap", theme: "light"});
-                } else if (reply.type === "ready" && !ready) {
-                    ready = true;
-                    clearTimeout(timer);
-                    send({type: "setPoints", revision: 1, points: [{id: "synthetic-row-1", longitude: 121.4737, latitude: 31.2304},
-                        {id: "synthetic-row-2", longitude: 121.5037, latitude: 31.2404}]});
-                    send({type: "visibility", visible: true});
-                    owner.send("map-webview-fixture-state", {type: "ready", mode});
-                    resolveReady();
-                } else if (reply.type === "error") fail(reply.code);
-                else if (reply.type === "markerClick" && ready && reply.revision === 1 &&
-                    ["synthetic-row-1", "synthetic-row-2"].includes(reply.id)) {
-                    evidence.replies.push(reply);
-                    owner.send("map-webview-fixture-state", reply);
-                }
-            });
-            port.start();
-            contents.postMessage("siyuan-map-port", {version: 1, instanceID, nonce, provider: "openfreemap"}, [channel.port2]);
-        });
+        if (!contents.isDestroyed() && contents.getType() === "webview" && contents.hostWebContents === owner && !guest) guest = contents;
+    };
+    const onState = (event, value) => {
+        if (event.sender !== owner || event.senderFrame !== owner.mainFrame || closed || value?.instanceID !== instanceID) return;
+        if (value.type === "attached") { src = value.src; partition = value.partition; }
+        else if (value.type === "ready") { clearTimeout(startupTimer); resolveReady(); }
+        else if (value.type === "error") {
+            const error = new Error("Map fixture failure");
+            error.code = value.code;
+            rejectReady(error);
+        } else if (value.type === "markerClick") evidence.replies.push(value);
     };
     const destroy = async () => {
         if (closed) return;
-        send({type: "destroy"});
         closed = true;
-        if (!ready) {
-            const error = new Error("Map fixture closed before ready");
-            error.code = "ownerClosed";
-            rejectReady(error);
-        }
-        clearTimeout(timer);
+        const error = new Error("Map fixture closed before ready");
+        error.code = "ownerClosed";
+        rejectReady(error);
+        clearTimeout(startupTimer);
+        manager?.destroyAll();
+        ipcMain.removeListener("map-webview-fixture-state", onState);
         app.removeListener("web-contents-created", onCreated);
-        port?.close();
-        router?.destroy();
-        if (guest && !guest.isDestroyed()) guest.close({waitForBeforeUnload: false});
         if (win && !win.isDestroyed()) win.destroy();
         session.defaultSession.webRequest.onHeadersReceived(null);
         server.closeAllConnections?.();
         if (server.listening) await new Promise(resolve => server.close(resolve));
     };
     try {
-        await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+        await new Promise((resolve, reject) => { server.once("error", reject); server.listen(0, "127.0.0.1", resolve); });
         const origin = `http://127.0.0.1:${server.address().port}`;
-        const src = origin + "/stage/map/index.html?provider=openfreemap#" + instanceID + ":" + nonce;
-        router = createMapSessionRouter({ses, origin, appDir,
-            readFile: syntheticFiles ? async filename => {
-                const relative = path.relative(appDir, filename).split(path.sep).join("/");
-                if (!syntheticFiles.has(relative)) throw new Error("Unknown synthetic fixture asset");
-                return syntheticFiles.get(relative);
-            } : undefined,
-            report: code => evidence.diagnostics.push(code)});
         session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
             evidence.defaultHeaderCalls++;
             if (details.url.includes("/stage/map/") || details.url.includes("/stage/build/map/")) evidence.defaultGuestHeaderCalls++;
             callback({responseHeaders: Object.fromEntries(Object.entries(details.responseHeaders || {})
                 .filter(([name]) => !["content-security-policy", "x-frame-options", "access-control-allow-origin"].includes(name.toLowerCase())))});
         });
+        manager = createMapHostManager({app, ipcMain, session, BrowserWindow, WebContentsView, MessageChannelMain, appDir,
+            getTarget: id => owner && id === owner.id ? {mode: "local", origin} : undefined,
+            isInitialized: id => owner && id === owner.id,
+            readFile: syntheticFiles ? async filename => {
+                const relative = path.relative(appDir, filename).split(path.sep).join("/");
+                if (!syntheticFiles.has(relative)) throw new Error("Unknown synthetic fixture asset");
+                return syntheticFiles.get(relative);
+            } : undefined});
         app.on("web-contents-created", onCreated);
-        win = new BrowserWindow({width: 820, height: 620, useContentSize: true, show: true,
-            webPreferences: {...ownerPreferences}});
+        ipcMain.on("map-webview-fixture-state", onState);
+        win = new BrowserWindow({width: 820, height: 620, useContentSize: true, show: true, webPreferences: {...ownerPreferences}});
         owner = win.webContents;
-        expected = {owner, src, partition, session: ses, used: false};
-        owner.on("will-attach-webview", (event, preferences, params) => {
-            if (!hardenAttachment(event, preferences, params, expected)) evidence.rejectedAttachments++;
-        });
-        owner.on("did-attach-webview", (_event, attached) => {
-            const actual = attached.getLastWebPreferences();
-            const mismatch = getGuestPreferenceMismatch(actual);
-            if (attached !== guest || attached.hostWebContents !== owner || attached.session !== ses || mismatch) {
-                fail(mismatch ? "attachPreferenceMismatch" : "hostAttachFailed", {preference: mismatch});
-                attached.close({waitForBeforeUnload: false});
-                return;
-            }
-            evidence.attached++;
-        });
+        owner.on("will-attach-webview", event => { queueMicrotask(() => { if (event.defaultPrevented) evidence.rejectedAttachments++; }); });
+        owner.on("did-attach-webview", () => { evidence.attached++; });
         win.on("closed", () => { void destroy().then(() => { if (!automate) app.quit(); }); });
-        await win.loadURL(origin + "/stage/build/app/");
-        timer = setTimeout(() => fail("hostBootstrapTimeout"), MAP_HOST_BOOTSTRAP_TIMEOUT);
-        owner.send("map-webview-fixture-start", {src, partition, mode});
+        startupTimer = setTimeout(() => {
+            const error = new Error("Owner fixture startup deadline exceeded");
+            error.code = "hostBootstrapTimeout";
+            rejectReady(error);
+        }, 85000);
+        await Promise.race([win.loadURL(origin + "/stage/build/app/"), readiness]);
+        owner.send("map-webview-fixture-start", {instanceID, mode});
         await readiness;
-        const harness = {win, owner, get guest() { return guest; }, session: ses, origin, src, partition, instanceID,
-            mode, evidence, send, destroy};
+        const harness = {win, owner, get guest() { return guest; }, session: guest.session, origin,
+            get src() { return src; }, get partition() { return partition; }, instanceID, mode, evidence, destroy};
         isolating = true;
         await verifyIsolation(harness);
         console.info("Map webview boundary checks passed: isolated session, opaque origin, no Node/IPC or owner DOM access, private network denied.");
@@ -330,7 +236,7 @@ const verifyHarness = async harness => {
     const evaluate = source => owner.executeJavaScript(source);
     const inspect = source => guest.executeJavaScript(source);
     await verifyIsolation(harness);
-    await waitFor(() => inspect("window.mapFixture?.fits === 1 && window.mapFixture.visible.length === 1"), "runtime receives points and visibility");
+    await waitFor(() => inspect("window.mapFixture?.fits === 1 && window.mapFixture.visible.at(-1) === true"), "runtime receives points and visibility");
     assert.equal(await inspect("window.mapFixture.locked"), true);
     const privateURL = origin + "/api/fixture-private";
     assert.deepEqual(await inspect(`new Promise(resolve => {
@@ -367,6 +273,14 @@ const verifyHarness = async harness => {
     assert.equal(guest.id, identity);
     assert.equal(await inspect("JSON.stringify({fits:mapFixture.fits,revisions:mapFixture.revisions,visible:mapFixture.visible})"), before,
         "opening/closing an ordinary menu neither hides, rebuilds nor refits the map");
+    await evaluate("window.setFixtureMenu(true)");
+    guest.sendInputEvent({type: "mouseDown", x: 40, y: 100, button: "left", clickCount: 1});
+    guest.sendInputEvent({type: "mouseUp", x: 40, y: 100, button: "left", clickCount: 1});
+    await waitFor(() => evaluate("document.getElementById('menu').hidden && window.ownerFixture.dismissals === 1"),
+        "a real map press dismisses the owner menu through the production manager");
+    await waitFor(() => inspect("window.mapFixture.clicks === 1"), "the same map click still reaches the map");
+    assert.equal(guest.id, identity);
+    assert.equal(await inspect("JSON.stringify({fits:mapFixture.fits,revisions:mapFixture.revisions,visible:mapFixture.visible})"), before);
     await evaluate("document.getElementById('scroll-area').scrollTop = 80");
     assert.equal(await evaluate("document.getElementById('scroll-area').scrollTop"), 80);
     assert.equal(guest.id, identity);
@@ -374,7 +288,7 @@ const verifyHarness = async harness => {
     await evaluate(`(() => {
         const bad = document.createElement("webview");
         bad.setAttribute("src", ${JSON.stringify(privateURL)});
-        bad.setAttribute("partition", "persist:untrusted-fixture");
+        bad.setAttribute("partition", ${JSON.stringify(harness.partition)});
         bad.setAttribute("nodeintegration", "");
         bad.setAttribute("disablewebsecurity", "");
         document.body.appendChild(bad);
@@ -398,5 +312,5 @@ const verifyHarness = async harness => {
     }
 };
 
-module.exports = {createHarness, createTemporaryProfile, verifyHarness, hardenAttachment, checkRealAssets,
-    createSyntheticFiles, ownerPreferences, guestPreferences, getGuestPreferenceMismatch, reportedPreferenceKeys, verifyIsolation};
+module.exports = {createHarness, createTemporaryProfile, verifyHarness, checkRealAssets,
+    createSyntheticFiles, ownerPreferences, guestPreferences, verifyIsolation};

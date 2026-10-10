@@ -7,6 +7,7 @@ const fs = require("node:fs/promises");
 const {randomBytes} = require("node:crypto");
 const {createManager: createUnplacedManager} = require("./mapUnplaced/manager");
 const {CHANNEL: UNPLACED_CHANNEL, keys: hasUnplacedKeys} = require("./mapUnplaced/policy");
+const {hardenMapWebviewPreferences, isMapWebviewAttachment, getMapWebviewPreferenceMismatch} = require("./mapWebviewHost");
 const {mapDiagnosticCodes, mapCSPDiagnosticCodes, isMapCSPResource, MAX_MAP_DIAGNOSTICS, classifyMapConsoleMessage,
     classifyMapCSPResources} = require("./mapHostDiagnostics");
 const {
@@ -184,6 +185,8 @@ const createMapSessionRouter = ({ses, origin, appDir, readFile = fs.readFile, tr
 const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContentsView, MessageChannelMain,
     getTarget, isInitialized, appDir, readFile, randomID = () => randomBytes(24).toString("hex")}) => {
     const hosts = new Map();
+    const attachmentOwners = new WeakSet();
+    const webviewSessions = new WeakSet();
     const mapContents = new Set();
     const activeFetchURLs = new Map();
     const trackFetch = (url, delta) => {
@@ -204,7 +207,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         if (event.senderFrame !== event.sender.mainFrame) return {reason: "notMainFrame"};
         if (!isInitialized(event.sender.id)) return {reason: "notInitialized"};
         const target = getTarget(event.sender.id);
-        if (!target) return {reason: "unregisteredOwner"};
+        if (!target || !["local", "remote"].includes(target.mode)) return {reason: "unregisteredOwner"};
         const origin = normalizeMapOrigin(target.origin);
         if (!origin) return {reason: "invalidKernelOrigin"};
         const win = BrowserWindow.fromWebContents(event.sender);
@@ -216,7 +219,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
                 return {reason: "unsupportedDocument"};
             }
         } catch (_error) { return {reason: "invalidDocument"}; }
-        return {owner: {win, origin}};
+        return {owner: {win, origin, mode: target.mode === "local" ? "webview" : "native"}};
     };
     const trustedOwner = event => inspectOwner(event).owner;
     const getHost = (event, value) => {
@@ -224,7 +227,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         if (!owner || value?.version !== 1 || typeof value.instanceID !== "string") return;
         const host = hosts.get(event.sender.id + ":" + value.instanceID);
         if (host && !host.destroyed && host.owner === event.sender && host.win === owner.win &&
-            host.origin === owner.origin && host.frame === event.senderFrame) return host;
+            host.origin === owner.origin && host.mode === owner.mode && host.frame === event.senderFrame) return host;
     };
     const sendOwner = (host, reply) => {
         if (!host.destroyed && !host.owner.isDestroyed()) {
@@ -232,6 +235,17 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         }
     };
     const setVisible = (host, visible, updateNative = true) => {
+        if (host.mode === "webview") {
+            host.visible = visible && host.ready && host.win.isVisible() && !host.win.isMinimized();
+            if (!host.visible) host.attributionGestureUntil = 0;
+            const visibility = host.visible ? host.visibility : {visible: false};
+            const key = JSON.stringify(visibility);
+            if (host.ready && key !== host.lastVisibility) {
+                host.lastVisibility = key;
+                post(host, {version: 1, instanceID: host.init.instanceID, type: "visibility", ...visibility});
+            }
+            return;
+        }
         if (updateNative && !host.view.webContents.isDestroyed()) host.view.setVisible(visible);
         if (!visible) host.attributionGestureUntil = 0;
         host.visible = visible;
@@ -267,14 +281,14 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             try { port?.close(); } catch (_error) { /* 端口已转移或关闭。 */ }
         }
         try {
-            if (!host.win.isDestroyed()) host.win.contentView.removeChildView(host.view);
+            if (host.view && !host.win.isDestroyed()) host.win.contentView.removeChildView(host.view);
         } catch (_error) { /* 移除失败也必须关闭渲染器。 */ }
         // 移除视图不会销毁 WebContents，必须实际关闭 SDK 渲染器。
-        if (!host.view.webContents.isDestroyed()) {
-            try { host.view.webContents.stop(); } catch (_error) { /* 仍尝试关闭。 */ }
-            try { host.view.webContents.close({waitForBeforeUnload: false}); } catch (_error) { /* 渲染器可能已关闭。 */ }
+        if (host.contents && !host.contents.isDestroyed()) {
+            try { host.contents.stop(); } catch (_error) { /* 仍尝试关闭。 */ }
+            try { host.contents.close({waitForBeforeUnload: false}); } catch (_error) { /* 渲染器可能已关闭。 */ }
         }
-        mapContents.delete(host.view.webContents.id);
+        if (host.contents) mapContents.delete(host.contents.id);
     };
     const fail = (host, code) => {
         if (!host || host.destroyed) return;
@@ -303,6 +317,10 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         }
     };
     const applyGeometry = host => {
+        if (host.mode === "webview") {
+            setVisible(host, host.visibility?.visible === true, false);
+            return;
+        }
         const geometry = host.geometry;
         if (!geometry?.visible || host.destroyed) return;
         // SDK 初始化也需要非零尺寸；设置已校验的几何不等于允许显示原生视图。
@@ -329,6 +347,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         }
     };
     const unplacedFor = host => {
+        if (host.mode !== "native") return;
         if (host.unplaced) return host.unplaced;
         const send = value => {
             if (host.owner.isDestroyed() || host.frame !== host.owner.mainFrame) return;
@@ -347,7 +366,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
     };
     ipcMain.handle("siyuan-map-unplaced-open", (event, value) => {
         const host = getHost(event, value);
-        if (!host || !host.ready || !host.visible ||
+        if (!host || host.mode !== "native" || !host.ready || !host.visible ||
             !hasUnplacedKeys(value, ["version", "instanceID", "state", "anchor"])) return;
         try {
             // 同一窗口最多一个菜单，新菜单不会改变任何地图的相机或原生可见性。
@@ -371,6 +390,85 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             try { host.unplaced.action(event, value); }
             catch (_error) { host.unplaced.dismiss("operation-failed"); }
             return;
+        }
+    });
+    const currentWebviewOwner = host => host.mode === "webview" && !hasUnsafeMapSwitches(app.commandLine) &&
+        getHost({sender: host.owner, senderFrame: host.frame}, host.init) === host;
+    const closeMapGuest = contents => {
+        try { contents.setWindowOpenHandler(() => ({action: "deny"})); } catch (_error) { /* 对象可能已被前序监听器销毁。 */ }
+        try { if (!contents.isDestroyed()) contents.close({waitForBeforeUnload: false}); } catch (_error) { /* 会话路由仍保持拒绝。 */ }
+    };
+    const installAttachmentOwner = owner => {
+        if (attachmentOwners.has(owner)) return;
+        attachmentOwners.add(owner);
+        const beforeAttach = (event, preferences, params) => {
+            // 仅接管保留的地图分区，其余插件和文档 webview 保留原有行为。
+            if (typeof params?.partition !== "string" || !params.partition.startsWith("siyuan-map-")) return;
+            const host = [...hosts.values()].find(item => item.partition === params.partition);
+            if (!host || host.owner !== owner || event.sender !== owner || !currentWebviewOwner(host) ||
+                host.attachmentAccepted || !isMapWebviewAttachment(params, host)) {
+                event.preventDefault();
+                return;
+            }
+            try {
+                const zoomFactor = owner.getZoomFactor();
+                if (!Number.isFinite(zoomFactor) || zoomFactor < 0.25 || zoomFactor > 5) {
+                    event.preventDefault();
+                    fail(host, "hostAttachFailed");
+                    return;
+                }
+                hardenMapWebviewPreferences(preferences, host.session, host.partition);
+                // 清空不可信偏好后恢复主窗口缩放，避免初次挂载回落到 100%。
+                preferences.zoomFactor = zoomFactor;
+                host.attachmentAccepted = true;
+            } catch (_error) {
+                event.preventDefault();
+                fail(host, "hostAttachFailed");
+            }
+        };
+        const didAttach = (_event, contents) => {
+            let host, mapGuest = false;
+            try {
+                if (contents.isDestroyed() || !webviewSessions.has(contents.session)) return;
+                mapGuest = true;
+                host = [...hosts.values()].find(item => item.contents === contents);
+                if (!host || !currentWebviewOwner(host) || host.attachmentVerified || contents.hostWebContents !== owner ||
+                    contents.session !== host.session || getMapWebviewPreferenceMismatch(contents.getLastWebPreferences())) {
+                    if (host) fail(host, "hostAttachFailed");
+                    closeMapGuest(contents);
+                    return;
+                }
+                host.attachmentVerified = true;
+            } catch (_error) {
+                if (host) fail(host, "hostAttachFailed");
+                if (mapGuest) closeMapGuest(contents);
+            }
+        };
+        owner.on("will-attach-webview", beforeAttach);
+        owner.on("did-attach-webview", didAttach);
+        owner.once("destroyed", () => {
+            owner.removeListener("will-attach-webview", beforeAttach);
+            owner.removeListener("did-attach-webview", didAttach);
+        });
+    };
+    app.on("web-contents-created", (_event, contents) => {
+        let host, mapGuest = false, ownsReservation = false;
+        try {
+            if (contents.isDestroyed() || contents.getType() !== "webview" || !webviewSessions.has(contents.session)) return;
+            mapGuest = true;
+            host = [...hosts.values()].find(item => item.session === contents.session);
+            ownsReservation = !!host && !host.contents && contents.hostWebContents === host.owner && host.attachmentAccepted;
+            // main.js 的通用外链处理器先安装；地图 guest 必须在首次加载前覆盖为拒绝。
+            contents.setWindowOpenHandler(() => ({action: "deny"}));
+            if (!ownsReservation || !currentWebviewOwner(host) || getMapWebviewPreferenceMismatch(contents.getLastWebPreferences())) {
+                closeMapGuest(contents);
+                if (ownsReservation) fail(host, "hostAttachFailed");
+                return;
+            }
+            host.attachContents(contents);
+        } catch (_error) {
+            if (ownsReservation) fail(host, "hostAttachFailed");
+            if (mapGuest) closeMapGuest(contents);
         }
     });
     ipcMain.handle("siyuan-map-capability", event => {
@@ -400,120 +498,151 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
                 ...(resource === undefined ? {} : {resource})});
         };
         try {
-            ses = session.fromPartition("siyuan-map-" + randomID(), {cache: false});
+            const partition = "siyuan-map-" + randomID();
+            ses = session.fromPartition(partition, {cache: false});
             router = createMapSessionRouter({ses, origin: owner.origin, appDir, readFile, trackFetch, report});
-            view = new WebContentsView({webPreferences: {session: ses, sandbox: true, contextIsolation: true,
+            if (owner.mode === "native") view = new WebContentsView({webPreferences: {session: ses, sandbox: true, contextIsolation: true,
                 webSecurity: true, nodeIntegration: false, nodeIntegrationInSubFrames: false,
                 nodeIntegrationInWorker: false, webviewTag: false, allowRunningInsecureContent: false,
                 navigateOnDragDrop: false, safeDialogs: true, disableDialogs: true, devTools: false,
                 spellcheck: false, backgroundThrottling: false, preload: path.join(__dirname, "mapHostPreload.js")}});
-            const contents = view.webContents;
+            const nonce = randomID();
+            const entryURL = owner.origin + "/stage/map/index.html?provider=openfreemap#" + init.instanceID + ":" + nonce;
             host = {key, init, owner: event.sender, frame: event.senderFrame, win: owner.win, origin: owner.origin, diagnostics: new Set(), report,
-                view, router, listeners: [], ids: new Set(), revision: -1, loaded: false, ready: false, bootstrapped: false, destroyed: false,
+                mode: owner.mode, session: ses, partition, entryURL, view, router, listeners: [], ids: new Set(), revision: -1,
+                loaded: false, ready: false, bootstrapped: false, destroyed: false,
                 visible: false, attributionGestureUntil: 0};
             hosts.set(key, host);
-            // 全局 web-contents-created 会安装外部打开链接处理器，必须在加载前替换为拒绝。
-            contents.setWindowOpenHandler(() => ({action: "deny"}));
-            const armAttributionClick = () => {
-                if (host.ready && host.visible && host.win.isFocused() && host.win.isVisible() && !host.win.isMinimized()) {
-                    host.attributionGestureUntil = Date.now() + 1000;
-                }
-            };
-            listen(host, contents, "before-mouse-event", (_event, input) => {
-                if (input.type === "mouseDown") dismissUnplaced(host.win, "outside");
-                if (input.type === "mouseUp" && input.button === "left") armAttributionClick();
-            });
-            listen(host, contents, "before-input-event", (_event, input) => {
-                if (input.type === "keyDown" && input.key === "Enter" && !input.isAutoRepeat) armAttributionClick();
-            });
-            mapContents.add(contents.id);
-            const denyNavigation = event => event.preventDefault();
-            for (const name of ["will-navigate", "will-frame-navigate", "will-redirect", "will-attach-webview"]) {
-                listen(host, contents, name, denyNavigation);
-            }
-            listen(host, contents, "select-client-certificate", (event, _url, _certificates, callback) => { event.preventDefault(); callback(); });
-            listen(host, contents, "login", (event, _details, _auth, callback) => { event.preventDefault(); callback(); });
-            listen(host, contents, "certificate-error", (_event, _url, _error, _certificate, callback) => callback(false));
-            listen(host, contents, "console-message", (event, _level, legacyMessage) => {
-                const message = event?.message ?? legacyMessage;
-                const resources = classifyMapCSPResources(message, host.origin);
-                for (const code of classifyMapConsoleMessage(message)) {
-                    if (!resources.some(item => item.code === code)) report(code);
-                }
-                for (const {code, resource} of resources) report(code, resource);
-            });
-            listen(host, contents, "did-fail-load", (_event, _code, _description, _url, isMainFrame) => {
-                if (isMainFrame === false) return;
-                report("documentLoadFailed");
-                fail(host, "hostDocumentLoadFailed");
-            });
-            listen(host, contents, "render-process-gone", () => fail(host, "hostRendererGone"));
-            listen(host, contents, "destroyed", () => fail(host, "hostDestroyed"));
             listen(host, event.sender, "destroyed", () => destroy(host));
             listen(host, event.sender, "render-process-gone", () => destroy(host));
+            listen(host, owner.win, "closed", () => destroy(host));
             listen(host, event.sender, "did-start-navigation", details => {
                 if (details.isMainFrame && !details.isSameDocument) destroy(host);
             });
-            for (const name of ["resize", "hide", "minimize", "enter-full-screen", "leave-full-screen"]) {
-                listen(host, owner.win, name, () => hide(host));
+            for (const name of ["hide", "minimize"]) listen(host, owner.win, name, () => hide(host));
+            if (host.mode === "native") {
+                for (const name of ["resize", "enter-full-screen", "leave-full-screen"]) {
+                    listen(host, owner.win, name, () => hide(host));
+                }
+                listen(host, event.sender, "zoom-changed", () => hide(host));
             }
-            // 失焦只撤销外链手势；仍可见的窗口继续绘制地图，遮挡由窗口系统和主文档分别处理。
+            // 失焦仅撤销署名外链手势，DOM 自行处理本地地图的裁剪和叠层。
             listen(host, owner.win, "blur", () => { host.attributionGestureUntil = 0; });
             for (const name of ["focus", "show", "restore"]) listen(host, owner.win, name, () => applyGeometry(host));
-            listen(host, event.sender, "zoom-changed", () => hide(host));
-            const nonce = randomID();
-            const entryURL = owner.origin + "/stage/map/index.html?provider=openfreemap#" + init.instanceID + ":" + nonce;
-            listen(host, contents, "did-finish-load", () => {
-                if (host.destroyed) return;
-                try {
-                    if (host.loaded) { fail(host, "hostDocumentReloaded"); return; }
-                    if (contents.getURL() !== entryURL) { fail(host, "hostDocumentMismatch"); return; }
-                    host.loaded = true;
-                    // 初始隐藏的 renderer 必须显式唤醒产帧，否则 SDK 的 load 会等待显示，而显示又等待 ready。
-                    contents.setBackgroundThrottling(false);
-                    applyGeometry(host);
-                    const {port1, port2} = new MessageChannelMain();
-                    host.port = port1;
-                    host.transferredPort = port2;
-                    port1.on("message", ({data}) => {
-                        if (host.destroyed) return;
-                        const reply = parseMapReply(data, init.instanceID);
-                        if (!reply) return;
-                        try {
-                            if (reply.type === "bootstrapReady" && !host.bootstrapped) {
-                                host.bootstrapped = true;
-                                // 打包资源和 CSP 已准备完成，此后只等待地图创建与 load 就绪。
-                                setDeadline(host, MAP_HOST_READY_TIMEOUT);
-                                post(host, init);
-                            } else if (reply.type === "ready" && host.bootstrapped && !host.ready) {
-                                host.ready = true;
-                                clearTimeout(host.timer);
-                                if (host.points) post(host, host.points);
-                                post(host, {version: 1, instanceID: init.instanceID, type: "theme", theme: init.theme});
-                                if (host.destroyed) return;
-                                applyGeometry(host);
-                                if (host.destroyed) return;
-                                contents.setBackgroundThrottling(true);
-                                sendOwner(host, reply);
-                            } else if (reply.type === "markerClick" && host.ready && reply.revision === host.revision && host.ids.has(reply.id)) {
-                                sendOwner(host, reply);
-                            } else if (reply.type === "attributionClick" && host.ready && host.visible &&
-                                host.win.isFocused() && host.win.isVisible() && !host.win.isMinimized() &&
-                                host.attributionGestureUntil > Date.now()) {
-                                host.attributionGestureUntil = 0;
-                                sendOwner(host, reply);
-                            } else if (reply.type === "error") {
-                                fail(host, reply.code === "hostUnavailable" ?
-                                    host.bootstrapped ? "hostOperationFailed" : "hostBootstrapFailed" : reply.code);
-                            }
-                        } catch (_error) { fail(host, "hostOperationFailed"); }
+            host.attachContents = contents => {
+                host.contents = contents;
+                // 全局 web-contents-created 会安装外部打开链接处理器，必须在加载前替换为拒绝。
+                contents.setWindowOpenHandler(() => ({action: "deny"}));
+                const armAttributionClick = () => {
+                    if (host.ready && host.visible && host.win.isFocused() && host.win.isVisible() && !host.win.isMinimized()) {
+                        host.attributionGestureUntil = Date.now() + 1000;
+                    }
+                };
+                listen(host, contents, "before-mouse-event", (_event, input) => {
+                    if (input.type === "mouseDown") {
+                        if (host.mode === "native") dismissUnplaced(host.win, "outside");
+                        else if (currentWebviewOwner(host) && host.ready && host.visible && host.win.isFocused() &&
+                            host.win.isVisible() && !host.win.isMinimized()) {
+                            sendOwner(host, {version: 1, instanceID: host.init.instanceID, type: "dismissMenu"});
+                        }
+                    }
+                    if (input.type === "mouseUp" && input.button === "left") armAttributionClick();
+                });
+                listen(host, contents, "before-input-event", (_event, input) => {
+                    if (input.type === "keyDown" && input.key === "Enter" && !input.isAutoRepeat) armAttributionClick();
+                });
+                mapContents.add(contents.id);
+                const denyNavigation = event => event.preventDefault();
+                for (const name of ["will-navigate", "will-frame-navigate", "will-redirect", "will-attach-webview"]) {
+                    listen(host, contents, name, denyNavigation);
+                }
+                listen(host, contents, "select-client-certificate", (event, _url, _certificates, callback) => { event.preventDefault(); callback(); });
+                listen(host, contents, "login", (event, _details, _auth, callback) => { event.preventDefault(); callback(); });
+                listen(host, contents, "certificate-error", (_event, _url, _error, _certificate, callback) => callback(false));
+                listen(host, contents, "console-message", (event, _level, legacyMessage) => {
+                    const message = event?.message ?? legacyMessage;
+                    const resources = classifyMapCSPResources(message, host.origin);
+                    for (const code of classifyMapConsoleMessage(message)) {
+                        if (!resources.some(item => item.code === code)) report(code);
+                    }
+                    for (const {code, resource} of resources) report(code, resource);
+                });
+                listen(host, contents, "did-fail-load", (_event, _code, _description, _url, isMainFrame) => {
+                    if (isMainFrame === false) return;
+                    report("documentLoadFailed");
+                    fail(host, "hostDocumentLoadFailed");
+                });
+                listen(host, contents, "render-process-gone", () => fail(host, "hostRendererGone"));
+                if (host.mode === "webview") {
+                    listen(host, contents, "did-navigate-in-page", () => fail(host, "hostDocumentMismatch"));
+                    listen(host, contents, "did-navigate", (_event, url) => {
+                        if (url !== entryURL) fail(host, "hostDocumentMismatch");
                     });
-                    port1.on("close", () => fail(host, "hostPortClosed"));
-                    port1.start();
-                    contents.postMessage("siyuan-map-port", {version: 1, instanceID: init.instanceID, nonce, provider: init.provider}, [port2]);
-                } catch (_error) { fail(host, "hostPortSetupFailed"); }
-            });
+                }
+                listen(host, contents, "destroyed", () => fail(host, "hostDestroyed"));
+                listen(host, contents, "did-finish-load", () => {
+                    if (host.destroyed) return;
+                    try {
+                        if (host.mode === "webview" && !host.attachmentVerified) { fail(host, "hostAttachFailed"); return; }
+                        if (host.loaded) { fail(host, "hostDocumentReloaded"); return; }
+                        if (contents.getURL() !== entryURL) { fail(host, "hostDocumentMismatch"); return; }
+                        host.loaded = true;
+                        // 初始隐藏的 renderer 必须显式唤醒产帧，否则 SDK 的 load 会等待显示，而显示又等待 ready。
+                        contents.setBackgroundThrottling(false);
+                        applyGeometry(host);
+                        const {port1, port2} = new MessageChannelMain();
+                        host.port = port1;
+                        host.transferredPort = port2;
+                        port1.on("message", ({data}) => {
+                            if (host.destroyed) return;
+                            if (getHost({sender: host.owner, senderFrame: host.frame}, host.init) !== host) {
+                                destroy(host);
+                                return;
+                            }
+                            const reply = parseMapReply(data, init.instanceID);
+                            if (!reply) return;
+                            try {
+                                if (reply.type === "bootstrapReady" && !host.bootstrapped) {
+                                    host.bootstrapped = true;
+                                    // 打包资源和 CSP 已准备完成，此后只等待地图创建与 load 就绪。
+                                    setDeadline(host, MAP_HOST_READY_TIMEOUT);
+                                    post(host, init);
+                                } else if (reply.type === "ready" && host.bootstrapped && !host.ready) {
+                                    host.ready = true;
+                                    clearTimeout(host.timer);
+                                    if (host.points) post(host, host.points);
+                                    post(host, {version: 1, instanceID: init.instanceID, type: "theme", theme: init.theme});
+                                    if (host.destroyed) return;
+                                    applyGeometry(host);
+                                    if (host.destroyed) return;
+                                    contents.setBackgroundThrottling(true);
+                                    sendOwner(host, reply);
+                                } else if (reply.type === "markerClick" && host.ready && reply.revision === host.revision && host.ids.has(reply.id)) {
+                                    sendOwner(host, reply);
+                                } else if (reply.type === "attributionClick" && host.ready && host.visible &&
+                                    host.win.isFocused() && host.win.isVisible() && !host.win.isMinimized() &&
+                                    host.attributionGestureUntil > Date.now()) {
+                                    host.attributionGestureUntil = 0;
+                                    sendOwner(host, reply);
+                                } else if (reply.type === "error") {
+                                    fail(host, reply.code === "hostUnavailable" ?
+                                        host.bootstrapped ? "hostOperationFailed" : "hostBootstrapFailed" : reply.code);
+                                }
+                            } catch (_error) { fail(host, "hostOperationFailed"); }
+                        });
+                        port1.on("close", () => fail(host, "hostPortClosed"));
+                        port1.start();
+                        contents.postMessage("siyuan-map-port", {version: 1, instanceID: init.instanceID, nonce, provider: init.provider}, [port2]);
+                    } catch (_error) { fail(host, "hostPortSetupFailed"); }
+                });
+            };
             setDeadline(host, MAP_HOST_BOOTSTRAP_TIMEOUT);
+            if (host.mode === "webview") {
+                webviewSessions.add(ses);
+                installAttachmentOwner(event.sender);
+                return {version: 1, instanceID: init.instanceID, mode: "webview", src: entryURL, partition};
+            }
+            host.attachContents(view.webContents);
             creationFailure = "hostAttachFailed";
             view.setVisible(false);
             // DOM 暂时不可见时也能完成初始化；此占位视图始终隐藏，不会覆盖编辑器。
@@ -521,20 +650,26 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             owner.win.contentView.addChildView(view);
             // Electron 添加的新地图会位于最上层；只提升菜单，不重排或隐藏其他地图。
             for (const other of hosts.values()) if (other.win === owner.win) other.unplaced?.promote();
-            void contents.loadURL(entryURL).catch(() => { report("documentLoadFailed"); fail(host, "hostDocumentLoadFailed"); });
+            void host.contents.loadURL(entryURL).catch(() => { report("documentLoadFailed"); fail(host, "hostDocumentLoadFailed"); });
         } catch (_error) {
             if (host) fail(host, creationFailure);
             else if (router) router.destroy();
             else if (ses) clearMapSession(ses);
             return {version: 1, instanceID: init.instanceID, error: creationFailure};
         }
-        return {version: 1, instanceID: init.instanceID};
+        return {version: 1, instanceID: init.instanceID, mode: "native"};
     });
     ipcMain.on("siyuan-map-command", (event, value) => {
         const host = getHost(event, value);
         if (!host) return;
         const command = parseMapCommand(value, host.init.instanceID);
         if (!command) return;
+        if (command.type === "visibility") {
+            if (host.mode !== "webview") return;
+            host.visibility = command.visible ? {visible: true, ...(command.viewport && {viewport: command.viewport})} : {visible: false};
+            applyGeometry(host);
+            return;
+        }
         if (command.type === "destroy") { destroy(host); return; }
         if (command.type === "setPoints") {
             if (command.revision <= host.revision) return;
@@ -546,7 +681,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
     });
     ipcMain.on("siyuan-map-geometry", (event, value) => {
         const host = getHost(event, value);
-        if (!host) return;
+        if (!host || host.mode !== "native") return;
         try {
             const geometry = parseMapGeometry(value, host.owner.getZoomFactor(), host.win.getContentBounds(), host.report);
             if (!geometry?.visible) { hide(host); return; }

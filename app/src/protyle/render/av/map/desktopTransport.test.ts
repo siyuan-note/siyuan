@@ -9,6 +9,7 @@ import {computeDesktopAVMapGeometry, MapGeometry} from "./desktopGeometry";
 import * as desktopGeometryDOM from "./desktopGeometryDOM";
 import * as loadingBudget from "./loadingBudget";
 import * as desktopUnplaced from "./desktopUnplaced";
+import {getAVMapVisibility} from "./host";
 
 const visibleGeometry = (geometry: MapGeometry) => {
     assert.ok(geometry.visible === true, "the fixture must produce visible geometry");
@@ -31,6 +32,7 @@ const load = (ipc: unknown, browser = false, warnings: unknown[][] = []) => {
         if (name === "./desktopGeometryDOM") { return desktopGeometryDOM; }
         if (name === "./loadingBudget") { return loadingBudget; }
         if (name === "./desktopUnplaced") { return desktopUnplaced; }
+        if (name === "./host") { return {getAVMapVisibility}; }
         assert.equal(name, "electron");
         assert.equal(browser, false, "browser must not import Electron");
         return {ipcRenderer: ipc};
@@ -59,12 +61,25 @@ const fixture = (warnings: unknown[][] = []) => {
         on: (name: string, fn: (...args: any[]) => void) => listeners.set(name, fn),
         removeListener: (name: string) => listeners.delete(name),
     };
-    const rect = {x: 10, y: 20, width: 400, height: 300};
+    const rect = {x: 10, y: 20, width: 400, height: 300, get left() { return this.x; }, get top() { return this.y; },
+        get right() { return this.x + this.width; }, get bottom() { return this.y + this.height; }};
+    const guests: Array<{tag: string; attributes: Map<string, string>; style: {cssText: string}; removed: boolean;
+        setAttribute: (name: string, value: string) => void; remove: () => void}> = [];
+    const attachments: unknown[] = [];
     const doc: any = {hidden: false, documentElement: {}, querySelectorAll: (): HTMLElement[] => [],
         elementFromPoint: () => container,
+        createElement: (tag: string) => {
+            const attributes = new Map<string, string>();
+            const guest = {tag, attributes, style: {cssText: ""}, removed: false,
+                setAttribute: (name: string, value: string) => attributes.set(name, value),
+                remove: () => { guest.removed = true; }};
+            guests.push(guest);
+            return guest;
+        },
         addEventListener: (name: string, fn: () => void) => domListeners.set(name, fn),
         removeEventListener: (name: string) => domListeners.delete(name)};
-    const scope = {crypto: webcrypto, innerWidth: 1000, innerHeight: 800, performance: {now: () => now},
+    const scope = {crypto: webcrypto, location: {origin: "http://127.0.0.1:6806"},
+        innerWidth: 1000, innerHeight: 800, performance: {now: () => now},
         setTimeout: (callback: () => void, delay: number) => {
             timers.set(++nextTimer, {callback, delay});
             return nextTimer;
@@ -79,7 +94,8 @@ const fixture = (warnings: unknown[][] = []) => {
             getPropertyValue: () => ""})};
     doc.defaultView = scope;
     const container: any = {ownerDocument: doc, isConnected: true, parentElement: null, closest: (): HTMLElement | null => null,
-        getClientRects: () => [rect], getBoundingClientRect: () => rect, contains: (target: unknown) => target === container};
+        clientWidth: 400, clientHeight: 300, append: (guest: unknown) => attachments.push(guest),
+        getClientRects: () => [rect], getBoundingClientRect: () => rect, contains: (target: unknown) => target === container || attachments.includes(target)};
     const errors: string[] = [], clicks: unknown[] = [], attributionClicks: string[] = [];
     let ready = 0;
     const api = load(ipc, false, warnings);
@@ -88,7 +104,8 @@ const fixture = (warnings: unknown[][] = []) => {
         onAttributionClick: (link: string) => attributionClicks.push(link),
         onMarkerClick: (...args: unknown[]) => clicks.push(args), onReady: () => ready++});
     const instanceID = calls[0][1].instanceID;
-    return {host, calls, listeners, domListeners, frames, timers, errors, clicks, attributionClicks, doc, container, rect,
+    return {host, calls, listeners, domListeners, frames, timers, errors, clicks, attributionClicks, doc, container, rect, guests, attachments,
+        api, instanceID,
         ready: () => ready,
         reply: (value: object) => listeners.get("siyuan-map-reply")?.({}, {version: 1, instanceID, ...value}),
         rejected: async () => {
@@ -96,7 +113,7 @@ const fixture = (warnings: unknown[][] = []) => {
             await new Promise<void>((resolve) => setImmediate(resolve));
         },
         created: async (overrides: object = {}) => {
-            resolveCreate({version: 1, instanceID, ...overrides});
+            resolveCreate({version: 1, instanceID, mode: "native", ...overrides});
             await new Promise<void>((resolve) => setImmediate(resolve));
         },
         advance: (milliseconds = 150) => {
@@ -108,6 +125,150 @@ const fixture = (warnings: unknown[][] = []) => {
 };
 
 describe("desktop map transport", () => {
+    it("accepts only explicit native mode or the fixed owner-origin map document and ephemeral webview partition", () => {
+        const api = load({});
+        const instanceID = "a".repeat(48);
+        const origin = "http://127.0.0.1:6806";
+        const src = `${origin}/stage/map/index.html?provider=openfreemap#${instanceID}:${"b".repeat(48)}`;
+        const partition = `siyuan-map-${"c".repeat(48)}`;
+        const valid = {version: 1, instanceID, mode: "webview", src, partition};
+        assert.deepEqual(api.parseDesktopMapCreation(valid, instanceID, origin), {mode: "webview", src, partition});
+        assert.deepEqual(api.parseDesktopMapCreation({version: 1, instanceID, mode: "native"}, instanceID, origin), {mode: "native"});
+        const invalidCreations: unknown[] = [null, [], {version: 1, instanceID}, {...valid, mode: "iframe"},
+            {...valid, src: undefined}, {...valid, partition: undefined}, {...valid, preload: "/private/preload.js"},
+            {...valid, mode: "native"}, {...valid, partition: "persist:" + partition}, {...valid, partition: "siyuan-map-other"},
+            {...valid, src: src.replace(origin, "https://other.invalid")}, {...valid, src: src.replace("index.html", "../index.html")},
+            {...valid, src: src.replace("provider=openfreemap", "provider=other")}, {...valid, src: src + "?extra"},
+            {...valid, src: src.replace(instanceID, "d".repeat(48))}, {...valid, src: src.slice(0, -1)}];
+        for (const value of invalidCreations) {
+            assert.equal(api.parseDesktopMapCreation(value, instanceID, origin), undefined, JSON.stringify(value));
+        }
+    });
+
+    it("mounts local maps as ordinary webviews and keeps the same guest through menus, scrolling and resize", async () => {
+        const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;
+        let mutations = 0, resizes = 0, disconnects = 0;
+        globalThis.MutationObserver = class {
+            constructor() { mutations++; }
+            observe() {}
+            disconnect() {}
+        } as any;
+        globalThis.ResizeObserver = class {
+            constructor() { resizes++; }
+            observe() {}
+            disconnect() { disconnects++; }
+        } as any;
+        const f = fixture();
+        const src = `${f.doc.defaultView.location.origin}/stage/map/index.html?provider=openfreemap#${f.instanceID}:${"b".repeat(48)}`;
+        const partition = `siyuan-map-${"c".repeat(48)}`;
+        const command = () => f.calls.filter(([name, value]) => name === "siyuan-map-command" && value.type === "visibility").at(-1)?.[1];
+        try {
+            f.host.setPoints([{id: "row", longitude: 1, latitude: 2, name: "private"}], 1);
+            f.host.setTheme("dark");
+            await f.created({mode: "webview", src, partition});
+            assert.equal(f.guests.length, 1);
+            const guest = f.guests[0];
+            assert.equal(guest.tag, "webview");
+            assert.deepEqual([...guest.attributes], [["title", ""], ["partition", partition], ["src", src]]);
+            assert.deepEqual(f.attachments, [guest]);
+            assert.equal(mutations, 0, "local composition must not install the native stability/occlusion observer");
+            assert.equal(resizes, 1);
+            assert.equal(desktopUnplaced.openDesktopMapUnplaced(f.container, f.container,
+                {} as desktopUnplaced.DesktopMapUnplacedState, () => {}, () => {}, () => true), undefined,
+            "local maps use the existing DOM unplaced menu");
+            f.reply({type: "ready"});
+            assert.equal(f.ready(), 1);
+            assert.deepEqual(command().viewport, {x: 0, y: 0, width: 400, height: 300});
+            const pointCommand = f.calls.find(([name, value]) => name === "siyuan-map-command" && value.type === "setPoints")[1];
+            assert.equal(pointCommand.points[0].name, undefined);
+            const themeCommand = f.calls.find(([name, value]) => name === "siyuan-map-command" && value.type === "theme")[1];
+            assert.equal(themeCommand.theme, "dark");
+            const scrim = {className: "av__panel", contains: () => false, getClientRects: () => [f.rect],
+                getBoundingClientRect: () => f.rect};
+            f.doc.querySelectorAll = () => [scrim];
+            f.doc.elementFromPoint = () => scrim;
+            f.advance();
+            assert.equal(command().visible, false, "a full menu scrim suppresses attribution interaction only");
+            assert.equal(guest.removed, false, "menus cannot detach or hide the guest map");
+            assert.deepEqual([...guest.attributes], [["title", ""], ["partition", partition], ["src", src]]);
+            f.doc.querySelectorAll = (): HTMLElement[] => [];
+            f.doc.elementFromPoint = () => f.container;
+            f.rect.y = -40;
+            f.domListeners.get("scroll")();
+            assert.equal(command().visible, true, "local scrolling has no native settle delay");
+            assert.deepEqual(command().viewport, {x: 0, y: 40, width: 400, height: 260});
+            f.host.resize();
+            assert.ok(f.calls.some(([name, value]) => name === "siyuan-map-command" && value.type === "resize"));
+            assert.equal(f.calls.some(([name]) => name === "siyuan-map-geometry"), false);
+            assert.equal(f.guests.length, 1);
+            f.doc.hidden = true;
+            f.domListeners.get("visibilitychange")();
+            assert.equal(command().visible, false);
+            f.host.destroy();
+            assert.equal(guest.removed, true);
+            assert.equal(disconnects, 1);
+            assert.equal(f.frames.size, 0);
+            assert.equal(f.listeners.size, 0);
+            assert.equal(f.domListeners.size, 0);
+            assert.deepEqual(f.errors, []);
+        } finally {
+            f.host.destroy();
+            globalThis.MutationObserver = oldMutation;
+            globalThis.ResizeObserver = oldResize;
+        }
+    });
+
+    it("dismisses existing menus only for fixed trusted-main signals from the live visible local map", async () => {
+        const oldResize = globalThis.ResizeObserver, oldWindow = globalThis.window;
+        globalThis.ResizeObserver = class { observe() {} disconnect() {} } as any;
+        let dismissed = 0;
+        globalThis.window = {siyuan: {menus: {menu: {remove: () => dismissed++}}}} as any;
+        const f = fixture();
+        try {
+            const src = `${f.doc.defaultView.location.origin}/stage/map/index.html?provider=openfreemap#${f.instanceID}:${"b".repeat(48)}`;
+            await f.created({mode: "webview", src, partition: `siyuan-map-${"c".repeat(48)}`});
+            f.reply({type: "dismissMenu"});
+            assert.equal(dismissed, 0);
+            f.reply({type: "ready"});
+            f.reply({type: "dismissMenu", instanceID: "other"});
+            f.reply({type: "dismissMenu", event: "click"});
+            assert.equal(dismissed, 0);
+            f.reply({type: "dismissMenu"});
+            assert.equal(dismissed, 1);
+            f.doc.hidden = true;
+            f.reply({type: "dismissMenu"});
+            f.doc.hidden = false;
+            f.container.isConnected = false;
+            f.reply({type: "dismissMenu"});
+            f.host.destroy();
+            f.reply({type: "dismissMenu"});
+            assert.equal(dismissed, 1);
+        } finally {
+            f.host.destroy();
+            globalThis.ResizeObserver = oldResize;
+            globalThis.window = oldWindow;
+        }
+    });
+
+    it("fails closed on missing modes and defers early ready callbacks until creation is validated", async () => {
+        for (const mode of [undefined, "other", "webview"]) {
+            const f = fixture();
+            f.host.setPoints([{id: "row", longitude: 1, latitude: 2}], 1);
+            f.reply({type: "ready"});
+            assert.equal(f.ready(), 0);
+            await f.created({mode});
+            assert.equal(f.ready(), 0);
+            assert.deepEqual(f.errors, ["hostCreateInvalidResponse"]);
+            assert.equal(f.guests.length, 0);
+            assert.equal(f.calls.some(([name]) => name === "siyuan-map-command"), false);
+        }
+        const disposed = fixture();
+        const src = `${disposed.doc.defaultView.location.origin}/stage/map/index.html?provider=openfreemap#${disposed.instanceID}:${"b".repeat(48)}`;
+        disposed.host.destroy();
+        await disposed.created({mode: "webview", src, partition: `siyuan-map-${"c".repeat(48)}`});
+        assert.equal(disposed.guests.length, 0, "a late response cannot recreate a disposed guest");
+    });
+
     it("registers a menu only for its ready map and closes a late menu creation after map disposal", async () => {
         class Observer { observe() {} disconnect() {} }
         const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver, oldWindow = globalThis.window;
@@ -494,7 +655,7 @@ describe("desktop map transport", () => {
             f.doc.querySelectorAll = (): HTMLElement[] => [];
             callbacks[0]();
             f.advance();
-            assert.deepEqual(lastGeometry().bounds, f.rect);
+            assert.deepEqual(lastGeometry().bounds, {x: f.rect.x, y: f.rect.y, width: f.rect.width, height: f.rect.height});
             assert.deepEqual(lastGeometry().crop, {x: 0, y: 0});
             assert.equal(f.calls.filter(([name]) => name === "siyuan-map-create").length, 1);
             assert.equal(f.calls.filter(([name]) => name === "siyuan-map-command").length, commands,

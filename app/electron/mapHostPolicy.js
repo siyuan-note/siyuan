@@ -62,6 +62,17 @@ const parseMapCreate = value => {
 const parseMapCommand = (value, instanceID) => {
     if (!isRecord(value) || value.version !== 1 || value.instanceID !== instanceID) return;
     const base = {version: 1, instanceID};
+    if (value.type === "visibility") {
+        if (Object.keys(value).some(key => !["version", "instanceID", "type", "visible", "viewport"].includes(key)) ||
+            typeof value.visible !== "boolean") return;
+        if (!value.visible) return !Object.hasOwn(value, "viewport") ? {...base, type: "visibility", visible: false} : undefined;
+        if (!Object.hasOwn(value, "viewport")) return {...base, type: "visibility", visible: true};
+        const rect = value.viewport;
+        if (!isRecord(rect) || Object.keys(rect).length !== 4 ||
+            !["x", "y", "width", "height"].every(key => Object.hasOwn(rect, key) && Number.isFinite(rect[key]) && rect[key] >= 0 && rect[key] <= 32768) ||
+            rect.width <= 0 || rect.height <= 0) return;
+        return {...base, type: "visibility", visible: true, viewport: {x: rect.x, y: rect.y, width: rect.width, height: rect.height}};
+    }
     if (value.type === "setPoints" && isMapRevision(value.revision) && Array.isArray(value.points)) {
         return {...base, type: value.type, revision: value.revision, points: sanitizeMapPoints(value.points)};
     }

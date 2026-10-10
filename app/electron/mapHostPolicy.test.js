@@ -67,6 +67,68 @@ test("obsolete coordinate-system point messages are rejected rather than reinter
     }
 });
 
+test("map visibility accepts only its exact envelope and copies a bounded viewport", () => {
+    for (const visible of [true, false]) {
+        const value = {...envelope, type: "visibility", visible};
+        assert.deepEqual(parseMapCommand(value, instanceID), value);
+    }
+    for (const viewport of [{x: 0, y: 0, width: 1, height: 1},
+        {x: 32768, y: 32768, width: 32768, height: 32768},
+        {x: 10.25, y: 20.5, width: 0.25, height: 0.5}]) {
+        const value = {...envelope, type: "visibility", visible: true, viewport};
+        const command = parseMapCommand(value, instanceID);
+        assert.deepEqual(command, value);
+        assert.notEqual(command, value);
+        assert.notEqual(command.viewport, viewport);
+    }
+});
+
+test("map visibility rejects foreign envelopes, extra fields and non-boolean visibility", () => {
+    const value = {...envelope, type: "visibility", visible: true};
+    for (const visible of [undefined, null, 0, 1, "true", "false", {}, []]) {
+        assert.equal(parseMapCommand({...value, visible}, instanceID), undefined);
+    }
+    for (const extra of [{url: origin}, {executeJavaScript: "never"}, {bounds: {}}, {visibleToOwner: true},
+        {privateData: undefined}]) {
+        assert.equal(parseMapCommand({...value, ...extra}, instanceID), undefined);
+    }
+    assert.equal(parseMapCommand({...value, version: 2}, instanceID), undefined);
+    assert.equal(parseMapCommand(value, "b".repeat(48)), undefined);
+    const missingVisibility = {...value};
+    delete missingVisibility.visible;
+    assert.equal(parseMapCommand(missingVisibility, instanceID), undefined);
+});
+
+test("map visibility rejects malformed viewport values and fields instead of discarding them", () => {
+    const value = {...envelope, type: "visibility", visible: true};
+    const viewport = {x: 0, y: 0, width: 200, height: 100};
+    for (const invalid of [null, undefined, [], "viewport", 1, {}, {...viewport, extra: true},
+        {...viewport, crop: undefined}]) {
+        assert.equal(parseMapCommand({...value, viewport: invalid}, instanceID), undefined);
+    }
+    for (const key of ["x", "y", "width", "height"]) {
+        const incomplete = {...viewport};
+        delete incomplete[key];
+        assert.equal(parseMapCommand({...value, viewport: incomplete}, instanceID), undefined, key);
+        for (const number of [undefined, null, NaN, Infinity, -Infinity, -1, 32769, "1", true]) {
+            assert.equal(parseMapCommand({...value, viewport: {...viewport, [key]: number}}, instanceID), undefined,
+                key + ": " + String(number));
+        }
+    }
+    for (const key of ["width", "height"]) {
+        assert.equal(parseMapCommand({...value, viewport: {...viewport, [key]: 0}}, instanceID), undefined, key);
+    }
+    for (const hiddenViewport of [viewport, null, undefined]) {
+        assert.equal(parseMapCommand({...value, visible: false, viewport: hiddenViewport}, instanceID), undefined);
+    }
+});
+
+test("guest replies cannot dismiss the owner's menu", () => {
+    for (const extra of [{}, {id: "row-1", revision: 1}, {trusted: true}, {visible: false}]) {
+        assert.equal(parseMapReply({...envelope, type: "dismissMenu", ...extra}, instanceID), undefined);
+    }
+});
+
 test("WGS84 points keep finite world bounds, the Mercator latitude limit and the point count limit", () => {
     const points = Array.from({length: 10010}, (_, index) => ({id: "row-" + index, longitude: 10, latitude: 20}));
     assert.equal(parseMapCommand({...envelope, type: "setPoints", revision: 0, points}, instanceID).points.length, 10000);

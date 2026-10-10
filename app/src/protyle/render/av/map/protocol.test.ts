@@ -42,7 +42,8 @@ describe("isolated map protocol", () => {
         }
         assert.deepEqual(parseAVMapCommand({...visibility, viewport: {...visibility.viewport, url: "secret"}}, "one"), visibility);
         assert.equal(parseAVMapCommand({...visibility, visible: "true"}, "one"), undefined);
-        assert.equal(parseMapCommand(visibility, "one"), undefined, "the owner cannot override native visibility");
+        assert.deepEqual(parseMapCommand(visibility, "one"), visibility, "webview visibility uses the same bounded runtime contract");
+        assert.equal(parseMapCommand({...visibility, viewport: {...visibility.viewport, url: "secret"}}, "one"), undefined);
     });
     it("copies only identifiers and WGS84 coordinates", () => {
         const input = {...point, name: "Private place", title: "Private record", document: "secret", token: "secret",
@@ -240,7 +241,7 @@ describe("shared owner and runtime protocol corpus", () => {
         assert.equal(parseAVMapReply(bootstrapped, "one"), undefined);
         const visibility = {...envelope, type: "visibility", visible: true};
         assert.deepEqual(parseAVMapCommand(visibility, "one"), visibility);
-        assert.equal(parseMapCommand(visibility, "one"), undefined);
+        assert.deepEqual(parseMapCommand(visibility, "one"), visibility);
         const init = {...envelope, type: "init", provider: "openfreemap", theme: "light"};
         assert.deepEqual(parseAVMapCommand(init, "one"), init);
         assert.equal(parseMapCommand(init, "one"), undefined);

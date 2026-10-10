@@ -77,7 +77,7 @@ const runBoundaryFixture = async (profile) => {
                 views.push(view);
                 return view;
             },
-            getTarget: id => id === owner.webContents.id ? {origin} : undefined,
+            getTarget: id => id === owner.webContents.id ? {origin, mode: "remote"} : undefined,
             isInitialized: id => id === owner.webContents.id, appDir: path.join(__dirname, ".."),
             readFile: async filename => {
                 const key = path.relative(path.join(__dirname, ".."), filename).split(path.sep).join("/");

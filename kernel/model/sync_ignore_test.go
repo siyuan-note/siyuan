@@ -278,7 +278,7 @@ func TestSyncIgnoreRepoCompatibility(t *testing.T) {
 		".hidden/file", "box/.hidden/file", "assets/file.tmp", "assets/tracked.txt",
 		"storage/local.json", "storage/recent-doc.json", "storage/ref-used.json", "storage/view-state.json",
 		"storage/view-state-corrupted-20260913000000.json", "nested/data/storage/local.json",
-		"filesys_status_check/file", "nested/filesys_status_check/file", "20210808180117-6v0mkxr/file.sy",
+		"filesys_status_check/file", ".siyuan/filesys_status_check/file", "20210808180117-6v0mkxr/file.sy",
 	}
 	for _, path := range paths {
 		writeSyncPathTestFile(t, filepath.Join(util.DataDir, path))

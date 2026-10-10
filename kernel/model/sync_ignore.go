@@ -128,7 +128,7 @@ func syncPathFilter(dataDir string, info os.FileInfo, absPath string) (bool, err
 		return true, nil
 	}
 	if info != nil && info.IsDir() {
-		if info.Name() == "filesys_status_check" {
+		if rel == "/.siyuan/filesys_status_check" || rel == "/filesys_status_check" {
 			return true, filepath.SkipDir
 		}
 		return true, nil

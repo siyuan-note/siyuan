@@ -1356,9 +1356,8 @@ var setNetworkProxy = contractHandler(apicontract.SetNetworkProxy, func(c *gin.C
 	return apicontract.Success(apicontract.Null{})
 })
 
-var addUIProcess = contractHandler(apicontract.SystemAddUIProcess, func(c *gin.Context, request apicontract.SystemUIProcessRequest) apicontract.Response[apicontract.Null] {
-	request.PID = c.Query("pid")
-	pidInt, err := strconv.Atoi(request.PID)
+var addUIProcess = contractHandler(apicontract.SystemAddUIProcess, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	pidInt, err := strconv.Atoi(c.Query("pid"))
 	if err != nil || 0 >= pidInt {
 		return apicontract.EmptyHTTPResponse[apicontract.Null](http.StatusOK)
 	}

@@ -229,6 +229,26 @@ func TestAPIContractSystemRawResponses(t *testing.T) {
 	requireAPIContract(t, "GET", "/api/system/bootProgressSSE", recorder)
 }
 
+func TestAPIContractUIProcessQueryParameters(t *testing.T) {
+	const pid = "2147483001"
+	util.UIProcessIDs.Delete(pid)
+	t.Cleanup(func() { util.UIProcessIDs.Delete(pid) })
+	engine := gin.New()
+	engine.POST("/api/system/uiproc", addUIProcess)
+	for _, query := range []string{"", "?pid=" + pid} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/system/uiproc"+query, strings.NewReader(`{"pid":"`+pid+`"}`)))
+		requireAPIContract(t, "POST", "/api/system/uiproc", recorder)
+		if recorder.Code != http.StatusOK || recorder.Body.Len() != 0 {
+			t.Fatalf("UI registration response changed: %d %s", recorder.Code, recorder.Body.String())
+		}
+		_, registered := util.UIProcessIDs.Load(pid)
+		if registered != (query != "") {
+			t.Fatalf("registration must use URL query parameters: query=%q registered=%v", query, registered)
+		}
+	}
+}
+
 func TestAPIContractSystemUploadErrors(t *testing.T) {
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()

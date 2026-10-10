@@ -23188,33 +23188,6 @@
       ],
       "additionalProperties": false
     },
-    "DynamicIconRequestInput": {
-      "type": "object",
-      "properties": {
-        "color": {
-          "type": "string"
-        },
-        "content": {
-          "type": "string"
-        },
-        "date": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "lang": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string"
-        },
-        "weekdayType": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
     "EditorReadOnlyRequestInput": {
       "type": "object",
       "properties": {
@@ -51303,42 +51276,6 @@
       ],
       "additionalProperties": false
     },
-    "SystemOIDCCallbackRequestInput": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "error": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "state": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "additionalProperties": false
-    },
     "SystemOIDCClaimRule": {
       "type": "object",
       "properties": {
@@ -52223,22 +52160,6 @@
               "additionalProperties": {
                 "$ref": "#/$defs/JSONValue"
               }
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "additionalProperties": false
-    },
-    "SystemUIProcessRequestInput": {
-      "type": "object",
-      "properties": {
-        "pid": {
-          "anyOf": [
-            {
-              "type": "string"
             },
             {
               "type": "null"
@@ -116204,7 +116125,7 @@
       ],
       "body": "none",
       "request": {
-        "$ref": "#/$defs/DynamicIconRequestInput"
+        "$ref": "#/$defs/EmptyRequestInput"
       },
       "response": {
         "anyOf": [
@@ -117076,7 +116997,7 @@
       ],
       "body": "none",
       "request": {
-        "$ref": "#/$defs/SystemOIDCCallbackRequestInput"
+        "$ref": "#/$defs/EmptyRequestInput"
       },
       "response": {
         "anyOf": [
@@ -172334,7 +172255,7 @@
       ],
       "body": "none",
       "request": {
-        "$ref": "#/$defs/SystemUIProcessRequestInput"
+        "$ref": "#/$defs/EmptyRequestInput"
       },
       "response": {
         "anyOf": [

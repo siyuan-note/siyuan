@@ -28,8 +28,9 @@ import (
 )
 
 var (
-	taskQueue []*Task
-	queueLock = sync.Mutex{}
+	taskQueue    []*Task
+	queueLock    = sync.Mutex{}
+	runningTasks = map[*Task]struct{}{}
 )
 
 type Task struct {
@@ -50,6 +51,7 @@ func AppendAsyncTaskWithDelay(action string, delay time.Duration, handler any, a
 	appendTaskWithDelayTimeout(action, true, delay, 24*time.Hour, handler, args...)
 }
 
+// AppendTaskWithTimeout 限制队列等待处理器的时间，不强制中止处理器；超时后仍跟踪运行实例并参与去重。
 func AppendTaskWithTimeout(action string, timeout time.Duration, handler any, args ...any) {
 	appendTaskWithDelayTimeout(action, false, 0, timeout, handler, args...)
 }
@@ -70,15 +72,15 @@ func appendTaskWithDelayTimeout(action string, async bool, delay, timeout time.D
 		Timeout: timeout,
 	}
 
+	queueLock.Lock()
+	defer queueLock.Unlock()
 	if gulu.Str.Contains(action, uniqueActions) {
-		if currentTasks := getCurrentTasks(); containTask(task, currentTasks) {
+		if currentTasks := getCurrentTasksLocked(); containTask(task, currentTasks) {
 			//logging.LogWarnf("task [%s] is already in queue, will be ignored", action)
 			return
 		}
 	}
 
-	queueLock.Lock()
-	defer queueLock.Unlock()
 	taskQueue = append(taskQueue, task)
 }
 
@@ -187,10 +189,18 @@ func areArgsEqual(a, b any) bool {
 func getCurrentTasks() (ret []*Task) {
 	queueLock.Lock()
 	defer queueLock.Unlock()
+	return getCurrentTasksLocked()
+}
 
+func getCurrentTasksLocked() (ret []*Task) {
 	currentTaskLock.Lock()
 	if nil != currentTask {
 		ret = append(ret, currentTask)
+	}
+	for task := range runningTasks {
+		if task != currentTask {
+			ret = append(ret, task)
+		}
 	}
 	currentTaskLock.Unlock()
 
@@ -271,8 +281,7 @@ func StatusJob() {
 	count := map[string]int{}
 	actionLangs := util.TaskActionLangs[util.Lang]
 
-	queueLock.Lock()
-	for _, task := range taskQueue {
+	for _, task := range getCurrentTasks() {
 		action := task.Action
 		if c := count[action]; 7 < c {
 			logging.LogWarnf("too many tasks [%s], ignore show its status", action)
@@ -295,16 +304,6 @@ func StatusJob() {
 		item := map[string]any{"action": action}
 		items = append(items, item)
 	}
-	defer queueLock.Unlock()
-
-	currentTaskLock.Lock()
-	if nil != currentTask && nil != actionLangs && !skipPushTaskAction(currentTask.Action) {
-		if label := actionLangs[currentTask.Action]; nil != label {
-			items = append([]map[string]any{{"action": label.(string)}}, items...)
-		}
-	}
-	currentTaskLock.Unlock()
-
 	if 1 > len(items) {
 		items = []map[string]any{}
 	}
@@ -335,6 +334,7 @@ func ExecTaskJob() {
 	}
 
 	if util.IsExiting.Load() {
+		finishRunningTask(task)
 		return
 	}
 
@@ -356,6 +356,7 @@ func popTask() (ret *Task) {
 
 		if !task.Async {
 			ret = task
+			runningTasks[task] = struct{}{}
 			taskQueue = append(taskQueue[:i], taskQueue[i+1:]...)
 			return
 		}
@@ -370,6 +371,9 @@ func ExecAsyncTaskJob() {
 	}
 
 	if util.IsExiting.Load() {
+		for _, task := range tasks {
+			finishRunningTask(task)
+		}
 		return
 	}
 
@@ -397,6 +401,7 @@ func popAsyncTasks() (ret []*Task) {
 		shouldPop := task.Async && time.Since(task.Created) > task.Delay
 		if shouldPop {
 			ret = append(ret, task)
+			runningTasks[task] = struct{}{}
 			// 不写入 taskQueue，相当于删除
 		} else {
 			// 保留此任务，移动到 writeIdx 位置
@@ -427,39 +432,48 @@ func execTask(task *Task) {
 
 	defer logging.Recover()
 
-	args := make([]reflect.Value, len(task.Args))
-	for i, v := range task.Args {
-		if nil == v {
-			args[i] = reflect.New(task.Handler.Type().In(i)).Elem()
-		} else {
-			args[i] = reflect.ValueOf(v)
-		}
-	}
-
+	queueLock.Lock()
+	runningTasks[task] = struct{}{}
 	if !task.Async {
 		currentTaskLock.Lock()
 		currentTask = task
 		currentTaskLock.Unlock()
 	}
+	queueLock.Unlock()
 
 	ctx, cancel := context.WithTimeout(context.Background(), task.Timeout)
 	defer cancel()
-	ch := make(chan bool, 1)
+	ch := make(chan struct{})
 	go func() {
+		defer close(ch)
+		defer finishRunningTask(task)
+		defer logging.Recover()
+		args := make([]reflect.Value, len(task.Args))
+		for i, v := range task.Args {
+			if nil == v {
+				args[i] = reflect.New(task.Handler.Type().In(i)).Elem()
+			} else {
+				args[i] = reflect.ValueOf(v)
+			}
+		}
 		task.Handler.Call(args)
-		ch <- true
 	}()
 
 	select {
 	case <-ctx.Done():
-		logging.LogWarnf("task [%s] timeout", task.Action)
+		logging.LogWarnf("task [%s] wait timeout; handler remains tracked until completion", task.Action)
 	case <-ch:
 		//logging.LogInfof("task [%s] done", task.Action)
 	}
+}
 
-	if !task.Async {
-		currentTaskLock.Lock()
+func finishRunningTask(task *Task) {
+	queueLock.Lock()
+	defer queueLock.Unlock()
+	delete(runningTasks, task)
+	currentTaskLock.Lock()
+	defer currentTaskLock.Unlock()
+	if currentTask == task {
 		currentTask = nil
-		currentTaskLock.Unlock()
 	}
 }

@@ -89,21 +89,9 @@ func GetBlocksInBox(ids []string, boxID string) (ret []*Block) {
 		return
 	}
 
-	sqlStmt := "SELECT * FROM blocks WHERE id IN (" + strings.Repeat("?,", len(notHitIDs)-1) + "?)"
-	args := make([]any, len(notHitIDs))
-	for i, id := range notHitIDs {
-		args[i] = id
-	}
-	rows, err := queryForBox(boxID, sqlStmt, args...)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
+	if err := queryBlocksInBatches(notHitIDs, boxID, cached, false); err != nil {
+		logging.LogErrorf("query blocks in box [%s] failed: %s", boxID, err)
 		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		if block := scanBlockRows(rows); nil != block {
-			cached[block.ID] = block
-		}
 	}
 	for _, id := range ids {
 		ret = append(ret, cached[id])

@@ -2025,7 +2025,7 @@ export class Toolbar {
 
         inputElement.addEventListener("input", (event) => {
             const value = inputElement.value.trim();
-            let matchLanguages;
+            let matchLanguages = hljsLanguages;
             let html = `<div data-id="clearLanguage" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
             let isMatchLanguages = false;
             // Sort
@@ -2054,7 +2054,7 @@ export class Toolbar {
             }
 
             if (areProtylePluginExtensionsEnabled(protyle) && hasPluginSubscriber("code-language-update")) {
-                const eventDetail = {languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement};
+                const eventDetail = {languages: matchLanguages, type: "match", value, listElement};
                 emitToPlugins("code-language-update", eventDetail);
                 matchLanguages = eventDetail.languages;
             }

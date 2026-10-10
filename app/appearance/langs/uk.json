@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Очищення ресурсів без посилань...",
+	"clearingUnusedAttributeViews": "Очищення баз даних без посилань...",
 	"extraLarge": "Дуже великий",
 	"mapUnplaced": "Записи без координат",
 	"mapLoadedCount": "Завантажено ${shown}/${total}",

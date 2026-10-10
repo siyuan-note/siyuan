@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Pulizia delle risorse senza riferimenti...",
+	"clearingUnusedAttributeViews": "Pulizia dei database senza riferimenti...",
 	"extraLarge": "Molto grande",
 	"mapUnplaced": "Voci senza coordinate",
 	"mapLoadedCount": "Caricati ${shown}/${total}",

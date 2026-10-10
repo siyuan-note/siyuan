@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "참조되지 않은 자산 파일을 정리하는 중...",
+	"clearingUnusedAttributeViews": "참조되지 않은 데이터베이스를 정리하는 중...",
 	"extraLarge": "매우 크게",
 	"mapUnplaced": "좌표가 없는 항목",
 	"mapLoadedCount": "불러옴 ${shown}/${total}",

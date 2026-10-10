@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "מנקה קובצי משאבים ללא הפניות...",
+	"clearingUnusedAttributeViews": "מנקה מסדי נתונים ללא הפניות...",
 	"extraLarge": "גדול במיוחד",
 	"mapUnplaced": "רשומות ללא קואורדינטות",
 	"mapLoadedCount": "נטענו ${shown}/${total}",

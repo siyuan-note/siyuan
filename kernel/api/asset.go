@@ -338,7 +338,7 @@ var removeUnusedAsset = contractHandler(apicontract.RemoveUnusedAsset, func(c *g
 })
 
 var removeUnusedAssets = contractHandler(apicontract.RemoveUnusedAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.AssetPathsData] {
-	defer beginSettingTask("clearAll")()
+	defer beginSettingTask("clearingUnusedAssets")()
 
 	paths, err := model.RemoveUnusedAssets()
 	if err != nil {

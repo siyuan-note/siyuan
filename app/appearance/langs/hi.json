@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "बिना संदर्भ वाली संसाधन फ़ाइलें साफ़ की जा रही हैं...",
+	"clearingUnusedAttributeViews": "बिना संदर्भ वाले डेटाबेस साफ़ किए जा रहे हैं...",
 	"extraLarge": "अतिरिक्त बड़ा",
 	"mapUnplaced": "निर्देशांक के बिना प्रविष्टियाँ",
 	"mapLoadedCount": "लोड हुए ${shown}/${total}",

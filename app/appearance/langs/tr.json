@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Başvurulmayan kaynak dosyaları temizleniyor...",
+	"clearingUnusedAttributeViews": "Başvurulmayan veritabanları temizleniyor...",
 	"extraLarge": "Çok büyük",
 	"mapUnplaced": "Koordinatı olmayan kayıtlar",
 	"mapLoadedCount": "Yüklendi ${shown}/${total}",

@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Nettoyage des ressources non référencées...",
+	"clearingUnusedAttributeViews": "Nettoyage des bases de données non référencées...",
 	"extraLarge": "Très grand",
 	"mapUnplaced": "Entrées sans coordonnées",
 	"mapLoadedCount": "Chargés ${shown}/${total}",

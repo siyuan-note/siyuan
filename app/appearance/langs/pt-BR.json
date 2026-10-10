@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Limpando recursos sem referências...",
+	"clearingUnusedAttributeViews": "Limpando bancos de dados sem referências...",
 	"extraLarge": "Muito grande",
 	"mapUnplaced": "Registros sem coordenadas",
 	"mapLoadedCount": "Carregados ${shown}/${total}",

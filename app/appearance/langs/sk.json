@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Čistenie súborov príloh bez odkazov...",
+	"clearingUnusedAttributeViews": "Čistenie databáz bez odkazov...",
 	"extraLarge": "Veľmi veľký",
 	"mapUnplaced": "Záznamy bez súradníc",
 	"mapLoadedCount": "Načítané ${shown}/${total}",

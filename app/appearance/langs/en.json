@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Cleaning up unreferenced assets...",
+	"clearingUnusedAttributeViews": "Cleaning up unreferenced databases...",
 	"extraLarge": "Extra large",
 	"mapUnplaced": "Unplaced records",
 	"mapLoadedCount": "Loaded ${shown}/${total}",

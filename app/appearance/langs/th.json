@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "กำลังล้างไฟล์ทรัพยากรที่ไม่มีการอ้างอิง...",
+	"clearingUnusedAttributeViews": "กำลังล้างฐานข้อมูลที่ไม่มีการอ้างอิง...",
 	"extraLarge": "ใหญ่พิเศษ",
 	"mapUnplaced": "รายการที่ไม่มีพิกัด",
 	"mapLoadedCount": "โหลดแล้ว ${shown}/${total}",

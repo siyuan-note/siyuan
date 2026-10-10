@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Czyszczenie nieużywanych zasobów...",
+	"clearingUnusedAttributeViews": "Czyszczenie nieużywanych baz danych...",
 	"extraLarge": "Bardzo duży",
 	"mapUnplaced": "Wpisy bez współrzędnych",
 	"mapLoadedCount": "Wczytano ${shown}/${total}",

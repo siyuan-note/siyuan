@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Nicht referenzierte Anhänge werden bereinigt...",
+	"clearingUnusedAttributeViews": "Nicht referenzierte Datenbanken werden bereinigt...",
 	"extraLarge": "Sehr groß",
 	"mapUnplaced": "Einträge ohne Koordinaten",
 	"mapLoadedCount": "Geladen ${shown}/${total}",

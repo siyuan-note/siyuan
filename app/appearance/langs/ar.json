@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "جارٍ تنظيف ملفات الموارد غير المشار إليها...",
+	"clearingUnusedAttributeViews": "جارٍ تنظيف قواعد البيانات غير المشار إليها...",
 	"extraLarge": "كبير جدًا",
 	"mapUnplaced": "عناصر بلا إحداثيات",
 	"mapLoadedCount": "تم تحميل ${shown}/${total}",

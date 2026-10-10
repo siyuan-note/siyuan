@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Чишћење датотека ресурса без референци...",
+	"clearingUnusedAttributeViews": "Чишћење база података без референци...",
 	"extraLarge": "Веома велико",
 	"mapUnplaced": "Записи без координата",
 	"mapLoadedCount": "Учитано ${shown}/${total}",

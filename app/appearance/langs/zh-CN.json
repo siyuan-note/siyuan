@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "正在清理未引用的资源文件...",
+	"clearingUnusedAttributeViews": "正在清理未引用的数据库...",
 	"extraLarge": "超大",
 	"mapUnplaced": "未定位条目",
 	"mapLoadedCount": "已加载 ${shown}/${total}",

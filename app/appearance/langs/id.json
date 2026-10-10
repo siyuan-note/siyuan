@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Membersihkan berkas aset yang tidak dirujuk...",
+	"clearingUnusedAttributeViews": "Membersihkan basis data yang tidak dirujuk...",
 	"extraLarge": "Sangat besar",
 	"mapUnplaced": "Entri tanpa koordinat",
 	"mapLoadedCount": "Dimuat ${shown}/${total}",

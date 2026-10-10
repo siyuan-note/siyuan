@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "未参照のアセットを削除しています...",
+	"clearingUnusedAttributeViews": "未参照のデータベースを削除しています...",
 	"extraLarge": "特大",
 	"mapUnplaced": "座標未設定の項目",
 	"mapLoadedCount": "読み込み済み ${shown}/${total}",

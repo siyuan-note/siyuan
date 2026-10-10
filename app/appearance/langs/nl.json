@@ -1,4 +1,6 @@
 {
+	"clearingUnusedAssets": "Niet-verwezen bijlagen opruimen...",
+	"clearingUnusedAttributeViews": "Niet-verwezen databases opruimen...",
 	"extraLarge": "Extra groot",
 	"mapUnplaced": "Items zonder coördinaten",
 	"mapLoadedCount": "Geladen ${shown}/${total}",

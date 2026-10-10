@@ -43,7 +43,7 @@ var removeUnusedAttributeView = contractHandler(apicontract.RemoveUnusedAttribut
 })
 
 var removeUnusedAttributeViews = contractHandler(apicontract.RemoveUnusedAttributeViews, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.AVPathsData] {
-	defer beginSettingTask("clearAllAV")()
+	defer beginSettingTask("clearingUnusedAttributeViews")()
 	paths, err := model.RemoveUnusedAttributeViews()
 	if err != nil {
 		return apicontract.Failure[apicontract.AVPathsData](-1, err.Error())

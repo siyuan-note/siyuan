@@ -2148,6 +2148,10 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		}
 	}
 
+	if len(simpleTypes) == 1 && simpleTypes[0] == "d" && len(clauses) == 0 {
+		// 文档类型的等值条件与文档部分索引的筛选条件保持一致。
+		return "(" + prefix + "type = 'd')"
+	}
 	if 0 < len(simpleTypes) {
 		clauses = append([]string{prefix + "type IN (" + sqlQuoteJoin(simpleTypes) + ")"}, clauses...)
 	}

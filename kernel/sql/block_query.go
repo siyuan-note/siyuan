@@ -575,6 +575,10 @@ func queryRawStmt(stmt string, limit int) (ret []map[string]any, err error) {
 }
 
 func queryRawStmtWithLimitInfo(stmt string, limit int, info *QueryLimitInfo) (ret []map[string]any, err error) {
+	return queryRawStmtRows(stmt, limit, info, false)
+}
+
+func queryRawStmtRows(stmt string, limit int, info *QueryLimitInfo, enforceLimit bool) (ret []map[string]any, err error) {
 	rows, err := query(stmt)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
@@ -616,7 +620,7 @@ func queryRawStmtWithLimitInfo(stmt string, limit int, info *QueryLimitInfo) (re
 
 		ret = append(ret, m)
 		count++
-		if noLimit && (limit < count || (info != nil && limit == count)) {
+		if (noLimit || enforceLimit) && count >= limit {
 			break
 		}
 	}

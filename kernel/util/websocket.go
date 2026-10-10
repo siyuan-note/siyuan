@@ -42,6 +42,7 @@ var (
 )
 
 func BroadcastByTypeAndExcludeApp(excludeApp, typ, cmd string, code int, msg string, data any) {
+	payload := broadcastPayload(cmd, code, msg, data)
 	sessions.Range(func(key, value any) bool {
 		appSessions := value.(*sync.Map)
 		if key == excludeApp {
@@ -54,12 +55,7 @@ func BroadcastByTypeAndExcludeApp(excludeApp, typ, cmd string, code int, msg str
 				return true
 			}
 			if t, ok := session.Get("type"); ok && typ == t {
-				event := NewResult()
-				event.Cmd = cmd
-				event.Code = code
-				event.Msg = msg
-				event.Data = data
-				session.Write(event.Bytes())
+				session.Write(payload())
 			}
 			return true
 		})
@@ -72,6 +68,7 @@ func BroadcastByTypeAndApp(typ, app, cmd string, code int, msg string, data any)
 	if !ok {
 		return
 	}
+	payload := broadcastPayload(cmd, code, msg, data)
 
 	appSessions.(*sync.Map).Range(func(key, value any) bool {
 		session := value.(*melody.Session)
@@ -79,12 +76,7 @@ func BroadcastByTypeAndApp(typ, app, cmd string, code int, msg string, data any)
 			return true
 		}
 		if t, ok := session.Get("type"); ok && typ == t {
-			event := NewResult()
-			event.Cmd = cmd
-			event.Code = code
-			event.Msg = msg
-			event.Data = data
-			session.Write(event.Bytes())
+			session.Write(payload())
 		}
 		return true
 	})
@@ -93,14 +85,19 @@ func BroadcastByTypeAndApp(typ, app, cmd string, code int, msg string, data any)
 // BroadcastByType 广播所有实例上 typ 类型的会话。
 func BroadcastByType(typ, cmd string, code int, msg string, data any) {
 	typeSessions := SessionsByType(typ)
+	payload := broadcastPayload(cmd, code, msg, data)
 	for _, sess := range typeSessions {
-		event := NewResult()
-		event.Cmd = cmd
-		event.Code = code
-		event.Msg = msg
-		event.Data = data
-		sess.Write(event.Bytes())
+		sess.Write(payload())
 	}
+}
+
+// broadcastPayload 仅在找到目标会话时序列化，同一次广播共享结果。
+func broadcastPayload(cmd string, code int, msg string, data any) func() []byte {
+	return sync.OnceValue(func() []byte {
+		event := NewResult()
+		event.Cmd, event.Code, event.Msg, event.Data = cmd, code, msg, data
+		return event.Bytes()
+	})
 }
 
 func SessionsByType(typ string) (ret []*melody.Session) {

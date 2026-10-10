@@ -4,6 +4,7 @@ package model
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -21,6 +22,237 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAutomationUnavailableReferencesPauseAndPreserveEdits(t *testing.T) {
+	for _, missing := range []string{"action-field", "changed-field-type", "condition-field", "action-filter", "trigger-field", "source-field", "related-field", "database", "related-condition-database"} {
+		t.Run(missing, func(t *testing.T) {
+			fixture, source, target, statusID, logsID := setupAutomationTest(t)
+			rule := source.Automations.Rules[0]
+			source.Automations.Rules = source.Automations.Rules[:1]
+			action := rule.Actions[0]
+			removedID := target.KeyValues[2].Key.ID
+			switch missing {
+			case "action-field":
+				removeAttributeViewFieldDefinition(target, removedID)
+			case "changed-field-type":
+				key, _ := target.GetKey(removedID)
+				key.Type = av.KeyTypeText
+			case "condition-field":
+				removedID = ast.NewNodeID()
+				rule.Conditions[0].Column = removedID
+			case "action-filter":
+				action.Filters = []*av.ViewFilter{{Column: removedID, Operator: av.FilterOperatorIsEmpty, Value: &av.Value{Type: av.KeyTypeDate}}}
+				delete(action.Fields, removedID)
+				removeAttributeViewFieldDefinition(target, removedID)
+			case "trigger-field":
+				removedID = ast.NewNodeID()
+				rule.KeyID = removedID
+			case "source-field":
+				removedID = ast.NewNodeID()
+				action.Fields[target.GetBlockKey().ID].KeyID = removedID
+			case "related-field":
+				removedID = logsID
+				action.Target, action.RelationKeyID = "related", logsID
+				removeAttributeViewFieldDefinition(source, logsID)
+			case "related-condition-database":
+				rule.Conditions = []*av.ViewFilter{{Column: logsID, Operator: av.FilterOperatorIsNotEmpty, Value: &av.Value{Type: av.KeyTypeRelation}}}
+				fallthrough
+			case "database":
+				removedID = target.ID
+			}
+			for _, view := range []*av.AttributeView{source, target} {
+				if err := av.SaveAttributeView(view); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if missing == "database" || missing == "related-condition-database" {
+				if err := os.Remove(filepath.Join(util.DataDir, "storage", "av", target.ID+".json")); err != nil {
+					t.Fatal(err)
+				}
+				cache.ClearAVCache()
+			}
+			rule.Enabled = false
+			wantConfig, _ := json.Marshal(source.Automations)
+			rule.Enabled = true
+			itemID := source.GetBlockKeyValues().Values[0].BlockID
+			tx := automationStatusTransaction(source, fixture.sourceID, statusID, itemID, "Active")
+			if err := PerformTxSync(tx); err != nil {
+				t.Fatalf("missing reference %s rolled back the source edit: %v", removedID, err)
+			}
+			stored := readAttributeViewItemsTest(t, source.ID)
+			gotConfig, _ := json.Marshal(stored.Automations)
+			if !bytes.Equal(wantConfig, gotConfig) || stored.GetValue(statusID, itemID).MSelect[0].Content != "Active" {
+				t.Fatalf("paused rule lost configuration or edit: %s", gotConfig)
+			}
+			if err := PerformTxSync(&Transaction{DoOperations: cloneOperations(tx.UndoOperations), isReplay: true}); err != nil {
+				t.Fatal(err)
+			}
+			if readAttributeViewItemsTest(t, source.ID).Automations.Rules[0].Enabled {
+				t.Fatal("undo re-enabled an unavailable rule")
+			}
+			if err := PerformTxSync(&Transaction{DoOperations: cloneOperations(tx.DoOperations), isReplay: true}); err != nil {
+				t.Fatal(err)
+			}
+			if err := PerformTxSync(automationStatusTransaction(stored, fixture.sourceID, statusID, itemID, "Done")); err != nil {
+				t.Fatal("a later edit failed after the rule was paused", err)
+			}
+		})
+	}
+}
+
+func TestAutomationPausedRuleRollsBackOnCommitFailure(t *testing.T) {
+	fixture, source, target, statusID, _ := setupAutomationTest(t)
+	removeAttributeViewFieldDefinition(target, target.KeyValues[2].Key.ID)
+	if err := av.SaveAttributeView(target); err != nil {
+		t.Fatal(err)
+	}
+	itemID := source.GetBlockKeyValues().Values[0].BlockID
+	tx := automationStatusTransaction(source, fixture.sourceID, statusID, itemID, "Active")
+	injected := errors.New("injected commit failure after pausing")
+	tx.writeTransactionTree = func(*parse.Tree) error { return injected }
+	if err := PerformTxSync(tx); err == nil || !strings.Contains(err.Error(), injected.Error()) {
+		t.Fatal("commit failure was ignored", err)
+	}
+	stored := readAttributeViewItemsTest(t, source.ID)
+	if !stored.Automations.Rules[0].Enabled || stored.GetValue(statusID, itemID).MSelect[0].Content != "Alpha" {
+		t.Fatal("failed commit retained the paused rule or source edit")
+	}
+}
+
+func TestAutomationMalformedActionStillRollsBack(t *testing.T) {
+	fixture, source, _, statusID, _ := setupAutomationTest(t)
+	rule := source.Automations.Rules[0]
+	rule.Actions[0].Fields = map[string]*av.AutomationValue{source.GetBlockKey().ID: nil}
+	if err := av.SaveAttributeView(source); err != nil {
+		t.Fatal(err)
+	}
+	itemID := source.GetBlockKeyValues().Values[0].BlockID
+	if err := PerformTxSync(automationStatusTransaction(source, fixture.sourceID, statusID, itemID, "Active")); err == nil {
+		t.Fatal("malformed rule data was treated as a removed field")
+	}
+	stored := readAttributeViewItemsTest(t, source.ID)
+	if !stored.Automations.Rules[0].Enabled || stored.GetValue(statusID, itemID).MSelect[0].Content != "Alpha" {
+		t.Fatal("malformed rule data lost the original configuration or source content")
+	}
+}
+
+func TestAutomationUnmatchedRuleKeepsActionReadErrorsDeferred(t *testing.T) {
+	fixture, source, target, statusID, logsID := setupAutomationTest(t)
+	source.Automations.Rules = source.Automations.Rules[:1]
+	key, _ := source.GetKey(logsID)
+	key.Relation.IsTwoWay = false
+	if err := av.SaveAttributeView(source); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(util.DataDir, "storage", "av", target.ID+".json")
+	before := []byte("corrupted target")
+	if err := os.WriteFile(path, before, 0600); err != nil {
+		t.Fatal(err)
+	}
+	cache.ClearAVCache()
+	itemID := source.GetBlockKeyValues().Values[0].BlockID
+	if err := PerformTxSync(automationStatusTransaction(source, fixture.sourceID, statusID, itemID, "Done")); err != nil {
+		t.Fatal("an unmatched rule tried to execute its action", err)
+	}
+	stored := readAttributeViewItemsTest(t, source.ID)
+	if !stored.Automations.Rules[0].Enabled || stored.GetValue(statusID, itemID).MSelect[0].Content != "Done" {
+		t.Fatal("an unmatched rule was paused or its unrelated source edit was lost")
+	}
+	after, err := os.ReadFile(path)
+	if err != nil || !bytes.Equal(before, after) {
+		t.Fatal("an unmatched rule changed its unreadable target")
+	}
+	if err := PerformTxSync(automationStatusTransaction(stored, fixture.sourceID, statusID, itemID, "Active")); err == nil {
+		t.Fatal("a matching rule accepted corrupted target data")
+	}
+	stored = readAttributeViewItemsTest(t, source.ID)
+	if !stored.Automations.Rules[0].Enabled || stored.GetValue(statusID, itemID).MSelect[0].Content != "Done" {
+		t.Fatal("a failed matching rule changed the source configuration or content")
+	}
+}
+
+func TestAutomationPausesOnlyUnavailableRule(t *testing.T) {
+	fixture, source, target, statusID, _ := setupAutomationTest(t)
+	removeAttributeViewFieldDefinition(target, target.KeyValues[2].Key.ID)
+	if err := av.SaveAttributeView(target); err != nil {
+		t.Fatal(err)
+	}
+	valid := source.Automations.Rules[1]
+	valid.Conditions = nil
+	valid.Actions = []*av.AutomationAction{{Type: "edit", Target: "current", Fields: map[string]*av.AutomationValue{
+		source.GetBlockKey().ID: {Mode: "static", Value: &av.Value{Type: av.KeyTypeBlock, Block: &av.ValueBlock{Content: "Valid rule"}}},
+	}}}
+	if err := av.SaveAttributeView(source); err != nil {
+		t.Fatal(err)
+	}
+	itemID := source.GetBlockKeyValues().Values[0].BlockID
+	if err := PerformTxSync(automationStatusTransaction(source, fixture.sourceID, statusID, itemID, "Active")); err != nil {
+		t.Fatal(err)
+	}
+	stored := readAttributeViewItemsTest(t, source.ID)
+	if stored.Automations.Rules[0].Enabled || !stored.Automations.Rules[1].Enabled || stored.GetBlockValue(itemID).Block.Content != "Valid rule" {
+		t.Fatal("pausing the unavailable rule prevented another valid rule from running")
+	}
+}
+
+func TestAutomationPauseMessageIdentifiesMissingReference(t *testing.T) {
+	previousDir, previousConf := util.WorkingDir, Conf
+	util.WorkingDir, _ = filepath.Abs("../../app")
+	Conf = NewAppConf()
+	Conf.Lang = "en"
+	defer func() { util.WorkingDir, Conf = previousDir, previousConf }()
+	message := (automationPausedRule{"Start <script>", &automationUnavailableReference{kind: "fields", id: "missing-field"}}).message()
+	if !strings.Contains(message, "Rule paused") || !strings.Contains(message, "Start") || !strings.Contains(message, "missing-field") {
+		t.Fatal("pause message omits the rule or missing field", message)
+	}
+	if strings.Contains(message, "<script>") || !strings.Contains(message, "&lt;script&gt;") {
+		t.Fatal("pause message rendered the rule name as HTML", message)
+	}
+}
+
+func TestAutomationEncryptedUnavailableReferencePause(t *testing.T) {
+	_, source, target, statusID, _ := setupAutomationTest(t)
+	boxID := ast.NewNodeID()
+	markRuntimeEncryptedBox(boxID)
+	setDEKForTest(boxID, bytes.Repeat([]byte{0x72}, 32))
+	t.Cleanup(func() {
+		for _, view := range []*av.AttributeView{source, target} {
+			av.SetAVBoxID(view.ID, "")
+		}
+		forgetRuntimeEncryptedBox(boxID)
+		encryptedBoxLifecycles.Delete(boxID)
+		cachedDEKsLock.Lock()
+		delete(cachedDEKs, boxID)
+		cachedDEKsLock.Unlock()
+	})
+	removeAttributeViewFieldDefinition(target, target.KeyValues[2].Key.ID)
+	for _, view := range []*av.AttributeView{source, target} {
+		av.SetAVBoxID(view.ID, boxID)
+		if err := av.SaveAttributeView(view); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Remove(filepath.Join(util.DataDir, "storage", "av", view.ID+".json")); err != nil {
+			t.Fatal(err)
+		}
+	}
+	itemID := source.GetBlockKeyValues().Values[0].BlockID
+	if err := PerformTxSync(automationStatusTransaction(source, "", statusID, itemID, "Active")); err != nil {
+		t.Fatal(err)
+	}
+	stored, err := av.ParseAttributeViewForIndexInBox(source.ID, boxID)
+	if err != nil || stored.Automations.Rules[0].Enabled || stored.GetValue(statusID, itemID).MSelect[0].Content != "Active" {
+		t.Fatal("encrypted edit did not pause the unavailable rule", err)
+	}
+	for _, view := range []*av.AttributeView{source, target} {
+		data, err := os.ReadFile(filepath.Join(util.DataDir, boxID, "storage", "av", view.ID+".json"))
+		if err != nil || !util.IsCiphertext(data) {
+			t.Fatal("pausing an encrypted rule did not preserve ciphertext storage", err)
+		}
+		if _, err := os.Stat(filepath.Join(util.DataDir, "storage", "av", view.ID+".json")); !os.IsNotExist(err) {
+			t.Fatal("pausing an encrypted rule created a plaintext copy", err)
+		}
+	}
+}
 
 func TestAutomationAddIgnoresMirrorContext(t *testing.T) {
 	for _, sameDatabase := range []bool{false, true} {

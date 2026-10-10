@@ -122,4 +122,23 @@ func TestAVContractAutomationWrites(t *testing.T) {
 			t.Fatalf("cell API did not trigger automation (batch=%v)", batch)
 		}
 	}
+	if err = model.PerformAttributeViewOperations([]*model.Operation{{Action: "removeAttrViewCol", AvID: database.ID,
+		BlockID: fixture.databaseID, ID: statusID}}); err != nil {
+		t.Fatal(err)
+	}
+	call("/api/av/setAttributeViewBlockAttr", map[string]any{"avID": database.ID,
+		"keyID": fixture.textKeyID, "itemID": itemID, "value": map[string]any{"text": map[string]any{"content": "after deletion"}},
+	}, setAttributeViewBlockAttr)
+	stored, err = av.ParseAttributeView(database.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.Automations.Rules[1].Enabled || stored.Automations.Rules[1].Actions[0].Fields[statusID] == nil ||
+		stored.GetValue(fixture.textKeyID, itemID).Text.Content != "after deletion" {
+		t.Fatal("deleted action field blocked the API edit or discarded the rule configuration")
+	}
+	call("/api/av/batchSetAttributeViewBlockAttrs", map[string]any{"avID": database.ID,
+		"values": []map[string]any{{"keyID": fixture.textKeyID, "itemID": itemID,
+			"value": map[string]any{"text": map[string]any{"content": "later batch"}}}},
+	}, batchSetAttributeViewBlockAttrs)
 }

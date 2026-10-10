@@ -2,7 +2,10 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"slices"
 	"sort"
@@ -13,6 +16,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 const maxAutomationOperations = 1000
@@ -29,6 +33,33 @@ type attributeViewAutomationState struct {
 	time       int64
 	count      int
 	recordUndo bool
+	paused     []automationPausedRule
+}
+
+type automationUnavailableReference struct {
+	kind, id string
+	err      error
+}
+
+func (e *automationUnavailableReference) Error() string { return e.err.Error() }
+func (e *automationUnavailableReference) Unwrap() error { return e.err }
+
+type automationPausedRule struct {
+	name      string
+	reference *automationUnavailableReference
+}
+
+func unavailableAutomationReference(kind, id, message string) error {
+	return &automationUnavailableReference{kind: kind, id: id, err: errors.New(message)}
+}
+
+// 提示仅在事务提交后发送，不把内部错误或认证信息作为界面文案。
+func (paused automationPausedRule) message() string {
+	detail := paused.name + " - " + util.I18nTerm(Conf.Lang, paused.reference.kind)
+	if paused.reference.id != "" {
+		detail += " [" + paused.reference.id + "]"
+	}
+	return strings.ReplaceAll(util.I18nTerm(Conf.Lang, "automationIncomplete"), "${1}", util.EscapeHTML(detail))
 }
 
 // 仅用户及 API 的条目写入产生触发事件，撤销重放只执行已记录的操作。
@@ -119,6 +150,14 @@ func (tx *Transaction) rememberAutomationView(view *av.AttributeView, blockID st
 			continue
 		}
 		original, err := tx.readAttributeViewForMutation(id, "", boxID)
+		if id != view.ID && errors.Is(err, av.ErrViewNotFound) {
+			original, err = tx.readAutomationTarget(id, boxID)
+		}
+		var unavailable *automationUnavailableReference
+		if id != view.ID && errors.As(err, &unavailable) {
+			// 已删除的关联目标没有可补偿的快照，失效规则由执行前的引用校验停用。
+			continue
+		}
 		if err != nil {
 			return err
 		}
@@ -174,8 +213,17 @@ func (tx *Transaction) runAttributeViewAutomations() error {
 		current := state.current[source.before.ID]
 		added, changed := automationChangedItems(source.before, current)
 		relationValues := tx.automationRelationValues(source.boxID, state.current)
-		for _, rule := range source.before.Automations.Rules {
+		paused := false
+		for _, rule := range current.Automations.Rules {
 			if rule == nil || !rule.Enabled {
+				continue
+			}
+			validationErr := tx.validateAutomationRule(current, rule, source.boxID)
+			var unavailable *automationUnavailableReference
+			if errors.As(validationErr, &unavailable) {
+				rule.Enabled = false
+				paused = true
+				state.paused = append(state.paused, automationPausedRule{rule.Name, unavailable})
 				continue
 			}
 			for _, row := range current.GetBlockKeyValues().Values {
@@ -193,15 +241,22 @@ func (tx *Transaction) runAttributeViewAutomations() error {
 				if !matches {
 					continue
 				}
+				if validationErr != nil {
+					return fmt.Errorf("automation [%s]: %w", rule.ID, validationErr)
+				}
 				triggered = append(triggered, triggeredRule{source, current, rule, row.BlockID})
 			}
+		}
+		if paused {
+			// 仅改变启用状态，保留失效引用供用户修复；失败时随源数据库快照一起恢复。
+			if err := avSaveView(current, source.blockID); err != nil {
+				return err
+			}
+			ReloadAttrView(current.ID)
 		}
 	}
 	// 先确定全部触发条件，关联关键词也不会读到前一自动动作修改后的标题。
 	for _, entry := range triggered {
-		if err := tx.validateAutomationRule(entry.current, entry.rule, entry.source.boxID); err != nil {
-			return fmt.Errorf("automation [%s]: %w", entry.rule.ID, err)
-		}
 		for _, action := range entry.rule.Actions {
 			if err := tx.runAutomationAction(entry.source, entry.current, entry.itemID, action); err != nil {
 				return fmt.Errorf("automation [%s]: %w", entry.rule.ID, err)
@@ -339,14 +394,58 @@ func (tx *Transaction) automationTarget(source *av.AttributeView, action *av.Aut
 	} else if action.Target == "related" {
 		key, err := source.GetKey(action.RelationKeyID)
 		if err != nil || key.Relation == nil || key.Relation.AvID == "" {
-			return nil, fmt.Errorf("automation relation field [%s] is unavailable", action.RelationKeyID)
+			return nil, unavailableAutomationReference("fields", action.RelationKeyID,
+				fmt.Sprintf("automation relation field [%s] is unavailable", action.RelationKeyID))
 		}
 		id = key.Relation.AvID
 	}
 	if !ast.IsNodeIDPattern(id) {
 		return nil, fmt.Errorf("invalid automation target database")
 	}
-	return tx.readAttributeViewForMutation(id, "", boxID)
+	return tx.readAutomationTarget(id, boxID)
+}
+
+// 仅确认文件不存在时将目标视为失效引用，访问失败和读取竞态仍交由事务处理。
+func (tx *Transaction) readAutomationTarget(id, boxID string) (*av.AttributeView, error) {
+	target, err := tx.readAttributeViewForMutation(id, "", boxID)
+	if errors.Is(err, av.ErrViewNotFound) {
+		_, statErr := os.Stat(filepath.Join(util.DataDir, boxID, "storage", "av", id+".json"))
+		if os.IsNotExist(statErr) {
+			err = &automationUnavailableReference{kind: "database", id: id, err: err}
+		} else if statErr != nil {
+			err = statErr
+		}
+	}
+	return target, err
+}
+
+// 在已认证的数据库定义上识别失效字段及关联目标；其他读取和配置错误仍返回给事务。
+func (tx *Transaction) validateAutomationFilters(view *av.AttributeView, filters []*av.ViewFilter, boxID string) error {
+	if err := av.ValidateFilterDepth(filters); err != nil {
+		return err
+	}
+	for _, filter := range filters {
+		if filter == nil {
+			continue
+		}
+		if filter.IsGroup() {
+			if err := tx.validateAutomationFilters(view, filter.Filters, boxID); err != nil {
+				return err
+			}
+			continue
+		}
+		key, err := view.GetKey(filter.Column)
+		if err != nil || !av.AutomationEditableKey(key.Type) || filter.Value != nil && filter.Value.Type != key.Type {
+			return unavailableAutomationReference("fields", filter.Column,
+				fmt.Sprintf("automation condition field [%s] is unavailable", filter.Column))
+		}
+		if key.Type == av.KeyTypeRelation {
+			if _, err = tx.automationTarget(view, &av.AutomationAction{Target: "related", RelationKeyID: key.ID}, boxID); err != nil {
+				return err
+			}
+		}
+	}
+	return av.ValidateAutomationFilters(view, filters)
 }
 
 func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av.AutomationRule, boxID string) error {
@@ -356,10 +455,11 @@ func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av
 	if rule.KeyID != "" {
 		key, err := source.GetKey(rule.KeyID)
 		if err != nil || !av.AutomationEditableKey(key.Type) {
-			return fmt.Errorf("automation trigger field [%s] is unavailable", rule.KeyID)
+			return unavailableAutomationReference("fields", rule.KeyID,
+				fmt.Sprintf("automation trigger field [%s] is unavailable", rule.KeyID))
 		}
 	}
-	if err := av.ValidateAutomationFilters(source, rule.Conditions); err != nil {
+	if err := tx.validateAutomationFilters(source, rule.Conditions, boxID); err != nil {
 		return err
 	}
 	for _, action := range rule.Actions {
@@ -371,34 +471,41 @@ func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av
 		if err != nil {
 			return err
 		}
-		if err = av.ValidateAutomationFilters(target, action.Filters); err != nil {
+		if err = tx.validateAutomationFilters(target, action.Filters, boxID); err != nil {
 			return err
 		}
 		for keyID, field := range action.Fields {
+			if field == nil {
+				return fmt.Errorf("invalid automation action value [%s]", keyID)
+			}
 			key, keyErr := target.GetKey(keyID)
-			if keyErr != nil || !av.AutomationEditableKey(key.Type) || field == nil {
-				return fmt.Errorf("automation action field [%s] is unavailable", keyID)
+			if keyErr != nil || !av.AutomationEditableKey(key.Type) {
+				return unavailableAutomationReference("fields", keyID,
+					fmt.Sprintf("automation action field [%s] is unavailable", keyID))
 			}
 			switch field.Mode {
 			case "currentTime":
 				if key.Type != av.KeyTypeDate {
-					return fmt.Errorf("automation trigger time requires a date field")
+					return unavailableAutomationReference("fields", keyID, "automation trigger time requires a date field")
 				}
 			case "triggerItem":
 				if key.Type != av.KeyTypeRelation || key.Relation == nil || key.Relation.AvID != source.ID {
-					return fmt.Errorf("automation trigger item requires a relation to the source database")
+					return unavailableAutomationReference("fields", keyID, "automation trigger item requires a relation to the source database")
 				}
 			case "static":
-				if field.Value == nil || field.Value.Type != key.Type {
-					return fmt.Errorf("automation field value type mismatch [%s]", keyID)
+				if field.Value == nil {
+					return fmt.Errorf("invalid automation static value [%s]", keyID)
+				}
+				if field.Value.Type != key.Type {
+					return unavailableAutomationReference("fields", keyID, fmt.Sprintf("automation field value type mismatch [%s]", keyID))
 				}
 			case "source":
 				sourceKey, sourceErr := source.GetKey(field.KeyID)
 				if sourceErr != nil || sourceKey.Type != key.Type && !(sourceKey.Type == av.KeyTypeBlock && key.Type == av.KeyTypeText) {
-					return fmt.Errorf("automation source field type mismatch [%s]", keyID)
+					return unavailableAutomationReference("fields", field.KeyID, fmt.Sprintf("automation source field type mismatch [%s]", field.KeyID))
 				}
 				if key.Type == av.KeyTypeRelation && (sourceKey.Relation == nil || key.Relation == nil || sourceKey.Relation.AvID != key.Relation.AvID) {
-					return fmt.Errorf("automation relation target mismatch [%s]", keyID)
+					return unavailableAutomationReference("fields", keyID, fmt.Sprintf("automation relation target mismatch [%s]", keyID))
 				}
 			default:
 				return fmt.Errorf("invalid automation value mode")

@@ -7650,6 +7650,8 @@ export interface APIPOSTRoutes {
      * addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。
      * 自动操作与原修改一同提交，失败一起回滚；普通 API 写入不生成编辑器撤销记录。
      * 自动化不串联，导入、同步、历史恢复和撤销重放不重新触发；重做保留原条目 ID 和触发时间。
+     * 字段失效或目标数据库被删除时，后续条目写入停用规则并保留配置，源修改仍提交；提交后提示失效引用。
+     * 修复后需手动启用，撤销源修改不重新启用规则；锁定、认证失败、损坏及实际写入失败仍一起回滚。
      * 跨库动作限于同一加密边界，要求目标可访问；单笔事务最多执行 1000 个自动操作。
      */
     "/api/transactions": {

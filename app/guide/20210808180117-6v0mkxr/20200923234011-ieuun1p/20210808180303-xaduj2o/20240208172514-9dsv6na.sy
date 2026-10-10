@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261010104905"
+		"updated": "20261010222552"
 	},
 	"Children": [
 		{
@@ -3786,7 +3786,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261003000448"
+				"updated": "20261010222552"
 			},
 			"Children": [
 				{
@@ -3800,7 +3800,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-5by05dc",
-				"updated": "20261003000448"
+				"updated": "20261010222552"
 			},
 			"Children": [
 				{
@@ -3824,6 +3824,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " to add a rule. Changes are saved automatically; text is saved when the field loses focus or Enter is pressed. New rules are disabled by default. Incomplete rules are automatically disabled and show what is missing; enable them manually after completing the configuration. Rules are shared by the entire database and can be triggered by item changes in any view or mirror"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". If a referenced field is deleted or its type changes, or a target database is deleted, the next item write automatically pauses the affected rule and identifies the rule and missing reference. The source edit is saved and the rule configuration is retained; repair it and enable the rule manually. Locked databases, authentication failures, corrupt data, and write failures still roll back the edit and automatic actions"
 				}
 			]
 		},

@@ -780,7 +780,7 @@ export class Wnd {
         }
     }
 
-    public addTab(tab: Tab, keepCursor = false, isSaveLayout = true, activeTime?: string) {
+    public addTab(tab: Tab, keepCursor = false, isSaveLayout = true, activeTime?: string, replaceTabID?: string) {
         if (keepCursor) {
             tab.headElement?.classList.remove("item--focus");
             tab.panelElement.classList.add("fn__none");
@@ -840,6 +840,11 @@ export class Wnd {
         tab.parent = this;
         if (tab.callback) {
             tab.callback(tab);
+        }
+
+        // 预览切换先移除被替换的页签，再检查数量上限，避免关闭无关页签。
+        if (replaceTabID && replaceTabID !== tab.id) {
+            this.removeTab(replaceTabID, false, false, false);
         }
 
         // 移除 centerLayout 中的 empty

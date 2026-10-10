@@ -597,7 +597,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     }
 };
 
-const newTab = (options: IOpenFileOptions) => {
+export const newTab = (options: IOpenFileOptions) => {
     let tab: Tab;
     if (options.assetPath) {
         const suffix = getAssetExtension(options.assetPath).toLowerCase();

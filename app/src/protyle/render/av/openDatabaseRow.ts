@@ -5,17 +5,20 @@ import {Dialog} from "../../../dialog";
 import {renderAVAttribute} from "./blockAttr";
 import {Protyle} from "../../index";
 /// #else
-import {openFile, openFileById} from "../../../editor/util";
+import {newTab, openFile, openFileById} from "../../../editor/util";
 import {Editor} from "../../../editor";
 import {getAllTabs} from "../../../layout/getAll";
 import {zoomOut} from "../../../menus/protyle";
 import {Custom} from "../../../layout/dock/Custom";
+import {fetchSyncPost} from "../../../util/fetch";
+import {showMessage} from "../../../dialog/message";
 /// #endif
 import {searchMarkRender} from "../searchMarkRender";
 import {registerDatabaseRowRefresh} from "./databaseRowRefresh";
 import {focusDatabasePrimary} from "./primaryFocus";
 import {preserveAVBindingRange} from "./binding";
 import {inheritDatabaseRowReadonly} from "./rowReadonly";
+import {getDatabaseRowNavigation, IDatabaseRowNavigation, mountDatabaseRowNavigation} from "./databaseRowNavigation";
 
 export interface IDatabaseRowOpenData {
     avID: string;
@@ -31,6 +34,7 @@ export interface IDatabaseRowOpenData {
     keywords?: string[];
     focusPrimary?: boolean;
     bindPrimary?: boolean;
+    navigation?: IDatabaseRowNavigation;
 }
 
 const highlightDatabaseRow = (protyle: IProtyle, rootElement: HTMLElement, data: IDatabaseRowOpenData) => {
@@ -79,6 +83,7 @@ const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRo
         },
     });
     const rowElement = dialog.element.querySelector<HTMLElement>(".protyle-db-row");
+    mountDatabaseRowNavigation(rowElement, data, next => openDatabaseRowByData(protyle, next));
     rowElement.querySelector(".protyle-db-row__title span").textContent = title;
     const render = (contextProtyle: IProtyle) => {
         const previousBodyElement = rowElement.querySelector<HTMLElement>(".protyle-db-row__body");
@@ -140,6 +145,7 @@ const showDatabaseRowPreview = (model: Editor, data: IDatabaseRowOpenData, sourc
     const editorProtyle = model.editor.protyle;
     inheritDatabaseRowReadonly(editorProtyle, source);
     editorProtyle.element.dataset.databaseRowId = data.boundBlockID || "";
+    mountDesktopDatabaseRowNavigation(model, data, source);
     editorProtyle.databaseAttributePanel?.expand(data.avID);
     editorProtyle.contentElement.scrollTop = 0;
     editorProtyle.databaseAttributePanel?.afterRender(() => {
@@ -183,6 +189,50 @@ const getDatabaseRowPreviewTab = (blockID: string) => {
         }
     });
 };
+
+const getCustomRowData = (data: IDatabaseRowOpenData) => ({
+    ...data, blockID: data.databaseBlockID, notebookId: data.notebookID,
+});
+
+const mountDesktopDatabaseRowNavigation = (model: Editor | Custom, data: IDatabaseRowOpenData,
+                                            source: Partial<IProtyle>) => {
+    const container = model instanceof Custom ? model.element.querySelector(".protyle-db-row") : model.editor.protyle.element;
+    mountDatabaseRowNavigation(container, data, async next => {
+        const tab = model.parent;
+        const wnd = tab.parent;
+        const options: IOpenFileOptions = {app: model.app};
+        if (next.isDetached || !window.siyuan.config.editor.databaseAttrShow) {
+            options.custom = {id: "siyuan-database-row", icon: "iconDatabase",
+                title: next.title || window.siyuan.languages.untitled, data: getCustomRowData(next)};
+        } else {
+            const response = await fetchSyncPost("/api/block/getBlockInfo", {id: next.boundBlockID});
+            if (response.code !== 0) {
+                return false;
+            }
+            Object.assign(options, {id: next.boundBlockID, rootID: response.data.rootID,
+                fileName: response.data.rootTitle, rootTitleEmpty: response.data.rootTitleEmpty,
+                rootIcon: response.data.rootIcon, zoomIn: next.boundBlockID !== response.data.rootID});
+        }
+        if (!tab.panelElement.isConnected || tab.model !== model) {
+            return false;
+        }
+        if (model instanceof Editor && model.editor.protyle.upload.isUploading) {
+            showMessage(window.siyuan.languages.uploading);
+            return false;
+        }
+        const opened = newTab(options);
+        // 复用来源预览所在的分屏，不依赖异步请求完成时用户正激活哪个分屏。
+        wnd.addTab(opened, false, true, undefined, tab.id);
+        if (opened.model instanceof Custom) {
+            opened.model.element.dispatchEvent(new CustomEvent("database-row-readonly", {detail: source}));
+            opened.model.update();
+            mountDesktopDatabaseRowNavigation(opened.model, next, source);
+        } else if (opened.model instanceof Editor) {
+            showDatabaseRowPreview(opened.model, next, source);
+        }
+        return true;
+    });
+};
 /// #endif
 
 export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data: IDatabaseRowOpenData, options?: {
@@ -190,6 +240,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
     keepAVPanel?: boolean,
     standalone?: boolean,
 }) => {
+    data = {...data, navigation: data.navigation || getDatabaseRowNavigation(protyle, data)};
     const title = data.title || window.siyuan.languages.untitled;
     const openStandalone = options?.standalone || data.isDetached || !window.siyuan.config.editor.databaseAttrShow;
     /// #if MOBILE
@@ -206,6 +257,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
         undefined, undefined, (editorProtyle) => {
             inheritDatabaseRowReadonly(editorProtyle, protyle);
             editorProtyle.element.dataset.databaseRowId = data.boundBlockID;
+            mountDatabaseRowNavigation(editorProtyle.element, data, next => openDatabaseRowByData(protyle, next));
             editorProtyle.databaseAttributePanel?.expand(data.avID);
             editorProtyle.contentElement.scrollTop = 0;
             editorProtyle.databaseAttributePanel?.afterRender(() => {
@@ -248,6 +300,7 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
                     Object.assign(model.data, data, {blockID: data.databaseBlockID, notebookId: data.notebookID});
                     model.element.dispatchEvent(new CustomEvent("database-row-readonly", {detail: protyle}));
                     model.update();
+                    mountDesktopDatabaseRowNavigation(model, data, protyle);
                 }
             },
         });

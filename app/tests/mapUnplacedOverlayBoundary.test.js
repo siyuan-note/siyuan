@@ -5,7 +5,7 @@ const os = require("node:os");
 
 // 使用真实 Electron owner、IPC、sandbox preload 和 DOM；底图及记录仍为合成测试资源。
 const run = async profile => {
-    const {createHarness} = require("./fixtures/map-unplaced-overlay/harness.cjs");
+    const {createHarness} = require("./fixtures/map-unplaced-overlay/harnessSupport.cjs");
     const f = await createHarness({profile, automate: true});
     const owner = source => f.owner.executeJavaScript(source);
     const waitFor = async (check, label) => {

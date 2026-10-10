@@ -245,7 +245,7 @@ test("overlay setup failures close sessions, views and listeners transactionally
 });
 
 test("manual harness requires an explicit profile and owns only its fresh temporary directory", async () => {
-    const {createHarness, createTemporaryProfile} = require("./fixtures/map-unplaced-overlay/harness.cjs");
+    const {createHarness, createTemporaryProfile} = require("./fixtures/map-unplaced-overlay/harnessSupport.cjs");
     await assert.rejects(createHarness(), /explicit isolated fixture profile/);
     const temporary = createTemporaryProfile();
     try {

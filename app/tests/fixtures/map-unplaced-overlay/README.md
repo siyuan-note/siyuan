@@ -7,13 +7,15 @@
 在 `app/` 目录运行：
 
 ```sh
-node --import tsx --test tests/mapUnplacedOverlay.test.js tests/mapUnplacedOverlayBoundary.test.js
-pnpm exec electron tests/fixtures/map-unplaced-overlay/harness.cjs
+node --import tsx --test tests/mapUnplacedOverlay.test.js tests/mapUnplacedOverlayStartup.test.js tests/mapUnplacedOverlayBoundary.test.js
+node node_modules/electron/cli.js tests/fixtures/map-unplaced-overlay/harness.cjs
 ```
 
 第一条命令同时收集纯 Node 测试和真实 Electron 测试。Linux 缺少 DISPLAY/WAYLAND_DISPLAY 时，真实 Electron 测试明确跳过；不允许添加 `--no-sandbox` 或安全绕过参数来令测试通过。第二条需要可用桌面，打开可手动测试的独立原型。自动与手动入口均在 app ready 前设置独立临时 userData，不使用用户原有 profile。手动入口在退出及启动失败时尽力清理自己生成的临时目录，显式传入的测试 profile 由调用者负责清理。运行入口只在内存编译已有 menu/text-field 共享 SCSS，不生成生产构建文件。
 
 当前环境无法运行真实 GUI。已执行的 Node 测试验证严格 schema、资源路由、owner/frame/session/revision/requestID、选择成员集合、权限撤销、导航和销毁、失败清理、几何去重，以及实际 preload/menu 脚本在模拟 IPC/DOM 下的行为。模拟 DOM 使用项目现有 parse5 fixture，不证明浏览器排版、真实键盘输入、中文输入法候选窗、CSP 的浏览器执行、原生层合成或真实 OFM 覆盖正确。真实 Electron 入口已经编写，但只有它实际通过后才可报告相应浏览器证据。
+
+手动入口启动时输出 `Map overlay prototype starting...`，窗口页面加载完成后输出 `Map overlay prototype window ready.`，失败时输出固定提示。`harness.cjs` 是专用启动入口，`harnessSupport.cjs` 是测试可导入的无启动副作用模块；入口回归使用 Electron 相同的动态 `import()` 语义，不能依赖 `require.main === module`。若进程处于 Node 模式，会提示检查 `ELECTRON_RUN_AS_NODE`，不会自动改变该环境变量。此入口回归使用受控替身验证启动分发，不替代真实 GUI 验收。
 
 ## 最小安全边界
 

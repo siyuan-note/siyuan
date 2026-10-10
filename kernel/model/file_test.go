@@ -294,8 +294,8 @@ func TestCustomSortMaintenanceIgnoresEffectiveModeAndListLimit(t *testing.T) {
 	if nil != err {
 		t.Fatalf("read custom sort after append failed: %v", err)
 	}
-	if 4 != sorts[maxID] {
-		t.Fatalf("append used effective display mode instead of complete custom order: got %d, want 4", sorts[maxID])
+	if 31 != sorts[maxID] || sorts[extraID] != 30 {
+		t.Fatalf("append did not preserve existing custom values: %v", sorts)
 	}
 
 	minID := "20260718000005-abcdefg"
@@ -305,7 +305,7 @@ func TestCustomSortMaintenanceIgnoresEffectiveModeAndListLimit(t *testing.T) {
 	if nil != err {
 		t.Fatalf("read custom sort after prepend failed: %v", err)
 	}
-	if 1 != sorts[minID] || 5 != sorts[maxID] {
+	if 9 != sorts[minID] || 31 != sorts[maxID] {
 		t.Fatalf("prepend did not preserve the complete custom order: prepend=%d, trailing=%d", sorts[minID], sorts[maxID])
 	}
 

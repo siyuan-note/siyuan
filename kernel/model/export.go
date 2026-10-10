@@ -787,6 +787,9 @@ func ExportData() (zipPath string, err error) {
 
 func exportData(exportFolder string) (zipPath string, err error) {
 	FlushTxQueue()
+	if err = recoverSortConfAppends(); err != nil {
+		return
+	}
 	if err = EnsureAllSyncAssets(); err != nil {
 		return
 	}
@@ -2633,6 +2636,10 @@ func exportBoxSYZip(boxID string) (zipPath string) {
 
 func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, includeBoxConf bool) (zipPath string) {
 	defer util.ClearPushProgress(100)
+	if err := recoverSortConfAppend(filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")); err != nil {
+		logging.LogErrorf("recover export sort conf failed: %s", err)
+		return
+	}
 	if err := prepareExportAssets(boxID, docPaths); err != nil {
 		util.PushErrMsg(err.Error(), 7000)
 		return
@@ -2931,13 +2938,10 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 	var sortData []byte
 	var sortErr error
 	if filelock.IsExist(sortPath) {
-		sortData, sortErr = filelock.ReadFile(sortPath)
+		fullSortIDs, sortErr = readSortConfMap(sortPath)
 		if nil != sortErr {
 			logging.LogErrorf("read sort conf failed: %s", sortErr)
-		}
-
-		if sortErr = gulu.JSON.UnmarshalJSON(sortData, &fullSortIDs); nil != sortErr {
-			logging.LogErrorf("unmarshal sort conf failed: %s", sortErr)
+			return
 		}
 
 		if 0 < len(fullSortIDs) {

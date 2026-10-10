@@ -244,6 +244,10 @@ func InitConf() {
 	if err := recoverNotebookArchiveOperations(); err != nil {
 		logging.LogErrorf("recover notebook archive operations failed: %s", err)
 	}
+	if err := recoverSortConfAppends(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover incremental sort conf failed: %s", err)
+		return
+	}
 	clearEncryptedExportTempOnBoot()
 	clearOldInstallPackages("")
 	confPath := filepath.Join(util.ConfDir, "conf.json")

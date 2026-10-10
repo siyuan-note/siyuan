@@ -303,6 +303,9 @@ func PrepareNotebookArchive(ids []string) (archiveID, downloadPath string, err e
 	}
 	defer release()
 	for _, id := range ids {
+		if err = recoverSortConfAppend(filepath.Join(util.DataDir, id, ".siyuan", "sort.json")); err != nil {
+			return
+		}
 		if err = EnsureAssetPrefixLocal(filepath.Join(util.DataDir, id)); err != nil {
 			return
 		}

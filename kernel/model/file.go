@@ -2510,29 +2510,49 @@ func normalizeDocTitle(title string) string {
 }
 
 func readSortConfMap(confPath string) (map[string]int, error) {
+	ret, _, err := readSortConfMapData(confPath)
+	return ret, err
+}
+
+func readSortConfMapData(confPath string) (map[string]int, []byte, error) {
 	sortConfRecoveryLock.Lock()
 	defer sortConfRecoveryLock.Unlock()
+	if err := recoverSortConfAppend(confPath); err != nil {
+		return nil, nil, err
+	}
 
 	if !filelock.IsExist(confPath) {
-		return map[string]int{}, nil
+		return map[string]int{}, nil, nil
 	}
 	data, err := filelock.ReadFile(confPath)
 	if err != nil {
 		logging.LogErrorf("read sort conf [%s] failed: %s", confPath, err)
-		return nil, err
+		return nil, nil, err
 	}
 	ret := map[string]int{}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogWarnf("unmarshal sort conf [%s] failed: %s", confPath, err)
-		return recoverSortConfMap(confPath, data)
+	err = gulu.JSON.UnmarshalJSON(data, &ret)
+	if err != nil || ret == nil {
+		logging.LogWarnf("unmarshal sort conf [%s] failed: %v", confPath, err)
+		_, err = recoverSortConfMap(confPath, data)
+		if err != nil {
+			return nil, nil, err
+		}
+		data, err = filelock.ReadFile(confPath)
+		if err != nil {
+			return nil, nil, err
+		}
+		ret = map[string]int{}
+		if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil || ret == nil {
+			return nil, nil, fmt.Errorf("read recovered sort conf [%s]: %v", confPath, err)
+		}
 	}
-	if ret == nil {
-		return recoverSortConfMap(confPath, data)
-	}
-	return ret, nil
+	return ret, data, nil
 }
 
 func writeSortConfMap(confPath string, fullSortIDs map[string]int) error {
+	if err := recoverSortConfAppend(confPath); err != nil {
+		return err
+	}
 	data, err := gulu.JSON.MarshalJSON(fullSortIDs)
 	if err != nil {
 		logging.LogErrorf("marshal sort conf [%s] failed: %s", confPath, err)
@@ -3151,7 +3171,7 @@ func (box *Box) placeDocsInSiblingOrder(parentPath string, ids []string, targetI
 		return fmt.Errorf("create conf dir failed: %w", err)
 	}
 	confPath := filepath.Join(confDir, "sort.json")
-	fullSortIDs, err := readSortConfMap(confPath)
+	fullSortIDs, sortData, err := readSortConfMapData(confPath)
 	if nil != err {
 		fileTreeSortLock.Unlock()
 		return err
@@ -3192,6 +3212,17 @@ func (box *Box) placeDocsInSiblingOrder(parentPath string, ids []string, targetI
 		}
 	}
 	orderedIDs = slices.Insert(orderedIDs, insertIndex, ids...)
+	if "" == targetID {
+		if additions, ok := newSiblingSortValues(currentIDs, ids, fullSortIDs, position); ok {
+			if err = appendSortConfMap(confPath, sortData, additions); err != nil {
+				fileTreeSortLock.Unlock()
+				return err
+			}
+			fileTreeSortLock.Unlock()
+			pushFiletreeSortChanged(additions)
+			return nil
+		}
+	}
 	sortIDs := make(map[string]int, len(orderedIDs))
 	for i, orderedID := range orderedIDs {
 		sortIDs[orderedID] = i + 1
@@ -3204,6 +3235,52 @@ func (box *Box) placeDocsInSiblingOrder(parentPath string, ids []string, targetI
 	fileTreeSortLock.Unlock()
 	pushFiletreeSortChanged(sortIDs)
 	return nil
+}
+
+// newSiblingSortValues 只为未配置排序值的新文档分配首尾位置，溢出时交由完整重排处理。
+func newSiblingSortValues(currentIDs, ids []string, fullSortIDs map[string]int, position string) (map[string]int, bool) {
+	if len(ids) == 0 || len(ids) > 512 {
+		return nil, false
+	}
+	moved := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		if _, exists := fullSortIDs[id]; exists || moved[id] {
+			return nil, false
+		}
+		moved[id] = true
+	}
+	minimum, maximum, found := 0, 0, false
+	for _, id := range currentIDs {
+		if moved[id] {
+			continue
+		}
+		value := fullSortIDs[id]
+		if !found {
+			minimum, maximum, found = value, value, true
+		} else {
+			minimum, maximum = min(minimum, value), max(maximum, value)
+		}
+	}
+	start := 1
+	if found {
+		maxInt := int(^uint(0) >> 1)
+		if "after" == position {
+			if maximum > maxInt-len(ids) {
+				return nil, false
+			}
+			start = maximum + 1
+		} else {
+			if minimum < -maxInt-1+len(ids) {
+				return nil, false
+			}
+			start = minimum - len(ids)
+		}
+	}
+	ret := make(map[string]int, len(ids))
+	for i, id := range ids {
+		ret[id] = start + i
+	}
+	return ret, true
 }
 
 func (box *Box) addSort(previousPath, id string) {

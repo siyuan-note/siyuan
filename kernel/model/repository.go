@@ -3061,6 +3061,9 @@ func newCloudRepositoryWithAssetSourceLocked() (*dejavu.Repo, error) {
 
 // newRepositoryWithAssetSourceLocked 由已持有来源锁的调用方创建仓库，避免读写锁递归等待。
 func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
+	if err = recoverSortConfAppends(); err != nil {
+		return
+	}
 	cloudConf, err := buildCloudConf()
 	if err != nil {
 		return

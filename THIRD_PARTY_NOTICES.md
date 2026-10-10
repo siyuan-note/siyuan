@@ -34,9 +34,9 @@ The component list is informational and does not replace the license terms. Copy
 | ClayGL | 1.2.x snapshot | BSD-2-Clause | [upstream](https://github.com/pissang/claygl) | Bundled by echarts-gl 2.0.9 |
 | flowchart.js | 1.18.0 | MIT | [upstream](https://github.com/adrai/flowchart.js) | app/stage/protyle/js/flowchart.js/flowchart.min.js |
 | Raphaël | 2.3.0 | MIT | [upstream](https://github.com/DmitryBaranovskiy/raphael) | Bundled by flowchart.js |
-| @viz-js/viz | 3.11.0 | MIT | [upstream](https://github.com/mdaines/viz-js) | app/stage/protyle/js/graphviz/viz.js |
-| Graphviz | Bundled snapshot | EPL-1.0 | [upstream](https://gitlab.com/graphviz/graphviz) | Object code bundled by @viz-js/viz |
-| Expat | Bundled snapshot | MIT | [upstream](https://github.com/libexpat/libexpat) | Object code bundled by @viz-js/viz |
+| @viz-js/viz | 3.31.0 | MIT | [upstream](https://github.com/mdaines/viz-js) | app/stage/protyle/js/graphviz/viz.js |
+| Graphviz | 16.1.0 | EPL-1.0 | [upstream](https://gitlab.com/graphviz/graphviz) | Object code bundled by @viz-js/viz |
+| Expat | 2.8.5 | MIT | [upstream](https://github.com/libexpat/libexpat) | Object code bundled by @viz-js/viz |
 | highlight.js | 11.12.0 | BSD-3-Clause | [upstream](https://github.com/highlightjs/highlight.js) | app/stage/protyle/js/highlight.js/ |
 | highlightjs-solidity | 2.0.5 and 2.0.6 | MIT | [upstream](https://github.com/highlightjs/highlightjs-solidity) | Bundled in app/stage/protyle/js/highlight.js/third-languages.js |
 | highlightjs-sap-abap | 0.3.0 | MIT | [upstream](https://github.com/highlightjs/highlightjs-sap-abap) | Bundled in app/stage/protyle/js/highlight.js/third-languages.js |
@@ -3089,8 +3089,8 @@ The following comments are extracted verbatim from the JavaScript and CSS artifa
 
 ```text
 /*!
-Viz.js 3.11.0
-Copyright (c) 2023 Michael Daines
+Viz.js 3.31.0
+Copyright (c) Michael Daines
 
 This distribution contains other software in object code form:
 Graphviz https://www.graphviz.org

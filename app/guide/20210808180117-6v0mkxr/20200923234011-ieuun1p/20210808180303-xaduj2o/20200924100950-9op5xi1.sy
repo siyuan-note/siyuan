@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261009184321"
+		"updated": "20261010134815"
 	},
 	"Children": [
 		{
@@ -4274,7 +4274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261008221006"
+				"updated": "20261010134815"
 			},
 			"Children": [
 				{
@@ -10165,7 +10165,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260928091724-mshqwvb",
-				"updated": "20260930171029"
+				"updated": "20261010134815"
 			},
 			"Children": [
 				{
@@ -10226,6 +10226,71 @@
 				{
 					"Type": "NodeText",
 					"Data": "In custom profiles, use the category selector to switch between the toolbar and slash menu. Drag the six-dot handle on the left of an item to change its order, or use its switch to change visibility. Drag near the list edge to scroll. Clear the search before sorting, and confirm to save the profile. Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices. New profiles based on Simple or Full follow the default order as versions change until you customize a level. Based on Current and duplicate preserve existing custom orders. Clear the search and use the reset icon in a column or dock group title to reset that level. To reset every level, use the refresh icon labeled Reset all orders on the right of the Position column title on desktop, or the Reset all orders button at the bottom on mobile. Confirm to save; Cancel discards the changes. Resetting order preserves visibility and dock placement, and reset levels continue to follow future default order changes."
+				}
+			]
+		},
+		{
+			"ID": "20261010134815-v9k29uo",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261010134815-v9k29uo",
+				"updated": "20261010134815"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Image title"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261010134815-bb1k769",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010134815-bb1k769",
+				"updated": "20261010134815"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click or tap the title below an image to edit it inline. When the title is focused, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to start editing. While editing, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to save or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to cancel. Leaving the field also saves. The change applies to this image reference and does not rename the asset file. Read-only documents do not allow title editing."
 				}
 			]
 		},

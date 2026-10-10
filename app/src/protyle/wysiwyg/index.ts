@@ -243,6 +243,7 @@ import {LargeTableVirtualizer} from "./tableVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {syncRootAttributes} from "../util/syncRootAttributes";
+import {bindImageTitleEditor} from "../render/imageTitleEditor";
 import {isDirectCalloutStructureClick} from "./calloutClick";
 import {
     BLOCK_SELECTION_CLASS,
@@ -415,6 +416,7 @@ export class WYSIWYG {
     private disposeHeadingFoldIndicators?: () => void;
     private disposeBoundedBlockDragSelect?: () => void;
     private disposeTouchCaret?: () => void;
+    private imageTitleEditor: ReturnType<typeof bindImageTitleEditor>;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -445,6 +447,7 @@ export class WYSIWYG {
     }
 
     public async flushPendingInput() {
+        this.imageTitleEditor?.flush();
         this.persistComposition?.();
         // 输入处理可能等待块引用查询，交接编辑器前也需等待已经开始执行的任务。
         while (this.pendingInputTimeouts.size || this.runningInputTasks.size) {
@@ -542,6 +545,7 @@ export class WYSIWYG {
             this.tableControl = new TableControl(protyle, this.element);
         }
         this.bindCommonEvent(protyle);
+        this.imageTitleEditor = bindImageTitleEditor(protyle, this.element);
         this.bindEvent(protyle);
         this.disposeEmbedToolbarVisibility = bindEmbedToolbarVisibility(this.element);
         /// #if BROWSER
@@ -588,6 +592,7 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.imageTitleEditor?.destroy();
         this.persistComposition?.();
         this.persistComposition = undefined;
         this.disposeHeadingFoldIndicators?.();

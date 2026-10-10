@@ -14,6 +14,21 @@ export const renderImageDisplay = (root: Element) => {
     root.querySelectorAll<HTMLImageElement>(".img img").forEach(image => {
         setImageTitle(image, getImageTitle(image));
         const container = image.parentElement;
+        const title = container.querySelector<HTMLElement>(".protyle-action__title");
+        if (title) {
+            const wysiwyg = image.closest(".protyle-wysiwyg");
+            if (getImageTitle(image) && wysiwyg && wysiwyg.getAttribute("data-readonly") !== "true" &&
+                !window.siyuan.config.readonly && !window.siyuan.isPublish &&
+                !image.closest(".protyle-wysiwyg__embed, .mindmap-view__preview-block")) {
+                title.tabIndex = 0;
+                title.setAttribute("role", "button");
+                title.setAttribute("aria-label", window.siyuan.languages.title);
+            } else {
+                title.removeAttribute("tabindex");
+                title.removeAttribute("role");
+                title.removeAttribute("aria-label");
+            }
+        }
         let alt = container.querySelector<HTMLElement>(".img__alt");
         if (window.siyuan.config.editor.displayImgAlt && image.alt) {
             if (!alt) {

@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261009184321"
+		"updated": "20261010134815"
 	},
 	"Children": [
 		{
@@ -4266,7 +4266,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20261008221006"
+				"updated": "20261010134815"
 			},
 			"Children": [
 				{
@@ -10142,7 +10142,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260928091724-sj0935a",
-				"updated": "20260930171029"
+				"updated": "20261010134815"
 			},
 			"Children": [
 				{
@@ -10203,6 +10203,71 @@
 				{
 					"Type": "NodeText",
 					"Data": "編輯自訂方案時，可透過分類選擇框切換工具列與斜線選單。拖曳項目左側的六點把手調整順序，使用項目開關調整顯隱；拖至清單邊緣可捲動。排序前需清空搜尋，修改後確認儲存方案。內建方案唯讀，可複製後自訂，再啟用儲存的方案。方案儲存在本裝置，不跨裝置同步。基於簡潔或完整建立的新方案，其未自訂的層級排序會隨版本預設順序更新；基於目前方案建立或複製方案會保留既有自訂排序。清空搜尋後，可點擊欄標題或停靠欄分組標題上的重設圖示重設該層級。重設全部排序時，桌面端可點擊「位置」欄標題右側的重新整理圖示，提示為「重設全部排序」；行動端可點擊底部的重設全部排序按鈕。確認後儲存，取消則放棄修改。重設排序會保留顯隱和停靠欄入口所在位置，重設後的層級持續跟隨後續版本的預設排序。"
+				}
+			]
+		},
+		{
+			"ID": "20261010134815-lhna2cb",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261010134815-lhna2cb",
+				"updated": "20261010134815"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "圖片標題"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261010134815-mtfjptp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010134815-mtfjptp",
+				"updated": "20261010134815"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊圖片下方的標題可就地編輯，行動裝置可輕觸標題。標題取得焦點時，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開始編輯；編輯時按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 儲存，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 取消，離開輸入框也會儲存。修改僅作用於目前的圖片引用，不會重新命名資源文件。唯讀文檔不支援編輯標題。"
 				}
 			]
 		},

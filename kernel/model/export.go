@@ -2676,11 +2676,20 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 	exportDir := filepath.Join(util.TempDir, "export", normalExportTempName(baseFolderName))
 	if encrypted {
 		exportDir = filepath.Join(util.TempDir, "export", boxID, "sy", exportID)
+	} else {
+		// 同名导出共享暂存路径，串行处理以免清理其他请求正在写入的文件。
+		filelock.Lock(exportDir)
+		defer filelock.Unlock(exportDir)
+		if err := os.RemoveAll(exportDir); err != nil {
+			logging.LogErrorf("clear export temp folder [%s] failed: %s", exportDir, err)
+			return
+		}
 	}
 	if err := os.MkdirAll(exportDir, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
 	}
+	defer os.RemoveAll(exportDir)
 	if includeBoxConf {
 		boxConf := box.GetConf()
 		boxConf.Sort = 0
@@ -2979,11 +2988,13 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 		zipPath = filepath.Join(util.TempDir, "export", boxID, "sy", exportID+"-"+zipBaseName)
 		zipPartialPath = zipPath + ".partial"
 	}
+	defer os.Remove(zipPartialPath)
 	zip, err := gulu.Zip.Create(zipPartialPath)
 	if err != nil {
 		logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportDir, err)
 		return ""
 	}
+	defer zip.Close()
 
 	zipCallback := func(filename string) {
 		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(253), filename))
@@ -3003,7 +3014,6 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 		return ""
 	}
 
-	os.RemoveAll(exportDir)
 	if encrypted {
 		zipPath = "/export/" + registerManagedEncryptedExport(boxID, "sy", zipPath)
 	} else {

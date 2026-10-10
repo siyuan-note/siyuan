@@ -5,7 +5,7 @@
 const path = require("node:path");
 const fs = require("node:fs/promises");
 const {randomBytes} = require("node:crypto");
-const {mapDiagnosticCodes, mapCSPDiagnosticCodes, mapCSPResourceCodes, classifyMapConsoleMessage,
+const {mapDiagnosticCodes, mapCSPDiagnosticCodes, isMapCSPResource, MAX_MAP_DIAGNOSTICS, classifyMapConsoleMessage,
     classifyMapCSPResources} = require("./mapHostDiagnostics");
 const {
     hasUnsafeMapSwitches, normalizeMapOrigin, parseMapCreate, parseMapCommand, parseMapReply, parseMapGeometry,
@@ -311,10 +311,10 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         let creationFailure = "hostSetupFailed";
         const report = (code, resource) => {
             if (!host || host.destroyed || !mapDiagnosticCodes.includes(code) ||
-                resource !== undefined && (!mapCSPDiagnosticCodes.includes(code) || !mapCSPResourceCodes.includes(resource))) return;
-            // 两个有限白名单的组合去重，同一指令拒绝不同资源时也保留证据。
+                resource !== undefined && (!mapCSPDiagnosticCodes.includes(code) || !isMapCSPResource(resource))) return;
+            // 按实例去重并限制总量，同一指令拒绝不同受限来源时也保留证据。
             const key = code + ":" + (resource || "");
-            if (host.diagnostics.has(key)) return;
+            if (host.diagnostics.has(key) || host.diagnostics.size >= MAX_MAP_DIAGNOSTICS) return;
             host.diagnostics.add(key);
             sendOwner(host, {version: 1, instanceID: init.instanceID, type: "diagnostic", code,
                 ...(resource === undefined ? {} : {resource})});
@@ -328,7 +328,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
                 navigateOnDragDrop: false, safeDialogs: true, disableDialogs: true, devTools: false,
                 spellcheck: false, backgroundThrottling: false, preload: path.join(__dirname, "mapHostPreload.js")}});
             const contents = view.webContents;
-            host = {key, init, owner: event.sender, frame: event.senderFrame, win: owner.win, origin: owner.origin, diagnostics: new Set(),
+            host = {key, init, owner: event.sender, frame: event.senderFrame, win: owner.win, origin: owner.origin, diagnostics: new Set(), report,
                 view, router, listeners: [], ids: new Set(), revision: -1, loaded: false, ready: false, bootstrapped: false, destroyed: false};
             hosts.set(key, host);
             // 全局 web-contents-created 会安装外部打开链接处理器，必须在加载前替换为拒绝。
@@ -343,7 +343,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             listen(host, contents, "certificate-error", (_event, _url, _error, _certificate, callback) => callback(false));
             listen(host, contents, "console-message", (event, _level, legacyMessage) => {
                 const message = event?.message ?? legacyMessage;
-                const resources = classifyMapCSPResources(message);
+                const resources = classifyMapCSPResources(message, host.origin);
                 for (const code of classifyMapConsoleMessage(message)) {
                     if (!resources.some(item => item.code === code)) report(code);
                 }
@@ -451,7 +451,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         const host = getHost(event, value);
         if (!host) return;
         try {
-            const geometry = parseMapGeometry(value, host.owner.getZoomFactor(), host.win.getContentBounds());
+            const geometry = parseMapGeometry(value, host.owner.getZoomFactor(), host.win.getContentBounds(), host.report);
             if (!geometry?.visible) { hide(host); return; }
             host.geometry = geometry;
             applyGeometry(host);

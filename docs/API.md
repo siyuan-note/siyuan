@@ -1606,7 +1606,7 @@ Block-writing APIs can return after their block-tree transaction is committed bu
   ```
 
     * `hPath`: human-readable path
-    * `content`: Markdown content
+    * `content`: Markdown content, including automatic heading numbers when enabled for the document (the document setting overrides the editor default); uses the editor numbering format and preserves source-document numbers for partial exports
 
 ### Export files and folders
 

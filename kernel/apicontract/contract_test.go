@@ -239,7 +239,11 @@ func TestGeneratedArtifacts(t *testing.T) {
 	if err := json.Unmarshal(legacyJSON, &legacy); err != nil {
 		t.Fatal(err)
 	}
-	if strings.ReplaceAll(string(declaration), "\r\n", "\n") != string(bundle.TypeScript(legacy)) {
+	documentation, err := ReadEndpointDocumentation("contracts.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.ReplaceAll(string(declaration), "\r\n", "\n") != string(bundle.TypeScript(legacy, documentation)) {
 		t.Fatal("TypeScript contracts are out of date")
 	}
 	schema, err := os.ReadFile("schema.json")

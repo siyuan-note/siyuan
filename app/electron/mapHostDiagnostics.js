@@ -1,24 +1,30 @@
-// 仅返回固定分类，不转发 SDK 日志、请求地址、脚本片段或凭据。
+// 仅返回固定分类或受限公共主机名，不转发 SDK 日志、完整地址、脚本片段或凭据。
+const MAX_MAP_DIAGNOSTICS = 64;
 const mapDiagnosticCodes = Object.freeze([
     "hostSetupFailed", "assetUnavailable", "documentLoadFailed", "bootstrapTimeout", "sdkTimeout",
     "providerRequestDenied", "providerInsecureRequest", "providerHTTPFailure", "providerNetworkFailure",
     "cspScript", "cspWorker", "cspConnect", "cspImage", "cspStyle", "cspEval", "cspWasm",
     "storageUnavailable", "webglUnavailable", "amapInvalidKey", "amapInvalidSecurityCode",
-    "amapDomainMismatch", "amapPlatformMismatch",
+    "amapDomainMismatch", "amapPlatformMismatch", "geometryInvalid", "geometryLogicalBounds",
+    "geometryCropBounds", "geometryWindowBounds", "geometryRoundedEmpty",
 ]);
 const mapCSPDiagnosticCodes = Object.freeze(["cspScript", "cspWorker", "cspConnect", "cspImage", "cspStyle", "cspEval", "cspWasm"]);
 const mapCSPResourceCodes = Object.freeze([
     "blob", "data", "inline", "eval", "wasm", "other",
-    "https:webapi.amap.com", "https:restapi.amap.com", "https:vdata.amap.com", "https:a.amap.com",
-    "https:g.alicdn.com", "https:fourier.taobao.com", "https:autonavi-tile", "https:other",
-    "http:webapi.amap.com", "http:restapi.amap.com", "http:vdata.amap.com", "http:a.amap.com",
-    "http:g.alicdn.com", "http:fourier.taobao.com", "http:autonavi-tile", "http:other",
+    "owner-origin", "local-address", "redacted",
 ]);
-const resourceHosts = Object.freeze(["webapi.amap.com", "restapi.amap.com", "vdata.amap.com", "a.amap.com",
-    "g.alicdn.com", "fourier.taobao.com"]);
+const isMapCSPHostname = value => typeof value === "string" && value.length <= 96 &&
+    /(?:^|\.)(?:amap\.com|autonavi\.com|alicdn\.com|taobao\.com)$/.test(value) &&
+    value.split(".").every(label => /^[a-z](?:[a-z0-9-]{0,22}[a-z0-9])?$/.test(label));
+const isMapCSPResource = value => {
+    if (typeof value !== "string" || value.length > 102) return false;
+    if (mapCSPResourceCodes.includes(value)) return true;
+    const hostname = /^https?:([a-z0-9.-]+)$/.exec(value)?.[1];
+    return isMapCSPHostname(hostname);
+};
 
-const classifyMapCSPResources = message => {
-    if (typeof message !== "string" || !/content security policy/i.test(message)) return [];
+const classifyMapCSPResources = (message, ownerOrigin) => {
+    if (typeof message !== "string" || message.length > 32768 || !/content security policy/i.test(message)) return [];
     // Chromium 的 eval 文案在 directive 和实际策略之间还有原因，不能按资源 URL 解析。
     if (/^(?:Evaluating a string as JavaScript|Refused to evaluate a string as JavaScript)/i.test(message)) {
         return [{code: "cspEval", resource: "eval"}];
@@ -41,14 +47,17 @@ const classifyMapCSPResources = message => {
             try {
                 const url = new URL(target);
                 if (["https:", "http:"].includes(url.protocol)) {
-                    const host = url.port ? "other" : resourceHosts.includes(url.hostname) ? url.hostname :
-                        /^(?:webst|webrd)\d+\.is\.autonavi\.com$/.test(url.hostname) ? "autonavi-tile" : "other";
-                    resource = url.protocol + host;
+                    const hostname = url.hostname;
+                    const local = !hostname.includes(".") || hostname.startsWith("[") ||
+                        /^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname) ||
+                        /(?:^|\.)(?:localhost|local|internal|lan|home)$/.test(hostname);
+                    resource = url.username || url.password ? "redacted" : url.origin === ownerOrigin ? "owner-origin" :
+                        local ? "local-address" : isMapCSPHostname(hostname) ? url.protocol + hostname : "redacted";
                 }
             } catch (_error) { /* 未识别资源只保留固定 other 类别。 */ }
         }
     }
-    return mapCSPResourceCodes.includes(resource) ? [{code, resource}] : [];
+    return isMapCSPResource(resource) ? [{code, resource}] : [];
 };
 
 const classifyMapConsoleMessage = message => {
@@ -70,4 +79,5 @@ const classifyMapConsoleMessage = message => {
     return ret;
 };
 
-module.exports = {mapDiagnosticCodes, mapCSPDiagnosticCodes, mapCSPResourceCodes, classifyMapConsoleMessage, classifyMapCSPResources};
+module.exports = {MAX_MAP_DIAGNOSTICS, mapDiagnosticCodes, mapCSPDiagnosticCodes, mapCSPResourceCodes,
+    isMapCSPResource, classifyMapConsoleMessage, classifyMapCSPResources};

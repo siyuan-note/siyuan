@@ -610,6 +610,10 @@
     overflow-y: hidden;
     cursor: auto;
 
+    &--grouped {
+      width: 100%;
+    }
+
     &.fn__block {
       overflow: visible;
     }

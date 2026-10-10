@@ -351,7 +351,7 @@ const renderGroupTable = (options: ITableOptions) => {
         }
     });
     if (options.renderAll) {
-        replaceAVContainer(options.blockElement, `<div class="av__container">
+        replaceAVContainer(options.blockElement, `<div class="av__container av__container--grouped">
     ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled, options.blockElement)}
     <div class="av__scroll">
         ${avBodyHTML}

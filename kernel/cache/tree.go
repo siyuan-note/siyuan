@@ -31,7 +31,7 @@ type treeCacheEntry struct {
 	generation uint64
 }
 
-const treeCacheMaxCost = 1024 * 1024 * 200
+const treeCacheMaxCost = DefaultMaxCostBytes
 
 var (
 	treeCacheEncoder, _ = zstd.NewWriter(nil, zstd.WithEncoderLevel(zstd.SpeedFastest),
@@ -39,7 +39,7 @@ var (
 	treeCacheDecoder, _ = zstd.NewReader(nil, zstd.WithDecoderConcurrency(1),
 		zstd.WithDecoderMaxMemory(treeCacheMaxCost), zstd.WithDecodeAllCapLimit(true))
 	treeCache, _ = ristretto.NewCache(&ristretto.Config{
-		NumCounters: 100000,
+		NumCounters: AdmissionCounters,
 		MaxCost:     treeCacheMaxCost,
 		BufferItems: 64,
 	})

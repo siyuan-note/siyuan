@@ -22,6 +22,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unsafe"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
@@ -30,6 +31,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/ClarkThan/ahocorasick"
 	"github.com/dgraph-io/ristretto"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -40,10 +42,23 @@ import (
 // virtualBlockRefCache 用于保存块关联的虚拟引用关键字。
 // 改进打开虚拟引用后加载文档的性能 https://github.com/siyuan-note/siyuan/issues/7378
 var virtualBlockRefCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 100000,
-	MaxCost:     10240,
+	NumCounters: cache.AdmissionCounters,
+	MaxCost:     cache.LookupMaxCostBytes,
 	BufferItems: 64,
 })
+
+// putVirtualRefCache 按关键字切片及字符串的驻留字节数计费，保留调用方指定的有效期。
+func putVirtualRefCache(key string, keywords []string, ttl time.Duration) {
+	cost := int64(unsafe.Sizeof(keywords)) + int64(cap(keywords))*int64(unsafe.Sizeof("")) + int64(len(key))
+	for _, keyword := range keywords {
+		cost += int64(len(keyword))
+	}
+	virtualBlockRefCache.Del(key)
+	if cost >= virtualBlockRefCache.MaxCost() {
+		return
+	}
+	virtualBlockRefCache.SetWithTTL(key, keywords, cost, ttl)
+}
 
 func getBlockVirtualRefKeywords(root *ast.Node, boxID string) (ret []string) {
 	key := boxID + "\x00" + root.ID
@@ -100,7 +115,7 @@ func putBlockVirtualRefKeywords(blockContent string, root *ast.Node, boxID strin
 
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	key := boxID + "\x00" + root.ID
-	virtualBlockRefCache.SetWithTTL(key, ret, 1, 10*time.Minute)
+	putVirtualRefCache(key, ret, 10*time.Minute)
 	return
 }
 
@@ -123,10 +138,10 @@ func ResetVirtualBlockRefCache() {
 	searchIgnoreLines := getSearchIgnoreLines()
 	refSearchIgnoreLines := getRefSearchIgnoreLines()
 	keywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines)
-	virtualBlockRefCache.Set("virtual_ref", keywords, 1)
+	putVirtualRefCache("virtual_ref", keywords, 0)
 	for _, boxID := range treenode.GetOpenedEncryptedBoxIDs() {
 		boxKeywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxID)
-		virtualBlockRefCache.Set(boxID+"\x00virtual_ref", boxKeywords, 1)
+		putVirtualRefCache(boxID+"\x00virtual_ref", boxKeywords, 0)
 	}
 }
 
@@ -292,7 +307,7 @@ func getVirtualRefKeywords(root *ast.Node, boxIDs ...string) (ret []string) {
 		refSearchIgnoreLines := getRefSearchIgnoreLines()
 		ret = sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias,
 			Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxIDs...)
-		virtualBlockRefCache.Set(key, ret, 1)
+		putVirtualRefCache(key, ret, 0)
 	}
 
 	includes := parseKeywords(Conf.Editor.VirtualBlockRefInclude)

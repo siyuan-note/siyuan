@@ -207,13 +207,69 @@ describe("desktop map transport", () => {
         const compute = load({}).computeDesktopAVMapGeometry;
         assert.deepEqual(compute({x: -20.5, y: 30, width: 200, height: 100},
             [{x: 0, y: 0, width: 1000, height: 800}, {x: 10, y: 40, width: 100, height: 60}]),
-        {visible: true, bounds: {x: 10, y: 40, width: 100, height: 60},
-            logicalSize: {width: 200, height: 100}, crop: {x: 30.5, y: 10}});
+        {visible: true, bounds: {x: 11, y: 41, width: 98, height: 58},
+            logicalSize: {width: 200, height: 100}, crop: {x: 31.5, y: 11}});
         const rect = {x: 0, y: 0, width: 100, height: 100};
         assert.deepEqual(compute(rect, [{...rect, x: 200}]), {visible: false});
         assert.deepEqual(compute(rect, [], [{x: 30, y: 40, width: 5, height: 5}]), {visible: false});
         assert.equal(compute(rect, [], [{...rect, x: 100}]).visible, true);
         assert.deepEqual(compute({...rect, width: NaN}, []), {visible: false});
+    });
+    it("keeps the native map inside the measured editor edge during upward and downward scrolling", async () => {
+        const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;
+        class Observer {
+            observe() {}
+            disconnect() {}
+        }
+        globalThis.MutationObserver = Observer as any;
+        globalThis.ResizeObserver = Observer as any;
+        const f = fixture();
+        const scope = f.doc.defaultView;
+        scope.innerWidth = 1920;
+        scope.innerHeight = 655;
+        Object.assign(f.rect, {x: 478, y: 375.5, width: 1290, height: 327.5});
+        const editor = {parentElement: null as HTMLElement | null, offsetWidth: 1500, offsetHeight: 539,
+            clientLeft: 0, clientTop: 0, clientWidth: 1490, clientHeight: 539,
+            getBoundingClientRect: () => ({x: 378, y: 84, width: 1500, height: 539})};
+        f.container.parentElement = editor;
+        const getStyle = scope.getComputedStyle;
+        scope.getComputedStyle = (element: unknown) => ({...getStyle(),
+            overflowX: element === editor ? "auto" : "visible", overflowY: element === editor ? "auto" : "visible"});
+        // 实测底栏从 y=623 开始，但半像素位置 622.5 已命中底栏。
+        f.doc.elementFromPoint = (_x: number, y: number) => y >= 622.5 ? editor : f.container;
+        try {
+            await f.created();
+            f.reply({type: "ready"});
+            f.advance();
+            const last = () => f.calls.filter(([name]) => name === "siyuan-map-geometry").at(-1)[1];
+            assert.deepEqual(last().bounds, {x: 478, y: 375.5, width: 1290, height: 246.5});
+            assert.deepEqual(last().logicalSize, {width: 1290, height: 327.5});
+            for (const y of [400, 460, 375.5, 290, 375.5]) {
+                f.rect.y = y;
+                f.domListeners.get("scroll")();
+                assert.equal(last().visible, true);
+                assert.ok(last().bounds.y + last().bounds.height <= 622);
+            }
+            f.doc.elementFromPoint = () => editor;
+            f.domListeners.get("scroll")();
+            assert.equal(last().visible, false, "real occlusion must still hide the map");
+        } finally {
+            f.host.destroy();
+            globalThis.MutationObserver = oldMutation;
+            globalThis.ResizeObserver = oldResize;
+        }
+        const compute = load({}).computeDesktopAVMapGeometry;
+        const rect = {x: 0, y: 0, width: 100, height: 100};
+        assert.equal(compute(rect, [{...rect, height: 1.5}]).visible, false);
+        assert.equal(compute(rect, [{...rect, height: 2}]).bounds.height, 1);
+        assert.equal(compute(rect, [{...rect, y: 20, height: 2.5}]).visible, false);
+        assert.equal(compute(rect, [{...rect, y: 20, height: 3}]).bounds.height, 1);
+        assert.deepEqual(compute(rect, [rect]).bounds, rect, "uncropped maps retain their complete bounds");
+        assert.deepEqual(compute(rect, [{x: -10, y: -10, width: 120, height: 120}]).bounds, rect);
+        const clip = {...rect, height: 50};
+        assert.equal(compute(rect, [clip, clip, clip]).bounds.height, 49, "nested clips inset only once");
+        const {parseMapGeometry} = require("../../../../../electron/mapHostPolicy");
+        assert.equal(parseMapGeometry(compute(rect, [{...rect, height: 2}]), 0.8, {width: 1000, height: 800}).visible, false);
     });
     it("fails closed for missing capability and omits Electron from browser compilation", async () => {
         assert.equal(await load(undefined, true).isDesktopAVMapHostSupported(), false);
@@ -229,15 +285,15 @@ describe("desktop map transport", () => {
         const cases = [
             {clips: [], width: rect.width, height: rect.height, cropX: 0, cropY: 0},
             {clips: [{x: rect.x + 40, y: 0, width: 2000, height: 1400}],
-                width: rect.width - 40, height: rect.height, cropX: 40, cropY: 0},
+                width: rect.width - 41, height: rect.height, cropX: 41, cropY: 0},
             {clips: [{x: 0, y: 0, width: rect.x + rect.width - 40, height: 1400}],
-                width: rect.width - 40, height: rect.height, cropX: 0, cropY: 0},
+                width: rect.width - 41, height: rect.height, cropX: 0, cropY: 0},
             {clips: [{x: 0, y: rect.y + 40, width: 2000, height: 1400}],
-                width: rect.width, height: rect.height - 40, cropX: 0, cropY: 40},
+                width: rect.width, height: rect.height - 41, cropX: 0, cropY: 41},
             {clips: [{x: 0, y: 0, width: 2000, height: rect.y + rect.height - 40}],
-                width: rect.width, height: rect.height - 40, cropX: 0, cropY: 0},
+                width: rect.width, height: rect.height - 41, cropX: 0, cropY: 0},
             {clips: [{x: rect.x + 10, y: rect.y + 30, width: rect.width - 30, height: rect.height - 70}],
-                width: rect.width - 30, height: rect.height - 70, cropX: 10, cropY: 30},
+                width: rect.width - 32, height: rect.height - 72, cropX: 11, cropY: 31},
         ];
         for (const entry of cases) {
             const geometry = compute(rect, entry.clips);
@@ -458,16 +514,16 @@ describe("desktop map transport", () => {
             await f.created();
             f.reply({type: "ready"});
             f.advance();
-            assert.deepEqual(lastGeometry().bounds, {x: 10, y: 123, width: 400, height: 237});
+            assert.deepEqual(lastGeometry().bounds, {x: 10, y: 124, width: 400, height: 236});
             assert.deepEqual(lastGeometry().logicalSize, {width: 400, height: 300});
-            assert.deepEqual(lastGeometry().crop, {x: 0, y: 63});
+            assert.deepEqual(lastGeometry().crop, {x: 0, y: 64});
             f.rect.y = 40;
             f.domListeners.get("scroll")();
-            assert.deepEqual(lastGeometry().bounds, {x: 10, y: 123, width: 400, height: 217});
+            assert.deepEqual(lastGeometry().bounds, {x: 10, y: 124, width: 400, height: 216});
             tabsRect.height += 5;
             callbacks[0]();
-            assert.deepEqual(lastGeometry().bounds, {x: 10, y: 128, width: 400, height: 212});
-            assert.deepEqual(lastGeometry().crop, {x: 0, y: 88});
+            assert.deepEqual(lastGeometry().bounds, {x: 10, y: 129, width: 400, height: 211});
+            assert.deepEqual(lastGeometry().crop, {x: 0, y: 89});
             const menu = {contains: () => false, getClientRects: () => [f.rect],
                 getBoundingClientRect: () => ({x: 30, y: 160, width: 40, height: 40})};
             f.doc.querySelectorAll = () => [menu];

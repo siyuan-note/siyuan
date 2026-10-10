@@ -37,6 +37,11 @@ export const computeDesktopAVMapGeometry = (rect: MapRect, clips: MapRect[], occ
         right = Math.min(right, clip.x + clip.width);
         bottom = Math.min(bottom, clip.y + clip.height);
     });
+    // 裁剪边缘内收一个 CSS 像素，避免半像素命中相邻控件；原生绘制区域与命中检测同步收窄。
+    if (left > rect.x) left += 1;
+    if (top > rect.y) top += 1;
+    if (right < rect.x + rect.width) right -= 1;
+    if (bottom < rect.y + rect.height) bottom -= 1;
     // 裁剪差值的浮点舍入不能使可见尺寸超过原始尺寸。
     const bounds = {x: left, y: top, width: Math.min(rect.width, right - left), height: Math.min(rect.height, bottom - top)};
     if (left < 0 || top < 0 || bounds.width < 1 || bounds.height < 1) {

@@ -98,7 +98,7 @@ const createManager = ({ipcMain, session, WebContentsView, owner, win, ownerURL,
         if (!host) return false;
         if (!currentOwner()) { close("owner-unavailable"); return false; }
         const zoom = owner.getZoomFactor();
-        const bounds = place(host.anchor, zoom, win.getContentBounds());
+        const bounds = place(host.anchor, zoom, win.getContentBounds(), host.preferredHeight);
         if (!permitted() || !win.isVisible() || win.isMinimized?.() || !bounds) { close("unavailable"); return false; }
         const key = JSON.stringify({bounds, zoom});
         if (host.geometryKey !== key) {
@@ -131,6 +131,7 @@ const createManager = ({ipcMain, session, WebContentsView, owner, win, ownerURL,
                 pending: state.loading, query: state.query, page: state.page, requestID: 0};
             const active = host;
             const contents = view.webContents;
+            view.setBackgroundColor("#00000000");
             contents.setWindowOpenHandler(() => ({action: "deny"}));
             for (const name of ["will-navigate", "will-frame-navigate", "will-redirect", "will-attach-webview"]) {
                 listen(contents, name, event => event.preventDefault(), host.listeners);
@@ -204,6 +205,11 @@ const createManager = ({ipcMain, session, WebContentsView, owner, win, ownerURL,
             return;
         }
         if (!host.ready || action.revision !== host.state.revision) return;
+        if (action.type === "resize") {
+            host.preferredHeight = action.height;
+            geometry();
+            return;
+        }
         if (action.type === "close") { close(action.reason, true); return; }
         if (action.type === "editing") {
             host.ids.clear();

@@ -112,7 +112,8 @@ const setup = (mobile = false, nativeReady = false) => {
     const scopeEvents = new Map<string, (event?: any) => void>();
     const documentEvents = new Map<string, (event?: any) => void>();
     const scope = {innerWidth: 1000, innerHeight: 800,
-        getComputedStyle: () => ({display: "block", visibility: "visible", overflowX: "visible", overflowY: "visible"}),
+        getComputedStyle: () => ({display: "block", visibility: "visible", overflowX: "visible", overflowY: "visible",
+            getPropertyValue: (name: string) => name === "--b3-font-size" ? "14px" : ""}),
         addEventListener: (type: string, callback: () => void) => scopeEvents.set(type, callback),
         removeEventListener: (type: string) => scopeEvents.delete(type),
         requestAnimationFrame: (callback: () => void) => { nativeFrames.set(++nextTimer, callback); return nextTimer; },
@@ -401,6 +402,8 @@ test("ready desktop host uses the real unplaced API and sends only the current p
     scenario.click();
     assert.equal(scenario.menus.length, 0, "native menus must not create a DOM menu over the map");
     assert.equal(scenario.nativeOpens.length, 1);
+    assert.equal(scenario.nativeOpens[0].value.state.theme.fontSize, 14, "menu uses shared UI font size");
+    assert.equal(scenario.nativeOpens[0].value.state.labels.search, "searchPlaceholder");
     assert.equal(JSON.stringify(scenario.requests[1].payload), JSON.stringify({id: "database", blockID: "carrier",
         viewID: "map-view", query: "main query", search: "", page: 1, pageSize: 50}));
     await scenario.nativeOpen();

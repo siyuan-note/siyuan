@@ -1,0 +1,61 @@
+// 日历无日期列表和可信地图菜单共享同一组内容布局。
+@mixin content($prefix, $list-max-height: min(45vh, 360px)) {
+  .#{$prefix}-head {
+    display: flex;
+    align-items: center;
+    padding: 0 16px 8px;
+
+    .b3-menu__label {
+      min-width: 0;
+      margin-right: auto;
+    }
+  }
+
+  .#{$prefix}-search {
+    box-sizing: border-box;
+    display: flex;
+    min-width: 0;
+    margin-bottom: 8px;
+    padding: 0 16px;
+
+    .b3-text-field {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .#{$prefix}-hint {
+    padding: 0 16px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .#{$prefix}-list {
+    min-height: 36px;
+    max-height: $list-max-height;
+    overflow-y: auto;
+  }
+
+  .#{$prefix}-item {
+    min-width: 0;
+
+    .b3-menu__label {
+      min-width: 0;
+      flex: 1;
+    }
+
+    &--selected {
+      background-color: var(--b3-theme-primary-lightest);
+    }
+  }
+
+  .#{$prefix}-empty {
+    padding: 8px;
+  }
+
+  .#{$prefix}-more,
+  .#{$prefix}-retry {
+    align-self: stretch;
+    margin: 4px 8px 0;
+  }
+}

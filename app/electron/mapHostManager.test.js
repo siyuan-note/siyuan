@@ -233,6 +233,7 @@ const setup = (initialFault) => {
                 views.push(this);
             }
             setVisible(value) { this.visible = value; (this.visibility ||= []).push(value); }
+            setBackgroundColor(value) { this.background = value; }
             setBounds(value) { fault("bounds"); this.bounds = value; }
         },
         MessageChannelMain: class {

@@ -55,6 +55,7 @@ const setup = (fail = "") => {
             const webContents = createContents("");
             if (fail === "load") webContents.loadURL = () => Promise.reject(new Error("load"));
             const view = {options, webContents, bounds: [], visibility: [],
+                setBackgroundColor(value) { this.background = value; },
                 setBounds(value) { if (fail === "bounds") throw new Error("bounds"); this.bounds.push(value); },
                 setVisible(value) { this.visibility.push(value); }};
             views.push(view);
@@ -382,7 +383,7 @@ test("actual preload exposes only fixed operations, binds session/revision and n
             contextBridge: {exposeInMainWorld(name, value) { assert.equal(name, "unplacedMenu"); bridge = value; }}}; },
         process: {argv: ["--unplaced-session=" + "a".repeat(48)]},
     });
-    assert.deepEqual(Object.keys(bridge).sort(), ["close", "editing", "more", "previous", "retry", "search", "select", "subscribe"]);
+    assert.deepEqual(Object.keys(bridge).sort(), ["close", "editing", "more", "previous", "resize", "retry", "search", "select", "subscribe"]);
     const updates = [], themes = [];
     bridge.subscribe((...args) => updates.push(args), (...args) => themes.push(args));
     assert.equal(sent[0].value.type, "ready");
@@ -402,7 +403,12 @@ test("actual preload exposes only fixed operations, binds session/revision and n
     assert.equal(sent.at(-1).value.sessionID, "a".repeat(48));
     const count = sent.length;
     bridge.close("url"); bridge.search("x".repeat(257));
+    for (const height of [0, 49, 4097, 50.5, NaN, Infinity, "200"]) bridge.resize(height);
     assert.equal(sent.length, count);
+    bridge.resize(220);
+    assert.equal(sent.at(-1).value.type, "resize");
+    assert.equal(sent.at(-1).value.height, 220);
+    assert.equal(sent.at(-1).value.revision, 3);
 });
 
 test("actual menu script uses text nodes, preserves pending edits against late states and suppresses composing search (simulated DOM)", () => {
@@ -411,14 +417,22 @@ test("actual menu script uses text nodes, preserves pending edits against late s
     document.body.innerHTML = fs.readFileSync(path.join(resourceDirectory, "menu.html"), "utf8");
     document.getElementById = id => document.body.querySelector('[id="' + id + '"]');
     document.addEventListener = (...args) => document.documentElement.addEventListener(...args);
+    document.createElementNS = (_namespace, name) => document.createElement(name);
+    const menu = document.getElementById("menu");
+    let preferredHeight = 180, observed, disconnected = false;
+    menu.getBoundingClientRect = () => ({height: menu.classList.contains("map-unplaced-menu--measure") ? preferredHeight : 120});
     const rows = document.getElementById("rows");
     rows.replaceChildren = () => { Array.from(rows.children).forEach(child => child.remove()); };
     const actions = [], timers = new Map();
     let update, themeUpdate, nextTimer = 0;
     const bridge = {subscribe(fn, onTheme) { update = fn; themeUpdate = onTheme; }};
+    const sizes = [], windowEvents = new Map();
     for (const name of ["search", "editing", "more", "previous", "retry", "select", "close"]) bridge[name] = value => actions.push([name, value]);
-    const window = {unplacedMenu: bridge, addEventListener() {}};
+    bridge.resize = value => sizes.push(value);
+    const window = {unplacedMenu: bridge, addEventListener(name, callback) { windowEvents.set(name, callback); }};
     vm.runInNewContext(fs.readFileSync(path.join(resourceDirectory, "menu.js"), "utf8"), {window, document,
+        ResizeObserver: function (callback) { observed = callback; this.observe = target => assert.equal(target, menu);
+            this.disconnect = () => { disconnected = true; }; },
         setTimeout(fn) { timers.set(++nextTimer, fn); return nextTimer; }, clearTimeout(id) { timers.delete(id); }});
     const flush = () => { const callbacks = [...timers.values()]; timers.clear(); callbacks.forEach(fn => fn()); };
     const fire = (element, type, event = {}) => (element.events.get(type) || []).forEach(fn => fn({preventDefault() {}, ...event}));
@@ -426,6 +440,20 @@ test("actual menu script uses text nodes, preserves pending edits against late s
     assert.equal(rows.children.length, 1);
     assert.equal(rows.querySelectorAll("img").length, 0);
     assert.equal(rows.children[0].textContent, "Private <img src=x>");
+    assert.deepEqual(rows.querySelectorAll("use").map(icon => icon.getAttribute("href")), ["#iconFile", "#iconOpen"]);
+    assert.ok(rows.children[0].classList.contains("av-records-panel-item"));
+    assert.ok(document.getElementById("count").classList.contains("counter--bg"));
+    assert.equal(document.getElementById("count").textContent, "123");
+    assert.equal(document.getElementById("status").hidden, true);
+    assert.deepEqual(sizes, [228]);
+    assert.equal(menu.classList.contains("map-unplaced-menu--measure"), false);
+    observed();
+    assert.deepEqual(sizes, [228], "viewport resize must not create a shrinking feedback loop");
+    update(state({revision: 2}));
+    assert.deepEqual(sizes, [228, 228], "a new state revision retries the same height after a stale resize");
+    preferredHeight = 240;
+    observed();
+    assert.equal(sizes.at(-1), 288);
     const input = document.getElementById("search");
     fire(document.getElementById("more"), "click");
     assert.equal(rows.children[0].disabled, true);
@@ -462,6 +490,15 @@ test("actual menu script uses text nodes, preserves pending edits against late s
     assert.equal(document.documentElement.dataset.fontSize, "24");
     fire(document.documentElement, "keydown", {key: "Escape"});
     assert.deepEqual(actions.at(-1), ["close", "escape"]);
+    const actionCount = actions.length;
+    fire(document.documentElement, "pointerdown", {target: input});
+    assert.equal(actions.length, actionCount);
+    fire(document.documentElement, "pointerdown", {target: document.body});
+    assert.deepEqual(actions.at(-1), ["close", "button"]);
+    fire(document.getElementById("close"), "click");
+    assert.deepEqual(actions.at(-1), ["close", "button"]);
+    windowEvents.get("pagehide")();
+    assert.equal(disconnected, true);
 });
 
 test("actual owner script keeps toggle/outside separate and cancels stale same-query work (simulated DOM)", async () => {
@@ -524,4 +561,35 @@ test("actual owner script keeps toggle/outside separate and cancels stale same-q
     assert.equal(updates.at(-1).state.total, 34);
     reply({type: "closed", sessionID, reason: "outside", restore: false});
     assert.equal(timers.size, 0);
+});
+
+test("trusted menu content sizing stays bounded and rejects stale or foreign renderer requests", () => {
+    const f = setup();
+    try {
+        f.open(); f.action("ready");
+        const view = f.views[0];
+        assert.equal(view.background, "#00000000");
+        f.action("resize", {height: 220});
+        assert.equal(view.bounds.at(-1).height, 220);
+        const count = view.bounds.length;
+        f.action("resize", {height: 220});
+        assert.equal(view.bounds.length, count, "same content size never moves or flashes the view");
+        for (const height of [0, 49, 4097, 100.5, NaN, Infinity]) {
+            f.action("resize", {height});
+            assert.equal(view.bounds.length, count);
+        }
+        f.action("resize", {height: 250, revision: 0});
+        f.action("resize", {height: 250, sessionID: "f".repeat(48)});
+        f.action("resize", {height: 250}, {sender: f.owner, senderFrame: f.owner.mainFrame});
+        assert.equal(view.bounds.length, count);
+        f.action("resize", {height: 4096});
+        const bounds = view.bounds.at(-1);
+        assert.ok(bounds.height <= Math.floor(f.win.bounds.height * 0.65) + 48);
+        assert.ok(bounds.x >= 0 && bounds.y >= 0 && bounds.x + bounds.width <= f.win.bounds.width &&
+            bounds.y + bounds.height <= f.win.bounds.height);
+        assert.deepEqual(view.visibility, [false, true], "resizing content never hides the map/menu");
+        assert.equal(f.actions.length, 0, "content size does not become an owner data action");
+        f.manager.revoke();
+        assert.equal(f.manager.inspect(), undefined);
+    } finally { f.manager.destroy(); }
 });

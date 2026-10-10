@@ -43,6 +43,7 @@ const parseAction = value => {
     if (["ready", "editing", "more", "previous", "retry"].includes(value.type) && keys(value, base)) return {...value};
     if (value.type === "search" && keys(value, [...base, "query"]) && text(value.query, 256)) return {...value};
     if (value.type === "select" && keys(value, [...base, "id"]) && text(value.id, 128) && value.id) return {...value};
+    if (value.type === "resize" && keys(value, [...base, "height"]) && integer(value.height, 4096) && value.height >= 50) return {...value};
     if (value.type === "close" && keys(value, [...base, "reason"]) &&
         ["escape", "button"].includes(value.reason)) return {...value};
 };
@@ -53,15 +54,17 @@ const parseAnchor = value => {
     return {...value};
 };
 // 缩放取主进程的真实 WebContents 值，锚点以 owner 的 CSS 像素表示。
-const place = (anchor, zoom, bounds) => {
+const place = (anchor, zoom, bounds, preferredHeight = 408) => {
     if (!parseAnchor(anchor) || !Number.isFinite(zoom) || zoom < 0.25 || zoom > 5 ||
-        bounds.width < 240 || bounds.height < 160) return;
+        !integer(preferredHeight, 4096) || preferredHeight < 50 || bounds.width < 240 || bounds.height < 160) return;
     const a = {x: anchor.x * zoom, y: anchor.y * zoom, width: anchor.width * zoom, height: anchor.height * zoom};
     if (a.x < 0 || a.y < 0 || a.x + a.width > bounds.width || a.y + a.height > bounds.height) return;
-    const width = Math.min(Math.round(320 * zoom), bounds.width);
-    const height = Math.min(Math.round(360 * zoom), bounds.height);
-    return {x: Math.max(0, Math.min(Math.round(a.x + a.width - width), bounds.width - width)),
-        y: Math.max(0, Math.min(Math.round(a.y + a.height), bounds.height - height)), width, height};
+    const padding = Math.round(24 * zoom);
+    const width = Math.min(Math.round(368 * zoom), bounds.width);
+    const height = Math.min(Math.round(preferredHeight * zoom), Math.round(568 * zoom),
+        Math.floor(bounds.height * 0.65) + 2 * padding, bounds.height);
+    return {x: Math.max(0, Math.min(Math.round(a.x + a.width - width + padding), bounds.width - width)),
+        y: Math.max(0, Math.min(Math.round(a.y + a.height - padding), bounds.height - height)), width, height};
 };
 const resource = (url, method) => {
     if (!["GET", "HEAD"].includes(method) || typeof url !== "string") return;

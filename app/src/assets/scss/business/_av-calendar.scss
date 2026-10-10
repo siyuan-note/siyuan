@@ -1,4 +1,5 @@
 @use "../util/tokens";
+@use "../component/record-inbox";
 
 .av[data-av-type="calendar"] {
   width: 100%;
@@ -28,64 +29,7 @@
     max-height: min(65vh, 520px);
   }
 
-  .av__calendar-undated-head {
-    display: flex;
-    align-items: center;
-    padding: 0 16px 8px;
-
-    .b3-menu__label {
-      min-width: 0;
-      margin-right: auto;
-    }
-  }
-
-  .av__calendar-undated-search {
-    box-sizing: border-box;
-    display: flex;
-    min-width: 0;
-    margin-bottom: 8px;
-    padding: 0 16px;
-
-    .b3-text-field {
-      flex: 1;
-      min-width: 0;
-    }
-  }
-
-  .av__calendar-undated-hint {
-    padding: 0 16px;
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-  .av__calendar-undated-list {
-    min-height: 36px;
-    max-height: min(45vh, 360px);
-    overflow-y: auto;
-  }
-
-  .av__calendar-undated-item {
-    min-width: 0;
-
-    .b3-menu__label {
-      min-width: 0;
-      flex: 1;
-    }
-
-    &--selected {
-      background-color: var(--b3-theme-primary-lightest);
-    }
-  }
-
-  .av__calendar-undated-empty {
-    padding: 8px;
-  }
-
-  .av__calendar-undated-more,
-  .av__calendar-undated-retry {
-    align-self: stretch;
-    margin: 4px 8px 0;
-  }
+  @include record-inbox.content("av__calendar-undated");
 }
 
 .av[data-av-type="calendar"] {

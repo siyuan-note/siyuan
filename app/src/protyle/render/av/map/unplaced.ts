@@ -169,7 +169,7 @@ export const bindMapUnplaced = (options: {
         const labels = window.siyuan.languages;
         let members = new Map<string, IAVRow>();
         let state: DesktopMapUnplacedState = {requestID: 0, query: "", rows: [], total: 0, page: 1,
-            loading: true, error: false, labels: {title: labels.mapUnplaced, search: labels.search,
+            loading: true, error: false, labels: {title: labels.mapUnplaced, search: labels.searchPlaceholder,
                 empty: labels.empty, loading: labels.loading, more: labels.next, previous: labels.previous,
                 retry: labels.retry, close: labels.close}};
         const loadPage = async (requestID: number, query: string, nextPage: number) => {

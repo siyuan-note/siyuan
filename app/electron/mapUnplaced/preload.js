@@ -28,6 +28,7 @@ contextBridge.exposeInMainWorld("unplacedMenu", Object.freeze({
     more() { send("more"); },
     previous() { send("previous"); },
     retry() { send("retry"); },
+    resize(height) { if (Number.isSafeInteger(height) && height >= 50 && height <= 4096) send("resize", {height}); },
     select(id) { if (typeof id === "string" && id.length <= 128) send("select", {id}); },
     close(reason) { if (["escape", "button"].includes(reason)) send("close", {reason}); },
 }));

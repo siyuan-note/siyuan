@@ -72,7 +72,8 @@ export const openDesktopMapUnplaced = (canvas: HTMLElement, anchor: HTMLElement,
     const active = () => !closed && hosts.get(canvas) === host && host.available() && available() &&
         canvas.isConnected && anchor.isConnected && !anchor.ownerDocument.hidden;
     const theme = () => ({mode: host.theme(),
-        fontSize: Math.max(12, Math.min(32, Math.round(window.siyuan.config?.editor?.fontSize || 16)))});
+        fontSize: Math.max(12, Math.min(32, Math.round(Number.parseFloat(
+            scope.getComputedStyle(anchor.ownerDocument.documentElement).getPropertyValue("--b3-font-size")) || 14)))});
     const wireState = () => ({...state, revision, theme: theme(),
         rows: state.rows.map(row => ({id: row.id, title: row.title})), labels: {...state.labels}});
     const position = () => {

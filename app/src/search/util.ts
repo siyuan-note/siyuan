@@ -190,7 +190,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
             </span>
-            <input id="searchInput" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" autocomplete="off" autocorrect="off" spellcheck="false">
+            <textarea id="searchInput" rows="1" class="b3-text-field b3-text-field--text search__input" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
         </div>
         <div class="block__icons">
             <span id="searchFilter" aria-label="${window.siyuan.languages.searchType}" class="block__icon ariaLabel" data-position="9south">
@@ -287,7 +287,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     const criteriaData: Config.IUILayoutTabSearchConfig[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
     const searchPanelElement = element.querySelector("#searchList");
-    const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
+    const searchInputElement = element.querySelector("#searchInput") as HTMLTextAreaElement;
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
     const edit = new Protyle(app, element.querySelector("#searchPreview") as HTMLElement, {
         blockId: "",
@@ -878,7 +878,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     if (isClick) {
                         clickTimeout = window.setTimeout(() => {
                             const activeElement = document.activeElement;
-                            const shouldRestoreFocus = (inputElement: HTMLInputElement) =>
+                            const shouldRestoreFocus = (inputElement: HTMLInputElement | HTMLTextAreaElement) =>
                                 !activeElement || activeElement === document.body ||
                                 activeElement === inputElement || target.contains(activeElement);
                             if (searchType === "asset") {
@@ -987,6 +987,9 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         saveKeyList("keys", searchInputElement.value, config);
     });
     searchInputElement.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && config.method !== 2) {
+            event.preventDefault();
+        }
         electronUndo(event);
     });
     replaceInputElement.addEventListener("keydown", (event) => {
@@ -1188,8 +1191,8 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     } else {
         searchIncludeElement.setAttribute("disabled", "disabled");
     }
-    if (runtimeConfig.k || options?.clear) {
-        (element.querySelector("#searchInput") as HTMLInputElement).value = runtimeConfig.k;
+    if (runtimeConfig.k !== undefined || options?.clear) {
+        (element.querySelector("#searchInput") as HTMLTextAreaElement).value = runtimeConfig.k;
     }
     (element.querySelector("#replaceInput") as HTMLInputElement).value = runtimeConfig.r;
     element.querySelector("#searchSyntaxCheck").outerHTML = genQueryHTML(runtimeConfig.method, "searchSyntaxCheck");
@@ -1427,7 +1430,7 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
     }
     const searchPanelElement = element.querySelector("#searchList");
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
-    const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
+    const searchInputElement = element.querySelector("#searchInput") as HTMLTextAreaElement;
 
     const loadElement = element.querySelector("svg.fn__rotate");
     if (!loadElement.classList.contains("fn__none")) {
@@ -1489,7 +1492,7 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
 
 const emitBeforeSearchResultsRender = (blocks: IBlock[], edit: Protyle,
                                        config: Config.IUILayoutTabSearchConfig,
-                                       searchElement: HTMLInputElement) => {
+                                       searchElement: HTMLTextAreaElement) => {
     const detail = {
         protyle: edit,
         config,
@@ -1529,7 +1532,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
         createTask(version) {
             const listElement = element.querySelector("#searchList") as HTMLElement;
             loadingElement.style.top = listElement.offsetTop + "px";
-            const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
+            const searchInputElement = element.querySelector("#searchInput") as HTMLTextAreaElement;
             config.query = searchInputElement.value;
             if (!config.page) {
                 config.page = 1;
@@ -1694,7 +1697,7 @@ ${countHTML}
             edit,
             id: currentData.id,
             config,
-            value: (element.querySelector("#searchInput") as HTMLInputElement).value,
+            value: (element.querySelector("#searchInput") as HTMLTextAreaElement).value,
             matches: getSearchAVMatchesFromHTML(currentData.content),
         });
     } else {
@@ -1705,7 +1708,7 @@ ${countHTML}
         config.method === 0 ? `<div class="b3-list-item b3-list-item--focus" data-type="search-new">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
     <span class="b3-list-item__text">
-        ${window.siyuan.languages.newFile} <mark>${escapeHtml((element.querySelector("#searchInput") as HTMLInputElement).value)}</mark>
+        ${window.siyuan.languages.newFile} <mark>${escapeHtml((element.querySelector("#searchInput") as HTMLTextAreaElement).value)}</mark>
     </span>
     <kbd class="b3-list-item__meta">${window.siyuan.languages.enterNew}</kbd>
 </div>

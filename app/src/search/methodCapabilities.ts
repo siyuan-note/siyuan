@@ -34,6 +34,12 @@ export const updateSearchMethodControls = (element: Element, config: Config.IUIL
                                           mobile = false) => {
     const capabilities = getSearchMethodCapabilities(config.method, config.group);
     const language = window.siyuan.languages;
+    const input = mobile ? document.querySelector("#toolbarSearch") : element.querySelector("#searchInput");
+    input?.classList.toggle("search__input--sql", config.method === 2);
+    if (mobile && input) {
+        input.closest(".toolbar__search")?.classList.toggle("toolbar__search--sql", config.method === 2);
+        input.closest(".toolbar__text")?.classList.toggle("toolbar__text--search-sql", config.method === 2);
+    }
     const pathAvailable = capabilities.path;
     const includeAvailable = (config.idPath || []).some(path => path.split("/").length > 1);
     const controls: Array<[string, boolean, string, boolean]> = mobile ? [

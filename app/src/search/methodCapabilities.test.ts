@@ -47,7 +47,9 @@ for (const mobile of [true, false]) {
             searchControlUnavailable: "unavailable", specifyPath: "path", searchType: "types", includeChildDoc: "children",
             filterCurrentDocument: "current document", replace: "replace", remove: "remove",
         }}} as unknown as Window & typeof globalThis;
-        globalThis.document = {querySelector: () => ({classList: {contains: () => true}})} as unknown as Document;
+        const searchInput = {...control(), closest: (): null => null};
+        globalThis.document = {querySelector: (selector: string) => selector === "#toolbarSearch" ? searchInput :
+            {classList: {contains: () => true}}} as unknown as Document;
         try {
             const controls = new Map<string, ReturnType<typeof control>>();
             const row = {...control(), value: "replacement text"};
@@ -74,6 +76,7 @@ for (const mobile of [true, false]) {
             config.method = 2;
             refresh();
             assert.equal(row.classes.has("fn__none"), true);
+            assert.equal((mobile ? searchInput : controls.get("#searchInput")).classes.has("search__input--sql"), true);
             assert.equal(controls.get(filter).attributes["aria-disabled"], "true");
             assert.equal(controls.get(include).attributes["aria-disabled"], "true");
             assert.ok(controls.get(filter).attributes["aria-label"].endsWith("unavailable"));

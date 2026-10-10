@@ -2,6 +2,15 @@
 @use "../component/form";
 
 .search {
+  &__input {
+    resize: none;
+
+    &--sql {
+      height: 100px;
+      max-height: 30vh;
+    }
+  }
+
   &__av-content {
     -webkit-line-clamp: 7;
     overflow-wrap: anywhere;
@@ -59,6 +68,10 @@
       padding: 5px 8px 5px 44px !important;
       box-shadow: none;
       width: 100%;
+
+      &.search__input--sql {
+        height: 100px;
+      }
     }
 
     .b3-form__icon-icon {

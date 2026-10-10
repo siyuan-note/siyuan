@@ -1,6 +1,6 @@
 import {isInIOS} from "../protyle/util/compatibility";
 
-export const focusSearchInput = (input: HTMLInputElement) => {
+export const focusSearchInput = (input: HTMLInputElement | HTMLTextAreaElement) => {
     const nativeComposition = isInIOS() && window.webkit?.messageHandlers.finishKeyboardComposition;
     if (nativeComposition) {
         const value = input.value;

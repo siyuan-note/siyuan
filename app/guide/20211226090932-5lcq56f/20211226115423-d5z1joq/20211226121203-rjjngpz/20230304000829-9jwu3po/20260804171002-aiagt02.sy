@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20261008125238"
+		"updated": "20261010113646"
 	},
 	"Children": [
 		{
@@ -1132,6 +1132,35 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261010113646-gmbl8rw",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261010113646-gmbl8rw",
+				"updated": "20261010113646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "結構化 SQL 搜尋"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261010113646-6398erx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010113646-6398erx",
+				"updated": "20261010113646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "對於區塊類型、行內格式、父子層級、多條件篩選或統計需求，智能體可按需呼叫 sql.schema 取得索引結構與範例，再透過 sql.query 查詢。查詢結果包含原始列資料與可點擊的區塊連結；統計結果直接用於回答，完整區塊查詢可透過 open_search 的 method=2 在搜尋視窗顯示。未指定搜尋方式時沿用目前設定，再次呼叫會更新既有視窗的查詢內容與方式。"
 				}
 			]
 		},

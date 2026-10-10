@@ -39,4 +39,5 @@ test("search input Enter retains keyword document creation and ordinary result o
     assert.deepEqual(runEnter("searchInput", 0, "search-new"), {calls: ["newFile"], handled: true});
     assert.deepEqual(runEnter("searchInput", 1, "search-new"), {calls: [], handled: false});
     assert.deepEqual(runEnter("searchInput", 0, "search-result"), {calls: ["open"], handled: true});
+    assert.deepEqual(runEnter("searchInput", 2, "search-result"), {calls: [], handled: false});
 });

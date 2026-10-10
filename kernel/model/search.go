@@ -1635,7 +1635,9 @@ func FullTextSearchBlock(options BlockSearchOptions) (ret []*Block, matchedBlock
 		return
 	}
 
-	query = filterQueryInvisibleChars(query)
+	if method != 2 {
+		query = filterQueryInvisibleChars(query)
+	}
 	if 2 != method && 3 != method && ast.IsNodeIDPattern(query) && isHiddenBoxDocBlock(query, boxID) {
 		return
 	}
@@ -2205,13 +2207,15 @@ func searchBySQLInBoxContext(ctx context.Context, stmt string, beforeLen, page, 
 		return
 	}
 
-	stmt = strings.ToLower(stmt)
-	stdQuery := !strings.Contains(stmt, "with recursive") && !strings.Contains(stmt, "union")
+	// 仅改写已知投影的前缀，保留条件中的大小写、注释和完整块查询的别名。
+	lowerStmt := strings.ToLower(stmt)
+	stdQuery := !strings.Contains(lowerStmt, "union") &&
+		(strings.HasPrefix(lowerStmt, "select * ") || strings.HasPrefix(lowerStmt, "select a.* "))
 	if stdQuery {
-		if strings.HasPrefix(stmt, "select a.* ") { // 多个搜索关键字匹配文档 https://github.com/siyuan-note/siyuan/issues/7350
-			stmt = strings.ReplaceAll(stmt, "select a.* ", "select COUNT(a.id) AS `matches`, COUNT(DISTINCT(a.root_id)) AS `docs` ")
+		if strings.HasPrefix(lowerStmt, "select a.* ") {
+			stmt = "SELECT COUNT(a.id) AS `matches`, COUNT(DISTINCT(a.root_id)) AS `docs` " + stmt[len("select a.* "):]
 		} else {
-			stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` ")
+			stmt = "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` " + stmt[len("select * "):]
 		}
 	}
 	stmt = removeLimitClause(stmt)
@@ -2226,8 +2230,13 @@ func searchBySQLInBoxContext(ctx context.Context, stmt string, beforeLen, page, 
 	if !stdQuery {
 		var rootIDs, blockIDs []string
 		for _, queryResult := range result {
-			rootIDs = append(rootIDs, queryResult["root_id"].(string))
-			blockIDs = append(blockIDs, queryResult["id"].(string))
+			rootID, hasRoot := queryResult["root_id"].(string)
+			blockID, hasID := queryResult["id"].(string)
+			if !hasRoot || !hasID {
+				return ret, 0, 0
+			}
+			rootIDs = append(rootIDs, rootID)
+			blockIDs = append(blockIDs, blockID)
 		}
 		rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
 		blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)

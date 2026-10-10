@@ -1,5 +1,6 @@
 import {getAssetExtension, getAssetName, isEncryptedBox} from "../../util/pathName";
 import {renameAsset} from "../../editor/rename";
+import {getImageTitle, setImageTitle} from "./imageTitle";
 
 const boundImageNames = new WeakSet<HTMLElement>();
 
@@ -11,6 +12,7 @@ const setImageName = (element: HTMLElement, path: string) => {
 
 export const renderImageDisplay = (root: Element) => {
     root.querySelectorAll<HTMLImageElement>(".img img").forEach(image => {
+        setImageTitle(image, getImageTitle(image));
         const container = image.parentElement;
         let alt = container.querySelector<HTMLElement>(".img__alt");
         if (window.siyuan.config.editor.displayImgAlt && image.alt) {

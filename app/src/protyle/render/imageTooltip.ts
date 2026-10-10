@@ -1,5 +1,6 @@
 import {escapeHtml} from "../../util/escape";
 import {getAssetExtension, getAssetName} from "../../util/pathName";
+import {getImageTitle} from "./imageTitle";
 
 export const getImageTooltip = (image: HTMLImageElement, size?: string, ocrText?: string) => {
     const source = image.getAttribute("data-src") || image.getAttribute("src") || "";
@@ -13,7 +14,7 @@ export const getImageTooltip = (image: HTMLImageElement, size?: string, ocrText?
         // 非 URL 编码的文件名保留原文。
     }
     const nameWithoutExtension = extension ? name.substring(0, name.lastIndexOf(".")) : name;
-    const descriptions = [image.title, image.alt].filter(value => value && value !== nameWithoutExtension);
+    const descriptions = [getImageTitle(image), image.alt].filter(value => value && value !== nameWithoutExtension);
     const text = Array.from(new Set([name, ...descriptions].filter(Boolean)))
         .map(value => escapeHtml(value)).join("<br>");
     const format = /^data:image\/([\w.+-]+)/.exec(source)?.[1].replace(/\+xml$/, "").toUpperCase() ||

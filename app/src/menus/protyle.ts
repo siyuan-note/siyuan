@@ -53,6 +53,7 @@ import {blockRender} from "../protyle/render/blockRender";
 import {renameAsset} from "../editor/rename";
 import {renderImageDisplay} from "../protyle/render/imageDisplay";
 import {renderImageActions} from "../protyle/render/imageActions";
+import {getImageTitle, setImageTitle} from "../protyle/render/imageTitle";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "./util";
@@ -1303,10 +1304,10 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         assetElement.querySelector(".protyle-action__drag").insertAdjacentHTML("afterend", '<span class="img__net"><svg><use xlink:href="#iconGlobe"></use></svg></span>');
                     }
                 });
-                textElements[1].value = titleElement.innerText;
+                textElements[1].value = getImageTitle(imgElement);
                 textElements[1].addEventListener("input", (event) => {
                     const value = (event.target as HTMLInputElement).value;
-                    imgElement.setAttribute("title", value);
+                    setImageTitle(imgElement, value);
                     titleElement.innerText = value;
                     mathRender(titleElement);
                 });

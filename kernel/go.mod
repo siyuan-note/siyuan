@@ -49,8 +49,8 @@ require (
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/klippa-app/go-pdfium v1.19.8
 	github.com/klauspost/compress v1.19.2
+	github.com/klippa-app/go-pdfium v1.19.8
 	github.com/lxzan/gws v1.10.1
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/microcosm-cc/bluemonday v1.0.27
@@ -100,7 +100,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.9-0.20261002140020-0b744c047833
+require github.com/88250/lute v1.7.9-0.20261010053458-8e7896b6b4b1
 
 require (
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect

@@ -47,6 +47,9 @@ const browserCases = async (source: string, luteSource: string, renameSource: st
     check.equal(alt.textContent, "description");
     check.equal(alt.previousElementSibling.className, "protyle-action__title");
     check.equal(lute.BlockDOM2StdMd(root.innerHTML), original);
+    const image = root.querySelector("img");
+    check.equal(image.hasAttribute("title"), false, "native tooltips are disabled without discarding the title");
+    check.equal(image.getAttribute("data-title"), "caption");
     name.click();
     check.equal(name.querySelector("input"), null);
     check.equal(options.value, "example");
@@ -93,9 +96,9 @@ test("image names open a rename dialog that updates references only after confir
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const source = transpileModule(readFileSync(path.resolve(__dirname, "imageDisplay.ts"), "utf8")
+    const source = ["imageTitle.ts", "imageDisplay.ts"].map(file => transpileModule(readFileSync(path.resolve(__dirname, file), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
-        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText).join("\n");
     const luteSource = readFileSync("stage/protyle/js/lute/lute.min.js", "utf8");
     const renameSource = transpileModule(readFileSync(path.resolve(__dirname, "../../editor/rename.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),

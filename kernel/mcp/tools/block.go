@@ -37,6 +37,11 @@ Block placement:
 - Headings (h1-h6) are leaf blocks; content shown below a heading is its following siblings, not its children. To place a block below a heading, use the heading ID (or the last block currently below it) as previousID, never as parentID.
 - A list-item must have a NodeList parent and cannot directly contain another list-item. To nest lists, create a NodeList inside the outer list-item, then add list-items to the inner list.
 
+Native SQL query embeds (NodeBlockQueryEmbed):
+- Create a dynamic single-line {{SQL}} block using insert/append/prepend with dataType=markdown; see the data syntax and sql.schema for examples and how query, search and embeds differ.
+- Read a single-line embed's stored query and IAL with get_kramdown(id), edit only the SQL inside {{...}}, then update the same ID with dataType=markdown and lockType=true. Preserve the returned IAL and embed display settings; never replace the embed with static results or delete/recreate it.
+- Markdown embeds require one physical line. For multiline SQL or -- comments, use dom(id), edit only the HTML-escaped data-content attribute, and update with dataType=dom and lockType=true while retaining the ID and all other attributes. See sql.schema for newline encoding and reuse.
+
 Native container structure and operations:
 - These are native, editable blocks; do not substitute HTML widgets, Mermaid diagrams, or plugins unless requested.
 - Tabs: NodeTabs contains only NodeTabItem; each item contains at least one body block and may contain nested tabs. Use an empty paragraph for an empty body. Use attr.set for tabs-position (top/left) and tabs-active-id (an existing direct item ID).

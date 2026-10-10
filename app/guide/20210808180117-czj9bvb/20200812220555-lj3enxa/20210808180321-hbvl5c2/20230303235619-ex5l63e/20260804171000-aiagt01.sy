@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261010113646"
+		"updated": "20261010173100"
 	},
 	"Children": [
 		{
@@ -1140,12 +1140,12 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261010113646-kdzs7xm",
-				"updated": "20261010113646"
+				"updated": "20261010173100"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "结构化 SQL 搜索"
+					"Data": "SQL 查询、搜索与动态嵌入"
 				}
 			],
 			"HeadingLevel": 2
@@ -1161,6 +1161,71 @@
 				{
 					"Type": "NodeText",
 					"Data": "对于块类型、行内格式、父子层级、多条件筛选或统计需求，智能体可按需调用 sql.schema 获取索引结构和示例，再通过 sql.query 查询。查询结果包含原始行数据和可点击的块链接；统计结果直接用于回答，完整块查询可通过 open_search 的 method=2 在搜索窗口展示。未指定搜索方式时沿用当前设置，再次调用会更新已有窗口的查询内容和方式。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-83sbnfz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-83sbnfz",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如需在文档中动态展示匹配块，可让智能体通过 block.insert、block.append 或 block.prepend 创建原生 SQL 嵌入块。通用 SQL 查询用于统计与分析，搜索窗口用于查看与定位，嵌入块保存查询并显示当前匹配内容。展示块时应返回完整块字段，不能直接使用统计结果或部分字段。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-0t7vxgc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-0t7vxgc",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "原生 SQL 嵌入使用独立的 Markdown 块，例如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{SELECT * FROM blocks WHERE type = 'p' ORDER BY updated DESC LIMIT 10}}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。实际写入时不要包裹代码围栏或行内代码标记，并与前后内容之间保留空行。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-8tye4pw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-8tye4pw",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "修改已有嵌入块时，先通过 block.get_kramdown 读取原始 SQL 和块属性，只修改外层双花括号中的 SQL，保留块 ID、返回的属性与嵌入显示设置，再用 block.update 更新同一块，并显式设置 lockType=true。不要删除重建或替换整个文档。更新后再次读取确认；将查询复用于 sql.query 或搜索窗口时，只去掉外层双花括号。加密笔记本需先解锁，并在块读写与 SQL 查询中传入所属 notebook；其中的嵌入查询使用该笔记本的隔离索引。"
+				}
+			]
+		},
+		{
+			"ID": "20261010173100-w3ijcw3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010173100-w3ijcw3",
+				"updated": "20261010173100"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown 嵌入的双花括号和 SQL 必须在同一行。对于需要换行的 SQL，特别是含 -- 行注释的查询，应通过 block.insert、block.append 或 block.prepend 使用 dataType=dom 创建 NodeBlockQueryEmbed，将 HTML 转义后的 SQL 放入 data-content 属性，换行可写为 &#10;。修改时通过 block.dom 读取，保留 data-node-id 和其他属性，只改 data-content，再用 block.update、dataType=dom 和 lockType=true 更新。不要将换行直接删除或替换为空格。Kramdown 可能用 _esc_newline_ 保存嵌入的换行；将 SQL 用于查询或搜索前应恢复实际换行，或从块 DOM 中提取并解码 SQL。"
 				}
 			]
 		},

@@ -29,7 +29,7 @@ const sqlQueryDefaultLimit = 100
 
 var SQLTool = &Tool{
 	Name:        "sql",
-	Description: "Read-only SQL on SiYuan's database. Actions: schema() for table definitions, type codes, hierarchy and search examples; query(stmt) for statistics, arbitrary projections and structural searches. Results include raw structured rows and verified block links. Results default to at most 100 rows; use explicit LIMIT and OFFSET for pagination. For the frontend SQL search interface, use SELECT b.* FROM blocks b to return complete block rows; ordinary search filters do not apply to SQL.",
+	Description: "Read-only SQL on SiYuan's database. Actions: schema() for table definitions, type codes, hierarchy, search examples and native SQL embed create/read/update guidance; query(stmt) for statistics, arbitrary projections and structural searches. Results include raw structured rows and verified block links. Results default to at most 100 rows; use explicit LIMIT and OFFSET for pagination. For the frontend SQL search interface or dynamic document embeds, use SELECT b.* FROM blocks b to return complete block rows; ordinary search filters do not apply to SQL. Create or update document embeds through block tools, not SQL writes.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

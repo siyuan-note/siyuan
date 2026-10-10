@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261010113646"
+		"updated": "20261010173100"
 	},
 	"Children": [
 		{
@@ -1140,12 +1140,12 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261010113646-aewwqju",
-				"updated": "20261010113646"
+				"updated": "20261010173100"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Structured SQL search"
+					"Data": "SQL queries, search and dynamic embeds"
 				}
 			],
 			"HeadingLevel": 2
@@ -1161,6 +1161,71 @@
 				{
 					"Type": "NodeText",
 					"Data": "For block types, inline formatting, ancestry, combined filters or statistics, the agent can request sql.schema for index definitions and examples, then query with sql.query. Results include original rows and clickable block links. Statistics can be used directly in an answer; complete block queries can be displayed in search using open_search with method=2. Omitting the method keeps the current setting; subsequent calls update the query and method in the existing window."
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-3btkysw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-3btkysw",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To display matching blocks dynamically in a document, ask the agent to create a native SQL query embed with block.insert, block.append or block.prepend. General SQL queries serve statistics and analysis; the search interface serves inspection and navigation; embeds store the query and display current matches. Displaying blocks requires complete block columns, rather than aggregates or projections."
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-6q4hhil",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-6q4hhil",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A native SQL embed is a standalone Markdown block, for example "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{SELECT * FROM blocks WHERE type = 'p' ORDER BY updated DESC LIMIT 10}}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". When writing it, omit code fences and inline code markers, and separate it from surrounding content with blank lines."
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-kw579hi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-kw579hi",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before modifying an existing embed, read its stored SQL and block attributes with block.get_kramdown. Change only the SQL inside the outer double braces, retain the block ID, returned attributes and embed display settings, then update the same block with block.update and explicitly set lockType=true. Do not delete/recreate it or replace the whole document. Read it again to confirm the update. To reuse its SQL with sql.query or search, remove only the outer double braces. Unlock encrypted notebooks first and pass the owning notebook on block read/write and SQL query calls; their embeds query that notebook's isolated index."
+				}
+			]
+		},
+		{
+			"ID": "20261010173100-8r4pamm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010173100-8r4pamm",
+				"updated": "20261010173100"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The double braces and SQL of a Markdown embed must be on one physical line. For SQL requiring newlines, especially -- line comments, create a NodeBlockQueryEmbed using block.insert, block.append or block.prepend with dataType=dom. Put HTML-escaped SQL in data-content; encode a newline as &#10;. To modify it, read block.dom, preserve data-node-id and other attributes, change only data-content, then use block.update with dataType=dom and lockType=true. Never remove newlines or replace them with spaces. Kramdown may serialize embed newlines as _esc_newline_; restore actual newlines before querying or searching, or extract and decode SQL from block DOM."
 				}
 			]
 		},

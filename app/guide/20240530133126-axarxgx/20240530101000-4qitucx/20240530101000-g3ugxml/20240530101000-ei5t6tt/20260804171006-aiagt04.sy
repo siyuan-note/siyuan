@@ -6,7 +6,7 @@
 		"id": "20260804171006-aiagt04",
 		"title": "AI エージェント",
 		"type": "doc",
-		"updated": "20261010113646"
+		"updated": "20261010173100"
 	},
 	"Children": [
 		{
@@ -1128,12 +1128,12 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261010113646-e4bfwsj",
-				"updated": "20261010113646"
+				"updated": "20261010173100"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "構造に基づく SQL 検索"
+					"Data": "SQL クエリ、検索、動的埋め込み"
 				}
 			],
 			"HeadingLevel": 2
@@ -1149,6 +1149,71 @@
 				{
 					"Type": "NodeText",
 					"Data": "ブロックタイプ、インライン書式、親子関係、複数条件や集計には、エージェントが必要に応じて sql.schema で索引の構造と例を取得し、sql.query で問い合わせます。結果には元の行データとクリックできるブロックリンクが含まれます。集計結果は回答に使用でき、完全なブロック行を返すクエリは open_search の method=2 で検索画面に表示できます。検索方法を省略すると現在の設定を引き継ぎ、再度呼び出すと既存の画面のクエリと検索方法が更新されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-3gmocso",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-3gmocso",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文書内に一致するブロックを動的に表示するには、block.insert、block.append または block.prepend でネイティブ SQL 埋め込みブロックを作成するようエージェントに依頼します。汎用 SQL クエリは集計や分析、検索画面は結果の確認や移動に使用し、埋め込みはクエリを保存して現在の一致結果を表示します。ブロック表示には完全なブロック列が必要で、集計結果や一部の列は使用できません。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-los4ny5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-los4ny5",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ネイティブ SQL 埋め込みには、独立した Markdown ブロックを使用します。例："
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{SELECT * FROM blocks WHERE type = 'p' ORDER BY updated DESC LIMIT 10}}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。実際に書き込む際はコードフェンスやインラインコード記号で囲まず、前後の内容と空行で区切ります。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-nkhymve",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-nkhymve",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "既存の埋め込みを変更する前に、block.get_kramdown で元の SQL とブロック属性を読み取ります。外側の二重波括弧内の SQL だけを変更し、ブロック ID、取得した属性と埋め込みの表示設定を保持したまま、block.update で同じブロックを更新し、lockType=true を明示します。削除して再作成したり、文書全体を置き換えたりしないでください。更新後は再度読み取り、確認します。sql.query や検索画面で再利用する場合は、外側の二重波括弧だけを取り除きます。暗号化ノートブックは先にロックを解除し、ブロックの読み書きと SQL クエリで所属する notebook を指定します。その埋め込みは当該ノートブックの分離された索引を使用します。"
+				}
+			]
+		},
+		{
+			"ID": "20261010173100-j0996f2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010173100-j0996f2",
+				"updated": "20261010173100"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown 埋め込みの二重波括弧と SQL は、同じ物理行に記述する必要があります。改行が必要な SQL、特に -- 行コメントを含むクエリには、block.insert、block.append または block.prepend の dataType=dom で NodeBlockQueryEmbed を作成します。HTML エスケープした SQL を data-content 属性に入れ、改行は &#10; で表せます。変更時は block.dom で読み取り、data-node-id と他の属性を保持して data-content だけを編集し、block.update、dataType=dom、lockType=true で更新します。改行を削除したり空白に置き換えたりしないでください。Kramdown は埋め込みの改行を _esc_newline_ として保存することがあるため、クエリや検索に再利用する前に実際の改行へ戻すか、ブロック DOM から SQL を取得してデコードします。"
 				}
 			]
 		},

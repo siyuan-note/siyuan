@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20261010113646"
+		"updated": "20261010173100"
 	},
 	"Children": [
 		{
@@ -1140,12 +1140,12 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261010113646-gmbl8rw",
-				"updated": "20261010113646"
+				"updated": "20261010173100"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "結構化 SQL 搜尋"
+					"Data": "SQL 查詢、搜尋與動態嵌入"
 				}
 			],
 			"HeadingLevel": 2
@@ -1161,6 +1161,71 @@
 				{
 					"Type": "NodeText",
 					"Data": "對於區塊類型、行內格式、父子層級、多條件篩選或統計需求，智能體可按需呼叫 sql.schema 取得索引結構與範例，再透過 sql.query 查詢。查詢結果包含原始列資料與可點擊的區塊連結；統計結果直接用於回答，完整區塊查詢可透過 open_search 的 method=2 在搜尋視窗顯示。未指定搜尋方式時沿用目前設定，再次呼叫會更新既有視窗的查詢內容與方式。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-kw70ky7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-kw70ky7",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如需在文件中動態顯示匹配區塊，可讓智能體透過 block.insert、block.append 或 block.prepend 建立原生 SQL 嵌入區塊。通用 SQL 查詢用於統計與分析，搜尋視窗用於查看與定位，嵌入區塊儲存查詢並顯示目前匹配內容。顯示區塊時應回傳完整區塊欄位，不能直接使用統計結果或部分欄位。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-evbp7ng",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-evbp7ng",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "原生 SQL 嵌入使用獨立的 Markdown 區塊，例如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{SELECT * FROM blocks WHERE type = 'p' ORDER BY updated DESC LIMIT 10}}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。實際寫入時不要包覆程式碼圍欄或行內程式碼標記，並與前後內容之間保留空行。"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-d86vd45",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-d86vd45",
+				"updated": "20261010172554"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "修改既有嵌入區塊時，先透過 block.get_kramdown 讀取原始 SQL 與區塊屬性，只修改外層雙大括號中的 SQL，保留區塊 ID、回傳的屬性與嵌入顯示設定，再用 block.update 更新同一個區塊，並明確設定 lockType=true。不要刪除重建或取代整份文件。更新後再次讀取確認；將查詢重用於 sql.query 或搜尋視窗時，只移除外層雙大括號。加密筆記本需先解鎖，並在區塊讀寫與 SQL 查詢中傳入所屬 notebook；其中的嵌入查詢使用該筆記本的隔離索引。"
+				}
+			]
+		},
+		{
+			"ID": "20261010173100-2229ah9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010173100-2229ah9",
+				"updated": "20261010173100"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown 嵌入的雙大括號與 SQL 必須在同一行。對於需要換行的 SQL，特別是含 -- 行註解的查詢，應透過 block.insert、block.append 或 block.prepend 使用 dataType=dom 建立 NodeBlockQueryEmbed，將 HTML 跳脫後的 SQL 放入 data-content 屬性，換行可寫為 &#10;。修改時透過 block.dom 讀取，保留 data-node-id 與其他屬性，只改 data-content，再用 block.update、dataType=dom 與 lockType=true 更新。不要直接刪除換行或將其取代為空格。Kramdown 可能用 _esc_newline_ 儲存嵌入的換行；將 SQL 用於查詢或搜尋前應恢復實際換行，或從區塊 DOM 中擷取並解碼 SQL。"
 				}
 			]
 		},

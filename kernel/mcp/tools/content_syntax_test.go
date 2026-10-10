@@ -6,6 +6,10 @@ package tools
 import (
 	"strings"
 	"testing"
+
+	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestContentToolsShareMarkdownSyntax(t *testing.T) {
@@ -65,5 +69,60 @@ func TestDocumentedMarkdownExamplesCreateNativeContent(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestDocumentedSQLQueryEmbedCreatesNativeBlock(t *testing.T) {
+	start := strings.Index(sqlEmbedMarkdownSyntax, "{{SELECT *")
+	if start < 0 {
+		t.Fatal("missing SQL embed example")
+	}
+	end := strings.Index(sqlEmbedMarkdownSyntax[start:], "}}")
+	if end < 0 {
+		t.Fatal("missing SQL embed example")
+	}
+	markdown := sqlEmbedMarkdownSyntax[start : start+end+2]
+	for _, data := range []string{markdown, "before\n\n" + markdown + "\n\nafter"} {
+		dom, err := prepareBlockWriteData(data, "markdown")
+		if err != nil {
+			t.Fatal(err)
+		}
+		tree := util.NewLute().BlockDOM2Tree(dom)
+		count := 0
+		ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+			if entering && node.Type == ast.NodeBlockQueryEmbed {
+				count++
+				if script := node.ChildByType(ast.NodeBlockQueryEmbedScript); script == nil ||
+					string(script.Tokens) != strings.TrimSuffix(strings.TrimPrefix(markdown, "{{"), "}}") {
+					t.Fatalf("embedded SQL changed: %+v", script)
+				}
+			}
+			return ast.WalkContinue
+		})
+		if count != 1 {
+			t.Fatalf("expected one native SQL embed, got %d: %s", count, dom)
+		}
+	}
+	codeDOM, err := prepareBlockWriteData("```sql\n"+markdown+"\n```", "markdown")
+	if err != nil || !strings.Contains(codeDOM, `data-type="NodeCodeBlock"`) ||
+		strings.Contains(codeDOM, `data-type="NodeBlockQueryEmbed"`) {
+		t.Fatalf("code fence must remain a code block: %s, %v", codeDOM, err)
+	}
+}
+
+func TestSQLQueryEmbedDOMPreservesMultilineSQL(t *testing.T) {
+	const query = "-- first comment\nSELECT * FROM blocks WHERE content = 'A&B'"
+	const data = `<div data-type="NodeBlockQueryEmbed" data-content="-- first comment&#10;SELECT * FROM blocks WHERE content = 'A&amp;B'"></div>`
+	dom, err := prepareBlockWriteData(data, "dom")
+	if err != nil {
+		t.Fatal(err)
+	}
+	node := util.NewLute().BlockDOM2Tree(dom).Root.FirstChild
+	if node.Type != ast.NodeBlockQueryEmbed {
+		t.Fatalf("expected native embed, got %s", node.Type)
+	}
+	script := node.ChildByType(ast.NodeBlockQueryEmbedScript)
+	if script == nil || strings.ReplaceAll(string(script.Tokens), editor.IALValEscNewLine, "\n") != query {
+		t.Fatalf("multiline SQL changed: %+v", script)
 	}
 }

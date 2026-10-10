@@ -5471,6 +5471,24 @@ export class WYSIWYG {
                     newRange.setEndAfter(inlineMathElement);
                     newRange.collapse(false);
                     focusByRange(newRange);
+                } else if (!newRange.collapsed) {
+                    // 划选停在公式内部时补齐边界，保留完整公式及原有选区方向。
+                    const endMathElement = hasClosestByAttribute(newRange.endContainer, "data-type", "inline-math");
+                    if (inlineMathElement || endMathElement) {
+                        const selection = getSelection();
+                        const backward = selection.anchorNode === newRange.endContainer &&
+                            selection.anchorOffset === newRange.endOffset;
+                        if (inlineMathElement) {
+                            newRange.setStartBefore(inlineMathElement);
+                        }
+                        if (endMathElement) {
+                            newRange.setEndAfter(endMathElement);
+                        }
+                        selection.setBaseAndExtent(backward ? newRange.endContainer : newRange.startContainer,
+                            backward ? newRange.endOffset : newRange.startOffset,
+                            backward ? newRange.startContainer : newRange.endContainer,
+                            backward ? newRange.startOffset : newRange.endOffset);
+                    }
                 }
                 const tripleClickBlockElement = event.detail > 2 && hasClosestBlock(event.target);
                 if (tripleClickBlockElement &&

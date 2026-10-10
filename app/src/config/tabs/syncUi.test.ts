@@ -16,6 +16,7 @@ const setup = (initial: {endpoint?: string, bucket?: string} = {}) => {
     Object.assign(s3, initial);
     const inputs = Object.fromEntries(Object.keys(s3).map((key) => [key, {
         value: "",
+        focus: () => {},
     }]));
     const messages: string[] = [];
     const events: Record<string, (event: unknown) => void> = {};
@@ -58,6 +59,28 @@ const setup = (initial: {endpoint?: string, bucket?: string} = {}) => {
 };
 
 const settle = () => new Promise<void>((resolve) => setImmediate(resolve));
+
+for (const key of ["timeout", "concurrentReqs"] as const) {
+    test(`empty S3 ${key} preserves the input and configuration until corrected`, async () => {
+        const ui = setup();
+        ui.fill();
+        await settle();
+        const saved = {...ui.requests[0].data.s3};
+        ui.inputs[key].value = "";
+        ui.change();
+        ui.requests[0].resolve({code: 0, data: {s3: saved}});
+        await settle();
+        assert.equal(ui.requests.length, 1);
+        assert.equal(ui.inputs[key].value, "");
+        assert.equal(ui.sync.s3[key], saved[key]);
+        assert.deepEqual(ui.messages, ["Input can not be empty"]);
+        ui.inputs[key].value = "7";
+        ui.change();
+        await settle();
+        assert.equal(ui.requests.length, 2);
+        assert.equal(ui.requests[1].data.s3[key], 7);
+    });
+}
 
 test("S3 bucket endpoint warning appears for saved configurations and follows edits without blocking saves", async () => {
     const ui = setup({endpoint: "https://my.bucket.s3.example.com", bucket: "my.bucket"});

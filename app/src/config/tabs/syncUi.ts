@@ -420,7 +420,19 @@ const saveSyncProviderConfigValues = (configElement: Element) => {
     if (!isThirdPartySyncProviderDef(def)) {
         return;
     }
-    const data = readProviderConfigFields(configElement, def.getConfig());
+    const template = def.getConfig();
+    for (const key of ["timeout", "concurrentReqs"] as const) {
+        if (typeof template[key] !== "number") {
+            continue;
+        }
+        const input = configElement.querySelector<HTMLInputElement>(`#${key}`);
+        if (input && !input.value.trim()) {
+            showMessage(window.siyuan.languages._kernel[142]);
+            input.focus();
+            return;
+        }
+    }
+    const data = readProviderConfigFields(configElement, template);
     const configKey = def.configKey;
     if (configKey === "s3") {
         for (const key of ["endpoint", "accessKey", "secretKey", "bucket", "region"]) {

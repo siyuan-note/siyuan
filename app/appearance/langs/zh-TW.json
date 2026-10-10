@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "已載入 ${shown}/${total}",
+	"mapSkippedCount": "已略過 ${count}",
 	"databaseMapView": "資料庫 地圖視圖",
 	"exportBlockRefMode": "區塊引用與區塊超鏈接",
 	"configGroupOCREngine": "辨識引擎",

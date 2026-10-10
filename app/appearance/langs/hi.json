@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "लोड हुए ${shown}/${total}",
+	"mapSkippedCount": "छोड़े गए ${count}",
 	"databaseMapView": "डेटाबेस मानचित्र दृश्य",
 	"exportBlockRefMode": "ब्लॉक रेफ़ और ब्लॉक लिंक",
 	"configGroupOCREngine": "पहचान इंजन",

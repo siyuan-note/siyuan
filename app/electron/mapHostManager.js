@@ -299,7 +299,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         if (host.loaded) {
             host.view.webContents.send("siyuan-map-viewport", {logicalSize: geometry.logicalSize, crop: geometry.crop});
         }
-        if (!host.ready || !host.win.isFocused() || !host.win.isVisible() || host.win.isMinimized()) {
+        if (!host.ready || !host.win.isVisible() || host.win.isMinimized()) {
             setVisible(host, false);
             return;
         }
@@ -389,7 +389,8 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             for (const name of ["resize", "hide", "minimize", "enter-full-screen", "leave-full-screen"]) {
                 listen(host, owner.win, name, () => hide(host));
             }
-            listen(host, owner.win, "blur", () => setVisible(host, false));
+            // 失焦只撤销外链手势；仍可见的窗口继续绘制地图，遮挡由窗口系统和主文档分别处理。
+            listen(host, owner.win, "blur", () => { host.attributionGestureUntil = 0; });
             for (const name of ["focus", "show", "restore"]) listen(host, owner.win, name, () => applyGeometry(host));
             listen(host, event.sender, "zoom-changed", () => hide(host));
             const nonce = randomID();

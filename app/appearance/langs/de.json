@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "Geladen ${shown}/${total}",
+	"mapSkippedCount": "Übersprungen ${count}",
 	"databaseMapView": "Datenbank-Kartenansicht",
 	"exportBlockRefMode": "Blockreferenzen und Blocklinks",
 	"configGroupOCREngine": "Erkennungs-Engine",

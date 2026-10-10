@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "已加载 ${shown}/${total}",
+	"mapSkippedCount": "已跳过 ${count}",
 	"databaseMapView": "数据库 地图视图",
 	"exportBlockRefMode": "块引用与块超链接",
 	"configGroupOCREngine": "识别引擎",

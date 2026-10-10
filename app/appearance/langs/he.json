@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "נטענו ${shown}/${total}",
+	"mapSkippedCount": "דולגו ${count}",
 	"databaseMapView": "תצוגת מפה של מסד הנתונים",
 	"exportBlockRefMode": "הפניות לבלוקים וקישורי בלוקים",
 	"configGroupOCREngine": "מנוע זיהוי",

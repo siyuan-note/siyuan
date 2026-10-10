@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "Wczytano ${shown}/${total}",
+	"mapSkippedCount": "Pominięto ${count}",
 	"databaseMapView": "Widok mapy bazy danych",
 	"exportBlockRefMode": "Odwołania i łącza do bloków",
 	"configGroupOCREngine": "Silnik rozpoznawania",

@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "تم تحميل ${shown}/${total}",
+	"mapSkippedCount": "تم تخطي ${count}",
 	"databaseMapView": "عرض الخريطة لقاعدة البيانات",
 	"exportBlockRefMode": "مراجع الكتل وروابط الكتل",
 	"configGroupOCREngine": "محرّك التعرّف",

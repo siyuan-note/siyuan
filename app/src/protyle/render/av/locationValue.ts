@@ -56,7 +56,8 @@ const formatAVLocationText = (location?: IAVCellLocationValue, longitudeFirst = 
         return name;
     }
     const coordinates = longitudeFirst ? [location.longitude, location.latitude] : [location.latitude, location.longitude];
-    return `${name ? name + "; " : ""}${coordinates.map(formatAVLocationCoordinate).join(", ")} [WGS84]`;
+    const text = coordinates.map(formatAVLocationCoordinate).join(", ");
+    return longitudeFirst ? `${name ? name + " " : ""}${text}` : `${name ? name + "; " : ""}${text} [WGS84]`;
 };
 
 // 复制、类型转换和内核导出保持既有的纬度、经度文本契约。

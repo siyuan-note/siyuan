@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "読み込み済み ${shown}/${total}",
+	"mapSkippedCount": "スキップ ${count}",
 	"databaseMapView": "データベースの地図ビュー",
 	"exportBlockRefMode": "ブロック参照とブロックリンク",
 	"configGroupOCREngine": "認識エンジン",

@@ -41,7 +41,8 @@ test("location cells display longitude first in every layout, row attributes and
     }};
     for (const type of ["table", "list", "gallery", "kanban", "map"] as TAVView[]) {
         const html = cell.renderCell(value, 0, false, type);
-        assert.match(html, /&lt;Home&gt;; 180, 0 \[WGS84\]/);
+        assert.match(html, /&lt;Home&gt; 180, 0/);
+        assert.doesNotMatch(html, /\[WGS84\]/);
         assert.doesNotMatch(html, /<Home>/);
         const data = /data-cell-value="([^"]+)"/.exec(html)?.[1];
         assert.deepEqual(JSON.parse(decodeURIComponent(data)), value);
@@ -49,10 +50,10 @@ test("location cells display longitude first in every layout, row attributes and
     }
     const attr = loadModule<typeof import("./attributeValue")>("attributeValue");
     const html = attr.genAVValueHTML(value);
-    assert.match(html, /&lt;Home>; 180, 0 \[WGS84\]/);
+    assert.match(html, /&lt;Home> 180, 0/);
     assert.match(html, /data-cell-value=/);
     const rollupHTML = cell.renderCell({type: "rollup", rollup: {contents: [value]}}, 0, false, "table");
-    assert.match(rollupHTML, /180, 0 \[WGS84\]/);
+    assert.match(rollupHTML, /180, 0/);
 });
 
 test("location copies preserve canonical text for cells, nested leaves and templates", () => {
@@ -74,8 +75,8 @@ test("location copies preserve canonical text for cells, nested leaves and templ
     assert.equal(cell.getCellText(firstLeaf as unknown as HTMLElement), "20, 30 [WGS84]");
     assert.equal(cell.getCellText(wrapper([firstLeaf])), "20, 30 [WGS84]");
     assert.equal(cell.getCellText(wrapper([firstLeaf, makeLeaf(), secondLeaf])), "20, 30 [WGS84], Ordinary text, Other; 40, 50 [WGS84]");
-    assert.equal(cell.getCellText(firstLeaf as unknown as HTMLElement, "display"), "30, 20 [WGS84]");
-    assert.equal(cell.getCellText(wrapper([firstLeaf, makeLeaf(), secondLeaf]), "display"), "30, 20 [WGS84], Ordinary text, Other; 50, 40 [WGS84]");
+    assert.equal(cell.getCellText(firstLeaf as unknown as HTMLElement, "display"), "30, 20");
+    assert.equal(cell.getCellText(wrapper([firstLeaf, makeLeaf(), secondLeaf]), "display"), "30, 20, Ordinary text, Other 50, 40");
     assert.equal(cell.getCellText(makeLeaf(first, true) as unknown as HTMLElement), "Custom display");
     assert.equal(cell.getCellText(wrapper([makeLeaf(first, true)])), "Custom display");
     assert.equal(cell.getCellText(wrapper([makeLeaf(first, true)]), "display"), "Custom display");
@@ -217,7 +218,8 @@ test("template and automation value buttons preserve the structured location unt
     const column = {type: "location"} as IAVColumn;
     const html = editor.getValueInputHTML(column, {mode: "static", value: {type: "location", location}});
     assert.match(html, /data-value-type="location"/);
-    assert.match(html, /-180, -90 \[WGS84\]/);
+    assert.match(html, /-180, -90/);
+    assert.doesNotMatch(html, /\[WGS84\]/);
     const input = {dataset: {location: encodeURIComponent(JSON.stringify(location))}} as unknown as HTMLElement;
     assert.deepEqual(JSON.parse(JSON.stringify(editor.genFieldValue(column, input))), {
         type: "location", location: locationValue.createAVLocationReplacement(location),

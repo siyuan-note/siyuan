@@ -100,8 +100,11 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
     root.setAttribute("aria-label", window.siyuan.languages.mapView);
     const pageText = window.siyuan.languages.mapPageScope.replace("${shown}", view.rows.length.toString())
         .replace("${total}", view.rowCount.toString());
-    root.innerHTML = `<div class="av__map-summary ft__smaller ft__on-surface">${escapeHtml(pageText)}</div>
-<div class="av__map-skipped ft__smaller ft__on-surface"></div>
+    const loadedText = window.siyuan.languages.mapLoadedCount.replace("${shown}", view.rows.length.toString())
+        .replace("${total}", view.rowCount.toString());
+    root.innerHTML = `<div class="av__map-summary ft__smaller ft__on-surface b3-tooltips b3-tooltips__ne" aria-label="${escapeAttr(pageText)}" tabindex="0">
+    <span>${escapeHtml(loadedText)}</span><span class="av__map-skipped"></span>
+</div>
 <div class="av__map-status ft__on-surface" role="status"></div>
 <div class="av__map-canvas fn__none"></div>
 `;
@@ -145,8 +148,14 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
             return;
         }
         const {points, skipped} = getMapPoints(view);
-        root.querySelector(".av__map-skipped").textContent = Object.entries(skipped).reduce((text, [key, value]) =>
-            text.replace("${" + key + "}", value.toString()), window.siyuan.languages.mapSkippedLocations);
+        const skippedCount = skipped.empty + skipped.invalid + skipped.projection;
+        if (skippedCount) {
+            const skippedElement = root.querySelector(".av__map-skipped");
+            skippedElement.textContent = window.siyuan.languages.mapSkippedCount.replace("${count}", skippedCount.toString());
+            const skippedText = Object.entries(skipped).reduce((text, [key, value]) =>
+                text.replace("${" + key + "}", value.toString()), window.siyuan.languages.mapSkippedLocations);
+            root.querySelector(".av__map-summary").setAttribute("aria-label", `${pageText}\n${skippedText}`);
+        }
         if (!canLoadMapHost({published: false, history: false, protocol: window.location.protocol})) {
             fallback(window.siyuan.languages.mapUnsupportedClient);
             return;

@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "Geladen ${shown}/${total}",
+	"mapSkippedCount": "Overgeslagen ${count}",
 	"databaseMapView": "Kaartweergave van database",
 	"exportBlockRefMode": "Blokreferenties en bloklinks",
 	"configGroupOCREngine": "Herkenning-engine",

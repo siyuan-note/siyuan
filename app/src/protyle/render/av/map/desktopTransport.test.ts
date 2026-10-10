@@ -461,7 +461,7 @@ describe("desktop map transport", () => {
             assert.equal(lastGeometry().visible, true);
             assert.equal(f.domListeners.has("blur"), false, "focusing the native map must not hide it");
             f.domListeners.get("focus")();
-            assert.equal(lastGeometry().visible, false);
+            assert.equal(lastGeometry().visible, true);
             f.advance();
             assert.equal(lastGeometry().visible, true);
             f.domListeners.get("scroll")();
@@ -488,6 +488,60 @@ describe("desktop map transport", () => {
             assert.equal(f.frames.size, 0);
             assert.equal(f.domListeners.size, 0);
             assert.equal(disconnects, 2);
+            assert.deepEqual(f.errors, []);
+        } finally {
+            f.host.destroy();
+            globalThis.MutationObserver = oldMutation;
+            globalThis.ResizeObserver = oldResize;
+        }
+    });
+    it("keeps the map visible when focus returns from attribution while rechecking real occlusion", async () => {
+        const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;
+        class Observer { observe() {} disconnect() {} }
+        globalThis.MutationObserver = Observer as any;
+        globalThis.ResizeObserver = Observer as any;
+        const f = fixture();
+        const geometryCalls = () => f.calls.filter(([name]) => name === "siyuan-map-geometry");
+        const lastGeometry = () => geometryCalls().at(-1)[1];
+        try {
+            await f.created();
+            f.reply({type: "ready"});
+            f.advance();
+            const count = geometryCalls().length;
+            assert.equal(f.domListeners.has("blur"), false, "the map receives focus without hiding its native view");
+            for (let i = 0; i < 3; i++) {
+                f.domListeners.get("focus")();
+                assert.equal(lastGeometry().visible, true, "clicking outside attribution must not blank the map");
+                f.advance(30);
+            }
+            assert.equal(geometryCalls().length, count, "unchanged focus returns must not send hidden geometry");
+            const menu = {contains: () => false, getClientRects: () => [f.rect],
+                getBoundingClientRect: () => ({...f.rect, width: 5, height: 5})};
+            f.doc.querySelectorAll = () => [menu];
+            f.domListeners.get("focus")();
+            assert.equal(lastGeometry().visible, false, "an overlapping app menu must hide the map immediately on focus");
+            f.doc.querySelectorAll = (): HTMLElement[] => [];
+            f.domListeners.get("focus")();
+            f.advance(119);
+            assert.equal(lastGeometry().visible, false);
+            f.advance(1);
+            assert.equal(lastGeometry().visible, true);
+            f.rect.x += 10;
+            f.domListeners.get("focus")();
+            assert.equal(lastGeometry().visible, false, "changed geometry still waits for layout to settle");
+            f.advance();
+            assert.equal(lastGeometry().bounds.x, f.rect.x);
+            f.doc.hidden = true;
+            f.domListeners.get("focus")();
+            assert.equal(lastGeometry().visible, false, "a genuinely hidden document remains hidden");
+            f.doc.hidden = false;
+            f.doc.elementFromPoint = () => ({});
+            f.domListeners.get("focus")();
+            assert.equal(lastGeometry().visible, false, "unknown owner overlays retain the hit-test safeguard");
+            f.doc.elementFromPoint = () => f.container;
+            f.domListeners.get("focus")();
+            f.advance();
+            assert.equal(lastGeometry().visible, true);
             assert.deepEqual(f.errors, []);
         } finally {
             f.host.destroy();

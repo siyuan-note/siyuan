@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "Yüklendi ${shown}/${total}",
+	"mapSkippedCount": "Atlandı ${count}",
 	"databaseMapView": "Veritabanı harita görünümü",
 	"exportBlockRefMode": "Blok başvuruları ve blok bağlantıları",
 	"configGroupOCREngine": "Tanıma motoru",

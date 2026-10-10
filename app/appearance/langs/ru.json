@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "Загружено ${shown}/${total}",
+	"mapSkippedCount": "Пропущено ${count}",
 	"databaseMapView": "Представление базы данных на карте",
 	"exportBlockRefMode": "Ссылки на блоки и гиперссылки блоков",
 	"configGroupOCREngine": "Движок распознавания",

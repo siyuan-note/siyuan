@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "Учитано ${shown}/${total}",
+	"mapSkippedCount": "Прескочено ${count}",
 	"databaseMapView": "Приказ базе података на мапи",
 	"exportBlockRefMode": "Reference blokova i veze blokova",
 	"configGroupOCREngine": "Mehanizam prepoznavanja",

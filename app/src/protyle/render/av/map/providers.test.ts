@@ -12,19 +12,23 @@ const fixture = () => {
     const classes = new Set<string>();
     let now = 0, nextFrame = 0;
     const rect = {left: 0, top: 0, right: 300, bottom: 24, width: 300, height: 24};
-    const attribution: any = {open: true, textContent: "MapLibre OpenFreeMap OpenStreetMap OpenMapTiles",
-        classList: {toggle: (name: string, on: boolean) => on ? classes.add(name) : classes.delete(name)},
+    const attributionText = {textContent: "MapLibre OpenFreeMap OpenStreetMap OpenMapTiles", getClientRects: () => [rect],
+        getBoundingClientRect: () => ({left: rect.left + 8, right: rect.right - 28, top: rect.top + 2,
+            bottom: rect.bottom - 2, width: rect.width - 36, height: rect.height - 4})};
+    const attribution: any = {tagName: "DETAILS", open: true, querySelector: () => attributionText,
+        classList: {toggle: (name: string, on: boolean) => on ? classes.add(name) : classes.delete(name),
+            contains: (name: string) => classes.has(name)},
         addEventListener: (name: string, callback: (event: any) => void) => events.set(name, callback),
         removeEventListener: (name: string) => events.delete(name),
         getClientRects: () => [rect], getBoundingClientRect: () => rect,
-        contains: (target: unknown) => target === attribution || target === anchor || target === summary};
+        contains: (target: unknown) => [attribution, attributionText, anchor, summary].includes(target)};
     const anchor = {href: "", getAttribute: () => anchor.href, closest: (selector: string): any => selector === "a" ? anchor : null};
     const summary = {closest: (selector: string): any => selector === "summary" ? summary : null};
     const scope = {innerWidth: 800, innerHeight: 600, navigator: {userActivation: {isActive: true}},
         requestAnimationFrame: (callback: (now: number) => void) => { frames.set(++nextFrame, callback); return nextFrame; },
         cancelAnimationFrame: (id: number) => frames.delete(id)};
     const doc = {documentElement: {dataset: {}}, defaultView: scope, hidden: false,
-        elementFromPoint: (): unknown => attribution,
+        elementFromPoint: (() => attribution) as (x: number, y: number) => unknown,
         addEventListener: (name: string, callback: () => void) => documentEvents.set(name, callback),
         removeEventListener: (name: string) => documentEvents.delete(name)};
     class SDKObject {
@@ -164,6 +168,49 @@ test("trusted attribution interaction cancels auto-collapse and only exact offic
     adapter.destroy();
     f.click("https://maplibre.org/");
     assert.equal(clicked.length, 4);
+});
+
+test("rounded attribution corners do not prevent its visible text from completing the display clock", () => {
+    const f = fixture();
+    const adapter = createAVMapAdapter("openfreemap", f.sdk, f.container, {onMarkerClick() {}, onError() {}});
+    f.doc.elementFromPoint = (x: number, y: number) =>
+        (x < 8 || x > 292) && (y < 2 || y > 22) ? f.container : f.attribution;
+    f.load(); adapter.setVisible(true, visibleViewport); f.advance(0); f.advance(4999);
+    assert.equal(f.attribution.open, true);
+    assert.equal(f.attribution.classList.contains("maplibregl-compact-show"), true);
+    f.advance(1);
+    assert.equal(f.attribution.open, false);
+    assert.equal(f.attribution.classList.contains("maplibregl-compact-show"), false);
+    adapter.destroy();
+});
+
+test("trusted local disclosure clicks survive host visibility transitions without permitting external navigation", () => {
+    const f = fixture();
+    const clicked: string[] = [];
+    const adapter = createAVMapAdapter("openfreemap", f.sdk, f.container, {
+        onMarkerClick() {}, onError() {}, onAttributionClick: link => clicked.push(link),
+    });
+    f.load(); adapter.setVisible(true, visibleViewport); f.advance(0);
+    f.scope.navigator.userActivation.isActive = false;
+    adapter.setVisible(false);
+    assert.equal((f.click() as any).prevented, true);
+    assert.equal(f.attribution.open, false);
+    assert.equal(f.attribution.classList.contains("maplibregl-compact-show"), false);
+    f.click("https://maplibre.org/");
+    assert.deepEqual(clicked, []);
+    f.click(undefined, {isTrusted: false});
+    assert.equal(f.attribution.open, false);
+    adapter.setVisible(true, visibleViewport);
+    f.click();
+    assert.equal(f.attribution.open, true);
+    f.advance(10000);
+    assert.equal(f.attribution.open, true, "the user's disclosure choice cancels automatic collapse");
+    f.click("https://maplibre.org/");
+    assert.deepEqual(clicked, []);
+    f.scope.navigator.userActivation.isActive = true;
+    f.click("https://maplibre.org/");
+    assert.deepEqual(clicked, ["maplibre"]);
+    adapter.destroy();
 });
 
 test("attribution display time respects parent clipping and translated native viewport coordinates", () => {

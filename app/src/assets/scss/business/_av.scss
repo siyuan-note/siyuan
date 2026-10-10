@@ -18,6 +18,19 @@
   overflow-wrap: anywhere;
 }
 
+.av__map-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-self: flex-start;
+  max-width: 100%;
+  gap: 4px 12px;
+}
+
+.av__map-status:empty,
+.av__map-skipped:empty {
+  display: none;
+}
+
 .av__map-canvas {
   width: 100%;
   height: clamp(240px, 50vh, 480px);

@@ -44,6 +44,7 @@ export const createAVMapAdapter = (provider: AVMapProvider, sdk: any, container:
     map.addControl(new sdk.AttributionControl({compact: true,
         customAttribution: `<a href="${maplibre.href}" target="_blank">${maplibre.label}</a>`}));
     const attribution = container.querySelector<HTMLDetailsElement>(".maplibregl-ctrl-attrib");
+    const attributionText = attribution.querySelector<HTMLElement>(".maplibregl-ctrl-attrib-inner");
     let loaded = false, visible = false, expanded = true, automatic = true;
     let viewport: AVMapViewport;
     let frame = 0, visibleSince: number;
@@ -58,13 +59,16 @@ export const createAVMapAdapter = (provider: AVMapProvider, sdk: any, container:
         visibleSince = undefined;
     };
     const attributionVisible = () => {
-        if (!viewport || doc.hidden || !attribution.getClientRects().length || !attribution.textContent?.trim()) return false;
+        if (!viewport || doc.hidden || !attributionText.getClientRects().length || !attributionText.textContent?.trim()) return false;
         const rect = attribution.getBoundingClientRect();
         if (rect.width <= 0 || rect.height <= 0 || rect.left < 0 || rect.top < 0 ||
             rect.right > scope.innerWidth || rect.bottom > scope.innerHeight ||
             rect.left < viewport.x || rect.top < viewport.y || rect.right > viewport.x + viewport.width ||
             rect.bottom > viewport.y + viewport.height) return false;
-        return [rect.left + 1, rect.right - 1].every(x => [rect.top + 1, rect.bottom - 1].every(y =>
+        // 紧凑控件的圆角属于透明区域，遮挡检查应命中实际展示的版权文字。
+        const textRect = attributionText.getBoundingClientRect();
+        if (textRect.width <= 0 || textRect.height <= 0) return false;
+        return [textRect.left + 1, textRect.right - 1].every(x => [textRect.top + 1, textRect.bottom - 1].every(y =>
             attribution.contains(doc.elementFromPoint(x, y))));
     };
     const tickAttribution = (now: number) => {
@@ -90,8 +94,7 @@ export const createAVMapAdapter = (provider: AVMapProvider, sdk: any, container:
         }
     };
     const onAttributionInteraction = (event: Event) => {
-        if (!event.isTrusted ||
-            !(scope.navigator as Navigator & {userActivation?: {isActive: boolean}}).userActivation?.isActive) return;
+        if (!event.isTrusted) return;
         automatic = false;
         stopCollapse();
     };
@@ -103,13 +106,15 @@ export const createAVMapAdapter = (provider: AVMapProvider, sdk: any, container:
         // 不向供应商文档授予导航或弹窗权限。
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (destroyed || !visible || !event.isTrusted || event.button !== 0 ||
-            !(scope.navigator as Navigator & {userActivation?: {isActive: boolean}}).userActivation?.isActive) return;
-        onAttributionInteraction(event);
+        if (destroyed || !event.isTrusted || event.button !== 0) return;
         if (summary) {
+            // 本地展开不依赖跨宿主可见性消息或外链所需的瞬时激活状态。
+            onAttributionInteraction(event);
             expanded = !expanded;
             syncAttribution();
-        } else if (attribution.contains(anchor)) {
+        } else if (visible && attribution.contains(anchor) &&
+            (scope.navigator as Navigator & {userActivation?: {isActive: boolean}}).userActivation?.isActive) {
+            onAttributionInteraction(event);
             const link = AV_MAP_ATTRIBUTION_LINKS[provider].find(item => item.href === anchor.getAttribute("href"));
             if (link) callbacks.onAttributionClick?.(link.id);
         }

@@ -240,6 +240,12 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
             geometry(checkGeometry());
         }
     };
+    const onFocus = () => {
+        if (!destroyed) {
+            // 从原生地图回到编辑器只复核布局；实际几何或遮挡变化仍会立即隐藏地图。
+            checkGeometry();
+        }
+    };
     const tick = () => {
         if (destroyed) {
             return;
@@ -265,7 +271,7 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
         scope?.removeEventListener("pagehide", destroy);
         scope?.removeEventListener("scroll", onScroll, true);
         scope?.removeEventListener("resize", invalidate);
-        scope?.removeEventListener("focus", invalidate);
+        scope?.removeEventListener("focus", onFocus);
         container.ownerDocument.removeEventListener("visibilitychange", invalidate);
         observer?.disconnect();
         resizeObserver?.disconnect();
@@ -383,8 +389,8 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
         created = true;
         scope.addEventListener("scroll", onScroll, true);
         scope.addEventListener("resize", invalidate);
-        // BrowserWindow focus is enforced in main. DOM blur also fires when the map view gains focus.
-        scope.addEventListener("focus", invalidate);
+        // DOM 焦点会在编辑器与原生地图间切换，窗口是否隐藏由主进程与文档可见性共同判断。
+        scope.addEventListener("focus", onFocus);
         container.ownerDocument.addEventListener("visibilitychange", invalidate);
         observer = new MutationObserver(() => {
             // 悬停提示和块标也会改变 DOM；仅地图几何或遮挡变化需要隐藏原生视图。

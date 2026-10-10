@@ -41,6 +41,7 @@ const fixture = (options: {ready?: boolean; assetFailure?: boolean; missingSDK?:
     scope.document = document;
     const container = {ownerDocument: document, replaceChildren() {}, querySelector: () => ({
         classList: {toggle() {}}, addEventListener() {}, removeEventListener() {},
+        querySelector: () => ({}),
     })} as unknown as HTMLElement;
     return {scope, requested, container, destroyed: () => destroyed};
 };

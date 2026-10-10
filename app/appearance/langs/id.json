@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "Dimuat ${shown}/${total}",
+	"mapSkippedCount": "Dilewati ${count}",
 	"databaseMapView": "Tampilan peta basis data",
 	"exportBlockRefMode": "Referensi blok dan tautan blok",
 	"configGroupOCREngine": "Mesin pengenalan",

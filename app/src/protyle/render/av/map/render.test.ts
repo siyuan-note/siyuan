@@ -18,10 +18,11 @@ class ElementStub {
     readonly children = new Map<string, ElementStub>();
     readonly events = new Map<string, () => void>();
     readonly classes = new Set<string>();
+    readonly attributes = new Map<string, string>();
     readonly classList = {add: (...names: string[]) => names.forEach(name => this.classes.add(name)),
         remove: (...names: string[]) => names.forEach(name => this.classes.delete(name)),
         toggle: (name: string, enabled: boolean) => enabled ? this.classes.add(name) : this.classes.delete(name)};
-    setAttribute() {}
+    setAttribute(name: string, value: string) { this.attributes.set(name, value); }
     remove() { this.isConnected = false; }
     addEventListener(type: string, callback: () => void) { this.events.set(type, callback); }
     querySelector(selector: string) {
@@ -39,8 +40,10 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
     const block = {dataset: {avId: "database", nodeId: "carrier"}, removeAttribute() {}, querySelector: (selector: string) =>
         selector.endsWith(".av__map") ? root : records};
     Object.assign(records, {before: (element: ElementStub) => { root = element; roots.push(root); }});
-    const languages = new Proxy<Record<string, string>>({mapPageScope: "${shown}/${total}",
-        mapSkippedLocations: "${empty}/${invalid}/${unknown}/${mismatch}"}, {get: (target, key: string) => target[key] || key});
+    const languages = new Proxy<Record<string, string>>({mapPageScope: "Map covers ${shown} loaded records of ${total} filtered records",
+        mapLoadedCount: "Loaded ${shown}/${total}", mapSkippedCount: "Skipped ${count}",
+        mapSkippedLocations: "Skipped locations: ${empty} missing, ${invalid} invalid, ${projection} unsupported projection"},
+    {get: (target, key: string) => target[key] || key});
     const events = new Map<string, () => void>();
     const observers: Array<{disconnected: boolean}> = [];
     class Observer {
@@ -145,6 +148,49 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
         control: (selector: string) => root.querySelector(selector),
         status: () => root.querySelector(".av__map-status").textContent};
 };
+
+test("map summary keeps loaded scope in one compact line and omits zero skipped locations", async () => {
+    const scenario = setup();
+    await scenario.render();
+    assert.match(scenario.roots[0].innerHTML, /<span>Loaded 1\/12<\/span><span class="av__map-skipped"><\/span>/);
+    assert.match(scenario.roots[0].innerHTML, /b3-tooltips b3-tooltips__ne" aria-label="Map covers 1 loaded records of 12 filtered records" tabindex="0"/);
+    assert.equal(scenario.control(".av__map-skipped").textContent, "");
+    assert.doesNotMatch(scenario.roots[0].innerHTML, /<div class="av__map-skipped|Skipped 0/);
+});
+
+test("map summary counts all skipped locations and keeps their reasons in its tooltip", async () => {
+    const scenario = setup();
+    const view = scenario.data.view as IAVTable;
+    const row = view.rows[0];
+    const withLocation = (id: string, location?: IAVCellLocationValue) => ({...row, id, cells: [{
+        ...row.cells[0], value: {...row.cells[0].value, location},
+    }]});
+    view.rows.push(withLocation("empty"), withLocation("invalid", {latitude: 100, longitude: 0}),
+        withLocation("projection", {latitude: 90, longitude: 0}));
+    await scenario.render();
+    assert.match(scenario.roots[0].innerHTML, /<span>Loaded 4\/12<\/span>/);
+    assert.equal(scenario.control(".av__map-skipped").textContent, "Skipped 3");
+    assert.equal(scenario.control(".av__map-summary").attributes.get("aria-label"),
+        "Map covers 4 loaded records of 12 filtered records\nSkipped locations: 1 missing, 1 invalid, 1 unsupported projection");
+    assert.equal(scenario.hosts[0].points.length, 1);
+    view.rows = [row];
+    await scenario.render();
+    assert.match(scenario.roots[1].innerHTML, /<span>Loaded 1\/12<\/span>/);
+    assert.equal(scenario.control(".av__map-skipped").textContent, "");
+    assert.doesNotMatch(scenario.roots[1].innerHTML, /Skipped locations/);
+});
+
+test("map summary retains skipped counts when every loaded row lacks a compatible location", async () => {
+    const scenario = setup();
+    const view = scenario.data.view as IAVTable;
+    view.rows[0].cells[0].value.location.latitude = 90;
+    await scenario.render();
+    assert.equal(scenario.status(), "mapNoMarkers");
+    assert.equal(scenario.control(".av__map-skipped").textContent, "Skipped 1");
+    assert.equal(scenario.control(".av__map-summary").attributes.get("aria-label"),
+        "Map covers 1 loaded records of 12 filtered records\nSkipped locations: 0 missing, 0 invalid, 1 unsupported projection");
+    assert.deepEqual(scenario.calls, []);
+});
 
 test("map attribution stays inside the control and parent opens only fixed current destinations", async () => {
     const scenario = setup();

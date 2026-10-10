@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "Caricati ${shown}/${total}",
+	"mapSkippedCount": "Ignorati ${count}",
 	"databaseMapView": "Vista mappa del database",
 	"exportBlockRefMode": "Riferimenti e link ai blocchi",
 	"configGroupOCREngine": "Motore di riconoscimento",

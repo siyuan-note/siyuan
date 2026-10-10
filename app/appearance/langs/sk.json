@@ -1,4 +1,6 @@
 {
+	"mapLoadedCount": "Načítané ${shown}/${total}",
+	"mapSkippedCount": "Vynechané ${count}",
 	"databaseMapView": "Mapové zobrazenie databázy",
 	"exportBlockRefMode": "Odkazy na bloky a prepojenia blokov",
 	"configGroupOCREngine": "Mechanizmus rozpoznávania",

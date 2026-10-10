@@ -117,11 +117,13 @@ describe("database location values", () => {
         const location = {name: "Office", latitude: 20, longitude: 30, originalInput: "20,30"};
         const before = {...location};
         const label = "WGS84";
-        assert.equal(getAVLocationDisplayText(location), `Office; 30, 20 [${label}]`);
+        assert.equal(getAVLocationDisplayText(location), "Office 30, 20");
         assert.equal(getAVLocationText(location), `Office; 20, 30 [${label}]`);
         assert.deepEqual(location, before);
         assert.equal(parseAVLocationCoordinates(getAVLocationText(location), "longitudeLatitude"), undefined);
-        assert.equal(getAVLocationDisplayText({latitude: 1e-7, longitude: -1e-8}), "-0.00000001, 0.0000001 [WGS84]");
+        assert.equal(getAVLocationDisplayText({latitude: 1e-7, longitude: -1e-8}), "-0.00000001, 0.0000001");
+        assert.equal(getAVLocationDisplayText({name: " 昆明 ", latitude: 25.04, longitude: 102.71}), "昆明 102.71, 25.04");
+        assert.equal(getAVLocationDisplayText({latitude: 0, longitude: 0}), "0, 0");
     });
 
     it("excludes provenance from emptiness, display, and semantic equality", () => {

@@ -188,9 +188,9 @@ const setup = (initialFault) => {
         isDestroyed() { return this.destroyed; }, getZoomFactor() { return this.zoom; },
         send(...args) { this.sent.push(structuredClone(args)); }});
     const owner = contents(1);
-    const win = Object.assign(new EventEmitter(), {webContents: owner, destroyed: false, focused: true, children: [],
+    const win = Object.assign(new EventEmitter(), {webContents: owner, destroyed: false, focused: true, visible: true, minimized: false, children: [],
         isDestroyed() { return this.destroyed; }, isFocused() { return this.focused; },
-        isVisible: () => true, isMinimized: () => false, getContentBounds: () => ({width: 1000, height: 800})});
+        isVisible() { return this.visible; }, isMinimized() { return this.minimized; }, getContentBounds: () => ({width: 1000, height: 800})});
     win.contentView = {addChildView: view => { fault("attach"); win.children.push(view); },
         removeChildView: view => { fault("detach"); win.children = win.children.filter(item => item !== view); }};
     const target = {origin};
@@ -340,7 +340,14 @@ test("attribution links require one recent native input in a ready visible focus
     contents.emit("before-input-event", {}, {type: "keyDown", key: "Enter", isAutoRepeat: false});
     s.reply({type: "attributionClick", link: "openstreetmap"});
     assert.equal(links().length, 2);
-    click(); s.win.focused = false; s.win.emit("blur"); s.win.focused = true; s.win.emit("focus");
+    click(); s.win.focused = false; s.win.emit("blur");
+    assert.equal(s.views[0].visible, true, "switching applications keeps the visible map painted");
+    s.reply({type: "attributionClick", link: "maplibre"});
+    click(); s.reply({type: "attributionClick", link: "maplibre"});
+    contents.emit("before-input-event", {}, {type: "keyDown", key: "Enter", isAutoRepeat: false});
+    s.reply({type: "attributionClick", link: "maplibre"});
+    assert.equal(links().length, 2, "an unfocused visible map cannot authorize an attribution link");
+    s.win.focused = true; s.win.emit("focus");
     s.reply({type: "attributionClick", link: "maplibre"});
     assert.equal(links().length, 2, "blur invalidates an outstanding gesture even after focus returns");
     click(); s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: false});
@@ -352,7 +359,7 @@ test("attribution links require one recent native input in a ready visible focus
     assert.equal(links().length, 2, "expired native input cannot open a link");
     s.command({type: "visibility", visible: true, viewport: {x: 0, y: 0, width: 400, height: 300}});
     const sent = s.channels[0].port1.sent.filter(message => message.type === "visibility");
-    assert.deepEqual(sent.map(message => message.visible), [true, false, true, false, true]);
+    assert.deepEqual(sent.map(message => message.visible), [true, false, true]);
     assert.deepEqual(sent[0].viewport, {x: 0, y: 0, width: 400, height: 300});
     s.manager.destroyAll();
     assert.equal(contents.listenerCount("before-mouse-event"), 0);
@@ -540,17 +547,53 @@ test("Electron's default file-access switch permits the HTTP map host while file
     s.manager.destroyAll();
 });
 
-test("geometry updates cannot show a map in an unfocused window and focus restores fresh geometry", () => {
+test("switching applications keeps a visible map painted through blur, geometry updates and focus", () => {
     const s = setup(); s.create(); s.load(); s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
-    s.win.focused = false; s.win.emit("blur");
-    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: true,
-        bounds: {x: 10, y: 20, width: 200, height: 100}, logicalSize: {width: 200, height: 100}, crop: {x: 0, y: 0}});
-    assert.equal(s.views[0].visible, false);
-    s.win.focused = true; s.win.emit("focus");
+    const geometry = {...envelope, visible: true, bounds: {x: 10, y: 20, width: 200, height: 100},
+        logicalSize: {width: 200, height: 100}, crop: {x: 0, y: 0}};
+    s.handlers["siyuan-map-geometry"](s.event(), geometry);
     assert.equal(s.views[0].visible, true);
+    for (let i = 0; i < 3; i++) {
+        s.win.focused = false; s.win.emit("blur");
+        assert.equal(s.views[0].visible, true);
+        geometry.bounds.x += 10;
+        s.handlers["siyuan-map-geometry"](s.event(), geometry);
+        assert.equal(s.views[0].visible, true);
+        assert.deepEqual(s.views[0].bounds, geometry.bounds);
+        s.win.focused = true; s.win.emit("focus");
+        assert.equal(s.views[0].visible, true);
+    }
+    const visibility = s.channels[0].port1.sent.filter(message => message.type === "visibility");
+    assert.deepEqual(visibility.map(message => message.visible), [true], "focus changes must not hide and restore the provider");
+    s.manager.destroyAll();
+});
+
+test("an unfocused window can finish showing a map but hiding, minimizing and owner overlays still suppress it", () => {
+    const s = setup(); s.create(); s.load();
+    const geometry = {...envelope, visible: true, bounds: {x: 10, y: 20, width: 200, height: 100},
+        logicalSize: {width: 200, height: 100}, crop: {x: 0, y: 0}};
     s.win.focused = false; s.win.emit("blur");
-    assert.equal(s.views[0].visible, false);
+    s.handlers["siyuan-map-geometry"](s.event(), geometry);
+    assert.equal(s.views[0].visible, false, "bootstrap must still complete before showing the map");
+    s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
+    assert.equal(s.views[0].visible, true);
+    for (const [property, hiddenValue, event, restore] of [
+        ["visible", false, "hide", "show"], ["minimized", true, "minimize", "restore"],
+    ]) {
+        s.win[property] = hiddenValue;
+        s.win.emit(event);
+        assert.equal(s.views[0].visible, false);
+        s.handlers["siyuan-map-geometry"](s.event(), geometry);
+        s.win.emit("focus");
+        assert.equal(s.views[0].visible, false, "geometry and focus cannot show a hidden or minimized window");
+        s.win[property] = !hiddenValue;
+        s.win.emit(restore);
+        assert.equal(s.views[0].visible, true);
+    }
+    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: false});
     s.win.focused = true; s.win.emit("focus");
+    assert.equal(s.views[0].visible, false, "window focus must not revive an owner-occluded map");
+    s.handlers["siyuan-map-geometry"](s.event(), geometry);
     assert.equal(s.views[0].visible, true);
     s.manager.destroyAll();
 });

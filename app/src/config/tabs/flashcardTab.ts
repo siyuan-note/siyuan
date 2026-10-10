@@ -55,8 +55,8 @@ const registerFlashcardReviewGroup = (tab: SettingTabBuilder) => {
     group.number("flashcard.requestRetention", {
         title: window.siyuan.languages.flashcardFSRSParamRequestRetention,
         desc: window.siyuan.languages.flashcardFSRSParamRequestRetentionTip,
-        min: 0,
-        max: 1,
+        min: 0.01,
+        max: 0.99,
         step: "0.01",
     });
     group.number("flashcard.maximumInterval", {

@@ -59,6 +59,7 @@ const fixture = () => {
     const container = {ownerDocument: doc, querySelector: () => attribution,
         replaceChildren() { calls.push(["clear"]); }};
     return {sdk, calls, instances, container: container as unknown as HTMLElement, attribution, frames, events, documentEvents, doc, scope, rect,
+        ready: () => instances[0].callbacks.get("style.load")(),
         load: () => instances[0].callbacks.get("load")(),
         advance: (milliseconds: number) => {
             now += milliseconds;
@@ -75,6 +76,36 @@ const fixture = () => {
 };
 
 const visibleViewport = {x: 0, y: 0, width: 800, height: 600};
+
+test("style readiness permits markers before slow tiles finish and preserves full-load attribution timing", () => {
+    const f = fixture();
+    let ready = 0;
+    const adapter = createAVMapAdapter("openfreemap", f.sdk, f.container, {
+        onMarkerClick() {}, onError() { assert.fail("SDK error"); }, onReady() { ready++; },
+    });
+    adapter.setVisible(true, visibleViewport);
+    f.ready();
+    f.ready();
+    assert.equal(ready, 1);
+    adapter.setPoints([{id: "row-1", longitude: 121, latitude: 31}], 1);
+    adapter.fit();
+    assert.deepEqual(f.calls.filter(call => call[0] === "setLngLat"), [["setLngLat", [121, 31]]]);
+    assert.equal(f.calls.filter(call => call[0] === "fitBounds").length, 1);
+    f.advance(30000);
+    assert.equal(f.attribution.open, true, "style readiness does not start the full-map attribution clock");
+    assert.equal(f.calls.some(call => call[0] === "remove"), false);
+    f.load(); f.advance(0); f.advance(4999);
+    assert.equal(f.attribution.open, true);
+    f.advance(1);
+    assert.equal(f.attribution.open, false);
+    const lateReady = f.instances[0].callbacks.get("style.load");
+    const lateLoad = f.instances[0].callbacks.get("load");
+    adapter.destroy();
+    assert.equal(f.instances[0].callbacks.size, 0);
+    lateReady(); lateLoad();
+    assert.equal(ready, 1);
+    assert.equal(f.frames.size, 0);
+});
 
 test("OpenFreeMap preserves longitude/latitude, attribution and cleans stale callbacks", () => {
     const {sdk, calls, instances, container} = fixture();
@@ -295,8 +326,9 @@ test("only recognized temporary tile HTTP errors after the first load preserve t
             onMarkerClick() {}, onError: code => errors.push(code),
         });
         const error = f.instances[0].callbacks.get("error");
+        f.ready();
         error(tileError(status));
-        assert.deepEqual(errors, ["mapUnavailable"], "the same failure before load is fatal");
+        assert.deepEqual(errors, ["mapUnavailable"], "style readiness preserves the fatal policy before full load");
         f.load();
         error(tileError(status));
         assert.deepEqual(errors, ["mapUnavailable"]);

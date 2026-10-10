@@ -78,6 +78,8 @@ const verifyTileHTTP = async (win, sources, css, sdk) => {
     const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAADUlEQVQImWOoWHDiPwAGVALgQhC29AAAAABJRU5ErkJggg==", "base64");
     let failNextTile = false;
     let failedTiles = 0;
+    let holdTiles = true;
+    const pendingTiles = [];
     const server = http.createServer((request, response) => {
         if (request.url === "/") {
             response.setHeader("Content-Type", "text/html");
@@ -91,8 +93,12 @@ const verifyTileHTTP = async (win, sources, css, sdk) => {
                 failedTiles++;
                 response.writeHead(503).end("Temporary fixture failure");
             } else {
-                response.setHeader("Content-Type", "image/png");
-                response.end(png);
+                const sendTile = () => {
+                    response.setHeader("Content-Type", "image/png");
+                    response.end(png);
+                };
+                if (holdTiles) pendingTiles.push(sendTile);
+                else sendTile();
             }
         } else {
             response.writeHead(404).end();
@@ -122,10 +128,10 @@ const verifyTileHTTP = async (win, sources, css, sdk) => {
             }
             const sdk = window.maplibregl;
             sdk.setWorkerUrl(origin + "/worker.js");
-            window.tileHTTP = {errors: [], removed: 0, tileError: null};
+            window.tileHTTP = {errors: [], removed: 0, tileError: null, ready: false, loaded: false};
             class FixtureMap extends sdk.Map {
                 constructor(options) {
-                    super({...options, style: {version: 8, sources: {fixture: {type: "raster", tileSize: 256,
+                    super({...options, preserveDrawingBuffer: true, style: {version: 8, sources: {fixture: {type: "raster", tileSize: 256,
                         tiles: [origin + "/tile/{z}/{x}/{y}.png"], minzoom: 0, maxzoom: 6, attribution: "Fixture data"}},
                         layers: [{id: "fixture", type: "raster", source: "fixture"}]}});
                     window.tileMap = this;
@@ -133,11 +139,16 @@ const verifyTileHTTP = async (win, sources, css, sdk) => {
                         window.tileHTTP.tileError = {status: event.error?.status, sourceId: event.sourceId,
                             state: event.tile?.state, canonical: event.tile?.tileID?.canonical};
                     });
+                    this.on("load", () => { window.tileHTTP.loaded = true; });
                 }
                 remove() { window.tileHTTP.removed++; super.remove(); }
             }
             window.tileAdapter = modules.providers.createAVMapAdapter("openfreemap", {...sdk, Map: FixtureMap},
-                document.getElementById("map"), {onMarkerClick() {}, onReady() { clearTimeout(timer); resolve(); },
+                document.getElementById("map"), {onMarkerClick() {}, onReady() {
+                    window.tileHTTP.ready = true;
+                    clearTimeout(timer);
+                    resolve();
+                },
                     onError(code) {
                         window.tileHTTP.errors.push(code);
                         window.tileAdapter?.destroy();
@@ -147,6 +158,30 @@ const verifyTileHTTP = async (win, sources, css, sdk) => {
         });
         await win.webContents.executeJavaScript(`(${installRealMap.toString()})(${JSON.stringify(sources)},
             ${JSON.stringify(css)}, ${JSON.stringify(origin)})`);
+        assert.equal(await win.webContents.executeJavaScript("tileHTTP.ready"), true);
+        assert.equal(await win.webContents.executeJavaScript("tileHTTP.loaded"), false);
+        await win.webContents.executeJavaScript("tileAdapter.setPoints([{id:'fixture', longitude:121, latitude:31}],1); tileAdapter.fit(); void 0");
+        assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.maplibregl-marker').length"), 1);
+        // 真实网络瓦片延迟超过原有 20 秒就绪期限；记录和相机已经可以使用。
+        await new Promise(resolve => setTimeout(resolve, 21000));
+        assert.ok(pendingTiles.length > 0);
+        assert.deepEqual(await win.webContents.executeJavaScript("({ready:tileHTTP.ready,loaded:tileHTTP.loaded,removed:tileHTTP.removed,errors:tileHTTP.errors})"),
+            {ready: true, loaded: false, removed: 0, errors: []});
+        holdTiles = false;
+        pendingTiles.splice(0).forEach(sendTile => sendTile());
+        const loadDeadline = Date.now() + 10000;
+        while (!await win.webContents.executeJavaScript("tileHTTP.loaded") && Date.now() < loadDeadline) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        assert.equal(await win.webContents.executeJavaScript("tileHTTP.loaded"), true, "delayed tiles eventually finish rendering");
+        const pixel = await win.webContents.executeJavaScript(`(() => {
+            const canvas = tileMap.getCanvas();
+            const gl = canvas.getContext("webgl2");
+            const pixel = new Uint8Array(4);
+            gl.readPixels(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+            return Array.from(pixel);
+        })()`);
+        assert.ok(pixel[3] > 0, "the real WebGL canvas paints the delayed raster tile");
         failNextTile = true;
         await win.webContents.executeJavaScript("tileMap.setZoom(3); void 0");
         const deadline = Date.now() + 10000;

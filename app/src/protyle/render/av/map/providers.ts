@@ -53,12 +53,18 @@ export const createAVMapAdapter = (provider: AVMapProvider, sdk: any, container:
     const map = new sdk.Map({container, style: AV_MAP_OPENFREEMAP_STYLE, center: [0, 0], zoom: 1,
         attributionControl: false, trackResize: false});
     let attribution: AVMapAttributionController;
-    let loaded = false;
+    let ready = false, loaded = false;
     const onReady = () => {
+        if (!destroyed && !ready) {
+            ready = true;
+            // 样式初始化后即可接收记录并定位，不等待默认世界视图的全部瓦片。
+            callbacks.onReady?.();
+        }
+    };
+    const onLoad = () => {
         if (!destroyed && !loaded) {
             loaded = true;
             attribution.onReady();
-            callbacks.onReady?.();
         }
     };
     const destroy = () => {
@@ -66,7 +72,8 @@ export const createAVMapAdapter = (provider: AVMapProvider, sdk: any, container:
         destroyed = true;
         try {
             attribution?.destroy();
-            map.off("load", onReady);
+            map.off("style.load", onReady);
+            map.off("load", onLoad);
             map.off("error", error);
             cleanMarkers();
             points = [];
@@ -81,7 +88,8 @@ export const createAVMapAdapter = (provider: AVMapProvider, sdk: any, container:
     try {
         attribution = createAVMapAttribution(provider, sdk, map, container, callbacks.onAttributionClick);
         map.on("error", error);
-        map.on("load", onReady);
+        map.on("style.load", onReady);
+        map.on("load", onLoad);
     } catch (error) {
         destroy();
         throw error;

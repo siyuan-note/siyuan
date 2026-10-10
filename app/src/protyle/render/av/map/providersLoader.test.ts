@@ -4,11 +4,13 @@ import {AVMapInit, AVMapLoadError} from "./protocol";
 import {loadAVMapAdapter} from "./providersLoader";
 import {getAVMapLockedPolicy, prepareAVMapBootstrap} from "./bootstrap";
 import {AV_MAP_ASSET_TIMEOUT, AV_MAP_READY_TIMEOUT} from "./loadingBudget";
+import {startAVMapRuntime} from "./hostRuntime";
 
 const fixture = (options: {ready?: boolean; assetFailure?: boolean; scriptFailure?: boolean; missingSDK?: boolean;
     mapError?: boolean; controlError?: boolean; manualAssets?: boolean; policyFailure?: boolean} = {}) => {
     const requested: any[] = [];
     const elements: any[] = [];
+    const mapEvents = new Map<string, () => void>();
     let destroyed = 0;
     class FakeMap {
         constructor() {
@@ -16,15 +18,24 @@ const fixture = (options: {ready?: boolean; assetFailure?: boolean; scriptFailur
             if (options.mapError) throw new Error("private error");
         }
         on(type: string, callback: () => void) {
-            if (options.ready !== false && type === "load") queueMicrotask(callback);
+            mapEvents.set(type, callback);
+            if (options.ready !== false && type === "style.load") queueMicrotask(callback);
         }
-        off() {}
+        off(type: string) { mapEvents.delete(type); }
         addControl() { if (options.controlError) throw new Error("private control failure"); }
+        fitBounds(bounds: unknown) { requested.push({bounds}); }
         remove() { destroyed++; }
     }
     const scope: any = {
         setTimeout, clearTimeout, cancelAnimationFrame() {},
         maplibregl: options.missingSDK ? undefined : {Map: FakeMap, AttributionControl: class {},
+            Marker: class {
+                setLngLat(coordinates: number[]) { requested.push({coordinates}); return this; }
+                addTo() { return this; }
+                getElement() { return {addEventListener() {}, removeEventListener() {}}; }
+                remove() {}
+            },
+            LngLatBounds: class { extend() {} },
             setWorkerUrl: (url: string) => requested.push({worker: url})},
         fetch: async (url: string, options: unknown) => {
             requested.push({url, options});
@@ -49,7 +60,7 @@ const fixture = (options: {ready?: boolean; assetFailure?: boolean; scriptFailur
         classList: {toggle() {}}, addEventListener() {}, removeEventListener() {},
         querySelector: () => ({}),
     })} as unknown as HTMLElement;
-    return {scope, requested, elements, container, destroyed: () => destroyed};
+    return {scope, requested, elements, container, mapEvents, destroyed: () => destroyed};
 };
 const init: AVMapInit = {version: 1, instanceID: "fixture", type: "init", provider: "openfreemap", theme: "light"};
 const callbacks = {onMarkerClick() {}, onError() {}};
@@ -137,6 +148,44 @@ const controlledTimers = (scope: any) => {
     scope.clearTimeout = (id: number) => pending.delete(id);
     return pending;
 };
+
+test("style-ready runtime fits records once while slow tiles outlive the old readiness deadline", async () => {
+    const f = fixture({ready: false});
+    const timers = controlledTimers(f.scope);
+    const signal = new AbortController().signal;
+    await prepareAVMapBootstrap(f.scope, "openfreemap", signal);
+    const replies: any[] = [];
+    const port = {onmessage: null as any, postMessage: (value: unknown) => replies.push(value), start() {}, close() {}};
+    const stop = startAVMapRuntime(port as unknown as MessagePort, init.instanceID, init.provider, f.container);
+    const send = (command: object) => port.onmessage({data: {...init, ...command}});
+    try {
+        const pending = send(init);
+        assert.equal(replies.length, 0);
+        const deadline = [...timers.values()].find(timer => timer.delay === AV_MAP_READY_TIMEOUT);
+        assert.ok(deadline);
+        f.mapEvents.get("style.load")();
+        await pending;
+        assert.deepEqual(replies, [{version: 1, instanceID: init.instanceID, type: "ready"}]);
+        assert.equal(timers.size, 0, "slow tiles no longer retain the adapter readiness timer");
+        const point = {id: "row-1", longitude: 121, latitude: 31};
+        await send({type: "setPoints", revision: 1, points: [point]});
+        await send({type: "setPoints", revision: 2, points: [{...point, id: "row-2"}]});
+        assert.deepEqual(f.requested.filter(request => request.coordinates).map(request => request.coordinates), [[121, 31], [121, 31]]);
+        assert.equal(f.requested.filter(request => request.bounds).length, 1, "the first points fit before any full-load event");
+        // 即使过期计时回调已经入队，也不能销毁已能接收记录的地图。
+        deadline.callback();
+        assert.equal(f.destroyed(), 0);
+        f.mapEvents.get("load")();
+        await flush();
+        assert.equal(f.destroyed(), 0);
+        assert.equal(replies.length, 1);
+        assert.equal(f.requested.filter(request => request.bounds).length, 1);
+    } finally {
+        stop();
+    }
+    assert.equal(f.destroyed(), 1);
+    assert.equal(f.mapEvents.size, 0);
+});
 
 test("each packaged asset is bounded and CSP cannot lock before the worker body finishes", async () => {
     const f = fixture({manualAssets: true});

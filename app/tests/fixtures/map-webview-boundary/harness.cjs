@@ -11,6 +11,18 @@ if (!app || !BrowserWindow) {
     let remoteRequested = false;
     const fail = error => {
         console.error("Map webview prototype startup failed.");
+        if (process.argv.includes("--verify")) {
+            // 只输出安全的断言位置和操作符，不泄露探测地址、令牌或断言值。
+            const failure = error.cause || error;
+            const location = typeof failure.stack === "string" &&
+                failure.stack.match(/\bharnessSupport\.cjs:(\d+):(\d+)\)?(?:\r?\n|$)/);
+            if (location) console.error("Verification location: harnessSupport.cjs:" + location[1] + ":" + location[2]);
+            if (failure.code === "ERR_ASSERTION") {
+                const operators = ["strictEqual", "notStrictEqual", "deepStrictEqual", "notDeepStrictEqual", "==", "!=", "fail"];
+                console.error("Verification assertion: ERR_ASSERTION" +
+                    (operators.includes(failure.operator) ? "; operator: " + failure.operator : ""));
+            }
+        }
         if (remoteRequested) console.error("Remote map webview verification: FAIL.");
         const codes = ["attachPreferenceMismatch", "hostAttachFailed", "hostDocumentLoadFailed", "hostDocumentMismatch",
             "hostRendererGone", "hostDestroyed", "hostBootstrapTimeout", "hostSDKTimeout", "documentCSPBlocked",
@@ -50,7 +62,7 @@ if (!app || !BrowserWindow) {
             if (flags.has("--verify")) {
                 try { await verifyHarness(harness); }
                 catch (failure) {
-                    const error = new Error("Fixture verification failed");
+                    const error = new Error("Fixture verification failed", {cause: failure});
                     error.code = failure?.code === "isolationCheckTimeout" ? "isolationCheckTimeout" : "isolationAssertionFailed";
                     throw error;
                 }

@@ -42,9 +42,11 @@ const sources = () => {
             return false;
         }).join("\n");
     };
+    const touchSelection = readFileSync(path.join(__dirname, "../src/protyle/wysiwyg/touchBlockSelection.ts"), "utf8")
+        .replace(/^import .*;\r?\n/gm, "").replaceAll("export const ", "const ");
     return [false, true].map(mobile => ts.transpileModule(preprocess(
         `const bind = function(protyle) {let beforeContextmenuRange; ${bindings.join(";\n")};};\n` +
-        range.getText(selection).replace("export ", "") + "\n" + wordSelection, mobile), {
+        range.getText(selection).replace("export ", "") + "\n" + wordSelection + "\n" + touchSelection, mobile), {
         compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS},
     }).outputText);
 };

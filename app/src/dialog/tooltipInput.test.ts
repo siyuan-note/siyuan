@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
-import {compileString} from "sass";
+import {compile} from "sass";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (sources: string[], css: string) => {
@@ -126,7 +126,7 @@ test("touch hover suppression preserves mouse, validation feedback and toolbar l
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText);
     const css = ["business/_block.scss", "component/_tooltips.scss", "main/_main.scss"]
-        .map(file => compileString(readFileSync("src/assets/scss/" + file, "utf8")).css).join("\n");
+        .map(file => compile("src/assets/scss/" + file).css).join("\n");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-touch-hover-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");

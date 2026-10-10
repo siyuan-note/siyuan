@@ -43,7 +43,7 @@ module.exports = async ({annotations = false} = {}) => {
         },
         bundle: true, write: false, format: "esm", platform: "browser",
         plugins: [{name: "siyuan-test-boundaries", setup(build) {
-            build.onResolve({filter: /.*/}, args => annotations && args.importer.endsWith("/asset/anno.ts") && Object.hasOwn(annotationMocks, args.path)
+            build.onResolve({filter: /.*/}, args => annotations && args.importer.replaceAll("\\", "/").endsWith("/asset/anno.ts") && Object.hasOwn(annotationMocks, args.path)
                 ? {path: args.path, namespace: "siyuan-annotation-mock"} : undefined);
             build.onLoad({filter: /.*/, namespace: "siyuan-annotation-mock"}, args => ({contents: annotationMocks[args.path], loader: "js"}));
             build.onResolve({filter: /.*/}, args => Object.hasOwn(mocks, args.path)

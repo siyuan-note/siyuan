@@ -1,12 +1,14 @@
 package model
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"syscall"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/sys/windows"
 )
 
 func TestSyncIgnoreReadFailureRecovers(t *testing.T) {
@@ -18,6 +20,8 @@ func TestSyncIgnoreReadFailureRecovers(t *testing.T) {
 	if err := os.WriteFile(p, []byte("/private/**/*"), 0644); err != nil {
 		t.Fatal(err)
 	}
+	invalidateSyncIgnoreRules(p)
+	t.Cleanup(func() { invalidateSyncIgnoreRules(p) })
 	ptr, err := syscall.UTF16PtrFromString(p)
 	if err != nil {
 		t.Fatal(err)
@@ -36,8 +40,11 @@ func TestSyncIgnoreReadFailureRecovers(t *testing.T) {
 	if _, err = os.Stat(p); err != nil {
 		t.Fatal(err)
 	}
+	if _, readErr := os.ReadFile(p); !errors.Is(readErr, windows.ERROR_SHARING_VIOLATION) {
+		t.Fatalf("read-denying handle did not produce a sharing violation: %v", readErr)
+	}
 	if _, matcher, loadErr := getSyncIgnoreRules(); loadErr == nil || matcher != nil {
-		t.Fatal("unreadable rules must return an error without a matcher")
+		t.Fatalf("unreadable rules must return an error without a matcher: error=%v, matcher=%v", loadErr, matcher)
 	}
 	if !PathsAffectSync(filepath.Join(util.DataDir, "private", "secret.txt")) {
 		t.Fatal("read failure must conservatively schedule sync")

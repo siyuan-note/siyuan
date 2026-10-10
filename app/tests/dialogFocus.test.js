@@ -336,7 +336,7 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
     }
 };
 
-const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSource) => {
+const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSource, openOptionsSource) => {
     const assert = require("node:assert/strict");
     const tick = () => new Promise(resolve => setTimeout(resolve, 20));
     const constants = {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_SEARCH: "search",
@@ -397,6 +397,7 @@ const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSou
     };
     modules["../dialog"] = load(dialogSource);
     modules["./focus"] = modules["../search/focus"] = load(focusSource);
+    modules["./openOptions"] = load(openOptionsSource);
     const {openSearch} = load(searchSource);
     const mobile = load(mobileSource);
     const search = () => openSearch({app: {}, hotkey: "search", notebookId: "box", searchPath: "/doc.sy"});
@@ -553,7 +554,8 @@ if (process.versions.electron && process.type === "browser") {
             await win.webContents.executeJavaScript(`(${runSearchCases.toString()})(
                 ${JSON.stringify(source)}, ${JSON.stringify(compileSearch("search/focus.ts"))},
                 ${JSON.stringify(compileSearch("search/spread.ts"))},
-                ${JSON.stringify(compileSearch("command/nativeRuntime.ts", true))})`);
+                ${JSON.stringify(compileSearch("command/nativeRuntime.ts", true))},
+                ${JSON.stringify(compileSearch("search/openOptions.ts"))})`);
             const cardSource = fs.readFileSync(path.join(__dirname, "../src/card/openCard.ts"), "utf8");
             for (const mobile of [false, true]) {
                 const compiled = ts.transpileModule(parse(cardSource, {MOBILE: mobile, BROWSER: true}, false, true), {

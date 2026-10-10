@@ -124,7 +124,12 @@ const bootChild = async (sources) => {
     });
     check.equal(typeof window.Lute, "undefined");
     const pluginEvents = [];
+    const hoverInput = loadRendererModule(sources.hoverInput, {
+        "../protyle/util/compatibility": {isInIOS: () => false},
+        "./touchActivation": {},
+    });
     const {initTooltips} = loadRendererModule(sources.tooltip, {
+        "../util/hoverInput": hoverInput,
         "../util/functions": {isMobile: () => false},
         "../plugin/EventBusCore": {emitToPlugins: name => pluginEvents.push(name),
             forEachPluginSubscriber: (name, callback) => callback({emit: () => pluginEvents.push(name)})},
@@ -445,7 +450,7 @@ if (process.versions.electron && process.type === "browser") {
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
             paint: "util/windowPaint.ts", frontend: "util/functions.ts", titles: "util/processTitle.ts",
             mount: "config/setting/mount.ts", save: "config/setting/save.ts", fragments: "config/render/fragments.ts",
-            bazaarPath: "config/bazaar/openPath.ts", tooltip: "dialog/tooltip.ts"})) {
+            bazaarPath: "config/bazaar/openPath.ts", tooltip: "dialog/tooltip.ts", hoverInput: "util/hoverInput.ts"})) {
             let source = fs.readFileSync(path.join(__dirname, "../src", file), "utf8");
             if (key === "frontend") {
                 source = require("ifdef-loader/preprocessor").parse(source, {MOBILE: false, BROWSER: false}, false, true);

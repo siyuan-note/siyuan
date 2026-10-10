@@ -61,7 +61,7 @@ test("anonymous map session blocks permissions, downloads, credentials and all n
     const response = await ses.protocols.http(new Request(origin + "/stage/map/index.html?provider=openfreemap"));
     assert.equal(await response.text(), "asset");
     assert.equal(files.length, 1);
-    assert.equal(files[0], "/app/stage/map/index.html");
+    assert.equal(files[0], path.join("/app", "stage/map/index.html"));
     assert.match(response.headers.get("content-security-policy"), /sandbox allow-scripts/);
     assert.equal(ses.fetches.length, 0);
     let headers;

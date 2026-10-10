@@ -54,6 +54,7 @@ for (const file of ["src/index.ts", "src/window/index.ts", "src/mobile/util/onMe
         runInNewContext(compile(`let zoomRevision = 0; const applyZoom = () => {}; ${storageChanged}
 export const receive = data => {switch(data.cmd){${clauses.join("\n")}}};`), {
             exports: receiver, window, ...preference,
+            onPageScrollButtonsStorageChanged() {},
             onWindowWorkspaceStorageChanged: key => platformCalls.push(key),
             MOBILE_BARS_CONFIG_KEY: "mobile-bars", Constants: {LOCAL_MOBILE_BOTTOM_BAR: "mobile-bottom", LOCAL_MOBILE_SIDE_PANEL: "mobile-side"},
             showMobileBars: () => platformCalls.push("bars"), renderMobileBottomBar: () => platformCalls.push("bottom"),

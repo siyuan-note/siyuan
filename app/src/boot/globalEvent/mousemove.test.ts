@@ -54,6 +54,7 @@ const fixture = (location: "editor" | "popover" | "backlink") => {
     const api: {windowMouseMove: (event: MouseEvent) => void} = {windowMouseMove: () => {}};
     runInNewContext(source, {
         exports: api,
+        getComputedStyle: () => ({paddingLeft: root.style.paddingLeft}),
         require: (name: string) => modules[name] || {},
         window: {siyuan: {layout: {}, blockPanels: location === "popover" ? [{editors: [{protyle}]}] : []}},
         document: {

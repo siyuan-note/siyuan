@@ -37,20 +37,29 @@ func TestIsSensitivePathNamespaceAlias(t *testing.T) {
 	tempDir := filepath.Join(WorkspaceDir, "temp")
 	dataDir := filepath.Join(WorkspaceDir, "data")
 
-	for _, test := range []struct {
+	type pathCase struct {
 		name      string
 		path      string
 		sensitive bool
-	}{
+	}
+	tests := []pathCase{
 		{"普通路径的 conf 目录", confDir, true},
-		{"扩展长度前缀的 conf 目录", `\\?\` + confDir, true},
-		{"反斜杠前缀的家目录凭据", `\\?\` + filepath.Join(HomeDir, ".ssh", "id_rsa"), true},
+		{"普通路径的家目录凭据", filepath.Join(HomeDir, ".ssh", "id_rsa"), true},
 		{"普通路径的 temp 目录", filepath.Join(tempDir, "private.txt"), true},
-		{"扩展长度前缀的 temp 目录", `\\?\` + filepath.Join(tempDir, "private.txt"), true},
 		{"temp/export 仍允许导出", filepath.Join(tempDir, "export", "document.pdf"), false},
-		{"扩展长度前缀的 temp/export 仍允许导出", `\\?\` + filepath.Join(tempDir, "export", "document.pdf"), false},
-		{"扩展长度前缀的工作空间资源", `\\?\` + filepath.Join(dataDir, "assets", "image.png"), false},
-	} {
+		{"普通路径的工作空间资源", filepath.Join(dataDir, "assets", "image.png"), false},
+	}
+	// Windows 命名空间前缀不能拼接到 POSIX 路径作为同位置别名。
+	if runtime.GOOS == "windows" {
+		tests = append(tests, []pathCase{
+			{"扩展长度前缀的 conf 目录", `\\?\` + confDir, true},
+			{"反斜杠前缀的家目录凭据", `\\?\` + filepath.Join(HomeDir, ".ssh", "id_rsa"), true},
+			{"扩展长度前缀的 temp 目录", `\\?\` + filepath.Join(tempDir, "private.txt"), true},
+			{"扩展长度前缀的 temp/export 仍允许导出", `\\?\` + filepath.Join(tempDir, "export", "document.pdf"), false},
+			{"扩展长度前缀的工作空间资源", `\\?\` + filepath.Join(dataDir, "assets", "image.png"), false},
+		}...)
+	}
+	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			if got := IsSensitivePath(test.path); got != test.sensitive {
 				t.Errorf("IsSensitivePath(%q) = %v, want %v", test.path, got, test.sensitive)

@@ -74,7 +74,11 @@ const setupEdge = async (mode) => {
     }, {once: true});
     return {before, after, left: {x: rect.left + 0.5, y: after.y},
         mathEnd: {x: rect.right + 1, y: after.y}, right: {x: rect.right + 1, y: before.y},
-        width: editable.clientWidth, mathLeft: rect.left, prefixLeft: prefix.getBoundingClientRect().left};
+        width: editable.clientWidth, mathLeft: rect.left, prefixLeft: prefix.getBoundingClientRect().left,
+        geometry: {mode, requestedWidth: editable.style.width, measuredPrefixWidth: width,
+            editable: editable.getBoundingClientRect().toJSON(), math: rect.toJSON(),
+            prefixLines: Array.from(prefix.getClientRects(), item => item.toJSON()),
+            fontsStatus: document.fonts.status, devicePixelRatio: window.devicePixelRatio}};
 };
 
 const runElectron = async () => {
@@ -170,14 +174,14 @@ const runElectron = async () => {
             for (const direction of mode === "left" ? ["forward", "backward", "cross-line"] : ["forward", "cross-line"]) {
                 const points = await win.webContents.executeJavaScript(`(${setupEdge.toString()})(${JSON.stringify(mode)})`);
                 if (mode === "left") {
-                    assert.ok(Math.abs(points.mathLeft - points.prefixLeft) < 1);
+                    assert.ok(Math.abs(points.mathLeft - points.prefixLeft) < 1, JSON.stringify(points));
                     await drag(direction === "forward" ? points.left : direction === "backward" ? points.after : points.before,
                         direction === "backward" ? points.left : direction === "forward" ? points.mathEnd : points.after, true);
                     if (direction === "backward") {
                         assert.equal(await win.webContents.executeJavaScript("getSelection().direction"), "backward");
                     }
                 } else {
-                    assert.ok(points.mathLeft > points.prefixLeft + points.width - 30);
+                    assert.ok(points.mathLeft > points.prefixLeft + points.width - 30, JSON.stringify(points));
                     await drag(direction === "cross-line" ? points.after : points.before,
                         direction === "forward" ? points.right : points.before, true);
                 }

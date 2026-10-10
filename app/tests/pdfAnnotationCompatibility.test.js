@@ -154,9 +154,29 @@ async function runElectron() {
         const viewerResults = await win.webContents.executeJavaScript(`(async () => {
             const {webViewerLoad, getPdfViewerHTML} = await import(${JSON.stringify(treeUrl)});
             const errors = [];
+            const errorDiagnostics = [];
+            let phase = "initialize viewers";
+            const recordError = message => {
+                errors.push(message);
+                if (errorDiagnostics.length >= 16) return;
+                // 仅在错误发生时记录测试查看器的几何信息，不改变渲染时序。
+                errorDiagnostics.push({phase, message, time: performance.now(),
+                    viewers: Array.from(document.querySelectorAll(".testViewer"), element => {
+                        const container = element.querySelector("#viewerContainer");
+                        return {hidden: getComputedStyle(element).display === "none",
+                            rect: element.getBoundingClientRect().toJSON(),
+                            container: container?.getBoundingClientRect().toJSON(),
+                            scroll: container ? [container.scrollLeft, container.scrollTop,
+                                container.scrollWidth, container.scrollHeight] : null,
+                            pages: Array.from(element.querySelectorAll(".page"), page => ({
+                                number: page.dataset.pageNumber, rect: page.getBoundingClientRect().toJSON(),
+                                scale: getComputedStyle(page).getPropertyValue("--scale-factor"),
+                            }))};
+                    })});
+            };
             const originalConsoleError = console.error;
-            console.error = (...args) => errors.push(args.map(String).join(" "));
-            const onError = event => errors.push(String(event.error || event.reason || event.message));
+            console.error = (...args) => recordError(args.map(String).join(" "));
+            const onError = event => recordError(String(event.error || event.reason || event.message));
             window.addEventListener("error", onError);
             window.addEventListener("unhandledrejection", onError);
             const waitFor = (bus, name, predicate = () => true) => new Promise((resolve, reject) => {
@@ -192,6 +212,7 @@ async function runElectron() {
             const viewers = [];
             try {
                 for (let i = 0; i < 2; i++) {
+                    phase = "initialize viewer " + i;
                     const element = document.createElement("div");
                     element.className = "testViewer fn__flex-1";
                     if (i === 0) element.classList.add("fn__none");
@@ -223,6 +244,7 @@ async function runElectron() {
                     if (page.div.querySelector('input[type="text"]').value !== "form text") throw new Error("Missing text field value");
                 }
                 const {pdf, element} = viewers[1];
+                phase = "zoom and rotate";
                 const firstScale = viewers[0].pdf.pdfViewer.currentScale;
                 let rendered = waitFor(pdf.eventBus, "pagerendered");
                 pdf.zoomIn();
@@ -232,6 +254,7 @@ async function runElectron() {
                 pdf.rotatePages(90);
                 await rendered;
                 const found = waitFor(pdf.eventBus, "updatefindmatchescount", data => data.matchesCount.total === 2);
+                phase = "search and sidebar";
                 pdf.eventBus.dispatch("find", {source: null, type: "", query: "Hello", caseSensitive: false,
                     entireWord: true, highlightAll: true, findPrevious: false, matchDiacritics: false});
                 await found;
@@ -242,6 +265,7 @@ async function runElectron() {
                 if (!thumbnail.image.src.startsWith("blob:")) throw new Error("Missing thumbnail image");
                 if (parseFloat(getComputedStyle(thumbnail.image).width) !== thumbnail.canvasWidth) throw new Error("Invalid thumbnail width");
                 await pdf.pdfDocumentProperties.open();
+                phase = "document properties and page navigation";
                 if (element.querySelector("#pageCountField").textContent !== "2") throw new Error("Missing document properties");
                 await pdf.pdfDocumentProperties.close();
                 const secondPage = pdf.pdfViewer.getPageView(1);
@@ -253,6 +277,7 @@ async function runElectron() {
                     throw new Error("Missing PDF UserUnit scale");
                 }
                 element.style.width = "375px";
+                phase = "resize and pinch";
                 pdf.pdfViewer.currentScaleValue = "page-width";
                 const scaleBeforePinch = pdf.pdfViewer.currentScale;
                 pdf.touchPinchCallback([180, 200], 100, 150, 0, 0);
@@ -266,12 +291,14 @@ async function runElectron() {
                     throw new Error("Deferred PDF navigation timed out");
                 };
                 pdf.pdfSidebar.close();
+                phase = "hide and queue navigation";
                 pdf.rotatePages(-90);
                 pdf.pdfLinkService.goToPage(1);
                 element.classList.add("fn__none");
                 pdf.pdfLinkService.setHash("page=1&zoom=150,0,50");
                 pdf.pdfLinkService.setHash("page=2&zoom=150,0,100");
                 await new Promise(resolve => setTimeout(resolve, 50));
+                phase = "show and resolve deferred navigation";
                 element.classList.remove("fn__none");
                 await waitUntil(() => pdf.pdfViewer.currentPageNumber === 2 &&
                     pdf.pdfViewer.currentScale === 1.5 && pdf.pdfViewer.container.scrollTop > 0);
@@ -281,11 +308,12 @@ async function runElectron() {
                     throw new Error("Deferred PDF destination differs from visible navigation");
                 }
                 element.classList.add("fn__none");
+                phase = "destroy with deferred navigation";
                 pdf.pdfLinkService.setHash("page=1&zoom=200,0,50");
                 await pdf.destroy();
                 element.classList.remove("fn__none");
                 await new Promise(resolve => setTimeout(resolve, 100));
-                return {count: viewers.length, pages: viewers[0].pdf.pagesCount, errors};
+                return {count: viewers.length, pages: viewers[0].pdf.pagesCount, errors, errorDiagnostics};
             } finally {
                 for (const {pdf, element} of viewers) { await pdf.destroy(); element.remove(); }
                 URL.revokeObjectURL(url);
@@ -294,7 +322,8 @@ async function runElectron() {
                 console.error = originalConsoleError;
             }
         })()`);
-        assert.deepEqual(viewerResults, {count: 2, pages: 2, errors: []});
+        const {errorDiagnostics, ...viewerState} = viewerResults;
+        assert.deepEqual(viewerState, {count: 2, pages: 2, errors: []}, JSON.stringify(errorDiagnostics));
     } catch (error) {
         console.error(error);
         exitCode = 1;

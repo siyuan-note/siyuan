@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
+import {isContainerGutterBridge} from "../../protyle/gutter/container";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const compiled = transpileModule(readFileSync(__dirname + "/mousemove.ts", "utf8"), {
@@ -17,7 +18,7 @@ const fixture = (paddingLeft: string, hasBlock = true) => {
     const block = {classList: {contains: () => false}, getBoundingClientRect: () => ({left: 196})};
     const hits: number[][] = [];
     const rendered: unknown[] = [];
-    const protyle = {wysiwyg: {element: root}, gutter: {render: (_owner: unknown, target: unknown) => rendered.push(target)}};
+    const protyle = {wysiwyg: {element: root}, gutter: {element: {classList: {contains: () => true}}, render: (_owner: unknown, target: unknown) => rendered.push(target)}};
     const exports = {} as typeof import("./mousemove");
     runInNewContext(compiled, {
         exports,
@@ -29,6 +30,7 @@ const fixture = (paddingLeft: string, hasBlock = true) => {
         },
         getComputedStyle: () => ({paddingLeft}),
         require: () => ({
+            isContainerGutterBridge,
             hasClosestBlock: (target: unknown) => target,
             getAllModels: () => ({editor: [{editor: {protyle}}], backlink: [] as unknown[]}),
         }),

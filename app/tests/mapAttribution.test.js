@@ -3,6 +3,12 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
+const closeTileServer = server => new Promise(resolve => {
+    server.close(resolve);
+    // 断言可能在刻意挂起的瓦片响应释放之前失败，清理时必须关闭这些连接。
+    server.closeAllConnections();
+});
+
 const install = (sources, css, controlledClock) => {
     document.head.innerHTML = "";
     document.body.innerHTML = '<div id="map" class="maplibregl-map"></div>';
@@ -204,8 +210,8 @@ const verifyTileHTTP = async (win, sources, css, sdk) => {
         assert.deepEqual(state.errors, ["mapUnavailable"]);
         assert.equal(state.removed, 1, "unclassified SDK errors retain the fatal cleanup path");
     } finally {
-        await win.webContents.executeJavaScript("window.tileAdapter?.destroy()");
-        await new Promise(resolve => server.close(resolve));
+        try { await win.webContents.executeJavaScript("window.tileAdapter?.destroy()"); }
+        finally { await closeTileServer(server); }
     }
 };
 
@@ -324,6 +330,30 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
+    test("tile fixture cleanup completes even when a failed assertion leaves responses held", async () => {
+        const http = require("node:http");
+        let response;
+        let requestReceived;
+        const received = new Promise(resolve => { requestReceived = resolve; });
+        const server = http.createServer((_request, incomingResponse) => {
+            response = incomingResponse;
+            requestReceived();
+        });
+        await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+        const request = http.get(`http://127.0.0.1:${server.address().port}/tile/0/0/0.png`);
+        request.on("error", () => {});
+        await received;
+        let rescued = false;
+        const rescue = setTimeout(() => { rescued = true; response.destroy(); }, 1000);
+        try {
+            await closeTileServer(server);
+            assert.equal(rescued, false, "teardown must close held responses before waiting for the server");
+        } finally {
+            clearTimeout(rescue);
+            request.destroy();
+            server.closeAllConnections();
+        }
+    });
     test("MapLibre attribution uses its real rounded DOM and supports trusted disclosure and visible display time", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY
             ? "Real Electron DOM verification requires DISPLAY or WAYLAND_DISPLAY" : false,

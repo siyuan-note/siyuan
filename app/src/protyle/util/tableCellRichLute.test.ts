@@ -502,7 +502,8 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     let oldCode: ReturnType<typeof api.serializeTableCellRich>;
     const settingCell = document.createElement("td");
     Object.assign(window.siyuan, {menus: {menu: {
-        remove: () => { menuItems = []; }, append: () => {}, popup: () => { menuShown++; },
+        element: document.createElement("div"),
+        remove() { menuItems = []; this.data = undefined; }, append: () => {}, popup: () => { menuShown++; },
         fullscreen: () => { mobileMenuShown++; },
     }}});
     const copyDependencies = {
@@ -797,7 +798,7 @@ test("table cells insert code through slash and Enter without losing soft breaks
     const start = editor.indexOf('host.addEventListener("keydown", event => {');
     const end = editor.indexOf("}, {capture: true, signal});", start) + "}, {capture: true, signal});".length;
     const keydownSource = compile(editor.substring(start, end));
-    const copySource = ["normalizeText.ts", "../wysiwyg/codeBlockUtil.ts", "../wysiwyg/codeBlock.ts", "../lite/codeActions.ts"]
+    const copySource = ["../../menus/menuToggle.ts", "normalizeText.ts", "../wysiwyg/codeBlockUtil.ts", "../wysiwyg/codeBlock.ts", "../lite/codeActions.ts"]
         .map(file => compile(read(file))).join("\n") +
         "\nbindLiteCodeActions(host, fragment.protyle, {signal, canEdit, beforeChange, onChange: commit});";
     const selectionSource = compile(read("selectionOffsets.ts")) + "\n" + compile(read("selection.ts")) + "\n" + compile(read("tableCellRichSelection.ts"));

@@ -13,6 +13,35 @@ const {createMapSessionRouter} = require("../electron/mapHostManager");
 const {createMapContentSecurityPolicy} = require("../electron/mapHostPolicy");
 const {createRemoteDocumentContentSecurityPolicy} = require("../electron/remoteKernel");
 
+test("verification failures identify the assertion location without exposing probe secrets", async () => {
+    const vm = require("node:vm");
+    const source = fs.readFileSync(path.join(__dirname, "fixtures/map-webview-boundary/harness.cjs"), "utf8");
+    for (const duringSetup of [false, true]) {
+        const failure = Object.assign(new Error("https://private.invalid/?token=secret-token"), {
+            code: "ERR_ASSERTION", operator: "deepStrictEqual", actual: "secret-token",
+            stack: "Error: https://private.invalid/?token=secret-token\n    at verifyHarness (C:\\private\\harnessSupport.cjs:401:12)\n",
+        });
+        const messages = [];
+        let resolveExit;
+        const exited = new Promise(resolve => { resolveExit = resolve; });
+        vm.runInNewContext(source, {
+            process: {argv: ["electron", "harness.cjs", "--synthetic", "--verify"]},
+            console: {info() {}, error: value => messages.push(String(value))},
+            require: name => name === "electron" ? {
+                app: {once() {}, exit: resolveExit}, BrowserWindow: {getAllWindows: () => []},
+            } : {
+                createTemporaryProfile: () => ({profile: "fixture", cleanup() {}}),
+                createHarness: async () => { if (duringSetup) throw failure; return {}; },
+                verifyHarness: async () => { throw failure; },
+            },
+        });
+        assert.equal(await exited, 1);
+        assert.match(messages.join("\n"), /Verification location: harnessSupport\.cjs:401:12/);
+        assert.match(messages.join("\n"), /Verification assertion: ERR_ASSERTION; operator: deepStrictEqual/);
+        assert.doesNotMatch(messages.join("\n"), /private|secret-token|https:/);
+    }
+});
+
 test("remote fixture retains web security and rejects subframes and objects with the production navigation policy", () => {
     assert.equal(remoteOwnerPreferences.webviewTag, true);
     assert.equal(remoteOwnerPreferences.webSecurity, true);

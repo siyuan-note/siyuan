@@ -191,7 +191,7 @@ const cases = async source => {
     openedMenu.items.find(item => item.id === "taskStatusInProgress").click();
     check.equal(api.getTabTask(menuFixture.item), "/");
     protyle.disabled = true;
-    openTabMenu(protyle, menuFixture.from, menuFixture.item, menuFixture.item);
+    openTabMenu(protyle, menuFixture.from, menuFixture.item, menuFixture.item, false);
     check.deepEqual(openedMenu.items.map(item => item.icon), ["iconCopy", "iconEnter"]);
     openedMenu.items.find(item => item.icon === "iconEnter").click();
     check.equal(focusedTab.protyle, protyle);

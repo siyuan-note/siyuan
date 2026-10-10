@@ -6,7 +6,7 @@ import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-import {compileString} from "sass";
+import {compile} from "sass";
 
 const browserCases = (sources: Record<string, string>, language: Record<string, unknown>, data: unknown, css: string) => {
     const check: typeof assert = require("node:assert/strict");
@@ -234,7 +234,7 @@ test("lunar date controls preserve dates, validate selections, and fit narrow la
     }
     const language = JSON.parse(readFileSync("appearance/langs/zh-CN.json", "utf8"));
     const data = JSON.parse(readFileSync("../kernel/av/lunar_calendar_data.json", "utf8"));
-    const css = compileString(readFileSync("src/assets/scss/business/_av.scss", "utf8")).css;
+    const css = compile("src/assets/scss/business/_av.scss").css;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-lunar-date-test-"));
     const script = path.join(temporary, "run.cjs");
     const args = [sources, language, data, css].map(value => JSON.stringify(value)).join(",");

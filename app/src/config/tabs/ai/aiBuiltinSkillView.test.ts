@@ -24,6 +24,7 @@ class ElementStub {
         remove: (value: string) => this.classes.delete(value),
         contains: (value: string) => this.classes.has(value) || this.className.split(" ").includes(value),
     };
+    dispatchEvent(event: Event) { this.events[event.type]?.(event); return true; }
     append(element: ElementStub) { this.children.push(element); }
     closest() { return this; }
     addEventListener(name: string, callback: (event: unknown) => void) { this.events[name] = callback; }
@@ -50,6 +51,7 @@ const loadView = (languages: Record<string, string> = new Proxy({}, {get: (_obje
     runInNewContext(code, {
         exports,
         HTMLElement: ElementStub,
+        CustomEvent,
         document: {createElement: () => view},
         window: {siyuan: {config, languages}},
         require: (name: string) => {

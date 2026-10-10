@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "Düzenlemeleriniz kaydedildi ancak bazı başvuru metinleri yenilenemedi. SiYuan otomatik olarak yeniden deneyecek.",
 	"clearingUnusedAssets": "Başvurulmayan kaynak dosyaları temizleniyor...",
 	"clearingUnusedAttributeViews": "Başvurulmayan veritabanları temizleniyor...",
 	"extraLarge": "Çok büyük",

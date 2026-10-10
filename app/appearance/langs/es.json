@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "Tus cambios se han guardado, pero no se ha podido actualizar parte del texto de las referencias. SiYuan lo intentará de nuevo automáticamente.",
 	"clearingUnusedAssets": "Limpiando recursos sin referencias...",
 	"clearingUnusedAttributeViews": "Limpiando bases de datos sin referencias...",
 	"extraLarge": "Extragrande",

@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "编辑已保存，但部分引用文本刷新失败，思源将自动重试。",
 	"clearingUnusedAssets": "正在清理未引用的资源文件...",
 	"clearingUnusedAttributeViews": "正在清理未引用的数据库...",
 	"extraLarge": "超大",

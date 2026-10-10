@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "Your edits have been saved, but some reference text could not be refreshed. SiYuan will retry automatically.",
 	"clearingUnusedAssets": "Cleaning up unreferenced assets...",
 	"clearingUnusedAttributeViews": "Cleaning up unreferenced databases...",
 	"extraLarge": "Extra large",

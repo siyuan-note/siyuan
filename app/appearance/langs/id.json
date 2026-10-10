@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "Perubahan Anda telah disimpan, tetapi sebagian teks referensi gagal diperbarui. SiYuan akan mencoba lagi secara otomatis.",
 	"clearingUnusedAssets": "Membersihkan berkas aset yang tidak dirujuk...",
 	"clearingUnusedAttributeViews": "Membersihkan basis data yang tidak dirujuk...",
 	"extraLarge": "Sangat besar",

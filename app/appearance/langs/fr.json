@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "Vos modifications ont été enregistrées, mais certains textes de référence n’ont pas pu être actualisés. SiYuan réessaiera automatiquement.",
 	"clearingUnusedAssets": "Nettoyage des ressources non référencées...",
 	"clearingUnusedAttributeViews": "Nettoyage des bases de données non référencées...",
 	"extraLarge": "Très grand",

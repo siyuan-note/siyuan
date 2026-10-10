@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "تم حفظ تعديلاتك، ولكن تعذر تحديث بعض نصوص المراجع. سيعيد SiYuan المحاولة تلقائيًا.",
 	"clearingUnusedAssets": "جارٍ تنظيف ملفات الموارد غير المشار إليها...",
 	"clearingUnusedAttributeViews": "جارٍ تنظيف قواعد البيانات غير المشار إليها...",
 	"extraLarge": "كبير جدًا",

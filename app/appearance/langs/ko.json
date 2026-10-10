@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "편집 내용은 저장되었지만 일부 참조 텍스트를 갱신하지 못했습니다. 자동으로 다시 시도합니다.",
 	"clearingUnusedAssets": "참조되지 않은 자산 파일을 정리하는 중...",
 	"clearingUnusedAttributeViews": "참조되지 않은 데이터베이스를 정리하는 중...",
 	"extraLarge": "매우 크게",

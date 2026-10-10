@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "編集内容は保存されましたが、一部の参照テキストを更新できませんでした。自動的に再試行します。",
 	"clearingUnusedAssets": "未参照のアセットを削除しています...",
 	"clearingUnusedAttributeViews": "未参照のデータベースを削除しています...",
 	"extraLarge": "特大",

@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "Zmiany zostały zapisane, ale nie udało się odświeżyć części tekstów odwołań. SiYuan automatycznie spróbuje ponownie.",
 	"clearingUnusedAssets": "Czyszczenie nieużywanych zasobów...",
 	"clearingUnusedAttributeViews": "Czyszczenie nieużywanych baz danych...",
 	"extraLarge": "Bardzo duży",

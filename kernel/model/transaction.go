@@ -3312,6 +3312,7 @@ func updateRefTextRenameDoc(renamedTree *parse.Tree) {
 func FlushUpdateRefTextRenameDocJob() {
 	sql.WaitFlushTx()
 	flushUpdateRefTextRenameDoc()
+	flushDynamicRefTextRetries()
 }
 
 func flushUpdateRefTextRenameDoc() {

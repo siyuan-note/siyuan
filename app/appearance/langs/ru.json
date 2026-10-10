@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "Изменения сохранены, но часть текста ссылок не удалось обновить. SiYuan автоматически повторит попытку.",
 	"clearingUnusedAssets": "Очистка ресурсов без ссылок...",
 	"clearingUnusedAttributeViews": "Очистка баз данных без ссылок...",
 	"extraLarge": "Очень большой",

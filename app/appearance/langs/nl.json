@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "Uw wijzigingen zijn opgeslagen, maar sommige verwijzingsteksten konden niet worden bijgewerkt. SiYuan probeert het automatisch opnieuw.",
 	"clearingUnusedAssets": "Niet-verwezen bijlagen opruimen...",
 	"clearingUnusedAttributeViews": "Niet-verwezen databases opruimen...",
 	"extraLarge": "Extra groot",

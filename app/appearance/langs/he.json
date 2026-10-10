@@ -1,4 +1,5 @@
 {
+	"dynamicRefTextRefreshRetry": "העריכות נשמרו, אך לא ניתן היה לרענן חלק מטקסט ההפניות. SiYuan ינסה שוב אוטומטית.",
 	"clearingUnusedAssets": "מנקה קובצי משאבים ללא הפניות...",
 	"clearingUnusedAttributeViews": "מנקה מסדי נתונים ללא הפניות...",
 	"extraLarge": "גדול במיוחד",

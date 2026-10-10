@@ -1,3 +1,13 @@
+// 列表项的首个容器保留独立块标，段落仍沿用列表项的合并操作。
+export const getListItemGutterContainer = (element: Element) => {
+    const item = element.closest('[data-type="NodeListItem"]');
+    const first = item?.querySelector(":scope > [data-node-id]");
+    if (first && ["NodeTable", "NodeBlockquote", "NodeCallout", "NodeSuperBlock", "NodeTabs"]
+        .includes(first.getAttribute("data-type")) && (element === item || first.contains(element))) {
+        return first;
+    }
+};
+
 // 鼠标经过祖先容器留白移向子块块标时，保留当前块标及其选区。
 export const isContainerGutterBridge = (gutter: HTMLElement, container: HTMLElement, target: HTMLElement,
                                        x: number, y: number, getBlock: (button: HTMLElement) => Element) => {

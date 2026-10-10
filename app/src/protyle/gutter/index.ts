@@ -142,6 +142,7 @@ import {CALLOUT_PRESETS, updateCalloutType, updateCustomCalloutType} from "../wy
 import {setTabsPosition, toggleTabsTasks, unwrapTabs} from "../wysiwyg/tabs";
 import {getTaskStatusItems} from "../wysiwyg/taskStatusDialog";
 import {hasTabsTasks} from "../render/tabsRender";
+import {getListItemGutterContainer} from "./container";
 
 const restoreGutterRange = (protyle: IProtyle) => {
     // 多选块菜单只操作选中的块，不恢复旧文本光标，避免编辑器滚动到光标位置。
@@ -3702,6 +3703,10 @@ export class Gutter {
         }
         let html = "";
         let nodeElement = selectedElement || element;
+        const listItemContainer = isMultiSelect ? undefined : getListItemGutterContainer(nodeElement);
+        if (listItemContainer && nodeElement === listItemContainer.parentElement) {
+            nodeElement = listItemContainer;
+        }
         const mindmapElement = (nodeElement.getAttribute("data-type") === "NodeMindmap" ||
             nodeElement.getAttribute("data-type") === "NodeList" &&
             nodeElement.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1") ?
@@ -3751,7 +3756,7 @@ export class Gutter {
                 }
                 if (index === 0) {
                     // 不单独显示，要不然在块的间隔中，gutter 会跳来跳去的
-                    if (!isMultiSelect && !mindmapElement &&
+                    if (!isMultiSelect && !mindmapElement && !listItemContainer &&
                         ["NodeBlockquote", "NodeList", "NodeCallout", "NodeSuperBlock"].includes(type)) {
                         if (target && type === "NodeCallout") {
                             // Callout 标题需显示
@@ -3767,6 +3772,9 @@ export class Gutter {
                     }
 
                     let topElement = selectedElement || (tabsHeader || mindmapElement ? nodeElement : getTopAloneElement(nodeElement));
+                    if (listItemContainer && topElement.contains(listItemContainer)) {
+                        topElement = nodeElement === listItemContainer.parentElement ? nodeElement : listItemContainer;
+                    }
                     if (embedContext && !embedContext.boundaryElement.contains(topElement)) {
                         // 单独查询列表项时，渲染器生成的无 ID 列表包装节点不属于可操作边界。
                         topElement = embedContext.targetElement || nodeElement;
@@ -3789,7 +3797,8 @@ export class Gutter {
                         listItem = undefined;
                     }
                     // 标题（除列表下的）、提示下的块必须显示
-                    if (topElement !== nodeElement && type !== "NodeHeading" && !hasClosestByClassName(nodeElement, "callout")) {
+                    if (topElement !== nodeElement && type !== "NodeHeading" &&
+                        (topElement === listItemContainer || !hasClosestByClassName(nodeElement, "callout"))) {
                         while (nodeElement !== topElement) {
                             nodeElement = nodeElement.parentElement;
                             // > > > > 1 left 位置
@@ -3803,7 +3812,7 @@ export class Gutter {
                     }
                 }
                 // - > # 1 \n  > 2
-                if (type === "NodeListItem" && index > 0) {
+                if (type === "NodeListItem" && index > 0 && nodeElement !== listItemContainer?.parentElement) {
                     // 列表项内的块不显示块标
                     html = "";
                 }
@@ -3848,7 +3857,8 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 if (type === "NodeListItem" || type === "NodeList") {
                     listItem = nodeElement;
                     if (type === "NodeListItem" && nodeElement.childElementCount > 3) {
-                        html = buttonHTML + foldHTML;
+                        html = nodeElement === listItemContainer?.parentElement ?
+                            html + foldHTML : buttonHTML + foldHTML;
                     }
                 }
                 if (type === "NodeHeading") {

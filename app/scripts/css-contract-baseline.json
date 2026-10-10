@@ -1640,7 +1640,7 @@
       "file": "src/assets/scss/pdf/annotation_layer_builder.scss",
       "rule": "declaration-no-important",
       "text": "Disallowed !important (declaration-no-important)",
-      "source": "outline: calc(1.5px * var(--scale-factor)) solid CanvasText !important;",
+      "source": "outline: calc(1.5px * var(--total-scale-factor)) solid CanvasText !important;",
       "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
     },
     {
@@ -1661,7 +1661,7 @@
       "file": "src/assets/scss/pdf/annotation_layer_builder.scss",
       "rule": "declaration-no-important",
       "text": "Disallowed !important (declaration-no-important)",
-      "source": "outline: calc(3px * var(--scale-factor)) solid Highlight !important;",
+      "source": "outline: calc(3px * var(--total-scale-factor)) solid Highlight !important;",
       "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
     },
     {

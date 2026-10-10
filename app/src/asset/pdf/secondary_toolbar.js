@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import {internalOpt} from "./internal_evt.js";
+
 /** @typedef {import("./event_utils.js").EventBus} EventBus */
 
 import {
@@ -235,9 +237,9 @@ class SecondaryToolbar {
       });
     }
 
-    eventBus._on("cursortoolchanged", this.#cursorToolChanged.bind(this));
-    eventBus._on("scrollmodechanged", this.#scrollModeChanged.bind(this));
-    eventBus._on("spreadmodechanged", this.#spreadModeChanged.bind(this));
+    eventBus.on("cursortoolchanged", this.#cursorToolChanged.bind(this), internalOpt);
+    eventBus.on("scrollmodechanged", this.#scrollModeChanged.bind(this), internalOpt);
+    eventBus.on("spreadmodechanged", this.#spreadModeChanged.bind(this), internalOpt);
   }
 
   #cursorToolChanged({ tool, disabled }) {

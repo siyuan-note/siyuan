@@ -162,6 +162,9 @@ export class Asset extends Model {
                 }
                 if (this.element.clientWidth === 0) {
                     const observer = new MutationObserver(() => {
+                        if (!this.element.isConnected || this.element.clientWidth === 0) {
+                            return;
+                        }
                         if (!this.pdfLoadState.consumeObserver()) {
                             return;
                         }

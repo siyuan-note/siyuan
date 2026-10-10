@@ -6,7 +6,7 @@ class TestEventBus {
     private listeners = new Map<string, Array<(event: any) => void>>();
     public lastHistoryState: {canGoBack: boolean, canGoForward: boolean};
 
-    public _on(eventName: string, listener: (event: any) => void, options?: {signal?: AbortSignal}) {
+    public on(eventName: string, listener: (event: any) => void, options?: {signal?: AbortSignal; internal?: string}) {
         const listeners = this.listeners.get(eventName) || [];
         listeners.push(listener);
         this.listeners.set(eventName, listeners);

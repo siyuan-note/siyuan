@@ -1,7 +1,7 @@
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 
-const PDF_JS_VERSION = "4.8.69";
+const PDF_JS_VERSION = "6.4.299-siyuan.1";
 
 interface IPromiseWithResolversConstructor {
     withResolvers?: <T>() => {

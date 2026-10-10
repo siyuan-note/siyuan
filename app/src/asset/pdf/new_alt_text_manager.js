@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import {internalOpt} from "./internal_evt.js";
+
 import { noContextMenu } from "./pdfjs";
 
 class NewAltTextManager {
@@ -142,9 +144,9 @@ class NewAltTextManager {
       this.#toggleTitleAndDisclaimer();
     });
 
-    eventBus._on("enableguessalttext", ({ value }) => {
+    eventBus.on("enableguessalttext", ({ value }) => {
       this.#toggleGuessAltText(value, /* isInitial = */ false);
-    });
+    }, internalOpt);
 
     this.#overlayManager.register(dialog);
 
@@ -314,7 +316,7 @@ class NewAltTextManager {
       }
 
       // We're done, remove the listener and hide the download model progress.
-      this.#eventBus._off("loadaiengineprogress", callback);
+      this.#eventBus.off("loadaiengineprogress", callback);
       this.#downloadModel.classList.toggle("hidden", true);
 
       this.#toggleAI(true);
@@ -330,7 +332,7 @@ class NewAltTextManager {
         /* isInitial = */ true
       );
     };
-    this.#eventBus._on("loadaiengineprogress", callback);
+    this.#eventBus.on("loadaiengineprogress", callback, internalOpt);
   }
 
   async editAltText(uiManager, editor, firstTime) {
@@ -588,13 +590,13 @@ class ImageAltTextSettings {
       });
     });
 
-    eventBus._on("enablealttextmodeldownload", ({ value }) => {
+    eventBus.on("enablealttextmodeldownload", ({ value }) => {
       if (value) {
         this.#download(false);
       } else {
         this.#delete(false);
       }
-    });
+    }, internalOpt);
 
     this.#overlayManager.register(dialog);
   }

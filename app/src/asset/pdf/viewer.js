@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {RenderingStates, ScrollMode, SpreadMode, TextLayerMode} from "./ui_utils.js";
+import {ScrollMode, SpreadMode, TextLayerMode} from "./ui_utils.js";
+import {RenderingStates} from "./renderable_view.js";
 import { AppOptions } from "./app_options.js";
 import { LinkTarget } from "./pdf_link_service.js";
 import { PDFViewerApplication } from "./app.js";
@@ -239,11 +240,20 @@ function getViewerConfiguration(element) {
 function webViewerLoad(file, element, pdfPage, annoId, previewOnly = false) {
   // SiYuan 通过 AppOptions.set 显式配置 viewer,禁用从 localStorage 读取的 Preferences,
   AppOptions.set("disablePreferences", true);
-  AppOptions.set("workerSrc", `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.compat.mjs?v=4.8.69`);
+  AppOptions.set("workerSrc", `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.compat.mjs?v=6.4.299-siyuan.1`);
   AppOptions.set("defaultUrl", file);
   AppOptions.set("cMapUrl", `${Constants.PROTYLE_CDN}/js/pdf/cmaps/`);
+  AppOptions.set("iccUrl", `${Constants.PROTYLE_CDN}/js/pdf/iccs/`);
   AppOptions.set("standardFontDataUrl", `${Constants.PROTYLE_CDN}/js/pdf/standard_fonts/`);
+  AppOptions.set("wasmUrl", `${Constants.PROTYLE_CDN}/js/pdf/wasm/`);
   AppOptions.set("annotationEditorMode", AnnotationEditorType.DISABLE);
+  AppOptions.set("enableScripting", false);
+  AppOptions.set("enableAutoLinking", false);
+  AppOptions.set("enableSelectionRendering", false);
+  AppOptions.set("enableComment", false);
+  AppOptions.set("enableSignatureEditor", false);
+  AppOptions.set("enableSignatureVerification", false);
+  AppOptions.set("enableSplitMerge", false);
   const pdf = new PDFViewerApplication(pdfPage)
   pdf.annoId = annoId
   const config = getViewerConfiguration(element);
@@ -287,6 +297,7 @@ function webViewerLoad(file, element, pdfPage, annoId, previewOnly = false) {
       return;
     }
     isDestroyed = true;
+    pdf._destroyed = true;
     destroyAnno(element);
     try {
       await runPromise;

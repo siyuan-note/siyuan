@@ -79,10 +79,18 @@
     height: 100%;
 
     canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
       margin: 0;
       display: block;
       width: 100%;
       height: 100%;
+      contain: content;
+
+      &.detailView {
+        image-rendering: pixelated;
+      }
 
       &[hidden] {
         display: none;
@@ -101,6 +109,8 @@
 }
 
 .pdfViewer .page {
+  --user-unit: 1;
+  --total-scale-factor: calc(var(--scale-factor) * var(--user-unit));
   --scale-round-x: 1px;
   --scale-round-y: 1px;
 

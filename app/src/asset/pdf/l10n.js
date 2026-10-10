@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-/** @typedef {import("./interfaces").IL10n} IL10n */
-
 /**
  * NOTE: The L10n-implementations should use lowercase language-codes
  *       internally.
- * @implements {IL10n}
  */
 class L10n {
   #dir;
 
-  #elements = new Set();
+  #elements;
 
   #lang;
 
@@ -53,7 +50,7 @@ class L10n {
   }
 
   /** @inheritdoc */
-  async get(ids, args = null, fallback) {
+  async get(ids, args = null) {
     if (Array.isArray(ids)) {
       ids = ids.map(id => ({ id }));
       const messages = await this.#l10n.formatMessages(ids);
@@ -66,12 +63,12 @@ class L10n {
         args,
       },
     ]);
-    return messages[0]?.value || fallback;
+    return messages[0]?.value;
   }
 
   /** @inheritdoc */
   async translate(element) {
-    this.#elements.add(element);
+    (this.#elements ||= new Set()).add(element);
     try {
       this.#l10n.connectRoot(element);
       await this.#l10n.translateRoots();
@@ -85,16 +82,19 @@ class L10n {
     try {
       await this.#l10n.translateElements([element]);
     } catch (ex) {
-      console.error(`translateOnce: "${ex}".`);
+      console.error("translateOnce:", ex);
     }
   }
 
   /** @inheritdoc */
   async destroy() {
-    for (const element of this.#elements) {
-      this.#l10n.disconnectRoot(element);
+    if (this.#elements) {
+      for (const element of this.#elements) {
+        this.#l10n.disconnectRoot(element);
+      }
+      this.#elements.clear();
+      this.#elements = null;
     }
-    this.#elements.clear();
     this.#l10n.pauseObserving();
   }
 

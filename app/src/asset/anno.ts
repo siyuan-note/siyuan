@@ -34,6 +34,8 @@ import {
 } from "./annoRuntime";
 import {appendPdfAnnotationId} from "../editor/pdfAssetLink";
 import {isPdfRectAnnotation, mergePdfTextAnnotationRects} from "./pdfTextAnnotation";
+import {pdfRectToViewport} from "./pdfCoordinates";
+import {getPdfSelectionText} from "./pdfSelectionText";
 
 export {destroyAnno, registerPdfInstance, unregisterPdfInstance} from "./annoRuntime";
 
@@ -184,6 +186,18 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                             pdf.appConfig.file.replace(location.origin, "").substr(8).replace(/-\d{14}-\w{7}.pdf$/, ""), pdf);
                     }
                 });
+                if (rectElement) {
+                    if (typeof selectionToolbarTimer !== "undefined") {
+                        window.clearTimeout(selectionToolbarTimer);
+                        selectionToolbarTimer = undefined;
+                    }
+                    showToolbar(element, undefined, rectElement);
+                    // 框选结束产生的点击不应立即关闭刚显示的菜单。
+                    ignoreRectClick = true;
+                    window.setTimeout(() => {
+                        ignoreRectClick = false;
+                    });
+                }
             } else {
                 rectElement = null;
             }
@@ -698,25 +712,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
         return;
     }
     const endIndex = parseInt(endPageElement.getAttribute("data-page-number")) - 1;
-    // https://github.com/siyuan-note/siyuan/issues/5213
-    const rangeContents = range.cloneContents();
-    Array.from(rangeContents.children).forEach(item => {
-        if (item.tagName === "BR" && item.previousElementSibling && item.nextElementSibling) {
-            const previousText = item.previousElementSibling.textContent;
-            const nextText = item.nextElementSibling.textContent;
-            if (/^[A-Za-z]$/.test(previousText.substring(previousText.length - 2, previousText.length - 1)) &&
-                /^[A-Za-z]$/.test(nextText.substring(0, 1))) {
-                if (previousText.endsWith("-")) {
-                    item.previousElementSibling.textContent = previousText.substring(0, previousText.length - 1);
-                } else {
-                    // 中文情况不能添加 https://github.com/siyuan-note/siyuan/issues/8152
-                    item.insertAdjacentText("afterend", " ");
-                }
-            }
-        }
-    });
-    // eslint-disable-next-line no-control-regex
-    const content = escapeHtmlTextAndAttr(rangeContents.textContent.replace(/[\x00]|\n/g, ""));
+    const content = escapeHtmlTextAndAttr(getPdfSelectionText(range));
     const startPage = pdf.pdfViewer.getPageView(startIndex);
     const startPageRect = startPage.canvas.getClientRects()[0];
     const startViewport = startPage.viewport;
@@ -976,7 +972,7 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
 };
 
 const setRectPosition = (element: HTMLElement, page: any, rect: number[], viewport = page.viewport.clone({rotation: 0})) => {
-    const bounds = viewport.convertToViewportRectangle(rect);
+    const bounds = pdfRectToViewport(viewport, rect);
     const width = Math.abs(bounds[0] - bounds[2]);
     if (width <= 0) {
         return false;
@@ -1100,14 +1096,14 @@ async function getRectImgData(pdfObj: any, pageNumber: number, position: number[
         scale: PDF_RECT_CAPTURE_SCALE,
         rotation: totalRotation,
     });
-    const targetRect = targetViewport.convertToViewportRectangle(position);
+    const targetRect = pdfRectToViewport(targetViewport, position);
     const captureScale = getLimitedCaptureScale(targetRect);
     if (captureScale <= 0) {
         throw new Error("PDF rectangle annotation has invalid coordinates");
     }
 
     const viewport = pdfPage.getViewport({scale: captureScale, rotation: totalRotation});
-    const captureBounds = getCaptureCanvasBounds(viewport.convertToViewportRectangle(position));
+    const captureBounds = getCaptureCanvasBounds(pdfRectToViewport(viewport, position));
     const captureViewport = pdfPage.getViewport({
         scale: captureScale,
         rotation: totalRotation,
@@ -1129,7 +1125,7 @@ async function getRectImgData(pdfObj: any, pageNumber: number, position: number[
 
     const displayViewport = pdfPage.getViewport({scale: PDF_RECT_DISPLAY_SCALE, rotation: totalRotation});
     const displayWidth = Math.min(
-        getCaptureDisplayWidth(displayViewport.convertToViewportRectangle(position)),
+        getCaptureDisplayWidth(pdfRectToViewport(displayViewport, position)),
         captureBounds.width,
     );
     const blob = await new Promise<Blob>((resolve, reject) => {

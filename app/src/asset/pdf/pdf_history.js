@@ -14,9 +14,11 @@
  */
 
 /** @typedef {import("./event_utils").EventBus} EventBus */
-/** @typedef {import("./interfaces").IPDFLinkService} IPDFLinkService */
+/** @typedef {import("./pdf_link_service.js").PDFLinkService} PDFLinkService */
 
 import { isValidRotation, parseQueryString } from "./ui_utils.js";
+import { internalOpt } from "./internal_evt.js";
+import { updateUrlHash } from "./pdfjs";
 import { waitOnEventOrTimeout } from "./event_utils.js";
 
 // Heuristic value used when force-resetting `this._blockHashChange`.
@@ -27,13 +29,13 @@ const POSITION_UPDATED_THRESHOLD = 50;
 const UPDATE_VIEWAREA_TIMEOUT = 1000; // milliseconds
 
 /**
- * @typedef {Object} PDFHistoryOptions
- * @property {IPDFLinkService} linkService - The navigation/linking service.
+ * @typedef {object} PDFHistoryOptions
+ * @property {PDFLinkService} linkService - The navigation/linking service.
  * @property {EventBus} eventBus - The application event bus.
  */
 
 /**
- * @typedef {Object} InitializeParameters
+ * @typedef {object} InitializeParameters
  * @property {string} fingerprint - The PDF document's unique fingerprint.
  * @property {boolean} [resetHistory] - Reset the browsing history.
  * @property {boolean} [updateUrl] - Attempt to update the document URL, with
@@ -41,7 +43,7 @@ const UPDATE_VIEWAREA_TIMEOUT = 1000; // milliseconds
  */
 
 /**
- * @typedef {Object} PushParameters
+ * @typedef {object} PushParameters
  * @property {string} [namedDest] - The named destination. If absent, a
  *   stringified version of `explicitDest` is used.
  * @property {Array} explicitDest - The explicit destination array.
@@ -53,7 +55,7 @@ function getCurrentHash() {
 }
 
 class PDFHistory {
-  #eventAbortController = null;
+  #eventAC = null;
 
   /**
    * @param {PDFHistoryOptions} options
@@ -68,17 +70,21 @@ class PDFHistory {
 
     // Ensure that we don't miss a "pagesinit" event,
     // by registering the listener immediately.
-    this.eventBus._on("pagesinit", () => {
-      this._isPagesLoaded = false;
+    this.eventBus.on(
+      "pagesinit",
+      () => {
+        this._isPagesLoaded = false;
 
-      this.eventBus._on(
-        "pagesloaded",
-        evt => {
-          this._isPagesLoaded = !!evt.pagesCount;
-        },
-        { once: true }
-      );
-    });
+        this.eventBus.on(
+          "pagesloaded",
+          evt => {
+            this._isPagesLoaded = !!evt.pagesCount;
+          },
+          { once: true, ...internalOpt }
+        );
+      },
+      internalOpt
+    );
   }
 
   /**
@@ -182,7 +188,7 @@ class PDFHistory {
 
   /**
    * Push an internal destination to the browser history.
-   * @param {PushParameters}
+   * @param {PushParameters} params
    */
   push({ namedDest = null, explicitDest, pageNumber }) {
     if (!this._initialized) {
@@ -383,10 +389,9 @@ class PDFHistory {
 
     let newUrl;
     if (this._updateUrl && destination?.hash) {
-      const baseUrl = document.location.href.split("#", 1)[0];
-      // Prevent errors in Firefox.
-      if (!baseUrl.startsWith("file://")) {
-        newUrl = `${baseUrl}#${destination.hash}`;
+      const { href, protocol } = document.location;
+      if (protocol !== "file:") {
+        newUrl = updateUrlHash(href, destination.hash);
       }
     }
     if (shouldReplace) {
@@ -479,10 +484,12 @@ class PDFHistory {
         return false;
       }
     }
-    if (!Number.isInteger(state.uid) || state.uid < 0) {
-      return false;
-    }
-    if (state.destination === null || typeof state.destination !== "object") {
+    if (
+      !Number.isInteger(state.uid) ||
+      state.uid < 0 ||
+      state.destination === null ||
+      typeof state.destination !== "object"
+    ) {
       return false;
     }
     return true;
@@ -671,22 +678,23 @@ class PDFHistory {
   }
 
   #bindEvents() {
-    if (this.#eventAbortController) {
+    if (this.#eventAC) {
       return; // The event listeners were already added.
     }
-    this.#eventAbortController = new AbortController();
-    const { signal } = this.#eventAbortController;
+    this.#eventAC = new AbortController();
+    const { signal } = this.#eventAC;
 
-    this.eventBus._on("updateviewarea", this.#updateViewarea.bind(this), {
+    this.eventBus.on("updateviewarea", this.#updateViewarea.bind(this), {
       signal,
+      ...internalOpt,
     });
     window.addEventListener("popstate", this.#popState.bind(this), { signal });
     window.addEventListener("pagehide", this.#pageHide.bind(this), { signal });
   }
 
   #unbindEvents() {
-    this.#eventAbortController?.abort();
-    this.#eventAbortController = null;
+    this.#eventAC?.abort();
+    this.#eventAC = null;
   }
 }
 
@@ -706,10 +714,11 @@ function isDestHashesEqual(destHash, pushHash) {
 
 function isDestArraysEqual(firstDest, secondDest) {
   function isEntryEqual(first, second) {
-    if (typeof first !== typeof second) {
-      return false;
-    }
-    if (Array.isArray(first) || Array.isArray(second)) {
+    if (
+      typeof first !== typeof second ||
+      Array.isArray(first) ||
+      Array.isArray(second)
+    ) {
       return false;
     }
     if (first !== null && typeof first === "object" && second !== null) {

@@ -22,9 +22,7 @@ import { AppOptions, OptionKind } from "./app_options.js";
  */
 class BasePreferences {
   #defaults = Object.freeze(
-    typeof PDFJSDev === "undefined"
-      ? AppOptions.getAll(OptionKind.PREFERENCE, /* defaultOnly = */ true)
-      : PDFJSDev.eval("DEFAULT_PREFERENCES")
+    AppOptions.getAll(OptionKind.PREFERENCE, /* defaultOnly = */ true)
   );
 
   #initializedPromise = null;
@@ -37,12 +35,10 @@ class BasePreferences {
       throw new Error("Cannot initialize BasePreferences.");
     }
 
-    if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("CHROME")) {
-      Object.defineProperty(this, "defaults", {
-        get() {
-          return this.#defaults;
-        },
-      });
+    if (AppOptions.get("disablePreferences")) {
+      // 思源通过 AppOptions 配置查看器，不读取浏览器中的偏好设置。
+      this.#initializedPromise = Promise.resolve();
+      return;
     }
 
     this.#initializedPromise = this._readFromStorage(this.#defaults).then(
@@ -57,7 +53,10 @@ class BasePreferences {
       }
     );
 
-    if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("MOZCENTRAL")) {
+    if (
+      typeof PDFJSDev === "undefined" ||
+      PDFJSDev.test("(TESTING && !LIB) || MOZCENTRAL")
+    ) {
       window.addEventListener(
         "updatedPreference",
         async ({ detail: { name, value } }) => {
@@ -70,7 +69,7 @@ class BasePreferences {
 
   /**
    * Stub function for writing preferences to storage.
-   * @param {Object} prefObj The preferences that should be written to storage.
+   * @param {object} prefObj The preferences that should be written to storage.
    * @returns {Promise} A promise that is resolved when the preference values
    *                    have been written.
    */
@@ -80,7 +79,7 @@ class BasePreferences {
 
   /**
    * Stub function for reading preferences from storage.
-   * @param {Object} prefObj The preferences that should be read from storage.
+   * @param {object} prefObj The preferences that should be read from storage.
    * @returns {Promise} A promise that is resolved with an {Object} containing
    *                    the preferences that have been read.
    */
@@ -133,6 +132,10 @@ class BasePreferences {
     }
     await this.#initializedPromise;
     return AppOptions.get(name);
+  }
+
+  get defaults() {
+    return this.#defaults;
   }
 
   get initializedPromise() {

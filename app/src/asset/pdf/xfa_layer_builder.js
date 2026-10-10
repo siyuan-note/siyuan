@@ -17,20 +17,30 @@
 // eslint-disable-next-line max-len
 /** @typedef {import("../src/display/annotation_storage").AnnotationStorage} AnnotationStorage */
 // eslint-disable-next-line max-len
-/** @typedef {import("../src/display/display_utils").PageViewport} PageViewport */
-/** @typedef {import("./interfaces").IPDFLinkService} IPDFLinkService */
+/** @typedef {import("../src/display/page_viewport").PageViewport} PageViewport */
+/** @typedef {import("./pdf_link_service.js").PDFLinkService} PDFLinkService */
 
 import { XfaLayer } from "./pdfjs";
 
 /**
- * @typedef {Object} XfaLayerBuilderOptions
+ * @typedef {object} XfaLayerBuilderOptions
  * @property {PDFPageProxy} pdfPage
  * @property {AnnotationStorage} [annotationStorage]
- * @property {IPDFLinkService} linkService
- * @property {Object} [xfaHtml]
+ * @property {PDFLinkService} linkService
+ * @property {object} [xfaHtml]
+ */
+
+/**
+ * @typedef {object} XfaLayerBuilderRenderOptions
+ * @property {PageViewport} viewport
+ * @property {string} [intent] - The default value is "display".
  */
 
 class XfaLayerBuilder {
+  #cancelled = false;
+
+  div = null;
+
   /**
    * @param {XfaLayerBuilderOptions} options
    */
@@ -44,63 +54,42 @@ class XfaLayerBuilder {
     this.annotationStorage = annotationStorage;
     this.linkService = linkService;
     this.xfaHtml = xfaHtml;
-
-    this.div = null;
-    this._cancelled = false;
   }
 
   /**
-   * @param {PageViewport} viewport
-   * @param {string} intent (default value is 'display')
-   * @returns {Promise<Object | void>} A promise that is resolved when rendering
+   * @param {XfaLayerBuilderRenderOptions} viewport
+   * @returns {Promise<object | void>} A promise that is resolved when rendering
    *   of the XFA layer is complete. The first rendering will return an object
    *   with a `textDivs` property that can be used with the TextHighlighter.
    */
-  async render(viewport, intent = "display") {
+  async render({ viewport, intent = "display" }) {
+    let xfaHtml;
     if (intent === "print") {
-      const parameters = {
-        viewport: viewport.clone({ dontFlip: true }),
-        div: this.div,
-        xfaHtml: this.xfaHtml,
-        annotationStorage: this.annotationStorage,
-        linkService: this.linkService,
-        intent,
-      };
+      xfaHtml = this.xfaHtml;
+    } else {
+      xfaHtml = await this.pdfPage.getXfa();
 
-      // Create an xfa layer div and render the form
-      this.div = document.createElement("div");
-      parameters.div = this.div;
-
-      return XfaLayer.render(parameters);
+      if (this.#cancelled || !xfaHtml) {
+        return { textDivs: [] };
+      }
     }
 
-    // intent === "display"
-    const xfaHtml = await this.pdfPage.getXfa();
-    if (this._cancelled || !xfaHtml) {
-      return { textDivs: [] };
-    }
-
-    const parameters = {
+    // Create an xfa layer div and render the form
+    const hasDiv = !!this.div;
+    const params = {
       viewport: viewport.clone({ dontFlip: true }),
-      div: this.div,
+      div: (this.div ??= document.createElement("div")),
       xfaHtml,
       annotationStorage: this.annotationStorage,
       linkService: this.linkService,
       intent,
     };
 
-    if (this.div) {
-      return XfaLayer.update(parameters);
-    }
-    // Create an xfa layer div and render the form
-    this.div = document.createElement("div");
-    parameters.div = this.div;
-
-    return XfaLayer.render(parameters);
+    return hasDiv ? XfaLayer.update(params) : XfaLayer.render(params);
   }
 
   cancel() {
-    this._cancelled = true;
+    this.#cancelled = true;
   }
 
   hide() {

@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261010133056"
+		"updated": "20261010140118"
 	},
 	"Children": [
 		{
@@ -967,7 +967,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003636-epvk98g",
-				"updated": "20261006114009"
+				"updated": "20261010140118"
 			},
 			"Children": [
 				{
@@ -1355,7 +1355,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202934-1h96or8",
-				"updated": "20261010133056"
+				"updated": "20261010140118"
 			},
 			"Children": [
 				{
@@ -1482,7 +1482,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-3zn8sf9",
-				"updated": "20261010133056"
+				"updated": "20261010140118"
 			},
 			"Children": [
 				{
@@ -1522,7 +1522,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " Hover over a local image to view its OCR text; an empty result is shown explicitly. The text selection icon identifies the OCR action, while the image icon copies the image as PNG, even when no OCR text is available. In a custom appearance profile, use "
+					"Data": " Hover over a local image to view its OCR text; an empty result is shown explicitly. The text recognition icon identifies the OCR action, while the image icon copies the image as PNG, even when no OCR text is available. In a custom appearance profile, use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1550,6 +1550,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " to show or hide the image copy button; it is hidden in the Simple profile."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Long OCR text is shortened to at most 200 characters and six lines, followed by three dots. Double-click the OCR icon to view the full text."
 				}
 			]
 		},

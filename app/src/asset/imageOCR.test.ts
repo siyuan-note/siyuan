@@ -99,7 +99,7 @@ const browserCases = async (source: string, actionsSource: string, statusSource:
     check.equal(requests, 1, "hover, focus, and pointer interactions reuse the status");
     check.equal(root.querySelectorAll(".protyle-action__ocr").length, 1);
     let action = root.querySelector<HTMLElement>(".protyle-action__ocr");
-    check.match(action.innerHTML, /#iconSelectText/);
+    check.match(action.innerHTML, /#iconOCR/);
     action.click();
     await new Promise(resolve => setTimeout(resolve, 30));
     check.equal(copies, 1);

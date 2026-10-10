@@ -14,6 +14,7 @@ export interface IImageOCRMenuContext {
 export const IMAGE_OCR_MENU: IMenuDeclaration<IImageOCRMenuContext> = {
     id: "ocr",
     label: () => "OCR",
+    icon: "iconOCR",
     simple: false,
     type: "entry",
     behavior: context => ({

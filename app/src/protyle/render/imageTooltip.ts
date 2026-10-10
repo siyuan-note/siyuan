@@ -2,6 +2,24 @@ import {escapeHtml} from "../../util/escape";
 import {getAssetExtension, getAssetName} from "../../util/pathName";
 import {getImageTitle} from "./imageTitle";
 
+const getOCRPreview = (text: string) => {
+    const content = text.trim().replace(/\r\n|\r/g, "\n");
+    let preview = "";
+    let length = 0;
+    let lines = 1;
+    for (const character of content) {
+        if (length === 200 || character === "\n" && lines === 6) {
+            return preview.trimEnd() + "...";
+        }
+        preview += character;
+        length++;
+        if (character === "\n") {
+            lines++;
+        }
+    }
+    return preview;
+};
+
 export const getImageTooltip = (image: HTMLImageElement, size?: string, ocrText?: string) => {
     const source = image.getAttribute("data-src") || image.getAttribute("src") || "";
     const path = source.split(/[?#]/)[0];
@@ -26,6 +44,6 @@ export const getImageTooltip = (image: HTMLImageElement, size?: string, ocrText?
     if (ocrText === undefined) {
         return tooltip;
     }
-    const ocr = escapeHtml(ocrText.trim() || window.siyuan.languages.emptyContent).replace(/\r\n|\r|\n/g, "<br>");
+    const ocr = escapeHtml(getOCRPreview(ocrText) || window.siyuan.languages.emptyContent).replace(/\n/g, "<br>");
     return tooltip + '<div class="fn__hr"></div>' + escapeHtml(window.siyuan.languages.ocrResult) + ":<br>" + ocr;
 };

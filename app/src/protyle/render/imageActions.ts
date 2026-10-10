@@ -98,7 +98,7 @@ const addImageAction = (image: HTMLImageElement) => {
     action.setAttribute("role", "button");
     action.setAttribute("aria-label", window.siyuan.languages.imageOCRActionTip);
     action.setAttribute("data-position", "north");
-    action.innerHTML = '<svg><use xlink:href="#iconSelectText"></use></svg>';
+    action.innerHTML = '<svg><use xlink:href="#iconOCR"></use></svg>';
     let timer: number;
     action.addEventListener("click", event => {
         event.stopPropagation();

@@ -68,6 +68,8 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             }
             let accessChanged = false;
             if (includes("system")) {
+                accessChanged = window.siyuan.config.system?.encryptedNotebookFollowSystemLock !==
+                    next.system?.encryptedNotebookFollowSystemLock;
                 // 系统设置通知同时同步访问授权的顶层配置，值以内核返回的脱敏配置为准。
                 for (const key of ["api", "oidc", "accessAuthCode"] as const) {
                     accessChanged ||= !objEquals(window.siyuan.config[key], next[key]);

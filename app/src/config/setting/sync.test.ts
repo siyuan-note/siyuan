@@ -250,9 +250,9 @@ for (const mobile of [false, true]) {
             {MOBILE: mobile, BROWSER: mobile}, false, true), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText;
-        const config = {system: {autoLaunch2: 0}, api: {token: "old-token"}, oidc: {enabled: false, clientSecret: "old"},
+        const config = {system: {autoLaunch2: 0, encryptedNotebookFollowSystemLock: false}, api: {token: "old-token"}, oidc: {enabled: false, clientSecret: "old"},
             accessAuthCode: "old-mask", editor: {}, appearance: {}, keymap: {}, ai: {}, sync: {enabled: true}};
-        let next = {...config, system: {autoLaunch2: 1}, api: {token: "new-token"},
+        let next = {...config, system: {autoLaunch2: 1, encryptedNotebookFollowSystemLock: false}, api: {token: "new-token"},
             oidc: {enabled: true, clientSecret: "******"}, accessAuthCode: "******"};
         let failed = false;
         const remounted: string[] = [];
@@ -274,6 +274,11 @@ for (const mobile of [false, true]) {
         remounted.length = 0;
         await exports.refreshSettingConfig("system");
         assert.deepEqual(remounted, mobile ? [] : ["app"]);
+        remounted.length = 0;
+        next = {...next, system: {...next.system, encryptedNotebookFollowSystemLock: true}};
+        await exports.refreshSettingConfig("system");
+        assert.equal(config.system.encryptedNotebookFollowSystemLock, true);
+        assert.deepEqual(remounted, mobile ? [] : ["app", "access"]);
         remounted.length = 0;
         next = {...next, api: {token: "latest-token"}};
         await exports.refreshSettingConfig();

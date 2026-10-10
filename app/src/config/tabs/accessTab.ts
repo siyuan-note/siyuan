@@ -791,7 +791,9 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
             desc: window.siyuan.languages.encryptedNotebookFollowSystemLockDesc,
             save: (value) => {
                 if (typeof value === "boolean") {
-                    fetchPost("/api/notebook/setEncryptedNotebookFollowSystemLock", {enabled: value});
+                    fetchPost("/api/notebook/setEncryptedNotebookFollowSystemLock", {enabled: value}, () => {
+                        window.siyuan.config.system.encryptedNotebookFollowSystemLock = value;
+                    });
                 }
             },
         });

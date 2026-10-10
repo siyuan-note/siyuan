@@ -175,26 +175,23 @@ test("destroy aborts in-flight provider requests, clears session state and leave
     assert.equal(ses.cleanup.length, 5);
 });
 
-const setup = (initialFault, mode = "remote") => {
+const setup = (initialFault, mode = "remote", autoAttach = true) => {
     let sequence = 0;
     const faults = new Set(initialFault ? [initialFault] : []);
     const fault = name => {
         if (faults.has(name)) throw new Error("https://private.invalid/?key=secret " + name);
     };
-    const handlers = {}, sessions = [], views = [], channels = [], order = [], switches = new Map();
+    const handlers = {}, sessions = [], guests = [], channels = [], order = [], switches = new Map();
     const app = Object.assign(new EventEmitter(), {commandLine: {
         hasSwitch: name => switches.has(name), getSwitchValue: name => switches.get(name),
     }});
     const contents = id => Object.assign(new EventEmitter(), {id, mainFrame: {url: origin + "/stage/build/app/"}, sent: [], destroyed: false, zoom: 1,
         isDestroyed() { return this.destroyed; }, getZoomFactor() { return this.zoom; },
-        focus() { this.focused = true; },
         send(...args) { this.sent.push(structuredClone(args)); }});
     const owner = contents(1);
-    const win = Object.assign(new EventEmitter(), {webContents: owner, destroyed: false, focused: true, visible: true, minimized: false, children: [],
+    const win = Object.assign(new EventEmitter(), {webContents: owner, destroyed: false, focused: true, visible: true, minimized: false,
         isDestroyed() { return this.destroyed; }, isFocused() { return this.focused; },
-        isVisible() { return this.visible; }, isMinimized() { return this.minimized; }, getContentBounds: () => ({width: 1000, height: 800})});
-    win.contentView = {addChildView: view => { fault("attach"); win.children = win.children.filter(item => item !== view); win.children.push(view); },
-        removeChildView: view => { fault("detach"); win.children = win.children.filter(item => item !== view); }};
+        isVisible() { return this.visible; }, isMinimized() { return this.minimized; }});
     const target = {origin, mode};
     app.on("web-contents-created", (_event, guest) => guest.setWindowOpenHandler(() => ({action: "allow"})));
     let initialized = true;
@@ -209,35 +206,6 @@ const setup = (initialFault, mode = "remote") => {
             ses.setPermissionRequestHandler = value => { fault("router"); setPermission(value); };
             return ses;
         }},
-        WebContentsView: class {
-            constructor(options) {
-                fault("view");
-                this.options = options;
-                this.webContents = contents(100 + views.length);
-                Object.assign(this.webContents, {
-                    setWindowOpenHandler(handler) { fault("openHandler"); this.openHandler = handler; order.push("openHandler"); },
-                    getURL() { return this.url; },
-                    loadURL(url) {
-                        fault("loadSync"); this.url = url; this.mainFrame.url = url; order.push("load");
-                        if (faults.has("earlyConsole")) {
-                            this.emit("console-message", {message: "Creating a worker from 'blob:null/private' violates the following Content Security Policy directive: \"worker-src 'none'\"."});
-                        }
-                        return faults.has("loadAsync") ? Promise.reject(new Error("private load failure")) : Promise.resolve();
-                    },
-                    postMessage(...args) { fault("portTransfer"); this.transferred = args; },
-                    setZoomFactor(zoom) { this.zoom = zoom; },
-                    setBackgroundThrottling(value) { this.throttling = value; order.push("throttling:" + value); },
-                    stop() { fault("stop"); this.stopped = true; },
-                    close(options) { this.closeOptions = options; this.destroyed = true; this.emit("destroyed"); },
-                });
-                const on = this.webContents.on;
-                this.webContents.on = function (...args) { fault("listener"); return on.apply(this, args); };
-                views.push(this);
-            }
-            setVisible(value) { this.visible = value; (this.visibility ||= []).push(value); }
-            setBackgroundColor(value) { this.background = value; }
-            setBounds(value) { fault("bounds"); this.bounds = value; }
-        },
         MessageChannelMain: class {
             constructor() {
                 fault("channel");
@@ -249,46 +217,64 @@ const setup = (initialFault, mode = "remote") => {
             }
         },
     });
+    manager.registerOwner(owner);
     const event = () => ({sender: owner, senderFrame: owner.mainFrame});
-    const create = (data = {}) => handlers["siyuan-map-create"](event(), {...envelope, provider: "openfreemap", theme: "light", ...data});
-    const command = data => handlers["siyuan-map-command"](event(), {...envelope, ...data});
-    const reply = data => channels.at(-1).port1.emit("message", {data: {...envelope, ...data}});
-    const load = () => views.at(-1).webContents.emit("did-finish-load");
     const attach = (descriptor, overrides = {}) => {
         const params = {src: descriptor.src, partition: descriptor.partition, ...overrides.params};
         const preferences = {nodeIntegration: true, sandbox: false, preload: "/untrusted.js", ...overrides.preferences};
-        const attachEvent = {sender: owner, prevented: false, preventDefault() { this.prevented = true; }};
+        const attachEvent = {sender: owner, prevented: false, preventDefault() { this.prevented = true; }, ...overrides.event};
         owner.emit("will-attach-webview", attachEvent, preferences, params);
         if (attachEvent.prevented) return {attachEvent, preferences};
-        const guest = Object.assign(contents(500 + sessions.length), {session: preferences.session, hostWebContents: owner,
-            getType: () => "webview", getLastWebPreferences: () => preferences,
-            getURL: () => descriptor.src,
-            setWindowOpenHandler(handler) { this.openHandler = handler; },
-            setBackgroundThrottling() {}, postMessage(...args) { this.transferred = args; },
-            stop() {}, close() { this.destroyed = true; this.emit("destroyed"); }, ...overrides.contents});
+        const guest = Object.assign(contents(500 + guests.length), {session: preferences.session, hostWebContents: owner,
+            url: descriptor.src, getType: () => "webview", getLastWebPreferences: () => preferences,
+            getURL() { return this.url; },
+            setWindowOpenHandler(handler) { this.openHandler = handler; order.push("openHandler"); },
+            setBackgroundThrottling(value) { this.throttling = value; order.push("throttling:" + value); },
+            postMessage(...args) { fault("portTransfer"); this.transferred = args; },
+            stop() { fault("stop"); this.stopped = true; },
+            close(options) { this.closeOptions = options; this.destroyed = true; this.emit("destroyed"); }, ...overrides.contents});
+        guest.preferences = preferences;
+        const on = guest.on;
+        guest.on = function (...args) { fault("listener"); return on.apply(this, args); };
+        guests.push(guest);
         if (overrides.deferCreated) return {attachEvent, preferences, guest};
         app.emit("web-contents-created", {}, guest);
         if (!guest.destroyed && !overrides.skipVerified) owner.emit("did-attach-webview", {}, guest);
+        if (faults.has("earlyConsole")) {
+            guest.emit("console-message", {message: "Creating a worker from 'blob:null/private' violates the following Content Security Policy directive: \"worker-src 'none'\"."});
+        }
         return {attachEvent, preferences, guest};
     };
-    return {manager, app, handlers, sessions, views, channels, order, switches, owner, win, target, event, create, command, reply, load, faults, attach,
+    const create = (data = {}) => {
+        const descriptor = handlers["siyuan-map-create"](event(), {...envelope, provider: "openfreemap", theme: "light", ...data});
+        if (autoAttach && !descriptor.error) attach(descriptor);
+        return descriptor;
+    };
+    const command = data => handlers["siyuan-map-command"](event(), {...envelope, ...data});
+    const reply = data => channels.at(-1).port1.emit("message", {data: {...envelope, ...data}});
+    const load = () => guests.at(-1).emit("did-finish-load");
+    return {manager, app, handlers, sessions, guests, channels, order, switches, owner, win, target, event, create, command, reply, load, faults, attach,
         setInitialized(value) { initialized = value; }};
 };
 
-test("WCV keeps an isolated memory session, secure preferences, denied external navigation and credential-free bootstrap", () => {
-    const s = setup();
-    assert.deepEqual(s.create({credentials: {apiKey: "test-key", securityCode: "test-code"}}), {...envelope, mode: "native"});
-    const prefs = s.views[0].options.webPreferences;
+const managerTest = (name, run) => {
+    for (const mode of ["local", "remote"]) test(name + " (" + mode + ")", t => run(t, mode));
+};
+
+managerTest("map guest keeps an isolated memory session, secure preferences, denied external navigation and credential-free bootstrap", (_t, mode) => {
+    const s = setup(undefined, mode);
+    assert.equal(s.create({credentials: {apiKey: "test-key", securityCode: "test-code"}}).mode, "webview");
+    const prefs = s.guests[0].preferences;
     assert.equal(prefs.sandbox, true); assert.equal(prefs.webSecurity, true); assert.equal(prefs.contextIsolation, true);
     for (const key of ["nodeIntegration", "nodeIntegrationInSubFrames", "nodeIntegrationInWorker", "webviewTag", "allowRunningInsecureContent"]) {
         assert.equal(prefs[key], false);
     }
     assert.equal(s.sessions[0].partition.startsWith("persist:"), false);
     assert.deepEqual(s.sessions[0].options, {cache: false});
-    assert.deepEqual(s.order, ["openHandler", "load"]);
-    assert.deepEqual(s.views[0].webContents.openHandler({url: "file:///etc/passwd"}), {action: "deny"});
-    assert.equal(s.views[0].visible, false);
-    assert.equal(s.views[0].webContents.url.includes("test-key"), false);
+    assert.deepEqual(s.order, ["openHandler", "openHandler", "openHandler"]);
+    assert.deepEqual(s.guests[0].openHandler({url: "file:///etc/passwd"}), {action: "deny"});
+    assert.equal(s.channels.length, 0);
+    assert.equal(s.guests[0].url.includes("test-key"), false);
     s.load();
     assert.equal(s.channels[0].port1.sent.length, 0);
     s.reply({type: "ready"});
@@ -300,8 +286,8 @@ test("WCV keeps an isolated memory session, secure preferences, denied external 
     s.manager.destroyAll();
 });
 
-test("only initialized registered owner main frame may create, update or destroy a map", () => {
-    const s = setup();
+managerTest("only initialized registered owner main frame may create, update or destroy a map", (_t, mode) => {
+    const s = setup(undefined, mode);
     const create = s.handlers["siyuan-map-create"];
     const config = {...envelope, provider: "openfreemap", theme: "light"};
     assert.throws(() => create({...s.event(), senderFrame: {}}, config));
@@ -310,15 +296,15 @@ test("only initialized registered owner main frame may create, update or destroy
     s.owner.mainFrame.url = origin + "/stage/build/app/";
     s.create();
     s.handlers["siyuan-map-destroy"]({...s.event(), senderFrame: {}}, envelope);
-    assert.equal(s.views[0].webContents.destroyed, false);
+    assert.equal(s.guests[0].destroyed, false);
     s.target.origin = "http://127.0.0.1:6807";
     s.handlers["siyuan-map-destroy"](s.event(), envelope);
-    assert.equal(s.views[0].webContents.destroyed, false);
+    assert.equal(s.guests[0].destroyed, true, "a changed kernel origin revokes the guest");
     s.manager.destroyAll();
 });
 
-test("points and clicks are bounded by current revision and membership; ready is one-shot", () => {
-    const s = setup(); s.create(); s.load();
+managerTest("points and clicks are bounded by current revision and membership; ready is one-shot", (_t, mode) => {
+    const s = setup(undefined, mode); s.create(); s.load();
     s.command({type: "setPoints", revision: 2, points: [{id: "row", longitude: 10, latitude: 20, secret: "never"}]});
     s.reply({type: "bootstrapReady"}); s.reply({type: "ready"}); s.reply({type: "ready"});
     assert.equal(s.owner.sent.filter(entry => entry[1].type === "ready").length, 1);
@@ -335,20 +321,19 @@ test("points and clicks are bounded by current revision and membership; ready is
     s.manager.destroyAll();
 });
 
-test("attribution links require one recent native input in a ready visible focused map", (t) => {
+managerTest("attribution links require one recent trusted guest input in a ready visible focused map", (t, mode) => {
     let now = 100000;
     t.mock.method(Date, "now", () => now);
-    const s = setup(); s.create(); s.load();
-    const contents = s.views[0].webContents;
+    const s = setup(undefined, mode); s.create(); s.load();
+    const contents = s.guests[0];
     const click = () => contents.emit("before-mouse-event", {}, {type: "mouseUp", button: "left"});
     const links = () => s.owner.sent.filter(entry => entry[1].type === "attributionClick").map(entry => entry[1]);
-    const geometry = {...envelope, visible: true, bounds: {x: 10, y: 20, width: 400, height: 300},
-        logicalSize: {width: 400, height: 300}, crop: {x: 0, y: 0}};
+    const visibility = {type: "visibility", visible: true, viewport: {x: 0, y: 0, width: 400, height: 300}};
     click(); s.reply({type: "attributionClick", link: "maplibre"});
     s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
     click(); s.reply({type: "attributionClick", link: "maplibre"});
     assert.deepEqual(links(), []);
-    s.handlers["siyuan-map-geometry"](s.event(), geometry);
+    s.command(visibility);
     s.reply({type: "attributionClick", link: "maplibre"});
     assert.deepEqual(links(), [], "a provider message alone is insufficient");
     click();
@@ -362,7 +347,8 @@ test("attribution links require one recent native input in a ready visible focus
     s.reply({type: "attributionClick", link: "openstreetmap"});
     assert.equal(links().length, 2);
     click(); s.win.focused = false; s.win.emit("blur");
-    assert.equal(s.views[0].visible, true, "switching applications keeps the visible map painted");
+    assert.equal(s.channels[0].port1.sent.filter(value => value.type === "visibility").at(-1).visible, true,
+        "switching applications keeps the visible map painted");
     s.reply({type: "attributionClick", link: "maplibre"});
     click(); s.reply({type: "attributionClick", link: "maplibre"});
     contents.emit("before-input-event", {}, {type: "keyDown", key: "Enter", isAutoRepeat: false});
@@ -371,90 +357,25 @@ test("attribution links require one recent native input in a ready visible focus
     s.win.focused = true; s.win.emit("focus");
     s.reply({type: "attributionClick", link: "maplibre"});
     assert.equal(links().length, 2, "blur invalidates an outstanding gesture even after focus returns");
-    click(); s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: false});
+    click(); s.command({type: "visibility", visible: false});
     s.reply({type: "attributionClick", link: "maplibre"});
-    s.handlers["siyuan-map-geometry"](s.event(), geometry);
+    s.command(visibility);
     s.reply({type: "attributionClick", link: "maplibre"});
-    assert.equal(links().length, 2, "hidden geometry invalidates an outstanding gesture");
+    assert.equal(links().length, 2, "hidden visibility invalidates an outstanding gesture");
     click(); now += 1001; s.reply({type: "attributionClick", link: "maplibre"});
-    assert.equal(links().length, 2, "expired native input cannot open a link");
+    assert.equal(links().length, 2, "expired guest input cannot open a link");
     s.command({type: "visibility", visible: true, viewport: {x: 0, y: 0, width: 400, height: 300}});
     const sent = s.channels[0].port1.sent.filter(message => message.type === "visibility");
-    assert.deepEqual(sent.map(message => message.visible), [true, false, true]);
-    assert.deepEqual(sent[0].viewport, {x: 0, y: 0, width: 400, height: 300});
+    assert.deepEqual(sent.map(message => message.visible), [false, true, false, true]);
+    assert.deepEqual(sent[1].viewport, {x: 0, y: 0, width: 400, height: 300});
     s.manager.destroyAll();
     assert.equal(contents.listenerCount("before-mouse-event"), 0);
     assert.equal(contents.listenerCount("before-input-event"), 0);
 });
 
-test("geometry is invisible before ready, uses owner zoom, and hides on invalid geometry or window transitions", () => {
-    const s = setup(); s.create(); s.load(); s.owner.zoom = 1.25;
-    const geometry = {...envelope, visible: true, bounds: {x: 10, y: 20, width: 200, height: 100},
-        logicalSize: {width: 400, height: 300}, crop: {x: 30, y: 40}};
-    s.handlers["siyuan-map-geometry"](s.event(), geometry);
-    assert.equal(s.views[0].visible, false);
-    assert.deepEqual(s.views[0].bounds, {x: 13, y: 25, width: 249, height: 125});
-    s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
-    assert.equal(s.views[0].visible, true);
-    assert.deepEqual(s.views[0].bounds, {x: 13, y: 25, width: 249, height: 125});
-    assert.equal(s.views[0].webContents.zoom, 1.25);
-    assert.deepEqual(s.channels[0].port1.sent.find(message => message.type === "visibility" && message.visible).viewport,
-        {x: 0, y: 0, width: 199.2, height: 100}, "native viewport uses cropped DIP bounds divided by zoom without adding crop");
-    s.win.emit("resize"); assert.equal(s.views[0].visible, false);
-    s.handlers["siyuan-map-geometry"](s.event(), geometry); assert.equal(s.views[0].visible, true);
-    s.handlers["siyuan-map-geometry"](s.event(), {...geometry, bounds: {...geometry.bounds, width: 10000}});
-    assert.equal(s.views[0].visible, false);
-    assert.deepEqual(s.owner.sent.at(-1)[1], {...envelope, type: "diagnostic", code: "geometryLogicalBounds"});
-    const count = s.owner.sent.length;
-    s.handlers["siyuan-map-geometry"](s.event(), {...geometry, bounds: {...geometry.bounds, width: 10000}});
-    assert.equal(s.owner.sent.length, count);
-    s.manager.destroyAll();
-});
-
-test("hidden bootstrap receives nonzero bounds and rendering frames without becoming visible", () => {
-    const s = setup(); s.create();
-    const view = s.views[0];
-    assert.equal(view.options.webPreferences.backgroundThrottling, false);
-    assert.deepEqual(view.bounds, {x: 0, y: 0, width: 1, height: 1});
-    assert.equal(view.visible, false);
-    const geometry = {...envelope, visible: true, bounds: {x: 10, y: 20, width: 200, height: 100},
-        logicalSize: {width: 400, height: 300}, crop: {x: 30, y: 40}};
-    s.handlers["siyuan-map-geometry"](s.event(), geometry);
-    assert.deepEqual(view.bounds, geometry.bounds);
-    assert.equal(view.webContents.sent.length, 0, "viewport waits for the preload to exist");
-    s.load();
-    assert.equal(view.webContents.throttling, false);
-    assert.equal(view.visible, false);
-    assert.deepEqual(view.webContents.sent[0], ["siyuan-map-viewport", {logicalSize: geometry.logicalSize, crop: geometry.crop}]);
-    s.reply({type: "bootstrapReady"});
-    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: false});
-    s.reply({type: "ready"});
-    assert.equal(view.visible, false, "a menu or hidden DOM during bootstrap must still hide the native view");
-    assert.equal(view.webContents.throttling, true, "normal throttling resumes after bootstrap");
-    s.handlers["siyuan-map-geometry"](s.event(), geometry);
-    assert.equal(view.visible, true);
-    s.manager.destroyAll();
-    assert.equal(view.webContents.destroyed, true);
-});
-
-test("an initially hidden or zero-size DOM can finish bootstrap without exposing the placeholder", () => {
-    const s = setup(); s.create(); s.load();
-    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: true, bounds: {x: 0, y: 0, width: 0, height: 0},
-        logicalSize: {width: 0, height: 0}, crop: {x: 0, y: 0}});
-    assert.deepEqual(s.views[0].bounds, {x: 0, y: 0, width: 1, height: 1});
-    assert.equal(s.views[0].webContents.throttling, false);
-    s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
-    assert.equal(s.views[0].visible, false);
-    assert.equal(s.views[0].webContents.throttling, true);
-    s.manager.destroyAll();
-    s.load();
-    assert.equal(s.views[0].visible, false);
-    assert.equal(s.views[0].webContents.destroyed, true);
-});
-
-test("known host diagnostics are bounded fixed codes and stop on disposal", () => {
-    const s = setup(); s.create();
-    const contents = s.views[0].webContents;
+managerTest("known host diagnostics are bounded fixed codes and stop on disposal", (_t, mode) => {
+    const s = setup(undefined, mode); s.create();
+    const contents = s.guests[0];
     const message = "Content Security Policy worker-src 'none'; https://secret.invalid/?key=private";
     contents.emit("console-message", {message});
     contents.emit("console-message", {message});
@@ -465,10 +386,10 @@ test("known host diagnostics are bounded fixed codes and stop on disposal", () =
     assert.equal(s.owner.sent.length, 1);
 });
 
-test("CSP resources are captured before load, deduplicated by category and isolated from the map port", () => {
-    const s = setup("earlyConsole"); s.create();
+managerTest("CSP resources are captured before load, deduplicated by category and isolated from the map port", (_t, mode) => {
+    const s = setup("earlyConsole", mode); s.create();
     assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "diagnostic", code: "cspWorker", resource: "blob"}]);
-    const contents = s.views[0].webContents;
+    const contents = s.guests[0];
     const emit = url => contents.emit("console-message", {}, 2,
         `Connecting to '${url}' violates the following Content Security Policy directive: "connect-src https://tiles.openfreemap.org".`);
     emit("https://tiles.openfreemap.org/path?key=secret");
@@ -487,9 +408,9 @@ test("CSP resources are captured before load, deduplicated by category and isola
     assert.equal(s.owner.sent.length, count);
 });
 
-test("unapproved CSP hostnames redact and deduplicate without entering public diagnostics", () => {
-    const s = setup(); s.create();
-    const contents = s.views[0].webContents;
+managerTest("unapproved CSP hostnames redact and deduplicate without entering public diagnostics", (_t, mode) => {
+    const s = setup(undefined, mode); s.create();
+    const contents = s.guests[0];
     for (let index = 0; index < 100; index++) {
         contents.emit("console-message", {message: `Connecting to 'https://map${index}.openfreemap.org/private?key=secret' violates the following Content Security Policy directive: "connect-src https://tiles.openfreemap.org".`});
     }
@@ -523,13 +444,13 @@ test("provider routing reports fixed transport failures without logging requests
     assert.equal(JSON.stringify(diagnostics).includes("private"), false);
 });
 
-test("destroy and owner navigation close real contents, ports, requests and session; stale events cannot resurrect", () => {
-    const s = setup(); s.create(); s.load(); s.reply({type: "bootstrapReady"});
+managerTest("destroy and owner navigation close real contents, ports, requests and session; stale events cannot resurrect", (_t, mode) => {
+    const s = setup(undefined, mode); s.create(); s.load(); s.reply({type: "bootstrapReady"});
     s.owner.emit("did-start-navigation", {isMainFrame: true, isSameDocument: false});
-    assert.equal(s.views[0].webContents.destroyed, true);
-    assert.deepEqual(s.views[0].webContents.closeOptions, {waitForBeforeUnload: false});
+    assert.equal(s.guests[0].destroyed, true);
+    assert.deepEqual(s.guests[0].closeOptions, {waitForBeforeUnload: false});
     assert.equal(s.channels[0].port1.closed, true); assert.equal(s.channels[0].port2.closed, true);
-    assert.equal(s.win.children.length, 0); assert.equal(s.sessions[0].cleanup.length, 5);
+    assert.equal(s.sessions[0].cleanup.length, 5);
     s.reply({type: "ready"}); assert.equal(s.owner.sent.length, 0);
     s.manager.destroyAll(); assert.equal(s.sessions[0].cleanup.length, 5);
     s.create({instanceID: "b".repeat(48)});
@@ -537,28 +458,28 @@ test("destroy and owner navigation close real contents, ports, requests and sess
     s.manager.destroyAll();
 });
 
-test("unsafe effective switches reject creation and duplicate instance IDs cannot replace a running host", () => {
-    const s = setup(); s.switches.set("disable-web-security", "");
-    assert.equal(s.create().error, "unsupportedEnvironment"); assert.equal(s.views.length, 0);
-    s.switches.clear(); s.create(); assert.equal(s.create().error, "hostLimitReached"); assert.equal(s.views.length, 1);
+managerTest("unsafe effective switches reject creation and duplicate instance IDs cannot replace a running host", (_t, mode) => {
+    const s = setup(undefined, mode); s.switches.set("disable-web-security", "");
+    assert.equal(s.create().error, "unsupportedEnvironment"); assert.equal(s.guests.length, 0);
+    s.switches.clear(); s.create(); assert.equal(s.create().error, "hostLimitReached"); assert.equal(s.guests.length, 1);
     s.manager.destroyAll();
 });
 
-test("capability is credential-free and only supports trusted owners with safe process switches", () => {
-    const s = setup();
+managerTest("capability is credential-free and only supports trusted owners with safe process switches", (_t, mode) => {
+    const s = setup(undefined, mode);
     const capability = s.handlers["siyuan-map-capability"];
     assert.deepEqual(capability(s.event()), {version: 1, supported: true});
     assert.deepEqual(capability({...s.event(), senderFrame: {}}), {version: 1, supported: false, reason: "notMainFrame"});
     s.switches.set("no-sandbox", "");
     assert.deepEqual(capability(s.event()), {version: 1, supported: false, reason: "unsafeProcessSwitches"});
-    assert.equal(s.views.length, 0);
+    assert.equal(s.guests.length, 0);
 });
 
-test("Electron's default file-access switch permits the HTTP map host while file access stays denied", async () => {
-    const s = setup();
+managerTest("Electron's default file-access switch permits the HTTP map host while file access stays denied", async (_t, mode) => {
+    const s = setup(undefined, mode);
     s.switches.set("allow-file-access-from-files", "");
     assert.deepEqual(s.handlers["siyuan-map-capability"](s.event()), {version: 1, supported: true});
-    assert.deepEqual(s.create(), {...envelope, mode: "native"});
+    assert.equal(s.create().mode, "webview");
     const ses = s.sessions[0];
     assert.equal((await ses.protocols.file(new Request("file:///etc/passwd"))).status, 403);
     assert.equal(ses.before({url: "file:///etc/passwd", resourceType: "mainFrame"}).cancel, true);
@@ -568,59 +489,8 @@ test("Electron's default file-access switch permits the HTTP map host while file
     s.manager.destroyAll();
 });
 
-test("switching applications keeps a visible map painted through blur, geometry updates and focus", () => {
-    const s = setup(); s.create(); s.load(); s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
-    const geometry = {...envelope, visible: true, bounds: {x: 10, y: 20, width: 200, height: 100},
-        logicalSize: {width: 200, height: 100}, crop: {x: 0, y: 0}};
-    s.handlers["siyuan-map-geometry"](s.event(), geometry);
-    assert.equal(s.views[0].visible, true);
-    for (let i = 0; i < 3; i++) {
-        s.win.focused = false; s.win.emit("blur");
-        assert.equal(s.views[0].visible, true);
-        geometry.bounds.x += 10;
-        s.handlers["siyuan-map-geometry"](s.event(), geometry);
-        assert.equal(s.views[0].visible, true);
-        assert.deepEqual(s.views[0].bounds, geometry.bounds);
-        s.win.focused = true; s.win.emit("focus");
-        assert.equal(s.views[0].visible, true);
-    }
-    const visibility = s.channels[0].port1.sent.filter(message => message.type === "visibility");
-    assert.deepEqual(visibility.map(message => message.visible), [true], "focus changes must not hide and restore the provider");
-    s.manager.destroyAll();
-});
-
-test("an unfocused window can finish showing a map but hiding, minimizing and owner overlays still suppress it", () => {
-    const s = setup(); s.create(); s.load();
-    const geometry = {...envelope, visible: true, bounds: {x: 10, y: 20, width: 200, height: 100},
-        logicalSize: {width: 200, height: 100}, crop: {x: 0, y: 0}};
-    s.win.focused = false; s.win.emit("blur");
-    s.handlers["siyuan-map-geometry"](s.event(), geometry);
-    assert.equal(s.views[0].visible, false, "bootstrap must still complete before showing the map");
-    s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
-    assert.equal(s.views[0].visible, true);
-    for (const [property, hiddenValue, event, restore] of [
-        ["visible", false, "hide", "show"], ["minimized", true, "minimize", "restore"],
-    ]) {
-        s.win[property] = hiddenValue;
-        s.win.emit(event);
-        assert.equal(s.views[0].visible, false);
-        s.handlers["siyuan-map-geometry"](s.event(), geometry);
-        s.win.emit("focus");
-        assert.equal(s.views[0].visible, false, "geometry and focus cannot show a hidden or minimized window");
-        s.win[property] = !hiddenValue;
-        s.win.emit(restore);
-        assert.equal(s.views[0].visible, true);
-    }
-    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: false});
-    s.win.focused = true; s.win.emit("focus");
-    assert.equal(s.views[0].visible, false, "window focus must not revive an owner-occluded map");
-    s.handlers["siyuan-map-geometry"](s.event(), geometry);
-    assert.equal(s.views[0].visible, true);
-    s.manager.destroyAll();
-});
-
-test("navigation, redirects, client certificates, login and renderer failure are blocked", () => {
-    const s = setup(); s.create(); const wc = s.views[0].webContents;
+managerTest("navigation, redirects, client certificates, login and renderer failure are blocked", (_t, mode) => {
+    const s = setup(undefined, mode); s.create(); const wc = s.guests[0];
     for (const name of ["will-navigate", "will-frame-navigate", "will-redirect", "will-attach-webview"]) {
         let prevented = false; wc.emit(name, {preventDefault() { prevented = true; }}); assert.equal(prevented, true, name);
     }
@@ -633,8 +503,8 @@ test("navigation, redirects, client certificates, login and renderer failure are
     assert.equal(s.owner.sent[0][1].code, "hostRendererGone");
 });
 
-test("main-process provider fetch cannot select client certificates or authenticate, including null WebContents", async () => {
-    const s = setup(); s.create();
+managerTest("main-process provider fetch cannot select client certificates or authenticate, including null WebContents", async (_t, mode) => {
+    const s = setup(undefined, mode); s.create();
     let finish;
     s.sessions[0].fetch = () => new Promise(resolve => { finish = resolve; });
     const url = "https://tiles.openfreemap.org/tile";
@@ -654,135 +524,136 @@ test("main-process provider fetch cannot select client certificates or authentic
     s.manager.destroyAll();
 });
 
-test("a closed runtime port destroys the map instead of retaining a live orphan renderer", () => {
-    const s = setup(); s.create(); s.load();
+managerTest("a closed runtime port destroys the map instead of retaining a live orphan renderer", (_t, mode) => {
+    const s = setup(undefined, mode); s.create(); s.load();
     s.channels[0].port1.emit("close");
-    assert.equal(s.views[0].webContents.destroyed, true);
+    assert.equal(s.guests[0].destroyed, true);
     assert.equal(s.owner.sent[0][1].code, "hostPortClosed");
 });
 
-test("bootstrap and SDK receive separate deadlines and duplicate bootstrap cannot extend SDK lifetime", t => {
+managerTest("bootstrap and SDK receive separate deadlines and duplicate bootstrap cannot extend SDK lifetime", (t, mode) => {
     t.mock.timers.enable({apis: ["setTimeout"]});
-    const s = setup(); s.create(); s.load();
+    const s = setup(undefined, mode); s.create(); s.load();
     t.mock.timers.tick(29000);
     s.reply({type: "bootstrapReady"});
     t.mock.timers.tick(39000);
-    assert.equal(s.views[0].webContents.destroyed, false, "both SDK phases retain their own 20-second budget");
+    assert.equal(s.guests[0].destroyed, false, "both SDK phases retain their own 20-second budget");
     assert.deepEqual(s.owner.sent, []);
     s.reply({type: "bootstrapReady"});
     t.mock.timers.tick(5999);
-    assert.equal(s.views[0].webContents.destroyed, false);
+    assert.equal(s.guests[0].destroyed, false);
     t.mock.timers.tick(1);
     assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error", code: "hostSDKTimeout"}]);
-    assert.equal(s.views[0].webContents.destroyed, true);
+    assert.equal(s.guests[0].destroyed, true);
     assert.equal(s.channels[0].port1.closed, true);
 });
 
-test("document and bootstrap timeouts have distinct final codes and successful ready clears all deadlines", t => {
+managerTest("document and bootstrap timeouts have distinct final codes and successful ready clears all deadlines", (t, mode) => {
     t.mock.timers.enable({apis: ["setTimeout"]});
     for (const loaded of [false, true]) {
-        const s = setup(); s.create();
+        const s = setup(undefined, mode); s.create();
         if (loaded) s.load();
         t.mock.timers.tick(29999);
         assert.deepEqual(s.owner.sent, []);
         t.mock.timers.tick(1);
         assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error",
             code: loaded ? "hostBootstrapTimeout" : "hostDocumentLoadTimeout"}]);
-        assert.equal(s.views[0].webContents.destroyed, true);
+        assert.equal(s.guests[0].destroyed, true);
     }
-    const s = setup(); s.create(); s.load();
+    const s = setup(undefined, mode); s.create(); s.load();
     t.mock.timers.tick(29000); s.reply({type: "bootstrapReady"});
     t.mock.timers.tick(39999); s.reply({type: "ready"});
     t.mock.timers.tick(90000);
     assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "ready"}]);
-    assert.equal(s.views[0].webContents.destroyed, false);
+    assert.equal(s.guests[0].destroyed, false);
     s.manager.destroyAll();
 });
 
-test("creation failures return fixed stage codes and release every resource already allocated", () => {
-    for (const [point, code] of [["session", "hostSetupFailed"], ["router", "hostSetupFailed"],
-        ["view", "hostSetupFailed"], ["openHandler", "hostSetupFailed"], ["listener", "hostSetupFailed"],
-        ["attach", "hostAttachFailed"], ["bounds", "hostAttachFailed"], ["loadSync", "hostAttachFailed"]]) {
-        const s = setup(point);
-        assert.deepEqual(s.create(), {...envelope, error: code}, point);
-        assert.equal(s.win.children.length, 0, point);
+managerTest("creation failures return fixed stage codes and release every resource already allocated", (_t, mode) => {
+    for (const point of ["session", "router"]) {
+        const s = setup(point, mode);
+        assert.deepEqual(s.create(), {...envelope, error: "hostSetupFailed"}, point);
         for (const ses of s.sessions) assert.equal(ses.cleanup.length, 5, point);
-        for (const view of s.views) {
-            assert.equal(view.webContents.destroyed, true, point);
-            assert.equal(view.webContents.eventNames().length, 0, point);
-        }
+        assert.equal(s.guests.length, 0);
         assert.equal(JSON.stringify(s.owner.sent).includes("secret"), false, point);
         s.faults.clear();
-        assert.deepEqual(s.create(), {...envelope, mode: "native"}, "a failed instance must not occupy its slot: " + point);
+        assert.equal(s.create().mode, "webview", "a failed instance must not occupy its slot: " + point);
         s.manager.destroyAll();
     }
 });
 
-test("load rejection and main-frame failure report document failure without waiting for the deadline", async () => {
-    const s = setup("loadAsync"); s.create();
-    await Promise.resolve();
-    assert.equal(s.owner.sent.at(-1)[1].code, "hostDocumentLoadFailed");
-    assert.equal(s.views[0].webContents.destroyed, true);
-    const f = setup(); f.create();
-    f.views[0].webContents.emit("did-fail-load", {}, -2, "secret", "https://private.invalid/?key=secret", false);
-    assert.deepEqual(f.owner.sent, []);
-    f.views[0].webContents.emit("did-fail-load", {}, -2, "secret", "https://private.invalid/?key=secret", true);
-    assert.equal(f.owner.sent.at(-1)[1].code, "hostDocumentLoadFailed");
-    assert.equal(JSON.stringify(f.owner.sent).includes("secret"), false);
-    assert.equal(f.views[0].webContents.destroyed, true);
+managerTest("guest listener setup failure closes the guest and releases the reservation", (_t, mode) => {
+    const s = setup("listener", mode);
+    assert.equal(s.create().mode, "webview");
+    assert.equal(s.guests[0].destroyed, true);
+    assert.equal(s.guests[0].eventNames().length, 0);
+    assert.equal(s.sessions[0].cleanup.length, 5);
+    assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error", code: "hostAttachFailed"}]);
+    s.faults.clear();
+    assert.equal(s.create().mode, "webview");
+    s.manager.destroyAll();
 });
 
-test("unexpected document, reload, destruction and bootstrap rejection retain their final failure reason", () => {
+managerTest("main-frame load failure reports document failure without waiting for the deadline", (_t, mode) => {
+    const s = setup(undefined, mode); s.create();
+    s.guests[0].emit("did-fail-load", {}, -2, "secret", "https://private.invalid/?key=secret", false);
+    assert.deepEqual(s.owner.sent, []);
+    s.guests[0].emit("did-fail-load", {}, -2, "secret", "https://private.invalid/?key=secret", true);
+    assert.equal(s.owner.sent.at(-1)[1].code, "hostDocumentLoadFailed");
+    assert.equal(JSON.stringify(s.owner.sent).includes("secret"), false);
+    assert.equal(s.guests[0].destroyed, true);
+});
+
+managerTest("unexpected document, reload, destruction and bootstrap rejection retain their final failure reason", (_t, mode) => {
     const cases = [
-        ["hostDocumentMismatch", s => { s.views[0].webContents.url += "unexpected"; s.load(); }],
+        ["hostDocumentMismatch", s => { s.guests[0].url += "unexpected"; s.load(); }],
         ["hostDocumentReloaded", s => { s.load(); s.load(); }],
-        ["hostDestroyed", s => { s.views[0].webContents.destroyed = true; s.views[0].webContents.emit("destroyed"); }],
+        ["hostDestroyed", s => { s.guests[0].destroyed = true; s.guests[0].emit("destroyed"); }],
         ["hostBootstrapFailed", s => { s.load(); s.reply({type: "error", code: "hostUnavailable"}); }],
         ["hostOperationFailed", s => { s.load(); s.reply({type: "bootstrapReady"}); s.reply({type: "error", code: "hostUnavailable"}); }],
     ];
     for (const [code, trigger] of cases) {
-        const s = setup(); s.create(); trigger(s);
+        const s = setup(undefined, mode); s.create(); trigger(s);
         assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error", code}]);
-        assert.equal(s.views[0].webContents.destroyed, true);
-        assert.equal(s.win.children.length, 0);
+        assert.equal(s.guests[0].destroyed, true);
         s.manager.destroyAll();
         assert.equal(s.owner.sent.length, 1, "disposal must not manufacture another hostDestroyed failure");
     }
 });
 
-test("port setup and message failures close both endpoints and preserve the fixed failure stage", () => {
+managerTest("port setup and message failures close both endpoints and preserve the fixed failure stage", (_t, mode) => {
     for (const point of ["channel", "portListener", "portStart", "portTransfer"]) {
-        const s = setup(); s.create(); s.faults.add(point); s.load();
+        const s = setup(undefined, mode); s.create(); s.faults.add(point); s.load();
         assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error", code: "hostPortSetupFailed"}], point);
-        assert.equal(s.views[0].webContents.destroyed, true, point);
+        assert.equal(s.guests[0].destroyed, true, point);
         for (const channel of s.channels) {
             assert.equal(channel.port1.closed, true, point);
             assert.equal(channel.port2.closed, true, point);
         }
     }
     for (const ready of [false, true]) {
-        const s = setup(); s.create(); s.load();
+        const s = setup(undefined, mode); s.create(); s.load();
         if (ready) s.reply({type: "bootstrapReady"});
         s.faults.add("portPost");
         s.reply({type: ready ? "ready" : "bootstrapReady"});
         assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error", code: "hostOperationFailed"}]);
-        assert.equal(s.views[0].webContents.destroyed, true);
-        assert.equal(s.views[0].webContents.throttling, false, "a failed post must not continue ready operations");
+        assert.equal(s.guests[0].destroyed, true);
+        assert.equal(s.guests[0].throttling, false, "a failed post must not continue ready operations");
     }
 });
 
-test("renderer closure still runs when detaching the view or stopping it throws", () => {
-    const s = setup(); s.create(); s.load();
-    s.faults.add("detach"); s.faults.add("stop");
+managerTest("renderer closure still runs when stopping it throws", (_t, mode) => {
+    const s = setup(undefined, mode); s.create(); s.load();
+    s.faults.add("stop");
     s.channels[0].port1.emit("close");
     assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "error", code: "hostPortClosed"}]);
-    assert.equal(s.views[0].webContents.destroyed, true);
+    assert.equal(s.guests[0].destroyed, true);
     assert.equal(s.sessions[0].cleanup.length, 5);
     assert.equal(s.channels[0].port1.closed, true);
     assert.equal(s.channels[0].port2.closed, true);
 });
 
-test("main wiring removes only the process security bypass and never enables remote on map contents", () => {
+managerTest("main wiring removes only the process security bypass and never enables remote on map contents", () => {
     const source = fs.readFileSync(path.join(__dirname, "main.js"), "utf8");
     assert.ok(!source.includes('appendSwitch("disable-web-security")'));
     assert.match(source, /createMapHostManager\(/);
@@ -794,7 +665,7 @@ test("main wiring removes only the process security bypass and never enables rem
 });
 
 
-test("capability reports bounded reasons for every owner rejection without weakening creation", () => {
+managerTest("capability reports bounded reasons for every owner rejection without weakening creation", (_t, mode) => {
     const cases = [
         ["ownerUnavailable", (_s, event) => { event.sender = undefined; }],
         ["ownerUnavailable", s => { s.owner.destroyed = true; }],
@@ -809,144 +680,11 @@ test("capability reports bounded reasons for every owner rejection without weake
         ["invalidDocument", s => { s.owner.mainFrame.url = "invalid secret"; }],
     ];
     for (const [reason, change] of cases) {
-        const s = setup(), event = s.event();
+        const s = setup(undefined, mode), event = s.event();
         change(s, event);
         assert.deepEqual(s.handlers["siyuan-map-capability"](event), {version: 1, supported: false, reason});
         assert.throws(() => s.handlers["siyuan-map-create"](event, {...envelope, provider: "openfreemap", theme: "light"}));
-        assert.equal(s.views.length, 0);
-        s.manager.destroyAll();
-    }
-});
-
-const unplacedState = (extra = {}) => ({revision: 0, requestID: 0, query: "", page: 1, total: 1,
-    rows: [{id: "private-row", title: "Private <img src=x>"}], loading: false, error: false,
-    theme: {mode: "light", fontSize: 16}, labels: {title: "List", search: "Search", empty: "Empty", loading: "Loading",
-        more: "Next", previous: "Previous", retry: "Retry", close: "Close"}, ...extra});
-const unplacedAnchor = {x: 100, y: 50, width: 160, height: 30};
-const readyMap = (s, id = instanceID) => {
-    s.create({instanceID: id});
-    const view = s.views.at(-1);
-    view.webContents.emit("did-finish-load");
-    const channel = s.channels.at(-1);
-    for (const type of ["bootstrapReady", "ready"]) channel.port1.emit("message", {data: {version: 1, instanceID: id, type}});
-    const geometry = {version: 1, instanceID: id, visible: true, bounds: {x: 10, y: 120, width: 600, height: 400},
-        logicalSize: {width: 600, height: 400}, crop: {x: 0, y: 0}};
-    s.handlers["siyuan-map-geometry"](s.event(), geometry);
-    return {view, channel, geometry};
-};
-const openUnplaced = (s, id = instanceID, extra = {}) => {
-    const result = s.handlers["siyuan-map-unplaced-open"](s.event(), {version: 1, instanceID: id,
-        state: unplacedState(extra), anchor: unplacedAnchor});
-    if (!result) return;
-    const view = s.views.at(-1);
-    const action = (type, values = {}, event = {sender: view.webContents, senderFrame: view.webContents.mainFrame}) => {
-        s.handlers["siyuan-map-unplaced-menu-action"](event, {sessionID: result.sessionID, revision: 0, type, ...values});
-    };
-    action("ready");
-    return {...result, view, action};
-};
-const unplacedReplies = s => s.owner.sent.filter(([name]) => name === "siyuan-map-unplaced-reply").map(([, value]) => value);
-
-test("production unplaced IPC requires the captured ready visible map owner and never delivers private text to the map", () => {
-    const s = setup();
-    assert.equal(openUnplaced(s), undefined);
-    s.create();
-    assert.equal(openUnplaced(s), undefined);
-    s.load(); s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
-    assert.equal(openUnplaced(s), undefined, "ready without visible geometry must reject menus");
-    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: true, bounds: {x: 0, y: 100, width: 600, height: 400},
-        logicalSize: {width: 600, height: 400}, crop: {x: 0, y: 0}});
-    const value = {...envelope, state: unplacedState(), anchor: unplacedAnchor};
-    for (const event of [{...s.event(), senderFrame: {}}, {sender: s.views[0].webContents, senderFrame: s.views[0].webContents.mainFrame}]) {
-        assert.equal(s.handlers["siyuan-map-unplaced-open"](event, value), undefined);
-    }
-    assert.equal(s.handlers["siyuan-map-unplaced-open"](s.event(), {...value, instanceID: "foreign"}), undefined);
-    assert.equal(s.handlers["siyuan-map-unplaced-open"](s.event(), {...value, note: {content: "secret"}}), undefined);
-    const menu = openUnplaced(s);
-    assert.ok(menu);
-    assert.equal(menu.view.visible, true);
-    assert.match(menu.view.options.webPreferences.preload, /mapUnplaced[/\\]preload\.js$/);
-    assert.equal(menu.view.options.webPreferences.sandbox, true);
-    assert.equal(menu.view.options.webPreferences.nodeIntegration, false);
-    assert.equal(s.sessions.at(-1).fetches.length, 0);
-    assert.equal(JSON.stringify(s.channels[0].port1.sent).includes("Private"), false);
-    assert.equal(JSON.stringify(s.views[0].webContents.sent).includes("Private"), false);
-    s.owner.mainFrame = {url: s.owner.mainFrame.url};
-    menu.action("select", {id: "private-row"});
-    assert.equal(menu.view.webContents.isDestroyed(), true, "same URL with a different owner frame cannot reuse the session");
-    assert.equal(unplacedReplies(s).some(reply => reply.action === "select"), false);
-    s.manager.destroyAll();
-});
-
-test("production menu stays above newly created maps, accepts their native outside clicks and never toggles map visibility", () => {
-    const s = setup(), first = readyMap(s);
-    const before = first.view.visibility.slice();
-    const menu = openUnplaced(s);
-    assert.equal(s.win.children.at(-1), menu.view);
-    const second = readyMap(s, "b".repeat(48));
-    assert.equal(s.win.children.at(-1), menu.view);
-    assert.deepEqual(s.win.children.slice(0, -1), [first.view, second.view]);
-    let prevented = false;
-    second.view.webContents.emit("before-mouse-event", {preventDefault() { prevented = true; }}, {type: "mouseDown", button: "left"});
-    assert.equal(prevented, false);
-    assert.equal(menu.view.webContents.isDestroyed(), true);
-    assert.equal(s.owner.focused, undefined, "outside click must keep the clicked map's focus");
-    assert.equal(unplacedReplies(s).at(-1).reason, "outside");
-    assert.deepEqual(first.view.visibility, before);
-    assert.equal(second.view.visible, true);
-    s.manager.destroyAll();
-});
-
-test("production menus pause attribution timing while painting maps, restore viewport on close and revoke old click gestures", () => {
-    const s = setup(), map = readyMap(s);
-    map.view.webContents.emit("before-mouse-event", {}, {type: "mouseUp", button: "left"});
-    const before = map.view.visibility.slice(), menu = openUnplaced(s);
-    assert.deepEqual(map.channel.port1.sent.filter(value => value.type === "visibility").at(-1), {...envelope, type: "visibility", visible: true});
-    const count = s.owner.sent.length;
-    s.reply({type: "attributionClick", attribution: "openfreemap"});
-    assert.equal(s.owner.sent.length, count);
-    s.win.focused = false; s.win.emit("blur");
-    assert.equal(menu.view.webContents.isDestroyed(), true);
-    assert.equal(map.view.visible, true);
-    assert.deepEqual(map.view.visibility, before);
-    assert.deepEqual(map.channel.port1.sent.filter(value => value.type === "visibility").at(-1),
-        {...envelope, type: "visibility", visible: true, viewport: {x: 0, y: 0, width: 600, height: 400}});
-    assert.equal(unplacedReplies(s).at(-1).reason, "window-blur");
-    s.manager.destroyAll();
-});
-
-test("one menu per window and a single terminal selection protect owner row lookup", () => {
-    const s = setup(); readyMap(s);
-    const otherID = "b".repeat(48); readyMap(s, otherID);
-    const first = openUnplaced(s), second = openUnplaced(s, otherID);
-    assert.equal(first.view.webContents.isDestroyed(), true);
-    assert.equal(unplacedReplies(s).at(-1).reason, "replace");
-    const count = unplacedReplies(s).length;
-    second.action("select", {id: "private-row"});
-    assert.equal(second.view.webContents.isDestroyed(), true);
-    assert.deepEqual(unplacedReplies(s).slice(count), [{version: 1, instanceID: otherID, type: "action", action: "select",
-        sessionID: second.sessionID, revision: 0, requestID: 0, id: "private-row"}]);
-    first.action("select", {id: "private-row"});
-    second.action("select", {id: "private-row"});
-    assert.equal(unplacedReplies(s).length, count + 1);
-    s.manager.destroyAll();
-});
-
-test("production native menu closes with its map, policy revocation and renderer failure without changing sibling maps", () => {
-    for (const operation of [
-        s => s.handlers["siyuan-map-destroy"](s.event(), envelope),
-        s => s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: false}),
-        (s, menu) => { s.setInitialized(false); menu.action("select", {id: "private-row"}); },
-        (_s, menu) => menu.view.webContents.emit("render-process-gone"),
-    ]) {
-        const s = setup(); readyMap(s);
-        const sibling = readyMap(s, "b".repeat(48));
-        const before = sibling.view.visibility.slice(), menu = openUnplaced(s);
-        operation(s, menu);
-        assert.equal(menu.view.webContents.isDestroyed(), true);
-        assert.equal(sibling.view.visible, true);
-        assert.deepEqual(sibling.view.visibility, before);
-        assert.equal(unplacedReplies(s).some(reply => reply.action === "select"), false);
+        assert.equal(s.guests.length, 0);
         s.manager.destroyAll();
     }
 });
@@ -963,13 +701,98 @@ const readyWebview = s => {
     return {...attached, descriptor};
 };
 
-test("local map reserves one fixed memory guest and installs its deny policy before first load", () => {
-    const s = setup(undefined, "local");
+managerTest("owner registration guards attachments before map creation and stays idempotent", (_t, mode) => {
+    const s = setup(undefined, mode, false);
+    s.manager.registerOwner(s.owner);
+    assert.equal(s.owner.listenerCount("will-attach-webview"), 1);
+    assert.equal(s.owner.listenerCount("did-attach-webview"), 1);
+    s.setInitialized(false);
+    s.owner.mainFrame.url = "about:blank";
+    for (const params of [undefined, {}, {src: origin + "/stage/map/index.html?provider=openfreemap"},
+        {src: "https://example.invalid/", partition: "plugin-session"},
+        {src: "https://example.invalid/", partition: "persist:siyuan-map-forged"},
+        {src: "https://example.invalid/", partition: "siyuan-map-forged"}]) {
+        const event = {sender: s.owner, prevented: false, preventDefault() { this.prevented = true; }};
+        const preferences = {sandbox: false, preload: "/plugin.js"};
+        s.owner.emit("will-attach-webview", event, preferences, params);
+        assert.equal(event.prevented, mode === "remote" || params?.partition === "siyuan-map-forged");
+        assert.deepEqual(preferences, {sandbox: false, preload: "/plugin.js"});
+    }
+    s.target.mode = "unknown";
+    assert.equal(s.attach({src: "https://example.invalid/", partition: "ordinary"}).attachEvent.prevented, true);
+    s.owner.emit("destroyed");
+    assert.equal(s.owner.listenerCount("will-attach-webview"), 0);
+    assert.equal(s.owner.listenerCount("did-attach-webview"), 0);
+    s.manager.destroyAll();
+});
+
+managerTest("unreserved created or attached guests obey the current owner's default policy", (_t, mode) => {
+    for (const phase of ["created", "attached"]) {
+        const s = setup(undefined, mode, false);
+        const guest = {session: {}, hostWebContents: s.owner, getType: () => "webview",
+            isDestroyed() { return !!this.destroyed; },
+            setWindowOpenHandler(value) { this.openHandler = value; }, close() { this.destroyed = true; }};
+        if (phase === "created") s.app.emit("web-contents-created", {}, guest);
+        else s.owner.emit("did-attach-webview", {}, guest);
+        assert.equal(!!guest.destroyed, mode === "remote", phase);
+        if (mode === "remote") assert.deepEqual(guest.openHandler({url: "https://example.invalid/"}), {action: "deny"});
+        s.manager.destroyAll();
+    }
+});
+
+managerTest("a reservation is bound to its owner, exact entry URL and memory partition", (_t, mode) => {
+    const s = setup(undefined, mode, false), descriptor = s.create();
+    const otherOwner = Object.assign(new EventEmitter(), {id: 2});
+    s.manager.registerOwner(otherOwner);
+    const foreign = {sender: otherOwner, prevented: false, preventDefault() { this.prevented = true; }};
+    otherOwner.emit("will-attach-webview", foreign, {}, {src: descriptor.src, partition: descriptor.partition});
+    assert.equal(foreign.prevented, true);
+    assert.equal(s.attach(descriptor, {event: {sender: otherOwner}}).attachEvent.prevented, true);
+    for (const params of [{src: descriptor.src + "extra"}, {src: descriptor.src.split("#")[0]},
+        {src: descriptor.src.replace("provider=openfreemap", "provider=other")},
+        {partition: "siyuan-map-forged"}]) {
+        assert.equal(s.attach(descriptor, {params}).attachEvent.prevented, true);
+    }
+    const {guest} = s.attach(descriptor);
+    assert.equal(guest.destroyed, false, "foreign attempts cannot consume the owner's reservation");
+    assert.equal(s.attach(descriptor).attachEvent.prevented, true);
+    s.manager.destroyAll();
+});
+
+managerTest("changing target mode revokes pending and admitted reservations before they can be reused", (_t, mode) => {
+    for (const phase of ["reserved", "accepted", "attached", "ready"]) {
+        const s = setup(undefined, mode, false), descriptor = s.create();
+        let guest;
+        if (phase !== "reserved") ({guest} = s.attach(descriptor, {deferCreated: phase === "accepted"}));
+        if (phase === "ready") {
+            guest.emit("did-finish-load");
+            s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
+        }
+        s.target.mode = mode === "local" ? "remote" : "local";
+        if (phase === "reserved") assert.equal(s.attach(descriptor).attachEvent.prevented, true);
+        if (phase === "accepted") s.app.emit("web-contents-created", {}, guest);
+        if (phase === "attached") guest.emit("did-finish-load");
+        if (phase === "ready") s.command({type: "theme", theme: "dark"});
+        if (guest) assert.equal(guest.destroyed, true, phase);
+        if (phase !== "ready") assert.equal(s.channels.length, 0, phase);
+        else assert.equal(s.channels[0].port1.closed, true);
+        assert.equal(s.sessions[0].cleanup.length, 5, phase);
+        assert.equal(s.attach(descriptor).attachEvent.prevented, true, "revoked partitions cannot be reused");
+        const replacement = s.create();
+        assert.equal(replacement.mode, "webview");
+        assert.notEqual(replacement.partition, descriptor.partition);
+        assert.equal(s.attach(replacement).guest.destroyed, false);
+        s.manager.destroyAll();
+    }
+});
+
+managerTest("map reserves one fixed memory guest and installs its deny policy before first load", (_t, mode) => {
+    const s = setup(undefined, mode, false);
     const descriptor = s.create({mode: "native", src: "https://evil.invalid/", partition: "persist:evil"});
     assert.equal(descriptor.mode, "webview");
     assert.match(descriptor.partition, /^siyuan-map-[a-f0-9]{48}$/);
     assert.match(descriptor.src, new RegExp("^" + origin + "/stage/map/index.html\\?provider=openfreemap#" + instanceID + ":[a-f0-9]{48}$"));
-    assert.equal(s.views.length, 0);
+    assert.equal(s.guests.length, 0);
     assert.equal(s.channels.length, 0);
     const {guest, preferences} = s.attach(descriptor);
     assert.equal(guest.session, s.sessions[0]);
@@ -994,9 +817,9 @@ test("local map reserves one fixed memory guest and installs its deny policy bef
     assert.equal(s.sessions[0].cleanup.length, 5);
 });
 
-test("local guest initial zoom uses the verified owner after clearing untrusted preferences", () => {
+managerTest("guest initial zoom uses the verified owner after clearing untrusted preferences", (_t, mode) => {
     for (const zoom of [0.25, 1.25, 5]) {
-        const s = setup(undefined, "local");
+        const s = setup(undefined, mode, false);
         s.owner.zoom = zoom;
         const {attachEvent, guest, preferences} = s.attach(s.create(), {preferences: {zoomFactor: 99}});
         assert.equal(attachEvent.prevented, false);
@@ -1007,9 +830,25 @@ test("local guest initial zoom uses the verified owner after clearing untrusted 
     }
 });
 
-test("local guest rejects invalid or unavailable owner zoom and releases its reservation", () => {
+managerTest("every security preference mismatch rejects a guest before bootstrap", (_t, mode) => {
+    for (const preference of ["sandbox", "contextIsolation", "webSecurity", "nodeIntegration", "nodeIntegrationInSubFrames",
+        "nodeIntegrationInWorker", "webviewTag", "allowRunningInsecureContent", "experimentalFeatures", "disablePopups",
+        "safeDialogs", "disableDialogs"]) {
+        const s = setup(undefined, mode, false), descriptor = s.create();
+        const {guest} = s.attach(descriptor, {contents: {
+            getLastWebPreferences: () => ({...MAP_WEBVIEW_PREFERENCES, [preference]: !MAP_WEBVIEW_PREFERENCES[preference]}),
+        }});
+        assert.equal(guest.destroyed, true, preference);
+        assert.equal(s.channels.length, 0, preference);
+        assert.equal(s.sessions[0].cleanup.length, 5, preference);
+        assert.equal(s.owner.sent.at(-1)[1].code, "hostAttachFailed", preference);
+        s.manager.destroyAll();
+    }
+});
+
+managerTest("guest rejects invalid or unavailable owner zoom and releases its reservation", (_t, mode) => {
     for (const zoom of [undefined, "1.25", NaN, Infinity, -Infinity, 0, -1, 0.249, 5.001, "throws"]) {
-        const s = setup(undefined, "local"), descriptor = s.create();
+        const s = setup(undefined, mode, false), descriptor = s.create();
         s.owner.getZoomFactor = () => {
             if (zoom === "throws") throw new Error("destroyed");
             return zoom;
@@ -1026,8 +865,8 @@ test("local guest rejects invalid or unavailable owner zoom and releases its res
     }
 });
 
-test("attachment guards reject map forgeries without taking over ordinary webviews", () => {
-    const s = setup(undefined, "local"), descriptor = s.create();
+managerTest("attachment guards reject map forgeries and preserve the target-specific ordinary webview policy", (_t, mode) => {
+    const s = setup(undefined, mode, false), descriptor = s.create();
     for (const params of [{src: origin + "/api/private"}, {preload: "file:///private.js"}, {nodeintegration: true},
         {webpreferences: "sandbox=false"}, {disablewebsecurity: true}]) {
         assert.equal(s.attach(descriptor, {params}).attachEvent.prevented, true);
@@ -1035,7 +874,7 @@ test("attachment guards reject map forgeries without taking over ordinary webvie
     const ordinary = {sender: s.owner, prevented: false, preventDefault() { this.prevented = true; }};
     const ordinaryPrefs = {nodeIntegration: true};
     s.owner.emit("will-attach-webview", ordinary, ordinaryPrefs, {src: "https://example.invalid/", partition: "plugin-session"});
-    assert.equal(ordinary.prevented, false);
+    assert.equal(ordinary.prevented, mode === "remote");
     assert.deepEqual(ordinaryPrefs, {nodeIntegration: true});
     const {guest} = s.attach(descriptor);
     const second = Object.assign(new EventEmitter(), {session: s.sessions[0], hostWebContents: {},
@@ -1049,7 +888,7 @@ test("attachment guards reject map forgeries without taking over ordinary webvie
     s.manager.destroyAll();
 });
 
-test("pending local attachments close immediately on owner loss and cannot be revived by late guest creation", () => {
+managerTest("pending attachments close immediately on owner loss and cannot be revived by late guest creation", (_t, mode) => {
     for (const invalidate of [
         s => s.owner.emit("did-start-navigation", {isMainFrame: true, isSameDocument: false}),
         s => s.owner.emit("destroyed"),
@@ -1057,7 +896,7 @@ test("pending local attachments close immediately on owner loss and cannot be re
         s => s.win.emit("closed"),
         s => s.handlers["siyuan-map-destroy"](s.event(), envelope),
     ]) {
-        const s = setup(undefined, "local"), descriptor = s.create();
+        const s = setup(undefined, mode, false), descriptor = s.create();
         const {guest} = s.attach(descriptor, {deferCreated: true});
         invalidate(s);
         assert.equal(s.sessions[0].cleanup.length, 5);
@@ -1069,9 +908,9 @@ test("pending local attachments close immediately on owner loss and cannot be re
     }
 });
 
-test("unattached map reservation uses the existing fixed bootstrap deadline", t => {
+managerTest("unattached map reservation uses the existing fixed bootstrap deadline", (t, mode) => {
     t.mock.timers.enable({apis: ["setTimeout"]});
-    const s = setup(undefined, "local"), descriptor = s.create();
+    const s = setup(undefined, mode, false), descriptor = s.create();
     t.mock.timers.tick(29999);
     assert.equal(s.sessions[0].cleanup.length, 0);
     t.mock.timers.tick(1);
@@ -1081,8 +920,8 @@ test("unattached map reservation uses the existing fixed bootstrap deadline", t 
     s.manager.destroyAll();
 });
 
-test("local visibility is bounded and survives resize while native geometry and unplaced admission stay separate", () => {
-    const s = setup(undefined, "local"), {guest} = readyWebview(s);
+managerTest("guest visibility is bounded and survives resize without native geometry or menu handlers", (_t, mode) => {
+    const s = setup(undefined, mode, false), {guest} = readyWebview(s);
     const visibility = () => s.channels[0].port1.sent.filter(item => item.type === "visibility");
     const dismiss = () => s.owner.sent.filter(item => item[1].type === "dismissMenu");
     const mouse = () => guest.emit("before-mouse-event", {preventDefault() { assert.fail("map input must continue"); }}, {type: "mouseDown"});
@@ -1091,26 +930,55 @@ test("local visibility is bounded and survives resize while native geometry and 
     s.owner.emit("zoom-changed");
     mouse();
     assert.equal(dismiss().length, 1);
-    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: false});
-    mouse();
-    assert.equal(dismiss().length, 2, "native geometry cannot hide a DOM guest");
-    assert.equal(s.handlers["siyuan-map-unplaced-open"](s.event(), {...envelope}), undefined);
+    assert.equal(s.handlers["siyuan-map-geometry"], undefined);
+    assert.equal(s.handlers["siyuan-map-unplaced-open"], undefined);
     s.win.visible = false; s.win.emit("hide"); mouse();
-    assert.equal(dismiss().length, 2);
+    assert.equal(dismiss().length, 1);
     assert.equal(visibility().at(-1).visible, false);
     s.win.visible = true; s.win.emit("show"); mouse();
-    assert.equal(dismiss().length, 3);
+    assert.equal(dismiss().length, 2);
     assert.equal(visibility().at(-1).visible, true);
     s.command({type: "visibility", visible: true, viewport: {x: 0, y: 0, width: Infinity, height: 3}});
     assert.equal(visibility().at(-1).viewport.width, 400);
     s.command({type: "visibility", visible: false}); mouse();
-    assert.equal(dismiss().length, 3);
-    assert.equal(s.views.length, 0);
+    assert.equal(dismiss().length, 2);
+    assert.equal(s.guests.length, 1);
     s.manager.destroyAll();
 });
 
-test("only current trusted guest input dismisses DOM menus; guest replies and revoked owners cannot", () => {
-    const s = setup(undefined, "local"), {guest} = readyWebview(s);
+managerTest("hidden bootstrap gets frames while window and DOM visibility remain authoritative", (_t, mode) => {
+    const s = setup(undefined, mode); s.create(); s.load();
+    const guest = s.guests[0];
+    const visible = {type: "visibility", visible: true, viewport: {x: 0, y: 0, width: 400, height: 300}};
+    const visibility = () => s.channels[0].port1.sent.filter(value => value.type === "visibility");
+    assert.equal(guest.preferences.backgroundThrottling, false);
+    assert.equal(guest.throttling, false);
+    s.command(visible);
+    assert.equal(visibility().length, 0, "the provider cannot receive a visible state before ready");
+    s.command({type: "visibility", visible: false});
+    s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
+    assert.equal(guest.throttling, true);
+    assert.equal(visibility().at(-1).visible, false);
+    s.win.focused = false; s.win.emit("blur"); s.command(visible);
+    assert.equal(visibility().at(-1).visible, true, "an unfocused visible window can paint the map");
+    for (const [property, hiddenValue, hide, restore] of [
+        ["visible", false, "hide", "show"], ["minimized", true, "minimize", "restore"],
+    ]) {
+        s.win[property] = hiddenValue; s.win.emit(hide);
+        assert.equal(visibility().at(-1).visible, false);
+        s.command(visible); s.win.emit("focus");
+        assert.equal(visibility().at(-1).visible, false, "owner commands cannot expose a hidden window");
+        s.win[property] = !hiddenValue; s.win.emit(restore);
+        assert.equal(visibility().at(-1).visible, true);
+    }
+    s.command({type: "visibility", visible: false});
+    s.win.focused = true; s.win.emit("focus");
+    assert.equal(visibility().at(-1).visible, false, "focus cannot revive an owner-occluded map");
+    s.manager.destroyAll();
+});
+
+managerTest("only current trusted guest input dismisses DOM menus; guest replies and revoked owners cannot", (_t, mode) => {
+    const s = setup(undefined, mode, false), {guest} = readyWebview(s);
     const dismiss = () => s.owner.sent.filter(item => item[1].type === "dismissMenu");
     s.reply({type: "dismissMenu"});
     assert.equal(dismiss().length, 0);
@@ -1118,16 +986,16 @@ test("only current trusted guest input dismisses DOM menus; guest replies and re
     assert.deepEqual(dismiss().map(item => item[1]), [{...envelope, type: "dismissMenu"}]);
     s.win.focused = false; guest.emit("before-mouse-event", {}, {type: "mouseDown"}); s.win.focused = true;
     s.setInitialized(false); guest.emit("before-mouse-event", {}, {type: "mouseDown"}); s.setInitialized(true);
-    s.target.mode = "remote"; guest.emit("before-mouse-event", {}, {type: "mouseDown"});
+    s.target.mode = mode === "local" ? "remote" : "local"; guest.emit("before-mouse-event", {}, {type: "mouseDown"});
     assert.equal(dismiss().length, 1);
     s.reply({type: "markerClick", id: "row", revision: 1});
     assert.equal(guest.destroyed, true, "mode changes revoke the old guest before accepting any reply");
     s.manager.destroyAll();
 });
 
-test("local load requires verified attachment and exact one-shot document identity", () => {
+managerTest("guest load requires verified attachment and exact one-shot document identity", (_t, mode) => {
     for (const failure of ["unverified", "hash", "other-document", "reload"]) {
-        const s = setup(undefined, "local"), descriptor = s.create();
+        const s = setup(undefined, mode, false), descriptor = s.create();
         const {guest} = s.attach(descriptor, {skipVerified: failure === "unverified"});
         guest.emit("did-finish-load");
         if (failure === "hash") guest.emit("did-navigate-in-page");
@@ -1140,18 +1008,18 @@ test("local load requires verified attachment and exact one-shot document identi
     }
 });
 
-test("kernel target mode is authoritative and unknown modes are not registered owners", () => {
-    const s = setup();
-    assert.equal(s.create({mode: "webview"}).mode, "native");
+managerTest("kernel target mode is authoritative and unknown modes are not registered owners", (_t, mode) => {
+    const s = setup(undefined, mode);
+    assert.equal(s.create({mode: "native"}).mode, "webview");
     s.manager.destroyAll();
     delete s.target.mode;
     assert.equal(s.handlers["siyuan-map-capability"](s.event()).reason, "unregisteredOwner");
     assert.throws(() => s.create());
 });
 
-test("guest readback and closure races cannot escape Electron attachment callbacks", () => {
+managerTest("guest readback and closure races cannot escape Electron attachment callbacks", (_t, mode) => {
     for (const phase of ["created", "attached", "close-throws"]) {
-        const s = setup(undefined, "local"), descriptor = s.create();
+        const s = setup(undefined, mode, false), descriptor = s.create();
         let reads = 0;
         let attached;
         assert.doesNotThrow(() => {
@@ -1174,7 +1042,7 @@ test("guest readback and closure races cannot escape Electron attachment callbac
         if (phase !== "close-throws") assert.equal(attached.guest.destroyed, true);
         s.manager.destroyAll();
     }
-    const s = setup(undefined, "local");
+    const s = setup(undefined, mode, false);
     assert.doesNotThrow(() => s.app.emit("web-contents-created", {}, {
         setWindowOpenHandler() {}, isDestroyed: () => true,
         getType() { throw new Error("Object has been destroyed"); },

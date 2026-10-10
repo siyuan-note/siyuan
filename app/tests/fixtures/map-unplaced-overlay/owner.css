@@ -1,6 +1,0 @@
-body { margin: 20px; font: 16px system-ui, sans-serif; }
-button { margin: 4px; padding: 8px; }
-#scroll { height: 220px; overflow: auto; position: relative; }
-#space { height: 600px; }
-#open { margin-left: 240px; }
-#result { position: fixed; bottom: 12px; }

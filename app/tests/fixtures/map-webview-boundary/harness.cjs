@@ -8,11 +8,13 @@ if (!app || !BrowserWindow) {
     process.exitCode = 1;
 } else {
     let temporary;
+    let remoteRequested = false;
     const fail = error => {
         console.error("Map webview prototype startup failed.");
+        if (remoteRequested) console.error("Remote map webview verification: FAIL.");
         const codes = ["attachPreferenceMismatch", "hostAttachFailed", "hostDocumentLoadFailed", "hostDocumentMismatch",
             "hostRendererGone", "hostDestroyed", "hostBootstrapTimeout", "hostSDKTimeout", "documentCSPBlocked",
-            "isolationAssertionFailed", "isolationCheckTimeout", "fixtureSetupFailed", "ownerClosed", "sdkUnavailable", "hostUnavailable",
+            "isolationAssertionFailed", "isolationCheckTimeout", "fixtureSetupFailed", "remoteOwnerPolicyFailed", "ownerClosed", "sdkUnavailable", "hostUnavailable",
             "sdkScriptLoadFailed", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout", "mapUnavailable"];
         if (codes.includes(error?.code)) {
             const prefKeys = ["sandbox", "contextIsolation", "webSecurity", "nodeIntegration", "nodeIntegrationInSubFrames",
@@ -34,7 +36,8 @@ if (!app || !BrowserWindow) {
     try {
         console.info("Map webview prototype starting...");
         const flags = new Set(process.argv.slice(2));
-        if ([...flags].some(flag => !["--real", "--synthetic", "--verify"].includes(flag)) ||
+        remoteRequested = flags.has("--remote");
+        if ([...flags].some(flag => !["--real", "--synthetic", "--verify", "--remote"].includes(flag)) ||
             (flags.has("--real") && flags.has("--synthetic")) || (flags.has("--verify") && !flags.has("--synthetic"))) {
             throw new Error("Invalid fixture mode");
         }
@@ -42,7 +45,7 @@ if (!app || !BrowserWindow) {
         app.once("will-quit", temporary.cleanup);
         app.once("quit", temporary.cleanup);
         void createHarness({profile: temporary.profile, mode: flags.has("--synthetic") ? "synthetic" : "real",
-            automate: flags.has("--verify")}).then(async harness => {
+            automate: flags.has("--verify"), ...(flags.has("--remote") && {kernelMode: "remote"})}).then(async harness => {
             console.info("Map webview prototype window ready.");
             if (flags.has("--verify")) {
                 try { await verifyHarness(harness); }

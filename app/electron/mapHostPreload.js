@@ -17,14 +17,4 @@ if (process.isMainFrame) {
         window.postMessage({type: "siyuan-map-desktop-connect", version: 1, instanceID: data.instanceID,
             nonce: data.nonce, provider: data.provider}, "*", [event.ports[0]]);
     });
-    ipcRenderer.on("siyuan-map-viewport", (_event, data) => {
-        const map = document.getElementById("map");
-        const size = data?.logicalSize;
-        const crop = data?.crop;
-        if (!map || !size || !crop || ![size.width, size.height, crop.x, crop.y]
-            .every(value => Number.isFinite(value) && value >= 0 && value <= 32768)) return;
-        map.style.width = size.width + "px";
-        map.style.height = size.height + "px";
-        map.style.transform = "translate(" + -crop.x + "px," + -crop.y + "px)";
-    });
 }

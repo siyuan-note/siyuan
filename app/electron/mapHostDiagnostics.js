@@ -4,8 +4,7 @@ const mapDiagnosticCodes = Object.freeze([
     "hostSetupFailed", "assetUnavailable", "documentLoadFailed", "bootstrapTimeout", "sdkTimeout",
     "providerRequestDenied", "providerInsecureRequest", "providerHTTPFailure", "providerNetworkFailure",
     "cspScript", "cspWorker", "cspConnect", "cspImage", "cspStyle", "cspEval", "cspWasm",
-    "storageUnavailable", "webglUnavailable", "geometryInvalid", "geometryLogicalBounds",
-    "geometryCropBounds", "geometryWindowBounds", "geometryRoundedEmpty",
+    "storageUnavailable", "webglUnavailable",
 ]);
 const mapCSPDiagnosticCodes = Object.freeze(["cspScript", "cspWorker", "cspConnect", "cspImage", "cspStyle", "cspEval", "cspWasm"]);
 const mapCSPResourceCodes = Object.freeze([

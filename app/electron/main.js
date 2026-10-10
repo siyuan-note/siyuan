@@ -21,7 +21,6 @@ const {
     net,
     app,
     BrowserWindow,
-    WebContentsView,
     MessageChannelMain,
     Notification,
     shell,
@@ -131,6 +130,7 @@ const notebookSystemLock = createNotebookSystemLock({
 });
 const windowKernelTargets = new Map();
 const initializedWindowIds = new Set();
+let mapHostManager;
 const pendingWindowIds = new Set();
 createSettingsTaskBridge({
     ipcMain,
@@ -1385,6 +1385,8 @@ const getKernelTarget = (target = kernelPort) => {
 const rememberWindowKernelTarget = (window, target) => {
     const webContentsId = window.webContents.id;
     windowKernelTargets.set(webContentsId, target);
+    // 在首次加载前登记宿主，远程窗口仅允许已授权的内置地图 guest。
+    mapHostManager.registerOwner(window.webContents);
     blockDragWindowFocusOrder.set(webContentsId, ++blockDragWindowFocusSequence);
     window.on("focus", () => {
         blockDragWindowFocusOrder.set(webContentsId, ++blockDragWindowFocusSequence);
@@ -1395,10 +1397,6 @@ const rememberWindowKernelTarget = (window, target) => {
                 event.preventDefault();
                 writeLog("blocked subframe navigation in remote kernel mode [url=" + event.url + "]");
             }
-        });
-        window.webContents.on("will-attach-webview", (event) => {
-            event.preventDefault();
-            writeLog("blocked webview creation in remote kernel mode");
         });
     }
     window.webContents.on("did-start-navigation", (details) => {
@@ -2189,7 +2187,7 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
             nodeIntegration: true,
             nodeIntegrationInSubFrames: false,
             nodeIntegrationInWorker: false,
-            webviewTag: kernelTarget.mode !== "remote",
+            webviewTag: true,
             webSecurity: kernelTarget.mode === "remote",
             ...(kernelTarget.mode === "remote" ? {session: getRemoteSession(kernelTarget)} : {}),
             contextIsolation: false,
@@ -2928,7 +2926,7 @@ const initRemoteKernel = async (target) => {
 };
 
 app.whenReady().then(() => {
-    createMapHostManager({app, ipcMain, session, BrowserWindow, WebContentsView, MessageChannelMain, appDir,
+    mapHostManager = createMapHostManager({app, ipcMain, session, BrowserWindow, MessageChannelMain, appDir,
         getTarget: id => getWindowKernelTarget(id), isInitialized: id => initializedWindowIds.has(id)});
     const startupStartedAt = Date.now();
     writeLog("app ready, preparing startup window");
@@ -3911,7 +3909,7 @@ app.whenReady().then(() => {
                 nodeIntegration: true,
                 nodeIntegrationInSubFrames: false,
                 nodeIntegrationInWorker: false,
-                webviewTag: kernelTarget.mode !== "remote",
+                webviewTag: true,
                 webSecurity: kernelTarget.mode === "remote",
                 ...(kernelTarget.mode === "remote" ? {session: getRemoteSession(kernelTarget)} : {}),
                 autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587

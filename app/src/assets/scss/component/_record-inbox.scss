@@ -25,7 +25,7 @@
   }
 }
 
-// 日历无日期列表和可信地图菜单共享同一组内容布局。
+// 日历无日期列表内容布局，标题与搜索样式由地图菜单复用。
 @mixin content($prefix, $list-max-height: min(45vh, 360px)) {
   @include header-search($prefix);
 

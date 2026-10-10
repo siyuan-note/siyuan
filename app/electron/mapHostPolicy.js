@@ -139,32 +139,6 @@ const createMapContentSecurityPolicy = origin => {
         "; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
 };
 
-// 渲染器传入 CSS 像素，原生视图使用设备无关像素，不能再乘屏幕像素密度。
-const parseMapGeometry = (value, zoom, contentBounds, report = () => {}) => {
-    const reject = code => { report(code); return undefined; };
-    if (!isRecord(value) || typeof value.visible !== "boolean") return reject("geometryInvalid");
-    if (!value.visible) return {visible: false};
-    if (!Number.isFinite(zoom) || zoom < 0.25 || zoom > 5 || !isRecord(value.bounds) ||
-        !isRecord(value.logicalSize) || !isRecord(value.crop)) return reject("geometryInvalid");
-    const {x, y, width, height} = value.bounds;
-    const full = value.logicalSize;
-    const crop = value.crop;
-    const numbers = [x, y, width, height, full.width, full.height, crop.x, crop.y];
-    if (!numbers.every(Number.isFinite) || numbers.some(number => number < 0 || number > 32768)) return reject("geometryInvalid");
-    if (width < 1 || height < 1 || full.width < width || full.height < height) return reject("geometryLogicalBounds");
-    if (crop.x + width > full.width + 1 || crop.y + height > full.height + 1) return reject("geometryCropBounds");
-    if ((x + width) * zoom > contentBounds.width + 1 || (y + height) * zoom > contentBounds.height + 1) {
-        return reject("geometryWindowBounds");
-    }
-    // 向内取整，避免原生视图绘制到可见 DOM 矩形之外。
-    const left = Math.ceil(x * zoom), top = Math.ceil(y * zoom);
-    const right = Math.floor((x + width) * zoom), bottom = Math.floor((y + height) * zoom);
-    if (right <= left || bottom <= top) { report("geometryRoundedEmpty"); return {visible: false}; }
-    return {visible: true, zoom, bounds: {x: left, y: top, width: right - left, height: bottom - top},
-        logicalSize: {width: full.width, height: full.height},
-        crop: {x: crop.x + left / zoom - x, y: crop.y + top / zoom - y}};
-};
-
 module.exports = {mapHostFiles, unsafeMapSwitches, hasUnsafeMapSwitches, normalizeMapOrigin,
-    isMapInstanceID, parseMapCreate, parseMapCommand, parseMapReply, parseMapGeometry,
+    isMapInstanceID, parseMapCreate, parseMapCommand, parseMapReply,
     isAllowedMapProviderURL, getMapRequestPolicy, createMapContentSecurityPolicy};

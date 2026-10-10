@@ -6,11 +6,13 @@ const path = require("node:path");
 const {randomBytes} = require("node:crypto");
 const {createMapHostManager} = require("../../../electron/mapHostManager");
 const {hasUnsafeMapSwitches, mapHostFiles} = require("../../../electron/mapHostPolicy");
+const {createRemoteDocumentContentSecurityPolicy, shouldBlockRemoteFrameNavigation} = require("../../../electron/remoteKernel");
 
 const appDir = path.resolve(__dirname, "../../..");
 const ownerPreferences = Object.freeze({nodeIntegration: true, nodeIntegrationInSubFrames: false,
     nodeIntegrationInWorker: false, webviewTag: true, webSecurity: false, contextIsolation: false,
     autoplayPolicy: "user-gesture-required"});
+const remoteOwnerPreferences = Object.freeze({...ownerPreferences, webSecurity: true});
 const {MAP_WEBVIEW_PREFERENCES: guestPreferences, getMapWebviewPreferenceMismatch: getGuestPreferenceMismatch} =
     require("../../../electron/mapWebviewHost");
 // Electron 44 的 getLastWebPreferences 只回传此固定子集，不包含 preload 等构造参数。
@@ -84,6 +86,63 @@ const waitFor = async (predicate, label, timeout = 5000) => {
     }
 };
 
+// 远程夹具复用正式导航策略，并保留响应 CSP，不运行本地夹具的移除响应头逻辑。
+const installRemoteOwnerGuards = (owner, ownerSession, evidence) => {
+    const record = url => {
+        try { evidence.blockedFramePaths.push(new URL(url).pathname); } catch (_error) { /* 只记录可解析的夹具路径。 */ }
+    };
+    owner.on("will-frame-navigate", event => {
+        if (shouldBlockRemoteFrameNavigation({isMainFrame: event.isMainFrame})) {
+            record(event.url);
+            event.preventDefault();
+        }
+    });
+    ownerSession.webRequest.onBeforeRequest((details, callback) => {
+        const cancel = shouldBlockRemoteFrameNavigation({resourceType: details.resourceType});
+        if (cancel) record(details.url);
+        callback({cancel});
+    });
+};
+
+const verifyRemoteOwnerRejections = async ({owner, origin, evidence}, expectedAttached = 0) => {
+    const evaluate = source => owner.executeJavaScript(source);
+    const before = evidence.rejectedAttachments;
+    const blockedBefore = evidence.blockedFramePaths.length;
+    await evaluate(`(() => {
+        if (!window.remoteFixtureViolations) {
+            window.remoteFixtureViolations = [];
+            document.addEventListener("securitypolicyviolation", event => {
+                window.remoteFixtureViolations.push({directive: event.effectiveDirective, uri: event.blockedURI});
+            });
+        } else window.remoteFixtureViolations.length = 0;
+        for (const partition of ["", "unreserved-remote-map", "persist:unreserved-remote-map"]) {
+            const view = document.createElement("webview");
+            view.className = "remote-boundary-probe";
+            view.setAttribute("src", ${JSON.stringify(origin + "/api/fixture-private")});
+            if (partition) view.setAttribute("partition", partition);
+            document.body.appendChild(view);
+        }
+        const frame = document.createElement("iframe");
+        frame.className = "remote-boundary-probe";
+        frame.src = ${JSON.stringify(origin + "/fixture-blocked-frame")};
+        document.body.appendChild(frame);
+        const object = document.createElement("object");
+        object.className = "remote-boundary-probe";
+        object.data = ${JSON.stringify(origin + "/fixture-blocked-object")};
+        document.body.appendChild(object);
+    })()`);
+    await waitFor(() => evidence.rejectedAttachments >= before + 3, "remote ordinary and persistent webviews are denied without a matching reservation");
+    for (const pathname of ["/fixture-blocked-frame", "/fixture-blocked-object"]) {
+        await waitFor(async () => evidence.blockedFramePaths.slice(blockedBefore).includes(pathname) || await evaluate(
+            `window.remoteFixtureViolations.some(value => value.uri === ${JSON.stringify(origin + pathname)})`),
+        "remote iframe and object policy rejects " + pathname);
+    }
+    assert.equal(evidence.attached, expectedAttached, "an unreserved guest never attaches");
+    assert.equal(evidence.privateRequests, 0);
+    assert.equal(evidence.frameRequests, 0, "blocked embedded documents never reach the server");
+    await evaluate('document.querySelectorAll(".remote-boundary-probe").forEach(element => element.remove())');
+};
+
 // 编译实际业务样式和可见性函数，避免夹具自行重写圆角规则或命中判断。
 const readMapCornerAssets = () => {
     const ts = require("typescript");
@@ -148,34 +207,41 @@ const verifyMapCorners = async harness => {
     }
 };
 
-const createHarness = async ({profile, mode = "real", automate = false} = {}) => {
-    if (typeof profile !== "string" || !path.isAbsolute(profile) || !["real", "synthetic"].includes(mode)) {
+const createHarness = async ({profile, mode = "real", automate = false, kernelMode = "local"} = {}) => {
+    if (typeof profile !== "string" || !path.isAbsolute(profile) || !["real", "synthetic"].includes(mode) ||
+        !["local", "remote"].includes(kernelMode)) {
         throw new Error("An isolated profile and fixed fixture mode are required");
     }
-    const {app, BrowserWindow, WebContentsView, MessageChannelMain, ipcMain, session} = require("electron");
+    const {app, BrowserWindow, MessageChannelMain, ipcMain, session} = require("electron");
     if (hasUnsafeMapSwitches(app.commandLine)) throw new Error("Unsafe process switches are prohibited");
     if (mode === "real") checkRealAssets();
     app.setPath("userData", profile);
     await app.whenReady();
     const syntheticFiles = mode === "synthetic" ? createSyntheticFiles() : undefined;
     const instanceID = randomBytes(24).toString("hex");
-    let win, owner, guest, manager, src, partition, startupTimer, closed = false, isolating = false;
+    let win, owner, ownerSession, origin, guest, manager, src, partition, startupTimer, closed = false, isolating = false;
+    let initialized = false;
     let resolveReady, rejectReady;
     const readiness = new Promise((resolve, reject) => { resolveReady = resolve; rejectReady = reject; });
     void readiness.catch(() => {});
     const evidence = {privateRequests: 0, guestNetworkRequests: 0, defaultHeaderCalls: 0,
-        defaultGuestHeaderCalls: 0, rejectedAttachments: 0, attached: 0, replies: [], diagnostics: []};
+        defaultGuestHeaderCalls: 0, rejectedAttachments: 0, attached: 0, replies: [], diagnostics: [],
+        ownerDocumentCSP: "", frameRequests: 0, blockedFramePaths: []};
+    const ownerHTML = fs.readFileSync(path.join(__dirname, "owner.html"), "utf8");
     const server = http.createServer((request, response) => {
         const files = {"/stage/build/app/": ["owner.html", "text/html"],
-            "/fixture-owner.js": ["owner.js", "text/javascript"], "/fixture-owner.css": ["owner.css", "text/css"]};
+            "/stage/fixture-owner.js": ["owner.js", "text/javascript"], "/stage/fixture-owner.css": ["owner.css", "text/css"]};
         const resource = files[request.url];
         if (!resource) {
-            if (request.url.startsWith("/api/")) evidence.privateRequests++;
+            if (request.url.startsWith("/fixture-blocked-")) evidence.frameRequests++;
+            else if (request.url.startsWith("/api/")) evidence.privateRequests++;
             else evidence.guestNetworkRequests++;
             response.writeHead(403).end();
             return;
         }
-        response.setHeader("Content-Security-Policy", "default-src 'none'");
+        const csp = kernelMode === "remote" ? createRemoteDocumentContentSecurityPolicy(ownerHTML, origin) : "default-src 'none'";
+        if (request.url === "/stage/build/app/") evidence.ownerDocumentCSP = csp;
+        response.setHeader("Content-Security-Policy", csp);
         response.setHeader("Content-Type", resource[1]);
         response.end(fs.readFileSync(path.join(__dirname, resource[0])));
     });
@@ -203,22 +269,24 @@ const createHarness = async ({profile, mode = "real", automate = false} = {}) =>
         ipcMain.removeListener("map-webview-fixture-state", onState);
         app.removeListener("web-contents-created", onCreated);
         if (win && !win.isDestroyed()) win.destroy();
-        session.defaultSession.webRequest.onHeadersReceived(null);
+        if (kernelMode === "local") session.defaultSession.webRequest.onHeadersReceived(null);
+        else ownerSession?.webRequest.onBeforeRequest(null);
         server.closeAllConnections?.();
         if (server.listening) await new Promise(resolve => server.close(resolve));
     };
     try {
         await new Promise((resolve, reject) => { server.once("error", reject); server.listen(0, "127.0.0.1", resolve); });
-        const origin = `http://127.0.0.1:${server.address().port}`;
-        session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+        origin = `http://127.0.0.1:${server.address().port}`;
+        ownerSession = kernelMode === "remote" ? session.fromPartition("siyuan-fixture-owner-" + randomBytes(24).toString("hex"), {cache: false}) : session.defaultSession;
+        if (kernelMode === "local") session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
             evidence.defaultHeaderCalls++;
             if (details.url.includes("/stage/map/") || details.url.includes("/stage/build/map/")) evidence.defaultGuestHeaderCalls++;
             callback({responseHeaders: Object.fromEntries(Object.entries(details.responseHeaders || {})
                 .filter(([name]) => !["content-security-policy", "x-frame-options", "access-control-allow-origin"].includes(name.toLowerCase())))});
         });
-        manager = createMapHostManager({app, ipcMain, session, BrowserWindow, WebContentsView, MessageChannelMain, appDir,
-            getTarget: id => owner && id === owner.id ? {mode: "local", origin} : undefined,
-            isInitialized: id => owner && id === owner.id,
+        manager = createMapHostManager({app, ipcMain, session, BrowserWindow, MessageChannelMain, appDir,
+            getTarget: id => owner && id === owner.id ? {mode: kernelMode, origin} : undefined,
+            isInitialized: id => initialized && owner && id === owner.id,
             readFile: syntheticFiles ? async filename => {
                 const relative = path.relative(appDir, filename).split(path.sep).join("/");
                 if (!syntheticFiles.has(relative)) throw new Error("Unknown synthetic fixture asset");
@@ -226,8 +294,11 @@ const createHarness = async ({profile, mode = "real", automate = false} = {}) =>
             } : undefined});
         app.on("web-contents-created", onCreated);
         ipcMain.on("map-webview-fixture-state", onState);
-        win = new BrowserWindow({width: 820, height: 620, useContentSize: true, show: true, webPreferences: {...ownerPreferences}});
+        win = new BrowserWindow({width: 820, height: 620, useContentSize: true, show: true,
+            webPreferences: {...(kernelMode === "remote" ? remoteOwnerPreferences : ownerPreferences), session: ownerSession}});
         owner = win.webContents;
+        manager.registerOwner(owner);
+        if (kernelMode === "remote") installRemoteOwnerGuards(owner, ownerSession, evidence);
         owner.on("will-attach-webview", event => { queueMicrotask(() => { if (event.defaultPrevented) evidence.rejectedAttachments++; }); });
         owner.on("did-attach-webview", () => { evidence.attached++; });
         win.on("closed", () => { void destroy().then(() => { if (!automate) app.quit(); }); });
@@ -237,13 +308,19 @@ const createHarness = async ({profile, mode = "real", automate = false} = {}) =>
             rejectReady(error);
         }, 85000);
         await Promise.race([win.loadURL(origin + "/stage/build/app/"), readiness]);
+        if (kernelMode === "remote") {
+            try { await verifyRemoteOwnerRejections({owner, origin, evidence}); }
+            catch (error) { error.code = "remoteOwnerPolicyFailed"; throw error; }
+        }
+        initialized = true;
         owner.send("map-webview-fixture-start", {instanceID, mode});
         await readiness;
         const harness = {win, owner, get guest() { return guest; }, session: guest.session, origin,
-            get src() { return src; }, get partition() { return partition; }, instanceID, mode, evidence, destroy};
+            get src() { return src; }, get partition() { return partition; }, instanceID, mode, kernelMode, evidence, destroy};
         isolating = true;
         await verifyIsolation(harness);
         console.info("Map webview boundary checks passed: isolated session, opaque origin, no Node/IPC or owner DOM access, private network denied.");
+        if (kernelMode === "remote") console.info("Remote map owner policy: PASS. Web security and production CSP retained; unreserved guests, iframes and objects denied.");
         return harness;
     } catch (error) {
         await destroy();
@@ -257,7 +334,7 @@ const verifyIsolationChecks = async harness => {
     const {owner, guest, evidence, origin} = harness;
     const inspect = source => guest.executeJavaScript(source);
     const ownerPrefs = owner.getLastWebPreferences();
-    for (const [name, value] of Object.entries(ownerPreferences)) {
+    for (const [name, value] of Object.entries(harness.kernelMode === "remote" ? remoteOwnerPreferences : ownerPreferences)) {
         if (reportedPreferenceKeys.includes(name)) assert.equal(ownerPrefs[name], value, name);
     }
     assert.equal(getGuestPreferenceMismatch(guest.getLastWebPreferences()), undefined);
@@ -272,7 +349,15 @@ const verifyIsolationChecks = async harness => {
             openerOwner: ownerVisible(opener), evalBlocked};
     })()`), {origin: "null", require: "undefined", process: "undefined", ipc: "undefined", bridge: ["version"],
         parentOwner: false, topOwner: false, openerOwner: false, evalBlocked: true});
-    assert.ok(evidence.defaultHeaderCalls > 0, "the unsafe owner header-removal fixture is active");
+    if (harness.kernelMode === "remote") {
+        const html = fs.readFileSync(path.join(__dirname, "owner.html"), "utf8");
+        assert.equal(evidence.ownerDocumentCSP, createRemoteDocumentContentSecurityPolicy(html, origin));
+        assert.equal(evidence.defaultHeaderCalls, 0, "remote owner never installs the local CSP-removal hook");
+        assert.equal(evidence.frameRequests, 0);
+        assert.ok(evidence.rejectedAttachments >= 3, "remote default denial is active before the map reservation");
+    } else {
+        assert.ok(evidence.defaultHeaderCalls > 0, "the unsafe owner header-removal fixture is active");
+    }
     assert.equal(evidence.defaultGuestHeaderCalls, 0, "guest resources bypass the owner's default session entirely");
     assert.equal(evidence.guestNetworkRequests, 0, "fixed local guest resources never reach the kernel server");
     for (const target of [origin + "/api/fixture-private", "https://example.invalid/private", "file:///fixture-private"]) {
@@ -301,6 +386,7 @@ const verifyHarness = async harness => {
     const inspect = source => guest.executeJavaScript(source);
     await verifyIsolation(harness);
     await waitFor(() => inspect("window.mapFixture?.fits === 1 && window.mapFixture.visible.at(-1) === true"), "runtime receives points and visibility");
+    if (harness.kernelMode === "remote") await verifyRemoteOwnerRejections(harness, 1);
     assert.equal(await inspect("window.mapFixture.locked"), true);
     const privateURL = origin + "/api/fixture-private";
     assert.deepEqual(await inspect(`new Promise(resolve => {
@@ -350,6 +436,7 @@ const verifyHarness = async harness => {
     assert.equal(await evaluate("document.getElementById('scroll-area').scrollTop"), 80);
     assert.equal(guest.id, identity);
     // 拒绝第二个伪造 guest，不影响已准入的 guest 和独立会话。
+    const rejectedBeforeForgery = evidence.rejectedAttachments;
     await evaluate(`(() => {
         const bad = document.createElement("webview");
         bad.setAttribute("src", ${JSON.stringify(privateURL)});
@@ -358,7 +445,7 @@ const verifyHarness = async harness => {
         bad.setAttribute("disablewebsecurity", "");
         document.body.appendChild(bad);
     })()`);
-    await waitFor(() => evidence.rejectedAttachments > 0, "a forged second guest is rejected before creation");
+    await waitFor(() => evidence.rejectedAttachments > rejectedBeforeForgery, "a forged second guest is rejected before creation");
     assert.equal(evidence.attached, 1);
     assert.equal(evidence.privateRequests, 0);
     assert.equal(guest.id, identity);
@@ -378,4 +465,5 @@ const verifyHarness = async harness => {
 };
 
 module.exports = {createHarness, createTemporaryProfile, verifyHarness, checkRealAssets,
-    createSyntheticFiles, ownerPreferences, guestPreferences, verifyIsolation, readMapCornerAssets};
+    createSyntheticFiles, ownerPreferences, remoteOwnerPreferences, guestPreferences, verifyIsolation, readMapCornerAssets,
+    installRemoteOwnerGuards};

@@ -138,6 +138,7 @@ test("settings popup authorization requires the registered top-level page and ex
     assert.equal(allowed.overrideBrowserWindowOptions.autoHideMenuBar, true);
     assert.equal(allowed.overrideBrowserWindowOptions.parent, undefined);
     assert.equal(allowed.overrideBrowserWindowOptions.webPreferences.webSecurity, true);
+    assert.equal(allowed.overrideBrowserWindowOptions.webPreferences.webviewTag, false);
     assert.equal(allowed.overrideBrowserWindowOptions.webPreferences.backgroundThrottling, false);
     assert.equal(policy(owner, prepared), undefined);
     event.senderFrame = {};

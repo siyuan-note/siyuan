@@ -51,12 +51,3 @@ test("the transferred map port only admits the fixed OpenFreeMap provider", () =
         assert.equal(s.posted.length, 0);
     }
 });
-
-test("viewport accepts only bounded numeric dimensions and crop, without exposing IPC", () => {
-    const s = setup();
-    s.listeners["siyuan-map-viewport"]({}, {logicalSize: {width: 500, height: 400}, crop: {x: 20, y: 40}});
-    assert.equal(s.map.style.width, "500px"); assert.equal(s.map.style.height, "400px");
-    assert.equal(s.map.style.transform, "translate(-20px,-40px)");
-    s.listeners["siyuan-map-viewport"]({}, {logicalSize: {width: "url(secret)", height: 400}, crop: {x: 0, y: 0}});
-    assert.equal(s.map.style.width, "500px");
-});

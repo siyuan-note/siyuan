@@ -5,10 +5,59 @@ const {promisify} = require("node:util");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const {ownerPreferences, guestPreferences, createSyntheticFiles, checkRealAssets, verifyIsolation, readMapCornerAssets} =
+const {EventEmitter} = require("node:events");
+const {ownerPreferences, remoteOwnerPreferences, guestPreferences, createSyntheticFiles, checkRealAssets,
+    verifyIsolation, readMapCornerAssets, installRemoteOwnerGuards} =
     require("./fixtures/map-webview-boundary/harnessSupport.cjs");
 const {createMapSessionRouter} = require("../electron/mapHostManager");
 const {createMapContentSecurityPolicy} = require("../electron/mapHostPolicy");
+const {createRemoteDocumentContentSecurityPolicy} = require("../electron/remoteKernel");
+
+test("remote fixture retains web security and rejects subframes and objects with the production navigation policy", () => {
+    assert.equal(remoteOwnerPreferences.webviewTag, true);
+    assert.equal(remoteOwnerPreferences.webSecurity, true);
+    assert.equal(remoteOwnerPreferences.nodeIntegrationInSubFrames, false);
+    const owner = new EventEmitter(), evidence = {blockedFramePaths: []};
+    let beforeRequest;
+    installRemoteOwnerGuards(owner, {webRequest: {onBeforeRequest(callback) { beforeRequest = callback; }}}, evidence);
+    for (const [resourceType, expected] of [["mainFrame", false], ["script", false], ["subFrame", true], ["object", true]]) {
+        let result;
+        beforeRequest({resourceType, url: "https://fixture.invalid/" + resourceType}, value => { result = value; });
+        assert.deepEqual(result, {cancel: expected});
+    }
+    for (const isMainFrame of [true, false]) {
+        let prevented = false;
+        owner.emit("will-frame-navigate", {isMainFrame, url: "https://fixture.invalid/frame",
+            preventDefault() { prevented = true; }});
+        assert.equal(prevented, !isMainFrame);
+    }
+    assert.deepEqual(evidence.blockedFramePaths, ["/subFrame", "/object", "/frame"]);
+});
+
+test("remote isolation verification fails if owner security, CSP or pre-reservation denial is missing", async () => {
+    const origin = "http://127.0.0.1:1234";
+    const html = fs.readFileSync(path.join(__dirname, "fixtures/map-webview-boundary/owner.html"), "utf8");
+    const result = {origin: "null", require: "undefined", process: "undefined", ipc: "undefined", bridge: ["version"],
+        parentOwner: false, topOwner: false, openerOwner: false, evalBlocked: true};
+    const fixture = () => ({origin, kernelMode: "remote",
+        owner: {getLastWebPreferences: () => remoteOwnerPreferences, session: {}, getOSProcessId: () => 1},
+        guest: {getLastWebPreferences: () => guestPreferences, session: {isPersistent: () => false},
+            getOSProcessId: () => 2, executeJavaScript: source => Promise.resolve(source.startsWith("fetch(") ? true : result)},
+        evidence: {defaultHeaderCalls: 0, defaultGuestHeaderCalls: 0, guestNetworkRequests: 0, privateRequests: 0,
+            ownerDocumentCSP: createRemoteDocumentContentSecurityPolicy(html, origin), frameRequests: 0, rejectedAttachments: 3}});
+    await verifyIsolation(fixture());
+    for (const weaken of [
+        value => { value.owner.getLastWebPreferences = () => ownerPreferences; },
+        value => { value.evidence.ownerDocumentCSP = ""; },
+        value => { value.evidence.defaultHeaderCalls = 1; },
+        value => { value.evidence.frameRequests = 1; },
+        value => { value.evidence.rejectedAttachments = 0; },
+    ]) {
+        const value = fixture();
+        weaken(value);
+        await assert.rejects(verifyIsolation(value));
+    }
+});
 
 test("common isolation checks have a fixed deadline and clear their timer on success, failure and timeout", async t => {
     let fire, delay;
@@ -90,13 +139,17 @@ test("corner fixture compiles production styles and visibility logic without a G
     assert.doesNotThrow(() => new Function("exports", assets.visibility));
 });
 
-test("real Electron webview clips rounded corners, retains attribution visibility and isolation, and stays behind DOM menus", {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY
-        ? "Real Electron verification requires DISPLAY or WAYLAND_DISPLAY; no unsafe startup fallback is allowed" : false,
-}, async () => {
-    const env = {...process.env};
-    delete env.ELECTRON_RUN_AS_NODE;
-    const result = await promisify(execFile)(require("electron"), [path.join(__dirname, "fixtures/map-webview-boundary/harness.cjs"),
-        "--synthetic", "--verify"], {env, windowsHide: true, timeout: 90000});
-    assert.match(result.stdout, /Map webview prototype verification passed\./);
-});
+for (const kernelMode of ["local", "remote"]) {
+    test(`real Electron ${kernelMode} webview retains owner policy, clips rounded corners and stays behind DOM menus`, {
+        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY
+            ? "Real Electron verification requires DISPLAY or WAYLAND_DISPLAY; no unsafe startup fallback is allowed" : false,
+    }, async () => {
+        const env = {...process.env};
+        delete env.ELECTRON_RUN_AS_NODE;
+        const flags = ["--synthetic", "--verify", ...(kernelMode === "remote" ? ["--remote"] : [])];
+        const result = await promisify(execFile)(require("electron"), [path.join(__dirname, "fixtures/map-webview-boundary/harness.cjs"),
+            ...flags], {env, windowsHide: true, timeout: 90000});
+        assert.match(result.stdout, /Map webview prototype verification passed\./);
+        if (kernelMode === "remote") assert.match(result.stdout, /Remote map owner policy: PASS\./);
+    });
+}

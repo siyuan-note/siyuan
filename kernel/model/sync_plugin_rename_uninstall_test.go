@@ -116,3 +116,35 @@ func TestSyncMergePluginRemovedDirTriggersUninstall(t *testing.T) {
 		t.Fatalf("插件目录消失应触发卸载：%s", line)
 	}
 }
+
+func TestSyncMergePluginOnlyDSStoreTriggersUninstall(t *testing.T) {
+	setupSyncMergePluginTest(t)
+	const plugin = "only-dsstore-plugin"
+	writePluginFile(t, plugin, ".DS_Store", "")
+	mergeResult := &dejavu.MergeResult{
+		Removes: []*entity.File{{Path: "/plugins/" + plugin + "/plugin.json"}},
+	}
+	processSyncMergeResult(true, false, mergeResult, &dejavu.TrafficStat{}, "a", 0)
+	line := lastReloadPluginsLog(t)
+	if !strings.Contains(line, "uninstalls=["+plugin+"]") {
+		t.Fatalf("metadata-only plugin must be uninstalled: %s", line)
+	}
+	if _, err := os.Stat(filepath.Join(util.DataDir, "plugins", plugin)); !os.IsNotExist(err) {
+		t.Fatalf("metadata-only plugin directory must be removed: %v", err)
+	}
+}
+
+func TestSyncMergeRemovedPetalStillTriggersUninstall(t *testing.T) {
+	setupSyncMergePluginTest(t)
+	const plugin = "removed-petal-plugin"
+	writePluginFile(t, plugin, "plugin.json", "{}")
+	mergeResult := &dejavu.MergeResult{
+		Removes:      []*entity.File{{Path: "/plugins/" + plugin + "/README.md"}},
+		RemovePetals: []string{plugin},
+	}
+	processSyncMergeResult(true, false, mergeResult, &dejavu.TrafficStat{}, "a", 0)
+	line := lastReloadPluginsLog(t)
+	if !strings.Contains(line, "uninstalls=["+plugin+"]") {
+		t.Fatalf("explicit petal removal must trigger uninstall: %s", line)
+	}
+}

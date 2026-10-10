@@ -491,6 +491,8 @@ var GetSnippet = define[GetSnippetRequest, SnippetsData]("getSnippet", "/api/sni
 var SetSnippet = define[SetSnippetRequest, Null]("setSnippet", "/api/snippet/setSnippet", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var RemoveSnippet = define[TrimmedIDRequest, *Snippet]("removeSnippet", "/api/snippet/removeSnippet", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var FlushTransaction = define[EmptyRequest, Null]("flushTransaction", "/api/sqlite/flushTransaction", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
+
+// 标准 Markdown 复制按文档标题编号开关和编辑器编号格式添加编号，局部导出保留原文档编号。
 var CopyStdMarkdown = define[CopyStdMarkdownRequest, string]("copyStdMarkdown", "/api/lute/copyStdMarkdown", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var Md2HTML = define[MarkdownHTMLRequest, HTMLData]("md2HTML", "/api/lute/md2html", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var SpinBlockDOM = define[DOMTextRequest, DOMData]("spinBlockDOM", "/api/lute/spinBlockDOM", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{413}}, "POST")
@@ -948,14 +950,24 @@ var Export2Liandi = define[ExportIDRequest, Null]("export2Liandi", "/api/export/
 var ExportDataInFolder = define[ExportFolderRequest, ExportNameData]("exportDataInFolder", "/api/export/exportDataInFolder", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportData = define[EmptyRequest, ExportZipData]("exportData", "/api/export/exportData", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var ExportResources = define[ExportResourcesRequest, ExportPathData]("exportResources", "/api/export/exportResources", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}, Text: true}, "POST")
+
+// Markdown 导出按各文档的标题编号开关和编辑器编号格式添加编号，不修改源文档。
 var ExportNotebookMd = define[ExportNotebookMarkdownRequest, ExportNamedZipData]("exportNotebookMd", "/api/export/exportNotebookMd", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// Markdown 导出按各文档的标题编号开关和编辑器编号格式添加编号，不修改源文档。
 var ExportNotebooksMd = define[ExportNotebooksMarkdownRequest, ExportNamedZipData]("exportNotebooksMd", "/api/export/exportNotebooksMd", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// Markdown 导出按各文档的标题编号开关和编辑器编号格式添加编号，不修改源文档。
 var ExportMds = define[ExportDocumentsMarkdownRequest, ExportNamedZipData]("exportMds", "/api/export/exportMds", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// Markdown 导出按文档标题编号开关和编辑器编号格式添加编号，不修改源文档。
 var ExportMd = define[ExportMarkdownRequest, ExportNamedZipData]("exportMd", "/api/export/exportMd", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportNotebookSY = define[ExportIDRequest, ExportZipData]("exportNotebookSY", "/api/export/exportNotebookSY", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportNotebooksSY = define[ExportNotebooksRequest, ExportZipData]("exportNotebooksSY", "/api/export/exportNotebooksSY", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportSYs = define[ExportIDsRequest, ExportZipData]("exportSYs", "/api/export/exportSYs", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportSY = define[ExportIDRequest, ExportZipData]("exportSY", "/api/export/exportSY", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// Markdown 内容按文档标题编号开关和编辑器编号格式添加编号，局部导出保留原文档编号。
 var ExportMdContent = define[ExportMarkdownContentRequest, ExportMarkdownContentData]("exportMdContent", "/api/export/exportMdContent", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportDocx = define[ExportDocxRequest, ExportPathData]("exportDocx", "/api/export/exportDocx", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var ExportMdHTML = define[ExportMarkdownHTMLRequest, ExportHTMLData]("exportMdHTML", "/api/export/exportMdHTML", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")

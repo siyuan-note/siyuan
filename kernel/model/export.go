@@ -1614,7 +1614,7 @@ func applyHeadingNumbersForExport(tree *parse.Tree, bt *treenode.BlockTree, merg
 	}
 
 	numberingTree := tree
-	if !merged && "d" != bt.Type {
+	if !merged && nil != bt && "d" != bt.Type {
 		luteEngine := NewLute()
 		if numberingTree, err = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine); err != nil {
 			return
@@ -3239,6 +3239,10 @@ func exportMarkdownContent(rootID string, exportOpts markdownExportOptions) (tre
 }
 
 func exportMarkdownContent0(id string, tree *parse.Tree, exportOpts markdownExportOptions) (ret string) {
+	if numberErr := applyHeadingNumbersForExport(tree, getExportBlockTreeInBox(id, tree.Box), false); nil != numberErr {
+		logging.LogErrorf("prepare Markdown heading numbers failed: %s", numberErr)
+		return ""
+	}
 	tree, exportTreeErr := exportTree(tree, treeExportOptions{
 		Config:           exportOpts.Config,
 		WYSIWYG:          false,

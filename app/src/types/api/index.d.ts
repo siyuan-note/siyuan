@@ -4685,6 +4685,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * Markdown 导出按文档标题编号开关和编辑器编号格式添加编号，不修改源文档。
+     */
     "/api/export/exportMd": {
         request: ExportMarkdownRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4692,6 +4695,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * Markdown 内容按文档标题编号开关和编辑器编号格式添加编号，局部导出保留原文档编号。
+     */
     "/api/export/exportMdContent": {
         request: ExportMarkdownContentRequestInput;
         response: { "code": 0; "data": ExportMarkdownContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4706,6 +4712,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * Markdown 导出按各文档的标题编号开关和编辑器编号格式添加编号，不修改源文档。
+     */
     "/api/export/exportMds": {
         request: ExportDocumentsMarkdownRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4720,6 +4729,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * Markdown 导出按各文档的标题编号开关和编辑器编号格式添加编号，不修改源文档。
+     */
     "/api/export/exportNotebookMd": {
         request: ExportNotebookMarkdownRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4734,6 +4746,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * Markdown 导出按各文档的标题编号开关和编辑器编号格式添加编号，不修改源文档。
+     */
     "/api/export/exportNotebooksMd": {
         request: ExportNotebooksMarkdownRequestInput;
         response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5493,6 +5508,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 标准 Markdown 复制按文档标题编号开关和编辑器编号格式添加编号，局部导出保留原文档编号。
+     */
     "/api/lute/copyStdMarkdown": {
         request: CopyStdMarkdownRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

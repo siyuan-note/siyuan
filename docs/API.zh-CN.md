@@ -1604,7 +1604,7 @@ if (response.code === 0 && response.data) {
   ```
 
     * `hPath`：人类可读的路径
-    * `content`：Markdown 内容
+    * `content`：Markdown 内容，文档启用标题自动编号时包含编号（文档设置优先于编辑器默认设置）；使用编辑器编号格式，局部导出保留原文档编号
 
 ### 导出文件与目录
 

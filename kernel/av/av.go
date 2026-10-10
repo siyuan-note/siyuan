@@ -1105,7 +1105,13 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		logging.LogErrorf("create attribute view dir [%s] failed: %s", filepath.Dir(avJSONPath), err)
 		return
 	}
-	if err = util.WriteFileByMmap(avJSONPath, writeData); nil != err {
+	if avBoxID != "" {
+		// 密文通过临时文件原子替换，避免原址覆写中断后丢失可认证的旧数据。
+		if err = filelock.WriteFile(avJSONPath, writeData); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
+			return
+		}
+	} else if err = util.WriteFileByMmap(avJSONPath, writeData); nil != err {
 		if err = filelock.WriteFile(avJSONPath, writeData); nil != err {
 			logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
 			return

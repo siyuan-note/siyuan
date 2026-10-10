@@ -798,6 +798,8 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
 			if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
 				logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
+				err = copyErr
+				return
 			}
 		} else {
 			// 加密笔记本：先把 AV 定义加密写入笔记本级目录，建立 box 映射后 mirror/relation 才能正确路由

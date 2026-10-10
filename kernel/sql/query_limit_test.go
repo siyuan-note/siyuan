@@ -2,8 +2,61 @@ package sql
 
 import (
 	gosql "database/sql"
+	"math"
 	"testing"
 )
+
+func TestQueryRowLimit(t *testing.T) {
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	testDB.SetMaxOpenConns(1)
+	t.Cleanup(func() { _ = testDB.Close() })
+	previousDB := db
+	db = testDB
+	t.Cleanup(func() { db = previousDB })
+	if _, err = testDB.Exec("CREATE TABLE items (n INTEGER, content TEXT); INSERT INTO items VALUES (1, 'a'), (2, 'a'), (3, 'a'), (4, 'a'), (5, 'a')"); err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		stmt      string
+		count     int
+		truncated bool
+	}{
+		{"SELECT n FROM items ORDER BY n", 3, true},
+		{"SELECT n FROM items WHERE n <= 3 ORDER BY n", 3, false},
+		{"SELECT n FROM items WHERE n < 0", 0, false},
+		{"SELECT n FROM items ORDER BY n LIMIT 5", 3, true},
+		{"SELECT n FROM items ORDER BY n LIMIT -1", 3, true},
+		{"SELECT n FROM items ORDER BY n LIMIT 2", 2, false},
+		{"SELECT n FROM items ORDER BY n LIMIT 3 OFFSET 3", 2, false},
+		{"SELECT n FROM items UNION SELECT 6 ORDER BY n", 3, true},
+		{"WITH x AS (SELECT n FROM items LIMIT 5) SELECT n FROM x ORDER BY n", 3, true},
+		{"SELECT n FROM items -- comment\nORDER BY n", 3, true},
+		{`SELECT n FROM items WHERE content LIKE '%a%' ESCAPE '\' ORDER BY n`, 3, true},
+	} {
+		rows, info, queryErr := QueryWithRowLimitInfo(tc.stmt, 3)
+		if queryErr != nil || rows == nil || len(rows) != tc.count || info.Limit != 3 || info.Truncated != tc.truncated {
+			t.Fatalf("%s: rows=%v info=%+v err=%v", tc.stmt, rows, info, queryErr)
+		}
+		if tc.count > 0 && rows[0]["n"] != int64(1) && tc.stmt != "SELECT n FROM items ORDER BY n LIMIT 3 OFFSET 3" {
+			t.Fatalf("query order changed: %s: %v", tc.stmt, rows)
+		}
+	}
+	for _, limit := range []int{0, -1, math.MaxInt} {
+		if _, _, err = QueryWithRowLimitInfo("SELECT 1", limit); err == nil {
+			t.Fatalf("invalid limit accepted: %d", limit)
+		}
+	}
+	if _, _, err = QueryWithRowLimitInfo("SELECT abs(-9223372036854775808)", 3); err == nil {
+		t.Fatal("row iteration error was ignored")
+	}
+	rows, err := Query(`SELECT n FROM items WHERE content LIKE '%a%' ESCAPE '\' ORDER BY n`, 3)
+	if err != nil || len(rows) != 3 {
+		t.Fatalf("raw fallback exceeded default limit: %v %v", rows, err)
+	}
+}
 
 func TestQueryWithLimitInfo(t *testing.T) {
 	testDB, err := gosql.Open("sqlite3_extended", ":memory:")

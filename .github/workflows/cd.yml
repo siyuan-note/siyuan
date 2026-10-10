@@ -233,12 +233,22 @@ jobs:
         with:
           go-version-file: kernel/go.mod
           cache-dependency-path: kernel/go.sum
-      - name: Test Windows process helpers
-        id: test_windows_process_helpers
+      - name: Set up Windows kernel test compiler
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          path-type: inherit
+          install: mingw-w64-ucrt-x86_64-gcc
+      - name: Test all Windows kernel packages
+        id: test_windows_kernel_packages
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true
-        run: go test ./internal/elevator -count=1
+        shell: msys2 {0}
+        run: go test -tags "fts5 sqlcipher" ./... -count=1
         working-directory: kernel
+        env:
+          CGO_ENABLED: 1
+          CC: gcc
       - uses: actions/setup-node@v6
         with:
           node-version: 24

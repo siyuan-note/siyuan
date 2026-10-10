@@ -56,7 +56,11 @@ func ValidateUnusedAttributeView(id string) error {
 	if !ast.IsNodeIDPattern(id) {
 		return fmt.Errorf("invalid attribute view ID: %s", id)
 	}
-	for _, item := range UnusedAttributeViews(false) {
+	items, err := UnusedAttributeViews(false)
+	if err != nil {
+		return err
+	}
+	for _, item := range items {
 		if item.Item == id {
 			return nil
 		}
@@ -103,17 +107,23 @@ func RemoveUnusedAttributeView(id string) (err error) {
 	return
 }
 
-func RemoveUnusedAttributeViews() (ret []string) {
+func RemoveUnusedAttributeViews() (ret []string, err error) {
 	ret = []string{}
+	unusedAttributeViews, err := UnusedAttributeViews(false)
+	if err != nil {
+		return
+	}
 	var size int64
 
 	msgId := util.PushMsg(Conf.Language(100), 30*1000)
 	defer func() {
+		if err != nil {
+			util.PushUpdateMsg(msgId, err.Error(), 7000)
+			return
+		}
 		msg := fmt.Sprintf(Conf.Language(280), len(ret), humanize.BytesCustomCeil(uint64(size), 2))
 		util.PushUpdateMsg(msgId, msg, 7000)
 	}()
-
-	unusedAttributeViews := UnusedAttributeViews(false)
 
 	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
@@ -142,6 +152,7 @@ func RemoveUnusedAttributeViews() (ret []string) {
 			}
 
 			if removeErr := filelock.RemoveWithoutFatal(absPath); removeErr != nil {
+				err = removeErr
 				logging.LogErrorf("remove unused av [%s] failed: %s", absPath, removeErr)
 				util.PushErrMsg(fmt.Sprintf("%s", removeErr), 7000)
 				return
@@ -158,12 +169,21 @@ func RemoveUnusedAttributeViews() (ret []string) {
 	return
 }
 
-func UnusedAttributeViews(sorted bool) (ret []*UnusedItem) {
-	defer logging.Recover()
+func UnusedAttributeViews(sorted bool) (ret []*UnusedItem, err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			ret = nil
+			err = fmt.Errorf("scan database references failed: %v", recovered)
+			logging.LogErrorf("%s", err)
+		}
+	}()
 	ret = []*UnusedItem{}
 
 	allAvIDs, err := getAllAvIDs()
 	if err != nil {
+		if os.IsNotExist(err) {
+			return ret, nil
+		}
 		return
 	}
 
@@ -171,13 +191,19 @@ func UnusedAttributeViews(sorted bool) (ret []*UnusedItem) {
 	luteEngine := util.NewLute()
 	boxes := Conf.GetBoxes()
 	for _, box := range boxes {
-		pages := pagedPaths(filepath.Join(util.DataDir, box.ID), 32)
+		if IsEncryptedBox(box.ID) {
+			continue
+		}
+		pages, walkErr := pagedPathsWithError(filepath.Join(util.DataDir, box.ID), 32)
+		if walkErr != nil {
+			return nil, walkErr
+		}
 		for _, paths := range pages {
 			var trees []*parse.Tree
 			for _, localPath := range paths {
 				tree, loadTreeErr := loadTree(localPath, luteEngine)
 				if nil != loadTreeErr {
-					continue
+					return nil, fmt.Errorf("read database references [%s] failed: %w", localPath, loadTreeErr)
 				}
 				trees = append(trees, tree)
 			}

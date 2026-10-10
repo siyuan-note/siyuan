@@ -957,9 +957,14 @@ var LogoutCloudUser = define[EmptyRequest, Null]("logoutCloudUser", "/api/settin
 var Login2faCloudUser = define[SettingLogin2faRequest, Login2faEnvelope]("login2faCloudUser", "/api/setting/login2faCloudUser", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Output: DirectJSONOutput}, "POST")
 var SetEmoji = define[SettingEmojiRequest, Null]("setEmoji", "/api/setting/setEmoji", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// RemoveUnusedAttributeView 先完整扫描普通笔记本的引用关系；扫描失败返回 -1，不创建清理历史或删除数据库。
+// 加密笔记本及笔记本级数据库不参与全局未引用清理。
 var RemoveUnusedAttributeView = define[RemoveUnusedAttributeViewRequest, AVIDData]("removeUnusedAttributeView", "/api/av/removeUnusedAttributeView", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// RemoveUnusedAttributeViews 完整扫描成功后才备份并删除未引用的全局数据库；扫描失败返回 -1，保留源文件。
 var RemoveUnusedAttributeViews = define[EmptyRequest, AVPathsData]("removeUnusedAttributeViews", "/api/av/removeUnusedAttributeViews", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 
+// GetUnusedAttributeViews 排除加密笔记本；普通文档读取或目录遍历失败时返回 -1，不返回不完整的候选列表。
 // 截断提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，离线目标不回退广播。
 var GetUnusedAttributeViews = define[EmptyRequest, []*AssetUnusedItem]("getUnusedAttributeViews", "/api/av/getUnusedAttributeViews", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var GetAttributeViewItemIDsByBoundIDs = define[GetAttributeViewItemIDsByBoundIDsRequest, map[string]string]("getAttributeViewItemIDsByBoundIDs", "/api/av/getAttributeViewItemIDsByBoundIDs", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")

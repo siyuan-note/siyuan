@@ -2,6 +2,7 @@ package model
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"testing"
@@ -15,6 +16,15 @@ import (
 // TestHistorySearchInjection 覆盖历史搜索的注入回归
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-4hjx-84f6-gr7c
 func TestHistorySearchInjection(t *testing.T) {
+	const childEnv = "SIYUAN_TEST_HISTORY_SEARCH_INJECTION"
+	if os.Getenv(childEnv) != "1" {
+		cmd := exec.Command(os.Args[0], "-test.run=^TestHistorySearchInjection$", "-test.timeout=30s")
+		cmd.Env = append(os.Environ(), childEnv+"=1")
+		if output, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("history search regression failed: %v\n%s", err, output)
+		}
+		return
+	}
 	root := t.TempDir()
 	util.WorkspaceDir = root
 	util.DataDir = filepath.Join(root, "data")

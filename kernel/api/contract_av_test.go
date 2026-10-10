@@ -5,15 +5,18 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -23,6 +26,68 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestUnusedAttributeViewScanFailureContract(t *testing.T) {
+	setupAssetContractWorkspace(t)
+	previousLang, previousLangs := util.Lang, util.AttrViewLangs
+	util.Lang = "en"
+	util.AttrViewLangs = map[string]map[string]any{"en": {"key": "Key", "select": "Select", "table": "Table"}}
+	t.Cleanup(func() { util.Lang, util.AttrViewLangs = previousLang, previousLangs })
+	model.Conf.FileTree = conf.NewFileTree()
+	box := &model.Box{ID: "20260918000000-abcdefg"}
+	if err := box.SaveConf(conf.NewBoxConf()); err != nil {
+		t.Fatal(err)
+	}
+	const id = "20260913000000-unused1"
+	if err := av.SaveAttributeView(av.NewAttributeView(id)); err != nil {
+		t.Fatal(err)
+	}
+	docPath := filepath.Join(util.DataDir, box.ID, "20260918000001-abcdefg.sy")
+	avPath := filepath.Join(util.DataDir, "storage", "av", id+".json")
+	original, err := os.ReadFile(avPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine := gin.New()
+	engine.POST("/api/av/getUnusedAttributeViews", getUnusedAttributeViews)
+	engine.POST("/api/av/removeUnusedAttributeViews", removeUnusedAttributeViews)
+	engine.POST("/api/av/removeUnusedAttributeView", removeUnusedAttributeView)
+	for _, data := range []string{`{"Type":"NodeDocument","Spec":"99"}`, `{"Type":"NodeDocument","Spec":"invalid"}`, `{"Type":`} {
+		if err = os.WriteFile(docPath, []byte(data), 0644); err != nil {
+			t.Fatal(err)
+		}
+		for _, endpoint := range []string{"getUnusedAttributeViews", "removeUnusedAttributeViews", "removeUnusedAttributeView"} {
+			url := "/api/av/" + endpoint
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", url, strings.NewReader(`{"id":"`+id+`"}`)))
+			requireAPIContract(t, "POST", url, recorder)
+			var response struct {
+				Code int
+				Msg  string
+				Data json.RawMessage
+			}
+			if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != -1 || !strings.Contains(response.Msg, filepath.Base(docPath)) || string(response.Data) != "null" {
+				t.Fatalf("%s must report scan failure: %s %v", endpoint, recorder.Body.String(), err)
+			}
+			if stored, readErr := os.ReadFile(avPath); readErr != nil || !bytes.Equal(stored, original) {
+				t.Fatalf("%s changed the database: %v", endpoint, readErr)
+			}
+		}
+	}
+	if err = os.Remove(docPath); err != nil {
+		t.Fatal(err)
+	}
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/av/getUnusedAttributeViews", nil))
+	requireAPIContract(t, "POST", "/api/av/getUnusedAttributeViews", recorder)
+	var response struct {
+		Code int
+		Data []apicontract.AssetUnusedItem
+	}
+	if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || len(response.Data) != 1 || response.Data[0].Item != id {
+		t.Fatalf("successful scan changed response shape: %s %v", recorder.Body.String(), err)
+	}
+}
 
 func TestAVContractDetachedItemIcon(t *testing.T) {
 	if os.Getenv("SIYUAN_TEST_AV_ICON_CONTRACT") != "1" {

@@ -526,7 +526,10 @@ func databaseItemUpdate(args map[string]any) (CallToolResult, error) {
 }
 
 func databaseUnused(args map[string]any) (CallToolResult, error) {
-	items := model.UnusedAttributeViews(true)
+	items, err := model.UnusedAttributeViews(true)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
 	return databaseSuccess("unused", map[string]any{"count": len(items), "items": items})
 }
 
@@ -538,7 +541,10 @@ func databaseClean(args map[string]any) (CallToolResult, error) {
 		}
 		return databaseSuccess("clean", map[string]any{"count": 1, "ids": []string{id}})
 	}
-	removed := model.RemoveUnusedAttributeViews()
+	removed, err := model.RemoveUnusedAttributeViews()
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
 	return databaseSuccess("clean", map[string]any{"count": len(removed), "ids": removed})
 }
 

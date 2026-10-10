@@ -1,48 +1,44 @@
-# 未定位菜单可信 overlay 独立原型
+# 未定位菜单可信 overlay 验证入口
 
-本目录没有生产入口。它不修改现有 `unplaced.ts`、`desktopTransport.ts`、`unplacedMenu.ts` 或 `mapHostManager.js`，不替换当前裁剪方案。生产环境「点击菜单仍闪烁」尚未解决。原型中所有记录是合成数据，底图是独立 WebContentsView 占位页；它没有连接真实笔记、内核、加密笔记本或 OpenFreeMap。
+本目录提供合成记录和合成地图的独立验证窗口。菜单 manager、policy、preload、HTML、JS 和 CSS 的唯一实现位于 `app/electron/mapUnplaced/`，真实地图与本入口直接复用，不保留两份菜单实现。合成入口不会读取真实笔记、连接内核或加载 OpenFreeMap，不能替代生产 OFM 验收。
 
 ## 可运行入口
 
 在 `app/` 目录运行：
 
 ```sh
-node --import tsx --test tests/mapUnplacedOverlay.test.js tests/mapUnplacedOverlayStartup.test.js tests/mapUnplacedOverlayBoundary.test.js
+node --import tsx --test tests/mapUnplacedOverlay.test.js tests/mapUnplacedOverlayStartup.test.js tests/mapUnplacedOverlayBoundary.test.js electron/mapHostManager.test.js
 node node_modules/electron/cli.js tests/fixtures/map-unplaced-overlay/harness.cjs
 ```
 
-第一条命令同时收集纯 Node 测试和真实 Electron 测试。Linux 缺少 DISPLAY/WAYLAND_DISPLAY 时，真实 Electron 测试明确跳过；不允许添加 `--no-sandbox` 或安全绕过参数来令测试通过。第二条需要可用桌面，打开可手动测试的独立原型。自动与手动入口均在 app ready 前设置独立临时 userData，不使用用户原有 profile。手动入口在退出及启动失败时尽力清理自己生成的临时目录，显式传入的测试 profile 由调用者负责清理。运行入口只在内存编译已有 menu/text-field 共享 SCSS，不生成生产构建文件。
+第一条命令收集 Node 回归和真实 Electron 边界测试。Linux 缺少 DISPLAY/WAYLAND_DISPLAY 时，真实 Electron 测试明确跳过；不能添加 `--no-sandbox` 或安全绕过参数。第二条命令需要桌面，打开可手动操作的独立窗口。两种入口均在 app ready 前设置独立临时 userData，不使用已有用户 profile。手动入口在退出及启动失败时尽力清理自己创建的临时目录；自动测试管理自己显式传入的 profile。
 
-当前环境无法运行真实 GUI。已执行的 Node 测试验证严格 schema、资源路由、owner/frame/session/revision/requestID、选择成员集合、权限撤销、导航和销毁、失败清理、几何去重，以及实际 preload/menu 脚本在模拟 IPC/DOM 下的行为。模拟 DOM 使用项目现有 parse5 fixture，不证明浏览器排版、真实键盘输入、中文输入法候选窗、CSP 的浏览器执行、原生层合成或真实 OFM 覆盖正确。真实 Electron 入口已经编写，但只有它实际通过后才可报告相应浏览器证据。
+合成入口在内存编译已有 menu/text-field 共享 SCSS，不生成生产构建文件。生产 webpack.map 输出 `stage/build/map/unplaced-controls.css`，主进程只从本地读取该文件；运行已打包应用不依赖 Sass。其余资源随 `electron/mapUnplaced/` 打包。正式接线生效需要开发者更新前端及地图共享样式构建产物，并完整重启 Electron；本改动不要求重新编译内核。
 
-手动入口启动时输出 `Map overlay prototype starting...`，窗口页面加载完成后输出 `Map overlay prototype window ready.`，失败时输出固定提示。`harness.cjs` 是专用启动入口，`harnessSupport.cjs` 是测试可导入的无启动副作用模块；入口回归使用 Electron 相同的动态 `import()` 语义，不能依赖 `require.main === module`。若进程处于 Node 模式，会提示检查 `ELECTRON_RUN_AS_NODE`，不会自动改变该环境变量。此入口回归使用受控替身验证启动分发，不替代真实 GUI 验收。
+手动入口启动时输出 `Map overlay prototype starting...`，窗口页面加载完成后输出 `Map overlay prototype window ready.`，失败时输出固定提示。`harness.cjs` 是专用启动入口，`harnessSupport.cjs` 可导入且没有启动副作用。启动回归使用 Electron 相同的动态 `import()` 语义；Node 模式会明确提示检查 `ELECTRON_RUN_AS_NODE`，不会自动改写该环境变量。
 
-## 最小安全边界
+## 生产安全边界
 
-- owner 是构造 manager 时固定登记的 WebContents、当前主 frame 和精确文档 URL。程序导航、销毁、窗口隐藏或失焦都会销毁旧 overlay；owner WebContents 失焦进入同一窗口 overlay 不会误关
-- 每次打开使用新随机内存 session，不复用 owner 或 OFM 会话。只有固定 synthetic HTTPS origin 上精确四个本地资源可通过 GET/HEAD 加载，额外 query、编码路径、凭证和其他地址全部拒绝。初始主文档只允许一次，子 frame、worker、WebSocket、下载和导航全部拒绝
-- overlay 禁用 Node、webview 和不安全内容，启用 contextIsolation、sandbox、webSecurity。CSP 不含 unsafe-inline/unsafe-eval，禁止网络、图片、字体、媒体、表单等能力；权限、设备、认证和新窗口拒绝。销毁后保留拒绝路由并清理 session
-- 可信 owner 只发送受限文本条目、计数、页码、加载状态、语言标签和主题枚举。所有标签用 textContent 渲染，不接受 HTML、URL、任意 CSS 或脚本。主题只支持静态浅色/深色与六档字体，使用本地 CSS 属性选择器，不动态注入样式
-- overlay 的桥只暴露 subscribe/editing/search/more/select/close。主进程校验发送者、主 frame、session、revision 和当前选择集合；编辑/组合开始立即撤销旧选择。主进程为请求签发递增 requestID，旧 A→B→A 回复即使 query 相同也不能复活旧成员
-- owner 保留查询取消和最终权限校验责任。这里的 owner 只用内存合成数据模拟，不从原型自行 fetch 内核。真实记录与权限/加密租约逻辑必须留在既有可信 owner
-- overlay 使用固定容量视口，owner 传 CSS 锚点与滚动容器/窗口的可见交集，完全裁掉时关闭且不恢复焦点；缩放从真实 owner WebContents 读取，按当前窗口 contentBounds 重验。滚动/缩放只更新且去重 bounds，不因菜单 DOM mutation 使用 hide/show 稳定延迟。未改变任何生产 observer/stabilize 行为
-- owner 的可信 DOM pointerdown 处理外部点击并排除 toggle；独立地图占位视图通过主进程 before-mouse-event 处理外部点击。Esc、选择和显式关闭恢复 owner 焦点；外部点击及窗口失焦不抢焦点。关闭取消 owner 定时器并清理 view、监听器、会话及条目集合
+- `mapHostManager` 的真实 `getHost` 同时验证 owner WebContents、捕获的主 frame、注册窗口、地图 instanceID、初始化状态和内核 origin。只有已 ready 且可见的存活地图允许打开；后续菜单动作继续验证同一 host，owner/frame 导航和地图销毁关闭菜单
+- 每个窗口至多一个菜单。新增地图后只把本窗口已有菜单提升到最上层，不重排地图。所有现有和后续地图的原生 mouseDown 都关闭本窗口菜单，不阻止事件或抢回焦点；窗口 blur 关闭菜单但保持地图绘制
+- 每次打开建立新的随机内存 session，不复用 owner 或 OFM session。只允许固定 HTTPS origin 上四个精确本地资源的 GET/HEAD；禁止其他网络、file、导航、子 frame、worker、WebSocket、下载、认证、设备和权限。主文档只允许一次
+- 菜单启用 sandbox、contextIsolation、webSecurity，禁用 Node、webview、不安全内容和开发者工具。CSP 不含 unsafe-inline/unsafe-eval，不允许图片、字体、媒体、表单或任意连接；退出后保留拒绝路由并清理 session
+- owner 只发送 `{id,title}` 文本条目、计数、页码、加载状态、固定语言标签与主题配置。最多保留当前页 50 条，翻页替换；上一页、下一页和原页重试可访问全部结果，没有 500 条或 20 页截断。标题仅通过 textContent 显示，不接受 HTML、URL 或任意 CSS
+- 每个状态必须同时匹配主进程签发的 requestID、query、page 和单调递增 revision。编辑及中文组合开始立刻撤销旧选择集合。选择必须是最新页成员；主进程仅发送一次终止 select 消息，owner 校验 session 和权限、取回私有行对象后才清理状态
+- 主题经独立受限 IPC 更新，仅更改浅色/深色和 12–32 整数字号，不推进数据 revision、不恢复选择成员。编辑和主题并行时不会使有效用户动作过期；静态 CSS 枚举不允许任意样式
+- 查询、AbortController、最终权限复核和真实行对象保留在可信 owner。OFM renderer 不接收标题、查询或菜单数据
+- 锚点是 owner CSS viewport 内与可见滚动容器裁剪后的矩形；实际缩放和窗口 contentBounds 由主进程读取。完全裁掉时关闭，更新 bounds 去重。Esc、选择、显式关闭恢复 owner 焦点，外部点击和窗口失焦不抢焦点
+- 菜单可见时地图继续绘制；主进程仅撤销旧版权点击手势，并暂时不给该窗口地图报告完整可见 viewport，避免菜单遮挡仍累计版权展示时间。关闭后恢复 viewport，不隐藏地图或重置相机
 
-## 实际 GUI 验收仍待完成
+## 证据范围与实际验收
 
-1. 在 Windows、macOS 和 Linux 的真实桌面启动原型，运行 Electron 测试，再人工检查原生输入法候选窗和组合中的 Esc；合成 composition 事件不算真实中文输入法验证
-2. 搜索、防抖、清空搜索、重复搜索 A→B→A、分页、快速连续开关、加载中关闭、加载失败后重试、空列表、超长标签、键盘方向键和焦点恢复
-3. 浅色/深色、较大字体、不同窗口大小、125%/150% 缩放、滚动、锚点离开可视区、其他原生地图视图和窗口抢焦点；验证无残留透明点击层
-4. 使用真实 OFM 和生产 observer/stabilize，检查菜单打开、输入、分页、焦点变动时地图不闪烁或被压住。占位地图始终可见的测试不能替代此项
-5. 真实内核查询的搜索分页契约、只读和权限撤销、锁定加密笔记本、当前视图/位置字段切换、地图销毁、窗口导航，以及在请求途中关闭后的迟到回复
-6. 现有自定义主题的有限 token 映射、共享菜单快捷键与可访问性、菜单尺寸与定位策略。这些产品接线细节尚未完成，不应因原型通过而默认启用
+Node 回归覆盖真实生产 manager 的 owner/frame/instance 绑定、跨页成员校验、超过 500 条和 20 页的遍历、请求乱序、权限撤销、清理、同窗口菜单排序、新地图外部点击、版权可见计时和地图可见性保持。preload/menu 脚本也在受控 IPC/DOM 下验证。合成 DOM 不能证明浏览器布局、真实中文输入法、CSP 执行或原生合成无闪烁。
 
-## 将来最小接线范围
+真实 Electron 测试使用同一生产菜单实现，验证文本渲染、无 Node/网络权限、主题、分页、Esc、焦点、外部点击、缩放和清理。没有显示环境时必须报告跳过。生产环境仍需人工检查：
 
-- `map/unplaced.ts`：保留现有 getAttributeViewMapUnplaced、toMapUnplacedRow、available/canEditMapSettings、AbortController 和 openMapRecord；只把渲染目标抽为 DOM Menu / desktop overlay adapter。仅向 overlay 发送所需标题与稳定选择 ID，收到选择时重新核对当前上下文、权限和条目映射。新增 requestID/session 校验不能取代最终权限检查
-- 独立可信菜单 manager、preload 和打包本地资源：登记真实 owner，复用现有 owner 信任判定，不给 OFM renderer 新通道、私有数据、菜单 DOM 或任何权限。资源必须纳入明确打包清单
-- `map/desktopTransport.ts` / `map/unplacedMenu.ts` 与 `electron/mapHostManager.js`：只在实际 overlay 成功就绪且安全绑定对应地图后，让该菜单退出 DOM 遮挡裁剪路径，并维护原生 sibling 层级与外部点击。不能全局忽略菜单遮挡或降低其他覆盖物的隔离
-- `electron/main.js` 及构建资源清单：仅负责可信 manager 的受限接线、销毁和本地资源打包。保留当前失败处理，准备好返回现有 DOM 菜单的路径；禁止把加载失败转为宽松 CSP 或共享 session
-- 浏览器/移动端继续使用现有 DOM Menu；此原型只研究 Electron 原生层级问题，未改变移动行为
+1. 实际 OFM 上开关、搜索、分页、窗口切换、滚动和缩放，确认地图无闪烁、相机不跳动、菜单不被新地图盖住
+2. 真实中文输入法组合、组合期间 Esc、键盘方向键、长标题、较大字号、不同窗口尺寸和跨平台焦点
+3. 实际查询分页、只读权限、锁定加密笔记本、位置字段或视图切换、请求中关闭、快速连续开关及迟到回复
+4. 多张地图同时存在、新建地图、关闭所属地图和窗口导航，确认没有残留原生视图、点击层或私有条目
 
-只有独立实现复核与实际 GUI/生产 OFM 验收完成，才可以决定是否接入和替换裁剪。此目录自身不授权或执行该替换。
+浏览器和移动端继续使用现有 DOM Menu；本入口及 Electron 接线不替换这些平台的行为。

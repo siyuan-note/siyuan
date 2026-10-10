@@ -1,5 +1,6 @@
 import type {AVTableRow} from "../../../../types/api";
 import {Constants} from "../../../../constants";
+import {showMessage} from "../../../../dialog/message";
 import {Menu} from "../../../../plugin/Menu";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {fetchSyncPost} from "../../../../util/fetch";
@@ -9,6 +10,8 @@ import {openMapRecord} from "./openRecord";
 import {canEditMapSettings} from "./settings";
 import {getMapSettings} from "./state";
 import {registerMapUnplacedMenu} from "./unplacedMenu";
+import {DesktopMapUnplacedHandle, DesktopMapUnplacedState, openDesktopMapUnplaced} from "./desktopUnplaced";
+import {isAVMapIdentifier} from "./protocol";
 
 const PAGE_SIZE = 50;
 
@@ -41,7 +44,12 @@ export const bindMapUnplaced = (options: {
     const locationKeyID = getMapSettings(data.view as IAVTable).locationKeyID;
     const query = blockElement.querySelector<HTMLElement>('[data-type="av-search"]')?.textContent.trim() || "";
     const context = {id: data.id, blockID: blockElement.dataset.nodeId || "", viewID: data.viewID, query};
-    const available = () => current() && canEditMapSettings(protyle) &&
+    const view = data.view;
+    let destroyed = false;
+    const available = () => !destroyed && current() && canEditMapSettings(protyle) && data.view === view &&
+        data.viewID === context.viewID && blockElement.dataset.avId === context.id &&
+        (blockElement.querySelector<HTMLElement>('[data-type="av-search"]')?.textContent.trim() || "") === query &&
+        !window.siyuan.notebooks?.some(notebook => notebook.id === protyle.notebookId && notebook.encrypted && notebook.closed) &&
         getMapSettings(data.view as IAVTable).locationKeyID === locationKeyID;
     const countRequest = new AbortController();
     let menu: Menu;
@@ -55,6 +63,8 @@ export const bindMapUnplaced = (options: {
     let elements: HTMLElement[] = [];
     let count: HTMLElement;
     let releaseMenu: () => void;
+    let native: DesktopMapUnplacedHandle;
+    let nativeGeneration = 0;
 
     const updateCount = (value: number) => {
         toggle.classList.toggle("fn__none", value === 0);
@@ -155,13 +165,100 @@ export const bindMapUnplaced = (options: {
             if (request === controller) loading = false;
         }
     };
+    const openNative = (canvas: HTMLElement) => {
+        const labels = window.siyuan.languages;
+        let members = new Map<string, IAVRow>();
+        let state: DesktopMapUnplacedState = {requestID: 0, query: "", rows: [], total: 0, page: 1,
+            loading: true, error: false, labels: {title: labels.mapUnplaced, search: labels.search,
+                empty: labels.empty, loading: labels.loading, more: labels.next, previous: labels.previous,
+                retry: labels.retry, close: labels.close}};
+        const loadPage = async (requestID: number, query: string, nextPage: number) => {
+            request?.abort();
+            const controller = new AbortController();
+            request = controller;
+            const generation = ++nativeGeneration;
+            members.clear();
+            state = {...state, requestID, query, page: nextPage, rows: [], loading: true, error: false};
+            native.update(state);
+            try {
+                const response = await fetchSyncPost("/api/av/getAttributeViewMapUnplaced", {
+                    ...context, search: query.trim(), page: nextPage, pageSize: PAGE_SIZE,
+                }, undefined, false, controller.signal);
+                if (controller.signal.aborted || generation !== nativeGeneration || !native) return;
+                if (!available()) { native.close(); return; }
+                if (response.code !== 0 || !response.data || !Array.isArray(response.data.rows) ||
+                    response.data.rows.length > PAGE_SIZE || !Number.isSafeInteger(response.data.total) || response.data.total < 0) {
+                    throw new Error("Invalid unplaced page");
+                }
+                const nextMembers = new Map<string, IAVRow>();
+                response.data.rows.forEach(source => {
+                    if (!source || !isAVMapIdentifier(source.id) || nextMembers.has(source.id)) return;
+                    const row = toMapUnplacedRow(source, locationKeyID);
+                    if (row) nextMembers.set(row.id, row);
+                });
+                members = nextMembers;
+                state = {...state, rows: Array.from(members.values(), row => ({id: row.id,
+                    title: (row.cells[0].value.block.content || labels.untitled).slice(0, 2048)})),
+                    total: response.data.total, loading: false};
+                if (!query.trim()) {
+                    countRequest.abort();
+                    updateCount(state.total);
+                }
+                native.update(state);
+            } catch {
+                if (controller.signal.aborted || generation !== nativeGeneration || !native) return;
+                if (!available()) { native.close(); return; }
+                members.clear();
+                state = {...state, rows: [], loading: false, error: true};
+                native.update(state);
+            }
+        };
+        native = openDesktopMapUnplaced(canvas, toggle, state, action => {
+            if (!native) return;
+            if (!available()) { native.close(); return; }
+            if (action.action === "select") {
+                const row = !state.loading && !state.error && action.requestID === state.requestID ? members.get(action.id) : undefined;
+                native.close();
+                if (row && available()) {
+                    toggle.focus();
+                    void openMapRecord(protyle, blockElement, row);
+                }
+                return;
+            }
+            request?.abort();
+            nativeGeneration++;
+            members.clear();
+            if (action.action === "editing") {
+                state = {...state, rows: [], loading: true};
+                return;
+            }
+            void loadPage(action.requestID, action.query, action.page);
+        }, failed => {
+            nativeGeneration++;
+            request?.abort();
+            members.clear();
+            native = undefined;
+            toggle.setAttribute("aria-expanded", "false");
+            if (failed && available()) showMessage(escapeHtml(`${labels.mapUnplaced}: ${labels.retry}`), 5000, "error");
+        }, available);
+        if (!native) return false;
+        toggle.setAttribute("aria-expanded", "true");
+        void loadPage(0, "", 1);
+        return true;
+    };
     toggle.addEventListener("click", event => {
         event.preventDefault();
         if (!available()) return;
+        if (native) {
+            native.close();
+            return;
+        }
         if (menu) {
             menu.close();
             return;
         }
+        const canvas = root.querySelector<HTMLElement>(".av__map-canvas");
+        if (!isMobile() && canvas && openNative(canvas)) return;
         menu = new Menu(undefined, () => {
             clearTimeout(searchTimer);
             request?.abort();
@@ -170,7 +267,6 @@ export const bindMapUnplaced = (options: {
             menu = undefined;
             toggle.setAttribute("aria-expanded", "false");
         });
-        const canvas = root.querySelector<HTMLElement>(".av__map-canvas");
         if (!isMobile() && canvas) releaseMenu = registerMapUnplacedMenu(menu.element, canvas);
         rows = [];
         page = 0;
@@ -204,9 +300,11 @@ export const bindMapUnplaced = (options: {
     });
     void refreshCount();
     return () => {
+        destroyed = true;
         countRequest.abort();
         request?.abort();
         clearTimeout(searchTimer);
         menu?.close();
+        native?.close();
     };
 };

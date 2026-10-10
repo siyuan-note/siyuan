@@ -8,6 +8,7 @@ import * as unplacedMenu from "./unplacedMenu";
 import {computeDesktopAVMapGeometry, MapGeometry} from "./desktopGeometry";
 import * as desktopGeometryDOM from "./desktopGeometryDOM";
 import * as loadingBudget from "./loadingBudget";
+import * as desktopUnplaced from "./desktopUnplaced";
 
 const visibleGeometry = (geometry: MapGeometry) => {
     assert.ok(geometry.visible === true, "the fixture must produce visible geometry");
@@ -29,6 +30,7 @@ const load = (ipc: unknown, browser = false, warnings: unknown[][] = []) => {
         if (name === "./protocol") { return protocol; }
         if (name === "./desktopGeometryDOM") { return desktopGeometryDOM; }
         if (name === "./loadingBudget") { return loadingBudget; }
+        if (name === "./desktopUnplaced") { return desktopUnplaced; }
         assert.equal(name, "electron");
         assert.equal(browser, false, "browser must not import Electron");
         return {ipcRenderer: ipc};
@@ -106,6 +108,42 @@ const fixture = (warnings: unknown[][] = []) => {
 };
 
 describe("desktop map transport", () => {
+    it("registers a menu only for its ready map and closes a late menu creation after map disposal", async () => {
+        class Observer { observe() {} disconnect() {} }
+        const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver, oldWindow = globalThis.window;
+        globalThis.MutationObserver = Observer as any;
+        globalThis.ResizeObserver = Observer as any;
+        globalThis.window = {siyuan: {config: {editor: {fontSize: 16}}}} as any;
+        const f = fixture();
+        let closed = 0;
+        const anchor = {...f.container, getBoundingClientRect: () => ({left: 100, right: 130, top: 20, bottom: 44})};
+        const state: desktopUnplaced.DesktopMapUnplacedState = {requestID: 0, query: "", rows: [], total: 0, page: 1,
+            loading: true, error: false, labels: {title: "Unplaced", search: "Search", empty: "Empty", loading: "Loading",
+                more: "Next", previous: "Previous", retry: "Retry", close: "Close"}};
+        const open = () => desktopUnplaced.openDesktopMapUnplaced(f.container, anchor, state, () => {}, () => closed++, () => true);
+        try {
+            assert.equal(open(), undefined);
+            await f.created();
+            assert.equal(open(), undefined, "an initializing map cannot own a native menu");
+            f.reply({type: "ready"});
+            assert.ok(open());
+            assert.equal(f.calls.filter(([name]) => name === "siyuan-map-unplaced-open").length, 1);
+            f.host.destroy();
+            assert.equal(closed, 1);
+            await f.created({sessionID: "b".repeat(48)});
+            assert.ok(f.calls.some(([name, value]) => name === "siyuan-map-unplaced-close" && value.sessionID === "b".repeat(48)),
+                "a session created after disposal is immediately closed");
+            assert.equal(open(), undefined);
+            assert.equal(f.listeners.size, 0);
+            assert.equal(f.frames.size, 0);
+            assert.equal(f.timers.size, 0);
+        } finally {
+            f.host.destroy();
+            globalThis.MutationObserver = oldMutation;
+            globalThis.ResizeObserver = oldResize;
+            globalThis.window = oldWindow;
+        }
+    });
     it("forwards only ready current fixed attribution replies already verified by main", async () => {
         class Observer { observe() {} disconnect() {} }
         const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;

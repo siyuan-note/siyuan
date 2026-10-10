@@ -39,13 +39,13 @@ const run = async profile => {
         assert.equal(await overlay.evaluate('fetch("http://127.0.0.1:6806/api/sql").then(() => false, () => true)'), true);
         assert.equal(await overlay.evaluate('fetch("https://tiles.openfreemap.org/private").then(() => false, () => true)'), true);
         await overlay.evaluate('document.getElementById("more").click()');
-        await waitFor(() => overlay.evaluate('document.getElementById("rows").children.length === 100'), "pagination appends rows");
+        await waitFor(() => overlay.evaluate('document.getElementById("rows").children.length === 50 && document.getElementById("rows").firstElementChild.dataset.rowId === "row-50"'), "pagination replaces the current page");
         await overlay.evaluate('const input = document.getElementById("search"); input.value = "合成记录 1"; input.dispatchEvent(new Event("input", {bubbles: true}));');
         await waitFor(() => overlay.evaluate('document.getElementById("count").textContent === "34"'), "search result replaces rows");
         await owner('document.getElementById("theme").click()');
         await waitFor(() => overlay.evaluate('document.documentElement.dataset.theme === "dark"'), "theme reaches trusted view");
-        assert.equal(await overlay.evaluate('getComputedStyle(document.querySelector(".fixture-menu")).fontSize'), "24px");
-        assert.equal(await overlay.evaluate('getComputedStyle(document.querySelector(".fixture-menu")).backgroundColor'), "rgb(41, 41, 41)");
+        assert.equal(await overlay.evaluate('getComputedStyle(document.querySelector(".map-unplaced-menu")).fontSize'), "24px");
+        assert.equal(await overlay.evaluate('getComputedStyle(document.querySelector(".map-unplaced-menu")).backgroundColor'), "rgb(41, 41, 41)");
         const before = overlay.view.getBounds();
         await owner('document.getElementById("scroll").scrollTop = 30');
         await waitFor(() => overlay.view.getBounds().y !== before.y, "anchor follows owner scroll");

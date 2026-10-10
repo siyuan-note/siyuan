@@ -3,8 +3,8 @@
     const toggle = document.getElementById("open");
     const result = document.getElementById("result");
     const records = Array.from({length: 123}, (_, index) => ({id: "row-" + index,
-        label: index === 0 ? "PRIVATE_FIXTURE <img src=x onerror=alert(1)>" : "合成记录 " + index}));
-    const labels = {title: "未定位记录", search: "搜索", empty: "没有记录", loading: "加载中...", more: "加载更多", retry: "重试", close: "关闭"};
+        title: index === 0 ? "PRIVATE_FIXTURE <img src=x onerror=alert(1)>" : "合成记录 " + index}));
+    const labels = {title: "未定位记录", search: "搜索", empty: "没有记录", loading: "加载中...", more: "下一页", previous: "上一页", retry: "重试", close: "关闭"};
     let sessionID, revision = 0, requestID = 0, page = 1, query = "", timer, generation = 0, opening = false;
     let theme = {mode: "light", fontSize: 16};
     const anchor = () => {
@@ -17,9 +17,9 @@
         return {x, y, width: right - x, height: bottom - y};
     };
     const state = (loading = false) => {
-        const filtered = records.filter(row => row.label.includes(query));
-        return {revision: ++revision, requestID, query, page: loading ? 0 : page, total: filtered.length,
-            rows: loading ? [] : filtered.slice(0, page * 50), loading, error: false, theme, labels};
+        const filtered = records.filter(row => row.title.includes(query));
+        return {revision: ++revision, requestID, query, page, total: filtered.length,
+            rows: loading ? [] : filtered.slice((page - 1) * 50, page * 50), loading, error: false, theme, labels};
     };
     const update = loading => { if (sessionID) bridge.update({sessionID, state: state(loading)}); };
     const geometry = () => {
@@ -52,20 +52,29 @@
             result.textContent = "关闭：" + message.reason;
             return;
         }
-        if (message.type === "select") { result.textContent = "已选择合成记录：" + message.id; return; }
+        if (message.type === "select") {
+            if (message.sessionID !== sessionID) return;
+            sessionID = undefined;
+            generation++;
+            clearTimeout(timer);
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.focus();
+            result.textContent = "已选择合成记录：" + message.id;
+            return;
+        }
         if (message.sessionID !== sessionID) return;
         clearTimeout(timer);
         const current = ++generation;
         requestID = message.requestID;
         if (message.type === "editing") return;
         query = message.query;
-        page = message.type === "search" ? 1 : page + 1;
+        page = message.page;
         update(true);
         timer = setTimeout(() => { if (current === generation && sessionID === message.sessionID) update(false); }, 150);
     });
     document.getElementById("theme").addEventListener("click", () => {
         theme = {mode: theme.mode === "light" ? "dark" : "light", fontSize: theme.fontSize === 16 ? 24 : 16};
-        update(false);
+        if (sessionID) bridge.theme({sessionID, theme});
     });
     document.getElementById("zoom").addEventListener("click", () => { bridge.zoom(); setTimeout(geometry, 50); });
     document.getElementById("permission").addEventListener("click", () => bridge.permission());

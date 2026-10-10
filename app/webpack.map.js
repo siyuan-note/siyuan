@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const {fileURLToPath} = require("url");
 const webpack = require("webpack");
 const {EsbuildPlugin} = require("esbuild-loader");
 
@@ -20,6 +21,16 @@ class MapLibreAssetsPlugin {
                     compilation.fileDependencies.add(resolved);
                     compilation.emitAsset(name, new webpack.sources.RawSource(fs.readFileSync(resolved)));
                 }
+                // 可信菜单复用共享控件，运行时不加载 Sass 或远程样式。
+                const sass = require("sass");
+                const controls = sass.compileString('@use "../util/reset"; @use "menu"; @use "text-field";', {
+                    loadPaths: [path.resolve(__dirname, "src/assets/scss/component")],
+                    logger: sass.Logger.silent,
+                });
+                for (const url of controls.loadedUrls) {
+                    if (url.protocol === "file:") compilation.fileDependencies.add(fileURLToPath(url));
+                }
+                compilation.emitAsset("unplaced-controls.css", new webpack.sources.RawSource(controls.css));
             });
         });
     }

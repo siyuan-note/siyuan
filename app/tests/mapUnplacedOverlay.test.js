@@ -5,13 +5,14 @@ const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 const vm = require("node:vm");
-const {ORIGIN, CHANNEL, CSP, parseState, parseAction, resource, place} = require("./fixtures/map-unplaced-overlay/policy.cjs");
-const {createRouter, createManager} = require("./fixtures/map-unplaced-overlay/manager.cjs");
+const {ORIGIN, CHANNEL, CSP, parseState, parseAction, resource, place} = require("../electron/mapUnplaced/policy");
+const {createRouter, createManager} = require("../electron/mapUnplaced/manager");
+const resourceDirectory = path.join(__dirname, "../electron/mapUnplaced");
 const fixtureDirectory = path.join(__dirname, "fixtures/map-unplaced-overlay");
 const ownerURL = "file:///fixture/owner.html";
-const state = (extra = {}) => ({revision: 1, requestID: 0, query: "", rows: [{id: "row-1", label: "Private <img src=x>"}],
+const state = (extra = {}) => ({revision: 1, requestID: 0, query: "", rows: [{id: "row-1", title: "Private <img src=x>"}],
     total: 123, page: 1, loading: false, error: false, theme: {mode: "light", fontSize: 16},
-    labels: {title: "List", search: "Search", empty: "Empty", loading: "Loading", more: "More", retry: "Retry", close: "Close"}, ...extra});
+    labels: {title: "List", search: "Search", empty: "Empty", loading: "Loading", more: "More", previous: "Previous", retry: "Retry", close: "Close"}, ...extra});
 const anchor = {x: 100, y: 50, width: 160, height: 30};
 const createSession = () => {
     const ses = Object.assign(new EventEmitter(), {handlers: {}, protocols: {}, cleanup: []});
@@ -59,6 +60,7 @@ const setup = (fail = "") => {
             views.push(view);
             return view;
         }, mayUse: () => allowed, randomID: () => (++counter).toString(16).padStart(48, "0"),
+        readFile: fail === "asset" ? async () => { throw new Error("private path"); } : undefined,
         onAction: value => actions.push(value), onClose: value => closed.push(value)});
     const event = {sender: owner, senderFrame: owner.mainFrame};
     const open = value => manager.open(event, {state: state(value), anchor});
@@ -76,10 +78,10 @@ test("overlay strict schemas copy bounded plain text and reject URLs, HTML field
     const source = state(), result = parseState(source);
     assert.deepEqual(result, source);
     assert.notEqual(result.rows, source.rows);
-    for (const value of [state({url: "https://evil.invalid"}), state({rows: [{id: "a", label: "x", html: "<b>"}]}),
-        state({rows: [{id: "a", label: "x"}, {id: "a", label: "y"}]}), state({query: "x".repeat(257)}),
-        state({theme: {mode: "dark", fontSize: 17}}), state({theme: {mode: "dark", fontSize: 16, css: "url(https://evil)"}}),
-        state({revision: NaN}), state({total: -1}), state({page: 0}), state({rows: [{id: "x", label: "x".repeat(2049)}]})]) {
+    for (const value of [state({url: "https://evil.invalid"}), state({rows: [{id: "a", title: "x", html: "<b>"}]}),
+        state({rows: [{id: "a", title: "x"}, {id: "a", title: "y"}]}), state({query: "x".repeat(257)}),
+        state({theme: {mode: "dark", fontSize: 33}}), state({theme: {mode: "dark", fontSize: 16, css: "url(https://evil)"}}),
+        state({revision: NaN}), state({total: -1}), state({page: 0}), state({rows: [{id: "x", title: "x".repeat(2049)}]})]) {
         assert.equal(parseState(value), undefined);
     }
     const envelope = {sessionID: "a".repeat(48), revision: 1, type: "select", id: "row-1"};
@@ -111,7 +113,7 @@ test("overlay router denies all networking, permissions, credentials, frames, re
     const response = await ses.protocols.https(new Request(ORIGIN + "/menu.html"));
     assert.equal(await response.text(), "local");
     assert.equal(response.headers.get("content-security-policy"), CSP);
-    assert.deepEqual(files, [path.join(fixtureDirectory, "menu.html")]);
+    assert.deepEqual(files, [path.join(resourceDirectory, "menu.html")]);
     assert.equal((await ses.protocols.https(new Request(ORIGIN + "/menu.js", {headers: {"service-worker": "script"}}))).status, 403);
     assert.equal((await ses.protocols.http(new Request("http://127.0.0.1"))).status, 403);
     assert.equal((await ses.protocols.file()).status, 403);
@@ -155,7 +157,7 @@ test("overlay owner/frame/session binding, request invalidation and membership g
         assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: 2, requestID: 2, query: "new", loading: true})}), true);
         f.action("select", {id: "row-1", revision: 2});
         assert.equal(f.actions.length, 2);
-        assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: 3, requestID: 2, query: "new", rows: [{id: "new", label: "new"}]})}), true);
+        assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: 3, requestID: 2, query: "new", rows: [{id: "new", title: "new"}]})}), true);
         f.action("select", {id: "row-1", revision: 3});
         f.action("select", {id: "new", revision: 2});
         assert.equal(f.actions.length, 2);
@@ -181,6 +183,120 @@ test("initial loading completes and main-issued request generations reject late 
         f.action("search", {revision: 2, query: "A"});
         assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: 3, requestID: 1, query: "A"})}), false);
         assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: 4, requestID: 3, query: "A"})}), true);
+    } finally { f.manager.destroy(); }
+});
+
+test("page replacement reaches every result beyond 500 rows and 20 pages, and previous/retry keep main-issued page identity", () => {
+    const f = setup(), total = 1234;
+    const rows = page => Array.from({length: Math.min(50, total - (page - 1) * 50)}, (_, index) => ({
+        id: "row-" + ((page - 1) * 50 + index), title: "Record " + ((page - 1) * 50 + index),
+    }));
+    try {
+        const sessionID = f.open({total, rows: rows(1)});
+        f.action("ready");
+        let revision = 1, requestID = 0;
+        const seen = new Set(rows(1).map(row => row.id));
+        for (let page = 2; page <= Math.ceil(total / 50); page++) {
+            f.action("more", {revision});
+            requestID++;
+            assert.equal(f.actions.at(-1).requestID, requestID);
+            assert.equal(f.actions.at(-1).page, page);
+            assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: revision + 1, requestID,
+                total, page: page - 1, rows: rows(page)})}), false, "same request with the previous page is stale");
+            assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: ++revision, requestID,
+                total, page, rows: rows(page)})}), true);
+            rows(page).forEach(row => seen.add(row.id));
+        }
+        assert.equal(seen.size, total);
+        const count = f.actions.length;
+        f.action("more", {revision});
+        assert.equal(f.actions.length, count, "only the actual final page disables Next");
+        f.action("previous", {revision});
+        requestID++;
+        assert.equal(f.actions.at(-1).page, 24);
+        assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: ++revision, requestID,
+            total, page: 24, error: true, rows: []})}), true);
+        f.action("retry", {revision});
+        requestID++;
+        assert.equal(f.actions.at(-1).page, 24);
+        assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: ++revision, requestID,
+            total, page: 24, rows: rows(24)})}), true);
+        f.action("select", {revision, id: rows(25)[0].id});
+        assert.ok(f.manager.inspect(), "members of a previously rendered page cannot be selected");
+        f.action("select", {revision, id: rows(24)[0].id});
+        assert.equal(f.manager.inspect(), undefined);
+        assert.equal(f.closed.length, 0, "select uses one terminal action and no earlier closed notification");
+    } finally { f.manager.destroy(); }
+});
+
+test("bounded DTOs reject oversized pages while preserving large result counts and settled query/page identity", () => {
+    assert.ok(parseState(state({total: 2000000, page: 20001})));
+    assert.equal(parseState(state({rows: Array.from({length: 51}, (_, index) => ({id: String(index), title: "Record"}))})), undefined);
+    for (const fontSize of [12, 13, 17, 31, 32]) assert.ok(parseState(state({theme: {mode: "dark", fontSize}})));
+    for (const fontSize of [11, 12.5, 33, Infinity]) assert.equal(parseState(state({theme: {mode: "dark", fontSize}})), undefined);
+    const f = setup();
+    try {
+        const sessionID = f.open(); f.action("ready");
+        for (const extra of [{query: "unexpected"}, {page: 2}, {requestID: 1}]) {
+            assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: 2, ...extra})}), false);
+        }
+        assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: 2, theme: {mode: "dark", fontSize: 23}})}), true);
+    } finally { f.manager.destroy(); }
+});
+
+test("independent theme updates never expire an in-flight edit or pagination action and cannot restore cleared row membership", () => {
+    const f = setup();
+    try {
+        const sessionID = f.open(); f.action("ready");
+        const theme = {mode: "dark", fontSize: 23};
+        for (const value of [{sessionID: "f".repeat(48), theme}, {sessionID, theme: {...theme, css: "private"}},
+            {sessionID, theme, revision: 2}, {sessionID, theme: {mode: "dark", fontSize: 33}}]) {
+            assert.equal(f.manager.setTheme(f.event, value), false);
+        }
+        assert.equal(f.manager.setTheme({...f.event, senderFrame: {}}, {sessionID, theme}), false);
+        assert.equal(f.manager.setTheme(f.event, {sessionID, theme}), true);
+        assert.deepEqual(f.views[0].webContents.sent.at(-1), [CHANNEL + "-theme", {sessionID, theme}]);
+        assert.equal(f.views[0].webContents.sent.filter(([name]) => name === CHANNEL + "-state").at(-1)[1].state.revision, 1);
+        f.action("editing", {revision: 1});
+        assert.equal(f.actions.at(-1).requestID, 1);
+        assert.equal(f.manager.setTheme(f.event, {sessionID, theme: {mode: "light", fontSize: 32}}), true);
+        f.action("select", {revision: 1, id: "row-1"});
+        assert.equal(f.actions.length, 1, "theme must not restore members cleared during editing");
+        f.action("search", {revision: 1, query: "latest"});
+        assert.equal(f.actions.at(-1).requestID, 2);
+        assert.equal(f.manager.update(f.event, {sessionID, state: state({revision: 2, requestID: 2, query: "latest"})}), true);
+        assert.equal(f.manager.setTheme(f.event, {sessionID, theme}), true);
+        f.action("more", {revision: 2});
+        assert.equal(f.actions.at(-1).page, 2);
+        assert.equal(f.actions.at(-1).requestID, 3);
+    } finally { f.manager.destroy(); }
+});
+
+test("shared production resources are read only from their exact package paths including compiled controls", async () => {
+    const ses = createSession(), files = [];
+    const controlsPath = "/app/stage/build/map/unplaced-controls.css";
+    const router = createRouter(ses, {controlsPath}, async filename => { files.push(filename); return "local"; });
+    try {
+        for (const resourceName of ["menu.html", "menu.js", "menu.css", "controls.css"]) {
+            assert.equal((await ses.protocols.https(new Request(ORIGIN + "/" + resourceName))).status, 200);
+        }
+        assert.deepEqual(files, [path.join(resourceDirectory, "menu.html"), path.join(resourceDirectory, "menu.js"),
+            path.join(resourceDirectory, "menu.css"), controlsPath]);
+        assert.equal((await ses.protocols.https(new Request(ORIGIN + "/controls.css?url=private"))).status, 403);
+        assert.equal((await ses.protocols.https(new Request(ORIGIN + "/preload.js"))).status, 403);
+    } finally { router.destroy(); }
+});
+
+test("a missing menu stylesheet closes the session instead of showing partially loaded private UI", async () => {
+    const f = setup("asset");
+    try {
+        f.open(); f.action("ready");
+        assert.equal((await f.sessions[0].protocols.https(new Request(ORIGIN + "/menu.css"))).status, 404);
+        assert.equal(f.manager.inspect(), undefined);
+        assert.equal(f.views[0].webContents.isDestroyed(), true);
+        assert.equal(f.sessions[0].cleanup.length, 5);
+        assert.equal(f.closed.at(-1).reason, "resource-failed");
+        assert.equal(JSON.stringify(f.closed).includes("private path"), false);
     } finally { f.manager.destroy(); }
 });
 
@@ -261,14 +377,14 @@ test("actual preload exposes only fixed operations, binds session/revision and n
     const ipc = new EventEmitter(), sent = [];
     ipc.send = (channel, value) => sent.push({channel, value});
     let bridge;
-    vm.runInNewContext(fs.readFileSync(path.join(fixtureDirectory, "preload.cjs"), "utf8"), {
+    vm.runInNewContext(fs.readFileSync(path.join(resourceDirectory, "preload.js"), "utf8"), {
         require: name => { assert.equal(name, "electron"); return {ipcRenderer: ipc,
             contextBridge: {exposeInMainWorld(name, value) { assert.equal(name, "unplacedMenu"); bridge = value; }}}; },
         process: {argv: ["--unplaced-session=" + "a".repeat(48)]},
     });
-    assert.deepEqual(Object.keys(bridge).sort(), ["close", "editing", "more", "search", "select", "subscribe"]);
-    const updates = [];
-    bridge.subscribe((...args) => updates.push(args));
+    assert.deepEqual(Object.keys(bridge).sort(), ["close", "editing", "more", "previous", "retry", "search", "select", "subscribe"]);
+    const updates = [], themes = [];
+    bridge.subscribe((...args) => updates.push(args), (...args) => themes.push(args));
     assert.equal(sent[0].value.type, "ready");
     const privateEvent = {sender: "must-not-pass"};
     ipc.emit(CHANNEL + "-state", privateEvent, {sessionID: "b".repeat(48), state: state()});
@@ -276,6 +392,11 @@ test("actual preload exposes only fixed operations, binds session/revision and n
     ipc.emit(CHANNEL + "-state", privateEvent, {sessionID: "a".repeat(48), state: state({revision: 3})});
     assert.equal(updates[0].length, 1);
     assert.equal(updates[0][0].revision, 3);
+    ipc.emit(CHANNEL + "-theme", privateEvent, {sessionID: "a".repeat(48), theme: {mode: "dark", fontSize: 32}});
+    assert.equal(themes.length, 1);
+    assert.equal(themes[0].length, 1);
+    assert.deepEqual(JSON.parse(JSON.stringify(themes[0][0])), {mode: "dark", fontSize: 32});
+    assert.equal(updates.length, 1, "theme must not replay a stale result state");
     bridge.select("row-1");
     assert.equal(sent.at(-1).value.revision, 3);
     assert.equal(sent.at(-1).value.sessionID, "a".repeat(48));
@@ -287,17 +408,17 @@ test("actual preload exposes only fixed operations, binds session/revision and n
 test("actual menu script uses text nodes, preserves pending edits against late states and suppresses composing search (simulated DOM)", () => {
     const {DOMFixture} = require("../src/protyle/render/av/map/testDOM.ts");
     const document = new DOMFixture();
-    document.body.innerHTML = fs.readFileSync(path.join(fixtureDirectory, "menu.html"), "utf8");
+    document.body.innerHTML = fs.readFileSync(path.join(resourceDirectory, "menu.html"), "utf8");
     document.getElementById = id => document.body.querySelector('[id="' + id + '"]');
     document.addEventListener = (...args) => document.documentElement.addEventListener(...args);
     const rows = document.getElementById("rows");
     rows.replaceChildren = () => { Array.from(rows.children).forEach(child => child.remove()); };
     const actions = [], timers = new Map();
-    let update, nextTimer = 0;
-    const bridge = {subscribe(fn) { update = fn; }};
-    for (const name of ["search", "editing", "more", "select", "close"]) bridge[name] = value => actions.push([name, value]);
+    let update, themeUpdate, nextTimer = 0;
+    const bridge = {subscribe(fn, onTheme) { update = fn; themeUpdate = onTheme; }};
+    for (const name of ["search", "editing", "more", "previous", "retry", "select", "close"]) bridge[name] = value => actions.push([name, value]);
     const window = {unplacedMenu: bridge, addEventListener() {}};
-    vm.runInNewContext(fs.readFileSync(path.join(fixtureDirectory, "menu.js"), "utf8"), {window, document,
+    vm.runInNewContext(fs.readFileSync(path.join(resourceDirectory, "menu.js"), "utf8"), {window, document,
         setTimeout(fn) { timers.set(++nextTimer, fn); return nextTimer; }, clearTimeout(id) { timers.delete(id); }});
     const flush = () => { const callbacks = [...timers.values()]; timers.clear(); callbacks.forEach(fn => fn()); };
     const fire = (element, type, event = {}) => (element.events.get(type) || []).forEach(fn => fn({preventDefault() {}, ...event}));
@@ -306,6 +427,18 @@ test("actual menu script uses text nodes, preserves pending edits against late s
     assert.equal(rows.querySelectorAll("img").length, 0);
     assert.equal(rows.children[0].textContent, "Private <img src=x>");
     const input = document.getElementById("search");
+    fire(document.getElementById("more"), "click");
+    assert.equal(rows.children[0].disabled, true);
+    themeUpdate({mode: "dark", fontSize: 32});
+    assert.equal(document.documentElement.dataset.fontSize, "32");
+    assert.equal(rows.children[0].disabled, true, "theme during pagination cannot restore previous-page members");
+    assert.equal(document.getElementById("more").disabled, true);
+    update(state());
+    input.value = ""; fire(input, "input"); flush();
+    assert.deepEqual(actions.at(-1), ["search", ""]);
+    themeUpdate({mode: "light", fontSize: 16});
+    assert.equal(rows.children[0].disabled, true, "theme after same-query search cannot replay the preceding result");
+    update(state());
     input.value = "new"; fire(input, "input");
     assert.equal(actions.at(-1)[0], "editing");
     update(state({revision: 2}));
@@ -318,8 +451,10 @@ test("actual menu script uses text nodes, preserves pending edits against late s
     assert.equal(rows.children[0].disabled, false);
     fire(input, "compositionstart"); input.value = "中文"; fire(input, "input", {isComposing: true}); flush();
     assert.equal(actions.at(-1)[0], "editing");
-    update(state({revision: 5, query: "new"}));
+    update(state({revision: 5, query: "new", theme: {mode: "dark", fontSize: 32}}));
     assert.equal(rows.children[0].disabled, true);
+    assert.equal(document.documentElement.dataset.theme, "dark");
+    assert.equal(document.documentElement.dataset.fontSize, "32");
     fire(input, "compositionend"); flush();
     assert.deepEqual(actions.at(-1), ["search", "中文"]);
     update(state({revision: 6, query: "中文", theme: {mode: "dark", fontSize: 24}}));
@@ -374,12 +509,12 @@ test("actual owner script keeps toggle/outside separate and cancels stale same-q
     pointer(document.body);
     assert.equal(closes.at(-1).reason, "outside");
     const query = "合成记录 1";
-    reply({type: "search", sessionID, requestID: 1, query});
+    reply({type: "search", sessionID, requestID: 1, query, page: 1});
     const lateA = [...timers.values()][0];
     reply({type: "editing", sessionID, requestID: 2});
-    reply({type: "search", sessionID, requestID: 3, query: "合成记录 2"});
+    reply({type: "search", sessionID, requestID: 3, query: "合成记录 2", page: 1});
     reply({type: "editing", sessionID, requestID: 4});
-    reply({type: "search", sessionID, requestID: 5, query});
+    reply({type: "search", sessionID, requestID: 5, query, page: 1});
     const count = updates.length;
     lateA();
     assert.equal(updates.length, count);

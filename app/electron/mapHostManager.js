@@ -5,6 +5,8 @@
 const path = require("node:path");
 const fs = require("node:fs/promises");
 const {randomBytes} = require("node:crypto");
+const {createManager: createUnplacedManager} = require("./mapUnplaced/manager");
+const {CHANNEL: UNPLACED_CHANNEL, keys: hasUnplacedKeys} = require("./mapUnplaced/policy");
 const {mapDiagnosticCodes, mapCSPDiagnosticCodes, isMapCSPResource, MAX_MAP_DIAGNOSTICS, classifyMapConsoleMessage,
     classifyMapCSPResources} = require("./mapHostDiagnostics");
 const {
@@ -221,20 +223,24 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         const owner = trustedOwner(event);
         if (!owner || value?.version !== 1 || typeof value.instanceID !== "string") return;
         const host = hosts.get(event.sender.id + ":" + value.instanceID);
-        if (host && host.origin === owner.origin && host.frame === event.senderFrame) return host;
+        if (host && !host.destroyed && host.owner === event.sender && host.win === owner.win &&
+            host.origin === owner.origin && host.frame === event.senderFrame) return host;
     };
     const sendOwner = (host, reply) => {
         if (!host.destroyed && !host.owner.isDestroyed()) {
             try { host.owner.send("siyuan-map-reply", reply); } catch (_error) { destroy(host); }
         }
     };
-    const setVisible = (host, visible) => {
-        if (!host.view.webContents.isDestroyed()) host.view.setVisible(visible);
+    const setVisible = (host, visible, updateNative = true) => {
+        if (updateNative && !host.view.webContents.isDestroyed()) host.view.setVisible(visible);
         if (!visible) host.attributionGestureUntil = 0;
         host.visible = visible;
         // 原生视口已裁剪并平移 #map，此处不能再次叠加 crop。
-        const visibility = visible ? {visible: true, viewport: {x: 0, y: 0,
-            width: host.geometry.bounds.width / host.geometry.zoom, height: host.geometry.bounds.height / host.geometry.zoom}} :
+        const obscured = [...hosts.values()].some(item => item.win === host.win && item.unplaced?.inspect()?.ready);
+        // 可信菜单独立叠在原生地图之上，保留地图绘制，但遮挡期间不能累计署名可见时间。
+        if (obscured) host.attributionGestureUntil = 0;
+        const visibility = visible ? {visible: true, ...(!obscured && {viewport: {x: 0, y: 0,
+            width: host.geometry.bounds.width / host.geometry.zoom, height: host.geometry.bounds.height / host.geometry.zoom}})} :
             {visible: false};
         const key = JSON.stringify(visibility);
         if (host.ready && key !== host.lastVisibility) {
@@ -243,12 +249,14 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         }
     };
     const hide = host => {
+        host.unplaced?.dismiss("map-hidden");
         host.geometry = undefined;
         setVisible(host, false);
     };
     const destroy = host => {
         if (!host || host.destroyed) return;
         host.destroyed = true;
+        host.unplaced?.destroy();
         clearTimeout(host.timer);
         hosts.delete(host.key);
         for (const [emitter, name, listener] of host.listeners) emitter.removeListener(name, listener);
@@ -310,6 +318,61 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         setVisible(host, true);
         post(host, {version: 1, instanceID: host.init.instanceID, type: "resize"});
     };
+    const dismissUnplaced = (win, reason) => {
+        for (const host of hosts.values()) if (host.win === win) host.unplaced?.dismiss(reason);
+    };
+    const refreshMenuVisibility = win => {
+        for (const host of hosts.values()) {
+            if (host.win !== win || host.destroyed) continue;
+            host.attributionGestureUntil = 0;
+            if (host.geometry) setVisible(host, host.visible, false);
+        }
+    };
+    const unplacedFor = host => {
+        if (host.unplaced) return host.unplaced;
+        const send = value => {
+            if (host.owner.isDestroyed() || host.frame !== host.owner.mainFrame) return;
+            try { host.owner.send("siyuan-map-unplaced-reply", {version: 1, instanceID: host.init.instanceID, ...value}); }
+            catch (_error) { host.unplaced?.dismiss("owner-unavailable"); }
+        };
+        host.unplaced = createUnplacedManager({ipcMain, session, WebContentsView, owner: host.owner, win: host.win,
+            ownerURL: host.frame.url, assets: {controlsPath: path.join(appDir, "stage/build/map/unplaced-controls.css")},
+            randomID, readFile, handleActions: false,
+            mayUse: () => getHost({sender: host.owner, senderFrame: host.frame}, host.init) === host && host.ready &&
+                host.visible && !host.view.webContents.isDestroyed() && !hasUnsafeMapSwitches(app.commandLine),
+            onAction: ({type, ...action}) => send({type: "action", action: type, ...action}),
+            onClose: value => send({type: "closed", ...value}),
+            onVisibility: () => refreshMenuVisibility(host.win)});
+        return host.unplaced;
+    };
+    ipcMain.handle("siyuan-map-unplaced-open", (event, value) => {
+        const host = getHost(event, value);
+        if (!host || !host.ready || !host.visible ||
+            !hasUnplacedKeys(value, ["version", "instanceID", "state", "anchor"])) return;
+        try {
+            // 同一窗口最多一个菜单，新菜单不会改变任何地图的相机或原生可见性。
+            dismissUnplaced(host.win, "replace");
+            const sessionID = unplacedFor(host).open(event, {state: value.state, anchor: value.anchor});
+            return sessionID ? {version: 1, instanceID: host.init.instanceID, sessionID} : undefined;
+        } catch (_error) { host.unplaced?.dismiss("operation-failed"); }
+    });
+    for (const [name, method, field] of [["update", "update", "state"], ["anchor", "setAnchor", "anchor"],
+        ["theme", "setTheme", "theme"], ["close", "close", "reason"]]) {
+        ipcMain.on("siyuan-map-unplaced-" + name, (event, value) => {
+            const host = getHost(event, value);
+            if (!host || !hasUnplacedKeys(value, ["version", "instanceID", "sessionID", field])) return;
+            try { host.unplaced?.[method](event, {sessionID: value.sessionID, [field]: value[field]}); }
+            catch (_error) { host.unplaced?.dismiss("operation-failed"); }
+        });
+    }
+    ipcMain.on(UNPLACED_CHANNEL + "-action", (event, value) => {
+        for (const host of hosts.values()) {
+            if (host.unplaced?.inspect()?.view.webContents !== event.sender) continue;
+            try { host.unplaced.action(event, value); }
+            catch (_error) { host.unplaced.dismiss("operation-failed"); }
+            return;
+        }
+    });
     ipcMain.handle("siyuan-map-capability", event => {
         const result = inspectOwner(event);
         const reason = result.reason || (hasUnsafeMapSwitches(app.commandLine) ? "unsafeProcessSwitches" : undefined);
@@ -357,6 +420,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
                 }
             };
             listen(host, contents, "before-mouse-event", (_event, input) => {
+                if (input.type === "mouseDown") dismissUnplaced(host.win, "outside");
                 if (input.type === "mouseUp" && input.button === "left") armAttributionClick();
             });
             listen(host, contents, "before-input-event", (_event, input) => {
@@ -455,6 +519,8 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             // DOM 暂时不可见时也能完成初始化；此占位视图始终隐藏，不会覆盖编辑器。
             view.setBounds({x: 0, y: 0, width: 1, height: 1});
             owner.win.contentView.addChildView(view);
+            // Electron 添加的新地图会位于最上层；只提升菜单，不重排或隐藏其他地图。
+            for (const other of hosts.values()) if (other.win === owner.win) other.unplaced?.promote();
             void contents.loadURL(entryURL).catch(() => { report("documentLoadFailed"); fail(host, "hostDocumentLoadFailed"); });
         } catch (_error) {
             if (host) fail(host, creationFailure);

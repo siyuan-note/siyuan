@@ -2,7 +2,7 @@ const path = require("node:path");
 const fs = require("node:fs");
 const os = require("node:os");
 const {pathToFileURL} = require("node:url");
-const {createManager} = require("./manager.cjs");
+const {createManager} = require("../../../electron/mapUnplaced/manager");
 const createTemporaryProfile = () => {
     const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-unplaced-manual-"));
     return {profile, cleanup() {
@@ -23,7 +23,7 @@ const createHarness = async ({profile, automate = false} = {}) => {
     // 样式只编译已有本地共享控件；该入口不生成或修改生产构建文件。
     const sass = require("sass");
     const component = path.resolve(__dirname, "../../../src/assets/scss/component");
-    const controls = sass.compileString('@use "menu"; @use "text-field";', {loadPaths: [component], logger: sass.Logger.silent}).css;
+    const controls = sass.compileString('@use "../util/reset"; @use "menu"; @use "text-field";', {loadPaths: [component], logger: sass.Logger.silent}).css;
     const ownerURL = pathToFileURL(path.join(__dirname, "owner.html")).href;
     const win = new BrowserWindow({width: 980, height: 760, useContentSize: true, show: true,
         webPreferences: {preload: path.join(__dirname, "owner-preload.cjs"), nodeIntegration: false,
@@ -47,7 +47,7 @@ const createHarness = async ({profile, automate = false} = {}) => {
     const prefix = "unplaced-fixture-owner-";
     const handlers = [];
     ipcMain.handle(prefix + "open", (event, value) => manager.open(event, value));
-    for (const [name, fn] of [["update", manager.update], ["anchor", manager.setAnchor], ["close", manager.close]]) {
+    for (const [name, fn] of [["update", manager.update], ["anchor", manager.setAnchor], ["theme", manager.setTheme], ["close", manager.close]]) {
         ipcMain.on(prefix + name, fn); handlers.push([prefix + name, fn]);
     }
     const trusted = event => event.sender === owner && event.senderFrame === owner.mainFrame && owner.mainFrame.url === ownerURL;

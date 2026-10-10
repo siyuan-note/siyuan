@@ -4,6 +4,7 @@ import {ipcRenderer} from "electron";
 import type {AVMapHost, AVMapHostOptions} from "./host";
 import {MapGeometry} from "./desktopGeometry";
 import {readDesktopAVMapGeometry} from "./desktopGeometryDOM";
+import {registerDesktopMapUnplacedHost} from "./desktopUnplaced";
 import {AV_MAP_OWNER_TIMEOUT} from "./loadingBudget";
 import {
     AV_MAP_PROTOCOL_VERSION, AVMapCommand, AVMapErrorCode, AVMapPoint, isAVMapHostErrorCode, isAVMapProvider, isAVMapRevision,
@@ -82,6 +83,7 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
     const diagnostics = new Set<string>();
     let observer: MutationObserver;
     let resizeObserver: ResizeObserver;
+    let releaseUnplacedHost: () => void;
     const envelope = () => ({version: AV_MAP_PROTOCOL_VERSION, instanceID} as const);
     const send = (command: AVMapCommand) => {
         if (!destroyed && ready) {
@@ -149,6 +151,8 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
         }
         destroyed = true;
         ready = false;
+        releaseUnplacedHost?.();
+        releaseUnplacedHost = undefined;
         if (instanceID) {
             ipc?.send("siyuan-map-destroy", envelope());
         }
@@ -265,6 +269,9 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
             return;
         }
         created = true;
+        releaseUnplacedHost = registerDesktopMapUnplacedHost(container, {
+            ipc, envelope, available: () => ready && !destroyed, theme: () => theme,
+        });
         scope.addEventListener("scroll", onScroll, true);
         scope.addEventListener("resize", invalidate);
         // DOM 焦点会在编辑器与原生地图间切换，窗口是否隐藏由主进程与文档可见性共同判断。

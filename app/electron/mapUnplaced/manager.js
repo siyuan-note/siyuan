@@ -1,7 +1,7 @@
 const path = require("node:path");
 const fs = require("node:fs/promises");
 const {randomBytes} = require("node:crypto");
-const {ORIGIN, CHANNEL, CSP, keys, parseState, parseAction, parseAnchor, place, resource} = require("./policy.cjs");
+const {ORIGIN, CHANNEL, PAGE_SIZE, CSP, keys, parseTheme, parseState, parseAction, parseAnchor, place, resource} = require("./policy");
 
 const deny = () => new Response("Forbidden", {status: 403});
 const clearSession = ses => {
@@ -9,7 +9,7 @@ const clearSession = ses => {
         try { void Promise.resolve(ses[method]()).catch(() => {}); } catch (_error) { /* 继续清理其他状态。 */ }
     }
 };
-const createRouter = (ses, assets, readFile = fs.readFile) => {
+const createRouter = (ses, assets, readFile = fs.readFile, onResourceFailure = () => {}) => {
     let destroyed = false, documentRequested = false;
     ses.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
     ses.setPermissionCheckHandler(() => false);
@@ -32,14 +32,18 @@ const createRouter = (ses, assets, readFile = fs.readFile) => {
         const entry = resource(request.url, request.method);
         if (destroyed || !entry || request.headers.get("service-worker")) return deny();
         try {
-            const body = entry[0] === "controls.css" ? assets.controls : await readFile(path.join(__dirname, entry[0]));
+            const body = entry[0] === "controls.css" ?
+                assets.controls ?? await readFile(assets.controlsPath) : await readFile(path.join(__dirname, entry[0]));
             if (destroyed) return deny();
             return new Response(request.method === "HEAD" ? null : body, {headers: {
                 "Content-Type": entry[1], "Content-Security-Policy": CSP, "Cache-Control": "no-store",
                 "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer",
                 "Permissions-Policy": "geolocation=(), camera=(), microphone=(), payment=(), usb=(), serial=(), bluetooth=()",
             }});
-        } catch (_error) { return new Response("Not Found", {status: 404}); }
+        } catch (_error) {
+            if (!destroyed) onResourceFailure();
+            return new Response("Not Found", {status: 404});
+        }
     };
     ses.protocol.handle("https", handle);
     ses.protocol.handle("http", deny);
@@ -51,16 +55,25 @@ const createRouter = (ses, assets, readFile = fs.readFile) => {
     }};
 };
 
-// 此管理器只由独立测试入口构造；生产地图没有引用此模块。
+// 菜单只保留当前页的纯文本；真实查询、权限和最终行对象始终由可信 owner 管理。
 const createManager = ({ipcMain, session, WebContentsView, owner, win, ownerURL, outsideContents = [], assets,
-    onAction, onClose = () => {}, mayUse = () => true, randomID = () => randomBytes(24).toString("hex")}) => {
+    onAction, onClose = () => {}, onVisibility = () => {}, mayUse = () => true, readFile,
+    randomID = () => randomBytes(24).toString("hex"), handleActions = true}) => {
     let host, disposed = false;
+    const ownerFrame = owner.mainFrame;
     const listeners = [];
-    const listen = (emitter, name, fn, list = listeners) => { emitter.on(name, fn); list.push([emitter, name, fn]); };
-    const currentOwner = () => !disposed && !owner.isDestroyed() && !win.isDestroyed() && owner.mainFrame.url === ownerURL;
+    const listen = (emitter, name, fn, list = listeners) => {
+        const guarded = (...args) => {
+            try { fn(...args); } catch (_error) { close("operation-failed"); }
+        };
+        emitter.on(name, guarded);
+        list.push([emitter, name, guarded]);
+    };
+    const currentOwner = () => !disposed && !owner.isDestroyed() && !win.isDestroyed() &&
+        owner.mainFrame === ownerFrame && ownerFrame.url === ownerURL;
     const trusted = event => currentOwner() && event?.sender === owner && event.senderFrame === owner.mainFrame;
     const permitted = () => { try { return mayUse() === true; } catch (_error) { return false; } };
-    const close = (reason, restore = false) => {
+    const close = (reason, restore = false, notify = true) => {
         const previous = host;
         if (!previous) return;
         host = undefined;
@@ -75,15 +88,18 @@ const createManager = ({ipcMain, session, WebContentsView, owner, win, ownerURL,
             try { contents.stop(); } catch (_error) { /* 继续关闭渲染器。 */ }
             try { contents.close({waitForBeforeUnload: false}); } catch (_error) { /* 渲染器可能已关闭。 */ }
         }
-        if (restore && !owner.isDestroyed() && !win.isDestroyed() && win.isFocused()) owner.focus();
-        onClose({sessionID: previous.sessionID, reason, restore});
+        if (previous.ready) onVisibility(false);
+        if (restore && currentOwner() && win.isFocused()) {
+            try { owner.focus(); } catch (_error) { /* 关闭仍然完成，不抢其他窗口焦点。 */ }
+        }
+        if (notify) onClose({sessionID: previous.sessionID, reason, restore});
     };
     const geometry = () => {
         if (!host) return false;
         if (!currentOwner()) { close("owner-unavailable"); return false; }
         const zoom = owner.getZoomFactor();
         const bounds = place(host.anchor, zoom, win.getContentBounds());
-        if (!permitted() || !win.isVisible() || !bounds) { close("unavailable"); return false; }
+        if (!permitted() || !win.isVisible() || win.isMinimized?.() || !bounds) { close("unavailable"); return false; }
         const key = JSON.stringify({bounds, zoom});
         if (host.geometryKey !== key) {
             host.view.webContents.setZoomFactor(zoom);
@@ -104,32 +120,38 @@ const createManager = ({ipcMain, session, WebContentsView, owner, win, ownerURL,
         const sessionID = randomID();
         let ses, router, view;
         try {
-        ses = session.fromPartition("unplaced-fixture-" + sessionID, {cache: false});
-        router = createRouter(ses, assets);
-        view = new WebContentsView({webPreferences: {session: ses, preload: path.join(__dirname, "preload.cjs"),
-            additionalArguments: ["--unplaced-session=" + sessionID], nodeIntegration: false,
-            nodeIntegrationInWorker: false, nodeIntegrationInSubFrames: false, contextIsolation: true, sandbox: true,
-            webSecurity: true, webviewTag: false, allowRunningInsecureContent: false, devTools: false}});
-        host = {sessionID, view, router, state, anchor, ids: stateIDs(state), ready: false, listeners: [],
-            pending: state.loading, query: state.query, requestID: 0};
-        const active = host;
-        const contents = view.webContents;
-        contents.setWindowOpenHandler(() => ({action: "deny"}));
-        for (const name of ["will-navigate", "will-frame-navigate", "will-redirect", "will-attach-webview"]) {
-            listen(contents, name, event => event.preventDefault(), host.listeners);
-        }
-        listen(contents, "login", (event, _details, _info, callback) => { event.preventDefault(); callback(); }, host.listeners);
-        listen(contents, "select-client-certificate", (event, _url, _certificates, callback) => { event.preventDefault(); callback(); }, host.listeners);
-        for (const name of ["render-process-gone", "destroyed", "did-fail-load"]) {
-            listen(contents, name, () => { if (host === active) close("renderer-failed"); }, host.listeners);
-        }
-        host.timer = setTimeout(() => { if (host === active) close("ready-timeout"); }, 10000);
-        host.timer.unref?.();
-        view.setVisible(false);
-        win.contentView.addChildView(view);
-        if (!geometry()) return;
-        void contents.loadURL(ORIGIN + "/menu.html").catch(() => { if (host === active) close("load-failed"); });
-        return sessionID;
+            ses = session.fromPartition("siyuan-map-unplaced-" + sessionID, {cache: false});
+            router = createRouter(ses, assets, readFile, () => { if (host?.sessionID === sessionID) close("resource-failed"); });
+            view = new WebContentsView({webPreferences: {session: ses, preload: path.join(__dirname, "preload.js"),
+                additionalArguments: ["--unplaced-session=" + sessionID], nodeIntegration: false,
+                nodeIntegrationInWorker: false, nodeIntegrationInSubFrames: false, contextIsolation: true, sandbox: true,
+                webSecurity: true, webviewTag: false, allowRunningInsecureContent: false, devTools: false,
+                navigateOnDragDrop: false, safeDialogs: true, disableDialogs: true, spellcheck: false}});
+            host = {sessionID, view, router, state, anchor, ids: stateIDs(state), ready: false, listeners: [],
+                pending: state.loading, query: state.query, page: state.page, requestID: 0};
+            const active = host;
+            const contents = view.webContents;
+            contents.setWindowOpenHandler(() => ({action: "deny"}));
+            for (const name of ["will-navigate", "will-frame-navigate", "will-redirect", "will-attach-webview"]) {
+                listen(contents, name, event => event.preventDefault(), host.listeners);
+            }
+            listen(contents, "login", (event, _details, _info, callback) => { event.preventDefault(); callback(); }, host.listeners);
+            listen(contents, "select-client-certificate", (event, _url, _certificates, callback) => { event.preventDefault(); callback(); }, host.listeners);
+            listen(contents, "certificate-error", (_event, _url, _error, _certificate, callback) => callback(false), host.listeners);
+            listen(contents, "did-finish-load", () => {
+                if (active.loaded || contents.getURL() !== ORIGIN + "/menu.html") { close("document-mismatch"); return; }
+                active.loaded = true;
+            }, host.listeners);
+            for (const name of ["render-process-gone", "destroyed", "did-fail-load"]) {
+                listen(contents, name, () => { if (host === active) close("renderer-failed"); }, host.listeners);
+            }
+            host.timer = setTimeout(() => { if (host === active) close("ready-timeout"); }, 10000);
+            host.timer.unref?.();
+            view.setVisible(false);
+            win.contentView.addChildView(view);
+            if (!geometry()) return;
+            void contents.loadURL(ORIGIN + "/menu.html").catch(() => { if (host === active) close("load-failed"); });
+            return sessionID;
         } catch (_error) {
             if (host?.sessionID === sessionID) close("setup-failed");
             else {
@@ -143,7 +165,7 @@ const createManager = ({ipcMain, session, WebContentsView, owner, win, ownerURL,
         if (!permitted()) { close("permission-revoked"); return false; }
         const state = parseState(value.state);
         if (!state || state.revision <= host.state.revision || state.requestID !== host.requestID ||
-            host.pending && state.query !== host.query) return false;
+            state.query !== host.query || state.page !== host.page) return false;
         host.state = state;
         host.ids = stateIDs(state);
         host.pending = state.loading;
@@ -157,6 +179,16 @@ const createManager = ({ipcMain, session, WebContentsView, owner, win, ownerURL,
         host.anchor = anchor;
         return geometry();
     };
+    const setTheme = (event, value) => {
+        if (!trusted(event) || !host || !keys(value, ["sessionID", "theme"]) || value.sessionID !== host.sessionID) return false;
+        if (!permitted()) { close("permission-revoked"); return false; }
+        const theme = parseTheme(value.theme);
+        if (!theme) return false;
+        // 主题更新不推进数据 revision，避免已发出的编辑、翻页和选择动作变成过期消息。
+        host.state.theme = theme;
+        if (host.ready) host.view.webContents.send(CHANNEL + "-theme", {sessionID: host.sessionID, theme});
+        return true;
+    };
     const message = (event, value) => {
         if (host && !currentOwner()) { close("owner-unavailable"); return; }
         const action = parseAction(value);
@@ -168,7 +200,7 @@ const createManager = ({ipcMain, session, WebContentsView, owner, win, ownerURL,
             host.ready = true;
             clearTimeout(host.timer);
             sendState();
-            if (geometry()) { host.view.setVisible(true); host.view.webContents.focus(); }
+            if (geometry()) { host.view.setVisible(true); onVisibility(true); host.view.webContents.focus(); }
             return;
         }
         if (!host.ready || action.revision !== host.state.revision) return;
@@ -182,18 +214,22 @@ const createManager = ({ipcMain, session, WebContentsView, owner, win, ownerURL,
         }
         if (action.type === "select") {
             if (!host.ids.has(action.id)) return;
-            const sessionID = host.sessionID;
-            close("select", true);
-            onAction({...action, sessionID});
+            const requestID = host.requestID;
+            // 选择是唯一终止消息；owner 必须先取回私有行对象，再清理自己的会话状态。
+            close("select", true, false);
+            onAction({...action, requestID});
             return;
         }
-        if (action.type === "more" && (host.pending || host.state.error || host.state.page * 50 >= host.state.total || host.state.rows.length >= 500)) return;
+        if (action.type !== "search" && host.pending) return;
+        if (action.type === "more" && (host.state.error || host.state.page * PAGE_SIZE >= host.state.total)) return;
+        if (action.type === "previous" && host.state.page <= 1 || action.type === "retry" && !host.state.error) return;
         host.ids.clear();
         host.pending = true;
         host.query = action.type === "search" ? action.query.trim() : host.state.query;
-        onAction({...action, query: host.query, requestID: ++host.requestID});
+        host.page = action.type === "search" ? 1 : host.state.page + (action.type === "more" ? 1 : action.type === "previous" ? -1 : 0);
+        onAction({...action, query: host.query, page: host.page, requestID: ++host.requestID});
     };
-    listen(ipcMain, CHANNEL + "-action", message);
+    if (handleActions) listen(ipcMain, CHANNEL + "-action", message);
     const outside = (_event, input) => { if (input.type === "mouseDown") close("outside"); };
     for (const contents of outsideContents) listen(contents, "before-mouse-event", outside);
     for (const name of ["blur", "hide", "minimize", "closed"]) listen(win, name, () => close("window-" + name));
@@ -201,12 +237,17 @@ const createManager = ({ipcMain, session, WebContentsView, owner, win, ownerURL,
     listen(owner, "zoom-changed", geometry);
     for (const name of ["will-navigate", "destroyed", "render-process-gone"]) listen(owner, name, () => close("owner-" + name));
     listen(owner, "did-start-navigation", details => { if (details.isMainFrame) close("owner-navigation"); });
-    return {open, update, setAnchor,
+    return {open, update, setAnchor, setTheme, action: message,
         close(event, value) {
             if (trusted(event) && host && keys(value, ["sessionID", "reason"]) && value.sessionID === host.sessionID &&
                 ["outside", "button", "anchor-hidden"].includes(value.reason)) close(value.reason, value.reason === "button");
         },
         revoke() { close("permission-revoked"); },
+        dismiss(reason = "outside") { close(reason); },
+        promote() {
+            if (!host || !currentOwner() || !permitted()) return;
+            try { win.contentView.addChildView(host.view); } catch (_error) { close("operation-failed"); }
+        },
         destroy() {
             if (disposed) return;
             close("destroy");

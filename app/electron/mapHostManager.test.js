@@ -186,12 +186,13 @@ const setup = (initialFault) => {
     }});
     const contents = id => Object.assign(new EventEmitter(), {id, mainFrame: {url: origin + "/stage/build/app/"}, sent: [], destroyed: false, zoom: 1,
         isDestroyed() { return this.destroyed; }, getZoomFactor() { return this.zoom; },
+        focus() { this.focused = true; },
         send(...args) { this.sent.push(structuredClone(args)); }});
     const owner = contents(1);
     const win = Object.assign(new EventEmitter(), {webContents: owner, destroyed: false, focused: true, visible: true, minimized: false, children: [],
         isDestroyed() { return this.destroyed; }, isFocused() { return this.focused; },
         isVisible() { return this.visible; }, isMinimized() { return this.minimized; }, getContentBounds: () => ({width: 1000, height: 800})});
-    win.contentView = {addChildView: view => { fault("attach"); win.children.push(view); },
+    win.contentView = {addChildView: view => { fault("attach"); win.children = win.children.filter(item => item !== view); win.children.push(view); },
         removeChildView: view => { fault("detach"); win.children = win.children.filter(item => item !== view); }};
     const target = {origin};
     let initialized = true;
@@ -215,7 +216,7 @@ const setup = (initialFault) => {
                     setWindowOpenHandler(handler) { fault("openHandler"); this.openHandler = handler; order.push("openHandler"); },
                     getURL() { return this.url; },
                     loadURL(url) {
-                        fault("loadSync"); this.url = url; order.push("load");
+                        fault("loadSync"); this.url = url; this.mainFrame.url = url; order.push("load");
                         if (faults.has("earlyConsole")) {
                             this.emit("console-message", {message: "Creating a worker from 'blob:null/private' violates the following Content Security Policy directive: \"worker-src 'none'\"."});
                         }
@@ -231,7 +232,7 @@ const setup = (initialFault) => {
                 this.webContents.on = function (...args) { fault("listener"); return on.apply(this, args); };
                 views.push(this);
             }
-            setVisible(value) { this.visible = value; }
+            setVisible(value) { this.visible = value; (this.visibility ||= []).push(value); }
             setBounds(value) { fault("bounds"); this.bounds = value; }
         },
         MessageChannelMain: class {
@@ -793,6 +794,139 @@ test("capability reports bounded reasons for every owner rejection without weake
         assert.deepEqual(s.handlers["siyuan-map-capability"](event), {version: 1, supported: false, reason});
         assert.throws(() => s.handlers["siyuan-map-create"](event, {...envelope, provider: "openfreemap", theme: "light"}));
         assert.equal(s.views.length, 0);
+        s.manager.destroyAll();
+    }
+});
+
+const unplacedState = (extra = {}) => ({revision: 0, requestID: 0, query: "", page: 1, total: 1,
+    rows: [{id: "private-row", title: "Private <img src=x>"}], loading: false, error: false,
+    theme: {mode: "light", fontSize: 16}, labels: {title: "List", search: "Search", empty: "Empty", loading: "Loading",
+        more: "Next", previous: "Previous", retry: "Retry", close: "Close"}, ...extra});
+const unplacedAnchor = {x: 100, y: 50, width: 160, height: 30};
+const readyMap = (s, id = instanceID) => {
+    s.create({instanceID: id});
+    const view = s.views.at(-1);
+    view.webContents.emit("did-finish-load");
+    const channel = s.channels.at(-1);
+    for (const type of ["bootstrapReady", "ready"]) channel.port1.emit("message", {data: {version: 1, instanceID: id, type}});
+    const geometry = {version: 1, instanceID: id, visible: true, bounds: {x: 10, y: 120, width: 600, height: 400},
+        logicalSize: {width: 600, height: 400}, crop: {x: 0, y: 0}};
+    s.handlers["siyuan-map-geometry"](s.event(), geometry);
+    return {view, channel, geometry};
+};
+const openUnplaced = (s, id = instanceID, extra = {}) => {
+    const result = s.handlers["siyuan-map-unplaced-open"](s.event(), {version: 1, instanceID: id,
+        state: unplacedState(extra), anchor: unplacedAnchor});
+    if (!result) return;
+    const view = s.views.at(-1);
+    const action = (type, values = {}, event = {sender: view.webContents, senderFrame: view.webContents.mainFrame}) => {
+        s.handlers["siyuan-map-unplaced-menu-action"](event, {sessionID: result.sessionID, revision: 0, type, ...values});
+    };
+    action("ready");
+    return {...result, view, action};
+};
+const unplacedReplies = s => s.owner.sent.filter(([name]) => name === "siyuan-map-unplaced-reply").map(([, value]) => value);
+
+test("production unplaced IPC requires the captured ready visible map owner and never delivers private text to the map", () => {
+    const s = setup();
+    assert.equal(openUnplaced(s), undefined);
+    s.create();
+    assert.equal(openUnplaced(s), undefined);
+    s.load(); s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
+    assert.equal(openUnplaced(s), undefined, "ready without visible geometry must reject menus");
+    s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: true, bounds: {x: 0, y: 100, width: 600, height: 400},
+        logicalSize: {width: 600, height: 400}, crop: {x: 0, y: 0}});
+    const value = {...envelope, state: unplacedState(), anchor: unplacedAnchor};
+    for (const event of [{...s.event(), senderFrame: {}}, {sender: s.views[0].webContents, senderFrame: s.views[0].webContents.mainFrame}]) {
+        assert.equal(s.handlers["siyuan-map-unplaced-open"](event, value), undefined);
+    }
+    assert.equal(s.handlers["siyuan-map-unplaced-open"](s.event(), {...value, instanceID: "foreign"}), undefined);
+    assert.equal(s.handlers["siyuan-map-unplaced-open"](s.event(), {...value, note: {content: "secret"}}), undefined);
+    const menu = openUnplaced(s);
+    assert.ok(menu);
+    assert.equal(menu.view.visible, true);
+    assert.match(menu.view.options.webPreferences.preload, /mapUnplaced[/\\]preload\.js$/);
+    assert.equal(menu.view.options.webPreferences.sandbox, true);
+    assert.equal(menu.view.options.webPreferences.nodeIntegration, false);
+    assert.equal(s.sessions.at(-1).fetches.length, 0);
+    assert.equal(JSON.stringify(s.channels[0].port1.sent).includes("Private"), false);
+    assert.equal(JSON.stringify(s.views[0].webContents.sent).includes("Private"), false);
+    s.owner.mainFrame = {url: s.owner.mainFrame.url};
+    menu.action("select", {id: "private-row"});
+    assert.equal(menu.view.webContents.isDestroyed(), true, "same URL with a different owner frame cannot reuse the session");
+    assert.equal(unplacedReplies(s).some(reply => reply.action === "select"), false);
+    s.manager.destroyAll();
+});
+
+test("production menu stays above newly created maps, accepts their native outside clicks and never toggles map visibility", () => {
+    const s = setup(), first = readyMap(s);
+    const before = first.view.visibility.slice();
+    const menu = openUnplaced(s);
+    assert.equal(s.win.children.at(-1), menu.view);
+    const second = readyMap(s, "b".repeat(48));
+    assert.equal(s.win.children.at(-1), menu.view);
+    assert.deepEqual(s.win.children.slice(0, -1), [first.view, second.view]);
+    let prevented = false;
+    second.view.webContents.emit("before-mouse-event", {preventDefault() { prevented = true; }}, {type: "mouseDown", button: "left"});
+    assert.equal(prevented, false);
+    assert.equal(menu.view.webContents.isDestroyed(), true);
+    assert.equal(s.owner.focused, undefined, "outside click must keep the clicked map's focus");
+    assert.equal(unplacedReplies(s).at(-1).reason, "outside");
+    assert.deepEqual(first.view.visibility, before);
+    assert.equal(second.view.visible, true);
+    s.manager.destroyAll();
+});
+
+test("production menus pause attribution timing while painting maps, restore viewport on close and revoke old click gestures", () => {
+    const s = setup(), map = readyMap(s);
+    map.view.webContents.emit("before-mouse-event", {}, {type: "mouseUp", button: "left"});
+    const before = map.view.visibility.slice(), menu = openUnplaced(s);
+    assert.deepEqual(map.channel.port1.sent.filter(value => value.type === "visibility").at(-1), {...envelope, type: "visibility", visible: true});
+    const count = s.owner.sent.length;
+    s.reply({type: "attributionClick", attribution: "openfreemap"});
+    assert.equal(s.owner.sent.length, count);
+    s.win.focused = false; s.win.emit("blur");
+    assert.equal(menu.view.webContents.isDestroyed(), true);
+    assert.equal(map.view.visible, true);
+    assert.deepEqual(map.view.visibility, before);
+    assert.deepEqual(map.channel.port1.sent.filter(value => value.type === "visibility").at(-1),
+        {...envelope, type: "visibility", visible: true, viewport: {x: 0, y: 0, width: 600, height: 400}});
+    assert.equal(unplacedReplies(s).at(-1).reason, "window-blur");
+    s.manager.destroyAll();
+});
+
+test("one menu per window and a single terminal selection protect owner row lookup", () => {
+    const s = setup(); readyMap(s);
+    const otherID = "b".repeat(48); readyMap(s, otherID);
+    const first = openUnplaced(s), second = openUnplaced(s, otherID);
+    assert.equal(first.view.webContents.isDestroyed(), true);
+    assert.equal(unplacedReplies(s).at(-1).reason, "replace");
+    const count = unplacedReplies(s).length;
+    second.action("select", {id: "private-row"});
+    assert.equal(second.view.webContents.isDestroyed(), true);
+    assert.deepEqual(unplacedReplies(s).slice(count), [{version: 1, instanceID: otherID, type: "action", action: "select",
+        sessionID: second.sessionID, revision: 0, requestID: 0, id: "private-row"}]);
+    first.action("select", {id: "private-row"});
+    second.action("select", {id: "private-row"});
+    assert.equal(unplacedReplies(s).length, count + 1);
+    s.manager.destroyAll();
+});
+
+test("production native menu closes with its map, policy revocation and renderer failure without changing sibling maps", () => {
+    for (const operation of [
+        s => s.handlers["siyuan-map-destroy"](s.event(), envelope),
+        s => s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: false}),
+        (s, menu) => { s.setInitialized(false); menu.action("select", {id: "private-row"}); },
+        (_s, menu) => menu.view.webContents.emit("render-process-gone"),
+    ]) {
+        const s = setup(); readyMap(s);
+        const sibling = readyMap(s, "b".repeat(48));
+        const before = sibling.view.visibility.slice(), menu = openUnplaced(s);
+        operation(s, menu);
+        assert.equal(menu.view.webContents.isDestroyed(), true);
+        assert.equal(sibling.view.visible, true);
+        assert.deepEqual(sibling.view.visibility, before);
+        assert.equal(unplacedReplies(s).some(reply => reply.action === "select"), false);
         s.manager.destroyAll();
     }
 });

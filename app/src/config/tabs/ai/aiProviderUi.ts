@@ -110,6 +110,7 @@ export const removeProviderView = (root: HTMLElement, view?: HTMLElement, onRemo
             removed = true;
             item.remove();
             onRemoved?.();
+            root.dispatchEvent(new CustomEvent("siyuan-setting-detail-closed", {bubbles: true}));
         };
         item.classList.remove("config__view--show");
         item.addEventListener("transitionend", (event) => {

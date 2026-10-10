@@ -120,6 +120,38 @@ test("settings refresh preserves an unfocused profile draft and resumes after th
     assert.equal(mounted, 1);
 });
 
+for (const detail of ["provider", "capability", "skill"]) {
+    test(`AI ${detail} details preserve drafts when unfocused and refresh after closing`, async () => {
+        const code = transpileModule(readFileSync("src/config/setting/mount.ts", "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText;
+        let visible = true;
+        let mounted = 0;
+        const listeners = new Map<string, () => void>();
+        const timers: Array<() => void> = [];
+        const root = {innerHTML: "unsaved draft", scrollTop: 12, scrollLeft: 0, contains: () => false,
+            querySelector: (selector: string) => visible && selector.includes(".config__view--show:not(.fn__none)") ? {} : null};
+        const exports = {} as {remountOpenSettingTab: (tab: string) => Promise<void>};
+        runInNewContext(code, {exports,
+            require: () => ({Constants: {DIALOG_SETTING: "settings"}, getSearchKeywordsLower: () => "",
+                getSettingsOwnerApp: () => ({}), getSettingTab: () => ({mount: async () => { mounted++; }})}),
+            document: {activeElement: {}, addEventListener: (name: string, callback: () => void) => listeners.set(name, callback)},
+            setTimeout: (callback: () => void) => timers.push(callback),
+            window: {siyuan: {dialogs: [{element: {getAttribute: () => "settings", querySelector: () => root}}]}}});
+        await exports.remountOpenSettingTab("ai");
+        listeners.get("focusout")();
+        timers.splice(0).forEach(callback => callback());
+        await Promise.resolve();
+        assert.equal(mounted, 0);
+        assert.equal(root.innerHTML, "unsaved draft");
+        visible = false;
+        listeners.get("siyuan-setting-detail-closed")();
+        timers.splice(0).forEach(callback => callback());
+        await Promise.resolve();
+        assert.equal(mounted, 1);
+    });
+}
+
 test("deferred refresh preserves a pressed label until its click completes or is canceled", async () => {
     const code = transpileModule(readFileSync("src/config/setting/mount.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},

@@ -53,7 +53,7 @@ export const remountOpenSettingTab = async (tabId: TSettingTab) => {
         return;
     }
     if (root.contains(document.activeElement) || pressedTarget && root.contains(pressedTarget as Node) ||
-        root.querySelector(".config-entry-visibility__view, [data-decision-profile-view]")) {
+        root.querySelector(".config__view--show:not(.fn__none), .config-entry-visibility__view, [data-decision-profile-view]")) {
         deferredTabs.add(tabId);
         if (!watchingFocus) {
             watchingFocus = true;
@@ -61,6 +61,7 @@ export const remountOpenSettingTab = async (tabId: TSettingTab) => {
             document.addEventListener("focusout", refreshDeferredTabs);
             document.addEventListener("siyuan-entry-profile-closed", refreshDeferredTabs);
             document.addEventListener("siyuan-decision-profile-closed", refreshDeferredTabs);
+            document.addEventListener("siyuan-setting-detail-closed", refreshDeferredTabs);
         }
         return;
     }

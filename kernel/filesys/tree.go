@@ -227,7 +227,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 		return
 	}
 
-	data, needFix, err = fixTreeJSONData(boxID, p, data, luteEngine, dek, encrypted)
+	data, needFix, err = fixTreeJSONData(boxID, p, data, luteEngine, dek, encrypted, true)
 	if nil != err {
 		return
 	}
@@ -654,7 +654,7 @@ func afterWriteTree(tree *parse.Tree) {
 }
 
 // fixTreeJSONData 订正树 JSON 数据。
-func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, dek []byte, encrypted bool) (data []byte, needFix bool, err error) {
+func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, dek []byte, encrypted, persist bool) (data []byte, needFix bool, err error) {
 	if err = validateTreePath(boxID, p); err != nil {
 		return
 	}
@@ -730,6 +730,9 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 		data = buf.Bytes()
 	}
 
+	if !persist {
+		return
+	}
 	filePath := filepath.Join(util.DataDir, ret.Box, ret.Path)
 	if err = os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
 		return

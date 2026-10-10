@@ -2272,10 +2272,26 @@ func renameDoc0(boxID, p, title string) (err error) {
 		return
 	}
 
+	titleChanged, emptyAttrUpdated, err := prepareDocRename(tree, title)
+	if err != nil {
+		return
+	}
+	if titleChanged || emptyAttrUpdated {
+		if err = renameWriteJSONQueue(tree); err != nil {
+			return
+		}
+	}
+	publishDocRename(tree, titleChanged, emptyAttrUpdated)
+	return
+}
+
+// 规范化标题及空标题标记，由调用方选择普通写入或基于扫描源的条件写入。
+func prepareDocRename(tree *parse.Tree, title string) (titleChanged, emptyAttrUpdated bool, err error) {
 	title = normalizeDocTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
-		return errors.New(Conf.Language(106))
+		err = errors.New(Conf.Language(106))
+		return
 	}
 
 	var isEmpty bool
@@ -2284,9 +2300,8 @@ func renameDoc0(boxID, p, title string) (err error) {
 		isEmpty = true
 	}
 	// 先规范化输入得到实际会存储的标题，再与旧标题比较
-	titleChanged := tree.Root.IALAttr("title") != title
+	titleChanged = tree.Root.IALAttr("title") != title
 
-	var emptyAttrUpdated bool
 	if titleChanged {
 		tree.HPath = path.Join(path.Dir(tree.HPath), title)
 		tree.Root.SetIALAttr("title", title)
@@ -2307,18 +2322,21 @@ func renameDoc0(boxID, p, title string) (err error) {
 
 	if titleChanged || emptyAttrUpdated {
 		tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-		if err = renameWriteJSONQueue(tree); err != nil {
-			return
-		}
+	}
+	return
+}
 
+// 在标题持久化成功后广播变更并刷新引用，避免失败的条件写入发布过期标题。
+func publishDocRename(tree *parse.Tree, titleChanged, emptyAttrUpdated bool) {
+	if titleChanged || emptyAttrUpdated {
 		refText := getNodeRefText(tree.Root)
 		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
 		evt.Data = map[string]any{
-			"box":     boxID,
+			"box":     tree.Box,
 			"id":      tree.Root.ID,
-			"path":    p,
-			"title":   title,
-			"empty":   isTitleEmpty,
+			"path":    tree.Path,
+			"title":   tree.Root.IALAttr("title"),
+			"empty":   tree.Root.IALAttr(NodeAttrTitleEmpty) == "true",
 			"refText": refText,
 		}
 		util.PushEvent(evt)

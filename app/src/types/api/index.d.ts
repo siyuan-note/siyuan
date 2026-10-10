@@ -6395,6 +6395,8 @@ export interface APIPOSTRoutes {
      * 文本与查询语法替换的所有启用类型遵循搜索配置的 caseSensitive，替换串按字面量写入。
      * 正则模式的大小写匹配由表达式决定，替换串支持捕获组展开。
      * 每次文档写盘成功后清理该文档及关联跨文档撤销记录，并广播更新后的撤销状态。
+     * 同一文档的标题、标签及正文汇总后仅提交一次，普通和加密文档均以已认证扫描源做条件写入。
+     * 并发修改或删除导致 code=1，保留当前文件及其撤销记录；此前已成功提交的文档不回滚。
      */
     "/api/search/findReplace": {
         request: FindReplaceRequestInput;

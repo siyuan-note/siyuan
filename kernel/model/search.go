@@ -631,6 +631,10 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 // FindReplaceInBox 与 FindReplace 一致，但按 boxID 路由到加密 db 或全局 db。
 func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types, subTypes map[string]bool, method int, boxID string) (err error) {
+	return findReplaceInBox(keyword, replacement, replaceTypes, ids, paths, boxes, types, subTypes, method, boxID, nil)
+}
+
+func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types, subTypes map[string]bool, method int, boxID string, beforeCommit func()) (err error) {
 	// method：0：文本，1：查询语法，2：SQL，3：正则表达式，4：语义搜索。
 	// SQL 和语义搜索不支持替换，必须在查询目标和生成历史前拒绝。
 	if 2 == method || 4 == method {
@@ -655,9 +659,9 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	escapedKey = strings.ReplaceAll(escapedKey, "&#34;", "&quot;")
 	escapedKey = strings.ReplaceAll(escapedKey, "&#39;", "'")
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
-	var renameRoots []*ast.Node
 	renameRootTitles := map[string]string{}
 	cachedTrees := map[string]*parse.Tree{}
+	originals := map[string][]byte{}
 
 	historyDir, err := getHistoryDir(HistoryOpReplace)
 	if err != nil {
@@ -698,9 +702,9 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			continue
 		}
 
-		tree, _ = LoadTreeByBlockID(id)
-		if nil == tree {
-			continue
+		tree, originals[bt.RootID], err = filesys.LoadTreeSnapshot(bt.BoxID, bt.Path, util.NewLute())
+		if err != nil {
+			return
 		}
 
 		generateTreeHistory(tree, historyDir)
@@ -712,6 +716,18 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	luteEngine := util.NewLute()
 	var reloadTreeIDs []string
 	updateNodes := map[string]*ast.Node{}
+	pendingNodes := map[string]map[string]*ast.Node{}
+	var changedRoots []string
+	seenRoots := map[string]bool{}
+	defer func() {
+		sql.FlushQueue()
+		for _, rootID := range reloadTreeIDs {
+			ReloadProtyle(rootID)
+		}
+		updateAttributeViewBlockText(updateNodes)
+		sql.FlushQueue()
+		util.PushClearProgress()
+	}()
 	for i, id := range ids {
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
@@ -728,7 +744,6 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			continue
 		}
 
-		reloadTreeIDs = append(reloadTreeIDs, tree.ID)
 		if ast.NodeDocument == node.Type {
 			if !replaceTypes["docTitle"] {
 				continue
@@ -739,7 +754,6 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			if 0 == method {
 				if newTitle, matched := replaceSearchText(title, method, keyword, strings.ReplaceAll(replacement, "/", "／"), r); matched {
 					renameRootTitles[node.ID] = newTitle
-					renameRoots = append(renameRoots, node)
 				}
 
 				if newTags, matched := replaceSearchText(tags, method, keyword, tagReplacement, r); matched {
@@ -752,7 +766,6 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 				if nil != r && r.MatchString(title) {
 					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
 					renameRootTitles[node.ID] = r.ReplaceAllString(title, docTitleReplacement)
-					renameRoots = append(renameRoots, node)
 				}
 
 				if nil != r && r.MatchString(tags) {
@@ -1042,33 +1055,76 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			}
 		}
 
-		if err = writeTreeUpsertQueue(tree); err != nil {
-			return
+		if !seenRoots[tree.ID] {
+			changedRoots = append(changedRoots, tree.ID)
+			seenRoots[tree.ID] = true
 		}
-		invalidateDocumentHistory(tree.ID)
-		updateNodes[id] = node
+		if pendingNodes[tree.ID] == nil {
+			pendingNodes[tree.ID] = map[string]*ast.Node{}
+		}
+		pendingNodes[tree.ID][id] = node
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(206), i+1, len(ids)))
 	}
 
-	for i, renameRoot := range renameRoots {
-		newTitle := renameRootTitles[renameRoot.ID]
-		RenameDoc(renameRoot.Box, renameRoot.Path, newTitle)
-
-		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(207), i+1, len(renameRoots)))
+	if beforeCommit != nil {
+		beforeCommit()
 	}
-
-	sql.FlushQueue()
-
-	reloadTreeIDs = gulu.Str.RemoveDuplicatedElem(reloadTreeIDs)
-	for _, id := range reloadTreeIDs {
-		ReloadProtyle(id)
+	for _, rootID := range changedRoots {
+		tree := cachedTrees[rootID]
+		title, rename := renameRootTitles[rootID]
+		if err = writeReplacementTree(tree, originals[rootID], title, rename); err != nil {
+			return
+		}
+		reloadTreeIDs = append(reloadTreeIDs, rootID)
+		for id, node := range pendingNodes[rootID] {
+			updateNodes[id] = node
+		}
 	}
-
-	updateAttributeViewBlockText(updateNodes)
-
-	sql.FlushQueue()
-	util.PushClearProgress()
 	return
+}
+
+// 每个文档只提交一次；文件、缓存、索引及撤销失效与编辑器事务串行，标题也使用同一份扫描基线。
+func writeReplacementTree(tree *parse.Tree, original []byte, title string, rename bool) error {
+	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
+	var size uint64
+	var err error
+	var titleChanged, emptyAttrUpdated bool
+	if rename {
+		if IsBoxDocPath(tree.Box, tree.Path) {
+			title = normalizeBoxName(title)
+		}
+		if titleChanged, emptyAttrUpdated, err = prepareDocRename(tree, title); err != nil {
+			return err
+		}
+	}
+	if titleChanged || emptyAttrUpdated {
+		size, err = writeRenameDocIfUnchanged(tree, original)
+	} else {
+		size, err = filesys.WriteTreeIfUnchanged(tree, original)
+	}
+	if err != nil {
+		return err
+	}
+	sql.UpsertTreeQueue(tree)
+	refreshDocInfoWithSize(tree, size)
+	invalidateDocumentHistory(tree.ID)
+	publishDocRename(tree, titleChanged, emptyAttrUpdated)
+	if rename && IsBoxDocPath(tree.Box, tree.Path) {
+		box := Conf.Box(tree.Box)
+		boxConf := box.GetConf()
+		boxConf.Name = tree.Root.IALAttr("title")
+		if err = box.SaveConf(boxConf); err != nil {
+			return err
+		}
+		box.Name = boxConf.Name
+		event := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
+		event.Data = map[string]any{"box": box.ID, "name": box.Name}
+		util.PushEvent(event)
+		IncSync()
+	}
+	return nil
 }
 
 func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey string, replacement string, r *regexp.Regexp, typ string, luteEngine *lute.Lute) {

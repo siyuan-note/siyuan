@@ -6,12 +6,16 @@ package util
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
 )
+
+// ErrFileChanged 表示扫描后的源文件已变化，调用方必须保留当前文件并重新读取。
+var ErrFileChanged = errors.New("source changed during operation")
 
 // WriteFileIfUnchanged 在同一文件锁内比对扫描源并原子写入；original 为 nil 时要求目标不存在。
 func WriteFileIfUnchanged(path string, original, data []byte) error {
@@ -25,7 +29,7 @@ func WriteFileIfUnchanged(path string, original, data []byte) error {
 	} else if err != nil {
 		return err
 	} else if !bytes.Equal(current, original) {
-		return fmt.Errorf("source changed during asset relink: %s", path)
+		return fmt.Errorf("%w: %s", ErrFileChanged, path)
 	}
 	return gulu.File.WriteFileSafer(path, data, 0644)
 }

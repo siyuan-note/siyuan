@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20261010113646"
+		"updated": "20261010225402"
 	},
 	"Children": [
 		{
@@ -359,7 +359,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613193423-6o0q64d",
-				"updated": "20260809232000"
+				"updated": "20261010225402"
 			},
 			"Children": [
 				{
@@ -555,7 +555,7 @@
 					},
 					"Properties": {
 						"id": "20260613193423-9tqsg45",
-						"updated": "20260809232000"
+						"updated": "20261010225402"
 					},
 					"Children": [
 						{
@@ -563,7 +563,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613193423-0whdff2",
-								"updated": "20260809232000"
+								"updated": "20261010225402"
 							},
 							"Children": [
 								{
@@ -592,6 +592,10 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ undo is not supported after replacement. The system automatically generates file history before execution; use data history rollback to restore if needed"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Ordinary and encrypted documents preserve edits made during replacement. If a document changes or is deleted before saving, replacement stops with an error and preserves the current document; documents already saved keep their replacement results. Finish editing before retrying"
 								}
 							]
 						}

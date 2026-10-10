@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "มุมมองแผนที่ฐานข้อมูล",
 	"exportBlockRefMode": "การอ้างอิงบล็อกและลิงก์บล็อก",
 	"configGroupOCREngine": "กลไกการรู้จำ",
 	"configGroupSignInTokens": "เข้าสู่ระบบและโทเค็น",

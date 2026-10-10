@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "Datenbank-Kartenansicht",
 	"exportBlockRefMode": "Blockreferenzen und Blocklinks",
 	"configGroupOCREngine": "Erkennungs-Engine",
 	"configGroupSignInTokens": "Anmeldung und Token",

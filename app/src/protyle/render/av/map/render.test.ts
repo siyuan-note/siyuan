@@ -13,6 +13,8 @@ class ElementStub {
     innerHTML = "";
     textContent = "";
     isConnected = true;
+    disabled = false;
+    value = "";
     readonly children = new Map<string, ElementStub>();
     readonly events = new Map<string, () => void>();
     readonly classes = new Set<string>();
@@ -34,7 +36,7 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
     const records = new ElementStub();
     let root: ElementStub;
     let lifecycle: {root: ElementStub; destroy: () => void};
-    const block = {dataset: {avId: "database", nodeId: "carrier"}, querySelector: (selector: string) =>
+    const block = {dataset: {avId: "database", nodeId: "carrier"}, removeAttribute() {}, querySelector: (selector: string) =>
         selector.endsWith(".av__map") ? root : records};
     Object.assign(records, {before: (element: ElementStub) => { root = element; roots.push(root); }});
     const languages = new Proxy<Record<string, string>>({mapPageScope: "${shown}/${total}",
@@ -51,8 +53,13 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
         destroyed: boolean; fitted: boolean}> = [];
     const opened: unknown[] = [];
     const calls: string[] = [];
+    const transactions: Array<{perform: IOperation[]; undo: IOperation[]; callback: () => void}> = [];
+    let settleTransaction: () => void;
+    let transactionPromise = Promise.resolve();
+    let refreshes = 0;
     const data = {id: "database", name: "Database", views: [], viewID: "map-view", viewType: "map", view: {
-        columns: [{id: "location", type: "location", hidden: true}], rowCount: 12,
+        columns: [{id: "location", name: "<Location>", type: "location", hidden: true},
+            {id: "text", name: "Text field", type: "text"}], rowCount: 12,
         map: {locationKeyID: "location"},
         rows: [{id: "row", cells: [{id: "location-value", value: {type: "location", keyID: "location",
             location: {latitude: 0, longitude: 0, name: "Private name", originalInput: "Private input"}}},
@@ -71,6 +78,13 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
             return () => lifecycle === next && next.root.isConnected;
         }},
         "../../../../util/escape": escape,
+        "../../../wysiwyg/transaction": {transaction: (_protyle: IProtyle, perform: IOperation[], undo: IOperation[],
+            options: {callback: () => void}) => {
+            transactions.push({perform, undo, callback: options.callback});
+            transactionPromise = new Promise(resolve => { settleTransaction = resolve; });
+        }},
+        "../../../util/transactionQueue": {waitForPendingTransactions: () => transactionPromise},
+        "../render": {avRender: () => { refreshes++; }},
         "../../../../util/fetch": {fetchSyncPost: async (url: string, payload: unknown) => {
             assert.equal(JSON.stringify(payload), "{}");
             calls.push(url);
@@ -101,17 +115,32 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {exports: openRecord, require: (id: string) => modules[id] || {}, window: {siyuan: {languages}}});
     modules["./openRecord"] = openRecord;
+    const settings = {} as typeof import("./settings");
+    const context = {siyuan: {languages, isPublish: options.published === true}};
+    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/map/settings.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
+    }).outputText, {exports: settings, require: (id: string) => modules[id] || {}, window: context});
+    modules["./settings"] = settings;
     runInNewContext(transpileModule(readFileSync("src/protyle/render/av/map/render.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {exports: methods, require: (id: string) => modules[id] || {},
-        window: {siyuan: {languages, isPublish: options.published === true}, location: {protocol: "https:"},
+        window: {...context, location: {protocol: "https:"},
             addEventListener: (type: string, callback: () => void) => events.set(type, callback),
             removeEventListener: (type: string) => events.delete(type)},
         navigator: {userAgent: "Mozilla/5.0", onLine: options.online !== false},
         document: {createElement: () => new ElementStub(), documentElement: {getAttribute: () => "light"}},
-        MutationObserver: Observer, ResizeObserver: Observer});
-    return {data, protyle, calls, hosts, roots, records, opened, events, observers, destroyMap,
+        MutationObserver: Observer, ResizeObserver: Observer, Lute: {NewNodeID: () => "new-location"}});
+    return {data, protyle, calls, hosts, roots, records, opened, events, observers, destroyMap, transactions, context,
+        refreshes: () => refreshes,
+        completeTransaction: async (success = true) => {
+            if (success) transactions[transactions.length - 1].callback();
+            settleTransaction();
+            await transactionPromise;
+            await new Promise(resolve => setImmediate(resolve));
+        },
         render: () => methods.renderMap(block as unknown as HTMLElement, protyle, data),
+        setupHTML: () => root.querySelector(".av__map-status").innerHTML,
+        control: (selector: string) => root.querySelector(selector),
         status: () => root.querySelector(".av__map-status").textContent};
 };
 
@@ -137,6 +166,146 @@ test("missing field, unavailable host, offline and unsupported projection maps n
     await incompatible.render();
     assert.deepEqual(incompatible.calls, []);
     assert.equal(incompatible.status(), "mapNoMarkers");
+});
+
+test("unconfigured, deleted and changed-type map fields show a repairable location setup", async () => {
+    for (const locationKeyID of ["", "deleted", "text"]) {
+        const scenario = setup();
+        (scenario.data.view as IAVTable).map.locationKeyID = locationKeyID;
+        await scenario.render();
+        const html = scenario.setupHTML();
+        assert.match(html, /class="av__map-empty"/);
+        assert.match(html, /#iconGlobe/);
+        assert.match(html, locationKeyID ? /mapMissingLocationField/ : /mapSelectLocationField/);
+        assert.match(html, /<label class="av__map-setting"><span>mapLocationField<\/span>/);
+        assert.match(html, /<select class="b3-select" data-map-location-field aria-label="mapLocationField">/);
+        assert.match(html, /<option value="location">&lt;Location><\/option>/);
+        assert.match(html, /class="b3-button b3-button--outline" data-map-create-field/);
+        assert.doesNotMatch(html, /value="text"|<Location>|provider|CRS|serviceID/);
+        assert.deepEqual(scenario.calls, []);
+    }
+    const empty = setup();
+    (empty.data.view as IAVTable).columns = [];
+    await empty.render();
+    assert.match(empty.setupHTML(), /data-map-create-field/);
+});
+
+test("selecting an existing location field submits one undoable transaction and refreshes after success", async () => {
+    const scenario = setup();
+    const view = scenario.data.view as IAVTable;
+    view.map.locationKeyID = "deleted";
+    const before = JSON.stringify(view);
+    await scenario.render();
+    const select = scenario.control("[data-map-location-field]");
+    select.value = "text";
+    select.events.get("change")();
+    select.value = "";
+    select.events.get("change")();
+    assert.equal(scenario.transactions.length, 0);
+    select.value = "location";
+    select.events.get("change")();
+    select.events.get("change")();
+    scenario.control("[data-map-create-field]").events.get("click")();
+    assert.equal(scenario.transactions.length, 1);
+    assert.equal(select.disabled, true);
+    assert.equal(scenario.control("[data-map-create-field]").disabled, true);
+    const {perform, undo} = scenario.transactions[0];
+    assert.equal(JSON.stringify(perform), JSON.stringify([{avID: "database", blockID: "carrier", viewID: "map-view",
+        action: "setAttrViewMap", data: {locationKeyID: "location"}}]));
+    assert.equal(JSON.stringify(undo[0].data), JSON.stringify({locationKeyID: "deleted"}));
+    assert.equal(JSON.stringify(view), before);
+    assert.equal(scenario.refreshes(), 0);
+    await scenario.completeTransaction();
+    assert.equal(scenario.refreshes(), 1);
+    select.events.get("change")();
+    assert.equal(scenario.transactions.length, 1);
+});
+
+test("adding a location field atomically creates, selects and hides it with an undo restoring the previous field", async () => {
+    const scenario = setup();
+    (scenario.data.view as IAVTable).map.locationKeyID = "";
+    await scenario.render();
+    const create = scenario.control("[data-map-create-field]");
+    create.events.get("click")();
+    create.events.get("click")();
+    assert.equal(scenario.transactions.length, 1);
+    const {perform, undo} = scenario.transactions[0];
+    assert.equal(JSON.stringify(perform), JSON.stringify([
+        {avID: "database", blockID: "carrier", viewID: "map-view", action: "addAttrViewCol",
+            id: "new-location", type: "location", name: "location"},
+        {avID: "database", blockID: "carrier", viewID: "map-view", action: "setAttrViewMap", data: {locationKeyID: "new-location"}},
+        {avID: "database", blockID: "carrier", viewID: "map-view", action: "setAttrViewColHidden",
+            id: "new-location", viewIDs: ["map-view"], data: true},
+    ]));
+    assert.equal(JSON.stringify(undo), JSON.stringify([
+        {avID: "database", blockID: "carrier", viewID: "map-view", action: "setAttrViewMap", data: {locationKeyID: ""}},
+        {avID: "database", blockID: "carrier", viewID: "map-view", action: "removeAttrViewCol", id: "new-location"},
+    ]));
+    await scenario.completeTransaction();
+    assert.equal(scenario.refreshes(), 1);
+});
+
+test("map setup hides write controls for readonly, published and history modes", async () => {
+    for (const mode of ["disabled", "published", "created", "snapshot"]) {
+        const scenario = setup({published: mode === "published"});
+        scenario.protyle.disabled = mode === "disabled";
+        if (["created", "snapshot"].includes(mode)) scenario.protyle.options.history = {[mode]: "version"};
+        (scenario.data.view as IAVTable).map.locationKeyID = "";
+        await scenario.render();
+        assert.doesNotMatch(scenario.setupHTML(), /data-map-location-field|data-map-create-field/);
+        if (mode === "disabled") assert.match(scenario.setupHTML(), /av__map-empty/);
+        assert.deepEqual(scenario.transactions, []);
+    }
+});
+
+test("stale setup controls and permissions changed after render cannot submit a transaction", async () => {
+    for (const mode of ["disabled", "published", "created", "snapshot", "destroyed", "removed", "rerendered"]) {
+        const scenario = setup();
+        (scenario.data.view as IAVTable).map.locationKeyID = "";
+        await scenario.render();
+        const select = scenario.control("[data-map-location-field]");
+        const create = scenario.control("[data-map-create-field]");
+        if (mode === "disabled") scenario.protyle.disabled = true;
+        if (mode === "published") scenario.context.siyuan.isPublish = true;
+        if (["created", "snapshot"].includes(mode)) scenario.protyle.options.history = {[mode]: "version"};
+        if (mode === "destroyed") scenario.destroyMap();
+        if (mode === "removed") scenario.roots[0].remove();
+        if (mode === "rerendered") await scenario.render();
+        select.value = "location";
+        select.events.get("change")();
+        create.events.get("click")();
+        assert.equal(scenario.transactions.length, 0, mode);
+    }
+});
+
+test("failed setup transactions reenable controls, while late completion cannot refresh a destroyed map", async () => {
+    const scenario = setup();
+    (scenario.data.view as IAVTable).map.locationKeyID = "";
+    await scenario.render();
+    const create = scenario.control("[data-map-create-field]");
+    create.events.get("click")();
+    assert.equal(create.disabled, true);
+    await scenario.completeTransaction(false);
+    assert.equal(create.disabled, false);
+    assert.equal(scenario.refreshes(), 0);
+    create.events.get("click")();
+    assert.equal(scenario.transactions.length, 2);
+    scenario.destroyMap();
+    await scenario.completeTransaction();
+    assert.equal(scenario.refreshes(), 0);
+});
+
+test("late setup transaction completions cannot refresh a removed or superseded view", async () => {
+    for (const mode of ["removed", "rerendered"]) {
+        const scenario = setup();
+        (scenario.data.view as IAVTable).map.locationKeyID = "";
+        await scenario.render();
+        scenario.control("[data-map-create-field]").events.get("click")();
+        if (mode === "removed") scenario.roots[0].remove();
+        else await scenario.render();
+        await scenario.completeTransaction();
+        assert.equal(scenario.refreshes(), 0);
+    }
 });
 
 test("map sends only IDs and coordinates and opens the existing row detail for a current marker", async () => {

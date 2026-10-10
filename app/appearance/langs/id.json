@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "Tampilan peta basis data",
 	"exportBlockRefMode": "Referensi blok dan tautan blok",
 	"configGroupOCREngine": "Mesin pengenalan",
 	"configGroupSignInTokens": "Login dan token",

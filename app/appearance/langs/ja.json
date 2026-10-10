@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "データベースの地図ビュー",
 	"exportBlockRefMode": "ブロック参照とブロックリンク",
 	"configGroupOCREngine": "認識エンジン",
 	"configGroupSignInTokens": "ログインとトークン",

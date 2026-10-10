@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "Представление базы данных на карте",
 	"exportBlockRefMode": "Ссылки на блоки и гиперссылки блоков",
 	"configGroupOCREngine": "Движок распознавания",
 	"configGroupSignInTokens": "Вход и токены",

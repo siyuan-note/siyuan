@@ -1,7 +1,11 @@
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {fetchSyncPost} from "../../../../util/fetch";
+import {transaction} from "../../../wysiwyg/transaction";
+import {waitForPendingTransactions} from "../../../util/transactionQueue";
+import {avRender} from "../render";
 import {getAVData} from "../virtualScroll";
 import {openMapRecord} from "./openRecord";
+import {canEditMapSettings} from "./settings";
 import {canLoadMapHost, destroyMap, getMapPoints, getMapSettings, registerMap} from "./state";
 import {createAVMapHost, isAVMapHostEnvironmentSupported} from "./host";
 import {createDesktopAVMapHost, isDesktopAVMapHostSupported} from "./desktopTransport";
@@ -9,6 +13,68 @@ import type {AVMapHost} from "./host";
 import {AV_MAP_ATTRIBUTION_LINKS, AV_MAP_MAX_POINTS} from "./protocol";
 
 const getTheme = () => document.documentElement.getAttribute("data-theme-mode") === "dark" ? "dark" : "light";
+
+const renderMapSetup = (root: HTMLElement, blockElement: HTMLElement, protyle: IProtyle,
+                        data: IAV, current: () => boolean) => {
+    const view = data.view as IAVTable;
+    const previous = getMapSettings(view);
+    const editable = canEditMapSettings(protyle);
+    const message = previous.locationKeyID ? window.siyuan.languages.mapMissingLocationField :
+        window.siyuan.languages.mapSelectLocationField;
+    root.querySelector(".av__map-status").innerHTML = `<div class="av__map-empty">
+    <svg aria-hidden="true"><use xlink:href="#iconGlobe"></use></svg><p>${escapeHtml(message)}</p>
+    ${editable ? `<div class="av__map-setup"><label class="av__map-setting"><span>${escapeHtml(window.siyuan.languages.mapLocationField)}</span>
+        <select class="b3-select" data-map-location-field aria-label="${escapeAttr(window.siyuan.languages.mapLocationField)}">
+            <option value="">${escapeHtml(window.siyuan.languages.mapSelectLocationField)}</option>
+            ${view.columns.filter(column => column.type === "location").map(column =>
+        `<option value="${escapeAttr(column.id)}">${escapeHtml(column.name)}</option>`).join("")}
+        </select></label></div>
+    <div class="av__map-create-fields"><button class="b3-button b3-button--outline" data-map-create-field>
+        ${escapeHtml(window.siyuan.languages.newCol)} ${escapeHtml(window.siyuan.languages.location)}</button></div>` : ""}
+</div>`;
+    if (!editable) return;
+    const select = root.querySelector<HTMLSelectElement>("[data-map-location-field]");
+    const create = root.querySelector<HTMLButtonElement>("[data-map-create-field]");
+    const context = {avID: data.id, blockID: blockElement.dataset.nodeId, viewID: data.viewID};
+    let pending = false;
+    const submit = async (locationKeyID?: string) => {
+        if (pending || !current() || !canEditMapSettings(protyle)) return;
+        if (locationKeyID !== undefined && (!locationKeyID ||
+            !view.columns.some(column => column.id === locationKeyID && column.type === "location"))) return;
+        pending = true;
+        select.disabled = true;
+        create.disabled = true;
+        let committed = false;
+        try {
+            const id = locationKeyID || Lute.NewNodeID();
+            const update: IOperation = {...context, action: "setAttrViewMap", data: {locationKeyID: id}};
+            const undo: IOperation = {...context, action: "setAttrViewMap", data: previous};
+            transaction(protyle, locationKeyID ? [update] : [
+                {...context, action: "addAttrViewCol", id, type: "location", name: window.siyuan.languages.location},
+                update,
+                {...context, action: "setAttrViewColHidden", id, viewIDs: [data.viewID], data: true},
+            ], locationKeyID ? [undo] : [undo, {...context, action: "removeAttrViewCol", id}], {
+                callback: () => {
+                    committed = true;
+                    if (current()) {
+                        blockElement.removeAttribute("data-render");
+                        avRender(blockElement, protyle);
+                    }
+                },
+            });
+            await waitForPendingTransactions(protyle);
+        } finally {
+            if (!committed && current()) {
+                pending = false;
+                select.value = "";
+                select.disabled = !canEditMapSettings(protyle);
+                create.disabled = select.disabled;
+            }
+        }
+    };
+    select.addEventListener("change", () => { void submit(select.value); });
+    create.addEventListener("click", () => { void submit(); });
+};
 
 export const refreshMapReadonly = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll<HTMLElement>('.av[data-av-type="map"]').forEach(block => {
@@ -77,12 +143,8 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
         return;
     }
     try {
-        if (!settings.locationKeyID) {
-            fallback(window.siyuan.languages.mapSelectLocationField);
-            return;
-        }
         if (!view.columns.some(column => column.id === settings.locationKeyID && column.type === "location")) {
-            fallback(window.siyuan.languages.mapMissingLocationField);
+            renderMapSetup(root, blockElement, protyle, data, current);
             return;
         }
         const {points, skipped} = getMapPoints(view);

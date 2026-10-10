@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "Mapové zobrazenie databázy",
 	"exportBlockRefMode": "Odkazy na bloky a prepojenia blokov",
 	"configGroupOCREngine": "Mechanizmus rozpoznávania",
 	"configGroupSignInTokens": "Prihlásenie a tokeny",

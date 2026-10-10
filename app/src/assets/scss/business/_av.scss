@@ -23,6 +23,64 @@
   height: clamp(240px, 50vh, 480px);
 }
 
+.av__map-empty {
+  font-size: var(--b3-font-size);
+  min-height: 240px;
+  padding: 32px 16px;
+  border: 1px solid var(--b3-border-color);
+  border-radius: var(--b3-border-radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--b3-theme-on-background);
+
+  > p {
+    margin: 12px 0 24px;
+    text-align: center;
+  }
+
+  > svg {
+    width: 32px;
+    height: 32px;
+    color: var(--b3-theme-on-surface);
+  }
+}
+
+.av__map-setup,
+.av__map-create-fields {
+  width: 360px;
+  max-width: 100%;
+}
+
+.av__map-setting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  align-items: center;
+  gap: 16px;
+
+  > span,
+  .b3-select {
+    min-width: 0;
+  }
+
+  .b3-select {
+    width: 100%;
+  }
+}
+
+.av__map-create-fields {
+  display: flex;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--b3-border-color);
+
+  .b3-button {
+    flex: 1;
+    white-space: normal;
+  }
+}
+
 .av__lunar-editor {
   width: 340px;
   max-width: 100%;

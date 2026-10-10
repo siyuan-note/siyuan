@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "데이터베이스 지도 보기",
 	"exportBlockRefMode": "블록 참조와 블록 링크",
 	"configGroupOCREngine": "인식 엔진",
 	"configGroupSignInTokens": "로그인과 토큰",

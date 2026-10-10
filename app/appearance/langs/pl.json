@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "Widok mapy bazy danych",
 	"exportBlockRefMode": "Odwołania i łącza do bloków",
 	"configGroupOCREngine": "Silnik rozpoznawania",
 	"configGroupSignInTokens": "Logowanie i tokeny",

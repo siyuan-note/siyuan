@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "資料庫 地圖視圖",
 	"exportBlockRefMode": "區塊引用與區塊超鏈接",
 	"configGroupOCREngine": "辨識引擎",
 	"configGroupSignInTokens": "登入與權杖",

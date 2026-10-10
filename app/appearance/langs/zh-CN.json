@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "数据库 地图视图",
 	"exportBlockRefMode": "块引用与块超链接",
 	"configGroupOCREngine": "识别引擎",
 	"configGroupSignInTokens": "登录与令牌",

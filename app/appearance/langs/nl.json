@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "Kaartweergave van database",
 	"exportBlockRefMode": "Blokreferenties en bloklinks",
 	"configGroupOCREngine": "Herkenning-engine",
 	"configGroupSignInTokens": "Inloggen en tokens",

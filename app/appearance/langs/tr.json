@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "Veritabanı harita görünümü",
 	"exportBlockRefMode": "Blok başvuruları ve blok bağlantıları",
 	"configGroupOCREngine": "Tanıma motoru",
 	"configGroupSignInTokens": "Giriş ve tokenlar",

@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "Подання бази даних на мапі",
 	"exportBlockRefMode": "Посилання на блоки та гіперпосилання блоків",
 	"configGroupOCREngine": "Рушій розпізнавання",
 	"configGroupSignInTokens": "Вхід і токени",

@@ -278,6 +278,11 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         value: '<div data-type="NodeAttributeView" data-av-type="calendar"></div>',
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCalendar"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.databaseCalendarView}</span></div>`,
     }, {
+        filter: [window.siyuan.languages.databaseMapView, "database map view", "地图", "数据库地图视图", "ditu", "shujukuditushitu", "sjkdts"],
+        id: "databaseMapView",
+        value: '<div data-type="NodeAttributeView" data-av-type="map"></div>',
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconGlobe"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.databaseMapView}</span></div>`,
+    }, {
         value: "",
         id: "separator_2",
         html: "separator",

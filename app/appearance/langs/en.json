@@ -1,4 +1,5 @@
 {
+	"databaseMapView": "Database map view",
 	"exportBlockRefMode": "Block refs and block links",
 	"configGroupOCREngine": "Recognition engine",
 	"configGroupSignInTokens": "Login and tokens",

@@ -542,7 +542,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 	if oldDir := path.Dir(oldPath); ast.IsNodeIDPattern(path.Base(oldDir)) {
 		fromDir := filepath.Join(boxLocalPath, oldDir)
 		if util.IsEmptyDir(fromDir) {
-			filelock.Remove(fromDir)
+			util.RemoveEmptyDir(fromDir)
 		}
 	}
 	IncSync()
@@ -934,7 +934,7 @@ func clearTempDir(dir string, count *int, size *int64) {
 	}
 
 	if util.IsEmptyDir(dir) {
-		os.Remove(dir)
+		util.RemoveEmptyDir(dir)
 	}
 	return
 }

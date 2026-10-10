@@ -169,7 +169,9 @@ func repoCheckout(args map[string]any) (CallToolResult, error) {
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
-	model.CheckoutRepoDirect(id)
+	if err := model.CheckoutRepoDirect(id); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "checkout snapshot failed: " + err.Error()}}, IsError: true}, nil
+	}
 	util.PushReloadFiletree()
 	util.ReloadUI()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "checkout to snapshot: " + id}}}, nil

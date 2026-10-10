@@ -145,15 +145,19 @@ const initMermaid = (mermaidElements: Element[]) => {
             return;
         }
         const id = "mermaid" + Lute.NewNodeID();
+        const container = document.createElement("div");
+        // 在屏幕外测量图形，避免临时节点参与主界面布局。
+        container.style.cssText = `position: fixed;left: -100000px;top: 0;width: ${document.body.clientWidth}px;pointer-events: none;`;
         let diagramElement: Element;
         try {
-            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"><span id="${id}"></span></div>`;
+            document.body.appendChild(container);
+            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"></div>`;
             diagramElement = renderElement.lastElementChild;
             const content = applyMermaidLayout(
                 Lute.UnEscapeHTMLStr(item.getAttribute("data-content")),
                 getMermaidLayout(item.getAttribute(MERMAID_LAYOUT_ATTR))
             );
-            const mermaidData = await window.mermaid.render(id, content);
+            const mermaidData = await window.mermaid.render(id, content, container);
             if (renderElement.lastElementChild !== diagramElement) {
                 return;
             }
@@ -164,12 +168,13 @@ const initMermaid = (mermaidElements: Element[]) => {
             if (renderElement.lastElementChild !== diagramElement) {
                 return;
             }
-            const errorElement = document.querySelector("#" + id);
+            const errorElement = container.querySelector("#" + id);
             const errorDiagram = errorElement ?
                 window.DOMPurify.sanitize(errorElement.outerHTML, MERMAID_SANITIZE_OPTIONS) : "";
             const errorMessage = escapeHtml(e instanceof Error ? e.message : String(e)).replace(/\n/g, "<br>");
             renderElement.lastElementChild.innerHTML = `${errorDiagram}<div class="fn__hr"></div><div class="ft__error">${errorMessage}</div>`;
-            errorElement?.parentElement?.remove();
+        } finally {
+            container.remove();
         }
     });
 };

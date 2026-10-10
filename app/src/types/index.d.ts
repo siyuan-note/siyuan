@@ -136,7 +136,7 @@ interface Window {
     mermaidTidyTree: object[],
     mermaid: {
         initialize(options: any): void,
-        render(id: string, text: string): Promise<{ svg: string }>,
+        render(id: string, text: string, container?: HTMLElement): Promise<{ svg: string }>,
         registerExternalDiagrams(ex: object[]): Promise<void>,
         registerLayoutLoaders(layouts: object[]): void,
         registerIconPacks(options: {

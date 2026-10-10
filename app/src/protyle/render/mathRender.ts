@@ -71,12 +71,12 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                         mathElement.firstElementChild.firstElementChild.setAttribute("contenteditable", "false");
                         mathElement.firstElementChild.firstElementChild.innerHTML = mathHTML;
                         // https://github.com/siyuan-note/siyuan/issues/3541
-                        const baseElements = mathElement.querySelectorAll(".base");
+                        const baseElements = mathElement.querySelectorAll(".katex-html > .katex-base");
                         if (baseElements.length > 0) {
                             baseElements[baseElements.length - 1].insertAdjacentHTML("afterend", "<span class='fn__flex-1'></span>");
                         }
                         // https://github.com/siyuan-note/siyuan/issues/4334
-                        const newlineElement = mathElement.querySelector(".katex-html > .newline");
+                        const newlineElement = mathElement.querySelector(".katex-html > .katex-newline");
                         if (newlineElement) {
                             newlineElement.parentElement.style.display = "block";
                         }

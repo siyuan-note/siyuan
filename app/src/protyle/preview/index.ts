@@ -310,7 +310,7 @@ export class Preview {
         // fix math render
         if (type === "mp-wechat") {
             this.link2online(copyElement);
-            copyElement.querySelectorAll(".katex-html .base").forEach((item: HTMLElement) => {
+            copyElement.querySelectorAll(".katex-html .katex-base").forEach((item: HTMLElement) => {
                 item.style.display = "initial";
             });
             copyElement.querySelectorAll("mjx-container > svg").forEach((item) => {

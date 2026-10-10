@@ -8,6 +8,7 @@ import {validateAVLocation} from "../locationValue";
 import {openMapRecord} from "./openRecord";
 import {canEditMapSettings} from "./settings";
 import {getMapSettings} from "./state";
+import {registerMapUnplacedMenu} from "./unplacedMenu";
 
 const PAGE_SIZE = 50;
 
@@ -53,6 +54,7 @@ export const bindMapUnplaced = (options: {
     let loading = false;
     let elements: HTMLElement[] = [];
     let count: HTMLElement;
+    let releaseMenu: () => void;
 
     const updateCount = (value: number) => {
         toggle.classList.toggle("fn__none", value === 0);
@@ -163,9 +165,13 @@ export const bindMapUnplaced = (options: {
         menu = new Menu(undefined, () => {
             clearTimeout(searchTimer);
             request?.abort();
+            releaseMenu?.();
+            releaseMenu = undefined;
             menu = undefined;
             toggle.setAttribute("aria-expanded", "false");
         });
+        const canvas = root.querySelector<HTMLElement>(".av__map-canvas");
+        if (!isMobile() && canvas) releaseMenu = registerMapUnplacedMenu(menu.element, canvas);
         rows = [];
         page = 0;
         total = 0;

@@ -4,6 +4,7 @@ import {webcrypto} from "node:crypto";
 import {describe, it} from "node:test";
 import * as ts from "typescript";
 import * as protocol from "./protocol";
+import * as unplacedMenu from "./unplacedMenu";
 
 const source = readFileSync(__dirname + "/desktopTransport.ts", "utf8");
 const load = (ipc: unknown, browser = false, warnings: unknown[][] = []) => {
@@ -18,6 +19,7 @@ const load = (ipc: unknown, browser = false, warnings: unknown[][] = []) => {
     const result: any = {};
     const requireModule = (name: string) => {
         if (name === "./protocol") { return protocol; }
+        if (name === "./unplacedMenu") { return unplacedMenu; }
         assert.equal(name, "electron");
         assert.equal(browser, false, "browser must not import Electron");
         return {ipcRenderer: ipc};
@@ -62,6 +64,7 @@ const fixture = (warnings: unknown[][] = []) => {
         addEventListener: (name: string, fn: () => void) => domListeners.set(name, fn),
         removeEventListener: (name: string) => domListeners.delete(name),
         getComputedStyle: () => ({display: "block", visibility: "visible", opacity: "1", overflowX: "visible", overflowY: "visible",
+            transform: "none", filter: "none", boxShadow: "none", outlineStyle: "none",
             getPropertyValue: () => ""})};
     doc.defaultView = scope;
     const container: any = {ownerDocument: doc, isConnected: true, parentElement: null, closest: (): HTMLElement | null => null,
@@ -298,6 +301,174 @@ describe("desktop map transport", () => {
         assert.equal(await load({invoke: async () => ({version: 1, supported: true})}).isDesktopAVMapHostSupported(), true);
         assert.equal(await load({invoke: async () => ({version: 2, supported: true})}).isDesktopAVMapHostSupported(), false);
         assert.equal(await load({invoke: async () => { throw new Error("old main"); }}).isDesktopAVMapHostSupported(), false);
+    });
+    it("selects the largest safe rectangle around one owned menu and retains the full logical map", () => {
+        const compute = load({}).computeDesktopAVMapGeometry;
+        const {parseMapGeometry} = require("../../../../../electron/mapHostPolicy");
+        const rect = {x: 10, y: 20, width: 400, height: 300};
+        const cases = [
+            {menu: {...rect, width: 100}, bounds: {x: 111, y: 20, width: 299, height: 300}},
+            {menu: {...rect, x: 310, width: 100}, bounds: {x: 10, y: 20, width: 299, height: 300}},
+            {menu: {...rect, height: 100}, bounds: {x: 10, y: 121, width: 400, height: 199}},
+            {menu: {...rect, y: 220, height: 100}, bounds: {x: 10, y: 20, width: 400, height: 199}},
+            {menu: {x: 160, y: 120, width: 100, height: 100}, bounds: {x: 10, y: 20, width: 149, height: 300}},
+        ];
+        for (const {menu, bounds} of cases) {
+            const geometry = compute(rect, [], [], [menu]);
+            assert.equal(geometry.visible, true);
+            assert.deepEqual(geometry.bounds, bounds);
+            assert.deepEqual(geometry.logicalSize, {width: rect.width, height: rect.height});
+            assert.deepEqual(geometry.crop, {x: bounds.x - rect.x, y: bounds.y - rect.y});
+            for (const zoom of [0.8, 0.9, 1, 1.25, 1.5, 2]) {
+                const native = parseMapGeometry(geometry, zoom, {width: 4000, height: 3000});
+                assert.equal(native?.visible, true);
+                assert.ok(native.bounds.x >= rect.x * zoom && native.bounds.y >= rect.y * zoom);
+                assert.ok(native.bounds.x + native.bounds.width <= (rect.x + rect.width) * zoom);
+                assert.ok(native.bounds.y + native.bounds.height <= (rect.y + rect.height) * zoom);
+                assert.ok(native.bounds.x + native.bounds.width <= menu.x * zoom ||
+                    native.bounds.x >= (menu.x + menu.width) * zoom ||
+                    native.bounds.y + native.bounds.height <= menu.y * zoom ||
+                    native.bounds.y >= (menu.y + menu.height) * zoom);
+            }
+        }
+        const menu = {...rect, width: 100};
+        assert.deepEqual(compute(rect, [], [menu]), {visible: false}, "ordinary menus never opt into cropping");
+        assert.deepEqual(compute(rect, [], [{...rect, width: 2}], [menu]), {visible: false},
+            "a second overlay hides the map even when it would lie outside the chosen crop");
+        assert.deepEqual(compute(rect, [], [], [menu, {...menu, x: 300}]), {visible: false});
+        assert.deepEqual(compute(rect, [], [], [rect]), {visible: false});
+        assert.deepEqual(compute(rect, [], [], [{...rect, width: 380}]), {visible: false});
+        assert.deepEqual(compute({...rect, height: 100}, [], [], [{...rect, width: 360}]), {visible: false});
+        assert.deepEqual(compute(rect, [], [], [{...menu, x: NaN}]), {visible: false});
+        const fractional = {x: 10.25, y: 20.75, width: 400.5, height: 300.5};
+        const geometry = compute(fractional, [{x: 30.5, y: 50.25, width: 340, height: 220}], [],
+            [{x: 290.5, y: 30, width: 100, height: 290}]);
+        assert.deepEqual(geometry.bounds, {x: 32, y: 52, width: 257, height: 217});
+        assert.deepEqual(geometry.crop, {x: 21.75, y: 31.25});
+        assert.deepEqual(geometry.logicalSize, {width: 400.5, height: 300.5});
+    });
+    it("clips only its own live unplaced menu including shadows and restores without refitting or recreating", async () => {
+        const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;
+        const callbacks: Array<() => void> = [];
+        class Observer {
+            constructor(callback: () => void) { callbacks.push(callback); }
+            observe() {}
+            disconnect() {}
+        }
+        globalThis.MutationObserver = Observer as any;
+        globalThis.ResizeObserver = Observer as any;
+        const f = fixture();
+        const rect = {x: 310, y: 30, width: 100, height: 260};
+        const submenu = {getClientRects: () => [rect]};
+        let submenus: unknown[] = [];
+        const menu: any = {contains: () => false, getClientRects: () => [rect], getBoundingClientRect: () => rect,
+            querySelectorAll: () => submenus};
+        const getStyle = f.doc.defaultView.getComputedStyle;
+        let shadow = "rgba(0, 0, 0, 0.2) 0px 8px 24px 0px";
+        let extraStyle = {};
+        f.doc.defaultView.getComputedStyle = (element: unknown) => ({...getStyle(),
+            ...(element === menu ? {boxShadow: shadow, ...extraStyle} : {})});
+        const lastGeometry = () => f.calls.filter(([name]) => name === "siyuan-map-geometry").at(-1)[1];
+        let release = unplacedMenu.registerMapUnplacedMenu(menu, f.container);
+        try {
+            await f.created();
+            f.reply({type: "ready"});
+            f.advance();
+            const commands = f.calls.filter(([name]) => name === "siyuan-map-command").length;
+            f.doc.querySelectorAll = () => [menu];
+            callbacks[0]();
+            f.advance();
+            assert.deepEqual(lastGeometry().bounds, {x: 10, y: 20, width: 251, height: 300});
+            assert.deepEqual(lastGeometry().logicalSize, {width: 400, height: 300});
+            const scroll = f.domListeners.get("scroll");
+            rect.height = 40;
+            scroll();
+            assert.deepEqual(lastGeometry().bounds, {x: 10, y: 127, width: 400, height: 193},
+                "a shorter result list can leave a larger rectangle below the menu");
+            rect.height = 260;
+            rect.x = 270;
+            scroll();
+            assert.equal(lastGeometry().bounds.width, 211, "moving or growing the menu refreshes its crop");
+            shadow = "rgba(0, 0, 0, 0.8) -8px -4px 3px 2px, rgb(255, 255, 255) 0px 0px 0px 2px";
+            scroll();
+            assert.equal(lastGeometry().bounds.width, 243, "every shadow and negative offset must be covered");
+            shadow = "rgb(0 0 0 / 0.5) 0px 0px 100px 0px inset";
+            scroll();
+            assert.equal(lastGeometry().bounds.width, 259, "inset shadows do not extend the menu");
+            extraStyle = {outlineStyle: "solid", outlineWidth: "4px", outlineOffset: "2px"};
+            scroll();
+            assert.equal(lastGeometry().bounds.width, 253, "outline pixels also remain outside the map");
+            extraStyle = {};
+            for (const unsupported of ["color(display-p3 1 0 0) 0px 0px 10px 0px", "rgb(0, 0, 0) 0px 0px invalid",
+                "rgb(0, 0, 0) 0px 0px -1px 0px"]) {
+                shadow = unsupported;
+                scroll();
+                assert.equal(lastGeometry().visible, false, "unsupported effects fail closed");
+            }
+            shadow = "none";
+            for (const style of [{transform: "matrix(1, 0, 0, 1, 1, 1)"}, {filter: "blur(2px)"},
+                {scale: "1.1"}, {getPropertyValue: () => "1.5"},
+                {outlineStyle: "solid", outlineWidth: "invalid", outlineOffset: "0px"}]) {
+                extraStyle = style;
+                scroll();
+                assert.equal(lastGeometry().visible, false);
+            }
+            extraStyle = {};
+            const parent = {};
+            menu.parentElement = parent;
+            f.doc.defaultView.getComputedStyle = (element: unknown) => ({...getStyle(),
+                ...(element === parent ? {getPropertyValue: () => "1.5"} : {})});
+            scroll();
+            assert.equal(lastGeometry().visible, false, "ancestor CSS zoom cannot leave underestimated shadow bounds");
+            menu.parentElement = null;
+            f.doc.defaultView.getComputedStyle = getStyle;
+            submenus = [submenu];
+            scroll();
+            assert.equal(lastGeometry().visible, false, "a visible submenu is not covered by the root rectangle");
+            submenus = [];
+            const otherMenu = {contains: () => false, getClientRects: () => [rect], getBoundingClientRect: () => rect};
+            f.doc.querySelectorAll = () => [menu, otherMenu];
+            scroll();
+            assert.equal(lastGeometry().visible, false, "a second overlapping menu retains full hiding");
+            f.doc.querySelectorAll = () => [menu];
+            f.doc.elementFromPoint = () => ({});
+            scroll();
+            assert.equal(lastGeometry().visible, false, "unknown overlays still fail the final hit test");
+            f.doc.elementFromPoint = () => f.container;
+            release();
+            scroll();
+            assert.equal(lastGeometry().visible, false, "a reused common menu loses the crop exception on close");
+            release = unplacedMenu.registerMapUnplacedMenu(menu, {} as HTMLElement);
+            scroll();
+            assert.equal(lastGeometry().visible, false, "another split view cannot claim this map's menu");
+            release();
+            release = unplacedMenu.registerMapUnplacedMenu(menu, f.container);
+            scroll();
+            assert.equal(lastGeometry().visible, true);
+            f.doc.querySelectorAll = (): HTMLElement[] => [];
+            callbacks[0]();
+            f.advance();
+            assert.deepEqual(lastGeometry().bounds, f.rect);
+            assert.deepEqual(lastGeometry().crop, {x: 0, y: 0});
+            assert.equal(f.calls.filter(([name]) => name === "siyuan-map-create").length, 1);
+            assert.equal(f.calls.filter(([name]) => name === "siyuan-map-command").length, commands,
+                "menu geometry changes must not send fit or recreate map state");
+        } finally {
+            release();
+            f.host.destroy();
+            globalThis.MutationObserver = oldMutation;
+            globalThis.ResizeObserver = oldResize;
+        }
+    });
+    it("keeps replacement menu ownership when an older registration is released", () => {
+        const menu = {} as HTMLElement, first = {} as HTMLElement, second = {} as HTMLElement;
+        const releaseFirst = unplacedMenu.registerMapUnplacedMenu(menu, first);
+        const releaseSecond = unplacedMenu.registerMapUnplacedMenu(menu, second);
+        releaseFirst();
+        assert.equal(unplacedMenu.isMapUnplacedMenu(menu, first), false);
+        assert.equal(unplacedMenu.isMapUnplacedMenu(menu, second), true);
+        releaseSecond();
+        assert.equal(unplacedMenu.isMapUnplacedMenu(menu, second), false);
     });
     it("preserves fractional geometry through native validation at every clipped edge and zoom", () => {
         const compute = load({}).computeDesktopAVMapGeometry;

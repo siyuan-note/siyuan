@@ -7,6 +7,7 @@ import type {AVTableRow} from "../../../../types/api";
 import * as escape from "../../../../util/escape";
 import * as locationValue from "../locationValue";
 import {getMapSettings} from "./state";
+import * as unplacedMenu from "./unplacedMenu";
 
 class ElementStub {
     isConnected = true;
@@ -46,7 +47,8 @@ const setup = (mobile = false) => {
     const count = new ElementStub();
     const search = {textContent: "  main query  "};
     const input = new ElementStub();
-    const root = {querySelector: () => toggle};
+    const canvas = new ElementStub();
+    const root = {querySelector: (selector: string) => selector === ".av__map-canvas" ? canvas : toggle};
     const block = {dataset: {nodeId: "carrier", avId: "database"}, querySelector: () => search};
     const protyle = {options: {}} as IProtyle;
     const data = {id: "database", viewID: "map-view", view: {
@@ -104,6 +106,7 @@ const setup = (mobile = false) => {
             }},
             "../locationValue": locationValue,
             "./state": {getMapSettings},
+            "./unplacedMenu": unplacedMenu,
             "./settings": {canEditMapSettings: () => !protyle.disabled && !context.siyuan.isPublish &&
                 !protyle.options.history?.created && !protyle.options.history?.snapshot},
             "./openRecord": {openMapRecord: (_protyle: IProtyle, _block: HTMLElement, row: IAVRow, keyID: string) =>
@@ -111,7 +114,7 @@ const setup = (mobile = false) => {
         })[id] || {}});
     const destroy = methods.bindMapUnplaced({root: root as unknown as HTMLElement, blockElement: block as unknown as HTMLElement,
         protyle, data, current: () => current});
-    return {methods, requests, menus, toggle, count, input, data, protyle, context, opens, destroy,
+    return {methods, requests, menus, toggle, count, input, canvas, data, protyle, context, opens, destroy,
         positions: () => positions,
         stale: () => { current = false; },
         click: () => toggle.events.get("click")({preventDefault() {}}),
@@ -242,10 +245,14 @@ test("closing or destroying unplaced menus aborts pending work and rejects late 
     for (const close of ["toggle", "menu", "destroy"]) {
         const scenario = setup();
         scenario.click();
+        assert.equal(unplacedMenu.isMapUnplacedMenu(scenario.menus[0].element as unknown as HTMLElement,
+            scenario.canvas as unknown as HTMLElement), true);
         if (close === "toggle") scenario.click();
         if (close === "menu") scenario.menus[0].close();
         if (close === "destroy") scenario.destroy();
         assert.equal(scenario.requests[1].signal.aborted, true, close);
+        assert.equal(unplacedMenu.isMapUnplacedMenu(scenario.menus[0].element as unknown as HTMLElement,
+            scenario.canvas as unknown as HTMLElement), false);
         assert.equal(scenario.toggle.attributes.get("aria-expanded"), "false");
         const before = scenario.positions();
         await scenario.respond(1, [row("late")]);
@@ -315,6 +322,8 @@ test("mobile unplaced menu uses shared menu placement without forcing a software
     await scenario.respond(1, [row("mobile")]);
     assert.equal(scenario.menus[0].position.target, scenario.toggle);
     assert.equal(scenario.input.focused, false);
+    assert.equal(unplacedMenu.isMapUnplacedMenu(scenario.menus[0].element as unknown as HTMLElement,
+        scenario.canvas as unknown as HTMLElement), false);
     scenario.menus[0].click("&lt;Title mobile>");
     assert.equal(scenario.opens[0].row.id, "mobile");
     scenario.destroy();

@@ -2,6 +2,7 @@
 import {ipcRenderer} from "electron";
 /// #endif
 import type {AVMapHost, AVMapHostOptions} from "./host";
+import {isMapUnplacedMenu} from "./unplacedMenu";
 import {
     AV_MAP_PROTOCOL_VERSION, AVMapCommand, AVMapErrorCode, AVMapPoint, isAVMapHostErrorCode, isAVMapProvider, isAVMapRevision,
     isAVMapTheme, parseAVMapReply, sanitizeAVMapPoints,
@@ -15,9 +16,14 @@ type MapGeometry = {visible: false} | {
 const intersects = (a: MapRect, b: MapRect) => a.x < b.x + b.width && b.x < a.x + a.width &&
     a.y < b.y + b.height && b.y < a.y + a.height;
 
+// 菜单打开时不展示难以操作的狭窄残片。
+const MIN_MENU_MAP_EDGE = 32;
+const MIN_MENU_MAP_AREA = 4096;
+
 // All coordinates stay in owner CSS pixels. Only the main process applies the owner zoom factor.
-export const computeDesktopAVMapGeometry = (rect: MapRect, clips: MapRect[], occluders: MapRect[] = []): MapGeometry => {
-    if (![rect, ...clips, ...occluders].every((item) => [item.x, item.y, item.width, item.height].every(Number.isFinite) &&
+export const computeDesktopAVMapGeometry = (rect: MapRect, clips: MapRect[], occluders: MapRect[] = [],
+                                          menus: MapRect[] = []): MapGeometry => {
+    if (![rect, ...clips, ...occluders, ...menus].every((item) => [item.x, item.y, item.width, item.height].every(Number.isFinite) &&
         item.width >= 0 && item.height >= 0)) {
         return {visible: false};
     }
@@ -37,15 +43,71 @@ export const computeDesktopAVMapGeometry = (rect: MapRect, clips: MapRect[], occ
     if (right < rect.x + rect.width) right -= 1;
     if (bottom < rect.y + rect.height) bottom -= 1;
     // 裁剪差值的浮点舍入不能使可见尺寸超过原始尺寸。
-    const bounds = {x: left, y: top, width: Math.min(rect.width, right - left), height: Math.min(rect.height, bottom - top)};
+    let bounds = {x: left, y: top, width: Math.min(rect.width, right - left), height: Math.min(rect.height, bottom - top)};
     if (left < 0 || top < 0 || bounds.width < 1 || bounds.height < 1) {
         return {visible: false};
     }
     if (occluders.some((item) => item.width > 0 && item.height > 0 && intersects(bounds, item))) {
         return {visible: false};
     }
+    const overlapping = menus.filter(item => item.width > 0 && item.height > 0 && intersects(bounds, item));
+    if (overlapping.length > 1) return {visible: false};
+    if (overlapping.length) {
+        const menu = overlapping[0];
+        const rightEdge = bounds.x + bounds.width, bottomEdge = bounds.y + bounds.height;
+        // 只处理当前地图唯一的未定位菜单，在四个连续矩形中选择面积最大的安全区域。
+        const candidates = [
+            [bounds.x, bounds.y, Math.min(rightEdge, menu.x - 1), bottomEdge],
+            [Math.max(bounds.x, menu.x + menu.width + 1), bounds.y, rightEdge, bottomEdge],
+            [bounds.x, bounds.y, rightEdge, Math.min(bottomEdge, menu.y - 1)],
+            [bounds.x, Math.max(bounds.y, menu.y + menu.height + 1), rightEdge, bottomEdge],
+        ].map(([x, y, right, bottom]) => ({x: Math.ceil(x), y: Math.ceil(y),
+            width: Math.floor(right) - Math.ceil(x), height: Math.floor(bottom) - Math.ceil(y)}))
+            .filter(item => item.width >= MIN_MENU_MAP_EDGE && item.height >= MIN_MENU_MAP_EDGE &&
+                item.width * item.height >= MIN_MENU_MAP_AREA);
+        if (!candidates.length) return {visible: false};
+        bounds = candidates.reduce((largest, item) => item.width * item.height > largest.width * largest.height ? item : largest);
+    }
     return {visible: true, bounds, logicalSize: {width: rect.width, height: rect.height},
-        crop: {x: left - rect.x, y: top - rect.y}};
+        crop: {x: bounds.x - rect.x, y: bounds.y - rect.y}};
+};
+
+const readMenuRect = (element: HTMLElement, style: CSSStyleDeclaration, scope: Window): MapRect | undefined => {
+    // 无法用单个矩形可靠界定的主题效果仍走全隐藏路径。
+    const measurable = (value: CSSStyleDeclaration) => value.transform === "none" && value.filter === "none" &&
+        ["", "normal", "1"].includes(value.getPropertyValue("zoom")) &&
+        [value.translate, value.rotate, value.scale].every(item => !item || item === "none");
+    if (!measurable(style)) return;
+    for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+        if (!measurable(scope.getComputedStyle(parent))) return;
+    }
+    const rect = element.getBoundingClientRect();
+    let left = 0, right = 0, top = 0, bottom = 0;
+    const shadows = style.boxShadow === "none" ? [] : style.boxShadow.split(/,(?![^()]*\))/);
+    for (const shadow of shadows) {
+        const parts = shadow.replace(/(?:rgba?|hsla?)\([\d\s.,%/+\-]+\)/, "").trim().split(/\s+/);
+        const inset = parts[0] === "inset" || parts[parts.length - 1] === "inset";
+        if (inset) parts.splice(parts[0] === "inset" ? 0 : parts.length - 1, 1);
+        if (parts.length < 2 || parts.length > 4 || parts.some(value => !/^-?(?:\d+\.?\d*|\.\d+)px$/.test(value))) return;
+        const [x, y, blur = 0, spread = 0] = parts.map(parseFloat);
+        if (blur < 0) return;
+        if (inset) continue;
+        // 模糊阴影按两倍半径保守外扩，包含多层阴影、负偏移和边框外侧的描边。
+        const extent = Math.max(0, blur * 2 + spread);
+        left = Math.max(left, extent - x);
+        right = Math.max(right, extent + x);
+        top = Math.max(top, extent - y);
+        bottom = Math.max(bottom, extent + y);
+    }
+    if (style.outlineStyle !== "none") {
+        if (![style.outlineWidth, style.outlineOffset].every(value => /^-?(?:\d+\.?\d*|\.\d+)px$/.test(value))) return;
+        const outline = Math.max(0, parseFloat(style.outlineWidth) + parseFloat(style.outlineOffset));
+        left = Math.max(left, outline);
+        right = Math.max(right, outline);
+        top = Math.max(top, outline);
+        bottom = Math.max(bottom, outline);
+    }
+    return {x: rect.x - left, y: rect.y - top, width: rect.width + left + right, height: rect.height + top + bottom};
 };
 
 const getIPC = () => {
@@ -156,6 +218,8 @@ const readGeometry = (container: HTMLElement): MapGeometry => {
         }
     }
     const occluders: MapRect[] = [];
+    const menus: MapRect[] = [];
+    let unsupportedMenu = false;
     // These are actual application overlay roots, not guesses based on arbitrary z-index values.
     doc.querySelectorAll<HTMLElement>(".b3-menu, .b3-dialog, .av__panel, .protyle-util, .protyle-toolbar, .block__popover, [popover]")
         .forEach((element) => {
@@ -164,10 +228,23 @@ const readGeometry = (container: HTMLElement): MapGeometry => {
             }
             const style = scope.getComputedStyle(element);
             if (style.display !== "none" && style.visibility === "visible" && Number(style.opacity) !== 0) {
-                occluders.push(element.getBoundingClientRect());
+                if (isMapUnplacedMenu(element, container)) {
+                    const bounds = readMenuRect(element, style, scope);
+                    const hasSubmenu = Array.from(element.querySelectorAll<HTMLElement>(".b3-menu__submenu"))
+                        .some(submenu => {
+                            const submenuStyle = scope.getComputedStyle(submenu);
+                            return submenu.getClientRects().length && submenuStyle.display !== "none" &&
+                                submenuStyle.visibility === "visible" && Number(submenuStyle.opacity) !== 0;
+                        });
+                    if (!bounds || hasSubmenu) unsupportedMenu = true;
+                    else menus.push(bounds);
+                } else {
+                    occluders.push(element.getBoundingClientRect());
+                }
             }
         });
-    const geometry = computeDesktopAVMapGeometry(rect, clips, occluders);
+    if (unsupportedMenu) return {visible: false};
+    const geometry = computeDesktopAVMapGeometry(rect, clips, occluders, menus);
     if (geometry.visible) {
         const bounds = geometry.bounds;
         // Hit-test the owner's DOM (native child views are not in this tree), including sticky toolbars.

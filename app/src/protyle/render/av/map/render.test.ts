@@ -169,7 +169,7 @@ test("map toolbar places the unplaced inbox after the summary and disposes its r
     await scenario.render();
     const html = scenario.roots[0].innerHTML;
     assert.match(html, /av__map-toolbar/);
-    assert.match(html, /data-map-unplaced-toggle.*aria-expanded="false".*#iconInbox/s);
+    assert.match(html, /data-map-unplaced-toggle data-position="4north".*aria-expanded="false".*#iconInbox/s);
     assert.ok(html.indexOf("av__map-summary") < html.indexOf("data-map-unplaced-toggle"));
     assert.equal(scenario.unplaced.length, 1);
     assert.equal(scenario.unplaced[0].options.data, scenario.data);

@@ -108,7 +108,7 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
 <div class="av__map-summary ft__smaller ft__on-surface b3-tooltips b3-tooltips__nw" aria-label="${escapeAttr(pageText)}" tabindex="0">
     <span>${escapeHtml(loadedText)}</span><span class="av__map-skipped"></span>
 </div>
-${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class="block__icon block__icon--show ariaLabel fn__none" data-map-unplaced-toggle data-position="8south" aria-label="${escapeAttr(window.siyuan.languages.mapUnplaced)}" aria-expanded="false"><svg><use xlink:href="#iconInbox"></use></svg></button>` : ""}
+${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class="block__icon block__icon--show ariaLabel fn__none" data-map-unplaced-toggle data-position="4north" aria-label="${escapeAttr(window.siyuan.languages.mapUnplaced)}" aria-expanded="false"><svg><use xlink:href="#iconInbox"></use></svg></button>` : ""}
 </div>
 <div class="av__map-status ft__on-surface" role="status"></div>
 <div class="av__map-canvas fn__none"></div>

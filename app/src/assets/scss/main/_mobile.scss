@@ -345,7 +345,13 @@ body.mobile-keyboard--open {
 
 #sidebar,
 #sidebarRight {
+  background-color: var(--b3-theme-background);
+
   .toolbar {
+    &--dark {
+      background-color: var(--b3-theme-background);
+    }
+
     &__icon {
       width: 18px;
       height: 18px;

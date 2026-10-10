@@ -1,11 +1,11 @@
 import {
-    AV_MAP_PROTOCOL_VERSION, AVMapErrorCode, AVMapInit, AVMapReply, getAVMapLoadErrorCode, isAVMapAttributionLink, isAVMapHandshake, isAVMapProvider,
+    AV_MAP_PROTOCOL_VERSION, AVMapErrorCode, AVMapInit, AVMapReply, getAVMapLoadErrorCode, isAVMapAttributionLink, isAVMapBootstrapMessage, isAVMapProvider,
     parseAVMapCommand,
 } from "./protocol";
 import {AVMapAdapter, AVMapAdapterCallbacks} from "./providers";
 import {loadAVMapAdapter} from "./providersLoader";
 import {prepareAVMapBootstrap} from "./bootstrap";
-import {isAVMapBootstrapMessage} from "./hostCapabilities";
+import {AV_MAP_BOOTSTRAP_TIMEOUT} from "./loadingBudget";
 
 export type AVMapAdapterFactory = (init: AVMapInit, container: HTMLElement,
     callbacks: AVMapAdapterCallbacks, signal: AbortSignal) => Promise<AVMapAdapter>;
@@ -104,8 +104,6 @@ export const startAVMapRuntime = (port: MessagePort, instanceID: string, provide
                 }
             } else if (adapter && command.type === "theme") {
                 adapter.setTheme(command.theme);
-            } else if (adapter && command.type === "fit") {
-                adapter.fit();
             } else if (adapter && command.type === "resize") {
                 adapter.resize();
             } else if (adapter && command.type === "visibility") {
@@ -172,12 +170,13 @@ export const connectAVMapRuntime = (scope: Window) => {
             } else {
                 scope.parent.postMessage({...envelope, type: "bootstrapReady"}, "*");
             }
-        } catch (_error) {
+        } catch (error) {
             if (!closed) {
+                const code = getAVMapLoadErrorCode(error) || "hostUnavailable";
                 if (desktop) {
-                    desktopPort?.postMessage({version: AV_MAP_PROTOCOL_VERSION, type: "error", instanceID, code: "hostUnavailable"});
+                    desktopPort?.postMessage({version: AV_MAP_PROTOCOL_VERSION, type: "error", instanceID, code});
                 } else {
-                    scope.parent.postMessage({...envelope, type: "bootstrapError"}, "*");
+                    scope.parent.postMessage({...envelope, type: "bootstrapError", code}, "*");
                 }
             }
             cleanup();
@@ -209,7 +208,7 @@ export const connectAVMapRuntime = (scope: Window) => {
             void prepare();
             return;
         }
-        if (!locked || event.ports.length !== 1 || !isAVMapHandshake(event.data, "connect", instanceID, nonce)) {
+        if (!locked || event.ports.length !== 1 || !isAVMapBootstrapMessage(event.data, "connect", instanceID, nonce)) {
             return;
         }
         connected = true;
@@ -217,7 +216,7 @@ export const connectAVMapRuntime = (scope: Window) => {
         scope.clearTimeout(timer);
         destroy = startAVMapRuntime(event.ports[0], instanceID, provider, scope.document.getElementById("map"));
     };
-    const timer = scope.setTimeout(cleanup, 30000);
+    const timer = scope.setTimeout(cleanup, AV_MAP_BOOTSTRAP_TIMEOUT);
     scope.addEventListener("message", onConnect);
     scope.addEventListener("pagehide", cleanup, {once: true});
     if (!desktop) {

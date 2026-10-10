@@ -76,6 +76,25 @@ describe("isolated map runtime lifecycle", () => {
         assert.equal(replies.length, 0);
         assert.equal(calls.filter((call) => call[0] === "destroy").length, 1);
     });
+    it("fits only the first nonempty snapshot and rejects the removed external fit command", async () => {
+        const {port, adapter, calls, send} = fixture();
+        const stop = startAVMapRuntime(port as unknown as MessagePort, "one", "openfreemap", {} as HTMLElement,
+            async () => adapter);
+        await send({type: "init", provider: "openfreemap", theme: "light"});
+        await send({type: "fit"});
+        await send({type: "setPoints", revision: 0, points: []});
+        assert.equal(calls.some(call => call[0] === "fit"), false);
+        await send({type: "setPoints", revision: 1, points: [{id: "row-1", longitude: 0, latitude: 0}]});
+        assert.equal(calls.filter(call => call[0] === "fit").length, 1);
+        await send({type: "fit"});
+        await send({type: "visibility", visible: false});
+        await send({type: "resize"});
+        await send({type: "visibility", visible: true});
+        await send({type: "setPoints", revision: 2, points: []});
+        await send({type: "setPoints", revision: 3, points: [{id: "row-2", longitude: 20, latitude: 20}]});
+        assert.equal(calls.filter(call => call[0] === "fit").length, 1);
+        stop();
+    });
     it("passes only fixed attribution identifiers and visibility booleans through the runtime", async () => {
         const {port, adapter, replies, calls, send} = fixture();
         let callbacks: AVMapAdapterCallbacks;
@@ -143,7 +162,7 @@ describe("isolated map runtime lifecycle", () => {
 });
 
 describe("isolated map bootstrap ordering", () => {
-    const bootstrapFixture = (desktop = false, native = false) => {
+    const bootstrapFixture = (desktop = false, native = false, timing = {setTimeout, clearTimeout}) => {
         const instanceID = "a".repeat(48);
         const nonce = "b".repeat(48);
         const events: any[] = [];
@@ -152,7 +171,7 @@ describe("isolated map bootstrap ordering", () => {
             "document", {get() { throw new Error("opaque sandbox"); }});
         const scope: any = {
             origin: "null", location: {hash: `#${instanceID}:${nonce}`, search: "?provider=openfreemap"},
-            parent, setTimeout, clearTimeout, maplibregl: {},
+            parent, ...timing, maplibregl: {Map() {}, AttributionControl() {}, setWorkerUrl() {}},
             fetch: async () => ({ok: true, text: async () => "worker"}),
             addEventListener: (name: string, callback: (event?: any) => void) => listeners.set(name, callback),
             removeEventListener: (name: string) => listeners.delete(name),
@@ -170,7 +189,8 @@ describe("isolated map bootstrap ordering", () => {
         if (native) {
             scope.JSAndroid = {};
         }
-        const port = {onmessage: null as any, start() {}, close() {}, postMessage: (message: unknown) => events.push(message)};
+        const port = {onmessage: null as any, closed: 0, start() {}, close() { this.closed++; },
+            postMessage: (message: unknown) => events.push(message)};
         connectAVMapRuntime(scope);
         const message = (type: string, values: Record<string, unknown> = {}, ports: unknown[] = []) => ({
             source: desktop ? scope : parent, origin: "https://fixture.invalid", ports,
@@ -224,5 +244,74 @@ describe("isolated map bootstrap ordering", () => {
         assert.equal(typeof port.onmessage, "function");
         assert.equal(listeners.has("message"), false);
         listeners.get("pagehide")();
+    });
+    it("reports preparation failures once with fixed codes and closes a transferred desktop port", async () => {
+        for (const desktop of [false, true]) {
+            for (const failure of ["script", "global", "policy"]) {
+                const {scope, events, listeners, port, message} = bootstrapFixture(desktop);
+                if (failure === "global" || failure === "script") scope.maplibregl = undefined;
+                const append = scope.document.head.appendChild;
+                scope.document.head.appendChild = (element: any) => {
+                    if (failure === "script" && element.tag === "script") {
+                        queueMicrotask(() => element.onerror?.(new Error("https://private.invalid/?token=secret")));
+                    } else if (failure === "policy" && element.tag === "meta") {
+                        throw new Error("https://private.invalid/?token=secret");
+                    } else append(element);
+                };
+                const receive = listeners.get("message");
+                const request = desktop ? message("siyuan-map-desktop-connect", {provider: "openfreemap"}, [port]) : message("prepare");
+                receive(request);
+                await tick();
+                const code = failure === "script" ? "sdkScriptLoadFailed" : failure === "global" ? "sdkGlobalMissing" : "hostUnavailable";
+                const replies = events.filter(event => event.type === "error" || event.type === "bootstrapError");
+                assert.equal(replies.length, 1);
+                assert.equal(replies[0].code, code);
+                assert.equal(JSON.stringify(events).includes("secret"), false);
+                assert.equal(events.some(event => event.type === "bootstrapReady"), false);
+                assert.equal(listeners.has("message"), false);
+                assert.equal(port.closed, desktop ? 1 : 0);
+                receive(request);
+                listeners.get("pagehide")();
+                assert.equal(events.filter(event => event.type === "error" || event.type === "bootstrapError").length, 1);
+            }
+        }
+    });
+    it("keeps slow CSS and script loading inside one bootstrap deadline and ignores late completion", async () => {
+        for (const desktop of [false, true]) {
+            let now = 0, nextTimer = 0, removed = 0;
+            const timers = new Map<number, {at: number; callback: () => void}>();
+            const timing = {
+                setTimeout: (callback: () => void, delay: number) => {
+                    timers.set(++nextTimer, {at: now + delay, callback});
+                    return nextTimer;
+                }, clearTimeout: (id: number) => timers.delete(id),
+            } as unknown as {setTimeout: typeof setTimeout; clearTimeout: typeof clearTimeout};
+            const {scope, events, listeners, port, message} = bootstrapFixture(desktop, false, timing);
+            const assets: any[] = [];
+            scope.document.createElement = (tag: string) => ({tag, remove() { removed++; }});
+            scope.document.head.appendChild = (element: any) => assets.push(element);
+            listeners.get("message")(desktop ? message("siyuan-map-desktop-connect", {provider: "openfreemap"}, [port]) : message("prepare"));
+            assert.equal(assets[0].tag, "link");
+            now = 19000;
+            assets[0].onload();
+            await tick();
+            assert.equal(assets[1].tag, "script");
+            const lateLoad = assets[1].onload;
+            now = 30000;
+            for (const [id, timer] of Array.from(timers)) {
+                if (timer.at <= now) { timers.delete(id); timer.callback(); }
+            }
+            await tick();
+            assert.equal(assets[1].onload, null);
+            assert.equal(assets[1].onerror, null);
+            assert.equal(removed, 1);
+            assert.equal(timers.size, 0);
+            assert.equal(port.closed, desktop ? 1 : 0);
+            lateLoad();
+            await tick();
+            assert.equal(events.some(event => event.type === "bootstrapReady" || event.type === "error"), false);
+            assert.equal(assets.some(element => element.tag === "meta"), false);
+            assert.equal(listeners.has("message"), false);
+        }
     });
 });

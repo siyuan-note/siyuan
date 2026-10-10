@@ -44,10 +44,10 @@ test("map preserves valid polar coordinates but counts unsupported projection se
 test("missing or changed location fields retain their saved identifiers and do not fall back", () => {
     const view = table([{latitude: 0, longitude: 0}]);
     view.map.locationKeyID = "removed";
-    assert.equal(getMapPoints(view).missingField, true);
+    assert.deepEqual(getMapPoints(view), {points: [], skipped: {empty: 0, invalid: 0, projection: 0}});
     assert.equal(getMapSettings(view).locationKeyID, "removed");
     view.map.locationKeyID = "primary";
-    assert.equal(getMapPoints(view).missingField, true);
+    assert.deepEqual(getMapPoints(view), {points: [], skipped: {empty: 0, invalid: 0, projection: 0}});
     assert.deepEqual(getMapSettings(view), {locationKeyID: "primary"});
     assert.deepEqual(getMapSettings({} as IAVTable), {locationKeyID: ""});
 });
@@ -78,12 +78,11 @@ test("map does not silently truncate the loaded page before the explicit renderi
     assert.equal(getMapPoints(view).points.length, AV_MAP_MAX_POINTS + 1);
 });
 
-test("map document eligibility excludes public, history and non-HTTP contexts before host capability checks", () => {
-    const context = {published: false, history: false, protocol: "https:"};
-    assert.equal(canLoadMapHost(context), true);
-    assert.equal(canLoadMapHost({...context, protocol: "http:"}), true);
-    for (const change of [{published: true}, {history: true}, {protocol: "file:"}]) {
-        assert.equal(canLoadMapHost({...context, ...change}), false);
+test("map host requires an HTTP document protocol", () => {
+    assert.equal(canLoadMapHost("https:"), true);
+    assert.equal(canLoadMapHost("http:"), true);
+    for (const protocol of ["file:", "data:", "siyuan:", ""]) {
+        assert.equal(canLoadMapHost(protocol), false);
     }
 });
 

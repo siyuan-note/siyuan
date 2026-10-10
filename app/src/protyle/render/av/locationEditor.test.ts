@@ -98,7 +98,10 @@ const createEditor = (options: {
     };
     runInNewContext(compiled, {
         exports: methods,
-        require: (name: string) => modules[name],
+        require: (name: string) => {
+            assert.ok(Object.prototype.hasOwnProperty.call(modules, name), `Unexpected location editor dependency: ${name}`);
+            return modules[name];
+        },
         Error,
         window: {siyuan: {languages: new Proxy({}, {get: (_target, property) => String(property)})}},
         document: {body: {}, activeElement: null, createElement: () => new Control(),
@@ -143,7 +146,7 @@ describe("database location editor", () => {
             assert.doesNotMatch(editor.markup, /<label class="b3-label/);
             assert.match(editor.markup, /<div class="b3-label b3-label--inner fn__flex">\s*<label class="fn__flex-1">longitude/);
             assert.match(editor.markup, /<label class="fn__flex-1">latitude/);
-            assert.doesNotMatch(editor.markup, /coordinateSystem|coordinateOrder|pasteCoordinates|textarea|data-action="parse"/);
+            assert.doesNotMatch(editor.markup, /coordinateSystem|select|textarea|data-action="parse"/);
             assert.match(editor.markup, /data-action="save"/);
         }
     });

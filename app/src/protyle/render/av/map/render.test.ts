@@ -7,53 +7,35 @@ import * as state from "./state";
 import * as protocol from "./protocol";
 import * as escape from "../../../../util/escape";
 import type {AVMapHost, AVMapHostOptions} from "./host";
-
-class ElementStub {
-    className = "";
-    innerHTML = "";
-    textContent = "";
-    isConnected = true;
-    disabled = false;
-    value = "";
-    readonly children = new Map<string, ElementStub>();
-    readonly events = new Map<string, () => void>();
-    readonly classes = new Set<string>();
-    readonly attributes = new Map<string, string>();
-    readonly classList = {add: (...names: string[]) => names.forEach(name => this.classes.add(name)),
-        remove: (...names: string[]) => names.forEach(name => this.classes.delete(name)),
-        toggle: (name: string, enabled: boolean) => enabled ? this.classes.add(name) : this.classes.delete(name)};
-    setAttribute(name: string, value: string) { this.attributes.set(name, value); }
-    remove() { this.isConnected = false; }
-    addEventListener(type: string, callback: () => void) { this.events.set(type, callback); }
-    querySelector(selector: string) {
-        if (!this.children.has(selector)) this.children.set(selector, new ElementStub());
-        return this.children.get(selector);
-    }
-}
+import {DOMElement, DOMFixture, requireFixture} from "./testDOM";
 
 const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?: boolean | Promise<boolean>;
-    online?: boolean; runtime?: () => Promise<unknown>} = {}) => {
-    const roots: ElementStub[] = [];
-    const records = new ElementStub();
-    let root: ElementStub;
-    let lifecycle: {root: ElementStub; destroy: () => void};
-    const block = {dataset: {avId: "database", nodeId: "carrier"}, removeAttribute() {}, querySelector: (selector: string) =>
-        selector.endsWith(".av__map") ? root : records};
-    Object.assign(records, {before: (element: ElementStub) => { root = element; roots.push(root); }});
+    online?: boolean; protocol?: string; source?: string; failDuringCreate?: boolean; runtime?: () => Promise<unknown>} = {}) => {
+    const document = new DOMFixture();
+    const roots: DOMElement[] = [];
+    const block = document.createElement("div");
+    block.dataset.avId = "database";
+    block.dataset.nodeId = "carrier";
+    block.innerHTML = '<div class="av__container"><div class="av__scroll"></div></div>';
+    document.body.append(block);
+    const records = block.querySelector(".av__scroll");
+    let root: DOMElement;
+    let lifecycle: {root: DOMElement; destroy: () => void};
     const languages = new Proxy<Record<string, string>>({mapPageScope: "Map covers ${shown} loaded records of ${total} filtered records",
         mapLoadedCount: "Loaded ${shown}/${total}", mapSkippedCount: "Skipped ${count}",
         mapSkippedLocations: "Skipped locations: ${empty} missing, ${invalid} invalid, ${projection} unsupported projection"},
     {get: (target, key: string) => target[key] || key});
     const events = new Map<string, () => void>();
-    const observers: Array<{disconnected: boolean}> = [];
+    const observers: Array<{disconnected: boolean; disconnects: number}> = [];
     class Observer {
         disconnected = false;
+        disconnects = 0;
         constructor() { observers.push(this); }
         observe() {}
-        disconnect() { this.disconnected = true; }
+        disconnect() { this.disconnected = true; this.disconnects++; }
     }
     const hosts: Array<{options: AVMapHostOptions; points: protocol.AVMapPoint[]; revision: number;
-        destroyed: boolean; fitted: boolean}> = [];
+        container: DOMElement; destroyed: boolean; destroys: number}> = [];
     const opened: unknown[] = [];
     const openedLinks: unknown[] = [];
     const calls: string[] = [];
@@ -90,12 +72,16 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
         }},
         "../../../util/transactionQueue": {waitForPendingTransactions: () => transactionPromise},
         "../render": {avRender: () => { refreshes++; }},
+        "../virtualScroll": {getAVData: () => data},
         "../../../../util/fetch": {fetchSyncPost: async (url: string, payload: unknown) => {
             assert.equal(JSON.stringify(payload), "{}");
             calls.push(url);
             return options.runtime ? options.runtime() : {code: 0, data: {provider: "openfreemap"}};
         }},
         "./protocol": protocol,
+        "../../../../plugin/Menu": {Menu: class {}},
+        "../../../../menus/Menu": {MenuItem: class {}},
+        "../../../../util/functions": {isMobile: () => false},
         "./unplaced": {bindMapUnplaced: (options: Parameters<typeof import("./unplaced").bindMapUnplaced>[0]) => {
             const binding = {options, destroyed: false};
             unplaced.push(binding);
@@ -103,13 +89,16 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
         }},
         "../openDatabaseRow": {openDatabaseRowByData: (_protyle: unknown, row: unknown) => opened.push(row)},
         "./host": {isAVMapHostEnvironmentSupported: () => options.hostSupported ?? true,
-            createAVMapHost: (_container: unknown, configuration: AVMapHostOptions) => {
+            createAVMapHost: (container: DOMElement, configuration: AVMapHostOptions) => {
+                assert.ok(container?.isConnected, "Map host needs its mounted canvas");
+                assert.ok(container.classList.contains("av__map-canvas"));
                 const host = {options: configuration, points: [] as protocol.AVMapPoint[], revision: -1,
-                    destroyed: false, fitted: false};
+                    container, destroyed: false, destroys: 0};
                 hosts.push(host);
-                return {destroy: () => { host.destroyed = true; },
+                if (options.failDuringCreate) configuration.onError("hostUnavailable");
+                return {destroy: () => { host.destroyed = true; host.destroys++; },
                     setPoints: (points: protocol.AVMapPoint[], revision: number) => { host.points = points; host.revision = revision; },
-                    fit: () => { host.fitted = true; }, resize() {}, setTheme() {}};
+                    resize() {}, setTheme() {}};
             }},
     };
     modules["./desktopTransport"] = {
@@ -123,25 +112,27 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
     const openRecord = {} as typeof import("./openRecord");
     runInNewContext(transpileModule(readFileSync("src/protyle/render/av/map/openRecord.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {exports: openRecord, require: (id: string) => modules[id] || {}, window: {siyuan: {languages}}});
+    }).outputText, {exports: openRecord, require: requireFixture(modules), window: {siyuan: {languages}}});
     modules["./openRecord"] = openRecord;
     const settings = {} as typeof import("./settings");
     const context = {siyuan: {languages, isPublish: options.published === true}};
     runInNewContext(transpileModule(readFileSync("src/protyle/render/av/map/settings.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {exports: settings, require: (id: string) => modules[id] || {}, window: context});
+    }).outputText, {exports: settings, require: requireFixture(modules), window: context});
     modules["./settings"] = settings;
-    runInNewContext(transpileModule(readFileSync("src/protyle/render/av/map/render.ts", "utf8"), {
+    runInNewContext(transpileModule(options.source ?? readFileSync("src/protyle/render/av/map/render.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-    }).outputText, {exports: methods, require: (id: string) => modules[id] || {},
-        window: {...context, location: {protocol: "https:"},
+    }).outputText, {exports: methods, require: requireFixture(modules),
+        window: {...context, location: {protocol: options.protocol || "https:"},
             open: (...args: unknown[]) => openedLinks.push(args),
             addEventListener: (type: string, callback: () => void) => events.set(type, callback),
             removeEventListener: (type: string) => events.delete(type)},
         navigator: {userAgent: "Mozilla/5.0", onLine: options.online !== false},
-        document: {createElement: () => new ElementStub(), documentElement: {getAttribute: () => "light"}},
-        MutationObserver: Observer, ResizeObserver: Observer, Lute: {NewNodeID: () => "new-location"}});
-    return {data, protyle, calls, hosts, roots, records, opened, openedLinks, events, observers, destroyMap, transactions, context, unplaced,
+        document: {createElement: () => { root = document.createElement("div"); roots.push(root); return root; },
+            documentElement: document.documentElement},
+        MutationObserver: Observer, ResizeObserver: class {constructor() { assert.fail("Map hosts own their resize observers"); }},
+        Lute: {NewNodeID: () => "new-location"}});
+    return {data, protyle, calls, hosts, roots, records, block, opened, openedLinks, events, observers, destroyMap, transactions, context, unplaced,
         refreshes: () => refreshes,
         completeTransaction: async (success = true) => {
             if (success) transactions[transactions.length - 1].callback();
@@ -169,7 +160,10 @@ test("map toolbar places the unplaced inbox after the summary and disposes its r
     await scenario.render();
     const html = scenario.roots[0].innerHTML;
     assert.match(html, /av__map-toolbar/);
-    assert.match(html, /data-map-unplaced-toggle data-position="4north".*aria-expanded="false".*#iconInbox/s);
+    const toggle = scenario.control("[data-map-unplaced-toggle]");
+    assert.equal(toggle.getAttribute("data-position"), "4north");
+    assert.equal(toggle.getAttribute("aria-expanded"), "false");
+    assert.match(toggle.innerHTML, /#iconInbox/);
     assert.ok(html.indexOf("av__map-summary") < html.indexOf("data-map-unplaced-toggle"));
     assert.equal(scenario.unplaced.length, 1);
     assert.equal(scenario.unplaced[0].options.data, scenario.data);
@@ -215,7 +209,7 @@ test("map summary counts all skipped locations and keeps their reasons in its to
     await scenario.render();
     assert.match(scenario.roots[0].innerHTML, /<span>Loaded 4\/12<\/span>/);
     assert.equal(scenario.control(".av__map-skipped").textContent, "Skipped 3");
-    assert.equal(scenario.control(".av__map-summary").attributes.get("aria-label"),
+    assert.equal(scenario.control(".av__map-summary").getAttribute("aria-label"),
         "Map covers 4 loaded records of 12 filtered records\nSkipped locations: 1 missing, 1 invalid, 1 unsupported projection");
     assert.equal(scenario.hosts[0].points.length, 1);
     view.rows = [row];
@@ -232,7 +226,7 @@ test("map summary retains skipped counts when every loaded row lacks a compatibl
     await scenario.render();
     assert.equal(scenario.status(), "mapNoMarkers");
     assert.equal(scenario.control(".av__map-skipped").textContent, "Skipped 1");
-    assert.equal(scenario.control(".av__map-summary").attributes.get("aria-label"),
+    assert.equal(scenario.control(".av__map-summary").getAttribute("aria-label"),
         "Map covers 1 loaded records of 12 filtered records\nSkipped locations: 0 missing, 0 invalid, 1 unsupported projection");
     assert.deepEqual(scenario.calls, []);
 });
@@ -284,8 +278,10 @@ test("deleted and changed-type map fields show a repairable location setup", asy
         assert.match(html, /#iconGlobe/);
         assert.match(html, locationKeyID ? /mapMissingLocationField/ : /mapSelectLocationField/);
         assert.match(html, /<label class="av__map-setting"><span>mapLocationField<\/span>/);
-        assert.match(html, /<select class="b3-select" data-map-location-field aria-label="mapLocationField">/);
-        assert.match(html, /<option value="location">&lt;Location><\/option>/);
+        const select = scenario.control("[data-map-location-field]");
+        assert.equal(select.tagName, "SELECT");
+        assert.equal(select.getAttribute("aria-label"), "mapLocationField");
+        assert.equal(select.querySelector('[value="location"]').textContent, "<Location>");
         assert.match(html, /class="b3-button b3-button--outline" data-map-create-field/);
         assert.doesNotMatch(html, /value="text"|<Location>|provider|CRS|serviceID/);
         assert.deepEqual(scenario.calls, []);
@@ -296,6 +292,39 @@ test("deleted and changed-type map fields show a repairable location setup", asy
     await empty.render();
     assert.match(empty.setupHTML(), /data-map-create-field/);
     assert.match(empty.setupHTML(), /mapSelectLocationField/);
+});
+
+test("parsed templates do not manufacture missing controls and reject a canvas class mutation", async () => {
+    const scenario = setup();
+    await scenario.render();
+    assert.equal(scenario.control("[data-map-create-field]"), null);
+    assert.equal(scenario.hosts[0].container, scenario.control(".av__map-canvas"));
+    assert.equal(scenario.hosts[0].container.classList.contains("fn__none"), false);
+    const source = readFileSync("src/protyle/render/av/map/render.ts", "utf8");
+    const mutated = source.replace('class="av__map-canvas fn__none"', 'class="av__wrong-canvas fn__none"');
+    assert.notEqual(mutated, source);
+    const broken = setup({source: mutated});
+    await assert.rejects(broken.render(), /classList/);
+    assert.equal(broken.hosts.length, 0);
+});
+
+test("render requires an existing records container and contains mounted map input events", async () => {
+    const absent = setup();
+    absent.records.remove();
+    await absent.render();
+    assert.equal(absent.roots.length, 0);
+    const scenario = setup();
+    await scenario.render();
+    let escaped = 0;
+    for (const type of ["click", "keydown", "pointerdown"]) {
+        scenario.block.addEventListener(type, () => escaped++);
+        scenario.control(".av__map-canvas").dispatch(type);
+    }
+    assert.equal(escaped, 0);
+});
+
+test("undeclared VM imports fail instead of silently returning an empty module", () => {
+    assert.throws(() => requireFixture({})("./unlisted"), /Unexpected require: \.\/unlisted/);
 });
 
 test("unconfigured maps render existing location fields without submitting settings transactions", async () => {
@@ -322,14 +351,14 @@ test("selecting an existing location field submits one undoable transaction and 
     await scenario.render();
     const select = scenario.control("[data-map-location-field]");
     select.value = "text";
-    select.events.get("change")();
+    select.dispatch("change");
     select.value = "";
-    select.events.get("change")();
+    select.dispatch("change");
     assert.equal(scenario.transactions.length, 0);
     select.value = "location";
-    select.events.get("change")();
-    select.events.get("change")();
-    scenario.control("[data-map-create-field]").events.get("click")();
+    select.dispatch("change");
+    select.dispatch("change");
+    scenario.control("[data-map-create-field]").dispatch("click");
     assert.equal(scenario.transactions.length, 1);
     assert.equal(select.disabled, true);
     assert.equal(scenario.control("[data-map-create-field]").disabled, true);
@@ -341,7 +370,7 @@ test("selecting an existing location field submits one undoable transaction and 
     assert.equal(scenario.refreshes(), 0);
     await scenario.completeTransaction();
     assert.equal(scenario.refreshes(), 1);
-    select.events.get("change")();
+    select.dispatch("change");
     assert.equal(scenario.transactions.length, 1);
 });
 
@@ -351,8 +380,8 @@ test("adding a location field atomically creates, selects and hides it with an u
     (scenario.data.view as IAVTable).columns = [];
     await scenario.render();
     const create = scenario.control("[data-map-create-field]");
-    create.events.get("click")();
-    create.events.get("click")();
+    create.dispatch("click");
+    create.dispatch("click");
     assert.equal(scenario.transactions.length, 1);
     const {perform, undo} = scenario.transactions[0];
     assert.equal(JSON.stringify(perform), JSON.stringify([
@@ -397,8 +426,8 @@ test("stale setup controls and permissions changed after render cannot submit a 
         if (mode === "removed") scenario.roots[0].remove();
         if (mode === "rerendered") await scenario.render();
         select.value = "location";
-        select.events.get("change")();
-        create.events.get("click")();
+        select.dispatch("change");
+        create.dispatch("click");
         assert.equal(scenario.transactions.length, 0, mode);
     }
 });
@@ -409,12 +438,12 @@ test("failed setup transactions reenable controls, while late completion cannot 
     (scenario.data.view as IAVTable).columns = [];
     await scenario.render();
     const create = scenario.control("[data-map-create-field]");
-    create.events.get("click")();
+    create.dispatch("click");
     assert.equal(create.disabled, true);
     await scenario.completeTransaction(false);
     assert.equal(create.disabled, false);
     assert.equal(scenario.refreshes(), 0);
-    create.events.get("click")();
+    create.dispatch("click");
     assert.equal(scenario.transactions.length, 2);
     scenario.destroyMap();
     await scenario.completeTransaction();
@@ -426,7 +455,7 @@ test("late setup transaction completions cannot refresh a removed or superseded 
         const scenario = setup();
         (scenario.data.view as IAVTable).map.locationKeyID = "deleted";
         await scenario.render();
-        scenario.control("[data-map-create-field]").events.get("click")();
+        scenario.control("[data-map-create-field]").dispatch("click");
         if (mode === "removed") scenario.roots[0].remove();
         else await scenario.render();
         await scenario.completeTransaction();
@@ -509,6 +538,9 @@ test("rerendering a map destroys the old host and invalidates its callbacks", as
     previous.options.onReady();
     await scenario.render();
     assert.equal(previous.destroyed, true);
+    previous.options.onError("hostUnavailable");
+    assert.equal(scenario.hosts[1].destroyed, false);
+    assert.equal(scenario.status(), "mapLoading");
     previous.options.onMarkerClick("row", previous.revision);
     assert.equal(scenario.opened.length, 0);
     const next = scenario.hosts[1];
@@ -516,6 +548,55 @@ test("rerendering a map destroys the old host and invalidates its callbacks", as
     next.options.onMarkerClick("row", next.revision);
     assert.equal(scenario.opened.length, 1);
     scenario.destroyMap();
+});
+
+test("host failure releases its observers once while preserving the unplaced inbox", async () => {
+    for (const mode of ["offline", "error"]) {
+        const scenario = setup();
+        await scenario.render();
+        const host = scenario.hosts[0];
+        if (mode === "offline") scenario.events.get("offline")();
+        else host.options.onError("hostUnavailable");
+        assert.equal(host.destroys, 1, mode);
+        assert.equal(scenario.observers.length, 1);
+        assert.equal(scenario.observers[0].disconnects, 1);
+        assert.equal(scenario.events.size, 0);
+        assert.equal(scenario.unplaced[0].destroyed, false);
+        assert.equal(scenario.control(".av__map-canvas").classList.contains("fn__none"), true);
+        const status = scenario.status();
+        host.options.onReady();
+        host.options.onError("hostUnavailable");
+        assert.equal(scenario.status(), status);
+        scenario.destroyMap();
+        scenario.destroyMap();
+        assert.equal(host.destroys, 1);
+        assert.equal(scenario.observers[0].disconnects, 1);
+        assert.equal(scenario.unplaced[0].destroyed, true);
+    }
+});
+
+test("a host that fails synchronously during creation never acquires view observers", async () => {
+    const scenario = setup({failDuringCreate: true});
+    await scenario.render();
+    assert.equal(scenario.status(), "mapLoadError");
+    assert.equal(scenario.hosts[0].destroys, 1);
+    assert.equal(scenario.hosts[0].points.length, 0);
+    assert.equal(scenario.observers.length, 0);
+    assert.equal(scenario.events.size, 0);
+    assert.equal(scenario.unplaced[0].destroyed, false);
+    scenario.destroyMap();
+    assert.equal(scenario.hosts[0].destroys, 1);
+});
+
+test("non-HTTP, both history modes and published views retain their own safe fallbacks", async () => {
+    for (const mode of ["protocol", "created", "snapshot", "published"]) {
+        const scenario = setup({protocol: mode === "protocol" ? "file:" : "https:", published: mode === "published"});
+        if (mode === "created" || mode === "snapshot") scenario.protyle.options.history = {[mode]: "version"};
+        await scenario.render();
+        assert.equal(scenario.status(), mode === "published" ? "mapPublicFallback" : "mapUnsupportedClient");
+        assert.deepEqual(scenario.calls, []);
+        assert.equal(scenario.hosts.length, 0);
+    }
 });
 
 test("authentication bypass reports its specific safe fallback without mounting the host", async () => {

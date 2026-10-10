@@ -18,7 +18,7 @@ func isolateImportedAttributeViewBindings(data []byte, importedBlockIDs map[stri
 	if err := av.CheckSpec(&attrView); err != nil {
 		return nil, err
 	}
-	if err := attrView.ValidateListLayouts(); err != nil {
+	if err := attrView.ValidateLayouts(); err != nil {
 		return nil, err
 	}
 	if err := attrView.NormalizeLocations(); err != nil {

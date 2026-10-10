@@ -16,6 +16,17 @@
 
 package av
 
+// ValidateLayouts 统一校验地图、日历和列表布局，拒绝损坏数据并保留原始文件。
+func (attrView *AttributeView) ValidateLayouts() error {
+	if err := attrView.ValidateMapLayouts(); err != nil {
+		return err
+	}
+	if err := attrView.ValidateCalendarLayouts(); err != nil {
+		return err
+	}
+	return attrView.ValidateListLayouts()
+}
+
 // BaseLayout 描述了布局的基础结构。
 type BaseLayout struct {
 	Spec int    `json:"spec"` // 布局格式版本

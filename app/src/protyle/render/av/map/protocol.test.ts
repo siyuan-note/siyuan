@@ -2,9 +2,11 @@ import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
 import {
     AV_MAP_ATTRIBUTION_LINKS, AV_MAP_MERCATOR_MAX_LATITUDE, AVMapLoadError, getAVMapLoadErrorCode,
-    isAVMapHandshake, isAVMapHostErrorCode, isAVMapProjectionSupported,
+    isAVMapBootstrapMessage, isAVMapHostErrorCode, isAVMapProjectionSupported,
     parseAVMapCommand, parseAVMapReply, sanitizeAVMapPoints,
 } from "./protocol";
+import {AV_MAP_BOOTSTRAP_TIMEOUT, AV_MAP_HOST_READY_TIMEOUT, AV_MAP_OWNER_TIMEOUT, AV_MAP_READY_TIMEOUT} from "./loadingBudget";
+import {getAVMapLockedPolicy} from "./bootstrap";
 
 describe("isolated map protocol", () => {
     const point = {id: "row-1", longitude: 0, latitude: 0};
@@ -99,10 +101,11 @@ describe("isolated map protocol", () => {
     });
     it("requires the exact nonce and instance during its one-time handshake", () => {
         const handshake = {version: 1, type: "hello", instanceID: "instance", nonce: "nonce"};
-        assert.equal(isAVMapHandshake(handshake, "hello", "instance", "nonce"), true);
+        assert.equal(isAVMapBootstrapMessage(handshake, "hello", "instance", "nonce"), true);
         for (const invalid of [{nonce: "old"}, {instanceID: "other"}, {version: 0}, {type: "connect"}]) {
-            assert.equal(isAVMapHandshake({...handshake, ...invalid}, "hello", "instance", "nonce"), false);
+            assert.equal(isAVMapBootstrapMessage({...handshake, ...invalid}, "hello", "instance", "nonce"), false);
         }
+        assert.equal(isAVMapBootstrapMessage(structuredClone(Object.assign([], handshake)), "hello", "instance", "nonce"), false);
     });
     it("admits only fixed loading stages and never treats arbitrary SDK exceptions as controlled errors", () => {
         for (const code of ["sdkScriptLoadFailed", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout"] as const) {
@@ -133,5 +136,113 @@ describe("isolated map protocol", () => {
             assert.equal(isAVMapHostErrorCode(code), false);
             assert.equal(parseAVMapReply({version: 1, instanceID: "one", type: "error", code}, "one"), undefined);
         }
+    });
+});
+
+describe("shared owner and runtime protocol corpus", () => {
+    const {parseMapCommand, parseMapReply} = require("../../../../../electron/mapHostPolicy");
+    const envelope = {version: 1, instanceID: "one"};
+    const point = {id: "row-1", longitude: 0, latitude: 0};
+    const commands = [
+        (value: unknown) => parseAVMapCommand(value, "one", "openfreemap"),
+        (value: unknown) => parseMapCommand(value, "one"),
+    ];
+    const replies = [(value: unknown) => parseAVMapReply(value, "one"), (value: unknown) => parseMapReply(value, "one")];
+    it("keeps desktop and web preparation and readiness budgets aligned and finite", () => {
+        const {MAP_HOST_BOOTSTRAP_TIMEOUT, MAP_HOST_READY_TIMEOUT} = require("../../../../../electron/mapHostManager");
+        assert.equal(MAP_HOST_BOOTSTRAP_TIMEOUT, AV_MAP_BOOTSTRAP_TIMEOUT);
+        assert.equal(MAP_HOST_READY_TIMEOUT, AV_MAP_HOST_READY_TIMEOUT);
+        assert.ok(AV_MAP_READY_TIMEOUT < AV_MAP_HOST_READY_TIMEOUT);
+        assert.ok(AV_MAP_BOOTSTRAP_TIMEOUT + AV_MAP_HOST_READY_TIMEOUT < AV_MAP_OWNER_TIMEOUT);
+        assert.ok(Number.isFinite(AV_MAP_OWNER_TIMEOUT));
+    });
+    it("only removes resource permissions when the initial desktop policy is locked", () => {
+        const {createMapContentSecurityPolicy, mapHostFiles} = require("../../../../../electron/mapHostPolicy");
+        const origin = "https://fixture.invalid";
+        const directives = (policy: string) => new Map(policy.split(";").map(value => value.trim().split(/\s+/))
+            .filter(([name]) => name).map(([name, ...values]) => [name, values]));
+        const initial = directives(createMapContentSecurityPolicy(origin));
+        const locked = directives(getAVMapLockedPolicy("openfreemap"));
+        assert.deepEqual(initial.get("sandbox"), ["allow-scripts"]);
+        assert.deepEqual(initial.get("frame-ancestors"), ["'none'"]);
+        assert.deepEqual(locked.get("script-src"), ["'none'"]);
+        assert.deepEqual(locked.get("connect-src"), ["https://tiles.openfreemap.org"]);
+        for (const directive of ["script-src", "connect-src", "img-src", "style-src", "font-src", "worker-src",
+            "frame-src", "object-src", "base-uri", "form-action"]) {
+            const before = initial.get(directive), after = locked.get(directive);
+            assert.ok(before && after);
+            for (const source of after) assert.ok(source === "'none'" || before.includes(source), `${directive}: ${source}`);
+        }
+        for (const sources of locked.values()) assert.equal(sources.some(source => source.includes("fixture.invalid")), false);
+        const localSources = [...initial.values()].flat().filter(source => source.startsWith(origin));
+        assert.equal(localSources.length, 5);
+        for (const source of localSources) assert.ok(Object.prototype.hasOwnProperty.call(mapHostFiles, new URL(source).pathname));
+        assert.deepEqual(locked.get("frame-src"), ["'none'"], "child-src must not permit subframe navigation");
+        assert.deepEqual(locked.get("worker-src"), ["blob:"], "only prepared blob workers remain available");
+    });
+    it("uses the same cloned command corpus while copying only allowed fields", () => {
+        const setPoints = {...envelope, type: "setPoints", revision: 1, points: [point]};
+        const valid = [setPoints, {...envelope, type: "theme", theme: "light"}, {...envelope, type: "theme", theme: "dark"},
+            {...envelope, type: "resize"}, {...envelope, type: "destroy"}];
+        for (const command of valid) {
+            for (const parse of commands) {
+                assert.deepEqual(parse(structuredClone({...command, secret: "private"})), command);
+                for (const malformed of [null, 1, "command", Object.assign([], command), {...command, version: 2},
+                    {...command, instanceID: "other"}, {...command, type: "fit"}, {...command, type: "unknown"}]) {
+                    assert.equal(parse(structuredClone(malformed)), undefined);
+                }
+            }
+        }
+        for (const revision of [-1, 1.5, NaN, Infinity, "1", null, Number.MAX_SAFE_INTEGER + 1]) {
+            for (const parse of commands) assert.equal(parse({...setPoints, revision}), undefined);
+        }
+        for (const points of [null, {}, "points"]) {
+            for (const parse of commands) assert.equal(parse({...setPoints, points}), undefined);
+        }
+        for (const theme of [null, {}, "auto", "LIGHT"]) {
+            for (const parse of commands) assert.equal(parse({...envelope, type: "theme", theme}), undefined);
+        }
+    });
+    it("rejects malformed point shapes, duplicates and nonprojectable values identically", () => {
+        const valid = [point,
+            {id: "west", longitude: -180, latitude: -AV_MAP_MERCATOR_MAX_LATITUDE},
+            {id: "east", longitude: 180, latitude: AV_MAP_MERCATOR_MAX_LATITUDE}];
+        const malformed = [null, 1, "point", Object.assign([], {...point, id: "array"}),
+            ...[{longitude: NaN}, {longitude: Infinity}, {longitude: "0"}, {longitude: 181}, {latitude: null},
+                {latitude: -86}, {latitude: 90}, {latitude: -Infinity}, {id: ""}, {id: "x".repeat(129)},
+                {id: "<script>"}, {coordinateSystem: undefined}].map(value => ({...point, ...value}))];
+        const command = {...envelope, type: "setPoints", revision: 0,
+            points: [...valid.map(value => ({...value, name: "private", originalInput: "secret"})), point, ...malformed]};
+        for (const parse of commands) {
+            assert.deepEqual(parse(structuredClone(command)), {...envelope, type: "setPoints", revision: 0, points: valid});
+            const points = Array.from({length: 10001}, (_, i) => ({...point, id: `row-${i}`}));
+            assert.deepEqual(parse({...command, points}).points, points.slice(0, 10000));
+        }
+    });
+    it("uses the same reply corpus and keeps privileged bootstrap and visibility directions explicit", () => {
+        const valid = [{...envelope, type: "ready"}, {...envelope, type: "markerClick", id: point.id, revision: 0},
+            ...AV_MAP_ATTRIBUTION_LINKS.openfreemap.map(({id: link}) => ({...envelope, type: "attributionClick", link})),
+            {...envelope, type: "error", code: "mapUnavailable"}];
+        for (const reply of valid) {
+            for (const parse of replies) {
+                assert.deepEqual(parse(structuredClone({...reply, url: "private", message: "secret"})), reply);
+                for (const malformed of [null, Object.assign([], reply), {...reply, version: 2}, {...reply, instanceID: "other"},
+                    {...reply, type: "unknown"}]) assert.equal(parse(structuredClone(malformed)), undefined);
+            }
+        }
+        for (const parse of replies) {
+            assert.equal(parse({...envelope, type: "error", code: "unknown"}), undefined);
+            assert.equal(parse({...envelope, type: "markerClick", id: [], revision: 0}), undefined);
+            assert.equal(parse({...envelope, type: "markerClick", id: point.id, revision: NaN}), undefined);
+        }
+        const bootstrapped = {...envelope, type: "bootstrapReady"};
+        assert.deepEqual(parseMapReply(bootstrapped, "one"), bootstrapped);
+        assert.equal(parseAVMapReply(bootstrapped, "one"), undefined);
+        const visibility = {...envelope, type: "visibility", visible: true};
+        assert.deepEqual(parseAVMapCommand(visibility, "one"), visibility);
+        assert.equal(parseMapCommand(visibility, "one"), undefined);
+        const init = {...envelope, type: "init", provider: "openfreemap", theme: "light"};
+        assert.deepEqual(parseAVMapCommand(init, "one"), init);
+        assert.equal(parseMapCommand(init, "one"), undefined);
     });
 });

@@ -1,7 +1,7 @@
 import {AVMapProvider, isAVMapProvider} from "./protocol";
 import {prepareAVMapAssets} from "./providersLoader";
 
-// This intersects the response policy. Local origins are removed before creating any Worker.
+// 此策略与响应策略共同生效，在创建 Worker 前移除本地来源权限。
 export const getAVMapLockedPolicy = (provider: AVMapProvider): string => {
     if (!isAVMapProvider(provider)) throw new Error("invalidConfiguration");
     return "default-src 'none'; script-src 'none'; connect-src https://tiles.openfreemap.org; " +

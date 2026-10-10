@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light" data-font-size="16">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/controls.css">
+    <link rel="stylesheet" href="/menu.css">
+    <script defer src="/menu.js"></script>
+    <title></title>
+</head>
+<body>
+    <section class="b3-menu fixture-menu" role="dialog" aria-labelledby="title">
+        <header><span id="title"></span> <span id="count"></span></header>
+        <div class="fixture-search"><input id="search" class="b3-text-field" type="search" maxlength="256"></div>
+        <div id="rows" class="b3-menu__items" role="group"></div>
+        <div id="status" role="status" aria-live="polite"></div>
+        <footer><button id="more" class="b3-menu__item" type="button"></button><button id="close" class="b3-menu__item" type="button"></button></footer>
+    </section>
+</body>
+</html>

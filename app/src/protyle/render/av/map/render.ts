@@ -119,25 +119,28 @@ ${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class
     const canvas = root.querySelector<HTMLElement>(".av__map-canvas");
     let host: AVMapHost;
     let themeObserver: MutationObserver;
-    let resizeObserver: ResizeObserver;
     let destroyUnplaced: () => void;
     let revision = 0;
     const offline = () => fallback(window.siyuan.languages.mapOffline);
-    const current = registerMap(blockElement, {root, destroy: () => {
+    const releaseHost = () => {
         revision++;
-        host?.destroy();
+        const previousHost = host;
+        host = undefined;
         themeObserver?.disconnect();
-        resizeObserver?.disconnect();
-        destroyUnplaced?.();
+        themeObserver = undefined;
         window.removeEventListener("offline", offline);
+        previousHost?.destroy();
+    };
+    const current = registerMap(blockElement, {root, destroy: () => {
+        releaseHost();
+        destroyUnplaced?.();
+        destroyUnplaced = undefined;
     }});
     const fallback = (message: string) => {
         if (!current()) {
             return;
         }
-        revision++;
-        host?.destroy();
-        host = undefined;
+        releaseHost();
         status.textContent = message;
         canvas.classList.add("fn__none");
     };
@@ -164,7 +167,7 @@ ${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class
                 text.replace("${" + key + "}", value.toString()), window.siyuan.languages.mapSkippedLocations);
             root.querySelector(".av__map-summary").setAttribute("aria-label", `${pageText}\n${skippedText}`);
         }
-        if (!canLoadMapHost({published: false, history: false, protocol: window.location.protocol})) {
+        if (!canLoadMapHost(window.location.protocol)) {
             fallback(window.siyuan.languages.mapUnsupportedClient);
             return;
         }
@@ -203,7 +206,7 @@ ${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class
         const pointIDs = new Set(points.map(point => point.id));
         const activeRevision = ++revision;
         canvas.classList.remove("fn__none");
-        host = (desktopHost ? createDesktopAVMapHost : createAVMapHost)(canvas, {
+        const nextHost = (desktopHost ? createDesktopAVMapHost : createAVMapHost)(canvas, {
             provider: "openfreemap",
             theme: getTheme(),
             title: window.siyuan.languages.mapView,
@@ -219,18 +222,25 @@ ${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class
                 const link = AV_MAP_ATTRIBUTION_LINKS.openfreemap.find(item => item.id === id);
                 if (link) window.open(link.href, "_blank", "noopener,noreferrer");
             },
-            onError: () => fallback(navigator.onLine ? window.siyuan.languages.mapLoadError : window.siyuan.languages.mapOffline),
+            onError: () => {
+                if (current() && revision === activeRevision) {
+                    fallback(navigator.onLine ? window.siyuan.languages.mapLoadError : window.siyuan.languages.mapOffline);
+                }
+            },
             onMarkerClick: (id, markerRevision) => {
                 if (current() && markerRevision === activeRevision && revision === activeRevision && pointIDs.has(id)) {
                     void openMapRecord(protyle, blockElement, rowByID.get(id));
                 }
             },
         });
+        if (!current() || revision !== activeRevision) {
+            nextHost.destroy();
+            return;
+        }
+        host = nextHost;
         host.setPoints(points, activeRevision);
         themeObserver = new MutationObserver(() => host?.setTheme(getTheme()));
         themeObserver.observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme-mode"]});
-        resizeObserver = new ResizeObserver(() => host?.resize());
-        resizeObserver.observe(canvas);
         window.addEventListener("offline", offline);
     } catch (_error) {
         fallback(window.siyuan.languages.mapLoadError);

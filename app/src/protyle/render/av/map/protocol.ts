@@ -30,7 +30,7 @@ export const isAVMapHostErrorCode = (value: unknown): value is AVMapHostErrorCod
 const mapLoadErrorCodes = new Set<AVMapLoadErrorCode>([
     "sdkScriptLoadFailed", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout",
 ]);
-const isAVMapLoadErrorCode = (value: unknown): value is AVMapLoadErrorCode =>
+export const isAVMapLoadErrorCode = (value: unknown): value is AVMapLoadErrorCode =>
     typeof value === "string" && mapLoadErrorCodes.has(value as AVMapLoadErrorCode);
 
 // 内部加载阶段只保留固定错误码，不保存 SDK 原始异常、地址或凭据。
@@ -78,7 +78,7 @@ export type AVMapCommand = AVMapInit |
     (AVMapEnvelope & {type: "setPoints"; revision: number; points: AVMapPoint[]}) |
     (AVMapEnvelope & {type: "theme"; theme: AVMapTheme}) |
     (AVMapEnvelope & {type: "visibility"} & AVMapVisibility) |
-    (AVMapEnvelope & {type: "fit" | "resize" | "destroy"});
+    (AVMapEnvelope & {type: "resize" | "destroy"});
 
 export type AVMapReply = (AVMapEnvelope & {type: "ready"}) |
     (AVMapEnvelope & {type: "attributionClick"; link: AVMapAttributionLink}) |
@@ -107,7 +107,7 @@ export const sanitizeAVMapPoints = (input: unknown): AVMapPoint[] => {
     const ids = new Set<string>();
     const result: AVMapPoint[] = [];
     input.slice(0, AV_MAP_MAX_POINTS).forEach((point) => {
-        if (!point || typeof point !== "object" || "coordinateSystem" in point || !isAVMapIdentifier(point.id) || ids.has(point.id) ||
+        if (!point || typeof point !== "object" || Array.isArray(point) || "coordinateSystem" in point || !isAVMapIdentifier(point.id) || ids.has(point.id) ||
             typeof point.longitude !== "number" || !Number.isFinite(point.longitude) ||
             point.longitude < -180 || point.longitude > 180 ||
             typeof point.latitude !== "number" || !Number.isFinite(point.latitude) ||
@@ -159,7 +159,6 @@ export const parseAVMapCommand = (value: unknown, instanceID: string, provider?:
             const viewport = parseAVMapViewport(input.viewport);
             return viewport ? {...envelope, type: "visibility", visible: true, viewport} : undefined;
         }
-        case "fit":
         case "resize":
         case "destroy":
             return {...envelope, type: input.type};
@@ -188,7 +187,11 @@ export const parseAVMapReply = (value: unknown, instanceID: string): AVMapReply 
     }
 };
 
-export const isAVMapHandshake = (value: unknown, type: "hello" | "connect", instanceID: string, nonce: string): boolean => {
+type AVMapBootstrapMessageType = "hello" | "wrapperHello" | "prepare" | "connect" |
+    "bootstrapReady" | "bootstrapError" | "siyuan-map-desktop-connect";
+
+export const isAVMapBootstrapMessage = (value: unknown, type: AVMapBootstrapMessageType,
+                                      instanceID: string, nonce: string): boolean => {
     const input = asRecord(value);
     return !!input && input.type === type && input.version === AV_MAP_PROTOCOL_VERSION &&
         input.instanceID === instanceID && input.nonce === nonce;

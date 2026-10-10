@@ -5,6 +5,7 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as locateState from "../locateState";
 import {isTableLikeView} from "../viewType";
+import {requireFixture} from "./testDOM";
 
 const setup = (open: () => Promise<boolean> = () => Promise.resolve(true)) => {
     const opened: unknown[] = [];
@@ -22,6 +23,9 @@ const setup = (open: () => Promise<boolean> = () => Promise.resolve(true)) => {
         "../../../dialog/message": {showMessage: (message: string) => messages.push(message)},
         "../../../util/highlightById": {scrollCenter: (_protyle: unknown, element: unknown) => scrolled.push(element)},
         "./backlinkScroll": {scrollBacklinkTarget: () => false},
+        "../../../constants": {}, "./publishState": {}, "./readonlyState": {}, "./gallery/style": {},
+        "../../wysiwyg/transaction": {}, "../../util/clear": {}, "./rangeSelect": {}, "./virtualScroll": {},
+        "./locateView": {}, "./color": {},
         "../openDatabaseRow": {openDatabaseRowByData: (_protyle: unknown, record: unknown) => {
             opened.push(record);
             return open();
@@ -31,7 +35,7 @@ const setup = (open: () => Promise<boolean> = () => Promise.resolve(true)) => {
         const exports = {};
         runInNewContext(transpileModule(readFileSync(path, "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-        }).outputText, {exports, require: (id: string) => modules[id] || {}, window: {siyuan: {languages}}});
+        }).outputText, {exports, require: requireFixture(modules), window: {siyuan: {languages}}});
         return exports;
     };
     modules["./map/openRecord"] = load("src/protyle/render/av/map/openRecord.ts");

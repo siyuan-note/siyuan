@@ -1,7 +1,8 @@
 import {transaction} from "../../../wysiwyg/transaction";
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {Menu} from "../../../../plugin/Menu";
-import {openViewSettingMenu} from "../viewSettingMenu";
+import {MenuItem} from "../../../../menus/Menu";
+import {isMobile} from "../../../../util/functions";
 import {getMapSettings} from "./state";
 
 export const canEditMapSettings = (protyle: IProtyle) => !protyle.disabled && !window.siyuan.isPublish &&
@@ -54,14 +55,59 @@ export const bindMapSettings = (options: {
         options.onChange?.();
     };
     controls.forEach(control => {
-        control.addEventListener("click", event => {
+        const choices = getChoices(view);
+        const items: IMenu[] = choices.map(choice => ({iconHTML: "", label: escapeHtml(choice.label),
+            checked: getMapSettings(view).locationKeyID === choice.value, click: () => {
+                if (item.element.isConnected) update(choice.value);
+            }}));
+        const label = choices.find(choice => choice.value === getMapSettings(view).locationKeyID).label;
+        const item = new MenuItem({iconHTML: "", label: window.siyuan.languages.mapLocationField,
+            accelerator: " ", submenu: items});
+        item.element.dataset.mapSetting = "locationKeyID";
+        const valueElement = item.element.querySelector(".b3-menu__accelerator");
+        valueElement.textContent = label;
+        valueElement.classList.add("fn__ellipsis", "av__map-setting-value");
+        valueElement.setAttribute("title", label);
+        control.replaceWith(item.element);
+        const submenu = item.element.querySelector<HTMLElement>(".b3-menu__submenu");
+        const show = () => {
+            if (!item.element.isConnected || !canEditMapSettings(options.protyle)) return;
+            item.element.classList.add("b3-menu__item--show");
+            window.siyuan.menus.menu.showSubMenu(submenu);
+        };
+        if (!isMobile()) {
+            item.element.addEventListener("mouseenter", show);
+            options.menuElement.addEventListener("mouseover", event => {
+                const hovered = (event.target as Element).closest(".b3-menu__item");
+                if (hovered && !item.element.contains(hovered)) item.element.classList.remove("b3-menu__item--show");
+            });
+            item.element.addEventListener("keydown", event => {
+                if (!item.element.isConnected || !canEditMapSettings(options.protyle)) return;
+                if (event.key === "ArrowRight") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    show();
+                    submenu.querySelector<HTMLButtonElement>(".b3-menu__item").focus();
+                } else if (event.key === "ArrowLeft" || event.key === "Escape") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    item.element.classList.remove("b3-menu__item--show");
+                    item.element.focus();
+                }
+            });
+        }
+        item.element.addEventListener("click", event => {
             event.preventDefault();
             event.stopPropagation();
-            if (!control.isConnected || !canEditMapSettings(options.protyle)) return;
-            const menu = new Menu();
-            getChoices(view).forEach(choice => menu.addItem({iconHTML: "", label: escapeHtml(choice.label),
-                checked: getMapSettings(view).locationKeyID === choice.value, click: () => update(choice.value)}));
-            openViewSettingMenu(menu, control);
+            if (!item.element.isConnected || !canEditMapSettings(options.protyle)) return;
+            if (isMobile()) {
+                const menu = new Menu(undefined, undefined, true);
+                items.forEach(choice => menu.addItem(choice));
+                const rect = item.element.getBoundingClientRect();
+                menu.open({x: rect.left, y: rect.bottom, h: rect.height, target: item.element});
+            } else {
+                show();
+            }
         });
     });
 };

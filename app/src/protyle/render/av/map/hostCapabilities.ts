@@ -36,9 +36,3 @@ export const getAVMapHostCapabilities = async (scope: Window): Promise<AVMapHost
         scope.clearTimeout(timer);
     }
 };
-
-export const isAVMapBootstrapMessage = (value: unknown, type: string, instanceID: string, nonce: string): boolean => {
-    const input = value as Record<string, unknown>;
-    return !!input && typeof input === "object" && input.version === 1 && input.type === type &&
-        input.instanceID === instanceID && input.nonce === nonce;
-};

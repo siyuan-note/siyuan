@@ -14,7 +14,7 @@ export const getMapPoints = (view: IAVTable) => {
     const fieldID = getMapSettings(view).locationKeyID;
     const fieldIndex = view.columns.findIndex(column => column.id === fieldID && column.type === "location");
     if (fieldIndex < 0) {
-        return {points, skipped, missingField: true};
+        return {points, skipped};
     }
     const used = new Set<string>();
     view.rows.forEach(row => {
@@ -31,14 +31,10 @@ export const getMapPoints = (view: IAVTable) => {
             points.push({id: row.id, longitude: location.longitude, latitude: location.latitude});
         }
     });
-    return {points, skipped, missingField: false};
+    return {points, skipped};
 };
 
-export const canLoadMapHost = (context: {
-    published: boolean;
-    history: boolean;
-    protocol: string;
-}) => !context.published && !context.history && ["http:", "https:"].includes(context.protocol);
+export const canLoadMapHost = (protocol: string) => ["http:", "https:"].includes(protocol);
 
 interface IMapLifecycle {
     root: HTMLElement;

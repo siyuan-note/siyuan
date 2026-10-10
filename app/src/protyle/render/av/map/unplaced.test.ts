@@ -8,6 +8,7 @@ import * as escape from "../../../../util/escape";
 import * as locationValue from "../locationValue";
 import {getMapSettings} from "./state";
 import * as unplacedMenu from "./unplacedMenu";
+import {requireFixture} from "./testDOM";
 
 class ElementStub {
     isConnected = true;
@@ -94,7 +95,7 @@ const setup = (mobile = false) => {
     runInNewContext(transpileModule(readFileSync("src/protyle/render/av/map/unplaced.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {exports: methods, window: context, AbortController,
-        clearTimeout: (id: number) => timers.delete(id), require: (id: string) => ({
+        clearTimeout: (id: number) => timers.delete(id), require: requireFixture({
             "../../../../constants": {Constants: {TIMEOUT_INPUT: 256, ATTRIBUTE_MENU_KEYMAP: "data-keymap"}},
             "../../../../plugin/Menu": {Menu: MenuStub},
             "../../../../util/escape": escape,
@@ -111,7 +112,7 @@ const setup = (mobile = false) => {
                 !protyle.options.history?.created && !protyle.options.history?.snapshot},
             "./openRecord": {openMapRecord: (_protyle: IProtyle, _block: HTMLElement, row: IAVRow, keyID: string) =>
                 opens.push({row, keyID})},
-        })[id] || {}});
+        })});
     const destroy = methods.bindMapUnplaced({root: root as unknown as HTMLElement, blockElement: block as unknown as HTMLElement,
         protyle, data, current: () => current});
     return {methods, requests, menus, toggle, count, input, canvas, data, protyle, context, opens, destroy,
@@ -135,10 +136,15 @@ const setup = (mobile = false) => {
             const nativeMenu = {} as typeof import("../../../../menus/Menu");
             runInNewContext(transpileModule(readFileSync("src/menus/Menu.ts", "utf8"), {
                 compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-            }).outputText, {exports: nativeMenu, window: context, CustomEvent: class {}, require: (id: string) => ({
+            }).outputText, {exports: nativeMenu, window: context, CustomEvent: class {}, require: requireFixture({
                 "../constants": {Constants: {KEYCODELIST: {13: "↩"}}},
                 "../protyle/util/compatibility": {getEventName: () => "click"},
-            })[id] || {}});
+                "../util/setPosition": {}, "../util/zIndex": {}, "./menuPosition": {}, "./menuGroup": {},
+                "./sheetOpen": {}, "../protyle/util/hasClosest": {}, "../util/functions": {},
+                "../layout/getTopBarHeight": {}, "../protyle/undo": {}, "../util/escape": {},
+                "./menuKeyboard": {}, "../plugin/EventBusCore": {}, "../mobile/util/keyboardToolbar": {},
+                "../block/popoverLifecycle": {}, "../config/entryVisibility/runtime": {},
+            })});
             assert.equal(nativeMenu.bindMenuKeydown({keyCode: 13, target: item.element} as unknown as KeyboardEvent), true);
         },
         runTimers: () => { const pending = [...timers.values()]; timers.clear(); pending.forEach(callback => callback()); },

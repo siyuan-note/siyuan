@@ -87,7 +87,7 @@ export const isAVLocationCoordinateInput = (text: string) => {
         parts.every(part => part === "" || coordinateInput.test(part))) || canonicalInput.test(text);
 };
 
-// 普通粘贴只记录地点名称；坐标文本必须使用明确标注顺序的导入入口。
+// 普通粘贴只记录地点名称；坐标必须在编辑器中按具名字段输入。
 export const createAVLocationFromText = (text: string): IAVCellLocationValue => {
     if (isAVLocationCoordinateInput(text)) {
         throw new Error("Location coordinates require explicit latitude, longitude input");
@@ -102,22 +102,6 @@ export const parseAVLocationCoordinate = (text: string) => {
     }
     const number = Number(value);
     return Number.isFinite(number) ? number : undefined;
-};
-
-// 只按用户明确选择的顺序解析，不根据范围猜测顺序或解析地图服务链接。
-export const parseAVLocationCoordinates = (text: string,
-                                          order: "latitudeLongitude" | "longitudeLatitude" = "latitudeLongitude"):
-    IAVCellLocationValue | undefined => {
-    const trimmed = text.trim();
-    const unwrapped = trimmed.startsWith("(") && trimmed.endsWith(")") ? trimmed.slice(1, -1) : trimmed;
-    const parts = unwrapped.split(",");
-    if (parts.length !== 2) {
-        return undefined;
-    }
-    const latitude = parseAVLocationCoordinate(parts[order === "longitudeLatitude" ? 1 : 0]);
-    const longitude = parseAVLocationCoordinate(parts[order === "longitudeLatitude" ? 0 : 1]);
-    const value = {latitude, longitude, originalInput: text};
-    return hasAVLocationCoordinates(value) ? value : undefined;
 };
 
 // 原始输入仅为来源记录，不参与值的语义比较。

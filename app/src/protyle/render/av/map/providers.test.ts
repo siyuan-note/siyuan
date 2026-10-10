@@ -3,6 +3,13 @@ import {test} from "node:test";
 import {AV_MAP_OPENFREEMAP_STYLE, createAVMapAdapter} from "./providers";
 import {AV_MAP_ATTRIBUTION_LINKS} from "./protocol";
 
+const {AJAXError, Evented} = require("maplibre-gl");
+
+// 瓦片数据形状依照 TileManager._loadTile；事件冒泡和 HTTP 异常使用实际 SDK 实现。
+const tileError = (status: number) => ({type: "error", sourceId: "fixture",
+    error: new AJAXError(status, "Fixture HTTP status", "https://fixture.invalid/tile", new Blob()),
+    tile: {state: "errored", tileID: {canonical: {z: 2, x: 1, y: 1}}}});
+
 const fixture = () => {
     const instances: any[] = [];
     const calls: Array<[string, ...any[]]> = [];
@@ -51,7 +58,7 @@ const fixture = () => {
         LngLatBounds: class LngLatBounds extends SDKObject {}, AttributionControl: class AttributionControl extends SDKObject {}};
     const container = {ownerDocument: doc, querySelector: () => attribution,
         replaceChildren() { calls.push(["clear"]); }};
-    return {sdk, calls, instances, container: container as unknown as HTMLElement, attribution, frames, events, doc, scope, rect,
+    return {sdk, calls, instances, container: container as unknown as HTMLElement, attribution, frames, events, documentEvents, doc, scope, rect,
         load: () => instances[0].callbacks.get("load")(),
         advance: (milliseconds: number) => {
             now += milliseconds;
@@ -246,5 +253,131 @@ test("removed providers cannot create a map", () => {
         assert.throws(() => createAVMapAdapter(provider as any, sdk, container, {onMarkerClick() {}, onError() {}}),
             /invalidConfiguration/);
         assert.equal(calls.length, 0);
+    }
+});
+
+test("fully visible viewport changes preserve the continuous attribution display clock", () => {
+    const f = fixture();
+    const adapter = createAVMapAdapter("openfreemap", f.sdk, f.container, {onMarkerClick() {}, onError() {}});
+    f.load();
+    adapter.setVisible(true, visibleViewport);
+    f.advance(0);
+    f.advance(4000);
+    adapter.setVisible(true, {...visibleViewport, width: 790});
+    f.advance(1000);
+    assert.equal(f.attribution.open, false, "five uninterrupted visible seconds include a viewport resize");
+    adapter.destroy();
+});
+
+test("a simulated SDK tile 503 after load preserves the ready map", () => {
+    const f = fixture();
+    const errors: string[] = [];
+    const adapter = createAVMapAdapter("openfreemap", f.sdk, f.container, {
+        onMarkerClick() {}, onError: code => { errors.push(code); adapter.destroy(); },
+    });
+    f.load();
+    const source = new Evented();
+    const map = new Evented();
+    source.setEventedParent(map, {sourceId: "fixture"});
+    map.on("error", f.instances[0].callbacks.get("error"));
+    const event = tileError(503);
+    source.fire("error", {error: event.error, tile: event.tile});
+    assert.deepEqual(errors, []);
+    assert.equal(f.calls.filter(call => call[0] === "remove").length, 0);
+    adapter.destroy();
+});
+
+test("only recognized temporary tile HTTP errors after the first load preserve the map", () => {
+    for (const status of [408, 429, 500, 502, 503, 504]) {
+        const f = fixture();
+        const errors: string[] = [];
+        const adapter = createAVMapAdapter("openfreemap", f.sdk, f.container, {
+            onMarkerClick() {}, onError: code => errors.push(code),
+        });
+        const error = f.instances[0].callbacks.get("error");
+        error(tileError(status));
+        assert.deepEqual(errors, ["mapUnavailable"], "the same failure before load is fatal");
+        f.load();
+        error(tileError(status));
+        assert.deepEqual(errors, ["mapUnavailable"]);
+        adapter.destroy();
+        error(tileError(status));
+        assert.deepEqual(errors, ["mapUnavailable"], "late SDK errors cannot resurrect a destroyed map");
+    }
+});
+
+test("ready maps still report startup, source, worker, authorization and unknown errors safely", () => {
+    const variants = [undefined, {}, {error: new Error("private worker failure")},
+        ...[0, 401, 403, 404, 501, 505].map(tileError),
+        {...tileError(503), tile: undefined}, {...tileError(503), sourceId: ""},
+        {...tileError(503), error: {status: "503", message: "private URL"}},
+        {...tileError(503), tile: {state: "loaded", tileID: {canonical: {z: 2, x: 1, y: 1}}}},
+        ...[{z: -1, x: 0, y: 0}, {z: 26, x: 1, y: 1}, {z: 2.5, x: 1, y: 1},
+            {z: 2, x: 4, y: 1}, {z: 2, x: 1, y: Infinity}, {z: "2", x: 1, y: 1}]
+            .map(canonical => ({...tileError(503), tile: {state: "errored", tileID: {canonical}}})),
+    ];
+    for (const event of variants) {
+        const f = fixture();
+        const errors: string[] = [];
+        const adapter = createAVMapAdapter("openfreemap", f.sdk, f.container, {
+            onMarkerClick() {}, onError: code => { errors.push(code); adapter.destroy(); },
+        });
+        f.load();
+        f.instances[0].callbacks.get("error")(event);
+        assert.deepEqual(errors, ["mapUnavailable"]);
+        assert.equal(f.calls.filter(call => call[0] === "remove").length, 1);
+    }
+});
+
+test("viewport clipping and occlusion reset accumulated time, including between animation frames", () => {
+    const f = fixture();
+    const adapter = createAVMapAdapter("openfreemap", f.sdk, f.container, {onMarkerClick() {}, onError() {}});
+    f.load(); adapter.setVisible(true, visibleViewport); f.advance(0); f.advance(4000);
+    adapter.setVisible(true, {...visibleViewport, width: 290});
+    adapter.setVisible(true, visibleViewport);
+    f.advance(0); f.advance(1000);
+    assert.equal(f.attribution.open, true, "brief clipping interrupts continuous display");
+    f.doc.elementFromPoint = () => f.container;
+    f.advance(0);
+    f.doc.elementFromPoint = () => f.attribution;
+    f.advance(0); f.advance(4999);
+    assert.equal(f.attribution.open, true);
+    f.advance(1);
+    assert.equal(f.attribution.open, false);
+    adapter.destroy();
+});
+
+test("destruction cancels pending attribution time and late DOM or SDK callbacks", () => {
+    const f = fixture();
+    const adapter = createAVMapAdapter("openfreemap", f.sdk, f.container, {onMarkerClick() {}, onError() {}});
+    f.load(); adapter.setVisible(true, visibleViewport); f.advance(0); f.advance(4000);
+    const tick = [...f.frames.values()][0];
+    const click = f.events.get("click");
+    const drag = f.instances[0].callbacks.get("drag");
+    adapter.destroy();
+    assert.equal(f.frames.size, 0);
+    assert.equal(f.events.size, 0);
+    tick(10000);
+    click({target: {closest: (selector: string) => selector === "summary" ? {} : null}, isTrusted: true,
+        button: 0, preventDefault() {}, stopImmediatePropagation() {}});
+    drag();
+    assert.equal(f.attribution.open, true);
+    assert.equal(f.frames.size, 0);
+});
+
+test("attribution initialization failures clean the already created map and partial listeners", () => {
+    for (const stage of ["control", "missingDOM", "eventRegistration", "initialState"]) {
+        const f = fixture();
+        const failure = () => { throw new Error("fixture initialization failure"); };
+        if (stage === "control") f.sdk.Map.prototype.addControl = failure;
+        if (stage === "missingDOM") f.container.querySelector = (): null => null;
+        if (stage === "eventRegistration") f.sdk.Map.prototype.on = failure;
+        if (stage === "initialState") f.attribution.classList.toggle = failure;
+        assert.throws(() => createAVMapAdapter("openfreemap", f.sdk, f.container, {onMarkerClick() {}, onError() {}}));
+        assert.equal(f.calls.filter(call => call[0] === "remove").length, 1, stage);
+        assert.equal(f.calls.filter(call => call[0] === "clear").length, 1, stage);
+        assert.equal(f.events.size, 0, stage);
+        assert.equal(f.documentEvents.size, 0, stage);
+        assert.equal(f.frames.size, 0, stage);
     }
 });

@@ -12,12 +12,16 @@ const install = (sources, css, controlledClock) => {
     const modules = {};
     for (const [name, source] of Object.entries(sources)) {
         const exports = {};
-        new Function("require", "exports", source)(name => modules[name.slice(2)], exports);
+        new Function("require", "exports", source)(name => {
+            assertModule(name, modules[name.slice(2)]);
+            return modules[name.slice(2)];
+        }, exports);
         modules[name] = exports;
     }
     const container = document.getElementById("map");
     class FakeMap {
         callbacks = new Map();
+        controls = [];
         style = {stylesheet: {}, tileManagers: {source: {used: true, getSource: () => ({attribution:
             '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> ' +
             '<a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> ' +
@@ -29,16 +33,17 @@ const install = (sources, css, controlledClock) => {
         off(name, callback) {
             this.callbacks.set(name, this.callbacks.get(name)?.filter(item => item !== callback) || []);
         }
-        remove() {}
+        remove() { this.controls.forEach(control => control.onRemove()); }
         getCanvasContainer() { return container; }
         _getUIString() { return "Toggle attribution"; }
         addControl(control) {
+            this.controls.push(control);
             const wrapper = document.createElement("div");
             wrapper.className = "maplibregl-ctrl-bottom-right";
             container.append(wrapper);
             wrapper.append(control.onAdd(this));
         }
-        emit(name) { this.callbacks.get(name)?.forEach(callback => callback()); }
+        emit(name) { this.callbacks.get(name)?.slice().forEach(callback => callback()); }
         constructor() { window.mapFixture = this; }
     }
     if (controlledClock) {
@@ -52,6 +57,7 @@ const install = (sources, css, controlledClock) => {
             frames.clear();
             pending.forEach(callback => callback(now));
         };
+        window.pendingAttributionFrames = () => frames.size;
     }
     window.attributionLinks = [];
     window.attributionAdapter = modules.providers.createAVMapAdapter("openfreemap", {
@@ -61,6 +67,111 @@ const install = (sources, css, controlledClock) => {
         visible ? {x: 0, y: 0, width: window.innerWidth, height: window.innerHeight} : undefined);
     window.showAttribution(true);
     window.mapFixture.emit("load");
+};
+
+const assertModule = (name, module) => {
+    if (!module) throw new Error(`Unknown fixture module: ${name}`);
+};
+
+const verifyTileHTTP = async (win, sources, css, sdk) => {
+    const http = require("node:http");
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAADUlEQVQImWOoWHDiPwAGVALgQhC29AAAAABJRU5ErkJggg==", "base64");
+    let failNextTile = false;
+    let failedTiles = 0;
+    const server = http.createServer((request, response) => {
+        if (request.url === "/") {
+            response.setHeader("Content-Type", "text/html");
+            response.end("<!doctype html><html><head></head><body style='margin:0'><div id='map' style='width:800px;height:600px'></div></body></html>");
+        } else if (request.url === "/worker.js") {
+            response.setHeader("Content-Type", "text/javascript");
+            response.end(fs.readFileSync(require.resolve("maplibre-gl/dist/maplibre-gl-csp-worker.js")));
+        } else if (/^\/tile\/\d+\/\d+\/\d+\.png$/.test(request.url)) {
+            if (failNextTile) {
+                failNextTile = false;
+                failedTiles++;
+                response.writeHead(503).end("Temporary fixture failure");
+            } else {
+                response.setHeader("Content-Type", "image/png");
+                response.end(png);
+            }
+        } else {
+            response.writeHead(404).end();
+        }
+    });
+    await new Promise((resolve, reject) => {
+        server.once("error", reject);
+        server.listen(0, "127.0.0.1", resolve);
+    });
+    const origin = `http://127.0.0.1:${server.address().port}`;
+    try {
+        await win.loadURL(origin);
+        await win.webContents.executeJavaScript(sdk);
+        const installRealMap = (sources, css, origin) => new Promise((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error("Fixture map did not load")), 15000);
+            const style = document.createElement("style");
+            style.textContent = css;
+            document.head.append(style);
+            const modules = {};
+            for (const [name, source] of Object.entries(sources)) {
+                const exports = {};
+                new Function("require", "exports", source)(name => {
+                    if (!modules[name.slice(2)]) throw new Error(`Unknown fixture module: ${name}`);
+                    return modules[name.slice(2)];
+                }, exports);
+                modules[name] = exports;
+            }
+            const sdk = window.maplibregl;
+            sdk.setWorkerUrl(origin + "/worker.js");
+            window.tileHTTP = {errors: [], removed: 0, tileError: null};
+            class FixtureMap extends sdk.Map {
+                constructor(options) {
+                    super({...options, style: {version: 8, sources: {fixture: {type: "raster", tileSize: 256,
+                        tiles: [origin + "/tile/{z}/{x}/{y}.png"], minzoom: 0, maxzoom: 6, attribution: "Fixture data"}},
+                        layers: [{id: "fixture", type: "raster", source: "fixture"}]}});
+                    window.tileMap = this;
+                    this.on("error", event => {
+                        window.tileHTTP.tileError = {status: event.error?.status, sourceId: event.sourceId,
+                            state: event.tile?.state, canonical: event.tile?.tileID?.canonical};
+                    });
+                }
+                remove() { window.tileHTTP.removed++; super.remove(); }
+            }
+            window.tileAdapter = modules.providers.createAVMapAdapter("openfreemap", {...sdk, Map: FixtureMap},
+                document.getElementById("map"), {onMarkerClick() {}, onReady() { clearTimeout(timer); resolve(); },
+                    onError(code) {
+                        window.tileHTTP.errors.push(code);
+                        window.tileAdapter?.destroy();
+                        clearTimeout(timer);
+                        reject(new Error("Fixture map failed: " + code));
+                    }});
+        });
+        await win.webContents.executeJavaScript(`(${installRealMap.toString()})(${JSON.stringify(sources)},
+            ${JSON.stringify(css)}, ${JSON.stringify(origin)})`);
+        failNextTile = true;
+        await win.webContents.executeJavaScript("tileMap.setZoom(3); void 0");
+        const deadline = Date.now() + 10000;
+        let state;
+        do {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            state = await win.webContents.executeJavaScript("tileHTTP");
+        } while (!state.tileError && Date.now() < deadline);
+        assert.equal(failedTiles, 1);
+        assert.equal(state.tileError?.status, 503);
+        assert.equal(state.tileError.sourceId, "fixture");
+        assert.equal(state.tileError.state, "errored");
+        assert.ok(Number.isInteger(state.tileError.canonical.z));
+        assert.deepEqual(state.errors, []);
+        assert.equal(state.removed, 0, "a real HTTP tile 503 preserves the loaded SDK map");
+        await win.webContents.executeJavaScript("tileAdapter.setPoints([{id:'fixture', longitude:0, latitude:0}],1); void 0");
+        assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.maplibregl-marker').length"), 1);
+        await win.webContents.executeJavaScript("tileMap.fire('error', {error: new Error('fixture fatal worker')}); void 0");
+        state = await win.webContents.executeJavaScript("tileHTTP");
+        assert.deepEqual(state.errors, ["mapUnavailable"]);
+        assert.equal(state.removed, 1, "unclassified SDK errors retain the fatal cleanup path");
+    } finally {
+        await win.webContents.executeJavaScript("window.tileAdapter?.destroy()");
+        await new Promise(resolve => server.close(resolve));
+    }
 };
 
 const inspect = () => {
@@ -88,7 +199,9 @@ if (process.versions.electron && process.type === "browser") {
                 path.join(__dirname, "../src/protyle/render/av/map", name + ".ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
             }).outputText;
-            const sources = {protocol: compile("protocol"), providers: compile("providers")};
+            const sources = Object.fromEntries(["protocol", "attribution", "providers"]
+                .filter(name => fs.existsSync(path.join(__dirname, "../src/protyle/render/av/map", name + ".ts")))
+                .map(name => [name, compile(name)]));
             const css = fs.readFileSync(require.resolve("maplibre-gl/dist/maplibre-gl.css"), "utf8");
             const sdk = fs.readFileSync(require.resolve("maplibre-gl/dist/maplibre-gl-csp.js"), "utf8");
             const evaluate = source => win.webContents.executeJavaScript(source);
@@ -96,7 +209,8 @@ if (process.versions.electron && process.type === "browser") {
             const setup = async controlled => {
                 await win.loadURL("data:text/html,<html><head></head><body></body></html>");
                 await evaluate(sdk);
-                await evaluate(`(${install.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(css)}, ${controlled})`);
+                await evaluate(`const assertModule = ${assertModule.toString()};
+                    (${install.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(css)}, ${controlled})`);
             };
             await setup(false);
             const initial = await state();
@@ -112,6 +226,12 @@ if (process.versions.electron && process.type === "browser") {
             }
             assert.equal((await state()).open, false, "actual visible time automatically collapses after five seconds");
             assert.equal((await state()).textVisible, false);
+            await evaluate("window.attributionAdapter.destroy()");
+
+            await setup(true);
+            await evaluate("document.getElementById('map').style.width = '780px'; advanceAttribution(0); advanceAttribution(4000)");
+            await evaluate("attributionAdapter.setVisible(true, {x: 0, y: 0, width: 790, height: 600}); advanceAttribution(1000)");
+            assert.equal((await state()).open, false, "an entirely visible viewport change preserves four elapsed seconds");
             await evaluate("window.attributionAdapter.destroy()");
 
             await setup(true);
@@ -154,6 +274,9 @@ if (process.versions.electron && process.type === "browser") {
             await click("summary");
             assert.equal((await state()).open, false);
             await evaluate("window.attributionAdapter.destroy()");
+            assert.deepEqual(await evaluate("[pendingAttributionFrames(), [...mapFixture.callbacks.values()].flat().length]"), [0, 0],
+                "destroy releases application and real SDK control listeners");
+            await verifyTileHTTP(win, sources, css, sdk);
         } catch (error) {
             console.error(error);
             code = 1;
@@ -174,7 +297,7 @@ if (process.versions.electron && process.type === "browser") {
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         try {
-            await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 30000});
+            await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 60000});
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});

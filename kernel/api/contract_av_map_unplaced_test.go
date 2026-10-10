@@ -103,15 +103,17 @@ func TestAVContractMapUnplacedPagination(t *testing.T) {
 		{"second", map[string]any{"page": 2}, 50, 50},
 		{"last", map[string]any{"page": 3}, 100, 5},
 		{"beyond", map[string]any{"page": 4}, 0, 0},
+		{"large page", map[string]any{"page": 1e9}, 0, 0},
 		{"count", map[string]any{"pageSize": 1}, 0, 1},
 		{"invalid bounds", map[string]any{"page": -1, "pageSize": 0}, 0, 50},
 		{"maximum", map[string]any{"pageSize": 1000}, 0, 100},
 		{"fractional", map[string]any{"page": 2.9, "pageSize": 1.9}, 1, 1},
+		{"fractional bounds", map[string]any{"page": -0.9, "pageSize": 0.9}, 0, 50},
 		{"null", map[string]any{"page": nil, "pageSize": nil}, 0, 50},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			rows, total := callMapUnplacedContractTest(t, database, test.options)
-			if total != len(ids) || len(rows) != test.count {
+			if total != len(ids) || rows == nil || len(rows) != test.count {
 				t.Fatalf("unexpected page: total %d, rows %d", total, len(rows))
 			}
 			for index, row := range rows {

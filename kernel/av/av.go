@@ -956,7 +956,7 @@ func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (r
 		err = fmt.Errorf("unsupported database automation specification [%d]", ret.Automations.Spec)
 	}
 	if nil == err {
-		err = ret.ValidateListLayouts()
+		err = ret.ValidateLayouts()
 	}
 	if nil == err && normalizeRichText {
 		err = ret.NormalizeRichText()
@@ -997,7 +997,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	if err = av.NormalizeLocations(); nil != err {
 		return
 	}
-	if err = av.ValidateListLayouts(); nil != err {
+	if err = av.ValidateLayouts(); nil != err {
 		return
 	}
 	if err = av.NormalizeRichText(); nil != err {

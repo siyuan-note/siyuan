@@ -1523,7 +1523,7 @@ interface IAVCellValue {
 }
 
 /**
- * 坐标统一使用 WGS84，不自动转换；文本顺序为纬度、经度。
+ * 坐标统一使用 WGS84，不自动转换；界面按经度、纬度显示，规范复制与导出文本按纬度、经度排列。
  * 位置字段的文本筛选条件使用 IAVCellValue.text.content，不把查询词解析成坐标。
  */
 interface IAVCellLocationValue {

@@ -306,14 +306,20 @@ func TestAttributeViewMapAndLocationImportOmittedValues(t *testing.T) {
 					t.Fatal(err)
 				}
 				for _, encrypted := range []bool{false, true} {
-					got, importErr := isolateImportedAttributeViewBindings(input, nil, encrypted)
-					wantSuccess := values == "null" || values == "[]" || values == ""
-					if wantSuccess && (importErr != nil || !bytes.Equal(got, input)) {
-						t.Fatalf("values=%q encrypted=%t rejected or rewrote valid empty data: %v", values, encrypted, importErr)
-					}
-					if !wantSuccess && importErr == nil {
-						t.Fatalf("values=%q encrypted=%t accepted malformed data", values, encrypted)
-					}
+					t.Run(fmt.Sprintf("values=%q/encrypted=%t", values, encrypted), func(t *testing.T) {
+						before := bytes.Clone(input)
+						got, importErr := isolateImportedAttributeViewBindings(input, nil, encrypted)
+						if !bytes.Equal(input, before) {
+							t.Fatal("import changed the source JSON")
+						}
+						wantSuccess := values == "null" || values == "[]" || values == ""
+						if wantSuccess && (importErr != nil || !bytes.Equal(got, input)) {
+							t.Fatalf("rejected or rewrote valid empty data: %v", importErr)
+						}
+						if !wantSuccess && importErr == nil {
+							t.Fatal("accepted malformed data")
+						}
+					})
 				}
 			}
 		})

@@ -12,23 +12,45 @@ import * as escape from "../../../util/escape";
 import {genAVDragFillValue} from "./dragFillValue";
 import {inferAVPasteColumnType} from "./paste";
 
+// 位置用例不调用这些依赖；新增依赖或意外调用都应立即使测试失败。
+const unusedDependencies = [
+    "./viewType", "./renderData", "../../wysiwyg/transaction", "../../util/hasClosest", "./openMenuPanel",
+    "./action", "../../util/compatibility", "../../../util/fetch", "../../util/selection", "../../util/selectionOffsets",
+    "dayjs", "../../../emoji", "./col", "./attributeValue", "../../../constants", "../../hint/extend",
+    "../../../util/pathName", "./select", "../../undo", "./dateFormat", "./row", "./view", "../../../util/image",
+    "../../../util/imageURL", "../../../mobile/util/mobileAppUtil", "../../../mobile/util/keyboardToolbar",
+    "../../../util/setPosition", "./selectionState", "./color", "./richText", "./richTextEditor", "./virtualScroll",
+    "./cellEditor", "./blockIcon", "./cellInputPosition", "./locationEditor", "../../../dialog/message",
+    "../../../util/hostCapabilities", "../../../plugin/Menu", "../../../util/upDownHint", "./richTextValue",
+    "../../../emoji/fileTreeIcon", "./lunarDate",
+];
+
 const loadModule = <T>(file: string, extra: Record<string, unknown> = {}) => {
     const methods = {} as T;
+    const modules: Record<string, unknown> = {
+        ...Object.fromEntries(unusedDependencies.map(name => [name, new Proxy({}, {
+            get: (_target, member) => {
+                throw new Error(`Unexpected dependency use in ${file}: ${name}.${String(member)}`);
+            },
+        })])),
+        "./capabilities": capabilities,
+        "./cellValue": cellValue,
+        "./locationValue": locationValue,
+        "./batchValue": batchValue,
+        "./dragFillValue": dragFillValue,
+        "../../../util/functions": {objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right)},
+        "../../../util/escape": escape,
+        ...extra,
+    };
     runInNewContext(transpileModule(readFileSync(`src/protyle/render/av/${file}.ts`, "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {
         exports: methods,
         window: {siyuan: {languages: {empty: "Empty", copy: "Copy", locationPasteInEditor: "Use the location editor"}}},
-        require: (name: string) => ({
-            "./capabilities": capabilities,
-            "./cellValue": cellValue,
-            "./locationValue": locationValue,
-            "./batchValue": batchValue,
-            "./dragFillValue": dragFillValue,
-            "../../../util/functions": {objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right)},
-            "../../../util/escape": escape,
-            ...extra,
-        })[name] || {},
+        require: (name: string) => {
+            assert.ok(Object.prototype.hasOwnProperty.call(modules, name), `Unexpected dependency in ${file}: ${name}`);
+            return modules[name];
+        },
     });
     return methods;
 };
@@ -84,7 +106,6 @@ test("location copies preserve canonical text for cells, nested leaves and templ
     assert.equal(cell.getCellText(attributeTemplate), "Custom display");
     assert.equal(cell.getCellText(attributeTemplate, "display"), "Custom display");
     assert.equal(cell.getCellValueText(first), "20, 30 [WGS84]");
-    assert.equal(locationValue.parseAVLocationCoordinates(cell.getCellValueText(first), "longitudeLatitude"), undefined);
     assert.throws(() => cell.genCellValue("location", cell.getCellValueText(first)));
 });
 

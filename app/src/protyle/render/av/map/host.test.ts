@@ -7,6 +7,37 @@ import {isAVMapRuntimeIsolated} from "./hostRuntime";
 describe("map host boundary", () => {
     const cleanups: Array<() => void> = [];
     afterEach(() => { cleanups.splice(0).reverse().forEach((cleanup) => cleanup()); });
+    it("preserves fixed preparation failures through the wrapper and strips unknown codes", async () => {
+        for (const input of ["sdkScriptLoadFailed", "sdkGlobalMissing", "https://private.invalid/?token=secret"]) {
+            const listeners = new Map<string, (event?: any) => void>();
+            const failures: string[] = [];
+            let removed = 0;
+            const iframe = {src: "", style: {}, contentWindow: {postMessage() {}}, setAttribute() {},
+                addEventListener() {}, remove() { removed++; }};
+            const scope = {location: {protocol: "https:", origin: "https://fixture.invalid"},
+                navigator: {userAgent: "Chromium"}, HTMLIFrameElement: {prototype: {}}, crypto: webcrypto,
+                setTimeout: () => 1, clearTimeout() {}, cancelAnimationFrame() {},
+                addEventListener: (name: string, listener: (event?: any) => void) => listeners.set(name, listener),
+                removeEventListener: (name: string) => listeners.delete(name)};
+            const container = {ownerDocument: {defaultView: scope, createElement: () => iframe,
+                addEventListener() {}, removeEventListener() {}}, appendChild() {}};
+            const host = createAVMapHost(container as unknown as HTMLElement, {provider: "openfreemap", theme: "light",
+                onMarkerClick() {}, onError: code => failures.push(code)});
+            cleanups.push(host.destroy);
+            await new Promise<void>(resolve => setImmediate(resolve));
+            const [instanceID, nonce] = iframe.src.split("#")[1].split(":");
+            const receive = listeners.get("message");
+            const data = {version: 1, instanceID, nonce, type: "wrapperHello"};
+            const event = {source: iframe.contentWindow, origin: scope.location.origin, ports: [] as MessagePort[], data};
+            receive({...event, data: Object.assign([], data)});
+            receive(event);
+            receive({...event, data: {...data, type: "bootstrapError", code: input, message: "secret"}});
+            assert.deepEqual(failures, [input.startsWith("sdk") ? input : "hostBootstrapFailed"]);
+            assert.equal(removed, 1);
+            receive({...event, data: {...data, type: "bootstrapError", code: input}});
+            assert.equal(failures.length, 1);
+        }
+    });
     it("fails closed for Electron and unguarded native bridges but does not require credentialless", async () => {
         const browser = {location: {protocol: "http:"}, navigator: {userAgent: "Chromium"},
             HTMLIFrameElement: {prototype: {credentialless: false}}};
@@ -100,7 +131,6 @@ describe("map host boundary", () => {
             data: {version: 1, type: "wrapperHello", instanceID, nonce}};
         const point = {id: "row-1", longitude: 0, latitude: 0};
         host.setPoints([{...point, title: "private"} as any], 1);
-        host.fit();
         onMessage({...handshake, source: {}});
         onMessage({...handshake, origin: "https://attacker.invalid"});
         onMessage({...handshake, data: {...handshake.data, nonce: "old"}});
@@ -113,7 +143,7 @@ describe("map host boundary", () => {
         onMessage({...handshake, data: {...handshake.data, type: "bootstrapReady"}});
         assert.equal(channels.length, 1);
         assert.deepEqual([...timers.values()].map((timer) => timer.delay), [45000],
-            "bootstrap completion starts a fresh budget covering both 20-second SDK phases");
+            "locked assets start a separate finite budget for map creation and readiness");
         assert.equal(listeners.has("message"), false);
         onMessage(handshake);
         assert.equal(channels.length, 1);
@@ -141,7 +171,7 @@ describe("map host boundary", () => {
         reply({type: "attributionClick", link: "maplibre"});
         assert.deepEqual(links, ["maplibre"], "visible attribution remains clickable when the map top is cropped");
         assert.deepEqual(port.messages.find((message) => message.type === "setPoints").points, [point]);
-        assert.equal(port.messages.filter((message) => message.type === "fit").length, 1);
+        assert.equal(port.messages.some((message) => message.type === "fit"), false);
         reply({type: "markerClick", id: "row-1", revision: 0});
         reply({type: "markerClick", id: "missing", revision: 1});
         reply({type: "markerClick", id: "row-1", revision: 1});

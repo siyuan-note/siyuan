@@ -3,6 +3,35 @@ import {describe, it} from "node:test";
 import {connectAVMapWrapper} from "./wrapperEntry";
 
 describe("trusted map navigation wrapper", () => {
+    it("forwards only fixed bootstrap error codes and rejects array-shaped handshakes", () => {
+        for (const input of ["sdkScriptLoadFailed", "sdkGlobalMissing", "https://private.invalid/?token=secret", {}]) {
+            const instanceID = "a".repeat(48), nonce = "b".repeat(48), origin = "https://fixture.invalid";
+            const messages: any[] = [], listeners = new Map<string, (event?: any) => void>();
+            let appended = 0, removed = 0;
+            const child = {style: {}, setAttribute() {}, contentWindow: {postMessage() {}}, remove() { removed++; }};
+            const scope = {
+                location: {hash: `#${instanceID}:${nonce}`, search: "?provider=openfreemap", protocol: "https:", origin},
+                parent: {postMessage: (value: unknown) => messages.push(value)},
+                document: {createElement: () => child, body: {appendChild() { appended++; }}},
+                setTimeout: () => 1, clearTimeout() {},
+                addEventListener: (type: string, callback: (event?: any) => void) => listeners.set(type, callback),
+                removeEventListener: (type: string) => listeners.delete(type),
+            };
+            connectAVMapWrapper(scope as unknown as Window);
+            const receive = listeners.get("message");
+            const prepare = {version: 1, type: "prepare", instanceID, nonce};
+            receive({source: scope.parent, origin, ports: [], data: Object.assign([], prepare)});
+            assert.equal(appended, 0);
+            receive({source: scope.parent, origin, ports: [], data: prepare});
+            receive({source: child.contentWindow, origin: "null", ports: [], data: {...prepare, type: "hello"}});
+            receive({source: child.contentWindow, origin: "null", ports: [],
+                data: {...prepare, type: "bootstrapError", code: input, message: "secret"}});
+            const code = typeof input === "string" && input.startsWith("sdk") ? input : "hostBootstrapFailed";
+            assert.deepEqual(messages[messages.length - 1], {version: 1, type: "bootstrapError", instanceID, nonce, code});
+            assert.equal(removed, 1);
+            assert.equal(listeners.has("message"), false);
+        }
+    });
     it("authenticates both sides, preserves the opaque sandbox, and transfers only one port after bootstrap", () => {
         const instanceID = "a".repeat(48);
         const nonce = "b".repeat(48);

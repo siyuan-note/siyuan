@@ -62,12 +62,6 @@ func TableFromViewable(viewable Viewable) *Table {
 
 // ValidateListLayouts 校验列表布局的结构，拒绝损坏数据并保留原始文件。
 func (attrView *AttributeView) ValidateListLayouts() error {
-	if err := attrView.ValidateMapLayouts(); nil != err {
-		return err
-	}
-	if err := attrView.ValidateCalendarLayouts(); nil != err {
-		return err
-	}
 	var validate func(*View) error
 	validate = func(view *View) error {
 		if nil == view {

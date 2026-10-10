@@ -1,9 +1,10 @@
 import {
     AV_MAP_PROTOCOL_VERSION, AVMapAttributionLink, AVMapCommand, AVMapErrorCode, AVMapPoint, AVMapProvider, AVMapTheme, AVMapVisibility,
-    isAVMapProvider, isAVMapRevision, isAVMapTheme, parseAVMapReply,
+    isAVMapBootstrapMessage, isAVMapLoadErrorCode, isAVMapProvider, isAVMapRevision, isAVMapTheme, parseAVMapReply,
     sanitizeAVMapPoints,
 } from "./protocol";
-import {getAVMapHostCapabilities, isAVMapBootstrapMessage} from "./hostCapabilities";
+import {getAVMapHostCapabilities} from "./hostCapabilities";
+import {AV_MAP_BOOTSTRAP_TIMEOUT, AV_MAP_HOST_READY_TIMEOUT} from "./loadingBudget";
 
 export interface AVMapHostOptions {
     provider: AVMapProvider;
@@ -17,7 +18,6 @@ export interface AVMapHostOptions {
 
 export interface AVMapHost {
     setPoints: (points: AVMapPoint[], revision: number) => void;
-    fit: () => void;
     resize: () => void;
     setTheme: (theme: AVMapTheme) => void;
     destroy: () => void;
@@ -93,7 +93,6 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
     let points: AVMapPoint[] = [];
     let ids = new Set<string>();
     let theme = options.theme;
-    let pendingFit = false;
     let instanceID = "";
     let nonce = "";
     let nativeBoundary = false;
@@ -164,16 +163,16 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
             return;
         }
         if (preparing && isAVMapBootstrapMessage(event.data, "bootstrapError", instanceID, nonce)) {
-            fail("hostBootstrapFailed");
+            fail(isAVMapLoadErrorCode(event.data.code) ? event.data.code : "hostBootstrapFailed");
             return;
         }
         if (!preparing || !isAVMapBootstrapMessage(event.data, "bootstrapReady", instanceID, nonce)) {
             return;
         }
         scope.removeEventListener("message", onMessage);
-        // SDK 脚本和地图初始化各有 20 秒预算，不能被之前的引导计时提前截断。
+        // 打包资源和 CSP 已准备完成；此预算仅保护后续地图创建与 load 就绪。
         scope.clearTimeout(timeout);
-        timeout = scope.setTimeout(() => fail("hostSDKTimeout"), 45000);
+        timeout = scope.setTimeout(() => fail("hostSDKTimeout"), AV_MAP_HOST_READY_TIMEOUT);
         const channel = new MessageChannel();
         port = channel.port1;
         port.onmessage = (replyEvent) => {
@@ -186,10 +185,6 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
                 scope.clearTimeout(timeout);
                 postPoints();
                 send({...envelope(), type: "theme", theme});
-                if (pendingFit) {
-                    send({...envelope(), type: "fit"});
-                    pendingFit = false;
-                }
                 options.onReady?.();
                 tickVisibility();
             } else if (reply?.type === "markerClick" && ready && reply.revision === revision && ids.has(reply.id)) {
@@ -204,7 +199,7 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
         };
         port.start();
         iframe.contentWindow.postMessage({...envelope(), type: "connect", nonce}, scope.location.origin, [channel.port2]);
-        // 端口建立后清除全局监听；外部 SDK 加载期间不再接受窗口消息。
+        // 端口建立后清除全局监听；地图初始化期间不再接受窗口消息。
         send({...envelope(), type: "init", provider: options.provider, theme});
     };
 
@@ -217,13 +212,6 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
             points = sanitizeAVMapPoints(input);
             ids = new Set(points.map((point) => point.id));
             postPoints();
-        },
-        fit: () => {
-            if (ready) {
-                send({...envelope(), type: "fit"});
-            } else {
-                pendingFit = true;
-            }
         },
         resize: () => {
             if (ready) {
@@ -276,7 +264,7 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
         scope.addEventListener("message", onMessage);
         scope.addEventListener("pagehide", destroy, {once: true});
         container.ownerDocument.addEventListener("visibilitychange", updateVisibility);
-        timeout = scope.setTimeout(() => fail("hostBootstrapTimeout"), 30000);
+        timeout = scope.setTimeout(() => fail("hostBootstrapTimeout"), AV_MAP_BOOTSTRAP_TIMEOUT);
         container.appendChild(iframe);
         if (typeof ResizeObserver !== "undefined") {
             observer = new ResizeObserver(host.resize);

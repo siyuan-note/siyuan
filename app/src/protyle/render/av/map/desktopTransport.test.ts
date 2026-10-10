@@ -5,6 +5,14 @@ import {describe, it} from "node:test";
 import * as ts from "typescript";
 import * as protocol from "./protocol";
 import * as unplacedMenu from "./unplacedMenu";
+import {computeDesktopAVMapGeometry, MapGeometry} from "./desktopGeometry";
+import * as desktopGeometryDOM from "./desktopGeometryDOM";
+import * as loadingBudget from "./loadingBudget";
+
+const visibleGeometry = (geometry: MapGeometry) => {
+    assert.ok(geometry.visible === true, "the fixture must produce visible geometry");
+    return geometry;
+};
 
 const source = readFileSync(__dirname + "/desktopTransport.ts", "utf8");
 const load = (ipc: unknown, browser = false, warnings: unknown[][] = []) => {
@@ -19,7 +27,8 @@ const load = (ipc: unknown, browser = false, warnings: unknown[][] = []) => {
     const result: any = {};
     const requireModule = (name: string) => {
         if (name === "./protocol") { return protocol; }
-        if (name === "./unplacedMenu") { return unplacedMenu; }
+        if (name === "./desktopGeometryDOM") { return desktopGeometryDOM; }
+        if (name === "./loadingBudget") { return loadingBudget; }
         assert.equal(name, "electron");
         assert.equal(browser, false, "browser must not import Electron");
         return {ipcRenderer: ipc};
@@ -229,7 +238,7 @@ describe("desktop map transport", () => {
         assert.deepEqual(browserWarnings, []);
     });
     it("clips CSS rectangles, preserves full logical size and never multiplies by display scale", () => {
-        const compute = load({}).computeDesktopAVMapGeometry;
+        const compute = computeDesktopAVMapGeometry;
         assert.deepEqual(compute({x: -20.5, y: 30, width: 200, height: 100},
             [{x: 0, y: 0, width: 1000, height: 800}, {x: 10, y: 40, width: 100, height: 60}]),
         {visible: true, bounds: {x: 11, y: 41, width: 98, height: 58},
@@ -283,16 +292,16 @@ describe("desktop map transport", () => {
             globalThis.MutationObserver = oldMutation;
             globalThis.ResizeObserver = oldResize;
         }
-        const compute = load({}).computeDesktopAVMapGeometry;
+        const compute = computeDesktopAVMapGeometry;
         const rect = {x: 0, y: 0, width: 100, height: 100};
         assert.equal(compute(rect, [{...rect, height: 1.5}]).visible, false);
-        assert.equal(compute(rect, [{...rect, height: 2}]).bounds.height, 1);
+        assert.equal(visibleGeometry(compute(rect, [{...rect, height: 2}])).bounds.height, 1);
         assert.equal(compute(rect, [{...rect, y: 20, height: 2.5}]).visible, false);
-        assert.equal(compute(rect, [{...rect, y: 20, height: 3}]).bounds.height, 1);
-        assert.deepEqual(compute(rect, [rect]).bounds, rect, "uncropped maps retain their complete bounds");
-        assert.deepEqual(compute(rect, [{x: -10, y: -10, width: 120, height: 120}]).bounds, rect);
+        assert.equal(visibleGeometry(compute(rect, [{...rect, y: 20, height: 3}])).bounds.height, 1);
+        assert.deepEqual(visibleGeometry(compute(rect, [rect])).bounds, rect, "uncropped maps retain their complete bounds");
+        assert.deepEqual(visibleGeometry(compute(rect, [{x: -10, y: -10, width: 120, height: 120}])).bounds, rect);
         const clip = {...rect, height: 50};
-        assert.equal(compute(rect, [clip, clip, clip]).bounds.height, 49, "nested clips inset only once");
+        assert.equal(visibleGeometry(compute(rect, [clip, clip, clip])).bounds.height, 49, "nested clips inset only once");
         const {parseMapGeometry} = require("../../../../../electron/mapHostPolicy");
         assert.equal(parseMapGeometry(compute(rect, [{...rect, height: 2}]), 0.8, {width: 1000, height: 800}).visible, false);
     });
@@ -303,7 +312,7 @@ describe("desktop map transport", () => {
         assert.equal(await load({invoke: async () => { throw new Error("old main"); }}).isDesktopAVMapHostSupported(), false);
     });
     it("selects the largest safe rectangle around one owned menu and retains the full logical map", () => {
-        const compute = load({}).computeDesktopAVMapGeometry;
+        const compute = computeDesktopAVMapGeometry;
         const {parseMapGeometry} = require("../../../../../electron/mapHostPolicy");
         const rect = {x: 10, y: 20, width: 400, height: 300};
         const cases = [
@@ -314,8 +323,7 @@ describe("desktop map transport", () => {
             {menu: {x: 160, y: 120, width: 100, height: 100}, bounds: {x: 10, y: 20, width: 149, height: 300}},
         ];
         for (const {menu, bounds} of cases) {
-            const geometry = compute(rect, [], [], [menu]);
-            assert.equal(geometry.visible, true);
+            const geometry = visibleGeometry(compute(rect, [], [], [menu]));
             assert.deepEqual(geometry.bounds, bounds);
             assert.deepEqual(geometry.logicalSize, {width: rect.width, height: rect.height});
             assert.deepEqual(geometry.crop, {x: bounds.x - rect.x, y: bounds.y - rect.y});
@@ -341,8 +349,8 @@ describe("desktop map transport", () => {
         assert.deepEqual(compute({...rect, height: 100}, [], [], [{...rect, width: 360}]), {visible: false});
         assert.deepEqual(compute(rect, [], [], [{...menu, x: NaN}]), {visible: false});
         const fractional = {x: 10.25, y: 20.75, width: 400.5, height: 300.5};
-        const geometry = compute(fractional, [{x: 30.5, y: 50.25, width: 340, height: 220}], [],
-            [{x: 290.5, y: 30, width: 100, height: 290}]);
+        const geometry = visibleGeometry(compute(fractional, [{x: 30.5, y: 50.25, width: 340, height: 220}], [],
+            [{x: 290.5, y: 30, width: 100, height: 290}]));
         assert.deepEqual(geometry.bounds, {x: 32, y: 52, width: 257, height: 217});
         assert.deepEqual(geometry.crop, {x: 21.75, y: 31.25});
         assert.deepEqual(geometry.logicalSize, {width: 400.5, height: 300.5});
@@ -471,7 +479,7 @@ describe("desktop map transport", () => {
         assert.equal(unplacedMenu.isMapUnplacedMenu(menu, second), false);
     });
     it("preserves fractional geometry through native validation at every clipped edge and zoom", () => {
-        const compute = load({}).computeDesktopAVMapGeometry;
+        const compute = computeDesktopAVMapGeometry;
         const {parseMapGeometry} = require("../../../../../electron/mapHostPolicy");
         const rect = {x: 155.55555555555554, y: 555.5555555555555, width: 1433.3333333333333, height: 480};
         assert.ok(rect.y + rect.height - rect.y > rect.height, "the fixture must reproduce floating-point expansion");
@@ -489,8 +497,7 @@ describe("desktop map transport", () => {
                 width: rect.width - 32, height: rect.height - 72, cropX: 11, cropY: 31},
         ];
         for (const entry of cases) {
-            const geometry = compute(rect, entry.clips);
-            assert.equal(geometry.visible, true);
+            const geometry = visibleGeometry(compute(rect, entry.clips));
             assert.ok(geometry.bounds.width <= rect.width);
             assert.ok(geometry.bounds.height <= rect.height);
             assert.ok(Math.abs(geometry.bounds.width - entry.width) < 1e-9);
@@ -508,7 +515,7 @@ describe("desktop map transport", () => {
         }
         const widthRect = {...rect, x: rect.y, width: rect.height};
         assert.ok(widthRect.x + widthRect.width - widthRect.x > widthRect.width);
-        const geometry = compute(widthRect, []);
+        const geometry = visibleGeometry(compute(widthRect, []));
         assert.equal(geometry.bounds.width, widthRect.width);
         assert.equal(parseMapGeometry(geometry, 1.25, {width: 4000, height: 3000})?.visible, true);
     });
@@ -604,7 +611,6 @@ describe("desktop map transport", () => {
             const point = {id: "row", longitude: 1, latitude: 2, name: "private"};
             f.host.setPoints([point], 1);
             f.host.setTheme("dark");
-            f.host.fit();
             assert.equal(f.calls[0][1].credentials, undefined);
             assert.match(f.calls[0][1].instanceID, /^[a-f0-9]{48}$/);
             await f.created();
@@ -614,7 +620,7 @@ describe("desktop map transport", () => {
             f.reply({type: "ready"});
             assert.equal(f.ready(), 1);
             const commands = f.calls.filter(([name]) => name === "siyuan-map-command").map(([, value]) => value);
-            assert.deepEqual(commands.map((value) => value.type), ["setPoints", "theme", "fit"]);
+            assert.deepEqual(commands.map((value) => value.type), ["setPoints", "theme"]);
             assert.equal(commands[0].points[0].name, undefined);
             assert.equal(commands[1].theme, "dark");
             f.reply({type: "markerClick", id: "row", revision: 0});

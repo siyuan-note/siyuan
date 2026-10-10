@@ -9,7 +9,7 @@ import {
     getAVLocationText,
     isAVLocationCoordinateInput,
     isAVLocationEmpty,
-    parseAVLocationCoordinates,
+    parseAVLocationCoordinate,
     validateAVLocation,
 } from "./locationValue";
 
@@ -23,18 +23,6 @@ describe("database location values", () => {
             assert.deepEqual(value, {latitude: 20, longitude: 30, coordinateSystem});
         }
     });
-    it("supports paired parentheses and explicit longitude-first order without guessing", () => {
-        const source = " (102.42,25.04) ";
-        assert.equal(parseAVLocationCoordinates(source), undefined);
-        assert.deepEqual(parseAVLocationCoordinates(source, "longitudeLatitude"), {
-            latitude: 25.04, longitude: 102.42, originalInput: source,
-        });
-        assert.equal(parseAVLocationCoordinates("(20,30)")?.latitude, 20);
-        assert.equal(parseAVLocationCoordinates("(20,30)", "longitudeLatitude")?.latitude, 30);
-        for (const text of ["(20,30", "20,30)", "((20,30))", "(20),30", "[20,30]"]) {
-            assert.equal(parseAVLocationCoordinates(text), undefined, text);
-        }
-    });
     it("keeps ordinary text as names without inference and replaces stale coordinates", () => {
         for (const text of ["  Office  ", "https://maps.example.com/?lat=31&lon=121", "geo:31,121"]) {
             assert.deepEqual(createAVLocationFromText(text), {
@@ -43,7 +31,7 @@ describe("database location values", () => {
         }
     });
 
-    it("requires the explicit import flow for coordinate-looking or canonical pasted text", () => {
+    it("requires the location editor for coordinate-looking or canonical pasted text", () => {
         for (const source of ["31.2,121.5", "(102.42,25.04)", " (20,30) ", "31,", ",121", "31,121,0", "181,91", "1e-7,-1e-7", "NaN,Infinity", "0,0 [WGS84]",
             "Office; 0, 0 [GCJ-02]", "Office; 0, 0 [BD-09]"]) {
             assert.equal(isAVLocationCoordinateInput(source), true, source);
@@ -79,23 +67,21 @@ describe("database location values", () => {
         }
     });
 
-    it("imports only the explicitly specified latitude, longitude order and exact source", () => {
-        const source = "  +31.23040,  121.47370\n";
-        assert.deepEqual(parseAVLocationCoordinates(source), {
-            latitude: 31.2304, longitude: 121.4737, originalInput: source,
-        });
-        assert.deepEqual(parseAVLocationCoordinates("0, -0"), {
-            latitude: 0, longitude: -0, originalInput: "0, -0",
-        });
-        assert.equal(parseAVLocationCoordinates("121.4737,31.2304"), undefined);
-        assert.equal(parseAVLocationCoordinates(".5,-.25")?.latitude, .5);
+    it("parses each named coordinate field as a signed decimal including zero and boundaries", () => {
+        for (const [source, expected] of [
+            ["  +31.23040\n", 31.2304], ["121.47370", 121.4737],
+            ["0", 0], ["+0.0", 0], ["-0", -0], [".5", .5], ["-.25", -.25], ["1.", 1],
+            ["-90", -90], ["90", 90], ["-180", -180], ["180", 180], ["0.0000001", 1e-7],
+        ] as const) {
+            assert.equal(parseAVLocationCoordinate(source), expected, source);
+        }
     });
 
-    it("rejects malformed, out-of-range, partial, nondecimal, and service-link imports", () => {
-        for (const source of ["", "31", "31,", ",121", "31,121,0", "90.1,0", "0,-180.1",
-            "1e1,2e1", "0x10,20", "NaN,0", "Infinity,0", "31 121", "31;121", "31\u00b0N,121\u00b0E",
-            "geo:31,121", "https://example.com/?lat=31&lon=121"]) {
-            assert.equal(parseAVLocationCoordinates(source), undefined, source);
+    it("rejects pairs, malformed, nondecimal, nonfinite, and service-link coordinate fields", () => {
+        for (const source of ["", " ", "+", "-", ".", "--1", "31,", ",121", "31,121", "31,121,0",
+            "(20)", "[20]", "(20,30)", "1e1", "0x10", "0b10", "0o10", "NaN", "Infinity", "-Infinity",
+            "9".repeat(400), "31 121", "31;121", "31\u00b0N", "geo:31,121", "https://example.com/?lat=31&lon=121"]) {
+            assert.equal(parseAVLocationCoordinate(source), undefined, source);
         }
     });
 
@@ -120,7 +106,7 @@ describe("database location values", () => {
         assert.equal(getAVLocationDisplayText(location), "Office 30, 20");
         assert.equal(getAVLocationText(location), `Office; 20, 30 [${label}]`);
         assert.deepEqual(location, before);
-        assert.equal(parseAVLocationCoordinates(getAVLocationText(location), "longitudeLatitude"), undefined);
+        assert.throws(() => createAVLocationFromText(getAVLocationText(location)));
         assert.equal(getAVLocationDisplayText({latitude: 1e-7, longitude: -1e-8}), "-0.00000001, 0.0000001");
         assert.equal(getAVLocationDisplayText({name: " 昆明 ", latitude: 25.04, longitude: 102.71}), "昆明 102.71, 25.04");
         assert.equal(getAVLocationDisplayText({latitude: 0, longitude: 0}), "0, 0");

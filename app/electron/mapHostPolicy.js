@@ -66,7 +66,7 @@ const parseMapCommand = (value, instanceID) => {
         return {...base, type: value.type, revision: value.revision, points: sanitizeMapPoints(value.points)};
     }
     if (value.type === "theme" && isMapTheme(value.theme)) return {...base, type: value.type, theme: value.theme};
-    if (["fit", "resize", "destroy"].includes(value.type)) return {...base, type: value.type};
+    if (["resize", "destroy"].includes(value.type)) return {...base, type: value.type};
 };
 const parseMapReply = (value, instanceID) => {
     if (!isRecord(value) || value.version !== 1 || value.instanceID !== instanceID) return;

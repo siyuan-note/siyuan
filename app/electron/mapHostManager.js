@@ -12,6 +12,10 @@ const {
     isAllowedMapProviderURL, getMapRequestPolicy, createMapContentSecurityPolicy,
 } = require("./mapHostPolicy");
 
+// 资源准备包含文档、打包资源和 CSP 锁定；地图就绪从 bootstrapReady 起另计有限预算。
+const MAP_HOST_BOOTSTRAP_TIMEOUT = 30000;
+const MAP_HOST_READY_TIMEOUT = 45000;
+
 const deniedResponse = () => new Response("Forbidden", {status: 403,
     headers: {"Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store"}});
 const withoutCredentials = (headers) => Object.fromEntries(Object.entries(headers || {})
@@ -414,15 +418,14 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
                         try {
                             if (reply.type === "bootstrapReady" && !host.bootstrapped) {
                                 host.bootstrapped = true;
-                                // SDK 脚本和地图完成分别最多等待 20 秒，启动耗时不占用这两个阶段的预算。
-                                setDeadline(host, 45000);
+                                // 打包资源和 CSP 已准备完成，此后只等待地图创建与 load 就绪。
+                                setDeadline(host, MAP_HOST_READY_TIMEOUT);
                                 post(host, init);
                             } else if (reply.type === "ready" && host.bootstrapped && !host.ready) {
                                 host.ready = true;
                                 clearTimeout(host.timer);
                                 if (host.points) post(host, host.points);
                                 post(host, {version: 1, instanceID: init.instanceID, type: "theme", theme: init.theme});
-                                if (host.pendingFit) post(host, {version: 1, instanceID: init.instanceID, type: "fit"});
                                 if (host.destroyed) return;
                                 applyGeometry(host);
                                 if (host.destroyed) return;
@@ -446,7 +449,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
                     contents.postMessage("siyuan-map-port", {version: 1, instanceID: init.instanceID, nonce, provider: init.provider}, [port2]);
                 } catch (_error) { fail(host, "hostPortSetupFailed"); }
             });
-            setDeadline(host, 30000);
+            setDeadline(host, MAP_HOST_BOOTSTRAP_TIMEOUT);
             creationFailure = "hostAttachFailed";
             view.setVisible(false);
             // DOM 暂时不可见时也能完成初始化；此占位视图始终隐藏，不会覆盖编辑器。
@@ -473,7 +476,6 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             host.points = command;
             host.ids = new Set(command.points.map(point => point.id));
         } else if (command.type === "theme") host.init.theme = command.theme;
-        else if (command.type === "fit") host.pendingFit = true;
         if (host.ready) post(host, command);
     });
     ipcMain.on("siyuan-map-geometry", (event, value) => {
@@ -491,4 +493,4 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
     return {destroyAll: () => [...hosts.values()].forEach(destroy)};
 };
 
-module.exports = {createMapSessionRouter, createMapHostManager};
+module.exports = {createMapSessionRouter, createMapHostManager, MAP_HOST_BOOTSTRAP_TIMEOUT, MAP_HOST_READY_TIMEOUT};

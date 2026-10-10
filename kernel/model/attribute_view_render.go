@@ -519,7 +519,7 @@ const (
 )
 
 func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, err error) {
-	if err = attrView.ValidateListLayouts(); nil != err {
+	if err = attrView.ValidateLayouts(); nil != err {
 		return
 	}
 	// 获取待渲染的视图

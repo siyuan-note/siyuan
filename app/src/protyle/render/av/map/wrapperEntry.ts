@@ -1,5 +1,5 @@
-import {isAVMapProvider} from "./protocol";
-import {isAVMapBootstrapMessage} from "./hostCapabilities";
+import {isAVMapBootstrapMessage, isAVMapLoadErrorCode, isAVMapProvider} from "./protocol";
+import {AV_MAP_BOOTSTRAP_TIMEOUT} from "./loadingBudget";
 
 // 可信 wrapper 不加载 SDK、不处理记录或凭证，只把一次业务端口交给固定 opaque 子框架。
 export const connectAVMapWrapper = (scope: Window) => {
@@ -58,11 +58,12 @@ export const connectAVMapWrapper = (scope: Window) => {
             ready = true;
             scope.parent.postMessage({...envelope, type: "bootstrapReady"}, scope.location.origin);
         } else if (booted && isAVMapBootstrapMessage(event.data, "bootstrapError", instanceID, nonce)) {
-            scope.parent.postMessage({...envelope, type: "bootstrapError"}, scope.location.origin);
+            const code = isAVMapLoadErrorCode(event.data.code) ? event.data.code : "hostBootstrapFailed";
+            scope.parent.postMessage({...envelope, type: "bootstrapError", code}, scope.location.origin);
             cleanup();
         }
     };
-    const timer = scope.setTimeout(cleanup, 30000);
+    const timer = scope.setTimeout(cleanup, AV_MAP_BOOTSTRAP_TIMEOUT);
     scope.addEventListener("message", onMessage);
     scope.addEventListener("pagehide", cleanup, {once: true});
     scope.parent.postMessage({...envelope, type: "wrapperHello"}, scope.location.origin);

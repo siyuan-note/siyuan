@@ -28,10 +28,10 @@ The component list is informational and does not replace the license terms. Copy
 | html-to-image | 1.11.13 | MIT | [upstream](https://github.com/bubkoo/html-to-image) | app/stage/protyle/js/html-to-image.min.js |
 | modern-screenshot | 4.6.6 | MIT | [upstream](https://github.com/qq15725/modern-screenshot) | app/stage/protyle/js/modern-screenshot.min.js |
 | abcjs | 6.7.1 | MIT | [upstream](https://github.com/paulrosen/abcjs) | app/stage/protyle/js/abcjs/ |
-| Apache ECharts | 5.3.2 | Apache-2.0 | [upstream](https://github.com/apache/echarts) | app/stage/protyle/js/echarts/echarts.min.js |
-| ZRender | 5.3.0 | BSD-3-Clause | [upstream](https://github.com/ecomfe/zrender) | Bundled by Apache ECharts |
-| echarts-gl | 2.0.9 | MIT | [upstream](https://github.com/ecomfe/echarts-gl) | app/stage/protyle/js/echarts/echarts-gl.min.js |
-| ClayGL | 1.2.x snapshot | BSD-2-Clause | [upstream](https://github.com/pissang/claygl) | Bundled by echarts-gl 2.0.9 |
+| Apache ECharts | 6.1.0 | Apache-2.0 | [upstream](https://github.com/apache/echarts) | app/stage/protyle/js/echarts/echarts.min.js |
+| ZRender | 6.1.0 | BSD-3-Clause | [upstream](https://github.com/ecomfe/zrender) | Bundled by Apache ECharts |
+| echarts-gl | 2.1.0 | BSD-3-Clause | [upstream](https://github.com/ecomfe/echarts-gl) | app/stage/protyle/js/echarts/echarts-gl.min.js |
+| ClayGL | 1.2.x snapshot | BSD-2-Clause | [upstream](https://github.com/pissang/claygl) | Bundled by echarts-gl 2.1.0 |
 | flowchart.js | 1.18.0 | MIT | [upstream](https://github.com/adrai/flowchart.js) | app/stage/protyle/js/flowchart.js/flowchart.min.js |
 | Raphaël | 2.3.0 | MIT | [upstream](https://github.com/DmitryBaranovskiy/raphael) | Bundled by flowchart.js |
 | @viz-js/viz | 3.31.0 | MIT | [upstream](https://github.com/mdaines/viz-js) | app/stage/protyle/js/graphviz/viz.js |
@@ -406,11 +406,11 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### Apache ECharts 5.3.2 - NOTICE
+### Apache ECharts 6.1.0 - NOTICE
 
 ```text
 Apache ECharts
-Copyright 2017-2022 The Apache Software Foundation
+Copyright 2017-2026 The Apache Software Foundation
 
 This product includes software developed at
 The Apache Software Foundation (https://www.apache.org/).
@@ -2009,6 +2009,59 @@ THE SOFTWARE.
 **This text is from: http://opensource.org/licenses/MIT**
 ```
 
+### app/stage/protyle/js/echarts/LICENSE-echarts-gl.txt
+
+```text
+BSD 3-Clause License
+
+Copyright (c) 2017, Baidu Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the copyright holder nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
+
+### app/stage/protyle/js/echarts/echarts-gl.min.js.LICENSE.txt
+
+```text
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+```
+
 ### app/stage/protyle/js/highlight.js/LICENSE
 
 ```text
@@ -3081,7 +3134,7 @@ The following comments are extracted verbatim from the JavaScript and CSS artifa
     * All rights reserved.
     *
     * LICENSE
-    * https://github.com/ecomfe/zrender/blob/master/LICENSE.txt
+    * https://github.com/ecomfe/zrender/blob/master/LICENSE
     */
 ```
 

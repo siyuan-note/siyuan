@@ -86,22 +86,22 @@ BUNDLED_COMPONENTS = [
     ),
     (
         "Apache ECharts",
-        "5.3.2",
+        "6.1.0",
         "Apache-2.0",
         "https://github.com/apache/echarts",
         "app/stage/protyle/js/echarts/echarts.min.js",
     ),
     (
         "ZRender",
-        "5.3.0",
+        "6.1.0",
         "BSD-3-Clause",
         "https://github.com/ecomfe/zrender",
         "Bundled by Apache ECharts",
     ),
     (
         "echarts-gl",
-        "2.0.9",
-        "MIT",
+        "2.1.0",
+        "BSD-3-Clause",
         "https://github.com/ecomfe/echarts-gl",
         "app/stage/protyle/js/echarts/echarts-gl.min.js",
     ),
@@ -110,7 +110,7 @@ BUNDLED_COMPONENTS = [
         "1.2.x snapshot",
         "BSD-2-Clause",
         "https://github.com/pissang/claygl",
-        "Bundled by echarts-gl 2.0.9",
+        "Bundled by echarts-gl 2.1.0",
     ),
     (
         "flowchart.js",
@@ -498,6 +498,7 @@ LOCAL_NOTICE_FILES = [
     "app/appearance/covers/manifest.json",
     "app/appearance/icons/color-icon/README.md",
     "app/stage/images/ai-providers/README.md",
+    "app/stage/protyle/js/echarts/echarts-gl.min.js.LICENSE.txt",
 ]
 
 LICENSE_NAME_PATTERN = re.compile(
@@ -959,11 +960,11 @@ def render_notices(runtime_packages, go_modules):
     lines.extend(
         [
             "",
-            "### Apache ECharts 5.3.2 - NOTICE",
+            "### Apache ECharts 6.1.0 - NOTICE",
             "",
             "```text",
             "Apache ECharts",
-            "Copyright 2017-2022 The Apache Software Foundation",
+            "Copyright 2017-2026 The Apache Software Foundation",
             "",
             "This product includes software developed at",
             "The Apache Software Foundation (https://www.apache.org/).",

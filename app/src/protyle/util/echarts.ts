@@ -8,7 +8,7 @@ export const loadECharts = (cdn = Constants.PROTYLE_CDN): Promise<boolean> => {
     if (window.echarts) {
         return Promise.resolve(true);
     }
-    pending ??= addScript(`${cdn}/js/echarts/echarts.min.js?v=5.3.2`, "protyleEchartsScript")
+    pending ??= addScript(`${cdn}/js/echarts/echarts.min.js?v=6.1.0`, "protyleEchartsScript")
         .then(() => Boolean(window.echarts))
         .finally(() => {
             pending = undefined;

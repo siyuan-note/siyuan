@@ -25,14 +25,14 @@ test("ECharts loading shares the pending script and allows retry after failure",
     assert.equal(exports.loadECharts(), first);
     assert.equal(loads.length, 1);
     assert.equal(loads[0].id, "protyleEchartsScript");
-    assert.equal(loads[0].url, "/stage/protyle/js/echarts/echarts.min.js?v=5.3.2");
+    assert.equal(loads[0].url, "/stage/protyle/js/echarts/echarts.min.js?v=6.1.0");
     loads[0].resolve(false);
     assert.equal(await first, false);
 
     const retry = exports.loadECharts("https://example.com/protyle");
     assert.equal(exports.loadECharts(), retry);
     assert.equal(loads.length, 2);
-    assert.equal(loads[1].url, "https://example.com/protyle/js/echarts/echarts.min.js?v=5.3.2");
+    assert.equal(loads[1].url, "https://example.com/protyle/js/echarts/echarts.min.js?v=6.1.0");
     const registry = {};
     fakeWindow.echarts = registry;
     loads[1].resolve(true);

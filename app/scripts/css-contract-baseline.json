@@ -414,6 +414,12 @@
         "src/protyle/render/imageActions.ts"
       ]
     },
+    "protyle-action__copy-image": {
+      "reason": "图片复制按钮的行为标识和主题钩子，基础外观复用 protyle-icon，不需要独立样式",
+      "references": [
+        "src/protyle/render/imageActions.ts"
+      ]
+    },
     "protyle-action__reload": {
       "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
       "references": [

@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20261006114009"
+		"updated": "20261010133056"
 	},
 	"Children": [
 		{
@@ -1363,7 +1363,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202710-a51lo76",
-				"updated": "20261006110222"
+				"updated": "20261010133056"
 			},
 			"Children": [
 				{
@@ -1490,7 +1490,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-qkecuzx",
-				"updated": "20260930090802"
+				"updated": "20261010133056"
 			},
 			"Children": [
 				{
@@ -1527,6 +1527,37 @@
 				{
 					"Type": "NodeText",
 					"Data": " 设置显示或隐藏。也可继续通过图片菜单复制和编辑 OCR 文本。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "悬浮在本地图片上可查看 OCR 文字，无识别结果时会显示空内容提示。文字选择图标表示 OCR 操作，图片图标则将图片复制为 PNG，无 OCR 文字时也可复制图片。在自定义外观方案中，可通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "图片"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "复制为 PNG"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 显示或隐藏图片复制按钮；该按钮在简洁方案中默认隐藏。"
 				}
 			]
 		},

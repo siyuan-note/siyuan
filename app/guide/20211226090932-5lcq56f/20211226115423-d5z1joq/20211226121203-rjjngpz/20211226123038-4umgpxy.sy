@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261006114009"
+		"updated": "20261010133056"
 	},
 	"Children": [
 		{
@@ -1349,7 +1349,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414203058-foirrwk",
-				"updated": "20261006110222"
+				"updated": "20261010133056"
 			},
 			"Children": [
 				{
@@ -1476,7 +1476,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-ffpq13r",
-				"updated": "20260930090802"
+				"updated": "20261010133056"
 			},
 			"Children": [
 				{
@@ -1513,6 +1513,37 @@
 				{
 					"Type": "NodeText",
 					"Data": " 設定顯示或隱藏。也可繼續透過圖片選單複製和編輯 OCR 文字。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "懸浮在本機圖片上可查看 OCR 文字，無辨識結果時會顯示空內容提示。文字選取圖示表示 OCR 操作，圖片圖示則將圖片複製為 PNG，無 OCR 文字時也可複製圖片。在自訂外觀方案中，可透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "圖片"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "複製為 PNG"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 顯示或隱藏圖片複製按鈕；該按鈕在簡潔方案中預設隱藏。"
 				}
 			]
 		},

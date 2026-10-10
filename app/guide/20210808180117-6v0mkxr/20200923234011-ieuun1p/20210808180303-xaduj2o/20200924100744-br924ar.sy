@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261006114009"
+		"updated": "20261010133056"
 	},
 	"Children": [
 		{
@@ -1355,7 +1355,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202934-1h96or8",
-				"updated": "20261006110222"
+				"updated": "20261010133056"
 			},
 			"Children": [
 				{
@@ -1482,7 +1482,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-3zn8sf9",
-				"updated": "20260930090802"
+				"updated": "20261010133056"
 			},
 			"Children": [
 				{
@@ -1519,6 +1519,37 @@
 				{
 					"Type": "NodeText",
 					"Data": " to show or hide it. The image menu remains available for copying and editing OCR text."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Hover over a local image to view its OCR text; an empty result is shown explicitly. The text selection icon identifies the OCR action, while the image icon copies the image as PNG, even when no OCR text is available. In a custom appearance profile, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Image"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Copy as PNG"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to show or hide the image copy button; it is hidden in the Simple profile."
 				}
 			]
 		},

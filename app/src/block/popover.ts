@@ -15,6 +15,7 @@ import {isTouchDevice} from "../util/functions";
 import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../util/escape";
 import {isListItemActionElement} from "../protyle/wysiwyg/listContext";
 import {getImageTooltip} from "../protyle/render/imageTooltip";
+import {getImageOCRText} from "../asset/imageOCRStatus";
 import {
     cancelPendingPopover,
     getPopoverGeneration,
@@ -192,15 +193,27 @@ export const initBlockPopover = (app: App) => {
                 !isEncryptedBox(image.closest("[data-notebook-id]")?.getAttribute("data-notebook-id"))) {
                 tooltipAbortController = new AbortController();
                 const capturedController = tooltipAbortController;
+                let size: string;
+                let ocrText: string;
+                const updateImageTooltip = () => {
+                    if (!capturedController.signal.aborted && image.isConnected &&
+                        (image.getAttribute("data-src") || image.getAttribute("src")) === imagePath) {
+                        showTooltip(getImageTooltip(image, size, ocrText), image, undefined, event);
+                    }
+                };
+                if (imagePath.startsWith("assets/")) {
+                    getImageOCRText(imagePath).then(text => {
+                        ocrText = text;
+                        updateImageTooltip();
+                    });
+                }
                 fetchPost("/api/asset/statAsset", {path: imagePath}, (response) => {
                     if (capturedController.signal.aborted || !image.isConnected) {
                         return;
                     }
                     if (response.code === 0 && response.data) {
-                        showTooltip(getImageTooltip(image, response.data.hSize), image, undefined, event);
-                    }
-                    if (tooltipAbortController === capturedController) {
-                        tooltipAbortController = null;
+                        size = response.data.hSize;
+                        updateImageTooltip();
                     }
                 }, undefined, undefined, capturedController.signal);
             }

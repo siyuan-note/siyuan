@@ -132,6 +132,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         select.value = "editor.image";
         select.dispatchEvent(new Event("change", {bubbles: true}));
         check(view.querySelector("[data-entry-path='editor.image.ocrText']"), "Mobile exposes image OCR visibility");
+        check(view.querySelector("[data-entry-path='editor.image.copyAsPNG']"), "Mobile exposes image copy visibility");
         check(select.options.length === 3, "Mobile must offer toolbar, slash, and image categories");
         select.value = "editor.slash";
         select.dispatchEvent(new Event("change", {bubbles: true}));
@@ -417,7 +418,7 @@ const runEntryUiCases = async (mobileBuild: boolean) => {
         "config/entryVisibility/profile", "config/entryVisibility/mobileToolbarContext",
         "config/entryVisibility/dockOrder", "config/entryVisibility/touchOrder",
         "protyle/toolbar/defaults", "mobile/util/toolbarActions", "protyle/wysiwyg/codeBlockUtil", "protyle/gutter/turnIntoMenu",
-        "plugin/dockKey", "plugin/topBarKey", "util/escape"];
+        "plugin/dockKey", "plugin/topBarKey", "util/escape", "menus/declarations/imageOCRMenu", "menus/declarations/menuDeclaration"];
     if (mobileBuild) {
         modules.push("config/setting/windowContext");
     }

@@ -12,6 +12,7 @@ const browserCases = async (source: string) => {
     const requests: ((response: unknown) => void)[] = [];
     let tooltip = "";
     const assetRequests: {path: string, signal: AbortSignal, receive: (response: unknown) => void}[] = [];
+    const ocrRequests: ((text: string | undefined) => void)[] = [];
     class Panel {
         element = document.createElement("div");
         editors: {protyle: IProtyle}[] = [];
@@ -37,6 +38,7 @@ const browserCases = async (source: string) => {
     const dependencies = {
         BlockPanel: Panel,
         fetchSyncPost: () => new Promise(resolve => requests.push(resolve)),
+        getImageOCRText: () => new Promise<string | undefined>(resolve => ocrRequests.push(resolve)),
         hideTooltip: () => {},
         showTooltip: (text: string) => { tooltip = text; },
         fetchPost: (_url: string, body: {path: string}, receive: (response: unknown) => void,
@@ -49,6 +51,8 @@ const browserCases = async (source: string) => {
             .replace(/-\d{14}-\w{7}$/, ""),
         Constants: {TIMEOUT_INPUT: 5},
         isTouchDevice: () => false,
+        isTouchHoverInput: () => false,
+        isInteractiveTooltipTarget: () => false,
         isEncryptedBox: () => false,
         isListItemActionElement: () => false,
         isAbove: () => false,
@@ -59,6 +63,7 @@ const browserCases = async (source: string) => {
         config: {editor: {floatWindowMode: 0, floatWindowDelay: 20}},
         menus: {menu: {element: document.createElement("div")}},
         blockPanels: [],
+        languages: {ocrResult: "OCR text", emptyContent: "No related content found"},
     } as unknown as typeof window.siyuan;
     window.JSAndroid = {} as typeof window.JSAndroid;
     const root = document.createElement("div");
@@ -173,23 +178,34 @@ const browserCases = async (source: string) => {
     check.equal(assetRequests.length, 1);
     assetRequests[0].receive({code: 0, data: {hSize: "2 MiB"}});
     check.match(tooltip, /PNG · 1920 × 1080 · 2 MiB$/);
+    ocrRequests[0]("<script> & text\nsecond line");
+    await Promise.resolve();
+    check.match(tooltip, /OCR text:<br>&lt;script> &amp; text<br>second line$/);
+    check.match(tooltip, /2 MiB/);
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     document.body.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.equal(assetRequests[1].signal.aborted, true);
     tooltip = "later target";
     assetRequests[1].receive({code: 0, data: {hSize: "stale"}});
+    ocrRequests[1]("stale OCR");
+    await Promise.resolve();
     check.equal(tooltip, "later target");
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     const unavailable = tooltip;
     assetRequests[2].receive({code: 1, data: null});
     check.equal(tooltip, unavailable);
+    ocrRequests[2](" \n ");
+    await Promise.resolve();
+    check.match(tooltip, /OCR text:<br>No related content found$/);
     image.setAttribute("data-src", "https://example.com/photo.webp");
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.match(tooltip, /photo.webp.*WEBP · 1920 × 1080/);
     check.equal(assetRequests.length, 3);
+    check.equal(ocrRequests.length, 3, "remote images do not query OCR");
     image.setAttribute("data-src", "assets/encrypted.png?box=encrypted");
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.equal(assetRequests.length, 3);
+    check.equal(ocrRequests.length, 3, "encrypted resources do not query OCR");
     check.equal(image.title, "");
     check.equal(image.alt, "");
     return "Popover interaction cases passed";

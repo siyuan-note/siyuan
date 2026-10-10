@@ -60,7 +60,12 @@ test("image OCR actions retain their configurable paths and order", t => {
     assert.equal(imageAction.simple, false);
     assert.equal(imageAction.sortable, false);
     assert.equal(getEntryParentPath("editor.image.ocrText"), "editor.image");
-    assert.deepEqual(getEntryCatalogChildren("editor.image").map(item => item.key), ["ocrText"]);
+    assert.deepEqual(getEntryCatalogChildren("editor.image").map(item => item.key), ["ocrText", "copyAsPNG"]);
+    const copyImage = getEntryCatalogNode("editor.image.copyAsPNG");
+    assert.equal(copyImage.type, "entry");
+    assert.equal(copyImage.simple, false);
+    assert.equal(copyImage.sortable, false);
+    assert.equal(getEntryParentPath("editor.image.copyAsPNG"), "editor.image");
     assert.deepEqual(getEntryCatalogChildren("inline.image.ocr").map(item => item.key), [
         "ocrResult", "copyOCRText", "separator_reOCR", "reOCR", "reAIOCR",
     ]);

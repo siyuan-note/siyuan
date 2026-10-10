@@ -1,7 +1,7 @@
 import {escapeHtml} from "../../util/escape";
 import {getAssetExtension, getAssetName} from "../../util/pathName";
 
-export const getImageTooltip = (image: HTMLImageElement, size?: string) => {
+export const getImageTooltip = (image: HTMLImageElement, size?: string, ocrText?: string) => {
     const source = image.getAttribute("data-src") || image.getAttribute("src") || "";
     const path = source.split(/[?#]/)[0];
     const inline = /^(data|blob):/.test(path);
@@ -21,5 +21,10 @@ export const getImageTooltip = (image: HTMLImageElement, size?: string) => {
     // 原始尺寸不受编辑器缩放和图片排版宽度影响。
     const dimensions = image.naturalWidth && image.naturalHeight ? `${image.naturalWidth} × ${image.naturalHeight}` : "";
     const information = [format, dimensions, size].filter(Boolean).map(value => escapeHtml(value)).join(" · ");
-    return text + (text && information ? '<div class="fn__hr"></div>' : "") + information;
+    const tooltip = text + (text && information ? '<div class="fn__hr"></div>' : "") + information;
+    if (ocrText === undefined) {
+        return tooltip;
+    }
+    const ocr = escapeHtml(ocrText.trim() || window.siyuan.languages.emptyContent).replace(/\r\n|\r|\n/g, "<br>");
+    return tooltip + '<div class="fn__hr"></div>' + escapeHtml(window.siyuan.languages.ocrResult) + ":<br>" + ocr;
 };

@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20261006114009"
+		"updated": "20261010133056"
 	},
 	"Children": [
 		{
@@ -1398,7 +1398,7 @@
 			"Properties": {
 				"ID": "20240530101000-aefldsk",
 				"id": "20240530101000-cpod2qy",
-				"updated": "20261006110222"
+				"updated": "20261010133056"
 			},
 			"Children": [
 				{
@@ -1540,7 +1540,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-fdfc9yh",
-				"updated": "20260930090802"
+				"updated": "20261010133056"
 			},
 			"Children": [
 				{
@@ -1577,6 +1577,37 @@
 				{
 					"Type": "NodeText",
 					"Data": " で表示を切り替えられます。画像メニューからも OCR テキストのコピーと編集ができます。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ローカル画像にマウスを合わせると OCR テキストを確認でき、認識結果が空の場合も表示されます。文字選択アイコンは OCR 操作を示し、画像アイコンは OCR テキストの有無にかかわらず画像を PNG としてコピーします。カスタム外観プロファイルでは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディター"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "PNG としてコピー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で画像コピーボタンの表示を切り替えられます。シンプルプロファイルでは既定で非表示です。"
 				}
 			]
 		},

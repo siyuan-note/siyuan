@@ -902,7 +902,10 @@ export const entryCatalog: IEntryCatalogSection[] = [
         key: "editor.image",
         label: location(lang("editor"), lang("image")),
         sortable: false,
-        children: [node("ocrText", lang("ocrResult"), false, undefined, false)],
+        children: [
+            node("ocrText", lang("ocrResult"), false, undefined, false),
+            node("copyAsPNG", lang("copyAsPNG"), false, undefined, false),
+        ],
     },
     {
         key: "editor.slash",

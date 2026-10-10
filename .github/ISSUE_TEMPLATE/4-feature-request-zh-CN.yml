@@ -5,8 +5,8 @@ body:
     attributes:
       value: |
         > [!IMPORTANT]
-        > 我们目前不再接受关系图相关的新功能提议。
-        > 功能提议应具有一定的通用性，我们不接受过于特殊或偏向个人定制的需求。
+        > - 功能提议应具有一定的通用性，我们不接受过于特殊或偏向个人定制的需求
+        > - 我们目前不再接受关系图相关的新功能提议
   - type: checkboxes
     attributes:
       label: 提交前确认
@@ -17,9 +17,9 @@ body:
           required: true
         - label: 本 issue 仅包含一个功能提议
           required: true
-        - label: 本提议与关系图无关
-          required: true
         - label: 本提议具有一定的通用性，不属于过于特殊或偏向个人定制的需求
+          required: true
+        - label: 本提议与关系图无关
           required: true
   - type: textarea
     attributes:

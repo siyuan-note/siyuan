@@ -5,8 +5,8 @@ body:
     attributes:
       value: |
         > [!IMPORTANT]
-        > We are currently not accepting new graph-related feature requests.
-        > Feature requests should address broadly applicable use cases. We do not accept requests for overly specialized or personal customizations.
+        > - Feature requests should address broadly applicable use cases; we do not accept requests for overly specialized or personal customizations
+        > - We are currently not accepting new graph-related feature requests
   - type: checkboxes
     attributes:
       label: Before submitting
@@ -17,9 +17,9 @@ body:
           required: true
         - label: This issue contains only one feature request
           required: true
-        - label: This request is not related to graph features
-          required: true
         - label: This request addresses a broadly applicable use case and does not involve overly specialized or personal customization
+          required: true
+        - label: This request is not related to graph features
           required: true
   - type: textarea
     attributes:

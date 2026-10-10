@@ -60,7 +60,6 @@ func IsMoveOutlineHeading(transactions *[]*Transaction) bool {
 func FlushTxQueue() {
 	diagnostic := util.WatchOperation("flush editing transactions", "wait for transaction queue")
 	defer diagnostic.Finish()
-	time.Sleep(time.Duration(50) * time.Millisecond)
 	for 0 < txQueueSize() || isFlushing.Load() {
 		time.Sleep(10 * time.Millisecond)
 	}

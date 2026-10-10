@@ -66,14 +66,15 @@ const fixture = (warnings: unknown[][] = []) => {
     doc.defaultView = scope;
     const container: any = {ownerDocument: doc, isConnected: true, parentElement: null, closest: (): HTMLElement | null => null,
         getClientRects: () => [rect], getBoundingClientRect: () => rect, contains: (target: unknown) => target === container};
-    const errors: string[] = [], clicks: unknown[] = [];
+    const errors: string[] = [], clicks: unknown[] = [], attributionClicks: string[] = [];
     let ready = 0;
     const api = load(ipc, false, warnings);
     const host = api.createDesktopAVMapHost(container, {provider: "openfreemap", theme: "light",
         onError: (value: string) => errors.push(value),
+        onAttributionClick: (link: string) => attributionClicks.push(link),
         onMarkerClick: (...args: unknown[]) => clicks.push(args), onReady: () => ready++});
     const instanceID = calls[0][1].instanceID;
-    return {host, calls, listeners, domListeners, frames, timers, errors, clicks, doc, container, rect,
+    return {host, calls, listeners, domListeners, frames, timers, errors, clicks, attributionClicks, doc, container, rect,
         ready: () => ready,
         reply: (value: object) => listeners.get("siyuan-map-reply")?.({}, {version: 1, instanceID, ...value}),
         rejected: async () => {
@@ -93,6 +94,29 @@ const fixture = (warnings: unknown[][] = []) => {
 };
 
 describe("desktop map transport", () => {
+    it("forwards only ready current fixed attribution replies already verified by main", async () => {
+        class Observer { observe() {} disconnect() {} }
+        const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;
+        globalThis.MutationObserver = Observer as any;
+        globalThis.ResizeObserver = Observer as any;
+        const f = fixture();
+        try {
+            f.reply({type: "attributionClick", link: "maplibre"});
+            assert.deepEqual(f.attributionClicks, []);
+            await f.created(); f.reply({type: "ready"});
+            f.reply({type: "attributionClick", link: "maplibre", instanceID: "old"});
+            f.reply({type: "attributionClick", link: "https://evil.invalid/"});
+            f.reply({type: "attributionClick", link: "maplibre", url: "https://evil.invalid/"});
+            assert.deepEqual(f.attributionClicks, ["maplibre"]);
+            f.host.destroy();
+            f.reply({type: "attributionClick", link: "maplibre"});
+            assert.deepEqual(f.attributionClicks, ["maplibre"]);
+        } finally {
+            f.host.destroy();
+            globalThis.MutationObserver = oldMutation;
+            globalThis.ResizeObserver = oldResize;
+        }
+    });
     it("preserves fixed creation failures and never logs rejected IPC details", async () => {
         for (const code of ["hostLimitReached", "hostSetupFailed", "hostAttachFailed"] as const) {
             const warnings: unknown[][] = [];
@@ -317,7 +341,7 @@ describe("desktop map transport", () => {
         assert.equal(geometry.bounds.width, widthRect.width);
         assert.equal(parseMapGeometry(geometry, 1.25, {width: 4000, height: 3000})?.visible, true);
     });
-    it("reports only fixed visibility transitions and distinguishes clipped bottom hit tests", async () => {
+    it("keeps all visibility and hit-test checks without logging normal geometry transitions", async () => {
         const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;
         class Observer { observe() {} disconnect() {} }
         globalThis.MutationObserver = Observer as any;
@@ -325,23 +349,20 @@ describe("desktop map transport", () => {
         const warnings: unknown[][] = [];
         const f = fixture(warnings);
         const getStyle = f.doc.defaultView.getComputedStyle;
-        const visibility = () => warnings.filter(([prefix]) => prefix === "Database map visibility:");
         const lastGeometry = () => f.calls.filter(([name]) => name === "siyuan-map-geometry").at(-1)[1];
         f.container.id = "private-block-id";
         f.container.textContent = "private-document-content";
         try {
             await f.created();
-            assert.deepEqual(visibility(), [["Database map visibility:", "openfreemap", "stabilizing"]]);
+            assert.equal(lastGeometry().visible, false);
             f.advance();
-            assert.deepEqual(visibility().at(-1), ["Database map visibility:", "openfreemap", "visible"]);
+            assert.equal(lastGeometry().visible, true);
             const scroll = f.domListeners.get("scroll");
             const expectHidden = (reason: string) => {
                 scroll();
-                assert.equal(lastGeometry().visible, false);
-                assert.deepEqual(visibility().at(-1), ["Database map visibility:", "openfreemap", reason]);
-                const count = warnings.length;
+                assert.equal(lastGeometry().visible, false, reason);
                 for (let i = 0; i < 10; i++) f.advance(30);
-                assert.equal(warnings.length, count, "unchanged reasons must not log on every animation frame");
+                assert.equal(warnings.length, 0, "normal geometry changes must not log warnings");
             };
             f.doc.hidden = true;
             expectHidden("documentHidden");
@@ -385,24 +406,16 @@ describe("desktop map transport", () => {
             f.doc.elementFromPoint = () => f.container;
             scroll();
             assert.equal(lastGeometry().visible, true);
-            assert.deepEqual(visibility().at(-1), ["Database map visibility:", "openfreemap", "visible"]);
-            const fixedReasons = new Set(["stabilizing", "visible", "documentHidden", "disconnected", "noClientRects",
-                "hiddenStyle", "zeroRect", "invalidGeometry", "outsideViewport", "clipped", "overlay", "hitTestTop",
-                "hitTestMiddle", "hitTestBottom"]);
-            assert.ok(warnings.every(values => values.length === 3 && values[0] === "Database map visibility:" &&
-                values[1] === "openfreemap" && fixedReasons.has(values[2] as string)));
-            assert.doesNotMatch(JSON.stringify(warnings), /private|do-not-send|https:|instanceID/);
             for (let i = 0; i < 100; i++) {
                 f.doc.hidden = i % 2 === 0;
                 scroll();
-                assert.equal(lastGeometry().visible, !f.doc.hidden, "the log limit must not interrupt geometry updates");
+                assert.equal(lastGeometry().visible, !f.doc.hidden, "repeated changes must not interrupt geometry updates");
             }
-            assert.equal(visibility().length, 64);
-            const count = warnings.length;
+            assert.equal(warnings.length, 0);
             f.host.destroy();
             scroll();
             f.advance();
-            assert.equal(warnings.length, count);
+            assert.equal(warnings.length, 0);
         } finally {
             f.host.destroy();
             globalThis.MutationObserver = oldMutation;

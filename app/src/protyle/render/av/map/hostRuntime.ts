@@ -1,5 +1,5 @@
 import {
-    AV_MAP_PROTOCOL_VERSION, AVMapErrorCode, AVMapInit, AVMapReply, getAVMapLoadErrorCode, isAVMapHandshake, isAVMapProvider,
+    AV_MAP_PROTOCOL_VERSION, AVMapErrorCode, AVMapInit, AVMapReply, getAVMapLoadErrorCode, isAVMapAttributionLink, isAVMapHandshake, isAVMapProvider,
     parseAVMapCommand,
 } from "./protocol";
 import {AVMapAdapter, AVMapAdapterCallbacks} from "./providers";
@@ -81,6 +81,11 @@ export const startAVMapRuntime = (port: MessagePort, instanceID: string, provide
                         }
                     },
                     onError: fail,
+                    onAttributionClick: link => {
+                        if (adapter && isAVMapAttributionLink(link)) {
+                            send({...envelope, type: "attributionClick", link});
+                        }
+                    },
                 }, abort.signal);
                 if (destroyed) {
                     next.destroy();
@@ -103,6 +108,8 @@ export const startAVMapRuntime = (port: MessagePort, instanceID: string, provide
                 adapter.fit();
             } else if (adapter && command.type === "resize") {
                 adapter.resize();
+            } else if (adapter && command.type === "visibility") {
+                adapter.setVisible(command.visible, command.viewport);
             }
         } catch (error) {
             fail(getAVMapLoadErrorCode(error) || (adapter ? "mapUnavailable" : "sdkUnavailable"));

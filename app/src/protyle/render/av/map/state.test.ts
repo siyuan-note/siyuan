@@ -52,6 +52,25 @@ test("missing or changed location fields retain their saved identifiers and do n
     assert.deepEqual(getMapSettings({} as IAVTable), {locationKeyID: ""});
 });
 
+test("unconfigured maps derive the first location in view order without persisting it", () => {
+    const view = table([{latitude: 0, longitude: 0}]);
+    view.map.locationKeyID = "";
+    const before = JSON.stringify(view);
+    assert.equal(getMapSettings(view).locationKeyID, "location");
+    assert.deepEqual(getMapPoints(view).points, [{id: "row-0", longitude: 0, latitude: 0}]);
+    assert.equal(JSON.stringify(view), before);
+    view.columns.unshift({id: "other", type: "location", hidden: true});
+    assert.equal(getMapSettings(view).locationKeyID, "other");
+    view.map.locationKeyID = "location";
+    assert.equal(getMapSettings(view).locationKeyID, "location");
+    delete view.map;
+    assert.equal(getMapSettings(view).locationKeyID, "other");
+    view.columns = [];
+    assert.equal(getMapSettings(view).locationKeyID, "");
+    view.columns.push({id: "added", type: "location"});
+    assert.equal(getMapSettings(view).locationKeyID, "added");
+});
+
 test("map does not silently truncate the loaded page before the explicit rendering limit", () => {
     const view = table(Array.from({length: AV_MAP_MAX_POINTS + 1}, () => ({
         latitude: 0, longitude: 0,

@@ -2,8 +2,9 @@ import {hasAVLocationCoordinates, validateAVLocation} from "../locationValue";
 import type {AVMapPoint} from "./protocol";
 import {isAVMapIdentifier, isAVMapProjectionSupported} from "./protocol";
 
+// 未配置时按视图顺序派生默认值；读取不写入配置，失效的显式绑定仍由用户修复。
 export const getMapSettings = (view: IAVTable): IAVMapSettings => ({
-    locationKeyID: view.map?.locationKeyID || "",
+    locationKeyID: view.map?.locationKeyID || view.columns?.find(column => column.type === "location")?.id || "",
 });
 
 // 只使用选定字段的已加载行，WGS84 坐标不会被裁切或改写。

@@ -75,6 +75,9 @@ const parseMapReply = (value, instanceID) => {
     if (value.type === "markerClick" && isMapIdentifier(value.id) && isMapRevision(value.revision)) {
         return {...base, type: value.type, id: value.id, revision: value.revision};
     }
+    if (value.type === "attributionClick" && ["openfreemap", "openmaptiles", "openstreetmap", "maplibre"].includes(value.link)) {
+        return {...base, type: value.type, link: value.link};
+    }
     if (value.type === "error" && ["unsupportedEnvironment", "invalidConfiguration",
         "hostUnavailable", "sdkUnavailable", "mapUnavailable", "sdkScriptLoadFailed",
         "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout", "hostLimitReached", "hostSetupFailed",

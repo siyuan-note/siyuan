@@ -1,5 +1,5 @@
 import {
-    AV_MAP_PROTOCOL_VERSION, AVMapCommand, AVMapErrorCode, AVMapPoint, AVMapProvider, AVMapTheme,
+    AV_MAP_PROTOCOL_VERSION, AVMapAttributionLink, AVMapCommand, AVMapErrorCode, AVMapPoint, AVMapProvider, AVMapTheme, AVMapVisibility,
     isAVMapProvider, isAVMapRevision, isAVMapTheme, parseAVMapReply,
     sanitizeAVMapPoints,
 } from "./protocol";
@@ -12,6 +12,7 @@ export interface AVMapHostOptions {
     onReady?: () => void;
     onMarkerClick: (id: string, revision: number) => void;
     onError: (code: AVMapErrorCode) => void;
+    onAttributionClick?: (link: AVMapAttributionLink) => void;
 }
 
 export interface AVMapHost {
@@ -31,6 +32,55 @@ const randomID = (scope: Window): string => {
     return Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
 };
 
+// 将父页面裁剪区域换算为隔离 iframe 视口的 CSS 像素。
+export const getAVMapVisibility = (container: HTMLElement): AVMapVisibility => {
+    const doc = container.ownerDocument;
+    const scope = doc.defaultView;
+    const hidden = {visible: false};
+    if (!scope || doc.hidden || !container.isConnected || !container.getClientRects().length) return hidden;
+    const rect = container.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0 || container.clientWidth <= 0 || container.clientHeight <= 0) return hidden;
+    let left = Math.max(0, rect.left), top = Math.max(0, rect.top);
+    let right = Math.min(scope.innerWidth, rect.right), bottom = Math.min(scope.innerHeight, rect.bottom);
+    for (let element = container; element; element = element.parentElement) {
+        const style = scope.getComputedStyle(element);
+        if (style.display === "none" || style.visibility !== "visible" || Number(style.opacity) === 0 ||
+            style.getPropertyValue("content-visibility") === "hidden") return hidden;
+        if (element !== container) {
+            const clip = element.getBoundingClientRect();
+            const scaleX = element.offsetWidth ? clip.width / element.offsetWidth : 1;
+            const scaleY = element.offsetHeight ? clip.height / element.offsetHeight : 1;
+            if (/hidden|clip|scroll|auto/.test(style.overflowX)) {
+                const x = clip.left + element.clientLeft * scaleX;
+                left = Math.max(left, x); right = Math.min(right, x + element.clientWidth * scaleX);
+            }
+            if (/hidden|clip|scroll|auto/.test(style.overflowY)) {
+                const y = clip.top + element.clientTop * scaleY;
+                top = Math.max(top, y); bottom = Math.min(bottom, y + element.clientHeight * scaleY);
+            }
+        }
+    }
+    if (right - left < 2 || bottom - top < 2) return hidden;
+    const hits = [left + 0.5, (left + right) / 2, right - 0.5].flatMap(x =>
+        [top + 0.5, (top + bottom) / 2, bottom - 0.5].map(y => container.contains(doc.elementFromPoint(x, y))));
+    if (!hits.some(Boolean)) return hidden;
+    if (!hits.every(Boolean)) return {visible: true};
+    // 内层无法命中检测父页面浮层；小浮层也可能遮住署名而避开上面的采样点。
+    const overlays = doc.querySelectorAll<HTMLElement>(
+        ".b3-menu, .b3-dialog, .av__panel, .protyle-util, .protyle-toolbar, .block__popover, [popover]");
+    for (const overlay of Array.from(overlays)) {
+        if (overlay.contains(container) || !overlay.getClientRects().length) continue;
+        const style = scope.getComputedStyle(overlay);
+        const bounds = overlay.getBoundingClientRect();
+        if (style.display !== "none" && style.visibility === "visible" && Number(style.opacity) !== 0 &&
+            bounds.width > 0 && bounds.height > 0 && bounds.left < right && bounds.right > left &&
+            bounds.top < bottom && bounds.bottom > top) return {visible: true};
+    }
+    const scaleX = rect.width / container.clientWidth, scaleY = rect.height / container.clientHeight;
+    return {visible: true, viewport: {x: (left - rect.left) / scaleX, y: (top - rect.top) / scaleY,
+        width: (right - left) / scaleX, height: (bottom - top) / scaleY}};
+};
+
 export const createAVMapHost = (container: HTMLElement, options: AVMapHostOptions): AVMapHost => {
     const scope = container.ownerDocument.defaultView;
     let destroyed = false;
@@ -48,6 +98,7 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
     let nonce = "";
     let nativeBoundary = false;
     let preparing = false;
+    let frame = 0, visible = false, lastVisibility = "";
 
     const send = (command: AVMapCommand) => {
         if (!destroyed && port) {
@@ -55,6 +106,20 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
         }
     };
     const envelope = () => ({version: AV_MAP_PROTOCOL_VERSION, instanceID} as const);
+    const updateVisibility = () => {
+        const next = ready ? getAVMapVisibility(container) : {visible: false};
+        const key = JSON.stringify(next);
+        if (key !== lastVisibility) {
+            visible = next.visible;
+            lastVisibility = key;
+            send({...envelope(), type: "visibility", ...next});
+        }
+    };
+    const tickVisibility = () => {
+        if (destroyed) return;
+        updateVisibility();
+        frame = scope.requestAnimationFrame(tickVisibility);
+    };
     const destroy = () => {
         if (destroyed) {
             return;
@@ -63,8 +128,10 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
         destroyed = true;
         ready = false;
         scope?.clearTimeout(timeout);
+        scope?.cancelAnimationFrame(frame);
         scope?.removeEventListener("message", onMessage);
         scope?.removeEventListener("pagehide", destroy);
+        container.ownerDocument.removeEventListener("visibilitychange", updateVisibility);
         observer?.disconnect();
         if (port) {
             port.onmessage = null;
@@ -124,8 +191,13 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
                     pendingFit = false;
                 }
                 options.onReady?.();
+                tickVisibility();
             } else if (reply?.type === "markerClick" && ready && reply.revision === revision && ids.has(reply.id)) {
                 options.onMarkerClick(reply.id, reply.revision);
+            } else if (reply?.type === "attributionClick" && ready && visible &&
+                getAVMapVisibility(container).visible &&
+                (scope.navigator as Navigator & {userActivation?: {isActive: boolean}}).userActivation?.isActive) {
+                options.onAttributionClick?.(reply.link);
             } else if (reply?.type === "error") {
                 fail(reply.code);
             }
@@ -203,6 +275,7 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
         iframe.addEventListener("error", () => fail("hostDocumentLoadFailed"), {once: true});
         scope.addEventListener("message", onMessage);
         scope.addEventListener("pagehide", destroy, {once: true});
+        container.ownerDocument.addEventListener("visibilitychange", updateVisibility);
         timeout = scope.setTimeout(() => fail("hostBootstrapTimeout"), 30000);
         container.appendChild(iframe);
         if (typeof ResizeObserver !== "undefined") {

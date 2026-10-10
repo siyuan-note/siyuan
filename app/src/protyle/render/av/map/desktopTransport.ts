@@ -11,23 +11,17 @@ interface MapRect { x: number; y: number; width: number; height: number; }
 type MapGeometry = {visible: false} | {
     visible: true; bounds: MapRect; logicalSize: {width: number; height: number}; crop: {x: number; y: number};
 };
-type MapVisibilityReason = "visible" | "stabilizing" | "ownerUnavailable" | "documentHidden" | "disconnected" |
-    "noClientRects" | "hiddenStyle" | "invalidGeometry" | "zeroRect" | "outsideViewport" | "clipped" | "overlay" |
-    "hitTestTop" | "hitTestMiddle" | "hitTestBottom";
 
 const intersects = (a: MapRect, b: MapRect) => a.x < b.x + b.width && b.x < a.x + a.width &&
     a.y < b.y + b.height && b.y < a.y + a.height;
 
 // All coordinates stay in owner CSS pixels. Only the main process applies the owner zoom factor.
-export const computeDesktopAVMapGeometry = (rect: MapRect, clips: MapRect[], occluders: MapRect[] = [],
-                                          report?: (reason: MapVisibilityReason) => void): MapGeometry => {
+export const computeDesktopAVMapGeometry = (rect: MapRect, clips: MapRect[], occluders: MapRect[] = []): MapGeometry => {
     if (![rect, ...clips, ...occluders].every((item) => [item.x, item.y, item.width, item.height].every(Number.isFinite) &&
         item.width >= 0 && item.height >= 0)) {
-        report?.("invalidGeometry");
         return {visible: false};
     }
     if (rect.width < 1 || rect.height < 1) {
-        report?.("zeroRect");
         return {visible: false};
     }
     let left = rect.x, top = rect.y, right = rect.x + rect.width, bottom = rect.y + rect.height;
@@ -45,14 +39,11 @@ export const computeDesktopAVMapGeometry = (rect: MapRect, clips: MapRect[], occ
     // 裁剪差值的浮点舍入不能使可见尺寸超过原始尺寸。
     const bounds = {x: left, y: top, width: Math.min(rect.width, right - left), height: Math.min(rect.height, bottom - top)};
     if (left < 0 || top < 0 || bounds.width < 1 || bounds.height < 1) {
-        report?.("clipped");
         return {visible: false};
     }
     if (occluders.some((item) => item.width > 0 && item.height > 0 && intersects(bounds, item))) {
-        report?.("overlay");
         return {visible: false};
     }
-    report?.("visible");
     return {visible: true, bounds, logicalSize: {width: rect.width, height: rect.height},
         crop: {x: left - rect.x, y: top - rect.y}};
 };
@@ -117,24 +108,20 @@ export const isDesktopAVMapHostSupported = async (): Promise<boolean> => {
     return false;
 };
 
-const readGeometry = (container: HTMLElement, report: (reason: MapVisibilityReason) => void): MapGeometry => {
+const readGeometry = (container: HTMLElement): MapGeometry => {
     const doc = container.ownerDocument;
     const scope = doc.defaultView;
-    const hidden = (reason: MapVisibilityReason): MapGeometry => {
-        report(reason);
-        return {visible: false};
-    };
     if (!scope) {
-        return hidden("ownerUnavailable");
+        return {visible: false};
     }
     if (doc.hidden) {
-        return hidden("documentHidden");
+        return {visible: false};
     }
     if (!container.isConnected) {
-        return hidden("disconnected");
+        return {visible: false};
     }
     if (!container.getClientRects().length) {
-        return hidden("noClientRects");
+        return {visible: false};
     }
     const rect = container.getBoundingClientRect();
     const clips: MapRect[] = [{x: 0, y: 0, width: scope.innerWidth, height: scope.innerHeight}];
@@ -142,7 +129,7 @@ const readGeometry = (container: HTMLElement, report: (reason: MapVisibilityReas
         const style = scope.getComputedStyle(element);
         if (style.display === "none" || style.visibility !== "visible" || Number(style.opacity) === 0 ||
             style.getPropertyValue("content-visibility") === "hidden") {
-            return hidden("hiddenStyle");
+            return {visible: false};
         }
         if (element !== container && /hidden|clip|scroll|auto/.test(style.overflowX + style.overflowY)) {
             const bounds = element.getBoundingClientRect();
@@ -180,19 +167,15 @@ const readGeometry = (container: HTMLElement, report: (reason: MapVisibilityReas
                 occluders.push(element.getBoundingClientRect());
             }
         });
-    const geometry = computeDesktopAVMapGeometry(rect, clips, occluders, reason => {
-        report(reason === "clipped" && !intersects(rect, clips[0]) ? "outsideViewport" : reason);
-    });
+    const geometry = computeDesktopAVMapGeometry(rect, clips, occluders);
     if (geometry.visible) {
         const bounds = geometry.bounds;
         // Hit-test the owner's DOM (native child views are not in this tree), including sticky toolbars.
         for (const x of [bounds.x + 0.5, bounds.x + bounds.width / 2, bounds.x + bounds.width - 0.5]) {
-            const samples: Array<[number, MapVisibilityReason]> = [[bounds.y + 0.5, "hitTestTop"],
-                [bounds.y + bounds.height / 2, "hitTestMiddle"], [bounds.y + bounds.height - 0.5, "hitTestBottom"]];
-            for (const [y, reason] of samples) {
+            for (const y of [bounds.y + 0.5, bounds.y + bounds.height / 2, bounds.y + bounds.height - 0.5]) {
                 const top = doc.elementFromPoint(x, y);
                 if (!top || !container.contains(top)) {
-                    return hidden(reason);
+                    return {visible: false};
                 }
             }
         }
@@ -209,10 +192,7 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
     let ids = new Set<string>();
     let frame = 0, timeout = 0, stableAfter = 0, scrollingUntil = 0;
     let lastGeometry = "", sentGeometry = "";
-    let visibilityReason: MapVisibilityReason = "stabilizing", lastVisibilityReason: MapVisibilityReason;
-    let visibilityDiagnosticsRemaining = 64;
     const diagnostics = new Set<string>();
-    const provider = isAVMapProvider(options.provider) ? options.provider : undefined;
     let observer: MutationObserver;
     let resizeObserver: ResizeObserver;
     const envelope = () => ({version: AV_MAP_PROTOCOL_VERSION, instanceID} as const);
@@ -221,16 +201,8 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
             ipc.send("siyuan-map-command", command);
         }
     };
-    const geometry = (value: MapGeometry, reason = visibilityReason) => {
+    const geometry = (value: MapGeometry) => {
         const key = JSON.stringify(value);
-        if (created && provider && reason !== lastVisibilityReason) {
-            // 仅记录可见状态切换和固定原因，不输出 DOM、尺寸、位置或实例标识。
-            if (visibilityDiagnosticsRemaining > 0) {
-                console.warn("Database map visibility:", provider, reason);
-                visibilityDiagnosticsRemaining--;
-            }
-            lastVisibilityReason = reason;
-        }
         if (created && key !== sentGeometry) {
             ipc.send("siyuan-map-geometry", {...envelope(), ...value});
             sentGeometry = key;
@@ -239,11 +211,11 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
     const invalidate = () => {
         if (!destroyed && scope) {
             stableAfter = scope.performance.now() + 120;
-            geometry({visible: false}, "stabilizing");
+            geometry({visible: false});
         }
     };
     const checkGeometry = () => {
-        const next = readGeometry(container, reason => { visibilityReason = reason; });
+        const next = readGeometry(container);
         const key = JSON.stringify(next);
         if (key !== lastGeometry) {
             lastGeometry = key;
@@ -252,7 +224,7 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
                 geometry(next);
             } else {
                 stableAfter = scope.performance.now() + 120;
-                geometry({visible: false}, next.visible ? "stabilizing" : visibilityReason);
+                geometry({visible: false});
             }
         }
         if (!next.visible) {
@@ -340,6 +312,9 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
             options.onReady?.();
         } else if (reply?.type === "markerClick" && ready && reply.revision === revision && ids.has(reply.id)) {
             options.onMarkerClick(reply.id, reply.revision);
+        } else if (reply?.type === "attributionClick" && ready) {
+            // 主进程已校验原生视图可见性，并消费一次可信用户输入。
+            options.onAttributionClick?.(reply.link);
         } else if (reply?.type === "error") {
             fail(reply.code);
         }

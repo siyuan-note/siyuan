@@ -14,6 +14,7 @@ const fixture = () => {
         setPoints: (...args) => { calls.push(["setPoints", ...args]); },
         fit: () => { calls.push(["fit"]); }, resize: () => { calls.push(["resize"]); },
         setTheme: (...args) => { calls.push(["theme", ...args]); }, destroy: () => { calls.push(["destroy"]); },
+        setVisible: (...args) => { calls.push(["visibility", ...args]); },
     };
     const send = (data: Record<string, unknown>) => port.onmessage?.({data: {version: 1, instanceID: "one", ...data}});
     return {replies, calls, port, adapter, send};
@@ -74,6 +75,29 @@ describe("isolated map runtime lifecycle", () => {
         await tick();
         assert.equal(replies.length, 0);
         assert.equal(calls.filter((call) => call[0] === "destroy").length, 1);
+    });
+    it("passes only fixed attribution identifiers and visibility booleans through the runtime", async () => {
+        const {port, adapter, replies, calls, send} = fixture();
+        let callbacks: AVMapAdapterCallbacks;
+        const stop = startAVMapRuntime(port as unknown as MessagePort, "one", "openfreemap", {} as HTMLElement,
+            async (_init, _container, value) => {
+                callbacks = value;
+                value.onAttributionClick("maplibre");
+                return adapter;
+            });
+        await send({type: "visibility", visible: true, viewport: {x: 0, y: 0, width: 800, height: 600}});
+        await send({type: "init", provider: "openfreemap", theme: "light"});
+        assert.deepEqual(replies.map(reply => reply.type), ["ready"]);
+        await send({type: "visibility", visible: "true"});
+        const viewport = {x: 0, y: 50, width: 800, height: 550};
+        await send({type: "visibility", visible: true, viewport});
+        await send({type: "visibility", visible: false});
+        assert.deepEqual(calls.filter(call => call[0] === "visibility"), [["visibility", true, viewport], ["visibility", false, undefined]]);
+        callbacks.onAttributionClick("maplibre");
+        callbacks.onAttributionClick("https://evil.invalid/" as any);
+        assert.deepEqual(replies[1], {version: 1, instanceID: "one", type: "attributionClick", link: "maplibre"});
+        stop(); callbacks.onAttributionClick("maplibre");
+        assert.equal(replies.length, 2);
     });
     it("never initializes a removed provider", async () => {
         for (const provider of ["amap", "tencent", "baidu"]) {

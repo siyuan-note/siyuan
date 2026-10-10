@@ -52,6 +52,7 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
     const hosts: Array<{options: AVMapHostOptions; points: protocol.AVMapPoint[]; revision: number;
         destroyed: boolean; fitted: boolean}> = [];
     const opened: unknown[] = [];
+    const openedLinks: unknown[] = [];
     const calls: string[] = [];
     const transactions: Array<{perform: IOperation[]; undo: IOperation[]; callback: () => void}> = [];
     let settleTransaction: () => void;
@@ -125,12 +126,13 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {exports: methods, require: (id: string) => modules[id] || {},
         window: {...context, location: {protocol: "https:"},
+            open: (...args: unknown[]) => openedLinks.push(args),
             addEventListener: (type: string, callback: () => void) => events.set(type, callback),
             removeEventListener: (type: string) => events.delete(type)},
         navigator: {userAgent: "Mozilla/5.0", onLine: options.online !== false},
         document: {createElement: () => new ElementStub(), documentElement: {getAttribute: () => "light"}},
         MutationObserver: Observer, ResizeObserver: Observer, Lute: {NewNodeID: () => "new-location"}});
-    return {data, protyle, calls, hosts, roots, records, opened, events, observers, destroyMap, transactions, context,
+    return {data, protyle, calls, hosts, roots, records, opened, openedLinks, events, observers, destroyMap, transactions, context,
         refreshes: () => refreshes,
         completeTransaction: async (success = true) => {
             if (success) transactions[transactions.length - 1].callback();
@@ -144,6 +146,19 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
         status: () => root.querySelector(".av__map-status").textContent};
 };
 
+test("map attribution stays inside the control and parent opens only fixed current destinations", async () => {
+    const scenario = setup();
+    await scenario.render();
+    const {options} = scenario.hosts[0];
+    assert.doesNotMatch(scenario.roots[0].innerHTML, /data-map-attribution/);
+    options.onAttributionClick("maplibre");
+    options.onAttributionClick("https://evil.invalid/" as any);
+    assert.deepEqual(scenario.openedLinks, [["https://maplibre.org/", "_blank", "noopener,noreferrer"]]);
+    scenario.destroyMap();
+    options.onAttributionClick("openstreetmap");
+    assert.equal(scenario.openedLinks.length, 1);
+});
+
 test("published maps render a status without inline settings, runtime admission, or SDK calls", async () => {
     const scenario = setup({published: true});
     await scenario.render();
@@ -156,7 +171,7 @@ test("published maps render a status without inline settings, runtime admission,
 test("missing field, unavailable host, offline and unsupported projection maps never request runtime admission", async () => {
     for (const option of [{hostSupported: false}, {online: false}, {}]) {
         const scenario = setup(option);
-        if (!Object.keys(option).length) (scenario.data.view as IAVTable).map.locationKeyID = "";
+        if (!Object.keys(option).length) (scenario.data.view as IAVTable).columns = [];
         await scenario.render();
         assert.deepEqual(scenario.calls, []);
         assert.equal(scenario.hosts.length, 0);
@@ -168,8 +183,8 @@ test("missing field, unavailable host, offline and unsupported projection maps n
     assert.equal(incompatible.status(), "mapNoMarkers");
 });
 
-test("unconfigured, deleted and changed-type map fields show a repairable location setup", async () => {
-    for (const locationKeyID of ["", "deleted", "text"]) {
+test("deleted and changed-type map fields show a repairable location setup", async () => {
+    for (const locationKeyID of ["deleted", "text"]) {
         const scenario = setup();
         (scenario.data.view as IAVTable).map.locationKeyID = locationKeyID;
         await scenario.render();
@@ -185,9 +200,27 @@ test("unconfigured, deleted and changed-type map fields show a repairable locati
         assert.deepEqual(scenario.calls, []);
     }
     const empty = setup();
+    (empty.data.view as IAVTable).map.locationKeyID = "";
     (empty.data.view as IAVTable).columns = [];
     await empty.render();
     assert.match(empty.setupHTML(), /data-map-create-field/);
+    assert.match(empty.setupHTML(), /mapSelectLocationField/);
+});
+
+test("unconfigured maps render existing location fields without submitting settings transactions", async () => {
+    for (const mode of ["editable", "readonly", "published", "history"]) {
+        const scenario = setup({published: mode === "published"});
+        const view = scenario.data.view as IAVTable;
+        view.map.locationKeyID = "";
+        scenario.protyle.disabled = mode === "readonly";
+        if (mode === "history") scenario.protyle.options.history = {created: "version"};
+        const before = JSON.stringify(view);
+        await scenario.render();
+        assert.equal(JSON.stringify(view), before);
+        assert.equal(scenario.transactions.length, 0);
+        assert.equal(scenario.hosts.length, mode === "editable" || mode === "readonly" ? 1 : 0);
+        assert.doesNotMatch(scenario.setupHTML(), /data-map-create-field/);
+    }
 });
 
 test("selecting an existing location field submits one undoable transaction and refreshes after success", async () => {
@@ -224,6 +257,7 @@ test("selecting an existing location field submits one undoable transaction and 
 test("adding a location field atomically creates, selects and hides it with an undo restoring the previous field", async () => {
     const scenario = setup();
     (scenario.data.view as IAVTable).map.locationKeyID = "";
+    (scenario.data.view as IAVTable).columns = [];
     await scenario.render();
     const create = scenario.control("[data-map-create-field]");
     create.events.get("click")();
@@ -250,7 +284,7 @@ test("map setup hides write controls for readonly, published and history modes",
         const scenario = setup({published: mode === "published"});
         scenario.protyle.disabled = mode === "disabled";
         if (["created", "snapshot"].includes(mode)) scenario.protyle.options.history = {[mode]: "version"};
-        (scenario.data.view as IAVTable).map.locationKeyID = "";
+        (scenario.data.view as IAVTable).map.locationKeyID = "deleted";
         await scenario.render();
         assert.doesNotMatch(scenario.setupHTML(), /data-map-location-field|data-map-create-field/);
         if (mode === "disabled") assert.match(scenario.setupHTML(), /av__map-empty/);
@@ -261,7 +295,7 @@ test("map setup hides write controls for readonly, published and history modes",
 test("stale setup controls and permissions changed after render cannot submit a transaction", async () => {
     for (const mode of ["disabled", "published", "created", "snapshot", "destroyed", "removed", "rerendered"]) {
         const scenario = setup();
-        (scenario.data.view as IAVTable).map.locationKeyID = "";
+        (scenario.data.view as IAVTable).map.locationKeyID = "deleted";
         await scenario.render();
         const select = scenario.control("[data-map-location-field]");
         const create = scenario.control("[data-map-create-field]");
@@ -281,6 +315,7 @@ test("stale setup controls and permissions changed after render cannot submit a 
 test("failed setup transactions reenable controls, while late completion cannot refresh a destroyed map", async () => {
     const scenario = setup();
     (scenario.data.view as IAVTable).map.locationKeyID = "";
+    (scenario.data.view as IAVTable).columns = [];
     await scenario.render();
     const create = scenario.control("[data-map-create-field]");
     create.events.get("click")();
@@ -298,7 +333,7 @@ test("failed setup transactions reenable controls, while late completion cannot 
 test("late setup transaction completions cannot refresh a removed or superseded view", async () => {
     for (const mode of ["removed", "rerendered"]) {
         const scenario = setup();
-        (scenario.data.view as IAVTable).map.locationKeyID = "";
+        (scenario.data.view as IAVTable).map.locationKeyID = "deleted";
         await scenario.render();
         scenario.control("[data-map-create-field]").events.get("click")();
         if (mode === "removed") scenario.roots[0].remove();

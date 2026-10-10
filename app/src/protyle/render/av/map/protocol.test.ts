@@ -10,13 +10,37 @@ describe("isolated map protocol", () => {
     const point = {id: "row-1", longitude: 0, latitude: 0};
     it("keeps attribution destinations in a fixed official allowlist", () => {
         assert.deepEqual(AV_MAP_ATTRIBUTION_LINKS.openfreemap.map((link) => link.href), [
-            "https://openfreemap.org", "https://www.openmaptiles.org/", "https://www.openstreetmap.org/copyright",
+            "https://openfreemap.org", "https://www.openmaptiles.org/", "https://www.openstreetmap.org/copyright", "https://maplibre.org/",
         ]);
         assert.deepEqual(Object.keys(AV_MAP_ATTRIBUTION_LINKS), ["openfreemap"]);
         Object.values(AV_MAP_ATTRIBUTION_LINKS).flat().forEach((link) => {
             assert.equal(new URL(link.href).protocol, "https:");
             assert.equal(/[<>]/.test(link.label), false);
         });
+    });
+    it("accepts only fixed attribution identifiers across both protocol boundaries", () => {
+        const {parseMapReply, parseMapCommand} = require("../../../../../electron/mapHostPolicy");
+        for (const {id: link} of AV_MAP_ATTRIBUTION_LINKS.openfreemap) {
+            const reply = {version: 1, instanceID: "one", type: "attributionClick", link};
+            assert.deepEqual(parseAVMapReply({...reply, href: "https://evil.invalid/", url: "private"}, "one"), reply);
+            assert.deepEqual(parseMapReply({...reply, href: "https://evil.invalid/", url: "private"}, "one"), reply);
+            assert.equal(parseAVMapReply(reply, "old"), undefined);
+        }
+        for (const link of ["https://maplibre.org/", "https://evil.invalid/", "maplibre?secret", "", {}, null]) {
+            const reply = {version: 1, instanceID: "one", type: "attributionClick", link};
+            assert.equal(parseAVMapReply(reply, "one"), undefined);
+            assert.equal(parseMapReply(reply, "one"), undefined);
+        }
+        const visibility = {version: 1, instanceID: "one", type: "visibility", visible: true,
+            viewport: {x: 0, y: 50, width: 800, height: 550}};
+        assert.deepEqual(parseAVMapCommand(visibility, "one"), visibility);
+        assert.equal(parseAVMapCommand({...visibility, viewport: {x: 0, y: 0, width: -1, height: 500}}, "one"), undefined);
+        for (const value of [NaN, Infinity, "0", -1, 32769]) {
+            assert.equal(parseAVMapCommand({...visibility, viewport: {...visibility.viewport, x: value}}, "one"), undefined);
+        }
+        assert.deepEqual(parseAVMapCommand({...visibility, viewport: {...visibility.viewport, url: "secret"}}, "one"), visibility);
+        assert.equal(parseAVMapCommand({...visibility, visible: "true"}, "one"), undefined);
+        assert.equal(parseMapCommand(visibility, "one"), undefined, "the owner cannot override native visibility");
     });
     it("copies only identifiers and WGS84 coordinates", () => {
         const input = {...point, name: "Private place", title: "Private record", document: "secret", token: "secret",

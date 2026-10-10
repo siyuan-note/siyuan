@@ -224,9 +224,23 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             try { host.owner.send("siyuan-map-reply", reply); } catch (_error) { destroy(host); }
         }
     };
+    const setVisible = (host, visible) => {
+        if (!host.view.webContents.isDestroyed()) host.view.setVisible(visible);
+        if (!visible) host.attributionGestureUntil = 0;
+        host.visible = visible;
+        // 原生视口已裁剪并平移 #map，此处不能再次叠加 crop。
+        const visibility = visible ? {visible: true, viewport: {x: 0, y: 0,
+            width: host.geometry.bounds.width / host.geometry.zoom, height: host.geometry.bounds.height / host.geometry.zoom}} :
+            {visible: false};
+        const key = JSON.stringify(visibility);
+        if (host.ready && key !== host.lastVisibility) {
+            host.lastVisibility = key;
+            post(host, {version: 1, instanceID: host.init.instanceID, type: "visibility", ...visibility});
+        }
+    };
     const hide = host => {
         host.geometry = undefined;
-        if (!host.view.webContents.isDestroyed()) host.view.setVisible(false);
+        setVisible(host, false);
     };
     const destroy = host => {
         if (!host || host.destroyed) return;
@@ -286,10 +300,10 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             host.view.webContents.send("siyuan-map-viewport", {logicalSize: geometry.logicalSize, crop: geometry.crop});
         }
         if (!host.ready || !host.win.isFocused() || !host.win.isVisible() || host.win.isMinimized()) {
-            host.view.setVisible(false);
+            setVisible(host, false);
             return;
         }
-        host.view.setVisible(true);
+        setVisible(host, true);
         post(host, {version: 1, instanceID: host.init.instanceID, type: "resize"});
     };
     ipcMain.handle("siyuan-map-capability", event => {
@@ -328,10 +342,22 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
                 spellcheck: false, backgroundThrottling: false, preload: path.join(__dirname, "mapHostPreload.js")}});
             const contents = view.webContents;
             host = {key, init, owner: event.sender, frame: event.senderFrame, win: owner.win, origin: owner.origin, diagnostics: new Set(), report,
-                view, router, listeners: [], ids: new Set(), revision: -1, loaded: false, ready: false, bootstrapped: false, destroyed: false};
+                view, router, listeners: [], ids: new Set(), revision: -1, loaded: false, ready: false, bootstrapped: false, destroyed: false,
+                visible: false, attributionGestureUntil: 0};
             hosts.set(key, host);
             // 全局 web-contents-created 会安装外部打开链接处理器，必须在加载前替换为拒绝。
             contents.setWindowOpenHandler(() => ({action: "deny"}));
+            const armAttributionClick = () => {
+                if (host.ready && host.visible && host.win.isFocused() && host.win.isVisible() && !host.win.isMinimized()) {
+                    host.attributionGestureUntil = Date.now() + 1000;
+                }
+            };
+            listen(host, contents, "before-mouse-event", (_event, input) => {
+                if (input.type === "mouseUp" && input.button === "left") armAttributionClick();
+            });
+            listen(host, contents, "before-input-event", (_event, input) => {
+                if (input.type === "keyDown" && input.key === "Enter" && !input.isAutoRepeat) armAttributionClick();
+            });
             mapContents.add(contents.id);
             const denyNavigation = event => event.preventDefault();
             for (const name of ["will-navigate", "will-frame-navigate", "will-redirect", "will-attach-webview"]) {
@@ -363,7 +389,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             for (const name of ["resize", "hide", "minimize", "enter-full-screen", "leave-full-screen"]) {
                 listen(host, owner.win, name, () => hide(host));
             }
-            listen(host, owner.win, "blur", () => view.setVisible(false));
+            listen(host, owner.win, "blur", () => setVisible(host, false));
             for (const name of ["focus", "show", "restore"]) listen(host, owner.win, name, () => applyGeometry(host));
             listen(host, event.sender, "zoom-changed", () => hide(host));
             const nonce = randomID();
@@ -402,6 +428,11 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
                                 contents.setBackgroundThrottling(true);
                                 sendOwner(host, reply);
                             } else if (reply.type === "markerClick" && host.ready && reply.revision === host.revision && host.ids.has(reply.id)) {
+                                sendOwner(host, reply);
+                            } else if (reply.type === "attributionClick" && host.ready && host.visible &&
+                                host.win.isFocused() && host.win.isVisible() && !host.win.isMinimized() &&
+                                host.attributionGestureUntil > Date.now()) {
+                                host.attributionGestureUntil = 0;
                                 sendOwner(host, reply);
                             } else if (reply.type === "error") {
                                 fail(host, reply.code === "hostUnavailable" ?

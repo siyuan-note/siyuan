@@ -17,7 +17,7 @@ const getTheme = () => document.documentElement.getAttribute("data-theme-mode") 
 const renderMapSetup = (root: HTMLElement, blockElement: HTMLElement, protyle: IProtyle,
                         data: IAV, current: () => boolean) => {
     const view = data.view as IAVTable;
-    const previous = getMapSettings(view);
+    const previous = {locationKeyID: view.map?.locationKeyID || ""};
     const editable = canEditMapSettings(protyle);
     const message = previous.locationKeyID ? window.siyuan.languages.mapMissingLocationField :
         window.siyuan.languages.mapSelectLocationField;
@@ -104,13 +104,11 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
 <div class="av__map-skipped ft__smaller ft__on-surface"></div>
 <div class="av__map-status ft__on-surface" role="status"></div>
 <div class="av__map-canvas fn__none"></div>
-<div class="ft__smaller fn__none" data-map-attribution></div>
 `;
     records.before(root);
     ["click", "keydown", "pointerdown"].forEach(type => root.addEventListener(type, event => event.stopPropagation()));
     const status = root.querySelector<HTMLElement>(".av__map-status");
     const canvas = root.querySelector<HTMLElement>(".av__map-canvas");
-    const attribution = root.querySelector<HTMLElement>("[data-map-attribution]");
     let host: AVMapHost;
     let themeObserver: MutationObserver;
     let resizeObserver: ResizeObserver;
@@ -130,7 +128,6 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
         revision++;
         host?.destroy();
         host = undefined;
-        attribution.classList.add("fn__none");
         status.textContent = message;
         canvas.classList.add("fn__none");
     };
@@ -188,9 +185,6 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
         const rowByID = new Map(view.rows.map(row => [row.id, row]));
         const pointIDs = new Set(points.map(point => point.id));
         const activeRevision = ++revision;
-        // 固定官方署名链接留在父页，避免为第三方 SDK 放宽沙箱弹窗权限。
-        attribution.innerHTML = AV_MAP_ATTRIBUTION_LINKS.openfreemap.map(link =>
-            `<a href="${escapeAttr(link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label)}</a>`).join(" · ");
         canvas.classList.remove("fn__none");
         host = (desktopHost ? createDesktopAVMapHost : createAVMapHost)(canvas, {
             provider: "openfreemap",
@@ -201,7 +195,12 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
                     return;
                 }
                 status.textContent = "";
-                attribution.classList.remove("fn__none");
+            },
+            onAttributionClick: id => {
+                if (!current() || revision !== activeRevision) return;
+                // 仅可信父页面解析固定官方链接，供应商 URL 不跨越隔离边界。
+                const link = AV_MAP_ATTRIBUTION_LINKS.openfreemap.find(item => item.id === id);
+                if (link) window.open(link.href, "_blank", "noopener,noreferrer");
             },
             onError: () => fallback(navigator.onLine ? window.siyuan.languages.mapLoadError : window.siyuan.languages.mapOffline),
             onMarkerClick: (id, markerRevision) => {

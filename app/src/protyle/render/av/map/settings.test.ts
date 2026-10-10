@@ -77,6 +77,46 @@ test("map field selection uses an undoable transaction without changing cells", 
     assert.equal(JSON.stringify(operations[0].undo[0].data), JSON.stringify({locationKeyID: "missing-field"}));
 });
 
+test("the default field is displayed without writes and can be explicitly pinned with a raw-state undo", () => {
+    const {methods, operations, menus} = setup();
+    const database = data();
+    const view = database.view as IAVTable;
+    view.map.locationKeyID = "";
+    const before = JSON.stringify(view);
+    assert.match(methods.getMapSettingsHTML(view), /&lt;Location>/);
+    const field = control();
+    methods.bindMapSettings({data: database, protyle: {options: {}} as IProtyle,
+        blockElement: {getAttribute: () => "carrier"} as unknown as Element,
+        menuElement: {querySelectorAll: () => [field]} as unknown as Element});
+    field.handlers.click({preventDefault() {}, stopPropagation() {}});
+    assert.equal(operations.length, 0);
+    assert.equal(JSON.stringify(view), before);
+    assert.equal(menus[0].length, 1);
+    assert.equal(menus[0][0].checked, true);
+    menus[0][0].click();
+    assert.equal(JSON.stringify(operations[0].perform[0].data), JSON.stringify({locationKeyID: "location"}));
+    assert.equal(JSON.stringify(operations[0].undo[0].data), JSON.stringify({locationKeyID: ""}));
+    assert.equal(view.map.locationKeyID, "location");
+});
+
+test("choosing another field from an automatic default keeps the empty binding in undo", () => {
+    const {methods, operations, menus} = setup();
+    const database = data();
+    const view = database.view as IAVTable;
+    view.map.locationKeyID = "";
+    view.columns.push({id: "second", type: "location", name: "Second"});
+    const field = control();
+    methods.bindMapSettings({data: database, protyle: {options: {}} as IProtyle,
+        blockElement: {getAttribute: () => "carrier"} as unknown as Element,
+        menuElement: {querySelectorAll: () => [field]} as unknown as Element});
+    field.handlers.click({preventDefault() {}, stopPropagation() {}});
+    menus[0].find(item => item.label === "Second").click();
+    assert.equal(view.map.locationKeyID, "second");
+    assert.equal(JSON.stringify(operations[0].undo[0].data), JSON.stringify({locationKeyID: ""}));
+    view.map = {locationKeyID: (operations[0].undo[0].data as IAVMapSettings).locationKeyID};
+    assert.equal(state.getMapSettings(view).locationKeyID, "location");
+});
+
 test("readonly, history, and published maps cannot change settings", () => {
     for (const mode of ["disabled", "history", "published"]) {
         const {methods, operations, context} = setup();

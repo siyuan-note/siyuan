@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import {webcrypto} from "node:crypto";
 import {afterEach, describe, it} from "node:test";
-import {createAVMapHost, isAVMapHostEnvironmentSupported} from "./host";
+import {createAVMapHost, getAVMapVisibility, isAVMapHostEnvironmentSupported} from "./host";
 import {isAVMapRuntimeIsolated} from "./hostRuntime";
 
 describe("map host boundary", () => {
@@ -60,7 +60,11 @@ describe("map host boundary", () => {
             addEventListener() {}, remove() { iframe.removed = true; },
         };
         const scope = {
-            location: {protocol: "https:", origin: "https://fixture.invalid"}, navigator: {userAgent: "Chromium"}, crypto: webcrypto,
+            location: {protocol: "https:", origin: "https://fixture.invalid"},
+            navigator: {userAgent: "Chromium", userActivation: {isActive: true}}, crypto: webcrypto,
+            innerWidth: 1000, innerHeight: 800,
+            getComputedStyle: () => ({display: "block", visibility: "visible", opacity: "1", getPropertyValue: () => ""}),
+            requestAnimationFrame: () => 1, cancelAnimationFrame() {},
             HTMLIFrameElement: {prototype: {credentialless: false}},
             clearTimeout(id: number) { timers.delete(id); },
             setTimeout(callback: () => void, delay: number) {
@@ -70,12 +74,19 @@ describe("map host boundary", () => {
             addEventListener: (name: string, listener: (event?: unknown) => void) => listeners.set(name, listener),
             removeEventListener: (name: string) => listeners.delete(name),
         };
-        const container = {ownerDocument: {defaultView: scope, createElement: () => iframe}, appendChild() {}};
+        const rect = {left: 0, top: 0, right: 400, bottom: 300, width: 400, height: 300};
+        const doc = {defaultView: scope, createElement: () => iframe, hidden: false,
+            elementFromPoint: () => iframe, querySelectorAll: (): HTMLElement[] => [], addEventListener() {}, removeEventListener() {}};
+        const container = {ownerDocument: doc, appendChild() {}, isConnected: true, clientWidth: 400, clientHeight: 300,
+            getClientRects: () => [rect],
+            getBoundingClientRect: () => rect, contains: (element: unknown) => element === iframe};
         let ready = 0;
         const clicked: any[] = [];
+        const links: string[] = [];
         const host = createAVMapHost(container as unknown as HTMLElement, {
             provider: "openfreemap", theme: "light",
             onReady: () => ready++, onMarkerClick: (...args) => clicked.push(args), onError: () => assert.fail("unexpected error"),
+            onAttributionClick: link => links.push(link),
         });
         cleanups.push(host.destroy);
         await new Promise<void>((resolve) => setImmediate(resolve));
@@ -111,12 +122,24 @@ describe("map host boundary", () => {
         assert.deepEqual(port.messages[0], {version: 1, instanceID, type: "init", provider: "openfreemap",
             theme: "light"});
         const reply = (data: Record<string, unknown>) => port.onmessage({data: {version: 1, instanceID, ...data}});
+        reply({type: "attributionClick", link: "maplibre"});
+        assert.equal(links.length, 0);
         reply({type: "ready", instanceID: "old"});
         assert.equal(ready, 0);
         reply({type: "ready"});
         reply({type: "ready"});
         assert.equal(timers.size, 0, "ready clears the SDK deadline");
         assert.equal(ready, 1);
+        reply({type: "attributionClick", link: "maplibre", instanceID: "old"});
+        reply({type: "attributionClick", link: "https://evil.invalid/"});
+        scope.navigator.userActivation.isActive = false;
+        reply({type: "attributionClick", link: "maplibre"});
+        scope.navigator.userActivation.isActive = true;
+        doc.hidden = true; reply({type: "attributionClick", link: "maplibre"}); doc.hidden = false;
+        assert.equal(links.length, 0);
+        rect.top = -100;
+        reply({type: "attributionClick", link: "maplibre"});
+        assert.deepEqual(links, ["maplibre"], "visible attribution remains clickable when the map top is cropped");
         assert.deepEqual(port.messages.find((message) => message.type === "setPoints").points, [point]);
         assert.equal(port.messages.filter((message) => message.type === "fit").length, 1);
         reply({type: "markerClick", id: "row-1", revision: 0});
@@ -132,6 +155,8 @@ describe("map host boundary", () => {
         assert.equal(iframe.removed, true);
         assert.equal(port.closed, true);
         lateReply({data: {version: 1, instanceID, type: "markerClick", id: "row-1", revision: 2}});
+        lateReply({data: {version: 1, instanceID, type: "attributionClick", link: "maplibre"}});
+        assert.equal(links.length, 1);
         assert.equal(clicked.length, 1);
     });
     it("does not create a frame after destruction while an asynchronous native report is pending", async () => {
@@ -139,7 +164,7 @@ describe("map host boundary", () => {
         const scope = {location: {protocol: "http:"}, navigator: {userAgent: "SiYuanAndroid"}, JSAndroid: {},
             HTMLIFrameElement: {prototype: {}}, setTimeout, clearTimeout, removeEventListener() {},
             getAVMapNativeBoundary: () => new Promise((resolve) => { finish = resolve; })};
-        const container = {ownerDocument: {defaultView: scope,
+        const container = {ownerDocument: {defaultView: {...scope, cancelAnimationFrame() {}}, removeEventListener() {},
             createElement: () => assert.fail("late native response must not create an iframe")}};
         const host = createAVMapHost(container as unknown as HTMLElement, {provider: "openfreemap", theme: "light",
             onMarkerClick() {}, onError: () => assert.fail("destroyed host must not emit errors")});
@@ -147,5 +172,34 @@ describe("map host boundary", () => {
         host.destroy();
         finish({version: 1, enabled: true});
         await new Promise<void>((resolve) => setImmediate(resolve));
+    });
+    it("distinguishes partial visibility from safe attribution display time and checks clipping", () => {
+        const rect = {left: 10, top: -10, right: 410, bottom: 290, width: 400, height: 300};
+        const style = {display: "block", visibility: "visible", opacity: "1", overflowX: "visible", overflowY: "visible",
+            getPropertyValue: () => ""};
+        const doc: any = {hidden: false, defaultView: {innerWidth: 800, innerHeight: 600, getComputedStyle: () => style},
+            elementFromPoint: () => container, querySelectorAll: (): HTMLElement[] => []};
+        const container: any = {ownerDocument: doc, isConnected: true, clientWidth: 400, clientHeight: 300, getClientRects: () => [rect],
+            getBoundingClientRect: () => rect, contains: (element: unknown) => element === container};
+        assert.deepEqual(getAVMapVisibility(container), {visible: true, viewport: {x: 0, y: 10, width: 400, height: 290}});
+        rect.top = 10;
+        rect.bottom = 310;
+        assert.equal(getAVMapVisibility(container).visible, true);
+        doc.hidden = true; assert.equal(getAVMapVisibility(container).visible, false); doc.hidden = false;
+        style.opacity = "0"; assert.equal(getAVMapVisibility(container).visible, false); style.opacity = "1";
+        doc.elementFromPoint = () => ({}); assert.equal(getAVMapVisibility(container).visible, false);
+        doc.elementFromPoint = () => container;
+        rect.width = 800; rect.right = 810; rect.height = 600; rect.bottom = 610;
+        assert.deepEqual(getAVMapVisibility(container), {visible: true, viewport: {x: 0, y: 0, width: 395, height: 295}},
+            "parent CSS scaling is removed before forwarding iframe viewport coordinates");
+        container.parentElement = {parentElement: null, clientLeft: 0, clientTop: 0, clientWidth: 350, clientHeight: 500,
+            offsetWidth: 350, offsetHeight: 500, getBoundingClientRect: () => ({left: 20, top: 30, width: 350, height: 500})};
+        style.overflowX = "hidden"; style.overflowY = "scroll";
+        assert.deepEqual(getAVMapVisibility(container), {visible: true, viewport: {x: 5, y: 10, width: 175, height: 250}},
+            "ancestor scroll clipping is converted in the same coordinate system");
+        doc.querySelectorAll = () => [{contains: () => false, getClientRects: () => [{}],
+            getBoundingClientRect: () => ({left: 100, right: 120, top: 250, bottom: 270, width: 20, height: 20})}];
+        assert.deepEqual(getAVMapVisibility(container), {visible: true},
+            "a small parent overlay blocks counting even when it misses every sampled point");
     });
 });

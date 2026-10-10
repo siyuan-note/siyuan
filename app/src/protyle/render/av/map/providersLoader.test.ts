@@ -16,11 +16,13 @@ const fixture = (options: {ready?: boolean; assetFailure?: boolean; missingSDK?:
             if (options.ready !== false && type === "load") queueMicrotask(callback);
         }
         off() {}
+        addControl() {}
         remove() { destroyed++; }
     }
     const scope: any = {
-        setTimeout, clearTimeout,
-        maplibregl: options.missingSDK ? undefined : {Map: FakeMap, setWorkerUrl: (url: string) => requested.push({worker: url})},
+        setTimeout, clearTimeout, cancelAnimationFrame() {},
+        maplibregl: options.missingSDK ? undefined : {Map: FakeMap, AttributionControl: class {},
+            setWorkerUrl: (url: string) => requested.push({worker: url})},
         fetch: async (url: string, options: unknown) => {
             requested.push({url, options});
             return {ok: true, text: async () => "/* fixture worker */"};
@@ -28,6 +30,7 @@ const fixture = (options: {ready?: boolean; assetFailure?: boolean; missingSDK?:
     };
     const document: any = {
         defaultView: scope, documentElement: {dataset: {}},
+        addEventListener() {}, removeEventListener() {},
         createElement: (tag: string) => ({tag, remove() {}}),
         head: {appendChild: (element: any) => {
             requested.push({tag: element.tag, src: element.src, href: element.href, referrerPolicy: element.referrerPolicy,
@@ -36,7 +39,9 @@ const fixture = (options: {ready?: boolean; assetFailure?: boolean; missingSDK?:
         }},
     };
     scope.document = document;
-    const container = {ownerDocument: document, replaceChildren() {}} as unknown as HTMLElement;
+    const container = {ownerDocument: document, replaceChildren() {}, querySelector: () => ({
+        classList: {toggle() {}}, addEventListener() {}, removeEventListener() {},
+    })} as unknown as HTMLElement;
     return {scope, requested, container, destroyed: () => destroyed};
 };
 const init: AVMapInit = {version: 1, instanceID: "fixture", type: "init", provider: "openfreemap", theme: "light"};

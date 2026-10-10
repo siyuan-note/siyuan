@@ -314,6 +314,51 @@ test("points and clicks are bounded by current revision and membership; ready is
     s.manager.destroyAll();
 });
 
+test("attribution links require one recent native input in a ready visible focused map", (t) => {
+    let now = 100000;
+    t.mock.method(Date, "now", () => now);
+    const s = setup(); s.create(); s.load();
+    const contents = s.views[0].webContents;
+    const click = () => contents.emit("before-mouse-event", {}, {type: "mouseUp", button: "left"});
+    const links = () => s.owner.sent.filter(entry => entry[1].type === "attributionClick").map(entry => entry[1]);
+    const geometry = {...envelope, visible: true, bounds: {x: 10, y: 20, width: 400, height: 300},
+        logicalSize: {width: 400, height: 300}, crop: {x: 0, y: 0}};
+    click(); s.reply({type: "attributionClick", link: "maplibre"});
+    s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
+    click(); s.reply({type: "attributionClick", link: "maplibre"});
+    assert.deepEqual(links(), []);
+    s.handlers["siyuan-map-geometry"](s.event(), geometry);
+    s.reply({type: "attributionClick", link: "maplibre"});
+    assert.deepEqual(links(), [], "a provider message alone is insufficient");
+    click();
+    s.reply({type: "attributionClick", link: "maplibre", instanceID: "b".repeat(48)});
+    s.reply({type: "attributionClick", link: "https://evil.invalid/"});
+    assert.deepEqual(links(), []);
+    s.reply({type: "attributionClick", link: "maplibre", href: "https://evil.invalid/"});
+    s.reply({type: "attributionClick", link: "openstreetmap"});
+    assert.deepEqual(links(), [{...envelope, type: "attributionClick", link: "maplibre"}]);
+    contents.emit("before-input-event", {}, {type: "keyDown", key: "Enter", isAutoRepeat: false});
+    s.reply({type: "attributionClick", link: "openstreetmap"});
+    assert.equal(links().length, 2);
+    click(); s.win.focused = false; s.win.emit("blur"); s.win.focused = true; s.win.emit("focus");
+    s.reply({type: "attributionClick", link: "maplibre"});
+    assert.equal(links().length, 2, "blur invalidates an outstanding gesture even after focus returns");
+    click(); s.handlers["siyuan-map-geometry"](s.event(), {...envelope, visible: false});
+    s.reply({type: "attributionClick", link: "maplibre"});
+    s.handlers["siyuan-map-geometry"](s.event(), geometry);
+    s.reply({type: "attributionClick", link: "maplibre"});
+    assert.equal(links().length, 2, "hidden geometry invalidates an outstanding gesture");
+    click(); now += 1001; s.reply({type: "attributionClick", link: "maplibre"});
+    assert.equal(links().length, 2, "expired native input cannot open a link");
+    s.command({type: "visibility", visible: true, viewport: {x: 0, y: 0, width: 400, height: 300}});
+    const sent = s.channels[0].port1.sent.filter(message => message.type === "visibility");
+    assert.deepEqual(sent.map(message => message.visible), [true, false, true, false, true]);
+    assert.deepEqual(sent[0].viewport, {x: 0, y: 0, width: 400, height: 300});
+    s.manager.destroyAll();
+    assert.equal(contents.listenerCount("before-mouse-event"), 0);
+    assert.equal(contents.listenerCount("before-input-event"), 0);
+});
+
 test("geometry is invisible before ready, uses owner zoom, and hides on invalid geometry or window transitions", () => {
     const s = setup(); s.create(); s.load(); s.owner.zoom = 1.25;
     const geometry = {...envelope, visible: true, bounds: {x: 10, y: 20, width: 200, height: 100},
@@ -325,6 +370,8 @@ test("geometry is invisible before ready, uses owner zoom, and hides on invalid 
     assert.equal(s.views[0].visible, true);
     assert.deepEqual(s.views[0].bounds, {x: 13, y: 25, width: 249, height: 125});
     assert.equal(s.views[0].webContents.zoom, 1.25);
+    assert.deepEqual(s.channels[0].port1.sent.find(message => message.type === "visibility" && message.visible).viewport,
+        {x: 0, y: 0, width: 199.2, height: 100}, "native viewport uses cropped DIP bounds divided by zoom without adding crop");
     s.win.emit("resize"); assert.equal(s.views[0].visible, false);
     s.handlers["siyuan-map-geometry"](s.event(), geometry); assert.equal(s.views[0].visible, true);
     s.handlers["siyuan-map-geometry"](s.event(), {...geometry, bounds: {...geometry.bounds, width: 10000}});

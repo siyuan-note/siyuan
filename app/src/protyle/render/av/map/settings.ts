@@ -8,8 +8,10 @@ export const canEditMapSettings = (protyle: IProtyle) => !protyle.disabled && !w
     !protyle.options.history?.created && !protyle.options.history?.snapshot;
 
 const getChoices = (view: IAVTable) => {
-    const choices = [{value: "", label: window.siyuan.languages.mapSelectLocationField},
-        ...view.columns.filter(column => column.type === "location").map(column => ({value: column.id, label: column.name}))];
+    const choices = view.columns.filter(column => column.type === "location").map(column => ({value: column.id, label: column.name}));
+    if (choices.length === 0) {
+        choices.push({value: "", label: window.siyuan.languages.mapSelectLocationField});
+    }
     const saved = getMapSettings(view).locationKeyID;
     if (saved && !choices.some(choice => choice.value === saved)) {
         choices.push({value: saved, label: window.siyuan.languages.mapMissingLocationField});
@@ -42,7 +44,7 @@ export const bindMapSettings = (options: {
     }
     const update = (locationKeyID: string) => {
         if (!canEditMapSettings(options.protyle)) return;
-        const previous = getMapSettings(view);
+        const previous = {locationKeyID: view.map?.locationKeyID || ""};
         if (previous.locationKeyID === locationKeyID) return;
         const next = {locationKeyID};
         const operation = {action: "setAttrViewMap" as const, avID: options.data.id,

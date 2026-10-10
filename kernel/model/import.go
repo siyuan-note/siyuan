@@ -515,6 +515,9 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		err = errors.New(Conf.Language(0))
 		return
 	}
+	if _, err = importEmojiFiles(unzipRootPath, true); err != nil {
+		return
+	}
 	if createNotebook {
 		if importedBoxConf != nil && importedBoxConf.Name != "" {
 			name = importedBoxConf.Name
@@ -1043,47 +1046,12 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	// AV 定义已在 storage 删除前处理（加密笔记本DEK 加密拷到笔记本级，
 	// 普通 box 拷到全局 storage/av/），这里不再重复处理
 
-	// 将包含的自定义表情统一移动到 data/emojis/ 下
-	unzipRootEmojisPath := filepath.Join(unzipRootPath, "emojis")
-	filelock.Walk(unzipRootEmojisPath, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d == nil {
-			return nil
-		}
-		if !util.IsValidExistingEmojiFileName(d.Name()) {
-			emojiFullName := path
-			fullPathFilteredName := filepath.Join(filepath.Dir(path), util.FilterUploadEmojiFileName(d.Name()))
-			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-			logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", d.Name(), fullPathFilteredName)
-			if removeErr := util.RenameEmojiFile(emojiFullName, fullPathFilteredName); nil != removeErr {
-				logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
-			}
-		}
-		return nil
-	})
-	var emojiDirs []string
-	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d == nil || unzipRootPath == path {
-			return nil
-		}
-		if d.Name() == "emojis" && d.IsDir() {
-			emojiDirs = append(emojiDirs, path)
-		}
-		return nil
-	})
-	dataEmojis := filepath.Join(util.DataDir, "emojis")
+	// 将包内表情复制到全局目录，冲突时不覆盖已有内容。
+	emojiDirs, err := importEmojiFiles(unzipRootPath, false)
+	if err != nil {
+		return
+	}
 	for _, emojis := range emojiDirs {
-		if gulu.File.IsDir(emojis) {
-			if err = filelock.Copy(emojis, dataEmojis); err != nil {
-				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", emojis, dataEmojis, err)
-				return
-			}
-		}
 		os.RemoveAll(emojis)
 	}
 

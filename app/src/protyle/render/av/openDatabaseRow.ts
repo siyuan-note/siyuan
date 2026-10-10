@@ -231,7 +231,7 @@ const mountDesktopDatabaseRowNavigation = (model: Editor | Custom, data: IDataba
             showDatabaseRowPreview(opened.model, next, source);
         }
         return true;
-    });
+    }, model instanceof Custom ? undefined : model.editor.protyle.breadcrumb?.element.parentElement);
 };
 /// #endif
 

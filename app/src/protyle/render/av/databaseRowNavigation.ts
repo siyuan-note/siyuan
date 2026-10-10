@@ -99,18 +99,19 @@ export const getDatabaseRowNeighbors = async (data: IDatabaseRowOpenData) => {
 };
 
 export const mountDatabaseRowNavigation = (container: Element, data: IDatabaseRowOpenData,
-                                           open: (data: IDatabaseRowOpenData) => Promise<boolean>) => {
-    container.querySelector(":scope > [data-database-row-navigation]")?.remove();
+                                           open: (data: IDatabaseRowOpenData) => Promise<boolean>, breadcrumb?: HTMLElement) => {
+    container.querySelector(":scope > [data-database-row-navigation], :scope > .protyle-breadcrumb > [data-database-row-navigation]")?.remove();
     if (!data.navigation) {
         return;
     }
     const toolbar = document.createElement("div");
-    toolbar.className = "block__icons";
+    const inline = breadcrumb && container.contains(breadcrumb);
+    toolbar.className = inline ? "fn__flex fn__flex-center fn__flex-shrink" : "block__icons";
     toolbar.setAttribute("data-database-row-navigation", data.itemID);
     toolbar.innerHTML = ["previous", "next"].map((name, index) =>
         `<button type="button" disabled class="block__icon block__icon--show block__icon--touch ariaLabel" data-position="8south" aria-label="${escapeAttr(window.siyuan.languages[name])}"><svg><use xlink:href="#${index ? "iconDown" : "iconUp"}"></use></svg></button>`)
-        .join('<span class="fn__space"></span>');
-    container.prepend(toolbar);
+        .join(inline ? "" : '<span class="fn__space"></span>') + (inline ? '<span class="fn__space"></span>' : "");
+    (inline ? breadcrumb : container).prepend(toolbar);
     const buttons = Array.from(toolbar.querySelectorAll("button"));
     let busy = false;
     const update = async () => {

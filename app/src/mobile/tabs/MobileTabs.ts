@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {Constants} from "../../constants";
 import {getDocumentIconHTML} from "../../emoji/fileTreeIcon";
 import type {App} from "../../index";
@@ -830,48 +831,55 @@ export class MobileTabs {
         this.persist();
     }
 
-    private openTabMenu(tabID: string) {
-        const tab = this.state.tabs.find((item) => item.id === tabID);
-        if (!tab) {
-            return;
-        }
-        const pinned = !!tab.pin;
-        window.siyuan.menus.menu.remove();
-        window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_MOBILE_TABS);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "close",
-            icon: "iconClose",
-            label: window.siyuan.languages.close,
-            click: () => {
-                void this.close(tabID);
+    private openTabMenu(tabID: string, target?: Element) {
+        toggleMenu({
+            target,
+            toggle: false,
+            build: (_menu, session) => {
+                const tab = this.state.tabs.find((item) => item.id === tabID);
+                if (!tab) {
+                    return;
+                }
+                const pinned = !!tab.pin;
+
+                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_MOBILE_TABS);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "close",
+                    icon: "iconClose",
+                    label: window.siyuan.languages.close,
+                    click: () => {
+                        void this.close(tabID);
+                    },
+                }).element);
+                if (this.state.tabs.length > 1) {
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        id: "closeOthers",
+                        label: window.siyuan.languages.closeOthers,
+                        click: () => {
+                            this.closeOthers(tabID);
+                        },
+                    }).element);
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        id: "closeAll",
+                        label: window.siyuan.languages.closeAll,
+                        click: () => {
+                            this.closeAll();
+                        },
+                    }).element);
+                }
+                window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: pinned ? "unpin" : "pin",
+                    icon: getPinIcon(pinned),
+                    label: pinned ? window.siyuan.languages.unpin : window.siyuan.languages.pin,
+                    click: () => {
+                        this.togglePin(tabID);
+                    },
+                }).element);
+                session.show(() => window.siyuan.menus.menu.fullscreen("bottom"));
+
             },
-        }).element);
-        if (this.state.tabs.length > 1) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "closeOthers",
-                label: window.siyuan.languages.closeOthers,
-                click: () => {
-                    this.closeOthers(tabID);
-                },
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "closeAll",
-                label: window.siyuan.languages.closeAll,
-                click: () => {
-                    this.closeAll();
-                },
-            }).element);
-        }
-        window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: pinned ? "unpin" : "pin",
-            icon: getPinIcon(pinned),
-            label: pinned ? window.siyuan.languages.unpin : window.siyuan.languages.pin,
-            click: () => {
-                this.togglePin(tabID);
-            },
-        }).element);
-        window.siyuan.menus.menu.fullscreen("bottom");
+        });
     }
 
     private togglePin(tabID: string) {
@@ -1051,7 +1059,7 @@ export class MobileTabs {
                 }
                 this.overviewLongPressTriggered = true;
                 this.suppressOverviewClickUntil = Date.now() + Constants.TIMEOUT_LONGPRESS;
-                this.openTabMenu(tabID);
+                this.openTabMenu(tabID, itemElement);
             }, Constants.TIMEOUT_LONGPRESS);
         });
         element.addEventListener("pointermove", processPointerMove);

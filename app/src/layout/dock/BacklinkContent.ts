@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {GlobalBacklinkList} from "./GlobalBacklinkList";
 import {bindPanelSearch} from "./panelSearch";
 import type {Tab} from "../Tab";
@@ -490,10 +491,16 @@ export class BacklinkContent extends Model {
                             break;
                         case "sort":
                         case "mSort": {
-                            this.showSortMenu(type, target.getAttribute("data-sort"));
-                            const rect = target.getBoundingClientRect();
-                            window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
-                            event.stopPropagation();
+                            toggleMenu({
+                                target: target,
+                                build: (_menu, session) => {
+                                    this.showSortMenu(type, target.getAttribute("data-sort"));
+                                    const rect = target.getBoundingClientRect();
+                                    session.show(() => window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height}));
+
+                                },
+                            });
+                        event.stopPropagation();
                             break;
                         }
                         case "sourceFilter":
@@ -983,165 +990,171 @@ export class BacklinkContent extends Model {
     }
 
     private showSourceFilterMenu(target: HTMLElement) {
-        let foldedTypes = normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes"));
-        const foldItems = new Map<string, HTMLElement>();
-        let foldResetElement: HTMLElement;
-        let resetElement: HTMLElement;
-        const applyFoldTypes = (types: string[]) => {
-            this.viewState?.set("foldedBlockTypes", types);
-            this.updateSourceFilterButton();
-            BACKLINK_BLOCK_TYPES.forEach(([type]) => {
-                if (foldedTypes.includes(type) !== types.includes(type)) {
-                    const field = `type-fold-generation:${type}`;
-                    this.viewState?.set(field, (this.viewState.get<number>(field) || 0) + 1);
-                }
-            });
-            foldedTypes = types;
-            foldItems.forEach((element, type) => {
-                element.querySelector(".b3-menu__checked")?.remove();
-                if (foldedTypes.includes(type)) {
-                    element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>');
-                }
-            });
-            if (foldedTypes.length === 0) {
-                foldResetElement?.setAttribute("disabled", "disabled");
-            } else {
-                foldResetElement?.removeAttribute("disabled");
-            }
-            if (!getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0) {
-                resetElement?.setAttribute("disabled", "disabled");
-            } else {
-                resetElement?.removeAttribute("disabled");
-            }
-            this.itemRecords[0].forEach(record => {
-                if (record.editor && this.viewState) {
-                    configureBacklinkTypeFold(record.editor.protyle, types, this.viewState);
-                }
-            });
-            this.globalList?.updateFoldTypes();
-        };
-        const blockTypeFoldSubmenu: IMenu[] = [{
-            label: window.siyuan.languages.reset,
-            icon: "iconUndo",
-            disabled: foldedTypes.length === 0,
-            bind: element => { foldResetElement = element; },
-            click: () => {
-                applyFoldTypes([]);
-                return true;
-            },
-        }, {type: "separator"}, ...BACKLINK_BLOCK_TYPES.map(([type, label]) => ({
-            label: window.siyuan.languages[label] || label,
-            checked: foldedTypes.includes(type),
-            iconHTML: "",
-            bind: (element: HTMLElement) => { foldItems.set(type, element); },
-            click: () => {
-                applyFoldTypes(foldedTypes.includes(type) ?
-                    foldedTypes.filter(item => item !== type) : [...foldedTypes, type]);
-                return true;
-            },
-        }))];
-        const dailyNoteSubmenu = ([
-            ["all", window.siyuan.languages.all],
-            ["only", window.siyuan.languages.dailyNote],
-            ["exclude", window.siyuan.languages.nonDailyNote],
-        ] as Array<[TBacklinkDailyNoteFilter, string]>).map(([value, label]) => ({
-            checked: this.sourceFilter.dailyNote === value,
-            iconHTML: "",
-            label,
-            click: () => {
-                this.applySourceFilter({...this.sourceFilter, dailyNote: value});
-            }
-        }));
-        const notebookSubmenu: IMenu[] = [{
-            checked: this.sourceFilter.excludedNotebookIDs.length === 0,
-            iconHTML: "",
-            label: window.siyuan.languages.allNotebooks,
-            click: () => {
-                this.applySourceFilter({...this.sourceFilter, excludedNotebookIDs: []});
-            }
-        }, {type: "separator"}];
-        (window.siyuan.notebooks || []).filter(item => !item.closed).forEach(item => {
-            notebookSubmenu.push({
-                checked: !this.sourceFilter.excludedNotebookIDs.includes(item.id),
-                iconHTML: "",
-                label: escapeHtml(item.name),
-                click: () => {
-                    const excludedNotebookIDs = new Set(this.sourceFilter.excludedNotebookIDs);
-                    if (excludedNotebookIDs.has(item.id)) {
-                        excludedNotebookIDs.delete(item.id);
+        toggleMenu({
+            target: target,
+            build: (_menu, session) => {
+                let foldedTypes = normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes"));
+                const foldItems = new Map<string, HTMLElement>();
+                let foldResetElement: HTMLElement;
+                let resetElement: HTMLElement;
+                const applyFoldTypes = (types: string[]) => {
+                    this.viewState?.set("foldedBlockTypes", types);
+                    this.updateSourceFilterButton();
+                    BACKLINK_BLOCK_TYPES.forEach(([type]) => {
+                        if (foldedTypes.includes(type) !== types.includes(type)) {
+                            const field = `type-fold-generation:${type}`;
+                            this.viewState?.set(field, (this.viewState.get<number>(field) || 0) + 1);
+                        }
+                    });
+                    foldedTypes = types;
+                    foldItems.forEach((element, type) => {
+                        element.querySelector(".b3-menu__checked")?.remove();
+                        if (foldedTypes.includes(type)) {
+                            element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>');
+                        }
+                    });
+                    if (foldedTypes.length === 0) {
+                        foldResetElement?.setAttribute("disabled", "disabled");
                     } else {
-                        excludedNotebookIDs.add(item.id);
+                        foldResetElement?.removeAttribute("disabled");
                     }
-                    this.applySourceFilter({...this.sourceFilter, excludedNotebookIDs: Array.from(excludedNotebookIDs)});
-                }
-            });
-        });
-
-        window.siyuan.menus.menu.remove();
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconContract",
-            label: window.siyuan.languages.backlinkFoldByType,
-            type: "submenu",
-            disabled: !this.viewStateLoaded || !this.viewState,
-            submenu: blockTypeFoldSubmenu,
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconCalendar",
-            label: window.siyuan.languages.dailyNote,
-            type: "submenu",
-            submenu: dailyNoteSubmenu,
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconFiles",
-            label: window.siyuan.languages.agentCatNotebook,
-            type: "submenu",
-            submenu: notebookSubmenu,
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            checked: this.sourceFilter.excludeSelf,
-            iconHTML: "",
-            label: window.siyuan.languages.excludeSelfBacklink,
-            click: () => {
-                this.applySourceFilter({...this.sourceFilter, excludeSelf: !this.sourceFilter.excludeSelf});
-            }
-        }).element);
-        const refFilterGeneration = this.viewStateGeneration;
-        let refFilterMenuElement: HTMLElement;
-        window.siyuan.menus.menu.append(new MenuItem({
-            iconHTML: "",
-            label: `${window.siyuan.languages.backlinkExcludeRefDefs} (${this.sourceFilter.excludedRefDefIDs.length})`,
-            disabled: !this.blockId,
-            bind: element => { refFilterMenuElement = element; },
-            loadSubmenu: () => {
-                return loadBacklinkRefFilterMenu({
-                    id: this.blockId,
-                    notebook: isEncryptedBox(this.notebookId) ? this.notebookId : "",
-                    keyword: this.inputsElement[0].value,
-                    filter: this.sourceFilter,
-                    getSelected: () => this.sourceFilter.excludedRefDefIDs,
-                    isCurrent: () => !this.destroyed && refFilterGeneration === this.viewStateGeneration,
-                    apply: ids => {
-                        this.applySourceFilter({...this.sourceFilter, excludedRefDefIDs: ids});
-                        refFilterMenuElement.querySelector(":scope > .b3-menu__label").textContent =
-                            `${window.siyuan.languages.backlinkExcludeRefDefs} (${this.sourceFilter.excludedRefDefIDs.length})`;
-                        resetElement?.toggleAttribute("disabled", !getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0);
+                    if (!getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0) {
+                        resetElement?.setAttribute("disabled", "disabled");
+                    } else {
+                        resetElement?.removeAttribute("disabled");
+                    }
+                    this.itemRecords[0].forEach(record => {
+                        if (record.editor && this.viewState) {
+                            configureBacklinkTypeFold(record.editor.protyle, types, this.viewState);
+                        }
+                    });
+                    this.globalList?.updateFoldTypes();
+                };
+                const blockTypeFoldSubmenu: IMenu[] = [{
+                    label: window.siyuan.languages.reset,
+                    icon: "iconUndo",
+                    disabled: foldedTypes.length === 0,
+                    bind: element => {foldResetElement = element;},
+                    click: () => {
+                        applyFoldTypes([]);
+                        return true;
                     },
+                }, {type: "separator"}, ...BACKLINK_BLOCK_TYPES.map(([type, label]) => ({
+                    label: window.siyuan.languages[label] || label,
+                    checked: foldedTypes.includes(type),
+                    iconHTML: "",
+                    bind: (element: HTMLElement) => {foldItems.set(type, element);},
+                    click: () => {
+                        applyFoldTypes(foldedTypes.includes(type) ?
+                            foldedTypes.filter(item => item !== type) : [...foldedTypes, type]);
+                        return true;
+                    },
+                }))];
+                const dailyNoteSubmenu = ([
+                    ["all", window.siyuan.languages.all],
+                    ["only", window.siyuan.languages.dailyNote],
+                    ["exclude", window.siyuan.languages.nonDailyNote],
+                ] as Array<[TBacklinkDailyNoteFilter, string]>).map(([value, label]) => ({
+                    checked: this.sourceFilter.dailyNote === value,
+                    iconHTML: "",
+                    label,
+                    click: () => {
+                        this.applySourceFilter({...this.sourceFilter, dailyNote: value});
+                    }
+                }));
+                const notebookSubmenu: IMenu[] = [{
+                    checked: this.sourceFilter.excludedNotebookIDs.length === 0,
+                    iconHTML: "",
+                    label: window.siyuan.languages.allNotebooks,
+                    click: () => {
+                        this.applySourceFilter({...this.sourceFilter, excludedNotebookIDs: []});
+                    }
+                }, {type: "separator"}];
+                (window.siyuan.notebooks || []).filter(item => !item.closed).forEach(item => {
+                    notebookSubmenu.push({
+                        checked: !this.sourceFilter.excludedNotebookIDs.includes(item.id),
+                        iconHTML: "",
+                        label: escapeHtml(item.name),
+                        click: () => {
+                            const excludedNotebookIDs = new Set(this.sourceFilter.excludedNotebookIDs);
+                            if (excludedNotebookIDs.has(item.id)) {
+                                excludedNotebookIDs.delete(item.id);
+                            } else {
+                                excludedNotebookIDs.add(item.id);
+                            }
+                            this.applySourceFilter({...this.sourceFilter, excludedNotebookIDs: Array.from(excludedNotebookIDs)});
+                        }
+                    });
                 });
+
+
+                window.siyuan.menus.menu.append(new MenuItem({
+                    icon: "iconContract",
+                    label: window.siyuan.languages.backlinkFoldByType,
+                    type: "submenu",
+                    disabled: !this.viewStateLoaded || !this.viewState,
+                    submenu: blockTypeFoldSubmenu,
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    icon: "iconCalendar",
+                    label: window.siyuan.languages.dailyNote,
+                    type: "submenu",
+                    submenu: dailyNoteSubmenu,
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    icon: "iconFiles",
+                    label: window.siyuan.languages.agentCatNotebook,
+                    type: "submenu",
+                    submenu: notebookSubmenu,
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    checked: this.sourceFilter.excludeSelf,
+                    iconHTML: "",
+                    label: window.siyuan.languages.excludeSelfBacklink,
+                    click: () => {
+                        this.applySourceFilter({...this.sourceFilter, excludeSelf: !this.sourceFilter.excludeSelf});
+                    }
+                }).element);
+                const refFilterGeneration = this.viewStateGeneration;
+                let refFilterMenuElement: HTMLElement;
+                window.siyuan.menus.menu.append(new MenuItem({
+                    iconHTML: "",
+                    label: `${window.siyuan.languages.backlinkExcludeRefDefs} (${this.sourceFilter.excludedRefDefIDs.length})`,
+                    disabled: !this.blockId,
+                    bind: element => {refFilterMenuElement = element;},
+                    loadSubmenu: () => {
+                        return loadBacklinkRefFilterMenu({
+                            id: this.blockId,
+                            notebook: isEncryptedBox(this.notebookId) ? this.notebookId : "",
+                            keyword: this.inputsElement[0].value,
+                            filter: this.sourceFilter,
+                            getSelected: () => this.sourceFilter.excludedRefDefIDs,
+                            isCurrent: () => !this.destroyed && refFilterGeneration === this.viewStateGeneration,
+                            apply: ids => {
+                                this.applySourceFilter({...this.sourceFilter, excludedRefDefIDs: ids});
+                                refFilterMenuElement.querySelector(":scope > .b3-menu__label").textContent =
+                                    `${window.siyuan.languages.backlinkExcludeRefDefs} (${this.sourceFilter.excludedRefDefIDs.length})`;
+                                resetElement?.toggleAttribute("disabled", !getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0);
+                            },
+                        });
+                    },
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    disabled: !getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0,
+                    bind: element => {resetElement = element;},
+                    icon: "iconUndo",
+                    label: window.siyuan.languages.reset,
+                    click: () => {
+                        this.applySourceFilter(createBacklinkSourceFilter());
+                        applyFoldTypes([]);
+                    }
+                }).element);
+                const rect = target.getBoundingClientRect();
+                session.show(() => window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height}));
+
             },
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            disabled: !getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0,
-            bind: element => { resetElement = element; },
-            icon: "iconUndo",
-            label: window.siyuan.languages.reset,
-            click: () => {
-                this.applySourceFilter(createBacklinkSourceFilter());
-                applyFoldTypes([]);
-            }
-        }).element);
-        const rect = target.getBoundingClientRect();
-        window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
+        });
     }
 
     private toggleItem(liElement: HTMLElement, isMention: boolean, persist = true) {

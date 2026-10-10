@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../../menus/menuToggle";
 import {escapeHtmlTextAndAttr} from "../../../util/escape";
 import type {AIModelTestData} from "../../../types/api";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../../render/fragments";
@@ -280,82 +281,90 @@ const renderDraftModels = (container: HTMLElement, models: Config.IModel[], avai
 </div>`).join("");
 };
 
-const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[], displayNames: Record<string, string> = {}) => {
-    const menu = new Menu();
-    menu.addItem({
-        iconHTML: "",
-        type: "empty",
-        label: `<div class="fn__flex-column b3-menu__filter">
-    <input spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
-    <div class="fn__hr"></div>
-    <div class="b3-list fn__flex-1 b3-list--background">
-        ${models.map((model) => `<div class="b3-list-item b3-list-item--narrow" data-model="${escapeHTML(model)}">
-    <span class="b3-list-item__text">${escapeHTML(displayNames[model] || model)}</span>
-    ${model === modelInput.value ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
-</div>`).join("")}
-        <div class="b3-list--empty fn__none" data-type="empty">${window.siyuan.languages.emptyContent}</div>
-    </div>
-</div>`,
-        bind(element) {
-            const listElement = element.querySelector<HTMLElement>(".b3-list");
-            const searchInput = element.querySelector<HTMLInputElement>("input");
-            const emptyElement = element.querySelector<HTMLElement>("[data-type='empty']");
-            const selectModel = (item: HTMLElement) => {
-                modelInput.value = item.dataset.model;
-                modelInput.dispatchEvent(new InputEvent("input", {bubbles: true}));
-                menu.close();
-                modelInput.focus();
-            };
-            const filterModels = () => {
-                const keyword = searchInput.value.toLowerCase().trim();
-                let firstVisibleItem: HTMLElement;
-                listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach((item) => {
-                    item.classList.remove("b3-list-item--focus");
-                    const hidden = !item.dataset.model.toLowerCase().includes(keyword);
-                    item.classList.toggle("fn__none", hidden);
-                    if (!hidden && !firstVisibleItem) {
-                        firstVisibleItem = item;
-                    }
-                });
-                firstVisibleItem?.classList.add("b3-list-item--focus");
-                emptyElement.classList.toggle("fn__none", !!firstVisibleItem);
-            };
-            filterModels();
-            searchInput.addEventListener("keydown", (event: KeyboardEvent) => {
-                event.stopPropagation();
-                if (event.isComposing) {
-                    return;
-                }
-                upDownHint(listElement, event);
-                if (event.key === "Enter") {
-                    const item = listElement.querySelector<HTMLElement>(".b3-list-item--focus");
-                    if (item) {
-                        selectModel(item);
-                    }
-                    event.preventDefault();
-                } else if (event.key === "Escape") {
-                    menu.close();
-                    modelInput.focus();
-                    event.preventDefault();
-                }
-            });
-            searchInput.addEventListener("input", (event: InputEvent) => {
-                if (!event.isComposing) {
+const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[], displayNames: Record<string, string> = {},
+                                toggle = true) => {
+    toggleMenu({
+        target: modelInput,
+        toggle,
+        build: (_menu, session) => {
+            const menu = new Menu();
+            menu.addItem({
+                iconHTML: "",
+                type: "empty",
+                label: `<div class="fn__flex-column b3-menu__filter">
+            <input spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
+            <div class="fn__hr"></div>
+            <div class="b3-list fn__flex-1 b3-list--background">
+                ${models.map((model) => `<div class="b3-list-item b3-list-item--narrow" data-model="${escapeHTML(model)}">
+            <span class="b3-list-item__text">${escapeHTML(displayNames[model] || model)}</span>
+            ${model === modelInput.value ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
+        </div>`).join("")}
+                <div class="b3-list--empty fn__none" data-type="empty">${window.siyuan.languages.emptyContent}</div>
+            </div>
+        </div>`,
+                bind(element) {
+                    const listElement = element.querySelector<HTMLElement>(".b3-list");
+                    const searchInput = element.querySelector<HTMLInputElement>("input");
+                    const emptyElement = element.querySelector<HTMLElement>("[data-type='empty']");
+                    const selectModel = (item: HTMLElement) => {
+                        modelInput.value = item.dataset.model;
+                        modelInput.dispatchEvent(new InputEvent("input", {bubbles: true}));
+                        menu.close();
+                        modelInput.focus();
+                    };
+                    const filterModels = () => {
+                        const keyword = searchInput.value.toLowerCase().trim();
+                        let firstVisibleItem: HTMLElement;
+                        listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach((item) => {
+                            item.classList.remove("b3-list-item--focus");
+                            const hidden = !item.dataset.model.toLowerCase().includes(keyword);
+                            item.classList.toggle("fn__none", hidden);
+                            if (!hidden && !firstVisibleItem) {
+                                firstVisibleItem = item;
+                            }
+                        });
+                        firstVisibleItem?.classList.add("b3-list-item--focus");
+                        emptyElement.classList.toggle("fn__none", !!firstVisibleItem);
+                    };
                     filterModels();
-                }
+                    searchInput.addEventListener("keydown", (event: KeyboardEvent) => {
+                        event.stopPropagation();
+                        if (event.isComposing) {
+                            return;
+                        }
+                        upDownHint(listElement, event);
+                        if (event.key === "Enter") {
+                            const item = listElement.querySelector<HTMLElement>(".b3-list-item--focus");
+                            if (item) {
+                                selectModel(item);
+                            }
+                            event.preventDefault();
+                        } else if (event.key === "Escape") {
+                            menu.close();
+                            modelInput.focus();
+                            event.preventDefault();
+                        }
+                    });
+                    searchInput.addEventListener("input", (event: InputEvent) => {
+                        if (!event.isComposing) {
+                            filterModels();
+                        }
+                    });
+                    searchInput.addEventListener("compositionend", filterModels);
+                    listElement.addEventListener("click", (event) => {
+                        const item = (event.target as HTMLElement).closest<HTMLElement>(".b3-list-item");
+                        if (item) {
+                            selectModel(item);
+                        }
+                    });
+                },
             });
-            searchInput.addEventListener("compositionend", filterModels);
-            listElement.addEventListener("click", (event) => {
-                const item = (event.target as HTMLElement).closest<HTMLElement>(".b3-list-item");
-                if (item) {
-                    selectModel(item);
-                }
-            });
+            const rect = modelInput.getBoundingClientRect();
+            session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: modelInput}));
+            menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+
         },
     });
-    const rect = modelInput.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: modelInput});
-    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
 };
 
 const showTestResult = (data: AIModelTestData) => {
@@ -658,7 +667,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         }
         modelInput.focus();
         if (availableModels.length > 0) {
-            openAvailableModelMenu(modelInput, availableModels, availableModelDisplayNames);
+            openAvailableModelMenu(modelInput, availableModels, availableModelDisplayNames, false);
         }
     };
 
@@ -862,7 +871,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         event.preventDefault();
-        openAvailableModelMenu(target, availableModels, availableModelDisplayNames);
+        openAvailableModelMenu(target, availableModels, availableModelDisplayNames, false);
     });
 
     view.addEventListener("click", (event) => {
@@ -1065,60 +1074,66 @@ const openGroupedModelMenu = (
     options: IGroupedModelPickerOptions,
     update: () => void,
 ) => {
-    if (element.disabled) {
-        return;
-    }
-    const modelGroups = getEnabledModelGroups(group);
-    const selectedModelId = options.getSelectedModelId ? options.getSelectedModelId() : getSelectedModelId(group);
-    const menu = new Menu(getGroupedModelMenuId(group, options));
-    if (menu.isOpen) {
-        return;
-    }
-    const selectModel = (modelId: string, label: string) => {
-        if (modelId === selectedModelId) {
-            return;
-        }
-        if (options.onSelect) {
-            options.onSelect(modelId);
-            update();
-            return;
-        }
-        element.dataset.modelId = modelId;
-        setGroupedModelPickerLabel(element, label);
-        aiConfigApi.patch(`${group}.modelId`, modelId, () => syncGroupedModelPickers(root));
-    };
-    const optional = group === "imageGeneration";
-    if (optional) {
-        menu.addItem({
-            iconHTML: "",
-            label: window.siyuan.languages.noModelConfigured,
-            current: selectedModelId === "",
-            click: () => selectModel("", window.siyuan.languages.noModelConfigured),
-        });
-        menu.addSeparator();
-    }
-    modelGroups.forEach(({provider, models}, index) => {
-        if (index > 0) {
-            menu.addSeparator();
-        }
-        menu.addItem({
-            iconHTML: "",
-            type: "readonly",
-            label: escapeHTML(getProviderTitle(provider)),
-        });
-        models.forEach((model) => {
-            const label = model.displayName || model.name;
-            menu.addItem({
-                iconHTML: "",
-                label: escapeHTML(label),
-                current: model.id === selectedModelId,
-                click: () => selectModel(model.id, label),
+    toggleMenu({
+        target: element,
+        build: (_menu, session) => {
+            if (element.disabled) {
+                return;
+            }
+            const modelGroups = getEnabledModelGroups(group);
+            const selectedModelId = options.getSelectedModelId ? options.getSelectedModelId() : getSelectedModelId(group);
+            const menu = new Menu(getGroupedModelMenuId(group, options));
+            if (menu.isOpen) {
+                return;
+            }
+            const selectModel = (modelId: string, label: string) => {
+                if (modelId === selectedModelId) {
+                    return;
+                }
+                if (options.onSelect) {
+                    options.onSelect(modelId);
+                    update();
+                    return;
+                }
+                element.dataset.modelId = modelId;
+                setGroupedModelPickerLabel(element, label);
+                aiConfigApi.patch(`${group}.modelId`, modelId, () => syncGroupedModelPickers(root));
+            };
+            const optional = group === "imageGeneration";
+            if (optional) {
+                menu.addItem({
+                    iconHTML: "",
+                    label: window.siyuan.languages.noModelConfigured,
+                    current: selectedModelId === "",
+                    click: () => selectModel("", window.siyuan.languages.noModelConfigured),
+                });
+                menu.addSeparator();
+            }
+            modelGroups.forEach(({provider, models}, index) => {
+                if (index > 0) {
+                    menu.addSeparator();
+                }
+                menu.addItem({
+                    iconHTML: "",
+                    type: "readonly",
+                    label: escapeHTML(getProviderTitle(provider)),
+                });
+                models.forEach((model) => {
+                    const label = model.displayName || model.name;
+                    menu.addItem({
+                        iconHTML: "",
+                        label: escapeHTML(label),
+                        current: model.id === selectedModelId,
+                        click: () => selectModel(model.id, label),
+                    });
+                });
             });
-        });
+            const rect = element.getBoundingClientRect();
+            menu.element.style.minWidth = `${rect.width}px`;
+            session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: element}));
+
+        },
     });
-    const rect = element.getBoundingClientRect();
-    menu.element.style.minWidth = `${rect.width}px`;
-    menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: element});
 };
 
 const syncGroupedModelPickers = (root: HTMLElement) => {

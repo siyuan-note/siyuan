@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {recordReplacementUndo} from "./replacementInput";
 import {expandAndroidWordSelection, isAndroidWordSelectionPending} from "../../mobile/util/wordSelection";
 import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
@@ -5186,23 +5187,29 @@ export class WYSIWYG {
 
             const menuElement = hasClosestByClassName(event.target, "protyle-action__menu");
             if (menuElement) {
-                if (!protyle.gutter) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                }
-                protyle.gutter.renderMenu(protyle, menuElement.parentElement.parentElement);
-                /// #if MOBILE
-                window.siyuan.menus.menu.fullscreen();
-                /// #else
-                const rect = menuElement.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({
-                    x: rect.left,
-                    y: rect.top,
-                    isLeft: true
+                toggleMenu({
+                    target: menuElement,
+                    build: (_menu, session) => {
+                        if (!protyle.gutter) {
+                            event.stopPropagation();
+                            event.preventDefault();
+                            return;
+                        }
+                        protyle.gutter.renderMenu(protyle, menuElement.parentElement.parentElement);
+                        /// #if MOBILE
+                        session.show(() => window.siyuan.menus.menu.fullscreen());
+                        /// #else
+                        const rect = menuElement.getBoundingClientRect();
+                        session.show(() => window.siyuan.menus.menu.popup({
+                            x: rect.left,
+                            y: rect.top,
+                            isLeft: true
+                        }));
+                        /// #endif
+
+                    },
                 });
-                /// #endif
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 return;
             }
@@ -5460,7 +5467,7 @@ export class WYSIWYG {
                 }
                 // https://github.com/siyuan-note/siyuan/issues/14481
                 const inlineMathElement = hasClosestByAttribute(newRange.startContainer, "data-type", "inline-math");
-                if (inlineMathElement) {
+                if (newRange.collapsed && inlineMathElement) {
                     newRange.setEndAfter(inlineMathElement);
                     newRange.collapse(false);
                     focusByRange(newRange);

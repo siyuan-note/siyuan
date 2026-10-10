@@ -7,7 +7,7 @@ import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
 import {openEmojiPanel} from "../../emoji";
 import {escapeHtml} from "../../util/escape";
 import {initFileMenu} from "../../menus/navigation";
-import {toggleFileTreeMenu} from "../../menus/fileTreeMenu";
+import {toggleMenu} from "../../menus/menuToggle";
 import {globalClickHideMenu} from "../../menus/menuClick";
 import {parseDocumentTabDragData, parseDocumentTreeDragData} from "../../util/fileTreeMove";
 import {reorderSortedFileTree} from "../../util/fileTreeReorder";
@@ -461,9 +461,11 @@ export class PinnedDocs {
         }
         const moreButton = target.closest("[data-pin-more]");
         if (moreButton) {
-            toggleFileTreeMenu(moreButton, () => {
-                const rect = moreButton.getBoundingClientRect();
-                this.menu(row, {x: rect.left, y: rect.bottom, h: rect.height});
+            toggleMenu({
+                target: moreButton, build: () => {
+                    const rect = moreButton.getBoundingClientRect();
+                    this.menu(row, {x: rect.left, y: rect.bottom, h: rect.height});
+                }
             });
         } else if (target.closest("[data-pin-new]")) {
             newFileInTree(this.app, row.dataset.notebook, row.dataset.path);

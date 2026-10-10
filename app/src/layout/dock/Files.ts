@@ -7,7 +7,7 @@ import {Constants} from "../../constants";
 import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
 import {newFileInTree} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
-import {toggleFileTreeMenu} from "../../menus/fileTreeMenu";
+import {toggleMenu} from "../../menus/menuToggle";
 import {isDocTreeDragSelectionAllowed} from "../../menus/navigationSelection";
 import {MenuItem} from "../../menus/Menu";
 import {showMessage} from "../../dialog/message";
@@ -112,7 +112,7 @@ export class Files extends Model {
     <div class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></div>
     <div data-type="more" data-menu="true" class="ariaLabel block__icon${window.siyuan.config.readonly ? " fn__none" : ""}" data-position="north" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
-    </div> 
+    </div>
     <span class="fn__space"></span>
     <span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
@@ -220,9 +220,11 @@ export class Files extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "more") {
-                    toggleFileTreeMenu(target, () => {
-                        const rect = target.getBoundingClientRect();
-                        this.initMoreMenu().popup({x: rect.left, y: rect.bottom, h: rect.height});
+                    toggleMenu({
+                        target: target, build: () => {
+                            const rect = target.getBoundingClientRect();
+                            this.initMoreMenu().popup({x: rect.left, y: rect.bottom, h: rect.height});
+                        }
                     });
                     event.preventDefault();
                     event.stopPropagation();
@@ -352,24 +354,28 @@ export class Files extends Model {
                             if (type === "new") {
                                 newFileInTree(options.app, notebookId, pathString);
                             } else if (type === "more-root") {
-                                toggleFileTreeMenu(target, () => {
-                                    const rect = target.getBoundingClientRect();
-                                    initNavigationMenu(options.app, target.parentElement).popup({
-                                        x: rect.left,
-                                        y: rect.bottom,
-                                        h: rect.height,
-                                    });
+                                toggleMenu({
+                                    target: target, build: () => {
+                                        const rect = target.getBoundingClientRect();
+                                        initNavigationMenu(options.app, target.parentElement).popup({
+                                            x: rect.left,
+                                            y: rect.bottom,
+                                            h: rect.height,
+                                        });
+                                    }
                                 });
                             }
                         }
                         if (type === "more-file") {
-                            toggleFileTreeMenu(target, () => {
-                                const rect = target.getBoundingClientRect();
-                                initFileMenu(options.app, notebookId, pathString, target.parentElement).popup({
-                                    x: rect.left,
-                                    y: rect.bottom,
-                                    h: rect.height,
-                                });
+                            toggleMenu({
+                                target: target, build: () => {
+                                    const rect = target.getBoundingClientRect();
+                                    initFileMenu(options.app, notebookId, pathString, target.parentElement).popup({
+                                        x: rect.left,
+                                        y: rect.bottom,
+                                        h: rect.height,
+                                    });
+                                }
                             });
                         }
                         event.preventDefault();
@@ -2162,7 +2168,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
             window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 && item.subFileCount > 0 ? " file-tree__item--title-expand" : ""}`;
         const defaultIcon = item.subFileCount === 0 ? "file" : "folder";
         return `<li data-node-id="${item.id}" data-name="${escapeHtmlTextAndAttr(item.name)}" draggable="true" data-count="${item.subFileCount}" ${FILE_TREE_CHILDREN_SORT_MODE}="${item.childrenSortMode ?? ""}"
-data-type="navigation-file" 
+data-type="navigation-file"
 style="--file-toggle-width:${paddingLeft + 18}px;--file-action-offset:${paddingLeft + 20}px"
 class="b3-list-item b3-list-item--hide-action${actionClasses}" data-path="${item.path}"${getFileTreeDefaultIconAttr(item.icon, defaultIcon)}>
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">

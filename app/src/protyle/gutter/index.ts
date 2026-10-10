@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {copyBlockSelection} from "../util/blockClipboard";
 import {
     hasClosestBlock,
@@ -423,19 +424,25 @@ export class Gutter {
                     const br = activeBlockButton.getBoundingClientRect();
                     if (event.clientX >= br.left && event.clientX <= br.right &&
                         event.clientY >= br.top && event.clientY <= br.bottom) {
-                        this.renderMenu(protyle, activeBlockButton as HTMLElement);
-                        if (!protyle.toolbar.range &&
-                            window.siyuan.menus.menu.element.getAttribute("data-name") !== Constants.MENU_BLOCK_MULTI) {
-                            protyle.toolbar.range = getEditorRange(
-                                this.getNodeElement(protyle, activeBlockButton) || protyle.wysiwyg.element.firstElementChild);
+                        toggleMenu({
+                            target: activeBlockButton,
+                            build: (_menu, session) => {
+                                this.renderMenu(protyle, activeBlockButton as HTMLElement);
+                                if (!protyle.toolbar.range &&
+                                    window.siyuan.menus.menu.element.getAttribute("data-name") !== Constants.MENU_BLOCK_MULTI) {
+                                    protyle.toolbar.range = getEditorRange(
+                                        this.getNodeElement(protyle, activeBlockButton) || protyle.wysiwyg.element.firstElementChild);
+                                }
+                                /// #if MOBILE
+                                session.show(() => window.siyuan.menus.menu.fullscreen());
+                                /// #else
+                                session.show(() => window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, h: br.height, isLeft: true}));
+                                restoreGutterRange(protyle);
+                                /// #endif
+
+                            },
+                        });
                         }
-                        /// #if MOBILE
-                        window.siyuan.menus.menu.fullscreen();
-                        /// #else
-                        window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, h: br.height, isLeft: true});
-                        restoreGutterRange(protyle);
-                        /// #endif
-                    }
                 }
                 return;
             }
@@ -610,21 +617,27 @@ export class Gutter {
                 // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
                 openAttr(this.getNodeElement(protyle, buttonElement), "bookmark", protyle);
             } else if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
-                this.renderMenu(protyle, buttonElement);
-                // https://ld246.com/article/1648433751993
-                if (!protyle.toolbar.range &&
-                    window.siyuan.menus.menu.element.getAttribute("data-name") !== Constants.MENU_BLOCK_MULTI) {
-                    protyle.toolbar.range = getEditorRange(
-                        this.getNodeElement(protyle, buttonElement) || protyle.wysiwyg.element.firstElementChild);
-                }
-                /// #if MOBILE
-                window.siyuan.menus.menu.fullscreen();
-                /// #else
-                window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
-                const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
-                window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
-                restoreGutterRange(protyle);
-                /// #endif
+                toggleMenu({
+                    target: buttonElement,
+                    build: (_menu, session) => {
+                        this.renderMenu(protyle, buttonElement);
+                        // https://ld246.com/article/1648433751993
+                        if (!protyle.toolbar.range &&
+                            window.siyuan.menus.menu.element.getAttribute("data-name") !== Constants.MENU_BLOCK_MULTI) {
+                            protyle.toolbar.range = getEditorRange(
+                                this.getNodeElement(protyle, buttonElement) || protyle.wysiwyg.element.firstElementChild);
+                        }
+                        /// #if MOBILE
+                        session.show(() => window.siyuan.menus.menu.fullscreen());
+                        /// #else
+                        session.show(() => window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true}));
+                        const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+                        window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
+                        restoreGutterRange(protyle);
+                        /// #endif
+
+                    },
+                });
             }
         });
         this.element.addEventListener("contextmenu", (event: MouseEvent & { target: HTMLInputElement }) => {

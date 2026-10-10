@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {Divider} from "./Divider";
 import {BlockType, updateBlockTypeButton} from "./BlockType";
 import {prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
@@ -2460,6 +2461,7 @@ export class Toolbar {
                 } else {
                     try {
                         const text = await readClipboard();
+
                         paste(protyle, Object.assign(text, {target: nodeElement as HTMLElement}));
                     } catch (e) {
                         console.log(e);
@@ -2493,16 +2495,21 @@ export class Toolbar {
                 this.subElement.lastElementChild.innerHTML = html;
                 setContentPosition();
             } else if (action === "plugin") {
-                window.siyuan.menus.menu.remove();
-                pluginMenus.forEach(item => window.siyuan.menus.menu.addItem({...item, index: undefined}));
-                const triggerRect = btnElemen.getBoundingClientRect();
-                const selectionRect = this.range.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({
-                    x: triggerRect.left,
-                    y: selectionRect.bottom + 8,
-                    h: selectionRect.height + 8,
+                await toggleMenu({
+                    target: btnElemen,
+                    build: (_menu, session) => {
+                        pluginMenus.forEach(item => window.siyuan.menus.menu.addItem({...item, index: undefined}));
+                        const triggerRect = btnElemen.getBoundingClientRect();
+                        const selectionRect = this.range.getBoundingClientRect();
+                        session.show(() => window.siyuan.menus.menu.popup({
+                            x: triggerRect.left,
+                            y: selectionRect.bottom + 8,
+                            h: selectionRect.height + 8,
+                        }));
+                        this.subElement.classList.add("fn__none");
+
+                    },
                 });
-                this.subElement.classList.add("fn__none");
             } else if (action === "more") {
                 this.subElement.lastElementChild.innerHTML = `<button class="keyboard__action${hasCopy ? "" : " fn__none"}" data-action="copyPlainText"><span>${window.siyuan.languages.copyPlainText}</span></button>
 <div class="keyboard__split${hasCopy ? "" : " fn__none"}"></div>

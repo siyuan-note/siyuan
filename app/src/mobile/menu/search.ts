@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {closePanel} from "../util/closePanel";
 import {updateSearchMethodControls} from "../../search/methodCapabilities";
 import {buildSearchRequest, refreshSearchConfigHPath} from "../../search/config";
@@ -627,29 +628,35 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                 event.preventDefault();
                 break;
             } else if (type === "more") {
-                moreMenu(config, criteriaData, element, () => {
-                    config.page = 1;
-                    updateSearchResult(config, element, true);
-                }, () => {
-                    config = updateConfig(element, {
-                        removed: true,
-                        sort: 0,
-                        group: 0,
-                        hasReplace: false,
-                        method: 0,
-                        hPath: "",
-                        idPath: [],
-                        k: "",
-                        r: "",
-                        page: 1,
-                        types: getDefaultType(),
-                        subTypes: getDefaultSubType(),
-                        replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
-                    }, config, true);
-                    element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
+                toggleMenu({
+                    target: target,
+                    build: (_menu, session) => {
+                        moreMenu(config, criteriaData, element, () => {
+                            config.page = 1;
+                            updateSearchResult(config, element, true);
+                        }, () => {
+                            config = updateConfig(element, {
+                                removed: true,
+                                sort: 0,
+                                group: 0,
+                                hasReplace: false,
+                                method: 0,
+                                hPath: "",
+                                idPath: [],
+                                k: "",
+                                r: "",
+                                page: 1,
+                                types: getDefaultType(),
+                                subTypes: getDefaultSubType(),
+                                replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
+                            }, config, true);
+                            element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
+                        });
+                        session.show(() => window.siyuan.menus.menu.fullscreen());
+
+                    },
                 });
-                window.siyuan.menus.menu.fullscreen();
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "replace-all") {

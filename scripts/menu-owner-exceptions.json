@@ -1,0 +1,366 @@
+{
+  "app/src/ai/actions.ts | openAIActions | menu | fullscreen": {
+    "count": 1,
+    "reason": "由 AIActions 的会话检查后调用，亦供键盘操作打开"
+  },
+  "app/src/ai/actions.ts | openAIActions | menu | open": {
+    "count": 1,
+    "reason": "由 AIActions 的会话检查后调用，亦供键盘操作打开"
+  },
+  "app/src/boot/globalEvent/command/panel.ts | commandPanel | menu | fullscreen": {
+    "count": 1,
+    "reason": "键盘或命令打开，保留仅打开和焦点行为"
+  },
+  "app/src/boot/globalEvent/keydown.ts | fileTreeKeydown | initFileMenu(app, notebookId, pathString, liElements[0]) | popup": {
+    "count": 1,
+    "reason": "键盘或命令打开，保留仅打开和焦点行为"
+  },
+  "app/src/boot/globalEvent/keydown.ts | fileTreeKeydown | initNavigationMenu(app, liElements[0] as HTMLElement) | popup": {
+    "count": 1,
+    "reason": "键盘或命令打开，保留仅打开和焦点行为"
+  },
+  "app/src/boot/globalEvent/searchKeydown.ts | searchKeydown | initSearchMenu(id) | popup": {
+    "count": 1,
+    "reason": "键盘或命令打开，保留仅打开和焦点行为"
+  },
+  "app/src/config/tabs/keymapUi.ts | bindKeymapList/event:\"contextmenu\" | menu | open": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/layout/dock/PinnedDocs.ts | PinnedDocs/menu | menu | fullscreen": {
+    "count": 2,
+    "reason": "由具体更多按钮的 toggleMenu 构建回调或右键入口调用"
+  },
+  "app/src/layout/dock/PinnedDocs.ts | PinnedDocs/menu | menu | popup": {
+    "count": 2,
+    "reason": "由具体更多按钮的 toggleMenu 构建回调或右键入口调用"
+  },
+  "app/src/layout/topBar.ts | initBar | initTopBarMenu() | popup": {
+    "count": 1,
+    "reason": "Electron 顶栏原生右键事件转发"
+  },
+  "app/src/menus/Menu.ts | Menu/popup | this | fullscreen": {
+    "count": 1,
+    "reason": "既有公共打开方法与平台布局转发，保持插件兼容"
+  },
+  "app/src/menus/index.ts | Menus/event:\"contextmenu\" | initDockMenu(target) | popup": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/menus/index.ts | Menus/event:\"contextmenu\" | initDockMenu(undefined, target) | popup": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/menus/index.ts | Menus/event:\"contextmenu\" | initFileMenu(app, this.getDir(target), target.getAttribute(\"data-path\"), target) | popup": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/menus/index.ts | Menus/event:\"contextmenu\" | initNavigationMenu(app, target) | popup": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/menus/index.ts | Menus/event:\"contextmenu\" | initSearchMenu(nodeId) | popup": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/menus/index.ts | Menus/event:\"contextmenu\" | initStatusBarMenu(target.closest(\"[data-statusbar-entry]\") || undefined) | popup": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/menus/index.ts | Menus/event:\"contextmenu\" | initTabMenu(app, (getInstanceById(target.getAttribute(\"data-id\")) as Tab)) | popup": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/menus/index.ts | Menus/event:\"contextmenu\" | initTopBarMenu() | popup": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/menus/index.ts | Menus/event:\"contextmenu\" | initTopBarMenu(target) | popup": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/menus/protyle.ts | fileAnnotationRefMenu | window.siyuan.menus.menu | fullscreen": {
+    "count": 1,
+    "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
+  },
+  "app/src/menus/protyle.ts | fileAnnotationRefMenu | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
+  },
+  "app/src/menus/protyle.ts | imgMenu | window.siyuan.menus.menu | fullscreen": {
+    "count": 1,
+    "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
+  },
+  "app/src/menus/protyle.ts | imgMenu | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
+  },
+  "app/src/menus/protyle.ts | inlineMathMenu | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
+  },
+  "app/src/menus/protyle.ts | linkMenu | window.siyuan.menus.menu | fullscreen": {
+    "count": 1,
+    "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
+  },
+  "app/src/menus/protyle.ts | linkMenu | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
+  },
+  "app/src/menus/protyle.ts | refMenu | window.siyuan.menus.menu | fullscreen": {
+    "count": 1,
+    "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
+  },
+  "app/src/menus/protyle.ts | refMenu | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
+  },
+  "app/src/menus/protyle.ts | renderAssetList/show | window.siyuan.menus.menu | fullscreen": {
+    "count": 1,
+    "reason": "已有资产菜单的异步内容刷新；按钮入口检查会话，独立及 AV 调用保留既有行为"
+  },
+  "app/src/menus/protyle.ts | renderAssetList/show | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "已有资产菜单的异步内容刷新；按钮入口检查会话，独立及 AV 调用保留既有行为"
+  },
+  "app/src/menus/protyle.ts | tagMenu | window.siyuan.menus.menu | fullscreen": {
+    "count": 1,
+    "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
+  },
+  "app/src/menus/protyle.ts | tagMenu | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "行内内容上下文菜单，保留已有弹出及浮窗归属行为"
+  },
+  "app/src/mobile/dock/MobileFiles.ts | MobileFiles | window.siyuan.menus.menu | fullscreen": {
+    "count": 1,
+    "reason": "由 renderMultiSelectToolbar 的具体菜单按钮 toggleMenu 回调打开"
+  },
+  "app/src/mobile/util/nativeSelect.ts | openSelect | menu | open": {
+    "count": 1,
+    "reason": "原生表单选择器，包括 AV 表单及独立菜单，保留选择和提交行为"
+  },
+  "app/src/plugin/Menu.ts | Menu/fullscreen | this.menu | fullscreen": {
+    "count": 1,
+    "reason": "既有公共打开方法与平台布局转发，保持插件兼容"
+  },
+  "app/src/plugin/Menu.ts | Menu/open | this.menu | popup": {
+    "count": 1,
+    "reason": "既有公共打开方法与平台布局转发，保持插件兼容"
+  },
+  "app/src/protyle/gutter/index.ts | Gutter/event:\"contextmenu\" | window.siyuan.menus.menu | fullscreen": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/protyle/gutter/index.ts | Gutter/event:\"contextmenu\" | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/protyle/header/Title.ts | Title/event:\"contextmenu\" | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/protyle/header/documentMenu.ts | openDocumentMenu | window.siyuan.menus.menu | fullscreen": {
+    "count": 1,
+    "reason": "文档菜单构建器，由标题的会话检查后调用，亦供图谱和右键打开"
+  },
+  "app/src/protyle/header/documentMenu.ts | openDocumentMenu | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "文档菜单构建器，由标题的会话检查后调用，亦供图谱和右键打开"
+  },
+  "app/src/protyle/hint/index.ts | Hint/fill | window.siyuan.menus.menu | fullscreen": {
+    "count": 1,
+    "reason": "输入提示和斜杠命令的程序化打开"
+  },
+  "app/src/protyle/hint/index.ts | Hint/fill | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "输入提示和斜杠命令的程序化打开"
+  },
+  "app/src/protyle/render/av/action.ts | avClick | addMenu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/action.ts | avContextmenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/action.ts | openAVEditFieldMenu | menu | fullscreen": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/action.ts | openAVEditFieldMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/asset.ts | addAssetLink | menu | fullscreen": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/asset.ts | addAssetLink | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/asset.ts | editAssetItem | menu | fullscreen": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/asset.ts | editAssetItem | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/automation.ts | openAutomationMenu/chooseField | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/blockAttr.ts | openEdit | addMenu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/calc.ts | openCalcMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/calendar/undated.ts | bindCalendarUndated/setOpen | menu | fullscreen": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/col.ts | bindEditEvent/event:\"click\" | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/col.ts | showAVColumnWidthMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/col.ts | showColMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/col.ts | showColMenu/click | addMenu | open": {
+    "count": 2,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/dateCalendarMenu.ts | bindDateCalendarMenu/event:\"click\" | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/dateFormatMenu.ts | formatDate | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/fieldValueEditor.ts | bindFieldLunarDates/event:\"click\" | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/fieldValueEditor.ts | openFieldRelationMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/fieldValueEditor.ts | openFieldSelectMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/filter.ts | addFilter | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/groups.ts | goGroupsDate | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/groups.ts | goGroupsSort | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/kanban/groupMenu.ts | openKanbanGroupMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/map/settings.ts | bindMapSettings/event:\"click\" | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/map/unplaced.ts | bindMapUnplaced/event:\"click\" | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/newItemTemplate.ts | openContentTemplateMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/newItemTemplate.ts | openNewItemTemplateDialog/openTemplateActionMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/newItemTemplate.ts | openNewItemTemplateMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/number.ts | formatNumber | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/panels/edit.ts | \"newCol\" | addMenu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/panels/filters.ts | \"addFilterCondition\" | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/panels/filters.ts | \"moreFilter\" | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/relation.ts | openSearchAV/bind | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/relationLayout.ts | bindRelationLayout/positionMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/rollup.ts | goSearchRollupCol/bind | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/select.ts | setColOption | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/sort.ts | addSort | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/view.ts | addView | addMenu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/view.ts | openViewMenu | menu | open": {
+    "count": 1,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/render/av/viewSettingMenu.ts | openViewSettingMenu | menu | open": {
+    "count": 2,
+    "reason": "AV 菜单保持既有构造和交互"
+  },
+  "app/src/protyle/toolbar/index.ts | Toolbar/showMultiSelectMode | window.siyuan.menus.menu | fullscreen": {
+    "count": 1,
+    "reason": "由 renderMultiSelectToolbar 的具体菜单按钮 toggleMenu 回调打开"
+  },
+  "app/src/protyle/wysiwyg/index.ts | WYSIWYG/bindCommonEvent/event:\"mousedown\"/finishDragSelect | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "框选结束后的程序化打开"
+  },
+  "app/src/protyle/wysiwyg/index.ts | WYSIWYG/bindEvent/event:\"contextmenu\" | window.siyuan.menus.menu | fullscreen": {
+    "count": 2,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/protyle/wysiwyg/index.ts | WYSIWYG/bindEvent/event:\"contextmenu\" | window.siyuan.menus.menu | popup": {
+    "count": 4,
+    "reason": "右键在当前指针位置重新打开，不参与按钮开关"
+  },
+  "app/src/protyle/wysiwyg/keydown.ts | keydown/event:\"keydown\" | window.siyuan.menus.menu | popup": {
+    "count": 1,
+    "reason": "键盘或命令打开，保留仅打开和焦点行为"
+  }
+}

@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../../menus/menuToggle";
 import {Constants} from "../../../constants";
 import {showMessage} from "../../../dialog/message";
 import {fetchSyncPost} from "../../../util/fetch";
@@ -211,26 +212,36 @@ class ListMindmapController {
                 metadata.viewLocked = locked;
             }) : Promise.resolve(true),
             onExpandLevelMenu: (anchor, select) => {
-                const menu = new Menu();
-                for (let level = 1; level <= 6; level++) {
-                    menu.addItem({
-                        id: `level${level}`,
-                        iconHTML: "",
-                        label: window.siyuan.languages.listMindmapExpandToLevel.replace("${level}", String(level)),
-                        click: () => select(level),
-                    });
-                }
-                menu.addSeparator({id: "separator_all"});
-                menu.addItem({id: "expandAll", icon: "iconExpand", label: window.siyuan.languages.expandAll,
-                    click: () => select("expandAll")});
-                menu.addItem({id: "foldAll", icon: "iconContract", label: window.siyuan.languages.foldAll,
-                    click: () => select("foldAll")});
-                if (isMobile()) {
-                    menu.fullscreen("bottom");
-                } else {
-                    const rect = anchor.getBoundingClientRect();
-                    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
-                }
+                toggleMenu({
+                    target: anchor,
+                    build: (_menu, session) => {
+                        const menu = new Menu();
+                        for (let level = 1; level <= 6; level++) {
+                            menu.addItem({
+                                id: `level${level}`,
+                                iconHTML: "",
+                                label: window.siyuan.languages.listMindmapExpandToLevel.replace("${level}", String(level)),
+                                click: () => select(level),
+                            });
+                        }
+                        menu.addSeparator({id: "separator_all"});
+                        menu.addItem({
+                            id: "expandAll", icon: "iconExpand", label: window.siyuan.languages.expandAll,
+                            click: () => select("expandAll")
+                        });
+                        menu.addItem({
+                            id: "foldAll", icon: "iconContract", label: window.siyuan.languages.foldAll,
+                            click: () => select("foldAll")
+                        });
+                        if (isMobile()) {
+                            session.show(() => menu.fullscreen("bottom"));
+                        } else {
+                            const rect = anchor.getBoundingClientRect();
+                            session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height}));
+                        }
+
+                    },
+                });
             },
             onFoldLevel: level => this.change(() => {
                 const model = readListMindmap(list);
@@ -312,28 +323,40 @@ class ListMindmapController {
             onTaskToggle: (id, cycle) => this.setTask(id, cycle ? nextTaskListStatus : nextTaskListMarker),
             onTabTaskToggle: (id, itemId) => this.setTabTask(id, itemId, nextTaskListMarker),
             onTabTaskMenu: (id, itemId, anchor) => {
-                const item = getListMindmapTabItem(list, id, itemId);
-                const marker = item && getTabTask(item);
-                if (!canEdit(owner, list) || marker == null) {
-                    return;
-                }
-                const menu = new Menu();
-                getTaskStatusItems(marker, next => this.setTabTask(id, itemId, () => next)).forEach(entry => menu.addItem(entry));
-                const rect = anchor.getBoundingClientRect();
-                menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+                toggleMenu({
+                    target: anchor,
+                    build: (_menu, session) => {
+                        const item = getListMindmapTabItem(list, id, itemId);
+                        const marker = item && getTabTask(item);
+                        if (!canEdit(owner, list) || marker == null) {
+                            return;
+                        }
+                        const menu = new Menu();
+                        getTaskStatusItems(marker, next => this.setTabTask(id, itemId, () => next)).forEach(entry => menu.addItem(entry));
+                        const rect = anchor.getBoundingClientRect();
+                        session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height}));
+
+                    },
+                });
             },
             onTaskMenu: (id, anchor) => {
-                if (!canEdit(owner, list)) {
-                    return;
-                }
-                const marker = readListMindmap(list).nodes.get(id)?.taskMarker;
-                if (marker === undefined) {
-                    return;
-                }
-                const menu = new Menu();
-                getTaskStatusItems(marker, next => this.setTask(id, () => next)).forEach(item => menu.addItem(item));
-                const rect = anchor.getBoundingClientRect();
-                menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+                toggleMenu({
+                    target: anchor,
+                    build: (_menu, session) => {
+                        if (!canEdit(owner, list)) {
+                            return;
+                        }
+                        const marker = readListMindmap(list).nodes.get(id)?.taskMarker;
+                        if (marker === undefined) {
+                            return;
+                        }
+                        const menu = new Menu();
+                        getTaskStatusItems(marker, next => this.setTask(id, () => next)).forEach(item => menu.addItem(item));
+                        const rect = anchor.getBoundingClientRect();
+                        session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height}));
+
+                    },
+                });
             },
             isTaskCycle: event => matchHotKey(window.siyuan.config.keymap.editor.list.checkToggle, event),
             isTaskCompletionToggle: event => matchHotKey(window.siyuan.config.keymap.editor.list.taskCompletionToggle, event),

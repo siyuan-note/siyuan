@@ -1,4 +1,5 @@
 import {createImageOCRMenu} from "./imageOCRMenu";
+import {toggleMenu, IMenuSession} from "./menuToggle";
 import {escapeHtmlTextAndAttr} from "../util/escape";
 import type {FileTreeGetDocRequestInput} from "../types/api";
 import {
@@ -98,12 +99,15 @@ import {
     stripSemanticMarkersFromRangeText,
 } from "../protyle/util/inlineElementMarker";
 
-const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
+const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = [], session?: IMenuSession) => {
     fetchPost("/api/search/searchAsset", {
         k,
         exts,
         includeMetadata: true
     }, (response) => {
+        if (session && !session.isCurrent()) {
+            return;
+        }
         let searchHTML = "";
         response.data.forEach((item: { path: string, hName: string }, index: number) => {
             searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${item.hName}</div></div>`;
@@ -118,11 +122,18 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
         } else {
             previewElement.innerHTML = window.siyuan.languages.emptyContent;
         }
-        /// #if MOBILE
-        window.siyuan.menus.menu.fullscreen();
-        /// #else
-        window.siyuan.menus.menu.popup(position);
-        /// #endif
+        const show = () => {
+            /// #if MOBILE
+            window.siyuan.menus.menu.fullscreen();
+            /// #else
+            window.siyuan.menus.menu.popup(position);
+            /// #endif
+        };
+        if (session) {
+            session.show(show);
+        } else {
+            show();
+        }
         if (!k) {
             inputElement.select();
         }
@@ -131,6 +142,18 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
 
 export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (url: string, name: string) => void,
                           exts?: string[], independent = false) => {
+    if (independent || !position.target) {
+        buildAssetMenu(protyle, position, callback, exts, independent);
+        return;
+    }
+    toggleMenu({
+        target: position.target,
+        build: (_menu, session) => buildAssetMenu(protyle, position, callback, exts, false, session),
+    });
+};
+
+const buildAssetMenu = (protyle: IProtyle, position: IPosition, callback?: (url: string, name: string) => void,
+                        exts?: string[], independent = false, session?: IMenuSession) => {
     const menu = new Menu(Constants.MENU_BACKGROUND_ASSET, undefined, independent);
     if (menu.isOpen) {
         return;
@@ -207,11 +230,11 @@ export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (ur
                     return;
                 }
                 event.stopPropagation();
-                renderAssetList(element, inputElement.value, position, exts);
+                renderAssetList(element, inputElement.value, position, exts, session);
             });
             inputElement.addEventListener("compositionend", (event: InputEvent) => {
                 event.stopPropagation();
-                renderAssetList(element, inputElement.value, position, exts);
+                renderAssetList(element, inputElement.value, position, exts, session);
             });
             element.lastElementChild.addEventListener("click", (event) => {
                 const target = event.target as HTMLElement;
@@ -242,7 +265,7 @@ export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (ur
                     }
                 }
             });
-            renderAssetList(element, "", position, exts);
+            renderAssetList(element, "", position, exts, session);
         }
     });
 };
@@ -1274,19 +1297,19 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
-    </span>   
+    </span>
 </div><textarea spellcheck="false" style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" rows="1" class="b3-text-field">${src}</textarea><div class="fn__hr"></div><div class="fn__flex">
     <span class="fn__flex-center">${window.siyuan.languages.title}</span>
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
-    </span>   
+    </span>
 </div><textarea style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" rows="1" class="b3-text-field"></textarea><div class="fn__hr"></div><div class="fn__flex">
     <span class="fn__flex-center">${window.siyuan.languages.tooltipText}</span>
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
-    </span>   
+    </span>
 </div><textarea style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" rows="1" class="b3-text-field"></textarea>`,
             bind(element) {
                 element.style.maxWidth = "none";
@@ -1636,20 +1659,20 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
-    </span>   
-</div><textarea spellcheck="false" rows="1" 
+    </span>
+</div><textarea spellcheck="false" rows="1"
 style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-field"></textarea><div class="fn__hr"></div><div class="fn__flex">
     <span class="fn__flex-center">${window.siyuan.languages.anchor}</span>
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
-    </span>   
+    </span>
 </div><textarea style="width: ${isMobile() ? "100%" : "360px"};margin: 4px 0;" rows="1" class="b3-text-field"></textarea><div class="fn__hr"></div><div class="fn__flex">
     <span class="fn__flex-center">${window.siyuan.languages.title}</span>
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
-    </span>   
+    </span>
 </div><textarea style="width: ${isMobile() ? "100%" : "360px"};margin: 4px 0;" rows="1" class="b3-text-field"></textarea>`,
             bind(element) {
                 element.style.maxWidth = "none";

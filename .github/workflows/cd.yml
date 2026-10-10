@@ -257,6 +257,9 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
         working-directory: app
+      - name: Check shared menu ownership
+        run: pnpm run menu:check
+        working-directory: app
       - name: Test frontend, Electron and packaging scripts
         id: test_frontend_electron_and_packaging_scripts
         # 测试失败只记录结果，不阻塞后续发布构建。

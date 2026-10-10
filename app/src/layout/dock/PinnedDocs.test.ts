@@ -64,10 +64,10 @@ const loadPanel = (fetchCode = 0) => {
         return {code: kind === "http" ? fetchCode : 0, data: args[0] === "/api/filetree/listDocsByPath" ? childData : docs};
     };
     const exports: {PinnedDocs?: {prototype: object}} = {};
-    const fileTreeMenu = {};
-    runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "../../menus/fileTreeMenu.ts"), "utf8"), {
+    const menuToggle = {};
+    runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "../../menus/menuToggle.ts"), "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
-    }).outputText, {exports: fileTreeMenu, window: {siyuan: runtime}});
+    }).outputText, {exports: menuToggle, window: {siyuan: runtime}});
     const source = ts.transpileModule(readFileSync(join(__dirname, "PinnedDocs.ts"), "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
     }).outputText;
@@ -84,7 +84,7 @@ const loadPanel = (fetchCode = 0) => {
             remove() { calls.push({kind: "removeGhost", args: [this]}); },
         })},
         require: (name: string) => {
-            if (name.endsWith("/fileTreeMenu")) { return fileTreeMenu; }
+            if (name.endsWith("/menuToggle")) { return menuToggle; }
             if (name.endsWith("/menuClick")) { return {globalClickHideMenu: () => {}}; }
             if (name.endsWith("/dragTip")) { return {setDragTipGhost: record("dragTipGhost"),
                 showDragTip: (...args: unknown[]) => tips.push(args), hideDragTip: () => tips.push([])}; }
@@ -151,7 +151,8 @@ test("collapse clears descendant expansion and persists the closed section", asy
 test("pinned document more actions open the source document menu and toggle on repeated clicks", () => {
     const {panel, calls} = loadPanel();
     const row = {dataset: {nodeId: "document", notebook: "notebook", path: "/document.sy"}};
-    const button = {getBoundingClientRect: () => ({left: 180, bottom: 120, height: 24})};
+    const button = {closest: (): null => null, setAttribute: () => {},
+        getBoundingClientRect: () => ({left: 180, bottom: 120, height: 24})};
     const event = {
         stopPropagation: () => {}, clientX: 10, clientY: 20,
         target: {closest: (selector: string) => selector === "[data-pin-row]" ? row : selector === "[data-pin-more]" ? button : null},

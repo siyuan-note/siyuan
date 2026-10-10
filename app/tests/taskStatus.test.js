@@ -64,6 +64,7 @@ const sources = () => {
             extract("protyle/render/tabsState.ts", ["resolveTabID", "tabKeyboardTarget"]) +
             extract("protyle/render/tabsAttributes.ts", ["clearTabsAttributes", "renderTabsAttributes"]),
         menu: extract("protyle/wysiwyg/taskStatusDialog.ts", ["getTaskStatusItems"]),
+        menuToggle: extract("menus/menuToggle.ts", ["sessions", "toggleMenu"]),
         tabMenu: extract("protyle/wysiwyg/tabsFocus.ts", ["canFocusTabItem"]) +
             extract("protyle/wysiwyg/tabs.ts", ["canEdit", "openTabsMenu"]),
         normalizeSeparators: extract("config/entryVisibility/runtime.ts", ["normalizeSeparators"]),
@@ -113,7 +114,8 @@ const cases = async source => {
     const taskStyle = document.createElement("style");
     taskStyle.textContent = source.css;
     document.head.append(taskStyle);
-    window.siyuan = {languages: {}};
+    window.siyuan = {languages: {}, menus: {menu: {element: document.createElement("div"), remove() { this.data = undefined; }}}};
+    const toggleMenu = new Function(source.menuToggle + "; return toggleMenu;")();
     let customMarker;
     const getMenu = new Function("openTaskStatusDialog", source.menu + "; return getTaskStatusItems;")(
         marker => { customMarker = marker; });
@@ -147,12 +149,12 @@ const cases = async source => {
         open() {}
     }
     let focusedTab;
-    const openTabMenu = new Function("Menu", "Constants", "getTabTask", "getTaskStatusItems", "setTabTask", "copySubMenu", "zoomOut",
+    const openTabMenu = new Function("toggleMenu", "Menu", "Constants", "getTabTask", "getTaskStatusItems", "setTabTask", "copySubMenu", "zoomOut",
         source.tabMenu + "; return openTabsMenu;")(
-        TestMenu, {CB_GET_HISTORY: "history"}, api.getTabTask, getMenu, api.setTabTask, () => [],
+        toggleMenu, TestMenu, {CB_GET_HISTORY: "history"}, api.getTabTask, getMenu, api.setTabTask, () => [],
         options => { focusedTab = options; });
     const menuFixture = reset();
-    openTabMenu(protyle, menuFixture.from, menuFixture.item, menuFixture.item);
+    openTabMenu(protyle, menuFixture.from, menuFixture.item, menuFixture.item, false);
     const expectedStates = ["taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "taskStatusCanceled", "customTaskStatus"];
     check.deepEqual(openedMenu.items.filter(item => expectedStates.includes(item.id)).map(item => item.id), expectedStates);
     check.equal(openedMenu.items.filter(item => item.id === "customTaskStatus").length, 1);

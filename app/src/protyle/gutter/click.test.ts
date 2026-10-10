@@ -3,6 +3,7 @@ import test from "node:test";
 import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {createSourceFile, forEachChild, isCallExpression, ScriptTarget, transpileModule} from "typescript";
+const {loadMenuToggle} = require("../../../tests/menu-toggle-fixture.cjs");
 
 const source = createSourceFile("index.ts", readFileSync(join(__dirname, "index.ts"), "utf8"), ScriptTarget.Latest, true);
 const listeners = new Map<string, string>();
@@ -22,17 +23,21 @@ const fixture = (type: string, mobile: boolean, cached: Record<string, boolean>)
     const calls: string[] = [];
     const noop = () => {};
     const button = {
+        closest: (): null => null,
+        setAttribute: noop,
         dataset: {type: "NodeList"},
         classList: {contains: () => false},
         getAttribute: (key: string) => key === "data-node-id" ? "list-id" : "NodeList",
         getBoundingClientRect: () => ({left: 10, bottom: 30}),
     };
     const menu = {
-        element: {setAttribute: noop},
+        element: {setAttribute: noop, classList: {contains: () => true}},
+        remove: noop,
         fullscreen: () => calls.push("fullscreen"),
         popup: () => calls.push("popup"),
     };
     const dependencies = {
+        ...loadMenuToggle({window: {siyuan: {menus: {menu}}}}),
         window: {siyuan: {...cached, menus: {menu}}},
         hasClosestByTag: () => button,
         hideTooltip: noop,

@@ -1,3 +1,4 @@
+import {toggleMenu} from "../menus/menuToggle";
 import * as path from "path";
 import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
@@ -414,73 +415,79 @@ export const movePathTo = (options: {
         setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
     };
     const toggleMovePathHistory = () => {
-        const keys = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys;
-        if (!keys || keys.length === 0) {
-            return;
-        }
-        const menu = new Menu(Constants.MENU_MOVE_PATH_HISTORY);
-        if (menu.isOpen) {
-            return;
-        }
-        menu.element.classList.add("b3-menu--list");
-        menu.addItem({
-            iconHTML: "",
-            label: window.siyuan.languages.clearHistory,
-            click() {
-                window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = [];
-                setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
-            }
-        });
-        const separatorElement = menu.addSeparator(1);
-        let current = true;
-        keys.forEach((s: string) => {
-            if (s) {
-                const menuItem = menu.addItem({
+        toggleMenu({
+            target: inputElement.previousElementSibling,
+            build: (_menu, session) => {
+                const keys = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys;
+                if (!keys || keys.length === 0) {
+                    return;
+                }
+                const menu = new Menu(Constants.MENU_MOVE_PATH_HISTORY);
+                if (menu.isOpen) {
+                    return;
+                }
+                menu.element.classList.add("b3-menu--list");
+                menu.addItem({
                     iconHTML: "",
-                    label: escapeHtml(s),
-                    action: "iconCloseRound",
-                    bind(element) {
-                        element.addEventListener("click", (itemEvent) => {
-                            if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
-                                keys.find((item: string, index: number) => {
-                                    if (item === s) {
-                                        keys.splice(index, 1);
-                                        return true;
+                    label: window.siyuan.languages.clearHistory,
+                    click() {
+                        window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = [];
+                        setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
+                    }
+                });
+                const separatorElement = menu.addSeparator(1);
+                let current = true;
+                keys.forEach((s: string) => {
+                    if (s) {
+                        const menuItem = menu.addItem({
+                            iconHTML: "",
+                            label: escapeHtml(s),
+                            action: "iconCloseRound",
+                            bind(element) {
+                                element.addEventListener("click", (itemEvent) => {
+                                    if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
+                                        keys.find((item: string, index: number) => {
+                                            if (item === s) {
+                                                keys.splice(index, 1);
+                                                return true;
+                                            }
+                                        });
+                                        window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = keys;
+                                        setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
+                                        if (element.previousElementSibling?.classList.contains("b3-menu__separator") && !element.nextElementSibling) {
+                                            window.siyuan.menus.menu.remove();
+                                        } else {
+                                            element.remove();
+                                        }
+                                    } else {
+                                        inputElement.value = s;
+                                        inputElement.dispatchEvent(new Event("change"));
+                                        saveMovePathHistory();
+                                        inputEvent();
+                                        window.siyuan.menus.menu.remove();
                                     }
+                                    itemEvent.preventDefault();
+                                    itemEvent.stopPropagation();
                                 });
-                                window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = keys;
-                                setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
-                                if (element.previousElementSibling?.classList.contains("b3-menu__separator") && !element.nextElementSibling) {
-                                    window.siyuan.menus.menu.remove();
-                                } else {
-                                    element.remove();
-                                }
-                            } else {
-                                inputElement.value = s;
-                                inputElement.dispatchEvent(new Event("change"));
-                                saveMovePathHistory();
-                                inputEvent();
-                                window.siyuan.menus.menu.remove();
                             }
-                            itemEvent.preventDefault();
-                            itemEvent.stopPropagation();
                         });
+                        if (current) {
+                            menuItem.classList.add("b3-menu__item--current");
+                        }
+                        current = false;
                     }
                 });
                 if (current) {
-                    menuItem.classList.add("b3-menu__item--current");
+                    separatorElement.remove();
                 }
-                current = false;
-            }
-        });
-        if (current) {
-            separatorElement.remove();
-        }
-        const rect = inputElement.getBoundingClientRect();
-        menu.open({
-            x: rect.left,
-            y: rect.bottom,
-            h: rect.height
+                const rect = inputElement.getBoundingClientRect();
+                session.show(() => menu.open({
+                    x: rect.left,
+                    y: rect.bottom,
+                    h: rect.height
+                }));
+
+            },
         });
     };
     inputEvent();

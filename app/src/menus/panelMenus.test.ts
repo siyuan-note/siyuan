@@ -4,18 +4,20 @@ import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
+const {loadMenuToggle, menuAnchor} = require("../../tests/menu-toggle-fixture.cjs");
 
 const loadMenu = (name: "tag" | "bookmark") => {
     let visible = false;
     let menuName: string;
     const positions: {x: number, y: number, h: number}[] = [];
     const menu = {
+        data: undefined as Element,
         element: {
             classList: {contains: () => !visible},
             getAttribute: () => menuName,
             setAttribute: (_key: string, value: string) => { menuName = value; },
         },
-        remove: () => { visible = false; },
+        remove: () => { visible = false; menu.data = undefined; },
         append: () => {},
         popup: (position: {x: number, y: number, h: number}) => {
             visible = true;
@@ -23,6 +25,7 @@ const loadMenu = (name: "tag" | "bookmark") => {
         },
     };
     const exports: Record<string, (...args: unknown[]) => void> = {};
+    const menuToggle = loadMenuToggle({window: {siyuan: {menus: {menu}}}});
     const source = ts.transpileModule(readFileSync(join(__dirname, `${name}.ts`), "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
     }).outputText;
@@ -30,6 +33,7 @@ const loadMenu = (name: "tag" | "bookmark") => {
         exports,
         window: {siyuan: {config: {readonly: false}, menus: {menu}, languages: {}}},
         require: (path: string) => {
+            if (path === "./menuToggle") { return menuToggle; }
             if (path === "./Menu") { return {MenuItem: class { element = {}; }}; }
             if (path.endsWith("/constants")) {
                 return {Constants: {MENU_TAG: "tag", MENU_BOOKMARK: "bookmark"}};
@@ -44,7 +48,7 @@ const loadMenu = (name: "tag" | "bookmark") => {
 for (const name of ["tag", "bookmark"] as const) {
     test(`${name} right clicks reopen at the current row and pointer`, () => {
         const {open, positions, isVisible} = loadMenu(name);
-        const row = (bottom: number) => ({getAttribute: (): string | null => null,
+        const row = (bottom: number) => ({...menuAnchor(), getAttribute: (): string | null => null,
             getBoundingClientRect: () => ({left: 0, bottom, height: 28})});
         const firstRow = row(120);
         const event = {type: "contextmenu", clientX: 80, clientY: 110};
@@ -62,7 +66,7 @@ for (const name of ["tag", "bookmark"] as const) {
     test(`${name} more button anchors to the button and toggles on a second click`, () => {
         const {open, positions, isVisible} = loadMenu(name);
         const row = {getAttribute: (): string | null => null};
-        const button = {getBoundingClientRect: () => ({left: 240, bottom: 120, height: 20})};
+        const button = {...menuAnchor(), getBoundingClientRect: () => ({left: 240, bottom: 120, height: 20})};
         const event = {type: "click", clientX: 250, clientY: 110, target: {closest: () => button}};
         open(row, event, "first");
         assert.equal(isVisible(), true);

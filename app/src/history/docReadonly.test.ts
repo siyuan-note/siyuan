@@ -7,6 +7,7 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const {parse} = require("ifdef-loader/preprocessor");
 const noop = () => {};
+const {loadMenuToggle} = require("../../tests/menu-toggle-fixture.cjs");
 
 const loadModule = (path: string, mobile: boolean, dependencies: Record<string, unknown>, globals: object) => {
     const source = parse(readFileSync(resolve("src", path), "utf8"), {MOBILE: mobile, BROWSER: true}, false, true, path);
@@ -14,6 +15,7 @@ const loadModule = (path: string, mobile: boolean, dependencies: Record<string, 
     const code = transpileModule(source, {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
+    dependencies["../../menus/menuToggle"] = loadMenuToggle(globals);
     runInNewContext(code, {exports, require: (name: string) => name === "./documentMenu" ?
         loadModule("protyle/header/documentMenu.ts", mobile, dependencies, globals) : dependencies[name] || {}, ...globals});
     return exports;

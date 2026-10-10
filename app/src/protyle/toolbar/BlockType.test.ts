@@ -5,6 +5,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, isMethodDeclaration, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {getBlockTypeOptions, isSameTextRange} from "./blockTypeCore";
+const {loadMenuToggle} = require("../../../tests/menu-toggle-fixture.cjs");
 
 const source = transpileModule(readFileSync(resolve(process.cwd(), "src/protyle/toolbar/BlockType.ts"), "utf8"),
     {compilerOptions: {module: ModuleKind.CommonJS}}).outputText;
@@ -41,6 +42,9 @@ const setup = (mobile = false) => {
         embed: undefined as {allowChildOperation: boolean, targetElement?: HTMLElement} | undefined};
     const menu = {close: (): void => undefined};
     const commonMenu = {
+        data: undefined as Element,
+        remove: () => { menu.close(); commonMenu.data = undefined; },
+        closeSheet: () => sheetExports.close.call(commonMenu),
         restoreKeyboard: undefined as (() => void) | undefined,
         element: {classList: {contains: () => true}},
         fullscreen: (_position: string, restore: () => void) => {
@@ -93,6 +97,7 @@ const setup = (mobile = false) => {
         addEventListener: (name: string, listener: () => void) => listeners.set(name, listener),
         removeEventListener: (name: string) => listeners.delete(name),
     };
+    modules["../../menus/menuToggle"] = loadMenuToggle({window: {siyuan: {menus: {menu: commonMenu}}}});
     runInNewContext(source, {exports,
         require: (name: string) => {
             assert.ok(modules[name], name);
@@ -105,7 +110,7 @@ const setup = (mobile = false) => {
                 languages: new Proxy({blockTypeParentChange: "Changes outer block"} as Record<string, string>,
                     {get: (target, key: string) => target[key] || key})}},
     });
-    const button = {isConnected: true, contains: (): boolean => false,
+    const button = {isConnected: true, contains: (): boolean => false, closest: (): null => null, setAttribute: () => {},
         getBoundingClientRect: () => ({left: 0, bottom: 30, height: 30, width: 60})} as unknown as HTMLElement;
     const open = () => exports.openBlockTypeMenu(protyle, button, snapshot as Parameters<typeof exports.openBlockTypeMenu>[2],
         {isCurrent: () => state.current, onClose: () => state.restored++});

@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {MenuItem} from "../../menus/Menu";
 import {getTableGridRect, TableGridCache} from "./tableGridCache";
 import {getVirtualTableGrid, setTableVirtualSelection, TABLE_VIRTUAL_ID, TABLE_VIRTUAL_ROWS} from "./tableVirtualizationDOM";
@@ -883,7 +884,7 @@ export class TableControl {
             if (!isPrimaryModifier(event) && !event.shiftKey) {
                 const handle = type === "row" ? this.rowHandle : this.columnHandle;
                 const rect = handle.getBoundingClientRect();
-                this.openMenu(rect.right, rect.bottom);
+                this.openMenu(rect.right, rect.bottom, handle);
             }
             return;
         }
@@ -892,7 +893,7 @@ export class TableControl {
         }
         if (!isPrimaryModifier(event) && !event.shiftKey) {
             const rect = this.cellHandle.getBoundingClientRect();
-            this.openMenu(rect.right, rect.bottom);
+            this.openMenu(rect.right, rect.bottom, this.cellHandle);
         }
     }
 
@@ -1505,140 +1506,147 @@ export class TableControl {
         }
     }
 
-    private openMenu(x: number, y: number) {
-        if (!this.selection) {
-            return;
-        }
-        const menu = window.siyuan.menus.menu;
-        menu.remove();
-        menu.element.setAttribute("data-name", `table-${this.selection.mode}`);
-        const merged = buildTableGrid(this.selection.table).cellInfos.some(info => info.rowspan > 1 || info.colspan > 1);
-        const mergedSelection = this.selection.mode !== "cell" && merged;
-        const rectangle = this.selection.mode !== "cell" || this.isRectangle();
-        menu.append(new MenuItem({
-            icon: "iconCopy",
-            label: window.siyuan.languages.copy,
-            disabled: !rectangle,
-            accelerator: rectangle ? undefined : window.siyuan.languages.tableRectangleSelectionRequired,
-            click: () => this.execClipboardCommand("copy"),
-        }).element);
-        if (this.selection.mode === "cell" && rectangle && this.getSelectedCells().length > 1) {
-            menu.append(new MenuItem({
-                id: "copyRichText",
-                label: window.siyuan.languages.copyRichText,
-                accelerator: window.siyuan.config.keymap.editor.general.copyRichText.custom,
-                click: () => this.copySelectionAsRichText(),
-            }).element);
-            menu.append(new MenuItem({
-                id: "copyPlainText",
-                label: window.siyuan.languages.copyPlainText,
-                click: () => {
-                    const content = this.getSelectionClipboardContent();
-                    if (content) {
-                        copyPlainText(content.text);
-                    }
-                },
-            }).element);
-        }
-        menu.append(new MenuItem({
-            icon: "iconCut",
-            label: window.siyuan.languages.cut,
-            disabled: this.protyle.disabled || !rectangle || mergedSelection,
-            accelerator: !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
-            action: mergedSelection ? "iconInfo" : undefined,
-            actionLabel: mergedSelection ? window.siyuan.languages.splitMergedCellTip : undefined,
-            click: () => this.execClipboardCommand("cut"),
-        }).element);
-        if (!this.protyle.disabled && this.selection.mode === "cell") {
-            menu.append(new MenuItem({
-                icon: "iconPaste",
-                label: window.siyuan.languages.paste,
-                click: () => this.paste(),
-            }).element);
-            menu.append(new MenuItem({
-                icon: "iconClear",
-                label: window.siyuan.languages.clear,
-                warning: true,
-                click: () => this.clearCells(),
-            }).element);
-        }
-        if (!this.protyle.disabled) {
-            menu.append(new MenuItem({type: "separator"}).element);
-            this.appendInsertMenus();
-            if (this.selection.mode !== "cell") {
+    private openMenu(x: number, y: number, target?: Element) {
+        toggleMenu({
+            target: target,
+            toggle: Boolean(target),
+            build: (_menu, session) => {
+                if (!this.selection) {
+                    return;
+                }
+                const menu = window.siyuan.menus.menu;
+
+                menu.element.setAttribute("data-name", `table-${this.selection.mode}`);
+                const merged = buildTableGrid(this.selection.table).cellInfos.some(info => info.rowspan > 1 || info.colspan > 1);
+                const mergedSelection = this.selection.mode !== "cell" && merged;
+                const rectangle = this.selection.mode !== "cell" || this.isRectangle();
                 menu.append(new MenuItem({
                     icon: "iconCopy",
-                    label: window.siyuan.languages.duplicateCopy,
-                    disabled: merged,
-                    action: merged ? "iconInfo" : undefined,
-                    actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
-                    click: () => this.duplicateRowsOrColumns(),
+                    label: window.siyuan.languages.copy,
+                    disabled: !rectangle,
+                    accelerator: rectangle ? undefined : window.siyuan.languages.tableRectangleSelectionRequired,
+                    click: () => this.execClipboardCommand("copy"),
                 }).element);
-                if (this.selection.indexes.size === 1 && this.selection.indexes.has(0)) {
-                    const headerType = this.selection.mode === "row" ? "row" : "column";
+                if (this.selection.mode === "cell" && rectangle && this.getSelectedCells().length > 1) {
                     menu.append(new MenuItem({
-                        id: headerType === "row" ? "tableHeaderRow" : "tableHeaderColumn",
-                        label: headerType === "row" ? window.siyuan.languages.tableHeaderRow :
-                            window.siyuan.languages.tableHeaderColumn,
-                        checked: isTableHeaderEnabled(this.selection.node, headerType),
-                        click: () => toggleTableHeader(this.protyle, this.selection.node, headerType),
+                        id: "copyRichText",
+                        label: window.siyuan.languages.copyRichText,
+                        accelerator: window.siyuan.config.keymap.editor.general.copyRichText.custom,
+                        click: () => this.copySelectionAsRichText(),
+                    }).element);
+                    menu.append(new MenuItem({
+                        id: "copyPlainText",
+                        label: window.siyuan.languages.copyPlainText,
+                        click: () => {
+                            const content = this.getSelectionClipboardContent();
+                            if (content) {
+                                copyPlainText(content.text);
+                            }
+                        },
                     }).element);
                 }
-                if (this.selection.mode === "column") {
-                    const columns = this.getSelectedColumns();
+                menu.append(new MenuItem({
+                    icon: "iconCut",
+                    label: window.siyuan.languages.cut,
+                    disabled: this.protyle.disabled || !rectangle || mergedSelection,
+                    accelerator: !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
+                    action: mergedSelection ? "iconInfo" : undefined,
+                    actionLabel: mergedSelection ? window.siyuan.languages.splitMergedCellTip : undefined,
+                    click: () => this.execClipboardCommand("cut"),
+                }).element);
+                if (!this.protyle.disabled && this.selection.mode === "cell") {
                     menu.append(new MenuItem({
-                        id: "autoFitColWidth",
-                        icon: "iconWidth",
-                        label: window.siyuan.languages.autoFitColWidth,
-                        click: () => this.setSelectedColumnWidth(),
+                        icon: "iconPaste",
+                        label: window.siyuan.languages.paste,
+                        click: () => this.paste(),
                     }).element);
                     menu.append(new MenuItem({
-                        id: "distributeSelectedColWidths",
-                        icon: "iconScale",
-                        label: window.siyuan.languages.distributeSelectedColWidths,
-                        disabled: columns.length < 2,
-                        click: () => this.distributeSelectedColumnWidths(),
-                    }).element);
-                    menu.append(new MenuItem({
-                        id: "useDefaultWidth",
-                        label: window.siyuan.languages.useDefaultWidth,
-                        disabled: columns.length === 0 || columns.every(column =>
-                            isDefaultTableColumnWidth(column.style.width, column.style.minWidth)),
-                        click: () => this.setSelectedColumnWidth(TABLE_DEFAULT_COLUMN_WIDTH),
+                        icon: "iconClear",
+                        label: window.siyuan.languages.clear,
+                        warning: true,
+                        click: () => this.clearCells(),
                     }).element);
                 }
-                menu.append(new MenuItem({type: "separator"}).element);
-            }
-            menu.append(new MenuItem({
-                icon: "iconFont",
-                label: window.siyuan.languages.fontStyle,
-                submenu: getTableCellTextStyleMenus(this.protyle, this.getSelectedCells(), () => this.scheduleRender()),
-            }).element);
-            menu.append(new MenuItem({
-                icon: "iconTheme",
-                label: window.siyuan.languages.colorPrimary,
-                submenu: this.getBackgroundMenus(),
-            }).element);
-            if (this.selection.mode === "cell") {
-                this.appendCellMenus(rectangle);
-            } else {
-                this.appendAlignmentMenu();
-                menu.append(new MenuItem({type: "separator"}).element);
-                menu.append(new MenuItem({
-                    icon: "iconClear",
-                    label: window.siyuan.languages.clear,
-                    warning: true,
-                    click: () => this.clearCells(),
-                }).element);
-                menu.append(new MenuItem({
-                    icon: "iconTrashcan",
-                    label: this.selection.mode === "row" ? window.siyuan.languages["delete-row"] :
-                        window.siyuan.languages["delete-column"],
-                    click: () => this.deleteSelection(false),
-                }).element);
-            }
-        }
-        menu.popup({x, y});
+                if (!this.protyle.disabled) {
+                    menu.append(new MenuItem({type: "separator"}).element);
+                    this.appendInsertMenus();
+                    if (this.selection.mode !== "cell") {
+                        menu.append(new MenuItem({
+                            icon: "iconCopy",
+                            label: window.siyuan.languages.duplicateCopy,
+                            disabled: merged,
+                            action: merged ? "iconInfo" : undefined,
+                            actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
+                            click: () => this.duplicateRowsOrColumns(),
+                        }).element);
+                        if (this.selection.indexes.size === 1 && this.selection.indexes.has(0)) {
+                            const headerType = this.selection.mode === "row" ? "row" : "column";
+                            menu.append(new MenuItem({
+                                id: headerType === "row" ? "tableHeaderRow" : "tableHeaderColumn",
+                                label: headerType === "row" ? window.siyuan.languages.tableHeaderRow :
+                                    window.siyuan.languages.tableHeaderColumn,
+                                checked: isTableHeaderEnabled(this.selection.node, headerType),
+                                click: () => toggleTableHeader(this.protyle, this.selection.node, headerType),
+                            }).element);
+                        }
+                        if (this.selection.mode === "column") {
+                            const columns = this.getSelectedColumns();
+                            menu.append(new MenuItem({
+                                id: "autoFitColWidth",
+                                icon: "iconWidth",
+                                label: window.siyuan.languages.autoFitColWidth,
+                                click: () => this.setSelectedColumnWidth(),
+                            }).element);
+                            menu.append(new MenuItem({
+                                id: "distributeSelectedColWidths",
+                                icon: "iconScale",
+                                label: window.siyuan.languages.distributeSelectedColWidths,
+                                disabled: columns.length < 2,
+                                click: () => this.distributeSelectedColumnWidths(),
+                            }).element);
+                            menu.append(new MenuItem({
+                                id: "useDefaultWidth",
+                                label: window.siyuan.languages.useDefaultWidth,
+                                disabled: columns.length === 0 || columns.every(column =>
+                                    isDefaultTableColumnWidth(column.style.width, column.style.minWidth)),
+                                click: () => this.setSelectedColumnWidth(TABLE_DEFAULT_COLUMN_WIDTH),
+                            }).element);
+                        }
+                        menu.append(new MenuItem({type: "separator"}).element);
+                    }
+                    menu.append(new MenuItem({
+                        icon: "iconFont",
+                        label: window.siyuan.languages.fontStyle,
+                        submenu: getTableCellTextStyleMenus(this.protyle, this.getSelectedCells(), () => this.scheduleRender()),
+                    }).element);
+                    menu.append(new MenuItem({
+                        icon: "iconTheme",
+                        label: window.siyuan.languages.colorPrimary,
+                        submenu: this.getBackgroundMenus(),
+                    }).element);
+                    if (this.selection.mode === "cell") {
+                        this.appendCellMenus(rectangle);
+                    } else {
+                        this.appendAlignmentMenu();
+                        menu.append(new MenuItem({type: "separator"}).element);
+                        menu.append(new MenuItem({
+                            icon: "iconClear",
+                            label: window.siyuan.languages.clear,
+                            warning: true,
+                            click: () => this.clearCells(),
+                        }).element);
+                        menu.append(new MenuItem({
+                            icon: "iconTrashcan",
+                            label: this.selection.mode === "row" ? window.siyuan.languages["delete-row"] :
+                                window.siyuan.languages["delete-column"],
+                            click: () => this.deleteSelection(false),
+                        }).element);
+                    }
+                }
+                session.show(() => menu.popup({x, y}));
+
+            },
+        });
     }
 
     private appendInsertMenus() {

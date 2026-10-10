@@ -1732,7 +1732,8 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.mainMenu, event)) {
-        workspaceMenu(app, document.querySelector("#barWorkspace").getBoundingClientRect(), true);
+        const target = document.querySelector("#barWorkspace");
+        workspaceMenu(app, target.getBoundingClientRect(), true, target);
         event.preventDefault();
         return;
     }

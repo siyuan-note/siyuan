@@ -7,7 +7,7 @@ const sources = () => {
     const ts = require("typescript");
     const preprocess = require("ifdef-loader/preprocessor").parse;
     const modules = {};
-    for (const name of ["layout/dock/BacklinkContent", "layout/dock/backlinkRefresh",
+    for (const name of ["menus/menuToggle", "layout/dock/BacklinkContent", "layout/dock/backlinkRefresh",
         "layout/dock/GlobalBacklinkList", "layout/dock/globalBacklinkPaging",
         "layout/dock/backlinkReadingAnchor", "layout/dock/backlinkSourceFilter", "mobile/util/secondaryEditors",
         "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/MobileEditorDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "menus/sheetOpen", "protyle/util/transactionQueue",

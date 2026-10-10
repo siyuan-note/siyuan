@@ -1,3 +1,4 @@
+import {toggleMenu} from "../menus/menuToggle";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
 import {fetchPost} from "../util/fetch";
@@ -396,252 +397,266 @@ export const bindCardEvent = async (options: {
             }
             const moreElement = hasClosestByAttribute(target, "data-type", "more");
             if (moreElement && currentCard) {
-                event.stopPropagation();
-                event.preventDefault();
-                if (filterElement.getAttribute("data-cardtype") === "all" && filterElement.getAttribute("data-id")) {
-                    showMessage(window.siyuan.languages.noSupportTip);
-                    return;
-                }
-                const menu = new Menu();
-                menu.addItem({
-                    id: "setDueTime",
-                    icon: "iconClock",
-                    label: window.siyuan.languages.setDueTime,
-                    click() {
-                        openInputDialog({
-                            title: window.siyuan.languages.setDueTime,
-                            label: window.siyuan.languages.showCardDay,
-                            value: "1",
-                            type: "number",
-                            min: "1",
-                            step: "1",
-                            onConfirm: (value, timedialog) => {
-                                const inputElement = timedialog.element.querySelector("input") as HTMLInputElement;
-                                const days = Number(value);
-                                if (!Number.isInteger(days) || days < 1) {
-                                    showMessage(window.siyuan.languages.invalid, 3000, "error");
-                                    inputElement.focus();
-                                    inputElement.select();
-                                    return;
-                                }
-                                const due = dayjs().add(days, "day");
-                                if (!due.isValid() || due.year() > 9999) {
-                                    showMessage(window.siyuan.languages.invalid, 3000, "error");
-                                    inputElement.focus();
-                                    inputElement.select();
-                                    return;
-                                }
-                                fetchPost("/api/riff/batchSetRiffCardsDueTime", {
-                                    cardDues: [{
-                                        id: currentCard.cardID,
-                                        due: due.format("YYYYMMDDHHmmss")
-                                    }]
-                                }, () => {
-                                    actionElements[0].classList.add("fn__none");
-                                    actionElements[1].classList.remove("fn__none");
-                                    if (currentCard.state === 0) {
-                                        options.cardsData.unreviewedNewCardCount--;
-                                    } else {
-                                        options.cardsData.unreviewedOldCardCount--;
-                                    }
-                                    options.element.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: "0"}));
-                                    options.cardsData.cards.splice(index, 1);
-                                    index--;
-                                    timedialog.destroy();
-                                });
-                            },
-                        });
-                    }
-                });
-                if (currentCard.state !== 0) {
-                    menu.addItem({
-                        id: "reset",
-                        icon: "iconRefresh",
-                        label: window.siyuan.languages.reset,
-                        click() {
-                            resetPending = true;
-                            let refreshing: Promise<void>;
-                            fetchPost("/api/riff/resetRiffCards", {
-                                type: filterElement.getAttribute("data-cardtype"),
-                                id: docId,
-                                deckID: Constants.QUICK_DECK_ID,
-                                blockIDs: [currentCard.blockID],
-                            }, () => {
-                                resetRefresh = {card: currentCard, onRefreshed: () => {
-                                    const minLang = window.siyuan.languages._time["1m"].replace("%s", "");
-                                    currentCard.lapses = 0;
-                                    currentCard.lastReview = -62135596800000;
-                                    currentCard.reps = 0;
-                                    currentCard.state = 0;
-                                    currentCard.nextDues = {
-                                        1: minLang,
-                                        2: minLang.replace("1", "5"),
-                                        3: minLang.replace("1", "10"),
-                                        4: window.siyuan.languages._time["1d"].replace("%s", "").replace("1", "6")
-                                    };
-                                    actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
-                                        if (btnIndex < 2) {
+                toggleMenu({
+                    target: moreElement,
+                    build: (_menu, session) => {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        if (filterElement.getAttribute("data-cardtype") === "all" && filterElement.getAttribute("data-id")) {
+                            showMessage(window.siyuan.languages.noSupportTip);
+                            return;
+                        }
+                        const menu = new Menu();
+                        menu.addItem({
+                            id: "setDueTime",
+                            icon: "iconClock",
+                            label: window.siyuan.languages.setDueTime,
+                            click() {
+                                openInputDialog({
+                                    title: window.siyuan.languages.setDueTime,
+                                    label: window.siyuan.languages.showCardDay,
+                                    value: "1",
+                                    type: "number",
+                                    min: "1",
+                                    step: "1",
+                                    onConfirm: (value, timedialog) => {
+                                        const inputElement = timedialog.element.querySelector("input") as HTMLInputElement;
+                                        const days = Number(value);
+                                        if (!Number.isInteger(days) || days < 1) {
+                                            showMessage(window.siyuan.languages.invalid, 3000, "error");
+                                            inputElement.focus();
+                                            inputElement.select();
                                             return;
                                         }
-                                        element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
+                                        const due = dayjs().add(days, "day");
+                                        if (!due.isValid() || due.year() > 9999) {
+                                            showMessage(window.siyuan.languages.invalid, 3000, "error");
+                                            inputElement.focus();
+                                            inputElement.select();
+                                            return;
+                                        }
+                                        fetchPost("/api/riff/batchSetRiffCardsDueTime", {
+                                            cardDues: [{
+                                                id: currentCard.cardID,
+                                                due: due.format("YYYYMMDDHHmmss")
+                                            }]
+                                        }, () => {
+                                            actionElements[0].classList.add("fn__none");
+                                            actionElements[1].classList.remove("fn__none");
+                                            if (currentCard.state === 0) {
+                                                options.cardsData.unreviewedNewCardCount--;
+                                            } else {
+                                                options.cardsData.unreviewedOldCardCount--;
+                                            }
+                                            options.element.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: "0"}));
+                                            options.cardsData.cards.splice(index, 1);
+                                            index--;
+                                            timedialog.destroy();
+                                        });
+                                    },
+                                });
+                            }
+                        });
+                        if (currentCard.state !== 0) {
+                            menu.addItem({
+                                id: "reset",
+                                icon: "iconRefresh",
+                                label: window.siyuan.languages.reset,
+                                click() {
+                                    resetPending = true;
+                                    let refreshing: Promise<void>;
+                                    fetchPost("/api/riff/resetRiffCards", {
+                                        type: filterElement.getAttribute("data-cardtype"),
+                                        id: docId,
+                                        deckID: Constants.QUICK_DECK_ID,
+                                        blockIDs: [currentCard.blockID],
+                                    }, () => {
+                                        resetRefresh = {
+                                            card: currentCard, onRefreshed: () => {
+                                                const minLang = window.siyuan.languages._time["1m"].replace("%s", "");
+                                                currentCard.lapses = 0;
+                                                currentCard.lastReview = -62135596800000;
+                                                currentCard.reps = 0;
+                                                currentCard.state = 0;
+                                                currentCard.nextDues = {
+                                                    1: minLang,
+                                                    2: minLang.replace("1", "5"),
+                                                    3: minLang.replace("1", "10"),
+                                                    4: window.siyuan.languages._time["1d"].replace("%s", "").replace("1", "6")
+                                                };
+                                                actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
+                                                    if (btnIndex < 2) {
+                                                        return;
+                                                    }
+                                                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
+                                                });
+                                                options.cardsData.unreviewedOldCardCount--;
+                                                options.cardsData.unreviewedNewCardCount++;
+                                                countElement.innerHTML = genCardCount(options.cardsData, index);
+                                            }
+                                        };
+                                        refreshing = refreshResetCard();
+                                    }).finally(async () => {
+                                        await refreshing;
+                                        resetPending = false;
                                     });
-                                    options.cardsData.unreviewedOldCardCount--;
-                                    options.cardsData.unreviewedNewCardCount++;
-                                    countElement.innerHTML = genCardCount(options.cardsData, index);
-                                }};
-                                refreshing = refreshResetCard();
-                            }).finally(async () => {
-                                await refreshing;
-                                resetPending = false;
+                                }
                             });
                         }
-                    });
-                }
-                menu.addItem({
-                    id: "removeRiffCard",
-                    icon: "iconTrashcan",
-                    label: `${window.siyuan.languages.remove} <b>${window.siyuan.languages.riffCard}</b>`,
-                    click() {
-                        actionElements[0].classList.add("fn__none");
-                        actionElements[1].classList.remove("fn__none");
-                        if (currentCard.state === 0) {
-                            options.cardsData.unreviewedNewCardCount--;
-                        } else {
-                            options.cardsData.unreviewedOldCardCount--;
-                        }
-                        options.element.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: "0"}));
-                        transaction(undefined, [{
-                            action: "removeFlashcards",
-                            deckID: Constants.QUICK_DECK_ID,
-                            blockIDs: [currentCard.blockID]
-                        }]);
-                        options.cardsData.cards.splice(index, 1);
-                        index--;
-                    }
+                        menu.addItem({
+                            id: "removeRiffCard",
+                            icon: "iconTrashcan",
+                            label: `${window.siyuan.languages.remove} <b>${window.siyuan.languages.riffCard}</b>`,
+                            click() {
+                                actionElements[0].classList.add("fn__none");
+                                actionElements[1].classList.remove("fn__none");
+                                if (currentCard.state === 0) {
+                                    options.cardsData.unreviewedNewCardCount--;
+                                } else {
+                                    options.cardsData.unreviewedOldCardCount--;
+                                }
+                                options.element.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: "0"}));
+                                transaction(undefined, [{
+                                    action: "removeFlashcards",
+                                    deckID: Constants.QUICK_DECK_ID,
+                                    blockIDs: [currentCard.blockID]
+                                }]);
+                                options.cardsData.cards.splice(index, 1);
+                                index--;
+                            }
+                        });
+                        menu.addSeparator();
+                        menu.addItem({
+                            id: "forgetCountAndRevisionCountAndCardStatusAndLastReviewTime",
+                            iconHTML: "",
+                            type: "readonly",
+                            label: `<div class="fn__flex">
+            <div class="fn__flex-1 ft__breakword">${window.siyuan.languages.forgetCount}</div>
+            <div class="fn__space"></div>
+            <div>${currentCard.lapses}</div>
+        </div><div class="fn__flex">
+            <div class="fn__flex-1 ft__breakword">${window.siyuan.languages.revisionCount}</div>
+            <div class="fn__space"></div>
+            <div>${currentCard.reps}</div>
+        </div><div class="fn__flex">
+            <div class="fn__flex-1 ft__breakword">${window.siyuan.languages.cardStatus}</div>
+            <div class="fn__space"></div>
+            <div class="${currentCard.state === 0 ? "ft__primary" : "ft__success"}">${currentCard.state === 0 ? window.siyuan.languages.flashcardNewCard : window.siyuan.languages.flashcardReviewCard}</div>
+        </div><div class="fn__flex${currentCard.lastReview > 0 ? "" : " fn__none"}">
+            <div class="fn__flex-1 ft__breakword" style="width: 170px;">${window.siyuan.languages.lastReviewTime}</div>
+            <div class="fn__space"></div>
+            <div>${dayjs(currentCard.lastReview).format("YYYY-MM-DD")}</div>
+        </div>`,
+                        });
+                        /// #if MOBILE
+                        session.show(() => menu.fullscreen());
+                        /// #else
+                        const rect = moreElement.getBoundingClientRect();
+                        session.show(() => menu.open({
+                            x: rect.left,
+                            y: rect.bottom,
+                            h: rect.height
+                        }));
+                        /// #endif
+
+                    },
                 });
-                menu.addSeparator();
-                menu.addItem({
-                    id: "forgetCountAndRevisionCountAndCardStatusAndLastReviewTime",
-                    iconHTML: "",
-                    type: "readonly",
-                    label: `<div class="fn__flex">
-    <div class="fn__flex-1 ft__breakword">${window.siyuan.languages.forgetCount}</div>
-    <div class="fn__space"></div>
-    <div>${currentCard.lapses}</div>
-</div><div class="fn__flex">
-    <div class="fn__flex-1 ft__breakword">${window.siyuan.languages.revisionCount}</div>
-    <div class="fn__space"></div>
-    <div>${currentCard.reps}</div>
-</div><div class="fn__flex">
-    <div class="fn__flex-1 ft__breakword">${window.siyuan.languages.cardStatus}</div>
-    <div class="fn__space"></div>
-    <div class="${currentCard.state === 0 ? "ft__primary" : "ft__success"}">${currentCard.state === 0 ? window.siyuan.languages.flashcardNewCard : window.siyuan.languages.flashcardReviewCard}</div>
-</div><div class="fn__flex${currentCard.lastReview > 0 ? "" : " fn__none"}">
-    <div class="fn__flex-1 ft__breakword" style="width: 170px;">${window.siyuan.languages.lastReviewTime}</div>
-    <div class="fn__space"></div>
-    <div>${dayjs(currentCard.lastReview).format("YYYY-MM-DD")}</div>
-</div>`,
-                });
-                /// #if MOBILE
-                menu.fullscreen();
-                /// #else
-                const rect = moreElement.getBoundingClientRect();
-                menu.open({
-                    x: rect.left,
-                    y: rect.bottom,
-                    h: rect.height
-                });
-                /// #endif
-                return;
+            return;
             }
             /// #if !MOBILE
             const sticktabElement = hasClosestByAttribute(target, "data-type", "sticktab");
             if (sticktabElement) {
-                const stickMenu = new Menu();
-                stickMenu.addItem({
-                    id: "openInNewTab",
-                    icon: "iconOpen",
-                    label: window.siyuan.languages.openInNewTab,
-                    click() {
-                        openFile({
-                            app: options.app,
-                            custom: {
-                                icon: "iconRiffCard",
-                                title: window.siyuan.languages.spaceRepetition,
-                                data: {
-                                    cardsData: options.cardsData,
-                                    index,
-                                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
-                                    id: docId,
-                                    title: options.title
-                                },
-                                id: "siyuan-card"
-                            },
-                        });
-                        options.dialog.destroy();
-                    }
-                });
-                stickMenu.addItem({
-                    id: "insertRight",
-                    icon: "iconLayoutRight",
-                    label: window.siyuan.languages.insertRight,
-                    click() {
-                        openFile({
-                            app: options.app,
-                            position: "right",
-                            custom: {
-                                icon: "iconRiffCard",
-                                title: window.siyuan.languages.spaceRepetition,
-                                data: {
-                                    cardsData: options.cardsData,
-                                    index,
-                                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
-                                    id: docId,
-                                    title: options.title
-                                },
-                                id: "siyuan-card"
-                            },
-                        });
-                        options.dialog.destroy();
-                    }
-                });
-                /// #if !BROWSER
-                stickMenu.addItem({
-                    id: "openByNewWindow",
-                    icon: "iconOpenWindow",
-                    label: window.siyuan.languages.openByNewWindow,
-                    click() {
-                        const json = [{
-                            "title": window.siyuan.languages.spaceRepetition,
-                            "icon": "iconRiffCard",
-                            "instance": "Tab",
-                            "children": {
-                                "instance": "Custom",
-                                "customModelType": "siyuan-card",
-                                "customModelData": {
-                                    "cardsData": options.cardsData,
-                                    "index": index,
-                                    "cardType": filterElement.getAttribute("data-cardtype"),
-                                    "id": docId,
-                                    "title": options.title
-                                }
+                toggleMenu({
+                    target: sticktabElement,
+                    build: (_menu, session) => {
+                        const stickMenu = new Menu();
+                        stickMenu.addItem({
+                            id: "openInNewTab",
+                            icon: "iconOpen",
+                            label: window.siyuan.languages.openInNewTab,
+                            click() {
+                                openFile({
+                                    app: options.app,
+                                    custom: {
+                                        icon: "iconRiffCard",
+                                        title: window.siyuan.languages.spaceRepetition,
+                                        data: {
+                                            cardsData: options.cardsData,
+                                            index,
+                                            cardType: filterElement.getAttribute("data-cardtype") as TCardType,
+                                            id: docId,
+                                            title: options.title
+                                        },
+                                        id: "siyuan-card"
+                                    },
+                                });
+                                options.dialog.destroy();
                             }
-                        }];
-                        const url = new URL("/stage/build/app/window.html", window.location.origin);
-                        url.searchParams.set("v", Constants.SIYUAN_VERSION);
-                        url.searchParams.set("json", JSON.stringify(json));
-                        ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {url: appendRemoteQuery(url).href});
-                        options.dialog.destroy();
-                    }
+                        });
+                        stickMenu.addItem({
+                            id: "insertRight",
+                            icon: "iconLayoutRight",
+                            label: window.siyuan.languages.insertRight,
+                            click() {
+                                openFile({
+                                    app: options.app,
+                                    position: "right",
+                                    custom: {
+                                        icon: "iconRiffCard",
+                                        title: window.siyuan.languages.spaceRepetition,
+                                        data: {
+                                            cardsData: options.cardsData,
+                                            index,
+                                            cardType: filterElement.getAttribute("data-cardtype") as TCardType,
+                                            id: docId,
+                                            title: options.title
+                                        },
+                                        id: "siyuan-card"
+                                    },
+                                });
+                                options.dialog.destroy();
+                            }
+                        });
+                        /// #if !BROWSER
+                        stickMenu.addItem({
+                            id: "openByNewWindow",
+                            icon: "iconOpenWindow",
+                            label: window.siyuan.languages.openByNewWindow,
+                            click() {
+                                const json = [{
+                                    "title": window.siyuan.languages.spaceRepetition,
+                                    "icon": "iconRiffCard",
+                                    "instance": "Tab",
+                                    "children": {
+                                        "instance": "Custom",
+                                        "customModelType": "siyuan-card",
+                                        "customModelData": {
+                                            "cardsData": options.cardsData,
+                                            "index": index,
+                                            "cardType": filterElement.getAttribute("data-cardtype"),
+                                            "id": docId,
+                                            "title": options.title
+                                        }
+                                    }
+                                }];
+                                const url = new URL("/stage/build/app/window.html", window.location.origin);
+                                url.searchParams.set("v", Constants.SIYUAN_VERSION);
+                                url.searchParams.set("json", JSON.stringify(json));
+                                ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {url: appendRemoteQuery(url).href});
+                                options.dialog.destroy();
+                            }
+                        });
+                        /// #endif
+                        const rect = sticktabElement.getBoundingClientRect();
+                        session.show(() => stickMenu.open({
+                            x: rect.left,
+                            y: rect.bottom,
+                            h: rect.height
+                        }));
+
+                    },
                 });
-                /// #endif
-                const rect = sticktabElement.getBoundingClientRect();
-                stickMenu.open({
-                    x: rect.left,
-                    y: rect.bottom,
-                    h: rect.height
-                });
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 return;
             }
@@ -657,66 +672,76 @@ export const bindCardEvent = async (options: {
             }
             const filterTempElement = hasClosestByAttribute(target, "data-type", "filter");
             if (filterTempElement) {
-                fetchPost("/api/riff/getRiffDecks", {}, (response) => {
-                    window.siyuan.menus.menu.remove();
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        id: "all",
-                        iconHTML: "",
-                        label: window.siyuan.languages.all,
-                        click() {
-                            filterElement.setAttribute("data-id", "");
-                            filterElement.setAttribute("data-cardtype", "all");
-                            fetchNewRound();
-                        },
-                    }).element);
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        id: "fileTree",
-                        iconHTML: "",
-                        label: window.siyuan.languages.fileTree,
-                        click() {
-                            movePathTo({
-                                cb: (toPath, toNotebook) => {
-                                    filterElement.setAttribute("data-id", toPath[0] === "/" ? toNotebook[0] : getDisplayName(toPath[0], true, true));
-                                    filterElement.setAttribute("data-cardtype", toPath[0] === "/" ? "notebook" : "doc");
+                toggleMenu({
+                    target: filterTempElement,
+                    build: (_menu, session) => {
+                        fetchPost("/api/riff/getRiffDecks", {}, (response) => {
+                            if (!session.isCurrent()) {
+                                return;
+                            }
+
+                            window.siyuan.menus.menu.remove();
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                id: "all",
+                                iconHTML: "",
+                                label: window.siyuan.languages.all,
+                                click() {
+                                    filterElement.setAttribute("data-id", "");
+                                    filterElement.setAttribute("data-cardtype", "all");
                                     fetchNewRound();
                                 },
-                                title: window.siyuan.languages.specifyPath,
-                                flashcard: true
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                id: "fileTree",
+                                iconHTML: "",
+                                label: window.siyuan.languages.fileTree,
+                                click() {
+                                    movePathTo({
+                                        cb: (toPath, toNotebook) => {
+                                            filterElement.setAttribute("data-id", toPath[0] === "/" ? toNotebook[0] : getDisplayName(toPath[0], true, true));
+                                            filterElement.setAttribute("data-cardtype", toPath[0] === "/" ? "notebook" : "doc");
+                                            fetchNewRound();
+                                        },
+                                        title: window.siyuan.languages.specifyPath,
+                                        flashcard: true
+                                    });
+                                }
+                            }).element);
+                            if (options.title || response.data.length > 0) {
+                                window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                            }
+                            if (options.title) {
+                                window.siyuan.menus.menu.append(new MenuItem({
+                                    iconHTML: "",
+                                    label: escapeHtml(options.title),
+                                    click() {
+                                        filterElement.setAttribute("data-id", options.id);
+                                        filterElement.setAttribute("data-cardtype", options.cardType);
+                                        fetchNewRound();
+                                    },
+                                }).element);
+                                if (response.data.length > 0) {
+                                    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                                }
+                            }
+                            response.data.forEach((deck: {id: string, name: string}) => {
+                                window.siyuan.menus.menu.append(new MenuItem({
+                                    iconHTML: "",
+                                    label: escapeHtml(deck.name),
+                                    click() {
+                                        filterElement.setAttribute("data-id", deck.id);
+                                        filterElement.setAttribute("data-cardtype", "all");
+                                        fetchNewRound();
+                                    },
+                                }).element);
                             });
-                        }
-                    }).element);
-                    if (options.title || response.data.length > 0) {
-                        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-                    }
-                    if (options.title) {
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            iconHTML: "",
-                            label: escapeHtml(options.title),
-                            click() {
-                                filterElement.setAttribute("data-id", options.id);
-                                filterElement.setAttribute("data-cardtype", options.cardType);
-                                fetchNewRound();
-                            },
-                        }).element);
-                        if (response.data.length > 0) {
-                            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-                        }
-                    }
-                    response.data.forEach((deck: { id: string, name: string }) => {
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            iconHTML: "",
-                            label: escapeHtml(deck.name),
-                            click() {
-                                filterElement.setAttribute("data-id", deck.id);
-                                filterElement.setAttribute("data-cardtype", "all");
-                                fetchNewRound();
-                            },
-                        }).element);
-                    });
-                    const filterRect = filterTempElement.getBoundingClientRect();
-                    window.siyuan.menus.menu.popup({x: filterRect.left, y: filterRect.bottom, h: filterRect.height});
+                            const filterRect = filterTempElement.getBoundingClientRect();
+                            session.show(() => window.siyuan.menus.menu.popup({x: filterRect.left, y: filterRect.bottom, h: filterRect.height}));
+                        });
+
+                    },
                 });
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 return;
             }

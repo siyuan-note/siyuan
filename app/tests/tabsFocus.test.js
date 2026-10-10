@@ -27,6 +27,7 @@ const sources = () => {
     visit(keydownSource);
     assert.ok(titleKeydown);
     return [
+        compile("menus/menuToggle.ts"),
         compile("protyle/render/tabsState.ts"),
         compile("protyle/render/tabsDrag.ts"),
         compile("protyle/render/tabsAttributes.ts"),
@@ -61,6 +62,7 @@ const cases = async (source) => {
     lute.SetKramdownIAL(true);
     lute.SetProtyleWYSIWYG(true);
     window.siyuan = {languages: {enter: "Zoom in", copy: "Copy", delete: "Delete", rename: "Rename"},
+        menus: {menu: {element: document.createElement("div"), remove() { this.data = undefined; }}},
         config: {editor: {spellcheck: false}}};
     const style = document.createElement("style");
     style.textContent = ".fn__none, .tab-item[data-tabs-hidden=\"true\"] {display: none !important;} " +
@@ -129,7 +131,7 @@ const cases = async (source) => {
             if (!readonly) {
                 const title = b.querySelector(".tab-item-title");
                 api.bindTitleKeydown(protyle, title);
-                api.openTabsMenu(protyle, tabs, b, tabs);
+                api.openTabsMenu(protyle, tabs, b, tabs, false);
                 menu.find(item => item.label === "Rename").click();
                 title.textContent = "Retained title";
                 title.focus();
@@ -148,7 +150,7 @@ const cases = async (source) => {
                 check.equal(root.querySelector(".protyle-wysiwyg--select-mode"), null);
             }
             const replayGroup = tabs.outerHTML;
-            api.openTabsMenu(protyle, tabs, a, tabs);
+            api.openTabsMenu(protyle, tabs, a, tabs, false);
             menu.find(item => item.label === "Zoom in").click();
             check.deepEqual(navigations, [a.dataset.nodeId]);
 
@@ -279,7 +281,7 @@ const cases = async (source) => {
                 const group = root.firstElementChild;
                 check.equal(group.dataset.type, "NodeTabs");
                 check.equal(group.querySelectorAll(":scope > .tabs-header > .tabs-list > .tabs-tab").length, 2);
-                api.openTabsMenu(protyle, group, group.querySelector(".tab-item"), group);
+                api.openTabsMenu(protyle, group, group.querySelector(".tab-item"), group, false);
                 check.equal(menu.some(item => item.label === "Zoom in"), false);
             }
             api.destroyTabsRender(root);

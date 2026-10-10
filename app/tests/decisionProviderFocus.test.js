@@ -4,6 +4,7 @@ const os = require("node:os");
 const path = require("node:path");
 
 const sourceModules = [
+    "menus/menuToggle",
     "config/tabs/ai/aiDecisionUi", "config/tabs/ai/aiProviderUi", "config/render/fragments", "util/escape",
     "config/tabs/ai/aiModelOrder", "config/tabs/ai/aiProviderHeaders", "config/tabs/ai/aiModelTestResult",
     "config/tabs/ai/aiProviderPresets",

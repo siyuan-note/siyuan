@@ -5,6 +5,7 @@ const {test} = require("node:test");
 const {runInNewContext} = require("node:vm");
 const ts = require("typescript");
 const {parse} = require("ifdef-loader/preprocessor");
+const {loadMenuToggle} = require("./menu-toggle-fixture.cjs");
 
 const sourceFile = file => ts.createSourceFile(file, readFileSync(path.join(__dirname, "../src", file), "utf8"),
     ts.ScriptTarget.Latest, true);
@@ -38,12 +39,20 @@ const prefix = (source, fn, marker, scope) => {
     };`, scope).subject;
 };
 const hiddenElement = (hidden = true) => ({classList: {contains: () => hidden}});
+const ownedPrefix = (source, fn, scope) => {
+    const build = find(fn, node => ts.isPropertyAssignment(node) && node.name.getText(source) === "build").initializer.body;
+    const body = fn.body.getText(source);
+    const start = build.getStart(source) - fn.body.getStart(source);
+    const end = build.end - fn.body.getStart(source);
+    const guarded = body.slice(0, start) + '{throw new Error("An existing panel must not be rendered again");}' + body.slice(end);
+    return evaluate(`exports.subject = async function(${fn.parameters.map(node => node.getText(source)).join(",")}) ${guarded}`,
+        {...scope, ...loadMenuToggle(scope)}).subject;
+};
 
 for (const [file, name, marker, args] of [
     ["business/openRecentDocs.ts", "openRecentDocs", "const sortBy", openOnly => [openOnly]],
     ["history/history.ts", "openHistory", "const localHistory", openOnly => [{}, "doc", openOnly]],
     ["card/openCard.ts", "openCardByData", "let lastRange", openOnly => [{}, {}, "doc", "id", "title", openOnly]],
-    ["menus/workspace.ts", "workspaceMenu", "let remoteConnections", openOnly => [{}, {}, openOnly]],
 ]) {
     test(`${name} retains the open panel for shortcuts and toggles for mouse entry`, async () => {
         let closes = 0;
@@ -61,18 +70,32 @@ for (const [file, name, marker, args] of [
     });
 }
 
+test("workspaceMenu retains the open panel for shortcuts and toggles for its mouse anchor", async () => {
+    let closes = 0;
+    const anchor = {closest: () => null, setAttribute() {}};
+    const window = {siyuan: {menus: {menu: {data: anchor,
+        element: {...hiddenElement(false), getAttribute: () => "panel"}, remove: () => closes++}}}};
+    const source = sourceFile("menus/workspace.ts");
+    const subject = ownedPrefix(source, arrow(source, "workspaceMenu"), {window, Constants: {MENU_BAR_WORKSPACE: "panel"}});
+    await subject({}, {}, true, anchor);
+    assert.equal(closes, 0);
+    await subject({}, {}, false, anchor);
+    assert.equal(closes, 1);
+});
+
 test("tab list and inline appearance retain their existing shortcut panel", async () => {
     let closes = 0;
     const source = sourceFile("layout/Wnd.ts");
     const method = find(source, node => ts.isMethodDeclaration(node) && node.name.getText(source) === "renderTabList");
-    const subject = prefix(source, method, "window.siyuan.menus.menu.remove();", {
-        window: {siyuan: {menus: {menu: {element: {...hiddenElement(false), getAttribute: () => "tabs"},
+    const anchor = {closest: () => null, setAttribute() {}};
+    const subject = ownedPrefix(source, method, {
+        window: {siyuan: {menus: {menu: {data: anchor, element: {...hiddenElement(false), getAttribute: () => "tabs"},
             remove: () => closes++}}}}, Constants: {MENU_TAB_LIST: "tabs"},
     });
     const wnd = {headersElement: {children: [{}]}};
-    await subject.call(wnd, {}, true);
+    await subject.call(wnd, anchor, true);
     assert.equal(closes, 0);
-    await subject.call(wnd, {}, false);
+    await subject.call(wnd, anchor, false);
     assert.equal(closes, 1);
     const font = sourceFile("protyle/toolbar/Font.ts");
     const binding = find(font, node => ts.isCallExpression(node) &&
@@ -107,7 +130,8 @@ test("native shortcut sources open panels without toggling while menu commands r
         target[key] || (() => false)}), document: {querySelector: () => ({getBoundingClientRect: () => ({})})}});
     for (const command of ["mainMenu", "recentDocs", "dataHistory", "riffCard"]) {
         assert.equal(globalCommand(command, {}, undefined, true), true);
-        assert.equal(dispatches.at(-1).args.at(-1), true);
+        const call = dispatches.at(-1);
+        assert.equal(call.name === "workspaceMenu" ? call.args[2] : call.args.at(-1), true);
     }
 });
 

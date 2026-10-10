@@ -4,6 +4,7 @@ import {resolve} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+const {loadMenuToggle} = require("../../../tests/menu-toggle-fixture.cjs");
 
 const {parse} = require("ifdef-loader/preprocessor");
 
@@ -63,26 +64,30 @@ const createPendingFontMenu = (key: string) => {
     const listeners = new Map<string, () => Promise<void>>();
     const attributes = new Map<string, string>();
     const state = {opened: 0, focused: 0, items: 0};
+    let visible = false;
     let resolveFonts: (fonts: unknown[]) => void;
-    const input = {style: {removeProperty() {}}, isConnected: true,
+    const input = {style: {removeProperty() {}}, isConnected: true, closest: (): null => null, setAttribute() {},
         addEventListener: (name: string, callback: () => Promise<void>) => listeners.set(name, callback),
         getBoundingClientRect: () => ({left: 700, bottom: 200, height: 28})};
     const selected = {innerHTML: "", classList: {toggle() {}}, querySelectorAll: (): unknown[] => [], addEventListener() {}};
     const element = {
+        classList: {contains: () => !visible},
         contains: (target: unknown) => target === element,
         getAttribute: (name: string) => attributes.get(name),
         setAttribute: (name: string, value: string) => attributes.set(name, value),
         querySelector: (selector: string) => selector === ".b3-menu__items" ? {setAttribute() {}} :
             {focus: () => state.focused++},
     };
-    const menu = {element, removeCB: undefined as (() => void),
+    const menu = {element, data: undefined as Element, removeCB: undefined as (() => void),
         remove() {
+            visible = false;
+            this.data = undefined;
             const callback = this.removeCB;
             this.removeCB = undefined;
             callback?.();
             attributes.clear();
         },
-        addItem: () => state.items++, popup: () => state.opened++,
+        addItem: () => state.items++, popup: () => { visible = true; state.opened++; },
     };
     const window = {siyuan: {menus: {menu}, languages: {default: "Default"},
         config: {appearance: {globalFontFamilies: [] as unknown[]},
@@ -100,6 +105,7 @@ const createPendingFontMenu = (key: string) => {
         "../protyle/util/hasClosest": {hasClosestByAttribute: (target: unknown) => target === input},
     });
     const appearance = load("src/config/tabs/appearanceTab.ts", {
+        "../../menus/menuToggle": loadMenuToggle({window}),
         "../../plugin/Menu": pluginMenu,
         "../../util/availableFont": {loadAvailableFonts: () => new Promise(resolve => {
             resolveFonts = fonts => resolve({customFontSupported: false, customFonts: [], fontItems: fonts});

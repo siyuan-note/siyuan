@@ -35,7 +35,7 @@ const sources = () => {
     const renderMenu = find(workspace, node => ts.isVariableDeclaration(node) &&
         node.name.getText(workspace) === "renderMenu").initializer;
     const popupIndex = renderMenu.body.statements.findIndex(node =>
-        node.getText(workspace).startsWith("window.siyuan.menus.menu.popup("));
+        node.getText(workspace).startsWith("session.show(() => window.siyuan.menus.menu.popup("));
     assert.ok(popupIndex >= 0);
     const menu = sourceFile("menus/Menu.ts");
     const declaration = name => find(menu, node => ts.isVariableDeclaration(node) &&
@@ -53,9 +53,12 @@ const sources = () => {
             ${escape.getText(keyboard)}
         }` + sourceFile("protyle/toolbar/subElementLifecycle.ts").text.replaceAll("export ", "")),
         card: compile(`const openCardByData = ${openCard.getText(card)};`),
-        menu: compile(`async function workspaceMenu(app, rect, openOnly = false) {
+        menuToggle: compile(sourceFile("menus/menuToggle.ts").text),
+        menu: compile(`async function workspaceMenu(app, rect, openOnly = false, target) {
             ${workspaceMenu.body.statements[0].getText(workspace)}
+            await toggleMenu({target, toggle: !openOnly && Boolean(target), build: (_menu, session) => {
             ${renderMenu.body.statements.slice(popupIndex).map(node => node.getText(workspace)).join("\n")}
+            }});
         }
         const ${declaration("getActionMenu")};
         const ${declaration("bindMenuKeydown")};`),
@@ -199,8 +202,8 @@ const cases = async compiled => {
     }
     // 快捷键将焦点移到可操作菜单项，方向键不再被编辑器截获。
     const menuConstants = {MENU_BAR_WORKSPACE: "workspace", KEYCODELIST: {38: "↑", 40: "↓", 220: "\\"}};
-    const menuBindings = new Function("window", "Constants", compiled.menu +
-        "\nreturn {workspaceMenu, bindMenuKeydown};")(window, menuConstants);
+    const menuBindings = new Function("window", "Constants", "toggleMenu", compiled.menu +
+        "\nreturn {workspaceMenu, bindMenuKeydown};")(window, menuConstants, load(compiled.menuToggle, {}).toggleMenu);
     const keymap = load(compiled.keymap, {});
     const hotkey = load(compiled.hotkey, {"../../util/keymapBindings": keymap, "../../constants": {Constants: menuConstants},
         "./compatibility": {isNotCtrl: event => !event.ctrlKey && !event.metaKey, isMac: () => false,
@@ -256,7 +259,7 @@ const cases = async compiled => {
                 editor.dispatchEvent(event);
                 check.equal(event.defaultPrevented, true);
             } else {
-                await menuBindings.workspaceMenu({}, {}, false);
+                await menuBindings.workspaceMenu({}, {}, false, bar);
             }
             check.equal(document.activeElement, openOnly ? menuElement.querySelector("#firstAction") : editor);
             document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {
@@ -274,7 +277,7 @@ const cases = async compiled => {
                 }));
                 check.equal(menuElement.classList.contains("fn__none"), true);
                 check.equal(document.activeElement, editor);
-                await menuBindings.workspaceMenu({}, {}, true);
+                await menuBindings.workspaceMenu({}, {}, true, bar);
                 const newFocus = document.createElement("button");
                 document.body.append(newFocus);
                 newFocus.focus();

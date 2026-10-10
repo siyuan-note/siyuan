@@ -6,6 +6,7 @@ import {createSourceFile, isClassDeclaration, isPropertyAssignment, ScriptTarget
 import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
 import type {ListMindmapFoldTarget} from "./fold";
 import type {ListMindmapNode} from "./model";
+const {loadMenuToggle} = require("../../../../tests/menu-toggle-fixture.cjs");
 
 const node = (id: string, children: ListMindmapNode[] = [], collapsed = false): ListMindmapNode => ({
     id, children, collapsed, virtual: false, contentBlocks: [],
@@ -83,12 +84,14 @@ test("desktop and mobile menus offer six levels without icon placeholders follow
                 open(position: unknown) { positions.push(position); }
             },
             isMobile: () => mobile,
-            window: {siyuan: {languages: {listMindmapExpandToLevel: "Level ${level}", expandAll: "Expand", foldAll: "Collapse"}}},
+            window: {siyuan: {menus: {menu: {element: {classList: {contains: () => true}}, remove() {}}},
+                languages: {listMindmapExpandToLevel: "Level ${level}", expandAll: "Expand", foldAll: "Collapse"}}},
         };
+        Object.assign(context, loadMenuToggle(context));
         const open = runInNewContext(transpileModule(`(${callback})`, {
             compilerOptions: {target: ScriptTarget.ES2021},
         }).outputText, context);
-        open({getBoundingClientRect: () => ({left: 10, bottom: 30, height: 20})},
+        open({closest: (): null => null, setAttribute() {}, getBoundingClientRect: () => ({left: 10, bottom: 30, height: 20})},
             (level: ListMindmapFoldTarget) => selected.push(level));
         assert.deepEqual(entries.map(item => item.id), [...Array.from({length: 6}, (_, i) => `level${i + 1}`),
             "separator_all", "expandAll", "foldAll"]);

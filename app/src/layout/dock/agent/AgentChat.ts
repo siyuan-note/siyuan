@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../../menus/menuToggle";
 import {fetchWithAppId} from "../../../util/fetchWithAppId";
 import {Model} from "../../Model";
 import type {App} from "../../../index";
@@ -762,24 +763,30 @@ export class AgentChat extends Model {
     private initPermissionMenu() {
         this.applyPermissionMode(this.permissionMode);
         this.permissionButton.addEventListener("click", (event: MouseEvent) => {
-            event.stopPropagation();
-            const menu = new Menu("agent-chat-permission");
-            if (menu.isOpen) {
-                return;
-            }
-            (["confirm", "allowSession"] as AgentPermissionMode[]).forEach(mode => {
-                menu.addItem({
-                    iconHTML: "",
-                    label: escapeHtml(this.permissionLabel(mode)),
-                    current: mode === this.permissionMode,
-                    click: () => {
-                        void this.changePermissionMode(mode);
-                    },
-                });
+            toggleMenu({
+                target: this.permissionButton,
+                build: (_menu, session) => {
+                    event.stopPropagation();
+                    const menu = new Menu("agent-chat-permission");
+                    if (menu.isOpen) {
+                        return;
+                    }
+                    (["confirm", "allowSession"] as AgentPermissionMode[]).forEach(mode => {
+                        menu.addItem({
+                            iconHTML: "",
+                            label: escapeHtml(this.permissionLabel(mode)),
+                            current: mode === this.permissionMode,
+                            click: () => {
+                                void this.changePermissionMode(mode);
+                            },
+                        });
+                    });
+                    const rect = this.permissionButton.getBoundingClientRect();
+                    menu.element.style.minWidth = `${rect.width}px`;
+                    session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: this.permissionButton}));
+
+                },
             });
-            const rect = this.permissionButton.getBoundingClientRect();
-            menu.element.style.minWidth = `${rect.width}px`;
-            menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: this.permissionButton});
         });
     }
 
@@ -792,26 +799,32 @@ export class AgentChat extends Model {
         };
         updateLabel();
         this.reasoningEffortButton.addEventListener("click", (event: MouseEvent) => {
-            event.stopPropagation();
-            const menu = new Menu("agent-chat-reasoning-effort");
-            if (menu.isOpen) {
-                return;
-            }
-            options.forEach(option => {
-                menu.addItem({
-                    iconHTML: "",
-                    label: escapeHtml(option.label),
-                    current: option.value === this.selectedReasoningEffort,
-                    click: () => {
-                        this.selectedReasoningEffort = option.value;
-                        setAgentReasoningEffort(option.value);
-                        updateLabel();
-                    },
-                });
+            toggleMenu({
+                target: this.reasoningEffortButton,
+                build: (_menu, session) => {
+                    event.stopPropagation();
+                    const menu = new Menu("agent-chat-reasoning-effort");
+                    if (menu.isOpen) {
+                        return;
+                    }
+                    options.forEach(option => {
+                        menu.addItem({
+                            iconHTML: "",
+                            label: escapeHtml(option.label),
+                            current: option.value === this.selectedReasoningEffort,
+                            click: () => {
+                                this.selectedReasoningEffort = option.value;
+                                setAgentReasoningEffort(option.value);
+                                updateLabel();
+                            },
+                        });
+                    });
+                    const rect = this.reasoningEffortButton.getBoundingClientRect();
+                    menu.element.style.minWidth = `${Math.max(rect.width, 120)}px`;
+                    session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: this.reasoningEffortButton}));
+
+                },
             });
-            const rect = this.reasoningEffortButton.getBoundingClientRect();
-            menu.element.style.minWidth = `${Math.max(rect.width, 120)}px`;
-            menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: this.reasoningEffortButton});
         });
     }
 

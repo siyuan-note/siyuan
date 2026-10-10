@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {listIndent, listOutdent} from "../../protyle/wysiwyg/list";
 import {
     hasClosestBlock,
@@ -1931,41 +1932,51 @@ export const initKeyboardToolbar = () => {
             hideAndroidKeyboardForPanel(protyle);
             return;
         } else if (type === "block") {
-            event.preventDefault();
-            protyle.toolbar.range = range;
-            keyboardPanelClosing = false;
-            hideKeyboardToolbarUtil();
-            if (!protyle.gutter && getTableCellRichContext(protyle)) {
-                const {MenuItem} = await import("../../menus/Menu");
-                if (!nodeElement.isConnected || protyle.disabled || !getTableCellRichContext(protyle)) {
-                    return;
-                }
-                window.siyuan.menus.menu.remove();
-                window.siyuan.menus.menu.append(new MenuItem({
-                    id: "insertBefore",
-                    icon: "iconBefore",
-                    label: window.siyuan.languages.insertBefore,
-                    click: () => insertEmptyBlock(protyle, "beforebegin", nodeElement),
-                }).element);
-                window.siyuan.menus.menu.append(new MenuItem({
-                    id: "insertAfter",
-                    icon: "iconAfter",
-                    label: window.siyuan.languages.insertAfter,
-                    click: () => insertEmptyBlock(protyle, "afterend", nodeElement),
-                }).element);
-                window.siyuan.menus.menu.fullscreen("all", restoreMenuKeyboard);
-                return;
-            }
-            // 多选时以已选块打开共享块菜单，使列表项转换作用于整个选区。
-            const selectedBlock = protyle.wysiwyg.element.querySelector<HTMLElement>(".protyle-wysiwyg--select");
-            protyle.gutter?.renderMenu(protyle, selectedBlock || nodeElement);
-            window.siyuan.menus.menu.fullscreen("all", restoreMenuKeyboard);
-            return;
+            await toggleMenu({
+                target: target,
+                build: async (_menu, session) => {
+                    event.preventDefault();
+                    protyle.toolbar.range = range;
+                    keyboardPanelClosing = false;
+                    hideKeyboardToolbarUtil();
+                    if (!protyle.gutter && getTableCellRichContext(protyle)) {
+                        const {MenuItem} = await import("../../menus/Menu");
+                        if (!session.isCurrent()) {
+                            return;
+                        }
+                        if (!nodeElement.isConnected || protyle.disabled || !getTableCellRichContext(protyle)) {
+                            return;
+                        }
+                        window.siyuan.menus.menu.remove();
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            id: "insertBefore",
+                            icon: "iconBefore",
+                            label: window.siyuan.languages.insertBefore,
+                            click: () => insertEmptyBlock(protyle, "beforebegin", nodeElement),
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            id: "insertAfter",
+                            icon: "iconAfter",
+                            label: window.siyuan.languages.insertAfter,
+                            click: () => insertEmptyBlock(protyle, "afterend", nodeElement),
+                        }).element);
+                        session.show(() => window.siyuan.menus.menu.fullscreen("all", restoreMenuKeyboard));
+                        return;
+                    }
+                    // 多选时以已选块打开共享块菜单，使列表项转换作用于整个选区。
+                    const selectedBlock = protyle.wysiwyg.element.querySelector<HTMLElement>(".protyle-wysiwyg--select");
+                    protyle.gutter?.renderMenu(protyle, selectedBlock || nodeElement);
+                    session.show(() => window.siyuan.menus.menu.fullscreen("all", restoreMenuKeyboard));
+
+                },
+            });
+        return;
         } else if (type === "outdent") {
             if (nodeElement.classList.contains("code-block")) {
                 tabCodeBlock(protyle, nodeElement, range, true);
             } else {
                 await listOutdent(protyle, [nodeElement.parentElement], range);
+
             }
             focusByRange(range);
             return;
@@ -1974,6 +1985,7 @@ export const initKeyboardToolbar = () => {
                 tabCodeBlock(protyle, nodeElement, range);
             } else {
                 await listIndent(protyle, [nodeElement.parentElement], range);
+
             }
             focusByRange(range);
             return;

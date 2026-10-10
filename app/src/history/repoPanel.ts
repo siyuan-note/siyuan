@@ -1,3 +1,4 @@
+import {toggleMenu} from "../menus/menuToggle";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
@@ -231,21 +232,27 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
             const expanded = root.classList.toggle("history__snapshots--filters");
             button.setAttribute("aria-expanded", String(expanded));
         } else if (action === "source-more") {
-            const pane = button.closest<HTMLElement>("[data-repo-source]");
-            const purge = pane.querySelector<HTMLButtonElement>('[data-action="purge"]');
-            const menu = window.siyuan.menus.menu;
-            menu.remove();
-            menu.append(new MenuItem({
-                icon: "iconTrashcan",
-                label: purge.textContent,
-                disabled: !canPurgeRepo(pane.dataset.repoSource as RepoSource, window.siyuan.config.sync.provider),
-                click: () => {
-                    menu.remove();
-                    purge.click();
+            toggleMenu({
+                target: button,
+                build: (_menu, session) => {
+                    const pane = button.closest<HTMLElement>("[data-repo-source]");
+                    const purge = pane.querySelector<HTMLButtonElement>('[data-action="purge"]');
+                    const menu = window.siyuan.menus.menu;
+
+                    menu.append(new MenuItem({
+                        icon: "iconTrashcan",
+                        label: purge.textContent,
+                        disabled: !canPurgeRepo(pane.dataset.repoSource as RepoSource, window.siyuan.config.sync.provider),
+                        click: () => {
+                            menu.remove();
+                            purge.click();
+                        },
+                    }).element);
+                    const rect = button.getBoundingClientRect();
+                    session.show(() => menu.popup({x: rect.left, y: rect.bottom, h: rect.height}));
+
                 },
-            }).element);
-            const rect = button.getBoundingClientRect();
-            menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
+            });
         } else if (action === "range-clear") {
             startDate.value = "";
             endDate.value = "";

@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as flashcardMode from "./flashcardMode";
+const {loadMenuToggle} = require("../../tests/menu-toggle-fixture.cjs");
 
 const classList = () => {
     const values = new Set<string>();
@@ -24,6 +25,9 @@ const createReview = async () => {
         querySelectorAll: () => actions, querySelector: (selector: string) => selector === '[data-type="filter"]' ? {getAttribute: (name: string) => name === "data-id" ? "" : "all"} : {innerHTML: ""}};
     const protyle = {element, block: {id: "block"}, wysiwyg: {element: {querySelector: (): null => null}, renderCustom: () => {}}};
     const constants = {LOCAL_FLASHCARD: "card", CB_GET_ALL: "all", SIZE_GET_MAX: 100, DIALOG_OPENCARD: "card", QUICK_DECK_ID: "deck"};
+    const menuToggle = loadMenuToggle({window: {siyuan: {menus: {menu: {
+        element: {classList: {contains: () => true}}, remove() {},
+    }}}}});
     const dependencies = new Proxy({Constants: constants, Protyle: class {protyle = protyle;},
         fetchPost: (url: string, payload: Record<string, unknown>, callback: (response: unknown) => void) => new Promise<void>(resolve => { requests.push({url, payload, callback, resolve}); }),
         Menu: class {addItem(item: IMenu) {menuItems.set(item.id, item);} addSeparator() {} fullscreen() {} open() {}},
@@ -36,6 +40,7 @@ const createReview = async () => {
     runInNewContext(transpileModule(readFileSync(__dirname + "/openCard.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText, {exports, require: (specifier: string) => {
+        if (specifier.endsWith("menuToggle")) return menuToggle;
         if (specifier === "./flashcardMode") return {...flashcardMode, hasFlashcardAnswer: () => true};
         if (specifier === "dayjs") return () => ({format: () => "date", add: () => ({isValid: () => true, year: () => 2026, format: () => "20261015000000"})});
         return dependencies;
@@ -46,7 +51,8 @@ const createReview = async () => {
         cardsData: {cards: [card]} as unknown as ICardData, cardType: "all"});
     const press = (detail: string) => click({detail, target: {}, preventDefault: () => {}, stopPropagation: () => {}});
     return {requests, actions, press, menuItems,
-        more: () => click({detail: 0, target: {type: "more", getBoundingClientRect: () => ({})}, preventDefault: () => {}, stopPropagation: () => {}}),
+        more: () => click({detail: 0, target: {type: "more", closest: (): null => null, setAttribute() {},
+            getBoundingClientRect: () => ({})}, preventDefault: () => {}, stopPropagation: () => {}}),
         confirmDue: () => confirmDue("7", {element: {querySelector: () => ({})}}),
         complete: () => {
         requests[0].callback({data: {ial: {}}});

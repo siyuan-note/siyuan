@@ -1,3 +1,4 @@
+import {toggleMenu} from "./menuToggle";
 import type {BlockQueryRequestInput} from "../types/api";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile, isValidCustomAttrName} from "../util/functions";
@@ -393,32 +394,42 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
                 event.preventDefault();
                 break;
             } else if (type === "bookmark") {
-                fetchPost("/api/attr/getBookmarkLabels", {}, (response) => {
-                    window.siyuan.menus.menu.remove();
-                    if (response.data.length === 0) {
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            id: "emptyContent",
-                            iconHTML: "",
-                            label: window.siyuan.languages.emptyContent,
-                            type: "readonly",
-                        }).element);
-                    } else {
-                        response.data.forEach((item: string) => {
-                            window.siyuan.menus.menu.append(new MenuItem({
-                                label: item,
-                                click() {
-                                    const bookmarkInputElement = target.parentElement.parentElement.querySelector("input");
-                                    bookmarkInputElement.value = item;
-                                    bookmarkInputElement.dispatchEvent(new CustomEvent("change"));
-                                }
-                            }).element);
+                toggleMenu({
+                    target: target,
+                    build: (_menu, session) => {
+                        fetchPost("/api/attr/getBookmarkLabels", {}, (response) => {
+                            if (!session.isCurrent()) {
+                                return;
+                            }
+
+                            window.siyuan.menus.menu.remove();
+                            if (response.data.length === 0) {
+                                window.siyuan.menus.menu.append(new MenuItem({
+                                    id: "emptyContent",
+                                    iconHTML: "",
+                                    label: window.siyuan.languages.emptyContent,
+                                    type: "readonly",
+                                }).element);
+                            } else {
+                                response.data.forEach((item: string) => {
+                                    window.siyuan.menus.menu.append(new MenuItem({
+                                        label: item,
+                                        click() {
+                                            const bookmarkInputElement = target.parentElement.parentElement.querySelector("input");
+                                            bookmarkInputElement.value = item;
+                                            bookmarkInputElement.dispatchEvent(new CustomEvent("change"));
+                                        }
+                                    }).element);
+                                });
+                            }
+                            window.siyuan.menus.menu.element.classList.add("b3-menu--list");
+                            const rect = target.getBoundingClientRect();
+                            session.show(() => window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width}));
                         });
-                    }
-                    window.siyuan.menus.menu.element.classList.add("b3-menu--list");
-                    const rect = target.getBoundingClientRect();
-                    window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});
+
+                    },
                 });
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "addCustom") {

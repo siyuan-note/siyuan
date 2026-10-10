@@ -5,7 +5,7 @@ import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
 import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
-import {toggleFileTreeMenu} from "../../menus/fileTreeMenu";
+import {toggleMenu} from "../../menus/menuToggle";
 import {
     getPublishAccessLevel,
     getPublishAccessOptionByLevel,
@@ -298,18 +298,22 @@ export class MobileFiles extends Model {
                             if (type === "new") {
                                 newFileInTree(app, notebookId, pathString);
                             } else if (type === "more-root") {
-                                toggleFileTreeMenu(target, () => {
-                                    initNavigationMenu(app, target.parentElement);
-                                    this.insertMultiSelectMenu(target.parentElement);
-                                    window.siyuan.menus.menu.fullscreen("bottom");
+                                toggleMenu({
+                                    target: target, build: () => {
+                                        initNavigationMenu(app, target.parentElement);
+                                        this.insertMultiSelectMenu(target.parentElement);
+                                        window.siyuan.menus.menu.fullscreen("bottom");
+                                    }
                                 });
                             }
                         }
                         if (type === "more-file") {
-                            toggleFileTreeMenu(target, () => {
-                                initFileMenu(app, notebookId, pathString, target.parentElement);
-                                this.insertMultiSelectMenu(target.parentElement);
-                                window.siyuan.menus.menu.fullscreen("bottom");
+                            toggleMenu({
+                                target: target, build: () => {
+                                    initFileMenu(app, notebookId, pathString, target.parentElement);
+                                    this.insertMultiSelectMenu(target.parentElement);
+                                    window.siyuan.menus.menu.fullscreen("bottom");
+                                }
                             });
                         }
                     }
@@ -839,35 +843,40 @@ export class MobileFiles extends Model {
     }
 
     private genSort() {
-        window.siyuan.menus.menu.remove();
-        const subMenu = sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort) => {
-            if (sort === null) {
-                return;
-            }
-            fetchPost("/api/setting/setFiletree", {
-                ...window.siyuan.config.fileTree,
-                sort,
-            }, (response) => {
-                if (response.code !== 0) {
-                    return;
-                }
-                window.siyuan.config.fileTree = {
-                        ...response.data,
-                        tabStartupMode: response.data.tabStartupMode === 1 ? 1 : response.data.tabStartupMode === 2 ? 2 : 0,
-                    };
-                this.onDocSortModeChanged({
-                    scope: "global",
-                    box: "",
-                    id: "",
-                    path: "/",
-                    sortMode: sort,
+        toggleMenu({
+            target: this.element.querySelector("[data-type=sort]"),
+            build: (_menu, session) => {
+                const subMenu = sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort) => {
+                    if (sort === null) {
+                        return;
+                    }
+                    fetchPost("/api/setting/setFiletree", {
+                        ...window.siyuan.config.fileTree,
+                        sort,
+                    }, (response) => {
+                        if (response.code !== 0) {
+                            return;
+                        }
+                        window.siyuan.config.fileTree = {
+                            ...response.data,
+                            tabStartupMode: response.data.tabStartupMode === 1 ? 1 : response.data.tabStartupMode === 2 ? 2 : 0,
+                        };
+                        this.onDocSortModeChanged({
+                            scope: "global",
+                            box: "",
+                            id: "",
+                            path: "/",
+                            sortMode: sort,
+                        });
+                    });
                 });
-            });
+                subMenu.forEach((item) => {
+                    window.siyuan.menus.menu.append(new MenuItem(item).element);
+                });
+                session.show(() => window.siyuan.menus.menu.fullscreen("bottom"));
+
+            },
         });
-        subMenu.forEach((item) => {
-            window.siyuan.menus.menu.append(new MenuItem(item).element);
-        });
-        window.siyuan.menus.menu.fullscreen("bottom");
     }
 
     private updateItemArrow(notebookId: string, filePath: string) {

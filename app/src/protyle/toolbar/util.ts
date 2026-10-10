@@ -222,7 +222,7 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
             const editor = protyle.protyle;
             const range = editor.toolbar.range?.cloneRange();
             if (range && !range.collapsed) {
-                AIActions([], editor, range);
+                AIActions([], editor, range, editor.toolbar.element.querySelector('[data-type="ai"]'));
             }
         },
     }, {

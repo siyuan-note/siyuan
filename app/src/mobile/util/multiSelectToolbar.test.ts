@@ -40,7 +40,9 @@ describe("shared mobile multi-select toolbar", () => {
     before(() => {
         Object.defineProperty(globalThis, "window", {
             configurable: true,
-            value: {siyuan: {languages: {more: "More", close: "Close", selectAll: "Select all"}}},
+            value: {siyuan: {languages: {more: "More", close: "Close", selectAll: "Select all"}, menus: {menu: {
+                data: undefined, element: {classList: {contains: () => true}}, remove() { this.data = undefined; },
+            }}}},
         });
     });
     after(() => {
@@ -53,7 +55,7 @@ describe("shared mobile multi-select toolbar", () => {
 
     const createToolbar = (onSelectAll?: () => void) => {
         const count = {textContent: ""};
-        const menu = {dataset: {type: "menu"}, disabled: false};
+        const menu = {dataset: {type: "menu"}, disabled: false, closest: (): null => null, setAttribute: () => {}};
         const close = {dataset: {type: "exitMultiSelectMode"}, disabled: false};
         let listener: (event: unknown) => void;
         let menuCalls = 0;
@@ -65,7 +67,7 @@ describe("shared mobile multi-select toolbar", () => {
             firstElementChild: {addEventListener: (_type: string, callback: typeof listener) => { listener = callback; }},
         } as unknown as HTMLElement;
         renderMultiSelectToolbar(element, 1, () => { menuCalls++; }, () => { exitCalls++; }, onSelectAll);
-        const click = (button: typeof menu | null) => {
+        const click = (button: {dataset: {type: string}, disabled: boolean} | null) => {
             let prevented = false;
             let stopped = false;
             listener({

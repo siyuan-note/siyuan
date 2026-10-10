@@ -1,3 +1,4 @@
+import {toggleMenu} from "../menus/menuToggle";
 import type {FileTreeGetDocRequestInput} from "../types/api";
 import {updateSearchMethodControls} from "./methodCapabilities";
 import {getAttr} from "./attrs";
@@ -195,7 +196,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         <div class="block__icons">
             <span id="searchFilter" aria-label="${window.siyuan.languages.searchType}" class="block__icon ariaLabel" data-position="9south">
                 <svg><use xlink:href="#iconFilter"></use></svg>
-            </span> 
+            </span>
             <span class="fn__space"></span>
             ${genQueryHTML(config.method, "searchSyntaxCheck")}
             <span class="fn__space"></span>
@@ -673,81 +674,87 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.preventDefault();
                 break;
             } else if (target.id === "searchMore") {
-                moreMenu(config, criteriaData, element, () => {
-                    config.page = 1;
-                    inputEvent(element, config, edit, true);
-                }, () => {
-                    config = updateConfig(element, {
-                        removed: true,
-                        sort: 0,
-                        group: 0,
-                        hasReplace: false,
-                        method: 0,
-                        hPath: "",
-                        idPath: [],
-                        k: "",
-                        r: "",
-                        page: 1,
-                        types: getDefaultType(),
-                        subTypes: getDefaultSubType(),
-                        replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
-                    }, config, edit, {clear: true, preserveCurrentPath: true});
-                    element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
-                }, () => {
-                    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-                    const isPopover = hasClosestByClassName(element, "b3-dialog__container");
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        iconHTML: "",
-                        label: window.siyuan.languages.layout,
-                        type: "submenu",
-                        submenu: [{
-                            iconHTML: "",
-                            label: window.siyuan.languages.topBottomLayout,
-                            current: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
-                            click() {
-                                element.querySelector(".search__layout").classList.remove("search__layout--row");
-                                edit.protyle.element.style.width = "";
-                                if ((isPopover && localData.row) || (!isPopover && localData.rowTab)) {
-                                    edit.protyle.element.style.height = isPopover ? localData.row : localData.rowTab;
-                                    edit.protyle.element.classList.remove("fn__flex-1");
-                                } else {
-                                    edit.protyle.element.classList.add("fn__flex-1");
-                                }
-                                resize(edit.protyle);
-                                if (isPopover) {
-                                    localData.layout = 0;
-                                } else {
-                                    localData.layoutTab = 0;
-                                }
-                                setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
-                            }
-                        }, {
-                            iconHTML: "",
-                            label: window.siyuan.languages.leftRightLayout,
-                            current: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
-                            click() {
-                                element.querySelector(".search__layout").classList.add("search__layout--row");
-                                edit.protyle.element.style.height = "";
-                                if ((isPopover && localData.col) || (!isPopover && localData.colTab)) {
-                                    edit.protyle.element.style.width = isPopover ? localData.col : localData.colTab;
-                                    edit.protyle.element.classList.remove("fn__flex-1");
-                                } else {
-                                    edit.protyle.element.classList.add("fn__flex-1");
-                                }
-                                resize(edit.protyle);
-                                if (isPopover) {
-                                    localData.layout = 1;
-                                } else {
-                                    localData.layoutTab = 1;
-                                }
-                                setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
-                            }
-                        }]
-                    }).element);
+                toggleMenu({
+                    target: target,
+                    build: (_menu, session) => {
+                        moreMenu(config, criteriaData, element, () => {
+                            config.page = 1;
+                            inputEvent(element, config, edit, true);
+                        }, () => {
+                            config = updateConfig(element, {
+                                removed: true,
+                                sort: 0,
+                                group: 0,
+                                hasReplace: false,
+                                method: 0,
+                                hPath: "",
+                                idPath: [],
+                                k: "",
+                                r: "",
+                                page: 1,
+                                types: getDefaultType(),
+                                subTypes: getDefaultSubType(),
+                                replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
+                            }, config, edit, {clear: true, preserveCurrentPath: true});
+                            element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
+                        }, () => {
+                            const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
+                            const isPopover = hasClosestByClassName(element, "b3-dialog__container");
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                iconHTML: "",
+                                label: window.siyuan.languages.layout,
+                                type: "submenu",
+                                submenu: [{
+                                    iconHTML: "",
+                                    label: window.siyuan.languages.topBottomLayout,
+                                    current: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
+                                    click() {
+                                        element.querySelector(".search__layout").classList.remove("search__layout--row");
+                                        edit.protyle.element.style.width = "";
+                                        if ((isPopover && localData.row) || (!isPopover && localData.rowTab)) {
+                                            edit.protyle.element.style.height = isPopover ? localData.row : localData.rowTab;
+                                            edit.protyle.element.classList.remove("fn__flex-1");
+                                        } else {
+                                            edit.protyle.element.classList.add("fn__flex-1");
+                                        }
+                                        resize(edit.protyle);
+                                        if (isPopover) {
+                                            localData.layout = 0;
+                                        } else {
+                                            localData.layoutTab = 0;
+                                        }
+                                        setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
+                                    }
+                                }, {
+                                    iconHTML: "",
+                                    label: window.siyuan.languages.leftRightLayout,
+                                    current: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
+                                    click() {
+                                        element.querySelector(".search__layout").classList.add("search__layout--row");
+                                        edit.protyle.element.style.height = "";
+                                        if ((isPopover && localData.col) || (!isPopover && localData.colTab)) {
+                                            edit.protyle.element.style.width = isPopover ? localData.col : localData.colTab;
+                                            edit.protyle.element.classList.remove("fn__flex-1");
+                                        } else {
+                                            edit.protyle.element.classList.add("fn__flex-1");
+                                        }
+                                        resize(edit.protyle);
+                                        if (isPopover) {
+                                            localData.layout = 1;
+                                        } else {
+                                            localData.layoutTab = 1;
+                                        }
+                                        setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
+                                    }
+                                }]
+                            }).element);
+                        });
+                        const rect = target.getBoundingClientRect();
+                        session.show(() => window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true}));
+
+                    },
                 });
-                const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "searchFilter" && !target.hasAttribute("disabled")) {
@@ -810,15 +817,21 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.preventDefault();
                 break;
             } else if (target.id === "searchSyntaxCheck") {
-                queryMenu(config, () => {
-                    element.querySelector("#searchSyntaxCheck").outerHTML = genQueryHTML(config.method, "searchSyntaxCheck");
-                    config.page = 1;
-                    inputEvent(element, config, edit, true);
-                    persistSearchConfig(config);
+                toggleMenu({
+                    target: target,
+                    build: (_menu, session) => {
+                        queryMenu(config, () => {
+                            element.querySelector("#searchSyntaxCheck").outerHTML = genQueryHTML(config.method, "searchSyntaxCheck");
+                            config.page = 1;
+                            inputEvent(element, config, edit, true);
+                            persistSearchConfig(config);
+                        });
+                        const rect = target.getBoundingClientRect();
+                        session.show(() => window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true}));
+
+                    },
                 });
-                const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "searchHistoryBtn") {

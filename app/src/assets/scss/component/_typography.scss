@@ -88,7 +88,7 @@
 
   span[data-type~="inline-math"] {
     direction: ltr;
-    user-select: text;
+    user-select: all;
     display: inline;
     // https://github.com/siyuan-note/siyuan/issues/17211
     &:after {

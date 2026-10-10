@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 /// #if !MOBILE
 import {Tab} from "../Tab";
 import {setPanelFocus} from "../util";
@@ -239,7 +240,7 @@ ${data.shorthandContent}
     private genItemHTML(item: IInbox) {
         return sanitizeKernelHTML(`<li style="padding-left: 0" data-id="${item.oId}" class="b3-list-item">
     <span data-type="select" class="b3-list-item__action">
-        <svg><use xlink:href="#icon${this.selectIds.includes(item.oId) ? "Check" : "Uncheck"}"></use></svg> 
+        <svg><use xlink:href="#icon${this.selectIds.includes(item.oId) ? "Check" : "Uncheck"}"></use></svg>
     </span>
     <span class="fn__space--small"></span>
     <span class="b3-list-item__text" title="${item.shorthandTitle}${item.shorthandTitle === item.shorthandDesc ? "" : "\n" + item.shorthandDesc}">${item.shorthandTitle}</span>
@@ -248,85 +249,92 @@ ${data.shorthandContent}
     }
 
     private more(event: MouseEvent, itemElement?: HTMLElement) {
-        const detailsElement = this.element.querySelector(".inboxDetails");
-        window.siyuan.menus.menu.remove();
-        /// #if !MOBILE
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.refresh,
-            icon: "iconRefresh",
-            click: () => {
-                this.refresh(itemElement);
-            }
-        }).element);
-        /// #endif
-        let ids: string[] = [];
-        if (itemElement) {
-            ids = [itemElement.dataset.id];
-        } else if (detailsElement.classList.contains("fn__none")) {
-            ids = this.selectIds;
-        } else {
-            ids = [detailsElement.getAttribute("data-id")];
-        }
-        if (ids.length > 0) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.move,
-                icon: "iconMove",
-                click: () => {
-                    this.move(ids);
-                }
-            }).element);
-            let protyle: IProtyle;
-            /// #if MOBILE
-            protyle = window.siyuan.mobile.editor?.protyle;
-            /// #else
-            const tab = getActiveTab(false);
-            if (tab?.model instanceof Editor) {
-                protyle = tab.model.editor?.protyle;
-            }
-            /// #endif
-            if (protyle?.block.rootID && !protyle.disabled && !window.siyuan.config.readonly && !window.siyuan.isPublish) {
+        toggleMenu({
+            target: (event.target as Element).closest(".block__icon") || itemElement,
+            toggle: event.type !== "contextmenu",
+            build: (_menu, session) => {
+                const detailsElement = this.element.querySelector(".inboxDetails");
+
+                /// #if !MOBILE
                 window.siyuan.menus.menu.append(new MenuItem({
-                    label: window.siyuan.languages.insertToCurrentDoc,
-                    icon: "iconAdd",
+                    label: window.siyuan.languages.refresh,
+                    icon: "iconRefresh",
                     click: () => {
-                        void this.insertToCurrentDoc(ids, protyle.block.rootID);
+                        this.refresh(itemElement);
                     }
                 }).element);
-            }
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.remove,
-                icon: "iconTrashcan",
-                click: () => {
-                    let removeTitle = "";
-                    ids.forEach((id, index) => {
-                        removeTitle += '<code class="fn__code">' + escapeHtml(this.data[id].shorthandTitle) + "</code>" + (index === ids.length - 1 ? "" : ", ");
-                    });
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} ${removeTitle}?`, () => {
-                        if (itemElement) {
-                            this.remove([itemElement.dataset.id]);
-                        } else if (detailsElement.classList.contains("fn__none")) {
-                            this.remove();
-                        } else {
-                            this.remove([detailsElement.getAttribute("data-id")]);
-                        }
-                    }, undefined, true);
+                /// #endif
+                let ids: string[] = [];
+                if (itemElement) {
+                    ids = [itemElement.dataset.id];
+                } else if (detailsElement.classList.contains("fn__none")) {
+                    ids = this.selectIds;
+                } else {
+                    ids = [detailsElement.getAttribute("data-id")];
                 }
-            }).element);
-        }
-        emitOpenMenu({
-            type: "open-menu-inbox",
-            detail: {
-                ids,
-                element: itemElement || detailsElement,
+                if (ids.length > 0) {
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        label: window.siyuan.languages.move,
+                        icon: "iconMove",
+                        click: () => {
+                            this.move(ids);
+                        }
+                    }).element);
+                    let protyle: IProtyle;
+                    /// #if MOBILE
+                    protyle = window.siyuan.mobile.editor?.protyle;
+                    /// #else
+                    const tab = getActiveTab(false);
+                    if (tab?.model instanceof Editor) {
+                        protyle = tab.model.editor?.protyle;
+                    }
+                    /// #endif
+                    if (protyle?.block.rootID && !protyle.disabled && !window.siyuan.config.readonly && !window.siyuan.isPublish) {
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            label: window.siyuan.languages.insertToCurrentDoc,
+                            icon: "iconAdd",
+                            click: () => {
+                                void this.insertToCurrentDoc(ids, protyle.block.rootID);
+                            }
+                        }).element);
+                    }
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        label: window.siyuan.languages.remove,
+                        icon: "iconTrashcan",
+                        click: () => {
+                            let removeTitle = "";
+                            ids.forEach((id, index) => {
+                                removeTitle += '<code class="fn__code">' + escapeHtml(this.data[id].shorthandTitle) + "</code>" + (index === ids.length - 1 ? "" : ", ");
+                            });
+                            confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} ${removeTitle}?`, () => {
+                                if (itemElement) {
+                                    this.remove([itemElement.dataset.id]);
+                                } else if (detailsElement.classList.contains("fn__none")) {
+                                    this.remove();
+                                } else {
+                                    this.remove([detailsElement.getAttribute("data-id")]);
+                                }
+                            }, undefined, true);
+                        }
+                    }).element);
+                }
+                emitOpenMenu({
+                    type: "open-menu-inbox",
+                    detail: {
+                        ids,
+                        element: itemElement || detailsElement,
+                    },
+                    separatorPosition: "top",
+                });
+                const button = (event.target as Element).closest("[data-type='more']");
+                const rect = (itemElement || button)?.getBoundingClientRect();
+                session.show(() => window.siyuan.menus.menu.popup({
+                    x: !itemElement && rect ? rect.left : event.clientX,
+                    y: rect ? rect.bottom : event.clientY + 16,
+                    h: rect ? rect.height : 0,
+                }));
+
             },
-            separatorPosition: "top",
-        });
-        const button = (event.target as Element).closest("[data-type='more']");
-        const rect = (itemElement || button)?.getBoundingClientRect();
-        window.siyuan.menus.menu.popup({
-            x: !itemElement && rect ? rect.left : event.clientX,
-            y: rect ? rect.bottom : event.clientY + 16,
-            h: rect ? rect.height : 0,
         });
     }
 

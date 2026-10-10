@@ -1,3 +1,4 @@
+import {toggleMenu} from "../menus/menuToggle";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -522,46 +523,60 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
         });
     };
     const openEntryMenu = (entry: TemplateEntry, anchor: HTMLElement, event?: MouseEvent) => {
-        void run(async () => {
-            // 菜单固定操作对象和读取版本，打开菜单不切换编辑器或丢弃未保存的源码。
-            let target: TemplateActionTarget;
-            if (entry.path === editing?.path) {
-                target = {entry, revision: editingRevision, sourceDocID};
-            } else {
-                const response = await api({action: "read", path: entry.path});
-                if (!response?.data || Array.isArray(response.data) || !("content" in response.data) || closed) {
-                    return;
-                }
-                target = {entry, revision: response.data.revision, sourceDocID: response.data.sourceDocID};
-            }
-            const menu = window.siyuan.menus.menu;
-            menu.remove();
-            menu.element.setAttribute("data-name", "template-manager");
-            const add = (action: string, label: string, icon: string) => {
-                const state = getTemplateActionState(action, entry, dirty(), false);
-                const item = new MenuItem({
-                    id: action,
-                    label,
-                    icon,
-                    disabled: state.disabled,
-                    click: () => actOnEntry(action, target),
-                }).element;
-                if (state.packageMove) {
-                    item.title = lang.templatePackageMoveTip;
-                }
-                menu.append(item);
-            };
-            if (target.sourceDocID && !entry.isDir) {
-                add("source", lang.templateOpenSourceDoc, "iconFile");
-            }
-            add("rename", lang.rename, "iconEdit");
-            add("move", lang.move, "iconMove");
-            if (canOpenFolder) {
-                add("open", lang.showInFolder, "iconFolder");
-            }
-            add("remove", lang.remove, "iconTrashcan");
-            const rect = anchor.getBoundingClientRect();
-            menu.popup(event ? {x: event.clientX, y: event.clientY} : {x: rect.left, y: rect.bottom, h: rect.height});
+        toggleMenu({
+            target: anchor,
+            toggle: !event,
+            build: (_menu, session) => {
+                void run(async () => {
+                    if (!session.isCurrent()) {
+                        return;
+                    }
+
+                    // 菜单固定操作对象和读取版本，打开菜单不切换编辑器或丢弃未保存的源码。
+                    let target: TemplateActionTarget;
+                    if (entry.path === editing?.path) {
+                        target = {entry, revision: editingRevision, sourceDocID};
+                    } else {
+                        const response = await api({action: "read", path: entry.path});
+                        if (!session.isCurrent()) {
+                            return;
+                        }
+                        if (!response?.data || Array.isArray(response.data) || !("content" in response.data) || closed) {
+                            return;
+                        }
+                        target = {entry, revision: response.data.revision, sourceDocID: response.data.sourceDocID};
+                    }
+                    const menu = window.siyuan.menus.menu;
+                    menu.remove();
+                    menu.element.setAttribute("data-name", "template-manager");
+                    const add = (action: string, label: string, icon: string) => {
+                        const state = getTemplateActionState(action, entry, dirty(), false);
+                        const item = new MenuItem({
+                            id: action,
+                            label,
+                            icon,
+                            disabled: state.disabled,
+                            click: () => actOnEntry(action, target),
+                        }).element;
+                        if (state.packageMove) {
+                            item.title = lang.templatePackageMoveTip;
+                        }
+                        menu.append(item);
+                    };
+                    if (target.sourceDocID && !entry.isDir) {
+                        add("source", lang.templateOpenSourceDoc, "iconFile");
+                    }
+                    add("rename", lang.rename, "iconEdit");
+                    add("move", lang.move, "iconMove");
+                    if (canOpenFolder) {
+                        add("open", lang.showInFolder, "iconFolder");
+                    }
+                    add("remove", lang.remove, "iconTrashcan");
+                    const rect = anchor.getBoundingClientRect();
+                    session.show(() => menu.popup(event ? {x: event.clientX, y: event.clientY} : {x: rect.left, y: rect.bottom, h: rect.height}));
+                });
+
+            },
         });
     };
     editorMore.addEventListener("click", () => {

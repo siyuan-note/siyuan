@@ -4,6 +4,7 @@ import {runInNewContext} from "node:vm";
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import * as ts from "typescript";
+const {loadMenuToggle} = require("../../tests/menu-toggle-fixture.cjs");
 
 const source = ts.transpileModule(readFileSync(join(__dirname, "Wnd.ts"), "utf8"), {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
@@ -36,9 +37,11 @@ const fixture = () => {
     });
     menuElement.classes.add("fn__none");
     const menu = {
+        data: undefined as Element,
         element: menuElement,
         removeCB: undefined as (() => void) | undefined,
         remove: () => {
+            menu.data = undefined;
             menu.removeCB?.();
             menu.removeCB = undefined;
             items.length = 0;
@@ -56,9 +59,11 @@ const fixture = () => {
         classList: {contains: () => active},
     });
     const headers = [header("first", false), header("second", true)];
-    const anchor = {getBoundingClientRect: () => ({left: 10, top: 20, width: 30, height: 40})};
+    const anchor = {closest: (): null => null, setAttribute: () => {},
+        getBoundingClientRect: () => ({left: 10, top: 20, width: 30, height: 40})};
     const exports: any = {};
     const dependencies: Record<string, object> = {
+        "../menus/menuToggle": loadMenuToggle({window: {siyuan: {menus: {menu}}}}),
         "../constants": {Constants: {MENU_TAB_LIST: "tab-list"}},
         "../util/escape": {escapeHtml: (value: string) => value},
         "../emoji/fileTreeIcon": {getFileTreeIconHTML: () => ""},

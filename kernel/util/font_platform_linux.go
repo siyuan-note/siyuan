@@ -34,7 +34,9 @@ func loadPlatformFonts() []*Font {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	output, err := exec.CommandContext(ctx, path, "-f", fontconfigListFormat).Output()
+	cmd := exec.CommandContext(ctx, path, "-f", fontconfigListFormat)
+	cmd.WaitDelay = 2 * time.Second
+	output, err := cmd.Output()
 	if nil != err {
 		if ctx.Err() == context.DeadlineExceeded {
 			logging.LogWarnf("load Fontconfig fonts timed out")

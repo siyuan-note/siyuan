@@ -650,6 +650,7 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	}
 
 	r, _ := regexp.Compile(keyword)
+	tagReplacement := strings.TrimSuffix(strings.TrimPrefix(replacement, "#"), "#")
 	escapedKey := util.EscapeHTML(keyword)
 	escapedKey = strings.ReplaceAll(escapedKey, "&#34;", "&quot;")
 	escapedKey = strings.ReplaceAll(escapedKey, "&#39;", "'")
@@ -741,9 +742,7 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 					renameRoots = append(renameRoots, node)
 				}
 
-				if newTags, matched := replaceSearchText(tags, method, keyword, strings.TrimSuffix(strings.TrimPrefix(replacement, "#"), "#"), r); matched {
-					replacement = strings.TrimPrefix(replacement, "#")
-					replacement = strings.TrimSuffix(replacement, "#")
+				if newTags, matched := replaceSearchText(tags, method, keyword, tagReplacement, r); matched {
 					tags = newTags
 					tags = strings.ReplaceAll(tags, editor.Zwsp, "")
 					node.SetIALAttr("tags", tags)
@@ -757,9 +756,7 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 				}
 
 				if nil != r && r.MatchString(tags) {
-					replacement = strings.TrimPrefix(replacement, "#")
-					replacement = strings.TrimSuffix(replacement, "#")
-					tags = r.ReplaceAllString(tags, replacement)
+					tags = r.ReplaceAllString(tags, tagReplacement)
 					tags = strings.ReplaceAll(tags, editor.Zwsp, "")
 					node.SetIALAttr("tags", tags)
 					ReloadTag()

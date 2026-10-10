@@ -11,6 +11,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -26,6 +27,9 @@ func TestFindReplaceCaseSensitivityAcrossTypes(t *testing.T) {
 	}{
 		{"literal-insensitive", "foo", "bar$1", 0, false, true, true},
 		{"query-insensitive", "foo", "bar$1", 1, false, true, true},
+		{"literal-tag-replacement", "foo", "#bar#", 0, false, true, true},
+		{"query-tag-replacement", "foo", "#bar#", 1, false, true, true},
+		{"regex-tag-replacement", "(?i)foo", "#bar#", 3, false, true, true},
 		{"literal-sensitive", "foo", "bar", 0, true, false, true},
 		{"regex-sensitive", "foo", "bar", 3, false, false, true},
 		{"regex-folded-capture", "(?i)(foo)", "${1}bar", 3, true, true, true},
@@ -107,8 +111,18 @@ func TestFindReplaceCaseSensitivityAcrossTypes(t *testing.T) {
 				return
 			}
 			expected := tc.replacement
-			if tc.method == 3 {
+			if tc.name == "regex-folded-capture" {
 				expected = "FOObar"
+			}
+			if tc.replacement == "#bar#" {
+				after = render.NewJSONRenderer(restored, engine.RenderOptions, engine.ParseOptions).Render()
+				if restored.Root.IALAttr("tags") != "bar" || restored.Root.IALAttr("title") != "#bar#" {
+					t.Fatalf("tag replacement changed document replacement: tags %q, title %q", restored.Root.IALAttr("tags"), restored.Root.IALAttr("title"))
+				}
+				if strings.Count(string(after), "#bar#") < 10 {
+					t.Fatalf("tag delimiters lost in following body replacements: %s", after)
+				}
+				return
 			}
 			if got := strings.Count(string(after), expected); got < want {
 				t.Fatalf("not all fields replaced literally: got %d matches, want at least %d\n%s", got, want, after)

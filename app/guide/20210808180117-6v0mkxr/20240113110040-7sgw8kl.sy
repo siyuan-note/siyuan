@@ -7,7 +7,7 @@
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
 		"type": "doc",
-		"updated": "20261004052629"
+		"updated": "20261010114821"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110114-xav9o1n",
-				"updated": "20260921210136"
+				"updated": "20261010114821"
 			},
 			"Children": [
 				{
@@ -95,6 +95,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261010114821-igdube1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010114821-igdube1",
+				"updated": "20261010114821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When using desktop layout on Android, the system Back button first closes the topmost dialog, menu, editing overlay, image preview or floating drawer. Each press closes one layer and preserves the browsing state underneath. With no dismissible layer open, Back performs the original page navigation."
 				}
 			]
 		},

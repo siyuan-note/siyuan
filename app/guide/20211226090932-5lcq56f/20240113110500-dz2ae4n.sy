@@ -7,7 +7,7 @@
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
 		"type": "doc",
-		"updated": "20261004052629"
+		"updated": "20261010114821"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110513-8s7tp6d",
-				"updated": "20260921210136"
+				"updated": "20261010114821"
 			},
 			"Children": [
 				{
@@ -95,6 +95,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中調整功能順序。"
+				}
+			]
+		},
+		{
+			"ID": "20261010114821-z8mdm4l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010114821-z8mdm4l",
+				"updated": "20261010114821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android 上使用桌面佈局時，系統返回鍵會先關閉目前最上層的對話框、選單、編輯浮層、圖片預覽或浮動抽屜，每次只關閉一層並保留底層瀏覽狀態。沒有可關閉的浮層時，才執行原有的頁面返回行為。"
 				}
 			]
 		},

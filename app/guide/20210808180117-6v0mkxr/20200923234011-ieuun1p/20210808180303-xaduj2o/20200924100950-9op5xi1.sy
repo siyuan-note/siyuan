@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261010134815"
+		"updated": "20261010201951"
 	},
 	"Children": [
 		{
@@ -4274,7 +4274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261010134815"
+				"updated": "20261010201951"
 			},
 			"Children": [
 				{
@@ -13681,7 +13681,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-jeh8w1g",
-				"updated": "20261008221006"
+				"updated": "20261010201951"
 			},
 			"Children": [
 				{
@@ -13714,6 +13714,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20261010201951-9uwktyc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010201951-9uwktyc",
+				"updated": "20261010201951"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "At a table cell boundary, arrow keys move to the adjacent cell. If there is no cell in that direction, they move to the surrounding document content; at a document boundary, the cell remains focused."
 				}
 			]
 		},
@@ -14871,7 +14885,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-pfrny4c",
-				"updated": "20260906013806"
+				"updated": "20261010201951"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -14886,7 +14900,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-dh6bex8",
-				"updated": "20260906013806"
+				"updated": "20261010201951"
 			},
 			"Children": [
 				{
@@ -14914,6 +14928,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " to finish editing and move to the content. Clicking the content also ends title editing."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Up and Down move between surrounding blocks, the active tab title, and its content. At the start or end of a tab title, Left and Right keep the caret inside the title."
 				}
 			]
 		},

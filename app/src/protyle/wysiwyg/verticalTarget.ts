@@ -54,7 +54,8 @@ const findVisibleBoundaryBlock = (element: Element, direction: TVerticalDirectio
         const region = getHostVerticalRegion(element);
         // 非容器块属于一个不透明导航区域，不能根据其内部渲染结果改变外部导航目标。
         if (element.getAttribute("fold") === "1" || !isContainerBlock(element) ||
-            (direction === "down" && region?.title && isVerticalNavigationElementVisible(region.title))) {
+            (direction === "down" && region?.title &&
+                (region.setTitleEditing || isVerticalNavigationElementVisible(region.title)))) {
             return element;
         }
     }

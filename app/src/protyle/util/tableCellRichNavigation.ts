@@ -1,6 +1,19 @@
 import {buildTableGrid, getVerticalTableCell} from "./table";
 import {isCaretAtVerticalBoundary} from "../wysiwyg/verticalCaret";
 import {stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
+import {focusAdjacentVerticalRegion} from "../wysiwyg/verticalNavigation";
+import {getAdjacentVerticalBlock} from "../wysiwyg/verticalTarget";
+import {focusBlock} from "./selection";
+
+// 单元格边界之外沿所属文档导航，文档没有相邻区域时保留单元格编辑状态。
+export const leaveRichTableCell = (protyle: IProtyle, table: HTMLElement, key: string, goalX: number) => {
+    const direction = key === "ArrowLeft" || key === "ArrowUp" ? "up" : "down";
+    if (key === "ArrowUp" || key === "ArrowDown") {
+        return focusAdjacentVerticalRegion(protyle, table, direction, goalX) === "moved";
+    }
+    const target = getAdjacentVerticalBlock(table, direction);
+    return !!target && !!focusBlock(target, undefined, direction === "down");
+};
 
 export const isTableCellCaretAtBoundary = (element: HTMLElement, range: Range, key: string) => {
     if (!range.collapsed || !element.contains(range.startContainer)) {

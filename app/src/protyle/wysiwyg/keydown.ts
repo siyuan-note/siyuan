@@ -477,6 +477,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 !event.altKey && !event.shiftKey && isNotCtrl(event);
             if ((event.key.startsWith("Arrow") && !isPlainVerticalArrow) ||
                 event.key === "Home" || event.key === "End") {
+                if (calloutTitleElement.classList.contains("tab-item-title") && range.collapsed &&
+                    !event.altKey && !event.shiftKey && isNotCtrl(event)) {
+                    const offset = getSelectionOffset(calloutTitleElement, nodeElement, range);
+                    if (event.key === "ArrowLeft" && offset.start === 0 ||
+                        event.key === "ArrowRight" && offset.end === calloutTitleElement.textContent.length) {
+                        event.preventDefault();
+                    }
+                }
                 event.stopPropagation();
                 return;
             }

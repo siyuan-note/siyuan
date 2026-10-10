@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261010134815"
+		"updated": "20261010201951"
 	},
 	"Children": [
 		{
@@ -4272,7 +4272,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20261010134815"
+				"updated": "20261010201951"
 			},
 			"Children": [
 				{
@@ -13751,7 +13751,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-xpgtzbg",
-				"updated": "20261008221006"
+				"updated": "20261010201951"
 			},
 			"Children": [
 				{
@@ -13784,6 +13784,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20261010201951-6o053ma",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010201951-6o053ma",
+				"updated": "20261010201951"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在表格单元格的边界按方向键可进入相邻单元格；该方向没有单元格时，焦点移到表格外的相邻文档内容。到达文档边界时，焦点保持在单元格内。"
 				}
 			]
 		},
@@ -14941,7 +14955,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-avhukx7",
-				"updated": "20260906013806"
+				"updated": "20261010201951"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -14956,7 +14970,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-w4xwhs9",
-				"updated": "20260906013806"
+				"updated": "20261010201951"
 			},
 			"Children": [
 				{
@@ -14984,6 +14998,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " 结束编辑并进入正文；点击正文也可结束编辑。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "上下方向键在相邻块、当前页签标题和正文之间移动焦点；在页签标题的开头或末尾按左右方向键，光标保持在标题内。"
 				}
 			]
 		},

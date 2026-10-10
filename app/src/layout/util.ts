@@ -29,6 +29,7 @@ import {isEncryptedBox, parseUriInfo} from "../util/pathName";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
 import {newDatabaseRowModel} from "../editor/databaseRow";
+import {showDatabaseRowPreview} from "../protyle/render/av/openDatabaseRow";
 import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
@@ -54,7 +55,8 @@ const isBuiltInCustomModel = (type: string) => {
 
 export const isSensitiveTab = (tab: Tab) => {
     if (tab.model instanceof Editor) {
-        return isEncryptedBox(tab.model.editor.protyle.notebookId);
+        return isEncryptedBox(tab.model.editor.protyle.notebookId) ||
+            isEncryptedBox(tab.model.databaseRow?.notebookID);
     }
     if (tab.model instanceof Search) {
         return isSensitiveSearchConfig(tab.model.config);
@@ -821,6 +823,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
         json.action = (layout.editor.protyle.block.showAll && layout.editor.protyle.block.id !== layout.editor.protyle.block.rootID) ? Constants.CB_GET_ALL : Constants.CB_GET_SCROLL;
         json.databaseRowId = layout.editor.protyle.element.dataset.databaseRowId;
+        json.databaseRow = layout.databaseRow;
         json.instance = "Editor";
         if (isWindow()) {
             const scrollAttr = saveScroll(layout.editor.protyle, true);
@@ -1037,7 +1040,9 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             scrollAttr: json.scrollAttr,
             action,
             afterInitProtyle(editor) {
-                if (json.databaseRowId) {
+                if (json.databaseRow?.navigation) {
+                    showDatabaseRowPreview(editorModel, json.databaseRow, editor.protyle);
+                } else if (json.databaseRowId) {
                     editor.protyle.databaseAttributePanel?.expand();
                     editor.protyle.contentElement.scrollTop = 0;
                 }
@@ -1046,6 +1051,7 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
         if (json.databaseRowId) {
             editorModel.editor.protyle.element.dataset.databaseRowId = json.databaseRowId;
         }
+        editorModel.databaseRow = json.databaseRow;
         model = editorModel;
     }
     return model;

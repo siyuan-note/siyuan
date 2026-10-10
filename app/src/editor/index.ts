@@ -9,12 +9,14 @@ import {countBlockWord} from "../layout/status";
 import type {App} from "../index";
 import {fetchPost} from "../util/fetch";
 import {Backlink} from "../layout/dock/Backlink";
+import type {IDatabaseRowOpenData} from "../protyle/render/av/openDatabaseRow";
 
 export class Editor extends Model {
     public element: HTMLElement;
     public editor: Protyle;
     public headElement: HTMLElement;
     public backlink?: Backlink;
+    public databaseRow?: IDatabaseRowOpenData;
     private backlinkElement?: HTMLElement;
     private backlinkIntersectionObserver?: IntersectionObserver;
     private backlinkMutationObserver?: MutationObserver;

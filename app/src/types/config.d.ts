@@ -2500,6 +2500,7 @@ declare namespace Config {
          * 数据库行预览块 ID
          */
         databaseRowId?: string;
+        databaseRow?: import("../protyle/render/av/openDatabaseRow").IDatabaseRowOpenData;
         /**
          * Object name
          */

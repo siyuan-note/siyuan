@@ -597,7 +597,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     }
 };
 
-export const newTab = (options: IOpenFileOptions) => {
+export const newTab = (options: IOpenFileOptions, afterInitProtyle?: ConstructorParameters<typeof Editor>[0]["afterInitProtyle"]) => {
     let tab: Tab;
     if (options.assetPath) {
         const suffix = getAssetExtension(options.assetPath).toLowerCase();
@@ -649,7 +649,9 @@ export const newTab = (options: IOpenFileOptions) => {
                         data: options.custom.data
                     }));
                 }
-                setPanelFocus(tab.panelElement.parentElement.parentElement);
+                if (!options.keepCursor) {
+                    setPanelFocus(tab.panelElement.parentElement.parentElement);
+                }
             }
         });
     } else if (options.searchData) {
@@ -678,8 +680,10 @@ export const newTab = (options: IOpenFileOptions) => {
                         blockId: options.id,
                         rootId: options.rootID,
                         notebookId: options.notebookId,
-                        action: [Constants.CB_GET_ALL, isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS],
+                        action: options.keepCursor ? [Constants.CB_GET_ALL] :
+                            [Constants.CB_GET_ALL, isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS],
                         scrollPosition: options.scrollPosition,
+                        afterInitProtyle,
                     });
                 } else {
                     editor = new Editor({
@@ -691,6 +695,7 @@ export const newTab = (options: IOpenFileOptions) => {
                         mode: options.mode,
                         action: options.action,
                         scrollPosition: options.scrollPosition,
+                        afterInitProtyle,
                     });
                 }
                 tab.addModel(editor);

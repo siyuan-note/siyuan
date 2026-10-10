@@ -755,6 +755,7 @@ interface ILayoutJSON extends ILayoutOptions {
     icon?: string
     rootId?: string
     databaseRowId?: string
+    databaseRow?: import("../protyle/render/av/openDatabaseRow").IDatabaseRowOpenData
     active?: boolean
     pin?: boolean
     isPreview?: boolean

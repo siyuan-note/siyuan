@@ -897,12 +897,13 @@ export const isSensitiveLayoutData = (data?: {
     type?: string,
     notebookId?: string,
     config?: Config.IUILayoutTabSearchConfig,
+    databaseRow?: {notebookID: string},
 }) => {
     if (!data) {
         return false;
     }
     if (data.instance === "Editor") {
-        return isEncryptedBox(data.notebookId);
+        return isEncryptedBox(data.notebookId) || isEncryptedBox(data.databaseRow?.notebookID);
     }
     if (data.instance === "Search") {
         return isSensitiveSearchConfig(data.config);

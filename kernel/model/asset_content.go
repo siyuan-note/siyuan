@@ -424,6 +424,9 @@ func (searcher *AssetsSearcher) fullIndex(writeBatch func([]*sql.AssetContent)) 
 	if !gulu.File.IsDir(assetsDir) {
 		return
 	}
+	started := time.Now()
+	scanned, parsed := 0, 0
+	logging.LogInfof("start asset content full indexing")
 
 	const maxBatchCount, maxBatchBytes = 128, 4 * 1024 * 1024
 	var batch []*sql.AssetContent
@@ -435,7 +438,7 @@ func (searcher *AssetsSearcher) fullIndex(writeBatch func([]*sql.AssetContent)) 
 		writeBatch(batch)
 		batch, batchBytes = nil, 0
 	}
-	filelock.Walk(assetsDir, func(absPath string, d fs.DirEntry, err error) error {
+	walkErr := filelock.Walk(assetsDir, func(absPath string, d fs.DirEntry, err error) error {
 		if err != nil {
 			logging.LogErrorf("walk dir [%s] failed: %s", absPath, err)
 			return err
@@ -444,6 +447,7 @@ func (searcher *AssetsSearcher) fullIndex(writeBatch func([]*sql.AssetContent)) 
 		if d.IsDir() {
 			return nil
 		}
+		scanned++
 
 		// 加密笔记本的 asset 是密文，跳过全量内容索引（避免密文污染搜索索引、泄漏文件名集合）
 		if IsEncryptedAssetPath(absPath) {
@@ -456,7 +460,7 @@ func (searcher *AssetsSearcher) fullIndex(writeBatch func([]*sql.AssetContent)) 
 			return nil
 		}
 
-		logging.LogInfof("parsing asset content [%s]", absPath)
+		logging.LogDebugf("parsing asset content [%s]", absPath)
 
 		result := parser.Parse(absPath)
 		if nil == result {
@@ -472,6 +476,7 @@ func (searcher *AssetsSearcher) fullIndex(writeBatch func([]*sql.AssetContent)) 
 		result.Path = "assets" + filepath.ToSlash(strings.TrimPrefix(absPath, assetsDir))
 		result.Size = info.Size()
 		result.Updated = info.ModTime().Unix()
+		parsed++
 		if batchBytes+len(result.Content) > maxBatchBytes {
 			flush()
 		}
@@ -491,6 +496,8 @@ func (searcher *AssetsSearcher) fullIndex(writeBatch func([]*sql.AssetContent)) 
 		return nil
 	})
 	flush()
+	logging.LogInfof("asset content full indexing finished: files=%d, parsed=%d, skipped=%d, elapsed=%s, error=%v",
+		scanned, parsed, scanned-parsed, time.Since(started), walkErr)
 }
 
 func NewAssetsSearcher() *AssetsSearcher {

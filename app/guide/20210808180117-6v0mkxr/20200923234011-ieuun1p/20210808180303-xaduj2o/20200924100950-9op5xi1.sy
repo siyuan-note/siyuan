@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261010201951"
+		"updated": "20261010202520"
 	},
 	"Children": [
 		{
@@ -4274,7 +4274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261010201951"
+				"updated": "20261010202520"
 			},
 			"Children": [
 				{
@@ -14885,7 +14885,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-pfrny4c",
-				"updated": "20261010201951"
+				"updated": "20261010202520"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -14900,7 +14900,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-dh6bex8",
-				"updated": "20261010201951"
+				"updated": "20261010202520"
 			},
 			"Children": [
 				{
@@ -14932,6 +14932,10 @@
 				{
 					"Type": "NodeText",
 					"Data": " Up and Down move between surrounding blocks, the active tab title, and its content. At the start or end of a tab title, Left and Right keep the caret inside the title."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Press Esc while editing a tab title to finish editing and keep the current text."
 				}
 			]
 		},

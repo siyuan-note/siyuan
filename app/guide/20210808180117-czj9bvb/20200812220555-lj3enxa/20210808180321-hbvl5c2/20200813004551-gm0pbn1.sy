@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261010201951"
+		"updated": "20261010202520"
 	},
 	"Children": [
 		{
@@ -4272,7 +4272,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20261010201951"
+				"updated": "20261010202520"
 			},
 			"Children": [
 				{
@@ -14955,7 +14955,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-avhukx7",
-				"updated": "20261010201951"
+				"updated": "20261010202520"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -14970,7 +14970,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-w4xwhs9",
-				"updated": "20261010201951"
+				"updated": "20261010202520"
 			},
 			"Children": [
 				{
@@ -15002,6 +15002,10 @@
 				{
 					"Type": "NodeText",
 					"Data": "上下方向键在相邻块、当前页签标题和正文之间移动焦点；在页签标题的开头或末尾按左右方向键，光标保持在标题内。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "编辑页签标题时，按 Esc 结束编辑并保留当前文字。"
 				}
 			]
 		},

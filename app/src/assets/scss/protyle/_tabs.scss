@@ -22,6 +22,14 @@
     &.protyle-wysiwyg--hl::after {
       border-radius: inherit;
     }
+
+    &.protyle-wysiwyg--select-mode {
+      border-color: var(--b3-theme-primary-lighter);
+
+      &::after {
+        box-shadow: none;
+      }
+    }
   }
 
   .tabs-header {

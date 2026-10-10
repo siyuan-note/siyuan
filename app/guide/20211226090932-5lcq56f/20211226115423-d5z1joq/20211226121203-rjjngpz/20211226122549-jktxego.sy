@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261010201951"
+		"updated": "20261010202520"
 	},
 	"Children": [
 		{
@@ -4266,7 +4266,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20261010201951"
+				"updated": "20261010202520"
 			},
 			"Children": [
 				{
@@ -14873,7 +14873,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-degzfbw",
-				"updated": "20261010201951"
+				"updated": "20261010202520"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -14888,7 +14888,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-z6l8pda",
-				"updated": "20261010201951"
+				"updated": "20261010202520"
 			},
 			"Children": [
 				{
@@ -14920,6 +14920,10 @@
 				{
 					"Type": "NodeText",
 					"Data": "上下方向鍵在相鄰區塊、目前頁籤標題和內文之間移動焦點；在頁籤標題的開頭或末尾按左右方向鍵，游標維持在標題內。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "編輯頁籤標題時，按 Esc 結束編輯並保留目前文字。"
 				}
 			]
 		},

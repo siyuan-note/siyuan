@@ -14,6 +14,18 @@ const sources = () => {
         return ts.transpileModule(statements.map(statement => statement.getText(source)).join("\n")
             .replace(/^export /gm, ""), {compilerOptions: {target: ts.ScriptTarget.ES2021}}).outputText;
     };
+    const keydownSource = ts.createSourceFile("keydown.ts", readFileSync(path.join(__dirname,
+        "../src/protyle/wysiwyg/keydown.ts"), "utf8"), ts.ScriptTarget.Latest, true);
+    let titleKeydown;
+    const visit = node => {
+        if (ts.isIfStatement(node) && node.expression.getText(keydownSource) ===
+            "calloutTitleElement && !event.isComposing && !blockSelectionModeElement") {
+            titleKeydown = node.getText(keydownSource);
+        }
+        ts.forEachChild(node, visit);
+    };
+    visit(keydownSource);
+    assert.ok(titleKeydown);
     return [
         compile("protyle/render/tabsState.ts"),
         compile("protyle/render/tabsDrag.ts"),
@@ -29,6 +41,16 @@ const sources = () => {
         compile("protyle/wysiwyg/transaction.ts", ["onTransaction"]),
         compile("protyle/wysiwyg/tabs.ts", ["boundFocusedTitles", "canEdit", "changeTabs", "renameTab", "openTabsMenu", "initEditorTabs"]),
         compile("protyle/util/selection.ts", ["selectAll"]),
+        ts.transpileModule(`const bindTitleKeydown = (protyle, calloutTitleElement) => {
+            calloutTitleElement.addEventListener("keydown", event => {
+                const range = getSelection().getRangeAt(0);
+                const nodeElement = calloutTitleElement.closest(".tab-item");
+                const blockSelectionModeElement = undefined;
+                const matchHotKey = () => false;
+                ${titleKeydown}
+                throw new Error("Title key fell through to block selection");
+            });
+        };`, {compilerOptions: {target: ts.ScriptTarget.ES2021}}).outputText,
     ].join("\n");
 };
 
@@ -59,10 +81,18 @@ const cases = async (source) => {
         "getSelectAllBlockAction", "countBlockWord", "getTaskStatusItems", "replayDeps",
         "const {invalidateTrackedRangesByOperations, invalidateViewFoldRequests, handleViewFoldSourceOperation, " +
         "updateBlock, syncTrackedRanges, applyViewFoldStates, queueHeadingNumberRefresh, refreshHeadingFoldIndicators} = replayDeps;" +
-        source + "; return {initEditorTabs, openTabsMenu, changeTabs, selectAll, destroyTabsRender, onTransaction};")(
+        source + "; return {initEditorTabs, openTabsMenu, changeTabs, selectAll, destroyTabsRender, onTransaction, bindTitleKeydown};")(
         {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing"}, Menu, () => [],
         (_protyle, forward, undo) => { transactions.push({forward, undo}); },
-        options => { navigations.push(options.id); }, () => {}, () => {}, range => {
+        options => { navigations.push(options.id); }, () => {}, item => {
+            const content = item.querySelector('.tab-item-content [contenteditable="true"]');
+            content.focus();
+            const range = document.createRange();
+            range.selectNodeContents(content);
+            range.collapse(true);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+        }, range => {
             window.getSelection().removeAllRanges();
             window.getSelection().addRange(range);
         }, (_protyle, task) => task(), () => {}, () => {}, () => {}, () => {},
@@ -96,6 +126,27 @@ const cases = async (source) => {
             tabs.setAttribute("tabs-active-id", b.dataset.nodeId);
             const fullGroup = tabs.outerHTML;
             api.initEditorTabs(protyle);
+            if (!readonly) {
+                const title = b.querySelector(".tab-item-title");
+                api.bindTitleKeydown(protyle, title);
+                api.openTabsMenu(protyle, tabs, b, tabs);
+                menu.find(item => item.label === "Rename").click();
+                title.textContent = "Retained title";
+                title.focus();
+                const titleRange = document.createRange();
+                titleRange.selectNodeContents(title);
+                titleRange.collapse(false);
+                getSelection().removeAllRanges();
+                getSelection().addRange(titleRange);
+                const escape = new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true});
+                title.dispatchEvent(escape);
+                await new Promise(resolve => setTimeout(resolve, 0));
+                check.equal(escape.defaultPrevented, true);
+                check.equal(title.textContent, "Retained title");
+                check.equal(b.dataset.tabsEditing, "false");
+                check.ok(b.querySelector(".tab-item-content").contains(getSelection().anchorNode));
+                check.equal(root.querySelector(".protyle-wysiwyg--select-mode"), null);
+            }
             const replayGroup = tabs.outerHTML;
             api.openTabsMenu(protyle, tabs, a, tabs);
             menu.find(item => item.label === "Zoom in").click();

@@ -5,33 +5,40 @@
 package av
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"regexp"
 
 	"github.com/88250/lute/ast"
 )
 
-// MapSettings 只保存本机地图服务引用和位置字段绑定，不保存服务凭据或浏览状态。
+// MapSettings 只保存位置字段绑定，底图固定为 OpenFreeMap。
 type MapSettings struct {
-	ServiceID      string `json:"serviceID"`
-	LocationKeyID  string `json:"locationKeyID"`
-	ShowRecordList bool   `json:"showRecordList"`
+	LocationKeyID string `json:"locationKeyID"`
 }
 
-var mapServiceIDPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$`)
-
-// Validate 允许缺失的服务和字段引用，保持跨设备、删除和撤销后的原始绑定。
-func (settings MapSettings) Validate() error {
-	if settings.ServiceID != "" && !mapServiceIDPattern.MatchString(settings.ServiceID) {
-		return fmt.Errorf("invalid map service ID")
+// UnmarshalJSON 拒绝额外设置，避免把不支持的地图结构静默保存为新结构。
+func (settings *MapSettings) UnmarshalJSON(data []byte) error {
+	type plainSettings MapSettings
+	var next plainSettings
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&next); err != nil {
+		return err
 	}
+	*settings = MapSettings(next)
+	return nil
+}
+
+// Validate 允许缺失的字段引用，保持跨设备、删除和撤销后的原始绑定。
+func (settings MapSettings) Validate() error {
 	if settings.LocationKeyID != "" && !ast.IsNodeIDPattern(settings.LocationKeyID) {
 		return fmt.Errorf("invalid map location field ID")
 	}
 	return nil
 }
 
-// LayoutMap 独立保存记录列表字段顺序和显隐设置，复用表格的筛选、排序及分页。
+// LayoutMap 复用表格的数据字段、筛选、排序及分页。
 type LayoutMap struct {
 	*LayoutTable
 	Settings MapSettings `json:"settings"`
@@ -49,7 +56,7 @@ func NewMapView() *View {
 	view := NewTableView()
 	view.Name = GetAttributeViewI18n("map")
 	view.LayoutType = LayoutTypeMap
-	view.Map = &LayoutMap{LayoutTable: view.Table, Settings: MapSettings{ShowRecordList: true}}
+	view.Map = &LayoutMap{LayoutTable: view.Table}
 	view.Table = nil
 	return view
 }

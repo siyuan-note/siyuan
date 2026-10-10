@@ -641,7 +641,6 @@ func toContractAVKey(value *av.Key) *apicontract.AVKey {
 		Relation:                 toContractAVRelation(value.Relation),
 		Rollup:                   toContractAVRollup(value.Rollup),
 		Date:                     toContractAVDate(value.Date),
-		Location:                 toContractAVLocation(value.Location),
 		Created:                  toContractAVCreated(value.Created),
 		Updated:                  toContractAVUpdated(value.Updated),
 	}
@@ -764,7 +763,6 @@ func toContractAVBaseInstanceField(value *av.BaseInstanceField) *apicontract.AVB
 		Relation:       toContractAVRelation(value.Relation),
 		Rollup:         toContractAVRollup(value.Rollup),
 		Date:           toContractAVDate(value.Date),
-		Location:       toContractAVLocation(value.Location),
 		Created:        toContractAVCreated(value.Created),
 		Updated:        toContractAVUpdated(value.Updated),
 	}
@@ -1360,7 +1358,7 @@ func toContractAVValueLocation(value *av.ValueLocation) *apicontract.AVValueLoca
 	}
 	return &apicontract.AVValueLocation{
 		Name: value.Name, Latitude: value.Latitude, Longitude: value.Longitude,
-		CoordinateSystem: value.CoordinateSystem, OriginalInput: value.OriginalInput,
+		OriginalInput: value.OriginalInput,
 	}
 }
 
@@ -1370,13 +1368,6 @@ func fromContractAVValueLocation(value *apicontract.AVValueLocation) *av.ValueLo
 	}
 	return &av.ValueLocation{
 		Name: value.Name, Latitude: value.Latitude, Longitude: value.Longitude,
-		CoordinateSystem: value.CoordinateSystem, OriginalInput: value.OriginalInput,
+		OriginalInput: value.OriginalInput,
 	}
-}
-
-func toContractAVLocation(value *av.Location) *apicontract.AVLocation {
-	if value == nil {
-		return nil
-	}
-	return &apicontract.AVLocation{DefaultCoordinateSystem: value.DefaultCoordinateSystem}
 }

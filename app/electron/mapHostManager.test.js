@@ -36,7 +36,7 @@ const createSession = () => {
 const setupRouter = (options = {}) => {
     const ses = createSession();
     const files = [];
-    const router = createMapSessionRouter({ses, origin, provider: "openfreemap", appDir: "/app", readFile: async file => {
+    const router = createMapSessionRouter({ses, origin, appDir: "/app", readFile: async file => {
         files.push(file); return Buffer.from("asset");
     }, ...options});
     return {ses, router, files};
@@ -120,23 +120,22 @@ test("same-provider redirects work without leaking redirect headers or provider 
     router.destroy();
 });
 
-test("new AMap CSP sources reject cross-host redirects before fetching the unauthorized destination", async () => {
-    for (const [from, to] of [
-        ["webapi.amap.com", "jsapi.amap.com"], ["webapi.amap.com", "jsapi-service.amap.com"],
-        ["jsapi.amap.com", "webapi.amap.com"], ["jsapi-service.amap.com", "restapi.amap.com"],
-        ["jsapi.amap.com", "jsapi-service.amap.com"], ["jsapi-service.amap.com", "jsapi.amap.com"],
-    ]) {
+test("OpenFreeMap redirects cannot reach other providers or unapproved hosts on any hop", async () => {
+    for (const to of ["jsapi.amap.com", "jsapi-service.amap.com", "webapi.amap.com", "restapi.amap.com",
+        "webrd01.is.autonavi.com", "map.qq.com", "api.map.baidu.com", "tiles.openfreemap.org.evil.invalid"]) {
         const reports = [], tracked = [];
-        const {ses, router} = setupRouter({provider: "amap", report: code => reports.push(code),
+        const {ses, router} = setupRouter({report: code => reports.push(code),
             trackFetch: (url, delta) => tracked.push([url, delta])});
         ses.fetch = async (url, options) => {
             ses.fetches.push({url, options});
-            return new Response(null, {status: 302, headers: {Location: "https://" + to + "/private?key=secret"}});
+            return new Response(null, {status: 302, headers: {
+                Location: url.endsWith("/start") ? "/next" : "https://" + to + "/private?key=secret",
+            }});
         };
-        const initialURL = "https://" + from + "/start";
+        const initialURL = "https://tiles.openfreemap.org/start";
         const response = await ses.protocols.https(new Request(initialURL));
-        assert.equal(response.status, 403, from + " -> " + to);
-        assert.deepEqual(ses.fetches.map(fetch => fetch.url), [initialURL]);
+        assert.equal(response.status, 403, to);
+        assert.deepEqual(ses.fetches.map(fetch => fetch.url), [initialURL, "https://tiles.openfreemap.org/next"]);
         assert.deepEqual(reports, ["providerRequestDenied"]);
         assert.equal(response.headers.get("location"), null);
         assert.equal(tracked.reduce((total, entry) => total + entry[1], 0), 0);
@@ -144,50 +143,17 @@ test("new AMap CSP sources reject cross-host redirects before fetching the unaut
     }
 });
 
-test("new AMap sources permit same-host path redirects with unchanged anonymous forwarding", async () => {
-    for (const hostname of ["jsapi.amap.com", "jsapi-service.amap.com"]) {
-        const reports = [];
-        const {ses, router} = setupRouter({provider: "amap", report: code => reports.push(code)});
-        ses.fetch = async (url, options) => {
-            ses.fetches.push({url, options});
-            return url.endsWith("/start") ? new Response(null, {status: 307, headers: {Location: "/end"}}) :
-                new Response("provider-body", {headers: {"Content-Type": "application/javascript", "Set-Cookie": "secret"}});
-        };
-        const response = await ses.protocols.https(new Request("https://" + hostname + "/start", {
-            headers: {Cookie: "secret", Authorization: "secret"},
-        }));
-        assert.equal(await response.text(), "provider-body");
-        assert.deepEqual(ses.fetches.map(fetch => fetch.url), ["https://" + hostname + "/start", "https://" + hostname + "/end"]);
-        for (const {options} of ses.fetches) {
-            assert.equal(options.credentials, "omit");
-            assert.equal(options.redirect, "manual");
-            assert.deepEqual(options.headers, {Referer: origin + "/"});
-        }
-        assert.equal(response.headers.get("set-cookie"), null);
-        assert.deepEqual(reports, []);
-        router.destroy();
-    }
-});
-
-test("existing AMap cross-host redirects retain behavior but cannot enter a new source on a later hop", async () => {
-    for (const enterNewSource of [false, true]) {
-        const reports = [];
-        const {ses, router} = setupRouter({provider: "amap", report: code => reports.push(code)});
-        ses.fetch = async (url, options) => {
-            ses.fetches.push({url, options});
-            if (url === "https://webapi.amap.com/start") {
-                return new Response(null, {status: 302, headers: {Location: "https://restapi.amap.com/end"}});
-            }
-            return enterNewSource ? new Response(null, {status: 302, headers: {Location: "https://jsapi.amap.com/private"}}) :
-                new Response("existing-provider-body");
-        };
-        const response = await ses.protocols.https(new Request("https://webapi.amap.com/start"));
-        assert.equal(response.status, enterNewSource ? 403 : 200);
-        assert.deepEqual(ses.fetches.map(fetch => fetch.url), ["https://webapi.amap.com/start", "https://restapi.amap.com/end"]);
-        assert.deepEqual(reports, enterNewSource ? ["providerRequestDenied"] : []);
-        await response.body?.cancel();
-        router.destroy();
-    }
+test("OpenFreeMap redirect loops remain bounded and release anonymous request tracking", async () => {
+    const tracked = [];
+    const {ses, router} = setupRouter({trackFetch: (url, delta) => tracked.push([url, delta])});
+    ses.fetch = async (url, options) => {
+        ses.fetches.push({url, options});
+        return new Response(null, {status: 302, headers: {Location: "/loop"}});
+    };
+    assert.equal((await ses.protocols.https(new Request("https://tiles.openfreemap.org/loop"))).status, 403);
+    assert.equal(ses.fetches.length, 6);
+    assert.equal(tracked.reduce((total, entry) => total + entry[1], 0), 0);
+    router.destroy();
 });
 
 test("destroy aborts in-flight provider requests, clears session state and leaves orphan traffic denied", async () => {
@@ -288,9 +254,9 @@ const setup = (initialFault) => {
         setInitialized(value) { initialized = value; }};
 };
 
-test("WCV has a unique memory session, secure preferences, no external-open handler and no credentials before bootstrap", () => {
+test("WCV keeps an isolated memory session, secure preferences, denied external navigation and credential-free bootstrap", () => {
     const s = setup();
-    assert.deepEqual(s.create({provider: "amap", credentials: {apiKey: "test-key", securityCode: "test-code"}}), envelope);
+    assert.deepEqual(s.create({credentials: {apiKey: "test-key", securityCode: "test-code"}}), envelope);
     const prefs = s.views[0].options.webPreferences;
     assert.equal(prefs.sandbox, true); assert.equal(prefs.webSecurity, true); assert.equal(prefs.contextIsolation, true);
     for (const key of ["nodeIntegration", "nodeIntegrationInSubFrames", "nodeIntegrationInWorker", "webviewTag", "allowRunningInsecureContent"]) {
@@ -307,7 +273,7 @@ test("WCV has a unique memory session, secure preferences, no external-open hand
     s.reply({type: "ready"});
     assert.equal(s.owner.sent.length, 0);
     s.reply({type: "bootstrapReady"});
-    assert.equal(s.channels[0].port1.sent[0].credentials.apiKey, "test-key");
+    assert.deepEqual(s.channels[0].port1.sent[0], {...envelope, type: "init", provider: "openfreemap", theme: "light"});
     s.reply({type: "bootstrapReady"});
     assert.equal(s.channels[0].port1.sent.length, 1);
     s.manager.destroyAll();
@@ -332,10 +298,11 @@ test("only initialized registered owner main frame may create, update or destroy
 
 test("points and clicks are bounded by current revision and membership; ready is one-shot", () => {
     const s = setup(); s.create(); s.load();
-    s.command({type: "setPoints", revision: 2, points: [{id: "row", longitude: 10, latitude: 20, coordinateSystem: "wgs84", secret: "never"}]});
+    s.command({type: "setPoints", revision: 2, points: [{id: "row", longitude: 10, latitude: 20, secret: "never"}]});
     s.reply({type: "bootstrapReady"}); s.reply({type: "ready"}); s.reply({type: "ready"});
     assert.equal(s.owner.sent.filter(entry => entry[1].type === "ready").length, 1);
-    assert.equal(s.channels[0].port1.sent.find(entry => entry.type === "setPoints").points[0].secret, undefined);
+    assert.deepEqual(s.channels[0].port1.sent.find(entry => entry.type === "setPoints").points,
+        [{id: "row", longitude: 10, latitude: 20}]);
     s.reply({type: "markerClick", id: "row", revision: 1});
     s.reply({type: "markerClick", id: "unknown", revision: 2});
     s.reply({type: "markerClick", id: "row", revision: 2, url: "https://evil.example"});
@@ -419,7 +386,7 @@ test("known host diagnostics are bounded fixed codes and stop on disposal", () =
     contents.emit("console-message", {message: "unclassified private detail"});
     assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "diagnostic", code: "cspWorker"}]);
     s.manager.destroyAll();
-    contents.emit("console-message", {message: "INVALID_USER_KEY"});
+    contents.emit("console-message", {message: "WebGL initialization failed"});
     assert.equal(s.owner.sent.length, 1);
 });
 
@@ -428,31 +395,30 @@ test("CSP resources are captured before load, deduplicated by category and isola
     assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "diagnostic", code: "cspWorker", resource: "blob"}]);
     const contents = s.views[0].webContents;
     const emit = url => contents.emit("console-message", {}, 2,
-        `Connecting to '${url}' violates the following Content Security Policy directive: "connect-src https://webapi.amap.com".`);
-    emit("https://g.alicdn.com/path?key=secret");
-    emit("https://g.alicdn.com/another?key=another-secret");
+        `Connecting to '${url}' violates the following Content Security Policy directive: "connect-src https://tiles.openfreemap.org".`);
+    emit("https://tiles.openfreemap.org/path?key=secret");
+    emit("https://tiles.openfreemap.org/another?key=another-secret");
     emit("blob:null/private");
     for (let index = 0; index < 100; index++) emit(`https://unknown-${index}.invalid/secret`);
-    assert.deepEqual(s.owner.sent.map(entry => entry[1].resource), ["blob", "https:g.alicdn.com", "blob", "redacted"]);
+    assert.deepEqual(s.owner.sent.map(entry => entry[1].resource), ["blob", "https:tiles.openfreemap.org", "blob", "redacted"]);
     assert.equal(JSON.stringify(s.owner.sent).includes("secret"), false);
     const count = s.owner.sent.length;
     s.load();
-    s.reply({type: "diagnostic", code: "cspWorker", resource: "https:g.alicdn.com"});
+    s.reply({type: "diagnostic", code: "cspWorker", resource: "https:tiles.openfreemap.org"});
     s.owner.emit("console-message", {message: "Content Security Policy worker-src 'none'"});
     assert.equal(s.owner.sent.length, count, "only the known map contents can contribute diagnostics");
     s.manager.destroyAll();
-    emit("https://fourier.taobao.com/private");
+    emit("http://tiles.openfreemap.org/private");
     assert.equal(s.owner.sent.length, count);
 });
 
-test("dynamic public CSP source diagnostics remain bounded per host", () => {
+test("unapproved CSP hostnames redact and deduplicate without entering public diagnostics", () => {
     const s = setup(); s.create();
     const contents = s.views[0].webContents;
     for (let index = 0; index < 100; index++) {
-        contents.emit("console-message", {message: `Connecting to 'https://map${index}.amap.com/private?key=secret' violates the following Content Security Policy directive: "connect-src https://webapi.amap.com".`});
+        contents.emit("console-message", {message: `Connecting to 'https://map${index}.openfreemap.org/private?key=secret' violates the following Content Security Policy directive: "connect-src https://tiles.openfreemap.org".`});
     }
-    assert.equal(s.owner.sent.length, 64);
-    assert.ok(s.owner.sent.every(entry => entry[1].instanceID === envelope.instanceID));
+    assert.deepEqual(s.owner.sent.map(entry => entry[1]), [{...envelope, type: "diagnostic", code: "cspConnect", resource: "redacted"}]);
     assert.equal(JSON.stringify(s.owner.sent).includes("secret"), false);
     s.manager.destroyAll();
 });

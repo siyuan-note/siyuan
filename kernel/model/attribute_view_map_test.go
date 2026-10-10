@@ -29,13 +29,12 @@ func setupMapTest(t *testing.T) (*av.AttributeView, *av.View) {
 
 func TestAttributeViewMapSettingsFieldsAndClone(t *testing.T) {
 	attrView, view := setupMapTest(t)
-	if !view.Map.Settings.ShowRecordList || view.Map.Settings.LocationKeyID != "" || view.Map.Settings.ServiceID != "" {
+	if view.Map.Settings.LocationKeyID != "" {
 		t.Fatal("new map must retain an explicit unbound state")
 	}
 	key := av.NewKey(ast.NewNodeID(), "Place", "", av.KeyTypeLocation)
 	addAttributeViewKey(attrView, view, key, "")
 	view.Map.Settings.LocationKeyID = key.ID
-	view.Map.Settings.ServiceID = "local-service"
 	view.Group = &av.ViewGroup{Field: attrView.KeyValues[1].Key.ID}
 	if getAttributeViewField(view, key.ID) == nil || view.IsGroupView() {
 		t.Fatal("map field or grouping state is incorrect")
@@ -66,8 +65,8 @@ func TestAttributeViewMapSettingsFieldsAndClone(t *testing.T) {
 	}
 	copySettings := copy.Views[0].Map.Settings
 	copyKey, err := copy.GetKey(copySettings.LocationKeyID)
-	if err != nil || copyKey.Type != av.KeyTypeLocation || copyKey.ID == key.ID || copySettings.ServiceID != "local-service" {
-		t.Fatal("clone did not remap its own field or preserve local service reference")
+	if err != nil || copyKey.Type != av.KeyTypeLocation || copyKey.ID == key.ID {
+		t.Fatal("clone did not remap its own location field")
 	}
 	if err = av.SaveAttributeView(attrView); err != nil {
 		t.Fatal(err)
@@ -91,7 +90,6 @@ func TestAttributeViewMapFilterSortPageTargetAndExport(t *testing.T) {
 	key := av.NewKey(ast.NewNodeID(), "Place", "", av.KeyTypeLocation)
 	addAttributeViewKey(attrView, view, key, "")
 	view.Map.Settings.LocationKeyID = key.ID
-	view.Map.Settings.ServiceID = "missing-service"
 	view.PageSize = 10
 	for _, column := range view.Map.Columns {
 		if column.ID == key.ID {
@@ -108,8 +106,7 @@ func TestAttributeViewMapFilterSortPageTargetAndExport(t *testing.T) {
 		value := &av.Value{ID: ast.NewNodeID(), KeyID: key.ID, BlockID: id, Type: av.KeyTypeLocation}
 		if i < 120 {
 			zero := 0.0
-			value.Location = &av.ValueLocation{Name: fmt.Sprintf("Place %03d", i), Latitude: &zero, Longitude: &zero,
-				CoordinateSystem: "wgs84"}
+			value.Location = &av.ValueLocation{Name: fmt.Sprintf("Place %03d", i), Latitude: &zero, Longitude: &zero}
 		}
 		values.Values = append(values.Values, value)
 	}
@@ -121,7 +118,7 @@ func TestAttributeViewMapFilterSortPageTargetAndExport(t *testing.T) {
 			t.Fatal(err)
 		}
 		if len(mapped.Rows) != 10 || mapped.RowCount != 120 || mapped.Rows[0].ID != view.ItemIDs[129-page*10] ||
-			mapped.MapMarkerScope != "page" || mapped.Map.ServiceID != "missing-service" {
+			mapped.MapMarkerScope != "page" || mapped.Map.LocationKeyID != key.ID {
 			t.Fatalf("page %d did not follow ordinary filtered/sorted rows: %+v", page, mapped.Table)
 		}
 		if value := mapped.Rows[0].GetValue(key.ID); value == nil || value.Location == nil || *value.Location.Latitude != 0 {
@@ -137,7 +134,7 @@ func TestAttributeViewMapFilterSortPageTargetAndExport(t *testing.T) {
 	exported := getAttrViewTable(attrView, view, "")
 	after, _ := json.Marshal(view.Map)
 	if len(exported.Rows) != 125 || exported.Map != nil || !bytes.Equal(before, after) {
-		t.Fatal("map export must contain all ordinary records without map service data or layout mutations")
+		t.Fatal("map export must contain all ordinary records without map layout data or layout mutations")
 	}
 }
 
@@ -149,7 +146,7 @@ func TestAttributeViewMapInvalidSavePreservesSource(t *testing.T) {
 	path := av.GetAttributeViewDataPath(attrView.ID)
 	before, _ := os.ReadFile(path)
 	for _, malformed := range []any{nil, map[string]any{}, map[string]any{"serviceID": "", "locationKeyID": "", "showRecordList": true, "apiKey": "not-allowed"},
-		av.MapSettings{ServiceID: "invalid/url"}, av.MapSettings{LocationKeyID: "invalid"}} {
+		map[string]any{"locationKeyID": "", "serviceID": "openfreemap"}, map[string]any{"locationKeyID": "", "showRecordList": false}, av.MapSettings{LocationKeyID: "invalid"}} {
 		if err := setAttrViewMap(&Operation{AvID: attrView.ID, ViewID: view.ID, Data: malformed}); err == nil {
 			t.Fatalf("invalid settings accepted: %#v", malformed)
 		}
@@ -166,7 +163,7 @@ func TestAttributeViewMapInvalidSavePreservesSource(t *testing.T) {
 	if !bytes.Equal(before, after) {
 		t.Fatal("invalid layout changed source")
 	}
-	if _, err := isolateImportedAttributeViewBindings([]byte(`{"spec":12,"views":[{"type":"map"}]}`), nil, false); err == nil {
+	if _, err := isolateImportedAttributeViewBindings([]byte(`{"spec":13,"views":[{"type":"map"}]}`), nil, false); err == nil {
 		t.Fatal("import accepted a damaged map layout")
 	}
 }
@@ -181,7 +178,7 @@ func testAttributeViewMapImportAndHistoryPreserveBindings(t *testing.T, populate
 	oldHistory := util.HistoryDir
 	util.HistoryDir = t.TempDir()
 	t.Cleanup(func() { util.HistoryDir = oldHistory })
-	view.Map.Settings = av.MapSettings{ServiceID: "device-without-service", LocationKeyID: ast.NewNodeID(), ShowRecordList: true}
+	view.Map.Settings = av.MapSettings{LocationKeyID: ast.NewNodeID()}
 	if populated {
 		primary := attrView.GetBlockKeyValues()
 		itemID := ast.NewNodeID()
@@ -222,15 +219,33 @@ func testAttributeViewMapImportAndHistoryPreserveBindings(t *testing.T, populate
 	if !bytes.Equal(data, after) {
 		t.Fatal("history rendering changed its source")
 	}
-	for _, spec := range []int{av.LocationSpec, av.MapSpec, av.CurrentSpec + 1} {
+	settingsData, err := json.Marshal(view.Map.Settings)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var invalidInputs [][]byte
+	for _, extra := range []string{`"serviceID":"openfreemap"`, `"serviceID":""`, `"showRecordList":true`, `"showRecordList":false`} {
+		legacySettings := []byte(`{"locationKeyID":"` + view.Map.Settings.LocationKeyID + `",` + extra + `}`)
+		invalid := bytes.Replace(data, settingsData, legacySettings, 1)
+		if bytes.Equal(invalid, data) {
+			t.Fatal("legacy map settings fixture did not replace settings")
+		}
+		invalidInputs = append(invalidInputs, invalid)
+	}
+	for _, spec := range []int{11, 12, av.MapSpec, av.CurrentSpec + 1} {
 		attrView.Spec = spec
 		view.Map.Spec = 1
 		invalid, _ := json.Marshal(attrView)
+		invalidInputs = append(invalidInputs, invalid)
+	}
+	for _, invalid := range invalidInputs {
 		if _, err = parseHistoricalAttributeViewData(attrView.ID, invalid); err == nil {
 			t.Fatal("history accepted malformed or unknown map format")
 		}
-		if _, err = isolateImportedAttributeViewBindings(invalid, nil, true); err == nil {
-			t.Fatal("encrypted import accepted malformed or unknown map format")
+		for _, encrypted := range []bool{false, true} {
+			if _, err = isolateImportedAttributeViewBindings(invalid, nil, encrypted); err == nil {
+				t.Fatal("import accepted malformed or unknown map format")
+			}
 		}
 		if err = os.WriteFile(path, invalid, 0600); err != nil {
 			t.Fatal(err)

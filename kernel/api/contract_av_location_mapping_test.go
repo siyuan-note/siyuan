@@ -10,8 +10,8 @@ func TestAVContractLocationTransportMapping(t *testing.T) {
 	zero, longitude := 0.0, 102.42
 	for _, location := range []*av.ValueLocation{nil, {}, {Name: "Office"}, {
 		Name: "Office", Latitude: &zero, Longitude: &longitude,
-		CoordinateSystem: "gcj02", OriginalInput: "(102.42,0)",
-	}, {Latitude: &zero, Longitude: &zero, CoordinateSystem: "unknown"}} {
+		OriginalInput: "(102.42,0)",
+	}, {Latitude: &zero, Longitude: &zero}} {
 		value := &av.Value{ID: "value", KeyID: "location", BlockID: "item", Type: av.KeyTypeLocation, Location: location}
 		t.Run(value.String(false), func(t *testing.T) {
 			assertAVContractJSONEqual(t, value, toContractAVValue(value))
@@ -29,13 +29,12 @@ func TestAVContractLocationTransportMapping(t *testing.T) {
 
 func TestAVContractLocationFieldAndRenderMapping(t *testing.T) {
 	zero, longitude := 0.0, 102.42
-	for _, system := range []string{"", "unknown", "wgs84", "gcj02", "bd09"} {
-		location := &av.Location{DefaultCoordinateSystem: system}
-		key := &av.Key{ID: "location", Type: av.KeyTypeLocation, Location: location}
-		field := &av.BaseInstanceField{ID: key.ID, Type: key.Type, Location: location}
-		value := &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{
-			Latitude: &zero, Longitude: &longitude, CoordinateSystem: system, OriginalInput: "(102.42,0)",
-		}}
+	for _, location := range []*av.ValueLocation{{Name: "Office"}, {
+		Latitude: &zero, Longitude: &longitude, OriginalInput: "(102.42,0)",
+	}} {
+		key := &av.Key{ID: "location", Type: av.KeyTypeLocation}
+		field := &av.BaseInstanceField{ID: key.ID, Type: key.Type}
+		value := &av.Value{Type: av.KeyTypeLocation, Location: location}
 		assertAVContractJSONEqual(t, key, toContractAVKey(key))
 		assertAVContractJSONEqual(t, field, toContractAVBaseInstanceField(field))
 		table := &av.Table{BaseInstance: &av.BaseInstance{ID: "view"},

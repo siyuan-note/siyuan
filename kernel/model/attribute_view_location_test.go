@@ -22,7 +22,7 @@ func TestUpdateAttributeViewLocationPartialAndInvalid(t *testing.T) {
 	value := &av.Value{ID: "20261009000003-locaval", KeyID: keyID, BlockID: itemID,
 		Type: av.KeyTypeLocation, CreatedAt: 100, UpdatedAt: 200,
 		Location: &av.ValueLocation{Name: "Home", Latitude: modelLocationCoordinate(0),
-			Longitude: modelLocationCoordinate(120), CoordinateSystem: "gcj02", OriginalInput: "original"}}
+			Longitude: modelLocationCoordinate(120), OriginalInput: "original"}}
 	view := &av.AttributeView{ID: "20261009000000-locatav", KeyValues: []*av.KeyValues{
 		{Key: &av.Key{ID: "20261009000004-locabky", Type: av.KeyTypeBlock}, Values: []*av.Value{{
 			BlockID: itemID, Type: av.KeyTypeBlock, IsDetached: true, Block: &av.ValueBlock{Content: "Entry"}}}},
@@ -37,6 +37,11 @@ func TestUpdateAttributeViewLocationPartialAndInvalid(t *testing.T) {
 		{"location": map[string]any{"latitude": nil}},
 		{"location": map[string]any{"longitude": -181}},
 		{"location": map[string]any{"coordinateSystem": "WGS84"}},
+		{"location": map[string]any{"coordinateSystem": "wgs84"}},
+		{"location": map[string]any{"coordinateSystem": "unknown"}},
+		{"location": map[string]any{"coordinateSystem": "gcj02"}},
+		{"location": map[string]any{"coordinateSystem": nil}},
+		{"location": map[string]any{"name": "Changed", "unknown": true}},
 		{"location": map[string]any{"latitude": "wrong"}},
 	} {
 		before, _ := json.Marshal(view)
@@ -52,7 +57,7 @@ func TestUpdateAttributeViewLocationPartialAndInvalid(t *testing.T) {
 		t.Fatal(err)
 	}
 	if value.Location.Name != "Office" || *value.Location.Latitude != 0 || *value.Location.Longitude != 120 ||
-		value.Location.CoordinateSystem != "gcj02" || value.Location.OriginalInput != "original" || value.CreatedAt != 100 {
+		value.Location.OriginalInput != "original" || value.CreatedAt != 100 {
 		t.Fatalf("partial update lost location data: %+v", value)
 	}
 	if err := update(map[string]any{"location": map[string]any{"latitude": 0}}); err != nil || value.Location.OriginalInput != "original" {
@@ -63,9 +68,6 @@ func TestUpdateAttributeViewLocationPartialAndInvalid(t *testing.T) {
 	}
 	if err := update(map[string]any{"location": map[string]any{"latitude": 2, "originalInput": "new source"}}); err != nil || value.Location.OriginalInput != "new source" {
 		t.Fatalf("explicit provenance replacement: %v", err)
-	}
-	if err := update(map[string]any{"location": map[string]any{"coordinateSystem": "wgs84"}}); err != nil || value.Location.OriginalInput != "" {
-		t.Fatalf("coordinate system change retained stale provenance: %v", err)
 	}
 	if err := update(map[string]any{"LOCATION": map[string]any{"latitude": 3, "ORIGINALINPUT": "uppercase source"}}); err != nil || value.Location.OriginalInput != "uppercase source" {
 		t.Fatalf("case-insensitive provenance member: %v", err)
@@ -87,26 +89,25 @@ func TestUpdateAttributeViewLocationPartialAndInvalid(t *testing.T) {
 	}
 }
 
-func TestAttributeViewLocationUnknownProvenance(t *testing.T) {
+func TestAttributeViewLocationNoOpProvenance(t *testing.T) {
 	previous := &av.ValueLocation{Latitude: modelLocationCoordinate(0), Longitude: modelLocationCoordinate(0), OriginalInput: "source"}
 	updated := *previous
-	updated.CoordinateSystem = "unknown"
-	normalizeAttributeViewLocationProvenance(previous, &updated, []byte(`{"location":{"coordinateSystem":"unknown"}}`))
+	normalizeAttributeViewLocationProvenance(previous, &updated, []byte(`{"location":{"latitude":0,"longitude":0}}`))
 	if updated.OriginalInput != "source" {
-		t.Fatal("equivalent unknown coordinate system cleared provenance")
+		t.Fatal("no-op coordinates cleared provenance")
 	}
 }
 
 func TestAttributeViewLocationAutomationReplacement(t *testing.T) {
-	previous := &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{Name: "Home", Latitude: modelLocationCoordinate(0), Longitude: modelLocationCoordinate(0), CoordinateSystem: "wgs84", OriginalInput: "original"}}
+	previous := &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{Name: "Home", Latitude: modelLocationCoordinate(0), Longitude: modelLocationCoordinate(0), OriginalInput: "original"}}
 	next := previous.Clone()
 	next.Location.OriginalInput = "different provenance"
 	if !equalAutomationValues(previous, next) {
 		t.Fatal("provenance triggered an automation value change")
 	}
-	next.Location.CoordinateSystem = "gcj02"
+	next.Location.Longitude = modelLocationCoordinate(1)
 	if equalAutomationValues(previous, next) {
-		t.Fatal("coordinate system change was ignored")
+		t.Fatal("coordinate change was ignored")
 	}
 	for _, desired := range []*av.Value{
 		{Type: av.KeyTypeLocation},
@@ -161,7 +162,7 @@ func TestAttributeViewLocationEncryptedRecovery(t *testing.T) {
 				t.Fatalf("legacy authenticated read: %v", err)
 			}
 			value := &av.Value{ID: "20261009000002-locaval", KeyID: locationKeyID, BlockID: "20260921000003-example", Type: av.KeyTypeLocation,
-				Location: &av.ValueLocation{Name: "Home", Latitude: modelLocationCoordinate(0), Longitude: modelLocationCoordinate(0), CoordinateSystem: "wgs84", OriginalInput: "original"}}
+				Location: &av.ValueLocation{Name: "Home", Latitude: modelLocationCoordinate(0), Longitude: modelLocationCoordinate(0), OriginalInput: "original"}}
 			view.KeyValues = append(view.KeyValues, &av.KeyValues{Key: &av.Key{ID: locationKeyID, Name: "Location", Type: av.KeyTypeLocation}, Values: []*av.Value{value}})
 			if err = av.SaveAttributeView(view); err != nil {
 				t.Fatal(err)
@@ -216,26 +217,35 @@ func TestAttributeViewLocationImportHistoryValidation(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		t.Fatal(err)
 	}
+	var inputs [][]byte
 	for _, payload := range []string{
 		`{"latitude":91,"longitude":0}`,
 		`{"latitude":0,"longitude":181}`,
 		`{"latitude":0}`,
 		`{"latitude":0,"longitude":0,"coordinateSystem":"invalid"}`,
+		`{"latitude":0,"longitude":0,"coordinateSystem":"wgs84"}`,
+		`{"latitude":0,"longitude":0,"coordinateSystem":"gcj02"}`,
+		`{"latitude":0,"longitude":0,"coordinateSystem":"unknown"}`,
 	} {
-		data := []byte(`{"spec":11,"id":"` + avID + `","keyValues":[{"key":{"type":"location"},"values":[{"type":"location","location":` + payload + `}]}]}`)
+		inputs = append(inputs, []byte(`{"spec":13,"id":"`+avID+`","keyValues":[{"key":{"type":"location"},"values":[{"type":"location","location":`+payload+`}]}]}`))
+	}
+	for _, spec := range []string{"11", "12"} {
+		inputs = append(inputs, []byte(`{"spec":`+spec+`,"id":"`+avID+`","keyValues":[{"key":{"type":"location"},"values":[{"type":"location","location":{"latitude":0,"longitude":0}}]}]}`))
+	}
+	for _, data := range inputs {
 		for _, encryptedTarget := range []bool{false, true} {
 			if _, err := isolateImportedAttributeViewBindings(data, nil, encryptedTarget); err == nil {
-				t.Fatalf("invalid location imported: %s", payload)
+				t.Fatalf("invalid location imported: %s", data)
 			}
 		}
 		if _, err := parseHistoricalAttributeViewData(avID, data); err == nil {
-			t.Fatalf("invalid history/snapshot location accepted: %s", payload)
+			t.Fatalf("invalid history/snapshot location accepted: %s", data)
 		}
 		if err := os.WriteFile(path, data, 0600); err != nil {
 			t.Fatal(err)
 		}
 		if _, _, err := RenderHistoryAttributeView(avID, "", "", "", 1, -1, nil, strconv.FormatInt(created.Unix(), 10)); err == nil {
-			t.Fatalf("history preview accepted invalid location: %s", payload)
+			t.Fatalf("history preview accepted invalid location: %s", data)
 		}
 		after, _ := os.ReadFile(path)
 		if !bytes.Equal(data, after) {

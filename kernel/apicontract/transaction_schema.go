@@ -48,8 +48,6 @@ var transactionActionPayloads = []transactionActionPayload{
 	{"setAttrViewColDesc", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
 	// 仅修改属性面板可见性；data 支持空字符串、always、hide-empty、hide，不影响数据库视图的字段显隐。
 	{"setAttrViewColAttributePanelVisibility", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
-	// 仅设置位置字段的新录入默认坐标系，data 为 unknown、wgs84、gcj02 或 bd09，不改写已有位置。
-	{"setAttrViewColLocationDefaultCoordinateSystem", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
 	{"insertAttrViewBlock", reflect.TypeFor[Null](), reflect.TypeFor[TransactionInsertedItems]()},
 	{"removeAttrViewBlock", reflect.TypeFor[Null](), reflect.TypeFor[Null]()},
 	{"addAttrViewCol", reflect.TypeFor[string](), reflect.TypeFor[Null]()},

@@ -16,7 +16,6 @@ const deniedResponse = () => new Response("Forbidden", {status: 403,
     headers: {"Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store"}});
 const withoutCredentials = (headers) => Object.fromEntries(Object.entries(headers || {})
     .filter(([name]) => !["cookie", "authorization", "proxy-authorization"].includes(name.toLowerCase())));
-const amapSingleHostRedirects = ["jsapi.amap.com", "jsapi-service.amap.com"];
 const clearMapSession = ses => {
     for (const method of ["closeAllConnections", "clearStorageData", "clearAuthCache", "clearCache", "clearHostResolverCache"]) {
         try { void Promise.resolve(ses[method]()).catch(() => {}); } catch (_error) { /* 继续清理其他会话状态。 */ }
@@ -24,7 +23,7 @@ const clearMapSession = ses => {
 };
 
 // 此会话从不向任何内核发送网络请求，包括未设置密码的本机内核。
-const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.readFile, trackFetch = () => {}, report = () => {}}) => {
+const createMapSessionRouter = ({ses, origin, appDir, readFile = fs.readFile, trackFetch = () => {}, report = () => {}}) => {
     let destroyed = false;
     let documentRequested = false;
     const requests = new Set();
@@ -36,7 +35,7 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
     ses.allowNTLMCredentialsForDomains("");
     ses.on("will-download", event => event.preventDefault());
     ses.webRequest.onBeforeRequest((details, callback) => {
-        const policy = getMapRequestPolicy(details.url, details.method, origin, provider);
+        const policy = getMapRequestPolicy(details.url, details.method, origin);
         let allowed = !destroyed && !!policy;
         if (details.resourceType === "mainFrame") {
             allowed = allowed && policy.type === "local" && policy.document && !documentRequested;
@@ -62,7 +61,7 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
         callback({cancel: destroyed, responseHeaders});
     });
     const handle = async (request) => {
-        const policy = !destroyed && getMapRequestPolicy(request.url, request.method, origin, provider);
+        const policy = !destroyed && getMapRequestPolicy(request.url, request.method, origin);
         if (!policy || request.headers.get("service-worker")) return deniedResponse();
         if (policy.type === "local") {
             try {
@@ -72,7 +71,7 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
                     "X-Content-Type-Options": "nosniff", "Access-Control-Allow-Origin": "*",
                     "Referrer-Policy": "strict-origin-when-cross-origin",
                     "Permissions-Policy": "geolocation=(), camera=(), microphone=(), payment=(), usb=(), serial=(), bluetooth=()"};
-                if (policy.document) headers["Content-Security-Policy"] = createMapContentSecurityPolicy(origin, provider);
+                if (policy.document) headers["Content-Security-Policy"] = createMapContentSecurityPolicy(origin);
                 return new Response(request.method === "HEAD" ? null : data, {headers});
             } catch (_error) {
                 report("assetUnavailable");
@@ -99,24 +98,16 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
         abort.signal.addEventListener("abort", finish, {once: true});
         try {
             let url = request.url;
-            const initialHostname = new URL(url).hostname;
             for (let redirects = 0; redirects <= 5; redirects++) {
                 if (destroyed || abort.signal.aborted) break;
-                if (!isAllowedMapProviderURL(url, provider)) {
+                if (!isAllowedMapProviderURL(url)) {
                     report(url.startsWith("http:") ? "providerInsecureRequest" : "providerRequestDenied");
-                    break;
-                }
-                const hostname = new URL(url).hostname;
-                // 代理会隐藏重定向终点；新增来源不得借跨主机跳转越过各自的 CSP 用途限制。
-                if (provider === "amap" && hostname !== initialHostname &&
-                    [initialHostname, hostname].some(host => amapSingleHostRedirects.includes(host))) {
-                    report("providerRequestDenied");
                     break;
                 }
                 if (activeURL) trackFetch(activeURL, -1);
                 activeURL = url;
                 trackFetch(activeURL, 1);
-                // 不复制浏览器凭证或任意请求头；服务商的密钥来源校验仅使用内核来源，不携带笔记路径。
+                // 不复制浏览器凭证或任意请求头；来源只保留内核来源，不携带笔记路径。
                 const headers = {"Referer": origin + "/"};
                 for (const name of ["accept", "accept-language", "range"]) {
                     const value = request.headers.get(name);
@@ -163,7 +154,7 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
                 return new Response(body, {status: response.status, headers: responseHeaders});
             }
         } catch (_error) {
-            // 服务商地址可能包含密钥，不记录请求地址或异常文本。
+            // 请求地址可能包含私有数据，不记录请求地址或异常文本。
             if (!destroyed && !abort.signal.aborted) report("providerNetworkFailure");
         }
         finish();
@@ -201,7 +192,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
     app.on("login", (event, contents, details, _authInfo, callback) => {
         if (!contents && isMapAuthentication(contents, details.url)) { event.preventDefault(); callback(); }
     });
-    // 返回固定诊断码，不暴露地址、启动参数值或地图凭据；所有宿主入口复用相同信任检查。
+    // 返回固定诊断码，不暴露地址或启动参数值；所有宿主入口复用相同信任检查。
     const inspectOwner = event => {
         if (!event?.sender || event.sender.isDestroyed()) return {reason: "ownerUnavailable"};
         if (event.senderFrame !== event.sender.mainFrame) return {reason: "notMainFrame"};
@@ -244,7 +235,6 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         hosts.delete(host.key);
         for (const [emitter, name, listener] of host.listeners) emitter.removeListener(name, listener);
         host.ids.clear();
-        host.init.credentials = {};
         host.points = undefined;
         host.router.destroy();
         for (const port of [host.port, host.transferredPort]) {
@@ -330,7 +320,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
         };
         try {
             ses = session.fromPartition("siyuan-map-" + randomID(), {cache: false});
-            router = createMapSessionRouter({ses, origin: owner.origin, provider: init.provider, appDir, readFile, trackFetch, report});
+            router = createMapSessionRouter({ses, origin: owner.origin, appDir, readFile, trackFetch, report});
             view = new WebContentsView({webPreferences: {session: ses, sandbox: true, contextIsolation: true,
                 webSecurity: true, nodeIntegration: false, nodeIntegrationInSubFrames: false,
                 nodeIntegrationInWorker: false, webviewTag: false, allowRunningInsecureContent: false,
@@ -377,7 +367,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             for (const name of ["focus", "show", "restore"]) listen(host, owner.win, name, () => applyGeometry(host));
             listen(host, event.sender, "zoom-changed", () => hide(host));
             const nonce = randomID();
-            const entryURL = owner.origin + "/stage/map/index.html?provider=" + init.provider + "#" + init.instanceID + ":" + nonce;
+            const entryURL = owner.origin + "/stage/map/index.html?provider=openfreemap#" + init.instanceID + ":" + nonce;
             listen(host, contents, "did-finish-load", () => {
                 if (host.destroyed) return;
                 try {
@@ -400,7 +390,6 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
                                 // SDK 脚本和地图完成分别最多等待 20 秒，启动耗时不占用这两个阶段的预算。
                                 setDeadline(host, 45000);
                                 post(host, init);
-                                init.credentials = {};
                             } else if (reply.type === "ready" && host.bootstrapped && !host.ready) {
                                 host.ready = true;
                                 clearTimeout(host.timer);
@@ -433,7 +422,6 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
             owner.win.contentView.addChildView(view);
             void contents.loadURL(entryURL).catch(() => { report("documentLoadFailed"); fail(host, "hostDocumentLoadFailed"); });
         } catch (_error) {
-            init.credentials = {};
             if (host) fail(host, creationFailure);
             else if (router) router.destroy();
             else if (ses) clearMapSession(ses);
@@ -444,7 +432,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, WebContents
     ipcMain.on("siyuan-map-command", (event, value) => {
         const host = getHost(event, value);
         if (!host) return;
-        const command = parseMapCommand(value, host.init.instanceID, host.init.provider);
+        const command = parseMapCommand(value, host.init.instanceID);
         if (!command) return;
         if (command.type === "destroy") { destroy(host); return; }
         if (command.type === "setPoints") {

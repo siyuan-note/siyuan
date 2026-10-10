@@ -74,7 +74,7 @@ describe("map host boundary", () => {
         let ready = 0;
         const clicked: any[] = [];
         const host = createAVMapHost(container as unknown as HTMLElement, {
-            provider: "openfreemap", theme: "light", credentials: {apiKey: "fixture-key", token: "secret"} as any,
+            provider: "openfreemap", theme: "light",
             onReady: () => ready++, onMarkerClick: (...args) => clicked.push(args), onError: () => assert.fail("unexpected error"),
         });
         cleanups.push(host.destroy);
@@ -87,7 +87,7 @@ describe("map host boundary", () => {
         const onMessage = listeners.get("message");
         const handshake = {source: iframe.contentWindow, origin: scope.location.origin, ports: [] as unknown[],
             data: {version: 1, type: "wrapperHello", instanceID, nonce}};
-        const point = {id: "row-1", longitude: 0, latitude: 0, coordinateSystem: "wgs84" as const};
+        const point = {id: "row-1", longitude: 0, latitude: 0};
         host.setPoints([{...point, title: "private"} as any], 1);
         host.fit();
         onMessage({...handshake, source: {}});
@@ -109,7 +109,7 @@ describe("map host boundary", () => {
         assert.equal(transfers.length, 2);
         const port = channels[0].port1 as Port;
         assert.deepEqual(port.messages[0], {version: 1, instanceID, type: "init", provider: "openfreemap",
-            credentials: {}, theme: "light"});
+            theme: "light"});
         const reply = (data: Record<string, unknown>) => port.onmessage({data: {version: 1, instanceID, ...data}});
         reply({type: "ready", instanceID: "old"});
         assert.equal(ready, 0);

@@ -15,17 +15,17 @@ func TestAVContractLocationSaveAndRender(t *testing.T) {
 	database, view := fixture.attrView, fixture.attrView.Views[0]
 	primary := database.GetBlockKeyValues()
 	key := av.NewKey(ast.NewNodeID(), "Location", "", av.KeyTypeLocation)
-	key.Location = &av.Location{DefaultCoordinateSystem: "gcj02"}
-	coordinatesID, nameID, emptyID, unknownID := ast.NewNodeID(), ast.NewNodeID(), ast.NewNodeID(), ast.NewNodeID()
-	view.ItemIDs = []string{coordinatesID, nameID, emptyID, unknownID}
+	coordinatesID, nameID, emptyID, zeroID := ast.NewNodeID(), ast.NewNodeID(), ast.NewNodeID(), ast.NewNodeID()
+	zero, longitude := 0.0, 102.42
+	view.ItemIDs = []string{coordinatesID, nameID, emptyID, zeroID}
 	for _, id := range view.ItemIDs {
 		primary.Values = append(primary.Values, &av.Value{ID: ast.NewNodeID(), KeyID: primary.Key.ID, BlockID: id,
 			Type: av.KeyTypeBlock, IsDetached: true, Block: &av.ValueBlock{Content: id}})
 	}
 	database.KeyValues = []*av.KeyValues{primary, {Key: key, Values: []*av.Value{
 		{ID: ast.NewNodeID(), KeyID: key.ID, BlockID: emptyID, Type: av.KeyTypeLocation, Location: &av.ValueLocation{}},
-		{ID: ast.NewNodeID(), KeyID: key.ID, BlockID: unknownID, Type: av.KeyTypeLocation,
-			Location: &av.ValueLocation{CoordinateSystem: "unknown"}},
+		{ID: ast.NewNodeID(), KeyID: key.ID, BlockID: zeroID, Type: av.KeyTypeLocation,
+			Location: &av.ValueLocation{Latitude: &zero, Longitude: &zero}},
 	}}}
 	view.Table.Columns = []*av.ViewTableColumn{
 		{BaseField: &av.BaseField{ID: primary.Key.ID}},
@@ -52,8 +52,8 @@ func TestAVContractLocationSaveAndRender(t *testing.T) {
 		}
 		for _, column := range result.Data.View.Columns {
 			if column.ID == key.ID {
-				if column.Location == nil || column.Location.DefaultCoordinateSystem != "gcj02" {
-					t.Fatalf("location column default was lost: %+v", column.Location)
+				if column.Type != av.KeyTypeLocation {
+					t.Fatalf("location column type was lost: %+v", column)
 				}
 				return result.Data.View
 			}
@@ -68,18 +68,18 @@ func TestAVContractLocationSaveAndRender(t *testing.T) {
 		}
 		assertAVContractJSONEqual(t, want, value.Location)
 	}
-	assertEmptyValues := func(table *av.Table) {
+	assertStoredValues := func(table *av.Table) {
 		t.Helper()
 		assertLocation(table.GetValue(emptyID, key.ID), &av.ValueLocation{})
-		assertLocation(table.GetValue(unknownID, key.ID), &av.ValueLocation{CoordinateSystem: "unknown"})
+		assertLocation(table.GetValue(zeroID, key.ID), &av.ValueLocation{Latitude: &zero, Longitude: &zero})
 	}
 
-	// 只给缺少持久化值的单元格应用默认坐标系，已存空值及显式未知值保持原意。
+	// 渲染补齐缺失单元格，不改变已存空值或零坐标。
 	table := render()
 	for _, id := range []string{coordinatesID, nameID} {
-		assertLocation(table.GetValue(id, key.ID), &av.ValueLocation{CoordinateSystem: "gcj02"})
+		assertLocation(table.GetValue(id, key.ID), &av.ValueLocation{})
 	}
-	assertEmptyValues(table)
+	assertStoredValues(table)
 	cache.ClearAVCache()
 	stored, err := av.ParseAttributeView(database.ID)
 	if err != nil {
@@ -93,14 +93,13 @@ func TestAVContractLocationSaveAndRender(t *testing.T) {
 
 	// 再次渲染后保存新位置，验证渲染操作不影响持久化。
 	render()
-	zero, longitude := 0.0, 102.42
 	saves := []struct {
 		itemID   string
 		location *av.ValueLocation
 	}{
 		{coordinatesID, &av.ValueLocation{Name: "Office", Latitude: &zero, Longitude: &longitude,
-			CoordinateSystem: "gcj02", OriginalInput: "(102.42,0)"}},
-		{nameID, &av.ValueLocation{Name: "Home", CoordinateSystem: "gcj02", OriginalInput: "Home"}},
+			OriginalInput: "(102.42,0)"}},
+		{nameID, &av.ValueLocation{Name: "Home", OriginalInput: "Home"}},
 	}
 	for _, save := range saves {
 		value, updateErr := model.UpdateAttributeViewCell(nil, database.ID, key.ID, save.itemID,
@@ -128,10 +127,10 @@ func TestAVContractLocationSaveAndRender(t *testing.T) {
 		}
 	}
 	assertLocation(stored.GetValue(key.ID, emptyID), &av.ValueLocation{})
-	assertLocation(stored.GetValue(key.ID, unknownID), &av.ValueLocation{CoordinateSystem: "unknown"})
+	assertLocation(stored.GetValue(key.ID, zeroID), &av.ValueLocation{Latitude: &zero, Longitude: &zero})
 	table = render()
 	for _, save := range saves {
 		assertLocation(table.GetValue(save.itemID, key.ID), save.location)
 	}
-	assertEmptyValues(table)
+	assertStoredValues(table)
 }

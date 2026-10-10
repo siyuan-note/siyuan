@@ -19,7 +19,7 @@ import (
 )
 
 func TestAVContractMapMapping(t *testing.T) {
-	table := &av.Table{Map: &av.MapSettings{ServiceID: "local-service", LocationKeyID: "20261009000000-abcdefg", ShowRecordList: true},
+	table := &av.Table{Map: &av.MapSettings{LocationKeyID: "20261009000000-abcdefg"},
 		MapMarkerScope: "page", Columns: []*av.TableColumn{}, Rows: []*av.TableRow{}, RowCount: 120}
 	assertAVContractJSONEqual(t, &av.Map{Table: table}, avContractView(&av.Map{Table: table}))
 	layout := &av.LayoutMap{LayoutTable: av.NewLayoutTable(), Settings: *table.Map}
@@ -209,7 +209,7 @@ func TestAVContractMapPublishPagesAccessibleResult(t *testing.T) {
 			view.Filters = []*av.ViewFilter{{Column: filterKey.ID, Operator: av.FilterOperatorIsEqual,
 				Value: &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "keep"}}}}
 			view.LayoutType = av.LayoutTypeMap
-			view.Map = &av.LayoutMap{LayoutTable: view.Table, Settings: av.MapSettings{ShowRecordList: true}}
+			view.Map = &av.LayoutMap{LayoutTable: view.Table}
 			view.Table = nil
 			view.Map.Columns = []*av.ViewTableColumn{
 				{BaseField: &av.BaseField{ID: primary.Key.ID}, Calc: &av.FieldCalc{Operator: av.CalcOperatorCountAll}},
@@ -307,7 +307,7 @@ func TestAVContractMapPublishFiltersTargetsAndPreservesSource(t *testing.T) {
 	}
 	view.ItemIDs = []string{hiddenID, visibleID}
 	view.LayoutType = av.LayoutTypeMap
-	view.Map = &av.LayoutMap{LayoutTable: view.Table, Settings: av.MapSettings{ServiceID: "missing", LocationKeyID: ast.NewNodeID()}}
+	view.Map = &av.LayoutMap{LayoutTable: view.Table, Settings: av.MapSettings{LocationKeyID: ast.NewNodeID()}}
 	view.Table = nil
 	if err := av.SaveAttributeView(database); err != nil {
 		t.Fatal(err)

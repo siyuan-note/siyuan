@@ -148,9 +148,6 @@ const createBatchEditContext = (options: {
         const value = cell?.value ?
             cloneValue(cell.value) :
             createEmptyAVValue(options.field.id, options.field.type, itemID);
-        if (options.field.type === "location" && !cell?.value) {
-            value.location.coordinateSystem = options.field.location?.defaultCoordinateSystem || "unknown";
-        }
         value.id = value.id || cell?.id;
         value.keyID = options.field.id;
         value.blockID = itemID;

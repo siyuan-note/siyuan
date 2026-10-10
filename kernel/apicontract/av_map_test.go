@@ -14,10 +14,13 @@ func TestAVMapTransactionContract(t *testing.T) {
 		data  string
 		valid bool
 	}{
-		{`{"serviceID":"local-service","locationKeyID":"20261009000000-abcdefg","showRecordList":true}`, true},
-		{`{"serviceID":"","locationKeyID":"","showRecordList":false}`, true},
+		{`{"locationKeyID":"20261009000000-abcdefg"}`, true},
+		{`{"locationKeyID":""}`, true},
+		{`{}`, false},
+		{`{"locationKeyID":false}`, false},
 		{`{"serviceID":"","locationKeyID":""}`, false},
-		{`{"serviceID":"","locationKeyID":"","showRecordList":"true"}`, false},
+		{`{"locationKeyID":"","showRecordList":true}`, false},
+		{`{"locationKeyID":"","showRecordList":false}`, false},
 		{`{"serviceID":"","locationKeyID":"","showRecordList":true,"apiKey":"secret"}`, false},
 	} {
 		var operation TransactionOperation

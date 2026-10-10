@@ -31,6 +31,24 @@ func (value AVViewInstance) MarshalJSON() ([]byte, error) {
 }
 
 func avPayloadSchema(b *schemaBuilder, t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[*AVValueLocation]() {
+		schema, err := b.schema(t.Elem(), input)
+		return nullable(schema), err
+	}
+	if t == reflect.TypeFor[AVValueLocation]() {
+		name := t.Name()
+		if input {
+			name += "Input"
+		}
+		if _, ok := b.definitions[name]; !ok {
+			result := &Schema{Type: "object", Properties: map[string]*Schema{}, AdditionalProperties: false}
+			b.definitions[name] = result
+			if err := b.fields(result, t, input); err != nil {
+				return nil, err
+			}
+		}
+		return &Schema{Ref: "#/$defs/" + name}, nil
+	}
 	if t == reflect.TypeFor[*AVValuePatch]() {
 		schema, err := b.schema(reflect.TypeFor[AVValue](), input)
 		return nullable(schema), err

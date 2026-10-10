@@ -26,7 +26,7 @@ interface AutomationRule extends Omit<AVAutomationRuleInput, "actions" | "condit
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
 const newFieldValue = (field: IAVColumn): IAVCellValue => field.type === "location" ? {
     type: "location",
-    location: createAVLocationReplacement({coordinateSystem: field.location?.defaultCoordinateSystem || "unknown"}),
+    location: createAVLocationReplacement(),
 } : genEmptyFilterValue(field).value;
 const fieldsOf = (database: AVAttributeViewData): IAVColumn[] => (database?.keyValues || [])
     .filter(item => item?.key && hasAVCapability(item.key.type, "editable"))

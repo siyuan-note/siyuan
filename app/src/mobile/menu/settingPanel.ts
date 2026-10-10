@@ -9,7 +9,6 @@ import {clearSyncTabElement} from "../../config/tabs/syncRuntime";
 import {clearAccessTabElement} from "../../config/tabs/accessRuntime";
 import {unmountAssetsTab} from "../../config/assets";
 import {unmountOCRTab} from "../../config/ocr";
-import {unmountMapTab} from "../../config/map";
 import {unmountWorkspaceStorage} from "../../config/tabs/workspaceStorage";
 
 /** 卸载设置页中持有全局状态的模块，避免容器被替换后残留副作用 */
@@ -20,8 +19,6 @@ export const unmountSettingTab = (root: HTMLElement, tabId: TSettingTab) => {
         unmountAssetsTab(root);
     } else if (tabId === "ocr") {
         unmountOCRTab(root);
-    } else if (tabId === "map") {
-        unmountMapTab(root);
     } else if (tabId === "app") {
         unmountWorkspaceStorage(root);
     } else if (tabId === "sync") {
@@ -33,7 +30,7 @@ export const unmountSettingTab = (root: HTMLElement, tabId: TSettingTab) => {
 
 /** 以全屏面板打开单个设置页，`returnCallback` 用于接管面板返回按钮的行为 */
 export const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>,
-                               returnCallback?: () => void, missingMapServiceID?: string) => {
+                               returnCallback?: () => void) => {
     let root: HTMLElement | undefined;
     openModel({
         title: settingTabDef.title,
@@ -42,7 +39,6 @@ export const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettin
         html: `<div class="config${isMobile() ? " config--mobile" : ""}"></div>`,
         bindEvent(modelMainElement: HTMLElement) {
             root = modelMainElement.firstElementChild as HTMLElement;
-            if (settingTabDef.id === "map" && missingMapServiceID) root.dataset.mapServiceID = missingMapServiceID;
             bindSettingSaveDelegation(root);
             const mountedRoot = root;
             void getSettingTab(settingTabDef.id).mount(mountedRoot, undefined, app).then(() => {

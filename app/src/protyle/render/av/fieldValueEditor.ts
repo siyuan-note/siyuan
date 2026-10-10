@@ -136,8 +136,7 @@ export const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFiel
         return `<button type="button" class="b3-button b3-button--cancel${fieldValue?.mode === "currentTime" ? " fn__none" : ""}" data-role="field-value" data-value-type="lunarDate" data-lunar-value="${escapeAttr(JSON.stringify(date))}">${escapeHtml(formatDateValue(date, "lunar") || window.siyuan.languages.select)}</button>`;
     }
     if (column.type === "location") {
-        const location = value ? value.location || {coordinateSystem: "unknown"} :
-            {coordinateSystem: column.location?.defaultCoordinateSystem || "unknown"};
+        const location = value?.location || {};
         return `<button type="button" class="b3-button b3-button--cancel fn__flex-1" data-role="field-value" data-value-type="location" data-location="${escapeAttr(encodeURIComponent(JSON.stringify(location)))}">${escapeHtml(getAVLocationDisplayText(location) || window.siyuan.languages.empty)}</button>`;
     }
     if (column.type === "checkbox") {

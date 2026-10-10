@@ -17,7 +17,7 @@ func TestMapPrivatePaginationBufferIsNotSerialized(t *testing.T) {
 }
 
 func TestMapConditionalSpecAndValidation(t *testing.T) {
-	for _, spec := range []int{PlainTextSpec, RichTextSpec, 10, LocationSpec} {
+	for _, spec := range []int{PlainTextSpec, RichTextSpec, 10, 11, 12, CurrentSpec} {
 		plain := &AttributeView{Spec: spec}
 		UpgradeSpec(plain)
 		if plain.Spec != spec {
@@ -26,8 +26,8 @@ func TestMapConditionalSpecAndValidation(t *testing.T) {
 	}
 	for _, nested := range []bool{false, true} {
 		view := &View{LayoutType: LayoutTypeTable, Map: &LayoutMap{LayoutTable: NewLayoutTable(),
-			Settings: MapSettings{ServiceID: "missing-service", LocationKeyID: ast.NewNodeID()}}}
-		attrView := &AttributeView{Spec: LocationSpec, Views: []*View{view}}
+			Settings: MapSettings{LocationKeyID: ast.NewNodeID()}}}
+		attrView := &AttributeView{Spec: 12, Views: []*View{view}}
 		if nested {
 			attrView.Views = []*View{{Groups: []*View{view}}}
 		}
@@ -61,16 +61,33 @@ func TestMapConditionalSpecAndValidation(t *testing.T) {
 }
 
 func TestMapSettingsValidation(t *testing.T) {
-	for _, settings := range []MapSettings{{}, {ServiceID: "map_1-2", LocationKeyID: ast.NewNodeID()},
-		{ServiceID: "missing", ShowRecordList: true}} {
+	for _, settings := range []MapSettings{{}, {LocationKeyID: ast.NewNodeID()}} {
 		if err := settings.Validate(); err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, settings := range []MapSettings{{ServiceID: "https://maps.invalid/"}, {ServiceID: " key"},
-		{ServiceID: "_key"}, {LocationKeyID: "invalid"}} {
+	for _, settings := range []MapSettings{{LocationKeyID: "invalid"}, {LocationKeyID: " key"}} {
 		if settings.Validate() == nil {
 			t.Fatalf("invalid map settings accepted: %+v", settings)
+		}
+	}
+}
+
+func TestMapSettingsJSONRejectsLegacyFieldsWithoutMutation(t *testing.T) {
+	for _, payload := range []string{
+		`{"locationKeyID":"","serviceID":"openfreemap"}`,
+		`{"locationKeyID":"","serviceID":""}`,
+		`{"locationKeyID":"","showRecordList":true}`,
+		`{"locationKeyID":"","showRecordList":false}`,
+		`{"locationKeyID":"","apiKey":"secret"}`,
+	} {
+		settings := MapSettings{LocationKeyID: ast.NewNodeID()}
+		before := settings
+		if err := json.Unmarshal([]byte(payload), &settings); err == nil {
+			t.Fatalf("legacy map setting accepted: %s", payload)
+		}
+		if settings != before {
+			t.Fatalf("rejected settings changed field binding: %s", payload)
 		}
 	}
 }

@@ -25,8 +25,6 @@ import (
 )
 
 func ServeAPI(ginServer *gin.Engine) {
-	ginServer.Handle("POST", "/api/map/getConf", contractRouteHandlers(apicontract.MapGetConf, getMapConf)...)
-	ginServer.Handle("POST", "/api/map/setConf", contractRouteHandlers(apicontract.MapSetConf, setMapConf)...)
 	ginServer.Handle("POST", "/api/map/getRuntime", contractRouteHandlers(apicontract.MapGetRuntime, getMapRuntime)...)
 	ginServer.Use(boxLeaseMiddleware)
 	registerOauthRoutes(ginServer)

@@ -1,13 +1,12 @@
 import {
-    AV_MAP_PROTOCOL_VERSION, AVMapCommand, AVMapCredentials, AVMapErrorCode, AVMapPoint, AVMapProvider, AVMapTheme,
+    AV_MAP_PROTOCOL_VERSION, AVMapCommand, AVMapErrorCode, AVMapPoint, AVMapProvider, AVMapTheme,
     isAVMapProvider, isAVMapRevision, isAVMapTheme, parseAVMapReply,
-    sanitizeAVMapCredentials, sanitizeAVMapPoints,
+    sanitizeAVMapPoints,
 } from "./protocol";
 import {getAVMapHostCapabilities, isAVMapBootstrapMessage} from "./hostCapabilities";
 
 export interface AVMapHostOptions {
     provider: AVMapProvider;
-    credentials?: AVMapCredentials;
     theme: AVMapTheme;
     title?: string;
     onReady?: () => void;
@@ -134,8 +133,7 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
         port.start();
         iframe.contentWindow.postMessage({...envelope(), type: "connect", nonce}, scope.location.origin, [channel.port2]);
         // 端口建立后清除全局监听；外部 SDK 加载期间不再接受窗口消息。
-        send({...envelope(), type: "init", provider: options.provider,
-            credentials: sanitizeAVMapCredentials(options.credentials, options.provider), theme});
+        send({...envelope(), type: "init", provider: options.provider, theme});
     };
 
     const host: AVMapHost = {
@@ -144,7 +142,7 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
                 return;
             }
             revision = nextRevision;
-            points = sanitizeAVMapPoints(input, options.provider);
+            points = sanitizeAVMapPoints(input);
             ids = new Set(points.map((point) => point.id));
             postPoints();
         },

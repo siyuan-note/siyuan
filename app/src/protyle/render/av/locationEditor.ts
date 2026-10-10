@@ -11,7 +11,6 @@ import {
     areAVLocationsEqual,
     createAVLocationReplacement,
     formatAVLocationCoordinate,
-    isAVLocationCoordinateSystem,
     parseAVLocationCoordinate,
     validateAVLocation,
 } from "./locationValue";
@@ -58,17 +57,6 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
             <span class="fn__hr"></span><input class="b3-text-field fn__block" data-field="latitude" type="text" inputmode="decimal" spellcheck="false">
         </label>
     </div>
-    <div class="b3-label b3-label--inner">
-        <label>${escapeHtml(languages.coordinateSystem)}
-            <span class="fn__hr"></span><select class="b3-select fn__block" data-field="coordinateSystem">
-                <option value="" disabled>${escapeHtml(languages.selectCoordinateSystem)}</option>
-                <option value="wgs84">${escapeHtml(languages.coordinateSystemWGS84)}</option>
-                <option value="gcj02">${escapeHtml(languages.coordinateSystemGCJ02)}</option>
-                <option value="bd09">${escapeHtml(languages.coordinateSystemBD09)}</option>
-            </select>
-        </label>
-        <div class="b3-label__text">${escapeHtml(languages.coordinateSystemTip)}</div>
-    </div>
     <div class="ft__error fn__none" style="margin-top:8px" data-role="error" role="alert" aria-live="polite"></div>
 </div>
 <div class="b3-dialog__action">
@@ -90,17 +78,12 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     const nameInput = root.querySelector<HTMLInputElement>('[data-field="name"]');
     const latitudeInput = root.querySelector<HTMLInputElement>('[data-field="latitude"]');
     const longitudeInput = root.querySelector<HTMLInputElement>('[data-field="longitude"]');
-    const systemInput = root.querySelector<HTMLSelectElement>('[data-field="coordinateSystem"]');
     const errorElement = root.querySelector<HTMLElement>('[data-role="error"]');
     const controls = root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>(
         "input, select, button");
     nameInput.value = initial.name || "";
     latitudeInput.value = initial.latitude == null ? "" : formatAVLocationCoordinate(initial.latitude);
     longitudeInput.value = initial.longitude == null ? "" : formatAVLocationCoordinate(initial.longitude);
-    // 旧值未注明坐标系时保留空选项，必须明确选择，不能打开即重标。
-    systemInput.value = initial.coordinateSystem && initial.coordinateSystem !== "unknown" &&
-        isAVLocationCoordinateSystem(initial.coordinateSystem) ? initial.coordinateSystem : "";
-    const hasSelectedSystem = () => systemInput.value !== "unknown" && isAVLocationCoordinateSystem(systemInput.value);
 
     const setError = (message = "") => {
         errorElement.textContent = message;
@@ -133,14 +116,9 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
             dialog.destroy();
             return;
         }
-        let value: IAVCellLocationValue = {coordinateSystem: "unknown"};
+        let value: IAVCellLocationValue = {};
         if (!clear) {
-            if (!hasSelectedSystem()) {
-                setError(languages.selectCoordinateSystem);
-                systemInput.focus();
-                return;
-            }
-            value = {name: nameInput.value.trim(), coordinateSystem: systemInput.value as IAVCellLocationValue["coordinateSystem"]};
+            value = {name: nameInput.value.trim()};
             if (latitudeInput.value.trim() || longitudeInput.value.trim()) {
                 value.latitude = parseAVLocationCoordinate(latitudeInput.value);
                 value.longitude = parseAVLocationCoordinate(longitudeInput.value);
@@ -188,7 +166,6 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
         setError();
     };
     [latitudeInput, longitudeInput].forEach(input => input.addEventListener("input", clearProvenance));
-    systemInput.addEventListener("change", clearProvenance);
     root.addEventListener("compositionstart", () => composing = true);
     root.addEventListener("compositionend", () => composing = false);
     root.addEventListener("keydown", (event: KeyboardEvent) => {

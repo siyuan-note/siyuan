@@ -1,17 +1,15 @@
 import {hasAVLocationCoordinates, validateAVLocation} from "../locationValue";
-import type {AVMapPoint, AVMapProvider} from "./protocol";
-import {isAVMapIdentifier, isAVMapProjectionSupported, supportsAVMapCoordinateSystem} from "./protocol";
+import type {AVMapPoint} from "./protocol";
+import {isAVMapIdentifier, isAVMapProjectionSupported} from "./protocol";
 
 export const getMapSettings = (view: IAVTable): IAVMapSettings => ({
-    serviceID: view.map?.serviceID || "",
     locationKeyID: view.map?.locationKeyID || "",
-    showRecordList: view.map?.showRecordList !== false,
 });
 
-// 只使用选定字段的已加载行，缺失或不兼容的来源坐标不会被猜测或改写。
-export const getMapPoints = (view: IAVTable, provider: AVMapProvider) => {
+// 只使用选定字段的已加载行，WGS84 坐标不会被裁切或改写。
+export const getMapPoints = (view: IAVTable) => {
     const points: AVMapPoint[] = [];
-    const skipped = {empty: 0, invalid: 0, unknown: 0, mismatch: 0, projection: 0};
+    const skipped = {empty: 0, invalid: 0, projection: 0};
     const fieldID = getMapSettings(view).locationKeyID;
     const fieldIndex = view.columns.findIndex(column => column.id === fieldID && column.type === "location");
     if (fieldIndex < 0) {
@@ -25,16 +23,11 @@ export const getMapPoints = (view: IAVTable, provider: AVMapProvider) => {
             skipped.empty++;
         } else if (!validateAVLocation(location) || !hasAVLocationCoordinates(location) || !isAVMapIdentifier(row.id) || used.has(row.id)) {
             skipped.invalid++;
-        } else if (!location.coordinateSystem || location.coordinateSystem === "unknown") {
-            skipped.unknown++;
-        } else if (!supportsAVMapCoordinateSystem(provider, location.coordinateSystem)) {
-            skipped.mismatch++;
-        } else if (!isAVMapProjectionSupported(provider, location.latitude)) {
+        } else if (!isAVMapProjectionSupported(location.latitude)) {
             skipped.projection++;
         } else {
             used.add(row.id);
-            points.push({id: row.id, longitude: location.longitude, latitude: location.latitude,
-                coordinateSystem: location.coordinateSystem});
+            points.push({id: row.id, longitude: location.longitude, latitude: location.latitude});
         }
     });
     return {points, skipped, missingField: false};

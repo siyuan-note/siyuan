@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261009171730"
+		"updated": "20261010064719"
 	},
 	"Children": [
 		{
@@ -74,7 +74,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009034010-6kd9rk5",
-				"updated": "20261009171730"
+				"updated": "20261010064719"
 			},
 			"Children": [
 				{
@@ -88,12 +88,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-0yhiv8g",
-				"updated": "20261009111821"
+				"updated": "20261010064719"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Add a field of type Location, then click a cell to edit its name and coordinates. The name is optional. Enter both longitude and latitude in decimal degrees. Longitude ranges from -180 to 180 and latitude from -90 to 90; zero is a valid value. Leave both coordinates blank to save only a name. In the field settings, Default coordinate system for new input only presets new input; existing locations stay unchanged, each value can choose its own coordinate system, and copied or imported locations retain their saved coordinate system. Existing locations without a labeled coordinate system are preserved as saved; when editing, explicitly select the coordinate system actually used by their coordinates. Coordinates are not converted automatically."
+					"Data": "Add a field of type Location, then click a cell to edit its optional name and WGS84 coordinates. Enter both longitude and latitude in decimal degrees. Longitude ranges from -180 to 180 and latitude from -90 to 90; zero is valid. Leave both coordinates blank to save only a name. Coordinates are not converted automatically."
 				}
 			]
 		},
@@ -102,12 +102,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-h9vridq",
-				"updated": "20261009171730"
+				"updated": "20261010064719"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Enter longitude and latitude in their separate fields, for example longitude 116.4074 and latitude 39.9042. Choose WGS84 (OpenFreeMap), GCJ-02 (AMap, Tencent Maps), or BD-09 (Baidu Maps) for the coordinate system; changing this label does not convert coordinates. Source text retained by previously saved locations stays unchanged when you only edit the name. Manually changing the coordinates or coordinate system clears that source text."
+					"Data": "Enter longitude and latitude in their separate fields, for example longitude 116.4074 and latitude 39.9042. Source text stays unchanged when you only edit the name. Manually changing the coordinates clears that source text."
 				}
 			]
 		},
@@ -116,43 +116,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-dub50kq",
-				"updated": "20261009171730"
+				"updated": "20261010064719"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Click Save to apply edits or Cancel to discard them. Clear removes the location value. Text filters and sorting use the combined name, coordinates, and coordinate-system label. This field does not load maps or contact external location services. Coordinates are displayed in longitude, latitude order in the app. Plain-text copying and export keep latitude, longitude; to reuse those coordinates, enter each value in its corresponding field in the location editor. Structured database copying preserves named coordinate values. Named JSON fields and previously saved locations are unchanged."
-				},
-				{
-					"Type": "NodeText",
-					"Data": " Press "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " ("
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Cmd+Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " on macOS) to save, or "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Esc"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to cancel. Update SiYuan to a compatible version on every device before using a database with Location fields; older kernels cannot open these databases."
+					"Data": "Click Save to apply edits or Cancel to discard them. Clear removes the location value. Text filters and sorting use the combined name, coordinates, and fixed WGS84 label. This field does not contact external location services. The app displays longitude, latitude; plain-text copying and export use latitude, longitude. Structured database copying preserves the named latitude and longitude values."
 				}
 			]
 		},
@@ -3948,7 +3917,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009050034-byowtq3",
-				"updated": "20261009075700"
+				"updated": "20261010064719"
 			},
 			"Children": [
 				{
@@ -3962,30 +3931,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-yqulacv",
-				"updated": "20261009050034"
+				"updated": "20261010064719"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Add a map service in "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Settings"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Map"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ", then create a Map view and choose a map service and Location field in its view settings. Map views do not show a record list; switch to a Table view to browse or edit records. Services are stored on the current device; each view saves only a service ID. On another device, explicitly add the same ID to restore the reference, or choose another service"
+					"Data": "Create a Map view and select a Location field in its view settings. The map uses built-in OpenFreeMap. Map views do not show a record list; switch to a Table view to browse or edit records."
 				}
 			]
 		},
@@ -3994,12 +3945,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-2ja6x7k",
-				"updated": "20261009050034"
+				"updated": "20261010064719"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "AMap requires a Web JS API key and security code, Tencent Maps requires a key, and Baidu Maps requires a browser AK with JS API access. OpenFreeMap requires no key. Filled configuration fields do not prove service access, commercial eligibility, quotas, domain restrictions, or regional availability. Confirm these with the provider before use"
+					"Data": "OpenFreeMap requires no API key or global service configuration. Keep the map's provider and data attribution visible."
 				}
 			]
 		},
@@ -4008,12 +3959,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-w0l8ys9",
-				"updated": "20261009050034"
+				"updated": "20261010064719"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The map uses the original coordinates and their declared coordinate system: OpenFreeMap uses WGS84, AMap and Tencent Maps use GCJ-02, and Baidu Maps uses BD-09 or its supported GCJ-02 marker option. Unknown or incompatible systems are counted and skipped; the map never guesses, converts, or overwrites the saved values. OpenFreeMap and AMap use Web Mercator: latitudes beyond ±85.0511287798066° are valid stored coordinates but are skipped with a separate unsupported-projection count rather than silently clamped"
+					"Data": "The map displays WGS84 coordinates without conversion. OpenFreeMap uses Web Mercator: latitudes beyond ±85.0511287798066° are valid stored coordinates but are skipped with an unsupported-projection count rather than silently clamped."
 				}
 			]
 		},
@@ -4036,12 +3987,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-x0kdedj",
-				"updated": "20261009050034"
+				"updated": "20261010064719"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Map services use an external network connection. Only the selected service receives its runtime credentials, coordinates, and opaque record IDs; record titles and full contents are not passed to the map host. Browser SDK credentials are visible to the authorized browser and provider. Configuration exports omit map services and credentials; published pages do not load a live map, and document exports retain a table of records"
+					"Data": "Maps require an external network connection. The isolated map page receives coordinates and opaque record IDs, but no record titles or full contents. Published pages do not load a live map, and document exports retain a table of records."
 				}
 			]
 		},
@@ -4050,12 +4001,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-wflckkb",
-				"updated": "20261009075700"
+				"updated": "20261010064719"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The host follows the app theme. AMap also switches its basemap theme, and Baidu switches control appearance; OpenFreeMap and Tencent Maps currently retain their default basemap styles. Maps run in isolated Web pages. Desktop clients use a separate secure host; mobile clients require a matching app shell that restricts native bridges and navigation to trusted documents. Older shells or clients unable to establish these boundaries do not load maps. Desktop maps follow page scrolling and clip the area covered by sticky tabs. They may hide temporarily when menus or dialogs overlap them. When offline, unconfigured, incompatible with WebGL, or unable to load a provider, switch to a Table view to access records. Address search, geocoding, route planning, and clicking the map to write a location are not provided. Maps are also unavailable when authentication bypass is enabled; records remain accessible in a Table view"
+					"Data": "The host follows the app theme; the basemap keeps its default style. Maps run in isolated Web pages. Desktop clients use a separate secure host; mobile clients require an app shell that restricts native bridges and navigation to trusted documents. Maps do not load if these boundaries cannot be established. Desktop maps follow page scrolling and clip areas covered by sticky tabs; menus or dialogs may hide them temporarily. When offline, incompatible with WebGL, unable to load the map, or using authentication bypass, switch to a Table view to access records. Address search, geocoding, routing, and clicking the map to save a location are not provided."
 				}
 			]
 		},

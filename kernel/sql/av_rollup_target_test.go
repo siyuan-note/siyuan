@@ -352,7 +352,7 @@ func newNestedRollupTestLeaf(typ av.KeyType) (*av.AttributeView, *av.Key) {
 		if typ == av.KeyTypeNumber {
 			value.Number = &av.ValueNumber{Content: float64(row + 1), IsNotEmpty: true}
 		} else if typ == av.KeyTypeLocation {
-			value.Location = &av.ValueLocation{Name: fmt.Sprintf("fresh-%d", row), CoordinateSystem: "unknown", OriginalInput: "source"}
+			value.Location = &av.ValueLocation{Name: fmt.Sprintf("fresh-%d", row), OriginalInput: "source"}
 		} else {
 			value.Text = &av.ValueText{Content: fmt.Sprintf("fresh-%d", row)}
 		}

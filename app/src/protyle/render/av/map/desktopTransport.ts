@@ -4,7 +4,7 @@ import {ipcRenderer} from "electron";
 import type {AVMapHost, AVMapHostOptions} from "./host";
 import {
     AV_MAP_PROTOCOL_VERSION, AVMapCommand, AVMapErrorCode, AVMapPoint, isAVMapHostErrorCode, isAVMapProvider, isAVMapRevision,
-    isAVMapTheme, parseAVMapReply, sanitizeAVMapCredentials, sanitizeAVMapPoints,
+    isAVMapTheme, parseAVMapReply, sanitizeAVMapPoints,
 } from "./protocol";
 
 interface MapRect { x: number; y: number; width: number; height: number; }
@@ -74,8 +74,7 @@ const mapDiagnosticCodes = new Set([
     "hostSetupFailed", "assetUnavailable", "documentLoadFailed", "bootstrapTimeout", "sdkTimeout",
     "providerRequestDenied", "providerInsecureRequest", "providerHTTPFailure", "providerNetworkFailure",
     "cspScript", "cspWorker", "cspConnect", "cspImage", "cspStyle", "cspEval", "cspWasm",
-    "storageUnavailable", "webglUnavailable", "amapInvalidKey", "amapInvalidSecurityCode",
-    "amapDomainMismatch", "amapPlatformMismatch", "geometryInvalid", "geometryLogicalBounds",
+    "storageUnavailable", "webglUnavailable", "geometryInvalid", "geometryLogicalBounds",
     "geometryCropBounds", "geometryWindowBounds", "geometryRoundedEmpty",
 ]);
 const mapCSPDiagnosticCodes = new Set(["cspScript", "cspWorker", "cspConnect", "cspImage", "cspStyle", "cspEval", "cspWasm"]);
@@ -86,9 +85,7 @@ const mapCSPResourceCodes = new Set([
 const isMapCSPResource = (value: unknown): value is string => {
     if (typeof value !== "string" || value.length > 102) return false;
     if (mapCSPResourceCodes.has(value)) return true;
-    const hostname = /^https?:([a-z0-9.-]+)$/.exec(value)?.[1];
-    return !!hostname && hostname.length <= 96 && /(?:^|\.)(?:amap\.com|autonavi\.com|alicdn\.com|taobao\.com)$/.test(hostname) &&
-        hostname.split(".").every(label => /^[a-z](?:[a-z0-9-]{0,22}[a-z0-9])?$/.test(label));
+    return value === "https:tiles.openfreemap.org" || value === "http:tiles.openfreemap.org";
 };
 const logMapDiagnostic = (code: unknown, resource?: unknown) => {
     if (typeof code === "string" && mapDiagnosticCodes.has(code)) {
@@ -351,7 +348,7 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
         setPoints: (input, nextRevision) => {
             if (!destroyed && isAVMapRevision(nextRevision) && nextRevision > revision) {
                 revision = nextRevision;
-                points = sanitizeAVMapPoints(input, options.provider);
+                points = sanitizeAVMapPoints(input);
                 ids = new Set(points.map((point) => point.id));
                 postPoints();
             }
@@ -388,8 +385,7 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
         timeout = scope.setTimeout(() => fail("hostReadyTimeout"), 90000);
         let reply: {version?: number; instanceID?: string; error?: unknown; diagnostic?: unknown};
         try {
-            reply = await ipc.invoke("siyuan-map-create", {...envelope(), provider: options.provider,
-                credentials: sanitizeAVMapCredentials(options.credentials, options.provider), theme});
+            reply = await ipc.invoke("siyuan-map-create", {...envelope(), provider: options.provider, theme});
         } catch (_error) {
             fail("hostCreateRejected");
             return;

@@ -53,9 +53,9 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
     const calls: string[] = [];
     const data = {id: "database", name: "Database", views: [], viewID: "map-view", viewType: "map", view: {
         columns: [{id: "location", type: "location", hidden: true}], rowCount: 12,
-        map: {serviceID: "service", locationKeyID: "location", showRecordList: false},
+        map: {locationKeyID: "location"},
         rows: [{id: "row", cells: [{id: "location-value", value: {type: "location", keyID: "location",
-            location: {latitude: 0, longitude: 0, coordinateSystem: "wgs84", name: "Private name", originalInput: "Private input"}}},
+            location: {latitude: 0, longitude: 0, name: "Private name", originalInput: "Private input"}}},
         {id: "primary-value", valueType: "block", value: {type: "block", isDetached: true,
             block: {content: "Private title"}}}]}],
     }} as IAV;
@@ -71,16 +71,12 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
             return () => lifecycle === next && next.root.isConnected;
         }},
         "../../../../util/escape": escape,
-        "../../../../util/fetch": {fetchSyncPost: async (url: string) => {
+        "../../../../util/fetch": {fetchSyncPost: async (url: string, payload: unknown) => {
+            assert.equal(JSON.stringify(payload), "{}");
             calls.push(url);
             return options.runtime ? options.runtime() : {code: 0, data: {provider: "openfreemap"}};
         }},
-        "./settings": {loadMapServices: async () => {
-            calls.push("/api/map/getConf");
-            return [{id: "service", provider: "openfreemap", configured: true}];
-        }},
         "./protocol": protocol,
-        "../../../../config/mapRuntime": {MAP_CONFIG_CHANGED_EVENT: "map-config-change"},
         "../openDatabaseRow": {openDatabaseRowByData: (_protyle: unknown, row: unknown) => opened.push(row)},
         "./host": {isAVMapHostEnvironmentSupported: () => options.hostSupported ?? true,
             createAVMapHost: (_container: unknown, configuration: AVMapHostOptions) => {
@@ -119,7 +115,7 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
         status: () => root.querySelector(".av__map-status").textContent};
 };
 
-test("published maps render a status without inline settings, runtime credentials, or SDK calls", async () => {
+test("published maps render a status without inline settings, runtime admission, or SDK calls", async () => {
     const scenario = setup({published: true});
     await scenario.render();
     assert.deepEqual(scenario.calls, []);
@@ -128,27 +124,27 @@ test("published maps render a status without inline settings, runtime credential
     assert.doesNotMatch(scenario.roots[0].innerHTML, /av__map-settings|data-map-setting|data-map-configure|av__map-actions|data-map-fit|data-map-retry/);
 });
 
-test("unconfigured, unavailable host, offline and incompatible maps never request runtime credentials", async () => {
+test("missing field, unavailable host, offline and unsupported projection maps never request runtime admission", async () => {
     for (const option of [{hostSupported: false}, {online: false}, {}]) {
         const scenario = setup(option);
-        if (!Object.keys(option).length) (scenario.data.view as IAVTable).map.serviceID = "";
+        if (!Object.keys(option).length) (scenario.data.view as IAVTable).map.locationKeyID = "";
         await scenario.render();
-        assert.deepEqual(scenario.calls, ["/api/map/getConf"]);
+        assert.deepEqual(scenario.calls, []);
         assert.equal(scenario.hosts.length, 0);
     }
     const incompatible = setup();
-    (incompatible.data.view as IAVTable).rows[0].cells[0].value.location.coordinateSystem = "unknown";
+    (incompatible.data.view as IAVTable).rows[0].cells[0].value.location.latitude = 90;
     await incompatible.render();
-    assert.deepEqual(incompatible.calls, ["/api/map/getConf"]);
+    assert.deepEqual(incompatible.calls, []);
     assert.equal(incompatible.status(), "mapNoMarkers");
 });
 
 test("map sends only IDs and coordinates and opens the existing row detail for a current marker", async () => {
     const scenario = setup();
     await scenario.render();
-    assert.deepEqual(scenario.calls, ["/api/map/getConf", "/api/map/getRuntime"]);
+    assert.deepEqual(scenario.calls, ["/api/map/getRuntime"]);
     const host = scenario.hosts[0];
-    assert.equal(JSON.stringify(host.points), JSON.stringify([{id: "row", longitude: 0, latitude: 0, coordinateSystem: "wgs84"}]));
+    assert.equal(JSON.stringify(host.points), JSON.stringify([{id: "row", longitude: 0, latitude: 0}]));
     assert.doesNotMatch(JSON.stringify(host.options), /Private|primary-value|notebook/);
     host.options.onReady();
     assert.doesNotMatch(scenario.roots[0].innerHTML, /av__map-settings|data-map-setting|data-map-configure|av__map-actions|data-map-fit|data-map-retry/);
@@ -170,7 +166,7 @@ test("map sends only IDs and coordinates and opens the existing row detail for a
 test("an independently secured desktop host is selected instead of a renderer iframe", async () => {
     const scenario = setup({desktop: true, hostSupported: false});
     await scenario.render();
-    assert.deepEqual(scenario.calls, ["/api/map/getConf", "/api/map/getRuntime", "desktop-host"]);
+    assert.deepEqual(scenario.calls, ["/api/map/getRuntime", "desktop-host"]);
     assert.equal(scenario.hosts.length, 1);
 });
 
@@ -182,7 +178,7 @@ test("late native capability replies cannot initialize a removed map", async () 
     scenario.destroyMap();
     report(true);
     await pending;
-    assert.deepEqual(scenario.calls, ["/api/map/getConf"]);
+    assert.deepEqual(scenario.calls, []);
     assert.equal(scenario.hosts.length, 0);
 });
 
@@ -197,7 +193,7 @@ test("stale runtime responses cannot mount a map after the view is removed", asy
     assert.equal(scenario.hosts.length, 0);
 });
 
-test("history and oversized loaded pages report status without fetching runtime credentials", async () => {
+test("history and oversized loaded pages report status without fetching runtime admission", async () => {
     const history = setup();
     history.protyle.options.history = {created: "version"};
     await history.render();
@@ -206,7 +202,7 @@ test("history and oversized loaded pages report status without fetching runtime 
     const view = scenario.data.view as IAVTable;
     view.rows = Array.from({length: protocol.AV_MAP_MAX_POINTS + 1}, (_, index) => ({...view.rows[0], id: `row-${index}`}));
     await scenario.render();
-    assert.deepEqual(scenario.calls, ["/api/map/getConf"]);
+    assert.deepEqual(scenario.calls, []);
     assert.equal(scenario.status(), "mapTooManyMarkers");
     assert.equal(scenario.hosts.length, 0);
 });

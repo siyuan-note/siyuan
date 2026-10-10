@@ -2349,16 +2349,14 @@ if (response.code === 0 && response.data) {
 | `url`      | `{"url": {"content": "https://siyuan.com"}}`                                                                         |
 | `email`    | `{"email": {"content": "a@b.com"}}`                                                                                  |
 | `phone`    | `{"phone": {"content": "1234567890"}}`                                                                               |
-| `location` | `{"location":{"name":"Home","latitude":0,"longitude":0,"coordinateSystem":"unknown","originalInput":"0, 0"}}` |
+| `location` | `{"location":{"name":"Home","latitude":0,"longitude":0,"originalInput":"0, 0"}}` |
 | `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
 
 > ⚠️ `itemID` 是**条目 ID**，即[渲染](#渲染)返回的条目 `id`：表格和列表为 `rows[].id`，卡片和看板为 `cards[].id`，启用分组时位于 `groups[]` 的对应视图实例中。它也等于主键值的 `value.blockID`。对于绑定条目，绑定块 ID 位于主键值的 `value.block.id`；二者是不同概念，不能假设相等。传入错误的 ID 会把值存为孤儿数据，不会出现在渲染后的单元格中。
 
 对于富文本，`text.rich.content` 是权威的 Kramdown 源。内核会校验其受支持的结构并派生 `text.content` 纯文本投影；调用方提供的纯文本投影会被忽略。为兼容现有 API 客户端，省略 `text.rich` 时，如果 `text.content` 未改变则保留已存储的富文本载荷，如果 `text.content` 改变则以纯文本替换。即使纯文本投影未改变，也可以发送 `"rich": null` 明确移除富文本格式。包含富文本的数据库使用存储规范 9，无法由仅支持更早数据库规范的内核打开。
 
-`location` 的 `name` 可选。`latitude` 和 `longitude` 必须同时缺省或为 null，或者同时为有限数值，范围分别为 [-90, 90] 和 [-180, 180]；零是有效坐标。`coordinateSystem` 支持 `unknown`、`wgs84`、`gcj02` 和 `bd09`，省略或空值按未知处理。坐标不自动转换。`originalInput` 保留来源文本，不参与筛选和排序。更新时省略成员会保留已有值；清空位置可发送 `{"location":null}`，或显式清空名称并将两个坐标都设为 null。坐标或有效坐标系变化时，省略的 `originalInput` 会自动清空；显式提供的来源文本会被保留。文本筛选使用 `{"type":"location","text":{"content":"查询词"}}`，匹配名称、坐标及坐标系。位置字段使用数据库存储版本 11，旧版内核无法打开；未使用位置字段的数据库保留原有存储版本。
-
-字段可选的 `location.defaultCoordinateSystem` 设置仅为新的手动录入提供默认坐标系。每条已存位置保留各自的坐标系，包括 `unknown`；更改设置不会重写已有、复制或导入的值。API 写入省略值的坐标系时仍表示未知，不继承可能与来源无关的字段默认值。
+`location` 的 `name` 可选。`latitude` 和 `longitude` 必须同时缺省或为 null，或者同时为有限数值，范围分别为 [-90, 90] 和 [-180, 180]；零是有效坐标。所有坐标隐式使用 WGS84，保存时不自动转换。位置值不接受显式坐标系属性，字段不提供默认坐标系设置。`originalInput` 保留来源文本，不参与筛选和排序。更新时省略成员会保留已有值；清空位置可发送 `{"location":null}`，或显式清空名称并将两个坐标都设为 null。坐标变化时，省略的 `originalInput` 会自动清空；显式提供的来源文本会被保留。文本筛选使用 `{"type":"location","text":{"content":"查询词"}}`，匹配名称和坐标。位置字段使用数据库存储版本 13，旧版内核无法打开；未使用位置字段的数据库保留原有存储版本。
 
 * `/api/av/setAttributeViewBlockAttr`
 * 参数

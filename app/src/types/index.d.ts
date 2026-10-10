@@ -1293,15 +1293,12 @@ interface IAVCalendarRange {
 
 // 表格、列表和日历共用行列结构，布局由 viewType 区分。
 interface IAVMapSettings {
-    /** 设备本地地图服务的稳定引用；缺失时保留，不自动替换。 */
-    serviceID: string;
     /** 位置字段引用；缺失或类型变化时保留，不自动改绑。 */
     locationKeyID: string;
-    showRecordList: boolean;
 }
 
 interface IAVTable extends IAVView {
-    /** 地图只渲染当前加载页中匹配服务坐标系的原始坐标。 */
+    /** 地图只渲染当前加载页中的 WGS84 坐标。 */
     map?: IAVMapSettings;
     mapMarkerScope?: "page";
     /** 仅日历布局返回的持久化字段设置。 */
@@ -1415,8 +1412,6 @@ interface IAVColumn {
     type?: TAVCol,
     numberFormat?: string,
     dateFormat?: TAVDateFormat,
-    /** 仅用于新录入，不覆盖已有位置的坐标系。 */
-    location?: {defaultCoordinateSystem?: IAVCellLocationValue["coordinateSystem"]},
     template?: string,
     renderTemplate?: string,
     calc?: IAVCalc,
@@ -1528,14 +1523,13 @@ interface IAVCellValue {
 }
 
 /**
- * 坐标按原坐标系保存，不自动转换；文本顺序为纬度、经度。未知坐标系不能当作 WGS84 使用。
+ * 坐标统一使用 WGS84，不自动转换；文本顺序为纬度、经度。
  * 位置字段的文本筛选条件使用 IAVCellValue.text.content，不把查询词解析成坐标。
  */
 interface IAVCellLocationValue {
     name?: string;
     latitude?: number | null;
     longitude?: number | null;
-    coordinateSystem?: "" | "unknown" | "wgs84" | "gcj02" | "bd09";
     /** 原始坐标输入仅作为来源信息，不参与判空、筛选和排序。 */
     originalInput?: string;
 }

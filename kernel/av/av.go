@@ -210,8 +210,7 @@ type Key struct {
 	Rollup *Rollup `json:"rollup,omitempty"` // 汇总信息
 
 	// 日期
-	Date     *Date     `json:"date,omitempty"`     // 日期设置
-	Location *Location `json:"location,omitempty"` // 新输入位置的默认坐标系
+	Date *Date `json:"date,omitempty"` // 日期设置
 
 	// 创建时间
 	Created *Created `json:"created,omitempty"` // 创建时间设置
@@ -1457,8 +1456,8 @@ var (
 	ErrInvalidColumnAlign     = errors.New("invalid column align")
 	ErrSpecTooNew             = errors.New("attribute view spec is too new")
 	ErrRichTextSpecMismatch   = errors.New("attribute view rich text requires storage spec 9")
-	ErrMapSpecMismatch        = errors.New("attribute view map requires storage spec 12")
-	ErrLocationSpecMismatch   = errors.New("attribute view location requires storage spec 11")
+	ErrMapSpecMismatch        = errors.New("attribute view map requires storage spec 13")
+	ErrLocationSpecMismatch   = errors.New("attribute view location requires storage spec 13")
 	ErrFilterTooDeep          = errors.New("filter nesting depth exceeds the maximum allowed")
 )
 

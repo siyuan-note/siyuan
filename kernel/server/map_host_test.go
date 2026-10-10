@@ -17,15 +17,12 @@ import (
 )
 
 func TestMapHostPolicy(t *testing.T) {
-	for _, provider := range []string{"openfreemap", "amap", "tencent", "baidu"} {
+	for _, provider := range []string{"openfreemap"} {
 		policy, ok := mapHostPolicy("localhost:6806", provider)
 		if !ok || !strings.Contains(policy, "sandbox allow-scripts;") ||
 			strings.Contains(policy, "allow-same-origin") || strings.Contains(policy, "'unsafe-eval'") ||
 			strings.Contains(policy, "connect-src 'self'") || !strings.Contains(policy, "form-action 'none'") {
 			t.Fatalf("unsafe policy for %s: %s", provider, policy)
-		}
-		if provider != "openfreemap" && strings.Contains(policy, "tiles.openfreemap.org") {
-			t.Fatalf("provider sources leaked into %s", provider)
 		}
 		wrapper, valid := mapWrapperPolicy("localhost:6806", provider)
 		if !valid || !strings.Contains(wrapper, "frame-src localhost:6806/stage/map/index.html;") ||
@@ -52,33 +49,22 @@ func TestMapHostPolicy(t *testing.T) {
 	}
 }
 
-func TestMapHostAMapRestrictedWorkersAndScripts(t *testing.T) {
-	policy, ok := mapHostPolicy("localhost:6806", "amap")
-	if !ok {
-		t.Fatal("AMap policy unavailable")
-	}
-	directives := map[string]string{}
-	for _, part := range strings.Split(policy, ";") {
-		fields := strings.Fields(part)
-		if len(fields) > 0 {
-			directives[fields[0]] = strings.Join(fields[1:], " ")
+func TestMapHostRejectsRemovedProviders(t *testing.T) {
+	for _, provider := range []string{"amap", "tencent", "baidu", "custom", ""} {
+		if _, ok := mapHostPolicy("localhost:6806", provider); ok {
+			t.Fatalf("accepted provider %q", provider)
+		}
+		if _, ok := mapWrapperPolicy("localhost:6806", provider); ok {
+			t.Fatalf("accepted wrapper provider %q", provider)
 		}
 	}
-	for name, want := range map[string]string{
-		"script-src":  "localhost:6806/stage/build/map/host.js https://webapi.amap.com https://restapi.amap.com https://jsapi-service.amap.com",
-		"worker-src":  "blob:",
-		"connect-src": "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com https://jsapi.amap.com",
-		"frame-src":   "'none'",
-		"sandbox":     "allow-scripts",
-	} {
-		if directives[name] != want {
-			t.Fatalf("unexpected %s: %s", name, directives[name])
-		}
+	policy, ok := mapHostPolicy("localhost:6806", "openfreemap")
+	if !ok || !strings.Contains(policy, "https://tiles.openfreemap.org") {
+		t.Fatal("missing built-in tile source")
 	}
-	for _, provider := range []string{"tencent", "baidu"} {
-		other, _ := mapHostPolicy("localhost:6806", provider)
-		if !strings.Contains(other, "worker-src 'none'") || strings.Contains(other, "restapi.amap.com") {
-			t.Fatalf("AMap permissions leaked into %s", provider)
+	for _, host := range []string{"amap.com", "autonavi.com", "qq.com", "baidu.com", "bdimg.com"} {
+		if strings.Contains(policy, host) {
+			t.Fatalf("retained removed host %s", host)
 		}
 	}
 }
@@ -103,7 +89,7 @@ func TestMapHostStaticIsolationHeaders(t *testing.T) {
 	router.Static("/stage", filepath.Join(util.WorkingDir, "stage"))
 	router.GET("/api/conf", func(c *gin.Context) { c.String(200, "ordinary route") })
 	for _, path := range []string{"/stage/map/index.html?provider=openfreemap", "/stage/build/map/host.js",
-		"/stage/map/wrapper.html?provider=amap", "/stage/build/map/wrapper.js"} {
+		"/stage/map/wrapper.html?provider=openfreemap", "/stage/build/map/wrapper.js"} {
 		response := httptest.NewRecorder()
 		router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, path, nil))
 		if response.Code != 200 || response.Body.String() != "fixture" ||
@@ -120,12 +106,12 @@ func TestMapHostStaticIsolationHeaders(t *testing.T) {
 			t.Fatal("missing wrapper navigation boundary")
 		}
 	}
-	for _, path := range []string{"/stage/map/index.html", "/stage/map/index.html?provider=custom", "/stage/map/wrapper.html", "/stage/map/wrapper.html?provider=custom",
-		"/stage/map/private.json", "/stage/build/map/host.js.map", "/stage/map%2findex.html?provider=amap", "/stage/Map/wrapper.html?provider=amap",
-		"/stage/.%2fmap/index.html?provider=amap", "/stage/%2fmap/index.html?provider=amap",
-		"/stage/anything/..%2fmap/index.html?provider=amap", "/stage/build/.%2fmap/host.js",
-		"/stage/%5cmap%5cindex.html?provider=amap", "/stage/Map/index.html?provider=amap",
-		"/stage/build/MAP/host.js", "/stage/map./index.html?provider=amap", "/stage/map%20/index.html?provider=amap"} {
+	for _, path := range []string{"/stage/map/index.html", "/stage/map/index.html?provider=custom", "/stage/map/index.html?provider=amap", "/stage/map/wrapper.html?provider=tencent", "/stage/map/index.html?provider=baidu", "/stage/map/wrapper.html", "/stage/map/wrapper.html?provider=custom",
+		"/stage/map/private.json", "/stage/build/map/host.js.map", "/stage/map%2findex.html?provider=openfreemap", "/stage/Map/wrapper.html?provider=openfreemap",
+		"/stage/.%2fmap/index.html?provider=openfreemap", "/stage/%2fmap/index.html?provider=openfreemap",
+		"/stage/anything/..%2fmap/index.html?provider=openfreemap", "/stage/build/.%2fmap/host.js",
+		"/stage/%5cmap%5cindex.html?provider=openfreemap", "/stage/Map/index.html?provider=openfreemap",
+		"/stage/build/MAP/host.js", "/stage/map./index.html?provider=openfreemap", "/stage/map%20/index.html?provider=openfreemap"} {
 		response := httptest.NewRecorder()
 		router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, path, nil))
 		if response.Code == http.StatusOK {

@@ -17,7 +17,7 @@ describe("trusted map navigation wrapper", () => {
             setAttribute: (key: string, value: string) => { attributes[key] = value; },
             contentWindow: {postMessage: (...args: any[]) => childMessages.push(args)}, remove() { removed++; }};
         const scope = {
-            location: {hash: `#${instanceID}:${nonce}`, search: "?provider=amap", protocol: "https:", origin},
+            location: {hash: `#${instanceID}:${nonce}`, search: "?provider=openfreemap", protocol: "https:", origin},
             parent: {postMessage: (...args: any[]) => parentMessages.push(args)},
             document: {createElement: () => child, body: {appendChild() { appended++; }}},
             setTimeout() { return 1; }, clearTimeout() {},
@@ -38,7 +38,7 @@ describe("trusted map navigation wrapper", () => {
         assert.equal(appended, 1);
         assert.equal(attributes.sandbox, "allow-scripts");
         assert.equal(child.credentialless, true);
-        assert.equal(child.src, `/stage/map/index.html?provider=amap#${instanceID}:${nonce}`);
+        assert.equal(child.src, `/stage/map/index.html?provider=openfreemap#${instanceID}:${nonce}`);
         const port = {};
         const connect = {...fromParent, ports: [port], data: {...fromParent.data, type: "connect"}};
         onMessage(connect);

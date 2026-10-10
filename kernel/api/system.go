@@ -512,8 +512,6 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 	clonedConf.Api = nil
 	clonedConf.Repo = nil
 	clonedConf.Secrets = nil
-	// 地图服务是本机配置；导入设置时保留本机服务列表，不随配置包迁移。
-	clonedConf.Map = nil
 	clonedConf.NotebookCrypto = nil
 	clonedConf.Onboarding = nil
 	clonedConf.Publish = nil

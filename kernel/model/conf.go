@@ -73,7 +73,6 @@ type AppConf struct {
 	Search         *conf.Search         `json:"search"`         // 搜索配置
 	Flashcard      *conf.Flashcard      `json:"flashcard"`      // 闪卡配置
 	AI             *conf.AI             `json:"ai"`             // 人工智能配置
-	Map            *conf.Map            `json:"map"`            // 本机地图服务配置，不参与数据同步
 	OCR            *conf.OCR            `json:"ocr"`            // 本地图片文字识别
 	Secrets        *conf.Secrets        `json:"secrets"`        // 全局密钥库
 	Variables      *conf.Variables      `json:"variables"`      // 全局变量库
@@ -794,8 +793,6 @@ func InitConf() {
 	}
 	Conf.AI.Normalize()
 	Conf.AI.ReconcileModelIDs()
-	Conf.Map = normalizeMapConfig(Conf.Map)
-	Conf.Map.DecryptCredentials()
 
 	if nil == Conf.OIDC {
 		Conf.OIDC = conf.NewOIDC()
@@ -1269,9 +1266,6 @@ func (conf *AppConf) marshalForSave() ([]byte, error) {
 	if snapshot.AI != nil {
 		snapshot.AI.EncryptAPIKeys()
 	}
-	if snapshot.Map != nil {
-		snapshot.Map.EncryptCredentials()
-	}
 	if snapshot.OIDC != nil {
 		snapshot.OIDC.EncryptClientSecret()
 	}
@@ -1455,7 +1449,6 @@ func GetMaskedConf() (ret *AppConf, err error) {
 
 	ret.UserData = MaskedUserData
 	ret.MCPOAuth = ""
-	ret.Map = ret.Map.Masked()
 	ret.CookieKey = ""
 	if "" != ret.AccessAuthCode {
 		ret.AccessAuthCode = MaskedAccessAuthCode
@@ -1481,7 +1474,6 @@ func UpdateServerAddrs(serverAddrs []string) bool {
 // REF: https://github.com/siyuan-note/siyuan/issues/11364
 func HideConfSecret(c *AppConf) {
 	c.AI = &conf.AI{}
-	c.Map = conf.NewMap()
 	c.OIDC = &conf.OIDC{}
 	c.MCPOAuth = ""
 	c.CookieKey = ""

@@ -8148,9 +8148,6 @@
             "id": {
               "type": "string"
             },
-            "location": {
-              "$ref": "#/$defs/AVLocation"
-            },
             "name": {
               "type": "string"
             },
@@ -8856,9 +8853,6 @@
             "id": {
               "type": "string"
             },
-            "location": {
-              "$ref": "#/$defs/AVLocation"
-            },
             "name": {
               "type": "string"
             },
@@ -9041,9 +9035,6 @@
         },
         "id": {
           "type": "string"
-        },
-        "location": {
-          "$ref": "#/$defs/AVLocation"
         },
         "name": {
           "type": "string"
@@ -10002,39 +9993,15 @@
         }
       ]
     },
-    "AVLocation": {
-      "type": "object",
-      "properties": {
-        "defaultCoordinateSystem": {
-          "type": "string",
-          "enum": [
-            "",
-            "unknown",
-            "wgs84",
-            "gcj02",
-            "bd09"
-          ]
-        }
-      },
-      "additionalProperties": false
-    },
     "AVMapSettings": {
       "type": "object",
       "properties": {
         "locationKeyID": {
           "type": "string"
-        },
-        "serviceID": {
-          "type": "string"
-        },
-        "showRecordList": {
-          "type": "boolean"
         }
       },
       "required": [
-        "locationKeyID",
-        "serviceID",
-        "showRecordList"
+        "locationKeyID"
       ],
       "additionalProperties": false
     },
@@ -10043,18 +10010,10 @@
       "properties": {
         "locationKeyID": {
           "type": "string"
-        },
-        "serviceID": {
-          "type": "string"
-        },
-        "showRecordList": {
-          "type": "boolean"
         }
       },
       "required": [
-        "locationKeyID",
-        "serviceID",
-        "showRecordList"
+        "locationKeyID"
       ],
       "additionalProperties": false
     },
@@ -11917,9 +11876,6 @@
             "id": {
               "type": "string"
             },
-            "location": {
-              "$ref": "#/$defs/AVLocation"
-            },
             "name": {
               "type": "string"
             },
@@ -12951,16 +12907,6 @@
     "AVValueLocation": {
       "type": "object",
       "properties": {
-        "coordinateSystem": {
-          "type": "string",
-          "enum": [
-            "",
-            "unknown",
-            "wgs84",
-            "gcj02",
-            "bd09"
-          ]
-        },
         "latitude": {
           "type": "number"
         },
@@ -12979,23 +12925,6 @@
     "AVValueLocationInput": {
       "type": "object",
       "properties": {
-        "coordinateSystem": {
-          "enum": [
-            "",
-            "unknown",
-            "wgs84",
-            "gcj02",
-            "bd09"
-          ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "latitude": {
           "anyOf": [
             {
@@ -31106,160 +31035,18 @@
       },
       "additionalProperties": false
     },
-    "MapConfig": {
-      "type": "object",
-      "properties": {
-        "revision": {
-          "type": "string"
-        },
-        "services": {
-          "anyOf": [
-            {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/MapService"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "required": [
-        "revision",
-        "services"
-      ],
-      "additionalProperties": false
-    },
     "MapRuntime": {
       "type": "object",
       "properties": {
-        "apiKey": {
-          "type": "string"
-        },
         "provider": {
           "type": "string",
           "enum": [
-            "amap",
-            "tencent",
-            "baidu",
-            "openfreemap"
-          ]
-        },
-        "securityCode": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "provider"
-      ],
-      "additionalProperties": false
-    },
-    "MapRuntimeRequestInput": {
-      "type": "object",
-      "properties": {
-        "serviceID": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "serviceID"
-      ],
-      "additionalProperties": false
-    },
-    "MapService": {
-      "type": "object",
-      "properties": {
-        "configured": {
-          "type": "boolean"
-        },
-        "hasAPIKey": {
-          "type": "boolean"
-        },
-        "hasSecurityCode": {
-          "type": "boolean"
-        },
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "provider": {
-          "type": "string",
-          "enum": [
-            "amap",
-            "tencent",
-            "baidu",
             "openfreemap"
           ]
         }
       },
       "required": [
-        "configured",
-        "hasAPIKey",
-        "hasSecurityCode",
-        "id",
-        "name",
         "provider"
-      ],
-      "additionalProperties": false
-    },
-    "MapServiceInputInput": {
-      "type": "object",
-      "properties": {
-        "apiKey": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "provider": {
-          "type": "string",
-          "enum": [
-            "amap",
-            "tencent",
-            "baidu",
-            "openfreemap"
-          ]
-        },
-        "securityCode": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "name",
-        "provider"
-      ],
-      "additionalProperties": false
-    },
-    "MapSetConfRequestInput": {
-      "type": "object",
-      "properties": {
-        "expectedRevision": {
-          "type": "string"
-        },
-        "services": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/MapServiceInputInput"
-          }
-        }
-      },
-      "required": [
-        "expectedRevision",
-        "services"
       ],
       "additionalProperties": false
     },
@@ -50226,16 +50013,6 @@
         "logLevel": {
           "type": "string"
         },
-        "map": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/MapConfig"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "mcpOAuth": {
           "type": "string"
         },
@@ -50433,7 +50210,6 @@
         "lang",
         "langs",
         "logLevel",
-        "map",
         "mcpOAuth",
         "notebookCrypto",
         "ocr",
@@ -61435,217 +61211,6 @@
               "type": "string",
               "enum": [
                 "setAttrViewColAttributePanelVisibility"
-              ]
-            },
-            "avID": {
-              "type": "string"
-            },
-            "backRelationKeyID": {
-              "type": "string"
-            },
-            "blockID": {
-              "type": "string"
-            },
-            "blockIDs": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "cellUpdates": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/TransactionCellUpdate"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "context": {
-              "$ref": "#/$defs/TransactionContext"
-            },
-            "data": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "deckID": {
-              "type": "string"
-            },
-            "format": {
-              "type": "string"
-            },
-            "groupID": {
-              "type": "string"
-            },
-            "id": {
-              "type": "string"
-            },
-            "ignoreDefaultFill": {
-              "type": "boolean"
-            },
-            "isDetached": {
-              "type": "boolean"
-            },
-            "isTwoWay": {
-              "type": "boolean"
-            },
-            "keyID": {
-              "type": "string"
-            },
-            "layout": {
-              "type": "string"
-            },
-            "name": {
-              "type": "string"
-            },
-            "nextID": {
-              "type": "string"
-            },
-            "parentID": {
-              "type": "string"
-            },
-            "previousID": {
-              "type": "string"
-            },
-            "removeDest": {
-              "type": "boolean"
-            },
-            "retData": {
-              "type": "null"
-            },
-            "rootID": {
-              "type": "string"
-            },
-            "rowID": {
-              "type": "string"
-            },
-            "srcIDs": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "srcs": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "$ref": "#/$defs/TransactionSourceFieldsInput"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "targetGroupID": {
-              "type": "string"
-            },
-            "type": {
-              "type": "string",
-              "enum": [
-                "",
-                "block",
-                "text",
-                "number",
-                "date",
-                "select",
-                "mSelect",
-                "url",
-                "email",
-                "phone",
-                "location",
-                "mAsset",
-                "template",
-                "created",
-                "updated",
-                "checkbox",
-                "relation",
-                "rollup",
-                "lineNumber"
-              ]
-            },
-            "viewID": {
-              "type": "string"
-            },
-            "viewIDs": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          "required": [
-            "action",
-            "id",
-            "rootID",
-            "parentID",
-            "previousID",
-            "nextID",
-            "blockIDs",
-            "blockID",
-            "deckID",
-            "avID",
-            "srcIDs",
-            "srcs",
-            "isDetached",
-            "name",
-            "type",
-            "format",
-            "keyID",
-            "rowID",
-            "isTwoWay",
-            "backRelationKeyID",
-            "removeDest",
-            "layout",
-            "groupID",
-            "targetGroupID",
-            "viewID",
-            "ignoreDefaultFill",
-            "context",
-            "data",
-            "retData"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "action": {
-              "type": "string",
-              "enum": [
-                "setAttrViewColLocationDefaultCoordinateSystem"
               ]
             },
             "avID": {
@@ -89759,364 +89324,6 @@
             "action": {
               "type": "string",
               "enum": [
-                "setAttrViewColLocationDefaultCoordinateSystem"
-              ]
-            },
-            "avID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "backRelationKeyID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "blockID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "blockIDs": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "cellUpdates": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "$ref": "#/$defs/TransactionCellUpdateInput"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "context": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/TransactionContext"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "data": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "deckID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "format": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "groupID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "ignoreDefaultFill": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "isDetached": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "isTwoWay": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "keyID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "layout": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "name": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "nextID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "parentID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "previousID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "removeDest": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "retData": {
-              "type": "null"
-            },
-            "rootID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "rowID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "srcIDs": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "srcs": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "$ref": "#/$defs/TransactionSourceFieldsInput"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "targetGroupID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "type": {
-              "enum": [
-                "",
-                "block",
-                "text",
-                "number",
-                "date",
-                "select",
-                "mSelect",
-                "url",
-                "email",
-                "phone",
-                "location",
-                "mAsset",
-                "template",
-                "created",
-                "updated",
-                "checkbox",
-                "relation",
-                "rollup",
-                "lineNumber"
-              ],
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "viewID": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "viewIDs": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          "required": [
-            "action"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "action": {
-              "type": "string",
-              "enum": [
                 "insertAttrViewBlock"
               ]
             },
@@ -114184,7 +113391,6 @@
           "setAttrViewColIcon",
           "setAttrViewColDesc",
           "setAttrViewColAttributePanelVisibility",
-          "setAttrViewColLocationDefaultCoordinateSystem",
           "insertAttrViewBlock",
           "removeAttrViewBlock",
           "addAttrViewCol",
@@ -150388,8 +149594,8 @@
     },
     {
       "method": "POST",
-      "path": "/api/map/getConf",
-      "handler": "getMapConf",
+      "path": "/api/map/getRuntime",
+      "handler": "getMapRuntime",
       "authorization": [
         "authenticated",
         "admin"
@@ -150412,180 +149618,7 @@
               "data": {
                 "anyOf": [
                   {
-                    "$ref": "#/$defs/MapConfig"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  -1
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "closeTimeout": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "closeTimeout"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": true
-          }
-        ]
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/api/map/getRuntime",
-      "handler": "getMapRuntime",
-      "authorization": [
-        "authenticated",
-        "admin"
-      ],
-      "body": "json",
-      "request": {
-        "$ref": "#/$defs/MapRuntimeRequestInput"
-      },
-      "response": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  0
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
                     "$ref": "#/$defs/MapRuntime"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  -1
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "closeTimeout": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "closeTimeout"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": true
-          }
-        ]
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/api/map/setConf",
-      "handler": "setMapConf",
-      "authorization": [
-        "authenticated",
-        "admin",
-        "writable"
-      ],
-      "body": "json",
-      "request": {
-        "$ref": "#/$defs/MapSetConfRequestInput"
-      },
-      "response": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  0
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
-                    "$ref": "#/$defs/MapConfig"
                   },
                   {
                     "type": "null"

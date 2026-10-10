@@ -1,14 +1,12 @@
 import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {fetchSyncPost} from "../../../../util/fetch";
 import {getAVData} from "../virtualScroll";
-import {loadMapServices} from "./settings";
 import {openMapRecord} from "./openRecord";
 import {canLoadMapHost, destroyMap, getMapPoints, getMapSettings, registerMap} from "./state";
 import {createAVMapHost, isAVMapHostEnvironmentSupported} from "./host";
 import {createDesktopAVMapHost, isDesktopAVMapHostSupported} from "./desktopTransport";
 import type {AVMapHost} from "./host";
 import {AV_MAP_ATTRIBUTION_LINKS, AV_MAP_MAX_POINTS} from "./protocol";
-import {MAP_CONFIG_CHANGED_EVENT} from "../../../../config/mapRuntime";
 
 const getTheme = () => document.documentElement.getAttribute("data-theme-mode") === "dark" ? "dark" : "light";
 
@@ -52,14 +50,12 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
     let resizeObserver: ResizeObserver;
     let revision = 0;
     const offline = () => fallback(window.siyuan.languages.mapOffline);
-    const configChanged = () => { void renderMap(blockElement, protyle, data); };
     const current = registerMap(blockElement, {root, destroy: () => {
         revision++;
         host?.destroy();
         themeObserver?.disconnect();
         resizeObserver?.disconnect();
         window.removeEventListener("offline", offline);
-        window.removeEventListener(MAP_CONFIG_CHANGED_EVENT, configChanged);
     }});
     const fallback = (message: string) => {
         if (!current()) {
@@ -80,12 +76,7 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
         fallback(window.siyuan.languages.mapUnsupportedClient);
         return;
     }
-    window.addEventListener(MAP_CONFIG_CHANGED_EVENT, configChanged);
     try {
-        const services = await loadMapServices();
-        if (!current()) {
-            return;
-        }
         if (!settings.locationKeyID) {
             fallback(window.siyuan.languages.mapSelectLocationField);
             return;
@@ -94,16 +85,7 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
             fallback(window.siyuan.languages.mapMissingLocationField);
             return;
         }
-        if (!settings.serviceID) {
-            fallback(window.siyuan.languages.mapSelectService);
-            return;
-        }
-        const service = services.find(service => service.id === settings.serviceID);
-        if (!service) {
-            fallback(window.siyuan.languages.mapMissingService);
-            return;
-        }
-        const {points, skipped} = getMapPoints(view, service.provider);
+        const {points, skipped} = getMapPoints(view);
         root.querySelector(".av__map-skipped").textContent = Object.entries(skipped).reduce((text, [key, value]) =>
             text.replace("${" + key + "}", value.toString()), window.siyuan.languages.mapSkippedLocations);
         if (!canLoadMapHost({published: false, history: false, protocol: window.location.protocol})) {
@@ -131,16 +113,12 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
             fallback(window.siyuan.languages.mapOffline);
             return;
         }
-        if (!service.configured) {
-            fallback(window.siyuan.languages.mapCredentialsMissing);
-            return;
-        }
         status.textContent = window.siyuan.languages.mapLoading;
-        const response = await fetchSyncPost("/api/map/getRuntime", {serviceID: settings.serviceID});
+        const response = await fetchSyncPost("/api/map/getRuntime", {});
         if (!current()) {
             return;
         }
-        if (response.code !== 0 || response.data.provider !== service.provider) {
+        if (response.code !== 0 || response.data?.provider !== "openfreemap") {
             fallback(response.msg === "mapAuthenticationBypass" ? window.siyuan.languages.mapAuthenticationBypass :
                 window.siyuan.languages.mapLoadError);
             return;
@@ -149,12 +127,11 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
         const pointIDs = new Set(points.map(point => point.id));
         const activeRevision = ++revision;
         // 固定官方署名链接留在父页，避免为第三方 SDK 放宽沙箱弹窗权限。
-        attribution.innerHTML = AV_MAP_ATTRIBUTION_LINKS[service.provider].map(link =>
+        attribution.innerHTML = AV_MAP_ATTRIBUTION_LINKS.openfreemap.map(link =>
             `<a href="${escapeAttr(link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label)}</a>`).join(" · ");
         canvas.classList.remove("fn__none");
         host = (desktopHost ? createDesktopAVMapHost : createAVMapHost)(canvas, {
-            provider: response.data.provider,
-            credentials: {apiKey: response.data.apiKey, securityCode: response.data.securityCode},
+            provider: "openfreemap",
             theme: getTheme(),
             title: window.siyuan.languages.mapView,
             onReady: () => {

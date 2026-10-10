@@ -22,7 +22,6 @@ import type {TSettingTab} from "./setting/tabs";
 import type {App} from "../index";
 import {unmountAssetsTab} from "./assets";
 import {unmountOCRTab} from "./ocr";
-import {requestMapServiceConfiguration, unmountMapTab} from "./map";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {unmountWorkspaceStorage} from "./tabs/workspaceStorage";
 /// #if !MOBILE
@@ -78,8 +77,6 @@ export const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") 
             }
             const ocrRoot = settingDialogRef.element?.querySelector<HTMLElement>('.config__tab-container[data-name="ocr"]');
             if (ocrRoot) unmountOCRTab(ocrRoot);
-            const mapRoot = settingDialogRef.element?.querySelector<HTMLElement>('.config__tab-container[data-name="map"]');
-            if (mapRoot) unmountMapTab(mapRoot);
             clearSyncTabElement();
             clearAccessTabElement();
             const appRoot = settingDialogRef.element?.querySelector<HTMLElement>('.config__tab-container[data-name="app"]');
@@ -132,7 +129,7 @@ export const openPluginSetting = (app: App) => {
     /// #endif
 };
 
-export const openSetting = (app: App, tab?: TSettingTab, options?: {aiProvider?: "chatgpt"; missingMapServiceID?: string}) => {
+export const openSetting = (app: App, tab?: TSettingTab, options?: {aiProvider?: "chatgpt"}) => {
     const aiProvider = options?.aiProvider;
     if (tab === "bazaar" && !isBazaarAvailable()) {
         return;
@@ -141,7 +138,7 @@ export const openSetting = (app: App, tab?: TSettingTab, options?: {aiProvider?:
         return;
     }
     /// #if MOBILE
-    openMobileSetting(app, tab, undefined, options?.missingMapServiceID);
+    openMobileSetting(app, tab);
     if (aiProvider === "chatgpt") { openChatGPTProvider(); }
     /// #else
     /// #if !BROWSER
@@ -155,24 +152,16 @@ export const openSetting = (app: App, tab?: TSettingTab, options?: {aiProvider?:
         const dialog = window.siyuan.dialogs.find(item => item.element.getAttribute("data-key") === Constants.DIALOG_SETTING);
         if (dialog) {
             switchSettingTab(dialog.element, app, tab || "editor");
-            if (tab === "map" && options?.missingMapServiceID) {
-                requestMapServiceConfiguration(dialog.element.querySelector('.config__tab-container[data-name="map"]'), options.missingMapServiceID);
-            }
             if (aiProvider === "chatgpt") { openChatGPTProvider(); }
             return dialog;
         }
     }
     const dialog = openSettingDialog(app, tab);
-    if (tab === "map" && options?.missingMapServiceID) {
-        requestMapServiceConfiguration(dialog.element.querySelector('.config__tab-container[data-name="map"]'), options.missingMapServiceID);
-    }
     if (aiProvider === "chatgpt") { openChatGPTProvider(); }
     return dialog;
     /// #endif
 };
 
-export const openMapSettings = (app: App, missingServiceID?: string) =>
-    openSetting(app, "map", {missingMapServiceID: missingServiceID});
 
 export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemName: string, from: "bazaar" | "downloaded") => {
     if (!isBazaarAvailable()) {

@@ -1,26 +1,26 @@
-const coordinateSystems = new Set(["unknown", "wgs84", "gcj02", "bd09"]);
 const decimalCoordinate = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/;
 const coordinateInputNumber = "[+-]?(?:(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:e[+-]?\\d+)?|Infinity|NaN)";
 const coordinateInput = new RegExp(`^${coordinateInputNumber}$`, "i");
 const canonicalInput = new RegExp(`(?:^|;\\s*)${coordinateInputNumber}\\s*,\\s*${coordinateInputNumber}\\s*\\[[^\\]]+\\]\\s*$`, "i");
+const locationFields = new Set(["name", "latitude", "longitude", "originalInput"]);
 
-export const isAVLocationCoordinateSystem = (value: string): value is IAVCellLocationValue["coordinateSystem"] => {
-    return coordinateSystems.has(value);
-};
+const isLocationObject = (location: unknown): location is IAVCellLocationValue =>
+    !!location && typeof location === "object" && !Array.isArray(location) &&
+    Object.keys(location).every(key => locationFields.has(key));
 
 export const hasAVLocationCoordinates = (location?: IAVCellLocationValue) => {
-    return typeof location?.latitude === "number" && Number.isFinite(location.latitude) &&
+    return isLocationObject(location) &&
+        typeof location.latitude === "number" && Number.isFinite(location.latitude) &&
         location.latitude >= -90 && location.latitude <= 90 &&
         typeof location.longitude === "number" && Number.isFinite(location.longitude) &&
         location.longitude >= -180 && location.longitude <= 180;
 };
 
 export const validateAVLocation = (location?: IAVCellLocationValue) => {
-    if (!location) {
+    if (location == null) {
         return true;
     }
-    if (location.coordinateSystem !== undefined && location.coordinateSystem !== "" &&
-        !isAVLocationCoordinateSystem(location.coordinateSystem)) {
+    if (!isLocationObject(location)) {
         return false;
     }
     if ((location.name !== undefined && typeof location.name !== "string") ||
@@ -55,10 +55,8 @@ const formatAVLocationText = (location?: IAVCellLocationValue, longitudeFirst = 
     if (!hasAVLocationCoordinates(location)) {
         return name;
     }
-    const system = location.coordinateSystem || "unknown";
-    const label = {unknown: "unknown", wgs84: "WGS84", gcj02: "GCJ-02", bd09: "BD-09"}[system] || "unknown";
     const coordinates = longitudeFirst ? [location.longitude, location.latitude] : [location.latitude, location.longitude];
-    return `${name ? name + "; " : ""}${coordinates.map(formatAVLocationCoordinate).join(", ")} [${label}]`;
+    return `${name ? name + "; " : ""}${coordinates.map(formatAVLocationCoordinate).join(", ")} [WGS84]`;
 };
 
 // 复制、类型转换和内核导出保持既有的纬度、经度文本契约。
@@ -68,13 +66,17 @@ export const getAVLocationText = (location?: IAVCellLocationValue) => formatAVLo
 export const getAVLocationDisplayText = (location?: IAVCellLocationValue) => formatAVLocationText(location, true);
 
 // 事务按字段合并，删除旧坐标或来源时必须显式发送空值。
-export const createAVLocationReplacement = (location?: IAVCellLocationValue): IAVCellLocationValue => ({
-    name: location?.name?.trim() || "",
-    latitude: location?.latitude ?? null,
-    longitude: location?.longitude ?? null,
-    coordinateSystem: location?.coordinateSystem || "unknown",
-    originalInput: location?.originalInput ?? "",
-});
+export const createAVLocationReplacement = (location?: IAVCellLocationValue): IAVCellLocationValue => {
+    if (!validateAVLocation(location)) {
+        throw new Error("Invalid WGS84 location");
+    }
+    return {
+        name: location?.name?.trim() || "",
+        latitude: location?.latitude ?? null,
+        longitude: location?.longitude ?? null,
+        originalInput: location?.originalInput ?? "",
+    };
+};
 
 export const isAVLocationCoordinateInput = (text: string) => {
     const trimmed = text.trim();
@@ -103,19 +105,17 @@ export const parseAVLocationCoordinate = (text: string) => {
 
 // 只按用户明确选择的顺序解析，不根据范围猜测顺序或解析地图服务链接。
 export const parseAVLocationCoordinates = (text: string,
-                                          coordinateSystem: IAVCellLocationValue["coordinateSystem"] = "unknown",
                                           order: "latitudeLongitude" | "longitudeLatitude" = "latitudeLongitude"):
     IAVCellLocationValue | undefined => {
-    coordinateSystem = coordinateSystem || "unknown";
     const trimmed = text.trim();
     const unwrapped = trimmed.startsWith("(") && trimmed.endsWith(")") ? trimmed.slice(1, -1) : trimmed;
     const parts = unwrapped.split(",");
-    if (parts.length !== 2 || !isAVLocationCoordinateSystem(coordinateSystem)) {
+    if (parts.length !== 2) {
         return undefined;
     }
     const latitude = parseAVLocationCoordinate(parts[order === "longitudeLatitude" ? 1 : 0]);
     const longitude = parseAVLocationCoordinate(parts[order === "longitudeLatitude" ? 0 : 1]);
-    const value = {latitude, longitude, coordinateSystem, originalInput: text};
+    const value = {latitude, longitude, originalInput: text};
     return hasAVLocationCoordinates(value) ? value : undefined;
 };
 
@@ -123,6 +123,5 @@ export const parseAVLocationCoordinates = (text: string,
 export const areAVLocationsEqual = (left?: IAVCellLocationValue, right?: IAVCellLocationValue) => {
     return (left?.name?.trim() || "") === (right?.name?.trim() || "") &&
         (left?.latitude ?? null) === (right?.latitude ?? null) &&
-        (left?.longitude ?? null) === (right?.longitude ?? null) &&
-        (left?.coordinateSystem || "unknown") === (right?.coordinateSystem || "unknown");
+        (left?.longitude ?? null) === (right?.longitude ?? null);
 };

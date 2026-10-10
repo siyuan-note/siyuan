@@ -536,7 +536,7 @@ func automationValuePatch(value *av.Value) map[string]any {
 			location = &av.ValueLocation{}
 		}
 		ret[field] = map[string]any{"name": location.Name, "latitude": location.Latitude,
-			"longitude": location.Longitude, "coordinateSystem": location.CoordinateSystem,
+			"longitude":     location.Longitude,
 			"originalInput": location.OriginalInput}
 	}
 	for _, key := range []string{"id", "keyID", "blockID", "createdAt", "updatedAt", "renderedContent", "hasRenderTemplate"} {

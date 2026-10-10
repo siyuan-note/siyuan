@@ -21,7 +21,6 @@ const refreshActions = new Set<TOperation>([
     "setAttrViewColIcon",
     "setAttrViewColDesc",
     "setAttrViewColAttributePanelVisibility",
-    "setAttrViewColLocationDefaultCoordinateSystem",
     "setAttrViewName",
     "setAttrViewCustomColors",
     "updateAttrViewColTemplate",

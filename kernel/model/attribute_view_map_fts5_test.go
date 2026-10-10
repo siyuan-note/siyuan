@@ -52,7 +52,7 @@ func TestAttributeViewMapSettingsUndoAndEncryptedReplay(t *testing.T) {
 				}
 			}
 			before := view.Map.Settings
-			after := av.MapSettings{ServiceID: "missing-service", LocationKeyID: ast.NewNodeID(), ShowRecordList: false}
+			after := av.MapSettings{LocationKeyID: ast.NewNodeID()}
 			operation := func(settings av.MapSettings) *Operation {
 				return &Operation{Action: "setAttrViewMap", AvID: database.ID, ViewID: view.ID, Data: settings}
 			}

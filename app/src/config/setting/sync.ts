@@ -7,7 +7,6 @@ import {objEquals} from "../../util/functions";
 import {syncSettingTasks} from "./taskBlocker";
 import {processSync} from "../../dialog/processSystem";
 import {notifyOCRChanged} from "../ocrRuntime";
-import {notifyMapConfigChanged} from "../mapRuntime";
 import {refreshMountedBazaar} from "../bazaarTab";
 /// #if !MOBILE
 import {applyKeymap} from "../tabs/keymapRuntime";
@@ -84,7 +83,7 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
                 window.siyuan.config.keymap = next.keymap;
             }
             /// #endif
-            const simple = ["export", "fileTree", "search", "flashcard", "secrets", "variables", "repo", "system", "bazaar", "publish", "ocr", "map"] as const;
+            const simple = ["export", "fileTree", "search", "flashcard", "secrets", "variables", "repo", "system", "bazaar", "publish", "ocr"] as const;
             for (const key of simple) {
                 if (includes(key)) {
                     Object.assign(window.siyuan.config, {[key]: next[key]});
@@ -93,7 +92,6 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             if (includes("ocr") && next.ocr) {
                 notifyOCRChanged();
             }
-            if (includes("map")) notifyMapConfigChanged();
             if (includes("bazaar")) {
                 void refreshMountedBazaar();
             }
@@ -102,7 +100,7 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             const remountTabs = new Set<TSettingTab>();
             for (const namespace of namespaces.has("*") ? [...simple, "editor", "keymap", "appearance", "ai", "sync"] : namespaces) {
                 const tab = getSettingTabDefs().find(definition => definition.id === (tabs[namespace] || namespace));
-                if (tab && tab.id !== "ocr" && tab.id !== "map") remountTabs.add(tab.id);
+                if (tab && tab.id !== "ocr") remountTabs.add(tab.id);
             }
             if (accessChanged) remountTabs.add("access");
             remountTabs.forEach(tab => { void remountOpenSettingTab(tab); });

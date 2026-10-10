@@ -10,7 +10,7 @@ if (process.isMainFrame) {
     ipcRenderer.once("siyuan-map-port", (event, data) => {
         if (data?.version !== 1 || !/^[a-f0-9]{48}$/.test(data.instanceID || "") ||
             !/^[a-f0-9]{48}$/.test(data.nonce || "") || event.ports.length !== 1 ||
-            !["openfreemap", "amap", "tencent", "baidu"].includes(data.provider)) {
+            data.provider !== "openfreemap") {
             event.ports.forEach(port => port.close());
             return;
         }

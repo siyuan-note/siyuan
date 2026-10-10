@@ -37,7 +37,7 @@ const cell = loadModule<typeof import("./cell")>("cell");
 
 test("location cells display longitude first in every layout, row attributes and rollups", () => {
     const value: IAVCellValue = {type: "location", location: {
-        name: "<Home>", latitude: 0, longitude: 180, coordinateSystem: "wgs84", originalInput: "untrusted raw",
+        name: "<Home>", latitude: 0, longitude: 180, originalInput: "untrusted raw",
     }};
     for (const type of ["table", "list", "gallery", "kanban", "map"] as TAVView[]) {
         const html = cell.renderCell(value, 0, false, type);
@@ -56,8 +56,8 @@ test("location cells display longitude first in every layout, row attributes and
 });
 
 test("location copies preserve canonical text for cells, nested leaves and templates", () => {
-    const first: IAVCellValue = {type: "location", location: {latitude: 20, longitude: 30, coordinateSystem: "wgs84"}};
-    const second: IAVCellValue = {type: "location", location: {name: "Other", latitude: 40, longitude: 50, coordinateSystem: "gcj02"}};
+    const first: IAVCellValue = {type: "location", location: {latitude: 20, longitude: 30}};
+    const second: IAVCellValue = {type: "location", location: {name: "Other", latitude: 40, longitude: 50}};
     const makeLeaf = (value?: IAVCellValue, template = false) => ({
         dataset: value ? {cellValue: encodeURIComponent(JSON.stringify(value))} : {},
         textContent: template ? "Custom display" : value ? locationValue.getAVLocationDisplayText(value.location) : "Ordinary text",
@@ -73,9 +73,9 @@ test("location copies preserve canonical text for cells, nested leaves and templ
     }) as unknown as HTMLElement;
     assert.equal(cell.getCellText(firstLeaf as unknown as HTMLElement), "20, 30 [WGS84]");
     assert.equal(cell.getCellText(wrapper([firstLeaf])), "20, 30 [WGS84]");
-    assert.equal(cell.getCellText(wrapper([firstLeaf, makeLeaf(), secondLeaf])), "20, 30 [WGS84], Ordinary text, Other; 40, 50 [GCJ-02]");
+    assert.equal(cell.getCellText(wrapper([firstLeaf, makeLeaf(), secondLeaf])), "20, 30 [WGS84], Ordinary text, Other; 40, 50 [WGS84]");
     assert.equal(cell.getCellText(firstLeaf as unknown as HTMLElement, "display"), "30, 20 [WGS84]");
-    assert.equal(cell.getCellText(wrapper([firstLeaf, makeLeaf(), secondLeaf]), "display"), "30, 20 [WGS84], Ordinary text, Other; 50, 40 [GCJ-02]");
+    assert.equal(cell.getCellText(wrapper([firstLeaf, makeLeaf(), secondLeaf]), "display"), "30, 20 [WGS84], Ordinary text, Other; 50, 40 [WGS84]");
     assert.equal(cell.getCellText(makeLeaf(first, true) as unknown as HTMLElement), "Custom display");
     assert.equal(cell.getCellText(wrapper([makeLeaf(first, true)])), "Custom display");
     assert.equal(cell.getCellText(wrapper([makeLeaf(first, true)]), "display"), "Custom display");
@@ -83,7 +83,7 @@ test("location copies preserve canonical text for cells, nested leaves and templ
     assert.equal(cell.getCellText(attributeTemplate), "Custom display");
     assert.equal(cell.getCellText(attributeTemplate, "display"), "Custom display");
     assert.equal(cell.getCellValueText(first), "20, 30 [WGS84]");
-    assert.equal(locationValue.parseAVLocationCoordinates(cell.getCellValueText(first), "wgs84", "longitudeLatitude"), undefined);
+    assert.equal(locationValue.parseAVLocationCoordinates(cell.getCellValueText(first), "longitudeLatitude"), undefined);
     assert.throws(() => cell.genCellValue("location", cell.getCellValueText(first)));
 });
 
@@ -96,7 +96,7 @@ test("location hover text explicitly uses display order instead of clipboard ord
 
 test("selected location copies keep structured values and latitude-first TSV independent of display", () => {
     const value: IAVCellValue = {type: "location", location: {
-        name: "Office", latitude: 20, longitude: 30, coordinateSystem: "wgs84", originalInput: "20,30",
+        name: "Office", latitude: 20, longitude: 30, originalInput: "20,30",
     }};
     const selected = [{rowID: "row", rowIndex: 0, cell: {value}, column: {type: "location"}},
         {rowID: "row", rowIndex: 0, cell: {value}, column: {type: "location"}}] as import("./selectionState").IAVSelectedCell[];
@@ -108,14 +108,19 @@ test("selected location copies keep structured values and latitude-first TSV ind
 });
 
 test("location generic paste keeps place names and rejects coordinates without guessing", () => {
+    for (const coordinateSystem of ["wgs84", "gcj02", "bd09", "unknown"]) {
+        const tagged = {latitude: 20, longitude: 30, coordinateSystem};
+        assert.throws(() => cell.genCellValue("location", tagged), /Invalid WGS84 location/);
+        assert.deepEqual(tagged, {latitude: 20, longitude: 30, coordinateSystem});
+    }
     const raw = "  Home  ";
     const value = cell.genCellValue("location", raw);
     assert.equal(value.location.name, raw.trim());
     assert.equal(value.location.originalInput, raw);
-    assert.equal(value.location.coordinateSystem, "unknown");
+    assert.equal("coordinateSystem" in value.location, false);
     assert.equal(value.location.latitude, null);
     assert.equal(value.location.longitude, null);
-    for (const text of ["31.20, 121.40", "91, 0", "Home; 0, 0 [unknown]"]) {
+    for (const text of ["31.20, 121.40", "91, 0", "Home; 0, 0 [WGS84]"]) {
         assert.throws(() => cell.genCellValue("location", text));
     }
     assert.equal(inferAVPasteColumnType(["31.20, 121.40", "0, 0"]), "text");
@@ -124,7 +129,7 @@ test("location generic paste keeps place names and rejects coordinates without g
 
 test("location snapshots, drag fill and empty values retain structured zero coordinates", () => {
     const value: IAVCellValue = {type: "location", keyID: "key", blockID: "row", location: {
-        name: "Origin", latitude: 0, longitude: 0, coordinateSystem: "unknown", originalInput: "+0.0, -0.0",
+        name: "Origin", latitude: 0, longitude: 0, originalInput: "+0.0, -0.0",
     }};
     assert.equal(cellValue.cellValueIsEmpty(value), false);
     const cloned = genAVDragFillValue(value, {id: "next", keyID: "other", blockID: "other-row"});
@@ -160,7 +165,7 @@ test("location update, clear, structured paste and undo send full replacement pa
         "../../../dialog/message": {showMessage: (message: string) => warnings.push(message)},
     });
     const block = {dataset: {avId: "av", nodeId: "block"}, getAttribute: () => "table"} as unknown as HTMLElement;
-    const oldLocation: IAVCellLocationValue = {name: "Old", latitude: 20, longitude: 30, coordinateSystem: "wgs84", originalInput: "20,30"};
+    const oldLocation: IAVCellLocationValue = {name: "Old", latitude: 20, longitude: 30, originalInput: "20,30"};
     const selected = (location?: IAVCellLocationValue): import("./selectionState").IAVSelectedCell[] => [{
         rowID: "row", colID: "key", groupID: "", colIndex: 0, rowIndex: 0,
         cell: {id: "value", color: "", bgColor: "", valueType: "location", value: {type: "location", location}},
@@ -179,7 +184,7 @@ test("location update, clear, structured paste and undo send full replacement pa
         assert.equal(operation.data.location.latitude, null);
         assert.equal(operation.data.location.longitude, null);
         assert.equal(operation.data.location.originalInput, "");
-        assert.equal(operation.data.location.coordinateSystem, "unknown");
+        assert.equal("coordinateSystem" in operation.data.location, false);
         const undo = result.undoOperations[0];
         assert.equal(undo.action, "updateAttrViewCell");
         if (undo.action !== "updateAttrViewCell") {
@@ -208,32 +213,30 @@ test("location update, clear, structured paste and undo send full replacement pa
 
 test("template and automation value buttons preserve the structured location until explicitly edited", () => {
     const editor = loadModule<typeof import("./fieldValueEditor")>("fieldValueEditor");
-    const location: IAVCellLocationValue = {latitude: -90, longitude: -180, coordinateSystem: "gcj02", originalInput: "-90, -180"};
+    const location: IAVCellLocationValue = {latitude: -90, longitude: -180, originalInput: "-90, -180"};
     const column = {type: "location"} as IAVColumn;
     const html = editor.getValueInputHTML(column, {mode: "static", value: {type: "location", location}});
     assert.match(html, /data-value-type="location"/);
-    assert.match(html, /-180, -90 \[GCJ-02\]/);
+    assert.match(html, /-180, -90 \[WGS84\]/);
     const input = {dataset: {location: encodeURIComponent(JSON.stringify(location))}} as unknown as HTMLElement;
     assert.deepEqual(JSON.parse(JSON.stringify(editor.genFieldValue(column, input))), {
         type: "location", location: locationValue.createAVLocationReplacement(location),
     });
 });
 
-test("new template and automation locations use the field default without changing existing unknown values", () => {
+test("new template and automation locations use a single WGS84 value shape", () => {
     const editor = loadModule<typeof import("./fieldValueEditor")>("fieldValueEditor");
-    const column = {type: "location", location: {defaultCoordinateSystem: "gcj02"}} as IAVColumn;
+    const column = {type: "location"} as IAVColumn;
     const readValue = (value?: IAVNewItemFieldValue) => {
         const html = editor.getValueInputHTML(column, value);
         return JSON.parse(decodeURIComponent(/data-location="([^"]+)"/.exec(html)[1])) as IAVCellLocationValue;
     };
-    assert.equal(readValue().coordinateSystem, "gcj02");
-    assert.equal(readValue({mode: "static", value: {type: "location"}}).coordinateSystem, "unknown");
-    assert.equal(readValue({mode: "static", value: {type: "location", location: null}}).coordinateSystem, "unknown");
-    for (const location of [{coordinateSystem: "unknown"}, {name: "Existing"}, {coordinateSystem: "wgs84"}]) {
-        const value = {mode: "static", value: {type: "location", location}} as IAVNewItemFieldValue;
-        assert.deepEqual(readValue(value), location);
-        assert.deepEqual(value.value.location, location);
-    }
+    assert.deepEqual(readValue(), {});
+    assert.deepEqual(readValue({mode: "static", value: {type: "location"}}), {});
+    const location = {name: "Existing", latitude: 0, longitude: 0};
+    const value = {mode: "static", value: {type: "location", location}} as IAVNewItemFieldValue;
+    assert.deepEqual(readValue(value), location);
+    assert.deepEqual(value.value.location, location);
 });
 
 test("template and automation location editors are cancelled with their source control", () => {

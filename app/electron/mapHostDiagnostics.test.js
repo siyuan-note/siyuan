@@ -9,7 +9,8 @@ test("provider console diagnostics return fixed categories without SDK text, URL
         ["Refused eval because Content Security Policy script-src does not allow unsafe-eval; key=private", ["cspScript", "cspEval"]],
         ["SecurityError: Access to localStorage is denied for https://secret.invalid", ["storageUnavailable"]],
         ["WebGL initialization failed", ["webglUnavailable"]],
-        ["INVALID_USER_SCODE credential=private", ["amapInvalidSecurityCode"]],
+        ["INVALID_USER_SCODE credential=private", []],
+        ["INVALID_USER_KEY INVALID_USER_DOMAIN USERKEY_PLAT_NOMATCH", []],
         ["arbitrary provider text with key=private", []],
         [undefined, []],
     ];
@@ -20,23 +21,21 @@ test("provider console diagnostics return fixed categories without SDK text, URL
     }
 });
 
-test("Chromium CSP messages identify bounded resources and public hostnames without retaining their URLs", () => {
+test("Chromium CSP messages identify bounded resources and the fixed public tile hostname without retaining their URLs", () => {
     // Chromium 152 的三类资源拒绝文案，以及旧式 Refused to 文案。
     const cases = [
-        ["Loading the script 'https://g.alicdn.com/private.js?key=secret' violates the following Content Security Policy directive: \"script-src https://webapi.amap.com\". The action has been blocked.", "cspScript", "https:g.alicdn.com"],
-        ["Connecting to 'https://fourier.taobao.com/rp?secret=private' violates the following Content Security Policy directive: \"connect-src https://webapi.amap.com\".", "cspConnect", "https:fourier.taobao.com"],
+        ["Loading the script 'https://tiles.openfreemap.org/private.js?key=secret' violates the following Content Security Policy directive: \"script-src https://tiles.openfreemap.org\". The action has been blocked.", "cspScript", "https:tiles.openfreemap.org"],
+        ["Connecting to 'https://tiles.openfreemap.org/rp?secret=private' violates the following Content Security Policy directive: \"connect-src https://tiles.openfreemap.org\".", "cspConnect", "https:tiles.openfreemap.org"],
         ["Creating a worker from 'blob:null/private-token' violates the following Content Security Policy directive: \"worker-src 'none'\".", "cspWorker", "blob"],
         ["Refused to create a worker from 'data:text/javascript,private' because it violates the following Content Security Policy directive: \"worker-src 'none'\".", "cspWorker", "data"],
-        ["Refused to load the script 'https://private@restapi.amap.com/log?key=secret' because it violates the following Content Security Policy directive: \"script-src https://webapi.amap.com\".", "cspScript", "redacted"],
-        ["Refused to connect to 'http://vdata.amap.com/private' because it violates the following Content Security Policy directive: \"connect-src https://vdata.amap.com\".", "cspConnect", "http:vdata.amap.com"],
-        ["Connecting to 'https://webst02.is.autonavi.com/private' violates the following Content Security Policy directive: \"connect-src https://vdata.amap.com\".", "cspConnect", "https:webst02.is.autonavi.com"],
-        ["Loading the image 'http://webrd01.is.autonavi.com/private' violates the following Content Security Policy directive: \"img-src https://webapi.amap.com\".", "cspImage", "http:webrd01.is.autonavi.com"],
-        ["Connecting to 'https://wprd01.is.autonavi.com/private?key=secret' violates the following Content Security Policy directive: \"connect-src https://vdata.amap.com\".", "cspConnect", "https:wprd01.is.autonavi.com"],
-        ["Loading the script 'https://jsapi0.amap.com/private?key=secret' violates the following Content Security Policy directive: \"script-src https://webapi.amap.com\".", "cspScript", "https:jsapi0.amap.com"],
-        ["Executing inline script violates the following Content Security Policy directive 'script-src https://webapi.amap.com'. Either the 'unsafe-inline' keyword, a hash, or a nonce is required.", "cspScript", "inline"],
-        ["Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src https://webapi.amap.com\".", "cspEval", "eval"],
-        ["Compiling or instantiating a WebAssembly module violates the following Content Security policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src https://webapi.amap.com\".", "cspWasm", "wasm"],
-        ["Applying inline style violates the following Content Security Policy directive 'style-src-attr https://webapi.amap.com'.", "cspStyle", "inline"],
+        ["Refused to load the script 'https://private@tiles.openfreemap.org/log?key=secret' because it violates the following Content Security Policy directive: \"script-src https://tiles.openfreemap.org\".", "cspScript", "redacted"],
+        ["Refused to connect to 'http://tiles.openfreemap.org/private' because it violates the following Content Security Policy directive: \"connect-src https://tiles.openfreemap.org\".", "cspConnect", "http:tiles.openfreemap.org"],
+        ["Loading the image 'http://tiles.openfreemap.org/private' violates the following Content Security Policy directive: \"img-src https://tiles.openfreemap.org\".", "cspImage", "http:tiles.openfreemap.org"],
+        ["Loading the stylesheet 'https://tiles.openfreemap.org/private?key=secret' violates the following Content Security Policy directive: \"style-src 'none'\".", "cspStyle", "https:tiles.openfreemap.org"],
+        ["Executing inline script violates the following Content Security Policy directive 'script-src https://tiles.openfreemap.org'. Either the 'unsafe-inline' keyword, a hash, or a nonce is required.", "cspScript", "inline"],
+        ["Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src https://tiles.openfreemap.org\".", "cspEval", "eval"],
+        ["Compiling or instantiating a WebAssembly module violates the following Content Security policy directive because 'unsafe-eval' is not an allowed source of script: \"script-src https://tiles.openfreemap.org\".", "cspWasm", "wasm"],
+        ["Applying inline style violates the following Content Security Policy directive 'style-src-attr https://tiles.openfreemap.org'.", "cspStyle", "inline"],
     ];
     for (const [message, code, resource] of cases) {
         const result = classifyMapCSPResources(message);
@@ -47,16 +46,16 @@ test("Chromium CSP messages identify bounded resources and public hostnames with
 });
 
 test("unknown or malformed CSP resources stay bounded and URL contents cannot become diagnostic data", () => {
-    for (const [url, resource] of [["https://webapi.amap.com.evil.invalid/path?key=secret", "redacted"],
-        ["https://webapi.amap.com:8443/private", "https:webapi.amap.com"],
+    for (const [url, resource] of [["https://tiles.openfreemap.org.evil.invalid/path?key=secret", "redacted"],
+        ["https://tiles.openfreemap.org:8443/private", "https:tiles.openfreemap.org"],
         ["http://unknown.invalid/unsafe-eval?blob:secret", "redacted"], ["file:///secret", "other"],
         ["not a URL private", "other"], ["blob:https://private.invalid/secret", "blob"]]) {
-        const result = classifyMapCSPResources(`Loading the script '${url}' violates the following Content Security Policy directive: "script-src https://webapi.amap.com".`);
+        const result = classifyMapCSPResources(`Loading the script '${url}' violates the following Content Security Policy directive: "script-src https://tiles.openfreemap.org".`);
         assert.deepEqual(result, [{code: "cspScript", resource}]);
     }
     for (const message of [undefined, {}, "provider secret text", "Content Security Policy unknown directive private",
         "Loading the script 'https://private.invalid' violates a made-up directive",
-        "Loading the script 'https://webapi.amap.com/" + "private".repeat(5000) + "' violates Content Security Policy directive: \"script-src 'none'\"."]) {
+        "Loading the script 'https://tiles.openfreemap.org/" + "private".repeat(5000) + "' violates Content Security Policy directive: \"script-src 'none'\"."]) {
         assert.deepEqual(classifyMapCSPResources(message), []);
     }
 });
@@ -83,26 +82,27 @@ test("owner and other local addresses become fixed labels without disclosing nam
     assert.deepEqual(result, [{code: "cspConnect", resource: "owner-origin"}]);
 });
 
-test("resource validator accepts only fixed codes or short canonical hostnames in bounded public domain families", () => {
-    for (const resource of [...mapCSPResourceCodes, "https:webapi.amap.com", "https:wprd01.is.autonavi.com",
-        "http:g.alicdn.com", "https:fourier.taobao.com", "https:jsapi0.amap.com"]) {
+test("resource validator accepts only fixed codes or the exact public tile hostname", () => {
+    for (const resource of [...mapCSPResourceCodes, "https:tiles.openfreemap.org", "http:tiles.openfreemap.org"]) {
         assert.equal(isMapCSPResource(resource), true, resource);
     }
-    for (const resource of [undefined, null, {}, ["blob"], "https://webapi.amap.com", "https:webapi.amap.com:8443",
-        "https:webapi.amap.com/private", "https:webapi.amap.com?key=secret", "https:webapi.amap.com#secret",
-        "https:secret@webapi.amap.com", "https:webapi.amap.com.evil.invalid", "https:notamap.com",
+    for (const resource of [undefined, null, {}, ["blob"], "https://tiles.openfreemap.org", "https:tiles.openfreemap.org:8443",
+        "https:tiles.openfreemap.org/private", "https:tiles.openfreemap.org?key=secret", "https:tiles.openfreemap.org#secret",
+        "https:secret@tiles.openfreemap.org", "https:tiles.openfreemap.org.evil.invalid", "https:sub.tiles.openfreemap.org",
         "https:unknown.example", "https:127.0.0.1", "https:[::1]", "https:machine.local", "https:localhost",
-        "HTTPS:webapi.amap.com", "https:WEBAPI.amap.com", "https:1234567890.amap.com", "https:bad-.amap.com",
-        "https:" + "a".repeat(25) + ".amap.com", "https:" + ("a".repeat(24) + ".").repeat(4) + "amap.com"]) {
+        "HTTPS:tiles.openfreemap.org", "https:TILES.openfreemap.org", "https:tiles.openfreemap.org.",
+        "https:" + "a".repeat(100) + ".openfreemap.org"]) {
         assert.equal(isMapCSPResource(resource), false, String(resource));
     }
     assert.equal(MAX_MAP_DIAGNOSTICS, 64);
 });
 
-test("suspicious public host labels are redacted while the effective blocked directive survives", () => {
-    for (const host of ["unknown.example", "amap.com.evil.example", "a".repeat(25) + ".amap.com",
-        ("a".repeat(24) + ".").repeat(4) + "amap.com", "1234567890.amap.com", "bad-.amap.com"]) {
-        const message = `Loading the script 'https://${host}/private?key=secret' violates the following Content Security Policy directive: "script-src https://webapi.amap.com".`;
+test("other providers and unapproved tile subdomains are redacted while blocked directives survive", () => {
+    for (const host of ["unknown.example", "webapi.amap.com", "jsapi.amap.com", "webst02.is.autonavi.com",
+        "g.alicdn.com", "fourier.taobao.com", "map.qq.com", "api.map.baidu.com", "tiles.openfreemap.org.evil.example",
+        "sub.tiles.openfreemap.org", "tiles.openfreemap.org.", "a".repeat(100) + ".openfreemap.org"]) {
+        const message = `Loading the script 'https://${host}/private?key=secret' violates the following Content Security Policy directive: "script-src https://tiles.openfreemap.org".`;
         assert.deepEqual(classifyMapCSPResources(message), [{code: "cspScript", resource: "redacted"}]);
+        assert.equal(isMapCSPResource("https:" + host), false);
     }
 });

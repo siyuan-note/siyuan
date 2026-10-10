@@ -27,11 +27,12 @@ import (
 )
 
 const (
-	CurrentSpec   = 12
+	CurrentSpec   = 13
 	PlainTextSpec = 8
 	RichTextSpec  = 9
-	LocationSpec  = 11
-	MapSpec       = 12
+	// 单一 WGS84 位置和内置底图使用独立版本，防止其他格式的内核重写坐标含义。
+	LocationSpec = 13
+	MapSpec      = 13
 )
 
 const MaxFilterNestingDepth = 3

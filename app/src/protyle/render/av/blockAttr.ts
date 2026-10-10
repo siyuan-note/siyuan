@@ -157,9 +157,6 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     createEmptyAVValue(item.key.id, item.key.type, primaryValue?.blockID),
                     item.values?.[0] || {}
                 );
-                if (item.key.type === "location" && !item.values?.[0]) {
-                    value.location.coordinateSystem = item.key.location?.defaultCoordinateSystem || "unknown";
-                }
                 innerHTML += genAVAttributeRowHTML({
                     nodeID: id,
                     avID: table.avID,

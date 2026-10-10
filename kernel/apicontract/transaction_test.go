@@ -50,7 +50,6 @@ func TestTransactionFiniteActionSchemas(t *testing.T) {
 	}
 	for _, fixture := range []struct{ action, data string }{
 		{"setAttrViewColAttributePanelVisibility", `"hide-empty"`},
-		{"setAttrViewColLocationDefaultCoordinateSystem", `"wgs84"`},
 		{"update", `"<div>content</div>"`},
 		{"append", `"<div>content</div>"`},
 		{"move", `"<div>content</div>"`},

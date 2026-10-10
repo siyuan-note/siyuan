@@ -26,15 +26,15 @@ describe("isolated map runtime lifecycle", () => {
         let starts = 0;
         const stop = startAVMapRuntime(port as unknown as MessagePort, "one", "openfreemap", {} as HTMLElement,
             async (_init, _container, value) => { starts++; callbacks = value; return adapter; });
-        await send({type: "init", provider: "amap", credentials: {}, theme: "light"});
+        await send({type: "init", provider: "amap", theme: "light"});
         assert.equal(starts, 0);
-        await send({type: "init", provider: "openfreemap", credentials: {}, theme: "light"});
-        await send({type: "init", provider: "openfreemap", credentials: {}, theme: "dark"});
+        await send({type: "init", provider: "openfreemap", theme: "light"});
+        await send({type: "init", provider: "openfreemap", theme: "dark"});
         assert.equal(starts, 1);
         assert.deepEqual(replies, [{version: 1, instanceID: "one", type: "ready"}]);
-        const point = {id: "row-1", longitude: 0, latitude: 0, coordinateSystem: "wgs84"};
+        const point = {id: "row-1", longitude: 0, latitude: 0};
         await send({type: "setPoints", revision: 2, points: [{...point, title: "private"},
-            {...point, id: "invalid", coordinateSystem: "unknown"}]});
+            {...point, id: "invalid", latitude: 91}]});
         assert.deepEqual(calls.find((call) => call[0] === "setPoints"), ["setPoints", [point], 2]);
         assert.equal(calls.filter((call) => call[0] === "fit").length, 1);
         await send({type: "setPoints", revision: 1, points: []});
@@ -66,7 +66,7 @@ describe("isolated map runtime lifecycle", () => {
                 signal = value;
                 return new Promise<AVMapAdapter>((resolve) => { finish = resolve; });
             });
-        const pending = send({type: "init", provider: "openfreemap", credentials: {}, theme: "light"});
+        const pending = send({type: "init", provider: "openfreemap", theme: "light"});
         await send({type: "destroy"});
         assert.equal(signal.aborted, true);
         finish(adapter);
@@ -75,34 +75,34 @@ describe("isolated map runtime lifecycle", () => {
         assert.equal(replies.length, 0);
         assert.equal(calls.filter((call) => call[0] === "destroy").length, 1);
     });
-    it("does not initialize a key-backed provider without its required credentials", async () => {
-        for (const provider of ["amap", "tencent", "baidu"] as const) {
+    it("never initializes a removed provider", async () => {
+        for (const provider of ["amap", "tencent", "baidu"]) {
             const {port, replies, send} = fixture();
-            startAVMapRuntime(port as unknown as MessagePort, "one", provider, {} as HTMLElement,
+            startAVMapRuntime(port as unknown as MessagePort, "one", "openfreemap", {} as HTMLElement,
                 async () => assert.fail("must not load an SDK"));
-            await send({type: "init", provider, credentials: {}, theme: "light"});
-            assert.deepEqual(replies, [{version: 1, instanceID: "one", type: "error", code: "missingCredentials"}]);
+            await send({type: "init", provider, theme: "light"});
+            assert.deepEqual(replies, []);
         }
     });
     it("returns only a stable code when SDK loading fails with a secret-bearing exception", async () => {
         const {port, replies, send} = fixture();
         startAVMapRuntime(port as unknown as MessagePort, "one", "openfreemap", {} as HTMLElement,
             async () => { throw new Error("https://sdk.invalid?key=secret"); });
-        await send({type: "init", provider: "openfreemap", credentials: {}, theme: "light"});
+        await send({type: "init", provider: "openfreemap", theme: "light"});
         assert.deepEqual(replies, [{version: 1, instanceID: "one", type: "error", code: "sdkUnavailable"}]);
     });
     it("preserves only controlled loading stages without passing exception fields to the owner", async () => {
-        for (const code of ["sdkScriptLoadFailed", "sdkCallbackTimeout", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout"] as const) {
+        for (const code of ["sdkScriptLoadFailed", "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout"] as const) {
             const {port, replies, send} = fixture();
-            startAVMapRuntime(port as unknown as MessagePort, "one", "amap", {} as HTMLElement,
+            startAVMapRuntime(port as unknown as MessagePort, "one", "openfreemap", {} as HTMLElement,
                 async () => { throw Object.assign(new AVMapLoadError(code), {message: "https://sdk.invalid?key=secret"}); });
-            await send({type: "init", provider: "amap", credentials: {apiKey: "fixture-key", securityCode: "fixture-code"}, theme: "light"});
+            await send({type: "init", provider: "openfreemap", theme: "light"});
             assert.deepEqual(replies, [{version: 1, instanceID: "one", type: "error", code}]);
         }
         const {port, replies, send} = fixture();
         startAVMapRuntime(port as unknown as MessagePort, "one", "openfreemap", {} as HTMLElement,
             async () => { throw Object.assign(new Error("https://sdk.invalid?key=secret"), {code: "mapCreationFailed"}); });
-        await send({type: "init", provider: "openfreemap", credentials: {}, theme: "light"});
+        await send({type: "init", provider: "openfreemap", theme: "light"});
         assert.deepEqual(replies, [{version: 1, instanceID: "one", type: "error", code: "sdkUnavailable"}]);
     });
     it("does not report a provider rejection caused by teardown", async () => {
@@ -111,7 +111,7 @@ describe("isolated map runtime lifecycle", () => {
             async (_init, _container, _callbacks, signal) => new Promise<AVMapAdapter>((_resolve, reject) => {
                 signal.addEventListener("abort", () => reject(new AVMapLoadError("mapReadyTimeout")), {once: true});
             }));
-        const pending = send({type: "init", provider: "openfreemap", credentials: {}, theme: "light"});
+        const pending = send({type: "init", provider: "openfreemap", theme: "light"});
         await send({type: "destroy"});
         await pending;
         assert.deepEqual(replies, []);
@@ -127,12 +127,16 @@ describe("isolated map bootstrap ordering", () => {
         const parent = Object.defineProperty({postMessage: (message: unknown) => events.push(message)},
             "document", {get() { throw new Error("opaque sandbox"); }});
         const scope: any = {
-            origin: "null", location: {hash: `#${instanceID}:${nonce}`, search: "?provider=amap"},
-            parent, setTimeout, clearTimeout,
+            origin: "null", location: {hash: `#${instanceID}:${nonce}`, search: "?provider=openfreemap"},
+            parent, setTimeout, clearTimeout, maplibregl: {},
+            fetch: async () => ({ok: true, text: async () => "worker"}),
             addEventListener: (name: string, callback: (event?: any) => void) => listeners.set(name, callback),
             removeEventListener: (name: string) => listeners.delete(name),
-            document: {createElement: (tag: string) => ({tag}),
-                head: {appendChild: (element: any) => events.push({type: "policy", content: element.content})},
+            document: {createElement: (tag: string) => ({tag, remove() {}}),
+                head: {appendChild: (element: any) => {
+                    if (element.tag === "meta") events.push({type: "policy", content: element.content});
+                    else queueMicrotask(() => element.onload?.());
+                }},
                 getElementById: () => ({})},
         };
         if (desktop) {
@@ -183,7 +187,7 @@ describe("isolated map bootstrap ordering", () => {
     it("accepts a desktop preload port once and returns readiness only after the same CSP lock", async () => {
         const {events, listeners, port, message} = bootstrapFixture(true);
         const receive = listeners.get("message");
-        const valid = message("siyuan-map-desktop-connect", {provider: "amap"}, [port]);
+        const valid = message("siyuan-map-desktop-connect", {provider: "openfreemap"}, [port]);
         receive({...valid, source: {}});
         receive({...valid, data: {...valid.data, provider: "baidu"}});
         receive({...valid, data: {...valid.data, nonce: "old"}});

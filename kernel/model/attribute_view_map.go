@@ -19,7 +19,6 @@ import (
 func newAttributeViewMapLayout(attrView *av.AttributeView, fieldIDs []string) *av.LayoutMap {
 	return &av.LayoutMap{
 		LayoutTable: newAttributeViewListLayout(attrView, fieldIDs),
-		Settings:    av.MapSettings{ShowRecordList: true},
 	}
 }
 
@@ -184,22 +183,19 @@ func setAttrViewMap(operation *Operation) error {
 	if err != nil {
 		return err
 	}
-	// 完整设置必须包含三个字段，拒绝凭据和未知字段进入数据库事务。
+	// 设置只包含位置字段，拒绝其他内容进入数据库事务。
 	var settings struct {
-		ServiceID      *string `json:"serviceID"`
-		LocationKeyID  *string `json:"locationKeyID"`
-		ShowRecordList *bool   `json:"showRecordList"`
+		LocationKeyID *string `json:"locationKeyID"`
 	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	if err = decoder.Decode(&settings); err != nil {
 		return err
 	}
-	if settings.ServiceID == nil || settings.LocationKeyID == nil || settings.ShowRecordList == nil {
+	if settings.LocationKeyID == nil {
 		return fmt.Errorf("complete map settings are required")
 	}
-	next := av.MapSettings{ServiceID: *settings.ServiceID, LocationKeyID: *settings.LocationKeyID,
-		ShowRecordList: *settings.ShowRecordList}
+	next := av.MapSettings{LocationKeyID: *settings.LocationKeyID}
 	if err = next.Validate(); err != nil {
 		return err
 	}

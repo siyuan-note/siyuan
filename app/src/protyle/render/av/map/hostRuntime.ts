@@ -74,11 +74,6 @@ export const startAVMapRuntime = (port: MessagePort, instanceID: string, provide
                     return;
                 }
                 initializing = true;
-                if (provider !== "openfreemap" && !command.credentials.apiKey ||
-                    provider === "amap" && !command.credentials.securityCode) {
-                    fail("missingCredentials");
-                    return;
-                }
                 const next = await factory(command, container, {
                     onMarkerClick: (id, clickedRevision) => {
                         if (clickedRevision === revision && ids.has(id)) {

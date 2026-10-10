@@ -32,7 +32,7 @@ func TestAttributeViewLocationCSVAndMarkdownExport(t *testing.T) {
 	primary.Values = []*av.Value{{ID: ast.NewNodeID(), KeyID: primary.Key.ID, BlockID: rowID, Type: av.KeyTypeBlock, IsDetached: true, Block: &av.ValueBlock{Content: "Entry"}}}
 	key := av.NewKey(ast.NewNodeID(), "Location", "", av.KeyTypeLocation)
 	view.KeyValues = append(view.KeyValues, &av.KeyValues{Key: key, Values: []*av.Value{{ID: ast.NewNodeID(), KeyID: key.ID, BlockID: rowID, Type: av.KeyTypeLocation,
-		Location: &av.ValueLocation{Name: "Home", Latitude: modelLocationCoordinate(0), Longitude: modelLocationCoordinate(0), CoordinateSystem: "wgs84", OriginalInput: "private provenance"}}}})
+		Location: &av.ValueLocation{Name: "Home", Latitude: modelLocationCoordinate(0), Longitude: modelLocationCoordinate(0), OriginalInput: "private provenance"}}}})
 	view.Views[0].ItemIDs = []string{rowID}
 	view.Views[0].Table.Columns = []*av.ViewTableColumn{{BaseField: &av.BaseField{ID: primary.Key.ID}}, {BaseField: &av.BaseField{ID: key.ID}}}
 	for _, test := range []struct{ name, template, want string }{

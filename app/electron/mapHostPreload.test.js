@@ -41,6 +41,17 @@ test("invalid port metadata closes the port and subframes receive no capability"
     assert.deepEqual(subframe.exposed, {}); assert.deepEqual(subframe.listeners, {});
 });
 
+test("the transferred map port only admits the fixed OpenFreeMap provider", () => {
+    for (const provider of ["amap", "tencent", "baidu", "__proto__", undefined]) {
+        const s = setup(); let closed = false;
+        s.listeners["siyuan-map-port"]({ports: [{close() { closed = true; }}]}, {
+            version: 1, instanceID: "a".repeat(48), nonce: "b".repeat(48), provider,
+        });
+        assert.equal(closed, true);
+        assert.equal(s.posted.length, 0);
+    }
+});
+
 test("viewport accepts only bounded numeric dimensions and crop, without exposing IPC", () => {
     const s = setup();
     s.listeners["siyuan-map-viewport"]({}, {logicalSize: {width: 500, height: 400}, crop: {x: 20, y: 40}});

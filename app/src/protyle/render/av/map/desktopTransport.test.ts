@@ -70,7 +70,7 @@ const fixture = (warnings: unknown[][] = []) => {
     let ready = 0;
     const api = load(ipc, false, warnings);
     const host = api.createDesktopAVMapHost(container, {provider: "openfreemap", theme: "light",
-        credentials: {apiKey: "do-not-send", extra: "private"}, onError: (value: string) => errors.push(value),
+        onError: (value: string) => errors.push(value),
         onMarkerClick: (...args: unknown[]) => clicks.push(args), onReady: () => ready++});
     const instanceID = calls[0][1].instanceID;
     return {host, calls, listeners, domListeners, frames, timers, errors, clicks, doc, container, rect,
@@ -171,16 +171,14 @@ describe("desktop map transport", () => {
         assert.equal(warnings.length, mapCSPResourceCodes.length);
         assert.equal(JSON.stringify(warnings).includes("secret"), false);
     });
-    it("bounds public CSP diagnostics per instance and rejects raw addresses", () => {
+    it("deduplicates allowed resources and rejects arbitrary public hostnames", () => {
         const warnings: unknown[][] = [];
         const f = fixture(warnings);
         for (let i = 0; i < 100; i++) {
-            const value = {type: "diagnostic", code: "cspConnect", resource: `https:map${i}.amap.com`};
-            f.reply(value);
-            f.reply(value);
+            f.reply({type: "diagnostic", code: "cspConnect", resource: "https:tiles.openfreemap.org"});
+            f.reply({type: "diagnostic", code: "cspConnect", resource: "https:map" + i + ".invalid"});
         }
-        assert.equal(warnings.length, 64);
-        assert.deepEqual(warnings[0], ["Database map diagnostic:", "cspConnect", "https:map0.amap.com"]);
+        assert.deepEqual(warnings, [["Database map diagnostic:", "cspConnect", "https:tiles.openfreemap.org"]]);
         f.host.destroy();
     });
     it("logs only approved capability reason codes and never exception or response details", async () => {
@@ -419,11 +417,11 @@ describe("desktop map transport", () => {
         globalThis.ResizeObserver = Observer as any;
         const f = fixture();
         try {
-            const point = {id: "row", longitude: 1, latitude: 2, coordinateSystem: "wgs84", name: "private"};
+            const point = {id: "row", longitude: 1, latitude: 2, name: "private"};
             f.host.setPoints([point], 1);
             f.host.setTheme("dark");
             f.host.fit();
-            assert.deepEqual(f.calls[0][1].credentials, {});
+            assert.equal(f.calls[0][1].credentials, undefined);
             assert.match(f.calls[0][1].instanceID, /^[a-f0-9]{48}$/);
             await f.created();
             f.reply({type: "ready", instanceID: "old"});

@@ -58,19 +58,6 @@ func mapHostPolicy(host, provider string) (string, bool) {
 		images += " https://tiles.openfreemap.org"
 		styles += " " + local + "maplibre-gl.css"
 		workers = "blob:"
-	case "amap":
-		scripts += " https://webapi.amap.com https://restapi.amap.com https://jsapi-service.amap.com"
-		workers = "blob:"
-		connect = "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com https://jsapi.amap.com"
-		images += " https://webapi.amap.com https://a.amap.com https://*.is.autonavi.com"
-	case "tencent":
-		scripts += " https://map.qq.com"
-		connect = "https://map.qq.com https://apis.map.qq.com https://*.map.qq.com"
-		images += " https://map.qq.com https://*.map.qq.com"
-	case "baidu":
-		scripts += " https://api.map.baidu.com"
-		connect = "https://api.map.baidu.com https://*.map.bdimg.com https://*.bdimg.com"
-		images += " https://api.map.baidu.com https://*.map.bdimg.com https://*.bdimg.com https://*.map.baidu.com"
 	default:
 		return "", false
 	}

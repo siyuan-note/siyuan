@@ -4,8 +4,7 @@ const mapDiagnosticCodes = Object.freeze([
     "hostSetupFailed", "assetUnavailable", "documentLoadFailed", "bootstrapTimeout", "sdkTimeout",
     "providerRequestDenied", "providerInsecureRequest", "providerHTTPFailure", "providerNetworkFailure",
     "cspScript", "cspWorker", "cspConnect", "cspImage", "cspStyle", "cspEval", "cspWasm",
-    "storageUnavailable", "webglUnavailable", "amapInvalidKey", "amapInvalidSecurityCode",
-    "amapDomainMismatch", "amapPlatformMismatch", "geometryInvalid", "geometryLogicalBounds",
+    "storageUnavailable", "webglUnavailable", "geometryInvalid", "geometryLogicalBounds",
     "geometryCropBounds", "geometryWindowBounds", "geometryRoundedEmpty",
 ]);
 const mapCSPDiagnosticCodes = Object.freeze(["cspScript", "cspWorker", "cspConnect", "cspImage", "cspStyle", "cspEval", "cspWasm"]);
@@ -13,9 +12,7 @@ const mapCSPResourceCodes = Object.freeze([
     "blob", "data", "inline", "eval", "wasm", "other",
     "owner-origin", "local-address", "redacted",
 ]);
-const isMapCSPHostname = value => typeof value === "string" && value.length <= 96 &&
-    /(?:^|\.)(?:amap\.com|autonavi\.com|alicdn\.com|taobao\.com)$/.test(value) &&
-    value.split(".").every(label => /^[a-z](?:[a-z0-9-]{0,22}[a-z0-9])?$/.test(label));
+const isMapCSPHostname = value => value === "tiles.openfreemap.org";
 const isMapCSPResource = value => {
     if (typeof value !== "string" || value.length > 102) return false;
     if (mapCSPResourceCodes.includes(value)) return true;
@@ -72,10 +69,6 @@ const classifyMapConsoleMessage = message => {
     }
     if (/localStorage|sessionStorage/.test(message) && /denied|SecurityError|insecure/i.test(message)) ret.push("storageUnavailable");
     if (/webgl/i.test(message) && /fail|error|unsupported/i.test(message)) ret.push("webglUnavailable");
-    for (const [token, code] of [["INVALID_USER_KEY", "amapInvalidKey"], ["INVALID_USER_SCODE", "amapInvalidSecurityCode"],
-        ["INVALID_USER_DOMAIN", "amapDomainMismatch"], ["USERKEY_PLAT_NOMATCH", "amapPlatformMismatch"]]) {
-        if (message.includes(token)) ret.push(code);
-    }
     return ret;
 };
 

@@ -13,12 +13,6 @@ const mapHostFiles = Object.freeze({
     "/stage/build/map/maplibre-LICENSE.txt": ["stage/build/map/maplibre-LICENSE.txt", "text/plain; charset=utf-8"],
 });
 
-const providerHosts = Object.freeze({
-    openfreemap: ["tiles.openfreemap.org"],
-    amap: ["jsapi.amap.com", "jsapi-service.amap.com", "webapi.amap.com", "restapi.amap.com", "vdata.amap.com", "a.amap.com", "*.is.autonavi.com"],
-    tencent: ["map.qq.com", "apis.map.qq.com", "*.map.qq.com"],
-    baidu: ["api.map.baidu.com", "*.map.bdimg.com", "*.bdimg.com", "*.map.baidu.com"],
-});
 // Electron 默认启用 allow-file-access-from-files；地图仅加载 HTTP(S) 文档，并由独立会话拒绝文件协议。
 // 该开关只影响文件来源文档，不应误判为此地图宿主的安全绕过。
 const unsafeMapSwitches = Object.freeze([
@@ -35,7 +29,6 @@ const hasUnsafeMapSwitches = (commandLine) => unsafeMapSwitches.some(name => com
 
 const isRecord = value => !!value && typeof value === "object" && !Array.isArray(value);
 const isMapInstanceID = value => typeof value === "string" && /^[a-f0-9]{48}$/.test(value);
-const isMapProvider = value => typeof value === "string" && Object.hasOwn(providerHosts, value);
 const isMapTheme = value => value === "light" || value === "dark";
 const isMapRevision = value => Number.isSafeInteger(value) && value >= 0;
 const isMapIdentifier = value => typeof value === "string" && /^[a-zA-Z0-9_-]{1,128}$/.test(value);
@@ -48,42 +41,29 @@ const normalizeMapOrigin = value => {
         return;
     }
 };
-const sanitizeMapCredentials = (value, provider) => {
-    const result = {};
-    if (!isRecord(value) || provider === "openfreemap") return result;
-    for (const key of provider === "amap" ? ["apiKey", "securityCode"] : ["apiKey"]) {
-        const text = typeof value[key] === "string" ? value[key].trim() : "";
-        if (text && Buffer.byteLength(text, "utf8") <= 4096) result[key] = text;
-    }
-    return result;
-};
-const sanitizeMapPoints = (value, provider) => {
+const sanitizeMapPoints = value => {
     if (!Array.isArray(value)) return [];
     const ids = new Set();
     const points = [];
     for (const point of value.slice(0, 10000)) {
-        if (!isRecord(point) || !isMapIdentifier(point.id) || ids.has(point.id) ||
+        if (!isRecord(point) || "coordinateSystem" in point || !isMapIdentifier(point.id) || ids.has(point.id) ||
             !Number.isFinite(point.longitude) || Math.abs(point.longitude) > 180 ||
-            !Number.isFinite(point.latitude) || Math.abs(point.latitude) > 90 ||
-            (["openfreemap", "amap"].includes(provider) && Math.abs(point.latitude) > 85.0511287798066)) continue;
-        const systems = provider === "openfreemap" ? ["wgs84"] : provider === "baidu" ? ["bd09", "gcj02"] : ["gcj02"];
-        if (!systems.includes(point.coordinateSystem)) continue;
+            !Number.isFinite(point.latitude) || Math.abs(point.latitude) > 85.0511287798066) continue;
         ids.add(point.id);
-        points.push({id: point.id, longitude: point.longitude, latitude: point.latitude, coordinateSystem: point.coordinateSystem});
+        points.push({id: point.id, longitude: point.longitude, latitude: point.latitude});
     }
     return points;
 };
 const parseMapCreate = value => {
     if (!isRecord(value) || value.version !== 1 || !isMapInstanceID(value.instanceID) ||
-        !isMapProvider(value.provider) || !isMapTheme(value.theme)) return;
-    return {version: 1, instanceID: value.instanceID, type: "init", provider: value.provider,
-        credentials: sanitizeMapCredentials(value.credentials, value.provider), theme: value.theme};
+        value.provider !== "openfreemap" || !isMapTheme(value.theme)) return;
+    return {version: 1, instanceID: value.instanceID, type: "init", provider: "openfreemap", theme: value.theme};
 };
-const parseMapCommand = (value, instanceID, provider) => {
+const parseMapCommand = (value, instanceID) => {
     if (!isRecord(value) || value.version !== 1 || value.instanceID !== instanceID) return;
     const base = {version: 1, instanceID};
     if (value.type === "setPoints" && isMapRevision(value.revision) && Array.isArray(value.points)) {
-        return {...base, type: value.type, revision: value.revision, points: sanitizeMapPoints(value.points, provider)};
+        return {...base, type: value.type, revision: value.revision, points: sanitizeMapPoints(value.points)};
     }
     if (value.type === "theme" && isMapTheme(value.theme)) return {...base, type: value.type, theme: value.theme};
     if (["fit", "resize", "destroy"].includes(value.type)) return {...base, type: value.type};
@@ -95,8 +75,8 @@ const parseMapReply = (value, instanceID) => {
     if (value.type === "markerClick" && isMapIdentifier(value.id) && isMapRevision(value.revision)) {
         return {...base, type: value.type, id: value.id, revision: value.revision};
     }
-    if (value.type === "error" && ["unsupportedEnvironment", "missingCredentials", "invalidConfiguration",
-        "hostUnavailable", "sdkUnavailable", "mapUnavailable", "sdkScriptLoadFailed", "sdkCallbackTimeout",
+    if (value.type === "error" && ["unsupportedEnvironment", "invalidConfiguration",
+        "hostUnavailable", "sdkUnavailable", "mapUnavailable", "sdkScriptLoadFailed",
         "sdkGlobalMissing", "mapCreationFailed", "mapReadyTimeout", "hostLimitReached", "hostSetupFailed",
         "hostAttachFailed", "hostDocumentLoadFailed", "hostDocumentLoadTimeout", "hostDocumentReloaded",
         "hostDocumentMismatch", "hostRendererGone", "hostDestroyed", "hostPortSetupFailed", "hostPortClosed",
@@ -106,17 +86,16 @@ const parseMapReply = (value, instanceID) => {
     }
 };
 
-const isAllowedMapProviderURL = (value, provider) => {
+const isAllowedMapProviderURL = value => {
     try {
         const url = new URL(value);
-        return isMapProvider(provider) && url.protocol === "https:" && !url.username && !url.password &&
-            !url.port && !url.hash && providerHosts[provider].some(host => host.startsWith("*.")
-                ? url.hostname.endsWith(host.slice(1)) && url.hostname !== host.slice(2) : url.hostname === host);
+        return url.protocol === "https:" && !url.username && !url.password &&
+            !url.port && !url.hash && url.hostname === "tiles.openfreemap.org";
     } catch (_error) {
         return false;
     }
 };
-const getMapRequestPolicy = (value, method, origin, provider) => {
+const getMapRequestPolicy = (value, method, origin) => {
     try {
         if (!["GET", "HEAD"].includes(method) || typeof value !== "string" || value.length > 16384) return;
         const url = new URL(value);
@@ -124,46 +103,25 @@ const getMapRequestPolicy = (value, method, origin, provider) => {
         if (url.origin === origin) {
             if (!Object.hasOwn(mapHostFiles, url.pathname)) return;
             if (url.pathname === "/stage/map/index.html") {
-                if (url.search !== "?provider=" + provider) return;
+                if (url.search !== "?provider=openfreemap") return;
             } else if (url.search) return;
             return {type: "local", file: mapHostFiles[url.pathname], document: url.pathname === "/stage/map/index.html"};
         }
-        if (isAllowedMapProviderURL(value, provider)) return {type: "provider"};
+        if (isAllowedMapProviderURL(value)) return {type: "provider"};
     } catch (_error) {
         return;
     }
 };
 
-const createMapContentSecurityPolicy = (origin, provider) => {
-    if (!normalizeMapOrigin(origin) || !isMapProvider(provider)) throw new Error("Invalid map origin or provider");
+const createMapContentSecurityPolicy = origin => {
+    if (!normalizeMapOrigin(origin)) throw new Error("Invalid map origin");
     const assets = origin + "/stage/build/map/";
-    let scripts = assets + "host.js";
-    let connect = "'none'";
-    let images = "data: blob:";
-    let styles = "'unsafe-inline' " + origin + "/stage/map/host.css";
-    let workers = "'none'";
-    if (provider === "openfreemap") {
-        scripts += " " + assets + "maplibre-gl.js";
-        connect = "https://tiles.openfreemap.org " + assets + "maplibre-gl-csp-worker.js";
-        images += " https://tiles.openfreemap.org";
-        styles += " " + assets + "maplibre-gl.css";
-        workers = "blob:";
-    } else if (provider === "amap") {
-        scripts += " https://webapi.amap.com https://restapi.amap.com https://jsapi-service.amap.com";
-        workers = "blob:";
-        connect = "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com https://jsapi.amap.com";
-        images += " https://webapi.amap.com https://a.amap.com https://*.is.autonavi.com";
-    } else if (provider === "tencent") {
-        scripts += " https://map.qq.com";
-        connect = "https://map.qq.com https://apis.map.qq.com https://*.map.qq.com";
-        images += " https://map.qq.com https://*.map.qq.com";
-    } else {
-        scripts += " https://api.map.baidu.com";
-        connect = "https://api.map.baidu.com https://*.map.bdimg.com https://*.bdimg.com";
-        images += " https://api.map.baidu.com https://*.map.bdimg.com https://*.bdimg.com https://*.map.baidu.com";
-    }
+    const scripts = assets + "host.js " + assets + "maplibre-gl.js";
+    const connect = "https://tiles.openfreemap.org " + assets + "maplibre-gl-csp-worker.js";
+    const images = "data: blob: https://tiles.openfreemap.org";
+    const styles = "'unsafe-inline' " + origin + "/stage/map/host.css " + assets + "maplibre-gl.css";
     return "default-src 'none'; sandbox allow-scripts; script-src " + scripts + "; connect-src " + connect +
-        "; img-src " + images + "; style-src " + styles + "; font-src 'none'; worker-src " + workers +
+        "; img-src " + images + "; style-src " + styles + "; font-src 'none'; worker-src blob:" +
         "; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
 };
 
@@ -193,6 +151,6 @@ const parseMapGeometry = (value, zoom, contentBounds, report = () => {}) => {
         crop: {x: crop.x + left / zoom - x, y: crop.y + top / zoom - y}};
 };
 
-module.exports = {mapHostFiles, providerHosts, unsafeMapSwitches, hasUnsafeMapSwitches, normalizeMapOrigin,
+module.exports = {mapHostFiles, unsafeMapSwitches, hasUnsafeMapSwitches, normalizeMapOrigin,
     isMapInstanceID, parseMapCreate, parseMapCommand, parseMapReply, parseMapGeometry,
     isAllowedMapProviderURL, getMapRequestPolicy, createMapContentSecurityPolicy};

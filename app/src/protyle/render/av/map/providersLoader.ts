@@ -1,10 +1,7 @@
-import {AVMapInit, AVMapLoadError, AVMapLoadErrorCode, AVMapProvider, getAVMapLoadErrorCode} from "./protocol";
+import {AVMapInit, AVMapLoadError, AVMapLoadErrorCode, AVMapProvider, getAVMapLoadErrorCode, isAVMapProvider} from "./protocol";
 import {AVMapAdapter, AVMapAdapterCallbacks, createAVMapAdapter} from "./providers";
 
-const SDK_CALLBACK = "__siyuanMapSDKReady";
-
 interface AVMapPreparedAssets {
-    provider: AVMapProvider;
     locked: boolean;
     sdk?: any;
     workerSource?: string;
@@ -14,127 +11,67 @@ interface AVMapPreparedAssets {
 
 const preparedAssets = new WeakMap<Window, AVMapPreparedAssets>();
 
-const loadScript = (scope: Window, source: string, signal: AbortSignal, callback = false): Promise<void> => {
-    return new Promise((resolve, reject) => {
-        let script: HTMLScriptElement;
-        try {
-            script = scope.document.createElement("script");
-        } catch (_error) {
-            reject(new AVMapLoadError("sdkScriptLoadFailed"));
-            return;
-        }
-        const globals = scope as unknown as Record<string, any>;
+const loadAsset = (scope: Window, element: HTMLScriptElement | HTMLLinkElement, signal: AbortSignal): Promise<void> =>
+    new Promise((resolve, reject) => {
         let settled = false;
-        let callbackInstalled = false;
-        const finish = (success: boolean, code?: AVMapLoadErrorCode) => {
-            if (settled) {
-                return;
-            }
+        const finish = (success: boolean) => {
+            if (settled) return;
             settled = true;
             scope.clearTimeout(timer);
-            script.onload = null;
-            script.onerror = null;
+            element.onload = null;
+            element.onerror = null;
             signal.removeEventListener("abort", abort);
-            if (callbackInstalled) {
-                delete globals[SDK_CALLBACK];
-            }
             if (success) {
                 resolve();
             } else {
-                script.remove();
-                reject(code ? new AVMapLoadError(code) : new Error("sdkUnavailable"));
+                element.remove();
+                reject(new Error("hostUnavailable"));
             }
         };
         const abort = () => finish(false);
-        const timer = scope.setTimeout(() => finish(false, callback ? "sdkCallbackTimeout" : "sdkScriptLoadFailed"), 20000);
+        const timer = scope.setTimeout(abort, 20000);
         signal.addEventListener("abort", abort, {once: true});
+        element.onload = () => finish(true);
+        element.onerror = abort;
         try {
-            if (callback) {
-                globals[SDK_CALLBACK] = () => finish(true);
-                callbackInstalled = true;
-            } else {
-                script.onload = () => finish(true);
-            }
-            script.onerror = () => finish(false, "sdkScriptLoadFailed");
-            script.src = source;
-            script.referrerPolicy = "strict-origin-when-cross-origin";
-            script.async = true;
-            if (signal.aborted) {
-                finish(false);
-            } else {
-                scope.document.head.appendChild(script);
-            }
+            if (signal.aborted) finish(false);
+            else scope.document.head.appendChild(element);
         } catch (_error) {
-            finish(false, "sdkScriptLoadFailed");
+            finish(false);
         }
     });
-};
 
-// 只准备固定无凭据资产，不构造 Map、Worker 或 blob；只有 bootstrap 可以推进锁定阶段。
+// Only packaged assets are prepared here; no Map, Worker or blob exists before CSP is locked.
 export const prepareAVMapAssets = async (scope: Window, provider: AVMapProvider, signal: AbortSignal) => {
-    if (preparedAssets.has(scope) || signal.aborted) {
+    if (!isAVMapProvider(provider) || preparedAssets.has(scope) || signal.aborted) {
         throw new Error("hostUnavailable");
     }
-    const assets: AVMapPreparedAssets = {provider, locked: false, destroy: () => {
+    const assets: AVMapPreparedAssets = {locked: false, destroy: () => {
         if (assets.workerURL) {
             URL.revokeObjectURL(assets.workerURL);
             assets.workerURL = undefined;
         }
         assets.workerSource = undefined;
-        if (preparedAssets.get(scope) === assets) {
-            preparedAssets.delete(scope);
-        }
+        if (preparedAssets.get(scope) === assets) preparedAssets.delete(scope);
     }};
     preparedAssets.set(scope, assets);
     try {
-        if (provider === "openfreemap") {
-            await new Promise<void>((resolve, reject) => {
-                const stylesheet = scope.document.createElement("link");
-                stylesheet.rel = "stylesheet";
-                stylesheet.href = "/stage/build/map/maplibre-gl.css";
-                let settled = false;
-                const finish = (success: boolean) => {
-                    if (settled) {
-                        return;
-                    }
-                    settled = true;
-                    scope.clearTimeout(timer);
-                    signal.removeEventListener("abort", abort);
-                    stylesheet.onload = null;
-                    stylesheet.onerror = null;
-                    if (success) {
-                        resolve();
-                    } else {
-                        stylesheet.remove();
-                        reject(new Error("hostUnavailable"));
-                    }
-                };
-                const abort = () => finish(false);
-                const timer = scope.setTimeout(abort, 20000);
-                signal.addEventListener("abort", abort, {once: true});
-                stylesheet.onload = () => finish(true);
-                stylesheet.onerror = abort;
-                scope.document.head.appendChild(stylesheet);
-                if (signal.aborted) {
-                    finish(false);
-                }
-            });
-            await loadScript(scope, "/stage/build/map/maplibre-gl.js", signal);
-            const response = await scope.fetch("/stage/build/map/maplibre-gl-csp-worker.js", {
-                credentials: "omit", mode: "cors", cache: "no-store", referrerPolicy: "no-referrer", signal,
-            });
-            if (!response.ok) {
-                throw new Error("hostUnavailable");
-            }
-            assets.workerSource = await response.text();
-            assets.sdk = (scope as unknown as Record<string, any>).maplibregl;
-            if (!assets.sdk) {
-                throw new Error("hostUnavailable");
-            }
-        }
-        if (signal.aborted) {
-            throw new Error("hostUnavailable");
-        }
+        const stylesheet = scope.document.createElement("link");
+        stylesheet.rel = "stylesheet";
+        stylesheet.href = "/stage/build/map/maplibre-gl.css";
+        await loadAsset(scope, stylesheet, signal);
+        const script = scope.document.createElement("script");
+        script.src = "/stage/build/map/maplibre-gl.js";
+        script.referrerPolicy = "no-referrer";
+        script.async = true;
+        await loadAsset(scope, script, signal);
+        const response = await scope.fetch("/stage/build/map/maplibre-gl-csp-worker.js", {
+            credentials: "omit", mode: "cors", cache: "no-store", referrerPolicy: "no-referrer", signal,
+        });
+        if (!response.ok) throw new Error("hostUnavailable");
+        assets.workerSource = await response.text();
+        assets.sdk = (scope as unknown as Record<string, any>).maplibregl;
+        if (!assets.sdk || signal.aborted) throw new Error("hostUnavailable");
         return {lock: () => { assets.locked = true; }, destroy: assets.destroy};
     } catch (_error) {
         assets.destroy();
@@ -145,48 +82,21 @@ export const prepareAVMapAssets = async (scope: Window, provider: AVMapProvider,
 export const loadAVMapAdapter = async (init: AVMapInit, container: HTMLElement,
                                      callbacks: AVMapAdapterCallbacks, signal: AbortSignal): Promise<AVMapAdapter> => {
     const scope = container.ownerDocument.defaultView;
-    const globals = scope as unknown as Record<string, any>;
-    const {provider, credentials} = init;
     const assets = preparedAssets.get(scope);
-    if (!assets?.locked || assets.provider !== provider || signal.aborted) {
+    if (!isAVMapProvider(init.provider) || !assets?.locked || signal.aborted) {
         throw new Error("hostUnavailable");
     }
-    if (provider !== "openfreemap" && !credentials.apiKey || provider === "amap" && !credentials.securityCode) {
-        throw new Error("missingCredentials");
-    }
     try {
-        let sdk: any;
-        if (provider === "openfreemap") {
-            // blob 与 Worker 的创建都晚于 CSP 锁定，不继承启动阶段的本地网络权限。
-            assets.workerURL = URL.createObjectURL(new Blob([assets.workerSource], {type: "text/javascript"}));
-            assets.workerSource = undefined;
-            sdk = assets.sdk;
-            sdk.setWorkerUrl(assets.workerURL);
-        } else {
-            const scriptURL = new URL(provider === "amap" ? "https://webapi.amap.com/maps" :
-                provider === "tencent" ? "https://map.qq.com/api/gljs" : "https://api.map.baidu.com/api");
-            scriptURL.searchParams.set("v", provider === "amap" ? "2.0" : provider === "tencent" ? "1.exp" : "4.0");
-            scriptURL.searchParams.set(provider === "baidu" ? "ak" : "key", credentials.apiKey);
-            scriptURL.searchParams.set("callback", SDK_CALLBACK);
-            if (provider === "amap") {
-                globals._AMapSecurityConfig = {securityJsCode: credentials.securityCode};
-            }
-            await loadScript(scope, scriptURL.href, signal, true);
-            sdk = globals[provider === "amap" ? "AMap" : provider === "tencent" ? "TMap" : "BMap"];
-        }
-        if (signal.aborted) {
-            throw new Error("sdkUnavailable");
-        }
-        if (!sdk) {
-            throw new AVMapLoadError("sdkGlobalMissing");
-        }
+        // Worker and blob inherit the locked policy, with no local network authority.
+        assets.workerURL = URL.createObjectURL(new Blob([assets.workerSource], {type: "text/javascript"}));
+        assets.workerSource = undefined;
+        const sdk = assets.sdk;
+        sdk.setWorkerUrl(assets.workerURL);
         let adapter: AVMapAdapter;
         await new Promise<void>((resolve, reject) => {
             let settled = false;
             const finish = (success: boolean, code?: AVMapLoadErrorCode) => {
-                if (settled) {
-                    return;
-                }
+                if (settled) return;
                 settled = true;
                 scope.clearTimeout(timer);
                 signal.removeEventListener("abort", abort);
@@ -204,14 +114,12 @@ export const loadAVMapAdapter = async (init: AVMapInit, container: HTMLElement,
             const timer = scope.setTimeout(() => finish(false, "mapReadyTimeout"), 20000);
             signal.addEventListener("abort", abort, {once: true});
             try {
-                adapter = createAVMapAdapter(provider, sdk, container, {...callbacks,
-                    onReady: () => finish(true), onError: (code) => {
+                adapter = createAVMapAdapter(init.provider, sdk, container, {...callbacks,
+                    onReady: () => finish(true), onError: code => {
                         callbacks.onError(code);
                         finish(false);
-                    }}, {bd09: globals.BMAP_COORD_BD09, gcj02: globals.BMAP_COORD_GCJ02});
-                if (signal.aborted) {
-                    finish(false);
-                }
+                    }});
+                if (signal.aborted) finish(false);
             } catch (_error) {
                 finish(false, "mapCreationFailed");
             }
@@ -228,9 +136,7 @@ export const loadAVMapAdapter = async (init: AVMapInit, container: HTMLElement,
     } catch (error) {
         assets.destroy();
         const code = getAVMapLoadErrorCode(error);
-        if (code) {
-            throw new AVMapLoadError(code);
-        }
+        if (code) throw new AVMapLoadError(code);
         throw new Error("sdkUnavailable");
     }
 };

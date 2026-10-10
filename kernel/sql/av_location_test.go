@@ -1,33 +1,33 @@
 package sql
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/av"
 )
 
-func TestLocationColumnDefaultOnlyFillsMissingCells(t *testing.T) {
+func TestLocationRenderFillsEmptyCellsAndPreservesStoredValues(t *testing.T) {
+	zero := 0.0
 	for _, test := range []struct {
 		name  string
 		value *av.Value
-		want  string
+		want  *av.ValueLocation
 	}{
-		{"missing", nil, "gcj02"},
-		{"nil payload", &av.Value{Type: av.KeyTypeLocation}, ""},
-		{"empty", &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{}}, ""},
-		{"name only", &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{Name: "Home"}}, ""},
-		{"unknown", &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{CoordinateSystem: "unknown"}}, "unknown"},
-		{"explicit", &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{CoordinateSystem: "wgs84"}}, "wgs84"},
+		{"missing", nil, &av.ValueLocation{}},
+		{"nil payload", &av.Value{Type: av.KeyTypeLocation}, &av.ValueLocation{}},
+		{"empty", &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{}}, &av.ValueLocation{}},
+		{"name only", &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{Name: "Home"}}, &av.ValueLocation{Name: "Home"}},
+		{"zero coordinates", &av.Value{Type: av.KeyTypeLocation, Location: &av.ValueLocation{Latitude: &zero, Longitude: &zero, OriginalInput: "0,0"}},
+			&av.ValueLocation{Latitude: &zero, Longitude: &zero, OriginalInput: "0,0"}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			base := &av.BaseValue{ID: "20261009000000-locaval", ValueType: av.KeyTypeLocation, Value: test.value}
-			fillAttributeViewBaseValue(base, "location", "20261009000000-locarow", "", "", "", false, &av.Location{DefaultCoordinateSystem: "gcj02"})
-			if base.Value.Location.CoordinateSystem != test.want {
-				t.Fatalf("default overwrote existing location: %+v", base.Value.Location)
-			}
-			fillAttributeViewBaseValue(base, "location", "20261009000000-locarow", "", "", "", false, &av.Location{DefaultCoordinateSystem: "bd09"})
-			if base.Value.Location.CoordinateSystem != test.want {
-				t.Fatal("changing the column default reinterpreted existing cell")
+			for range 2 {
+				fillAttributeViewBaseValue(base, "location", "20261009000000-locarow", "", "", "", false)
+				if base.Value == nil || !reflect.DeepEqual(base.Value.Location, test.want) {
+					t.Fatalf("render changed stored location: %+v", base.Value)
+				}
 			}
 		})
 	}

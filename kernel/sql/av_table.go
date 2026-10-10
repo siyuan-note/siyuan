@@ -73,7 +73,6 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				Relation:       key.Relation,
 				Rollup:         key.Rollup,
 				Date:           key.Date,
-				Location:       key.Location,
 				Created:        key.Created,
 				Updated:        key.Updated,
 			},
@@ -128,7 +127,7 @@ func renderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				filedDateIsTime = col.Date.FillSpecificTime
 			}
 			fillAttributeViewBaseValue(tableCell.BaseValue, col.ID, rowID, col.NumberFormat, col.DateFormat, col.Template,
-				filedDateIsTime, col.Location)
+				filedDateIsTime)
 			tableRow.Cells = append(tableRow.Cells, tableCell)
 		}
 		ret.Rows = append(ret.Rows, &tableRow)

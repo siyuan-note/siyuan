@@ -10,7 +10,6 @@ import {mountSyncTabExtras, patchSyncConfig} from "../tabs/syncRuntime";
 import {mountAccessTab} from "../tabs/accessRuntime";
 import {collectAssetsTabSearchStrings, mountAssetsTab} from "../assets";
 import {mountOCRTab, registerOCRTab} from "../ocr";
-import {mountMapTab, registerMapTab} from "../map";
 import {collectBazaarTabSearchStrings, mountBazaarTab} from "../bazaarTab";
 /// #if !MOBILE
 import {collectKeymapTabSearchStrings, mountKeymapTab} from "../tabs/keymapUi";
@@ -93,12 +92,6 @@ const createSettingTabs = () => {
             title: () => "OCR",
             afterMount: mountOCRTab,
         }, registerOCRTab),
-        map: setting.tab({
-            id: "map",
-            icon: "iconGlobe",
-            title: () => window.siyuan.languages.mapSettings,
-            afterMount: mountMapTab,
-        }, registerMapTab),
         export: setting.tab({
             id: "export",
             icon: "iconUpload",

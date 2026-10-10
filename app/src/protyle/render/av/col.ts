@@ -1,6 +1,5 @@
 import {hasAVCapability, isAVReadonlyType, isAVSelectType, isAVTimestampType} from "./capabilities";
 import {isTableLikeView} from "./viewType";
-import {bindLocationDefaultCoordinateSystem} from "./locationColumn";
 import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
 import {MenuItem} from "../../../menus/Menu";
@@ -162,12 +161,6 @@ export const getEditHTML = (options: {
         colData.options.forEach(item => {
             html += getColOptionHTML(item);
         });
-    } else if (colData.type === "location") {
-        html += `<button class="b3-menu__separator" data-id="separator_2"></button>
-<button class="b3-menu__item" data-type="locationDefaultCoordinateSystem">
-    <span class="b3-menu__label">${window.siyuan.languages.defaultCoordinateSystem}</span>
-    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
-</button>`;
     } else if (colData.type === "number") {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
 <button class="b3-menu__item" data-type="numberFormat" data-format="${colData.numberFormat}">
@@ -314,21 +307,6 @@ export const bindEditEvent = (options: {
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
     bindDateCalendarMenu(options.protyle, avID, colData, options.menuElement);
-    if (colData.type === "location") {
-        bindLocationDefaultCoordinateSystem({
-            menuElement: options.menuElement,
-            column: colData,
-            onChange: system => {
-                const previous = colData.location?.defaultCoordinateSystem || "unknown";
-                transaction(options.protyle, [{
-                    action: "setAttrViewColLocationDefaultCoordinateSystem", id: colId, avID, data: system,
-                }], [{
-                    action: "setAttrViewColLocationDefaultCoordinateSystem", id: colId, avID, data: previous,
-                }]);
-                colData.location = {...colData.location, defaultCoordinateSystem: system};
-            },
-        });
-    }
     const visibilityElement = options.menuElement.querySelector('[data-type="attributePanelVisibility"]');
     if (visibilityElement) {
         const choices: Array<[IAVColumn["attributePanelVisibility"], string]> = [

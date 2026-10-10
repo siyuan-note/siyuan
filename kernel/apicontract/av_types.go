@@ -148,20 +148,18 @@ type AVValuePhone struct {
 	Content string `json:"content" api:"optional,nullable"`
 }
 
-// AVValueLocation 保存单个位置的原始坐标，不执行坐标系转换。
+// AVValueLocation 保存单个位置的 WGS84 坐标，不执行坐标系转换。
 // API 使用具名成员，不接受无标签的坐标数组。
 // 界面按经度、纬度显示，坐标对粘贴默认经度在前且可显式切换；规范文本复制与导出保留纬度、经度顺序。
 // 纬度和经度必须同时为空或同时提供，范围分别为 [-90,90] 和 [-180,180]，零是有效坐标。
 // 更新时省略成员保留原值，显式 null 同时清空两个坐标；名称可以独立存在。
-// 坐标系省略或为空时按 unknown 处理，不推断 WGS84；其他非枚举值会被拒绝。
-// 后续地图适配必须显式选择坐标顺序与转换规则，未知坐标系不能直接视为 WGS84。
+// 位置值拒绝坐标系及其他额外字段，字段不提供默认坐标系设置。
 // 位置字段的文本筛选条件放在 AVValue.Text.Content，不将搜索词解析成坐标。
 type AVValueLocation struct {
-	Name             string   `json:"name,omitempty" api:"optional,nullable"`
-	Latitude         *float64 `json:"latitude,omitempty" api:"optional,nullable"`
-	Longitude        *float64 `json:"longitude,omitempty" api:"optional,nullable"`
-	CoordinateSystem string   `json:"coordinateSystem,omitempty" api:"optional,nullable,enum=|unknown|wgs84|gcj02|bd09"`
-	// 来源文本不参与判空、筛选和排序。仅修改名称时保留；修改坐标或有效坐标系时若省略则清空。
+	Name      string   `json:"name,omitempty" api:"optional,nullable"`
+	Latitude  *float64 `json:"latitude,omitempty" api:"optional,nullable"`
+	Longitude *float64 `json:"longitude,omitempty" api:"optional,nullable"`
+	// 来源文本不参与判空、筛选和排序。仅修改名称时保留；修改坐标时若省略则清空。
 	OriginalInput string `json:"originalInput,omitempty" api:"optional,nullable"`
 }
 
@@ -250,7 +248,6 @@ type AVKey struct {
 	Relation       *AVRelation `json:"relation,omitempty" api:"optional,nullable"`
 	Rollup         *AVRollup   `json:"rollup,omitempty" api:"optional,nullable"`
 	Date           *AVDate     `json:"date,omitempty" api:"optional,nullable"`
-	Location       *AVLocation `json:"location,omitempty" api:"optional,nullable"`
 	Created        *AVCreated  `json:"created,omitempty" api:"optional,nullable"`
 	Updated        *AVUpdated  `json:"updated,omitempty" api:"optional,nullable"`
 }
@@ -260,12 +257,6 @@ type AVSelectOption struct {
 	Color         string                `json:"color" api:"optional,nullable"`
 	Desc          string                `json:"desc" api:"optional,nullable"`
 	ResolvedColor *AVAttributeViewColor `json:"resolvedColor,omitempty" api:"optional,nullable"`
-}
-
-// AVLocation 的默认坐标系仅供新录入使用，不改变任何已存位置或复制、导入的值。
-// 每个 AVValueLocation 的坐标系独立保存，显式 unknown 不是等待应用默认值的空值。
-type AVLocation struct {
-	DefaultCoordinateSystem string `json:"defaultCoordinateSystem,omitempty" api:"optional,nullable,enum=|unknown|wgs84|gcj02|bd09"`
 }
 
 type AVRelation struct {
@@ -336,7 +327,6 @@ type AVBaseInstanceField struct {
 	Relation       *AVRelation `json:"relation,omitempty" api:"optional,nullable"`
 	Rollup         *AVRollup   `json:"rollup,omitempty" api:"optional,nullable"`
 	Date           *AVDate     `json:"date,omitempty" api:"optional,nullable"`
-	Location       *AVLocation `json:"location,omitempty" api:"optional,nullable"`
 	Created        *AVCreated  `json:"created,omitempty" api:"optional,nullable"`
 	Updated        *AVUpdated  `json:"updated,omitempty" api:"optional,nullable"`
 }

@@ -103,13 +103,39 @@ interface Window {
         }): void;
     };
     MathJax: {
+        loader?: {
+            paths: {[key: string]: string}
+        }
+        output?: {
+            font: string
+            fontPath: string
+            linebreaks?: {
+                inline: boolean
+            }
+        }
+        options?: {
+            enableMenu: boolean
+            enableEnrichment: boolean
+            enableSpeech: boolean
+            enableBraille: boolean
+            enableExplorer: boolean
+            menuOptions?: {
+                settings: {
+                    enrich: boolean
+                    speech: boolean
+                    braille: boolean
+                }
+            }
+        }
         svg: {
             fontCache: string
         }
         startup?: {
-            promise: Promise<void>
+            promise?: Promise<void>
+            typeset?: boolean
         }
         tex2svg?(math: string, options: { display: boolean }): HTMLElement
+        tex2svgPromise?(math: string, options: { display: boolean }): Promise<HTMLElement>
     };
     hljs: {
         listLanguages(): string[];

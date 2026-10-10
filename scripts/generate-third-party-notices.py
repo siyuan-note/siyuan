@@ -219,10 +219,17 @@ BUNDLED_COMPONENTS = [
     ),
     (
         "MathJax",
-        "3.1.2",
+        "4.1.3",
         "Apache-2.0",
         "https://github.com/mathjax/MathJax-src",
         "app/stage/protyle/js/mathjax/",
+    ),
+    (
+        "MathJax TeX font and font extensions",
+        "4.1.3",
+        "Apache-2.0",
+        "https://github.com/mathjax/MathJax-fonts",
+        "app/stage/protyle/js/mathjax/output/fonts/",
     ),
     (
         "Mermaid",

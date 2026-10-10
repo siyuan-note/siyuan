@@ -46,7 +46,8 @@ The component list is informational and does not replace the license terms. Copy
 | Tokyo Night highlight.js themes | Bundled snapshot | MIT | [upstream](https://github.com/enkia/tokyo-night-vscode-theme) | app/stage/protyle/js/highlight.js/styles/tokyo-night-*.min.css |
 | KaTeX | 0.19.0 | MIT | [upstream](https://github.com/KaTeX/KaTeX) | app/stage/protyle/js/katex/ |
 | KaTeX fonts | 0.19.0 | OFL-1.1 | [upstream](https://github.com/KaTeX/KaTeX/tree/v0.19.0/fonts) | app/stage/protyle/js/katex/fonts/ |
-| MathJax | 3.1.2 | Apache-2.0 | [upstream](https://github.com/mathjax/MathJax-src) | app/stage/protyle/js/mathjax/ |
+| MathJax | 4.1.3 | Apache-2.0 | [upstream](https://github.com/mathjax/MathJax-src) | app/stage/protyle/js/mathjax/ |
+| MathJax TeX font and font extensions | 4.1.3 | Apache-2.0 | [upstream](https://github.com/mathjax/MathJax-fonts) | app/stage/protyle/js/mathjax/output/fonts/ |
 | Mermaid | 12.1.0 | MIT | [upstream](https://github.com/mermaid-js/mermaid) | app/stage/protyle/js/mermaid/mermaid.min.js; bundled notices are retained in the file |
 | DOMPurify | 3.4.12 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | Bundled by Mermaid 12.1.0 |
 | ELK.js | 0.9.3 | EPL-2.0 | [upstream](https://github.com/kieler/elkjs) | Bundled by Mermaid 12.1.0; app/stage/protyle/js/mermaid/LICENSE-elkjs.md |
@@ -5391,6 +5392,43 @@ Expat https://libexpat.github.io
   License: see project LICENSE
   Touched: 2022
 */
+```
+
+### app/stage/protyle/js/mathjax/input/tex/extensions/mhchem.js
+
+```text
+/*!
+ *************************************************************************
+ *
+ *  mhchemParser.ts
+ *  4.2.1
+ *
+ *  Parser for the \ce command and \pu command for MathJax and Co.
+ *
+ *  mhchem's \ce is a tool for writing beautiful chemical equations easily.
+ *  mhchem's \pu is a tool for writing physical units easily.
+ *
+ *  ----------------------------------------------------------------------
+ *
+ *  Copyright (c) 2015-2023 Martin Hensel
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *  ----------------------------------------------------------------------
+ *
+ *  https://github.com/mhchem/mhchemParser
+ *
+ */
 ```
 
 ### app/stage/protyle/js/mermaid/mermaid-zenuml.min.js

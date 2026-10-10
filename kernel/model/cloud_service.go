@@ -321,17 +321,14 @@ func refreshSubscriptionExpirationRemind() {
 func refreshUser() {
 	defer logging.Recover()
 
-	if nil != Conf.GetUser() {
-		time.Sleep(2 * time.Minute)
-		if nil != Conf.GetUser() {
-			_, err := RefreshUser(Conf.GetUser().UserToken)
-			if nil != err {
-				msg := Conf.Language(18)
-				if IsInvalidUserRefresh(err) {
-					msg = Conf.Language(19)
-				}
-				util.PushErrMsg(msg, 5000)
+	if user := Conf.GetUser(); nil != user {
+		_, err := RefreshUser(user.UserToken)
+		if nil != err {
+			msg := Conf.Language(18)
+			if IsInvalidUserRefresh(err) {
+				msg = Conf.Language(19)
 			}
+			util.PushErrMsg(msg, 5000)
 		}
 		subscriptionExpirationReminded = false
 	}

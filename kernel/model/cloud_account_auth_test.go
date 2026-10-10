@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/httpclient"
@@ -213,6 +214,25 @@ func TestCloudUserRefreshAuthenticationFailure(t *testing.T) {
 			}
 			assertCloudAccountLoggedOut(t)
 		})
+	}
+}
+
+func TestCloudUserBackgroundRefresh(t *testing.T) {
+	user := setupCloudAccountAuthTest(t)
+	previousReminded := subscriptionExpirationReminded
+	t.Cleanup(func() { subscriptionExpirationReminded = previousReminded })
+	called := false
+	mockCloudAuthResponse(t, func(request *http.Request) (*http.Response, error) {
+		called = true
+		return cloudAuthResponse(request, http.StatusServiceUnavailable, ""), nil
+	})
+	started := time.Now()
+	refreshUser()
+	if time.Since(started) > 5*time.Second {
+		t.Fatal("background refresh delayed the cloud query")
+	}
+	if !called || Conf.GetUser() != user || Conf.UserData != "persisted-user" {
+		t.Fatal("background refresh did not query the cloud or changed the account after a network failure")
 	}
 }
 

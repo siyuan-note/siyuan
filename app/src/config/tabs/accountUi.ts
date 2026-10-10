@@ -19,10 +19,64 @@ import {escapeAttr, escapeHtml} from "../../util/escape";
 import {bindAccountAuthEnter, isAccountLoginDisabled} from "./accountAuth";
 import {
     getCloudLoginUserName,
+    getCloudUserSession,
+    createCloudUserRefresh,
     resolveCloudUserRefresh,
     setCloudUser,
     type TCloudUser,
 } from "./cloudUser";
+
+const getCloudUserRefreshKey = () =>
+    `${window.siyuan.config.cloudRegion}:${window.siyuan.user?.userId}:${getCloudUserSession()}`;
+
+const requestCloudUserRefresh = createCloudUserRefresh(async (key) => {
+    const user = window.siyuan.user;
+    if (!user?.userToken || key !== getCloudUserRefreshKey()) {
+        return;
+    }
+    const region = window.siyuan.config.cloudRegion;
+    const session = getCloudUserSession();
+    let result: {code: number; msg: string} | undefined;
+    const isCurrentSession = () => session === getCloudUserSession() &&
+        region === window.siyuan.config.cloudRegion && user.userId === window.siyuan.user?.userId;
+    await fetchPost("/api/setting/getCloudUser", {token: user.userToken}, response => {
+        if (!isCurrentSession()) {
+            return;
+        }
+        result = {code: response.code, msg: response.msg};
+        const action = resolveCloudUserRefresh(response.code, response.data, user.userName);
+        if (action.apply) {
+            applyCloudUserState(action.user, action.userName);
+        }
+    }, undefined, () => {
+        if (isCurrentSession()) {
+            result = {code: 400, msg: window.siyuan.languages._kernel[18]};
+        }
+    });
+    return result;
+});
+
+export const refreshCloudUser = async (force = false, root?: Element) => {
+    const user = window.siyuan.user;
+    if (!user?.userToken) {
+        return;
+    }
+    const key = getCloudUserRefreshKey();
+    const icon = root?.querySelector("#refresh svg");
+    icon?.classList.add("fn__rotate");
+    try {
+        const result = await requestCloudUserRefresh(key, force);
+        if (result && root?.isConnected) {
+            if (result.code !== 0) {
+                showMessage(result.msg);
+            } else if (force) {
+                showMessage(window.siyuan.languages.refreshUser, 3000);
+            }
+        }
+    } finally {
+        icon?.classList.remove("fn__rotate");
+    }
+};
 
 /** 账号节：由 syncTab 注册 */
 export const registerAccountGroup = (tab: SettingTabBuilder) => {
@@ -189,25 +243,7 @@ const bindAccountMainEvent = (accountSettingsRoot: Element) => {
         if (refreshIcon?.classList.contains("fn__rotate")) {
             return;
         }
-        refreshIcon?.classList.add("fn__rotate");
-        const previousUserName = window.siyuan.user?.userName || "";
-        fetchPost("/api/setting/getCloudUser", {
-            token: window.siyuan.user?.userToken || "",
-        }, response => {
-            const action = resolveCloudUserRefresh(response.code, response.data, previousUserName);
-            if (action.apply) {
-                applyCloudUserState(action.user, action.userName, accountSettingsRoot);
-            }
-            if (response.code !== 0) {
-                showMessage(response.msg);
-                return;
-            }
-            showMessage(window.siyuan.languages.refreshUser, 3000);
-        }, undefined, () => {
-            showMessage(window.siyuan.languages._kernel[18]);
-        }).finally(() => {
-            refreshIcon?.classList.remove("fn__rotate");
-        });
+        void refreshCloudUser(true, accountSettingsRoot);
     });
     if (accountMainEl.classList.contains("config-account--login")) {
         bindAccountAuthForm(accountMainEl as HTMLElement, "login", accountSettingsRoot);

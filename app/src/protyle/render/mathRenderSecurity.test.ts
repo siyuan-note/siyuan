@@ -1,5 +1,8 @@
 import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
+import {readFileSync, existsSync} from "node:fs";
+import * as path from "node:path";
+import {runInNewContext} from "node:vm";
 import {getMathRenderSecurity, isSafeMathURLProtocol} from "./mathRenderSecurity";
 
 const katex = require("../../../stage/protyle/js/katex/katex.min.js");
@@ -26,6 +29,19 @@ const attributeValue = (html: string, attribute: string) => {
 const activeURLPattern = new RegExp("\\b(?:href|src)=[\"']?\\s*(?:javascript|data|vbscript|file|siyuan)\\s*:", "i");
 
 describe("math render security", () => {
+    it("rejects invalid HTML data attribute names in trusted local formulas", () => {
+        assert.throws(() => katex.renderToString("\\htmlData{foo onmouseover=alert(1)}{x}", {
+            trust: getMathRenderSecurity(false, false).trust,
+            strict: "ignore",
+        }), /Invalid attribute name/);
+    });
+
+    it("enforces expansion limits inside expanded macro definitions", () => {
+        assert.throws(() => katex.renderToString("\\def\\a{xxxxxxxxxx}\\edef\\b{\\a\\a\\a\\a}", {
+            maxExpand: 20,
+        }), /Too many expansions/);
+    });
+
     it("always disables trusted KaTeX commands for safe fragments", () => {
         assert.deepEqual(getMathRenderSecurity(false, true), {trust: false, sanitize: true});
         assert.deepEqual(getMathRenderSecurity(true, true), {trust: false, sanitize: true});
@@ -115,5 +131,37 @@ describe("math render security", () => {
             assert.doesNotMatch(html, /<img\b/i);
             assert.doesNotMatch(html, /background\s*:\s*url/i);
         });
+    });
+});
+
+describe("bundled math rendering compatibility", () => {
+    it("renders custom macros, matrices and inline formulas with editor strict settings", () => {
+        const options = {
+            output: "html",
+            macros: {"\\RR": "\\mathbb{R}"},
+            strict: (errorCode: string) => errorCode === "unicodeTextInMathMode" ? "ignore" : "warn",
+        };
+        for (const displayMode of [false, true]) {
+            const html = katex.renderToString("\\RR \\ni x^2 + \\frac{1}{2} + \\begin{pmatrix}a&b\\\\c&d\\end{pmatrix}",
+                {...options, displayMode});
+            assert.match(html, /katex-html/);
+            assert.doesNotMatch(html, /katex-error/);
+        }
+    });
+
+    it("loads the bundled chemistry extension through its browser entry", () => {
+        const source = readFileSync(path.resolve(__dirname, "../../../stage/protyle/js/katex/mhchem.min.js"), "utf8");
+        runInNewContext(source, {katex});
+        for (const tex of ["\\ce{2 H2 + O2 -> 2 H2O}", "\\pu{123 kJ/mol}"]) {
+            assert.match(katex.renderToString(tex), /katex-html/);
+        }
+    });
+
+    it("ships every font referenced by the bundled stylesheet", () => {
+        const directory = path.resolve(__dirname, "../../../stage/protyle/js/katex");
+        const css = readFileSync(path.join(directory, "katex.min.css"), "utf8");
+        const fonts = Array.from(css.matchAll(/url\((fonts\/[^)]+)\)/g), match => match[1]);
+        assert.ok(fonts.length > 0);
+        fonts.forEach(font => assert.ok(existsSync(path.join(directory, font)), font));
     });
 });

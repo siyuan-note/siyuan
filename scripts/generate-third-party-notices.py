@@ -198,16 +198,16 @@ BUNDLED_COMPONENTS = [
     ),
     (
         "KaTeX",
-        "0.16.9",
+        "0.19.0",
         "MIT",
         "https://github.com/KaTeX/KaTeX",
         "app/stage/protyle/js/katex/",
     ),
     (
         "KaTeX fonts",
-        "0.16.9",
+        "0.19.0",
         "OFL-1.1",
-        "https://github.com/KaTeX/KaTeX/tree/v0.16.9/fonts",
+        "https://github.com/KaTeX/KaTeX/tree/v0.19.0/fonts",
         "app/stage/protyle/js/katex/fonts/",
     ),
     (

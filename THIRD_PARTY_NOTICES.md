@@ -44,8 +44,8 @@ The component list is informational and does not replace the license terms. Copy
 | NNFX highlight.js themes | Bundled snapshot | CC-BY-SA-4.0 | [upstream](https://github.com/highlightjs/highlight.js) | app/stage/protyle/js/highlight.js/styles/nnfx-*.min.css |
 | Stack Overflow highlight.js themes | Bundled snapshot | MIT | [upstream](https://github.com/StackExchange/Stacks) | app/stage/protyle/js/highlight.js/styles/stackoverflow-*.min.css |
 | Tokyo Night highlight.js themes | Bundled snapshot | MIT | [upstream](https://github.com/enkia/tokyo-night-vscode-theme) | app/stage/protyle/js/highlight.js/styles/tokyo-night-*.min.css |
-| KaTeX | 0.16.9 | MIT | [upstream](https://github.com/KaTeX/KaTeX) | app/stage/protyle/js/katex/ |
-| KaTeX fonts | 0.16.9 | OFL-1.1 | [upstream](https://github.com/KaTeX/KaTeX/tree/v0.16.9/fonts) | app/stage/protyle/js/katex/fonts/ |
+| KaTeX | 0.19.0 | MIT | [upstream](https://github.com/KaTeX/KaTeX) | app/stage/protyle/js/katex/ |
+| KaTeX fonts | 0.19.0 | OFL-1.1 | [upstream](https://github.com/KaTeX/KaTeX/tree/v0.19.0/fonts) | app/stage/protyle/js/katex/fonts/ |
 | MathJax | 3.1.2 | Apache-2.0 | [upstream](https://github.com/mathjax/MathJax-src) | app/stage/protyle/js/mathjax/ |
 | Mermaid | 12.1.0 | MIT | [upstream](https://github.com/mermaid-js/mermaid) | app/stage/protyle/js/mermaid/mermaid.min.js; bundled notices are retained in the file |
 | DOMPurify | 3.4.12 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | Bundled by Mermaid 12.1.0 |

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SiYuan</title>
-    <link id="protyleKatexStyle" rel="stylesheet" href="../../protyle/js/katex/katex.min.css?v=0.16.9">
+    <link id="protyleKatexStyle" rel="stylesheet" href="../../protyle/js/katex/katex.min.css?v=0.19.0">
     <script src="../../protyle/js/pdf/pdf.min.mjs?v=4.8.69" type="module"></script>
 </head>
 <body class="fn__flex-column body--settings">

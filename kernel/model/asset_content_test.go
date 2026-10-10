@@ -17,9 +17,13 @@
 package model
 
 import (
+	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestAssetContentFieldRegexpUsesArguments(t *testing.T) {
@@ -71,5 +75,25 @@ func TestPDFParser(t *testing.T) {
 	res := p.Parse("../testdata/parsertest.pdf")
 	if res == nil || res.Content == "" {
 		t.Fatalf("empty or nil PDF content result")
+	}
+}
+
+func TestPDFParserRejectsOversizeBeforeCopy(t *testing.T) {
+	oldLimit, oldTemp := PDFAssetContentMaxSize, util.TempDir
+	t.Cleanup(func() { PDFAssetContentMaxSize, util.TempDir = oldLimit, oldTemp })
+	t.Setenv("SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE", "16")
+	util.TempDir = filepath.Join(t.TempDir(), "unused-temp")
+	pdf := filepath.Join(t.TempDir(), "oversize.pdf")
+	if err := os.WriteFile(pdf, []byte(strings.Repeat("x", 17)), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if result := (&PdfAssetParser{}).Parse(pdf); result != nil {
+		t.Fatal("oversize PDF must be skipped")
+	}
+	if PDFAssetContentMaxSize != 16 {
+		t.Fatal("environment limit was not applied before the size check")
+	}
+	if _, err := os.Stat(util.TempDir); !os.IsNotExist(err) {
+		t.Fatalf("rejected PDF must not create temporary data: %v", err)
 	}
 }

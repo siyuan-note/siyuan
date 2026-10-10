@@ -18,7 +18,9 @@ package model
 
 import (
 	"bytes"
+	"io"
 	"io/fs"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -810,7 +812,22 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		return
 	}
 
-	if !gulu.File.IsExist(absPath) {
+	info, err := os.Stat(absPath)
+	if err != nil || !info.Mode().IsRegular() {
+		return
+	}
+	if maxSizeVal := os.Getenv("SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE"); "" != maxSizeVal {
+		if maxSize, parseErr := strconv.ParseUint(maxSizeVal, 10, 64); nil == parseErr {
+			if maxSize != PDFAssetContentMaxSize {
+				PDFAssetContentMaxSize = maxSize
+				logging.LogInfof("set PDF asset content index max size to [%s]", humanize.BytesCustomCeil(maxSize, 2))
+			}
+		} else {
+			logging.LogWarnf("invalid env [SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE]: [%s], parsing failed: %s", maxSizeVal, parseErr)
+		}
+	}
+	if PDFAssetContentMaxSize < uint64(info.Size()) {
+		logging.LogWarnf("ignore large PDF asset [%s] with [%s]", absPath, humanize.BytesCustomCeil(uint64(info.Size()), 2))
 		return
 	}
 
@@ -821,9 +838,20 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	defer os.RemoveAll(tmp)
 
 	// PDF blob will be processed in-memory making sharing of PDF document data across worker goroutines possible
-	pdfData, err := os.ReadFile(tmp)
+	pdfFile, err := os.Open(tmp)
 	if err != nil {
 		logging.LogErrorf("open [%s] failed: [%s]", tmp, err)
+		return
+	}
+	// 复制期间源文件可能增长，读取上限仍需独立约束。
+	pdfData, err := io.ReadAll(io.LimitReader(pdfFile, int64(min(PDFAssetContentMaxSize, uint64(math.MaxInt64-1)))+1))
+	pdfFile.Close()
+	if err != nil {
+		logging.LogErrorf("open [%s] failed: [%s]", tmp, err)
+		return
+	}
+	if PDFAssetContentMaxSize < uint64(len(pdfData)) {
+		logging.LogWarnf("ignore large PDF asset [%s] with [%s]", absPath, humanize.BytesCustomCeil(uint64(len(pdfData)), 2))
 		return
 	}
 
@@ -868,23 +896,6 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	if PDFAssetContentMaxPage < pc.PageCount {
 		// PDF files longer than 1024 pages are not included in asset file content searching https://github.com/siyuan-note/siyuan/issues/9053
 		logging.LogWarnf("ignore large PDF asset [%s] with [%d] pages", absPath, pc.PageCount)
-		return
-	}
-
-	if maxSizeVal := os.Getenv("SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE"); "" != maxSizeVal {
-		if maxSize, parseErr := strconv.ParseUint(maxSizeVal, 10, 64); nil == parseErr {
-			if maxSize != PDFAssetContentMaxSize {
-				PDFAssetContentMaxSize = maxSize
-				logging.LogInfof("set PDF asset content index max size to [%s]", humanize.BytesCustomCeil(maxSize, 2))
-			}
-		} else {
-			logging.LogWarnf("invalid env [SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE]: [%s], parsing failed: %s", maxSizeVal, parseErr)
-		}
-	}
-
-	if PDFAssetContentMaxSize < uint64(len(pdfData)) {
-		// PDF files larger than 128MB are not included in asset file content searching https://github.com/siyuan-note/siyuan/issues/9500
-		logging.LogWarnf("ignore large PDF asset [%s] with [%s]", absPath, humanize.BytesCustomCeil(uint64(len(pdfData)), 2))
 		return
 	}
 

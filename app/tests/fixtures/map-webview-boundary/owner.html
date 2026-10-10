@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Map webview boundary prototype</title>
+    <link rel="stylesheet" href="/fixture-owner.css">
+    <script defer src="/fixture-owner.js"></script>
+</head>
+<body>
+    <header>
+        <button id="toggle-menu" type="button">Open ordinary DOM menu</button>
+        <span id="status">Preparing isolated map...</span>
+    </header>
+    <p>Local prototype with synthetic points. Open the menu, enter Chinese text, press Escape, and scroll.</p>
+    <div id="scroll-area"><div id="map-slot"></div><div class="spacer">Scroll inside this region.</div></div>
+    <div id="owner-private-sentinel" hidden>Owner-only fixture data</div>
+    <div id="menu" class="b3-menu" hidden>
+        <label>中文输入 <input id="menu-input" placeholder="输入中文，测试组合输入"></label>
+        <button id="menu-action" type="button">Menu action</button>
+        <p>Escape or click outside to close.</p>
+    </div>
+</body>
+</html>

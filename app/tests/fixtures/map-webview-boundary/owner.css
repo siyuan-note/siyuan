@@ -1,0 +1,11 @@
+body { margin: 0; padding: 20px; font: 15px system-ui, sans-serif; color: #202124; background: #fff; }
+header { display: flex; align-items: center; gap: 16px; }
+button, input { font: inherit; padding: 8px; }
+#scroll-area { position: absolute; left: 20px; top: 110px; width: 740px; height: 410px; overflow: auto; border: 1px solid #444; }
+#map-slot { width: 720px; height: 360px; }
+webview { display: flex; width: 100%; height: 100%; }
+.spacer { height: 300px; padding: 16px; }
+#menu { position: fixed; z-index: 10; left: 360px; top: 90px; width: 260px; height: 230px; box-sizing: border-box; padding: 16px; background: rgb(214, 49, 49); color: white; border-radius: 8px; }
+#menu[hidden] { display: none; }
+#menu label { display: block; }
+#menu input { box-sizing: border-box; width: 100%; margin: 8px 0; }

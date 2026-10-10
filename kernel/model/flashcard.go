@@ -556,20 +556,23 @@ func GetDeckFlashcards(deckID string, page, pageSize int) (blocks []*Block, tota
 	return
 }
 
-func getCardsBlocks(cards []riff.Card, page, pageSize int) (blocks []*Block, total, pageCount int) {
-	cards = filterSupportedFlashcards(cards)
-	// sort by due date asc https://github.com/siyuan-note/siyuan/pull/9673
+// sortFlashcardsByDue 按到期时间升序排列，新卡的零到期时间排在前面，相同时间按卡片 ID 排列。
+func sortFlashcardsByDue(cards []riff.Card) {
 	sort.Slice(cards, func(i, j int) bool {
 		due1 := cards[i].(*riff.FSRSCard).C.Due
 		due2 := cards[j].(*riff.FSRSCard).C.Due
-		if due1.IsZero() || due2.IsZero() {
-			// Improve flashcard management sorting https://github.com/siyuan-note/siyuan/issues/14686
+		if due1.Equal(due2) {
 			cid1 := cards[i].ID()
 			cid2 := cards[j].ID()
 			return cid1 < cid2
 		}
 		return due1.Before(due2)
 	})
+}
+
+func getCardsBlocks(cards []riff.Card, page, pageSize int) (blocks []*Block, total, pageCount int) {
+	cards = filterSupportedFlashcards(cards)
+	sortFlashcardsByDue(cards)
 
 	total = len(cards)
 	pageCount = int(math.Ceil(float64(total) / float64(pageSize)))

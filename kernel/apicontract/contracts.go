@@ -753,6 +753,8 @@ var BatchSetRiffCardsDueTime = define[SetRiffCardsDueRequest, Null]("batchSetRif
 var ResetRiffCards = define[ResetRiffCardsRequest, Null]("resetRiffCards", "/api/riff/resetRiffCards", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetNotebookRiffCards = define[RiffCardsRequest, RiffCardsData]("getNotebookRiffCards", "/api/riff/getNotebookRiffCards", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var GetTreeRiffCards = define[RiffCardsRequest, RiffCardsData]("getTreeRiffCards", "/api/riff/getTreeRiffCards", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// GetRiffCards 按到期时间升序分页，零到期时间的新卡排在前面，相同到期时间按卡片 ID 排序。
 var GetRiffCards = define[RiffCardsRequest, RiffCardsData]("getRiffCards", "/api/riff/getRiffCards", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ReviewRiffCard = define[ReviewRiffCardRequest, Null]("reviewRiffCard", "/api/riff/reviewRiffCard", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var SkipReviewRiffCard = define[RiffCardRequest, Null]("skipReviewRiffCard", "/api/riff/skipReviewRiffCard", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

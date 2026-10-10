@@ -292,6 +292,10 @@ test("geometry is invisible before ready, uses owner zoom, and hides on invalid 
     s.handlers["siyuan-map-geometry"](s.event(), geometry); assert.equal(s.views[0].visible, true);
     s.handlers["siyuan-map-geometry"](s.event(), {...geometry, bounds: {...geometry.bounds, width: 10000}});
     assert.equal(s.views[0].visible, false);
+    assert.deepEqual(s.owner.sent.at(-1)[1], {...envelope, type: "diagnostic", code: "geometryLogicalBounds"});
+    const count = s.owner.sent.length;
+    s.handlers["siyuan-map-geometry"](s.event(), {...geometry, bounds: {...geometry.bounds, width: 10000}});
+    assert.equal(s.owner.sent.length, count);
     s.manager.destroyAll();
 });
 
@@ -359,7 +363,7 @@ test("CSP resources are captured before load, deduplicated by category and isola
     emit("https://g.alicdn.com/another?key=another-secret");
     emit("blob:null/private");
     for (let index = 0; index < 100; index++) emit(`https://unknown-${index}.invalid/secret`);
-    assert.deepEqual(s.owner.sent.map(entry => entry[1].resource), ["blob", "https:g.alicdn.com", "blob", "https:other"]);
+    assert.deepEqual(s.owner.sent.map(entry => entry[1].resource), ["blob", "https:g.alicdn.com", "blob", "redacted"]);
     assert.equal(JSON.stringify(s.owner.sent).includes("secret"), false);
     const count = s.owner.sent.length;
     s.load();
@@ -369,6 +373,18 @@ test("CSP resources are captured before load, deduplicated by category and isola
     s.manager.destroyAll();
     emit("https://fourier.taobao.com/private");
     assert.equal(s.owner.sent.length, count);
+});
+
+test("dynamic public CSP source diagnostics remain bounded per host", () => {
+    const s = setup(); s.create();
+    const contents = s.views[0].webContents;
+    for (let index = 0; index < 100; index++) {
+        contents.emit("console-message", {message: `Connecting to 'https://map${index}.amap.com/private?key=secret' violates the following Content Security Policy directive: "connect-src https://webapi.amap.com".`});
+    }
+    assert.equal(s.owner.sent.length, 64);
+    assert.ok(s.owner.sent.every(entry => entry[1].instanceID === envelope.instanceID));
+    assert.equal(JSON.stringify(s.owner.sent).includes("secret"), false);
+    s.manager.destroyAll();
 });
 
 test("provider routing reports fixed transport failures without logging requests", async () => {

@@ -171,6 +171,18 @@ describe("desktop map transport", () => {
         assert.equal(warnings.length, mapCSPResourceCodes.length);
         assert.equal(JSON.stringify(warnings).includes("secret"), false);
     });
+    it("bounds public CSP diagnostics per instance and rejects raw addresses", () => {
+        const warnings: unknown[][] = [];
+        const f = fixture(warnings);
+        for (let i = 0; i < 100; i++) {
+            const value = {type: "diagnostic", code: "cspConnect", resource: `https:map${i}.amap.com`};
+            f.reply(value);
+            f.reply(value);
+        }
+        assert.equal(warnings.length, 64);
+        assert.deepEqual(warnings[0], ["Database map diagnostic:", "cspConnect", "https:map0.amap.com"]);
+        f.host.destroy();
+    });
     it("logs only approved capability reason codes and never exception or response details", async () => {
         for (const reason of ["ownerUnavailable", "notMainFrame", "notInitialized", "unregisteredOwner", "invalidKernelOrigin",
             "originMismatch", "unsupportedDocument", "invalidDocument", "unsafeProcessSwitches"]) {
@@ -208,6 +220,140 @@ describe("desktop map transport", () => {
         assert.equal(await load({invoke: async () => ({version: 1, supported: true})}).isDesktopAVMapHostSupported(), true);
         assert.equal(await load({invoke: async () => ({version: 2, supported: true})}).isDesktopAVMapHostSupported(), false);
         assert.equal(await load({invoke: async () => { throw new Error("old main"); }}).isDesktopAVMapHostSupported(), false);
+    });
+    it("preserves fractional geometry through native validation at every clipped edge and zoom", () => {
+        const compute = load({}).computeDesktopAVMapGeometry;
+        const {parseMapGeometry} = require("../../../../../electron/mapHostPolicy");
+        const rect = {x: 155.55555555555554, y: 555.5555555555555, width: 1433.3333333333333, height: 480};
+        assert.ok(rect.y + rect.height - rect.y > rect.height, "the fixture must reproduce floating-point expansion");
+        const cases = [
+            {clips: [], width: rect.width, height: rect.height, cropX: 0, cropY: 0},
+            {clips: [{x: rect.x + 40, y: 0, width: 2000, height: 1400}],
+                width: rect.width - 40, height: rect.height, cropX: 40, cropY: 0},
+            {clips: [{x: 0, y: 0, width: rect.x + rect.width - 40, height: 1400}],
+                width: rect.width - 40, height: rect.height, cropX: 0, cropY: 0},
+            {clips: [{x: 0, y: rect.y + 40, width: 2000, height: 1400}],
+                width: rect.width, height: rect.height - 40, cropX: 0, cropY: 40},
+            {clips: [{x: 0, y: 0, width: 2000, height: rect.y + rect.height - 40}],
+                width: rect.width, height: rect.height - 40, cropX: 0, cropY: 0},
+            {clips: [{x: rect.x + 10, y: rect.y + 30, width: rect.width - 30, height: rect.height - 70}],
+                width: rect.width - 30, height: rect.height - 70, cropX: 10, cropY: 30},
+        ];
+        for (const entry of cases) {
+            const geometry = compute(rect, entry.clips);
+            assert.equal(geometry.visible, true);
+            assert.ok(geometry.bounds.width <= rect.width);
+            assert.ok(geometry.bounds.height <= rect.height);
+            assert.ok(Math.abs(geometry.bounds.width - entry.width) < 1e-9);
+            assert.ok(Math.abs(geometry.bounds.height - entry.height) < 1e-9);
+            assert.ok(Math.abs(geometry.crop.x - entry.cropX) < 1e-9);
+            assert.ok(Math.abs(geometry.crop.y - entry.cropY) < 1e-9);
+            for (const zoom of [0.8, 0.9, 1, 1.1, 1.25, 1.5, 2]) {
+                const native = parseMapGeometry(geometry, zoom, {width: 4000, height: 3000});
+                assert.equal(native?.visible, true, `native validation must retain the map at zoom ${zoom}`);
+                assert.ok(native.bounds.x >= geometry.bounds.x * zoom);
+                assert.ok(native.bounds.y >= geometry.bounds.y * zoom);
+                assert.ok(native.bounds.x + native.bounds.width <= (geometry.bounds.x + geometry.bounds.width) * zoom);
+                assert.ok(native.bounds.y + native.bounds.height <= (geometry.bounds.y + geometry.bounds.height) * zoom);
+            }
+        }
+        const widthRect = {...rect, x: rect.y, width: rect.height};
+        assert.ok(widthRect.x + widthRect.width - widthRect.x > widthRect.width);
+        const geometry = compute(widthRect, []);
+        assert.equal(geometry.bounds.width, widthRect.width);
+        assert.equal(parseMapGeometry(geometry, 1.25, {width: 4000, height: 3000})?.visible, true);
+    });
+    it("reports only fixed visibility transitions and distinguishes clipped bottom hit tests", async () => {
+        const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;
+        class Observer { observe() {} disconnect() {} }
+        globalThis.MutationObserver = Observer as any;
+        globalThis.ResizeObserver = Observer as any;
+        const warnings: unknown[][] = [];
+        const f = fixture(warnings);
+        const getStyle = f.doc.defaultView.getComputedStyle;
+        const visibility = () => warnings.filter(([prefix]) => prefix === "Database map visibility:");
+        const lastGeometry = () => f.calls.filter(([name]) => name === "siyuan-map-geometry").at(-1)[1];
+        f.container.id = "private-block-id";
+        f.container.textContent = "private-document-content";
+        try {
+            await f.created();
+            assert.deepEqual(visibility(), [["Database map visibility:", "openfreemap", "stabilizing"]]);
+            f.advance();
+            assert.deepEqual(visibility().at(-1), ["Database map visibility:", "openfreemap", "visible"]);
+            const scroll = f.domListeners.get("scroll");
+            const expectHidden = (reason: string) => {
+                scroll();
+                assert.equal(lastGeometry().visible, false);
+                assert.deepEqual(visibility().at(-1), ["Database map visibility:", "openfreemap", reason]);
+                const count = warnings.length;
+                for (let i = 0; i < 10; i++) f.advance(30);
+                assert.equal(warnings.length, count, "unchanged reasons must not log on every animation frame");
+            };
+            f.doc.hidden = true;
+            expectHidden("documentHidden");
+            f.doc.hidden = false;
+            f.container.isConnected = false;
+            expectHidden("disconnected");
+            f.container.isConnected = true;
+            f.container.getClientRects = (): DOMRect[] => [];
+            expectHidden("noClientRects");
+            f.container.getClientRects = () => [f.rect];
+            f.doc.defaultView.getComputedStyle = () => ({...getStyle(), visibility: "hidden"});
+            expectHidden("hiddenStyle");
+            f.doc.defaultView.getComputedStyle = getStyle;
+            f.rect.width = 0;
+            expectHidden("zeroRect");
+            f.rect.width = 400;
+            f.rect.x = NaN;
+            expectHidden("invalidGeometry");
+            f.rect.x = 10;
+            f.rect.y = 900;
+            expectHidden("outsideViewport");
+            f.rect.y = 20;
+            const parent = {parentElement: null as HTMLElement | null, getBoundingClientRect: () => ({x: 0, y: 0, width: 1000, height: 800}),
+                offsetWidth: 1000, offsetHeight: 800, clientWidth: 1000, clientHeight: 0, clientLeft: 0, clientTop: 0};
+            f.container.parentElement = parent;
+            f.doc.defaultView.getComputedStyle = (element: unknown) => ({...getStyle(),
+                overflowY: element === parent ? "hidden" : "visible"});
+            expectHidden("clipped");
+            f.container.parentElement = null;
+            f.doc.defaultView.getComputedStyle = getStyle;
+            f.doc.querySelectorAll = () => [{contains: () => false, getClientRects: () => [f.rect],
+                getBoundingClientRect: () => f.rect, textContent: "private-overlay-content"}];
+            expectHidden("overlay");
+            f.doc.querySelectorAll = (): HTMLElement[] => [];
+            for (const [y, reason] of [[f.rect.y + 0.5, "hitTestTop"],
+                [f.rect.y + f.rect.height / 2, "hitTestMiddle"], [f.rect.y + f.rect.height - 0.5, "hitTestBottom"]] as const) {
+                f.doc.elementFromPoint = (_x: number, pointY: number) => pointY === y ?
+                    {textContent: "private-hit-content", id: "private-overlay-id"} : f.container;
+                expectHidden(reason);
+            }
+            f.doc.elementFromPoint = () => f.container;
+            scroll();
+            assert.equal(lastGeometry().visible, true);
+            assert.deepEqual(visibility().at(-1), ["Database map visibility:", "openfreemap", "visible"]);
+            const fixedReasons = new Set(["stabilizing", "visible", "documentHidden", "disconnected", "noClientRects",
+                "hiddenStyle", "zeroRect", "invalidGeometry", "outsideViewport", "clipped", "overlay", "hitTestTop",
+                "hitTestMiddle", "hitTestBottom"]);
+            assert.ok(warnings.every(values => values.length === 3 && values[0] === "Database map visibility:" &&
+                values[1] === "openfreemap" && fixedReasons.has(values[2] as string)));
+            assert.doesNotMatch(JSON.stringify(warnings), /private|do-not-send|https:|instanceID/);
+            for (let i = 0; i < 100; i++) {
+                f.doc.hidden = i % 2 === 0;
+                scroll();
+                assert.equal(lastGeometry().visible, !f.doc.hidden, "the log limit must not interrupt geometry updates");
+            }
+            assert.equal(visibility().length, 64);
+            const count = warnings.length;
+            f.host.destroy();
+            scroll();
+            f.advance();
+            assert.equal(warnings.length, count);
+        } finally {
+            f.host.destroy();
+            globalThis.MutationObserver = oldMutation;
+            globalThis.ResizeObserver = oldResize;
+        }
     });
     it("caches ready commands, validates replies and recovers from scroll, occlusion and visibility changes", async () => {
         const oldMutation = globalThis.MutationObserver, oldResize = globalThis.ResizeObserver;

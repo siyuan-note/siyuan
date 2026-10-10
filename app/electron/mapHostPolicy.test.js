@@ -148,3 +148,26 @@ test("native geometry converts CSS to DIP, crops inward, and denies off-window o
     assert.equal(parseMapGeometry({...value, bounds: {...value.bounds, x: NaN}}, 1, {width: 800, height: 600}), undefined);
     assert.deepEqual(parseMapGeometry({visible: false}, 1, {}), {visible: false});
 });
+
+test("geometry rejection reports only fixed reasons without weakening validation", () => {
+    const value = {visible: true, bounds: {x: 10, y: 20, width: 200, height: 100},
+        logicalSize: {width: 400, height: 200}, crop: {x: 0, y: 0}};
+    const viewport = {width: 800, height: 600};
+    for (const [input, zoom, bounds, reason] of [
+        [null, 1, viewport, "geometryInvalid"],
+        [value, 0, viewport, "geometryInvalid"],
+        [{...value, bounds: {...value.bounds, x: NaN}}, 1, viewport, "geometryInvalid"],
+        [{...value, logicalSize: {width: 199.99999999999997, height: 200}}, 1, viewport, "geometryLogicalBounds"],
+        [{...value, crop: {x: 300, y: 0}}, 1, viewport, "geometryCropBounds"],
+        [value, 1, {width: 100, height: 100}, "geometryWindowBounds"],
+        [{...value, bounds: {x: 0.1, y: 0.1, width: 1, height: 1}}, 0.25, viewport, "geometryRoundedEmpty"],
+    ]) {
+        const reasons = [];
+        const result = parseMapGeometry(input, zoom, bounds, code => reasons.push(code));
+        assert.ok(!result?.visible);
+        assert.deepEqual(reasons, [reason]);
+    }
+    const reasons = [];
+    assert.deepEqual(parseMapGeometry({visible: false}, 1, viewport, code => reasons.push(code)), {visible: false});
+    assert.deepEqual(reasons, []);
+});

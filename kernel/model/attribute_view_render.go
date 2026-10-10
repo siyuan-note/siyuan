@@ -491,12 +491,6 @@ func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 		}
 	}
 
-	// 诊断：AV 解析后的数据量
-	blockKV := attrView.GetBlockKeyValues()
-	if nil != blockKV {
-	} else {
-	}
-
 	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID, calendarRanges...)
 	return
 }

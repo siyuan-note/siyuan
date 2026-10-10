@@ -564,6 +564,10 @@ func parseValueTextRich(rich *ValueTextRich) (blockDOM string, tree *parse.Tree,
 }
 
 func parseValueTextRichWithImages(rich *ValueTextRich, images bool) (blockDOM string, tree *parse.Tree, err error) {
+	return parseValueTextRichWithLute(rich, images, newValueTextRichLute())
+}
+
+func parseValueTextRichWithLute(rich *ValueTextRich, images bool, luteEngine *lute.Lute) (blockDOM string, tree *parse.Tree, err error) {
 	if nil == rich {
 		return
 	}
@@ -576,7 +580,6 @@ func parseValueTextRichWithImages(rich *ValueTextRich, images bool) (blockDOM st
 		return
 	}
 
-	luteEngine := newValueTextRichLute()
 	content, protectedStyleEntities, protectErr := protectValueTextRichKramdownStyleEntities(rich.Content)
 	if nil != protectErr {
 		err = protectErr
@@ -2171,12 +2174,16 @@ func newValueTextRichBackslashSentinel(content string) string {
 
 // NormalizeValueTextRich 校验并将文本字段的富文本源规范化为 SiYuan Kramdown。
 func NormalizeValueTextRich(rich *ValueTextRich) (tree *parse.Tree, err error) {
-	_, tree, err = parseValueTextRich(rich)
+	return normalizeValueTextRichWithLute(rich, newValueTextRichLute())
+}
+
+func normalizeValueTextRichWithLute(rich *ValueTextRich, luteEngine *lute.Lute) (tree *parse.Tree, err error) {
+	_, tree, err = parseValueTextRichWithLute(rich, false, luteEngine)
 	if nil != err || nil == rich {
 		return tree, err
 	}
 	var normalized string
-	if normalized, tree, err = normalizeValueTextRichTreeSource(tree); nil != err {
+	if normalized, tree, err = normalizeValueTextRichTreeSourceWithLute(tree, false, luteEngine); nil != err {
 		return nil, err
 	}
 	rich.Content = normalized
@@ -2188,13 +2195,16 @@ func normalizeValueTextRichTreeSource(tree *parse.Tree) (content string, normali
 }
 
 func normalizeValueTextRichTreeSourceWithImages(tree *parse.Tree, images bool) (content string, normalizedTree *parse.Tree, err error) {
+	return normalizeValueTextRichTreeSourceWithLute(tree, images, newValueTextRichLute())
+}
+
+func normalizeValueTextRichTreeSourceWithLute(tree *parse.Tree, images bool, luteEngine *lute.Lute) (content string, normalizedTree *parse.Tree, err error) {
 	normalizedTree = tree
 	previous := ""
 	for iteration := 0; iteration < 4; iteration++ {
 		if err = normalizeValueTextRichTreeStyles(normalizedTree, images); nil != err {
 			return "", nil, err
 		}
-		luteEngine := newValueTextRichLute()
 		blockDOM := luteEngine.Tree2BlockDOM(normalizedTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		content = valueTextRichBlockDOM2Kramdown(luteEngine, blockDOM)
 		if 0 < iteration && previous == content {
@@ -2204,7 +2214,7 @@ func normalizeValueTextRichTreeSourceWithImages(tree *parse.Tree, images bool) (
 		candidate := &ValueTextRich{
 			Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: content,
 		}
-		if _, normalizedTree, err = parseValueTextRichWithImages(candidate, images); nil != err {
+		if _, normalizedTree, err = parseValueTextRichWithLute(candidate, images, luteEngine); nil != err {
 			return "", nil, err
 		}
 	}

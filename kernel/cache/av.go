@@ -17,6 +17,7 @@
 package cache
 
 import (
+	"bytes"
 	"sync"
 	"sync/atomic"
 
@@ -30,8 +31,9 @@ var avCache, _ = ristretto.NewCache(&ristretto.Config{
 })
 
 type avCacheEntry struct {
-	raw     []byte
-	version uint64
+	raw        []byte
+	version    uint64
+	normalized []byte
 }
 
 type avSearchDataEntry struct {
@@ -76,6 +78,48 @@ func GetAVDataWithVersionInBox(avID, boxID string) (raw []byte, version uint64, 
 		return
 	}
 	return entry.raw, entry.version, true
+}
+
+// GetAVNormalizedDataInBox 读取同一数据版本的规范化副本，共用原始数据的容量及失效边界。
+func GetAVNormalizedDataInBox(avID, boxID string, version uint64) (data []byte, ok bool) {
+	avSearchDataCacheLock.RLock()
+	defer avSearchDataCacheLock.RUnlock()
+	key := avCacheKey(avID, boxID)
+	value, found := avCache.Get(key)
+	if !found || value == nil || avDataVersions[key] != version {
+		return
+	}
+	entry := value.(*avCacheEntry)
+	if entry.version != version || entry.normalized == nil {
+		return
+	}
+	return entry.normalized, true
+}
+
+// SetAVNormalizedDataInBox 仅接纳已认证、已校验数据的同版本派生副本，不改变原始缓存字节。
+func SetAVNormalizedDataInBox(avID, boxID string, version uint64, raw, normalized []byte) bool {
+	if raw == nil || normalized == nil || version == 0 {
+		return false
+	}
+	// 等待原始数据的异步准入，避免两次新条目准入互相覆盖派生副本。
+	avCache.Wait()
+	avSearchDataCacheLock.Lock()
+	defer avSearchDataCacheLock.Unlock()
+	key := avCacheKey(avID, boxID)
+	if avDataVersions[key] != version {
+		return false
+	}
+	cost := int64(len(raw) + len(normalized))
+	if bytes.Equal(raw, normalized) {
+		normalized = raw
+		cost = int64(len(raw))
+	}
+	if cost > avCache.MaxCost() {
+		return false
+	}
+	// 按新条目重新准入，使派生字节也参与容量淘汰，而不是直接扩大已驻留条目。
+	avCache.Del(key)
+	return avCache.Set(key, &avCacheEntry{raw: raw, version: version, normalized: normalized}, cost)
 }
 
 func EnsureAVDataVersionInBox(avID, boxID string) (version uint64) {

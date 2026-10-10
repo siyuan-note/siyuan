@@ -868,7 +868,16 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 		dataVersion = cache.SetAVDataWithVersionInBox(avID, boxID, data)
 	}
 
-	ret, err = ParseAttributeViewData(avID, data)
+	if normalized, ok := cache.GetAVNormalizedDataInBox(avID, boxID, dataVersion); ok {
+		ret, err = parseAttributeViewData(avID, normalized, false)
+	} else {
+		ret, err = ParseAttributeViewData(avID, data)
+		if err == nil {
+			if normalized, marshalErr := json.Marshal(ret); marshalErr == nil {
+				cache.SetAVNormalizedDataInBox(avID, boxID, dataVersion, data, normalized)
+			}
+		}
+	}
 	if nil == err {
 		if resolveColors {
 			ret.ResolveDirectColors()
@@ -880,6 +889,10 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 
 // ParseAttributeViewData 解析已经完成解密认证的数据库数据，复用现有格式兼容与规范化处理。
 func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err error) {
+	return parseAttributeViewData(avID, data, true)
+}
+
+func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (ret *AttributeView, err error) {
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
 	if err = json.Unmarshal(data, ret); err != nil {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
@@ -946,7 +959,7 @@ func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err e
 	if nil == err {
 		err = ret.ValidateListLayouts()
 	}
-	if nil == err {
+	if nil == err && normalizeRichText {
 		err = ret.NormalizeRichText()
 	}
 	if nil == err {

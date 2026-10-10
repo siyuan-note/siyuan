@@ -19,6 +19,7 @@ package av
 import (
 	"time"
 
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
@@ -140,13 +141,17 @@ func (av *AttributeView) NormalizeRichText() (err error) {
 		richContent string
 	}
 	var normalized []normalizedText
+	var luteEngine *lute.Lute
 	av.visitPersistedValues(func(value *Value) {
 		if nil != err || nil == value.Text || !value.Text.IsRich() {
 			return
 		}
 		rich := *value.Text.Rich
+		if luteEngine == nil {
+			luteEngine = newValueTextRichLute()
+		}
 		var tree *parse.Tree
-		if tree, err = NormalizeValueTextRich(&rich); nil == err {
+		if tree, err = normalizeValueTextRichWithLute(&rich, luteEngine); nil == err {
 			normalized = append(normalized, normalizedText{
 				value:       value.Text,
 				content:     valueTextRichPlainContent(tree),

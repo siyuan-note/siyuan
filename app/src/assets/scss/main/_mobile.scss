@@ -278,6 +278,11 @@ body.mobile-keyboard--open {
     display: flex;
     align-items: center;
     height: 48px;
+
+    &--sql {
+      height: auto;
+      min-height: 48px;
+    }
   }
 
   &__text {
@@ -293,6 +298,10 @@ body.mobile-keyboard--open {
       min-width: 0;
       height: 48px;
       -webkit-line-clamp: unset;
+    }
+
+    &--search-sql {
+      height: auto;
     }
   }
 

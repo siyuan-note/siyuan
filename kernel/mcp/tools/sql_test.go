@@ -52,3 +52,37 @@ func TestFormatSQLRowsReportsPossibleTruncation(t *testing.T) {
 		t.Fatalf("missing SQL result truncation warning:\n%s", got)
 	}
 }
+
+func TestSQLSchemaActionAndEmptyStructuredResult(t *testing.T) {
+	validator, err := CompileToolValidator(SQLTool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = validator.ValidateInput(map[string]any{"action": "schema"}); err != nil {
+		t.Fatalf("schema must not require stmt: %v", err)
+	}
+	result, err := sqlHandler(map[string]any{"action": "schema"})
+	if err != nil || result.IsError || len(result.Content) != 1 {
+		t.Fatalf("schema result: %+v, %v", result, err)
+	}
+	for _, text := range []string{"spans", "parent_id", "textmark code", "WITH RECURSIVE", "SELECT b.*", "LIMIT/OFFSET"} {
+		if !strings.Contains(result.Content[0].Text, text) {
+			t.Fatalf("schema missing %q", text)
+		}
+	}
+	empty := sqlQueryResult(nil, false, "")
+	output := empty.StructuredContent.(map[string]any)
+	if empty.Content[0].Text != "no results" || output["rows"] == nil || output["rowCount"] != 0 {
+		t.Fatalf("empty SQL result: %+v", empty)
+	}
+}
+
+func TestSQLResultPreservesRawValuesAndEscapesTable(t *testing.T) {
+	rows := []map[string]any{{"text": "a|b\nc", "total": int64(4)}}
+	result := sqlQueryResult(rows, false, "")
+	output := result.StructuredContent.(map[string]any)
+	if output["rows"].([]map[string]any)[0]["text"] != "a|b\nc" ||
+		!strings.Contains(result.Content[0].Text, "a\\|b<br>c") {
+		t.Fatalf("SQL values were corrupted: %+v", result)
+	}
+}

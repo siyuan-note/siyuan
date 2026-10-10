@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20261008125238"
+		"updated": "20261010113646"
 	},
 	"Children": [
 		{
@@ -1132,6 +1132,35 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261010113646-kdzs7xm",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261010113646-kdzs7xm",
+				"updated": "20261010113646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "结构化 SQL 搜索"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261010113646-xl27dnz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010113646-xl27dnz",
+				"updated": "20261010113646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "对于块类型、行内格式、父子层级、多条件筛选或统计需求，智能体可按需调用 sql.schema 获取索引结构和示例，再通过 sql.query 查询。查询结果包含原始行数据和可点击的块链接；统计结果直接用于回答，完整块查询可通过 open_search 的 method=2 在搜索窗口展示。未指定搜索方式时沿用当前设置，再次调用会更新已有窗口的查询内容和方式。"
 				}
 			]
 		},

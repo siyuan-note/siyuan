@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20261009182324"
+		"updated": "20261010113646"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-t1r641c",
-				"updated": "20261009182324"
+				"updated": "20261010113646"
 			},
 			"Children": [
 				{
@@ -93,6 +93,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "SQL search uses the filters and result order written in the SQL statement. The panel's block-type and path filters, including the current-document scope and child-document option, do not apply. Replacement is unavailable. Grouping by document remains available; in grouped results, type, creation-time, update-time and content-order sorting remain available, but relevance sorting does not apply."
+				}
+			]
+		},
+		{
+			"ID": "20261010113646-apg2y00",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010113646-apg2y00",
+				"updated": "20261010113646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Desktop and mobile SQL search support pasted multiline statements and preserve comments. In SQL mode, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to insert a newline. Keep the newline after a -- line comment so that the following statement is not treated as a comment. The search window requires complete block columns, such as SELECT b.* FROM blocks b; use the agent's sql.query for projections or aggregates."
 				}
 			]
 		},

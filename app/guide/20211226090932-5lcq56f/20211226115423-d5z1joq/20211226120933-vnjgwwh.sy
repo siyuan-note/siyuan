@@ -7,7 +7,7 @@
 		"id": "20211226120933-vnjgwwh",
 		"title": "搜索進階",
 		"type": "doc",
-		"updated": "20261009182324"
+		"updated": "20261010113646"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-g42svwc",
-				"updated": "20261009182324"
+				"updated": "20261010113646"
 			},
 			"Children": [
 				{
@@ -93,6 +93,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "SQL 搜尋使用語句中指定的篩選條件和結果順序。面板中的區塊類型、路徑篩選，包括目前文件範圍與包含子文件選項，不會生效，也不支援取代。仍可依文件分組；分組後可依類型、建立時間、更新時間與內容順序整理結果，但不支援依相關度排序。"
+				}
+			]
+		},
+		{
+			"ID": "20261010113646-lqqhbxx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010113646-lqqhbxx",
+				"updated": "20261010113646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端與行動端的 SQL 搜尋支援貼上多行語句並保留註解。SQL 模式下按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 換行；請保留 -- 行註解後的換行，避免後續語句被視為註解。搜尋視窗需要完整區塊欄位，例如 SELECT b.* FROM blocks b；僅選取部分欄位或統計結果應交給智能體的 sql.query。"
 				}
 			]
 		},

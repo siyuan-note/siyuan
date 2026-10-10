@@ -15,13 +15,13 @@ import {
 import {beginSearchPathRequest} from "./path";
 import {isDisabledFeature, isInIOS} from "../protyle/util/compatibility";
 import {focusSearchInput} from "./focus";
+import {applySearchOpenOptions, SearchOpenOptions} from "./openOptions";
 
 let openSearchVersion = 0;
 
-export const openSearch = async (options: {
+export const openSearch = async (options: SearchOpenOptions & {
     app: App,
     hotkey: string,
-    key?: string,
     notebookId?: string,
     notebookIds?: string[],
     searchPath?: string,
@@ -70,7 +70,7 @@ export const openSearch = async (options: {
     }
     const config = {
         removed: localData.removed,
-        k: options.key || localData.k,
+        k: localData.k,
         r: localData.r,
         hasReplace: options.hotkey === Constants.DIALOG_REPLACE,
         method: localData.method === 4 && (isDisabledFeature("ai") || !window.siyuan.config.ai.embedding.enabled) ? 0 : localData.method,
@@ -81,8 +81,9 @@ export const openSearch = async (options: {
         types: Object.assign({}, localData.types),
         subTypes: Object.assign({}, localData.subTypes),
         replaceTypes: Object.assign({}, localData.replaceTypes),
-        page: options.key ? 1 : localData.page
+        page: localData.page
     };
+    applySearchOpenOptions(config, options);
     setSearchConfigTemporaryPath(config, hasScopedPath || options.hotkey === Constants.DIALOG_SEARCH);
     // 搜索中继续执行 ctrl+F/P 不退出 https://github.com/siyuan-note/siyuan/issues/11637
     const exitDialog = window.siyuan.dialogs.find((item) => {
@@ -97,6 +98,7 @@ export const openSearch = async (options: {
             if (selectText) {
                 cloneData.k = selectText;
             }
+            applySearchOpenOptions(cloneData, options);
             if (hasScopedPath) {
                 setSearchConfigTemporaryPath(item.data, true);
             } else if (options.hotkey === Constants.DIALOG_GLOBALSEARCH) {
@@ -139,6 +141,7 @@ export const openSearch = async (options: {
                     if (selectText) {
                         currentData.k = selectText;
                     }
+                    applySearchOpenOptions(currentData, options);
                     currentData.idPath = [pathPosix().join(toNotebook, toPath)];
                     currentData.hPath = response.data[0];
                     setSearchConfigTemporaryPath(item.data, true);

@@ -1372,7 +1372,6 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	}
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id, titleEmpty)
 
-	nameValues := map[string]string{}
 	tags = strings.TrimSpace(tags)
 	tags = strings.ReplaceAll(tags, "，", ",")
 	tagArray := strings.Split(tags, ",")
@@ -1381,8 +1380,9 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 		tmp = append(tmp, strings.TrimSpace(tag))
 	}
 	tags = strings.Join(tmp, ",")
-	nameValues["tags"] = tags
-	SetBlockAttrs(retID, nameValues)
+	if tags != "" {
+		SetBlockAttrs(retID, map[string]string{"tags": tags})
+	}
 
 	FlushTxQueue()
 

@@ -15,9 +15,9 @@ export const getAVMapLockedPolicy = (provider: AVMapProvider): string => {
             workers = "blob:";
             break;
         case "amap":
-            scripts = "https://webapi.amap.com https://restapi.amap.com";
+            scripts = "https://webapi.amap.com https://restapi.amap.com https://jsapi-service.amap.com";
             workers = "blob:";
-            connect = "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com";
+            connect = "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com https://jsapi.amap.com";
             images += " https://webapi.amap.com https://a.amap.com https://*.is.autonavi.com";
             break;
         case "tencent":

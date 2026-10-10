@@ -120,6 +120,76 @@ test("same-provider redirects work without leaking redirect headers or provider 
     router.destroy();
 });
 
+test("new AMap CSP sources reject cross-host redirects before fetching the unauthorized destination", async () => {
+    for (const [from, to] of [
+        ["webapi.amap.com", "jsapi.amap.com"], ["webapi.amap.com", "jsapi-service.amap.com"],
+        ["jsapi.amap.com", "webapi.amap.com"], ["jsapi-service.amap.com", "restapi.amap.com"],
+        ["jsapi.amap.com", "jsapi-service.amap.com"], ["jsapi-service.amap.com", "jsapi.amap.com"],
+    ]) {
+        const reports = [], tracked = [];
+        const {ses, router} = setupRouter({provider: "amap", report: code => reports.push(code),
+            trackFetch: (url, delta) => tracked.push([url, delta])});
+        ses.fetch = async (url, options) => {
+            ses.fetches.push({url, options});
+            return new Response(null, {status: 302, headers: {Location: "https://" + to + "/private?key=secret"}});
+        };
+        const initialURL = "https://" + from + "/start";
+        const response = await ses.protocols.https(new Request(initialURL));
+        assert.equal(response.status, 403, from + " -> " + to);
+        assert.deepEqual(ses.fetches.map(fetch => fetch.url), [initialURL]);
+        assert.deepEqual(reports, ["providerRequestDenied"]);
+        assert.equal(response.headers.get("location"), null);
+        assert.equal(tracked.reduce((total, entry) => total + entry[1], 0), 0);
+        router.destroy();
+    }
+});
+
+test("new AMap sources permit same-host path redirects with unchanged anonymous forwarding", async () => {
+    for (const hostname of ["jsapi.amap.com", "jsapi-service.amap.com"]) {
+        const reports = [];
+        const {ses, router} = setupRouter({provider: "amap", report: code => reports.push(code)});
+        ses.fetch = async (url, options) => {
+            ses.fetches.push({url, options});
+            return url.endsWith("/start") ? new Response(null, {status: 307, headers: {Location: "/end"}}) :
+                new Response("provider-body", {headers: {"Content-Type": "application/javascript", "Set-Cookie": "secret"}});
+        };
+        const response = await ses.protocols.https(new Request("https://" + hostname + "/start", {
+            headers: {Cookie: "secret", Authorization: "secret"},
+        }));
+        assert.equal(await response.text(), "provider-body");
+        assert.deepEqual(ses.fetches.map(fetch => fetch.url), ["https://" + hostname + "/start", "https://" + hostname + "/end"]);
+        for (const {options} of ses.fetches) {
+            assert.equal(options.credentials, "omit");
+            assert.equal(options.redirect, "manual");
+            assert.deepEqual(options.headers, {Referer: origin + "/"});
+        }
+        assert.equal(response.headers.get("set-cookie"), null);
+        assert.deepEqual(reports, []);
+        router.destroy();
+    }
+});
+
+test("existing AMap cross-host redirects retain behavior but cannot enter a new source on a later hop", async () => {
+    for (const enterNewSource of [false, true]) {
+        const reports = [];
+        const {ses, router} = setupRouter({provider: "amap", report: code => reports.push(code)});
+        ses.fetch = async (url, options) => {
+            ses.fetches.push({url, options});
+            if (url === "https://webapi.amap.com/start") {
+                return new Response(null, {status: 302, headers: {Location: "https://restapi.amap.com/end"}});
+            }
+            return enterNewSource ? new Response(null, {status: 302, headers: {Location: "https://jsapi.amap.com/private"}}) :
+                new Response("existing-provider-body");
+        };
+        const response = await ses.protocols.https(new Request("https://webapi.amap.com/start"));
+        assert.equal(response.status, enterNewSource ? 403 : 200);
+        assert.deepEqual(ses.fetches.map(fetch => fetch.url), ["https://webapi.amap.com/start", "https://restapi.amap.com/end"]);
+        assert.deepEqual(reports, enterNewSource ? ["providerRequestDenied"] : []);
+        await response.body?.cancel();
+        router.destroy();
+    }
+});
+
 test("destroy aborts in-flight provider requests, clears session state and leaves orphan traffic denied", async () => {
     const {ses, router} = setupRouter();
     let signal;

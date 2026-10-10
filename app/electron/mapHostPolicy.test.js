@@ -114,17 +114,30 @@ test("bootstrap CSP has sandbox isolation and only fixed local assets plus the s
     assert.throws(() => createMapContentSecurityPolicy("http://example.com/a", "openfreemap"));
 });
 
-test("AMap permits only its named REST script and blob workers without expanding network access", () => {
+test("AMap permits only approved script and connection origins with isolated blob workers", () => {
     const csp = createMapContentSecurityPolicy(origin, "amap");
     const directives = Object.fromEntries(csp.split(";").filter(value => value.trim()).map(value => {
         const [name, ...sources] = value.trim().split(/\s+/);
         return [name, sources];
     }));
-    assert.deepEqual(directives["script-src"], [origin + "/stage/build/map/host.js", "https://webapi.amap.com", "https://restapi.amap.com"]);
+    assert.deepEqual(directives["script-src"], [origin + "/stage/build/map/host.js", "https://webapi.amap.com", "https://restapi.amap.com", "https://jsapi-service.amap.com"]);
     assert.deepEqual(directives["worker-src"], ["blob:"]);
-    assert.deepEqual(directives["connect-src"], ["https://webapi.amap.com", "https://restapi.amap.com", "https://vdata.amap.com"]);
+    assert.deepEqual(directives["connect-src"], ["https://webapi.amap.com", "https://restapi.amap.com", "https://vdata.amap.com", "https://jsapi.amap.com"]);
     assert.deepEqual(directives["frame-src"], ["'none'"]);
     assert.deepEqual(directives.sandbox, ["allow-scripts"]);
+    for (const host of ["jsapi.amap.com", "jsapi-service.amap.com"]) {
+        assert.equal(getMapRequestPolicy("https://" + host + "/resource", "GET", origin, "amap").type, "provider");
+        for (const url of ["http://" + host + "/", "https://" + host + ":8443/", "https://user@" + host + "/",
+            "https://" + host + ".example/", "https://sub." + host + "/"]) {
+            assert.equal(getMapRequestPolicy(url, "GET", origin, "amap"), undefined);
+        }
+        for (const provider of ["openfreemap", "tencent", "baidu"]) {
+            assert.equal(getMapRequestPolicy("https://" + host + "/", "GET", origin, provider), undefined);
+            assert.equal(createMapContentSecurityPolicy(origin, provider).includes(host), false);
+        }
+    }
+    assert.equal(directives["script-src"].includes("https://jsapi.amap.com"), false);
+    assert.equal(directives["connect-src"].includes("https://jsapi-service.amap.com"), false);
     for (const value of ["https://unknown.example/a", "http://restapi.amap.com/a", origin + "/api/system/getConf", "file:///tmp/a"]) {
         assert.equal(getMapRequestPolicy(value, "GET", origin, "amap"), undefined);
     }

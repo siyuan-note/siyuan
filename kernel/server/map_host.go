@@ -59,9 +59,9 @@ func mapHostPolicy(host, provider string) (string, bool) {
 		styles += " " + local + "maplibre-gl.css"
 		workers = "blob:"
 	case "amap":
-		scripts += " https://webapi.amap.com https://restapi.amap.com"
+		scripts += " https://webapi.amap.com https://restapi.amap.com https://jsapi-service.amap.com"
 		workers = "blob:"
-		connect = "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com"
+		connect = "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com https://jsapi.amap.com"
 		images += " https://webapi.amap.com https://a.amap.com https://*.is.autonavi.com"
 	case "tencent":
 		scripts += " https://map.qq.com"

@@ -65,9 +65,9 @@ func TestMapHostAMapRestrictedWorkersAndScripts(t *testing.T) {
 		}
 	}
 	for name, want := range map[string]string{
-		"script-src":  "localhost:6806/stage/build/map/host.js https://webapi.amap.com https://restapi.amap.com",
+		"script-src":  "localhost:6806/stage/build/map/host.js https://webapi.amap.com https://restapi.amap.com https://jsapi-service.amap.com",
 		"worker-src":  "blob:",
-		"connect-src": "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com",
+		"connect-src": "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com https://jsapi.amap.com",
 		"frame-src":   "'none'",
 		"sandbox":     "allow-scripts",
 	} {

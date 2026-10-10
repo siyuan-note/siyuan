@@ -15,7 +15,7 @@ const mapHostFiles = Object.freeze({
 
 const providerHosts = Object.freeze({
     openfreemap: ["tiles.openfreemap.org"],
-    amap: ["webapi.amap.com", "restapi.amap.com", "vdata.amap.com", "a.amap.com", "*.is.autonavi.com"],
+    amap: ["jsapi.amap.com", "jsapi-service.amap.com", "webapi.amap.com", "restapi.amap.com", "vdata.amap.com", "a.amap.com", "*.is.autonavi.com"],
     tencent: ["map.qq.com", "apis.map.qq.com", "*.map.qq.com"],
     baidu: ["api.map.baidu.com", "*.map.bdimg.com", "*.bdimg.com", "*.map.baidu.com"],
 });
@@ -149,9 +149,9 @@ const createMapContentSecurityPolicy = (origin, provider) => {
         styles += " " + assets + "maplibre-gl.css";
         workers = "blob:";
     } else if (provider === "amap") {
-        scripts += " https://webapi.amap.com https://restapi.amap.com";
+        scripts += " https://webapi.amap.com https://restapi.amap.com https://jsapi-service.amap.com";
         workers = "blob:";
-        connect = "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com";
+        connect = "https://webapi.amap.com https://restapi.amap.com https://vdata.amap.com https://jsapi.amap.com";
         images += " https://webapi.amap.com https://a.amap.com https://*.is.autonavi.com";
     } else if (provider === "tencent") {
         scripts += " https://map.qq.com";

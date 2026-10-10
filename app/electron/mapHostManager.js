@@ -16,6 +16,7 @@ const deniedResponse = () => new Response("Forbidden", {status: 403,
     headers: {"Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store"}});
 const withoutCredentials = (headers) => Object.fromEntries(Object.entries(headers || {})
     .filter(([name]) => !["cookie", "authorization", "proxy-authorization"].includes(name.toLowerCase())));
+const amapSingleHostRedirects = ["jsapi.amap.com", "jsapi-service.amap.com"];
 const clearMapSession = ses => {
     for (const method of ["closeAllConnections", "clearStorageData", "clearAuthCache", "clearCache", "clearHostResolverCache"]) {
         try { void Promise.resolve(ses[method]()).catch(() => {}); } catch (_error) { /* 继续清理其他会话状态。 */ }
@@ -98,10 +99,18 @@ const createMapSessionRouter = ({ses, origin, provider, appDir, readFile = fs.re
         abort.signal.addEventListener("abort", finish, {once: true});
         try {
             let url = request.url;
+            const initialHostname = new URL(url).hostname;
             for (let redirects = 0; redirects <= 5; redirects++) {
                 if (destroyed || abort.signal.aborted) break;
                 if (!isAllowedMapProviderURL(url, provider)) {
                     report(url.startsWith("http:") ? "providerInsecureRequest" : "providerRequestDenied");
+                    break;
+                }
+                const hostname = new URL(url).hostname;
+                // 代理会隐藏重定向终点；新增来源不得借跨主机跳转越过各自的 CSP 用途限制。
+                if (provider === "amap" && hostname !== initialHostname &&
+                    [initialHostname, hostname].some(host => amapSingleHostRedirects.includes(host))) {
+                    report("providerRequestDenied");
                     break;
                 }
                 if (activeURL) trackFetch(activeURL, -1);

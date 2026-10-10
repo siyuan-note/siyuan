@@ -264,9 +264,9 @@ describe("isolated provider loading", () => {
     });
     it("allows only the approved AMap REST script and blob worker while keeping child frames disabled", () => {
         const policy = getAVMapLockedPolicy("amap");
-        assert.match(policy, /(?:^|; )script-src https:\/\/webapi\.amap\.com https:\/\/restapi\.amap\.com;/);
+        assert.match(policy, /(?:^|; )script-src https:\/\/webapi\.amap\.com https:\/\/restapi\.amap\.com https:\/\/jsapi-service\.amap\.com;/);
         assert.match(policy, /worker-src blob:; child-src 'none'; frame-src 'none';/);
-        assert.match(policy, /connect-src https:\/\/webapi\.amap\.com https:\/\/restapi\.amap\.com https:\/\/vdata\.amap\.com;/);
+        assert.match(policy, /connect-src https:\/\/webapi\.amap\.com https:\/\/restapi\.amap\.com https:\/\/vdata\.amap\.com https:\/\/jsapi\.amap\.com;/);
         assert.equal(/unsafe-eval|script-src[^;]*unsafe-inline|https:\/\/\*\.amap/.test(policy), false);
         for (const provider of ["tencent", "baidu"] as AVMapProvider[]) {
             assert.match(getAVMapLockedPolicy(provider), /worker-src 'none'; child-src 'none';/);

@@ -83,6 +83,7 @@ const browserCases = async (layoutSource: string, exportSource: string, mobile: 
                 rememberBlob(data.file);
                 callback({code: 0, data: {file: "image.png"}});
             }
+            return Promise.resolve();
         }},
         "../../util/contractFormData": {ContractFormData: class {
             file: File;

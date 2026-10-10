@@ -26,7 +26,7 @@ The component list is informational and does not replace the license terms. Copy
 | PaddleOCR PP-OCRv6 Tiny ONNX models | Pinned revisions in scripts/ocr-assets.json | Apache-2.0 | [official models](https://huggingface.co/collections/PaddlePaddle/pp-ocrv6) | app/stage/ocr/models/; license text in app/stage/ocr/PADDLEOCR-LICENSE |
 | DOMPurify | 3.3.3 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | app/stage/protyle/js/protyle-html.js |
 | html-to-image | 1.11.13 | MIT | [upstream](https://github.com/bubkoo/html-to-image) | app/stage/protyle/js/html-to-image.min.js |
-| modern-screenshot | 4.6.6 | MIT | [upstream](https://github.com/qq15725/modern-screenshot) | app/stage/protyle/js/modern-screenshot.min.js |
+| modern-screenshot | 4.7.0 | MIT | [upstream](https://github.com/qq15725/modern-screenshot) | app/stage/protyle/js/modern-screenshot.min.js |
 | abcjs | 6.7.1 | MIT | [upstream](https://github.com/paulrosen/abcjs) | app/stage/protyle/js/abcjs/ |
 | Apache ECharts | 6.1.0 | Apache-2.0 | [upstream](https://github.com/apache/echarts) | app/stage/protyle/js/echarts/echarts.min.js |
 | ZRender | 6.1.0 | BSD-3-Clause | [upstream](https://github.com/ecomfe/zrender) | Bundled by Apache ECharts |
@@ -392,7 +392,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### modern-screenshot 4.6.6 - LICENSE
+### modern-screenshot 4.7.0 - LICENSE
 
 ```text
 The MIT License (MIT)

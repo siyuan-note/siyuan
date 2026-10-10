@@ -156,7 +156,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         const style = {boxSizing: "border-box", overflow: "hidden"};
         if (isIPhone() || isIPad() || isSafari()) {
             // modern-screenshot 通过缓存默认样式提高 WebKit/WKWebView 环境下的导出性能。
-            await addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.6.6`, "protyleModernScreenshot");
+            await addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.7.0`, "protyleModernScreenshot");
             return window.modernScreenshot.domToBlob(
                 contentElement, {
                     ...size,

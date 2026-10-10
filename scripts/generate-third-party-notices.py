@@ -78,6 +78,13 @@ BUNDLED_COMPONENTS = [
         "app/stage/protyle/js/html-to-image.min.js",
     ),
     (
+        "modern-screenshot",
+        "4.7.0",
+        "MIT",
+        "https://github.com/qq15725/modern-screenshot",
+        "app/stage/protyle/js/modern-screenshot.min.js",
+    ),
+    (
         "abcjs",
         "6.7.1",
         "MIT",
@@ -828,6 +835,8 @@ def collect_additional_notices(go_modules):
         ("SQLCipher 4.16.0 Community - BSD-3-Clause notice", sqlcipher_notice),
         ("LibTomCrypt subset - public-domain notice", "LibTomCrypt is public domain software."),
         ("ClayGL 1.2.x - LICENSE", CLAYGL_LICENSE),
+        ("modern-screenshot 4.7.0 - LICENSE",
+         (APP_ROOT / "stage" / "protyle" / "js" / "modern-screenshot-LICENSE.txt").read_text(encoding="utf-8")),
         ("PDFium 7323 - LICENSE", PDFIUM_BSD_NOTICE + "\n\n" + apache_license),
         ("theSVG snapshot aa0605996b4ad4fdda98502f84021b3c3a64847d - LICENSE", THESVG_LICENSE),
         ("Microsoft Edge Demos - LICENSE", MICROSOFT_EDGE_DEMOS_LICENSE),

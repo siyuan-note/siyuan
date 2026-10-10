@@ -5,6 +5,7 @@ import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
 import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
+import {toggleFileTreeMenu} from "../../menus/fileTreeMenu";
 import {
     getPublishAccessLevel,
     getPublishAccessOptionByLevel,
@@ -297,15 +298,19 @@ export class MobileFiles extends Model {
                             if (type === "new") {
                                 newFileInTree(app, notebookId, pathString);
                             } else if (type === "more-root") {
-                                initNavigationMenu(app, target.parentElement);
-                                this.insertMultiSelectMenu(target.parentElement);
-                                window.siyuan.menus.menu.fullscreen("bottom");
+                                toggleFileTreeMenu(target, () => {
+                                    initNavigationMenu(app, target.parentElement);
+                                    this.insertMultiSelectMenu(target.parentElement);
+                                    window.siyuan.menus.menu.fullscreen("bottom");
+                                });
                             }
                         }
                         if (type === "more-file") {
-                            initFileMenu(app, notebookId, pathString, target.parentElement);
-                            this.insertMultiSelectMenu(target.parentElement);
-                            window.siyuan.menus.menu.fullscreen("bottom");
+                            toggleFileTreeMenu(target, () => {
+                                initFileMenu(app, notebookId, pathString, target.parentElement);
+                                this.insertMultiSelectMenu(target.parentElement);
+                                window.siyuan.menus.menu.fullscreen("bottom");
+                            });
                         }
                     }
                     event.preventDefault();
@@ -993,7 +998,7 @@ export class MobileFiles extends Model {
     ${emojiHTML}
     ${switchHTML}
     <span class="b3-list-item__text${item.closed ? " ft__on-surface" : ""}">${escapeHtml(item.name)}</span>
-    <span data-type="more-root" class="b3-list-item__action${(window.siyuan.config.readonly || item.closed) ? " fn__none" : ""}">
+    <span data-type="more-root" data-menu="true" class="b3-list-item__action${(window.siyuan.config.readonly || item.closed) ? " fn__none" : ""}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </span>
     <span data-type="new" class="b3-list-item__action${(window.siyuan.config.readonly || item.closed) ? " fn__none" : ""}">
@@ -1732,7 +1737,7 @@ export class MobileFiles extends Model {
         const paddingLeft = (item.path.split("/").length - 1) * 20;
         const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
         const defaultIcon = item.subFileCount === 0 ? "file" : "folder";
-        const actionHTML = `<span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
+        const actionHTML = `<span data-type="more-file" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </span>
     <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__nw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newSubDoc}">

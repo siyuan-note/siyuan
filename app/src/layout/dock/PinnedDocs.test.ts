@@ -49,15 +49,25 @@ const loadPanel = (fetchCode = 0) => {
     const config = {readonly: false, fileTree: {docIconClickMode: 0, parentDocTitleClickMode: 0}};
     const calls: {kind: string, args: unknown[]}[] = [];
     const timers: (() => void)[] = [];
+    let menuVisible = false;
+    const menu = {
+        data: undefined as Element | undefined,
+        element: {classList: {contains: () => !menuVisible}},
+        remove: () => { menuVisible = false; menu.data = undefined; },
+    };
     const runtime = {config, notebooks: [] as unknown[], languages: {pinDoc: "Pin", dragTipMoveChild: "Into ${x}",
         dragTipMoveBefore: "Before ${x}", dragTipMoveAfter: "After ${x}"}, dragElement: undefined as {innerText: string},
-        dragTitle: "Document", touchDragActive: false, touchDragGhost: undefined as unknown};
+        dragTitle: "Document", touchDragActive: false, touchDragGhost: undefined as unknown, menus: {menu}};
     const tips: unknown[][] = [];
     const record = (kind: string) => async (...args: unknown[]) => {
         calls.push({kind, args});
         return {code: kind === "http" ? fetchCode : 0, data: args[0] === "/api/filetree/listDocsByPath" ? childData : docs};
     };
     const exports: {PinnedDocs?: {prototype: object}} = {};
+    const fileTreeMenu = {};
+    runInNewContext(ts.transpileModule(readFileSync(join(__dirname, "../../menus/fileTreeMenu.ts"), "utf8"), {
+        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+    }).outputText, {exports: fileTreeMenu, window: {siyuan: runtime}});
     const source = ts.transpileModule(readFileSync(join(__dirname, "PinnedDocs.ts"), "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
     }).outputText;
@@ -74,6 +84,8 @@ const loadPanel = (fetchCode = 0) => {
             remove() { calls.push({kind: "removeGhost", args: [this]}); },
         })},
         require: (name: string) => {
+            if (name.endsWith("/fileTreeMenu")) { return fileTreeMenu; }
+            if (name.endsWith("/menuClick")) { return {globalClickHideMenu: () => {}}; }
             if (name.endsWith("/dragTip")) { return {setDragTipGhost: record("dragTipGhost"),
                 showDragTip: (...args: unknown[]) => tips.push(args), hideDragTip: () => tips.push([])}; }
             if (name.endsWith("/fileTreeAnimation")) { return {setFileTreeVisibility: (element: HTMLElement, visible: boolean) => element.classList.toggle("fn__none", !visible)}; }
@@ -85,8 +97,12 @@ const loadPanel = (fetchCode = 0) => {
             if (name.endsWith("/emoji")) { return {openEmojiPanel: record("icon")}; }
             if (name.endsWith("/navigation")) {
                 return {initFileMenu: (...args: unknown[]) => {
+                    menu.remove();
                     calls.push({kind: "menu", args});
-                    return {popup: record("popup"), fullscreen: record("fullscreen")};
+                    return {
+                        popup: (...position: unknown[]) => { menuVisible = true; return record("popup")(...position); },
+                        fullscreen: (...position: unknown[]) => { menuVisible = true; return record("fullscreen")(...position); },
+                    };
                 }};
             }
             if (name.endsWith("/pinnedDocs")) { return {updatePinnedDocs: record("pin"), pinnedDocIDs: new Set<string>()}; }
@@ -132,14 +148,15 @@ test("collapse clears descendant expansion and persists the closed section", asy
     assert.equal(calls[0].args[0], "/api/filetree/listDocsByPath");
 });
 
-test("pinned document more actions open the source document menu", () => {
+test("pinned document more actions open the source document menu and toggle on repeated clicks", () => {
     const {panel, calls} = loadPanel();
     const row = {dataset: {nodeId: "document", notebook: "notebook", path: "/document.sy"}};
     const button = {getBoundingClientRect: () => ({left: 180, bottom: 120, height: 24})};
-    panel.click({
+    const event = {
         stopPropagation: () => {}, clientX: 10, clientY: 20,
         target: {closest: (selector: string) => selector === "[data-pin-row]" ? row : selector === "[data-pin-more]" ? button : null},
-    });
+    };
+    panel.click(event);
     assert.equal(calls[0].kind, "menu");
     assert.deepEqual(calls[0].args.slice(1), ["notebook", "/document.sy", row]);
     assert.equal(calls[1].kind, "popup");
@@ -147,6 +164,12 @@ test("pinned document more actions open the source document menu", () => {
     panel.mobile = true;
     panel.menu(row, {x: 180, y: 120, h: 24});
     assert.equal(calls[3].kind, "fullscreen");
+    panel.click(event);
+    assert.equal(calls.length, 6);
+    panel.click(event);
+    assert.equal(calls.length, 6);
+    panel.click(event);
+    assert.equal(calls.length, 8);
 });
 
 test("pinned roots share one list and retain each document notebook without wrapper lists", async () => {

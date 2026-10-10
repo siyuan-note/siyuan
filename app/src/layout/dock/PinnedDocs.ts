@@ -7,6 +7,8 @@ import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
 import {openEmojiPanel} from "../../emoji";
 import {escapeHtml} from "../../util/escape";
 import {initFileMenu} from "../../menus/navigation";
+import {toggleFileTreeMenu} from "../../menus/fileTreeMenu";
+import {globalClickHideMenu} from "../../menus/menuClick";
 import {parseDocumentTabDragData, parseDocumentTreeDragData} from "../../util/fileTreeMove";
 import {reorderSortedFileTree} from "../../util/fileTreeReorder";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
@@ -325,7 +327,7 @@ export class PinnedDocs {
         // 桌面端点击会修改图标时给出提示，移动端保留无障碍标签
         const iconLabel = this.getDocIconLabel(doc.subFileCount);
         if (!doc.icon) { row.dataset.defaultIcon = doc.subFileCount ? "folder" : "file"; }
-        row.innerHTML = `<span data-pin-toggle="true" style="padding-left:${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${doc.subFileCount ? "" : " fn__hidden"}"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__icon${iconLabel ? " ariaLabel" : ""}" data-position="8east"${iconLabel ? ` aria-label="${iconLabel}"` : ""}>${getFileTreeIconHTML(doc.icon, doc.subFileCount ? "folder" : "file")}</span><span class="b3-list-item__text">${escapeHtml(doc.name)}${doc.unavailable ? ` (${window.siyuan.languages.closeNotebook})` : ""}</span><span data-pin-more="true" class="b3-list-item__action" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`;
+        row.innerHTML = `<span data-pin-toggle="true" style="padding-left:${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${doc.subFileCount ? "" : " fn__hidden"}"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__icon${iconLabel ? " ariaLabel" : ""}" data-position="8east"${iconLabel ? ` aria-label="${iconLabel}"` : ""}>${getFileTreeIconHTML(doc.icon, doc.subFileCount ? "folder" : "file")}</span><span class="b3-list-item__text">${escapeHtml(doc.name)}${doc.unavailable ? ` (${window.siyuan.languages.closeNotebook})` : ""}</span><span data-pin-more="true" data-menu="true" class="b3-list-item__action" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`;
         if (!doc.unavailable && !window.siyuan.config.readonly) {
             const add = document.createElement("span");
             add.className = "b3-list-item__action";
@@ -439,6 +441,7 @@ export class PinnedDocs {
         event.stopPropagation();
         if (this.suppressClick) { event.preventDefault(); return; }
         const target = event.target as Element;
+        globalClickHideMenu(target as HTMLElement);
         if (!target.closest(".b3-list-item__text") || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
             this.parentDocClick.cancel();
         }
@@ -458,8 +461,10 @@ export class PinnedDocs {
         }
         const moreButton = target.closest("[data-pin-more]");
         if (moreButton) {
-            const rect = moreButton.getBoundingClientRect();
-            this.menu(row, {x: rect.left, y: rect.bottom, h: rect.height});
+            toggleFileTreeMenu(moreButton, () => {
+                const rect = moreButton.getBoundingClientRect();
+                this.menu(row, {x: rect.left, y: rect.bottom, h: rect.height});
+            });
         } else if (target.closest("[data-pin-new]")) {
             newFileInTree(this.app, row.dataset.notebook, row.dataset.path);
         } else if (target.closest("[data-pin-toggle]")) {

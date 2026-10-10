@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "عناصر بلا إحداثيات",
 	"mapLoadedCount": "تم تحميل ${shown}/${total}",
 	"mapSkippedCount": "تم تخطي ${count}",
 	"databaseMapView": "عرض الخريطة لقاعدة البيانات",

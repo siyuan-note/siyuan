@@ -58,6 +58,7 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
     const openedLinks: unknown[] = [];
     const calls: string[] = [];
     const transactions: Array<{perform: IOperation[]; undo: IOperation[]; callback: () => void}> = [];
+    const unplaced: Array<{options: Parameters<typeof import("./unplaced").bindMapUnplaced>[0]; destroyed: boolean}> = [];
     let settleTransaction: () => void;
     let transactionPromise = Promise.resolve();
     let refreshes = 0;
@@ -95,6 +96,11 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
             return options.runtime ? options.runtime() : {code: 0, data: {provider: "openfreemap"}};
         }},
         "./protocol": protocol,
+        "./unplaced": {bindMapUnplaced: (options: Parameters<typeof import("./unplaced").bindMapUnplaced>[0]) => {
+            const binding = {options, destroyed: false};
+            unplaced.push(binding);
+            return () => { binding.destroyed = true; };
+        }},
         "../openDatabaseRow": {openDatabaseRowByData: (_protyle: unknown, row: unknown) => opened.push(row)},
         "./host": {isAVMapHostEnvironmentSupported: () => options.hostSupported ?? true,
             createAVMapHost: (_container: unknown, configuration: AVMapHostOptions) => {
@@ -135,7 +141,7 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
         navigator: {userAgent: "Mozilla/5.0", onLine: options.online !== false},
         document: {createElement: () => new ElementStub(), documentElement: {getAttribute: () => "light"}},
         MutationObserver: Observer, ResizeObserver: Observer, Lute: {NewNodeID: () => "new-location"}});
-    return {data, protyle, calls, hosts, roots, records, opened, openedLinks, events, observers, destroyMap, transactions, context,
+    return {data, protyle, calls, hosts, roots, records, opened, openedLinks, events, observers, destroyMap, transactions, context, unplaced,
         refreshes: () => refreshes,
         completeTransaction: async (success = true) => {
             if (success) transactions[transactions.length - 1].callback();
@@ -153,9 +159,48 @@ test("map summary keeps loaded scope in one compact line and omits zero skipped 
     const scenario = setup();
     await scenario.render();
     assert.match(scenario.roots[0].innerHTML, /<span>Loaded 1\/12<\/span><span class="av__map-skipped"><\/span>/);
-    assert.match(scenario.roots[0].innerHTML, /b3-tooltips b3-tooltips__ne" aria-label="Map covers 1 loaded records of 12 filtered records" tabindex="0"/);
+    assert.match(scenario.roots[0].innerHTML, /b3-tooltips b3-tooltips__nw" aria-label="Map covers 1 loaded records of 12 filtered records" tabindex="0"/);
     assert.equal(scenario.control(".av__map-skipped").textContent, "");
     assert.doesNotMatch(scenario.roots[0].innerHTML, /<div class="av__map-skipped|Skipped 0/);
+});
+
+test("map toolbar places the unplaced inbox after the summary and disposes its requests with the map", async () => {
+    const scenario = setup();
+    await scenario.render();
+    const html = scenario.roots[0].innerHTML;
+    assert.match(html, /av__map-toolbar/);
+    assert.match(html, /data-map-unplaced-toggle.*aria-expanded="false".*#iconInbox/s);
+    assert.ok(html.indexOf("av__map-summary") < html.indexOf("data-map-unplaced-toggle"));
+    assert.equal(scenario.unplaced.length, 1);
+    assert.equal(scenario.unplaced[0].options.data, scenario.data);
+    await scenario.render();
+    assert.equal(scenario.unplaced[0].destroyed, true);
+    assert.equal(scenario.unplaced[1].destroyed, false);
+    scenario.destroyMap();
+    assert.equal(scenario.unplaced[1].destroyed, true);
+});
+
+test("unplaced records remain accessible when the map is empty or its online host cannot load", async () => {
+    for (const mode of ["empty", "unsupported", "offline"]) {
+        const scenario = setup({hostSupported: mode !== "unsupported", online: mode !== "offline"});
+        if (mode === "empty") (scenario.data.view as IAVTable).rows = [];
+        await scenario.render();
+        assert.equal(scenario.unplaced.length, 1, mode);
+        assert.match(scenario.roots[0].innerHTML, /data-map-unplaced-toggle/);
+    }
+});
+
+test("unplaced inbox matches calendar edit permissions and requires a valid selected location field", async () => {
+    for (const mode of ["disabled", "published", "created", "snapshot", "missing", "changed-type"]) {
+        const scenario = setup({published: mode === "published"});
+        scenario.protyle.disabled = mode === "disabled";
+        if (["created", "snapshot"].includes(mode)) scenario.protyle.options.history = {[mode]: "version"};
+        if (mode === "missing") (scenario.data.view as IAVTable).map.locationKeyID = "removed";
+        if (mode === "changed-type") (scenario.data.view as IAVTable).map.locationKeyID = "text";
+        await scenario.render();
+        assert.equal(scenario.unplaced.length, 0, mode);
+        assert.doesNotMatch(scenario.roots[0].innerHTML, /data-map-unplaced-toggle/);
+    }
 });
 
 test("map summary counts all skipped locations and keeps their reasons in its tooltip", async () => {

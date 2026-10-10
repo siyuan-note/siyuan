@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "Koordinatı olmayan kayıtlar",
 	"mapLoadedCount": "Yüklendi ${shown}/${total}",
 	"mapSkippedCount": "Atlandı ${count}",
 	"databaseMapView": "Veritabanı harita görünümü",

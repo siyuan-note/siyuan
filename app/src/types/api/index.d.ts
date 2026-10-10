@@ -366,6 +366,10 @@ export type AVMapSettings = { "locationKeyID": string; };
 
 export type AVMapSettingsInput = { "locationKeyID": string; };
 
+export type AVMapUnplacedData = { "rows": Array<AVTableRow | null> | null; "total": number; };
+
+export type AVMapUnplacedRequestInput = { "blockID"?: string | null; "id": string; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "search"?: string | null; "viewID": string; };
+
 export type AVNewItemFieldValue = { "mode": "static" | "currentTime"; "value"?: AVValue; };
 
 export type AVNewItemFieldValueInput = { "mode"?: "static" | "currentTime"; "value"?: AVValueInput | null; };
@@ -3555,6 +3559,20 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","writable"];
+    };
+    /**
+     * 返回地图选定位置字段尚无坐标的条目，包含合法的仅名称值，不包含零坐标、无效值或超出地图投影范围的已有坐标。
+     * 空绑定按视图字段顺序使用首个位置字段；显式绑定失效时返回空列表，不自动改绑或写入配置。
+     * 损坏或不支持的位置数据沿用现有读取校验并返回错误，保留源数据，不静默当作未定位条目。
+     * 保留当前视图筛选、上下文筛选、query 搜索和排序，search 额外匹配标题；独立分页默认 50 条，上限 100 条。
+     * 仅允许非只读管理员访问，保留加密笔记本读取租约；只读取实时数据，不创建、升级或保存数据库。
+     */
+    "/api/av/getAttributeViewMapUnplaced": {
+        request: AVMapUnplacedRequestInput;
+        response: { "code": 0; "data": AVMapUnplacedData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/av/getAttributeViewPasteRows": {
         request: GetAttributeViewPasteRowsRequestInput;

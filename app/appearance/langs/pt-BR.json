@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "Registros sem coordenadas",
 	"mapLoadedCount": "Carregados ${shown}/${total}",
 	"mapSkippedCount": "Ignorados ${count}",
 	"databaseMapView": "Visualização de mapa do banco de dados",

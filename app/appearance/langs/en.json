@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "Unplaced records",
 	"mapLoadedCount": "Loaded ${shown}/${total}",
 	"mapSkippedCount": "Skipped ${count}",
 	"databaseMapView": "Database map view",

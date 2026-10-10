@@ -11,6 +11,7 @@ import {createAVMapHost, isAVMapHostEnvironmentSupported} from "./host";
 import {createDesktopAVMapHost, isDesktopAVMapHostSupported} from "./desktopTransport";
 import type {AVMapHost} from "./host";
 import {AV_MAP_ATTRIBUTION_LINKS, AV_MAP_MAX_POINTS} from "./protocol";
+import {bindMapUnplaced} from "./unplaced";
 
 const getTheme = () => document.documentElement.getAttribute("data-theme-mode") === "dark" ? "dark" : "light";
 
@@ -102,8 +103,12 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
         .replace("${total}", view.rowCount.toString());
     const loadedText = window.siyuan.languages.mapLoadedCount.replace("${shown}", view.rows.length.toString())
         .replace("${total}", view.rowCount.toString());
-    root.innerHTML = `<div class="av__map-summary ft__smaller ft__on-surface b3-tooltips b3-tooltips__ne" aria-label="${escapeAttr(pageText)}" tabindex="0">
+    const hasLocationField = view.columns.some(column => column.id === settings.locationKeyID && column.type === "location");
+    root.innerHTML = `<div class="av__map-toolbar">
+<div class="av__map-summary ft__smaller ft__on-surface b3-tooltips b3-tooltips__nw" aria-label="${escapeAttr(pageText)}" tabindex="0">
     <span>${escapeHtml(loadedText)}</span><span class="av__map-skipped"></span>
+</div>
+${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class="block__icon block__icon--show ariaLabel fn__none" data-map-unplaced-toggle data-position="8south" aria-label="${escapeAttr(window.siyuan.languages.mapUnplaced)}" aria-expanded="false"><svg><use xlink:href="#iconInbox"></use></svg></button>` : ""}
 </div>
 <div class="av__map-status ft__on-surface" role="status"></div>
 <div class="av__map-canvas fn__none"></div>
@@ -115,6 +120,7 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
     let host: AVMapHost;
     let themeObserver: MutationObserver;
     let resizeObserver: ResizeObserver;
+    let destroyUnplaced: () => void;
     let revision = 0;
     const offline = () => fallback(window.siyuan.languages.mapOffline);
     const current = registerMap(blockElement, {root, destroy: () => {
@@ -122,6 +128,7 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
         host?.destroy();
         themeObserver?.disconnect();
         resizeObserver?.disconnect();
+        destroyUnplaced?.();
         window.removeEventListener("offline", offline);
     }});
     const fallback = (message: string) => {
@@ -143,10 +150,11 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
         return;
     }
     try {
-        if (!view.columns.some(column => column.id === settings.locationKeyID && column.type === "location")) {
+        if (!hasLocationField) {
             renderMapSetup(root, blockElement, protyle, data, current);
             return;
         }
+        if (canEditMapSettings(protyle)) destroyUnplaced = bindMapUnplaced({root, blockElement, protyle, data, current});
         const {points, skipped} = getMapPoints(view);
         const skippedCount = skipped.empty + skipped.invalid + skipped.projection;
         if (skippedCount) {

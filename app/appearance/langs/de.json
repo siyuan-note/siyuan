@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "Einträge ohne Koordinaten",
 	"mapLoadedCount": "Geladen ${shown}/${total}",
 	"mapSkippedCount": "Übersprungen ${count}",
 	"databaseMapView": "Datenbank-Kartenansicht",

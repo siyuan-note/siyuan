@@ -853,6 +853,7 @@ func registerSnippetRoutes(ginServer *gin.Engine) {
 func registerAvRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/renderAttributeView", contractRouteHandlers(apicontract.RenderAttributeView, renderAttributeView)...)
 	ginServer.Handle("POST", "/api/av/getAttributeViewCalendarUndated", contractRouteHandlers(apicontract.GetAttributeViewCalendarUndated, getAttributeViewCalendarUndated)...)
+	ginServer.Handle("POST", "/api/av/getAttributeViewMapUnplaced", contractRouteHandlers(apicontract.GetAttributeViewMapUnplaced, getAttributeViewMapUnplaced)...)
 	ginServer.Handle("POST", "/api/av/getAttributeViewItemStatuses", contractRouteHandlers(apicontract.GetAttributeViewItemStatuses, getAttributeViewItemStatuses)...)
 	ginServer.Handle("POST", "/api/av/renderHistoryAttributeView", contractRouteHandlers(apicontract.RenderHistoryAttributeView, renderHistoryAttributeView)...)
 	ginServer.Handle("POST", "/api/av/renderSnapshotAttributeView", contractRouteHandlers(apicontract.RenderSnapshotAttributeView, renderSnapshotAttributeView)...)

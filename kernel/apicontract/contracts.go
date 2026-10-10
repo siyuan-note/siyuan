@@ -1160,6 +1160,13 @@ var RenderSnapshotAttributeView = define[RenderSnapshotAttributeViewRequest, AVA
 var RenderHistoryAttributeView = define[RenderHistoryAttributeViewRequest, AVArchiveRenderData]("renderHistoryAttributeView", "/api/av/renderHistoryAttributeView", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var RenderAttributeView = define[RenderAttributeViewRequest, AVRenderResult]("renderAttributeView", "/api/av/renderAttributeView", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true, FastJSON: true}, "POST")
 var GetAttributeViewCalendarUndated = define[AVCalendarUndatedRequest, AVCalendarUndatedData]("getAttributeViewCalendarUndated", "/api/av/getAttributeViewCalendarUndated", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 返回地图选定位置字段尚无坐标的条目，包含合法的仅名称值，不包含零坐标、无效值或超出地图投影范围的已有坐标。
+// 空绑定按视图字段顺序使用首个位置字段；显式绑定失效时返回空列表，不自动改绑或写入配置。
+// 损坏或不支持的位置数据沿用现有读取校验并返回错误，保留源数据，不静默当作未定位条目。
+// 保留当前视图筛选、上下文筛选、query 搜索和排序，search 额外匹配标题；独立分页默认 50 条，上限 100 条。
+// 仅允许非只读管理员访问，保留加密笔记本读取租约；只读取实时数据，不创建、升级或保存数据库。
+var GetAttributeViewMapUnplaced = define[AVMapUnplacedRequest, AVMapUnplacedData]("getAttributeViewMapUnplaced", "/api/av/getAttributeViewMapUnplaced", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetCurrentAttrViewImages = define[GetCurrentAttrViewImagesRequest, []string]("getCurrentAttrViewImages", "/api/av/getCurrentAttrViewImages", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewKeys = define[GetAttributeViewKeysRequest, []*AVBlockAttributeViewKeys]("getAttributeViewKeys", "/api/av/getAttributeViewKeys", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewSearchTarget = define[GetAttributeViewSearchTargetRequest, *AVAttributeViewSearchTarget]("getAttributeViewSearchTarget", "/api/av/getAttributeViewSearchTarget", AuthenticatedAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

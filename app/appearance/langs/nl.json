@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "Items zonder coördinaten",
 	"mapLoadedCount": "Geladen ${shown}/${total}",
 	"mapSkippedCount": "Overgeslagen ${count}",
 	"databaseMapView": "Kaartweergave van database",

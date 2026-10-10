@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "未定位条目",
 	"mapLoadedCount": "已加载 ${shown}/${total}",
 	"mapSkippedCount": "已跳过 ${count}",
 	"databaseMapView": "数据库 地图视图",

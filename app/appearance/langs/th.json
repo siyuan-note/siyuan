@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "รายการที่ไม่มีพิกัด",
 	"mapLoadedCount": "โหลดแล้ว ${shown}/${total}",
 	"mapSkippedCount": "ข้าม ${count}",
 	"databaseMapView": "มุมมองแผนที่ฐานข้อมูล",

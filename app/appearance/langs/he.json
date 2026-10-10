@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "רשומות ללא קואורדינטות",
 	"mapLoadedCount": "נטענו ${shown}/${total}",
 	"mapSkippedCount": "דולגו ${count}",
 	"databaseMapView": "תצוגת מפה של מסד הנתונים",

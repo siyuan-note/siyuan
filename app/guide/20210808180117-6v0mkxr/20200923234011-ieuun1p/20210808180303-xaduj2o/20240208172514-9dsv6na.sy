@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261010064719"
+		"updated": "20261010104905"
 	},
 	"Children": [
 		{
@@ -3917,7 +3917,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009050034-byowtq3",
-				"updated": "20261010064719"
+				"updated": "20261010104905"
 			},
 			"Children": [
 				{
@@ -3931,12 +3931,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-yqulacv",
-				"updated": "20261010064719"
+				"updated": "20261010104905"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Create a Map view and select a Location field in its view settings. The map uses built-in OpenFreeMap. Map views do not show a record list; switch to a Table view to browse or edit records."
+					"Data": "The map uses built-in OpenFreeMap. When no Location field is selected, the first Location field in the view is used; you can change it in the view settings. In an editable view, use the Unplaced records button to the right of the summary to browse records without coordinates in that field under the current filters and search, including records with only a place name. The list supports search and loading more records in batches. Click a record to open and edit it. Switch to a Table view to browse all records."
 				}
 			]
 		},

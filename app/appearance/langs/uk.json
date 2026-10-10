@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "Записи без координат",
 	"mapLoadedCount": "Завантажено ${shown}/${total}",
 	"mapSkippedCount": "Пропущено ${count}",
 	"databaseMapView": "Подання бази даних на мапі",

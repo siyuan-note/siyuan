@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "Entri tanpa koordinat",
 	"mapLoadedCount": "Dimuat ${shown}/${total}",
 	"mapSkippedCount": "Dilewati ${count}",
 	"databaseMapView": "Tampilan peta basis data",

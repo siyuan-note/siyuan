@@ -46,7 +46,7 @@ type LayoutMap struct {
 
 type Map struct {
 	*Table
-	// 保留筛选和排序后的完整行集，供发布权限过滤后重新分页；绝不序列化给客户端。
+	// 保留筛选和排序后的完整行集，供发布权限过滤后重新分页和未定位条目查询；绝不序列化给客户端。
 	RowsBeforePagination []*TableRow `json:"-"`
 }
 

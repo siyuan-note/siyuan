@@ -1293,7 +1293,7 @@ interface IAVCalendarRange {
 
 // 表格、列表和日历共用行列结构，布局由 viewType 区分。
 interface IAVMapSettings {
-    /** 位置字段引用；缺失或类型变化时保留，不自动改绑。 */
+    /** 位置字段引用；空值按视图顺序使用首个位置字段而不写回；显式字段缺失或类型变化时保留，不自动改绑。 */
     locationKeyID: string;
 }
 

@@ -18,12 +18,26 @@
   overflow-wrap: anywhere;
 }
 
+.av__map-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .av__map-summary {
   display: flex;
   flex-wrap: wrap;
-  align-self: flex-start;
+  justify-content: flex-end;
+  min-width: 0;
   max-width: 100%;
   gap: 4px 12px;
+}
+
+.av__map-unplaced-search {
+  width: min(320px, 75vw);
+  max-width: 100%;
+  margin: 4px 0;
 }
 
 .av__map-status:empty,

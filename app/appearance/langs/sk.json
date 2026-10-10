@@ -1,4 +1,5 @@
 {
+	"mapUnplaced": "Záznamy bez súradníc",
 	"mapLoadedCount": "Načítané ${shown}/${total}",
 	"mapSkippedCount": "Vynechané ${count}",
 	"databaseMapView": "Mapové zobrazenie databázy",

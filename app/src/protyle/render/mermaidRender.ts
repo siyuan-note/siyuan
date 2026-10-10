@@ -53,7 +53,7 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
     if (mermaidElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=11.16.1`, "protyleMermaidScript").then(async () => {
+    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=12.1.0`, "protyleMermaidScript").then(async () => {
         await registerMermaidExternalDiagrams(mermaidElements, cdn);
         await registerMermaidLayouts(mermaidElements, cdn);
         window.mermaid.registerIconPacks([

@@ -37,7 +37,11 @@ test("Mermaid follows both theme directions and discards renders superseded by a
         }),
         Lute: {NewNodeID: () => String(++counter), UnEscapeHTMLStr: (value: string) => value},
         window: {siyuan: {config}, DOMPurify: {sanitize: (value: string) => value}, mermaid: {
-            registerIconPacks() {}, initialize: (value: {theme: string}) => { theme = value.theme; },
+            registerIconPacks() {}, initialize: (value: {theme: string, look: string, layout: string}) => {
+                assert.equal(value.look, undefined);
+                assert.equal(value.layout, undefined);
+                theme = value.theme;
+            },
             render: () => new Promise(resolve => renders.push({theme, resolve})),
         }},
     });

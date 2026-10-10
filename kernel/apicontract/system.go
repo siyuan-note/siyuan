@@ -115,9 +115,6 @@ type SystemAppearanceModeRequest struct {
 type SystemAppearanceData struct {
 	Appearance *SettingAppearance `json:"appearance"`
 }
-type SystemUIProcessRequest struct {
-	PID string `json:"pid" api:"optional,nullable"`
-}
 type SystemExitRequest struct {
 	Force               bool    `json:"force" api:"optional,nullable"`
 	ExecInstallPkg      float64 `json:"execInstallPkg" api:"optional,nullable"`
@@ -147,11 +144,6 @@ type SystemOIDCStartData struct {
 	AuthURL   string `json:"authURL"`
 	ExpiresIn int    `json:"expiresIn"`
 	PollToken string `json:"pollToken,omitempty"`
-}
-type SystemOIDCCallbackRequest struct {
-	State string `json:"state" api:"optional,nullable"`
-	Code  string `json:"code" api:"optional,nullable"`
-	Error string `json:"error" api:"optional,nullable"`
 }
 type SystemOIDCMobileRequest struct {
 	CallbackURL string `json:"callbackURL" api:"optional,nullable"`

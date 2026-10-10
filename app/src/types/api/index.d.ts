@@ -950,8 +950,6 @@ export type DownloadInstallPkgRequestInput = { "downloadInstallPkg": boolean; };
 
 export type DuplicateAttributeViewBlockRequestInput = { "avID": string; };
 
-export type DynamicIconRequestInput = { "color"?: string; "content"?: string; "date"?: string; "id"?: string; "lang"?: string; "type"?: string; "weekdayType"?: string; };
-
 export type EditorReadOnlyRequestInput = { "readonly": boolean; };
 
 export type EmbedBlock = { "allowChildOperation": boolean; "block": SearchBlock | null; "blockPaths": Array<BlockPath | null> | null; };
@@ -2264,8 +2262,6 @@ export type SystemOIDC = { "allowAll": boolean; "claimRules": Array<SystemOIDCCl
 
 export type SystemOIDCActivateData = { "config": SystemOIDC | null; "status": "completed"; };
 
-export type SystemOIDCCallbackRequestInput = { "code"?: string | null; "error"?: string | null; "state"?: string | null; };
-
 export type SystemOIDCClaimRule = { "claim": string; "operator": string; "values": Array<string> | null; };
 
 export type SystemOIDCClaimRuleInput = { "claim"?: string | null; "operator"?: string | null; "values"?: Array<string> | null; };
@@ -2321,8 +2317,6 @@ export type SystemTag = { "sort": number; };
 export type SystemTypeFilter = { "blockquote": boolean; "callout": boolean; "code": boolean; "heading": boolean; "list": boolean; "listItem": boolean; "math": boolean; "paragraph": boolean; "super": boolean; "table": boolean; "tag": boolean; };
 
 export type SystemUILayoutRequestInput = { "layout"?: { [key: string]: JSONValue } | null; };
-
-export type SystemUIProcessRequestInput = { "pid"?: string | null; };
 
 export type SystemWebDAV = { "concurrentReqs": number; "endpoint": string; "password": string; "skipTlsVerify": boolean; "timeout": number; "username": string; };
 
@@ -2521,7 +2515,7 @@ export interface APIGETRoutes {
         contentVariants: [{"status":200,"contentType":"text/html"},{"status":400,"contentType":"text/html"},{"status":403,"contentType":"text/plain"}];
     };
     "/api/icon/getDynamicIcon": {
-        request: DynamicIconRequestInput;
+        request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
@@ -2609,7 +2603,7 @@ export interface APIGETRoutes {
         contentVariants: [{"status":200,"contentType":"image/png"}];
     };
     "/api/system/oidc/callback": {
-        request: SystemOIDCCallbackRequestInput;
+        request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
@@ -7197,7 +7191,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/system/uiproc": {
-        request: SystemUIProcessRequestInput;
+        request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */

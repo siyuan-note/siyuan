@@ -117,7 +117,7 @@ func darkenColor(hexColor string, factor float64) string {
 	return fmt.Sprintf("#%02X%02X%02X", r, g, b)
 }
 
-var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Context, request apicontract.DynamicIconRequest) apicontract.Response[apicontract.BinaryContent] {
+var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.BinaryContent] {
 	// Add internal kernel API `/api/icon/getDynamicIcon` https://github.com/siyuan-note/siyuan/pull/12939
 
 	iconType := c.Query("type")

@@ -1,7 +1,7 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 
-// 主进程直接请求本地内核，窗口关闭或访问会话退出后仍可锁定，认证材料只从本地配置读取。
+// 主进程直接请求本地内核，优先使用配置中的认证材料；仅会话认证时使用本地窗口的会话。
 const createNotebookSystemLock = ({getWorkspaces, fetch, writeLog, prepare = async () => {}, readFile = fs.readFile}) => {
     const pending = new Map();
     const running = new Map();
@@ -35,7 +35,7 @@ const createNotebookSystemLock = ({getWorkspaces, fetch, writeLog, prepare = asy
                     method: "POST",
                     headers,
                     body: "{}",
-                    credentials: "omit",
+                    credentials: headers.Authorization ? "omit" : "include",
                     redirect: "error",
                     signal: controller.signal,
                 });

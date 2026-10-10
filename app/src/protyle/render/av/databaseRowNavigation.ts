@@ -106,7 +106,7 @@ export const mountDatabaseRowNavigation = (container: Element, data: IDatabaseRo
     }
     const toolbar = document.createElement("div");
     const inline = breadcrumb && container.contains(breadcrumb);
-    toolbar.className = inline ? "fn__flex fn__flex-center fn__flex-shrink" : "block__icons";
+    toolbar.className = inline ? "protyle-breadcrumb__navigation fn__flex fn__flex-center fn__flex-shrink" : "block__icons";
     toolbar.setAttribute("data-database-row-navigation", data.itemID);
     toolbar.innerHTML = ["previous", "next"].map((name, index) =>
         `<button type="button" disabled class="block__icon block__icon--show block__icon--touch ariaLabel" data-position="8south" aria-label="${escapeAttr(window.siyuan.languages[name])}"><svg><use xlink:href="#${index ? "iconDown" : "iconUp"}"></use></svg></button>`)

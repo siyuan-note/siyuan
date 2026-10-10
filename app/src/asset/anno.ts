@@ -1010,13 +1010,20 @@ export const hlPDFRect = (element: HTMLElement, id: string) => {
 const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement = rectElement, automatic = false) => {
     const request = {};
     rectCopyRequests.set(annotationElement, request);
+    const pdfDocument = pdf.pdfDocument;
+    // 复制过程跨越计时器和异步截图，关闭或替换阅读器后不再访问页面及写入剪贴板。
+    const isActive = () => !pdf._destroyed && pdf.pdfDocument === pdfDocument &&
+        annotationElement.isConnected && rectCopyRequests.get(annotationElement) === request;
     const canCopy = async () => {
+        if (!isActive()) {
+            return false;
+        }
         if (!automatic) {
             return true;
         }
         try {
             const text = await readText(true);
-            return rectCopyRequests.get(annotationElement) === request && annotationElement.isConnected &&
+            return isActive() &&
                 typeof text === "string" && text.startsWith(`<<${idPath} `);
         } catch (error) {
             return false;
@@ -1041,7 +1048,10 @@ const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement 
             if (!position || pageIndex < 0) {
                 return;
             }
-            getRectImgData(pdf, pageIndex + 1, position).then((imageData) => {
+            getRectImgData(pdf, pageIndex + 1, position).then(async (imageData) => {
+                if (!await canCopy()) {
+                    return;
+                }
                 let msg = "";
                 if (!automatic && Constants.SIZE_UPLOAD_TIP_SIZE <= imageData.blob.size) {
                     msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", content + ".png")
@@ -1076,7 +1086,9 @@ const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement 
                     });
                 });
             }).catch((error) => {
-                console.error(error);
+                if (isActive()) {
+                    console.error(error);
+                }
             });
         } else {
             writeText(`<<${idPath} "${content}">>`);

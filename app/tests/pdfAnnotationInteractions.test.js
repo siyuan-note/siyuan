@@ -118,6 +118,9 @@ async function runElectron() {
                 await wait();container.remove();
             }
             pdf.appConfig.mainContainer.dispatchEvent(new Event("scroll"));
+            // 手动复制尚在等待截图时关闭阅读器，不能再读取已销毁的页面。
+            window.pdfTestMobile = false;
+            element.querySelector('.pdf__util [data-type="copy"]').click();
             await pdf.destroy(); element.remove(); await wait();
             const immediate = document.createElement("div"); immediate.className = "testViewer";
             immediate.innerHTML = getPdfViewerHTML();document.body.append(immediate);

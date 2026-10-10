@@ -27,6 +27,21 @@ def snapshot_command():
 
 
 class EditorWorkflowTests(unittest.TestCase):
+    def test_windows_kernel_tests_cover_all_packages_with_cgo(self):
+        frontend = job("frontend-tests")
+        compiler = frontend.split("- name: Set up Windows kernel test compiler\n", 1)[1].split("      - ", 1)[0]
+        self.assertIn("uses: msys2/setup-msys2@v2", compiler)
+        self.assertIn("msystem: UCRT64", compiler)
+        self.assertIn("path-type: inherit", compiler)
+        self.assertIn("mingw-w64-ucrt-x86_64-gcc", compiler)
+        step = frontend.split("- name: Test all Windows kernel packages\n", 1)[1].split("      - ", 1)[0]
+        self.assertIn('run: go test -tags "fts5 sqlcipher" ./... -count=1', step)
+        self.assertIn("shell: msys2 {0}", step)
+        self.assertIn("CGO_ENABLED: 1", step)
+        self.assertIn("CC: gcc", step)
+        self.assertIn("working-directory: kernel", step)
+        self.assertIn("continue-on-error: true", step)
+
     def test_nonblocking_steps_have_ids_and_always_report_outcomes(self):
         for workflow in [CD, DESKTOP]:
             sections = re.split(r"^  [\w-]+:\n", workflow, flags=re.M)

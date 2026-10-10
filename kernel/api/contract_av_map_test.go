@@ -19,7 +19,7 @@ import (
 )
 
 func TestAVContractMapMapping(t *testing.T) {
-	table := &av.Table{Map: &av.MapSettings{LocationKeyID: "20261009000000-abcdefg"},
+	table := &av.Table{Map: &av.MapSettings{LocationKeyID: "20261009000000-abcdefg", Height: 640},
 		MapMarkerScope: "page", Columns: []*av.TableColumn{}, Rows: []*av.TableRow{}, RowCount: 120}
 	assertAVContractJSONEqual(t, &av.Map{Table: table}, avContractView(&av.Map{Table: table}))
 	layout := &av.LayoutMap{LayoutTable: av.NewLayoutTable(), Settings: *table.Map}
@@ -307,7 +307,7 @@ func TestAVContractMapPublishFiltersTargetsAndPreservesSource(t *testing.T) {
 	}
 	view.ItemIDs = []string{hiddenID, visibleID}
 	view.LayoutType = av.LayoutTypeMap
-	view.Map = &av.LayoutMap{LayoutTable: view.Table, Settings: av.MapSettings{LocationKeyID: ast.NewNodeID()}}
+	view.Map = &av.LayoutMap{LayoutTable: view.Table, Settings: av.MapSettings{LocationKeyID: ast.NewNodeID(), Height: 800}}
 	view.Table = nil
 	if err := av.SaveAttributeView(database); err != nil {
 		t.Fatal(err)
@@ -349,6 +349,9 @@ func TestAVContractMapPublishFiltersTargetsAndPreservesSource(t *testing.T) {
 		if result.Code != 0 || result.Data.View.RowCount != 1 || len(result.Data.View.Rows) != 1 ||
 			result.Data.Target.Status != want || result.Data.Target.Index != 0 || result.Data.Target.Offset != 0 {
 			t.Fatalf("publish leaked map count or target: %s", body)
+		}
+		if result.Data.View.Map == nil || result.Data.View.Map.Height != 800 {
+			t.Fatalf("publish lost map height: %s", body)
 		}
 	}
 	after, _ := os.ReadFile(path)

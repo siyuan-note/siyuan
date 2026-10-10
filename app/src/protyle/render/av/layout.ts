@@ -148,7 +148,7 @@ export const getLayoutHTML = (data: IAV) => {
                 <div>${window.siyuan.languages.calendarView}</div>
             </div>
             <div data-type="set-layout" data-view-type="map" class="av__layout-item${data.viewType === "map" ? " av__layout-item--select" : ""}">
-                <svg><use xlink:href="#iconGlobe"></use></svg>
+                <svg><use xlink:href="#iconMap"></use></svg>
                 <div class="fn__hr"></div>
                 <div>${window.siyuan.languages.mapView}</div>
             </div>

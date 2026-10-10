@@ -275,7 +275,7 @@ test("deleted and changed-type map fields show a repairable location setup", asy
         await scenario.render();
         const html = scenario.setupHTML();
         assert.match(html, /class="av__map-empty"/);
-        assert.match(html, /#iconGlobe/);
+        assert.match(html, /#iconMap/);
         assert.match(html, locationKeyID ? /mapMissingLocationField/ : /mapSelectLocationField/);
         assert.match(html, /<label class="av__map-setting"><span>mapLocationField<\/span>/);
         const select = scenario.control("[data-map-location-field]");
@@ -292,6 +292,20 @@ test("deleted and changed-type map fields show a repairable location setup", asy
     await empty.render();
     assert.match(empty.setupHTML(), /data-map-create-field/);
     assert.match(empty.setupHTML(), /mapSelectLocationField/);
+});
+
+test("map height is derived per view without changing the stored settings", async () => {
+    for (const height of [undefined, 320, 480, 640, 800] as const) {
+        const scenario = setup();
+        const view = scenario.data.view as IAVTable;
+        if (height !== undefined) view.map.height = height;
+        const stored = JSON.stringify(view.map);
+        await scenario.render();
+        assert.equal(scenario.roots[0].dataset.mapHeight, (height || 480).toString());
+        assert.equal(JSON.stringify(view.map), stored);
+        assert.equal(scenario.hosts.length, 1);
+        scenario.destroyMap();
+    }
 });
 
 test("parsed templates do not manufacture missing controls and reject a canvas class mutation", async () => {
@@ -347,6 +361,7 @@ test("selecting an existing location field submits one undoable transaction and 
     const scenario = setup();
     const view = scenario.data.view as IAVTable;
     view.map.locationKeyID = "deleted";
+    view.map.height = 640;
     const before = JSON.stringify(view);
     await scenario.render();
     const select = scenario.control("[data-map-location-field]");
@@ -364,8 +379,8 @@ test("selecting an existing location field submits one undoable transaction and 
     assert.equal(scenario.control("[data-map-create-field]").disabled, true);
     const {perform, undo} = scenario.transactions[0];
     assert.equal(JSON.stringify(perform), JSON.stringify([{avID: "database", blockID: "carrier", viewID: "map-view",
-        action: "setAttrViewMap", data: {locationKeyID: "location"}}]));
-    assert.equal(JSON.stringify(undo[0].data), JSON.stringify({locationKeyID: "deleted"}));
+        action: "setAttrViewMap", data: {locationKeyID: "location", height: 640}}]));
+    assert.equal(JSON.stringify(undo[0].data), JSON.stringify({locationKeyID: "deleted", height: 640}));
     assert.equal(JSON.stringify(view), before);
     assert.equal(scenario.refreshes(), 0);
     await scenario.completeTransaction();

@@ -35,6 +35,7 @@ func TestAttributeViewMapSettingsFieldsAndClone(t *testing.T) {
 	key := av.NewKey(ast.NewNodeID(), "Place", "", av.KeyTypeLocation)
 	addAttributeViewKey(attrView, view, key, "")
 	view.Map.Settings.LocationKeyID = key.ID
+	view.Map.Settings.Height = 800
 	view.Group = &av.ViewGroup{Field: attrView.KeyValues[1].Key.ID}
 	if getAttributeViewField(view, key.ID) == nil || view.IsGroupView() {
 		t.Fatal("map field or grouping state is incorrect")
@@ -64,6 +65,9 @@ func TestAttributeViewMapSettingsFieldsAndClone(t *testing.T) {
 		t.Fatal("map database clone failed")
 	}
 	copySettings := copy.Views[0].Map.Settings
+	if cloned.Map.Settings.Height != 800 || copySettings.Height != 800 {
+		t.Fatal("cloning lost map height")
+	}
 	copyKey, err := copy.GetKey(copySettings.LocationKeyID)
 	if err != nil || copyKey.Type != av.KeyTypeLocation || copyKey.ID == key.ID {
 		t.Fatal("clone did not remap its own location field")
@@ -90,6 +94,7 @@ func TestAttributeViewMapFilterSortPageTargetAndExport(t *testing.T) {
 	key := av.NewKey(ast.NewNodeID(), "Place", "", av.KeyTypeLocation)
 	addAttributeViewKey(attrView, view, key, "")
 	view.Map.Settings.LocationKeyID = key.ID
+	view.Map.Settings.Height = 320
 	view.PageSize = 10
 	for _, column := range view.Map.Columns {
 		if column.ID == key.ID {
@@ -118,7 +123,7 @@ func TestAttributeViewMapFilterSortPageTargetAndExport(t *testing.T) {
 			t.Fatal(err)
 		}
 		if len(mapped.Rows) != 10 || mapped.RowCount != 120 || mapped.Rows[0].ID != view.ItemIDs[129-page*10] ||
-			mapped.MapMarkerScope != "page" || mapped.Map.LocationKeyID != key.ID {
+			mapped.MapMarkerScope != "page" || mapped.Map.LocationKeyID != key.ID || mapped.Map.Height != 320 {
 			t.Fatalf("page %d did not follow ordinary filtered/sorted rows: %+v", page, mapped.Table)
 		}
 		if value := mapped.Rows[0].GetValue(key.ID); value == nil || value.Location == nil || *value.Location.Latitude != 0 {
@@ -146,6 +151,9 @@ func TestAttributeViewMapInvalidSavePreservesSource(t *testing.T) {
 	path := av.GetAttributeViewDataPath(attrView.ID)
 	before, _ := os.ReadFile(path)
 	for _, malformed := range []any{nil, map[string]any{}, map[string]any{"serviceID": "", "locationKeyID": "", "showRecordList": true, "apiKey": "not-allowed"},
+		map[string]any{"locationKeyID": "", "height": 0}, map[string]any{"locationKeyID": "", "height": nil},
+		map[string]any{"locationKeyID": "", "height": 400}, map[string]any{"locationKeyID": "", "height": 480.5},
+		map[string]any{"locationKeyID": "", "height": "480"},
 		map[string]any{"locationKeyID": "", "serviceID": "openfreemap"}, map[string]any{"locationKeyID": "", "showRecordList": false}, av.MapSettings{LocationKeyID: "invalid"}} {
 		if err := setAttrViewMap(&Operation{AvID: attrView.ID, ViewID: view.ID, Data: malformed}); err == nil {
 			t.Fatalf("invalid settings accepted: %#v", malformed)
@@ -168,6 +176,29 @@ func TestAttributeViewMapInvalidSavePreservesSource(t *testing.T) {
 	}
 }
 
+func TestAttributeViewMapHeightIsPerView(t *testing.T) {
+	attrView, view := setupMapTest(t)
+	other := av.NewMapView()
+	attrView.Views = append(attrView.Views, other)
+	if err := av.SaveAttributeView(attrView); err != nil {
+		t.Fatal(err)
+	}
+	for _, height := range []int{320, 480, 640, 800, 0} {
+		settings := av.MapSettings{Height: height}
+		if err := setAttrViewMap(&Operation{AvID: attrView.ID, ViewID: view.ID, Data: settings}); err != nil {
+			t.Fatal(err)
+		}
+		cache.ClearAVCache()
+		stored, err := av.ParseAttributeView(attrView.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if stored.Views[0].Map.Settings.Height != height || stored.Views[1].Map.Settings.Height != 0 {
+			t.Fatal("height change did not stay within its view")
+		}
+	}
+}
+
 func TestAttributeViewMapImportAndHistoryPreserveBindings(t *testing.T) {
 	t.Run("empty", func(t *testing.T) { testAttributeViewMapImportAndHistoryPreserveBindings(t, false) })
 	t.Run("populated", func(t *testing.T) { testAttributeViewMapImportAndHistoryPreserveBindings(t, true) })
@@ -178,7 +209,7 @@ func testAttributeViewMapImportAndHistoryPreserveBindings(t *testing.T, populate
 	oldHistory := util.HistoryDir
 	util.HistoryDir = t.TempDir()
 	t.Cleanup(func() { util.HistoryDir = oldHistory })
-	view.Map.Settings = av.MapSettings{LocationKeyID: ast.NewNodeID()}
+	view.Map.Settings = av.MapSettings{LocationKeyID: ast.NewNodeID(), Height: 640}
 	if populated {
 		primary := attrView.GetBlockKeyValues()
 		itemID := ast.NewNodeID()

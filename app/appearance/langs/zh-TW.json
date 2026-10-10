@@ -1,4 +1,5 @@
 {
+	"extraLarge": "超大",
 	"mapUnplaced": "未定位項目",
 	"mapLoadedCount": "已載入 ${shown}/${total}",
 	"mapSkippedCount": "已略過 ${count}",

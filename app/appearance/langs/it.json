@@ -1,4 +1,5 @@
 {
+	"extraLarge": "Molto grande",
 	"mapUnplaced": "Voci senza coordinate",
 	"mapLoadedCount": "Caricati ${shown}/${total}",
 	"mapSkippedCount": "Ignorati ${count}",

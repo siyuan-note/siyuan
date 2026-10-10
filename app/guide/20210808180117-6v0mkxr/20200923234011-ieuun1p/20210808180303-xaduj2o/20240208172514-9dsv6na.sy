@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261010222552"
+		"updated": "20261010233500"
 	},
 	"Children": [
 		{
@@ -3921,7 +3921,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009050034-byowtq3",
-				"updated": "20261010104905"
+				"updated": "20261010233500"
 			},
 			"Children": [
 				{
@@ -3935,12 +3935,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-yqulacv",
-				"updated": "20261010104905"
+				"updated": "20261010233500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The map uses built-in OpenFreeMap. When no Location field is selected, the first Location field in the view is used; you can change it in the view settings. In an editable view, use the Unplaced records button to the right of the summary to browse records without coordinates in that field under the current filters and search, including records with only a place name. The list supports search and loading more records in batches. Click a record to open and edit it. Switch to a Table view to browse all records."
+					"Data": "The map uses built-in OpenFreeMap. When no Location field is selected, the first Location field in the view is used; you can change it in the view settings. In an editable view, use the Unplaced records button to the right of the summary to browse records without coordinates in that field under the current filters and search, including records with only a place name. The list supports search and loading more records in batches. Click a record to open and edit it. Switch to a Table view to browse all records. In the view settings, Height offers Small (320 px), Medium (480 px), Large (640 px), and Extra large (800 px), with Medium as the default. The height is saved separately for each view and adapts to small screens."
 				}
 			]
 		},

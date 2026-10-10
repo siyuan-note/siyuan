@@ -1296,6 +1296,8 @@ interface IAVCalendarRange {
 interface IAVMapSettings {
     /** 位置字段引用；空值按视图顺序使用首个位置字段而不写回；显式字段缺失或类型变化时保留，不自动改绑。 */
     locationKeyID: string;
+    /** 按视图保存的地图高度（CSS px）；省略时为 480，显式 0 和 null 无效。 */
+    height?: 320 | 480 | 640 | 800;
 }
 
 interface IAVTable extends IAVView {

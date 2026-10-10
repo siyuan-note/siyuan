@@ -183,9 +183,10 @@ func setAttrViewMap(operation *Operation) error {
 	if err != nil {
 		return err
 	}
-	// 设置只包含位置字段，拒绝其他内容进入数据库事务。
+	// 设置只包含位置字段和高度，拒绝其他内容进入数据库事务。
 	var settings struct {
-		LocationKeyID *string `json:"locationKeyID"`
+		LocationKeyID *string         `json:"locationKeyID"`
+		Height        json.RawMessage `json:"height"`
 	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
@@ -196,6 +197,14 @@ func setAttrViewMap(operation *Operation) error {
 		return fmt.Errorf("complete map settings are required")
 	}
 	next := av.MapSettings{LocationKeyID: *settings.LocationKeyID}
+	if settings.Height != nil {
+		if err = json.Unmarshal(settings.Height, &next.Height); err != nil {
+			return err
+		}
+		if next.Height == 0 {
+			return fmt.Errorf("invalid map height")
+		}
+	}
 	if err = next.Validate(); err != nil {
 		return err
 	}

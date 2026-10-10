@@ -26,7 +26,8 @@ const setup = (mobile = false) => {
     const menus: Array<{items: IMenu[]; independent: boolean; position?: IPosition; element: DOMElement}> = [];
     let closed = 0;
     const context = {siyuan: {isPublish: false,
-        languages: {mapLocationField: "Location", mapSelectLocationField: "Select field", mapMissingLocationField: "Missing field"},
+        languages: {mapLocationField: "Location", mapSelectLocationField: "Select field", mapMissingLocationField: "Missing field",
+            height: "Height", small: "Small", medium: "Medium", large: "Large", extraLarge: "Extra large"},
         menus: {menu: {showSubMenu: (element: DOMElement) => shown.push(element), remove: () => { closed++; }}}}};
     const sharedMenu = {} as typeof import("../../../../menus/Menu");
     runInNewContext(menuSource, {exports: sharedMenu, document, window: context, require: requireFixture({
@@ -70,7 +71,9 @@ const setup = (mobile = false) => {
         methods.bindMapSettings({data: database, protyle, menuElement: menuElement as unknown as Element,
             blockElement: blockElement as unknown as Element, onChange: () => { updated++; }});
         const field = menuElement.querySelector('[data-map-setting="locationKeyID"]');
-        return {database, protyle, field, menuElement, updated: () => updated,
+        const height = menuElement.querySelector('[data-map-setting="height"]');
+        return {database, protyle, field, height, menuElement, updated: () => updated,
+            heightChoices: () => height.querySelector(".b3-menu__submenu").querySelectorAll("button"),
             choices: () => field.querySelector(".b3-menu__submenu").querySelectorAll("button")};
     };
     return {methods, document, operations, shown, menus, context, mount, closed: () => closed};
@@ -204,14 +207,64 @@ test("readonly, both history modes and published maps cannot open field submenus
     for (const mode of ["disabled", "created", "snapshot", "published"]) {
         const scenario = setup();
         scenario.context.siyuan.isPublish = mode === "published";
-        const {field} = scenario.mount(data(), {disabled: mode === "disabled",
+        const {field, height} = scenario.mount(data(), {disabled: mode === "disabled",
             options: {history: ["created", "snapshot"].includes(mode) ? {[mode]: "version"} : undefined}} as IProtyle);
         assert.equal(field.disabled, true);
+        assert.equal(height.disabled, true);
+        assert.equal(height.querySelector(".b3-menu__submenu"), null);
+        height.dispatch("click");
         assert.equal(field.querySelector(".b3-menu__submenu"), null);
         field.dispatch("click");
         assert.equal(scenario.operations.length, 0);
         assert.equal(scenario.shown.length, 0);
     }
+});
+
+test("map height has four checked presets, defaults without mutation, and preserves raw field selection", () => {
+    for (const locationKeyID of ["", "missing-field"]) {
+        const scenario = setup();
+        const database = data();
+        const view = database.view as IAVTable;
+        view.map.locationKeyID = locationKeyID;
+        const before = JSON.stringify(view);
+        const {height, heightChoices, updated} = scenario.mount(database);
+        assert.equal(height.querySelector(".av__map-setting-value").textContent, "Medium");
+        assert.deepEqual(heightChoices().map(choice => choice.querySelector(".b3-menu__label").textContent),
+            ["Small", "Medium", "Large", "Extra large"]);
+        assert.ok(heightChoices()[1].querySelector(".b3-menu__checked"));
+        assert.equal(JSON.stringify(view), before);
+        heightChoices()[3].dispatch("click");
+        assert.equal(updated(), 1);
+        assert.deepEqual(JSON.parse(JSON.stringify(scenario.operations[0].perform[0].data)), {locationKeyID, height: 800});
+        assert.deepEqual(JSON.parse(JSON.stringify(scenario.operations[0].undo[0].data)), {locationKeyID});
+        assert.equal(view.map.locationKeyID, locationKeyID);
+    }
+});
+
+test("changing location preserves height and selecting the current saved height is a no-op", () => {
+    const scenario = setup();
+    const database = data();
+    const view = database.view as IAVTable;
+    view.map.height = 640;
+    const {choices, heightChoices} = scenario.mount(database);
+    heightChoices()[2].dispatch("click");
+    assert.equal(scenario.operations.length, 0);
+    choices()[0].dispatch("click");
+    assert.deepEqual(JSON.parse(JSON.stringify(scenario.operations[0].perform[0].data)), {locationKeyID: "location", height: 640});
+    assert.deepEqual(JSON.parse(JSON.stringify(scenario.operations[0].undo[0].data)), {locationKeyID: "missing-field", height: 640});
+});
+
+test("mobile height choices use the shared independent menu and protect later readonly transitions", () => {
+    const scenario = setup(true);
+    const {height, protyle} = scenario.mount();
+    height.dispatch("click");
+    assert.equal(scenario.menus[0].independent, true);
+    assert.equal(scenario.menus[0].position.target, height);
+    assert.equal(scenario.menus[0].items.length, 4);
+    assert.equal(scenario.menus[0].items[1].checked, true);
+    protyle.disabled = true;
+    scenario.menus[0].element.querySelector("button").dispatch("click");
+    assert.equal(scenario.operations.length, 0);
 });
 
 test("dismissed controls and later readonly transitions cannot change fields", () => {

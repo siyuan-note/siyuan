@@ -362,9 +362,9 @@ export type AVLayoutMap = { "columns": Array<AVViewTableColumn | null> | null; "
 
 export type AVLayoutTable = { "columns": Array<AVViewTableColumn | null> | null; "filters"?: Array<AVViewFilter | null>; "id": string; "pageSize"?: number; "rowIds": Array<string> | null; "showIcon": boolean; "sorts"?: Array<AVViewSort | null>; "spec": number; "wrapField": boolean; } | ({ "columns": Array<AVViewTableColumn | null> | null; "rowIds": Array<string> | null; } & { "filters"?: never; "id"?: never; "pageSize"?: never; "showIcon"?: never; "sorts"?: never; "spec"?: never; "wrapField"?: never; });
 
-export type AVMapSettings = { "locationKeyID": string; };
+export type AVMapSettings = { "height"?: 320 | 480 | 640 | 800; "locationKeyID": string; };
 
-export type AVMapSettingsInput = { "locationKeyID": string; };
+export type AVMapSettingsInput = { "height"?: 320 | 480 | 640 | 800; "locationKeyID": string; };
 
 export type AVMapUnplacedData = { "rows": Array<AVTableRow | null> | null; "total": number; };
 

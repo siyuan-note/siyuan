@@ -84,6 +84,70 @@ const waitFor = async (predicate, label, timeout = 5000) => {
     }
 };
 
+// 编译实际业务样式和可见性函数，避免夹具自行重写圆角规则或命中判断。
+const readMapCornerAssets = () => {
+    const ts = require("typescript");
+    const source = fs.readFileSync(path.join(appDir, "src/protyle/render/av/map/host.ts"), "utf8");
+    const parsed = ts.createSourceFile("host.ts", source, ts.ScriptTarget.Latest, true);
+    const visibility = parsed.statements.find(statement => ts.isVariableStatement(statement) &&
+        statement.declarationList.declarations.some(declaration => declaration.name.getText(parsed) === "getAVMapVisibility"));
+    assert.ok(visibility, "production visibility function exists");
+    const theme = fs.readFileSync(path.join(appDir, "appearance/themes/daylight/theme.css"), "utf8");
+    const radius = theme.match(/--b3-border-radius:\s*([^;]+);/);
+    assert.ok(radius, "production theme defines the shared corner radius");
+    return {css: require("sass").compile(path.join(appDir, "src/assets/scss/business/_av.scss")).css,
+        radius: radius[1].trim(), visibility: ts.transpileModule(visibility.getText(parsed), {
+            compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+        }).outputText};
+};
+
+const verifyMapCorners = async harness => {
+    const {owner, guest, win} = harness;
+    const assets = readMapCornerAssets();
+    const evaluate = source => owner.executeJavaScript(source);
+    const before = await evaluate(`(() => {
+        const rect = document.getElementById("map-slot").getBoundingClientRect();
+        return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};
+    })()`);
+    await owner.insertCSS(assets.css);
+    await evaluate(`document.documentElement.style.setProperty("--b3-border-radius", ${JSON.stringify(assets.radius)});
+        document.getElementById("map-slot").classList.add("av__map-canvas");`);
+    const state = await evaluate(`(() => {
+        const exports = {};
+        ${assets.visibility}
+        const slot = document.getElementById("map-slot");
+        const rect = slot.getBoundingClientRect();
+        return {bounds: {x: rect.x, y: rect.y, width: rect.width, height: rect.height},
+            visibility: exports.getAVMapVisibility(slot)};
+    })()`);
+    assert.deepEqual(state.bounds, before, "production child clipping preserves the map position and height");
+    assert.deepEqual(state.visibility, {visible: true, viewport: {x: 0, y: 0, width: before.width, height: before.height}},
+        "rounded guest corners retain the rectangular owner hit region and attribution viewport");
+    // 移除合成文案，确保内侧采样不会碰到字形；不改变生产 guest 的隔离配置。
+    const caption = await guest.executeJavaScript('document.getElementById("map").textContent');
+    await guest.executeJavaScript('document.getElementById("map").textContent = ""');
+    try {
+        const pixel = async (x, y) => {
+            const shot = await win.webContents.capturePage({x: Math.round(before.x + x), y: Math.round(before.y + y), width: 1, height: 1});
+            const bitmap = shot.toBitmap();
+            return [bitmap[2], bitmap[1], bitmap[0]].join();
+        };
+        for (const x of [0, before.width - 1]) {
+            for (const y of [0, before.height - 1]) {
+                await waitFor(async () => await pixel(x, y) === "255,255,255", "owner background is visible at every clipped guest corner");
+            }
+        }
+        const inset = Math.ceil(parseFloat(assets.radius)) + 2;
+        for (const x of [inset, before.width - inset - 1]) {
+            for (const y of [inset, before.height - inset - 1]) {
+                await waitFor(async () => await pixel(x, y) === "25,119,145", "the guest remains painted inside every rounded corner");
+            }
+        }
+    } finally {
+        await guest.executeJavaScript(`document.getElementById("map").textContent = ${JSON.stringify(caption)}`);
+    }
+};
+
 const createHarness = async ({profile, mode = "real", automate = false} = {}) => {
     if (typeof profile !== "string" || !path.isAbsolute(profile) || !["real", "synthetic"].includes(mode)) {
         throw new Error("An isolated profile and fixed fixture mode are required");
@@ -251,6 +315,7 @@ const verifyHarness = async harness => {
     await new Promise(resolve => setTimeout(resolve, 100));
     assert.equal(guest.getURL(), src);
     assert.equal(evidence.privateRequests, 0);
+    await verifyMapCorners(harness);
     const identity = guest.id;
     const before = await inspect("JSON.stringify({fits:mapFixture.fits,revisions:mapFixture.revisions,visible:mapFixture.visible})");
     const pixel = async () => {
@@ -313,4 +378,4 @@ const verifyHarness = async harness => {
 };
 
 module.exports = {createHarness, createTemporaryProfile, verifyHarness, checkRealAssets,
-    createSyntheticFiles, ownerPreferences, guestPreferences, verifyIsolation};
+    createSyntheticFiles, ownerPreferences, guestPreferences, verifyIsolation, readMapCornerAssets};

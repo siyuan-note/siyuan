@@ -60,7 +60,20 @@
 
 .av__map-canvas {
   width: 100%;
-  height: clamp(240px, 50vh, 480px);
+  height: clamp(240px, 60vh, 480px);
+
+  // 保留外层矩形命中区域，避免圆角透明区中断地图可见性与署名计时。
+  > iframe,
+  > webview {
+    border-radius: var(--b3-border-radius);
+    overflow: hidden;
+  }
+}
+
+@each $height, $minimum, $viewport in ((320, 160px, 40vh), (640, 320px, 80vh), (800, 400px, 100vh)) {
+  .av__map[data-map-height="#{$height}"] > .av__map-canvas {
+    height: clamp($minimum, $viewport, #{$height}px);
+  }
 }
 
 .av__map-empty {

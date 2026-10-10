@@ -18,12 +18,12 @@ const getTheme = () => document.documentElement.getAttribute("data-theme-mode") 
 const renderMapSetup = (root: HTMLElement, blockElement: HTMLElement, protyle: IProtyle,
                         data: IAV, current: () => boolean) => {
     const view = data.view as IAVTable;
-    const previous = {locationKeyID: view.map?.locationKeyID || ""};
+    const previous = {...view.map, locationKeyID: view.map?.locationKeyID || ""};
     const editable = canEditMapSettings(protyle);
     const message = previous.locationKeyID ? window.siyuan.languages.mapMissingLocationField :
         window.siyuan.languages.mapSelectLocationField;
     root.querySelector(".av__map-status").innerHTML = `<div class="av__map-empty">
-    <svg aria-hidden="true"><use xlink:href="#iconGlobe"></use></svg><p>${escapeHtml(message)}</p>
+    <svg aria-hidden="true"><use xlink:href="#iconMap"></use></svg><p>${escapeHtml(message)}</p>
     ${editable ? `<div class="av__map-setup"><label class="av__map-setting"><span>${escapeHtml(window.siyuan.languages.mapLocationField)}</span>
         <select class="b3-select" data-map-location-field aria-label="${escapeAttr(window.siyuan.languages.mapLocationField)}">
             <option value="">${escapeHtml(window.siyuan.languages.mapSelectLocationField)}</option>
@@ -48,7 +48,7 @@ const renderMapSetup = (root: HTMLElement, blockElement: HTMLElement, protyle: I
         let committed = false;
         try {
             const id = locationKeyID || Lute.NewNodeID();
-            const update: IOperation = {...context, action: "setAttrViewMap", data: {locationKeyID: id}};
+            const update: IOperation = {...context, action: "setAttrViewMap", data: {...previous, locationKeyID: id}};
             const undo: IOperation = {...context, action: "setAttrViewMap", data: previous};
             transaction(protyle, locationKeyID ? [update] : [
                 {...context, action: "addAttrViewCol", id, type: "location", name: window.siyuan.languages.location},
@@ -97,6 +97,7 @@ export const renderMap = async (blockElement: HTMLElement, protyle: IProtyle, da
     const settings = getMapSettings(view);
     const root = document.createElement("div");
     root.className = "av__map";
+    root.dataset.mapHeight = settings.height.toString();
     root.setAttribute("contenteditable", "false");
     root.setAttribute("aria-label", window.siyuan.languages.mapView);
     const pageText = window.siyuan.languages.mapPageScope.replace("${shown}", view.rows.length.toString())

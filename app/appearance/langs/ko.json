@@ -1,4 +1,5 @@
 {
+	"extraLarge": "매우 크게",
 	"mapUnplaced": "좌표가 없는 항목",
 	"mapLoadedCount": "불러옴 ${shown}/${total}",
 	"mapSkippedCount": "건너뜀 ${count}",

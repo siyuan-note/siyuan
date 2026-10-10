@@ -571,7 +571,7 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
         }
     });
     addMenu.addItem({
-        icon: "iconGlobe",
+        icon: "iconMap",
         label: window.siyuan.languages.mapView,
         click() {
             addVisibleView();
@@ -591,7 +591,7 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
 export const getViewIcon = (type: string) => {
     switch (type) {
         case "map":
-            return "iconGlobe";
+            return "iconMap";
         case "calendar":
             return "iconCalendar";
         case "table":

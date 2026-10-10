@@ -31,6 +31,9 @@ func (value AVViewInstance) MarshalJSON() ([]byte, error) {
 }
 
 func avPayloadSchema(b *schemaBuilder, t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[AVMapHeight]() {
+		return &Schema{Type: "integer", Enum: []any{320, 480, 640, 800}}, nil
+	}
 	if t == reflect.TypeFor[*AVValueLocation]() {
 		schema, err := b.schema(t.Elem(), input)
 		return nullable(schema), err

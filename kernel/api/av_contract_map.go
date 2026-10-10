@@ -9,7 +9,7 @@ func toContractAVMapSettings(value *av.MapSettings) *apicontract.AVMapSettings {
 	if value == nil {
 		return nil
 	}
-	return &apicontract.AVMapSettings{LocationKeyID: value.LocationKeyID}
+	return &apicontract.AVMapSettings{LocationKeyID: value.LocationKeyID, Height: apicontract.AVMapHeight(value.Height)}
 }
 
 func toContractAVLayoutMap(value *av.LayoutMap) *apicontract.AVLayoutMap {

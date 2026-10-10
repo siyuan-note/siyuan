@@ -1,4 +1,5 @@
 {
+	"extraLarge": "Très grand",
 	"mapUnplaced": "Entrées sans coordonnées",
 	"mapLoadedCount": "Chargés ${shown}/${total}",
 	"mapSkippedCount": "Ignorés ${count}",

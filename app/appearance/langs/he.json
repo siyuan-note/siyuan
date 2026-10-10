@@ -1,4 +1,5 @@
 {
+	"extraLarge": "גדול במיוחד",
 	"mapUnplaced": "רשומות ללא קואורדינטות",
 	"mapLoadedCount": "נטענו ${shown}/${total}",
 	"mapSkippedCount": "דולגו ${count}",

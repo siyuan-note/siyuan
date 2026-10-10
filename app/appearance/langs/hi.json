@@ -1,4 +1,5 @@
 {
+	"extraLarge": "अतिरिक्त बड़ा",
 	"mapUnplaced": "निर्देशांक के बिना प्रविष्टियाँ",
 	"mapLoadedCount": "लोड हुए ${shown}/${total}",
 	"mapSkippedCount": "छोड़े गए ${count}",

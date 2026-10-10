@@ -12,21 +12,37 @@ import (
 	"github.com/88250/lute/ast"
 )
 
-// MapSettings 只保存位置字段绑定，底图固定为 OpenFreeMap。
+// MapSettings 保存位置字段绑定和视图高度，底图固定为 OpenFreeMap。
 type MapSettings struct {
 	LocationKeyID string `json:"locationKeyID"`
+	Height        int    `json:"height,omitempty"` // 缺省为 480px；0 仅表示未保存此选项。
 }
 
 // UnmarshalJSON 拒绝额外设置，避免把不支持的地图结构静默保存为新结构。
 func (settings *MapSettings) UnmarshalJSON(data []byte) error {
 	type plainSettings MapSettings
-	var next plainSettings
+	var next struct {
+		plainSettings
+		Height json.RawMessage `json:"height"`
+	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&next); err != nil {
 		return err
 	}
-	*settings = MapSettings(next)
+	if next.Height != nil {
+		if err := json.Unmarshal(next.Height, &next.plainSettings.Height); err != nil {
+			return err
+		}
+		if next.plainSettings.Height == 0 {
+			return fmt.Errorf("invalid map height")
+		}
+	}
+	parsed := MapSettings(next.plainSettings)
+	if err := parsed.Validate(); err != nil {
+		return err
+	}
+	*settings = parsed
 	return nil
 }
 
@@ -34,6 +50,11 @@ func (settings *MapSettings) UnmarshalJSON(data []byte) error {
 func (settings MapSettings) Validate() error {
 	if settings.LocationKeyID != "" && !ast.IsNodeIDPattern(settings.LocationKeyID) {
 		return fmt.Errorf("invalid map location field ID")
+	}
+	switch settings.Height {
+	case 0, 320, 480, 640, 800:
+	default:
+		return fmt.Errorf("invalid map height")
 	}
 	return nil
 }

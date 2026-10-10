@@ -52,7 +52,7 @@ func TestAttributeViewMapSettingsUndoAndEncryptedReplay(t *testing.T) {
 				}
 			}
 			before := view.Map.Settings
-			after := av.MapSettings{LocationKeyID: ast.NewNodeID()}
+			after := av.MapSettings{LocationKeyID: ast.NewNodeID(), Height: 800}
 			operation := func(settings av.MapSettings) *Operation {
 				return &Operation{Action: "setAttrViewMap", AvID: database.ID, ViewID: view.ID, Data: settings}
 			}

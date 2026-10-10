@@ -48,8 +48,18 @@ test("missing or changed location fields retain their saved identifiers and do n
     assert.equal(getMapSettings(view).locationKeyID, "removed");
     view.map.locationKeyID = "primary";
     assert.deepEqual(getMapPoints(view), {points: [], skipped: {empty: 0, invalid: 0, projection: 0}});
-    assert.deepEqual(getMapSettings(view), {locationKeyID: "primary"});
-    assert.deepEqual(getMapSettings({} as IAVTable), {locationKeyID: ""});
+    assert.deepEqual(getMapSettings(view), {locationKeyID: "primary", height: 480});
+    assert.deepEqual(getMapSettings({} as IAVTable), {locationKeyID: "", height: 480});
+});
+
+test("map height derives a safe default without changing stored settings", () => {
+    for (const height of [undefined, null, 0, 321, "640", 320, 480, 640, 800]) {
+        const view = table([]);
+        Object.assign(view.map, {height});
+        const before = JSON.stringify(view);
+        assert.equal(getMapSettings(view).height, [320, 480, 640, 800].includes(height as number) ? height : 480);
+        assert.equal(JSON.stringify(view), before);
+    }
 });
 
 test("unconfigured maps derive the first location in view order without persisting it", () => {

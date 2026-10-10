@@ -5,7 +5,7 @@ const {promisify} = require("node:util");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const {ownerPreferences, guestPreferences, createSyntheticFiles, checkRealAssets, verifyIsolation} =
+const {ownerPreferences, guestPreferences, createSyntheticFiles, checkRealAssets, verifyIsolation, readMapCornerAssets} =
     require("./fixtures/map-webview-boundary/harnessSupport.cjs");
 const {createMapSessionRouter} = require("../electron/mapHostManager");
 const {createMapContentSecurityPolicy} = require("../electron/mapHostPolicy");
@@ -83,7 +83,14 @@ test("synthetic mode bundles the existing runtime while real mode fails explicit
     finally { fs.rmSync(empty, {recursive: true, force: true}); }
 });
 
-test("real Electron webview retains isolation and ordinary DOM menus cover its live surface without hide or refit", {
+test("corner fixture compiles production styles and visibility logic without a GUI", () => {
+    const assets = readMapCornerAssets();
+    assert.match(assets.css, /\.av__map-canvas > webview/);
+    assert.match(assets.radius, /^\d+(?:\.\d+)?px$/);
+    assert.doesNotThrow(() => new Function("exports", assets.visibility));
+});
+
+test("real Electron webview clips rounded corners, retains attribution visibility and isolation, and stays behind DOM menus", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY
         ? "Real Electron verification requires DISPLAY or WAYLAND_DISPLAY; no unsafe startup fallback is allowed" : false,
 }, async () => {

@@ -1,4 +1,5 @@
 {
+	"extraLarge": "Дуже великий",
 	"mapUnplaced": "Записи без координат",
 	"mapLoadedCount": "Завантажено ${shown}/${total}",
 	"mapSkippedCount": "Пропущено ${count}",

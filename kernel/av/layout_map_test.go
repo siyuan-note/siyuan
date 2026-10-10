@@ -73,6 +73,32 @@ func TestMapSettingsValidation(t *testing.T) {
 	}
 }
 
+func TestMapSettingsHeight(t *testing.T) {
+	for _, height := range []int{0, 320, 480, 640, 800} {
+		settings := MapSettings{Height: height}
+		data, err := json.Marshal(settings)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var restored MapSettings
+		if err = json.Unmarshal(data, &restored); err != nil || restored != settings {
+			t.Fatalf("height roundtrip %d: %+v, %v", height, restored, err)
+		}
+		if height == 0 && bytes.Contains(data, []byte("height")) {
+			t.Fatal("omitted height must remain omitted")
+		}
+	}
+	for _, height := range []string{"0", "null", "-1", "400", "480.5", `"480"`, "true", "{}"} {
+		settings := MapSettings{Height: 640}
+		if err := json.Unmarshal([]byte(`{"locationKeyID":"","height":`+height+`}`), &settings); err == nil {
+			t.Fatalf("invalid height accepted: %s", height)
+		}
+		if settings.Height != 640 {
+			t.Fatal("invalid height mutated settings")
+		}
+	}
+}
+
 func TestMapSettingsJSONRejectsLegacyFieldsWithoutMutation(t *testing.T) {
 	for _, payload := range []string{
 		`{"locationKeyID":"","serviceID":"openfreemap"}`,

@@ -3,7 +3,7 @@ import {escapeAttr, escapeHtml} from "../../../../util/escape";
 import {Menu} from "../../../../plugin/Menu";
 import {MenuItem} from "../../../../menus/Menu";
 import {isMobile} from "../../../../util/functions";
-import {getMapSettings} from "./state";
+import {AV_MAP_HEIGHTS, getMapSettings} from "./state";
 
 export const canEditMapSettings = (protyle: IProtyle) => !protyle.disabled && !window.siyuan.isPublish &&
     !protyle.options.history?.created && !protyle.options.history?.snapshot;
@@ -20,15 +20,23 @@ const getChoices = (view: IAVTable) => {
     return choices;
 };
 
-export const getMapSettingsHTML = (view: IAVTable) => {
-    const value = getMapSettings(view).locationKeyID;
-    const label = getChoices(view).find(choice => choice.value === value).label;
-    return `<button class="b3-menu__item" data-map-setting="locationKeyID">
-    <span class="fn__flex-center">${window.siyuan.languages.mapLocationField}</span><span class="fn__flex-1"></span>
+type MapSetting = "locationKeyID" | "height";
+
+const getSettingChoices = (view: IAVTable, key: MapSetting): Array<{value: string | IAVMapSettings["height"]; label: string}> =>
+    key === "locationKeyID" ? getChoices(view) : AV_MAP_HEIGHTS.map((value, index) => ({value,
+        label: window.siyuan.languages[(["small", "medium", "large", "extraLarge"] as const)[index]]}));
+
+const getSettingLabel = (key: MapSetting) => key === "height" ? window.siyuan.languages.height : window.siyuan.languages.mapLocationField;
+
+export const getMapSettingsHTML = (view: IAVTable) => (["locationKeyID", "height"] as const).map(key => {
+    const value = getMapSettings(view)[key];
+    const label = getSettingChoices(view, key).find(choice => choice.value === value).label;
+    return `<button class="b3-menu__item" data-map-setting="${key}">
+    <span class="fn__flex-center">${getSettingLabel(key)}</span><span class="fn__flex-1"></span>
     <span class="b3-menu__accelerator fn__ellipsis av__map-setting-value" title="${escapeAttr(label)}">${escapeHtml(label)}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;
-};
+}).join("");
 
 export const bindMapSettings = (options: {
     protyle: IProtyle;
@@ -37,17 +45,17 @@ export const bindMapSettings = (options: {
     menuElement: Element;
     onChange?: () => void;
 }) => {
-    const controls = options.menuElement.querySelectorAll<HTMLButtonElement>('[data-map-setting="locationKeyID"]');
+    const controls = options.menuElement.querySelectorAll<HTMLButtonElement>("[data-map-setting]");
     const view = options.data.view as IAVTable;
     if (!canEditMapSettings(options.protyle)) {
         controls.forEach(control => { control.disabled = true; });
         return;
     }
-    const update = (locationKeyID: string) => {
+    const update = (key: MapSetting, value: string | IAVMapSettings["height"]) => {
         if (!canEditMapSettings(options.protyle)) return;
-        const previous = {locationKeyID: view.map?.locationKeyID || ""};
-        if (previous.locationKeyID === locationKeyID) return;
-        const next = {locationKeyID};
+        const previous: IAVMapSettings = {locationKeyID: "", ...view.map};
+        if (previous[key] === value) return;
+        const next: IAVMapSettings = {...previous, [key]: value};
         const operation = {action: "setAttrViewMap" as const, avID: options.data.id,
             blockID: options.blockElement.getAttribute("data-node-id"), viewID: options.data.viewID};
         transaction(options.protyle, [{...operation, data: next}], [{...operation, data: previous}]);
@@ -55,15 +63,16 @@ export const bindMapSettings = (options: {
         options.onChange?.();
     };
     controls.forEach(control => {
-        const choices = getChoices(view);
+        const key = control.dataset.mapSetting as MapSetting;
+        const choices = getSettingChoices(view, key);
         const items: IMenu[] = choices.map(choice => ({iconHTML: "", label: escapeHtml(choice.label),
-            checked: getMapSettings(view).locationKeyID === choice.value, click: () => {
-                if (item.element.isConnected) update(choice.value);
+            checked: getMapSettings(view)[key] === choice.value, click: () => {
+                if (item.element.isConnected) update(key, choice.value);
             }}));
-        const label = choices.find(choice => choice.value === getMapSettings(view).locationKeyID).label;
-        const item = new MenuItem({iconHTML: "", label: window.siyuan.languages.mapLocationField,
+        const label = choices.find(choice => choice.value === getMapSettings(view)[key]).label;
+        const item = new MenuItem({iconHTML: "", label: getSettingLabel(key),
             accelerator: " ", submenu: items});
-        item.element.dataset.mapSetting = "locationKeyID";
+        item.element.dataset.mapSetting = key;
         const valueElement = item.element.querySelector(".b3-menu__accelerator");
         valueElement.textContent = label;
         valueElement.classList.add("fn__ellipsis", "av__map-setting-value");

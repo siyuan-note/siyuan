@@ -1,4 +1,5 @@
 {
+	"extraLarge": "Extra large",
 	"mapUnplaced": "Unplaced records",
 	"mapLoadedCount": "Loaded ${shown}/${total}",
 	"mapSkippedCount": "Skipped ${count}",

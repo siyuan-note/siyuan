@@ -1,4 +1,5 @@
 {
+	"extraLarge": "Muito grande",
 	"mapUnplaced": "Registros sem coordenadas",
 	"mapLoadedCount": "Carregados ${shown}/${total}",
 	"mapSkippedCount": "Ignorados ${count}",

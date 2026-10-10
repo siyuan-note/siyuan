@@ -9996,6 +9996,15 @@
     "AVMapSettings": {
       "type": "object",
       "properties": {
+        "height": {
+          "type": "integer",
+          "enum": [
+            320,
+            480,
+            640,
+            800
+          ]
+        },
         "locationKeyID": {
           "type": "string"
         }
@@ -10008,6 +10017,15 @@
     "AVMapSettingsInput": {
       "type": "object",
       "properties": {
+        "height": {
+          "type": "integer",
+          "enum": [
+            320,
+            480,
+            640,
+            800
+          ]
+        },
         "locationKeyID": {
           "type": "string"
         }

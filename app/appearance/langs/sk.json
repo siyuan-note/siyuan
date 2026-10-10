@@ -1,4 +1,5 @@
 {
+	"extraLarge": "Veľmi veľký",
 	"mapUnplaced": "Záznamy bez súradníc",
 	"mapLoadedCount": "Načítané ${shown}/${total}",
 	"mapSkippedCount": "Vynechané ${count}",

@@ -29,7 +29,7 @@ test("the map slash entry is searchable and creates a map database block", () =>
         assert.equal(resolveSlashMenuItems([item], {...options, key})[0], item);
     }
     assert.equal(item.value, '<div data-type="NodeAttributeView" data-av-type="map"></div>');
-    assert.match(item.html, /#iconGlobe/);
+    assert.match(item.html, /#iconMap/);
     assert.match(item.html, /Database map view/);
     assert.equal(resolveSlashMenuItems([item], {...options, key: "map", visible: () => false}).length, 0);
     assert.equal(resolveSlashMenuItems([item], {...options, key: "map", lite: true}).length, 0);

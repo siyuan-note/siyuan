@@ -2,9 +2,12 @@ import {hasAVLocationCoordinates, validateAVLocation} from "../locationValue";
 import type {AVMapPoint} from "./protocol";
 import {isAVMapIdentifier, isAVMapProjectionSupported} from "./protocol";
 
+export const AV_MAP_HEIGHTS = [320, 480, 640, 800] as const;
+
 // 未配置时按视图顺序派生默认值；读取不写入配置，失效的显式绑定仍由用户修复。
 export const getMapSettings = (view: IAVTable): IAVMapSettings => ({
     locationKeyID: view.map?.locationKeyID || view.columns?.find(column => column.type === "location")?.id || "",
+    height: AV_MAP_HEIGHTS.includes(view.map?.height) ? view.map.height : 480,
 });
 
 // 只使用选定字段的已加载行，WGS84 坐标不会被裁切或改写。

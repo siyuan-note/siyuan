@@ -110,6 +110,16 @@ func isRegularDirectoryEntry(entry os.DirEntry) (bool, error) {
 }
 
 func removeEmptyDirectoryTree(dirPath string) (removed bool, err error) {
+	info, err := os.Lstat(dirPath)
+	if errors.Is(err, os.ErrNotExist) {
+		return true, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+		return false, nil
+	}
 	entries, err := os.ReadDir(dirPath)
 	if errors.Is(err, os.ErrNotExist) {
 		return true, nil
@@ -124,7 +134,7 @@ func removeEmptyDirectoryTree(dirPath string) (removed bool, err error) {
 			return false, infoErr
 		}
 		if !isDir {
-			if util.IsSystemMetadataFile(entry.Name()) {
+			if entry.Type().IsRegular() && util.IsSystemMetadataFile(entry.Name()) {
 				metadataPaths = append(metadataPaths, filepath.Join(dirPath, entry.Name()))
 				continue
 			}

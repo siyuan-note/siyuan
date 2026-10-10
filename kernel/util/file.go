@@ -127,7 +127,8 @@ func IsSystemMetadataFile(name string) bool {
 
 // IsEmptyDir 判断目录是否为空，忽略系统元数据文件（如 .DS_Store）
 func IsEmptyDir(p string) bool {
-	if !gulu.File.IsDir(p) {
+	info, err := os.Lstat(p)
+	if err != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
 		return false
 	}
 
@@ -136,7 +137,7 @@ func IsEmptyDir(p string) bool {
 		return false
 	}
 	for _, file := range files {
-		if !IsSystemMetadataFile(file.Name()) {
+		if !file.Type().IsRegular() || !IsSystemMetadataFile(file.Name()) {
 			return false
 		}
 	}
@@ -145,6 +146,16 @@ func IsEmptyDir(p string) bool {
 
 // RemoveEmptyDir 删除仅含系统元数据文件（如 .DS_Store）的目录；若目录仍含业务文件则保留不动
 func RemoveEmptyDir(p string) (err error) {
+	info, err := os.Lstat(p)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+		return nil
+	}
 	entries, err := os.ReadDir(p)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -153,13 +164,14 @@ func RemoveEmptyDir(p string) (err error) {
 		return
 	}
 	for _, entry := range entries {
-		if IsSystemMetadataFile(entry.Name()) {
-			if err = os.Remove(filepath.Join(p, entry.Name())); err != nil && !os.IsNotExist(err) {
-				return
-			}
-			continue
+		if !entry.Type().IsRegular() || !IsSystemMetadataFile(entry.Name()) {
+			return nil
 		}
-		return nil
+	}
+	for _, entry := range entries {
+		if err = os.Remove(filepath.Join(p, entry.Name())); err != nil && !os.IsNotExist(err) {
+			return
+		}
 	}
 	if err = os.Remove(p); os.IsNotExist(err) {
 		return nil

@@ -73,7 +73,7 @@ func PackageDirContainsFile(dirPath string) (bool, error) {
 		return false, err
 	}
 	for _, entry := range entries {
-		if util.IsSystemMetadataFile(entry.Name()) {
+		if entry.Type().IsRegular() && util.IsSystemMetadataFile(entry.Name()) {
 			continue
 		}
 		if !entry.IsDir() {

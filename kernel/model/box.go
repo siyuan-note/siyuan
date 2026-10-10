@@ -542,7 +542,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 	if oldDir := path.Dir(oldPath); ast.IsNodeIDPattern(path.Base(oldDir)) {
 		fromDir := filepath.Join(boxLocalPath, oldDir)
 		if util.IsEmptyDir(fromDir) {
-			filelock.Remove(fromDir)
+			util.RemoveEmptyDir(fromDir)
 		}
 	}
 	IncSync()

@@ -228,6 +228,21 @@ func TestPackageDirContainsFileIgnoresDSStore(t *testing.T) {
 	}
 }
 
+func TestPackageDirContainsFileInMetadataNamedDirectory(t *testing.T) {
+	root := t.TempDir()
+	dir := filepath.Join(root, ".DS_Store")
+	if err := os.Mkdir(dir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "data.json"), []byte("{}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	contains, err := PackageDirContainsFile(root)
+	if err != nil || !contains {
+		t.Fatalf("nested business file must be preserved: contains=%v, err=%v", contains, err)
+	}
+}
+
 func TestIsValidInstalledPackageRequiresExactName(t *testing.T) {
 	if !IsValidInstalledPackage(&Package{Name: "plugin-sample"}, "plugin-sample") {
 		t.Fatal("expected an exact package name match to be valid")

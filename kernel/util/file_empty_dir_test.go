@@ -86,3 +86,45 @@ func TestRemoveEmptyDir(t *testing.T) {
 		t.Fatalf("目录不存在时应返回 nil：%s", err)
 	}
 }
+
+func TestMetadataNamedDirectoryIsPreserved(t *testing.T) {
+	root := t.TempDir()
+	dir := filepath.Join(root, ".DS_Store")
+	if err := os.Mkdir(dir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if IsEmptyDir(root) {
+		t.Fatal("metadata-named directory must count as content")
+	}
+	if err := RemoveEmptyDir(root); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(dir); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRemoveEmptyDirPreservesSymlinkTarget(t *testing.T) {
+	root := t.TempDir()
+	target := filepath.Join(root, "target")
+	if err := os.Mkdir(target, 0755); err != nil {
+		t.Fatal(err)
+	}
+	metadata := filepath.Join(target, ".DS_Store")
+	if err := os.WriteFile(metadata, nil, 0644); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(root, "link")
+	if err := os.Symlink(target, link); err != nil {
+		t.Skipf("symlinks unavailable: %s", err)
+	}
+	if IsEmptyDir(link) {
+		t.Fatal("symlink must not be treated as an empty directory")
+	}
+	if err := RemoveEmptyDir(link); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(metadata); err != nil {
+		t.Fatal(err)
+	}
+}

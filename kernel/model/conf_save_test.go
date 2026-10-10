@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/eventbus"
 	appconf "github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -59,6 +60,31 @@ func TestSaveUsesEncryptedSnapshot(t *testing.T) {
 	}
 	if stored.MCPOAuth != app.MCPOAuth {
 		t.Fatalf("unexpected stored MCP OAuth data: %q", stored.MCPOAuth)
+	}
+}
+
+func TestIndexStateEventsDoNotSaveConfiguration(t *testing.T) {
+	oldConf, oldDir, oldReadOnly := Conf, util.ConfDir, util.ReadOnly
+	Conf, util.ConfDir, util.ReadOnly = NewAppConf(), t.TempDir(), false
+	t.Cleanup(func() { Conf, util.ConfDir, util.ReadOnly = oldConf, oldDir, oldReadOnly })
+	file := filepath.Join(util.ConfDir, "conf.json")
+	marker := []byte("configuration must not be serialized by index state events")
+	if err := os.WriteFile(file, marker, 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, state := range []int{1, 1, 0, 1, 0} {
+		if state == 1 {
+			eventbus.Publish(eventbus.EvtSQLIndexChanged)
+		} else {
+			eventbus.Publish(eventbus.EvtSQLIndexFlushed)
+		}
+		if Conf.DataIndexState != state {
+			t.Fatalf("runtime state=%d, want %d", Conf.DataIndexState, state)
+		}
+		data, err := os.ReadFile(file)
+		if err != nil || !bytes.Equal(data, marker) {
+			t.Fatalf("index event saved configuration: %v", err)
+		}
 	}
 }
 

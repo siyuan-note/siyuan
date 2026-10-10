@@ -23,6 +23,29 @@ import (
 	"github.com/88250/lute/ast"
 )
 
+func TestUndoLogClearReportsLinkedDocuments(t *testing.T) {
+	log := newUndoLog(64)
+	linked := &UndoEntry{id: "linked", mutatedRootIDs: []string{"source", "target"}}
+	kept := &UndoEntry{id: "kept", mutatedRootIDs: []string{"target"}}
+	log.stacks["source"] = &undoStack{undoStack: []*UndoEntry{linked}, redoStack: []*UndoEntry{linked}}
+	log.stacks["target"] = &undoStack{undoStack: []*UndoEntry{kept, linked}, redoStack: []*UndoEntry{linked}}
+	log.stacks["unrelated"] = &undoStack{undoStack: []*UndoEntry{kept}}
+	affected := log.clear("source")
+	slices.Sort(affected)
+	if !slices.Equal(affected, []string{"source", "target"}) {
+		t.Fatalf("affected document states: %v", affected)
+	}
+	if canUndo, canRedo, _ := log.State("source"); canUndo || canRedo {
+		t.Fatal("rewritten document retained history")
+	}
+	if log.Peek("target") != kept || log.Peek("unrelated") != kept {
+		t.Fatal("unrelated operations were removed")
+	}
+	if _, canRedo, _ := log.State("target"); canRedo {
+		t.Fatal("linked redo survived invalidation")
+	}
+}
+
 func TestUndoLogClearAttributeView(t *testing.T) {
 	avID := "affected-database"
 	snapshot := &attributeViewFieldsSnapshot{changes: map[string]*attributeViewFieldChange{avID: {}}}

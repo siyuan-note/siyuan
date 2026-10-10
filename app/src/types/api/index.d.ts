@@ -3246,6 +3246,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 实际重链接成功写盘后清理文档及关联跨文档撤销记录；预览和写入失败不清理历史。
+     */
     "/api/asset/relinkAsset": {
         request: RelinkAssetRequestInput;
         response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "items"?: never; "references"?: never; "skippedNotebooks"?: never; "unavailableAttributeViews"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
@@ -5227,6 +5230,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 格式化成功写盘后清理文档及关联跨文档撤销记录，并广播更新后的撤销状态。
+     */
     "/api/format/autoSpace": {
         request: TrimmedIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5234,6 +5240,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 转换成功写盘后清理文档及关联跨文档撤销记录；未改写文档时保留历史。
+     */
     "/api/format/netAssets2LocalAssets": {
         request: TrimmedIDRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5241,6 +5250,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 转换成功写盘后清理文档及关联跨文档撤销记录；未改写文档时保留历史。
+     */
     "/api/format/netImg2LocalAssets": {
         request: NetImageAssetsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6382,6 +6394,7 @@ export interface APIPOSTRoutes {
      * SQL（2）和语义搜索（4）返回 code=1 与提示信息，不执行替换；ids 为空时表示替换全部。
      * 文本与查询语法替换的所有启用类型遵循搜索配置的 caseSensitive，替换串按字面量写入。
      * 正则模式的大小写匹配由表达式决定，替换串支持捕获组展开。
+     * 每次文档写盘成功后清理该文档及关联跨文档撤销记录，并广播更新后的撤销状态。
      */
     "/api/search/findReplace": {
         request: FindReplaceRequestInput;

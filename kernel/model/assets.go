@@ -885,6 +885,7 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 			if err = writeTreeUpsertQueue(tree); err != nil {
 				return
 			}
+			invalidateDocumentHistory(tree.ID)
 			util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files, humanize.BytesCustomCeil(uint64(size), 2)), 5000)
 
 			if 0 < forbiddenCount {

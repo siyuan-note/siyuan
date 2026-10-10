@@ -81,6 +81,7 @@ func AutoSpace(rootID string) (err error) {
 	if err != nil {
 		return
 	}
+	invalidateDocumentHistory(newTree.ID)
 	logging.LogInfof("formatted tree [%s]", rootID)
 	util.RandomSleep(500, 700)
 	return

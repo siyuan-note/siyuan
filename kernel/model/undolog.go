@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // UndoEntry 是撤销栈中的一条记录。跨文档操作（MutatedRootIDs 含多个 rootID）的 entry
@@ -298,13 +299,22 @@ func (l *UndoLog) State(rootID string) (canUndo, canRedo bool, peekMutatedRootID
 
 // Clear 清理撤销日志。rootID 非空时清该文档栈并联动移除其它栈中相关条目；为空时清空全部。
 func (l *UndoLog) Clear(rootID string) {
+	l.clear(rootID)
+}
+
+// 返回状态发生变化的文档，包括联动移除跨文档记录的其他文档。
+func (l *UndoLog) clear(rootID string) (rootIDs []string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
 	if "" == rootID {
+		for id := range l.stacks {
+			rootIDs = append(rootIDs, id)
+		}
 		l.stacks = map[string]*undoStack{}
 		return
 	}
+	rootIDs = append(rootIDs, rootID)
 
 	s := l.stacks[rootID]
 	if nil == s {
@@ -328,12 +338,30 @@ func (l *UndoLog) Clear(rootID string) {
 	}
 	delete(l.stacks, rootID)
 	for otherID, other := range l.stacks {
+		beforeUndo, beforeRedo := len(other.undoStack), len(other.redoStack)
 		for id := range linkedIDs {
 			other.undoStack = removeEntryByID(other.undoStack, id)
 			other.redoStack = removeEntryByID(other.redoStack, id)
 		}
-		_ = otherID
+		if beforeUndo != len(other.undoStack) || beforeRedo != len(other.redoStack) {
+			rootIDs = append(rootIDs, otherID)
+		}
 	}
+	return
+}
+
+// 非编辑器写盘成功后失效旧记录，并通知所有客户端更新撤销和重做状态。
+func invalidateDocumentHistory(rootID string) {
+	rootIDs := GlobalUndoLog.clear(rootID)
+	states := map[string]map[string]bool{}
+	for _, id := range rootIDs {
+		canUndo, canRedo, _ := GlobalUndoLog.State(id)
+		states[id] = map[string]bool{"canUndo": canUndo, "canRedo": canRedo}
+	}
+	event := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+	event.Data = []*Transaction{}
+	event.Context = map[string]any{"rootIDs": rootIDs, "undoState": states}
+	util.PushEvent(event)
 }
 
 // ClearAttributeView 从各文档栈清理涉及指定数据库的整笔撤销、重做记录，保留无关记录。

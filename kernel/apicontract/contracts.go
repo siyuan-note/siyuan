@@ -474,8 +474,14 @@ var GetRecentUpdatedBlocks = define[EmptyRequest, []*SearchBlock]("getRecentUpda
 
 var Zip = define[ZipRequest, Null]("zip", "/api/archive/zip", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var Unzip = define[UnzipRequest, Null]("unzip", "/api/archive/unzip", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 格式化成功写盘后清理文档及关联跨文档撤销记录，并广播更新后的撤销状态。
 var AutoSpace = define[TrimmedIDRequest, Null]("autoSpace", "/api/format/autoSpace", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 转换成功写盘后清理文档及关联跨文档撤销记录；未改写文档时保留历史。
 var NetAssets2LocalAssets = define[TrimmedIDRequest, Null]("netAssets2LocalAssets", "/api/format/netAssets2LocalAssets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 转换成功写盘后清理文档及关联跨文档撤销记录；未改写文档时保留历史。
 var NetImg2LocalAssets = define[NetImageAssetsRequest, Null]("netImg2LocalAssets", "/api/format/netImg2LocalAssets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var PushMsg = define[NotificationRequest, NotificationData]("pushMsg", "/api/notification/pushMsg", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var PushErrMsg = define[NotificationRequest, NotificationData]("pushErrMsg", "/api/notification/pushErrMsg", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
@@ -739,6 +745,7 @@ var SearchEmbedBlock = define[SearchEmbedBlockRequest, EmbedBlocksData]("searchE
 // SQL（2）和语义搜索（4）返回 code=1 与提示信息，不执行替换；ids 为空时表示替换全部。
 // 文本与查询语法替换的所有启用类型遵循搜索配置的 caseSensitive，替换串按字面量写入。
 // 正则模式的大小写匹配由表达式决定，替换串支持捕获组展开。
+// 每次文档写盘成功后清理该文档及关联跨文档撤销记录，并广播更新后的撤销状态。
 var FindReplace = define[FindReplaceRequest, Null]("findReplace", "/api/search/findReplace", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 
 var SemanticSearchBlock = define[SearchBlockRequest, SearchBlocksData]("semanticSearchBlock", "/api/search/semanticSearchBlock", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1022,6 +1029,8 @@ var ImportOCRModels = define[ImportOCRModelsRequest, OCRModel]("importOCRModels"
 // 拒绝加密笔记本资源重命名；空名称或与原文件名相同的名称返回 code=0、data.newPath=""。
 var RenameAsset = define[RenameAssetRequest, AssetRenameData]("renameAsset", "/api/asset/renameAsset", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var FindAssetReferences = define[FindAssetReferencesRequest, AssetReferencesData]("findAssetReferences", "/api/asset/findAssetReferences", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+// 实际重链接成功写盘后清理文档及关联跨文档撤销记录；预览和写入失败不清理历史。
 var RelinkAsset = define[RelinkAssetRequest, AssetReferencesData]("relinkAsset", "/api/asset/relinkAsset", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var GetDocImageAssets = define[AssetDocumentRequest, []string]("getDocImageAssets", "/api/asset/getDocImageAssets", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var GetDocAssets = define[AssetDocumentAssetsRequest, []string]("getDocAssets", "/api/asset/getDocAssets", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")

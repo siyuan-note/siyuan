@@ -573,6 +573,7 @@ func (p *assetRelinkPlan) apply() (err error) {
 			var size uint64
 			size, writeErr = filesys.WriteTreeIfUnchanged(file.tree, file.before)
 			if writeErr == nil {
+				invalidateDocumentHistory(file.tree.ID)
 				sql.UpsertTreeQueue(file.tree)
 				refreshDocInfoWithSize(file.tree, size)
 				reload[file.tree.Root.ID] = true

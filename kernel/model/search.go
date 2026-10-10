@@ -1045,6 +1045,7 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 		if err = writeTreeUpsertQueue(tree); err != nil {
 			return
 		}
+		invalidateDocumentHistory(tree.ID)
 		updateNodes[id] = node
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(206), i+1, len(ids)))
 	}

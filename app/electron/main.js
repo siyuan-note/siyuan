@@ -4440,16 +4440,23 @@ app.whenReady().then(() => {
             return;
         }
 
-        workspaces.forEach(item => {
+        await Promise.all(workspaces.map(async item => {
             const server = item.kernelTarget.origin;
             writeLog("sync after system resume [" + server + "/api/sync/performSync" + "]");
-            (item.ownsKernel ? session.defaultSession : getRemoteSession(item.kernelTarget)).fetch(server + "/api/sync/performSync", {
-                method: "POST",
-                credentials: item.ownsKernel ? "omit" : "include",
-                bypassCustomProtocolHandlers: !item.ownsKernel,
-                redirect: item.ownsKernel ? "follow" : "manual",
-            });
-        });
+            try {
+                const response = await (item.ownsKernel ? session.defaultSession : getRemoteSession(item.kernelTarget)).fetch(server + "/api/sync/performSync", {
+                    method: "POST",
+                    credentials: "include",
+                    bypassCustomProtocolHandlers: !item.ownsKernel,
+                    redirect: item.ownsKernel ? "follow" : "manual",
+                });
+                if (!response.ok) {
+                    writeLog("sync after system resume rejected [HTTP " + response.status + "]");
+                }
+            } catch {
+                writeLog("sync after system resume request failed");
+            }
+        }));
     });
     powerMonitor.on("shutdown", () => {
         writeLog("system shutdown");

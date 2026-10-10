@@ -17,6 +17,7 @@
 package util
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 	"sync"
@@ -28,6 +29,18 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 )
+
+// LogWebSocketError 记录发送缓冲区满导致的消息丢弃，其他连接错误保留在调试日志中。
+func LogWebSocketError(session *melody.Session, channel string, err error) {
+	app, _ := session.Get("app")
+	id, _ := session.Get("id")
+	typ, _ := session.Get("type")
+	if errors.Is(err, melody.ErrMessageBufferFull) {
+		logging.LogWarnf("websocket message dropped [channel=%q, app=%v, id=%v, type=%v]: %s", channel, app, id, typ, err)
+		return
+	}
+	logging.LogDebugf("websocket failed [channel=%q, app=%v, id=%v, type=%v]: %s", channel, app, id, typ, err)
+}
 
 var (
 	WebSocketServer *melody.Melody

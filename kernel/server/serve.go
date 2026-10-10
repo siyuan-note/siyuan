@@ -1902,8 +1902,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 	})
 
 	util.WebSocketServer.HandleError(func(s *melody.Session, err error) {
-		//sessionId, _ := s.Get("id")
-		//logging.LogWarnf("ws [%s] failed: %s", sessionId, err)
+		util.LogWebSocketError(s, "main", err)
 	})
 
 	util.WebSocketServer.HandleClose(func(s *melody.Session, i int, str string) error {

@@ -289,7 +289,8 @@ func BoxDocSubFileCountForPublishAt(boxID, docPath string, publishAccess Publish
 
 func boxDocSubFileCount(boxID, parentPath string, include func(docPath string) bool) int {
 	ret, _ := visibleDocCount(boxID, parentPath, func(p string) map[string]string {
-		return filesys.DocIAL(filepath.Join(util.DataDir, boxID, p))
+		ial, _ := filesys.DocIAL(filepath.Join(util.DataDir, boxID, p))
+		return ial
 	}, include)
 	return ret
 }

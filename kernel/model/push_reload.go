@@ -278,7 +278,7 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 						continue
 					}
 
-					subDocIAL := filesys.DocIAL(filepath.Join(subDir, subFile.Name()))
+					subDocIAL, _ := filesys.DocIAL(filepath.Join(subDir, subFile.Name()))
 					if "true" == subDocIAL[DocHiddenAttr] {
 						continue
 					}

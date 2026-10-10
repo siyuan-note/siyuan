@@ -133,7 +133,10 @@ func addFileOperationTestDoc(t *testing.T, fixture *fileOperationTestFixture, id
 
 func TestListDocTreeUsesPathIDForInvalidPropertiesID(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	ial := filesys.DocIAL(filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath))
+	ial, err := filesys.DocIAL(filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath))
+	if err != nil {
+		t.Fatal(err)
+	}
 	tests := []struct {
 		name string
 		id   string

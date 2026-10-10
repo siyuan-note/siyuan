@@ -162,7 +162,14 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 	}
 
 	filePath := filepath.Join(util.DataDir, box.ID, p)
-	ret = filesys.DocIAL(filePath)
+	var readErr error
+	ret, readErr = filesys.DocIAL(filePath)
+	if readErr != nil && !errors.Is(readErr, filesys.ErrInvalidDocIAL) {
+		if !errors.Is(readErr, os.ErrNotExist) {
+			logging.LogWarnf("read document properties [%s] failed: %s", filePath, readErr)
+		}
+		return nil
+	}
 	if 1 > len(ret) {
 		// 目录枚举后文档可能已被删除，不将不存在的文件视为损坏。
 		if _, statErr := os.Stat(filePath); errors.Is(statErr, os.ErrNotExist) {

@@ -90,7 +90,10 @@ export const bindMapUnplaced = (options: {
     };
     const addItem = (item: IMenu) => {
         const element = menu.addItem(item);
-        if (element) elements.push(element);
+        if (element) {
+            element.querySelector(".b3-menu__label")?.classList.add("fn__ellipsis");
+            elements.push(element);
+        }
     };
     const resetPosition = () => window.siyuan.menus.menu.resetPosition();
     const renderRows = (more = true) => {
@@ -264,20 +267,22 @@ export const bindMapUnplaced = (options: {
             request?.abort();
             releaseMenu?.();
             releaseMenu = undefined;
+            menu.element.classList.remove("av__map-unplaced-menu");
             menu = undefined;
             toggle.setAttribute("aria-expanded", "false");
         });
+        menu.element.classList.add("av__map-unplaced-menu");
         if (!isMobile() && canvas) releaseMenu = registerMapUnplacedMenu(menu.element, canvas);
         rows = [];
         page = 0;
         total = 0;
         search = "";
         elements = [];
-        menu.addItem({type: "readonly", iconHTML: "", label: `${escapeHtml(window.siyuan.languages.mapUnplaced)} <span class="counter fn__none" data-map-unplaced-count></span>`});
-        count = menu.element.querySelector<HTMLElement>("[data-map-unplaced-count]");
         let input: HTMLInputElement;
-        menu.addItem({type: "empty", label: `<div class="av__map-unplaced-search"><input type="search" ${Constants.ATTRIBUTE_MENU_KEYMAP}="true" class="b3-text-field fn__block" aria-label="${escapeAttr(window.siyuan.languages.search)}" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}"></div>`,
+        menu.addItem({type: "empty", label: `<div class="av__map-unplaced-head"><span class="b3-menu__label">${escapeHtml(window.siyuan.languages.mapUnplaced)}</span><span class="counter ${isMobile() ? "counter--compact" : "counter--bg"} fn__none" data-map-unplaced-count></span></div>
+<div class="av__map-unplaced-search"><input type="search" ${Constants.ATTRIBUTE_MENU_KEYMAP}="true" class="b3-text-field" aria-label="${escapeAttr(window.siyuan.languages.search)}" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}"></div>`,
             bind: element => { input = element.querySelector("input"); }});
+        count = menu.element.querySelector<HTMLElement>("[data-map-unplaced-count]");
         const searchRows = () => {
             request?.abort();
             clearTimeout(searchTimer);

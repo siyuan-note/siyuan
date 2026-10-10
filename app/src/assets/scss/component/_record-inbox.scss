@@ -1,9 +1,9 @@
-// 日历无日期列表和可信地图菜单共享同一组内容布局。
-@mixin content($prefix, $list-max-height: min(45vh, 360px)) {
+// 日历和地图条目列表共享标题与搜索布局，内边距可适配外层菜单。
+@mixin header-search($prefix, $inset: 16px) {
   .#{$prefix}-head {
     display: flex;
     align-items: center;
-    padding: 0 16px 8px;
+    padding: 0 $inset 8px;
 
     .b3-menu__label {
       min-width: 0;
@@ -16,13 +16,18 @@
     display: flex;
     min-width: 0;
     margin-bottom: 8px;
-    padding: 0 16px;
+    padding: 0 $inset;
 
     .b3-text-field {
       flex: 1;
       min-width: 0;
     }
   }
+}
+
+// 日历无日期列表和可信地图菜单共享同一组内容布局。
+@mixin content($prefix, $list-max-height: min(45vh, 360px)) {
+  @include header-search($prefix);
 
   .#{$prefix}-hint {
     padding: 0 16px;

@@ -73,7 +73,7 @@ const setup = (mobile = false, nativeReady = false) => {
     const menus: MenuStub[] = [];
     class MenuStub {
         items: Array<{option: IMenu; element: ElementStub}> = [];
-        element = {querySelector: () => count};
+        element = Object.assign(new ElementStub(), {querySelector: () => count});
         position: IPosition;
         closed = false;
         constructor(_id?: string, private closeCB?: () => void) { menus.push(this); }
@@ -395,6 +395,26 @@ test("mobile unplaced menu uses shared menu placement without forcing a software
     scenario.menus[0].click("&lt;Title mobile>");
     assert.equal(scenario.opens[0].row.id, "mobile");
     scenario.destroy();
+});
+
+test("DOM inbox layout belongs to the open menu and preserves the flat search and row keyboard structure", async () => {
+    for (const mobile of [false, true]) {
+        const scenario = setup(mobile);
+        scenario.click();
+        await scenario.respond(1, [row("entry")]);
+        const menu = scenario.menus[0];
+        assert.ok(menu.element.classes.has("av__map-unplaced-menu"));
+        const header = menu.active()[0];
+        assert.equal(header.option.type, "empty");
+        assert.ok(header.option.label.includes("av__map-unplaced-head"));
+        assert.ok(header.option.label.includes("av__map-unplaced-search"));
+        assert.ok(header.option.label.includes(mobile ? "counter--compact" : "counter--bg"));
+        assert.equal(menu.active()[1].option.label, "&lt;Title entry>");
+        scenario.enter("&lt;Title entry>");
+        assert.equal(scenario.opens[0].row.id, "entry");
+        assert.equal(menu.element.classes.has("av__map-unplaced-menu"), false);
+        scenario.destroy();
+    }
 });
 
 test("ready desktop host uses the real unplaced API and sends only the current page of text to the native menu", async () => {

@@ -1,3 +1,5 @@
+@use "../component/record-inbox";
+
 .av__map {
   width: 100%;
   min-width: 0;
@@ -35,10 +37,20 @@
   gap: 4px 12px;
 }
 
-.av__map-unplaced-search {
-  width: min(320px, 75vw);
-  max-width: 100%;
-  margin: 4px 0;
+.av__map-unplaced-menu {
+  @include record-inbox.header-search("av__map-unplaced", 8px);
+
+  &:not(.b3-menu--fullscreen) {
+    width: min(320px, 75vw);
+  }
+
+  &.b3-menu--fullscreen {
+    .av__map-unplaced-head,
+    .av__map-unplaced-search {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
 }
 
 .av__map-status:empty,

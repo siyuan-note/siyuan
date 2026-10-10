@@ -2496,6 +2496,9 @@ export interface APIGETRoutes {
         output: "binary";
         contentVariants: [{"status":200,"contentType":"application/json"},{"status":400,"contentType":"application/json"},{"status":401,"contentType":"application/json"},{"status":404,"contentType":"application/json"},{"status":429,"contentType":"application/json"},{"status":500,"contentType":"application/json"}];
     };
+    /**
+     * MCP OAuth 协议入口返回标准 OAuth JSON 或授权页面，不使用内核结果信封。
+     */
     "/.well-known/oauth-protected-resource/mcp": {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2514,6 +2517,11 @@ export interface APIGETRoutes {
         output: "binary";
         contentVariants: [{"status":200,"contentType":"text/html"},{"status":400,"contentType":"text/html"},{"status":403,"contentType":"text/plain"}];
     };
+    /**
+     * 从 URL 查询参数读取 type、color、date、lang、weekdayType、content 和 id，不读取请求体。
+     * type 默认 1，lang 默认内核语言，weekdayType 默认 1；文字图标（type=8）跟随全局字体列表和首选字重。
+     * 日期类图标使用内置字体和常规字重；未配置全局字体时使用内置列表，缺失字体由客户端继续回退。
+     */
     "/api/icon/getDynamicIcon": {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2524,6 +2532,10 @@ export interface APIGETRoutes {
         emptyResponseStatuses: [500];
         contentVariants: [{"status":200,"contentType":"image/svg+xml"}];
     };
+    /**
+     * URL、TLS 和 Cookie 诊断对象包含标准库的原始 JSON。
+     * 已声明字段及其类型保持稳定；工具链新增的诊断字段通过 JSONValue 索引读取，不保证跨版本存在。
+     */
     "/api/network/echo": {
         request: Blob;
         response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2531,6 +2543,10 @@ export interface APIGETRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * URL、TLS 和 Cookie 诊断对象包含标准库的原始 JSON。
+     * 已声明字段及其类型保持稳定；工具链新增的诊断字段通过 JSONValue 索引读取，不保证跨版本存在。
+     */
     "/api/network/echo/*path": {
         request: Blob;
         response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2602,6 +2618,9 @@ export interface APIGETRoutes {
         emptyResponseStatuses: [500];
         contentVariants: [{"status":200,"contentType":"image/png"}];
     };
+    /**
+     * 从 URL 查询参数读取 state、code 和 error，验证登录事务及会话绑定，不读取请求体。
+     */
     "/api/system/oidc/callback": {
         request: EmptyRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2757,6 +2776,10 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
         additionalErrorStatuses: [409];
     };
+    /**
+     * 返回工作空间 data/ai/AGENTS.md 的 content 和 revision，要求管理员权限。
+     * 缺失文件返回空 content 和 missing 修订，不创建文件；非 UTF-8 文本、超出 32 KiB 或读取失败返回 code=-1。
+     */
     "/api/ai/agent/getInstructions": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AIAgentInstructionsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2779,6 +2802,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 独立于斜杠菜单的普通技能发现，只返回只读元数据，包括已禁用条目。
+     */
     "/api/ai/agent/lsBuiltinSkills": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AIBuiltinSkillInfo> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2859,6 +2885,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 接收 content 和读取时的 revision，要求管理员权限且禁止只读写入。
+     * 内容允许为空；修订冲突返回 code=-1 并保留原文。保存采用原子替换，并按工作空间同步忽略规则通知同步。
+     * 指令在下一轮用户对话生效，同轮工具调用和压缩使用固定快照，且不能覆盖工具权限、审批或访问控制。
+     */
     "/api/ai/agent/setInstructions": {
         request: AIAgentInstructionsSaveRequestInput;
         response: { "code": 0; "data": AIAgentInstructionsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2894,6 +2925,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 套餐授权接口仅供已鉴权管理员使用，遵守 AI 禁用开关及只读限制。
+     * 账户列表只返回身份及连接状态；令牌保存在主机私有目录，配置仅保存账户 ID。
+     */
     "/api/ai/chatgpt/accounts": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<ChatGPTAccount>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2908,6 +2943,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 导出使用至少 12 个字符的密码，先写入带版本的认证加密文件，再停止源主机刷新。
+     */
     "/api/ai/chatgpt/export": {
         request: ChatGPTTransferRequestInput;
         response: { "code": 0; "data": ExportFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2915,6 +2953,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 导入限制为 1 MiB，认证文件和账户身份后续期；失败保留账户及目标主机标识。
+     */
     "/api/ai/chatgpt/import": {
         request: ChatGPTTransferRequestInput;
         response: { "code": 0; "data": ChatGPTAccount; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2922,6 +2963,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 退出清除本地令牌并保留账户映射；revoked 表示远程撤销是否确认成功。
+     */
     "/api/ai/chatgpt/logout": {
         request: ChatGPTAccountRequestInput;
         response: { "code": 0; "data": ChatGPTLogoutResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2929,6 +2973,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 删除指定的本机账户注册并终止其请求及登录尝试，不合并同邮箱注册；不修改提供商配置或主机 ID。
+     * 先尝试撤销会话，远程撤销未确认时仍清除本地记录并返回 revoked=false；缺失账户报错。
+     */
     "/api/ai/chatgpt/remove": {
         request: ChatGPTAccountRequestInput;
         response: { "code": 0; "data": ChatGPTLogoutResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2936,6 +2984,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 登录地址可能包含身份提示，客户端不得记录；回调使用独立的 IPv4 回环监听器。
+     */
     "/api/ai/chatgpt/start": {
         request: ChatGPTAccountRequestInput;
         response: { "code": 0; "data": ChatGPTLogin; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3029,6 +3080,17 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 手动调用设备选择的 OCR AI 模型识别本地 assets/ 图片，不使用会话、工具。
+     * 未保存独立模型且本地提供商仍被选中时兼容智能体模型；显式模型失效时返回错误，不回退。
+     * path 保留 box 查询参数以隔离笔记本资源；拒绝加密资源和外部图片地址。
+     * 支持 PNG、JPEG、GIF、WebP，并将 BMP、TIFF 转为 PNG、HEIC/HEIF 转为 JPEG；其他格式返回错误。
+     * 保留原图分辨率，原始文件和发送图片均限制为 20 MiB、发送图片限制为四千万像素；HEIF 遵循预览解码限制。
+     * 支持现有 AI 生成协议，受 AI 功能开关、管理员权限和只读模式限制。
+     * 请求上限为两分钟，提供商配置的更短超时仍生效；模型不支持图片时返回错误，不降级为纯文本请求。
+     * 成功将完整文本（含换行和空白，图片无文字时可为空）保存到现有 OCR 存储并更新索引。
+     * 失败、取消、拒绝或截断时保留已有文本；不返回虚构的坐标和置信度。
+     */
     "/api/ai/ocr": {
         request: AssetPathRequestInput;
         response: { "code": 0; "data": AssetTextData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3148,6 +3210,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 扫描失败返回标准错误，不将失败表示为成功的空列表。
+     * 可选请求头 X-SiYuan-App-ID 将截断提示限定到对应前端，未提供时保留广播行为。
+     */
     "/api/asset/getUnusedAssets": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3176,6 +3242,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 始终使用当前设备选择的提供商，内核可在无界面的环境中识别。
+     * ai 使用设备保存的 aiModelId，返回原样文本和空 ocrJSON，不虚构坐标；本地提供商保持 TSV 数据。
+     * 不自动回退到另一提供商；取消、模型或推理错误不覆盖已有文本，加密笔记本不参与 OCR。
+     */
     "/api/asset/ocr": {
         request: AssetPathRequestInput;
         response: { "code": 0; "data": AssetOCRData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3190,6 +3261,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * path 为 data 相对资源路径，普通资源须通过完整未引用扫描。
+     * 全局 assets/android-notification-texts.txt 普通文件允许显式删除以关闭 Android 保活通知，无需未引用扫描。
+     * 目录和符号链接不能使用该例外；删除前保存资源历史并触发同步。
+     * 该文件不出现在 getUnusedAssets 中，也不被 removeUnusedAssets 批量清理。
+     */
     "/api/asset/removeUnusedAsset": {
         request: AssetPathRequestInput;
         response: { "code": 0; "data": AssetPathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3197,6 +3274,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 未引用资源扫描失败时返回标准错误，禁止使用不完整的引用集合清理资源。
+     */
     "/api/asset/removeUnusedAssets": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AssetPathsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3204,6 +3284,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 重命名普通笔记本资源，并同步字面量及百分号编码的文档、数据库引用。
+     * 引用及成功返回的 data.newPath 保留查询参数和片段；源资源解析失败返回 code=-1 和 5000 毫秒错误提示。
+     * 拒绝加密笔记本资源重命名；空名称或与原文件名相同的名称返回 code=0、data.newPath=""。
+     */
     "/api/asset/renameAsset": {
         request: RenameAssetRequestInput;
         response: { "code": 0; "data": AssetRenameData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3211,6 +3296,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 返回普通资源路径；已解锁的加密资源返回保留原始名称的受管临时明文副本路径。
+     */
     "/api/asset/resolveAssetPath": {
         request: AssetPathRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3253,6 +3341,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 上传提示生命周期使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，状态栏仍全局更新。
+     */
     "/api/asset/uploadCloud": {
         request: AssetCloudUploadRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3260,6 +3351,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 上传提示生命周期使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，保留 ignorePushMsg 语义。
+     */
     "/api/asset/uploadCloudByAssetsPaths": {
         request: AssetPathsCloudUploadRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3386,6 +3480,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 返回数据库级 automations，所有视图共享；缺省表示没有自动化规则。
+     * 规则通过 `/api/transactions` 的 setAttrViewAutomations 操作整体保存。
+     */
     "/api/av/getAttributeView": {
         request: GetAttributeViewRequestInput;
         response: { "code": 0; "data": AVData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3484,6 +3582,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 可选的 `sort: {column, order}` 按关联数据库字段排序，order 为 ASC 或 DESC。
+     * 全部候选排序后分页，仅影响本次查询，不修改视图和 selectedRows 顺序。
+     * 省略 sort 时按创建时间倒序；不存在的字段或无效方向返回错误。
+     */
     "/api/av/getAttributeViewRelationCandidates": {
         request: GetAttributeViewRelationCandidatesRequestInput;
         response: { "code": 0; "data": AVRelationCandidatesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3519,6 +3622,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 完整扫描普通笔记本的数据库引用；读取或目录遍历失败返回 code=-1，不返回不完整的候选列表。
+     * 加密笔记本及笔记本级数据库不参与全局未引用清理。
+     * 截断提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，离线目标不回退广播。
+     */
     "/api/av/getUnusedAttributeViews": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3540,6 +3648,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 先完整扫描普通笔记本的引用关系；扫描失败返回 code=-1，不创建清理历史或删除数据库。
+     * 加密笔记本及笔记本级数据库不参与全局未引用清理。
+     */
     "/api/av/removeUnusedAttributeView": {
         request: RemoveUnusedAttributeViewRequestInput;
         response: { "code": 0; "data": AVIDData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3547,6 +3659,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 完整扫描成功后才备份并删除未引用的全局数据库；扫描失败返回 code=-1，保留源文件。
+     * 加密笔记本及笔记本级数据库不参与全局未引用清理。
+     */
     "/api/av/removeUnusedAttributeViews": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": AVPathsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3785,6 +3901,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+     */
     "/api/bazaar/installBazaarIcon": {
         request: InstallBazaarIconRequestInput;
         response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3792,6 +3911,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；插件重载事件仍广播。
+     */
     "/api/bazaar/installBazaarPlugin": {
         request: InstallBazaarPluginRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3799,6 +3921,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+     */
     "/api/bazaar/installBazaarTemplate": {
         request: InstallBazaarTemplateRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3806,6 +3931,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；外观刷新事件仍广播。
+     */
     "/api/bazaar/installBazaarTheme": {
         request: InstallBazaarThemeRequestInput;
         response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3813,6 +3941,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播。
+     */
     "/api/bazaar/installBazaarWidget": {
         request: InstallBazaarWidgetRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3869,6 +4000,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 下载完成提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，离线目标不回退广播。
+     */
     "/api/bazaar/updateBazaarPackage": {
         request: UpdateBazaarPackageRequestInput;
         response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3876,6 +4010,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 目标为原生页签或脑图容器时，只能插入各自的项目块。
+     * 输入同类型容器片段时展开其直属项目，保留目标容器属性及项目 ID；非法子块由事务校验拒绝。
+     * 原生页签和脑图的结构化编辑使用 getBlockDOM 和 dataType="dom"，并保留已有 ID 和属性。
+     */
     "/api/block/appendBlock": {
         request: AppendBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3953,6 +4092,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 接收 ids，忽略非字符串及无效块 ID，重复 ID 合并为一个结果。
+     * notebook 为加密笔记本时只查询该库；省略或传入普通笔记本时查询全局库及本请求已持有租约的加密库。
+     * 不存在或已锁定且无法确定归属的块返回 false；显式指定已锁定的加密笔记本返回 code=-1、data=null。
+     * 发布读者的不可访问块不返回结果，加密响应租约保持到响应发送完成。
+     */
     "/api/block/checkBlocksExist": {
         request: CheckBlocksExistRequestInput;
         response: { "code": 0; "data": Record<string, boolean> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4037,6 +4182,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 默认输出供阅读的 Markdown，将原生页签平铺并将脑图输出为普通列表。
+     * 原生页签和脑图的结构化编辑应使用 getBlockDOM，并保留已有 ID 和属性。
+     */
     "/api/block/getBlockKramdown": {
         request: BlockKramdownRequestInput;
         response: { "code": 0; "data": BlockKramdownData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4065,6 +4214,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 标题结果包含可选的 `headingChildren`，表示完整文档同一容器内是否有下辖块。
+     * 空段落也算下辖块，结果不受折叠或分页影响；非标题及旧版内核省略该字段，省略不能视为空标题。
+     */
     "/api/block/getBlockTreeInfos": {
         request: BlocksQueryRequestInput;
         response: { "code": 0; "data": Record<string, BlockTreeInfo | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4233,6 +4386,14 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 按 nextID、previousID、parentID 的顺序选择插入位置。
+     * 生效的同级锚点必须是非文档块；未使用的定位参数不参与节点类型校验，文档 parentID 插入到文档开头。
+     * 目标非法时返回 code=-1、data=null，成功返回已落盘的操作。
+     * 目标为原生页签或脑图容器时，只能插入各自的项目块；同类型容器片段展开为其直属项目。
+     * 展开保留目标容器属性及项目 ID；非法子块由事务校验拒绝。
+     * 原生页签和脑图的结构化编辑使用 getBlockDOM 和 dataType="dom"，并保留已有 ID 和属性。
+     */
     "/api/block/insertBlock": {
         request: InsertBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4247,6 +4408,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 同步移动块，previousID 优先于 parentID，省略 previousID 时移动到父块开头。
+     * 成功和主动跳过返回 code=0、data=null；事务校验或提交失败返回 code=-1、data=null 和原因。
+     * 事务回滚时通知界面重载并显示错误；访问受加密笔记本权限及跨加密边界限制。
+     */
     "/api/block/moveBlock": {
         request: MoveBlockRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4261,6 +4427,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 目标为原生页签或脑图容器时，只能插入各自的项目块。
+     * 输入同类型容器片段时展开其直属项目，保留目标容器属性及项目 ID；非法子块由事务校验拒绝。
+     * 响应在事务排队后返回，code=0 不代表事务已通过校验；事务失败不落盘。
+     * 原生页签和脑图的结构化编辑使用 getBlockDOM 和 dataType="dom"，并保留已有 ID 和属性。
+     */
     "/api/block/prependBlock": {
         request: PrependBlockRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4373,6 +4545,13 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 接收已解锁的加密 notebook 和 assets 引用数组，返回原引用到新引用的映射。
+     * 普通附件复制为独立加密副本，原文件保持不变；同一笔记本内复用已有附件，拒绝跨加密笔记本复制。
+     * 引用仅限工作空间 assets/ 路径，可包含查询参数、片段和 PDF 标注 ID；PDF 标注文件随附件复制。
+     * 整批准备成功后调用方再插入内容；失败返回 code=-1、data=null，并清理本批次新建附件。
+     * 要求管理员权限，禁止只读写入，响应持有加密笔记本请求租约。
+     */
     "/api/clipboard/preparePasteAssets": {
         request: PreparePasteAssetsRequestInput;
         response: { "code": 0; "data": Record<string, string>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4590,6 +4769,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 导出图片或 PDF 预览时，可选的 keepJSEmbed: true 保留脚本嵌入占位，默认不保留。
+     * 内核不执行脚本；调用方须遵守安全模式限制，并等待异步渲染完成后再导出。
+     */
     "/api/export/exportPreviewHTML": {
         request: ExportPreviewHTMLRequestInput;
         response: { "code": 0; "data": ExportPreviewHTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4760,6 +4943,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 使用编辑器 Markdown 语法选项，并按 `/api/import/importStdMd` 的规则转换标准脚注。
+     * 转义的脚注语法保留为字面文本；返回创建的文档 ID，访问受笔记本权限限制。
+     */
     "/api/filetree/createDocWithMd": {
         request: FileTreeCreateMarkdownRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5110,6 +5297,14 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 接收文档 id、最多 32 个 searchHistory 时间戳 created，以及可选的 op（默认 all）。
+     * 每条结果包含 created、historyPath 和 snapshots，按快照创建时间倒序。
+     * snapshots 的每项包含 id、fileID、tags、memo 和 created；同一快照的多个标记合并到 tags。
+     * 仅匹配本地标记快照中认证解密后完整 .sy 数据相同的文件，不保证资源、数据库或引用内容相同。
+     * 无仓库密钥时关联为空；缺失历史、格式错误、读取或认证失败返回错误。
+     * 要求管理员权限，加密笔记本必须解锁，响应持有请求租约；不下载云端内容，不持久化摘要。
+     */
     "/api/history/getDocHistorySnapshots": {
         request: DocHistorySnapshotsRequestInput;
         response: { "code": 0; "data": DocHistorySnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5208,6 +5403,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * `.sy.zip` 导入复用同名同内容的自定义表情。
+     * 同名不同内容时返回错误并保留已有表情文件。
+     */
     "/api/import/importSY": {
         request: ImportSYRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5215,6 +5414,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * `.sy.zip` 导入复用同名同内容的自定义表情。
+     * 同名不同内容时返回错误并保留已有表情文件。
+     */
     "/api/import/importSYAuto": {
         request: ImportSYRequestInput;
         response: { "code": 0; "data": (ImportAutoDocument & { "notebook"?: never; "notebooks"?: never; }) | (ImportAutoNotebook & { "notebooks"?: never; "token"?: never; }) | (ImportAutoNotebooks & { "notebook"?: never; "token"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | (ImportAutoDocument & { "notebook"?: never; "notebooks"?: never; }) | (ImportAutoNotebook & { "notebooks"?: never; "token"?: never; }) | (ImportAutoNotebooks & { "notebook"?: never; "token"?: never; }); "msg": string; };
@@ -5222,6 +5425,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * `.sy.zip` 导入复用同名同内容的自定义表情。
+     * 同名不同内容时返回错误并保留已有表情文件。
+     */
     "/api/import/importSYNotebook": {
         request: ImportDataRequestInput;
         response: { "code": 0; "data": (ImportedNotebook & { "notebooks"?: never; }) | (ImportedNotebooks & { "notebook"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5229,6 +5436,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 标准脚注定义保存为独立列表项，正文引用转换为指向列表项的上标静态块引用。
+     * 多段内容保留在同一列表项内；多次引用共享目标，标签匹配忽略大小写，重复定义引用第一个匹配项。
+     * 未定义的脚注不生成块引用，代码和转义的脚注文本保持原样；反链复用块引用索引。
+     */
     "/api/import/importStdMd": {
         request: ImportMarkdownRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5236,6 +5448,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 压缩包中的 Markdown 使用与 `/api/import/importStdMd` 相同的标准脚注转换规则。
+     */
     "/api/import/importZipMd": {
         request: ImportZipMarkdownRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5334,6 +5549,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 接收 name 和精确匹配的 redirectURI，返回客户端 id 及仅显示一次的 secret。
+     * 要求管理员权限并禁止只读模式；OAuth 令牌只用于 /mcp，不解锁加密笔记本。
+     */
     "/api/mcp/addOAuthClient": {
         request: MCPOAuthClientRequestInput;
         response: { "code": 0; "data": MCPOAuthClientSecret; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5341,6 +5560,13 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 返回内置 MCP 服务端 OAuth 的公开地址、开关和预注册客户端列表，不返回凭证摘要或客户端密钥。
+     * 要求管理员权限；服务端 OAuth 与思源连接外部 MCP 的客户端 OAuth 配置相互独立，默认关闭。
+     * OAuth 使用授权码与 PKCE S256，支持 client_secret_basic 和 client_secret_post，不支持动态注册。
+     * 访问令牌最长有效一小时；offline_access 刷新令牌轮换并在授权后三十天过期，重放会撤销同一授权。
+     * OAuth 令牌只用于 /mcp，不能用于管理接口或其他内核 API，且不会解锁加密笔记本。
+     */
     "/api/mcp/getOAuth": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": MCPOAuthStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5348,6 +5574,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 接收 id 删除客户端并撤销授权，或传 all: true 撤销全部授权但保留注册。
+     * 要求管理员权限并禁止只读模式。
+     */
     "/api/mcp/removeOAuthClient": {
         request: MCPOAuthRemoveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5355,6 +5585,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 接收 enabled 和不含路径的 HTTPS publicURL，要求管理员权限并禁止只读模式。
+     * 启用需要锁屏密码或 OIDC 登录；关闭、修改地址或管理员认证配置会撤销已有授权。
+     * 服务端 OAuth 与连接外部 MCP 的客户端 OAuth 配置相互独立，默认关闭；协议说明见 `/api/mcp/getOAuth`。
+     */
     "/api/mcp/setOAuth": {
         request: MCPOAuthConfigInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5362,6 +5597,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * URL、TLS 和 Cookie 诊断对象包含标准库的原始 JSON。
+     * 已声明字段及其类型保持稳定；工具链新增的诊断字段通过 JSONValue 索引读取，不保证跨版本存在。
+     */
     "/api/network/echo": {
         request: Blob;
         response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5369,6 +5608,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * URL、TLS 和 Cookie 诊断对象包含标准库的原始 JSON。
+     * 已声明字段及其类型保持稳定；工具链新增的诊断字段通过 JSONValue 索引读取，不保证跨版本存在。
+     */
     "/api/network/echo/*path": {
         request: Blob;
         response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5413,6 +5656,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 移出已导出的加密笔记本，要求管理员权限并禁止只读模式；saved: true 表示用户确认已保存归档。
+     * 提交前重新检查源文件，内容变化需重新导出；重复提交同一归档不会重复移出，未选择的笔记本不受影响。
+     */
     "/api/notebook/commitNotebookArchive": {
         request: CommitNotebookArchiveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5483,6 +5730,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 接收 multipart 的 file、旧 password 和可选密钥备份 key，要求管理员权限并禁止只读模式。
+     * 恢复目标必须关闭同步，且没有加密密钥配置或加密数据；密文全部通过认证后才发布，恢复后保持锁定。
+     */
     "/api/notebook/importNotebookArchive": {
         request: ImportNotebookArchiveRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5525,6 +5776,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 接收已锁定的加密笔记本 ID，返回归档 ID 和下载路径，不删除源数据，要求管理员权限。
+     * 下载完成后，必须由用户确认已保存归档，再调用 `/api/notebook/commitNotebookArchive` 并传入 saved: true。
+     */
     "/api/notebook/prepareNotebookArchive": {
         request: PrepareNotebookArchiveRequestInput;
         response: { "code": 0; "data": NotebookArchiveData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5718,6 +5973,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
+     */
     "/api/ref/getBacklink2": {
         request: BacklinkListRequestInput;
         response: { "code": 0; "data": (BacklinkList & { "refDefs"?: never; }) | (BacklinkRefDefs & { "backlinks"?: never; "backmentions"?: never; "box"?: never; "k"?: never; "linkRefsCount"?: never; "mentionsCount"?: never; "mk"?: never; "revision"?: never; "unchanged"?: never; }) | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | (BacklinkList & { "refDefs"?: never; }) | (BacklinkRefDefs & { "backlinks"?: never; "backmentions"?: never; "box"?: never; "k"?: never; "linkRefsCount"?: never; "mentionsCount"?: never; "mk"?: never; "revision"?: never; "unchanged"?: never; }) | null; "msg": string; };
@@ -5732,6 +5990,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
+     */
     "/api/ref/getBackmentionDoc": {
         request: BackmentionDocumentRequestInput;
         response: { "code": 0; "data": BacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5802,6 +6063,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 可选的 startTime、endTime 按创建时间筛选后分页，筛选遍历索引页。
+     * 时间为非负整数 Unix 毫秒时间戳，包含起点、不包含终点；省略或为 0 表示该端无界。
+     * 两端均非 0 时终点必须大于起点；读取失败返回错误，不返回部分结果。
+     */
     "/api/repo/getCloudRepoSnapshots": {
         request: GetCloudRepoSnapshotsRequestInput;
         response: { "code": 0; "data": RepoCloudSnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5816,6 +6082,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 每个文件版本包含 snapshots，按文件 ID 关联全部本地标记快照。
+     * snapshots 按快照创建时间倒序，同一快照的多个标记合并；无关联时为空数组，不读取文件正文。
+     */
     "/api/repo/getRepoDocHistory": {
         request: GetRepoDocHistoryRequestInput;
         response: { "code": 0; "data": RepoDocHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5831,6 +6101,17 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
         output: "binary";
     };
+    /**
+     * 可选的 `id` 按 7 至 40 位十六进制 ID 前缀查询本地快照，忽略首尾空白和大小写。
+     * 前缀匹配多个快照时全部返回，按创建时间降序；page 仍为必填，但按 ID 查询时不参与分页。
+     * 省略或留空 ID 时按页查询；未找到返回空列表，格式错误、损坏或读取失败返回错误。
+     * includeFiles 默认为 false；传入 true 时必须提供完整 ID，并返回该快照的文件元数据，不读取正文。
+     * 结果的 tags 包含按名称排序的全部标记，未标记时为空数组；分页与 ID 查询均返回此字段。
+     * 可选的 startTime、endTime 按创建时间筛选后分页，也应用于 ID 查询。
+     * 时间为非负整数 Unix 毫秒时间戳，包含起点、不包含终点；省略或为 0 表示该端无界。
+     * 两端均非 0 时终点必须大于起点；ID 查询应用时间范围后仍忽略分页。
+     * 要求管理员权限，返回已有的快照元数据及资源下载状态，不下载或回滚快照。
+     */
     "/api/repo/getRepoSnapshots": {
         request: GetRepoSnapshotsRequestInput;
         response: { "code": 0; "data": RepoSnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5838,6 +6119,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 按标记逐行返回快照，tag 是当前行供上传、移除使用的标记，tags 是全部别名。
+     */
     "/api/repo/getRepoTagSnapshots": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": RepoTagsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5992,6 +6276,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 按到期时间升序分页，零到期时间的新卡排在前面，相同到期时间按卡片 ID 排序。
+     */
     "/api/riff/getRiffCards": {
         request: RiffCardsRequestInput;
         response: { "code": 0; "data": RiffCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6076,6 +6363,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * method 缺省或为 null 时使用文本替换，支持文本（0）、查询语法（1）和正则表达式（3）。
+     * SQL（2）和语义搜索（4）返回 code=1 与提示信息，不执行替换；ids 为空时表示替换全部。
+     * 文本与查询语法替换的所有启用类型遵循搜索配置的 caseSensitive，替换串按字面量写入。
+     * 正则模式的大小写匹配由表达式决定，替换串支持捕获组展开。
+     */
     "/api/search/findReplace": {
         request: FindReplaceRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6090,6 +6383,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * SQL 模式保留换行、注释与字面量大小写，支持带别名的完整块投影。
+     */
     "/api/search/fullTextSearchBlock": {
         request: FullTextSearchBlockRequestInput;
         response: { "code": 0; "data": FullTextSearchBlockData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6202,6 +6498,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 确认 `/api/setting/resetSettings` 发起的重置，要求管理员权限并禁止只读写入。
+     * 接收 prepareSettingsReset 通知中的一次性 token；已保存待提交内容时传入 saved: true，保存失败传 false。
+     * 主客户端在确认前暂停布局保存；15 秒未确认则取消，收到 cancelSettingsReset 后恢复正常保存。
+     */
     "/api/setting/confirmSettingsReset": {
         request: ConfirmSettingsResetRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6216,6 +6517,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * `cached: true` 仅返回内存中的账户，未登录时返回 null。
+     * 此模式忽略 token，不联网、不等待同步或切换资源来源；缓存结果不代表云端凭据仍然有效。
+     * 省略 cached 或传入 false 时执行账户恢复和令牌刷新；非管理员在两种模式下均得到 null。
+     * 客户端可先读取缓存完成初始化，再刷新账户，并通过 setCloudUser 主通道事件接收账户变化。
+     */
     "/api/setting/getCloudUser": {
         request: SettingCloudUserRequestInput;
         response: { "code": 0; "data": SettingUser | null; "msg": string; } | { "code": -1 | 1 | 255; "data": { "closeTimeout": number; } | null | SettingUser | null; "msg": string; };
@@ -6252,6 +6559,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 保留省略字段，成功后客户端重新读取配置；通知不包含密码或密钥。
+     */
     "/api/setting/patch": {
         request: PatchSettingRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6266,6 +6576,16 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 接收可选的 exit（默认 false），要求管理员权限并禁止只读写入。
+     * 仅重置当前工作空间的普通偏好、内置快捷键和当前布局；保留笔记、历史、历史保留天数、学习进度、
+     * 账号、认证、同步、加密及恢复材料、AI/MCP、插件和代码片段及其启用状态、已保存布局、语言及应用级设置。
+     * 已连接的主客户端收到 prepareSettingsReset 后，须保存待提交内容并暂停布局保存，再用通知中的一次性
+     * token 调用 `/api/setting/confirmSettingsReset`，传入 saved: true；保存失败传 false，15 秒未确认则取消。
+     * 成功后 settingsReset 通知所有主客户端直接重载；exit: true 仅让管理本地内核的桌面主窗口重载后正常退出，
+     * 不直接停止远程内核；失败时 cancelSettingsReset 携带此次操作 ID，客户端应恢复正常保存。
+     * 插件调用前应先取得用户确认，并确保未保存内容已经提交；重复调用恢复同一组默认值。
+     */
     "/api/setting/resetSettings": {
         request: ResetSettingsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6413,6 +6733,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 为管理员返回完整列表的 revision，即使结果按类型、启用状态或关键字筛选。
+     * 全量编辑应读取 type="all"、enabled=2 且不设置 keyword；发布读者不获得 revision。
+     */
     "/api/snippet/getSnippet": {
         request: GetSnippetRequestInput;
         response: { "code": 0; "data": SnippetsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6427,6 +6751,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 可携带 getSnippet 返回的 revision，在同一临界区检查版本并保存。
+     * 版本不匹配返回 code=-1、msg="snippet revision conflict"，不覆盖当前片段；调用方应保留草稿供用户合并。
+     * 省略 revision 或传入 null 时无条件全量保存，不能防止旧列表覆盖并发修改。
+     */
     "/api/snippet/setSnippet": {
         request: SetSnippetRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6952,6 +7281,14 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 无需参数，要求管理员权限并允许只读模式，统计当前内核工作空间的本地文件大小。
+     * totalSize 为普通文件字节数之和，assetsSize 是 data 的子集，不能重复累加；不含目录分配空间或链接目标。
+     * directories 按 data、repo、history、temp、conf、other 排序，calculatedAt 为扫描完成的 Unix 毫秒时间。
+     * 扫描不下载资源或解密文件，不返回绝对路径；并发请求共享扫描，完成后不缓存，不保证扫描期间的快照一致性。
+     * 扫描期间已删除的子文件或子目录不计入；根目录丢失、权限错误等返回失败。
+     * 读取失败或扫描超时返回 code=-1、data=null；调用方应保留旧结果的时间标记，并允许用户重试。
+     */
     "/api/system/getWorkspaceStorage": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": WorkspaceStorageData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7162,6 +7499,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 更新工作空间的独立设置窗口开关，仅桌面 Electron 客户端使用。
+     */
     "/api/system/setSettingsWindow": {
         request: SettingsWindowRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7190,6 +7530,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 从 URL 查询参数读取正整数 pid，不读取请求体；无效 pid 或注册表已满时返回空 200。
+     */
     "/api/system/uiproc": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7247,6 +7590,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 读取模板源码时，可选的 sourceDocID 表示导出模板末尾文档属性中的静态来源 ID。
+     * 普通 Markdown、目录或未声明有效 ID 的模板不返回该字段；读取不会执行模板或检查源文档是否仍可访问。
+     * 打开来源时需按当前工作空间的文档访问规则处理失败；该字段不是预览上下文，也不保证模板与源文档保持同步。
+     */
     "/api/template/manage": {
         request: TemplateFileRequestInput;
         response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | (TemplateFileRevision & { "content"?: never; "path"?: never; "sourceDocID"?: never; }) | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7268,6 +7616,15 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * move 操作支持 nextID，将块移到该同级锚点之前，优先于 previousID 和 parentID。
+     * 移动保留折叠标题下辖块顺序及源块身份，不将整列表自动拆成列表项；moveBlock 接口不接受 nextID。
+     * 数据库自动化通过 setAttrViewAutomations 操作整体保存，配置 spec 为 1，所有视图共享数据库级规则。
+     * addAttributeViewBlocks、setAttributeViewBlockAttr、batchSetAttributeViewBlockAttrs 触发启用的新增或字段变化规则。
+     * 自动操作与原修改一同提交，失败一起回滚；普通 API 写入不生成编辑器撤销记录。
+     * 自动化不串联，导入、同步、历史恢复和撤销重放不重新触发；重做保留原条目 ID 和触发时间。
+     * 跨库动作限于同一加密边界，要求目标可访问；单笔事务最多执行 1000 个自动操作。
+     */
     "/api/transactions": {
         request: PerformTransactionsRequestInput;
         response: { "code": 0; "data": Array<Transaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

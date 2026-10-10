@@ -249,22 +249,68 @@ func readEndpointNames(path string) (map[string]string, error) {
 		if !ok || len(spec.Names) != 1 || len(spec.Values) != 1 {
 			return true
 		}
-		call, ok := spec.Values[0].(*ast.CallExpr)
-		if !ok || len(call.Args) == 0 {
-			return true
-		}
-		generic, ok := call.Fun.(*ast.IndexListExpr)
-		if !ok {
-			return true
-		}
-		function, ok := generic.X.(*ast.Ident)
-		if !ok || function.Name != "define" {
-			return true
-		}
-		if name, ok := call.Args[0].(*ast.BasicLit); ok {
-			names[spec.Names[0].Name], _ = strconv.Unquote(name.Value)
+		if name := endpointName(spec); name != "" {
+			names[spec.Names[0].Name] = name
 		}
 		return true
 	})
 	return names, nil
+}
+
+func endpointName(spec *ast.ValueSpec) string {
+	if len(spec.Names) != 1 || len(spec.Values) != 1 {
+		return ""
+	}
+	call, ok := spec.Values[0].(*ast.CallExpr)
+	if !ok || len(call.Args) == 0 {
+		return ""
+	}
+	generic, ok := call.Fun.(*ast.IndexListExpr)
+	if !ok {
+		return ""
+	}
+	function, ok := generic.X.(*ast.Ident)
+	if !ok || function.Name != "define" {
+		return ""
+	}
+	name, ok := call.Args[0].(*ast.BasicLit)
+	if !ok || name.Kind != token.STRING {
+		return ""
+	}
+	value, _ := strconv.Unquote(name.Value)
+	return value
+}
+
+// ReadEndpointDocumentation 读取契约声明的前置注释，按处理函数名称关联到生成的路由类型。
+func ReadEndpointDocumentation(path string) (map[string]string, error) {
+	file, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.ParseComments)
+	if err != nil {
+		return nil, err
+	}
+	documentation := map[string]string{}
+	for _, declaration := range file.Decls {
+		group, ok := declaration.(*ast.GenDecl)
+		if !ok || group.Tok != token.VAR {
+			continue
+		}
+		for _, item := range group.Specs {
+			spec, ok := item.(*ast.ValueSpec)
+			if !ok {
+				continue
+			}
+			name := endpointName(spec)
+			if name == "" {
+				continue
+			}
+			comment := spec.Doc
+			if comment == nil && !group.Lparen.IsValid() {
+				comment = group.Doc
+			}
+			if comment != nil {
+				text := strings.TrimSpace(comment.Text())
+				documentation[name] = strings.TrimPrefix(text, spec.Names[0].Name+" ")
+			}
+		}
+	}
+	return documentation, nil
 }

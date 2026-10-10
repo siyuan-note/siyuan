@@ -31,6 +31,10 @@ func run(root, petal, base string, check bool) error {
 	if err != nil {
 		return err
 	}
+	documentation, err := apicontract.ReadEndpointDocumentation(filepath.Join(root, "kernel", "apicontract", "contracts.go"))
+	if err != nil {
+		return err
+	}
 	routes, bindings, err := apicontract.ReadRoutes(filepath.Join(root, "kernel", "api"))
 	if err != nil {
 		return err
@@ -80,14 +84,14 @@ func run(root, petal, base string, check bool) error {
 		return err
 	}
 	artifacts := map[string][]byte{
-		filepath.Join(root, "app", "src", "types", "api", "index.d.ts"): bundle.TypeScript(legacy),
+		filepath.Join(root, "app", "src", "types", "api", "index.d.ts"): bundle.TypeScript(legacy, documentation),
 		filepath.Join(root, "kernel", "apicontract", "schema.json"):     append(jsonData, '\n'),
 	}
 	capabilityRuntime, capabilityTypes := av.CapabilityTypeScript()
 	artifacts[filepath.Join(root, "app", "src", "protyle", "render", "av", "capabilities.generated.ts")] = capabilityRuntime
 	artifacts[filepath.Join(root, "app", "src", "types", "av", "index.d.ts")] = capabilityTypes
 	if petal != "" {
-		artifacts[filepath.Join(petal, "types", "api", "index.d.ts")] = bundle.TypeScript(legacy)
+		artifacts[filepath.Join(petal, "types", "api", "index.d.ts")] = bundle.TypeScript(legacy, documentation)
 		artifacts[filepath.Join(petal, "types", "av", "index.d.ts")] = capabilityTypes
 	}
 	var paths []string

@@ -42,6 +42,60 @@ const runCases = sources => {
         return dependencies[name];
     };
     const {renderCell, genCellValueByElement} = load("./cell");
+    const {bindKeyboard} = load("./relationKeyboardBinding");
+    const keyboardList = document.createElement("div");
+    keyboardList.innerHTML = '<div><div data-type="setRelationCell" data-relation-type="selected" class="b3-menu__item--current">Selected one</div>' +
+        '<div data-type="setRelationCell" data-relation-type="selected">Selected two</div></div>' +
+        '<div><div data-type="setRelationCell" data-relation-type="candidate">Match</div></div>' +
+        '<button data-type="setRelationCell" data-relation-type="create">Create</button>' +
+        '<button data-type="setRelationCell" data-relation-type="create" disabled>Disabled</button>';
+    document.body.replaceChildren(keyboardList);
+    const keyboardInput = document.createElement("input");
+    keyboardInput.value = "query";
+    const keyboardState = {keyword: "query", loading: false, page: 1};
+    const activated = [];
+    bindKeyboard(keyboardList, keyboardInput, keyboardState, (_protyle, _block, item) => activated.push(item));
+    const press = (key, input = keyboardInput, isComposing = false) => {
+        const event = new KeyboardEvent("keydown", {key, cancelable: true, isComposing});
+        input.dispatchEvent(event);
+        return event;
+    };
+    press("Enter");
+    assert.equal(activated.at(-1).dataset.relationType, "candidate");
+    press("ArrowDown");
+    press("Enter");
+    assert.equal(activated.at(-1).textContent, "Create");
+    press("ArrowDown");
+    press("Enter");
+    assert.equal(activated.at(-1).dataset.relationType, "candidate");
+    keyboardList.querySelector('[data-relation-type="candidate"]').remove();
+    press("Enter");
+    assert.equal(activated.at(-1).dataset.relationType, "create");
+    assert.ok(activated.every(item => item.dataset.relationType !== "selected"));
+    const beforePending = activated.length;
+    keyboardState.loading = true;
+    keyboardState.page = 0;
+    assert.equal(press("Enter").defaultPrevented, true);
+    keyboardState.loading = false;
+    press("Enter");
+    keyboardState.page = 1;
+    keyboardInput.value = "changed";
+    press("Enter");
+    keyboardInput.value = "query";
+    press("Enter", keyboardInput, true);
+    const pendingInput = document.createElement("input");
+    pendingInput.value = "query";
+    bindKeyboard(keyboardList, pendingInput, keyboardState, () => activated.push(null), 1);
+    assert.equal(press("Enter", pendingInput).defaultPrevented, true);
+    assert.equal(activated.length, beforePending);
+    keyboardList.querySelector('[data-relation-type="create"]').setAttribute("disabled", "");
+    press("Enter");
+    assert.equal(activated.length, beforePending);
+    keyboardInput.value = keyboardState.keyword = "";
+    press("ArrowDown");
+    press("Enter");
+    assert.equal(activated.at(-1).textContent, "Selected one");
+    assert.equal(keyboardList.querySelectorAll('[data-relation-type="selected"]').length, 2);
     const {deselect} = load("./relationSelection");
     const selectionMenu = document.createElement("div");
     selectionMenu.innerHTML = `<div data-relation-type="selectedRows"><div data-relation-type="selected" data-row-id="one" draggable="true">
@@ -242,10 +296,19 @@ const runElectron = async () => {
     let exitCode = 0;
     try {
         const ts = require("typescript");
-        const sources = Object.fromEntries(["cell", "cellValue", "attributeValue", "blockIcon", "relationLayout", "capabilities", "capabilities.generated"].map(name => ["./" + name,
+        const sources = Object.fromEntries(["cell", "cellValue", "attributeValue", "blockIcon", "relationLayout", "relationKeyboard", "capabilities", "capabilities.generated"].map(name => ["./" + name,
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
         const relationSource = readFileSync(path.join(__dirname, "../src/protyle/render/av/relation.ts"), "utf8");
+        const keyboardStart = relationSource.indexOf('    inputElement.addEventListener("keydown", (event) => {');
+        const keyboardEnd = relationSource.indexOf('    inputElement.addEventListener("input",', keyboardStart);
+        assert.ok(keyboardStart > 0 && keyboardEnd > keyboardStart);
+        sources["./relationKeyboardBinding"] = ts.transpileModule(`
+const {getRelationKeyboardTarget} = require("./relationKeyboard");
+export const bindKeyboard = (listElement, inputElement, state, setRelationCell, searchTimer) => {
+const options = {menuElement: listElement, cellElements: []};
+${relationSource.slice(keyboardStart, keyboardEnd)} };`,
+            {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         const rowStart = relationSource.indexOf("const genRelationRowHTML =");
         const rowEnd = relationSource.indexOf("const genRelationRowsHTML =", rowStart);
         sources["./relationPreview"] = ts.transpileModule(`

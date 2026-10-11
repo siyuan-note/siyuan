@@ -43,8 +43,10 @@ func syncCloudAlreadyApplied(repoPath, latestID string) (bool, error) {
 }
 
 func syncDataFromCloud() {
+	confSyncSnapshot := Conf.LoadSync()
+
 	defer logging.Recover()
-	if !Conf.Sync.Perception || conf.ProviderSiYuan != Conf.Sync.Provider || !checkSync(false, false, false) {
+	if !confSyncSnapshot.Perception || conf.ProviderSiYuan != confSyncSnapshot.Provider || !checkSync(false, false, false) {
 		return
 	}
 	scope := lanSyncScope()

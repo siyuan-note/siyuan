@@ -114,7 +114,7 @@ func bazaarHandler(ctx context.Context, args map[string]any) (CallToolResult, er
 	if err := ctx.Err(); err != nil {
 		return blockToolError(err.Error())
 	}
-	if model.Conf == nil || model.Conf.Bazaar == nil {
+	if model.Conf == nil || model.Conf.Bazaar.Load() == nil {
 		return blockToolError("Bazaar configuration is unavailable")
 	}
 	// 请求入口负责管理员鉴权；执行前再次检查只读模式与集市开关。
@@ -125,10 +125,10 @@ func bazaarHandler(ctx context.Context, args map[string]any) (CallToolResult, er
 	if isPluginProjectAction(action) {
 		return bazaarPluginProjectAction(ctx, action, args)
 	}
-	if action != "installed" && !model.Conf.Bazaar.Trust {
+	if action != "installed" && !model.Conf.Bazaar.Load().Trust {
 		return blockToolError("Bazaar is not trusted; enable Bazaar access in SiYuan settings first")
 	}
-	if effects.LocalWrite && pkgType == "plugins" && model.Conf.Bazaar.PetalDisabled {
+	if effects.LocalWrite && pkgType == "plugins" && model.Conf.Bazaar.Load().PetalDisabled {
 		return blockToolError("plugins are globally disabled")
 	}
 	var summaries []bazaarPackageSummary
@@ -251,7 +251,7 @@ func bazaarHandler(ctx context.Context, args map[string]any) (CallToolResult, er
 		if err != nil {
 			return bazaarProjectError(err, nil)
 		}
-		if model.Conf.Bazaar.PetalDisabled {
+		if model.Conf.Bazaar.Load().PetalDisabled {
 			// 插件全局禁用时先识别归档，其他类型仍可正常安装。
 			localType, _, _, cleanup, err := bazaar.ExtractLocalPackage(archive)
 			if cleanup != nil {
@@ -313,7 +313,7 @@ func bazaarUpdateAll(ctx context.Context, args map[string]any, frontend string) 
 			return blockToolError("update targets must have valid names and repoHash and must not repeat")
 		}
 		seen[key] = true
-		if target.PkgType == "plugins" && model.Conf.Bazaar.PetalDisabled {
+		if target.PkgType == "plugins" && model.Conf.Bazaar.Load().PetalDisabled {
 			return blockToolError("plugins are globally disabled")
 		}
 	}

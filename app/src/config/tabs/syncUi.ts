@@ -1,3 +1,4 @@
+import {config as configApi} from "../util/configApi";
 import {showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {ContractFormData} from "../../util/contractFormData";
@@ -149,7 +150,7 @@ const SYNC_PROVIDER_DEFS: Record<Config.ISync["provider"], SyncProviderDef> = {
         isProviderConfigAllowed: isPaidUser,
         configKey: "s3",
         requiredFields: ["endpoint", "accessKey", "secretKey", "bucket", "region"],
-        api: "/api/sync/setSyncProviderS3",
+
         getConfig: () => window.siyuan.config.sync.s3,
         genIntro: () => `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderS3Intro}
@@ -181,7 +182,7 @@ const SYNC_PROVIDER_DEFS: Record<Config.ISync["provider"], SyncProviderDef> = {
         isProviderConfigAllowed: isPaidUser,
         configKey: "webdav",
         requiredFields: ["endpoint"],
-        api: "/api/sync/setSyncProviderWebDAV",
+
         getConfig: () => window.siyuan.config.sync.webdav,
         genIntro: () => `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderWebDAVIntro}
@@ -207,7 +208,7 @@ const SYNC_PROVIDER_DEFS: Record<Config.ISync["provider"], SyncProviderDef> = {
         isProviderConfigAllowed: isPaidUser,
         configKey: "local",
         requiredFields: ["endpoint"],
-        api: "/api/sync/setSyncProviderLocal",
+
         getConfig: () => window.siyuan.config.sync.local,
         genIntro: () => `<div class="b3-label b3-label--inner">
     <div class="ft__error">
@@ -509,16 +510,15 @@ const openSyncProviderConfigDialog = (root: Element) => {
         setPending(true);
         setError("");
         try {
-            const response = await fetchSyncPost(def.api, {[def.configKey]: readProviderConfigFields(configElement, template)});
-            if (response.code !== 0 || !response.data?.[def.configKey]) {
-                setError(response.msg || L.syncConfigSaveFailed);
-                return;
-            }
-            window.siyuan.config.sync[def.configKey] = response.data[def.configKey];
-            refresh();
-            destroy();
-        } catch {
-            setError(L.syncConfigSaveFailed);
+            let saved = false;
+            await configApi.set(`sync.${def.configKey}`, readProviderConfigFields(configElement, template), () => {
+                saved = true;
+                refresh();
+                destroy();
+            });
+            if (!saved) setError(L.syncConfigSaveFailed);
+        } catch (error) {
+            setError(error?.message || L.syncConfigSaveFailed);
         } finally {
             setPending(false);
         }

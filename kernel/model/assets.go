@@ -516,10 +516,10 @@ func PrepareAgentMessageImage(assetPath string) (PreparedDocumentImage, error) {
 
 // GenerateImage 使用全局图片生成配置创建图片字节，可供文档资源、编辑器和其他图片入口复用。
 func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateImageResult, error) {
-	if Conf == nil || Conf.AI == nil {
+	if Conf == nil || Conf.AI.Load() == nil {
 		return GenerateImageResult{}, errors.New("AI configuration is unavailable")
 	}
-	provider, generationModel := Conf.AI.GetImageGenerationModel()
+	provider, generationModel := Conf.AI.Load().GetImageGenerationModel()
 	if err := validateImageModel(provider, generationModel); err != nil {
 		return GenerateImageResult{}, err
 	}
@@ -527,14 +527,14 @@ func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateI
 	if prompt == "" {
 		return GenerateImageResult{}, errors.New("prompt is required for image generation")
 	}
-	size := multimodalValueOrDefault(request.Size, Conf.AI.ImageGeneration.Size)
-	quality := multimodalValueOrDefault(request.Quality, Conf.AI.ImageGeneration.Quality)
-	outputFormat := strings.ToLower(multimodalValueOrDefault(request.OutputFormat, Conf.AI.ImageGeneration.OutputFormat))
+	size := multimodalValueOrDefault(request.Size, Conf.AI.Load().ImageGeneration.Size)
+	quality := multimodalValueOrDefault(request.Quality, Conf.AI.Load().ImageGeneration.Quality)
+	outputFormat := strings.ToLower(multimodalValueOrDefault(request.OutputFormat, Conf.AI.Load().ImageGeneration.OutputFormat))
 	if outputFormat != "png" && outputFormat != "jpeg" && outputFormat != "webp" {
 		return GenerateImageResult{}, errors.New("unsupported image output format")
 	}
 	generated, err := util.NewOpenAIImageAdapter(
-		provider.APIKey, provider.BaseURL, generationModel.Name, Conf.AI.ImageGeneration.RequestTimeout, ResolveAIProviderHeaders(provider),
+		provider.APIKey, provider.BaseURL, generationModel.Name, Conf.AI.Load().ImageGeneration.RequestTimeout, ResolveAIProviderHeaders(provider),
 	).Generate(ctx, util.GenerateImageRequest{
 		Prompt: prompt, Size: size, Quality: quality, OutputFormat: outputFormat,
 	})
@@ -915,14 +915,16 @@ type AssetSearchMatch struct {
 }
 
 func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
-	ret, _ = SearchAssetsByNamePage(keyword, exts, nil, 1, Conf.Search.Limit, false)
+	ret, _ = SearchAssetsByNamePage(keyword, exts, nil, 1, Conf.Search.Load().Limit, false)
 	return
 }
 
 // SearchAssetsByNamePage 筛选资源，可合并图片元数据命中，并按稳定顺序返回指定页。
 func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMatch, page, pageSize int, includeMetadata bool) (ret []*cache.Asset, err error) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	ret = []*cache.Asset{}
-	if page < 1 || pageSize < 1 || pageSize > Conf.Search.Limit {
+	if page < 1 || pageSize < 1 || pageSize > confSearchSnapshot.Limit {
 		return nil, errors.New("invalid asset search page")
 	}
 	allowedExts := map[string]bool{}
@@ -1092,7 +1094,7 @@ func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMat
 	highlightKeyword := strings.Join(keywords, search.TermSep)
 	for _, asset := range ret {
 		if pathHitCount[asset.Path] > 0 {
-			_, asset.HName = search.MarkText(asset.HName, highlightKeyword, 64, Conf.Search.CaseSensitive)
+			_, asset.HName = search.MarkText(asset.HName, highlightKeyword, 64, confSearchSnapshot.CaseSensitive)
 		}
 	}
 	return
@@ -2586,7 +2588,7 @@ func getQueryEmbedNodesAssetsLinkDests(node *ast.Node) (ret []string) {
 		stmt := n.TokensStr()
 		stmt = html.UnescapeString(stmt)
 		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Load().Limit)
 		for _, sqlBlock := range sqlBlocks {
 			subtree, _ := LoadTreeByBlockID(sqlBlock.ID)
 			if nil == subtree {

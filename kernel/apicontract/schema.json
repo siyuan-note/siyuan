@@ -34464,6 +34464,32 @@
       ],
       "additionalProperties": false
     },
+    "PatchRepoSettingInput": {
+      "type": "object",
+      "properties": {
+        "indexRetentionDays": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "retentionIndexesDaily": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "PatchSettingRequestInput": {
       "type": "object",
       "properties": {
@@ -34481,6 +34507,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingAppearanceInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bazaar": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingBazaarInput"
             },
             {
               "type": "null"
@@ -34533,6 +34569,36 @@
             "$ref": "#/$defs/JSONValue"
           }
         },
+        "ocr": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingOCRInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publish": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingPublishInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repo": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PatchRepoSettingInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "search": {
           "anyOf": [
             {
@@ -34553,10 +34619,232 @@
             }
           ]
         },
+        "snippet": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingSnptInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sync": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PatchSyncSettingInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "system": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PatchSystemSettingInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "variables": {
           "anyOf": [
             {
               "$ref": "#/$defs/SettingVariablesInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "PatchSyncSettingInput": {
+      "type": "object",
+      "properties": {
+        "assetDownloadMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cloudName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "generateConflictDoc": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "interval": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyncLANRequestInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "local": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyncLocalInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "perception": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "s3": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyncS3Input"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "webdav": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyncWebDAVInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "PatchSystemSettingInput": {
+      "type": "object",
+      "properties": {
+        "autoLaunch2": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "encryptedNotebookFollowSystemLock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lockScreenMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "networkProxy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NetworkProxyInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "networkServe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "networkServeTLS": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "settingsWindow": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -43055,6 +43343,32 @@
       ],
       "additionalProperties": false
     },
+    "SettingBazaarInput": {
+      "type": "object",
+      "properties": {
+        "petalDisabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "trust": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SettingBodyGradient": {
       "type": "object",
       "properties": {
@@ -46241,6 +46555,26 @@
       },
       "additionalProperties": false
     },
+    "SettingIssue": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "message",
+        "severity"
+      ],
+      "additionalProperties": false
+    },
     "SettingKeymapRequestInput": {
       "type": "object",
       "properties": {
@@ -47038,6 +47372,28 @@
       ],
       "additionalProperties": false
     },
+    "SettingPatchData": {
+      "type": "object",
+      "properties": {
+        "issues": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SettingIssue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "issues"
+      ],
+      "additionalProperties": false
+    },
     "SettingPetalDisabledData": {
       "type": "object",
       "properties": {
@@ -47374,6 +47730,42 @@
         "port",
         "publish"
       ],
+      "additionalProperties": false
+    },
+    "SettingPublishInput": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingBasicAuthInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "port": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "SettingRerank": {
@@ -48242,6 +48634,32 @@
         "enabledCSS",
         "enabledJS"
       ],
+      "additionalProperties": false
+    },
+    "SettingSnptInput": {
+      "type": "object",
+      "properties": {
+        "enabledCSS": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabledJS": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "SettingStatusBar": {
@@ -159511,7 +159929,14 @@
                 ]
               },
               "data": {
-                "type": "null"
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingPatchData"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "msg": {
                 "type": "string"
@@ -159549,6 +159974,16 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/SettingPatchData"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 ]
               },

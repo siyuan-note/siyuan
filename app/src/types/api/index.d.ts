@@ -1546,7 +1546,13 @@ export type PandocData = { "path": string; };
 
 export type PandocRequestInput = { "args": Array<string>; "dir"?: string | null; };
 
-export type PatchSettingRequestInput = { "ai"?: SettingAIInput | null; "appearance"?: SettingAppearanceInput | null; "editor"?: SettingEditorInput | null; "export"?: SettingExportInput | null; "fileTree"?: SettingFileTreeInput | null; "flashcard"?: SettingFlashcardInput | null; "keymap"?: { [key: string]: JSONValue }; "search"?: SettingSearchInput | null; "secrets"?: SettingSecretsInput | null; "variables"?: SettingVariablesInput | null; };
+export type PatchRepoSettingInput = { "indexRetentionDays"?: number | null; "retentionIndexesDaily"?: number | null; };
+
+export type PatchSettingRequestInput = { "ai"?: SettingAIInput | null; "appearance"?: SettingAppearanceInput | null; "bazaar"?: SettingBazaarInput | null; "editor"?: SettingEditorInput | null; "export"?: SettingExportInput | null; "fileTree"?: SettingFileTreeInput | null; "flashcard"?: SettingFlashcardInput | null; "keymap"?: { [key: string]: JSONValue }; "ocr"?: SettingOCRInput | null; "publish"?: SettingPublishInput | null; "repo"?: PatchRepoSettingInput | null; "search"?: SettingSearchInput | null; "secrets"?: SettingSecretsInput | null; "snippet"?: SettingSnptInput | null; "sync"?: PatchSyncSettingInput | null; "system"?: PatchSystemSettingInput | null; "variables"?: SettingVariablesInput | null; };
+
+export type PatchSyncSettingInput = { "assetDownloadMode"?: number | null; "cloudName"?: string | null; "enabled"?: boolean | null; "generateConflictDoc"?: boolean | null; "interval"?: number | null; "lan"?: SyncLANRequestInput | null; "local"?: SyncLocalInput | null; "mode"?: number | null; "perception"?: boolean | null; "s3"?: SyncS3Input | null; "webdav"?: SyncWebDAVInput | null; };
+
+export type PatchSystemSettingInput = { "autoLaunch2"?: number | null; "encryptedNotebookFollowSystemLock"?: boolean | null; "lockScreenMode"?: number | null; "networkProxy"?: NetworkProxyInput | null; "networkServe"?: boolean | null; "networkServeTLS"?: boolean | null; "settingsWindow"?: boolean | null; };
 
 export type PerformSyncRequestInput = { "mobileSwitch"?: boolean | null; "upload"?: boolean; };
 
@@ -1936,6 +1942,8 @@ export type SettingBasicAuthInput = { "accounts"?: Array<SettingBasicAuthAccount
 
 export type SettingBazaar = { "petalDisabled": boolean; "trust": boolean; };
 
+export type SettingBazaarInput = { "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
+
 export type SettingBodyGradient = { "dark": SettingBodyGradientColor; "light": SettingBodyGradientColor; "mode": string; };
 
 export type SettingBodyGradientColor = { "color": string; "opacity": number; };
@@ -2020,6 +2028,8 @@ export type SettingImageGeneration = { "modelId": string; "outputFormat": string
 
 export type SettingImageGenerationInput = { "modelId"?: string | null; "outputFormat"?: string | null; "quality"?: string | null; "requestTimeout"?: number | null; "size"?: string | null; };
 
+export type SettingIssue = { "field": string; "message": string; "severity": string; };
+
 export type SettingKeymapRequestInput = { "data"?: { [key: string]: JSONValue } | null; };
 
 export type SettingLogin2faRequestInput = { "code": string; "token": string; };
@@ -2048,6 +2058,8 @@ export type SettingOCR = { "aiModelId"?: string; "auto": boolean; "model": strin
 
 export type SettingOCRInput = { "aiModelId"?: string | null; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string | null; "thresholds"?: OCRThresholdsInput | null; };
 
+export type SettingPatchData = { "issues": Array<SettingIssue> | null; };
+
 export type SettingPetalDisabledData = { "dataChangePlugins": Array<string> | null; "globalPetalChanged": boolean; "globalPetalDisabled": boolean; "globalPetalEnabled": boolean; "globalPetalRevision": number; "reloadPlugins": Array<string> | null; "uninstallPlugins": Array<string> | null; "unloadPlugins": Array<string> | null; };
 
 export type SettingPetalDisabledRequestInput = { "petalDisabled": boolean; };
@@ -2059,6 +2071,8 @@ export type SettingProviderInput = { "accountID"?: string | null; "apiKey"?: str
 export type SettingPublish = { "auth": SettingBasicAuth | null; "enable": boolean; "port": number; };
 
 export type SettingPublishData = { "port": number; "publish": SettingPublish | null; };
+
+export type SettingPublishInput = { "auth"?: SettingBasicAuthInput | null; "enable"?: boolean | null; "port"?: number | null; };
 
 export type SettingRerank = { "apiKey": string; "candidateCount": number; "enabled": boolean; "endpoint": string; "id": string; "name": string; "requestFormat": string; "timeout": number; };
 
@@ -2077,6 +2091,8 @@ export type SettingSecrets = { "items": Array<SettingSecret | null> | null; };
 export type SettingSecretsInput = { "items"?: Array<SettingSecretInput | null> | null; };
 
 export type SettingSnpt = { "enabledCSS": boolean; "enabledJS": boolean; };
+
+export type SettingSnptInput = { "enabledCSS"?: boolean | null; "enabledJS"?: boolean | null; };
 
 export type SettingStatusBar = { "msgDataSyncDisabled": boolean; "msgTaskAssetDatabaseIndexCommitDisabled": boolean; "msgTaskDatabaseIndexCommitDisabled": boolean; "msgTaskHistoryDatabaseIndexCommitDisabled": boolean; "msgTaskHistoryGenerateFileDisabled": boolean; "version": number; };
 
@@ -6564,7 +6580,7 @@ export interface APIPOSTRoutes {
      */
     "/api/setting/patch": {
         request: PatchSettingRequestInput;
-        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": SettingPatchData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | SettingPatchData | null; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];

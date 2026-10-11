@@ -82,7 +82,7 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 		}
 	}
 
-	hPath := Conf.FileTree.ShorthandSavePath
+	hPath := Conf.FileTree.Load().ShorthandSavePath
 	if "" != hPath {
 		var renderErr error
 		hPath, renderErr = RenderGoTemplateInBox(hPath, boxID)
@@ -393,7 +393,7 @@ func consumeShorthands() {
 	}
 
 	boxes := Conf.GetBoxes()
-	box := selectShorthandSaveBox(Conf.FileTree.ShorthandSaveBox, boxes)
+	box := selectShorthandSaveBox(Conf.FileTree.Load().ShorthandSaveBox, boxes)
 	if nil == box {
 		logging.LogWarnf("auto consume shorthands failed: no available notebook found")
 		if !shorthandSaveBoxUnavailableNotified {

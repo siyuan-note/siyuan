@@ -36,13 +36,13 @@ func setupAIOCRContract(t *testing.T, handler http.HandlerFunc) *gin.Engine {
 	util.WorkingDir = filepath.Join("..", "..", "app")
 	t.Cleanup(func() { util.WorkingDir = previousWorking })
 	model.Conf.Lang = "en"
-	model.Conf.FileTree = conf.NewFileTree()
-	model.Conf.AI = conf.NewAI()
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	model.Conf.AI.Store(conf.NewAI())
 	server := httptest.NewServer(handler)
 	t.Cleanup(server.Close)
-	model.Conf.AI.Providers = []*conf.Provider{{ID: "provider", Enabled: true, APIKey: "test-key", BaseURL: server.URL + "/v1",
+	model.Conf.AI.Load().Providers = []*conf.Provider{{ID: "provider", Enabled: true, APIKey: "test-key", BaseURL: server.URL + "/v1",
 		Headers: map[string]string{"X-OCR-Test": "custom"}, Models: []*conf.Model{{ID: "vision", Enabled: true, Name: "vision-test"}}}}
-	model.Conf.AI.Agent.ModelID = "vision"
+	model.Conf.AI.Load().Agent.ModelID = "vision"
 	writeAIOCRImage(t, filepath.Join(assets, "ai-ocr.png"), 1)
 	engine := gin.New()
 	engine.POST("/api/ai/ocr", aiOCR)
@@ -103,7 +103,7 @@ func TestAPIContractAIOCRProtocols(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				_, _ = io.WriteString(w, test.body)
 			})
-			model.Conf.AI.Providers[0].Protocol = test.protocol
+			model.Conf.AI.Load().Providers[0].Protocol = test.protocol
 			const path = "assets/ai-ocr.png"
 			t.Cleanup(func() { util.RemoveAssetText(path) })
 			response := requestAIOCR(t, engine, path+"#preview")
@@ -211,7 +211,7 @@ func TestAPIContractAIOCRAdmissionAndCancellation(t *testing.T) {
 		case <-time.After(2 * time.Second):
 		}
 	})
-	provider := model.Conf.AI.Providers[0]
+	provider := model.Conf.AI.Load().Providers[0]
 	if err := os.WriteFile(filepath.Join(util.DataDir, "assets", "invalid.png"), []byte("invalid image"), 0600); err != nil {
 		t.Fatal(err)
 	}

@@ -15,26 +15,35 @@ import (
 )
 
 func TestAPIContractSettingNormalization(t *testing.T) {
-	previous, readOnly, markdown := model.Conf, util.ReadOnly, util.MarkdownSettings
-	singleLine, largeFile := util.UseSingleLineSave, util.LargeFileWarningSize
+	previous, readOnly, markdown := model.Conf, util.ReadOnly, util.MarkdownSettings.Load()
+	singleLine, largeFile := util.UseSingleLineSave.Load(), util.LargeFileWarningSize.Load()
 	util.ReadOnly = true
 	t.Cleanup(func() {
-		model.Conf, util.ReadOnly, util.MarkdownSettings = previous, readOnly, markdown
-		util.UseSingleLineSave, util.LargeFileWarningSize = singleLine, largeFile
+		{
+			derivedValue0, derivedValue1, derivedValue2 := previous, readOnly, markdown
+			model.Conf = derivedValue0
+			util.ReadOnly = derivedValue1
+			util.MarkdownSettings.Store(derivedValue2)
+		}
+		{
+			derivedValue0, derivedValue1 := singleLine, largeFile
+			util.UseSingleLineSave.Store(derivedValue0)
+			util.LargeFileWarningSize.Store(derivedValue1)
+		}
 	})
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = conf.NewEditor()
-	model.Conf.Editor.DisplayImgName = true
-	model.Conf.FileTree = conf.NewFileTree()
-	model.Conf.Flashcard = conf.NewFlashcard()
+	model.Conf.Editor.Store(conf.NewEditor())
+	model.Conf.Editor.Load().DisplayImgName = true
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	model.Conf.Flashcard.Store(conf.NewFlashcard())
 	for _, length := range []int{0, 1, 63, 95, 5120, 6000} {
 		body, _ := json.Marshal(map[string]int{"blockRefDynamicAnchorTextMaxLen": length, "fontSize": 100})
 		code, message, _ := settingContractRequest(t, "setEditor", setEditor, string(body))
 		if code != 0 {
 			t.Fatal(message)
 		}
-		editor := *model.Conf.Editor
-		if !reflect.DeepEqual(&editor, conf.NormalizeEditor(model.Conf.Editor)) || !editor.DisplayImgName || editor.FontSize != 16 {
+		editor := *model.Conf.Editor.Load()
+		if !reflect.DeepEqual(&editor, conf.NormalizeEditor(model.Conf.Editor.Load())) || !editor.DisplayImgName || editor.FontSize != 16 {
 			t.Fatal("saved editor differs from startup normalization or lost omitted fields")
 		}
 		want := length
@@ -49,11 +58,11 @@ func TestAPIContractSettingNormalization(t *testing.T) {
 		}
 	}
 	code, message, _ := settingContractRequest(t, "setFlashcard", setFlashcard, `{"weights":"invalid","requestRetention":2,"maximumInterval":-1}`)
-	if code != 0 || model.Conf.Flashcard.Weights != conf.DefaultFSRSWeights() || model.Conf.Flashcard.NewCardLimit != 0 {
+	if code != 0 || model.Conf.Flashcard.Load().Weights != conf.DefaultFSRSWeights() || model.Conf.Flashcard.Load().NewCardLimit != 0 {
 		t.Fatalf("flashcard normalization failed: %s", message)
 	}
 	code, message, _ = settingContractRequest(t, "setFiletree", setFiletree, `{"maxListCount":0,"largeFileWarningSize":1,"shorthandSavePath":"notes"}`)
-	if code != 0 || model.Conf.FileTree.MaxListCount != 512 || util.LargeFileWarningSize != 8 || model.Conf.FileTree.ShorthandSavePath != "/notes" {
+	if code != 0 || model.Conf.FileTree.Load().MaxListCount != 512 || util.LargeFileWarningSize.Load() != 8 || model.Conf.FileTree.Load().ShorthandSavePath != "/notes" {
 		t.Fatalf("file tree normalization failed: %s", message)
 	}
 }
@@ -69,7 +78,7 @@ func TestAPIContractImportedSettingsNormalization(t *testing.T) {
 		`{"export":{"blockRefMode":5}}`,
 	} {
 		model.Conf = model.NewAppConf()
-		originalSync := model.Conf.Sync
+		originalSync := model.Conf.Sync.Load()
 		var body bytes.Buffer
 		writer := multipart.NewWriter(&body)
 		part, err := writer.CreateFormFile("file", "settings.json")
@@ -94,10 +103,10 @@ func TestAPIContractImportedSettingsNormalization(t *testing.T) {
 		if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 {
 			t.Fatalf("import failed: %s (%v)", recorder.Body.String(), err)
 		}
-		if model.Conf.Editor == nil || model.Conf.Editor.FontSize != 16 || model.Conf.Editor.BlockRefDynamicAnchorTextMaxLen < 1 ||
-			model.Conf.Export == nil || model.Conf.Export.BlockRefMode != 4 ||
-			model.Conf.FileTree.MaxListCount != 512 || model.Conf.Search.Limit != 64 ||
-			model.Conf.Flashcard.Weights != conf.DefaultFSRSWeights() || model.Conf.Sync != originalSync {
+		if model.Conf.Editor.Load() == nil || model.Conf.Editor.Load().FontSize != 16 || model.Conf.Editor.Load().BlockRefDynamicAnchorTextMaxLen < 1 ||
+			model.Conf.Export.Load() == nil || model.Conf.Export.Load().BlockRefMode != 4 ||
+			model.Conf.FileTree.Load().MaxListCount != 512 || model.Conf.Search.Load().Limit != 64 ||
+			model.Conf.Flashcard.Load().Weights != conf.DefaultFSRSWeights() || model.Conf.Sync.Load() != originalSync {
 			t.Fatal("import did not normalize preferences or replaced sync configuration")
 		}
 	}

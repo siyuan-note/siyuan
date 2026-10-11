@@ -29,9 +29,9 @@ import (
 )
 
 func shorthandSyntaxTestSettings(t testing.TB) {
-	previous := util.MarkdownSettings
-	util.MarkdownSettings = util.NewMarkdown()
-	t.Cleanup(func() { util.MarkdownSettings = previous })
+	previous := util.MarkdownSettings.Load()
+	util.MarkdownSettings.Store(util.NewMarkdown())
+	t.Cleanup(func() { util.MarkdownSettings.Store(previous) })
 }
 
 func shorthandSyntaxNodes(tree *parse.Tree, typ ast.NodeType) (ret []*ast.Node) {
@@ -55,17 +55,17 @@ func TestShorthandMarkdownSettings(t *testing.T) {
 			set            func(bool)
 			node           ast.NodeType
 		}{
-			{"asterisk", "**text**", "strong", func(v bool) { util.MarkdownSettings.InlineAsterisk = v }, ast.NodeTextMark},
-			{"underscore", "__text__", "strong", func(v bool) { util.MarkdownSettings.InlineUnderscore = v }, ast.NodeTextMark},
-			{"sup", "^text^", "sup", func(v bool) { util.MarkdownSettings.InlineSup = v }, ast.NodeTextMark},
-			{"sub", "~text~", "sub", func(v bool) { util.MarkdownSettings.InlineSub = v }, ast.NodeTextMark},
-			{"tag", "#text#", "tag", func(v bool) { util.MarkdownSettings.InlineTag = v }, ast.NodeTextMark},
-			{"math", "$text$", "inline-math", func(v bool) { util.MarkdownSettings.InlineMath = v }, ast.NodeTextMark},
-			{"strikethrough", "~~text~~", "s", func(v bool) { util.MarkdownSettings.InlineStrikethrough = v }, ast.NodeTextMark},
-			{"full-width-strikethrough", "～～text～～", "s", func(v bool) { util.MarkdownSettings.InlineFullWidthStrikethrough = v }, ast.NodeTextMark},
-			{"mark", "==text==", "mark", func(v bool) { util.MarkdownSettings.InlineMark = v }, ast.NodeTextMark},
-			{"middle-dot", "···go\ntext\n···", "", func(v bool) { util.MarkdownSettings.CodeBlockMiddleDot = &v }, ast.NodeCodeBlock},
-			{"full-width-task", "【X】text", "", func(v bool) { util.MarkdownSettings.BlockFullWidthTaskList = &v }, ast.NodeListItem},
+			{"asterisk", "**text**", "strong", func(v bool) { util.MarkdownSettings.Load().InlineAsterisk = v }, ast.NodeTextMark},
+			{"underscore", "__text__", "strong", func(v bool) { util.MarkdownSettings.Load().InlineUnderscore = v }, ast.NodeTextMark},
+			{"sup", "^text^", "sup", func(v bool) { util.MarkdownSettings.Load().InlineSup = v }, ast.NodeTextMark},
+			{"sub", "~text~", "sub", func(v bool) { util.MarkdownSettings.Load().InlineSub = v }, ast.NodeTextMark},
+			{"tag", "#text#", "tag", func(v bool) { util.MarkdownSettings.Load().InlineTag = v }, ast.NodeTextMark},
+			{"math", "$text$", "inline-math", func(v bool) { util.MarkdownSettings.Load().InlineMath = v }, ast.NodeTextMark},
+			{"strikethrough", "~~text~~", "s", func(v bool) { util.MarkdownSettings.Load().InlineStrikethrough = v }, ast.NodeTextMark},
+			{"full-width-strikethrough", "～～text～～", "s", func(v bool) { util.MarkdownSettings.Load().InlineFullWidthStrikethrough = v }, ast.NodeTextMark},
+			{"mark", "==text==", "mark", func(v bool) { util.MarkdownSettings.Load().InlineMark = v }, ast.NodeTextMark},
+			{"middle-dot", "···go\ntext\n···", "", func(v bool) { util.MarkdownSettings.Load().CodeBlockMiddleDot = &v }, ast.NodeCodeBlock},
+			{"full-width-task", "【X】text", "", func(v bool) { util.MarkdownSettings.Load().BlockFullWidthTaskList = &v }, ast.NodeListItem},
 		} {
 			for _, enabled := range []bool{false, true} {
 				name := factory.name + "/" + tc.name + "/disabled"
@@ -73,7 +73,7 @@ func TestShorthandMarkdownSettings(t *testing.T) {
 					name = factory.name + "/" + tc.name + "/enabled"
 				}
 				t.Run(name, func(t *testing.T) {
-					util.MarkdownSettings = util.NewMarkdown()
+					util.MarkdownSettings.Store(util.NewMarkdown())
 					tc.set(enabled)
 					tree := parseShorthandMarkdown(tc.md, time.Now(), factory.new())
 					found := false
@@ -166,8 +166,8 @@ func TestShorthandTaskMarkersAndLiteralProtection(t *testing.T) {
 			}
 		})
 	}
-	util.MarkdownSettings.CodeBlockMiddleDot = nil
-	util.MarkdownSettings.BlockFullWidthTaskList = nil
+	util.MarkdownSettings.Load().CodeBlockMiddleDot = nil
+	util.MarkdownSettings.Load().BlockFullWidthTaskList = nil
 	tree := parseShorthandMarkdown("···\ncode\n···\n\n【】task", time.Now(), util.NewLute())
 	if 1 != len(shorthandSyntaxNodes(tree, ast.NodeCodeBlock)) || 1 != len(shorthandSyntaxNodes(tree, ast.NodeListItem)) {
 		t.Fatal("missing default shortcut settings disabled conversion")

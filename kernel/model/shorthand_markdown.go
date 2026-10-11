@@ -49,7 +49,7 @@ type shorthandMarker struct {
 
 // parseShorthandMarkdown 仅在消费速记时应用编辑器语法，不改变普通 Markdown 导入的解析配置。
 func parseShorthandMarkdown(md string, created time.Time, engine *lute.Lute) *parse.Tree {
-	engine.SetMark(util.MarkdownSettings.InlineMark)
+	engine.SetMark(util.MarkdownSettings.Load().InlineMark)
 	md, tasks := normalizeShorthandMarkdown(md, engine.ParseOptions)
 	tree := parse.Parse("", []byte(md), engine.ParseOptions)
 	if nil == tree {
@@ -92,7 +92,7 @@ func parseShorthandMarkdown(md string, created time.Time, engine *lute.Lute) *pa
 
 // normalizeShorthandMarkdown 由解析器判断标记的上下文，避免修改代码、公式、HTML 块和转义正文。
 func normalizeShorthandMarkdown(md string, options *parse.Options) (string, map[string]byte) {
-	settings := util.MarkdownSettings
+	settings := util.MarkdownSettings.Load()
 	dotsEnabled := nil == settings.CodeBlockMiddleDot || *settings.CodeBlockMiddleDot
 	tasksEnabled := nil == settings.BlockFullWidthTaskList || *settings.BlockFullWidthTaskList
 	if !dotsEnabled && !tasksEnabled {

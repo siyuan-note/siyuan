@@ -96,6 +96,14 @@ const createOCRPanel = async () => {
             options.signal.addEventListener("abort", () => notifications.delete(name));
         },
     }, require: () => ({
+        config: {set: (_path: string, value: typeof config.ocr, applied: (next: typeof config.ocr) => void) => {
+            return new Promise<{code: number; data?: typeof config.ocr}>((resolve, reject) => requests.push({config: value, resolve, reject}))
+                .then(response => {
+                    if (response.code !== 0) throw new Error("save failed");
+                    config.ocr = response.data;
+                    applied(response.data);
+                });
+        }},
         OCR_CHANGED_EVENT: "ocr-test",
         AI_CONFIG_CHANGED_EVENT: "ai-test",
         trackSettingSave: (task: Promise<boolean>) => task,
@@ -380,7 +388,7 @@ test("undoing an uncommitted threshold edit resumes updates from another window"
     panel.close();
 });
 
-test("closing the OCR panel cancels queued saves and ignores a late response", async () => {
+test("closing the OCR panel cancels queued saves while confirmed shared configuration remains synchronized", async () => {
     const panel = await createOCRPanel();
     const first = panel.changeAuto(true);
     await new Promise(setImmediate);
@@ -389,7 +397,8 @@ test("closing the OCR panel cancels queued saves and ignores a late response", a
     panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
     await Promise.all([first, second]);
     assert.equal(panel.requests.length, 1);
-    assert.equal(panel.config.ocr.auto, false);
+    assert.equal(panel.config.ocr.auto, true);
+    assert.equal(panel.controls.ocrAuto.checked, false);
 });
 
 test("OCR notifications update configuration and model options without replacing the form or file choices", async () => {

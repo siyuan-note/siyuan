@@ -15,7 +15,7 @@ import (
 func TestDatabaseCommandsRejectIncompleteUnusedScan(t *testing.T) {
 	previousConf, previousData, previousWorkspace, previousDryRun := model.Conf, util.DataDir, util.WorkspaceDir, dryRun
 	model.Conf = model.NewAppConf()
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	util.WorkspaceDir = t.TempDir()
 	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
 	t.Cleanup(func() {

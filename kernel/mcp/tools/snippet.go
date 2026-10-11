@@ -85,7 +85,7 @@ func AgentSnippetPreview(args map[string]any) (map[string]any, error) {
 		preview["truncated"] = len(content) > 65536
 		_, contentSet := args["content"]
 		preview["mayExecuteJS"] = snippet.Type == "js" && (action == "enable" || (action == "replace" || action == "update" && contentSet) && snippet.Enabled)
-		preview["global"] = model.Conf.Snippet
+		preview["global"] = model.Conf.Snippet.Load()
 		return preview, nil
 	}
 	return nil, fmt.Errorf("snippet not found")
@@ -96,6 +96,8 @@ func snippetAvailable() bool {
 }
 
 func snippetHandler(args map[string]any) (CallToolResult, error) {
+	confSnippetSnapshot := model.Conf.LoadSnippet()
+
 	if !snippetAvailable() {
 		return blockToolError("snippet capability is unavailable")
 	}
@@ -109,7 +111,7 @@ func snippetHandler(args map[string]any) (CallToolResult, error) {
 	if action == "get" && offset > 0 && revision == "" {
 		return blockToolError("revision is required for subsequent content pages")
 	}
-	result := map[string]any{"global": model.Conf.Snippet}
+	result := map[string]any{"global": confSnippetSnapshot}
 	if action == "list" || action == "get" {
 		snippets, err := model.LoadSnippets()
 		if err != nil {
@@ -170,7 +172,7 @@ func snippetHandler(args map[string]any) (CallToolResult, error) {
 		if err != nil {
 			return blockToolError(err.Error())
 		}
-		model.PushReloadSnippet(model.Conf.Snippet)
+		model.PushReloadSnippet(confSnippetSnapshot)
 		result["snippet"], result["action"] = snippetSummary(snippet), action
 	}
 	data, err := json.Marshal(result)

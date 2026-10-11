@@ -510,14 +510,14 @@ func initAssetContentDBTables() {
 }
 
 var (
-	caseSensitive  bool
-	hanSensitive   bool
-	indexAssetPath bool
+	caseSensitive  = util.NewAtomicValue(false)
+	hanSensitive   = util.NewAtomicValue(false)
+	indexAssetPath = util.NewAtomicValue(false)
 )
 
 func SetCaseSensitive(b bool) {
-	caseSensitive = b
-	util.SearchCaseSensitive = b
+	caseSensitive.Store(b)
+	util.SearchCaseSensitive.Store(b)
 
 	if nil == db {
 		return
@@ -531,25 +531,25 @@ func SetCaseSensitive(b bool) {
 }
 
 func SetHanSensitive(b bool) {
-	hanSensitive = b
-	util.SearchHanSensitive = b
+	hanSensitive.Store(b)
+	util.SearchHanSensitive.Store(b)
 }
 
 // ftsTokenize 返回 blocks FTS 表的 tokenize 参数。
 // 分词器参数在 CREATE VIRTUAL TABLE 时固化，切换区分大小写或区分繁简后需要重建索引。
 func ftsTokenize() string {
 	ret := "siyuan"
-	if !caseSensitive {
+	if !caseSensitive.Load() {
 		ret += " case_insensitive"
 	}
-	if !hanSensitive {
+	if !hanSensitive.Load() {
 		ret += " han_insensitive"
 	}
 	return ret
 }
 
 func SetIndexAssetPath(b bool) {
-	indexAssetPath = b
+	indexAssetPath.Store(b)
 }
 
 func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) {
@@ -1000,7 +1000,7 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		if !treenode.IsNodeOCRed(n) {
 			util.PushNodeOCRQueue(n)
 		}
-		content = nodeStaticContent(n, nil, true, indexAssetPath, true, true)
+		content = nodeStaticContent(n, nil, true, indexAssetPath.Load(), true, true)
 
 		fc := treenode.FirstLeafBlock(n)
 		if !treenode.IsNodeOCRed(fc) {
@@ -1018,7 +1018,7 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		if !treenode.IsNodeOCRed(n) {
 			util.PushNodeOCRQueue(n)
 		}
-		content = nodeStaticContent(n, nil, true, indexAssetPath, true, true)
+		content = nodeStaticContent(n, nil, true, indexAssetPath.Load(), true, true)
 
 		parentID = n.Parent.ID
 		if h := treenode.HeadingParent(n); nil != h {

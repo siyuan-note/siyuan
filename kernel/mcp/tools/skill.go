@@ -172,7 +172,7 @@ func skillLoad(args map[string]any) (CallToolResult, error) {
 	if loaded.ResourcePath == "" {
 		// Variables.Resolve 还会匹配 $NAME 和 ${NAME}。
 		// 资源可能包含脚本或模板，因此只解析技能正文，避免误改资源内容。
-		loaded.Content = model.Conf.Variables.Resolve(loaded.Content)
+		loaded.Content = model.Conf.Variables.Load().Resolve(loaded.Content)
 		result = formatSkillContent(loaded)
 	} else {
 		result = formatSkillResource(loaded)

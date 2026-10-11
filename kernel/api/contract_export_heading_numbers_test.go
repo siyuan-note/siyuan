@@ -44,11 +44,20 @@ func TestAPIContractExportHeadingNumbers(t *testing.T) {
 	util.DBPath, util.HistoryDBPath = filepath.Join(root, "siyuan.db"), filepath.Join(root, "history.db")
 	util.AssetContentDBPath, util.BlockTreeDBPath = filepath.Join(root, "asset_content.db"), filepath.Join(root, "blocktree.db")
 	model.Conf = model.NewAppConf()
-	model.Conf.FileTree, model.Conf.Sync = conf.NewFileTree(), conf.NewSync()
-	model.Conf.Search, model.Conf.Editor, model.Conf.Export = conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewFileTree(), conf.NewSync()
+		model.Conf.FileTree.Store(confSectionValue0)
+		model.Conf.Sync.Store(confSectionValue1)
+	}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+		model.Conf.Search.Store(confSectionValue0)
+		model.Conf.Editor.Store(confSectionValue1)
+		model.Conf.Export.Store(confSectionValue2)
+	}
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	model.Conf.Appearance = conf.NewAppearance()
-	model.Conf.Export.AddTitle = false
+	model.Conf.Appearance.Store(conf.NewAppearance())
+	model.Conf.Export.Load().AddTitle = false
 	boxID, docID := ast.NewNodeID(), ast.NewNodeID()
 	box := &model.Box{ID: boxID}
 	boxConf := conf.NewBoxConf()
@@ -90,8 +99,8 @@ func TestAPIContractExportHeadingNumbers(t *testing.T) {
 		{"full width punctuation", "true", "chinese-document", "一、**First**", "（二）Last", false},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			model.Conf.Editor.HeadingNumber = test.defaultEnabled
-			model.Conf.Editor.HeadingNumberFormat = test.format
+			model.Conf.Editor.Load().HeadingNumber = test.defaultEnabled
+			model.Conf.Editor.Load().HeadingNumberFormat = test.format
 			tree.Root.SetIALAttr("custom-sy-heading-number", test.documentSetting)
 			if _, err := filesys.WriteTree(tree); err != nil {
 				t.Fatal(err)

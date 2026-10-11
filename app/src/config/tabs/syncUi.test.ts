@@ -74,6 +74,20 @@ const setup = (provider = 2, mobile = false) => {
             if (name === "../../dialog/confirmDialog") {
                 return {confirmDialog: (_title: string, _text: string, confirm: () => void, cancel: () => void) => confirmations.push({confirm, cancel})};
             }
+            if (name === "../util/configApi") {
+                return {config: {set: (path: string, value: unknown, applied: () => void) => {
+                    const key = path.split(".")[1];
+                    return new Promise((resolve, reject) => requests.push({url: "/api/setting/patch", data: {sync: {[key]: value}}, resolve, reject}))
+                        .then((response: any) => {
+                            if (response.code === 0) {
+                                Object.assign(sync, response.data);
+                                applied();
+                            } else {
+                                throw new Error(response.msg);
+                            }
+                        });
+                }}};
+            }
             if (name === "../../util/fetch") {
                 return {fetchSyncPost: (url: string, data: any) => new Promise((resolve, reject) => requests.push({url, data, resolve, reject}))};
             }
@@ -102,11 +116,11 @@ for (const provider of [2, 3, 4]) {
         ui.click("save");
         ui.click("save");
         assert.equal(ui.requests.length, 1);
-        assert.equal(ui.requests[0].data[key].endpoint, "new.example.com");
+        assert.equal(ui.requests[0].data.sync[key].endpoint, "new.example.com");
         assert.equal(ui.buttons.save.disabled, true);
         ui.close();
         assert.equal(ui.closed(), 0);
-        ui.requests[0].resolve({code: 0, data: {[key]: {...ui.requests[0].data[key], endpoint: "https://new.example.com"}}});
+        ui.requests[0].resolve({code: 0, data: {[key]: {...ui.requests[0].data.sync[key], endpoint: "https://new.example.com"}}});
         await settle();
         assert.equal(ui.sync[key].endpoint, "https://new.example.com");
         assert.equal(ui.closed(), 1);
@@ -166,7 +180,7 @@ test("failed saves keep drafts after panel replacement and allow retry", async (
     assert.equal(ui.status.textContent, "Not confirmed");
     assert.equal(ui.buttons.save.disabled, false);
     ui.click("save");
-    ui.requests[2].resolve({code: 0, data: {s3: ui.requests[2].data.s3}});
+    ui.requests[2].resolve({code: 0, data: {s3: ui.requests[2].data.sync.s3}});
     await settle();
     assert.equal(ui.closed(), 1);
 });
@@ -218,8 +232,8 @@ test("draft stays bound to the opened provider even if another window changes th
     ui.sync.provider = 3;
     ui.inputs.endpoint.value = "changed.example.com";
     ui.click("save");
-    assert.equal(ui.requests[0].url, "/api/sync/setSyncProviderS3");
-    assert.equal(ui.requests[0].data.s3.endpoint, "changed.example.com");
+    assert.equal(ui.requests[0].url, "/api/setting/patch");
+    assert.equal(ui.requests[0].data.sync.s3.endpoint, "changed.example.com");
 });
 
 test("mobile uses the shared dialog and bucket warnings never submit the draft", () => {

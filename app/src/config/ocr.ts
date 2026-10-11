@@ -1,3 +1,4 @@
+import {config as configApi} from "./util/configApi";
 import type {OCRConfigData, OCRThresholds, SettingOCR} from "../types/api";
 import {fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
@@ -266,12 +267,12 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
                 if (closed) {
                     return false;
                 }
-                const response = await fetchSyncPost("/api/asset/setOCRConfig", config, undefined, true, controller.signal);
-                if (response.code === 0 && !closed) {
-                    data.config = response.data;
-                    window.siyuan.config.ocr = response.data;
-                    saved = true;
-                }
+                await configApi.set("ocr", config, next => {
+                    if (!closed) {
+                        data.config = next as SettingOCR;
+                        saved = true;
+                    }
+                });
             } catch (error) {
                 handleError(error);
             } finally {

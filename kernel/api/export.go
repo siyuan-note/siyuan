@@ -370,6 +370,8 @@ var exportSY = contractHandler(apicontract.ExportSY, func(c *gin.Context, reques
 })
 
 var exportMdContent = contractHandler(apicontract.ExportMdContent, func(c *gin.Context, request apicontract.ExportMarkdownContentRequest) apicontract.Response[apicontract.ExportMarkdownContentData] {
+	confExportSnapshot := model.Conf.LoadExport()
+
 	ret := gulu.Ret.NewResult()
 
 	id := request.ID
@@ -385,7 +387,7 @@ var exportMdContent = contractHandler(apicontract.ExportMdContent, func(c *gin.C
 		ret.Msg = err.Error()
 		return contractFailure[apicontract.ExportMarkdownContentData](ret)
 	}
-	refMode, embedMode, yfm := model.Conf.Export.BlockRefMode, model.Conf.Export.BlockEmbedMode, true
+	refMode, embedMode, yfm := confExportSnapshot.BlockRefMode, confExportSnapshot.BlockEmbedMode, true
 	if request.RefMode != nil {
 		refMode = int(*request.RefMode)
 	}
@@ -396,7 +398,7 @@ var exportMdContent = contractHandler(apicontract.ExportMdContent, func(c *gin.C
 		yfm = *request.YFM
 	}
 	fillCSSVar, adjustHeadingLevel, imgTag := request.FillCSSVar, request.AdjustHeadingLevel, request.ImgTag
-	addTitle := model.Conf.Export.AddTitle
+	addTitle := confExportSnapshot.AddTitle
 	if request.AddTitle != nil {
 		addTitle = *request.AddTitle
 	}
@@ -676,7 +678,7 @@ var exportHTML = contractHandler(apicontract.ExportHTML, func(c *gin.Context, re
 })
 
 func exportTitleOptions(options apicontract.ExportTitleOptions) (addTitle bool, customTitle string) {
-	addTitle = model.Conf.Export.AddTitle
+	addTitle = model.Conf.Export.Load().AddTitle
 	if options.AddTitle != nil {
 		addTitle = *options.AddTitle
 	}

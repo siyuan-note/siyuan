@@ -128,15 +128,21 @@ func NormalizeEditor(editor *Editor) *Editor {
 	return editor
 }
 
-// NormalizeExport 将已废弃的块引用导出模式统一转换为脚注与锚点哈希模式。
+// NormalizeExport 补全缺失的导出配置，不推断配置格式版本。
 func NormalizeExport(export *Export) *Export {
 	if export == nil {
 		export = NewExport()
 	}
-	if export.BlockRefMode == 0 || export.BlockRefMode == 1 || export.BlockRefMode == 5 {
-		export.BlockRefMode = 4
-	}
 	return export
+}
+
+// MigrateExportBlockRefMode 转换旧格式的块引用导出模式，保留其余模式。
+func MigrateExportBlockRefMode(export *Export) bool {
+	if export != nil && (export.BlockRefMode == 0 || export.BlockRefMode == 1 || export.BlockRefMode == 5) {
+		export.BlockRefMode = 4
+		return true
+	}
+	return false
 }
 
 // NormalizeSearch 保留非空布尔指针表示的用户选择。
@@ -204,4 +210,235 @@ func NormalizeFlashcard(flashcard *Flashcard) (*Flashcard, string) {
 		flashcard.Weights = defaults.Weights
 	}
 	return flashcard, message
+}
+
+// NormalizeAppearance 补全外观缺失字段，并将已移除的图标包和越界的状态栏配置转换为当前可用值。
+// mobile 表示是否为移动端容器，决定状态栏默认项。
+func NormalizeAppearance(appearance *Appearance, mobile bool) *Appearance {
+	if appearance == nil {
+		appearance = NewAppearanceForContainer(mobile)
+	}
+	if "ant" == appearance.Icon || "material" == appearance.Icon {
+		// v3.7.0 移除了 ant/material 图标包 https://github.com/siyuan-note/siyuan/issues/7976
+		appearance.Icon = "litheness"
+	}
+	if "" == appearance.CodeBlockThemeDark {
+		appearance.CodeBlockThemeDark = "dracula"
+	}
+	if "" == appearance.CodeBlockThemeLight {
+		appearance.CodeBlockThemeLight = "github"
+	}
+	appearance.StatusBar = util.NormalizeStatusBar(appearance.StatusBar, mobile)
+	if nil == appearance.Notifications {
+		appearance.Notifications = util.NewNotifications()
+	}
+	appearance.EntryVisibility = NormalizeEntryVisibility(appearance.EntryVisibility, EntryVisibilityProfileFull)
+	appearance.NormalizeGlobalFontFamilies()
+	return appearance
+}
+
+// NormalizeSync 限定同步间隔和并发数范围，并补全各存储服务的连接参数。
+func NormalizeSync(sync *Sync) *Sync {
+	if sync == nil {
+		sync = NewSync()
+	}
+	if 0 == sync.Mode {
+		sync.Mode = 1
+	}
+	sync.Interval = max(30, min(60*60*12, sync.Interval))
+	if nil == sync.S3 {
+		sync.S3 = &S3{PathStyle: true, SkipTlsVerify: true}
+	}
+	sync.S3.Endpoint = util.NormalizeEndpoint(sync.S3.Endpoint)
+	sync.S3.Timeout = util.NormalizeTimeout(sync.S3.Timeout)
+	sync.S3.ConcurrentReqs = util.NormalizeConcurrentReqs(sync.S3.ConcurrentReqs, ProviderS3)
+	if nil == sync.WebDAV {
+		sync.WebDAV = &WebDAV{SkipTlsVerify: true}
+	}
+	sync.WebDAV.Endpoint = util.NormalizeEndpoint(sync.WebDAV.Endpoint)
+	sync.WebDAV.Timeout = util.NormalizeTimeout(sync.WebDAV.Timeout)
+	sync.WebDAV.ConcurrentReqs = util.NormalizeConcurrentReqs(sync.WebDAV.ConcurrentReqs, ProviderWebDAV)
+	if nil == sync.Local {
+		sync.Local = &Local{}
+	}
+	sync.Local.Endpoint = util.NormalizeLocalPath(sync.Local.Endpoint)
+	sync.Local.Timeout = util.NormalizeTimeout(sync.Local.Timeout)
+	sync.Local.ConcurrentReqs = util.NormalizeConcurrentReqs(sync.Local.ConcurrentReqs, ProviderLocal)
+	if nil == sync.LAN {
+		sync.LAN = &LANSync{MaxConcurrentReqs: 16}
+	}
+	if 1 > sync.LAN.MaxConcurrentReqs {
+		sync.LAN.MaxConcurrentReqs = 16
+	}
+	sync.LAN.MaxConcurrentReqs = min(128, sync.LAN.MaxConcurrentReqs)
+	return sync
+}
+
+// NormalizeSystem 补全系统配置的设备标识和网络代理；运行环境信息由加载入口按当前进程投影。
+func NormalizeSystem(system *System) *System {
+	if system == nil {
+		system = NewSystem()
+	}
+	if nil == system.NetworkProxy {
+		system.NetworkProxy = &NetworkProxy{}
+	}
+	if nil == system.DisabledFeatures {
+		system.DisabledFeatures = []string{}
+	}
+	return system
+}
+
+// NormalizeRepo 限定数据仓库索引提示阈值和自动清理保留策略的下限。
+func NormalizeRepo(repo *Repo) *Repo {
+	defaults := NewRepo()
+	if repo == nil {
+		repo = defaults
+	}
+	repo.SyncIndexTiming = max(defaults.SyncIndexTiming, repo.SyncIndexTiming)
+	if 1 > repo.IndexRetentionDays {
+		repo.IndexRetentionDays = defaults.IndexRetentionDays
+	}
+	if 1 > repo.RetentionIndexesDaily {
+		repo.RetentionIndexesDaily = defaults.RetentionIndexesDaily
+	}
+	return repo
+}
+
+// NormalizeGraph 在全局或局部关系图配置缺失时整体恢复默认值，否则仅限定最大块数。
+func NormalizeGraph(graph *Graph) *Graph {
+	if graph == nil || graph.Local == nil || graph.Global == nil {
+		return NewGraph()
+	}
+	graph.NormalizeMaxBlocks()
+	return graph
+}
+
+// NormalizeOCR 将已合并的内置模型名称转换为当前名称；缺失配置的默认来源由加载入口决定。
+func NormalizeOCR(ocr *OCR) *OCR {
+	if ocr == nil {
+		ocr = NewOCR()
+	}
+	if "small" == ocr.Model {
+		// 内置模型统一为 Tiny，自行导入的模型仍保留内容摘要标识。
+		ocr.Model = "tiny"
+	}
+	return ocr
+}
+
+// NormalizeAI 补全人工智能配置并对齐模型标识；密钥解密由加载入口负责。
+func NormalizeAI(ai *AI) *AI {
+	if ai == nil {
+		ai = NewAI()
+	}
+	ai.Normalize()
+	ai.ReconcileModelIDs()
+	return ai
+}
+
+// NormalizeOIDC 补全 OpenID Connect 配置；环境变量覆盖和密钥解密由加载入口负责。
+func NormalizeOIDC(oidc *OIDC) *OIDC {
+	if oidc == nil {
+		oidc = NewOIDC()
+	}
+	oidc.Normalize()
+	return oidc
+}
+
+// NormalizePublish 保证发布服务始终带有认证配置，避免空认证配置写入后导致启动失败。
+func NormalizePublish(publish *Publish) *Publish {
+	if publish == nil {
+		publish = NewPublish()
+	}
+	if nil == publish.Auth {
+		publish.Auth = NewPublish().Auth
+	}
+	return publish
+}
+
+// NormalizeSnippet 在代码片段配置缺失时使用默认值。
+func NormalizeSnippet(snippet *Snpt) *Snpt {
+	if snippet == nil {
+		snippet = NewSnpt()
+	}
+	return snippet
+}
+
+// NormalizeTag 在标签面板配置缺失时使用默认值。
+func NormalizeTag(tag *Tag) *Tag {
+	if tag == nil {
+		tag = NewTag()
+	}
+	return tag
+}
+
+// NormalizeStat 在统计配置缺失时使用默认值。
+func NormalizeStat(stat *Stat) *Stat {
+	if stat == nil {
+		stat = NewStat()
+	}
+	return stat
+}
+
+// NormalizeBazaar 在集市配置缺失时使用默认值。
+func NormalizeBazaar(bazaar *Bazaar) *Bazaar {
+	if bazaar == nil {
+		bazaar = NewBazaar()
+	}
+	return bazaar
+}
+
+// NormalizeAPI 在 API 配置缺失时使用默认值。
+func NormalizeAPI(api *API) *API {
+	if api == nil {
+		api = NewAPI()
+	}
+	return api
+}
+
+// NormalizeNotebookCrypto 在加密笔记本密钥管理配置缺失时使用默认值，已有配置原样保留。
+func NormalizeNotebookCrypto(notebookCrypto *NotebookCrypto) *NotebookCrypto {
+	if notebookCrypto == nil {
+		notebookCrypto = NewNotebookCrypto()
+	}
+	return notebookCrypto
+}
+
+// NormalizeSecrets 在密钥库缺失时使用默认值；解密由加载入口负责。
+func NormalizeSecrets(secrets *Secrets) *Secrets {
+	if secrets == nil {
+		secrets = NewSecrets()
+	}
+	return secrets
+}
+
+// NormalizeVariables 在变量库缺失时使用默认值。
+func NormalizeVariables(variables *Variables) *Variables {
+	if variables == nil {
+		variables = NewVariables()
+	}
+	return variables
+}
+
+// NormalizeKeymap 在快捷键配置缺失时使用空配置，内置快捷键由前端按平台补全。
+func NormalizeKeymap(keymap *Keymap) *Keymap {
+	if keymap == nil {
+		keymap = &Keymap{}
+	}
+	return keymap
+}
+
+// NormalizeUILayout 在界面布局缺失时使用空布局。
+func NormalizeUILayout(uiLayout *UILayout) *UILayout {
+	if uiLayout == nil {
+		uiLayout = &UILayout{}
+	}
+	return uiLayout
+}
+
+// NormalizeOnboarding 在首次使用引导状态缺失时视为已完成，避免已有工作空间重复引导。
+func NormalizeOnboarding(onboarding *Onboarding) *Onboarding {
+	if onboarding == nil {
+		onboarding = &Onboarding{State: OnboardingCompleted}
+	}
+	return onboarding
 }

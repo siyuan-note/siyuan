@@ -65,6 +65,10 @@ func TestAPIContractSystemCompleteConfiguration(t *testing.T) {
 		if err := decoder.Decode(&payloadJSON); err != nil {
 			t.Fatal(err)
 		}
+		delete(sourceJSON.(map[string]any), "confVersion")
+		if _, exposed := payloadJSON.(map[string]any)["confVersion"]; exposed {
+			t.Fatal("internal configuration version was exposed")
+		}
 		if !reflect.DeepEqual(sourceJSON, payloadJSON) {
 			t.Fatalf("complete configuration changed:\n%s\n%s", before, after)
 		}

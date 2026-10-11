@@ -1,3 +1,4 @@
+import {config as configApi} from "../util/configApi";
 import {fetchWithAppId} from "../../util/fetchWithAppId";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import type {SettingTabBuilder} from "../setting/builder";
@@ -427,8 +428,7 @@ const mountOIDCButton = (root: HTMLElement) => {
                     }).catch((error) => validationFailed(error instanceof Error ? error.message : String(error), attempt));
                     return;
                 }
-                fetchPost("/api/system/setOIDC", nextConfig, (response) => {
-                    window.siyuan.config.oidc = response.data;
+                configApi.set("oidc", nextConfig, () => {
                     dialog.destroy();
                 });
             } catch (error) {
@@ -446,7 +446,7 @@ const mountAuthCodeButton = (root: HTMLElement) => {
             placeholder: window.siyuan.languages.about5,
             description: window.siyuan.languages.about6,
             onConfirm: (value) => {
-                fetchPost("/api/system/setAccessAuthCode", {accessAuthCode: value});
+                configApi.set("accessAuthCode", value);
             },
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_ACCESSAUTHCODE);

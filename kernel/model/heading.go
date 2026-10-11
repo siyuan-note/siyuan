@@ -366,7 +366,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 	}
 
 	box := Conf.Box(targetBoxID)
-	headingText := getNodeRefText0(headingNode, Conf.Editor.BlockRefDynamicAnchorTextMaxLen, true)
+	headingText := getNodeRefText0(headingNode, Conf.Editor.Load().BlockRefDynamicAnchorTextMaxLen, true)
 	if strings.Contains(headingText, "/") {
 		headingText = strings.ReplaceAll(headingText, "/", "_")
 		util.PushMsg(Conf.language(246), 7000)

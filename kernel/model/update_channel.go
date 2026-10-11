@@ -71,7 +71,7 @@ func SetUpdateChannel(channel string) error {
 	if err = filelock.WriteFile(configPath, data); err != nil {
 		return err
 	}
-	Conf.System.UpdateChannel = channel
+	UpdateSystemConf(func(s *conf.System) { s.UpdateChannel = channel })
 	return nil
 }
 

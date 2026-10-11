@@ -546,7 +546,7 @@ func useOAuthTestConf(t *testing.T) {
 	t.Helper()
 	oldConf, oldConfDir, oldReadOnly := model.Conf, util.ConfDir, util.ReadOnly
 	model.Conf = model.NewAppConf()
-	model.Conf.System = &conf.System{}
+	model.Conf.System.Store(&conf.System{})
 	util.ConfDir = t.TempDir()
 	util.ReadOnly = false
 	resetOAuthCredentialStore()

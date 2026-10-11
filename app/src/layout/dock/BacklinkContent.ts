@@ -1,3 +1,4 @@
+import {config as configApi} from "../../config/util/configApi";
 import {toggleMenu} from "../../menus/menuToggle";
 import {GlobalBacklinkList} from "./GlobalBacklinkList";
 import {bindPanelSearch} from "./panelSearch";
@@ -796,8 +797,8 @@ export class BacklinkContent extends Model {
             } else {
                 window.siyuan.config.editor.backmentionSort = sortValue;
             }
-            fetchPost("/api/setting/patch", {editor: type === "sort" ?
-                {backlinkSort: sortValue, backlinkGlobalSort: 0} : {backmentionSort: sortValue}});
+            configApi.set("editor", type === "sort" ?
+                {backlinkSort: sortValue, backlinkGlobalSort: 0} : {backmentionSort: sortValue});
             this.searchBacklinks();
         };
         window.siyuan.menus.menu.remove();
@@ -889,7 +890,7 @@ export class BacklinkContent extends Model {
                     click: () => {
                         window.siyuan.config.editor.backlinkBlockSort = mode;
                         window.siyuan.config.editor.backlinkGlobalSort = 0;
-                        fetchPost("/api/setting/patch", {editor: {backlinkBlockSort: mode, backlinkGlobalSort: 0}});
+                        configApi.set("editor", {backlinkBlockSort: mode, backlinkGlobalSort: 0});
                         this.cancelContextRequests(this.tree.element, false);
                         if (this.globalList) {
                             this.searchBacklinks(true);
@@ -908,7 +909,7 @@ export class BacklinkContent extends Model {
                     label, iconHTML: "", checked: globalSort === index + 1,
                     click: () => {
                         window.siyuan.config.editor.backlinkGlobalSort = index + 1;
-                        fetchPost("/api/setting/patch", {editor: {backlinkGlobalSort: index + 1}});
+                        configApi.set("editor", {backlinkGlobalSort: index + 1});
                         this.searchBacklinks();
                     },
                 }).element);

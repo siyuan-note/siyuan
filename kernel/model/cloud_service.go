@@ -150,7 +150,7 @@ func StartFreeTrial() (err error) {
 func DeactivateUser() (err error) {
 	release := lockAssetSourceChange()
 	defer release()
-	if Conf.Sync.Provider == conf.ProviderSiYuan {
+	if Conf.Sync.Load().Provider == conf.ProviderSiYuan {
 		if err = requireCompleteAssetDownloads(); err != nil {
 			return
 		}
@@ -504,7 +504,9 @@ func IsCloudAssetSourceChange(err error) bool {
 
 // 使用服务端返回的账号标识验证来源，允许过期登出后重新认证原账号。
 func validateCloudUserAssetSource(user *conf.User) error {
-	if Conf.Sync.Provider != conf.ProviderSiYuan {
+	confSyncSnapshot := Conf.LoadSync()
+
+	if confSyncSnapshot.Provider != conf.ProviderSiYuan {
 		return nil
 	}
 	cloudConf, err := buildCloudConf()
@@ -512,7 +514,7 @@ func validateCloudUserAssetSource(user *conf.User) error {
 		return &cloudAssetSourceError{cause: err}
 	}
 	cloudConf.UserID = user.UserId
-	if err = validateAssetDownloadSourceScope(assetDownloadScope(Conf.Sync.Provider, cloudConf, Conf.Repo.Key)); err != nil {
+	if err = validateAssetDownloadSourceScope(assetDownloadScope(confSyncSnapshot.Provider, cloudConf, Conf.Repo.Load().Key)); err != nil {
 		return &cloudAssetSourceError{cause: err}
 	}
 	return nil
@@ -828,7 +830,7 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 	release := lockAssetSourceChange()
 	defer release()
 	previousCloudRegion := util.CurrentCloudRegion
-	if Conf.Sync.Provider == conf.ProviderSiYuan && previousCloudRegion != cloudRegion {
+	if Conf.Sync.Load().Provider == conf.ProviderSiYuan && previousCloudRegion != cloudRegion {
 		if err := requireCompleteAssetDownloads(); err != nil {
 			ret = gulu.Ret.NewResult()
 			ret.Code = -1

@@ -327,7 +327,7 @@ var installBazaarIcon = contractHandler(apicontract.InstallBazaarIcon, func(c *g
 	}
 	util.PushMsgWithApp(resolveRequestAppID(c, ""), model.Conf.Language(69), 3000)
 
-	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("icons", "", request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance)}
+	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("icons", "", request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance.Load())}
 
 	return apicontract.Success(data)
 })
@@ -338,7 +338,7 @@ var uninstallBazaarIcon = contractHandler(apicontract.UninstallBazaarIcon, func(
 		return apicontract.Failure[apicontract.BazaarAppearancePackagesData](-1, err.Error())
 	}
 
-	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("icons", "", request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance)}
+	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("icons", "", request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance.Load())}
 
 	return apicontract.Success(data)
 })
@@ -403,7 +403,7 @@ var installBazaarTheme = contractHandler(apicontract.InstallBazaarTheme, func(c 
 	}
 
 	util.PushMsgWithApp(resolveRequestAppID(c, ""), model.Conf.Language(69), 3000)
-	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("themes", request.Frontend, request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance)}
+	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("themes", request.Frontend, request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance.Load())}
 
 	return apicontract.Success(data)
 })
@@ -414,7 +414,7 @@ var uninstallBazaarTheme = contractHandler(apicontract.UninstallBazaarTheme, fun
 		return apicontract.Failure[apicontract.BazaarAppearancePackagesData](-1, err.Error())
 	}
 
-	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("themes", request.Frontend, request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance)}
+	data := apicontract.BazaarAppearancePackagesData{Packages: bazaarPackages(model.GetBazaarPackages("themes", request.Frontend, request.Keyword)), Appearance: bazaarAppearance(model.Conf.Appearance.Load())}
 
 	return apicontract.Success(data)
 })

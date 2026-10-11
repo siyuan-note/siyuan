@@ -65,12 +65,12 @@ const DefaultUseSingleLineSave = true
 const DefaultLargeFileWarningSize = 8
 
 var (
-	UseSingleLineSave    = DefaultUseSingleLineSave    // UseSingleLineSave 是否使用单行保存 .sy 和数据库 .json 文件。
-	LargeFileWarningSize = DefaultLargeFileWarningSize // LargeFileWarningSize 大文件警告大小，单位：MB
+	UseSingleLineSave    = NewAtomicValue(DefaultUseSingleLineSave)    // UseSingleLineSave 是否使用单行保存 .sy 和数据库 .json 文件。
+	LargeFileWarningSize = NewAtomicValue(DefaultLargeFileWarningSize) // LargeFileWarningSize 大文件警告大小，单位：MB
 )
 
 func ExceedLargeFileWarningSize(fileSize int) bool {
-	return fileSize > LargeFileWarningSize*1024*1024
+	return fileSize > LargeFileWarningSize.Load()*1024*1024
 }
 
 // IsUILoaded 是否已经加载了 UI。
@@ -138,7 +138,7 @@ func logBootInfo() {
 				WaitForUILoaded()
 				time.Sleep(3 * time.Second)
 			}
-			if nil == NotificationsCfg || NotificationsCfg.WorkspaceNotSSD {
+			if nil == NotificationsCfg.Load() || NotificationsCfg.Load().WorkspaceNotSSD {
 				PushErrMsg(Langs[Lang][278], 15000)
 			}
 		}
@@ -634,7 +634,7 @@ const (
 	EvtSQLAssetContentRebuild = "sql.assetContent.rebuild"
 )
 
-var SearchCaseSensitive bool
+var SearchCaseSensitive = NewAtomicValue(false)
 
 // SearchHanSensitive 是否区分繁简，由 sql.SetHanSensitive 维护；默认 true 与既往行为一致
-var SearchHanSensitive = true
+var SearchHanSensitive = NewAtomicValue(true)

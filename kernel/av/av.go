@@ -1058,7 +1058,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	var data []byte
 	restoreRenderedContents := av.suspendRenderedContents()
 	restoreResolvedColors := av.suspendResolvedColors()
-	if util.UseSingleLineSave {
+	if util.UseSingleLineSave.Load() {
 		data, err = gulu.JSON.MarshalJSON(av)
 	} else {
 		data, err = gulu.JSON.MarshalIndentJSON(av, "", "\t")
@@ -1142,7 +1142,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	}
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
-		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize)
+		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize.Load())
 		util.PushErrMsg(msg, 7000)
 	}
 	return

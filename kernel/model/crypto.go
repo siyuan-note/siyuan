@@ -1884,7 +1884,11 @@ func finishMasterPasswordMigration(kek []byte) error {
 		if err != nil {
 			return err
 		}
-		return atomicWriteFile(filepath.Join(util.ConfDir, "conf.json"), data)
+		if err = atomicWriteFile(filepath.Join(util.ConfDir, "conf.json"), data); err != nil {
+			return err
+		}
+		recordPersistedConf(data)
+		return nil
 	}()
 	if err != nil {
 		return fmt.Errorf("save notebook crypto configuration failed: %w", err)

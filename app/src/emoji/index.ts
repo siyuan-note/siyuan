@@ -1,3 +1,4 @@
+import {config as configApi} from "../config/util/configApi";
 import {getRandom, isMobile} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
@@ -813,7 +814,7 @@ export const addEmoji = (unicode: string) => {
         Constants.SIZE_UNDO,
     );
 
-    fetchPost("/api/setting/setEmoji", {emoji: window.siyuan.config.editor.emoji});
+    configApi.set("editor.emoji", window.siyuan.config.editor.emoji);
 };
 
 const genWeekdayOptions = (lang: string, weekdayType: string) => {

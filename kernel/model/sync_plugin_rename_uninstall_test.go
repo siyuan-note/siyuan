@@ -39,8 +39,8 @@ func setupSyncMergePluginTest(t *testing.T) {
 	}
 
 	Conf = NewAppConf()
-	Conf.System = conf.NewSystem()
-	Conf.Sync = conf.NewSync()
+	Conf.System.Store(conf.NewSystem())
+	Conf.Sync.Store(conf.NewSync())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
 
 	logging.SetLogPath(util.LogPath)

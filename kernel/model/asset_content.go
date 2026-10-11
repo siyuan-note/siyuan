@@ -161,7 +161,7 @@ func fullTextSearchAssetContentByRegexp(exp, typeFilter string, typeArgs []any, 
 	stmt := "SELECT * FROM `asset_contents_fts_case_insensitive` WHERE " + fieldFilter + typeFilter
 	stmt += " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	assetContents := sql.SelectAssetContentsRawStmtNoParseArgs(stmt, args, Conf.Search.Limit)
+	assetContents := sql.SelectAssetContentsRawStmtNoParseArgs(stmt, args, Conf.Search.Load().Limit)
 	ret = fromSQLAssetContents(&assetContents)
 	if 1 > len(ret) {
 		ret = []*AssetContent{}
@@ -199,7 +199,7 @@ func fullTextSearchAssetContentByFTS(query, typeFilter string, typeArgs []any, o
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	args := []any{buildAssetContentColumnFilter() + ":(" + query + ")"}
 	args = append(args, typeArgs...)
-	assetContents := sql.SelectAssetContentsRawStmtNoParseArgs(stmt, args, Conf.Search.Limit)
+	assetContents := sql.SelectAssetContentsRawStmtNoParseArgs(stmt, args, Conf.Search.Load().Limit)
 	ret = fromSQLAssetContents(&assetContents)
 	if 1 > len(ret) {
 		ret = []*AssetContent{}

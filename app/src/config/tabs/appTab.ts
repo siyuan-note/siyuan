@@ -1,3 +1,4 @@
+import {config as configApi} from "../util/configApi";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import * as path from "path";
@@ -387,7 +388,7 @@ const mountNetworkProxy = (root: HTMLElement) => {
         const scheme = schemeElement.value as Config.TSystemNetworkProxyScheme;
         const host = hostElement.value;
         const port = portElement.value;
-        fetchPost("/api/system/setNetworkProxy", {scheme, host, port}, async () => {
+        configApi.set("system.networkProxy", {scheme, host, port}, async () => {
             Object.assign(window.siyuan.config.system.networkProxy, {scheme, host, port});
             /// #if !BROWSER
             ipcRenderer.invoke(Constants.SIYUAN_GET, {

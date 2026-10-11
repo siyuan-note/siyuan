@@ -517,8 +517,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			return
 		}
 
-		if kernelModel.Conf.AI.MCP != nil {
-			mcpclient.EnsureMCPConnected(kernelModel.Conf.AI.MCP.Servers)
+		if kernelModel.Conf.AI.Load().MCP != nil {
+			mcpclient.EnsureMCPConnected(kernelModel.Conf.AI.Load().MCP.Servers)
 		}
 		select {
 		case <-ctx.Done():
@@ -537,7 +537,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		rawUserMessage := userMessage
 		// 变量（非敏感）在用户消息注入对话时解析，让 LLM 看到实际值；密钥不进上下文。
 		// 在此统一解析一次，后续 checkpoint 与消息重建均使用解析后的值，保证全链路一致。
-		userMessage = kernelModel.Conf.Variables.Resolve(userMessage)
+		userMessage = kernelModel.Conf.Variables.Load().Resolve(userMessage)
 
 		capabilityContext := capabilityAccessContext{
 			SessionID:  sessionID,
@@ -713,12 +713,12 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 		}()
 
-		temperature := kernelModel.Conf.AI.Agent.Temperature
+		temperature := kernelModel.Conf.AI.Load().Agent.Temperature
 		if temperature < 0 || 2 < temperature {
 			temperature = 1.0
 		}
-		maxCompletionTokens := max(kernelModel.Conf.AI.Agent.MaxCompletionTokens, 0)
-		maxRounds := kernelModel.Conf.AI.Agent.MaxToolCallRounds
+		maxCompletionTokens := max(kernelModel.Conf.AI.Load().Agent.MaxCompletionTokens, 0)
+		maxRounds := kernelModel.Conf.AI.Load().Agent.MaxToolCallRounds
 		modelRound := 0
 		toolCallRounds := 0
 		overflowRetryPending := false
@@ -2085,8 +2085,10 @@ func availableSkillsSegment(skills []util.SkillInfo) string {
 }
 
 func buildSystemPrompt(language string, capabilities *capabilitySet, instructions ...string) string {
-	if kernelModel.Conf != nil && kernelModel.Conf.Appearance != nil && kernelModel.Conf.Appearance.Lang != "" {
-		language = kernelModel.Conf.Appearance.Lang
+	confAppearanceSnapshot := kernelModel.Conf.LoadAppearance()
+
+	if kernelModel.Conf != nil && confAppearanceSnapshot != nil && confAppearanceSnapshot.Lang != "" {
+		language = confAppearanceSnapshot.Lang
 	}
 
 	var sb strings.Builder

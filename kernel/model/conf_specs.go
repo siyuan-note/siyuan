@@ -1,0 +1,170 @@
+package model
+
+import (
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/task"
+	"github.com/siyuan-note/siyuan/kernel/util"
+	"sync/atomic"
+)
+
+func confSectionSpecs() map[string]registeredSection {
+	return map[string]registeredSection{
+		"appearance": appearanceSectionSpec(),
+		"fileTree":   newSectionSpec("fileTree", &Conf.FileTree, conf.NormalizeFileTree, fileTreeReactions()...),
+		"tag":        newSectionSpec("tag", &Conf.Tag, conf.NormalizeTag),
+		"editor":     newSectionSpec("editor", &Conf.Editor, conf.NormalizeEditor, editorReactions()...),
+		"export":     newSectionSpec("export", &Conf.Export, conf.NormalizeExport, exportReactions()...),
+		"graph":      newSectionSpec("graph", &Conf.Graph, conf.NormalizeGraph),
+		"uiLayout":   newSectionSpec("uiLayout", &Conf.UILayout, conf.NormalizeUILayout),
+		"system":     newSectionSpec("system", &Conf.System, conf.NormalizeSystem, systemReactions()...),
+		"keymap":     newSectionSpec("keymap", &Conf.Keymap, conf.NormalizeKeymap),
+		"sync":       newSectionSpec("sync", &Conf.Sync, conf.NormalizeSync),
+		"search":     newSectionSpec("search", &Conf.Search, conf.NormalizeSearch, searchReactions()...),
+		"flashcard":  flashcardSectionSpec(),
+		"ai":         newSectionSpec("ai", &Conf.AI, conf.NormalizeAI),
+		"ocr":        ocrSectionSpec(),
+		"secrets":    newSectionSpec("secrets", &Conf.Secrets, conf.NormalizeSecrets),
+		"variables":  newSectionSpec("variables", &Conf.Variables, conf.NormalizeVariables),
+		"bazaar":     newSectionSpec("bazaar", &Conf.Bazaar, conf.NormalizeBazaar, bazaarReactions()...),
+		"stat":       newSectionSpec("stat", &Conf.Stat, conf.NormalizeStat),
+		"api":        newSectionSpec("api", &Conf.Api, conf.NormalizeAPI),
+		"repo":       newSectionSpec("repo", &Conf.Repo, conf.NormalizeRepo),
+		"publish":    publishSectionSpec(),
+		"onboarding": newSectionSpec("onboarding", &Conf.Onboarding, conf.NormalizeOnboarding),
+		"snippet":    newSectionSpec("snippet", &Conf.Snippet, conf.NormalizeSnippet, Reaction[*conf.Snpt]{Name: "reload-snippet", Changed: func(old, next *conf.Snpt) bool { return true }, Apply: func(old, next *conf.Snpt) { PushReloadSnippet(next) }}),
+	}
+}
+
+var BazaarPetalStateRevision atomic.Uint64
+
+func bazaarReactions() []Reaction[*conf.Bazaar] {
+	return []Reaction[*conf.Bazaar]{{Name: "petal-state", Changed: func(old, next *conf.Bazaar) bool {
+		return petalsEnabled(old) != petalsEnabled(next) || old.PetalDisabled != next.PetalDisabled
+	}, Apply: func(old, next *conf.Bazaar) {
+		enabled := petalsEnabled(next)
+		if petalsEnabled(old) != enabled {
+			if enabled && OnKernelPluginsStart != nil {
+				OnKernelPluginsStart()
+			}
+			if !enabled && OnKernelPluginsStop != nil {
+				OnKernelPluginsStop()
+			}
+		}
+		PushReloadAllEnabledPlugins(enabled, next.PetalDisabled, BazaarPetalStateRevision.Add(1), true)
+	}}}
+}
+
+func appearanceSectionSpec() *SectionSpec[*conf.Appearance] {
+	spec := newSectionSpec("appearance", &Conf.Appearance, func(value *conf.Appearance) *conf.Appearance {
+		return conf.NormalizeAppearance(value, util.IsMobileContainer())
+	}, Reaction[*conf.Appearance]{Name: "appearance-resources", Changed: func(old, next *conf.Appearance) bool {
+		return old.Lang != next.Lang || old.Icon != next.Icon || old.ThemeLight != next.ThemeLight ||
+			old.ThemeDark != next.ThemeDark || old.Mode != next.Mode || old.ModeOS != next.ModeOS
+	}, Apply: func(old, next *conf.Appearance) {
+		InitAppearance()
+		WatchThemes()
+		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance.Load())
+	}})
+	spec.Store = func(value *conf.Appearance) {
+		Conf.Appearance.Store(value)
+		Conf.Lang = util.LangToBCP47(value.Lang)
+		util.Lang = Conf.Lang
+	}
+	return spec
+}
+
+func systemReactions() []Reaction[*conf.System] {
+	return []Reaction[*conf.System]{{Name: "network-proxy", Changed: func(old, next *conf.System) bool {
+		return old.NetworkProxy == nil || old.NetworkProxy.String() != next.NetworkProxy.String() ||
+			old.NetworkProxy.IsSystem() != next.NetworkProxy.IsSystem()
+	}, Apply: func(old, next *conf.System) {
+		util.SetNetworkProxy(next.NetworkProxy.String(), next.NetworkProxy.IsSystem())
+	}}}
+}
+
+func flashcardSectionSpec() *SectionSpec[*conf.Flashcard] {
+	var warning string
+	spec := newSectionSpec("flashcard", &Conf.Flashcard, func(value *conf.Flashcard) *conf.Flashcard {
+		value, warning = conf.NormalizeFlashcard(value)
+		return value
+	})
+	spec.Validate = func(value *conf.Flashcard) []Issue {
+		if warning != "" {
+			return []Issue{{Field: "flashcard.weights", Severity: "warning", Message: warning}}
+		}
+		return nil
+	}
+	return spec
+}
+
+// publishSectionSpec 在所有写入路径校验启用的认证账户，失败时保留现有凭据。
+func publishSectionSpec() *SectionSpec[*conf.Publish] {
+	spec := newSectionSpec("publish", &Conf.Publish, conf.NormalizePublish)
+	spec.Validate = func(value *conf.Publish) []Issue {
+		if !value.Auth.Enable {
+			return nil
+		}
+		usernames := map[string]bool{}
+		for _, account := range value.Auth.Accounts {
+			key := 0
+			if account == nil || account.Username == "" {
+				key = 361
+			} else if usernames[account.Username] {
+				key = 362
+			} else if len(account.Password) < 8 {
+				key = 363
+			}
+			if key != 0 {
+				return []Issue{{Field: "publish.auth.accounts", Severity: "error", Message: Conf.Language(key)}}
+			}
+			usernames[account.Username] = true
+		}
+		return nil
+	}
+	return spec
+}
+
+func editorReactions() []Reaction[*conf.Editor] {
+	return []Reaction[*conf.Editor]{
+		{Name: "history-interval", Changed: func(old, next *conf.Editor) bool { return old.GenerateHistoryInterval != next.GenerateHistoryInterval }, Apply: func(old, next *conf.Editor) { GenerateFileHistory(); ChangeHistoryTick(next.GenerateHistoryInterval) }},
+		{Name: "virtual-block-ref", Changed: func(old, next *conf.Editor) bool {
+			return old.VirtualBlockRef != next.VirtualBlockRef || old.VirtualBlockRefInclude != next.VirtualBlockRefInclude || old.VirtualBlockRefExclude != next.VirtualBlockRefExclude
+		}, Apply: func(old, next *conf.Editor) { ResetVirtualBlockRefCache() }},
+		{Name: "readonly", Changed: func(old, next *conf.Editor) bool { return old.ReadOnly != next.ReadOnly }, Apply: func(old, next *conf.Editor) {
+			util.BroadcastByType("protyle", "readonly", 0, "", next.ReadOnly)
+			util.BroadcastByType("main", "readonly", 0, "", next.ReadOnly)
+		}},
+	}
+}
+
+func fileTreeReactions() []Reaction[*conf.FileTree] {
+	return []Reaction[*conf.FileTree]{
+		{Name: "sort", Changed: func(old, next *conf.FileTree) bool { return old.Sort != next.Sort }, Apply: func(old, next *conf.FileTree) { PushDocSortModeChanged("global", "", "", "/", &next.Sort) }},
+		{Name: "box-document", Changed: func(old, next *conf.FileTree) bool {
+			return (old.BoxDocEnabled != nil && *old.BoxDocEnabled) != (next.BoxDocEnabled != nil && *next.BoxDocEnabled)
+		}, Apply: func(old, next *conf.FileTree) { RefreshBoxDocFeature() }},
+	}
+}
+
+func searchReactions() []Reaction[*conf.Search] {
+	return []Reaction[*conf.Search]{
+		{Name: "index", Changed: func(old, next *conf.Search) bool {
+			return old.CaseSensitive != next.CaseSensitive || old.HanSensitiveVal() != next.HanSensitiveVal() || old.IndexAssetPath != next.IndexAssetPath
+		}, Apply: func(old, next *conf.Search) {
+			if old.IndexAssetPath == next.IndexAssetPath {
+				task.AppendTask(task.DatabaseIndexFTS, ReindexFTS)
+			} else {
+				FullReindex(false)
+			}
+		}},
+		{Name: "virtual-block-ref", Changed: func(old, next *conf.Search) bool {
+			return old.VirtualRefName != next.VirtualRefName || old.VirtualRefAlias != next.VirtualRefAlias || old.VirtualRefAnchor != next.VirtualRefAnchor || old.VirtualRefDoc != next.VirtualRefDoc
+		}, Apply: func(old, next *conf.Search) { ResetVirtualBlockRefCache() }},
+	}
+}
+
+func exportReactions() []Reaction[*conf.Export] {
+	return []Reaction[*conf.Export]{
+		{Name: "pandoc", Changed: func(old, next *conf.Export) bool { return old.PandocBin != next.PandocBin }, Apply: func(old, next *conf.Export) { util.InitPandoc(next.PandocBin) }},
+	}
+}

@@ -145,7 +145,7 @@ func TestPasswordChangePreservesDeletedHistoryRecovery(t *testing.T) {
 	}
 	Conf = NewAppConf()
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	if err := EnableEncryptedNotebook("old-review-password"); err != nil {
 		t.Fatal(err)
 	}
@@ -304,7 +304,11 @@ func TestMasterPasswordMigrationRetainsHistoryKeysAfterBoxRemoval(t *testing.T) 
 		}
 	}
 	Conf = NewAppConf()
-	Conf.NotebookCrypto, Conf.Sync = conf.NewNotebookCrypto(), conf.NewSync()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewNotebookCrypto(), conf.NewSync()
+		Conf.NotebookCrypto = confSectionValue0
+		Conf.Sync.Store(confSectionValue1)
+	}
 	if err := EnableEncryptedNotebook("migration-old"); err != nil {
 		t.Fatal(err)
 	}

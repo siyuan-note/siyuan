@@ -40,8 +40,8 @@ func TestExportExplicitEmbedHeadingLevels(t *testing.T) {
 	util.ConfDir = t.TempDir()
 	t.Cleanup(func() { util.ConfDir = oldConfDir })
 	setupExportRelatedTest(t, boxID)
-	Conf.Editor = conf.NewEditor()
-	Conf.Search = conf.NewSearch()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Search.Store(conf.NewSearch())
 	oldDB, oldQueue := util.DBPath, util.QueueDir
 	oldHistoryDB, oldAssetDB := util.HistoryDBPath, util.AssetContentDBPath
 	util.DBPath = filepath.Join(util.TempDir, "siyuan.db")

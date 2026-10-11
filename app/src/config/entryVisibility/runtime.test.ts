@@ -315,7 +315,7 @@ test("dock visibility menus follow profile scope order instead of the catalog or
     assert.deepEqual(Array.from(exports.getEntryOrder("dock")), ["file", "outline"]);
 });
 
-test("entry profile saves in settings windows send requests and flush pending changes", () => {
+test("entry profile saves in settings windows send requests and flush pending changes", async () => {
     const initial: Config.IEntryVisibility = {version: 6, active: "full", profiles: []};
     const events: string[] = [];
     const requests: Array<{url: string; config: Config.IEntryVisibility;
@@ -343,25 +343,28 @@ test("entry profile saves in settings windows send requests and flush pending ch
         getDockEntryOrderSnapshot: () => Object.fromEntries(DOCK_ORDER_SCOPES.map(scope => [scope, []])),
         mergeDockEntryOrderSnapshot,
         applyDockEntryOrderSnapshot: () => {},
-        fetchPost: (url: string, config: Config.IEntryVisibility,
-                    respond: (response: {code: number; data: Config.IEntryVisibility}) => void) => {
-            requests.push({url, config, respond});
-        },
+        config: {set: (path: string, config: Config.IEntryVisibility, applied: (data: unknown) => void) => {
+            return new Promise<{code: number; data: Config.IEntryVisibility}>(resolve => {
+                requests.push({url: path, config, respond: resolve});
+            }).then(response => { if (response.code === 0) applied({entryVisibility: response.data}); });
+        }},
     })});
     const simple = {...initial, active: "simple"};
     const full = {...initial};
     exports.saveEntryVisibility(simple);
     assert.equal(window.siyuan.config.appearance.entryVisibility, simple);
     assert.equal(requests.length, 1);
-    assert.equal(requests[0].url, "/api/setting/setEntryVisibility");
+    assert.equal(requests[0].url, "appearance.entryVisibility");
     assert.equal(requests[0].config, simple);
     assert.deepEqual(events, ["siyuan-entry-visibility"]);
     exports.saveEntryVisibility(full);
     assert.equal(requests.length, 1);
     requests[0].respond({code: 0, data: simple});
+    await new Promise(setImmediate);
     assert.equal(requests.length, 2);
     assert.equal(requests[1].config, full);
     assert.equal(window.siyuan.config.appearance.entryVisibility, full);
     requests[1].respond({code: 0, data: full});
-    assert.deepEqual(events, ["siyuan-entry-visibility", "siyuan-entry-visibility", "siyuan-entry-visibility"]);
+    await new Promise(setImmediate);
+    assert.deepEqual(events, ["siyuan-entry-visibility", "siyuan-entry-visibility"]);
 });

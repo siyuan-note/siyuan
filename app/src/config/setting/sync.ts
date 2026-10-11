@@ -1,6 +1,7 @@
 import {fetchSyncPost} from "../../util/fetch";
 import {systemConfig} from "../systemConfig";
 import {editorConfigApi} from "../tabs/editorRuntime";
+import {exportConfigApi} from "../tabs/exportRuntime";
 import {appearanceConfigApi} from "../tabs/appearanceRuntime";
 import {aiConfigApi} from "../tabs/ai/aiRuntime";
 import {objEquals} from "../../util/functions";
@@ -54,13 +55,16 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             syncSettingTasks(response.data.settingTasks);
             const includes = (key: string) => namespaces.has("*") || namespaces.has(key);
             if (includes("editor") && !objEquals(window.siyuan.config.editor, next.editor)) {
-                editorConfigApi.apply(next.editor);
+                await editorConfigApi.apply(next.editor);
             }
             if (includes("appearance") && !objEquals(window.siyuan.config.appearance, next.appearance)) {
-                appearanceConfigApi.apply(next.appearance);
+                await appearanceConfigApi.apply(next.appearance);
+            }
+            if (includes("export") && !objEquals(window.siyuan.config.export, next.export)) {
+                await exportConfigApi.apply(next.export);
             }
             if (includes("ai") && !objEquals(window.siyuan.config.ai, next.ai)) {
-                aiConfigApi.apply(next.ai);
+                await aiConfigApi.apply(next.ai);
             }
             if (includes("sync") && !objEquals(window.siyuan.config.sync, next.sync)) {
                 window.siyuan.config.sync = next.sync;
@@ -85,9 +89,9 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
                 window.siyuan.config.keymap = next.keymap;
             }
             /// #endif
-            const simple = ["export", "fileTree", "search", "flashcard", "secrets", "variables", "repo", "system", "bazaar", "publish", "ocr"] as const;
+            const simple = ["fileTree", "search", "flashcard", "secrets", "variables", "repo", "system", "bazaar", "publish", "ocr", "snippet", "tag", "graph", "uiLayout", "stat"] as const;
             for (const key of simple) {
-                if (includes(key)) {
+                if (includes(key) && (key !== "graph" || !window.siyuan.config.readonly)) {
                     Object.assign(window.siyuan.config, {[key]: next[key]});
                 }
             }
@@ -100,7 +104,7 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             /// #if !MOBILE
             const tabs: Record<string, TSettingTab> = {fileTree: "file", secrets: "secretsVariables", variables: "secretsVariables", system: "app", publish: "access"};
             const remountTabs = new Set<TSettingTab>();
-            for (const namespace of namespaces.has("*") ? [...simple, "editor", "keymap", "appearance", "ai", "sync"] : namespaces) {
+            for (const namespace of namespaces.has("*") ? [...simple, "editor", "export", "keymap", "appearance", "ai", "sync"] : namespaces) {
                 const tab = getSettingTabDefs().find(definition => definition.id === (tabs[namespace] || namespace));
                 if (tab && tab.id !== "ocr") remountTabs.add(tab.id);
             }

@@ -237,7 +237,7 @@ func CheckUpdate(showMsg bool) {
 		return
 	}
 
-	if Conf.System.IsMicrosoftStore {
+	if Conf.System.Load().IsMicrosoftStore {
 		return
 	}
 
@@ -270,6 +270,8 @@ func isVersionUpToDate(releaseVer string) bool {
 var skipInstallPkgPlatformCached = -1
 
 func skipNewVerInstallPkg() bool {
+	confSystemSnapshot := Conf.LoadSystem()
+
 	if skipInstallPkgPlatformCached == -1 {
 		skipInstallPkgPlatformCached = 0
 		if !gulu.OS.IsWindows() && !gulu.OS.IsDarwin() {
@@ -277,7 +279,7 @@ func skipNewVerInstallPkg() bool {
 		} else if util.ISMicrosoftStore || util.ContainerStd != util.Container {
 			skipInstallPkgPlatformCached = 1
 		} else if gulu.OS.IsWindows() {
-			plat := strings.ToLower(Conf.System.OSPlatform)
+			plat := strings.ToLower(confSystemSnapshot.OSPlatform)
 			// Windows 7, 8 and Server 2012 are no longer supported https://github.com/siyuan-note/siyuan/issues/7347
 			if strings.Contains(plat, " 7 ") || strings.Contains(plat, " 8 ") || strings.Contains(plat, "2012") {
 				skipInstallPkgPlatformCached = 1
@@ -285,7 +287,7 @@ func skipNewVerInstallPkg() bool {
 		}
 	}
 
-	if skipInstallPkgPlatformCached == 1 || !Conf.System.DownloadInstallPkg {
+	if skipInstallPkgPlatformCached == 1 || !confSystemSnapshot.DownloadInstallPkg {
 		return true
 	}
 	return false

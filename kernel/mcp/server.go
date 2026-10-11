@@ -143,10 +143,10 @@ func externalMCPToolAllowed(tool *tools.Tool) bool {
 	if tool == nil || tool.AgentOnly || tool.Source == "mcp" || tool.Runtime == "mcp" {
 		return false
 	}
-	if model.Conf == nil || model.Conf.AI == nil || model.Conf.AI.MCP == nil {
+	if model.Conf == nil || model.Conf.AI.Load() == nil || model.Conf.AI.Load().MCP == nil {
 		return true
 	}
-	return model.Conf.AI.MCP.ExposurePolicy.Allows(tools.CapabilityIDForTool(tool))
+	return model.Conf.AI.Load().MCP.ExposurePolicy.Allows(tools.CapabilityIDForTool(tool))
 }
 
 func newServer() *mcpsdk.Server {

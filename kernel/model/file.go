@@ -210,6 +210,8 @@ func (box *Box) moveCorruptedData(filePath string) {
 }
 
 func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[string]string) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	ret = []map[string]string{}
 	var results []searchDocResult
 
@@ -275,7 +277,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 		keywords := strings.Fields(keyword)
 		if 0 < len(keywords) {
 			for _, box := range boxes {
-				if containsSearchDocKeyword(box.Name, keywords, Conf.Search.CaseSensitive) {
+				if containsSearchDocKeyword(box.Name, keywords, confSearchSnapshot.CaseSensitive) {
 					data := map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon}
 					if flashcard {
 						newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
@@ -286,12 +288,12 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 						data["dueFlashcardCount"] = strconv.Itoa(dueFlashcardCount)
 						data["flashcardCount"] = strconv.Itoa(flashcardCount)
 					}
-					results = append(results, searchDocResult{data: data, exact: isExactSearchDocMatch(box.Name, keyword, Conf.Search.CaseSensitive)})
+					results = append(results, searchDocResult{data: data, exact: isExactSearchDocMatch(box.Name, keyword, confSearchSnapshot.CaseSensitive)})
 				}
 			}
 
-			condition, args := buildSearchDocsCondition(keywords, excludeIDs, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo)
-			rootBlocks = queryRootBlocks(condition, keyword, Conf.Search.Limit, args...)
+			condition, args := buildSearchDocsCondition(keywords, excludeIDs, confSearchSnapshot.Name, confSearchSnapshot.Alias, confSearchSnapshot.Memo)
+			rootBlocks = queryRootBlocks(condition, keyword, confSearchSnapshot.Limit, args...)
 		} else {
 			for _, box := range boxes {
 				data := map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon}
@@ -329,7 +331,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 			data["dueFlashcardCount"] = strconv.Itoa(dueFlashcardCount)
 			data["flashcardCount"] = strconv.Itoa(flashcardCount)
 		}
-		results = append(results, searchDocResult{data: data, exact: isExactSearchDocBlockMatch(rootBlock, keyword, Conf.Search.CaseSensitive)})
+		results = append(results, searchDocResult{data: data, exact: isExactSearchDocBlockMatch(rootBlock, keyword, confSearchSnapshot.CaseSensitive)})
 	}
 
 	sortSearchDocResults(results)
@@ -473,7 +475,7 @@ func ResolveDocTreeSortMode(boxID, listPath string) (sortMode int, err error) {
 		}
 	}
 
-	sortMode = Conf.FileTree.Sort
+	sortMode = Conf.FileTree.Load().Sort
 	boxConf := box.GetConf()
 	if util.SortModeFileTree != boxConf.SortMode {
 		sortMode = boxConf.SortMode
@@ -648,6 +650,8 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes, quer
 // 加密笔记本打开文档时传入 boxID，blocktree/content 查询走加密 db；boxID 为空时 fall-through 全局 db。
 func GetDocInBox(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo bool, boxID string) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxIDOut, docPath string, isBacklinkExpand bool, keywords []string, headingNumbers map[string]string, docInfo *BlockInfo, err error) {
+	confEditorSnapshot := Conf.LoadEditor()
+
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/GetDoc")
 	//pprof.StartCPUProfile(cpuProfile)
@@ -765,8 +769,8 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	blockCount = tree.DocBlockCount()
 	if shouldReturnHeadingNumbers(mode, isBacklink) {
 		headingNumbers = map[string]string{}
-		if headingNumberEnabled(tree, Conf.Editor.HeadingNumber) {
-			headingNumbers = headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat)
+		if headingNumberEnabled(tree, confEditorSnapshot.HeadingNumber) {
+			headingNumbers = headingNumberLabels(tree, confEditorSnapshot.HeadingNumberFormat)
 		}
 	}
 	if ast.NodeDocument == node.Type {
@@ -802,7 +806,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 			childCount += treenode.CountBlockNodes(n)
 		}
 
-		if childCount > Conf.Editor.DynamicLoadBlocks {
+		if childCount > Conf.Editor.Load().DynamicLoadBlocks {
 			scroll = true
 			return ast.WalkStop
 		}
@@ -935,7 +939,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 						if ast.NodeCodeBlockCode == n.Type && !treenode.IsChartCodeBlockCode(n) {
 							// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
 							code := string(n.Tokens)
-							markedCode, matched := search.EncloseHighlightingRaw(code, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.CaseSensitive, false)
+							markedCode, matched := search.EncloseHighlightingRaw(code, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.Load().CaseSensitive, false)
 							if matched {
 								n.Tokens = gulu.Str.ToBytes(markedCode)
 								return ast.WalkContinue
@@ -1029,7 +1033,7 @@ func loadNodesByStartEnd(tree *parse.Tree, startID, endID string) (nodes []*ast.
 			break
 		}
 
-		if len(nodes) >= Conf.Editor.DynamicLoadBlocks {
+		if len(nodes) >= Conf.Editor.Load().DynamicLoadBlocks {
 			// 如果加载到指定数量的块则停止加载
 			break
 		}
@@ -1422,14 +1426,14 @@ func applyRequestedDocCreateTemplate(arg map[string]any, markdown, docID string)
 
 // ResolveDocCreateSaveLocation 按笔记本配置和全局配置解析新建文档的存放位置。
 func ResolveDocCreateSaveLocation(currentBoxID string) (boxID, pathTemplate string) {
-	pathTemplate = Conf.FileTree.DocCreateSavePath
+	pathTemplate = Conf.FileTree.Load().DocCreateSavePath
 	if box := Conf.Box(currentBoxID); nil != box {
 		boxConf := box.GetConf()
 		boxID = boxConf.DocCreateSaveBox
 		pathTemplate = boxConf.DocCreateSavePath
 	}
 	if "" == boxID && "" == pathTemplate {
-		boxID = Conf.FileTree.DocCreateSaveBox
+		boxID = Conf.FileTree.Load().DocCreateSaveBox
 	}
 	if "" != boxID && nil == Conf.Box(boxID) {
 		boxID = currentBoxID
@@ -1438,7 +1442,7 @@ func ResolveDocCreateSaveLocation(currentBoxID string) (boxID, pathTemplate stri
 		boxID = currentBoxID
 	}
 	if "" == pathTemplate {
-		pathTemplate = Conf.FileTree.DocCreateSavePath
+		pathTemplate = Conf.FileTree.Load().DocCreateSavePath
 	}
 	return
 }
@@ -1754,7 +1758,7 @@ func moveDocs(fromPaths []string, toBoxID, toPath string, callback any, placeByC
 	for _, fromPath := range fromPaths {
 		fromBox := pathsBoxes[fromPath]
 		childDepth := util.GetChildDocDepth(filepath.Join(util.DataDir, fromBox.ID, fromPath))
-		if depth := strings.Count(toPath, "/") + childDepth; 6 < depth && !Conf.FileTree.AllowCreateDeeper {
+		if depth := strings.Count(toPath, "/") + childDepth; 6 < depth && !Conf.FileTree.Load().AllowCreateDeeper {
 			err = errors.New(Conf.Language(118))
 			return
 		}
@@ -1786,6 +1790,8 @@ func moveDocs(fromPaths []string, toBoxID, toPath string, callback any, placeByC
 	refresh := newMoveDocsRefresh()
 	movedDocs := make([]moveDocResult, 0, len(fromPaths))
 	defer func() {
+		confFileTreeSnapshot := Conf.LoadFileTree()
+
 		if 0 < len(movedDocs) {
 			// 部分移动失败时也保存已完成文档的整组顺序，再通知前端刷新。
 			if placeByConf {
@@ -1794,7 +1800,7 @@ func moveDocs(fromPaths []string, toBoxID, toPath string, callback any, placeByC
 					ids = append(ids, util.GetTreeID(moved.NewPath))
 				}
 				position := "after"
-				if Conf.FileTree.CreateDocAtTop != nil && *Conf.FileTree.CreateDocAtTop {
+				if confFileTreeSnapshot.CreateDocAtTop != nil && *confFileTreeSnapshot.CreateDocAtTop {
 					position = "before"
 				}
 				if sortErr := toBox.placeDocsInSiblingOrder(strings.TrimSuffix(toPath, ".sy"), ids, "", position); sortErr != nil {
@@ -2412,7 +2418,7 @@ func validateCreateDoc(boxID, p, title string, titleEmpty bool) (ret *createDocV
 		hPath = path.Join(parentTree.HPath, title)
 	}
 
-	if depth := strings.Count(p, "/"); 7 < depth && !Conf.FileTree.AllowCreateDeeper {
+	if depth := strings.Count(p, "/"); 7 < depth && !Conf.FileTree.Load().AllowCreateDeeper {
 		return nil, errors.New(Conf.Language(118))
 	}
 	if box.Exist(p) {
@@ -3165,7 +3171,7 @@ func (box *Box) removeSort(ids []string) {
 }
 
 func (box *Box) setSortByConf(parentPath, id string) {
-	if *Conf.FileTree.CreateDocAtTop {
+	if *Conf.FileTree.Load().CreateDocAtTop {
 		box.addMinSort(parentPath, id)
 	} else {
 		box.addMaxSort(parentPath, id)

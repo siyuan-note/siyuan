@@ -50,7 +50,7 @@ func TestBuiltinSkillRejectsForgedContextAndMutations(t *testing.T) {
 
 func TestBuiltinSkillTrustedActivationAndResourceReads(t *testing.T) {
 	setSkillToolTestEnvironment(t)
-	model.Conf.Variables = &kernelConf.Variables{Items: []*kernelConf.Variable{{Name: "PLUGIN_NAME", Value: "modified-by-user-variable"}}}
+	model.Conf.Variables.Store(&kernelConf.Variables{Items: []*kernelConf.Variable{{Name: "PLUGIN_NAME", Value: "modified-by-user-variable"}}})
 	operations := []string{}
 	ctx := util.WithPluginDevelopmentAccess(context.Background(), func(operation string) (*util.PluginDevelopmentGrant, error) {
 		operations = append(operations, operation)
@@ -75,12 +75,12 @@ func TestBuiltinSkillTrustedActivationAndResourceReads(t *testing.T) {
 		t.Fatalf("resource read activated skill: %+v, %v, %v", result, err, operations)
 	}
 	operations = nil
-	model.Conf.AI.Agent.Skills.BuiltinDisabled = []string{util.BuiltinPluginSkillID}
+	model.Conf.AI.Load().Agent.Skills.BuiltinDisabled = []string{util.BuiltinPluginSkillID}
 	result, err = skillContextHandler(ctx, map[string]any{"source": "builtin", "name": util.PluginDevelopmentSkillName})
 	if err != nil || !result.IsError || strings.Join(operations, ",") != "load" {
 		t.Fatalf("disabled load activated skill: %+v, %v, %v", result, err, operations)
 	}
-	model.Conf.AI.Agent.Skills.BuiltinDisabled = nil
+	model.Conf.AI.Load().Agent.Skills.BuiltinDisabled = nil
 	ctx = util.WithPluginDevelopmentAccess(context.Background(), func(operation string) (*util.PluginDevelopmentGrant, error) {
 		if operation == "loaded" {
 			return nil, errors.New("choice revoked")
@@ -105,8 +105,8 @@ func setSkillToolTestEnvironment(t *testing.T) string {
 	util.HomeDir = filepath.Join(root, "home")
 	util.ConfDir = filepath.Join(util.WorkspaceDir, "conf")
 	model.Conf = model.NewAppConf()
-	model.Conf.AI = kernelConf.NewAI()
-	model.Conf.Variables = &kernelConf.Variables{Items: []*kernelConf.Variable{{Name: "VALUE", Value: "resolved"}}}
+	model.Conf.AI.Store(kernelConf.NewAI())
+	model.Conf.Variables.Store(&kernelConf.Variables{Items: []*kernelConf.Variable{{Name: "VALUE", Value: "resolved"}}})
 	t.Cleanup(func() {
 		util.WorkspaceDir, util.DataDir = originalWorkspaceDir, originalDataDir
 		util.HomeDir, util.ConfDir = originalHomeDir, originalConfDir

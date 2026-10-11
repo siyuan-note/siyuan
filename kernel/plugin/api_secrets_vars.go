@@ -37,13 +37,13 @@ func injectSecretsVars(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (
 
 	secrets := rt.NewObject()
 	lo.Must0(secrets.Set("resolve", rt.ToValue(makeResolver(func(tpl string) string {
-		return model.Conf.Secrets.Resolve(tpl)
+		return model.Conf.Secrets.Load().Resolve(tpl)
 	}))))
 	lo.Must0(siyuan.Set("secrets", secrets))
 
 	vars := rt.NewObject()
 	lo.Must0(vars.Set("resolve", rt.ToValue(makeResolver(func(tpl string) string {
-		return model.Conf.Variables.Resolve(tpl)
+		return model.Conf.Variables.Load().Resolve(tpl)
 	}))))
 	lo.Must0(siyuan.Set("vars", vars))
 

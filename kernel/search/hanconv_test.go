@@ -67,10 +67,10 @@ func TestNormalizeSearchText(t *testing.T) {
 }
 
 func TestEncloseHighlightingHanInsensitive(t *testing.T) {
-	old := util.SearchHanSensitive
-	defer func() { util.SearchHanSensitive = old }()
+	old := util.SearchHanSensitive.Load()
+	defer func() { util.SearchHanSensitive.Store(old) }()
 
-	util.SearchHanSensitive = false
+	util.SearchHanSensitive.Store(false)
 	got := EncloseHighlighting("詩經研究", []string{"诗经"}, "<mark>", "</mark>", false, false)
 	if want := "<mark>詩經</mark>研究"; want != got {
 		t.Errorf("繁简不敏感高亮 = %q, want %q", got, want)
@@ -82,7 +82,7 @@ func TestEncloseHighlightingHanInsensitive(t *testing.T) {
 		t.Errorf("大小写+繁简 = %q, want %q", got, want)
 	}
 
-	util.SearchHanSensitive = true
+	util.SearchHanSensitive.Store(true)
 	got = EncloseHighlighting("詩經研究", []string{"诗经"}, "<mark>", "</mark>", false, false)
 	if want := "詩經研究"; want != got {
 		t.Errorf("默认（区分繁简）不应高亮，got %q", got)

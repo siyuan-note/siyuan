@@ -336,7 +336,7 @@ func getBlockRefText(id string, tree *parse.Tree) (ret string) {
 	}
 
 	ret = getNodeRefText(node)
-	ret = maxContent(ret, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
+	ret = maxContent(ret, Conf.Editor.Load().BlockRefDynamicAnchorTextMaxLen)
 	return
 }
 
@@ -350,7 +350,7 @@ func getNodeRefText(node *ast.Node) string {
 		ret = util.EscapeHTML(ret)
 		return ret
 	}
-	return getNodeRefText0(node, Conf.Editor.BlockRefDynamicAnchorTextMaxLen, true)
+	return getNodeRefText0(node, Conf.Editor.Load().BlockRefDynamicAnchorTextMaxLen, true)
 }
 
 func getNodeAvBlockText(node *ast.Node, avID string) (icon, content string) {

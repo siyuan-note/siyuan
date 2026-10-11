@@ -63,6 +63,8 @@ var runningSessions = map[string]*runningSession{}
 var agentChat = contractHandler(apicontract.AIAgentChat, agentChatContract, aiProviderAdmission)
 
 func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) apicontract.Response[apicontract.Null] {
+	confAISnapshot := model.Conf.LoadAI()
+
 	req, err := aiAgentRequest(request)
 	if err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
@@ -71,9 +73,9 @@ func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) a
 	var selectedProvider *conf.Provider
 	var selectedModel *conf.Model
 	if modelID != "" {
-		selectedProvider, selectedModel = model.Conf.AI.GetModel(modelID)
+		selectedProvider, selectedModel = confAISnapshot.GetModel(modelID)
 	} else {
-		selectedProvider, selectedModel = model.Conf.AI.GetAgentModel()
+		selectedProvider, selectedModel = confAISnapshot.GetAgentModel()
 	}
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()
@@ -83,8 +85,8 @@ func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) a
 	}
 	client := model.NewAIProviderClient(selectedProvider, selectedModel.Name)
 
-	confirmTimeout := resolveAgentConfirmTimeout(model.Conf.AI.Agent.ConfirmTimeout)
-	maxRetries := model.Conf.AI.Agent.MaxRetries
+	confirmTimeout := resolveAgentConfirmTimeout(confAISnapshot.Agent.ConfirmTimeout)
+	maxRetries := confAISnapshot.Agent.MaxRetries
 	if maxRetries < 0 {
 		maxRetries = 0
 	}
@@ -94,7 +96,7 @@ func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) a
 	if requestTimeout <= 0 {
 		requestTimeout = 30 * time.Second
 	}
-	streamIdleTimeout := time.Duration(model.Conf.AI.Agent.StreamIdleTimeout) * time.Second
+	streamIdleTimeout := time.Duration(confAISnapshot.Agent.StreamIdleTimeout) * time.Second
 	if streamIdleTimeout <= 0 {
 		streamIdleTimeout = 120 * time.Second
 	}
@@ -152,7 +154,7 @@ func agentChatContract(c *gin.Context, request apicontract.AIAgentChatRequest) a
 			return
 		}
 
-		deadlineTimer, deadline := newAgentSessionDeadline(model.Conf.AI.Agent.SessionTimeout)
+		deadlineTimer, deadline := newAgentSessionDeadline(model.Conf.AI.Load().Agent.SessionTimeout)
 		if deadlineTimer != nil {
 			defer deadlineTimer.Stop()
 		}
@@ -313,14 +315,15 @@ func lsCapabilitiesContract(c *gin.Context, req apicontract.EmptyRequest) apicon
 var agentChatTitle = contractHandler(apicontract.AIAgentTitle, agentChatTitleContract)
 
 func agentChatTitleContract(c *gin.Context, req apicontract.AITitleRequest) apicontract.Response[string] {
+	confAISnapshot := model.Conf.LoadAI()
 
 	modelID := req.Model
 	var selectedProvider *conf.Provider
 	var selectedModel *conf.Model
 	if modelID != "" {
-		selectedProvider, selectedModel = model.Conf.AI.GetModel(modelID)
+		selectedProvider, selectedModel = confAISnapshot.GetModel(modelID)
 	} else {
-		selectedProvider, selectedModel = model.Conf.AI.GetAgentModel()
+		selectedProvider, selectedModel = confAISnapshot.GetAgentModel()
 	}
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()

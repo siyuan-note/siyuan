@@ -54,7 +54,7 @@ import (
 var historyTicker = time.NewTicker(time.Minute * 10)
 
 func AutoGenerateFileHistory() {
-	ChangeHistoryTick(Conf.Editor.GenerateHistoryInterval)
+	ChangeHistoryTick(Conf.Editor.Load().GenerateHistoryInterval)
 	for {
 		<-historyTicker.C
 		task.AppendTask(task.HistoryGenerateFile, GenerateFileHistory)
@@ -65,7 +65,7 @@ func AutoGenerateFileHistory() {
 // 锁定后定时器（GenerateFileHistory）无法为加密笔记本生成历史（不在 GetOpenedBoxes 里）。
 func GenerateFileHistoryForBox(box *Box) {
 	defer logging.Recover()
-	if 1 > Conf.Editor.GenerateHistoryInterval {
+	if 1 > Conf.Editor.Load().GenerateHistoryInterval {
 		return
 	}
 	box.generateDocHistory0()
@@ -74,7 +74,7 @@ func GenerateFileHistoryForBox(box *Box) {
 func GenerateFileHistory() {
 	defer logging.Recover()
 
-	if 1 > Conf.Editor.GenerateHistoryInterval {
+	if 1 > Conf.Editor.Load().GenerateHistoryInterval {
 		return
 	}
 
@@ -858,7 +858,7 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 		stmt += " AND path LIKE '%/storage/av/%'"
 	}
 
-	ago := time.Now().Add(-24 * time.Hour * time.Duration(Conf.Editor.HistoryRetentionDays))
+	ago := time.Now().Add(-24 * time.Hour * time.Duration(Conf.Editor.Load().HistoryRetentionDays))
 	stmt += " AND CAST(created AS INTEGER) > " + fmt.Sprintf("%d", ago.Unix()) + ""
 	return
 }
@@ -1056,7 +1056,7 @@ func clearOutdatedHistoryDir() {
 	}
 
 	now := time.Now()
-	ago := now.Add(-24 * time.Hour * time.Duration(Conf.Editor.HistoryRetentionDays)).Unix()
+	ago := now.Add(-24 * time.Hour * time.Duration(Conf.Editor.Load().HistoryRetentionDays)).Unix()
 	var removes []string
 	for _, dir := range dirs {
 		dirInfo, err := dir.Info()

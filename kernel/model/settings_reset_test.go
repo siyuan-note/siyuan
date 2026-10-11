@@ -21,10 +21,15 @@ import (
 func settingsResetTestEnvironment(t *testing.T) {
 	t.Helper()
 	previousConf, previousConfDir, previousDataDir, previousReadonly := Conf, util.ConfDir, util.DataDir, util.ReadOnly
-	previousMarkdown, previousSingleLine, previousWarning := util.MarkdownSettings, util.UseSingleLineSave, util.LargeFileWarningSize
+	previousMarkdown, previousSingleLine, previousWarning := util.MarkdownSettings.Load(), util.UseSingleLineSave.Load(), util.LargeFileWarningSize.Load()
 	t.Cleanup(func() {
 		Conf, util.ConfDir, util.DataDir, util.ReadOnly = previousConf, previousConfDir, previousDataDir, previousReadonly
-		util.MarkdownSettings, util.UseSingleLineSave, util.LargeFileWarningSize = previousMarkdown, previousSingleLine, previousWarning
+		{
+			derivedValue0, derivedValue1, derivedValue2 := previousMarkdown, previousSingleLine, previousWarning
+			util.MarkdownSettings.Store(derivedValue0)
+			util.UseSingleLineSave.Store(derivedValue1)
+			util.LargeFileWarningSize.Store(derivedValue2)
+		}
 	})
 	root := t.TempDir()
 	util.ConfDir, util.DataDir, util.ReadOnly = filepath.Join(root, "conf"), filepath.Join(root, "data"), false
@@ -35,8 +40,8 @@ func settingsResetTestEnvironment(t *testing.T) {
 	}
 	Conf = NewAppConf()
 	Conf.Lang = "ja"
-	Conf.System = conf.NewSystem()
-	Conf.Editor = conf.NewEditor()
+	Conf.System.Store(conf.NewSystem())
+	Conf.Editor.Store(conf.NewEditor())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	Conf.NotebookCrypto.MasterSalt = []byte("retained-salt")
 	Conf.NotebookCrypto.HistoryKEKs = [][]byte{[]byte("retained-history-key")}
@@ -44,37 +49,41 @@ func settingsResetTestEnvironment(t *testing.T) {
 	Conf.CookieKey = "cookie-signing-key"
 	Conf.MCPOAuth = "encrypted-oauth"
 	Conf.UserData = "encrypted-account"
-	Conf.Api = conf.NewAPI()
-	Conf.Api.Token = "preserved-token"
-	Conf.AI = conf.NewAI()
-	Conf.AI.Providers = []*conf.Provider{{APIKey: "retained-provider-key"}}
+	Conf.Api.Store(conf.NewAPI())
+	Conf.Api.Load().Token = "preserved-token"
+	Conf.AI.Store(conf.NewAI())
+	Conf.AI.Load().Providers = []*conf.Provider{{APIKey: "retained-provider-key"}}
 	Conf.OIDC.ClientSecret = "retained-oidc-secret"
-	Conf.Secrets = &conf.Secrets{Items: []*conf.Secret{{Name: "secret", Value: "retained-secret"}}}
-	Conf.Sync = conf.NewSync()
-	Conf.Repo = conf.NewRepo()
-	Conf.Snippet = conf.NewSnpt()
-	Conf.Bazaar = conf.NewBazaar()
-	Conf.Bazaar.PetalDisabled = true
+	Conf.Secrets.Store(&conf.Secrets{Items: []*conf.Secret{{Name: "secret", Value: "retained-secret"}}})
+	Conf.Sync.Store(conf.NewSync())
+	Conf.Repo.Store(conf.NewRepo())
+	Conf.Snippet.Store(conf.NewSnpt())
+	Conf.Bazaar.Store(conf.NewBazaar())
+	Conf.Bazaar.Load().PetalDisabled = true
 	Conf.Save()
 }
 
 func TestSettingsResetPreservesDataAndProtectedConfiguration(t *testing.T) {
 	settingsResetTestEnvironment(t)
-	Conf.Editor.FontSize = 31
-	Conf.Editor.HistoryRetentionDays = 3650
-	Conf.System.AutoLaunch2 = 2
-	Conf.System.NetworkServe = true
-	Conf.System.NetworkServeTLS = true
-	Conf.System.NetworkProxy = &conf.NetworkProxy{Host: "proxy"}
-	Conf.System.LockScreenMode = 1
-	Conf.System.EncryptedNotebookFollowSystemLock = true
-	Conf.System.DownloadInstallPkg = false
-	Conf.System.SettingsWindow = true
-	util.MarkdownSettings = util.NewMarkdown()
-	util.MarkdownSettings.InlineMath = false
-	util.UseSingleLineSave, util.LargeFileWarningSize = false, 64
+	Conf.Editor.Load().FontSize = 31
+	Conf.Editor.Load().HistoryRetentionDays = 3650
+	Conf.System.Load().AutoLaunch2 = 2
+	Conf.System.Load().NetworkServe = true
+	Conf.System.Load().NetworkServeTLS = true
+	Conf.System.Load().NetworkProxy = &conf.NetworkProxy{Host: "proxy"}
+	Conf.System.Load().LockScreenMode = 1
+	Conf.System.Load().EncryptedNotebookFollowSystemLock = true
+	Conf.System.Load().DownloadInstallPkg = false
+	Conf.System.Load().SettingsWindow = true
+	util.MarkdownSettings.Store(util.NewMarkdown())
+	util.MarkdownSettings.Load().InlineMath = false
+	{
+		derivedValue0, derivedValue1 := false, 64
+		util.UseSingleLineSave.Store(derivedValue0)
+		util.LargeFileWarningSize.Store(derivedValue1)
+	}
 	keymap := conf.Keymap{"general": map[string]any{"test": "custom"}, "editor": map[string]any{}, "plugin": map[string]any{"kept": true}}
-	Conf.Keymap = &keymap
+	Conf.Keymap.Store(&keymap)
 	Conf.Save()
 	protected := *Conf
 	storage := []byte(`{"local-zoom":2,"local-mobile-bars":{"autoHide":false},"local-layouts":[{"name":"saved"}],"plugin-unknown":{"key":"value"}}`)
@@ -90,26 +99,26 @@ func TestSettingsResetPreservesDataAndProtectedConfiguration(t *testing.T) {
 		if err := ResetSettings(); err != nil {
 			t.Fatal(err)
 		}
-		if Conf.Editor.FontSize != 16 || !Conf.Editor.Markdown.InlineMath || !Conf.FileTree.UseSingleLineSave || Conf.FileTree.LargeFileWarningSize != 8 {
+		if Conf.Editor.Load().FontSize != 16 || !Conf.Editor.Load().Markdown.InlineMath || !Conf.FileTree.Load().UseSingleLineSave || Conf.FileTree.Load().LargeFileWarningSize != 8 {
 			t.Fatal("reset must not inherit mutable runtime defaults")
 		}
-		if Conf.Editor.HistoryRetentionDays != 3650 || Conf.Lang != "ja" || Conf.Appearance.Lang != "ja" {
+		if Conf.Editor.Load().HistoryRetentionDays != 3650 || Conf.Lang != "ja" || Conf.Appearance.Load().Lang != "ja" {
 			t.Fatal("retention and language must be preserved")
 		}
-		if Conf.NotebookCrypto != protected.NotebookCrypto || Conf.Api != protected.Api || Conf.AccessAuthCode != protected.AccessAuthCode ||
+		if Conf.NotebookCrypto != protected.NotebookCrypto || Conf.Api.Load() != protected.Api.Load() || Conf.AccessAuthCode != protected.AccessAuthCode ||
 			Conf.CookieKey != protected.CookieKey || Conf.MCPOAuth != protected.MCPOAuth || Conf.UserData != protected.UserData ||
-			Conf.Snippet != protected.Snippet || Conf.Bazaar != protected.Bazaar || Conf.AI != protected.AI ||
-			Conf.OIDC != protected.OIDC || Conf.Secrets != protected.Secrets || Conf.Sync != protected.Sync || Conf.Repo != protected.Repo {
+			Conf.Snippet.Load() != protected.Snippet.Load() || Conf.Bazaar.Load() != protected.Bazaar.Load() || Conf.AI.Load() != protected.AI.Load() ||
+			Conf.OIDC != protected.OIDC || Conf.Secrets.Load() != protected.Secrets.Load() || Conf.Sync.Load() != protected.Sync.Load() || Conf.Repo.Load() != protected.Repo.Load() {
 			t.Fatal("protected configuration changed")
 		}
-		if Conf.System.AutoLaunch2 != 2 || !Conf.System.NetworkServe || !Conf.System.NetworkServeTLS ||
-			Conf.System.NetworkProxy.Host != "proxy" || Conf.System.LockScreenMode != 1 || !Conf.System.EncryptedNotebookFollowSystemLock {
+		if Conf.System.Load().AutoLaunch2 != 2 || !Conf.System.Load().NetworkServe || !Conf.System.Load().NetworkServeTLS ||
+			Conf.System.Load().NetworkProxy.Host != "proxy" || Conf.System.Load().LockScreenMode != 1 || !Conf.System.Load().EncryptedNotebookFollowSystemLock {
 			t.Fatal("host, networking and authentication settings changed")
 		}
-		if Conf.System.SettingsWindow {
+		if Conf.System.Load().SettingsWindow {
 			t.Fatal("desktop settings window preference must be reset to its default")
 		}
-		if !reflect.DeepEqual((*Conf.Keymap)["plugin"], keymap["plugin"]) || (*Conf.Keymap)["general"] != nil {
+		if !reflect.DeepEqual((*Conf.Keymap.Load())["plugin"], keymap["plugin"]) || (*Conf.Keymap.Load())["general"] != nil {
 			t.Fatal("only built-in shortcuts should be reset")
 		}
 	}
@@ -143,11 +152,11 @@ func TestSettingsResetPreservesDataAndProtectedConfiguration(t *testing.T) {
 		bytes.Contains(data, []byte("retained-secret")) {
 		t.Fatal("reset persisted plaintext credentials")
 	}
-	reloaded.AI.DecryptAPIKeys()
+	reloaded.AI.Load().DecryptAPIKeys()
 	reloaded.OIDC.DecryptClientSecret()
-	reloaded.Secrets.Decrypt()
-	if reloaded.AI.Providers[0].APIKey != Conf.AI.Providers[0].APIKey ||
-		reloaded.OIDC.ClientSecret != Conf.OIDC.ClientSecret || reloaded.Secrets.Items[0].Value != Conf.Secrets.Items[0].Value {
+	reloaded.Secrets.Load().Decrypt()
+	if reloaded.AI.Load().Providers[0].APIKey != Conf.AI.Load().Providers[0].APIKey ||
+		reloaded.OIDC.ClientSecret != Conf.OIDC.ClientSecret || reloaded.Secrets.Load().Items[0].Value != Conf.Secrets.Load().Items[0].Value {
 		t.Fatal("credentials no longer decrypt after reset")
 	}
 }
@@ -200,7 +209,7 @@ func TestSettingsResetFailureAndRecovery(t *testing.T) {
 
 func TestSettingsResetRejectsCorruptionAndReadonly(t *testing.T) {
 	settingsResetTestEnvironment(t)
-	before := Conf.Editor
+	before := Conf.Editor.Load()
 	util.ReadOnly = true
 	if ResetSettings() == nil {
 		t.Fatal("readonly reset accepted")
@@ -209,7 +218,7 @@ func TestSettingsResetRejectsCorruptionAndReadonly(t *testing.T) {
 	if err := os.WriteFile(settingsResetPaths()[1], []byte("invalid json"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if ResetSettings() == nil || Conf.Editor != before {
+	if ResetSettings() == nil || Conf.Editor.Load() != before {
 		t.Fatal("corrupt storage reset must preserve configuration")
 	}
 	if err := os.WriteFile(settingsResetJournalPath(), []byte(`{"version":99,"files":[]}`), 0600); err != nil {
@@ -327,13 +336,13 @@ func TestSettingsResetRollbackFailureStopsWrites(t *testing.T) {
 					t.Fatalf("original configuration was not recovered: %s, %v", path, readErr)
 				}
 			}
-			Conf.Api.Token = "token-after-successful-recovery"
+			Conf.Api.Load().Token = "token-after-successful-recovery"
 			Conf.Save()
 			if err = recoverSettingsReset(); err != nil {
 				t.Fatal(err)
 			}
 			data, err := os.ReadFile(paths[0])
-			if err != nil || !bytes.Contains(data, []byte(Conf.Api.Token)) {
+			if err != nil || !bytes.Contains(data, []byte(Conf.Api.Load().Token)) {
 				t.Fatal("recovery reverted a later configuration save")
 			}
 		})

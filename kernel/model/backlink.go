@@ -1019,28 +1019,30 @@ func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword st
 
 // buildTreeBackmentionInBox 与 buildTreeBackmention 一致，但按 boxID 路由到加密 db 或全局 db。
 func buildTreeBackmentionInBox(defSQLBlock *sql.Block, refBlocks []*Block, keyword string, excludeBacklinkIDs *hashset.Set, beforeLen int, boxID string, notifiers ...BackmentionNotifier) (ret []*Block, mentionKeywords []string) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	ret = []*Block{}
 
 	var names, aliases []string
 	var fName, rootID string
 	if "d" == defSQLBlock.Type {
-		if Conf.Search.BacklinkMentionName {
+		if confSearchSnapshot.BacklinkMentionName {
 			names = sql.QueryBlockNamesByRootIDInBox(defSQLBlock.ID, boxID)
 		}
-		if Conf.Search.BacklinkMentionAlias {
+		if confSearchSnapshot.BacklinkMentionAlias {
 			aliases = sql.QueryBlockAliasesInBox(defSQLBlock.ID, boxID)
 		}
-		if Conf.Search.BacklinkMentionDoc {
+		if confSearchSnapshot.BacklinkMentionDoc {
 			fName = path.Base(defSQLBlock.HPath)
 		}
 		rootID = defSQLBlock.ID
 	} else {
-		if Conf.Search.BacklinkMentionName {
+		if confSearchSnapshot.BacklinkMentionName {
 			if "" != defSQLBlock.Name {
 				names = append(names, defSQLBlock.Name)
 			}
 		}
-		if Conf.Search.BacklinkMentionAlias {
+		if confSearchSnapshot.BacklinkMentionAlias {
 			if "" != defSQLBlock.Alias {
 				aliases = strings.Split(defSQLBlock.Alias, ",")
 			}
@@ -1063,7 +1065,7 @@ func buildTreeBackmentionInBox(defSQLBlock *sql.Block, refBlocks []*Block, keywo
 		set.Add(fName)
 	}
 
-	if Conf.Search.BacklinkMentionAnchor {
+	if confSearchSnapshot.BacklinkMentionAnchor {
 		for _, refBlock := range refBlocks {
 			refs := sql.QueryRefsByDefIDRefIDInBox(refBlock.DefID, refBlock.ID, boxID)
 			for _, ref := range refs {
@@ -1075,7 +1077,7 @@ func buildTreeBackmentionInBox(defSQLBlock *sql.Block, refBlocks []*Block, keywo
 	for _, v := range set.Values() {
 		mentionKeywords = append(mentionKeywords, v.(string))
 	}
-	mentionKeywords = excludeKeywords(mentionKeywords, Conf.Editor.BacklinkMentionExclude)
+	mentionKeywords = excludeKeywords(mentionKeywords, Conf.Editor.Load().BacklinkMentionExclude)
 	mentionKeywords = prepareMarkKeywords(mentionKeywords)
 	mentionKeywords, ret = searchBackmentionInBox(mentionKeywords, keyword, excludeBacklinkIDs, rootID, beforeLen, boxID, notifiers...)
 	return
@@ -1104,6 +1106,8 @@ func buildBackmentionQuery(matchExpression, rootID, beforeID string, limit int) 
 
 // searchBackmentionInBox 与 searchBackmention 一致，但按 boxID 路由到加密 db 或全局 db。
 func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBacklinkIDs *hashset.Set, rootID string, beforeLen int, boxID string, notifiers ...BackmentionNotifier) (retMentionKeywords []string, ret []*Block) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	ret = []*Block{}
 	if 1 > len(mentionKeywords) {
 		return
@@ -1112,7 +1116,7 @@ func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBac
 	buf := bytes.Buffer{}
 	buf.WriteString(columnFilter() + ":(")
 	for i, mentionKeyword := range mentionKeywords {
-		if Conf.Search.BacklinkMentionKeywordsLimit < i {
+		if confSearchSnapshot.BacklinkMentionKeywordsLimit < i {
 			if notify := backmentionNotifier(notifiers); notify != nil {
 				notify(fmt.Sprintf(Conf.Language(38), len(mentionKeywords)), 5000)
 			}
@@ -1134,7 +1138,7 @@ func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBac
 		terms = append(terms, keyword)
 	}
 	luteEngine := util.NewLute()
-	limit := Conf.Search.Limit
+	limit := confSearchSnapshot.Limit
 	beforeID := ""
 	// 按块 ID 分批补取候选，正文校验和反链排除后的有效提及才占用结果额度。
 	for len(ret) < limit {
@@ -1233,7 +1237,7 @@ func buildFullLinks(condition string) (forwardlinks, backlinks []*Block) {
 func buildDefsAndRefs(condition string) (defBlocks []*Block) {
 	defBlockMap := map[string]*Block{}
 	refBlockMap := map[string]*Block{}
-	defRefs := sql.DefRefs(condition, Conf.Graph.MaxBlocks)
+	defRefs := sql.DefRefs(condition, Conf.Graph.Load().MaxBlocks)
 
 	// 将 sql block 转为 block
 	for _, row := range defRefs {

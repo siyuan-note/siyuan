@@ -28,7 +28,7 @@ import (
 
 func TestUpdateAttributeViewDynamicRefTextsKeepsStaticAnchors(t *testing.T) {
 	originalConf := Conf
-	Conf = &AppConf{Editor: conf.NewEditor()}
+	Conf = &AppConf{Editor: NewConfSection(conf.NewEditor())}
 	t.Cleanup(func() { Conf = originalConf })
 
 	const defID = "20260904040000-def0001"

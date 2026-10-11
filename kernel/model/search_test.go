@@ -33,7 +33,7 @@ import (
 func TestFromSQLBlockMapsTimestamps(t *testing.T) {
 	previousConf := Conf
 	Conf = NewAppConf()
-	Conf.Search = conf.NewSearch()
+	Conf.Search.Store(conf.NewSearch())
 	t.Cleanup(func() {
 		Conf = previousConf
 	})
@@ -340,7 +340,7 @@ func TestBuildExactSearchOrderConditionEscapesKeyword(t *testing.T) {
 		t.Fatalf("区分大小写的完全命中条件错误：got %q, want %q", condition, expected)
 	}
 
-	Conf.Search.CaseSensitive = false
+	Conf.Search.Load().CaseSensitive = false
 	condition = buildExactSearchOrderCondition("content", "O'Reilly%_\\")
 	if expected := "content LIKE 'O''Reilly\\%\\_\\\\' ESCAPE '\\'"; expected != condition {
 		t.Fatalf("忽略大小写的完全命中条件错误：got %q, want %q", condition, expected)
@@ -477,13 +477,13 @@ func TestBuildHPathContainsCondition(t *testing.T) {
 		t.Fatalf("区分大小写的路径条件错误：%q，%q", condition, arg)
 	}
 
-	Conf.Search.CaseSensitive = false
+	Conf.Search.Load().CaseSensitive = false
 	condition, arg = buildHPathContainsCondition("Parent%_\\")
 	if "instr(search_normalize(hpath, 0, 1), ?) > 0" != condition || "parent%_\\" != arg {
 		t.Fatalf("忽略大小写的路径条件错误：%q，%q", condition, arg)
 	}
 
-	Conf.Search.SetHanSensitive(false)
+	Conf.Search.Load().SetHanSensitive(false)
 	condition, arg = buildHPathContainsCondition("詩經")
 	if "instr(search_normalize(hpath, 0, 0), ?) > 0" != condition || "诗经" != arg {
 		t.Fatalf("忽略繁简的路径条件错误：%q，%q", condition, arg)
@@ -832,7 +832,7 @@ func TestDocumentSearchFieldMatchesMultipleHPathLevels(t *testing.T) {
 		t.Fatalf("关闭路径搜索后只能命中正文文档：%d", count)
 	}
 
-	Conf.Search.SetHanSensitive(false)
+	Conf.Search.Load().SetHanSensitive(false)
 	insertSearchHPathTestBlock(t, testDB, "20260729121004-child02", "20260729121004-child02", "/詩經/Child", "Child", "d")
 	hPathField = "MAX(CASE WHEN type = 'd' THEN " + normalizedHPathSearchField("hpath") + " ELSE '' END)"
 	filter = buildSearchDocumentLikeFilterWithHPath("GROUP_CONCAT("+contentField+")", hPathField, []string{"诗经", "Child"})
@@ -873,8 +873,8 @@ func setSearchCaseSensitive(t *testing.T, caseSensitive bool) {
 	t.Helper()
 	previousConf := Conf
 	Conf = NewAppConf()
-	Conf.Search = conf.NewSearch()
-	Conf.Search.CaseSensitive = caseSensitive
+	Conf.Search.Store(conf.NewSearch())
+	Conf.Search.Load().CaseSensitive = caseSensitive
 	t.Cleanup(func() {
 		Conf = previousConf
 	})

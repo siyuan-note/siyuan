@@ -264,6 +264,8 @@ func buildImportedSYSortValues(importedDocs []*importedSYSortDoc, sourceSortIDs 
 }
 
 func applyImportedSYSort(boxID, targetPath string, importedDocs []*importedSYSortDoc, sourceSortIDs map[string]int) error {
+	confFileTreeSnapshot := Conf.LoadFileTree()
+
 	if 1 > len(importedDocs) {
 		return nil
 	}
@@ -293,7 +295,7 @@ func applyImportedSYSort(boxID, targetPath string, importedDocs []*importedSYSor
 		}
 	}
 
-	createDocAtTop := nil != Conf.FileTree.CreateDocAtTop && *Conf.FileTree.CreateDocAtTop
+	createDocAtTop := nil != confFileTreeSnapshot.CreateDocAtTop && *confFileTreeSnapshot.CreateDocAtTop
 	sortValues := buildImportedSYSortValues(importedDocs, sourceSortIDs, existingRootIDs, createDocAtTop)
 	if 1 > len(sortValues) {
 		return nil
@@ -354,12 +356,14 @@ func importedBlockDocTitles(trees map[string]*parse.Tree) map[string]string {
 // 加密笔记本是孤岛，闪卡牌组与调度依赖全局数据库，因此必须拒绝导入；
 // 报错会指出包内哪些文档的卡片位于牌组中，便于用户在源笔记本中移除闪卡后重新导出。
 func checkEncryptedImportDeck(unzipRootPath string, trees map[string]*parse.Tree, blockIDs map[string]string) error {
+	confFlashcardSnapshot := Conf.LoadFlashcard()
+
 	storageRiffDir := filepath.Join(unzipRootPath, "storage", "riff")
 	if !gulu.File.IsExist(storageRiffDir) {
 		return nil
 	}
 
-	deck, loadErr := riff.LoadDeck(storageRiffDir, builtinDeckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
+	deck, loadErr := riff.LoadDeck(storageRiffDir, builtinDeckID, confFlashcardSnapshot.RequestRetention, confFlashcardSnapshot.MaximumInterval, confFlashcardSnapshot.Weights)
 	if nil != loadErr || nil == deck {
 		// 牌组无法解析时仍要拒绝导入，此时无法指出具体文档，只报告包内牌组路径
 		logging.LogErrorf("load imported deck [%s] failed: %s", storageRiffDir, loadErr)
@@ -874,7 +878,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	// 普通笔记本将关联的闪卡数据合并到默认卡包 data/storage/riff/20230218211946-2kw8jgx 中
 	storageRiffDir := filepath.Join(storage, "riff")
 	if gulu.File.IsExist(storageRiffDir) {
-		deckToImport, loadErr := riff.LoadDeck(storageRiffDir, builtinDeckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
+		deckToImport, loadErr := riff.LoadDeck(storageRiffDir, builtinDeckID, Conf.Flashcard.Load().RequestRetention, Conf.Flashcard.Load().MaximumInterval, Conf.Flashcard.Load().Weights)
 		if nil != loadErr {
 			logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
 		} else {
@@ -932,7 +936,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		data := renderer.Render()
 
-		if !util.UseSingleLineSave {
+		if !util.UseSingleLineSave.Load() {
 			buf := bytes.Buffer{}
 			buf.Grow(1024 * 1024 * 2)
 			if err = json.Indent(&buf, data, "", "\t"); err != nil {
@@ -2489,7 +2493,7 @@ func convertWikiLinksAndTags(tree *parse.Tree, searchLinks map[string]string) {
 }
 
 func convertTags(text string) (ret string) {
-	if !util.MarkdownSettings.InlineTag {
+	if !util.MarkdownSettings.Load().InlineTag {
 		return text
 	}
 

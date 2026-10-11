@@ -16,7 +16,7 @@ func TestAPIContractEntryVisibilityDefaults(t *testing.T) {
 	t.Cleanup(func() { model.Conf, util.ReadOnly = previous, readOnly })
 	for _, version := range []int{6, 7} {
 		model.Conf = model.NewAppConf()
-		model.Conf.Appearance = conf.NewAppearance()
+		model.Conf.Appearance.Store(conf.NewAppearance())
 		body := fmt.Sprintf(`{"version":%d,"active":"custom","profiles":[{"id":"custom","name":"Custom","defaults":"simple","entries":{"editor.toolbar.strong":false},"orders":{"dock":["plugin:unavailable:dock"]}}]}`, version)
 		code, message, data := settingContractRequest(t, "setEntryVisibility", setEntryVisibility, body)
 		if code != 0 {

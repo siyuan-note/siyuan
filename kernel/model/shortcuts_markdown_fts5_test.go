@@ -55,8 +55,8 @@ func TestMoveLocalShorthandsMarkdownSettings(t *testing.T) {
 		for _, enabled := range []bool{true, false} {
 			t.Run(fmt.Sprintf("%s/enabled=%t", route, enabled), func(t *testing.T) {
 				settings := shorthandMarkdownTestSettings(enabled)
-				util.MarkdownSettings = settings
-				Conf.Editor.Markdown = settings
+				util.MarkdownSettings.Store(settings)
+				Conf.Editor.Load().Markdown = settings
 				created := time.Date(2026, 9, 9, 8, caseIndex, 0, 0, time.Local)
 				caseIndex++
 				secondCreated := created.Add(11 * time.Second)
@@ -99,13 +99,13 @@ func TestMoveLocalShorthandsMarkdownSettings(t *testing.T) {
 				oldIDs := map[string]bool{}
 				switch route {
 				case "separate":
-					Conf.FileTree.ShorthandSavePath = ""
+					Conf.FileTree.Load().ShorthandSavePath = ""
 					hPath = "/" + created.Format("2006-01-02 15:04:05")
 				case "merged":
-					Conf.FileTree.ShorthandSavePath = hPath
+					Conf.FileTree.Load().ShorthandSavePath = hPath
 				case "append":
 					hPath = "/Source"
-					Conf.FileTree.ShorthandSavePath = hPath
+					Conf.FileTree.Load().ShorthandSavePath = hPath
 					bt := treenode.GetBlockTreeRootByHPath(fixture.box.ID, hPath)
 					if nil == bt {
 						t.Fatal("existing shorthand document fixture missing")
@@ -224,7 +224,7 @@ func TestMoveLocalShorthandsMarkdownSettings(t *testing.T) {
 
 func setupShorthandMarkdownTest(t *testing.T) (*fileOperationTestFixture, string) {
 	t.Helper()
-	originalMarkdown := util.MarkdownSettings
+	originalMarkdown := util.MarkdownSettings.Load()
 	originalPaths := map[*string]string{
 		&util.TempDir: util.TempDir, &util.QueueDir: util.QueueDir, &util.ConfDir: util.ConfDir,
 		&util.ShortcutsPath: util.ShortcutsPath, &util.DBPath: util.DBPath,
@@ -232,7 +232,7 @@ func setupShorthandMarkdownTest(t *testing.T) (*fileOperationTestFixture, string
 		&util.WorkingDir: util.WorkingDir,
 	}
 	t.Cleanup(func() {
-		util.MarkdownSettings = originalMarkdown
+		util.MarkdownSettings.Store(originalMarkdown)
 		for target, original := range originalPaths {
 			*target = original
 		}
@@ -252,8 +252,8 @@ func setupShorthandMarkdownTest(t *testing.T) (*fileOperationTestFixture, string
 		}
 	}
 	Conf.Lang = "en"
-	Conf.Search = conf.NewSearch()
-	Conf.Editor = conf.NewEditor()
+	Conf.Search.Store(conf.NewSearch())
+	Conf.Editor.Store(conf.NewEditor())
 	util.WorkingDir = filepath.Clean(filepath.Join("..", "..", "app"))
 	initLang()
 	sql.InitDatabase(true)

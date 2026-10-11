@@ -274,7 +274,7 @@ func recoverSortConfAppend(confPath string) (err error) {
 		return
 	}
 	logging.LogInfof("recovered incremental sort conf [%s]", confPath)
-	if Conf != nil && Conf.Sync != nil {
+	if Conf != nil && Conf.Sync.Load() != nil {
 		IncSync()
 	} else {
 		// 启动恢复发生在同步配置加载前，先标记待同步状态。

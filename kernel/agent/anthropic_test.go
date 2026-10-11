@@ -56,9 +56,9 @@ func TestAnthropicAgentToolHistoryRecovery(t *testing.T) {
 			useTestDataDir(t)
 			previous := kernelModel.Conf
 			kernelModel.Conf = kernelModel.NewAppConf()
-			kernelModel.Conf.AI = kernelConf.NewAI()
-			kernelModel.Conf.AI.MCP = nil
-			kernelModel.Conf.Variables = kernelConf.NewVariables()
+			kernelModel.Conf.AI.Store(kernelConf.NewAI())
+			kernelModel.Conf.AI.Load().MCP = nil
+			kernelModel.Conf.Variables.Store(kernelConf.NewVariables())
 			t.Cleanup(func() { kernelModel.Conf = previous })
 			const toolName = "test_anthropic_history"
 			var executions atomic.Int32

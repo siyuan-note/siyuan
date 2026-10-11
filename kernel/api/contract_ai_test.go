@@ -24,9 +24,9 @@ func aiContractConfiguration(t *testing.T) {
 	t.Helper()
 	previous, dir := model.Conf, util.DataDir
 	model.Conf = model.NewAppConf()
-	model.Conf.AI = conf.NewAI()
-	model.Conf.AI.Embedding = nil
-	model.Conf.AI.Rerank = nil
+	model.Conf.AI.Store(conf.NewAI())
+	model.Conf.AI.Load().Embedding = nil
+	model.Conf.AI.Load().Rerank = nil
 	util.DataDir = t.TempDir()
 	t.Cleanup(func() { model.Conf = previous; util.DataDir = dir })
 }
@@ -41,7 +41,7 @@ func (body aiUnreadBody) Close() error { return nil }
 
 func TestAPIContractAIProviderAdmissionBeforeBody(t *testing.T) {
 	aiContractConfiguration(t)
-	model.Conf.AI.Providers = nil
+	model.Conf.AI.Load().Providers = nil
 	engine := gin.New()
 	engine.POST("/api/ai/editor/chat", aiEditorChat)
 	engine.POST("/api/ai/agent/chat", agentChat)
@@ -209,8 +209,8 @@ func TestAPIContractAIEditorSSE(t *testing.T) {
 		fmt.Fprint(w, "data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"hello\",\"reasoning_content\":\"reason\"},\"finish_reason\":\"length\"}]}\n\ndata: [DONE]\n\n")
 	}))
 	defer upstream.Close()
-	model.Conf.AI.Providers = []*conf.Provider{{ID: "provider", Enabled: true, BaseURL: upstream.URL + "/v1", Protocol: "openai", APIKey: "test", Models: []*conf.Model{{ID: "model", Name: "model", Enabled: true}}}}
-	model.Conf.AI.Editing.ModelID = "model"
+	model.Conf.AI.Load().Providers = []*conf.Provider{{ID: "provider", Enabled: true, BaseURL: upstream.URL + "/v1", Protocol: "openai", APIKey: "test", Models: []*conf.Model{{ID: "model", Name: "model", Enabled: true}}}}
+	model.Conf.AI.Load().Editing.ModelID = "model"
 	engine := gin.New()
 	engine.POST("/api/ai/editor/chat", aiEditorChat)
 	recorder := httptest.NewRecorder()
@@ -281,8 +281,8 @@ func TestAPIContractAIEditorStreamCancellation(t *testing.T) {
 		close(closed)
 	}))
 	defer upstream.Close()
-	model.Conf.AI.Providers = []*conf.Provider{{ID: "provider", Enabled: true, BaseURL: upstream.URL + "/v1", Protocol: "openai", APIKey: "test", Models: []*conf.Model{{ID: "model", Name: "model", Enabled: true}}}}
-	model.Conf.AI.Editing.ModelID = "model"
+	model.Conf.AI.Load().Providers = []*conf.Provider{{ID: "provider", Enabled: true, BaseURL: upstream.URL + "/v1", Protocol: "openai", APIKey: "test", Models: []*conf.Model{{ID: "model", Name: "model", Enabled: true}}}}
+	model.Conf.AI.Load().Editing.ModelID = "model"
 	engine := gin.New()
 	engine.POST("/api/ai/editor/chat", aiEditorChat)
 	server := httptest.NewServer(engine)

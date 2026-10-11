@@ -17,10 +17,11 @@ import (
 
 func notebookArchiveTestWorkspace(t *testing.T) {
 	t.Helper()
-	oldConf := Conf
+	oldConf, oldPersisted := Conf, lastPersistedConf()
 	oldWorkspace, oldData, oldHistory, oldConfig, oldTemp, oldRepo := util.WorkspaceDir, util.DataDir, util.HistoryDir, util.ConfDir, util.TempDir, util.RepoDir
 	t.Cleanup(func() {
 		Conf = oldConf
+		recordPersistedConf(oldPersisted)
 		util.WorkspaceDir, util.DataDir, util.HistoryDir, util.ConfDir, util.TempDir, util.RepoDir = oldWorkspace, oldData, oldHistory, oldConfig, oldTemp, oldRepo
 	})
 	root := t.TempDir()
@@ -31,10 +32,12 @@ func notebookArchiveTestWorkspace(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	// 新工作空间尚未持久化配置
+	recordPersistedConf(nil)
 	Conf = NewAppConf()
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
-	Conf.Sync.Enabled = false
+	Conf.Sync.Store(conf.NewSync())
+	Conf.Sync.Load().Enabled = false
 }
 
 func notebookArchiveTestBox(t *testing.T, boxID string, kek []byte) []byte {
@@ -253,9 +256,11 @@ func TestNotebookArchiveMissingBackupAndLaterRecoveredKey(t *testing.T) {
 	}
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	Conf.NotebookCrypto.MasterSalt = []byte("partial old configuration")
+	// 模拟进程启动时配置文件缺失、从未持久化过配置
 	if err = os.Remove(filepath.Join(util.ConfDir, "conf.json")); err != nil {
 		t.Fatal(err)
 	}
+	recordPersistedConf(nil)
 	if err = os.Remove(dataCryptoBackupPath()); err != nil {
 		t.Fatal(err)
 	}
@@ -641,5 +646,38 @@ func TestNotebookArchiveDownloadsDeferredEncryptedAssets(t *testing.T) {
 	expected, expectedErr := os.ReadFile(filepath.Join(fullData, id, "assets", "legacy.bin"))
 	if err != nil || expectedErr != nil || !bytes.Equal(data, expected) {
 		t.Fatalf("download changed ciphertext: %v %v", err, expectedErr)
+	}
+}
+
+// 归档携带的持久化形态来自本进程最近一次落盘的配置，打包时磁盘文件被改写或删除不影响结果。
+func TestNotebookArchivePersistedConfIndependentOfDiskTiming(t *testing.T) {
+	notebookArchiveTestWorkspace(t)
+	if err := EnableEncryptedNotebook("archive-password"); err != nil {
+		t.Fatal(err)
+	}
+	keys, err := notebookArchiveKeys()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := keys["keys/persisted-conf.json"]
+	if len(expected) == 0 {
+		t.Fatal("persisted notebook crypto configuration was not archived")
+	}
+	confPath := filepath.Join(util.ConfDir, "conf.json")
+	for _, content := range [][]byte{[]byte(`{"notebookCrypto":{"enabled":false}}`), nil} {
+		if content == nil {
+			err = os.Remove(confPath)
+		} else {
+			err = os.WriteFile(confPath, content, 0644)
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		if keys, err = notebookArchiveKeys(); err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(keys["keys/persisted-conf.json"], expected) {
+			t.Fatalf("archived persisted configuration depends on disk state: %s", keys["keys/persisted-conf.json"])
+		}
 	}
 }

@@ -1,4 +1,4 @@
-import {fetchPost} from "../../util/fetch";
+import {config as configApi} from "../util/configApi";
 import {Constants} from "../../constants";
 import {getSettingsOwnerApp} from "../setting/windowContext";
 import {
@@ -209,11 +209,10 @@ const flushEntryVisibility = () => {
     saveRunning = true;
     const next = savePending;
     savePending = undefined;
-    fetchPost("/api/setting/setEntryVisibility", next, (response) => {
+    void configApi.set("appearance.entryVisibility", next, data => {
+        if (!savePending) applyEntryVisibility((data as Config.IAppearance).entryVisibility);
+    }).catch(error => console.warn("Could not save entry visibility", error)).finally(() => {
         saveRunning = false;
-        if (response.code === 0 && !savePending) {
-            applyEntryVisibility(response.data as Config.IEntryVisibility);
-        }
         flushEntryVisibility();
     });
 };

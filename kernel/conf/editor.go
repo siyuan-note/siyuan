@@ -247,6 +247,6 @@ func NewEditor() *Editor {
 		HeadingEmbedMode:                0,
 		PasteURLAutoConvert:             false,
 		DragHTMLFileToIframe:            false,
-		Markdown:                        util.MarkdownSettings,
+		Markdown:                        util.NewMarkdown(),
 	}
 }

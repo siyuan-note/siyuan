@@ -1393,20 +1393,20 @@ func TestFilterGraphByPublishAccess(t *testing.T) {
 	}
 	newGraph := func() ([]*GraphNode, []*GraphLink) {
 		return []*GraphNode{
-				{ID: publicDocID, Box: boxID, Path: "/" + publicDocID + ".sy", Size: 10, Type: "NodeDocument"},
-				{ID: protectedBlockID, Box: boxID, Path: "/" + protectedDocID + "/" + protectedBlockID + ".sy", Size: 10, Type: "NodeParagraph"},
-				{ID: hiddenDocID, Box: boxID, Path: "/" + hiddenDocID + ".sy", Size: 10, Type: "NodeDocument"},
-				{ID: disabledDocID, Box: boxID, Path: "/" + disabledDocID + ".sy", Size: 10, Type: "NodeDocument"},
-				{ID: sharedTagID, Label: sharedTagID, Size: 10, Type: "NodeTag"},
-				{ID: protectedTagID, Label: protectedTagID, Size: 10, Type: "NodeTag"},
-			}, []*GraphLink{
-				{From: sharedTagID, To: publicDocID},
-				{From: sharedTagID, To: protectedBlockID},
-				{From: protectedTagID, To: protectedBlockID},
-				{From: publicDocID, To: protectedBlockID, Ref: true},
-				{From: publicDocID, To: hiddenDocID, Ref: true},
-				{From: publicDocID, To: disabledDocID, Ref: true},
-			}
+			{ID: publicDocID, Box: boxID, Path: "/" + publicDocID + ".sy", Size: 10, Type: "NodeDocument"},
+			{ID: protectedBlockID, Box: boxID, Path: "/" + protectedDocID + "/" + protectedBlockID + ".sy", Size: 10, Type: "NodeParagraph"},
+			{ID: hiddenDocID, Box: boxID, Path: "/" + hiddenDocID + ".sy", Size: 10, Type: "NodeDocument"},
+			{ID: disabledDocID, Box: boxID, Path: "/" + disabledDocID + ".sy", Size: 10, Type: "NodeDocument"},
+			{ID: sharedTagID, Label: sharedTagID, Size: 10, Type: "NodeTag"},
+			{ID: protectedTagID, Label: protectedTagID, Size: 10, Type: "NodeTag"},
+		}, []*GraphLink{
+			{From: sharedTagID, To: publicDocID},
+			{From: sharedTagID, To: protectedBlockID},
+			{From: protectedTagID, To: protectedBlockID},
+			{From: publicDocID, To: protectedBlockID, Ref: true},
+			{From: publicDocID, To: hiddenDocID, Ref: true},
+			{From: publicDocID, To: disabledDocID, Ref: true},
+		}
 	}
 
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
@@ -1913,7 +1913,7 @@ func TestFilterBlockInfoByPublishAccessFiltersSubFileCount(t *testing.T) {
 	util.DataDir = t.TempDir()
 	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	treenode.InitBlockTree(true)
 	t.Cleanup(func() {
 		treenode.CloseDatabase()
@@ -1982,7 +1982,7 @@ func TestFilterBlockInfoByPublishAccessFiltersRefIDs(t *testing.T) {
 	util.DataDir = t.TempDir()
 	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	treenode.InitBlockTree(true)
 	t.Cleanup(func() {
 		treenode.CloseDatabase()

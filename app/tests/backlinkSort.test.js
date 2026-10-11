@@ -17,6 +17,10 @@ const createPanel = () => {
     runInNewContext(compiled, {
         exports,
         require: () => ({
+            config: {set: (_path, value) => {
+                requests.push({path: "/api/setting/patch", data: {editor: {...value}}});
+                return Promise.resolve();
+            }},
             Model: class {},
             MenuItem: class {
                 constructor(options) { this.element = options; }

@@ -23,9 +23,15 @@ import (
 
 func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 	t.Helper()
-	previousAI := Conf.AI
+	previousAI := Conf.AI.Load()
 	previousOCR := Conf.GetOCR()
-	defer func() { Conf.AI, Conf.OCR = previousAI, &previousOCR }()
+	defer func() {
+		{
+			confSectionValue0, confSectionValue1 := previousAI, &previousOCR
+			Conf.AI.Store(confSectionValue0)
+			Conf.OCR.Store(confSectionValue1)
+		}
+	}()
 	calls := 0
 	providerFailure := false
 	var beforeResponse func()
@@ -43,9 +49,9 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 		_, _ = io.WriteString(w, `{"choices":[{"finish_reason":"stop","message":{"content":"aiocrkeyword\nsecond  column"}}]}`)
 	}))
 	defer server.Close()
-	Conf.AI = conf.NewAI()
-	Conf.AI.Agent.ModelID = "vision"
-	Conf.AI.Providers = []*conf.Provider{{ID: "provider", Enabled: true, APIKey: "test", BaseURL: server.URL + "/v1",
+	Conf.AI.Store(conf.NewAI())
+	Conf.AI.Load().Agent.ModelID = "vision"
+	Conf.AI.Load().Providers = []*conf.Provider{{ID: "provider", Enabled: true, APIKey: "test", BaseURL: server.URL + "/v1",
 		Models: []*conf.Model{{ID: "vision", Enabled: true, Name: "vision-test"}}}}
 	file, err := os.Create(filepath.Join(util.DataDir, filepath.FromSlash(path)))
 	if err != nil {
@@ -73,23 +79,23 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 	if err != nil || len(matches) != 0 {
 		t.Fatalf("obsolete OCR text remains searchable: %v, %v", matches, err)
 	}
-	Conf.OCR = &conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision", Auto: true}
+	Conf.OCR.Store(&conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision", Auto: true})
 	for _, test := range []struct {
 		name   string
 		change func()
 		want   string
 	}{
-		{"automatic disabled", func() { Conf.m.Lock(); Conf.OCR.Auto = false; Conf.m.Unlock() }, ""},
-		{"model changed", func() { Conf.m.Lock(); Conf.OCR.AIModelID = "other"; Conf.m.Unlock() }, ""},
-		{"reasoning changed", func() { Conf.m.Lock(); Conf.OCR.ReasoningEffort = "none"; Conf.m.Unlock() }, ""},
-		{"AI model disabled", func() { Conf.AI.Providers[0].Models[0].Enabled = false }, ""},
+		{"automatic disabled", func() { Conf.m.Lock(); Conf.OCR.Load().Auto = false; Conf.m.Unlock() }, ""},
+		{"model changed", func() { Conf.m.Lock(); Conf.OCR.Load().AIModelID = "other"; Conf.m.Unlock() }, ""},
+		{"reasoning changed", func() { Conf.m.Lock(); Conf.OCR.Load().ReasoningEffort = "none"; Conf.m.Unlock() }, ""},
+		{"AI model disabled", func() { Conf.AI.Load().Providers[0].Models[0].Enabled = false }, ""},
 		{"manually edited", func() { SetOCRAssetText(path, "manual text") }, "manual text"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			util.RemoveAssetText(path)
 			value := conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision", Auto: true}
-			Conf.OCR = &value
-			Conf.AI.Providers[0].Models[0].Enabled = true
+			Conf.OCR.Store(&value)
+			Conf.AI.Load().Providers[0].Models[0].Enabled = true
 			beforeResponse = test.change
 			_, _, err := ocrAsset(context.Background(), path, value, true)
 			if !errors.Is(err, context.Canceled) || util.GetAssetText(path) != test.want {
@@ -98,8 +104,8 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 		})
 	}
 	beforeResponse = nil
-	Conf.AI.Providers[0].Models[0].Enabled = true
-	Conf.OCR = &conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision", Auto: true}
+	Conf.AI.Load().Providers[0].Models[0].Enabled = true
+	Conf.OCR.Store(&conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision", Auto: true})
 	util.RemoveAssetText(path)
 	const extra = "assets/automatic-20261005000000-abcdefg.png"
 	extraFile, err := os.Create(filepath.Join(util.DataDir, filepath.FromSlash(extra)))
@@ -131,14 +137,14 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 		t.Fatal("AI automatic OCR reran saved results")
 	}
 	util.RemoveAssetText(extra)
-	Conf.OCR.Auto = false
+	Conf.OCR.Load().Auto = false
 	autoOCRAssets()
-	Conf.OCR.Auto, Conf.OCR.AIModelID = true, "missing"
+	Conf.OCR.Load().Auto, Conf.OCR.Load().AIModelID = true, "missing"
 	autoOCRAssets()
 	if calls != previousCalls+2 {
 		t.Fatal("disabled automatic OCR or unavailable model reached provider")
 	}
-	Conf.OCR.AIModelID = "vision"
+	Conf.OCR.Load().AIModelID = "vision"
 	providerFailure = true
 	autoOCRAssets()
 	providerFailure = false
@@ -146,7 +152,7 @@ func testAIOCRAssetIndex(t *testing.T, path, blockID string) {
 	if calls != previousCalls+3 || util.ExistsAssetText(extra) {
 		t.Fatal("failed automatic OCR was not held for retry")
 	}
-	Conf.OCR.ReasoningEffort = "none"
+	Conf.OCR.Load().ReasoningEffort = "none"
 	autoOCRAssets()
 	if calls != previousCalls+4 || !util.ExistsAssetText(extra) {
 		t.Fatal("changed reasoning effort inherited the previous retry delay")

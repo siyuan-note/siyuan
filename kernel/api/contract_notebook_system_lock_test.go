@@ -47,10 +47,23 @@ func TestAPIContractNotebookSystemLock(t *testing.T) {
 		}
 	}
 	model.Conf = model.NewAppConf()
-	model.Conf.NotebookCrypto, model.Conf.FileTree = conf.NewNotebookCrypto(), conf.NewFileTree()
-	model.Conf.Sync, model.Conf.System = conf.NewSync(), conf.NewSystem()
-	model.Conf.Editor, model.Conf.Search, model.Conf.Export = conf.NewEditor(), conf.NewSearch(), conf.NewExport()
-	model.Conf.Api = &conf.API{Token: "system-lock-test"}
+	{
+		confSectionValue0, confSectionValue1 := conf.NewNotebookCrypto(), conf.NewFileTree()
+		model.Conf.NotebookCrypto = confSectionValue0
+		model.Conf.FileTree.Store(confSectionValue1)
+	}
+	{
+		confSectionValue0, confSectionValue1 := conf.NewSync(), conf.NewSystem()
+		model.Conf.Sync.Store(confSectionValue0)
+		model.Conf.System.Store(confSectionValue1)
+	}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewEditor(), conf.NewSearch(), conf.NewExport()
+		model.Conf.Editor.Store(confSectionValue0)
+		model.Conf.Search.Store(confSectionValue1)
+		model.Conf.Export.Store(confSectionValue2)
+	}
+	model.Conf.Api.Store(&conf.API{Token: "system-lock-test"})
 	model.Conf.AccessAuthCode = "application-lock-password"
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
@@ -190,7 +203,7 @@ func TestAPIContractNotebookSystemLock(t *testing.T) {
 
 func TestAPIContractNotebookSystemLockNotifications(t *testing.T) {
 	setupAssetContractWorkspace(t)
-	model.Conf.System = conf.NewSystem()
+	model.Conf.System.Store(conf.NewSystem())
 	previousConfDir := util.ConfDir
 	util.ConfDir = t.TempDir()
 	t.Cleanup(func() { util.ConfDir = previousConfDir })
@@ -203,7 +216,7 @@ func TestAPIContractNotebookSystemLockNotifications(t *testing.T) {
 		engine.ServeHTTP(recorder, httptest.NewRequest("POST", path, strings.NewReader(fmt.Sprintf(`{"enabled":%t}`, enabled))))
 		requireAPIContract(t, "POST", path, recorder)
 		var response struct{ Code int }
-		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || model.Conf.System.EncryptedNotebookFollowSystemLock != enabled {
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || model.Conf.System.Load().EncryptedNotebookFollowSystemLock != enabled {
 			t.Fatalf("system lock update failed: %s, %v", recorder.Body.String(), err)
 		}
 		if err := connection.SetReadDeadline(time.Now().Add(5 * time.Second)); err != nil {

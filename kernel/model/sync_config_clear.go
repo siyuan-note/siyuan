@@ -18,7 +18,7 @@ func ClearSyncProviderConfig(provider int) error {
 	}
 	release := lockAssetSourceChange()
 	defer release()
-	if provider == Conf.Sync.Provider {
+	if provider == Conf.Sync.Load().Provider {
 		if err := requireCompleteAssetDownloads(); err != nil {
 			return err
 		}
@@ -29,7 +29,7 @@ func ClearSyncProviderConfig(provider int) error {
 	if err := persistClearedSyncProviderConfig(provider); err != nil {
 		return err
 	}
-	if provider == Conf.Sync.Provider {
+	if provider == Conf.Sync.Load().Provider {
 		syncIndexListNotice.reset(util.PushClearMsg)
 	}
 	refreshLANSyncManager()
@@ -40,9 +40,9 @@ func ClearSyncProviderConfig(provider int) error {
 func persistClearedSyncProviderConfig(provider int) error {
 	Conf.m.Lock()
 	defer Conf.m.Unlock()
-	next := *Conf
-	syncConfig := *Conf.Sync
-	next.Sync = &syncConfig
+	next := Conf.cloneSettings()
+	// 深复制同步配置段，避免与生效配置共享子结构
+	syncConfig := cloneConfSection(Conf.Sync.Load())
 	if provider == syncConfig.Provider {
 		syncConfig.Enabled = false
 	}
@@ -56,6 +56,7 @@ func persistClearedSyncProviderConfig(provider int) error {
 	case conf.ProviderLocal:
 		syncConfig.Local = &conf.Local{Timeout: timeout, ConcurrentReqs: concurrentReqs}
 	}
+	next.Sync.Store(conf.NormalizeSync(syncConfig))
 	data, err := next.marshalForSave()
 	if err != nil {
 		return err
@@ -63,6 +64,7 @@ func persistClearedSyncProviderConfig(provider int) error {
 	if err = atomicWriteFile(filepath.Join(util.ConfDir, "conf.json"), data); err != nil {
 		return err
 	}
-	Conf.Sync = &syncConfig
+	recordPersistedConf(data)
+	Conf.Sync.Store(next.Sync.Load())
 	return nil
 }

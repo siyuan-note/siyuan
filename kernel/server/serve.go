@@ -137,6 +137,10 @@ var (
 )
 
 func Serve(fastMode bool, cookieKey string) {
+	confAISnapshot := model.Conf.LoadAI()
+
+	confSystemSnapshot := model.Conf.LoadSystem()
+
 	gin.SetMode(gin.ReleaseMode)
 	ginServer := gin.New()
 	if err := ginServer.SetTrustedProxies([]string{"127.0.0.1", "::1"}); err != nil {
@@ -193,7 +197,7 @@ func Serve(fastMode bool, cookieKey string) {
 	api.ServeAPI(ginServer)
 
 	var host string
-	if model.Conf.System.NetworkServe || util.ContainerDocker == util.Container {
+	if confSystemSnapshot.NetworkServe || util.ContainerDocker == util.Container {
 		host = "0.0.0.0"
 	} else {
 		host = "127.0.0.1"
@@ -232,7 +236,7 @@ func Serve(fastMode bool, cookieKey string) {
 	// 用户开启「启用 HTTPS」后网络服务必须真正强制加密传输，因此这里先把策略定下来：
 	// 证书不可用时不能静默退回明文，否则等于开关没生效却仍然宣称已加密。
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
-	tlsRequired := model.Conf.System.NetworkServeTLS && model.Conf.System.NetworkServe
+	tlsRequired := confSystemSnapshot.NetworkServeTLS && confSystemSnapshot.NetworkServe
 	util.SetTLSRequired(tlsRequired)
 	if tlsRequired && "" == certPath {
 		logging.LogErrorf("network serve TLS is enabled but no TLS certificate is available, "+
@@ -269,8 +273,8 @@ func Serve(fastMode bool, cookieKey string) {
 
 	// 启动后自动连接已配置的 MCP server，让用户首次使用 AI Agent 时工具已就绪。
 	// EnsureMCPConnected 是异步的，不阻塞 HTTP 监听；内置 mcpConnecting 标志防止重复连接。
-	if model.Conf.AI != nil && model.Conf.AI.MCP != nil {
-		go mcpclient.EnsureMCPConnected(model.Conf.AI.MCP.Servers)
+	if confAISnapshot != nil && confAISnapshot.MCP != nil {
+		go mcpclient.EnsureMCPConnected(confAISnapshot.MCP.Servers)
 	}
 
 	go func() {
@@ -884,6 +888,10 @@ func serveCheckAuth(ginServer *gin.Engine) {
 }
 
 func serveAuthPage(c *gin.Context) {
+	confAppearanceSnapshot := model.Conf.LoadAppearance()
+
+	confKeymapSnapshot := model.Conf.LoadKeymap()
+
 	data, err := os.ReadFile(filepath.Join(util.WorkingDir, "stage/auth.html"))
 	if err != nil {
 		logging.LogErrorf("load auth page failed: %s", err)
@@ -899,10 +907,10 @@ func serveAuthPage(c *gin.Context) {
 	}
 
 	keymapHideWindow := "⌥M"
-	if nil != (*model.Conf.Keymap)["general"] {
-		switch (*model.Conf.Keymap)["general"].(type) {
+	if nil != (*confKeymapSnapshot)["general"] {
+		switch (*confKeymapSnapshot)["general"].(type) {
 		case map[string]any:
-			keymapGeneral := (*model.Conf.Keymap)["general"].(map[string]any)
+			keymapGeneral := (*confKeymapSnapshot)["general"].(map[string]any)
 			if nil != keymapGeneral["toggleWin"] {
 				switch keymapGeneral["toggleWin"].(type) {
 				case map[string]any:
@@ -934,8 +942,8 @@ func serveAuthPage(c *gin.Context) {
 		"l13":                    model.Conf.Language(365),
 		"accessAuthCodeEnabled":  model.Conf.AccessAuthCode != "",
 		"oidcEnabled":            model.Conf.GetOIDC().Enabled,
-		"appearanceMode":         model.Conf.Appearance.Mode,
-		"appearanceModeOS":       model.Conf.Appearance.ModeOS,
+		"appearanceMode":         confAppearanceSnapshot.Mode,
+		"appearanceModeOS":       confAppearanceSnapshot.ModeOS,
 		"workspace":              util.WorkspaceName,
 		"keymapGeneralToggleWin": keymapHideWindow,
 		"trayMenuLangs":          util.TrayMenuLangs[util.Lang],
@@ -1315,7 +1323,7 @@ func serveSVG(context *gin.Context, assetAbsPath string) bool {
 			}()
 		}
 
-		if !model.Conf.Editor.AllowSVGScript {
+		if !model.Conf.Editor.Load().AllowSVGScript {
 			sanitized, sanitizeErr := util.SanitizeSVG(string(data))
 			if sanitizeErr != nil {
 				logging.LogWarnf("sanitize svg file failed [%s]: %s", assetAbsPath, sanitizeErr)

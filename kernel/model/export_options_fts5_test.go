@@ -17,8 +17,8 @@ import (
 func TestExportOptionsReachMarkdownArchiveStages(t *testing.T) {
 	const boxID = "20261009000000-box0001"
 	setupMarkdownReferencesTest(t, boxID)
-	Conf.Export.AddTitle, Conf.Export.MarkdownYFM, Conf.Export.RemoveAssetsID = false, false, false
-	baseline := *Conf.Export
+	Conf.Export.Load().AddTitle, Conf.Export.Load().MarkdownYFM, Conf.Export.Load().RemoveAssetsID = false, false, false
+	baseline := *Conf.Export.Load()
 	source := newFootnoteTestDoc(t, boxID, "Source")
 	child := newFootnoteTestDoc(t, boxID, "Child")
 	child.Path, child.HPath = "/"+source.ID+"/"+child.ID+".sy", "/Source/Child"
@@ -66,7 +66,7 @@ func TestExportOptionsReachMarkdownArchiveStages(t *testing.T) {
 		if overridden {
 			wantDocuments = 3
 		}
-		if documents != wantDocuments || *Conf.Export != baseline {
+		if documents != wantDocuments || *Conf.Export.Load() != baseline {
 			t.Fatalf("document inclusion or global configuration changed: got %d want %d", documents, wantDocuments)
 		}
 		if err := archive.Close(); err != nil {

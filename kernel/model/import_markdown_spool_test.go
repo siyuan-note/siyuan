@@ -20,7 +20,11 @@ func setupMarkdownSpoolTest(t *testing.T) {
 	t.Helper()
 	originalConf, originalTemp := Conf, util.TempDir
 	Conf = NewAppConf()
-	Conf.Editor, Conf.Export = conf.NewEditor(), conf.NewExport()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewEditor(), conf.NewExport()
+		Conf.Editor.Store(confSectionValue0)
+		Conf.Export.Store(confSectionValue1)
+	}
 	util.TempDir = t.TempDir()
 	t.Cleanup(func() { Conf, util.TempDir = originalConf, originalTemp })
 }

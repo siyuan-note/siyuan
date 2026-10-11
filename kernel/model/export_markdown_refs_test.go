@@ -22,8 +22,8 @@ import (
 func setupMarkdownReferencesTest(t *testing.T, boxIDs ...string) {
 	t.Helper()
 	setupExportPublishTest(t)
-	Conf.Export.IncludeSubDocs = false
-	Conf.Export.IncludeRelatedDocs = false
+	Conf.Export.Load().IncludeSubDocs = false
+	Conf.Export.Load().IncludeRelatedDocs = false
 	for _, boxID := range boxIDs {
 		boxConf := conf.NewBoxConf()
 		boxConf.Name, boxConf.Closed = boxID, false
@@ -81,7 +81,7 @@ func TestExportMarkdownReferenceScope(t *testing.T) {
 				sql.IndexTreeQueue(tree)
 			}
 			sql.FlushQueue()
-			Conf.Export.IncludeSubDocs, Conf.Export.IncludeRelatedDocs = scenario.includeSubDocs, scenario.includeRelated
+			Conf.Export.Load().IncludeSubDocs, Conf.Export.Load().IncludeRelatedDocs = scenario.includeSubDocs, scenario.includeRelated
 			ids := []string{source.ID}
 			if scenario.selectTarget {
 				ids = append(ids, target.ID)
@@ -178,8 +178,8 @@ func TestExportMarkdownFootnoteAssetsAndCrossNotebook(t *testing.T) {
 func TestExportMarkdownFootnoteDeferredAsset(t *testing.T) {
 	setupExportPublishTest(t)
 	fixture, _, _, _ := prepareAssetDownloadDocumentTest(t)
-	Conf.Search = conf.NewSearch()
-	Conf.Export.IncludeSubDocs, Conf.Export.IncludeRelatedDocs = false, false
+	Conf.Search.Store(conf.NewSearch())
+	Conf.Export.Load().IncludeSubDocs, Conf.Export.Load().IncludeRelatedDocs = false, false
 	source := newFootnoteTestDoc(t, fixture.box.ID, "Source")
 	target := newFootnoteTestDoc(t, fixture.box.ID, "Target")
 	source.Root.FirstChild.AppendChild(newFootnoteTestRef(target.Root.FirstChild.ID))
@@ -230,7 +230,7 @@ func TestExportMarkdownOtherReferenceModes(t *testing.T) {
 		t.Run(strconv.Itoa(mode), func(t *testing.T) {
 			const boxID = "20261003000006-box0007"
 			setupMarkdownReferencesTest(t, boxID)
-			Conf.Export.BlockRefMode = mode
+			Conf.Export.Load().BlockRefMode = mode
 			source := newFootnoteTestDoc(t, boxID, "Source")
 			target := newFootnoteTestDoc(t, boxID, "Target")
 			source.Root.FirstChild.AppendChild(newFootnoteTestRef(target.Root.FirstChild.ID))

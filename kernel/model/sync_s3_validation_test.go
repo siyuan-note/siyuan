@@ -38,7 +38,7 @@ func TestS3ConfigurationValidation(t *testing.T) {
 				candidate.Endpoint = "https://"
 				message = Conf.Language(249)
 			}
-			Conf.Sync.S3 = &valid
+			Conf.Sync.Load().S3 = &valid
 			Conf.Save()
 			path := filepath.Join(util.ConfDir, "conf.json")
 			before, err := os.ReadFile(path)
@@ -49,10 +49,10 @@ func TestS3ConfigurationValidation(t *testing.T) {
 				t.Fatalf("expected localized configuration error: %v", err)
 			}
 			after, err := os.ReadFile(path)
-			if err != nil || !bytes.Equal(before, after) || Conf.Sync.S3 != &valid {
+			if err != nil || !bytes.Equal(before, after) || Conf.Sync.Load().S3 != &valid {
 				t.Fatal("invalid configuration changed the saved settings")
 			}
-			Conf.Sync.S3 = &candidate
+			Conf.Sync.Load().S3 = &candidate
 			if _, err = GetCloudRepoTagSnapshots(); err == nil || err.Error() != message {
 				t.Fatalf("cloud tags did not reject invalid settings: %v", err)
 			}
@@ -73,7 +73,7 @@ func TestS3ConfigurationValidation(t *testing.T) {
 	if err := validateSyncS3(nil); err == nil || err.Error() != Conf.Language(142) {
 		t.Fatalf("expected missing-input error for nil configuration: %v", err)
 	}
-	Conf.Sync.S3 = &conf.S3{}
+	Conf.Sync.Load().S3 = &conf.S3{}
 	if _, err := newRepository(); err != nil {
 		t.Fatalf("incomplete cloud settings blocked the local repository: %v", err)
 	}

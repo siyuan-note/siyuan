@@ -25,7 +25,7 @@ func TestMarkdownImportBatchesPreserveReferencesAndEncryption(t *testing.T) {
 		t.Run(map[bool]string{false: "plain", true: "encrypted"}[encrypted], func(t *testing.T) {
 			const boxID = "20261010000000-batch01"
 			setupExportRelatedTest(t, boxID)
-			Conf.Editor = conf.NewEditor()
+			Conf.Editor.Store(conf.NewEditor())
 			setupNotebookDocumentImportDatabase(t)
 			t.Cleanup(func() { cache.ClearTreeCache(); cache.ClearDocsIAL(); cache.ClearBlocksIAL() })
 			if encrypted {
@@ -164,7 +164,7 @@ func TestMarkdownImportBatchesPreserveReferencesAndEncryption(t *testing.T) {
 func TestMarkdownImportSingleFileSkipsStaging(t *testing.T) {
 	const boxID = "20261010000000-single1"
 	setupExportRelatedTest(t, boxID)
-	Conf.Editor = conf.NewEditor()
+	Conf.Editor.Store(conf.NewEditor())
 	setupNotebookDocumentImportDatabase(t)
 	source := filepath.Join(t.TempDir(), "source.md")
 	original := []byte("# Single document\n\nContent")
@@ -186,7 +186,7 @@ func TestMarkdownImportSingleFileSkipsStaging(t *testing.T) {
 func TestMarkdownImportStagingFailurePreservesSource(t *testing.T) {
 	const boxID = "20261010000000-error01"
 	setupExportRelatedTest(t, boxID)
-	Conf.Editor = conf.NewEditor()
+	Conf.Editor.Store(conf.NewEditor())
 	sourceDir := t.TempDir()
 	source := filepath.Join(sourceDir, "source.md")
 	original := []byte("# source content")

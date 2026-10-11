@@ -82,7 +82,7 @@ type DocTreeReorderResult struct {
 func resolveDraggedDocSortMode(boxID, listPath string) (*int, error) {
 	mode := util.SortModeCustom
 	if listPath == "/" {
-		if Conf.FileTree.Sort == util.SortModeCustom {
+		if Conf.FileTree.Load().Sort == util.SortModeCustom {
 			mode = util.SortModeFileTree
 		}
 		return &mode, nil

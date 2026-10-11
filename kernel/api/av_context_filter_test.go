@@ -207,8 +207,8 @@ func setupAttributeViewContextFilterAPITest(t *testing.T) *attributeViewContextF
 	}
 	model.Conf = model.NewAppConf()
 	model.Conf.Lang = "en"
-	model.Conf.FileTree = conf.NewFileTree()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	model.Conf.Sync.Store(conf.NewSync())
 	cache.ClearAVCache()
 	treenode.InitBlockTree(true)
 	t.Cleanup(func() {

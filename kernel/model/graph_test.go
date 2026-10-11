@@ -59,8 +59,8 @@ func TestLinkTagSpansPreservesGraph(t *testing.T) {
 
 func TestGraphSearchLiteralWildcards(t *testing.T) {
 	previous := Conf
-	Conf = &AppConf{Search: conf.NewSearch()}
-	Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo = true, true, true
+	Conf = &AppConf{Search: NewConfSection(conf.NewSearch())}
+	Conf.Search.Load().Name, Conf.Search.Load().Alias, Conf.Search.Load().Memo = true, true, true
 	t.Cleanup(func() { Conf = previous })
 	db, err := gosql.Open("sqlite3_extended", ":memory:")
 	if err != nil {
@@ -155,7 +155,7 @@ func TestGrowLinkedNodesUsesIndexesAndStopsCycles(t *testing.T) {
 // 防止标签内容闭合字符串字面量注入查询 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-5rwv-4j4c-f954
 func TestQuery2StmtEscapesTagQuote(t *testing.T) {
 	oldConf := Conf
-	Conf = &AppConf{Search: conf.NewSearch()}
+	Conf = &AppConf{Search: NewConfSection(conf.NewSearch())}
 	t.Cleanup(func() {
 		Conf = oldConf
 	})

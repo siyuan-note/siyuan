@@ -434,7 +434,7 @@ func QueryBlockDefIDsByRefText(refText string) (ret []string) {
 
 func QueryBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
 	var q, arg string
-	if caseSensitive {
+	if caseSensitive.Load() {
 		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content = ?"
 		arg = refText
 	} else {
@@ -459,7 +459,7 @@ func QueryBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
 	escaped := escapeLikePattern(refText)
 	aliasArg := "%," + escaped + ",%"
 	var nameCond, docCond, exactArg string
-	if caseSensitive {
+	if caseSensitive.Load() {
 		nameCond = "name = ?"
 		docCond = "content = ?"
 		exactArg = refText
@@ -491,7 +491,7 @@ func QueryBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
 func queryDefIDsByDefText(keyword string) (ret []string) {
 	ret = []string{}
 	var q, arg string
-	if caseSensitive {
+	if caseSensitive.Load() {
 		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content = ?"
 		arg = keyword
 	} else {
@@ -520,7 +520,7 @@ func queryDefIDsByNameAliasAndDocTitle(keyword string) (ret []string) {
 	escaped := escapeLikePattern(keyword)
 	aliasArg := "%," + escaped + ",%"
 	var nameCond, docCond, exactArg string
-	if caseSensitive {
+	if caseSensitive.Load() {
 		nameCond = "name = ?"
 		docCond = "content = ?"
 		exactArg = keyword

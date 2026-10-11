@@ -44,12 +44,12 @@ func TestAPIContractDocHistorySnapshots(t *testing.T) {
 	util.AssetContentDBPath = filepath.Join(root, "assets.db")
 	util.BlockTreeDBPath = filepath.Join(root, "blocktree.db")
 	model.Conf = model.NewAppConf()
-	model.Conf.Repo = conf.NewRepo()
-	model.Conf.Repo.Key = bytes.Repeat([]byte{1}, 32)
-	model.Conf.Sync = conf.NewSync()
-	model.Conf.System = conf.NewSystem()
-	model.Conf.Editor = conf.NewEditor()
-	model.Conf.Export = conf.NewExport()
+	model.Conf.Repo.Store(conf.NewRepo())
+	model.Conf.Repo.Load().Key = bytes.Repeat([]byte{1}, 32)
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.System.Store(conf.NewSystem())
+	model.Conf.Editor.Store(conf.NewEditor())
+	model.Conf.Export.Store(conf.NewExport())
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)
@@ -72,7 +72,7 @@ func TestAPIContractDocHistorySnapshots(t *testing.T) {
 		{ID: "20260928100000-locked1", Type: model.HistoryTypeDoc, Op: "update", Title: "Locked", Path: "2026-09-28-100000-update/" + lockedBoxID + "/20260928100000-locked1.sy", Created: created},
 	})
 	sql.FlushHistoryQueue()
-	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, "test", "test", "test", model.Conf.Repo.Key, nil, nil)
+	repo, err := dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, "test", "test", "test", model.Conf.Repo.Load().Key, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

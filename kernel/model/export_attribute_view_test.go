@@ -35,7 +35,7 @@ import (
 func TestAttributeViewExportTablePresentation(t *testing.T) {
 	const boxID = "20261004000000-box0001"
 	setupExportRelatedTest(t, boxID)
-	Conf.Editor = conf.NewEditor()
+	Conf.Editor.Store(conf.NewEditor())
 	oldLang, oldAttrViewLangs := util.Lang, util.AttrViewLangs
 	util.Lang = "en"
 	util.AttrViewLangs = map[string]map[string]any{
@@ -195,7 +195,7 @@ func TestAttributeViewExportDoesNotCrossEncryptedBoundary(t *testing.T) {
 	)
 
 	setupExportRelatedTest(t, normalBoxID)
-	Conf.Editor = conf.NewEditor()
+	Conf.Editor.Store(conf.NewEditor())
 	oldLang, oldAttrViewLangs := util.Lang, util.AttrViewLangs
 	util.Lang = "en"
 	util.AttrViewLangs = map[string]map[string]any{

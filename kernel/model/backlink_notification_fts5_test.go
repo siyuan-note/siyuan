@@ -27,10 +27,10 @@ func TestBackmentionNotificationPlainAndEncrypted(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			fixture := setupStructureTransactionTest(t)
 			setupFoldTransactionDatabase(t, fixture)
-			Conf.Search = conf.NewSearch()
-			Conf.Search.BacklinkMentionDoc = true
-			Conf.Search.BacklinkMentionName = true
-			Conf.Search.BacklinkMentionKeywordsLimit = 0
+			Conf.Search.Store(conf.NewSearch())
+			Conf.Search.Load().BacklinkMentionDoc = true
+			Conf.Search.Load().BacklinkMentionName = true
+			Conf.Search.Load().BacklinkMentionKeywordsLimit = 0
 			var trees []*parse.Tree
 			for _, id := range []string{fixture.sourceID, fixture.targetID} {
 				tree, err := LoadTreeByBlockID(id)

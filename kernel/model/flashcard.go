@@ -747,6 +747,8 @@ func newFlashcard(card riff.Card, deckID string, now time.Time) *Flashcard {
 }
 
 func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Flashcard, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount int, err error) {
+	confFlashcardSnapshot := Conf.LoadFlashcard()
+
 	if IsEncryptedBox(boxID) {
 		err = errors.New(Conf.Language(393))
 		return
@@ -788,7 +790,7 @@ func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Fl
 		return
 	}
 
-	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit, Conf.Flashcard.ReviewMode)
+	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, confFlashcardSnapshot.NewCardLimit, confFlashcardSnapshot.ReviewCardLimit, confFlashcardSnapshot.ReviewMode)
 	now := time.Now()
 	for _, card := range cards {
 		ret = append(ret, newFlashcard(card, builtinDeckID, now))
@@ -803,6 +805,8 @@ func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Fl
 }
 
 func GetTreeDueFlashcards(rootID string, reviewedCardIDs []string) (ret []*Flashcard, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount int, err error) {
+	confFlashcardSnapshot := Conf.LoadFlashcard()
+
 	if err = validateFlashcardTree(rootID); err != nil {
 		return
 	}
@@ -817,8 +821,8 @@ func GetTreeDueFlashcards(rootID string, reviewedCardIDs []string) (ret []*Flash
 	}
 
 	_, treeBlockIDs := getTreeSubTreeChildBlocks(rootID)
-	newCardLimit := Conf.Flashcard.NewCardLimit
-	reviewCardLimit := Conf.Flashcard.ReviewCardLimit
+	newCardLimit := confFlashcardSnapshot.NewCardLimit
+	reviewCardLimit := confFlashcardSnapshot.ReviewCardLimit
 	// 文档级新卡/复习卡上限控制 Document-level new card/review card limit control https://github.com/siyuan-note/siyuan/issues/9365
 	ial := sql.GetBlockAttrs(rootID)
 	if newCardLimitStr := ial["custom-riff-new-card-limit"]; "" != newCardLimitStr {
@@ -836,7 +840,7 @@ func GetTreeDueFlashcards(rootID string, reviewedCardIDs []string) (ret []*Flash
 		}
 	}
 
-	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, newCardLimit, reviewCardLimit, Conf.Flashcard.ReviewMode)
+	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, treeBlockIDs, newCardLimit, reviewCardLimit, confFlashcardSnapshot.ReviewMode)
 	now := time.Now()
 	for _, card := range cards {
 		ret = append(ret, newFlashcard(card, builtinDeckID, now))
@@ -904,13 +908,15 @@ func GetDueFlashcards(deckID string, reviewedCardIDs []string) (ret []*Flashcard
 }
 
 func getDueFlashcards(deckID string, reviewedCardIDs []string) (ret []*Flashcard, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount int) {
+	confFlashcardSnapshot := Conf.LoadFlashcard()
+
 	deck := Decks[deckID]
 	if nil == deck {
 		logging.LogWarnf("deck not found [%s]", deckID)
 		return
 	}
 
-	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit, Conf.Flashcard.ReviewMode)
+	cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, confFlashcardSnapshot.NewCardLimit, confFlashcardSnapshot.ReviewCardLimit, confFlashcardSnapshot.ReviewMode)
 	now := time.Now()
 	for _, card := range cards {
 		ret = append(ret, newFlashcard(card, deckID, now))
@@ -925,6 +931,8 @@ func getDueFlashcards(deckID string, reviewedCardIDs []string) (ret []*Flashcard
 }
 
 func getAllDueFlashcards(reviewedCardIDs []string) (ret []*Flashcard, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount int) {
+	confFlashcardSnapshot := Conf.LoadFlashcard()
+
 	now := time.Now()
 	for _, deck := range Decks {
 		if deck.ID != builtinDeckID {
@@ -933,7 +941,7 @@ func getAllDueFlashcards(reviewedCardIDs []string) (ret []*Flashcard, unreviewed
 			continue
 		}
 
-		cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit, Conf.Flashcard.ReviewMode)
+		cards, unreviewedCnt, unreviewedNewCardCnt, unreviewedOldCardCnt := getDeckDueCards(deck, reviewedCardIDs, nil, confFlashcardSnapshot.NewCardLimit, confFlashcardSnapshot.ReviewCardLimit, confFlashcardSnapshot.ReviewMode)
 		unreviewedCount += unreviewedCnt
 		unreviewedNewCardCount += unreviewedNewCardCnt
 		unreviewedOldCardCount += unreviewedOldCardCnt
@@ -1168,6 +1176,8 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 }
 
 func LoadFlashcards() {
+	confFlashcardSnapshot := Conf.LoadFlashcard()
+
 	riffSavePath := getRiffDir()
 	if err := os.MkdirAll(riffSavePath, 0755); err != nil {
 		logging.LogErrorf("create riff dir [%s] failed: %s", riffSavePath, err)
@@ -1185,7 +1195,7 @@ func LoadFlashcards() {
 		name := entry.Name()
 		if before, ok := strings.CutSuffix(name, ".deck"); ok {
 			deckID := before
-			deck, loadErr := riff.LoadDeck(riffSavePath, deckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
+			deck, loadErr := riff.LoadDeck(riffSavePath, deckID, confFlashcardSnapshot.RequestRetention, confFlashcardSnapshot.MaximumInterval, confFlashcardSnapshot.Weights)
 			if nil != loadErr {
 				logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
 				continue
@@ -1272,8 +1282,10 @@ func createDeck(name string) (deck *riff.Deck, err error) {
 }
 
 func createDeck0(name string, deckID string) (deck *riff.Deck, err error) {
+	confFlashcardSnapshot := Conf.LoadFlashcard()
+
 	riffSavePath := getRiffDir()
-	deck, err = riff.LoadDeck(riffSavePath, deckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
+	deck, err = riff.LoadDeck(riffSavePath, deckID, confFlashcardSnapshot.RequestRetention, confFlashcardSnapshot.MaximumInterval, confFlashcardSnapshot.Weights)
 	if err != nil {
 		logging.LogErrorf("load deck [%s] failed: %s", deckID, err)
 		return

@@ -74,10 +74,10 @@ type capabilityAuthorizer interface {
 type configCapabilityAuthorizer struct{}
 
 func (configCapabilityAuthorizer) Allows(id string, _ capabilityAccessContext) bool {
-	if kernelModel.Conf == nil || kernelModel.Conf.AI == nil || kernelModel.Conf.AI.Agent == nil {
+	if kernelModel.Conf == nil || kernelModel.Conf.AI.Load() == nil || kernelModel.Conf.AI.Load().Agent == nil {
 		return true
 	}
-	return kernelModel.Conf.AI.Agent.CapabilityPolicy.Allows(id)
+	return kernelModel.Conf.AI.Load().Agent.CapabilityPolicy.Allows(id)
 }
 
 var currentCapabilityAuthorizer capabilityAuthorizer = configCapabilityAuthorizer{}
@@ -89,10 +89,10 @@ type capabilityApprover interface {
 type configCapabilityApprover struct{}
 
 func (configCapabilityApprover) Decision(id, action string, _ capabilityAccessContext) string {
-	if kernelModel.Conf == nil || kernelModel.Conf.AI == nil || kernelModel.Conf.AI.Agent == nil {
+	if kernelModel.Conf == nil || kernelModel.Conf.AI.Load() == nil || kernelModel.Conf.AI.Load().Agent == nil {
 		return conf.ApprovalDecisionRisk
 	}
-	return kernelModel.Conf.AI.Agent.ApprovalPolicy.Decision(id, action)
+	return kernelModel.Conf.AI.Load().Agent.ApprovalPolicy.Decision(id, action)
 }
 
 var currentCapabilityApprover capabilityApprover = configCapabilityApprover{}
@@ -176,10 +176,10 @@ func capabilityOwnerAvailable(source, runtime, ownerID string) bool {
 	if ownerID == "" {
 		return true
 	}
-	if kernelModel.Conf == nil || kernelModel.Conf.AI == nil || kernelModel.Conf.AI.MCP == nil {
+	if kernelModel.Conf == nil || kernelModel.Conf.AI.Load() == nil || kernelModel.Conf.AI.Load().MCP == nil {
 		return false
 	}
-	for _, server := range kernelModel.Conf.AI.MCP.Servers {
+	for _, server := range kernelModel.Conf.AI.Load().MCP.Servers {
 		if server.ID == ownerID {
 			return server.Enabled
 		}

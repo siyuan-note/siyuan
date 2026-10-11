@@ -127,6 +127,18 @@ func pluginStorageName(absPath string) (pluginName string, ok bool) {
 
 // PushReloadAllEnabledPlugins 向前端推送已启用插件的全局状态，并返回相同的权威状态供请求方应用。
 func PushReloadAllEnabledPlugins(enabled, petalDisabled bool, revision uint64, changed bool) map[string]any {
+	payload := PluginReloadPayload(enabled, petalDisabled, revision, changed)
+	if changed {
+		if len(payload["unloadPlugins"].([]string))+len(payload["reloadPlugins"].([]string)) > 0 {
+			util.ReloadPublishServiceSessions()
+		}
+		util.BroadcastByType("main", "reloadPlugin", 0, "", payload)
+	}
+	return payload
+}
+
+// PluginReloadPayload 构造插件生命周期结果，响应与广播复用同一形态。
+func PluginReloadPayload(enabled, petalDisabled bool, revision uint64, changed bool) map[string]any {
 	pluginNames := []string{}
 	for _, petal := range getPetals() {
 		if petal.Enabled {
@@ -156,10 +168,6 @@ func PushReloadAllEnabledPlugins(enabled, petalDisabled bool, revision uint64, c
 	if changed {
 		logging.LogInfof("reload plugins for global state, unloads=%v, reloads=%v, revision=%d",
 			unloadPlugins, reloadPlugins, revision)
-		if 0 < len(unloadPlugins)+len(reloadPlugins) {
-			util.ReloadPublishServiceSessions()
-		}
-		util.BroadcastByType("main", "reloadPlugin", 0, "", payload)
 	}
 	return payload
 }

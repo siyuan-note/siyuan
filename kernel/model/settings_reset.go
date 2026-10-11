@@ -10,7 +10,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -24,53 +23,62 @@ var resetSettingsStorageKeys = []string{
 }
 
 func defaultWorkspaceSettings(current *AppConf) *AppConf {
-	next := *current
-	next.Editor = conf.NewEditor()
-	next.Editor.Markdown = util.NewMarkdown()
-	if current.Editor != nil {
-		next.Editor.HistoryRetentionDays = current.Editor.HistoryRetentionDays
-		next.Editor.Emoji = current.Editor.Emoji
+	next := current.cloneSettings()
+	next.Editor.Store(conf.NewEditor())
+	next.Editor.Load().Markdown = util.NewMarkdown()
+	if current.Editor.Load() != nil {
+		next.Editor.Load().HistoryRetentionDays = current.Editor.Load().HistoryRetentionDays
+		next.Editor.Load().Emoji = current.Editor.Load().Emoji
 	}
-	next.FileTree = conf.NewFileTree()
-	next.FileTree.UseSingleLineSave = util.DefaultUseSingleLineSave
-	next.FileTree.LargeFileWarningSize = util.DefaultLargeFileWarningSize
-	next.FileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount
-	next.Tag = conf.NewTag()
-	next.Export = conf.NewExport()
-	next.Search = conf.NewSearch()
-	next.Graph = conf.NewGraph()
-	next.Flashcard = conf.NewFlashcard()
-	next.OCR = conf.NewOCR()
-	next.Appearance = conf.NewAppearance()
-	next.Appearance.Lang = current.Lang
-	if current.Appearance != nil {
-		next.Appearance.Mode = current.Appearance.Mode
-		next.Appearance.DarkThemes = current.Appearance.DarkThemes
-		next.Appearance.LightThemes = current.Appearance.LightThemes
-		next.Appearance.Icons = current.Appearance.Icons
+	next.FileTree.Store(conf.NewFileTree())
+	next.FileTree.Load().RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount
+	next.Tag.Store(conf.NewTag())
+	next.Export.Store(conf.NewExport())
+	next.Search.Store(conf.NewSearch())
+	next.Graph.Store(conf.NewGraph())
+	next.Flashcard.Store(conf.NewFlashcard())
+	next.OCR.Store(conf.NewOCR())
+	next.Appearance.Store(conf.NewAppearanceForContainer(util.IsMobileContainer()))
+	next.Appearance.Load().Lang = current.Lang
+	if current.Appearance.Load() != nil {
+		next.Appearance.Load().Mode = current.Appearance.Load().Mode
+		next.Appearance.Load().DarkThemes = current.Appearance.Load().DarkThemes
+		next.Appearance.Load().LightThemes = current.Appearance.Load().LightThemes
+		next.Appearance.Load().Icons = current.Appearance.Load().Icons
 	}
-	next.UILayout = &conf.UILayout{}
+	next.UILayout.Store(&conf.UILayout{})
 	keymap := conf.Keymap{}
-	if current.Keymap != nil {
+	if current.Keymap.Load() != nil {
 		// 内置快捷键在前端启动时按平台补全，插件快捷键完整保留。
-		for key, value := range *current.Keymap {
+		for key, value := range *current.Keymap.Load() {
 			if key != "general" && key != "editor" {
 				keymap[key] = value
 			}
 		}
 	}
-	next.Keymap = &keymap
-	if current.System != nil {
-		system := *current.System
+	next.Keymap.Store(&keymap)
+	if current.System.Load() != nil {
+		system := *current.System.Load()
 		system.DownloadInstallPkg = conf.NewSystem().DownloadInstallPkg
 		system.SettingsWindow = false
-		next.System = &system
+		next.System.Store(&system)
 	}
-	next.Editor = conf.NormalizeEditor(next.Editor)
-	next.Export = conf.NormalizeExport(next.Export)
-	next.FileTree = conf.NormalizeFileTree(next.FileTree)
-	next.Search = conf.NormalizeSearch(next.Search)
-	next.Flashcard, _ = conf.NormalizeFlashcard(next.Flashcard)
+	// 仅规范化被重置的配置段，未重置的配置段与当前内存配置共享，保持原样。
+	next.Appearance.Store(conf.NormalizeAppearance(next.Appearance.Load(), util.IsMobileContainer()))
+	next.UILayout.Store(conf.NormalizeUILayout(next.UILayout.Load()))
+	next.Keymap.Store(conf.NormalizeKeymap(next.Keymap.Load()))
+	next.Editor.Store(conf.NormalizeEditor(next.Editor.Load()))
+	next.Export.Store(conf.NormalizeExport(next.Export.Load()))
+	next.FileTree.Store(conf.NormalizeFileTree(next.FileTree.Load()))
+	next.Tag.Store(conf.NormalizeTag(next.Tag.Load()))
+	next.Search.Store(conf.NormalizeSearch(next.Search.Load()))
+	next.Graph.Store(conf.NormalizeGraph(next.Graph.Load()))
+	{
+		confSectionValue0, confSectionValue1 := conf.NormalizeFlashcard(next.Flashcard.Load())
+		next.Flashcard.Store(confSectionValue0)
+		_ = confSectionValue1
+	}
+	next.OCR.Store(conf.NormalizeOCR(next.OCR.Load()))
 	return &next
 }
 
@@ -118,36 +126,54 @@ func ResetSettings() error {
 	if err = writeSettingsReset([][]byte{config, local, boot}, filelock.WriteFile); err != nil {
 		return err
 	}
-	Conf.Editor, Conf.FileTree, Conf.Tag = next.Editor, next.FileTree, next.Tag
-	Conf.Export, Conf.Search, Conf.Graph = next.Export, next.Search, next.Graph
-	Conf.Flashcard, Conf.OCR, Conf.Appearance = next.Flashcard, next.OCR, next.Appearance
-	Conf.UILayout, Conf.Keymap = next.UILayout, next.Keymap
-	if Conf.System != nil {
-		Conf.System.DownloadInstallPkg = next.System.DownloadInstallPkg
-		Conf.System.SettingsWindow = next.System.SettingsWindow
+	recordPersistedConf(config)
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := next.Editor.Load(), next.FileTree.Load(), next.Tag.Load()
+		Conf.Editor.Store(confSectionValue0)
+		Conf.FileTree.Store(confSectionValue1)
+		Conf.Tag.Store(confSectionValue2)
+	}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := next.Export.Load(), next.Search.Load(), next.Graph.Load()
+		Conf.Export.Store(confSectionValue0)
+		Conf.Search.Store(confSectionValue1)
+		Conf.Graph.Store(confSectionValue2)
+	}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := next.Flashcard.Load(), next.OCR.Load(), next.Appearance.Load()
+		Conf.Flashcard.Store(confSectionValue0)
+		Conf.OCR.Store(confSectionValue1)
+		Conf.Appearance.Store(confSectionValue2)
+	}
+	{
+		confSectionValue0, confSectionValue1 := next.UILayout.Load(), next.Keymap.Load()
+		Conf.UILayout.Store(confSectionValue0)
+		Conf.Keymap.Store(confSectionValue1)
+	}
+	if Conf.System.Load() != nil {
+		replaceConfSectionLocked(&Conf.System, func(system *conf.System) bool {
+			system.DownloadInstallPkg = next.System.Load().DownloadInstallPkg
+			system.SettingsWindow = next.System.Load().SettingsWindow
+			return true
+		})
 	}
 	return nil
 }
 
 // ApplyResetSettings 更新运行时依赖，索引按现有队列重建，不修改笔记本密钥或历史保留策略。
 func ApplyResetSettings(previousSearch *conf.Search) {
-	util.MarkdownSettings = Conf.Editor.Markdown
-	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
-	util.LargeFileWarningSize = Conf.FileTree.LargeFileWarningSize
-	util.StatusBarCfg = Conf.Appearance.StatusBar
-	util.NotificationsCfg = Conf.Appearance.Notifications
-	ChangeHistoryTick(Conf.Editor.GenerateHistoryInterval)
+	confSearchSnapshot := Conf.LoadSearch()
+
+	applyConfRuntime()
+	ChangeHistoryTick(Conf.Editor.Load().GenerateHistoryInterval)
 	ResetVirtualBlockRefCache()
 	RefreshBoxDocFeature()
 	refreshAppearanceConfig()
 	WatchThemes()
-	sql.SetCaseSensitive(Conf.Search.CaseSensitive)
-	sql.SetHanSensitive(Conf.Search.HanSensitiveVal())
-	sql.SetIndexAssetPath(Conf.Search.IndexAssetPath)
 	go nativePaddle.Close()
-	if previousSearch == nil || previousSearch.CaseSensitive != Conf.Search.CaseSensitive ||
-		previousSearch.HanSensitiveVal() != Conf.Search.HanSensitiveVal() ||
-		previousSearch.IndexAssetPath != Conf.Search.IndexAssetPath {
+	if previousSearch == nil || previousSearch.CaseSensitive != confSearchSnapshot.CaseSensitive ||
+		previousSearch.HanSensitiveVal() != confSearchSnapshot.HanSensitiveVal() ||
+		previousSearch.IndexAssetPath != confSearchSnapshot.IndexAssetPath {
 		// 队列重建会重新加载闪卡调度参数，保留卡片和复习进度。
 		task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	} else {

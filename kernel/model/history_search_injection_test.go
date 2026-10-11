@@ -42,12 +42,12 @@ func TestHistorySearchInjection(t *testing.T) {
 		}
 	}
 	Conf = NewAppConf()
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
-	Conf.Search = conf.NewSearch()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
+	Conf.Search.Store(conf.NewSearch())
+	Conf.FileTree.Store(conf.NewFileTree())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)

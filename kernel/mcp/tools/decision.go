@@ -86,14 +86,16 @@ func init() {
 }
 
 func decisionAvailable() bool {
-	return decisionEnabled() && model.Conf.AI.Decision.Configured()
+	return decisionEnabled() && model.Conf.AI.Load().Decision.Configured()
 }
 
 // decisionEnabled 不读取活动供应商配置，已开始的批次使用独立的配置快照。
 func decisionEnabled() bool {
-	return !util.IsDisabledFeature("ai") && model.Conf != nil && model.Conf.AI != nil &&
-		model.Conf.AI.Decision != nil && model.Conf.AI.Decision.Enabled &&
-		(model.Conf.AI.Agent == nil || model.Conf.AI.Agent.CapabilityPolicy.Allows("native/backend/decision"))
+	confAISnapshot := model.Conf.LoadAI()
+
+	return !util.IsDisabledFeature("ai") && model.Conf != nil && confAISnapshot != nil &&
+		confAISnapshot.Decision != nil && confAISnapshot.Decision.Enabled &&
+		(confAISnapshot.Agent == nil || confAISnapshot.Agent.CapabilityPolicy.Allows("native/backend/decision"))
 }
 
 func decisionBoxLeases(args map[string]any) []string {
@@ -132,7 +134,7 @@ func decisionHandler(ctx context.Context, args map[string]any) (CallToolResult, 
 		return blockToolError("encrypted notebook is locked, please unlock it first")
 	}
 	defer release()
-	options, err := model.Conf.AI.Decision.ActiveOptions()
+	options, err := model.Conf.AI.Load().Decision.ActiveOptions()
 	if err != nil {
 		return blockToolError(err.Error())
 	}

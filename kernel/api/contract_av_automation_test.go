@@ -45,7 +45,12 @@ func TestAVContractAutomationWrites(t *testing.T) {
 		t.Fatal(err)
 	}
 	util.TimeLangs["en"] = language.Time
-	model.Conf.Search, model.Conf.Editor, model.Conf.Export = conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+		model.Conf.Search.Store(confSectionValue0)
+		model.Conf.Editor.Store(confSectionValue1)
+		model.Conf.Export.Store(confSectionValue2)
+	}
 	tree, err := model.LoadTreeByBlockID(fixture.databaseID)
 	if err != nil {
 		t.Fatal(err)

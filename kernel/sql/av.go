@@ -1268,7 +1268,7 @@ func filterByQuery(query string, collection av.Collection) {
 			for _, cell := range item.GetValues() {
 				allKeywordsHit := true
 				for _, keyword := range keywords {
-					if !util.SearchCaseSensitive {
+					if !util.SearchCaseSensitive.Load() {
 						if !strings.Contains(strings.ToLower(cell.String(true)), strings.ToLower(keyword)) {
 							allKeywordsHit = false
 							break

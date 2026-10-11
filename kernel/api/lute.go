@@ -177,7 +177,7 @@ var html2BlockDOM = contractHandler(apicontract.HTML2BlockDOM, func(c *gin.Conte
 		}
 	}
 
-	if util.ContainerStd == model.Conf.System.Container && !skipLocalAssets {
+	if util.ContainerStd == model.Conf.System.Load().Container && !skipLocalAssets {
 		// 处理本地资源文件复制
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || ast.NodeLinkDest != n.Type {

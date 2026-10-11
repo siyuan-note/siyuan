@@ -55,6 +55,11 @@ type BodyGradientColor struct {
 }
 
 func NewAppearance() *Appearance {
+	return NewAppearanceForContainer(false)
+}
+
+// NewAppearanceForContainer 使用显式容器参数选择状态栏默认项。
+func NewAppearanceForContainer(mobile bool) *Appearance {
 	return &Appearance{
 		GlobalFontFamilies:  []*EditorFont{},
 		Mode:                0,
@@ -68,7 +73,7 @@ func NewAppearance() *Appearance {
 		CloseButtonBehavior: 0,
 		HideToolbar:         true,
 		HideStatusBar:       false,
-		StatusBar:           util.NewStatusBar(util.IsMobileContainer()),
+		StatusBar:           util.NewStatusBar(mobile),
 		Notifications:       util.NewNotifications(),
 		EntryVisibility:     NewEntryVisibility(EntryVisibilityProfileSimple),
 	}

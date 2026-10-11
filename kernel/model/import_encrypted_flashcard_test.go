@@ -137,7 +137,7 @@ func newImportDeckFixture(t *testing.T, cards map[string]string) (root string) {
 func TestCheckEncryptedImportDeckReportsAffectedDocuments(t *testing.T) {
 	oldConf, oldLangs := Conf, util.Langs
 	Conf = &AppConf{Lang: "en"}
-	Conf.Flashcard = conf.NewFlashcard()
+	Conf.Flashcard.Store(conf.NewFlashcard())
 	util.Langs = map[string]map[int]string{
 		"en": {
 			385: "Encrypted notebooks do not support flashcards, so a .sy.zip containing flashcard deck data cannot be imported (documents: %s)",

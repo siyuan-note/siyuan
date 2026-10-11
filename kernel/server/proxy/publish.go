@@ -50,22 +50,24 @@ var (
 )
 
 func InitPublishService() (uint16, error) {
+	confPublishSnapshot := model.Conf.LoadPublish()
+
 	model.InitPublishAccounts()
 
 	if listener != nil {
-		if !model.Conf.Publish.Enable {
+		if !confPublishSnapshot.Enable {
 			closePublishListener()
 			return 0, nil
 		}
 
 		if port, err := util.ParsePort(Port); err != nil {
 			return 0, err
-		} else if port != model.Conf.Publish.Port {
+		} else if port != confPublishSnapshot.Port {
 			closePublishListener()
 			initPublishService()
 		}
 	} else {
-		if !model.Conf.Publish.Enable {
+		if !confPublishSnapshot.Enable {
 			return 0, nil
 		}
 
@@ -82,7 +84,7 @@ func initPublishService() {
 }
 
 func initPublishListener() (err error) {
-	listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", Host, model.Conf.Publish.Port))
+	listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", Host, model.Conf.Publish.Load().Port))
 	if err != nil {
 		logging.LogErrorf("start listener failed: %s", err)
 		return
@@ -196,7 +198,7 @@ func publishAuthRejectResponse(request *http.Request, statusCode, retryAfter int
 }
 
 func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.Response, err error) {
-	if model.Conf.Publish.Auth.Enable {
+	if model.Conf.Publish.Load().Auth.Enable {
 		// Session Auth
 		sessionIdCookie, cookieErr := request.Cookie(model.SessionIdCookieName)
 		if cookieErr == nil {

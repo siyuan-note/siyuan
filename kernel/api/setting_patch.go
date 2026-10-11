@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -17,8 +16,8 @@ import (
 )
 
 // 配置更新按内核接受顺序提交，旧接口与字段更新共用互斥，通知只携带配置域和顺序号。
-var settingMutationMu sync.Mutex
-var settingRevision uint64
+var settingMutationMu sync.RWMutex
+var settingNamespaceLocks sync.Map
 var settingTaskID atomic.Uint64
 var settingTasksMu sync.Mutex
 var settingTasks = map[string]apicontract.SettingTask{}
@@ -55,50 +54,31 @@ func beginSettingTask(messageKey string) func() {
 	return func() { notify(false) }
 }
 
-// 单项设置接口沿用原请求和返回值，成功后通知其他前端重新读取配置。
-func additionalSettingNamespace(path string) string {
-	switch path {
-	case "/api/setting/setKeymap":
-		return "keymap"
-	case "/api/setting/setBazaar":
-		return "bazaar"
-	case "/api/setting/setPublish":
-		return "publish"
-	case "/api/system/importConf":
-		return "*"
-	case "/api/system/setAutoLaunch", "/api/system/setFollowSystemLockScreen",
-		"/api/notebook/setEncryptedNotebookFollowSystemLock",
-		"/api/system/setDownloadInstallPkg", "/api/system/setSettingsWindow", "/api/system/setUpdateChannel",
-		"/api/system/setNetworkProxy", "/api/system/setAPIToken", "/api/system/setAccessAuthCode", "/api/system/setOIDC":
-		return "system"
-	}
-	if strings.HasPrefix(path, "/api/sync/set") {
-		return "sync"
-	}
-	if strings.HasPrefix(path, "/api/repo/set") {
-		return "repo"
-	}
-	if strings.HasPrefix(path, "/api/sync/importSyncProvider") {
-		return "sync"
-	}
-	return ""
+func notifySettingChanged(namespace string) {
+	model.NotifyConfChanged(namespace)
 }
 
-func notifySettingChanged(namespace string) {
-	settingRevision++
-	util.BroadcastByType("main", "settingChanged", 0, "", struct {
-		Namespace string `json:"namespace"`
-		Revision  uint64 `json:"revision"`
-	}{namespace, settingRevision})
+// 批量操作独占设置闸门，单段写入只串行化同一命名空间。
+func lockSetting(namespace string) func() {
+	if namespace == "*" {
+		settingMutationMu.Lock()
+		return settingMutationMu.Unlock
+	}
+	settingMutationMu.RLock()
+	value, _ := settingNamespaceLocks.LoadOrStore(namespace, &sync.Mutex{})
+	mu := value.(*sync.Mutex)
+	mu.Lock()
+	return func() { mu.Unlock(); settingMutationMu.RUnlock() }
 }
 
 func serializeSetting[Request, Data any](namespace string,
 	apply func(*gin.Context, Request) apicontract.Response[Data]) func(*gin.Context, Request) apicontract.Response[Data] {
 	return func(c *gin.Context, request Request) apicontract.Response[Data] {
-		settingMutationMu.Lock()
-		defer settingMutationMu.Unlock()
+		release := lockSetting(namespace)
+		defer release()
+		previous := model.ConfNamespaceRevision(namespace)
 		response := apply(c, request)
-		if response.Code() == 0 {
+		if response.Code() == 0 && previous == model.ConfNamespaceRevision(namespace) {
 			notifySettingChanged(namespace)
 		}
 		return response
@@ -173,68 +153,118 @@ func migrateDecisionSettingPatch(patch []byte) ([]byte, error) {
 }
 
 func applySettingPatch[Request, Data, Config any](c *gin.Context, patch []byte, config Config,
-	endpoint apicontract.Endpoint[Request, Data], apply func(*gin.Context, Request) apicontract.Response[Data]) apicontract.Response[apicontract.Null] {
+	endpoint apicontract.Endpoint[Request, Data], apply func(*gin.Context, Request) apicontract.Response[Data]) apicontract.Response[*apicontract.SettingPatchData] {
 	base, err := json.Marshal(config)
 	if err != nil {
-		return apicontract.Failure[apicontract.Null](-1, err.Error())
+		return apicontract.Failure[*apicontract.SettingPatchData](-1, err.Error())
 	}
 	merged, err := mergeSettingJSON(base, patch)
 	if err != nil {
-		return apicontract.Failure[apicontract.Null](-1, err.Error())
+		return apicontract.Failure[*apicontract.SettingPatchData](-1, err.Error())
 	}
 	request, err := endpoint.Decode(bytes.NewReader(merged))
 	if err != nil {
-		return apicontract.Failure[apicontract.Null](-1, err.Error())
+		return apicontract.Failure[*apicontract.SettingPatchData](-1, err.Error())
 	}
 	response := apply(c, request)
 	if response.Code() != 0 {
-		return apicontract.Failure[apicontract.Null](response.Code(), response.Message())
+		return apicontract.PatchSetting.FailureWithData(response.Code(), response.Message(), settingPatchDiagnostics(c))
 	}
-	return apicontract.Success(apicontract.Null{})
+	return apicontract.Success((*apicontract.SettingPatchData)(nil))
 }
 
-var patchSetting = contractHandler(apicontract.PatchSetting, func(c *gin.Context, request apicontract.PatchSettingRequest) apicontract.Response[apicontract.Null] {
-	settingMutationMu.Lock()
-	defer settingMutationMu.Unlock()
+var patchSetting = contractHandler(apicontract.PatchSetting, func(c *gin.Context, request apicontract.PatchSettingRequest) apicontract.Response[*apicontract.SettingPatchData] {
+	release := lockSetting(request.Namespace())
+	defer release()
+	previous := model.ConfNamespaceRevision(request.Namespace())
 	patch := request.PatchJSON()
-	var response apicontract.Response[apicontract.Null]
+	var response apicontract.Response[*apicontract.SettingPatchData]
 	switch request.Namespace() {
 	case "editor":
-		response = applySettingPatch(c, patch, model.Conf.Editor, apicontract.SetEditor, applyEditorSetting)
+		response = applySettingPatch(c, patch, model.Conf.Editor.Load(), apicontract.SetEditor, applyEditorSetting)
 	case "export":
-		response = applySettingPatch(c, patch, model.Conf.Export, apicontract.SetExport, applyExportSetting)
+		response = applySettingPatch(c, patch, model.Conf.Export.Load(), apicontract.SetExport, applyExportSetting)
 	case "fileTree":
-		response = applySettingPatch(c, patch, model.Conf.FileTree, apicontract.SetFiletree, applyFiletreeSetting)
+		response = applySettingPatch(c, patch, model.Conf.FileTree.Load(), apicontract.SetFiletree, applyFiletreeSetting)
 	case "search":
-		response = applySettingPatch(c, patch, model.Conf.Search, apicontract.SetSearch, applySearchSetting)
+		response = applySettingPatch(c, patch, model.Conf.Search.Load(), apicontract.SetSearch, applySearchSetting)
 	case "appearance":
-		response = applySettingPatch(c, patch, model.Conf.Appearance, apicontract.SetAppearance, applyAppearanceSetting)
+		response = applySettingPatch(c, patch, model.Conf.Appearance.Load(), apicontract.SetAppearance, applyAppearanceSetting)
 	case "flashcard":
-		response = applySettingPatch(c, patch, model.Conf.Flashcard, apicontract.SetFlashcard, applyFlashcardSetting)
+		response = applySettingPatch(c, patch, model.Conf.Flashcard.Load(), apicontract.SetFlashcard, applyFlashcardSetting)
 	case "secrets":
-		response = applySettingPatch(c, patch, model.Conf.Secrets, apicontract.SetSecrets, applySecretsSetting)
+		response = applySettingPatch(c, patch, model.Conf.Secrets.Load(), apicontract.SetSecrets, applySecretsSetting)
 	case "variables":
-		response = applySettingPatch(c, patch, model.Conf.Variables, apicontract.SetVariables, applyVariablesSetting)
+		response = applySettingPatch(c, patch, model.Conf.Variables.Load(), apicontract.SetVariables, applyVariablesSetting)
 	case "keymap":
 		response = applySettingPatch(c, append(append([]byte(`{"data":`), patch...), '}'),
 			struct {
 				Data *conf.Keymap `json:"data"`
-			}{model.Conf.Keymap}, apicontract.SetKeymap, applyKeymapSetting)
+			}{model.Conf.Keymap.Load()}, apicontract.SetKeymap, applyKeymapSetting)
 	case "ai":
 		if util.IsDisabledFeature("ai") {
-			return apicontract.Failure[apicontract.Null](-1, util.I18nTerm(model.Conf.Lang, "agentCapabilitiesUnavailable"))
+			return apicontract.Failure[*apicontract.SettingPatchData](-1, util.I18nTerm(model.Conf.Lang, "agentCapabilitiesUnavailable"))
 		}
 		var err error
 		patch, err = migrateDecisionSettingPatch(patch)
 		if err != nil {
-			return apicontract.Failure[apicontract.Null](-1, err.Error())
+			return apicontract.Failure[*apicontract.SettingPatchData](-1, err.Error())
 		}
-		response = applySettingPatch(c, patch, model.Conf.AI, apicontract.SetAI, applyAISetting)
+		response = applySettingPatch(c, patch, model.Conf.AI.Load(), apicontract.SetAI, applyAISetting)
+	case "ocr":
+		response = applySettingPatch(c, patch, model.Conf.OCR.Load(), apicontract.SetOCRConfig, applyOCRSetting)
+	case "bazaar":
+		response = applySettingPatch(c, patch, model.Conf.Bazaar.Load(), apicontract.SetBazaar, applyBazaarSetting)
+	case "publish":
+		response = applySettingPatch(c, patch, model.Conf.Publish.Load(), apicontract.SetPublish, applyPublishSetting)
+	case "snippet":
+		response = applySettingPatch(c, patch, model.Conf.Snippet.Load(), apicontract.SetConfSnippet, applySnippetSetting)
+	case "system", "repo", "sync":
+		var err error
+		var issues []model.Issue
+		if request.Namespace() == "sync" {
+			issues, err = model.ApplySyncSettingPatch(patch)
+		} else {
+			issues, err = model.ApplyConfPatch(request.Namespace(), patch)
+		}
+		recordSettingIssues(c, issues)
+		if err != nil {
+			return apicontract.PatchSetting.FailureWithData(-1, err.Error(), settingPatchDiagnostics(c))
+		}
+		response = apicontract.Success((*apicontract.SettingPatchData)(nil))
 	default:
-		return apicontract.Failure[apicontract.Null](-1, fmt.Sprintf("unsupported settings namespace: %s", request.Namespace()))
+		return apicontract.Failure[*apicontract.SettingPatchData](-1, fmt.Sprintf("unsupported settings namespace: %s", request.Namespace()))
+	}
+	if response.Code() == 0 && previous == model.ConfNamespaceRevision(request.Namespace()) {
+		notifySettingChanged(request.Namespace())
 	}
 	if response.Code() == 0 {
-		notifySettingChanged(request.Namespace())
+		return apicontract.Success(settingPatchDiagnostics(c))
 	}
 	return response
 })
+
+func recordSettingIssues(c *gin.Context, issues []model.Issue) {
+	if c != nil && len(issues) > 0 {
+		c.Set("settingIssues", issues)
+	}
+}
+
+func settingPatchDiagnostics(c *gin.Context) *apicontract.SettingPatchData {
+	if c == nil {
+		return nil
+	}
+	value, ok := c.Get("settingIssues")
+	if !ok {
+		return nil
+	}
+	issues, ok := value.([]model.Issue)
+	if !ok || len(issues) == 0 {
+		return nil
+	}
+	data := &apicontract.SettingPatchData{Issues: make([]apicontract.SettingIssue, len(issues))}
+	for i, issue := range issues {
+		data.Issues[i] = apicontract.SettingIssue{Field: issue.Field, Severity: issue.Severity, Message: issue.Message}
+	}
+	return data
+}

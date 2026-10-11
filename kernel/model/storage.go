@@ -517,6 +517,8 @@ func buildRecentDocsByTimeStmt(sortBy string, hiddenRootIDs []string, limit int)
 }
 
 func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
+	confFileTreeSnapshot := Conf.LoadFileTree()
+
 	ret = []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
 	recentDocs, err := loadRecentDocsRaw()
 	if err != nil {
@@ -595,8 +597,8 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	switch sortBy {
 	case "created", "updated": // 按创建时间或更新时间排序
 		// 从数据库查询最近创建或修改的文档
-		stmt, boxDocArgs := buildRecentDocsByTimeStmt(sortBy, hiddenBoxDocRootIDs(), Conf.FileTree.RecentDocsMaxListCount)
-		sqlBlocks := sql.SelectBlocksRawStmtArgs(stmt, boxDocArgs, Conf.FileTree.RecentDocsMaxListCount)
+		stmt, boxDocArgs := buildRecentDocsByTimeStmt(sortBy, hiddenBoxDocRootIDs(), confFileTreeSnapshot.RecentDocsMaxListCount)
+		sqlBlocks := sql.SelectBlocksRawStmtArgs(stmt, boxDocArgs, confFileTreeSnapshot.RecentDocsMaxListCount)
 		ret = []*RecentDoc{}
 		if 1 > len(sqlBlocks) {
 			return
@@ -684,7 +686,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 
 // normalizeRecentDocs 规范化最近文档列表：去重、清空 Title/Icon、按类型截取配置的最大数量记录
 func normalizeRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
-	maxCount := Conf.FileTree.RecentDocsMaxListCount
+	maxCount := Conf.FileTree.Load().RecentDocsMaxListCount
 
 	// 去重
 	seen := make(map[string]struct{}, len(recentDocs))

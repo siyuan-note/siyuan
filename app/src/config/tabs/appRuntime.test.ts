@@ -19,6 +19,13 @@ const fixture = () => {
         console: {warn: (): void => undefined},
         window: {siyuan: {config: {system}}},
         require: (name: string) => {
+            if (name === "../util/configApi") {
+                return {config: {set: (path: string, value: unknown, onApplied?: () => void) => {
+                    posted.push([path, value]);
+                    onApplied?.();
+                    return Promise.resolve();
+                }}};
+            }
             if (name === "../../util/fetch") {
                 return {fetchPost: (url: string, payload: unknown, cb?: () => void) => {
                     posted.push([url, payload]);
@@ -46,9 +53,9 @@ test("settings window preference submits the boolean and mirrors it locally", ()
     f.api.sendAppSetting("system.settingsWindow", undefined);
     assert.equal(f.system.settingsWindow, false);
     assert.equal(JSON.stringify(f.posted), JSON.stringify([
-        ["/api/system/setSettingsWindow", {settingsWindow: true}],
-        ["/api/system/setSettingsWindow", {settingsWindow: false}],
-        ["/api/system/setSettingsWindow", {settingsWindow: false}],
+        ["system.settingsWindow", true],
+        ["system.settingsWindow", false],
+        ["system.settingsWindow", false],
     ]));
 });
 

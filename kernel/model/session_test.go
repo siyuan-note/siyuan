@@ -33,9 +33,9 @@ import (
 func TestAuthByAPITokenThrottle(t *testing.T) {
 	originalConf := Conf
 	Conf = NewAppConf()
-	Conf.Api = conf.NewAPI()
+	Conf.Api.Store(conf.NewAPI())
 	t.Cleanup(func() { Conf = originalConf })
-	Conf.Api.Token = "test-api-token-123"
+	Conf.Api.Load().Token = "test-api-token-123"
 
 	engine := gin.New()
 	engine.GET("/api/test", CheckAuth, func(c *gin.Context) {

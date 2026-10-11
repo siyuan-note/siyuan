@@ -35,7 +35,7 @@ func GetRepoSnapshotsByTime(page int, startTime, endTime int64) (ret []*Snapshot
 		return GetRepoSnapshots(page)
 	}
 	ret = []*Snapshot{}
-	if len(Conf.Repo.Key) == 0 {
+	if len(Conf.Repo.Load().Key) == 0 {
 		return ret, 0, 0, errors.New(Conf.Language(26))
 	}
 	repo, err := newRepository()

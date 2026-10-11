@@ -38,8 +38,8 @@ func TestFindReplaceCaseSensitivityAcrossTypes(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			fixture := setupStructureTransactionTest(t)
 			setupFoldTransactionDatabase(t, fixture)
-			Conf.Search = conf.NewSearch()
-			Conf.Search.CaseSensitive = tc.caseSensitive
+			Conf.Search.Store(conf.NewSearch())
+			Conf.Search.Load().CaseSensitive = tc.caseSensitive
 			tree, err := LoadTreeByBlockID(fixture.sourceID)
 			if err != nil {
 				t.Fatal(err)

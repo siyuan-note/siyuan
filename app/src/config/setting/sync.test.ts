@@ -4,8 +4,8 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, isMethodDeclaration, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {getAgentDefaultModelID, getUsableAgentModels} from "../../layout/dock/agent/agentModel";
-import {createNamespacePatchQueue} from "../util/namespacePatchQueue";
 import {mergeRecordByDottedPath} from "../util/dotPath";
+import {createSectionRuntime, type Reaction} from "../util/sectionRuntime";
 
 
 for (const mobile of [false, true]) {
@@ -38,8 +38,11 @@ for (const mobile of [false, true]) {
         const api = {} as {createConfigNamespaceApi: (options: {
             namespace: string; getConfig: () => typeof config.editor;
         }) => {patch: (path: string, value: number, applied: (value: typeof config.editor) => void) => Promise<void>}};
+        const gateway = {} as typeof import("../util/configApi");
+        runInNewContext(compile("src/config/util/configApi.ts"), {exports: gateway, window: {siyuan: {config}}, structuredClone,
+            require: () => ({...refresh, fetchSyncPost, mergeRecordByDottedPath, trackSettingSave: (task: Promise<void>) => task})});
         runInNewContext(compile("src/config/util/namespaceApi.ts"), {exports: api, require: () => ({
-            ...refresh, fetchSyncPost, createNamespacePatchQueue, mergeRecordByDottedPath,
+            config: gateway.config, createSectionRuntime,
         })});
         let confirmed: typeof config.editor;
         await api.createConfigNamespaceApi({namespace: "editor", getConfig: () => config.editor})
@@ -217,7 +220,10 @@ for (const mobile of [false, true]) {
         const aiExports = {} as {aiConfigApi: {apply: (value: AIConfig) => void}};
         runInNewContext(compile("src/config/tabs/ai/aiRuntime.ts"), {
             exports: aiExports, window: windowContext, CustomEvent: class {constructor(public type: string) {}},
-            require: () => ({createConfigNamespaceApi: (options: {setConfig: (value: AIConfig) => void}) => ({apply: options.setConfig})}),
+            require: () => ({createConfigNamespaceApi: (options: {namespace: string; getConfig: () => AIConfig;
+                setConfig: (value: AIConfig) => void; reactions: Reaction<AIConfig>[]}) =>
+                createSectionRuntime({namespace: options.namespace, get: options.getConfig, set: options.setConfig,
+                    reactions: options.reactions || []})}),
         });
         const dependencies = {
             fetchSyncPost: async () => ({code: 0, data: {conf: JSON.parse(JSON.stringify({...config, ai: next}))}}),

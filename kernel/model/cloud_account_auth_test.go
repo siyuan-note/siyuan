@@ -31,9 +31,14 @@ func setupCloudAccountAuthTest(t *testing.T) *conf.User {
 		util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir = oldData, oldRepo, oldHistory, oldTemp
 	})
 	Conf = NewAppConf()
-	Conf.Sync, Conf.Repo, Conf.System = conf.NewSync(), conf.NewRepo(), conf.NewSystem()
-	Conf.Sync.Enabled, Conf.Sync.Provider, Conf.Sync.CloudName = true, conf.ProviderSiYuan, "main"
-	Conf.Repo.Key = []byte("0123456789abcdef0123456789abcdef")
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewSync(), conf.NewRepo(), conf.NewSystem()
+		Conf.Sync.Store(confSectionValue0)
+		Conf.Repo.Store(confSectionValue1)
+		Conf.System.Store(confSectionValue2)
+	}
+	Conf.Sync.Load().Enabled, Conf.Sync.Load().Provider, Conf.Sync.Load().CloudName = true, conf.ProviderSiYuan, "main"
+	Conf.Repo.Load().Key = []byte("0123456789abcdef0123456789abcdef")
 	util.ConfDir, util.CurrentCloudRegion, util.ReadOnly = t.TempDir(), 0, false
 	util.DataDir, util.RepoDir = filepath.Join(util.ConfDir, "data"), filepath.Join(util.ConfDir, "repo")
 	util.HistoryDir, util.TempDir = filepath.Join(util.ConfDir, "history"), filepath.Join(util.ConfDir, "temp")
@@ -59,7 +64,7 @@ func assertCloudAccountLoggedOut(t *testing.T) {
 	if err = json.Unmarshal(data, &saved); err != nil || saved.UserData != "" {
 		t.Fatalf("authentication failure retained persisted credentials: %v", err)
 	}
-	if !Conf.Sync.Enabled || Conf.Sync.CloudName != "main" || string(Conf.Repo.Key) != "0123456789abcdef0123456789abcdef" {
+	if !Conf.Sync.Load().Enabled || Conf.Sync.Load().CloudName != "main" || string(Conf.Repo.Load().Key) != "0123456789abcdef0123456789abcdef" {
 		t.Fatal("logout changed sync configuration or recovery key")
 	}
 }
@@ -93,10 +98,10 @@ func TestCloudRepoAuthFailurePreservesOtherSessions(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			user := setupCloudAccountAuthTest(t)
 			if name == "s3" {
-				Conf.Sync.Provider = conf.ProviderS3
+				Conf.Sync.Load().Provider = conf.ProviderS3
 			}
 			if name == "webdav" {
-				Conf.Sync.Provider = conf.ProviderWebDAV
+				Conf.Sync.Load().Provider = conf.ProviderWebDAV
 			}
 			handle := cloudRepoErrorHandler()
 			err := cloud.ErrCloudAuthFailed

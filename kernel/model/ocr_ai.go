@@ -29,6 +29,8 @@ func AIOCRAsset(ctx context.Context, path string) (string, error) {
 }
 
 func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool) (string, error) {
+	confAISnapshot := Conf.LoadAI()
+
 	if util.IsDisabledFeature("ai") {
 		return "", errors.New(Conf.Language(380))
 	}
@@ -36,7 +38,7 @@ func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool
 	if IsEncryptedOCRAsset(path) {
 		return "", errors.New(Conf.Language(380))
 	}
-	if Conf.AI == nil {
+	if confAISnapshot == nil {
 		return "", errors.New("AI configuration is unavailable")
 	}
 	provider, model := getOCRAIModel(value)
@@ -76,8 +78,8 @@ func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool
 		return "", err
 	}
 	maxTokens := 8192
-	if value.AIModelID == "" && Conf.AI.Agent != nil {
-		maxTokens = Conf.AI.Agent.MaxCompletionTokens
+	if value.AIModelID == "" && confAISnapshot.Agent != nil {
+		maxTokens = confAISnapshot.Agent.MaxCompletionTokens
 	}
 	if maxTokens == 0 {
 		maxTokens = 8192
@@ -124,16 +126,18 @@ func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool
 }
 
 func getOCRAIModel(value conf.OCR) (*conf.Provider, *conf.Model) {
-	if util.IsDisabledFeature("ai") || Conf.AI == nil {
+	confAISnapshot := Conf.LoadAI()
+
+	if util.IsDisabledFeature("ai") || confAISnapshot == nil {
 		return nil, nil
 	}
 	if value.AIModelID == "" {
 		if value.Provider == "ai" {
 			return nil, nil
 		}
-		return Conf.AI.GetAgentModel()
+		return confAISnapshot.GetAgentModel()
 	}
-	provider, model := Conf.AI.GetModel(value.AIModelID)
+	provider, model := confAISnapshot.GetModel(value.AIModelID)
 	if model == nil || model.ID != value.AIModelID || model.Name == "" {
 		return nil, nil
 	}
@@ -146,10 +150,12 @@ type OCRAIModel struct {
 
 // OCRAIModels 返回可选模型的显示信息；保留配置中的顺序，不泄露连接凭据。
 func OCRAIModels() (result []OCRAIModel) {
-	if util.IsDisabledFeature("ai") || Conf.AI == nil {
+	confAISnapshot := Conf.LoadAI()
+
+	if util.IsDisabledFeature("ai") || confAISnapshot == nil {
 		return
 	}
-	for _, provider := range Conf.AI.Providers {
+	for _, provider := range confAISnapshot.Providers {
 		if provider == nil || !provider.Enabled {
 			continue
 		}

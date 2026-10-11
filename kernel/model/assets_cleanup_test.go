@@ -99,8 +99,8 @@ func setupUnusedAssetWorkspace(t *testing.T) (boxID, docPath string) {
 	t.Helper()
 	originalConf, originalData, originalWorkspace := Conf, util.DataDir, util.WorkspaceDir
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
-	Conf.Sync = conf.NewSync()
+	Conf.FileTree.Store(conf.NewFileTree())
+	Conf.Sync.Store(conf.NewSync())
 	util.WorkspaceDir = t.TempDir()
 	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
 	t.Cleanup(func() { Conf, util.DataDir, util.WorkspaceDir = originalConf, originalData, originalWorkspace })
@@ -180,7 +180,7 @@ func TestUnusedAssetsTemplatePaths(t *testing.T) {
 	for _, mode := range []string{"uppercase extension", "symlink root"} {
 		t.Run(mode, func(t *testing.T) {
 			setupUnusedAssetWorkspace(t)
-			Conf.Search = conf.NewSearch()
+			Conf.Search.Store(conf.NewSearch())
 			templateDir := filepath.Join(util.DataDir, "templates")
 			name := "example.MD"
 			if mode == "symlink root" {

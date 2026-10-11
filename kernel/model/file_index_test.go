@@ -68,9 +68,9 @@ func TestRemoveDocFlushesDatabaseIndex(t *testing.T) {
 	}
 
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 
 	box := &Box{ID: "20260726000000-abcdefg"}
 	boxConf := conf.NewBoxConf()
@@ -192,11 +192,11 @@ func TestDocumentTemplatesWaitForDatabaseIndex(t *testing.T) {
 	}
 
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.FileTree.Store(conf.NewFileTree())
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	Conf.Lang = "en"
 	util.WorkingDir = filepath.Clean(filepath.Join("..", "..", "app"))
 	initLang()

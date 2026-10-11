@@ -24,8 +24,8 @@ import (
 func TestAPIContractDynamicIconGlobalFonts(t *testing.T) {
 	oldConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = conf.NewEditor()
-	model.Conf.Appearance = conf.NewAppearance()
+	model.Conf.Editor.Store(conf.NewEditor())
+	model.Conf.Appearance.Store(conf.NewAppearance())
 	t.Cleanup(func() { model.Conf = oldConf })
 	const fallback = "-apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'"
 	for _, test := range []struct {
@@ -42,8 +42,8 @@ func TestAPIContractDynamicIconGlobalFonts(t *testing.T) {
 		for _, allowScript := range []bool{false, true} {
 			for _, iconType := range []string{"1", "2", "3", "4", "5", "6", "7", "8", "", "unknown"} {
 				t.Run(fmt.Sprintf("%s/type%s/script%t", test.name, iconType, allowScript), func(t *testing.T) {
-					model.Conf.Appearance.GlobalFontFamilies = test.fonts
-					model.Conf.Editor.AllowSVGScript = allowScript
+					model.Conf.Appearance.Load().GlobalFontFamilies = test.fonts
+					model.Conf.Editor.Load().AllowSVGScript = allowScript
 					recorder := httptest.NewRecorder()
 					context, _ := gin.CreateTestContext(recorder)
 					context.Request = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/icon/getDynamicIcon?type=%s&content=Text&date=2026-09-29&lang=en", iconType), nil)
@@ -115,7 +115,7 @@ func TestGenerateTypeEightSVGHandlesEmptyContent(t *testing.T) {
 func TestGetDynamicIconSetsSecurityHeaders(t *testing.T) {
 	oldConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = conf.NewEditor()
+	model.Conf.Editor.Store(conf.NewEditor())
 	t.Cleanup(func() {
 		model.Conf = oldConf
 	})

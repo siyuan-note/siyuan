@@ -315,13 +315,13 @@ func StatusJob() {
 func skipPushTaskAction(action string) bool {
 	switch action {
 	case DatabaseIndexCommit:
-		return util.StatusBarCfg.MsgTaskDatabaseIndexCommitDisabled
+		return util.StatusBarCfg.Load().MsgTaskDatabaseIndexCommitDisabled
 	case HistoryDatabaseIndexCommit:
-		return util.StatusBarCfg.MsgTaskHistoryDatabaseIndexCommitDisabled
+		return util.StatusBarCfg.Load().MsgTaskHistoryDatabaseIndexCommitDisabled
 	case AssetContentDatabaseIndexCommit:
-		return util.StatusBarCfg.MsgTaskAssetDatabaseIndexCommitDisabled
+		return util.StatusBarCfg.Load().MsgTaskAssetDatabaseIndexCommitDisabled
 	case HistoryGenerateFile:
-		return util.StatusBarCfg.MsgTaskHistoryGenerateFileDisabled
+		return util.StatusBarCfg.Load().MsgTaskHistoryGenerateFileDisabled
 	default:
 		return false
 	}

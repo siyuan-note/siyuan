@@ -60,9 +60,9 @@ func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
 	util.BlockTreeDBPath = filepath.Join(tempDir, "blocktree.db")
 	Conf = NewAppConf()
 	Conf.Lang = testLang
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 
 	box := &Box{ID: "20260718000000-abcdefg"}
 	boxConf := conf.NewBoxConf()
@@ -181,7 +181,7 @@ func TestListDocTreeUsesPathIDForInvalidPropertiesID(t *testing.T) {
 
 func TestResolveDocTreeSortModeInheritance(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.FileTree.Sort = util.SortModeSizeDESC
+	Conf.FileTree.Load().Sort = util.SortModeSizeDESC
 	boxConf := fixture.box.GetConf()
 	boxConf.SortMode = util.SortModeCreatedASC
 	if err := fixture.box.SaveConf(boxConf); nil != err {
@@ -260,8 +260,8 @@ func TestResolveDocTreeSortModeInheritance(t *testing.T) {
 
 func TestCustomSortMaintenanceIgnoresEffectiveModeAndListLimit(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.FileTree.Sort = util.SortModeNameASC
-	Conf.FileTree.MaxListCount = 1
+	Conf.FileTree.Load().Sort = util.SortModeNameASC
+	Conf.FileTree.Load().MaxListCount = 1
 	boxConf := fixture.box.GetConf()
 	boxConf.SortMode = util.SortModeFileTree
 	if err := fixture.box.SaveConf(boxConf); nil != err {
@@ -327,7 +327,7 @@ func TestCustomSortMaintenanceIgnoresEffectiveModeAndListLimit(t *testing.T) {
 
 func TestReorderDocsUsesCompleteSiblingOrder(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.FileTree.MaxListCount = 2
+	Conf.FileTree.Load().MaxListCount = 2
 	hiddenTree := addFileOperationTestDoc(t, fixture, "20260718000003-abcdefg", "Hidden", true)
 	unlistedTree := addFileOperationTestDoc(t, fixture, "20260718000004-abcdefg", "Unlisted", false)
 	confPath := filepath.Join(util.DataDir, fixture.box.ID, ".siyuan", "sort.json")
@@ -467,8 +467,8 @@ func assertNotebookCustomOrder(t *testing.T, expected []string) {
 
 func TestGetDocOptionallyIncludesDocInfo(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	expected, err := GetDocInfo(fixture.sourceID)
 	if nil != err {
 		t.Fatalf("get standalone document info failed: %v", err)

@@ -17,8 +17,8 @@ func systemConfPayload(value *model.AppConf) (result *apicontract.SystemAppConf,
 	if err == nil {
 		err = json.Unmarshal(encoded, &result)
 	}
-	if err == nil && result != nil && value.AI != nil && result.AI != nil {
-		result.AI.Decision = settingDecisionPayload(value.AI.Decision)
+	if err == nil && result != nil && value.AI.Load() != nil && result.AI != nil {
+		result.AI.Decision = settingDecisionPayload(value.AI.Load().Decision)
 	}
 	return
 }

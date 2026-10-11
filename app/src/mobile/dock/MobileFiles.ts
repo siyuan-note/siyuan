@@ -1,3 +1,4 @@
+import {config as configApi} from "../../config/util/configApi";
 import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
 import {getTreeItemTailHTML} from "../../util/treeItemTail";
@@ -850,17 +851,7 @@ export class MobileFiles extends Model {
                     if (sort === null) {
                         return;
                     }
-                    fetchPost("/api/setting/setFiletree", {
-                        ...window.siyuan.config.fileTree,
-                        sort,
-                    }, (response) => {
-                        if (response.code !== 0) {
-                            return;
-                        }
-                        window.siyuan.config.fileTree = {
-                            ...response.data,
-                            tabStartupMode: response.data.tabStartupMode === 1 ? 1 : response.data.tabStartupMode === 2 ? 2 : 0,
-                        };
+                    configApi.set("fileTree.sort", sort, () => {
                         this.onDocSortModeChanged({
                             scope: "global",
                             box: "",

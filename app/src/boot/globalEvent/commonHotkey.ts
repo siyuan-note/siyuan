@@ -1,7 +1,7 @@
+import {config as configApi} from "../../config/util/configApi";
 import {keymapPayload} from "../../config/keymapPayload";
 import {mergeKeymapDefault} from "../../util/keymapBindings";
 import {Constants} from "../../constants";
-import {fetchPost} from "../../util/fetch";
 /// #if !BROWSER
 import {sendGlobalShortcut} from "./globalShortcut";
 import {ipcRenderer} from "electron";
@@ -151,9 +151,7 @@ export const correctHotkey = (app: App) => {
             msg: "update keymap"
         });
         /// #endif
-        fetchPost("/api/setting/setKeymap", {
-            data: keymapPayload(window.siyuan.config.keymap)
-        }, () => {
+        configApi.set("keymap", keymapPayload(window.siyuan.config.keymap), () => {
             /// #if !BROWSER
             sendGlobalShortcut(app);
             syncAppMenuShortcuts();

@@ -79,7 +79,7 @@ var (
 )
 
 func getUpdateRelease(force bool) (*updateRelease, error) {
-	channel := Conf.System.UpdateChannel
+	channel := Conf.System.Load().UpdateChannel
 	if conf.UpdateChannelStable == channel {
 		return getStableUpdateRelease(force)
 	}

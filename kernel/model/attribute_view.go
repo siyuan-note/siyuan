@@ -2888,7 +2888,7 @@ func relationCandidateMatches(row *av.TableRow, keyword string) bool {
 		content := cell.Value.String(true)
 		allKeywordsHit := true
 		for _, currentKeyword := range keywords {
-			if util.SearchCaseSensitive {
+			if util.SearchCaseSensitive.Load() {
 				if !strings.Contains(content, currentKeyword) {
 					allKeywordsHit = false
 					break

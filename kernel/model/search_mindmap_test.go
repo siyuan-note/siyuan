@@ -11,7 +11,7 @@ import (
 func TestMindmapSearchTypeFilter(t *testing.T) {
 	previous := Conf
 	Conf = NewAppConf()
-	Conf.Search = conf.NewSearch()
+	Conf.Search.Store(conf.NewSearch())
 	t.Cleanup(func() { Conf = previous })
 	for _, tc := range []struct {
 		types         map[string]bool
@@ -29,8 +29,8 @@ func TestMindmapSearchTypeFilter(t *testing.T) {
 			t.Fatalf("unexpected filter for %v: %s", tc.types, filter)
 		}
 	}
-	Conf.Search.Mindmap = new(false)
-	Conf.Search.MindmapItem = new(true)
+	Conf.Search.Load().Mindmap = new(false)
+	Conf.Search.Load().MindmapItem = new(true)
 	if filter := buildTypeFilter(nil, nil); strings.Contains(filter, "'mindmap'") || !strings.Contains(filter, "'mindmap_item'") {
 		t.Fatalf("global choices ignored: %s", filter)
 	}

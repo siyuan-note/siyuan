@@ -1,3 +1,4 @@
+import {config as configApi} from "../../config/util/configApi";
 import type {BlockQueryRequestInput} from "../../types/api";
 import {handleReadonlyAttributeHotkey} from "../util/attributeHotkey";
 import {isProtyleListItemFragment} from "../runtimeCapabilities";
@@ -212,11 +213,11 @@ const showSelectAllTip = () => {
     selectAllTipShown = true;
     document.querySelector(`#message [data-id="${messageId}"] button`)?.addEventListener("click", () => {
         hideMessage(messageId);
-        fetchPost("/api/setting/patch", {appearance: {
+        configApi.set("appearance", {
             notifications: {
                 selectAllTip: false,
             }
-        }});
+        });
     });
 };
 

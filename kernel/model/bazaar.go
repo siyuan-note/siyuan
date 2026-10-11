@@ -30,6 +30,7 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
 	"golang.org/x/sync/semaphore"
@@ -367,6 +368,8 @@ func installedPackageBaseURLPath(prefix, packageName string) string {
 }
 
 func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages []*bazaar.Package) {
+	confAppearanceSnapshot := Conf.LoadAppearance()
+
 	installedPackages = []*bazaar.Package{}
 
 	installedInfos, basePath, baseURLPathPrefix, err := GetInstalledPackageInfos(pkgType)
@@ -413,9 +416,9 @@ func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages
 			}
 		case "themes":
 			pkg.InstalledIncompatible = new(bazaar.IsIncompatibleTheme(pkg, frontend))
-			pkg.Current = pkg.Name == Conf.Appearance.ThemeDark || pkg.Name == Conf.Appearance.ThemeLight
+			pkg.Current = pkg.Name == confAppearanceSnapshot.ThemeDark || pkg.Name == confAppearanceSnapshot.ThemeLight
 		case "icons":
-			pkg.Current = pkg.Name == Conf.Appearance.Icon
+			pkg.Current = pkg.Name == confAppearanceSnapshot.Icon
 		}
 	}
 	return
@@ -507,6 +510,8 @@ func GetBazaarPackagesWithError(pkgType, frontend, keyword string) ([]*bazaar.Pa
 }
 
 func enrichBazaarPackages(bazaarPackages []*bazaar.Package, pkgType, keyword string) []*bazaar.Package {
+	confAppearanceSnapshot := Conf.LoadAppearance()
+
 	bazaarPackages = bazaar.FilterPackages(bazaarPackages, keyword)
 	installedInfos, _, _, err := GetInstalledPackageInfos(pkgType)
 	if err != nil {
@@ -528,9 +533,9 @@ func enrichBazaarPackages(bazaarPackages []*bazaar.Package, pkgType, keyword str
 		pkg.Outdated = 0 > semver.Compare("v"+installedPkg.Version, "v"+pkg.Version)
 		switch pkgType {
 		case "themes":
-			pkg.Current = pkg.Name == Conf.Appearance.ThemeDark || pkg.Name == Conf.Appearance.ThemeLight
+			pkg.Current = pkg.Name == confAppearanceSnapshot.ThemeDark || pkg.Name == confAppearanceSnapshot.ThemeLight
 		case "icons":
-			pkg.Current = pkg.Name == Conf.Appearance.Icon
+			pkg.Current = pkg.Name == confAppearanceSnapshot.Icon
 		}
 	}
 	return bazaarPackages
@@ -552,7 +557,7 @@ func installBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName strin
 	meta.update = parseErr == nil && installedPkg != nil && installedPkg.Name == packageName
 
 	options := bazaar.PackageInstallOptions{PrivateTemp: pkgType == "plugins"}
-	_, err = bazaar.InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, Conf.System.ID, pkgType, packageName, meta.update, options)
+	_, err = bazaar.InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, Conf.System.Load().ID, pkgType, packageName, meta.update, options)
 	if err != nil {
 		err = fmt.Errorf(Conf.Language(46), packageName, err)
 	} else {
@@ -595,31 +600,33 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 		for _, item := range items {
 			if !item.meta.update && nil != themeOptions {
 				// 新安装主题时才自动切换 https://github.com/siyuan-note/siyuan/issues/4966
-				applied := false
 				theme, err := bazaar.ParsePackageJSON(filepath.Join(util.AppearancePackagePath("themes", item.name), "theme.json"))
-				if nil == err && nil != theme && nil != theme.Modes {
-					for _, mode := range *theme.Modes {
-						switch mode {
-						case "light":
-							Conf.Appearance.ThemeLight = item.name
-							applied = true
-						case "dark":
-							Conf.Appearance.ThemeDark = item.name
-							applied = true
+				themeJS := gulu.File.IsExist(filepath.Join(util.AppearancePackagePath("themes", item.name), "theme.js"))
+				UpdateAppearanceConf(func(appearance *conf.Appearance) {
+					applied := false
+					if nil == err && nil != theme && nil != theme.Modes {
+						for _, mode := range *theme.Modes {
+							switch mode {
+							case "light":
+								appearance.ThemeLight = item.name
+								applied = true
+							case "dark":
+								appearance.ThemeDark = item.name
+								applied = true
+							}
 						}
 					}
-				}
-				if !applied {
-					if 0 == themeOptions.Mode {
-						Conf.Appearance.ThemeLight = item.name
-					} else {
-						Conf.Appearance.ThemeDark = item.name
+					if !applied {
+						if 0 == themeOptions.Mode {
+							appearance.ThemeLight = item.name
+						} else {
+							appearance.ThemeDark = item.name
+						}
 					}
-				}
-				Conf.Appearance.Mode = themeOptions.Mode
-				Conf.Appearance.ModeOS = themeOptions.ModeOS
-				Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.AppearancePackagePath("themes", item.name), "theme.js"))
-				Conf.Save()
+					appearance.Mode = themeOptions.Mode
+					appearance.ModeOS = themeOptions.ModeOS
+					appearance.ThemeJS = themeJS
+				})
 			}
 		}
 		var names []string
@@ -631,8 +638,7 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 		for _, item := range items {
 			if !item.meta.update && applyNewAppearance {
 				// 新安装图标时才自动切换
-				Conf.Appearance.Icon = item.name
-				Conf.Save()
+				UpdateAppearanceConf(func(appearance *conf.Appearance) { appearance.Icon = item.name })
 			}
 		}
 		var names []string

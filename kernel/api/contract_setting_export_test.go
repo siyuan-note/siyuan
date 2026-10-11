@@ -37,9 +37,9 @@ func TestAPIContractSettingExportNormalization(t *testing.T) {
 		} {
 			t.Run(route.name+"/"+entry.body, func(t *testing.T) {
 				model.Conf = model.NewAppConf()
-				model.Conf.Export = conf.NewExport()
-				model.Conf.Export.BlockRefMode = 3
-				model.Conf.Export.BlockRefTextLeft = "["
+				model.Conf.Export.Store(conf.NewExport())
+				model.Conf.Export.Load().BlockRefMode = 3
+				model.Conf.Export.Load().BlockRefTextLeft = "["
 				body, want := entry.body, entry.want
 				if route.name == "patch" {
 					body = `{"export":` + body + `}`
@@ -48,18 +48,18 @@ func TestAPIContractSettingExportNormalization(t *testing.T) {
 					}
 				}
 				code, message, data := settingContractRequest(t, route.name, route.handler, body)
-				if code != 0 || model.Conf.Export.BlockRefMode != want {
-					t.Fatalf("save failed: code=%d message=%s config=%+v", code, message, model.Conf.Export)
+				if code != 0 || model.Conf.Export.Load().BlockRefMode != want {
+					t.Fatalf("save failed: code=%d message=%s config=%+v", code, message, model.Conf.Export.Load())
 				}
 				if route.name == "setExport" {
 					var response conf.Export
 					if err := json.Unmarshal(data, &response); err != nil {
 						t.Fatal(err)
 					}
-					if !reflect.DeepEqual(&response, model.Conf.Export) || response.BlockRefTextLeft != "" {
+					if !reflect.DeepEqual(&response, model.Conf.Export.Load()) || response.BlockRefTextLeft != "" {
 						t.Fatal("replacement response differs from the applied export settings")
 					}
-				} else if model.Conf.Export.BlockRefTextLeft != "[" {
+				} else if model.Conf.Export.Load().BlockRefTextLeft != "[" {
 					t.Fatal("patch lost an omitted export setting")
 				}
 				persisted, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
@@ -70,8 +70,8 @@ func TestAPIContractSettingExportNormalization(t *testing.T) {
 				if err = json.Unmarshal(persisted, &reloaded); err != nil {
 					t.Fatal(err)
 				}
-				if !reflect.DeepEqual(reloaded.Export, model.Conf.Export) ||
-					!reflect.DeepEqual(conf.NormalizeExport(reloaded.Export), model.Conf.Export) {
+				if !reflect.DeepEqual(reloaded.Export.Load(), model.Conf.Export.Load()) ||
+					!reflect.DeepEqual(conf.NormalizeExport(reloaded.Export.Load()), model.Conf.Export.Load()) {
 					t.Fatal("persisted export settings differ from the applied or startup settings")
 				}
 			})

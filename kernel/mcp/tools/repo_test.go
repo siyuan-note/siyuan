@@ -14,7 +14,7 @@ func TestRepoCheckoutFailure(t *testing.T) {
 	previousLangs := util.Langs
 	previousReadOnly := util.ReadOnly
 	model.Conf = model.NewAppConf()
-	model.Conf.Repo = &conf.Repo{}
+	model.Conf.Repo.Store(&conf.Repo{})
 	model.Conf.Lang = "en"
 	util.Langs = map[string]map[int]string{"en": {26: "repository key is not configured"}}
 	util.ReadOnly = false

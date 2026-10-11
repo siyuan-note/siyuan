@@ -42,7 +42,7 @@ func TestBatchDocumentWritesInvalidateHistory(t *testing.T) {
 		t.Run(action, func(t *testing.T) {
 			fixture := setupStructureTransactionTest(t)
 			setupFoldTransactionDatabase(t, fixture)
-			Conf.Search = conf.NewSearch()
+			Conf.Search.Store(conf.NewSearch())
 			tree, err := LoadTreeByBlockID(fixture.sourceID)
 			if err != nil {
 				t.Fatal(err)

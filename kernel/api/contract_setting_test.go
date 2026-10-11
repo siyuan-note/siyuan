@@ -115,12 +115,17 @@ func TestAPIContractSettingImageDisplayCompatibility(t *testing.T) {
 }
 
 func TestAPIContractSettingImageDisplayUpdates(t *testing.T) {
-	previousConf, previousReadOnly, previousMarkdown := model.Conf, util.ReadOnly, util.MarkdownSettings
+	previousConf, previousReadOnly, previousMarkdown := model.Conf, util.ReadOnly, util.MarkdownSettings.Load()
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = conf.NewEditor()
+	model.Conf.Editor.Store(conf.NewEditor())
 	util.ReadOnly = true
 	t.Cleanup(func() {
-		model.Conf, util.ReadOnly, util.MarkdownSettings = previousConf, previousReadOnly, previousMarkdown
+		{
+			derivedValue0, derivedValue1, derivedValue2 := previousConf, previousReadOnly, previousMarkdown
+			model.Conf = derivedValue0
+			util.ReadOnly = derivedValue1
+			util.MarkdownSettings.Store(derivedValue2)
+		}
 	})
 	for _, entry := range []struct {
 		body string
@@ -137,7 +142,7 @@ func TestAPIContractSettingImageDisplayUpdates(t *testing.T) {
 		if err := json.Unmarshal(data, &response); err != nil {
 			t.Fatal(err)
 		}
-		if code != 0 || model.Conf.Editor.DisplayImgName != entry.want || response.DisplayImgName != entry.want {
+		if code != 0 || model.Conf.Editor.Load().DisplayImgName != entry.want || response.DisplayImgName != entry.want {
 			t.Fatalf("image display update %s: code=%d message=%s data=%s", entry.body, code, message, data)
 		}
 	}
@@ -153,7 +158,7 @@ func TestAPIContractSettingImageDisplayUpdates(t *testing.T) {
 		if err := json.Unmarshal(data, &response); err != nil {
 			t.Fatal(err)
 		}
-		if code != 0 || model.Conf.Editor.DisplayImgAlt != entry.want || response.DisplayImgAlt != entry.want {
+		if code != 0 || model.Conf.Editor.Load().DisplayImgAlt != entry.want || response.DisplayImgAlt != entry.want {
 			t.Fatalf("image tooltip text update %s: code=%d message=%s data=%s", entry.body, code, message, data)
 		}
 	}
@@ -218,17 +223,17 @@ func TestAPIContractSettingErrorsAndAdmission(t *testing.T) {
 func TestAPIContractSettingEmojiAndPublishValidation(t *testing.T) {
 	previous := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = conf.NewEditor()
-	model.Conf.Publish = conf.NewPublish()
+	model.Conf.Editor.Store(conf.NewEditor())
+	model.Conf.Publish.Store(conf.NewPublish())
 	t.Cleanup(func() { model.Conf = previous })
 	code, _, data := settingContractRequest(t, "setEmoji", setEmoji, `{"emoji":[]}`)
-	if code != 0 || string(data) != "null" || model.Conf.Editor.Emoji == nil || len(model.Conf.Editor.Emoji) != 0 {
+	if code != 0 || string(data) != "null" || model.Conf.Editor.Load().Emoji == nil || len(model.Conf.Editor.Load().Emoji) != 0 {
 		t.Fatal("empty emoji list changed")
 	}
-	priorPublish := model.Conf.Publish
+	priorPublish := model.Conf.Publish.Load()
 	for _, body := range []string{`{"auth":{"enable":true,"accounts":[null]}}`, `{"auth":{"enable":true,"accounts":[{"username":"u","password":"short"}]}}`, `{"auth":{"enable":true,"accounts":[{"username":"u","password":"12345678"},{"username":"u","password":"12345678"}]}}`} {
 		code, _, _ = settingContractRequest(t, "setPublish", setPublish, body)
-		if code != -1 || model.Conf.Publish != priorPublish {
+		if code != -1 || model.Conf.Publish.Load() != priorPublish {
 			t.Fatal("invalid publish credentials changed configuration")
 		}
 	}

@@ -32,6 +32,7 @@ import (
 	"github.com/ClarkThan/ahocorasick"
 	"github.com/dgraph-io/ristretto"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -91,7 +92,7 @@ func putBlockVirtualRefKeywords(blockContent string, root *ast.Node, boxID strin
 
 	contentTmp := blockContent
 	var keywordsTmp []string
-	if !Conf.Search.CaseSensitive {
+	if !Conf.Search.Load().CaseSensitive {
 		contentTmp = strings.ToLower(blockContent)
 		for _, keyword := range keywords {
 			keywordsTmp = append(keywordsTmp, strings.ToLower(keyword))
@@ -120,7 +121,7 @@ func putBlockVirtualRefKeywords(blockContent string, root *ast.Node, boxID strin
 }
 
 func CacheVirtualBlockRefJob() {
-	if !Conf.Editor.VirtualBlockRef {
+	if !Conf.Editor.Load().VirtualBlockRef {
 		return
 	}
 	task.AppendTask(task.CacheVirtualBlockRef, ResetVirtualBlockRefCache)
@@ -131,16 +132,16 @@ func ResetVirtualBlockRefCache() {
 	if nil == Conf {
 		return
 	}
-	if !Conf.Editor.VirtualBlockRef {
+	if !Conf.Editor.Load().VirtualBlockRef {
 		return
 	}
 
 	searchIgnoreLines := getSearchIgnoreLines()
 	refSearchIgnoreLines := getRefSearchIgnoreLines()
-	keywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines)
+	keywords := sql.QueryVirtualRefKeywords(Conf.Search.Load().VirtualRefName, Conf.Search.Load().VirtualRefAlias, Conf.Search.Load().VirtualRefAnchor, Conf.Search.Load().VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines)
 	putVirtualRefCache("virtual_ref", keywords, 0)
 	for _, boxID := range treenode.GetOpenedEncryptedBoxIDs() {
-		boxKeywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxID)
+		boxKeywords := sql.QueryVirtualRefKeywords(Conf.Search.Load().VirtualRefName, Conf.Search.Load().VirtualRefAlias, Conf.Search.Load().VirtualRefAnchor, Conf.Search.Load().VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxID)
 		putVirtualRefCache(boxID+"\x00virtual_ref", boxKeywords, 0)
 	}
 }
@@ -191,8 +192,7 @@ func AddVirtualBlockRefInclude(keyword []string) {
 	if 1 > len(keyword) {
 		return
 	}
-	Conf.Editor.VirtualBlockRefInclude = addNewKeywords(Conf.Editor.VirtualBlockRefInclude, keyword)
-	Conf.Save()
+	UpdateEditorConf(func(s *conf.Editor) { s.VirtualBlockRefInclude = addNewKeywords(s.VirtualBlockRefInclude, keyword) })
 	ResetVirtualBlockRefCache()
 }
 
@@ -200,13 +200,12 @@ func AddVirtualBlockRefExclude(keyword []string) {
 	if 1 > len(keyword) {
 		return
 	}
-	Conf.Editor.VirtualBlockRefExclude = addNewKeywords(Conf.Editor.VirtualBlockRefExclude, keyword)
-	Conf.Save()
+	UpdateEditorConf(func(s *conf.Editor) { s.VirtualBlockRefExclude = addNewKeywords(s.VirtualBlockRefExclude, keyword) })
 	ResetVirtualBlockRefCache()
 }
 
 func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeywords []string, refCount map[string]int, luteEngine *lute.Lute) bool {
-	if !Conf.Editor.VirtualBlockRef || 1 > len(virtualBlockRefKeywords) {
+	if !Conf.Editor.Load().VirtualBlockRef || 1 > len(virtualBlockRefKeywords) {
 		return false
 	}
 
@@ -292,7 +291,11 @@ func parseKeywords(keywordsStr string) (keywords []string) {
 }
 
 func getVirtualRefKeywords(root *ast.Node, boxIDs ...string) (ret []string) {
-	if !Conf.Editor.VirtualBlockRef {
+	confEditorSnapshot := Conf.LoadEditor()
+
+	confSearchSnapshot := Conf.LoadSearch()
+
+	if !confEditorSnapshot.VirtualBlockRef {
 		return
 	}
 
@@ -305,18 +308,18 @@ func getVirtualRefKeywords(root *ast.Node, boxIDs ...string) (ret []string) {
 	} else {
 		searchIgnoreLines := getSearchIgnoreLines()
 		refSearchIgnoreLines := getRefSearchIgnoreLines()
-		ret = sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias,
-			Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxIDs...)
+		ret = sql.QueryVirtualRefKeywords(confSearchSnapshot.VirtualRefName, confSearchSnapshot.VirtualRefAlias,
+			confSearchSnapshot.VirtualRefAnchor, confSearchSnapshot.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxIDs...)
 		putVirtualRefCache(key, ret, 0)
 	}
 
-	includes := parseKeywords(Conf.Editor.VirtualBlockRefInclude)
+	includes := parseKeywords(confEditorSnapshot.VirtualBlockRefInclude)
 	if 0 < len(includes) {
 		ret = append(ret, includes...)
 		ret = gulu.Str.RemoveDuplicatedElem(ret)
 	}
 
-	ret = excludeKeywords(ret, Conf.Editor.VirtualBlockRefExclude)
+	ret = excludeKeywords(ret, confEditorSnapshot.VirtualBlockRefExclude)
 
 	// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
 	// Virtual references exclude the name and aliases from the current document https://github.com/siyuan-note/siyuan/issues/9204

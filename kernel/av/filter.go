@@ -1367,7 +1367,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return valueContent == otherValueContent
 		}
 		return strings.EqualFold(valueContent, otherValueContent)
@@ -1375,7 +1375,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return valueContent != otherValueContent
 		}
 		return !strings.EqualFold(valueContent, otherValueContent)
@@ -1383,7 +1383,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return strings.Contains(valueContent, otherValueContent)
 		}
 		return strings.Contains(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
@@ -1391,7 +1391,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return !strings.Contains(valueContent, otherValueContent)
 		}
 		return !strings.Contains(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
@@ -1399,7 +1399,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return strings.HasPrefix(valueContent, otherValueContent)
 		}
 		return strings.HasPrefix(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
@@ -1407,7 +1407,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return strings.HasSuffix(valueContent, otherValueContent)
 		}
 		return strings.HasSuffix(strings.ToLower(valueContent), strings.ToLower(otherValueContent))

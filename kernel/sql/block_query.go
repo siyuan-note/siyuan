@@ -88,7 +88,7 @@ func queryBlockHashes(tx *sql.Tx, rootID string) (ret map[string]string) {
 }
 
 func QueryRootBlockByCondition(condition, exactKeyword string, limit int, args ...any) (ret []*Block) {
-	exactCondition, exactArg := rootBlockExactMatchCondition(exactKeyword, caseSensitive)
+	exactCondition, exactArg := rootBlockExactMatchCondition(exactKeyword, caseSensitive.Load())
 	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition +
 		" ORDER BY CASE WHEN " + exactCondition + " THEN 0 ELSE 1 END ASC, box DESC, lv ASC LIMIT ?"
 	args = append(args, exactArg...)
@@ -112,7 +112,7 @@ func QueryRootBlockByCondition(condition, exactKeyword string, limit int, args .
 }
 
 func QueryRootBlockByConditionInBox(condition, exactKeyword string, limit int, boxID string, args ...any) (ret []*Block) {
-	exactCondition, exactArg := rootBlockExactMatchCondition(exactKeyword, caseSensitive)
+	exactCondition, exactArg := rootBlockExactMatchCondition(exactKeyword, caseSensitive.Load())
 	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition +
 		" ORDER BY CASE WHEN " + exactCondition + " THEN 0 ELSE 1 END ASC, box DESC, lv ASC LIMIT ?"
 	args = append(args, exactArg...)

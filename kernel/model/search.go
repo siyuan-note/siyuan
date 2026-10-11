@@ -336,11 +336,13 @@ func SearchEmbedBlockForPublish(embedBlockID, stmt string, excludeIDs []string, 
 
 func searchEmbedBlockInBox(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool, boxID string,
 	updateIndex bool) (ret []*EmbedBlock) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	var sqlBlocks []*sql.Block
 	if "" != boxID {
-		sqlBlocks = sql.SelectBlocksRawStmtNoParseInBox(stmt, Conf.Search.Limit, boxID)
+		sqlBlocks = sql.SelectBlocksRawStmtNoParseInBox(stmt, confSearchSnapshot.Limit, boxID)
 	} else {
-		sqlBlocks = sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
+		sqlBlocks = sql.SelectBlocksRawStmtNoParse(stmt, confSearchSnapshot.Limit)
 	}
 	ret = buildEmbedBlock(embedBlockID, excludeIDs, headingMode, breadcrumb, treenode.GetEmbedBlockRefID(stmt), sqlBlocks, updateIndex, boxID)
 	return
@@ -420,6 +422,8 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 // SearchRefBlockInBox 与 SearchRefBlock 一致，但按 boxID 路由到加密 db 或全局 db。
 // 加密笔记本内搜索块引目标时传入 boxID，只搜该 box 自己的加密 db，避免跨加密边界引用。
 func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrackets, isDatabase bool, boxID string) (ret []*Block, newDoc bool) {
+	confEditorSnapshot := Conf.LoadEditor()
+
 	cachedTrees := map[string]*parse.Tree{}
 	nodeTrees := map[string]*parse.Tree{}
 	var nodeIDs []string
@@ -427,13 +431,13 @@ func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrac
 
 	onlyDoc := false
 	if isSquareBrackets {
-		onlyDoc = Conf.Editor.OnlySearchForDoc
+		onlyDoc = confEditorSnapshot.OnlySearchForDoc
 	}
 
 	if "" == keyword {
 		// 查询为空时默认的块引排序规则按最近引用优先 https://github.com/siyuan-note/siyuan/issues/3218
 
-		typeFilter := Conf.Search.TypeFilter()
+		typeFilter := Conf.Search.Load().TypeFilter()
 		ignoreLines := getRefSearchIgnoreLines()
 		refUsed := GetRefUsed()
 		refs := sql.QueryRefsRecentInBox(onlyDoc, typeFilter, ignoreLines, sortedRefUsedIDs(refUsed), boxID)
@@ -491,7 +495,7 @@ func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrac
 
 			block := fromSQLBlock(sqlBlock, "", 0)
 			block.RefText = getNodeRefText(node)
-			block.RefText = maxContent(block.RefText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
+			block.RefText = maxContent(block.RefText, confEditorSnapshot.BlockRefDynamicAnchorTextMaxLen)
 			block.RefCount = refCount[node.ID]
 			ret = append(ret, block)
 		}
@@ -1203,7 +1207,7 @@ func replaceEscapedTextMarkContent(content string, method int, keyword, replacem
 // replaceSearchText 的文本匹配遵循大小写设置并按字面量替换，正则模式保持捕获组展开语义。
 func replaceSearchText(input string, method int, keyword, replacement string, r *regexp.Regexp) (string, bool) {
 	if method == 0 {
-		if !Conf.Search.CaseSensitive {
+		if !Conf.Search.Load().CaseSensitive {
 			return replaceCaseInsensitiveText(input, keyword, replacement)
 		}
 		if strings.Contains(input, keyword) {
@@ -1223,7 +1227,7 @@ func replaceSearchTokens(input []byte, method int, keyword, replacement string, 
 }
 
 func equalSearchText(input, keyword string) bool {
-	if Conf.Search.CaseSensitive {
+	if Conf.Search.Load().CaseSensitive {
 		return input == keyword
 	}
 	return strings.EqualFold(input, keyword)
@@ -1371,7 +1375,7 @@ func findReplaceTextMatchIndexes(content string, method int, keyword string, r *
 	}
 
 	exp := regexp.QuoteMeta(keyword)
-	if !Conf.Search.CaseSensitive {
+	if !Conf.Search.Load().CaseSensitive {
 		exp = "(?i:" + exp + ")"
 	}
 	matcher, err := regexp.Compile(exp)
@@ -2071,7 +2075,7 @@ func buildOrderBy(query string, method, orderBy int) string {
 
 func buildExactSearchOrderCondition(field, query string) string {
 	escapedQuery := strings.ReplaceAll(query, "'", "''")
-	if Conf.Search.CaseSensitive {
+	if Conf.Search.Load().CaseSensitive {
 		return field + " = '" + escapedQuery + "'"
 	}
 	escapedQuery = conf.EscapeSearchLikePattern(query)
@@ -2084,7 +2088,7 @@ func buildExactAliasSearchOrderCondition(field, query string) string {
 	}
 
 	escapedQuery := strings.ReplaceAll(query, "'", "''")
-	if Conf.Search.CaseSensitive {
+	if Conf.Search.Load().CaseSensitive {
 		return "instr(',' || " + field + " || ',', '," + escapedQuery + ",') > 0"
 	}
 	escapedQuery = conf.EscapeSearchLikePattern(query)
@@ -2093,12 +2097,14 @@ func buildExactAliasSearchOrderCondition(field, query string) string {
 
 // buildTypeFilter 按父类型独立限制子类型，组内为空时仅按父类型筛选。
 func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	prefix := ""
 	if 0 < len(alias) && "" != alias[0] {
 		prefix = alias[0]
 	}
 	s := conf.NewSearch()
-	if err := copier.Copy(s, Conf.Search); err != nil {
+	if err := copier.Copy(s, confSearchSnapshot); err != nil {
 		logging.LogErrorf("copy search conf failed: %s", err)
 	}
 	if nil != types {
@@ -2126,26 +2132,26 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		s.TabItem = types["tabItem"]
 		s.CustomBlock = new(types["customBlock"])
 	} else {
-		s.Document = Conf.Search.Document
-		s.Heading = Conf.Search.Heading
-		s.List = Conf.Search.List
-		s.ListItem = Conf.Search.ListItem
-		s.CodeBlock = Conf.Search.CodeBlock
-		s.MathBlock = Conf.Search.MathBlock
-		s.Table = Conf.Search.Table
-		s.Blockquote = Conf.Search.Blockquote
-		s.SuperBlock = Conf.Search.SuperBlock
-		s.Paragraph = Conf.Search.Paragraph
-		s.HTMLBlock = Conf.Search.HTMLBlock
-		s.EmbedBlock = Conf.Search.EmbedBlock
-		s.DatabaseBlock = Conf.Search.DatabaseBlock
-		s.AudioBlock = Conf.Search.AudioBlock
-		s.VideoBlock = Conf.Search.VideoBlock
-		s.IFrameBlock = Conf.Search.IFrameBlock
-		s.WidgetBlock = Conf.Search.WidgetBlock
-		s.Callout = Conf.Search.Callout
-		s.Tabs = Conf.Search.Tabs
-		s.TabItem = Conf.Search.TabItem
+		s.Document = confSearchSnapshot.Document
+		s.Heading = confSearchSnapshot.Heading
+		s.List = confSearchSnapshot.List
+		s.ListItem = confSearchSnapshot.ListItem
+		s.CodeBlock = confSearchSnapshot.CodeBlock
+		s.MathBlock = confSearchSnapshot.MathBlock
+		s.Table = confSearchSnapshot.Table
+		s.Blockquote = confSearchSnapshot.Blockquote
+		s.SuperBlock = confSearchSnapshot.SuperBlock
+		s.Paragraph = confSearchSnapshot.Paragraph
+		s.HTMLBlock = confSearchSnapshot.HTMLBlock
+		s.EmbedBlock = confSearchSnapshot.EmbedBlock
+		s.DatabaseBlock = confSearchSnapshot.DatabaseBlock
+		s.AudioBlock = confSearchSnapshot.AudioBlock
+		s.VideoBlock = confSearchSnapshot.VideoBlock
+		s.IFrameBlock = confSearchSnapshot.IFrameBlock
+		s.WidgetBlock = confSearchSnapshot.WidgetBlock
+		s.Callout = confSearchSnapshot.Callout
+		s.Tabs = confSearchSnapshot.Tabs
+		s.TabItem = confSearchSnapshot.TabItem
 	}
 
 	var simpleTypes []string
@@ -2222,7 +2228,7 @@ func isDocumentSearchEnabled(types map[string]bool) bool {
 	if nil != types {
 		return types["document"]
 	}
-	return Conf.Search.Document
+	return Conf.Search.Load().Document
 }
 
 func sqlQuoteJoin(items []string) string {
@@ -2322,6 +2328,8 @@ func removeLimitClause(stmt string) string {
 
 // fullTextSearchRefBlockInBox 在指定笔记本内搜索可引用块，空 boxID 使用全局数据库。
 func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, boxID string) (ret []*Block) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	keyword = filterQueryInvisibleChars(keyword)
 
 	if id := extractID(keyword); "" != id {
@@ -2344,7 +2352,7 @@ func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, bo
 	if onlyDoc {
 		stmt += " = 'd'"
 	} else {
-		stmt += " IN " + Conf.Search.TypeFilter()
+		stmt += " IN " + confSearchSnapshot.TypeFilter()
 	}
 
 	if ignoreLines := getRefSearchIgnoreLines(); 0 < len(ignoreLines) {
@@ -2373,8 +2381,8 @@ func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, bo
              WHEN content LIKE '%${keyword}%' and type != 'i' and type != 'l' THEN 100
              ELSE 65535 END ASC, sort ASC, length ASC`
 	orderBy = strings.ReplaceAll(orderBy, "${keyword}", strings.ReplaceAll(keyword, "'", "''"))
-	stmt += orderBy + " LIMIT " + strconv.Itoa(Conf.Search.Limit)
-	blocks := sql.SelectBlocksRawStmtNoParseInBox(stmt, Conf.Search.Limit, boxID)
+	stmt += orderBy + " LIMIT " + strconv.Itoa(confSearchSnapshot.Limit)
+	blocks := sql.SelectBlocksRawStmtNoParseInBox(stmt, confSearchSnapshot.Limit, boxID)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -2446,6 +2454,8 @@ func extractID(content string) (ret string) {
 }
 
 func fullTextSearchByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter + " " + orderBy
@@ -2457,7 +2467,7 @@ func fullTextSearchByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs, pat
 
 	// box/path 过滤值通过绑定参数传递，避免 SQL 拼接注入
 	args := append(append([]any{}, boxArgs...), pathArgs...)
-	blocks := sql.SelectBlocksRegexArgsInBox(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, page, pageSize, boxID, args...)
+	blocks := sql.SelectBlocksRegexArgsInBox(stmt, regex, confSearchSnapshot.Name, confSearchSnapshot.Alias, confSearchSnapshot.Memo, confSearchSnapshot.IAL, page, pageSize, boxID, args...)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -2687,20 +2697,24 @@ func buildFTSAndHPathMatchesCTE(rawQuery, query, boxFilter, pathFilter string, b
 }
 
 func buildHPathContainsCondition(query string) (condition, arg string) {
-	if Conf.Search.CaseSensitive && Conf.Search.HanSensitiveVal() {
+	confSearchSnapshot := Conf.LoadSearch()
+
+	if confSearchSnapshot.CaseSensitive && confSearchSnapshot.HanSensitiveVal() {
 		return "instr(hpath, ?) > 0", query
 	}
 	caseSensitive, hanSensitive := searchNormalizationFlags()
 	condition = "instr(search_normalize(hpath, " + strconv.Itoa(caseSensitive) + ", " + strconv.Itoa(hanSensitive) + "), ?) > 0"
-	arg = search.NormalizeSearchText(query, Conf.Search.CaseSensitive, Conf.Search.HanSensitiveVal())
+	arg = search.NormalizeSearchText(query, confSearchSnapshot.CaseSensitive, confSearchSnapshot.HanSensitiveVal())
 	return
 }
 
 func searchNormalizationFlags() (caseSensitive, hanSensitive int) {
-	if Conf.Search.CaseSensitive {
+	confSearchSnapshot := Conf.LoadSearch()
+
+	if confSearchSnapshot.CaseSensitive {
 		caseSensitive = 1
 	}
-	if Conf.Search.HanSensitiveVal() {
+	if confSearchSnapshot.HanSensitiveVal() {
 		hanSensitive = 1
 	}
 	return
@@ -2910,9 +2924,11 @@ func buildSearchDocumentLikeFilter(field string, keywords []string) string {
 }
 
 func buildSearchDocumentLikeFilterWithHPath(contentField, hPathField string, keywords []string) string {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	var ret strings.Builder
 	for i, keyword := range keywords {
-		normalizedKeyword := search.NormalizeSearchText(keyword, Conf.Search.CaseSensitive, Conf.Search.HanSensitiveVal())
+		normalizedKeyword := search.NormalizeSearchText(keyword, confSearchSnapshot.CaseSensitive, confSearchSnapshot.HanSensitiveVal())
 		ret.WriteString("(")
 		ret.WriteString(contentField)
 		ret.WriteString(" LIKE '%")
@@ -2986,6 +3002,8 @@ func highlightByFTSInBox(query, typeFilter, id, boxID string) (ret []string) {
 
 // highlightByRegexpInBox 按 boxID 选择加密或全局数据库，获取正则检索高亮片段。
 func highlightByRegexpInBox(query, typeFilter, id, boxID string) (ret []string) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	fieldFilter := fieldRegexp(query)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter
 	stmt += " AND root_id = '" + id + "'"
@@ -2993,7 +3011,7 @@ func highlightByRegexpInBox(query, typeFilter, id, boxID string) (ret []string) 
 	if nil == regex {
 		return
 	}
-	sqlBlocks := sql.SelectBlocksRegexInBox(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, 1, 256, boxID)
+	sqlBlocks := sql.SelectBlocksRegexInBox(stmt, regex, confSearchSnapshot.Name, confSearchSnapshot.Alias, confSearchSnapshot.Memo, confSearchSnapshot.IAL, 1, 256, boxID)
 	for _, block := range sqlBlocks {
 		keyword := gulu.Str.SubstringsBetween(block.HPath, search.SearchMarkLeft, search.SearchMarkRight)
 		if 0 < len(keyword) {
@@ -3025,6 +3043,8 @@ func highlightByRegexpInBox(query, typeFilter, id, boxID string) (ret []string) 
 }
 
 func markSearch(text string, keyword string, beforeLen int) (marked string, score float64) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	if 0 == len(keyword) {
 		if strings.Contains(text, search.SearchMarkLeft) { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
 			marked = util.EscapeHTML(text)
@@ -3038,12 +3058,12 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 		keyword = strings.Join(keywords, search.TermSep)
 		marked = strings.ReplaceAll(text, search.SearchMarkLeft, "")
 		marked = strings.ReplaceAll(marked, search.SearchMarkRight, "")
-		_, marked = search.MarkText(marked, keyword, beforeLen, Conf.Search.CaseSensitive)
+		_, marked = search.MarkText(marked, keyword, beforeLen, confSearchSnapshot.CaseSensitive)
 		marked = util.EscapeHTML(marked)
 		return
 	}
 
-	pos, marked := search.MarkText(text, keyword, beforeLen, Conf.Search.CaseSensitive)
+	pos, marked := search.MarkText(text, keyword, beforeLen, confSearchSnapshot.CaseSensitive)
 	if -1 < pos {
 		if 0 == pos {
 			score = 1
@@ -3059,7 +3079,7 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 func partitionSearchTerms(text, terms string) (matched, unmatched string) {
 	var matchedTerms, unmatchedTerms []string
 	for _, term := range search.SplitKeyword(terms) {
-		pos, _ := search.MarkText(text, term, -1, Conf.Search.CaseSensitive)
+		pos, _ := search.MarkText(text, term, -1, Conf.Search.Load().CaseSensitive)
 		if -1 < pos {
 			matchedTerms = append(matchedTerms, term)
 		} else {
@@ -3186,28 +3206,30 @@ func maxContent(content string, maxLen int) string {
 }
 
 func fieldRegexp(regexp string) string {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	regexp = strings.ReplaceAll(regexp, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
 	buf := bytes.Buffer{}
 	buf.WriteString("(")
 	buf.WriteString("content REGEXP '")
 	buf.WriteString(regexp)
 	buf.WriteString("'")
-	if Conf.Search.Name {
+	if confSearchSnapshot.Name {
 		buf.WriteString(" OR name REGEXP '")
 		buf.WriteString(regexp)
 		buf.WriteString("'")
 	}
-	if Conf.Search.Alias {
+	if confSearchSnapshot.Alias {
 		buf.WriteString(" OR alias REGEXP '")
 		buf.WriteString(regexp)
 		buf.WriteString("'")
 	}
-	if Conf.Search.Memo {
+	if confSearchSnapshot.Memo {
 		buf.WriteString(" OR memo REGEXP '")
 		buf.WriteString(regexp)
 		buf.WriteString("'")
 	}
-	if Conf.Search.IAL {
+	if confSearchSnapshot.IAL {
 		buf.WriteString(" OR ial REGEXP '")
 		buf.WriteString(regexp)
 		buf.WriteString("'")
@@ -3219,18 +3241,20 @@ func fieldRegexp(regexp string) string {
 }
 
 func columnFilter() string {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	buf := bytes.Buffer{}
 	buf.WriteString("{content")
-	if Conf.Search.Name {
+	if confSearchSnapshot.Name {
 		buf.WriteString(" name")
 	}
-	if Conf.Search.Alias {
+	if confSearchSnapshot.Alias {
 		buf.WriteString(" alias")
 	}
-	if Conf.Search.Memo {
+	if confSearchSnapshot.Memo {
 		buf.WriteString(" memo")
 	}
-	if Conf.Search.IAL {
+	if confSearchSnapshot.IAL {
 		buf.WriteString(" ial")
 	}
 	buf.WriteString(" tag}")
@@ -3238,18 +3262,20 @@ func columnFilter() string {
 }
 
 func columnConcat() string {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	buf := bytes.Buffer{}
 	buf.WriteString("content")
-	if Conf.Search.Name {
+	if confSearchSnapshot.Name {
 		buf.WriteString("||name")
 	}
-	if Conf.Search.Alias {
+	if confSearchSnapshot.Alias {
 		buf.WriteString("||alias")
 	}
-	if Conf.Search.Memo {
+	if confSearchSnapshot.Memo {
 		buf.WriteString("||memo")
 	}
-	if Conf.Search.IAL {
+	if confSearchSnapshot.IAL {
 		buf.WriteString("||ial")
 	}
 	buf.WriteString("||tag")
@@ -3285,9 +3311,11 @@ func stringQuery(query string) string {
 
 // markReplaceSpan 用于处理搜索高亮。
 func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markSpanDataType string, luteEngine *lute.Lute) bool {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	if ast.NodeText == n.Type {
 		text := n.Content()
-		text, matched := search.EncloseHighlightingRaw(text, keywords, search.GetMarkSpanStart(markSpanDataType), search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
+		text, matched := search.EncloseHighlightingRaw(text, keywords, search.GetMarkSpanStart(markSpanDataType), search.GetMarkSpanEnd(), confSearchSnapshot.CaseSensitive, false)
 		if !matched {
 			return false
 		}
@@ -3313,7 +3341,7 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markS
 
 		text := n.Content()
 		startTag := search.GetMarkSpanStart(markSpanDataType)
-		text, matched := search.EncloseHighlightingRaw(text, keywords, startTag, search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
+		text, matched := search.EncloseHighlightingRaw(text, keywords, startTag, search.GetMarkSpanEnd(), confSearchSnapshot.CaseSensitive, false)
 		if matched {
 			dataType := search.GetMarkSpanStart(n.TextMarkType + " " + search.MarkDataType)
 			text = strings.ReplaceAll(text, startTag, dataType)
@@ -3366,7 +3394,7 @@ func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, 
 	// 虚拟引用和反链提及关键字按最长匹配优先 https://github.com/siyuan-note/siyuan/issues/7465
 	sort.Slice(keywords, func(i, j int) bool { return len(keywords[i]) > len(keywords[j]) })
 
-	tmp, matched := search.EncloseHighlightingRaw(text, keywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive, true)
+	tmp, matched := search.EncloseHighlightingRaw(text, keywords, replacementStart, replacementEnd, Conf.Search.Load().CaseSensitive, true)
 	if !matched {
 		ret = tmp
 		return

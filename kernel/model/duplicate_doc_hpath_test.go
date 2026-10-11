@@ -37,7 +37,7 @@ func TestDuplicateDocHPath(t *testing.T) {
 		return
 	}
 	prepareHPathRefreshTest(t)
-	Conf.Flashcard = conf.NewFlashcard()
+	Conf.Flashcard.Store(conf.NewFlashcard())
 	const password = "duplicate-hpath-test-password"
 	if err := EnableEncryptedNotebook(password); err != nil {
 		t.Fatal(err)

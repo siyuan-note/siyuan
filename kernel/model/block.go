@@ -1363,7 +1363,7 @@ func resolveEmbedContentInBox(n *ast.Node, luteEngine *lute.Lute, boxID string, 
 		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 
 		// 执行查询获取嵌入的块
-		sqlBlocks := sql.SelectBlocksRawStmtInBox(stmt, 1, Conf.Search.Limit, boxID)
+		sqlBlocks := sql.SelectBlocksRawStmtInBox(stmt, 1, Conf.Search.Load().Limit, boxID)
 		sqlBlocks = filterEmbedBlocksByAccess(sqlBlocks, accessChecker)
 
 		// 收集所有嵌入块的内容 HTML

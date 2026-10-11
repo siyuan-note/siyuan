@@ -1,5 +1,5 @@
+import {config as configApi} from "../config/util/configApi";
 import type {App} from "../index";
-import {fetchSyncPost} from "../util/fetch";
 import {
     GlobalPluginStateCoordinator,
     type IGlobalPluginStatePayload,
@@ -54,9 +54,10 @@ export const subscribeGlobalPluginState = (app: App, listener: (state: IGlobalPl
     (!isSettingsPluginApp(app) && getSettingsWindowHost()?.subscribePlugins(listener)) || getCoordinator(app).subscribe(listener);
 
 export const setGlobalPluginsDisabled = async (app: App, petalDisabled: boolean) => {
-    const response = await fetchSyncPost("/api/setting/setBazaarPetalDisabled", {petalDisabled});
-    if (response.code !== 0 || !response.data) {
-        throw new Error(response.msg || "Failed to update the global plugin state");
-    }
-    await applyPluginReload(app, response.data as TGlobalPluginReloadData);
+    let applied: Promise<void>;
+    await configApi.set("bazaar.petalDisabled", petalDisabled, (_, response) => {
+        applied = applyPluginReload(app, response.data as TGlobalPluginReloadData);
+    });
+    if (!applied) throw new Error("Failed to update the global plugin state");
+    await applied;
 };

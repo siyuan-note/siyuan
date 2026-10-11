@@ -30,7 +30,11 @@ func TestSQLSearchPreservesCommentsAndLiteralCase(t *testing.T) {
 	util.HistoryDBPath = filepath.Join(util.TempDir, "history.db")
 	util.AssetContentDBPath = filepath.Join(util.TempDir, "asset_content.db")
 	Conf = NewAppConf()
-	Conf.Search, Conf.FileTree = conf.NewSearch(), conf.NewFileTree()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewSearch(), conf.NewFileTree()
+		Conf.Search.Store(confSectionValue0)
+		Conf.FileTree.Store(confSectionValue1)
+	}
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)

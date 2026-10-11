@@ -421,7 +421,7 @@ func authByAPIToken(c *gin.Context, source, token string) (handled bool) {
 		c.Abort()
 		return true
 	}
-	if util.AuthCodeEquals(Conf.Api.Token, token) {
+	if util.AuthCodeEquals(Conf.Api.Load().Token, token) {
 		util.AuthThrottleReset(ip)
 		c.Set(RoleContextKey, RoleAdministrator)
 		c.Next()

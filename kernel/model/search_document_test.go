@@ -12,11 +12,11 @@ import (
 
 func TestDocumentTypeFilterFromSettings(t *testing.T) {
 	setSearchCaseSensitive(t, false)
-	Conf.Search = &conf.Search{Document: true, Mindmap: new(false), MindmapItem: new(false), CustomBlock: new(false)}
+	Conf.Search.Store(&conf.Search{Document: true, Mindmap: new(false), MindmapItem: new(false), CustomBlock: new(false)})
 	if got := buildTypeFilter(nil, nil); got != "(type = 'd')" {
 		t.Fatalf("document-only settings: %s", got)
 	}
-	Conf.Search.Paragraph = true
+	Conf.Search.Load().Paragraph = true
 	if got := buildTypeFilter(nil, nil); got != "(type IN ('d','p'))" {
 		t.Fatalf("mixed settings: %s", got)
 	}

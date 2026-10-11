@@ -19,8 +19,8 @@ import (
 func TestTableCellRichDocumentReaders(t *testing.T) {
 	originalConf := Conf
 	Conf = NewAppConf()
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	t.Cleanup(func() { Conf = originalConf })
 	legacy, err := os.ReadFile("../treenode/testdata/table-cell-legacy.sy")
 	if nil != err {
@@ -84,8 +84,8 @@ func TestTableCellRichDocumentReaders(t *testing.T) {
 func TestLegacyTableAlignmentReadersAndExports(t *testing.T) {
 	originalConf := Conf
 	Conf = NewAppConf()
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	t.Cleanup(func() { Conf = originalConf })
 	legacy, err := os.ReadFile("../treenode/testdata/table-alignment-legacy.sy")
 	if err != nil {

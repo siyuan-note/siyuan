@@ -20,7 +20,7 @@ func TestAPIContractAIBuiltinSkills(t *testing.T) {
 	engine.POST("/api/ai/agent/lsSkills", lsSkills)
 	for _, disabled := range []bool{false, true} {
 		if disabled {
-			model.Conf.AI.Agent.Skills.BuiltinDisabled = []string{util.BuiltinPluginSkillID, "builtin:future"}
+			model.Conf.AI.Load().Agent.Skills.BuiltinDisabled = []string{util.BuiltinPluginSkillID, "builtin:future"}
 		}
 		response := httptest.NewRecorder()
 		engine.ServeHTTP(response, httptest.NewRequest("POST", "/api/ai/agent/lsBuiltinSkills", strings.NewReader("{}")))

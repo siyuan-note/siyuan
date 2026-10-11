@@ -12,8 +12,8 @@ import (
 func TestExportMarkdownContentOmitsTableCellIAL(t *testing.T) {
 	oldConf := Conf
 	Conf = NewAppConf()
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	t.Cleanup(func() { Conf = oldConf })
 	luteEngine := NewLute()
 	tree := parse.Parse("", []byte("| Left | Center | Right |\n| :--- | :---: | ---: |\n| **bold** | middle | end |\n"), luteEngine.ParseOptions)

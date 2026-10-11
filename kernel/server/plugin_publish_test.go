@@ -17,8 +17,8 @@ func TestPluginPublishStaticBoundaries(t *testing.T) {
 	oldData, oldConf := util.DataDir, model.Conf
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
-	model.Conf.Bazaar = &conf.Bazaar{Trust: true}
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.Bazaar.Store(&conf.Bazaar{Trust: true})
 	t.Cleanup(func() { util.DataDir, model.Conf = oldData, oldConf })
 	for name, data := range map[string]string{
 		"plugins/example/plugin.json": `{"name":"example","version":"1.0.0","minAppVersion":"0.0.1","publish":{"resources":["index.html","logo.txt"]}}`,

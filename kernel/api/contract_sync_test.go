@@ -26,9 +26,9 @@ func syncTestConfiguration(t *testing.T) {
 	t.Helper()
 	previous, previousReadonly, previousTemp := model.Conf, util.ReadOnly, util.TempDir
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
-	model.Conf.Sync.S3 = &conf.S3{}
-	model.Conf.Sync.WebDAV = &conf.WebDAV{}
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.Sync.Load().S3 = &conf.S3{}
+	model.Conf.Sync.Load().WebDAV = &conf.WebDAV{}
 	util.ReadOnly = true
 	util.TempDir = t.TempDir()
 	t.Cleanup(func() { model.Conf, util.ReadOnly, util.TempDir = previous, previousReadonly, previousTemp })
@@ -87,7 +87,7 @@ func TestAPIContractSyncProviderConfigCompatibility(t *testing.T) {
 
 func TestAPIContractSyncHTTPResponses(t *testing.T) {
 	syncTestConfiguration(t)
-	model.Conf.Sync.Mode = 3
+	model.Conf.Sync.Load().Mode = 3
 	engine := gin.New()
 	for path, handler := range map[string]gin.HandlerFunc{
 		"getBootSync": getBootSync, "getSyncInfo": getSyncInfo, "getSyncLANStatus": getSyncLANStatus,
@@ -138,8 +138,8 @@ func TestAPIContractSyncHTTPResponses(t *testing.T) {
 			t.Fatalf("response changed for %s: %s (%v)", path, recorder.Body.String(), err)
 		}
 	}
-	if model.Conf.Sync.Mode != 3 || model.Conf.Sync.Interval != 31 {
-		t.Fatalf("numeric truncation changed: %+v", model.Conf.Sync)
+	if model.Conf.Sync.Load().Mode != 3 || model.Conf.Sync.Load().Interval != 31 {
+		t.Fatalf("numeric truncation changed: %+v", model.Conf.Sync.Load())
 	}
 }
 
@@ -148,7 +148,7 @@ func TestAPIContractSyncBootRole(t *testing.T) {
 	previous := model.BootSyncSucc.Load()
 	model.BootSyncSucc.Store(1)
 	t.Cleanup(func() { model.BootSyncSucc.Store(previous) })
-	model.Conf.Sync.Enabled = true
+	model.Conf.Sync.Load().Enabled = true
 	for _, role := range []model.Role{model.RoleAdministrator, model.RoleReader} {
 		engine := gin.New()
 		engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, role) })
@@ -252,16 +252,17 @@ func TestAPIContractSyncProviderMultipart(t *testing.T) {
 
 func TestAPIContractSyncProviderExportContents(t *testing.T) {
 	syncTestConfiguration(t)
-	model.Conf.Sync.S3 = &conf.S3{Endpoint: " endpoint ", AccessKey: "key", SecretKey: " secret ", Bucket: "bucket", Region: "auto", Timeout: 35}
-	model.Conf.Sync.WebDAV = &conf.WebDAV{Endpoint: " endpoint ", Password: " password ", Timeout: 36}
+	model.Conf.Sync.Load().S3 = &conf.S3{Endpoint: " endpoint ", AccessKey: "key", SecretKey: " secret ", Bucket: "bucket", Region: "auto", Timeout: 35}
+	model.Conf.Sync.Load().WebDAV = &conf.WebDAV{Endpoint: " endpoint ", Password: " password ", Timeout: 36}
 	for _, entry := range []struct {
 		name     string
 		handler  gin.HandlerFunc
-		expected []byte
+		expected func() []byte
 	}{
-		{"exportSyncProviderS3", exportSyncProviderS3, syncMarshal(t, model.Conf.Sync.S3)},
-		{"exportSyncProviderWebDAV", exportSyncProviderWebDAV, syncMarshal(t, model.Conf.Sync.WebDAV)},
+		{"exportSyncProviderS3", exportSyncProviderS3, func() []byte { return syncMarshal(t, model.Conf.Sync.Load().S3) }},
+		{"exportSyncProviderWebDAV", exportSyncProviderWebDAV, func() []byte { return syncMarshal(t, model.Conf.Sync.Load().WebDAV) }},
 	} {
+		expected := entry.expected()
 		engine := gin.New()
 		path := "/api/sync/" + entry.name
 		engine.POST(path, entry.handler)
@@ -295,8 +296,8 @@ func TestAPIContractSyncProviderExportContents(t *testing.T) {
 			t.Fatal(err)
 		}
 		plain, err := hex.DecodeString(string(util.AESDecrypt(string(encrypted))))
-		if err != nil || !bytes.Equal(plain, entry.expected) {
-			t.Fatalf("export encryption or JSON changed: %s != %s (%v)", plain, entry.expected, err)
+		if err != nil || !bytes.Equal(plain, expected) {
+			t.Fatalf("export encryption or JSON changed: %s != %s (%v)", plain, expected, err)
 		}
 		archiveData, err := os.ReadFile(filepath.Join(util.TempDir, filepath.FromSlash(strings.TrimPrefix(response.Data.Zip, "/"))))
 		if err != nil {

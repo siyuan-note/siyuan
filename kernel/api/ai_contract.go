@@ -12,7 +12,7 @@ import (
 )
 
 func aiProviderAdmission(c *gin.Context) *apicontract.Response[apicontract.Null] {
-	if model.Conf.AI.HasAnyProvider() {
+	if model.Conf.AI.Load().HasAnyProvider() {
 		return nil
 	}
 	response := apicontract.Failure[apicontract.Null](-1, model.Conf.Language(193))

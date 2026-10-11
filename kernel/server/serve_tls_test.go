@@ -38,7 +38,7 @@ func prepareTLSEnforceTest(t *testing.T, required, enforced bool) {
 
 	previousConf := model.Conf
 	previousRequired := util.TLSRequired()
-	model.Conf = &model.AppConf{System: &conf.System{NetworkServe: required, NetworkServeTLS: required}}
+	model.Conf = &model.AppConf{System: model.NewConfSection(&conf.System{NetworkServe: required, NetworkServeTLS: required})}
 	util.SetTLSRequired(required)
 	if enforced {
 		util.MarkTLSEnforced()

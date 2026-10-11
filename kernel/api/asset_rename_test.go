@@ -13,7 +13,7 @@ import (
 
 func TestRenameAssetMissingSourceContract(t *testing.T) {
 	setupAssetContractWorkspace(t)
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	engine := gin.New()
 	engine.POST("/api/asset/renameAsset", renameAsset)
 	recorder := httptest.NewRecorder()

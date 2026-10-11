@@ -20,8 +20,8 @@ import (
 func TestAttributeViewLocationCSVAndMarkdownExport(t *testing.T) {
 	const boxID, avID, docID, blockID, rowID = "20261009010000-box0001", "20261009010001-av00001", "20261009010002-doc0001", "20261009010003-avnode1", "20261009010004-row0001"
 	setupExportRelatedTest(t, boxID)
-	Conf.Editor = conf.NewEditor()
-	Conf.Search = conf.NewSearch()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Search.Store(conf.NewSearch())
 	oldLang, oldLangs := util.Lang, util.AttrViewLangs
 	util.Lang = "en"
 	util.AttrViewLangs = map[string]map[string]any{"en": {"key": "Key", "select": "Select", "table": "Table"}}
@@ -86,7 +86,7 @@ func TestAttributeViewLocationCSVAndMarkdownExport(t *testing.T) {
 			if !found {
 				t.Fatal("CSV file missing from export")
 			}
-			exported, err := exportTree(tree, treeExportOptions{Config: *Conf.Export, WYSIWYG: false})
+			exported, err := exportTree(tree, treeExportOptions{Config: *Conf.Export.Load(), WYSIWYG: false})
 			if err != nil {
 				t.Fatal(err)
 			}

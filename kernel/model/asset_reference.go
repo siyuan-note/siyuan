@@ -315,7 +315,7 @@ func rewriteAttributeViewDataAssetReferences(data []byte, options assetReference
 	if !rewriteAttributeViewAssetReferences(attrView, options) {
 		return data, nil
 	}
-	if util.UseSingleLineSave {
+	if util.UseSingleLineSave.Load() {
 		return gulu.JSON.MarshalJSON(attrView)
 	}
 	return gulu.JSON.MarshalIndentJSON(attrView, "", "\t")

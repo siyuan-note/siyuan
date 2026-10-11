@@ -17,7 +17,7 @@ func TestRepoSnapshotTimeRange(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	store, err := dejavu.NewStore(util.RepoDir, Conf.Repo.Key)
+	store, err := dejavu.NewStore(util.RepoDir, Conf.Repo.Load().Key)
 	if err != nil {
 		t.Fatal(err)
 	}

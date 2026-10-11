@@ -81,8 +81,18 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 		t.Fatal(err)
 	}
 	util.TimeLangs[model.Conf.Lang] = language.Time
-	model.Conf.FileTree, model.Conf.Sync, model.Conf.NotebookCrypto = conf.NewFileTree(), conf.NewSync(), conf.NewNotebookCrypto()
-	model.Conf.Search, model.Conf.Editor, model.Conf.Export = conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewFileTree(), conf.NewSync(), conf.NewNotebookCrypto()
+		model.Conf.FileTree.Store(confSectionValue0)
+		model.Conf.Sync.Store(confSectionValue1)
+		model.Conf.NotebookCrypto = confSectionValue2
+	}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+		model.Conf.Search.Store(confSectionValue0)
+		model.Conf.Editor.Store(confSectionValue1)
+		model.Conf.Export.Store(confSectionValue2)
+	}
 	box := &model.Box{ID: ast.NewNodeID()}
 	boxConf := conf.NewBoxConf()
 	boxConf.Closed = false

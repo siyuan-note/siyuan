@@ -33,7 +33,7 @@ func TestUnusedAttributeViewScanFailureContract(t *testing.T) {
 	util.Lang = "en"
 	util.AttrViewLangs = map[string]map[string]any{"en": {"key": "Key", "select": "Select", "table": "Table"}}
 	t.Cleanup(func() { util.Lang, util.AttrViewLangs = previousLang, previousLangs })
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	box := &model.Box{ID: "20260918000000-abcdefg"}
 	if err := box.SaveConf(conf.NewBoxConf()); err != nil {
 		t.Fatal(err)
@@ -114,7 +114,12 @@ func TestAVContractDetachedItemIcon(t *testing.T) {
 		t.Fatal(err)
 	}
 	util.TimeLangs["en"] = language.Time
-	model.Conf.Search, model.Conf.Editor, model.Conf.Export = conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+		model.Conf.Search.Store(confSectionValue0)
+		model.Conf.Editor.Store(confSectionValue1)
+		model.Conf.Export.Store(confSectionValue2)
+	}
 	tree, err := model.LoadTreeByBlockID(fixture.databaseID)
 	if err != nil {
 		t.Fatal(err)

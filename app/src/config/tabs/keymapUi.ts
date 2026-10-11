@@ -1,9 +1,9 @@
+import {config as configApi} from "../util/configApi";
 import {keymapPayload, keymapRowPatch} from "../keymapPayload";
 import {isMac, updateHotkeyTip} from "../../protyle/util/compatibility";
 import {matchHotKey} from "../../protyle/util/hotKey";
 import {Constants} from "../../constants";
 import {hideMessage, showMessage} from "../../dialog/message";
-import {fetchSyncPost} from "../../util/fetch";
 import {reloadUI} from "../../layout/util";
 import {applyKeymap} from "./keymapRuntime";
 import {confirmDialog} from "../../dialog/confirmDialog";
@@ -18,7 +18,6 @@ import {getKeymapBindings, getKeymapItem, setKeymapBindings, normalizeShortcutKe
 import {genKeymapRowHtml, getRowBindings, renderRowBindings} from "./keymapRow";
 import {escapeHtml} from "../../util/escape";
 import {Menu} from "../../plugin/Menu";
-import {refreshSettingConfig} from "../setting/sync";
 import {trackSettingSave} from "../setting/pending";
 import {getSettingsOwnerApp} from "../setting/windowContext";
 import type {App} from "../../index";
@@ -65,13 +64,11 @@ const bindKeymapToolbar = (root: HTMLElement) => {
             keymapSaveQueue = trackSettingSave(keymapSaveQueue.then(async () => {
                 try {
                     const data = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
-                    const response = await fetchSyncPost("/api/setting/setKeymap", {data: keymapPayload(data)});
-                    if (response.code !== 0) {
-                        throw new Error(response.msg);
-                    }
-                    savedKeymap = data;
-                    applyKeymap(data);
-                    void reloadUI();
+                    await configApi.set("keymap", keymapPayload(data), () => {
+                        savedKeymap = data;
+                        applyKeymap(data);
+                        void reloadUI();
+                    });
                 } catch (error) {
                     console.error("Could not reset shortcuts:", error);
                     showMessage(window.siyuan.languages.keymapSaveFailed);
@@ -738,15 +735,11 @@ const saveKeymapRow = (root: HTMLElement, row: HTMLElement, keys: string[], chan
     const revision = ++keymapRevision;
     keymapSaveQueue = trackSettingSave(keymapSaveQueue.then(async () => {
         try {
-            const response = await fetchSyncPost("/api/setting/patch", {
-                keymap: keymapRowPatch(row.dataset.key.split(Constants.ZWSP), {
-                    ...item, bindings: item.bindings ? {...item.bindings, priority: item.bindings.priority || null} : undefined,
-                }),
-            });
-            if (response.code !== 0) {
-                throw new Error(response.msg);
-            }
-            await refreshSettingConfig("keymap");
+            let applied = false;
+            await configApi.set("keymap", keymapRowPatch(row.dataset.key.split(Constants.ZWSP), {
+                ...item, bindings: item.bindings ? {...item.bindings, priority: item.bindings.priority || null} : undefined,
+            }), () => { applied = true; });
+            if (!applied) throw new Error("Could not save shortcuts");
             savedKeymap = JSON.parse(JSON.stringify(window.siyuan.config.keymap));
         } catch (error) {
             console.error("Could not save shortcuts:", error);

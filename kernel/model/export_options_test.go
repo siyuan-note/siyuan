@@ -12,9 +12,9 @@ import (
 
 func TestExportOptionsSnapshot(t *testing.T) {
 	previous := Conf
-	Conf = &AppConf{Export: conf.NewExport()}
+	Conf = &AppConf{Export: NewConfSection(conf.NewExport())}
 	t.Cleanup(func() { Conf = previous })
-	baseline := *Conf.Export
+	baseline := *Conf.Export.Load()
 	options := &ExportOptions{
 		AddTitle: new(false), InlineMemo: new(true), BlockRefMode: new(3), BlockEmbedMode: new(0),
 		FileAnnotationRefMode: new(1), BlockRefTextLeft: new("["), BlockRefTextRight: new("]"),
@@ -34,11 +34,11 @@ func TestExportOptionsSnapshot(t *testing.T) {
 			t.Fatalf("option %s was not resolved", name)
 		}
 	}
-	if *Conf.Export != baseline || resolveExportOptions(nil) != baseline || resolveExportOptions(&ExportOptions{}) != baseline {
+	if *Conf.Export.Load() != baseline || resolveExportOptions(nil) != baseline || resolveExportOptions(&ExportOptions{}) != baseline {
 		t.Fatal("single-export options changed defaults or the global configuration")
 	}
 	*options.AddTitle = true
-	Conf.Export.BlockRefMode = 2
+	Conf.Export.Load().BlockRefMode = 2
 	if resolved.AddTitle || resolved.BlockRefMode != 3 {
 		t.Fatal("resolved configuration retains a mutable reference to input or defaults")
 	}
@@ -55,9 +55,9 @@ func TestExportOptionsSnapshot(t *testing.T) {
 
 func TestExportOptionsConcurrentSnapshots(t *testing.T) {
 	previous := Conf
-	Conf = &AppConf{Export: conf.NewExport()}
+	Conf = &AppConf{Export: NewConfSection(conf.NewExport())}
 	t.Cleanup(func() { Conf = previous })
-	baseline := *Conf.Export
+	baseline := *Conf.Export.Load()
 	var workers sync.WaitGroup
 	for i := range 64 {
 		workers.Go(func() {
@@ -71,7 +71,7 @@ func TestExportOptionsConcurrentSnapshots(t *testing.T) {
 		})
 	}
 	workers.Wait()
-	if *Conf.Export != baseline {
+	if *Conf.Export.Load() != baseline {
 		t.Fatal("resolving concurrent exports changed global configuration")
 	}
 }

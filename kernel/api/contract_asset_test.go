@@ -26,7 +26,7 @@ func setupAssetContractWorkspace(t *testing.T) string {
 	t.Helper()
 	previousConf, previousData, previousWorkspace := model.Conf, util.DataDir, util.WorkspaceDir
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	util.WorkspaceDir = t.TempDir()
 	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
 	t.Cleanup(func() { model.Conf, util.DataDir, util.WorkspaceDir = previousConf, previousData, previousWorkspace })
@@ -217,7 +217,7 @@ func TestAssetUploadResultContractNullability(t *testing.T) {
 
 func TestAssetUnusedScanFailureContract(t *testing.T) {
 	assets := setupAssetContractWorkspace(t)
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	box := &model.Box{ID: "20260918000000-abcdefg"}
 	if err := box.SaveConf(conf.NewBoxConf()); err != nil {
 		t.Fatal(err)
@@ -278,7 +278,11 @@ func TestAndroidNotificationAssetDeletionContract(t *testing.T) {
 		return
 	}
 	assets := setupAssetContractWorkspace(t)
-	model.Conf.FileTree, model.Conf.Search = conf.NewFileTree(), conf.NewSearch()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewFileTree(), conf.NewSearch()
+		model.Conf.FileTree.Store(confSectionValue0)
+		model.Conf.Search.Store(confSectionValue1)
+	}
 	util.HistoryDir, util.TempDir, util.ConfDir = t.TempDir(), t.TempDir(), t.TempDir()
 	util.QueueDir = t.TempDir()
 	util.DBPath, util.HistoryDBPath = filepath.Join(util.TempDir, "siyuan.db"), filepath.Join(util.TempDir, "history.db")

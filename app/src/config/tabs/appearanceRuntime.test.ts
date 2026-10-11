@@ -4,6 +4,7 @@ import {resolve} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
+import {createSectionRuntime} from "../util/sectionRuntime";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
@@ -32,6 +33,7 @@ for (const mobile of [true, false]) {
                 window: {siyuan},
                 document: {getElementById: (): HTMLElement | null => null},
                 require: (name: string) => {
+                    if (name === "../util/sectionRuntime") return {createSectionRuntime};
                     if (name === "../util/namespaceApi") {
                         return {createConfigNamespaceApi: (options: {setConfig: (data: unknown) => void}) => ({apply: options.setConfig})};
                     }
@@ -79,6 +81,7 @@ for (const mobile of [true, false]) {
                 window: {siyuan, location: {reload: () => calls.push("reload")}},
                 document: {getElementById: (): HTMLElement | null => null},
                 require: (name: string) => {
+                    if (name === "../util/sectionRuntime") return {createSectionRuntime};
                     if (name === "../util/namespaceApi") {
                         return {createConfigNamespaceApi: () => ({})};
                     }

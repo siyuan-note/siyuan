@@ -34,7 +34,7 @@ func TestFrontendCapabilityModelNamesAreStableAndDistinct(t *testing.T) {
 func TestContentCapabilitiesExposeSharedToolDescriptions(t *testing.T) {
 	originalConf := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()
-	kernelModel.Conf.AI = conf.NewAI()
+	kernelModel.Conf.AI.Store(conf.NewAI())
 	t.Cleanup(func() { kernelModel.Conf = originalConf })
 	for _, tc := range []struct {
 		tool     *tools.Tool
@@ -45,7 +45,7 @@ func TestContentCapabilitiesExposeSharedToolDescriptions(t *testing.T) {
 	} {
 		t.Run(tc.tool.Name, func(t *testing.T) {
 			id := tools.CapabilityIDForTool(tc.tool)
-			kernelModel.Conf.AI.Agent.CapabilityPolicy = &conf.CapabilityPolicy{
+			kernelModel.Conf.AI.Load().Agent.CapabilityPolicy = &conf.CapabilityPolicy{
 				Default: "deny", Overrides: map[string]string{id: "allow"},
 			}
 			set, err := buildCapabilitySet(nil, capabilityAccessContext{})
@@ -70,7 +70,7 @@ func TestContentCapabilitiesExposeSharedToolDescriptions(t *testing.T) {
 			if schema.Properties[tc.property].Description != tc.tool.InputSchema.Properties[tc.property].Description {
 				t.Fatal("agent did not receive the shared content syntax")
 			}
-			kernelModel.Conf.AI.Agent.CapabilityPolicy.Overrides[id] = "deny"
+			kernelModel.Conf.AI.Load().Agent.CapabilityPolicy.Overrides[id] = "deny"
 			set, err = buildCapabilitySet(nil, capabilityAccessContext{})
 			if err != nil || len(set.definitions) != 0 {
 				t.Fatalf("disabled content tool descriptions were still exposed: %v", err)
@@ -86,8 +86,8 @@ func TestCapabilityPolicyControlsExposureAndExecution(t *testing.T) {
 
 	originalConf := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()
-	kernelModel.Conf.AI = conf.NewAI()
-	kernelModel.Conf.AI.Agent.CapabilityPolicy = &conf.CapabilityPolicy{
+	kernelModel.Conf.AI.Store(conf.NewAI())
+	kernelModel.Conf.AI.Load().Agent.CapabilityPolicy = &conf.CapabilityPolicy{
 		Default: "deny",
 		Overrides: map[string]string{
 			backendID:  "allow",
@@ -128,7 +128,7 @@ func TestCapabilityPolicyControlsExposureAndExecution(t *testing.T) {
 	if frontendRegistration == nil {
 		t.Fatal("allowed browser capability was not exposed")
 	}
-	kernelModel.Conf.AI.Agent.ApprovalPolicy.Overrides[backendID] = &conf.CapabilityApproval{
+	kernelModel.Conf.AI.Load().Agent.ApprovalPolicy.Overrides[backendID] = &conf.CapabilityApproval{
 		Default: "allow",
 		Actions: map[string]string{"write": "confirm"},
 	}
@@ -142,8 +142,8 @@ func TestCapabilityPolicyControlsExposureAndExecution(t *testing.T) {
 		t.Fatal("explicit confirmation was bypassed by the session approval mode")
 	}
 
-	kernelModel.Conf.AI.Agent.CapabilityPolicy.Overrides[backendID] = "deny"
-	kernelModel.Conf.AI.Agent.CapabilityPolicy.Overrides[frontendID] = "deny"
+	kernelModel.Conf.AI.Load().Agent.CapabilityPolicy.Overrides[backendID] = "deny"
+	kernelModel.Conf.AI.Load().Agent.CapabilityPolicy.Overrides[frontendID] = "deny"
 	if capabilityStillExecutable(backendRegistration, nil) || capabilityStillExecutable(frontendRegistration, nil) {
 		t.Fatal("disabled capability remained executable from an earlier model round")
 	}
@@ -163,7 +163,7 @@ func TestMCPCapabilityRequiresEnabledConfiguredServer(t *testing.T) {
 
 	originalConf := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()
-	kernelModel.Conf.AI = conf.NewAI()
+	kernelModel.Conf.AI.Store(conf.NewAI())
 	t.Cleanup(func() { kernelModel.Conf = originalConf })
 
 	tool := &tools.Tool{
@@ -191,7 +191,7 @@ func TestMCPCapabilityRequiresEnabledConfiguredServer(t *testing.T) {
 		t.Fatal("MCP capability without a configured server was exposed")
 	}
 
-	kernelModel.Conf.AI.MCP.Servers = []conf.MCPServer{{ID: serverID, Enabled: true}}
+	kernelModel.Conf.AI.Load().MCP.Servers = []conf.MCPServer{{ID: serverID, Enabled: true}}
 	set, err = buildCapabilitySet(nil, capabilityAccessContext{})
 	if err != nil {
 		t.Fatal(err)
@@ -201,7 +201,7 @@ func TestMCPCapabilityRequiresEnabledConfiguredServer(t *testing.T) {
 		t.Fatal("MCP capability for an enabled configured server was unavailable")
 	}
 
-	kernelModel.Conf.AI.MCP.Servers[0].Enabled = false
+	kernelModel.Conf.AI.Load().MCP.Servers[0].Enabled = false
 	if capabilityStillExecutable(registration, nil) {
 		t.Fatal("MCP capability remained executable after its server was disabled")
 	}
@@ -217,7 +217,7 @@ func TestMCPCapabilityRequiresEnabledConfiguredServer(t *testing.T) {
 func TestExplicitCapabilityConfirmationOverridesRiskAndSessionApproval(t *testing.T) {
 	originalConf := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()
-	kernelModel.Conf.AI = conf.NewAI()
+	kernelModel.Conf.AI.Store(conf.NewAI())
 	t.Cleanup(func() { kernelModel.Conf = originalConf })
 
 	registration := &capabilityRegistration{
@@ -238,7 +238,7 @@ func TestExplicitCapabilityConfirmationOverridesRiskAndSessionApproval(t *testin
 		t.Fatal("session approval did not bypass risk-based confirmation")
 	}
 
-	kernelModel.Conf.AI.Agent.ApprovalPolicy.Overrides[registration.ID] = &conf.CapabilityApproval{
+	kernelModel.Conf.AI.Load().Agent.ApprovalPolicy.Overrides[registration.ID] = &conf.CapabilityApproval{
 		Default: conf.ApprovalDecisionConfirm,
 		Actions: map[string]string{"semantic": conf.ApprovalDecisionAllow},
 	}

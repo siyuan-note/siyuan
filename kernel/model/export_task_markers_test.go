@@ -12,7 +12,11 @@ import (
 func TestExportMarkdownTaskMarkers(t *testing.T) {
 	previousConf := Conf
 	Conf = NewAppConf()
-	Conf.Editor, Conf.Export = conf.NewEditor(), conf.NewExport()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewEditor(), conf.NewExport()
+		Conf.Editor.Store(confSectionValue0)
+		Conf.Export.Store(confSectionValue1)
+	}
 	t.Cleanup(func() { Conf = previousConf })
 	config := *conf.NewExport()
 	config.AddTitle = false

@@ -110,7 +110,7 @@ var resetSettings = contractHandler(apicontract.ResetSettings,
 			}
 		}
 		model.FlushTxQueue()
-		previousSearch := model.Conf.Search
+		previousSearch := model.Conf.Search.Load()
 		if err := model.ResetSettings(); err != nil {
 			return apicontract.Failure[apicontract.Null](-1, err.Error())
 		}

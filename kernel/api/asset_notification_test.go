@@ -49,7 +49,7 @@ func testAPIContractUnusedNotificationScope(t *testing.T, attributeViews bool) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			assets := setupAssetContractWorkspace(t)
-			model.Conf.FileTree = conf.NewFileTree()
+			model.Conf.FileTree.Store(conf.NewFileTree())
 			if attributeViews {
 				assets = filepath.Join(util.DataDir, "storage", "av")
 				if err := os.MkdirAll(assets, 0755); err != nil {

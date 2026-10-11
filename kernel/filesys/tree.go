@@ -534,7 +534,7 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 	}
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
-		msg := fmt.Sprintf(util.Langs[util.Lang][268], tree.Root.IALAttr("title")+" "+filepath.Base(filePath), util.LargeFileWarningSize)
+		msg := fmt.Sprintf(util.Langs[util.Lang][268], tree.Root.IALAttr("title")+" "+filepath.Base(filePath), util.LargeFileWarningSize.Load())
 		util.PushErrMsg(msg, 7000)
 	}
 
@@ -583,7 +583,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	data = renderer.Render()
 	data, _ = removeUnescapedUnicodeNull(data)
-	if !util.UseSingleLineSave {
+	if !util.UseSingleLineSave.Load() {
 		buf := bytes.Buffer{}
 		buf.Grow(1024 * 1024 * 2)
 		if err = json.Indent(&buf, data, "", "\t"); err != nil {
@@ -721,7 +721,7 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 	renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	data = renderer.Render()
 
-	if !util.UseSingleLineSave {
+	if !util.UseSingleLineSave.Load() {
 		buf := bytes.Buffer{}
 		buf.Grow(1024 * 1024 * 2)
 		if err = json.Indent(&buf, data, "", "\t"); err != nil {

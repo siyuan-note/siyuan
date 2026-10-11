@@ -114,8 +114,8 @@ var rootCmd = &cobra.Command{
 		sql.InitDatabase(false)
 		sql.InitHistoryDatabase(false)
 		sql.InitAssetContentDatabase(false)
-		sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
-		sql.SetIndexAssetPath(model.Conf.Search.IndexAssetPath)
+		// 数据库打开后重新应用搜索配置，使 PRAGMA case_sensitive_like 对新连接生效
+		model.ApplySearchRuntime()
 		// 让 CLI 一次性命令（如 search -m 4）也能命中语义搜索：StartEmbeddingIndexer 是死循环不能用于会立即退出的进程，这里只把开关置真
 		model.PrepareEmbeddingSearch()
 		if err := rejectEncryptedNotebookCLI(cmd, args); err != nil {

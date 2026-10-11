@@ -5,5 +5,7 @@ export const setAVCellPanelTarget = (panelElement: Element, blockElement: Elemen
     cellPanelTargets.set(panelElement, blockElement);
 };
 
+export const getAVCellPanelTarget = (panelElement: Element) => cellPanelTargets.get(panelElement);
+
 export const isAVCellPanelForBlock = (panelElement: Element, blockElement: Element) =>
     cellPanelTargets.get(panelElement) === blockElement;

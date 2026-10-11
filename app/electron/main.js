@@ -731,7 +731,15 @@ app.setPath("userData", path.join(app.getPath("appData"), app.getName() + "-Elec
 
 if (process.platform === "win32") {
     // Windows 需要设置 AppUserModelId 才能正确显示应用名称和应用图标 https://github.com/siyuan-note/siyuan/issues/17022
-    app.setAppUserModelId("org.b3log.siyuan");
+    const appUserModelId = "org.b3log.siyuan";
+    app.setAppUserModelId(appUserModelId);
+    // 为所有窗口指定任务栏图标，打包后使用可执行文件内嵌的图标资源。
+    app.on("browser-window-created", (event, window) => {
+        window.setAppDetails({
+            appId: appUserModelId,
+            appIconPath: app.isPackaged ? process.execPath : path.join(appDir, "src", "assets", "icon.ico"),
+        });
+    });
 }
 
 if (!app.requestSingleInstanceLock()) {

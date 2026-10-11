@@ -24,7 +24,7 @@ export class MobileTags {
 
     constructor(app: App, element: HTMLElement) {
         this.element = element;
-        this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
+        this.element.innerHTML = `<div class="toolbar toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">
         ${window.siyuan.languages.tag}

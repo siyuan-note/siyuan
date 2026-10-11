@@ -96,7 +96,7 @@ export class MobileFiles extends Model {
             type: "filetree",
             msgCallback: this.handleMsgCallback.bind(this)
         });
-        filesElement.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
+        filesElement.innerHTML = `<div class="toolbar toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">${window.siyuan.languages.fileTree}</div>
     <div class="fn__space"></div>

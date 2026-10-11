@@ -65,7 +65,7 @@ export class MobileOutline extends Model {
         this.isPreview = options.isPreview;
         this.blockId = options.blockId;
         this.element = options.element;
-        this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
+        this.element.innerHTML = `<div class="toolbar toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">
         ${window.siyuan.languages.outline}

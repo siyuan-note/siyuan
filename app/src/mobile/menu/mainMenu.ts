@@ -309,8 +309,8 @@ const renderMobileMainMenuEntryHTML = (entry: TMobileMainMenuEntry) => {
 
 const renderMobileMainMenuGroupHTML = (group: IMobileMainMenuGroup) =>
     `<div class="b3-menu__group${group.hidden?.() ? " fn__none" : ""}" data-menu-group="${group.id}">
-        <div class="b3-menu__group-title fn__flex"><span class="fn__flex-1">${group.title()}</span>
-            <button type="button" class="block__icon" data-type="toggle-menu-group" aria-expanded="true" aria-controls="mobile-menu-group-${group.id}" aria-label="${escapeAttr(window.siyuan.languages.collapse + " - " + group.title())}"><svg><use xlink:href="#iconDown"></use></svg></button>
+        <div class="b3-menu__group-title fn__flex"><span class="fn__flex-1 fn__flex-center">${group.title()}</span>
+            <button type="button" class="block__icon block__icon--show block__icon--touch" data-type="toggle-menu-group" aria-expanded="true" aria-controls="mobile-menu-group-${group.id}" aria-label="${escapeAttr(window.siyuan.languages.collapse + " - " + group.title())}"><svg><use xlink:href="#iconDown"></use></svg></button>
         </div>
         <div id="mobile-menu-group-${group.id}" class="b3-menu__group-items">${group.entries.map(renderMobileMainMenuEntryHTML).join("")}</div>
     </div>`;

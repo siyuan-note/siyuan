@@ -63,6 +63,7 @@ const createOCRPanel = async () => {
     const controls = Object.fromEntries([
         "ocrProvider", "ocrModel", "ocrAIModel", "ocrReasoningEffort", "ocrAuto", "ocrImportModels", "ocrImport",
         "detector", "detectorConfig", "recognizer", "recognizerConfig",
+        "detectorName", "detectorConfigName", "recognizerName", "recognizerConfigName",
         "ocrThreshold_detection", "ocrThreshold_box", "ocrThreshold_recognition",
     ].map(id => [id, {
         id, value: id === "ocrProvider" ? "paddleocr" : id === "ocrAIModel" || id === "ocrReasoningEffort" ? "" : "tiny", checked: false, disabled: false, innerHTML: "",

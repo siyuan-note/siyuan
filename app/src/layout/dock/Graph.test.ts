@@ -3,7 +3,8 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-import {flushSettingSaves, trackSettingRequest} from "../../config/setting/pending";
+import {flushSettingSaves, trackSettingSave} from "../../config/setting/pending";
+import {mergeRecordByDottedPath} from "../../config/util/dotPath";
 
 for (const type of ["global", "local", "pin"]) {
     test(`reset flushes the latest delayed graph settings before acknowledging (${type})`, async () => {
@@ -16,16 +17,50 @@ for (const type of ["global", "local", "pin"]) {
         const code = transpileModule(readFileSync("src/layout/dock/Graph.ts", "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText;
+        const runtimeWindow = {
+            siyuan: {config: {graph: {}}},
+            setTimeout: (callback: () => void) => { timers.set(++timerID, callback); return timerID; },
+            clearTimeout: (id: number) => timers.delete(id),
+        };
+        let requestStarted: () => void;
+        const started = new Promise<void>(resolve => { requestStarted = resolve; });
+        const configExports = {} as typeof import("../../config/util/configApi");
+        runInNewContext(transpileModule(readFileSync("src/config/util/configApi.ts", "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText, {
+            exports: configExports, window: runtimeWindow, structuredClone,
+            require: (name: string) => {
+                if (name === "../../util/fetch") return {fetchSyncPost: (url: string, data: typeof writes[number]) => {
+                    assert.equal(url, "/api/graph/setGraphConf");
+                    writes.push(data);
+                    requestStarted();
+                    return request.then(() => ({code: 0}));
+                }};
+                if (name === "./dotPath") return {mergeRecordByDottedPath};
+                if (name === "../setting/pending") return {trackSettingSave};
+                if (name === "../setting/sync") return {
+                    refreshSettingConfigAfter: async (namespace: string, save: () => Promise<boolean>) => {
+                        assert.equal(namespace, "graph");
+                        return save();
+                    },
+                };
+                throw new Error("Unexpected config fixture module: " + name);
+            },
+        });
+        const unusedModules = new Set(["./panelSearch", "../Tab", "../util", "../tabUtil", "../../block/Panel",
+            "../../protyle/breadcrumb/action", "../../util/fetch", "../../editor/util",
+            "../../protyle/util/compatibility", "../../search/util", "../../util/noRelyPCFunction",
+            "../../editor", "../../util/pathName", "./graph/GraphEngine", "../../protyle/header/documentMenu",
+            "../../constants"]);
         runInNewContext(code, {
-            exports,
-            require: () => ({Model: class {}, fetchPost: (url: string, data: typeof writes[number]) => {
-                writes.push(data);
-                return trackSettingRequest(url, request);
-            }}),
-            window: {
-                siyuan: {config: {graph: {}}},
-                setTimeout: (callback: () => void) => { timers.set(++timerID, callback); return timerID; },
-                clearTimeout: (id: number) => timers.delete(id),
+            exports, window: runtimeWindow,
+            require: (name: string) => {
+                if (name === "../Model") return {Model: class {}};
+                if (name === "../../config/util/configApi") return configExports;
+                assert.ok(unusedModules.has(name), "Unexpected graph fixture module: " + name);
+                return new Proxy({}, {get: (_target, key) => {
+                    throw new Error(`Unexpected graph fixture dependency: ${name}.${String(key)}`);
+                }});
             },
         });
         let conf = {dailyNote: false};
@@ -40,9 +75,11 @@ for (const type of ["global", "local", "pin"]) {
         graph.scheduleGraphSearch();
         const resume = graph.suspendSettingsSaving();
         assert.equal(timers.size, 0);
+        await started;
         assert.equal(writes.length, 1);
         assert.equal(writes[0].type, type === "global" ? "global" : "local");
-        assert.equal(writes[0].conf, conf);
+        assert.deepEqual(writes[0].conf, conf);
+        assert.notEqual(writes[0].conf, conf, "queued configuration is copied before saving");
         graph.searchGraph();
         assert.equal(writes.length, 1);
         let flushed = false;

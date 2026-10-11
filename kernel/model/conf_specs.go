@@ -11,7 +11,7 @@ import (
 
 func confSectionSpecs() map[string]registeredSection {
 	return map[string]registeredSection{
-		"appearance": appearanceSectionSpec(),
+		"appearance": appearanceSectionSpec(false),
 		"fileTree":   newSectionSpec("fileTree", &Conf.FileTree, conf.NormalizeFileTree, fileTreeReactions()...),
 		"tag":        newSectionSpec("tag", &Conf.Tag, conf.NormalizeTag),
 		"editor":     newSectionSpec("editor", &Conf.Editor, conf.NormalizeEditor, editorReactions()...),
@@ -68,11 +68,16 @@ func bazaarReactions() []Reaction[*conf.Bazaar] {
 	}}}
 }
 
-func appearanceSectionSpec() *SectionSpec[*conf.Appearance] {
+// ApplyAppearanceSetting 在同一段写锁内提交设置并刷新磁盘资源，内部偏好更新仍按资源字段变化触发反应。
+func ApplyAppearanceSetting(value *conf.Appearance) ([]Issue, error) {
+	return Apply(appearanceSectionSpec(true), value)
+}
+
+func appearanceSectionSpec(refreshResources bool) *SectionSpec[*conf.Appearance] {
 	spec := newSectionSpec("appearance", &Conf.Appearance, func(value *conf.Appearance) *conf.Appearance {
 		return conf.NormalizeAppearance(value, util.IsMobileContainer())
 	}, Reaction[*conf.Appearance]{Name: "appearance-resources", Changed: func(old, next *conf.Appearance) bool {
-		return old.Lang != next.Lang || old.Icon != next.Icon || old.ThemeLight != next.ThemeLight ||
+		return refreshResources || old.Lang != next.Lang || old.Icon != next.Icon || old.ThemeLight != next.ThemeLight ||
 			old.ThemeDark != next.ThemeDark || old.Mode != next.Mode || old.ModeOS != next.ModeOS
 	}, Apply: func(old, next *conf.Appearance) {
 		InitAppearance()

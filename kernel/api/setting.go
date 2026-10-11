@@ -564,7 +564,7 @@ func applyAppearanceSetting(c *gin.Context, request apicontract.SetAppearanceReq
 	if !request.HasField("globalFontFamilies") {
 		appearance.GlobalFontFamilies = model.Conf.Appearance.Load().GlobalFontFamilies
 	}
-	issues, applyErr := model.ApplyConfSection("appearance", appearance)
+	issues, applyErr := model.ApplyAppearanceSetting(appearance)
 	recordSettingIssues(c, issues)
 	err = applyErr
 	if err != nil {

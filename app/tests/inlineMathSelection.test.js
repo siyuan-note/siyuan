@@ -38,6 +38,7 @@ const setup = async (source, suffix) => {
 };
 
 const setupEdge = async (mode) => {
+    window.mathSelectionDiagnosticAbort?.abort();
     document.body.innerHTML = '<div class="protyle-wysiwyg" contenteditable="false" data-readonly="false">' +
         '<div data-node-id="20261010232335-t6hx5pb" data-type="NodeParagraph" class="p">' +
         '<div contenteditable="true" spellcheck="false"><span data-inline-wrap="token"></span>' +
@@ -69,12 +70,32 @@ const setupEdge = async (mode) => {
     const rect = math.getBoundingClientRect();
     const after = point(math.nextSibling, 1);
     const before = point(prefix.firstChild, prefix.textContent.length - 2);
+    const diagnosticAbort = new AbortController();
+    window.mathSelectionDiagnosticAbort = diagnosticAbort;
+    window.mathSelectionDiagnostics = {mode, events: []};
+    const recordSelection = (phase, event) => {
+        const selection = getSelection();
+        const describe = node => node ? {name: node.nodeName,
+            text: node.textContent?.slice(0, 180), parent: node.parentElement?.outerHTML.slice(0, 512)} : null;
+        const events = window.mathSelectionDiagnostics.events;
+        if (events.length >= 48) return;
+        events.push({phase, text: selection?.toString(), collapsed: selection?.isCollapsed,
+            anchor: describe(selection?.anchorNode), anchorOffset: selection?.anchorOffset,
+            focus: describe(selection?.focusNode), focusOffset: selection?.focusOffset,
+            pointer: event && typeof event.clientX === "number" ? {x: event.clientX, y: event.clientY,
+                target: event.target?.outerHTML?.slice(0, 512)} : null});
+    };
+    for (const type of ["mousedown", "selectionchange", "mouseup", "click"]) {
+        document.addEventListener(type, event => recordSelection(type, event), {signal: diagnosticAbort.signal});
+    }
     document.addEventListener("click", () => {
         // 使用编辑器的延迟光标校正，验证鼠标释放后的选区不会被折叠。
         setTimeout(() => {
             const selection = getSelection();
             if (selection.rangeCount) {
+                recordSelection("before-caret-normalization");
                 window.mathSelectionAPI.normalizeInlineMathCaret(selection.getRangeAt(0));
+                recordSelection("after-caret-normalization");
             }
         }, 0);
     }, {once: true});
@@ -144,7 +165,8 @@ const runElectron = async () => {
         win.webContents.debugger.attach("1.3");
         const send = params => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", params);
         const drag = async (from, to, edge = false) => {
-            await win.webContents.executeJavaScript("getSelection().removeAllRanges(); true;");
+            await win.webContents.executeJavaScript(`getSelection().removeAllRanges();
+                if (window.mathSelectionDiagnostics) window.mathSelectionDiagnostics.events = []; true;`);
             await send({type: "mouseMoved", ...from});
             await send({type: "mousePressed", ...from, button: "left", clickCount: 1});
             for (let step = 1; step <= 15; step++) {
@@ -155,7 +177,29 @@ const runElectron = async () => {
             await new Promise(resolve => setTimeout(resolve, 30));
             const text = await win.webContents.executeJavaScript("getSelection().toString()");
             if (edge) {
-                assert.match(text, /I[\s\S]*E/, JSON.stringify(text));
+                try {
+                    assert.match(text, /I[\s\S]*E/, JSON.stringify(text));
+                } catch (error) {
+                    try {
+                        const diagnostics = await win.webContents.executeJavaScript(`(() => {
+                    const math = document.querySelector('[data-type="inline-math"]');
+                    const describePoint = point => {
+                        const hit = document.elementFromPoint(point.x, point.y);
+                        const caret = document.caretRangeFromPoint(point.x, point.y);
+                        return {point, hit: hit?.outerHTML.slice(0, 512),
+                            caretText: caret?.startContainer.textContent?.slice(0, 180), caretOffset: caret?.startOffset};
+                    };
+                    return {...window.mathSelectionDiagnostics,
+                        from: describePoint(${JSON.stringify(from)}), to: describePoint(${JSON.stringify(to)}),
+                        math: math?.getBoundingClientRect().toJSON(), viewport: [innerWidth, innerHeight],
+                        selection: {text: getSelection().toString(), collapsed: getSelection().isCollapsed}};
+                        })()`);
+                        error.message += "\nSelection diagnostics: " + JSON.stringify(diagnostics);
+                    } catch {
+                        // 页面关闭或诊断失败时仍保留原始选区断言。
+                    }
+                    throw error;
+                }
                 const markdown = await win.webContents.executeJavaScript(`(() => {
                     const copy = document.createElement("div");
                     copy.append(getSelection().getRangeAt(0).cloneContents());

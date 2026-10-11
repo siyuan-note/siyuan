@@ -1,9 +1,9 @@
 package model
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
-	"syscall"
 	"testing"
 
 	"github.com/88250/lute/ast"
@@ -11,7 +11,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestDocIALSharingViolationRecovers(t *testing.T) {
+func TestDocIALLockedReadRecovers(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	originalWorkspace := util.WorkspaceDir
 	util.WorkspaceDir = t.TempDir()
@@ -25,36 +25,24 @@ func TestDocIALSharingViolationRecovers(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { cache.RemoveDocIALInBox(document, fixture.box.ID) })
-	ptr, err := syscall.UTF16PtrFromString(filePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	handle, err := syscall.CreateFile(ptr, syscall.GENERIC_READ, syscall.FILE_SHARE_WRITE|syscall.FILE_SHARE_DELETE,
-		nil, syscall.OPEN_EXISTING, syscall.FILE_ATTRIBUTE_NORMAL, 0)
-	if err != nil {
-		t.Fatal(err)
-	}
-	closed := false
-	defer func() {
-		if !closed {
-			syscall.CloseHandle(handle)
-		}
-	}()
-	requireReadSharingViolation(t, filePath, handle)
+	release := lockFirstByteForTest(t, filePath)
 	if attrs := cache.GetDocIALInBox(document, fixture.box.ID); attrs != nil {
-		t.Fatalf("sharing-violation fixture unexpectedly has cached attributes: %v", attrs)
+		t.Fatalf("read-lock fixture unexpectedly has cached attributes: %v", attrs)
 	}
 	if attrs := fixture.box.docIAL(document); attrs != nil {
 		t.Fatalf("unreadable file returned attributes: %v", attrs)
 	}
-	if _, err = os.Stat(filepath.Join(util.WorkspaceDir, "corrupted")); !os.IsNotExist(err) {
-		t.Fatalf("sharing violation created a backup: %v", err)
+	if attrs := cache.GetDocIALInBox(document, fixture.box.ID); attrs != nil {
+		t.Fatalf("failed read populated document attributes: %v", attrs)
 	}
-	if err = syscall.CloseHandle(handle); err != nil {
-		t.Fatal(err)
+	if _, err := os.Stat(filepath.Join(util.WorkspaceDir, "corrupted")); !os.IsNotExist(err) {
+		t.Fatalf("locked read created a backup: %v", err)
 	}
-	closed = true
+	release()
+	if data, err := os.ReadFile(filePath); err != nil || !bytes.Equal(data, raw) {
+		t.Fatalf("locked read changed document data: %q, %v", data, err)
+	}
 	if attrs := fixture.box.docIAL(document); attrs["title"] != "Source" {
-		t.Fatalf("document did not recover after sharing violation: %v", attrs)
+		t.Fatalf("document did not recover after the read lock ended: %v", attrs)
 	}
 }

@@ -1,4 +1,8 @@
 {
+	"syncConfig": "同步服务配置",
+	"clearSyncConfig": "清除配置",
+	"clearSyncConfigConfirm": "清除该服务保存的地址和凭据？如果它是当前同步服务，将同时关闭同步。本地笔记和云端数据不会被删除。",
+	"syncConfigSaveFailed": "无法确认配置是否已更新，请检查连接后重试。",
 	"chooseFile": "选择文件",
 	"syncConfigNotSaved": "更改尚未保存，请填写完整的必填项",
 	"previousDatabaseRow": "上一条数据库条目",

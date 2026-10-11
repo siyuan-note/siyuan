@@ -1,4 +1,8 @@
 {
+	"syncConfig": "同步服務設定",
+	"clearSyncConfig": "清除設定",
+	"clearSyncConfigConfirm": "清除這項服務儲存的位址和憑證？如果它是目前的同步服務，也會關閉同步。本機筆記和雲端資料不會被刪除。",
+	"syncConfigSaveFailed": "無法確認設定是否已更新，請檢查連線後重試。",
 	"chooseFile": "選擇檔案",
 	"syncConfigNotSaved": "變更尚未儲存，請填寫完整的必填項目",
 	"previousDatabaseRow": "上一筆資料庫項目",

@@ -826,6 +826,10 @@ export type ChildBlock = { "content"?: string; "id": string; "markdown"?: string
 
 export type CleanupRichTextRequestInput = { "batch": string; "groups": Array<string>; };
 
+export type ClearSyncProviderConfigData = { "enabled": boolean; "local"?: SyncLocal; "s3"?: SyncS3; "webdav"?: SyncWebDAV; };
+
+export type ClearSyncProviderConfigRequestInput = { "provider": number; };
+
 export type ClipboardFile = { "isDir": boolean; "name": string; "path": string; "size": number; "updated": number; };
 
 export type ClipboardPathRequestInput = { "path": string; };
@@ -6999,6 +7003,18 @@ export interface APIPOSTRoutes {
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
+    };
+    /**
+     * 清除 provider 为 2（S3）、3（WebDAV）或 4（本地文件系统）的配置并同步落盘。
+     * 清除当前服务时先验证资源及历史快照完整性，再关闭同步；失败时保留原配置，不删除本地或云端数据。
+     * 响应包含当前同步开关及被清除服务的默认配置；其他服务配置、仓库密钥和下载模式保持不变。
+     */
+    "/api/sync/clearSyncProviderConfig": {
+        request: ClearSyncProviderConfigRequestInput;
+        response: { "code": 0; "data": ClearSyncProviderConfigData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
     };
     "/api/sync/createCloudSyncDir": {
         request: SyncNameRequestInput;

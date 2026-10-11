@@ -602,6 +602,22 @@ func setSyncProviderContract(c *gin.Context, request apicontract.SyncProviderReq
 
 var setSyncProviderS3 = contractHandler(apicontract.SetSyncProviderS3, setSyncProviderS3Contract)
 
+var clearSyncProviderConfig = contractHandler(apicontract.ClearSyncProviderConfig, func(c *gin.Context, request apicontract.ClearSyncProviderConfigRequest) apicontract.Response[apicontract.ClearSyncProviderConfigData] {
+	if err := model.ClearSyncProviderConfig(request.Provider); err != nil {
+		return apicontract.Failure[apicontract.ClearSyncProviderConfigData](-1, err.Error())
+	}
+	data := apicontract.ClearSyncProviderConfigData{Enabled: model.Conf.Sync.Enabled}
+	switch request.Provider {
+	case conf.ProviderS3:
+		data.S3 = (*apicontract.SyncS3)(model.Conf.Sync.S3)
+	case conf.ProviderWebDAV:
+		data.WebDAV = (*apicontract.SyncWebDAV)(model.Conf.Sync.WebDAV)
+	case conf.ProviderLocal:
+		data.Local = (*apicontract.SyncLocal)(model.Conf.Sync.Local)
+	}
+	return apicontract.Success(data)
+})
+
 func setSyncProviderS3Contract(c *gin.Context, request apicontract.SetSyncS3Request) (ret apicontract.Response[apicontract.SyncS3Data]) {
 
 	if err := request.ConfigError(); err != nil {

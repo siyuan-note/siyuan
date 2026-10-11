@@ -1,4 +1,8 @@
 {
+	"syncConfig": "Configuration du service de synchronisation",
+	"clearSyncConfig": "Effacer la configuration",
+	"clearSyncConfigConfirm": "Effacer l’adresse et les identifiants enregistrés pour ce service ? S’il s’agit du service de synchronisation actuel, la synchronisation sera aussi désactivée. Les notes locales et les données du cloud ne seront pas supprimées.",
+	"syncConfigSaveFailed": "Impossible de confirmer la modification de la configuration. Vérifiez la connexion et réessayez.",
 	"chooseFile": "Choisir un fichier",
 	"syncConfigNotSaved": "Les modifications n’ont pas été enregistrées ; remplissez les champs obligatoires",
 	"previousDatabaseRow": "Entrée précédente de la base de données",

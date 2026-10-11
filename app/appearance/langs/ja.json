@@ -1,4 +1,8 @@
 {
+	"syncConfig": "同期サービスの設定",
+	"clearSyncConfig": "設定を消去",
+	"clearSyncConfigConfirm": "このサービスの保存済みアドレスと認証情報を消去しますか？現在の同期サービスの場合は同期も無効になります。ローカルのノートとクラウドのデータは削除されません。",
+	"syncConfigSaveFailed": "設定の変更を確認できません。接続を確認して再試行してください。",
 	"chooseFile": "ファイルを選択",
 	"syncConfigNotSaved": "変更はまだ保存されていません。必須項目をすべて入力してください",
 	"previousDatabaseRow": "前のデータベース項目",

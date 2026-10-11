@@ -1,4 +1,8 @@
 {
+	"syncConfig": "Konfiguration des Synchronisierungsdienstes",
+	"clearSyncConfig": "Konfiguration löschen",
+	"clearSyncConfigConfirm": "Gespeicherte Adresse und Zugangsdaten dieses Dienstes löschen? Wenn dies der aktuelle Synchronisierungsdienst ist, wird auch die Synchronisierung deaktiviert. Lokale Notizen und Cloud-Daten werden nicht gelöscht.",
+	"syncConfigSaveFailed": "Die Konfigurationsänderung konnte nicht bestätigt werden. Prüfen Sie die Verbindung und versuchen Sie es erneut.",
 	"chooseFile": "Datei auswählen",
 	"syncConfigNotSaved": "Änderungen wurden noch nicht gespeichert; bitte alle Pflichtfelder ausfüllen",
 	"previousDatabaseRow": "Vorheriger Datenbankeintrag",

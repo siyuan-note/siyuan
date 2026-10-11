@@ -7,7 +7,7 @@
 		"id": "20240530101000-wo49zvq",
 		"title": "データ同期",
 		"type": "doc",
-		"updated": "20260918195936"
+		"updated": "20261011151543"
 	},
 	"Children": [
 		{
@@ -458,6 +458,95 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-f2vsvp5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261011151543-f2vsvp5",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サードパーティ同期の設定"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-94ddrfk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-94ddrfk",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アカウントと同期"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で S3、WebDAV、またはローカルファイルシステム（デスクトップ版のみ）を選び、同期サービスの設定欄にある設定ボタンを押します。必要な項目を入力して "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押してください。入力中は保存されず、変更したフォームを閉じると下書きを破棄するか確認されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-pf8uunp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-pf8uunp",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サービスの利用をやめる場合は、設定ダイアログで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定を消去"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押して確認します。保存されたアドレスと認証情報が削除され、現在の同期サービスの場合は同期も無効になります。ローカルのノートとクラウド上のデータは残ります。"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-ykfoii4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-ykfoii4",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "現在の同期元のリソースや履歴スナップショットが完全にダウンロードされていない場合、同期元の変更や設定の消去はできません。元の同期先へのアクセスを復旧し、すべてのリソースをダウンロードしてから再試行してください。保存や消去に失敗しても、有効な設定と下書きは保持されます。"
 				}
 			]
 		},

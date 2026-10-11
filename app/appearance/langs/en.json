@@ -1,4 +1,8 @@
 {
+	"syncConfig": "Sync service configuration",
+	"clearSyncConfig": "Clear configuration",
+	"clearSyncConfigConfirm": "Clear this service's saved address and credentials? If it is the current sync service, sync will also be disabled. Local notes and cloud data will not be deleted.",
+	"syncConfigSaveFailed": "Unable to confirm the configuration change. Check the connection and try again.",
 	"chooseFile": "Choose file",
 	"syncConfigNotSaved": "Changes have not been saved; complete the required fields",
 	"previousDatabaseRow": "Previous database entry",

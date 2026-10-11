@@ -1,4 +1,8 @@
 {
+	"syncConfig": "Konfiguracja usługi synchronizacji",
+	"clearSyncConfig": "Wyczyść konfigurację",
+	"clearSyncConfigConfirm": "Wyczyścić zapisany adres i dane uwierzytelniające tej usługi? Jeśli jest to bieżąca usługa synchronizacji, synchronizacja również zostanie wyłączona. Lokalne notatki i dane w chmurze nie zostaną usunięte.",
+	"syncConfigSaveFailed": "Nie można potwierdzić zmiany konfiguracji. Sprawdź połączenie i spróbuj ponownie.",
 	"chooseFile": "Wybierz plik",
 	"syncConfigNotSaved": "Zmiany nie zostały zapisane; uzupełnij wymagane pola",
 	"previousDatabaseRow": "Poprzedni wpis w bazie danych",

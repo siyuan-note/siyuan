@@ -100,6 +100,9 @@ func TestAssetDownloadModePreservesHistoricalRecovery(t *testing.T) {
 	if err = requireCompleteAssetDownloads(); err == nil {
 		t.Fatal("source change allowed with missing current content")
 	}
+	if err = ClearSyncProviderConfig(conf.ProviderLocal); err == nil || !Conf.Sync.Enabled || Conf.Sync.Local.Endpoint == "" {
+		t.Fatal("clear discarded the source of missing current assets")
+	}
 	assetPath := filepath.Join(fullData, "assets", "file.bin")
 	if err = os.WriteFile(assetPath, []byte("version two is different"), 0644); err != nil {
 		t.Fatal(err)
@@ -127,6 +130,9 @@ func TestAssetDownloadModePreservesHistoricalRecovery(t *testing.T) {
 	if err = requireCompleteAssetDownloads(); err == nil {
 		t.Fatal("source change allowed with missing historical content")
 	}
+	if err = ClearSyncProviderConfig(conf.ProviderLocal); err == nil || !Conf.Sync.Enabled || Conf.Sync.Local.Endpoint == "" {
+		t.Fatal("clear discarded the source of missing historical assets")
+	}
 	Conf.Sync.Enabled = false
 	if err = SetSyncAssetDownloadMode(0); err == nil || Conf.Sync.AssetDownloadMode != 1 {
 		t.Fatalf("offline mode switch discarded the previous mode: %v", err)
@@ -151,8 +157,11 @@ func TestAssetDownloadModePreservesHistoricalRecovery(t *testing.T) {
 	if data, err = os.ReadFile(localAsset); err != nil || !bytes.Equal(data, []byte("version two is different")) {
 		t.Fatalf("historical read overwrote current asset: %q, %v", data, err)
 	}
-	if err = clearAssetDownloadState(); err != nil {
+	if err = ClearSyncProviderConfig(conf.ProviderLocal); err != nil {
 		t.Fatal(err)
+	}
+	if Conf.Sync.Enabled || Conf.Sync.Local.Endpoint != "" {
+		t.Fatal("complete source was not cleared and disabled")
 	}
 	if exists, err := assetDownloadStateExists(); err != nil || exists {
 		t.Fatalf("authenticated complete state was not cleared: %v", err)

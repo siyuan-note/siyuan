@@ -1,4 +1,8 @@
 {
+	"syncConfig": "Configuratie van synchronisatiedienst",
+	"clearSyncConfig": "Configuratie wissen",
+	"clearSyncConfigConfirm": "Het opgeslagen adres en de inloggegevens van deze dienst wissen? Als dit de huidige synchronisatiedienst is, wordt synchronisatie ook uitgeschakeld. Lokale notities en cloudgegevens worden niet verwijderd.",
+	"syncConfigSaveFailed": "De configuratiewijziging kon niet worden bevestigd. Controleer de verbinding en probeer het opnieuw.",
 	"chooseFile": "Bestand kiezen",
 	"syncConfigNotSaved": "De wijzigingen zijn nog niet opgeslagen; vul de verplichte velden in",
 	"previousDatabaseRow": "Vorige databasevermelding",

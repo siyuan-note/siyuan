@@ -20689,6 +20689,39 @@
       ],
       "additionalProperties": false
     },
+    "ClearSyncProviderConfigData": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "local": {
+          "$ref": "#/$defs/SyncLocal"
+        },
+        "s3": {
+          "$ref": "#/$defs/SyncS3"
+        },
+        "webdav": {
+          "$ref": "#/$defs/SyncWebDAV"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "additionalProperties": false
+    },
+    "ClearSyncProviderConfigRequestInput": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "provider"
+      ],
+      "additionalProperties": false
+    },
     "ClipboardFile": {
       "type": "object",
       "properties": {
@@ -164800,6 +164833,86 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/sync/clearSyncProviderConfig",
+      "handler": "clearSyncProviderConfig",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ClearSyncProviderConfigRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/ClearSyncProviderConfigData"
               },
               "msg": {
                 "type": "string"

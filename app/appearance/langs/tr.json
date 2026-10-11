@@ -1,4 +1,8 @@
 {
+	"syncConfig": "Eşitleme hizmeti yapılandırması",
+	"clearSyncConfig": "Yapılandırmayı temizle",
+	"clearSyncConfigConfirm": "Bu hizmetin kayıtlı adresi ve kimlik bilgileri temizlensin mi? Geçerli eşitleme hizmetiyse eşitleme de devre dışı bırakılır. Yerel notlar ve bulut verileri silinmez.",
+	"syncConfigSaveFailed": "Yapılandırma değişikliği doğrulanamadı. Bağlantıyı kontrol edip tekrar deneyin.",
 	"chooseFile": "Dosya seç",
 	"syncConfigNotSaved": "Değişiklikler henüz kaydedilmedi; zorunlu alanları doldurun",
 	"previousDatabaseRow": "Önceki veritabanı kaydı",

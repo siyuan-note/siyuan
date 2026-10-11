@@ -1,4 +1,8 @@
 {
+	"syncConfig": "Konfigurasi layanan sinkronisasi",
+	"clearSyncConfig": "Hapus konfigurasi",
+	"clearSyncConfigConfirm": "Hapus alamat dan kredensial yang tersimpan untuk layanan ini? Jika ini layanan sinkronisasi saat ini, sinkronisasi juga akan dinonaktifkan. Catatan lokal dan data cloud tidak akan dihapus.",
+	"syncConfigSaveFailed": "Perubahan konfigurasi tidak dapat dikonfirmasi. Periksa koneksi lalu coba lagi.",
 	"chooseFile": "Pilih berkas",
 	"syncConfigNotSaved": "Perubahan belum disimpan; lengkapi kolom wajib",
 	"previousDatabaseRow": "Entri basis data sebelumnya",

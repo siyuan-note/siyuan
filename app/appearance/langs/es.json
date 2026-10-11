@@ -1,4 +1,8 @@
 {
+	"syncConfig": "Configuración del servicio de sincronización",
+	"clearSyncConfig": "Borrar configuración",
+	"clearSyncConfigConfirm": "¿Borrar la dirección y las credenciales guardadas de este servicio? Si es el servicio de sincronización actual, también se desactivará la sincronización. No se eliminarán las notas locales ni los datos en la nube.",
+	"syncConfigSaveFailed": "No se pudo confirmar el cambio de configuración. Compruebe la conexión e inténtelo de nuevo.",
 	"chooseFile": "Seleccionar archivo",
 	"syncConfigNotSaved": "Los cambios no se han guardado; completa los campos obligatorios",
 	"previousDatabaseRow": "Entrada anterior de la base de datos",

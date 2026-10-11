@@ -1,4 +1,8 @@
 {
+	"syncConfig": "Configurazione del servizio di sincronizzazione",
+	"clearSyncConfig": "Cancella configurazione",
+	"clearSyncConfigConfirm": "Cancellare l’indirizzo e le credenziali salvati per questo servizio? Se è il servizio di sincronizzazione attuale, verrà disattivata anche la sincronizzazione. Le note locali e i dati nel cloud non verranno eliminati.",
+	"syncConfigSaveFailed": "Impossibile confermare la modifica della configurazione. Controlla la connessione e riprova.",
 	"chooseFile": "Scegli file",
 	"syncConfigNotSaved": "Le modifiche non sono state salvate; compila i campi obbligatori",
 	"previousDatabaseRow": "Voce precedente del database",

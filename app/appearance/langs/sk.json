@@ -1,4 +1,8 @@
 {
+	"syncConfig": "Nastavenie služby synchronizácie",
+	"clearSyncConfig": "Vymazať nastavenie",
+	"clearSyncConfigConfirm": "Vymazať uloženú adresu a prihlasovacie údaje tejto služby? Ak ide o aktuálnu službu synchronizácie, synchronizácia sa tiež vypne. Lokálne poznámky a údaje v cloude sa neodstránia.",
+	"syncConfigSaveFailed": "Zmenu nastavenia sa nepodarilo potvrdiť. Skontrolujte pripojenie a skúste to znova.",
 	"chooseFile": "Vybrať súbor",
 	"syncConfigNotSaved": "Zmeny neboli uložené; vyplňte povinné polia",
 	"previousDatabaseRow": "Predchádzajúca položka databázy",

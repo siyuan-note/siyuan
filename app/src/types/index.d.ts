@@ -201,6 +201,7 @@ interface Window {
         }
     };
     htmlToImage: {
+        getFontEmbedCSS: (element: Element, options?: IHtmlToImageOptions) => Promise<string>
         toCanvas: (element: Element, options?: IHtmlToImageOptions) => Promise<HTMLCanvasElement>
         toBlob: (element: Element, options?: IHtmlToImageOptions) => Promise<Blob>
     };

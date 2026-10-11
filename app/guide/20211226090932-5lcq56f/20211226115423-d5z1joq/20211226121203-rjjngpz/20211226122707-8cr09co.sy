@@ -6,7 +6,7 @@
 		"id": "20211226122707-8cr09co",
 		"title": "資料歷史",
 		"type": "doc",
-		"updated": "20260927191121"
+		"updated": "20261011203418"
 	},
 	"Children": [
 		{
@@ -1839,7 +1839,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-5vxnykd",
-				"updated": "20260914102430"
+				"updated": "20261011203418"
 			},
 			"Children": [
 				{
@@ -1854,7 +1854,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422102151-dz30xx1",
-				"updated": "20260914102430"
+				"updated": "20261011203418"
 			},
 			"Children": [
 				{
@@ -1866,7 +1866,7 @@
 					},
 					"Properties": {
 						"id": "20230422102151-cvrozwk",
-						"updated": "20260914101605"
+						"updated": "20261011203418"
 					},
 					"Children": [
 						{
@@ -1874,7 +1874,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422102151-21jkic1",
-								"updated": "20260914101605"
+								"updated": "20261011203418"
 							},
 							"Children": [
 								{
@@ -1902,7 +1902,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "資料倉庫清理"
+									"TextMarkTextContent": "本機資料倉庫清理"
 								},
 								{
 									"Type": "NodeText",
@@ -1929,7 +1929,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "資料倉庫清理"
+									"TextMarkTextContent": "本機資料倉庫清理"
 								},
 								{
 									"Type": "NodeText",

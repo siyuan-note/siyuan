@@ -6,7 +6,7 @@
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
 		"type": "doc",
-		"updated": "20260927191121"
+		"updated": "20261011203418"
 	},
 	"Children": [
 		{
@@ -1863,7 +1863,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-nhnnujh",
-				"updated": "20260914102430"
+				"updated": "20261011203418"
 			},
 			"Children": [
 				{
@@ -1878,7 +1878,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422101614-mdijztr",
-				"updated": "20260914102430"
+				"updated": "20261011203418"
 			},
 			"Children": [
 				{
@@ -1890,7 +1890,7 @@
 					},
 					"Properties": {
 						"id": "20230422101614-5lwp8u3",
-						"updated": "20260914101605"
+						"updated": "20261011203418"
 					},
 					"Children": [
 						{
@@ -1898,7 +1898,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422101614-5kvwhn7",
-								"updated": "20260914101605"
+								"updated": "20261011203418"
 							},
 							"Children": [
 								{
@@ -1908,7 +1908,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Data repo purge"
+									"TextMarkTextContent": "Local data repo purge"
 								},
 								{
 									"Type": "NodeText",
@@ -1953,7 +1953,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Data repo purge"
+									"TextMarkTextContent": "Local data repo purge"
 								},
 								{
 									"Type": "NodeText",

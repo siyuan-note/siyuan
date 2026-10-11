@@ -169,6 +169,8 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
             avRender: noop,
             blockRender: noop,
             highlightRender: noop,
+            getUndoFocusContext: (): undefined => undefined,
+            restoreFocusContext: () => false,
             finishListMindmaps: () => state.finishNested(),
             cleanListMindmapHTML: new Function(cleanupSource + "; return cleanListMindmapHTML;")(),
         };

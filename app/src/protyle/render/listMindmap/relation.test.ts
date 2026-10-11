@@ -30,7 +30,7 @@ test("manual route save and reset use one transaction and reject stale relation 
     const original = JSON.stringify(data);
     const transactions: {before: string, after: string}[] = [];
     const messages: string[] = [];
-    const list = {isConnected: true, get outerHTML() { return JSON.stringify(data); }};
+    const list = {isConnected: true, dataset: {nodeId: "map-relations"}, get outerHTML() { return JSON.stringify(data); }};
     const context: any = {
         canEdit: () => true,
         getListMindmapSiblingIDs: () => new Map(),
@@ -39,7 +39,12 @@ test("manual route save and reset use one transaction and reject stale relation 
             nodes: new Map(["a", "b", "c"].map(id => [id, {}]))}),
         writeListMindmapMetadata: (_list: unknown, next: typeof data) => data = next,
         cleanListMindmapHTML: (html: string) => html,
-        updateTransaction: (_owner: unknown, _list: unknown, before: string) => transactions.push({before, after: list.outerHTML}),
+        updateTransaction: (_owner: unknown, _list: unknown, before: string, undoContext: Record<string, string>,
+                            additional: {context: Record<string, string>}) => {
+            assert.equal(undoContext.mindmapSnapshotId, list.dataset.nodeId);
+            assert.equal(additional.context.mindmapSnapshotId, list.dataset.nodeId);
+            transactions.push({before, after: list.outerHTML});
+        },
         showMessage: (message: string) => messages.push(message),
         window: {siyuan: {languages: {listMindmapStale: "stale"}}}, console,
     };

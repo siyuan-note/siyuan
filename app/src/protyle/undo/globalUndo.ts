@@ -278,7 +278,7 @@ export const requestUndo = async (protyle: IProtyle, rootID?: string) => {
             try {
                 confirmed = await new Promise<boolean>((resolve) => {
                     confirmDialog(`⚠️ ${window.siyuan.languages.undo}`,
-                        `${window.siyuan.languages.undoCrossDocConfirm}<div style="margin-top: 8px;">${names.map(n => `• ${n}`).join("<br>")}</div>`,
+                        `<div data-undo-confirmation="true">${window.siyuan.languages.undoCrossDocConfirm}<div style="margin-top: 8px;">${names.map(n => `• ${n}`).join("<br>")}</div></div>`,
                         () => resolve(true),
                         () => resolve(false));
                 });

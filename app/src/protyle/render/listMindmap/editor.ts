@@ -21,18 +21,20 @@ import {highlightRender} from "../highlightRender";
 import {cleanListMindmapHTML} from "./model";
 import type {ListMindmapNode} from "./model";
 import {finishListMindmaps} from "./index";
+import {getUndoFocusContext, restoreFocusContext} from "../../util/selection";
 
 interface ListMindmapEditorOptions {
     owner: IProtyle;
     node: ListMindmapNode;
     host: HTMLElement;
     canEdit: () => boolean;
-    onSave: (html: string) => Promise<boolean>;
+    onSave: (html: string, undoSelection?: Record<string, string>, redoSelection?: Record<string, string>) => Promise<boolean>;
     onResize: () => void;
     onAdd: (kind: "child" | "sibling") => Promise<void>;
     onFinish: () => void;
-    onUndo: (redo: boolean) => void;
+    onUndo: (redo: boolean, selection?: Record<string, string>) => void;
     replaceFirstParagraph?: string;
+    selection?: Record<string, string>;
 }
 
 const nestedBranchType = (node: ListMindmapNode) =>
@@ -201,6 +203,33 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     // 菜单使用未缩放的容器定位，同时保持在原生全屏元素内可见。
     overlays.forEach(element => overlayRoot.appendChild(element));
     let lastHTML = comparableContent(fragment.getBlockHTML());
+    let undoSelection: Record<string, string>;
+    let lastSelection: Record<string, string>;
+    const captureSelection = () => {
+        const selection = getSelection();
+        if (!selection?.rangeCount) {
+            return;
+        }
+        const range = selection.getRangeAt(0);
+        const anchor = range.startContainer instanceof Element ? range.startContainer : range.startContainer.parentElement;
+        const end = range.endContainer instanceof Element ? range.endContainer : range.endContainer.parentElement;
+        if (anchor?.closest(".protyle-wysiwyg") !== fragment.wysiwyg ||
+            end?.closest(".protyle-wysiwyg") !== fragment.wysiwyg ||
+            anchor.closest(".protyle-wysiwyg__embed, .av") || end.closest(".protyle-wysiwyg__embed, .av")) {
+            return;
+        }
+        const context = getUndoFocusContext(fragment.wysiwyg, range, true);
+        if (context) {
+            lastSelection = {...context, backward: String(!range.collapsed && selection.anchorNode === range.endContainer &&
+                selection.anchorOffset === range.endOffset)};
+            return lastSelection;
+        }
+    };
+    const captureBeforeChange = () => {
+        if (comparableContent(fragment.getBlockHTML()) === lastHTML) {
+            undoSelection = captureSelection() || undoSelection;
+        }
+    };
     const recover = () => {
         if (recoveryShown) {
             return;
@@ -249,11 +278,14 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         }
         saving = true;
         try {
-            if (!await options.onSave(retainIndependentBlocks(html, node))) {
+            // 前后选区和同一批正文快照一起保存，不能在异步提交后读取下一批输入的选区。
+            const redoSelection = captureSelection() || lastSelection || undoSelection;
+            if (!await options.onSave(retainIndependentBlocks(html, node), undoSelection, redoSelection)) {
                 return false;
             }
             source = comparableContent(nodeContent(node));
             lastHTML = version;
+            undoSelection = redoSelection;
             changed = comparableContent(fragment.getBlockHTML()) !== version;
             if (changed && !finishSession) {
                 saveTimer = window.setTimeout((): void => { void commit(); }, 350);
@@ -342,12 +374,15 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             }
             return;
         }
-        if (await finish()) {
-            options.onUndo(redo);
-        }
+        options.onUndo(redo, captureSelection() || lastSelection);
     };
     setMobileToolbarUndo(fragment.protyle, owner, undo);
     const signal = events.signal;
+    host.addEventListener("beforeinput", captureBeforeChange, {capture: true, signal});
+    host.addEventListener("compositionstart", captureBeforeChange, {capture: true, signal});
+    host.addEventListener("pointerdown", captureBeforeChange, {capture: true, signal});
+    host.addEventListener("keydown", captureBeforeChange, {capture: true, signal});
+    document.addEventListener("selectionchange", captureSelection, {signal});
     host.addEventListener("beforeinput", event => {
         const anchor = getSelection()?.anchorNode;
         const element = anchor instanceof Element ? anchor : anchor?.parentElement;
@@ -359,6 +394,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     bindLiteCodeActions(host, fragment.protyle, {
         signal,
         canEdit: () => !finished && !closing && options.canEdit(),
+        beforeChange: captureBeforeChange,
         onChange: () => {
             changed = true;
             void commit();
@@ -448,6 +484,9 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
     document.addEventListener("pointerdown", event => {
         if (!belongs(event.target as Node)) {
             finish();
+        } else {
+            // 工具栏浮层位于节点 host 外，格式命令执行前仍需保存原文字选区。
+            captureBeforeChange();
         }
     }, {capture: true, signal});
     window.addEventListener("blur", () => void commit(), {signal});
@@ -469,6 +508,7 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         range.selectNodeContents(editable);
         selection.removeAllRanges();
         selection.addRange(range);
+        captureBeforeChange();
         if (options.replaceFirstParagraph && !document.execCommand("insertText", false, options.replaceFirstParagraph)) {
             editable.textContent = options.replaceFirstParagraph;
             range.selectNodeContents(editable);
@@ -477,6 +517,12 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
             selection.addRange(range);
         }
     }
+    if (options.selection && restoreFocusContext(fragment.protyle, options.selection) &&
+        options.selection.backward === "true" && getSelection().rangeCount) {
+        const range = getSelection().getRangeAt(0);
+        getSelection().setBaseAndExtent(range.endContainer, range.endOffset, range.startContainer, range.startOffset);
+    }
+    undoSelection ||= captureSelection();
     return {finish, destroy, pasteImages: (files: File[]) => {
         if (finished || closing || !options.canEdit()) {
             return;

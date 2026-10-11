@@ -67,7 +67,7 @@ const browserCases = async (source: string) => {
     };
     const api = new Function(...Object.keys(dependencies), source.replace('import("../render/tableCellRichEditor")',
         "loadRichCellEditor()") +
-        "return {TableCutControl, getUndoFocusContext, restoreUndoFocus, focusByRange, focusByWbr, updateBlock, registerListMindmapRoot};")(...Object.values(dependencies));
+        "return {TableCutControl, getUndoFocusContext, restoreFocusContext, restoreUndoFocus, focusByRange, focusByWbr, updateBlock, registerListMindmapRoot};")(...Object.values(dependencies));
     const editor = document.createElement("div");
     editor.className = "protyle-wysiwyg";
     editor.contentEditable = "true";
@@ -230,6 +230,34 @@ const browserCases = async (source: string) => {
         check.deepEqual(pendingFocus.pop(), {listID: "map", ids: ["text", "child", "map"]});
     }
     unregisterMindmap();
+    // 脑图保存的文本选区在新建节点编辑器内按原块身份恢复，包含中文、富文本和 UTF-16 emoji 偏移。
+    editor.innerHTML = '<div data-type="NodeMindmap" data-node-id="map"><div data-type="NodeMindmapItem" data-node-id="child">' +
+        paragraph("first", "A😀BC") + paragraph("second", '<span data-type="strong">中文</span>tail') + "</div></div>";
+    const map = editor.firstElementChild;
+    const item = map.firstElementChild;
+    const range = document.createRange();
+    range.setStart(item.firstElementChild.firstElementChild.firstChild, 3);
+    range.setEnd(item.lastElementChild.firstElementChild.firstChild.firstChild, 1);
+    getSelection().removeAllRanges();
+    getSelection().addRange(range);
+    const mindmapSaved = api.getUndoFocusContext(editor, range, true);
+    const fragmentRoot = document.createElement("div");
+    fragmentRoot.className = "protyle-wysiwyg";
+    document.body.append(fragmentRoot);
+    const unregisterText = api.registerListMindmapRoot(editor, noop,
+        (_id: string, ids: string[], selection: Record<string, string>, source: Element) => {
+            check.equal(source, map);
+            check.equal(ids[0], "child");
+            fragmentRoot.innerHTML = item.innerHTML;
+            check.equal(api.restoreFocusContext({wysiwyg: {element: fragmentRoot}}, selection), true);
+        });
+    check.equal(api.restoreUndoFocus(protyle, [{context: {undoFocusId: "child", undoFocusStart: "0", undoFocusEnd: "0",
+        undoFocusMindmapSelection: JSON.stringify(mindmapSaved)}}]), true);
+    check.equal(getSelection().toString(), "BC中");
+    check.equal(getSelection().getRangeAt(0).startOffset, 3);
+    check.ok(fragmentRoot.contains(getSelection().anchorNode));
+    unregisterText();
+    fragmentRoot.remove();
     editor.remove();
     return "Undo replay focus cases passed";
 };
@@ -256,7 +284,7 @@ test("undo replay restores recorded carets across paragraphs, table cells and em
         extract("tableCellRichValue.ts", ["TABLE_CELL_RICH_ATTRIBUTE"]) +
         extract("selectionFocus.ts", ["getUndoFocusElement"]) +
         extract("../render/listMindmap/render.ts", ["editorRoots", "registerListMindmapRoot",
-            "restoreListMindmapFocus", "getListMindmapElements"]) +
+            "restoreListMindmapFocus", "getListMindmapElements", "readListMindmapSelection", "replayListMindmap"]) +
         extract("../wysiwyg/getBlock.ts", ["getContenteditableElement", "isEndOfBlock", "hasNextSibling",
             "isNotEditBlock", "isContainerBlock", "hasPreviousSibling"]) +
         extract("../wysiwyg/transaction.ts", ["updateBlock"]) +

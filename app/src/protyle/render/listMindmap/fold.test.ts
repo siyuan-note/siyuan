@@ -141,7 +141,7 @@ test("batch folding saves a single undo snapshot and reads the source after fini
     };
     collect(root);
     const snapshot = () => JSON.stringify([...nodes].map(([id, current]) => [id, current.collapsed]));
-    const list = {isConnected: true, get outerHTML() { return snapshot(); }};
+    const list = {isConnected: true, dataset: {nodeId: "map-fold"}, get outerHTML() { return snapshot(); }};
     const transactions: {before: string, after: string}[] = [];
     let allowed = true;
     const context: any = {
@@ -152,7 +152,10 @@ test("batch folding saves a single undo snapshot and reads the source after fini
         getListMindmapFoldStates,
         getListMindmapSiblingFoldStates,
         cleanListMindmapHTML: (html: string) => html,
-        updateTransaction: (_owner: unknown, _list: unknown, before: string) => {
+        updateTransaction: (_owner: unknown, _list: unknown, before: string, undoContext: Record<string, string>,
+                            additional: {context: Record<string, string>}) => {
+            assert.equal(undoContext.mindmapSnapshotId, list.dataset.nodeId);
+            assert.equal(additional.context.mindmapSnapshotId, list.dataset.nodeId);
             if (before !== snapshot()) {
                 transactions.push({before, after: snapshot()});
             }

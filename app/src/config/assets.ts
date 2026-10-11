@@ -128,7 +128,7 @@ const assets = {
             <ul class="b3-list b3-list--background config-assets__list">
                 <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
             </ul>
-            <div class="config-assets__preview${mobile ? " fn__none" : ""}"></div>
+            <div class="config-assets__preview fn__none"></div>
         </div>
         <div class="fn__none config-assets${mobile ? " b3-list--mobile" : ""}" data-type="removeAV">
             <div class="fn__hr--b"></div>
@@ -143,7 +143,7 @@ const assets = {
             <ul class="b3-list b3-list--background config-assets__list">
                 <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
             </ul>
-            <div class="config-assets__preview${mobile ? " fn__none" : ""}" style="display: block;padding: 8px;"></div>
+            <div class="config-assets__preview fn__none" style="display: block;padding: 8px;"></div>
         </div>
         <div class="fn__none config-assets${mobile ? " b3-list--mobile" : ""}" data-type="missing">
             <div class="fn__hr"></div>
@@ -166,10 +166,7 @@ const assets = {
         const assetsPreviewElement = assetsListElement.nextElementSibling as HTMLElement;
         const avPreviewElement = avListElement.nextElementSibling as HTMLElement;
         const preview = new AssetPreview(assetsPreviewElement);
-        const hideMobilePreview = (listElement: Element, previewElement: HTMLElement) => {
-            if (!mobile) {
-                return;
-            }
+        const hidePreview = (listElement: Element, previewElement: HTMLElement) => {
             listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             previewElement.classList.add("fn__none");
             previewElement.removeAttribute("data-item");
@@ -177,7 +174,7 @@ const assets = {
         const clearAssetPreview = () => {
             preview.clear();
             assetsListElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
-            hideMobilePreview(assetsListElement, assetsPreviewElement);
+            hidePreview(assetsListElement, assetsPreviewElement);
         };
         const visibilityObserver = new MutationObserver(() => {
             if (root.classList.contains("fn__none")) {
@@ -229,7 +226,7 @@ const assets = {
                         void runSettingsMaintenance(() => fetchPost("/api/av/removeUnusedAttributeViews", {}, () => {
                             avListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                             avPreviewElement.innerHTML = "";
-                            hideMobilePreview(avListElement, avPreviewElement);
+                            hidePreview(avListElement, avPreviewElement);
                         }));
                     }, undefined, true);
                     event.preventDefault();
@@ -238,7 +235,7 @@ const assets = {
                 } else if (target.classList.contains("item") && !target.classList.contains("item--focus")) {
                     clearAssetPreview();
                     if (mobile) {
-                        hideMobilePreview(avListElement, avPreviewElement);
+                        hidePreview(avListElement, avPreviewElement);
                     }
                     root.querySelector(".layout-tab-bar .item--focus").classList.remove("item--focus");
                     target.classList.add("item--focus");
@@ -285,16 +282,14 @@ const assets = {
                     const selected = mobile && target.classList.contains("b3-list-item--focus");
                     avListElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
                     if (selected) {
-                        hideMobilePreview(avListElement, avPreviewElement);
+                        hidePreview(avListElement, avPreviewElement);
                         event.preventDefault();
                         event.stopPropagation();
                         break;
                     }
                     target.classList.add("b3-list-item--focus");
-                    if (mobile) {
-                        avPreviewElement.setAttribute("data-item", target.dataset.item || "");
-                        avPreviewElement.classList.remove("fn__none");
-                    }
+                    avPreviewElement.setAttribute("data-item", target.dataset.item || "");
+                    avPreviewElement.classList.remove("fn__none");
                     onGet({
                         data: {
                             data: {
@@ -378,7 +373,7 @@ const assets = {
                                     });
                                 }
                                 if (avPreviewElement.getAttribute("data-item") === id) {
-                                    hideMobilePreview(avListElement, avPreviewElement);
+                                    hidePreview(avListElement, avPreviewElement);
                                 }
                             });
                         } else {
@@ -417,6 +412,7 @@ const assets = {
                 const liElement = hasClosestByClassName(event.target as Element, "b3-list-item");
                 if (liElement && liElement.getAttribute("data-item") !== assetsPreviewElement.getAttribute("data-item")) {
                     const item = liElement.getAttribute("data-item");
+                    assetsPreviewElement.classList.remove("fn__none");
                     preview.show(liElement.getAttribute("data-path"), item, 250);
                 }
             });

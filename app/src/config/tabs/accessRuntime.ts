@@ -1,3 +1,4 @@
+import {config as configApi} from "../util/configApi";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
 import {isMobile} from "../../util/functions";
@@ -44,15 +45,15 @@ export const savePublish = (
         authEnable?: boolean;
     },
 ) => {
-    fetchPost("/api/setting/setPublish", {
+    configApi.set("publish", {
         enable: overrides?.enable ?? window.siyuan.config.publish.enable,
         port: overrides?.port ?? window.siyuan.config.publish.port,
         auth: {
             enable: overrides?.authEnable ?? window.siyuan.config.publish.auth.enable,
             accounts: window.siyuan.config.publish.auth.accounts,
         },
-    }, (response: IWebSocketData) => {
-        updatePublishConfig(reloadAccounts, response);
+    }, () => {
+        fetchPost("/api/setting/getPublish", {}, response => updatePublishConfig(reloadAccounts, response));
     });
 };
 
@@ -113,7 +114,7 @@ export const sendAccessSetting = (controlId: string, value: unknown) => {
     switch (controlId) {
         case "api.token": {
             const token = value as Config.IAPI["token"];
-            fetchPost("/api/system/setAPIToken", {token}, () => {
+            configApi.set("api.token", token, () => {
                 window.siyuan.config.api.token = token;
                 const tokenTipEl = accessTabElement?.querySelector(`#${CSS.escape("api.token")}`)?.closest(".config-item")?.querySelector(".b3-label__text");
                 if (tokenTipEl) {

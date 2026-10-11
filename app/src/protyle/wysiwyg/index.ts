@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {recordReplacementUndo} from "./replacementInput";
 import {expandAndroidWordSelection, isAndroidWordSelectionPending} from "../../mobile/util/wordSelection";
 import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
@@ -12,6 +13,7 @@ import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
 import {isCommittedTextInput} from "./compositionInput";
 import {bindIOSTouchCaret} from "./touchCaret";
+import {clearTouchBlockSelection} from "./touchBlockSelection";
 import {isDirectMathClick} from "../util/mathClick";
 import {
     beforePaste,
@@ -242,6 +244,7 @@ import {LargeTableVirtualizer} from "./tableVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {syncRootAttributes} from "../util/syncRootAttributes";
+import {bindImageTitleEditor} from "../render/imageTitleEditor";
 import {isDirectCalloutStructureClick} from "./calloutClick";
 import {
     BLOCK_SELECTION_CLASS,
@@ -414,6 +417,7 @@ export class WYSIWYG {
     private disposeHeadingFoldIndicators?: () => void;
     private disposeBoundedBlockDragSelect?: () => void;
     private disposeTouchCaret?: () => void;
+    private imageTitleEditor: ReturnType<typeof bindImageTitleEditor>;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -444,6 +448,7 @@ export class WYSIWYG {
     }
 
     public async flushPendingInput() {
+        this.imageTitleEditor?.flush();
         this.persistComposition?.();
         // 输入处理可能等待块引用查询，交接编辑器前也需等待已经开始执行的任务。
         while (this.pendingInputTimeouts.size || this.runningInputTasks.size) {
@@ -541,6 +546,7 @@ export class WYSIWYG {
             this.tableControl = new TableControl(protyle, this.element);
         }
         this.bindCommonEvent(protyle);
+        this.imageTitleEditor = bindImageTitleEditor(protyle, this.element);
         this.bindEvent(protyle);
         this.disposeEmbedToolbarVisibility = bindEmbedToolbarVisibility(this.element);
         /// #if BROWSER
@@ -587,6 +593,7 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.imageTitleEditor?.destroy();
         this.persistComposition?.();
         this.persistComposition = undefined;
         this.disposeHeadingFoldIndicators?.();
@@ -3926,7 +3933,8 @@ export class WYSIWYG {
             }
         });
 
-        this.element.addEventListener("pointerdown", () => {
+        this.element.addEventListener("pointerdown", (event: PointerEvent) => {
+            clearTouchBlockSelection(protyle, event);
             if (getSelection().rangeCount > 0) {
                 beforeContextmenuRange = getSelection().getRangeAt(0);
             } else {
@@ -5179,23 +5187,29 @@ export class WYSIWYG {
 
             const menuElement = hasClosestByClassName(event.target, "protyle-action__menu");
             if (menuElement) {
-                if (!protyle.gutter) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                }
-                protyle.gutter.renderMenu(protyle, menuElement.parentElement.parentElement);
-                /// #if MOBILE
-                window.siyuan.menus.menu.fullscreen();
-                /// #else
-                const rect = menuElement.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({
-                    x: rect.left,
-                    y: rect.top,
-                    isLeft: true
+                toggleMenu({
+                    target: menuElement,
+                    build: (_menu, session) => {
+                        if (!protyle.gutter) {
+                            event.stopPropagation();
+                            event.preventDefault();
+                            return;
+                        }
+                        protyle.gutter.renderMenu(protyle, menuElement.parentElement.parentElement);
+                        /// #if MOBILE
+                        session.show(() => window.siyuan.menus.menu.fullscreen());
+                        /// #else
+                        const rect = menuElement.getBoundingClientRect();
+                        session.show(() => window.siyuan.menus.menu.popup({
+                            x: rect.left,
+                            y: rect.top,
+                            isLeft: true
+                        }));
+                        /// #endif
+
+                    },
                 });
-                /// #endif
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 return;
             }
@@ -5453,10 +5467,28 @@ export class WYSIWYG {
                 }
                 // https://github.com/siyuan-note/siyuan/issues/14481
                 const inlineMathElement = hasClosestByAttribute(newRange.startContainer, "data-type", "inline-math");
-                if (inlineMathElement) {
+                if (newRange.collapsed && inlineMathElement) {
                     newRange.setEndAfter(inlineMathElement);
                     newRange.collapse(false);
                     focusByRange(newRange);
+                } else if (!newRange.collapsed) {
+                    // 划选停在公式内部时补齐边界，保留完整公式及原有选区方向。
+                    const endMathElement = hasClosestByAttribute(newRange.endContainer, "data-type", "inline-math");
+                    if (inlineMathElement || endMathElement) {
+                        const selection = getSelection();
+                        const backward = selection.anchorNode === newRange.endContainer &&
+                            selection.anchorOffset === newRange.endOffset;
+                        if (inlineMathElement) {
+                            newRange.setStartBefore(inlineMathElement);
+                        }
+                        if (endMathElement) {
+                            newRange.setEndAfter(endMathElement);
+                        }
+                        selection.setBaseAndExtent(backward ? newRange.endContainer : newRange.startContainer,
+                            backward ? newRange.endOffset : newRange.startOffset,
+                            backward ? newRange.startContainer : newRange.endContainer,
+                            backward ? newRange.startOffset : newRange.endOffset);
+                    }
                 }
                 const tripleClickBlockElement = event.detail > 2 && hasClosestBlock(event.target);
                 if (tripleClickBlockElement &&

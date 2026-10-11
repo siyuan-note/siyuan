@@ -390,8 +390,9 @@ func CreateLegacyFlashcardV2ReviewSet(ctx context.Context, deckID, name string) 
 	if err != nil {
 		return flashcardv2.LegacyReviewSetInfo{}, err
 	}
+	confFlashcardSnapshot := Conf.LoadFlashcard()
 	return store.CreateLegacyReviewSet(ctx, flashcardv2.NewID(), deckID, name, time.Now().UnixMilli(),
-		Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
+		confFlashcardSnapshot.NewCardLimit, confFlashcardSnapshot.ReviewCardLimit)
 }
 
 // GetLegacyNotebookFlashcardV2DueCards 返回普通笔记本范围内的旧接口队列。
@@ -502,8 +503,9 @@ func GetLegacyFlashcardV2DueCards(ctx context.Context, deckID string, reviewedCa
 	if err != nil {
 		return nil, 0, 0, 0, err
 	}
+	confFlashcardSnapshot := Conf.LoadFlashcard()
 	selected, unreviewedCount, unreviewedNew, unreviewedOld := selectLegacyFlashcardV2DueCards(candidates,
-		reviewed, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit, Conf.Flashcard.ReviewMode)
+		reviewed, confFlashcardSnapshot.NewCardLimit, confFlashcardSnapshot.ReviewCardLimit, confFlashcardSnapshot.ReviewMode)
 	ret := make([]*Flashcard, 0, len(selected))
 	for _, card := range selected {
 		nextDues, previewErr := store.PreviewReviewDues(ctx, card.Card.ID, now.UnixMilli())

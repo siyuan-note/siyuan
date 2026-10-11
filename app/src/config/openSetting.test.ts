@@ -19,15 +19,17 @@ const fixture = (browser = false, mobile = false) => {
     const entry = {} as {openSetting: (app: unknown, tab?: string, options?: {aiProvider?: "chatgpt"}) => void;
         openBazaarReadme: (app: unknown, type: string, name: string, from: string) => Promise<void>};
     let native = false;
+    const root = {};
+    const dialog = {element: {getAttribute: () => "settings", querySelector: () => root}};
     runInNewContext(transpileModule(declarations.map(item => item.getText(index)).join("\n"),
         {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText, {
         exports: entry, isSettingsWindow: () => native,
         isBazaarAvailable: () => true, getHostCapabilities: () => ({documentImportExport: true}),
         openNativeSettings: (...args: unknown[]) => calls.push(["native", ...args]),
-        openSettingDialog: (...args: unknown[]) => calls.push(["dialog", ...args]),
+        openSettingDialog: (...args: unknown[]) => { calls.push(["dialog", ...args]); return dialog; },
         openMobileSetting: (...args: unknown[]) => calls.push(["mobile", ...args]),
         openChatGPTProvider: () => calls.push(["chatgpt"]),
-        window: {siyuan: {dialogs: [{element: {getAttribute: () => "settings"}}], config}},
+        window: {siyuan: {dialogs: [dialog], config}},
         Constants: {DIALOG_SETTING: "settings"}, switchSettingTab: (...args: unknown[]) => calls.push(["switch", ...args]),
         fetchSyncPost: async () => ({code: 0, data: {packages: [{name: "plugin"}]}}),
         getFrontend: () => "desktop", withMountedBazaar: async () => calls.push(["readme"]),
@@ -53,6 +55,7 @@ test("settings and marketplace readmes follow the current workspace preference",
     f.entry.openSetting(app, "app");
     assert.deepEqual(f.calls.map(item => item[0]), ["switch"]);
 });
+
 
 test("only a truthy workspace preference opens the independent settings window", () => {
     for (const [stored, expected] of [[false, "dialog"], [0, "dialog"], ["", "dialog"],

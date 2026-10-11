@@ -14,12 +14,15 @@
  */
 
 .textLayer {
+  color-scheme: only light;
   position: absolute;
   text-align: initial;
   inset: 0;
   overflow: clip;
   opacity: 1;
   line-height: 1;
+  letter-spacing: normal;
+  word-spacing: normal;
   text-size-adjust: none;
   forced-color-adjust: none;
   transform-origin: 0 0;
@@ -36,19 +39,28 @@
     white-space: pre;
     cursor: text;
     transform-origin: 0% 0%;
+    user-select: text;
   }
+
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
 
   > :not(.markedContent),
   .markedContent span:not(.markedContent) {
     z-index: 1;
+    --font-height: 0;
+    font-size: calc(var(--text-scale-factor) * var(--font-height));
+    --scale-x: 1;
+    --rotate: 0deg;
+    transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
   }
 
   /* Only necessary in Google Chrome, see issue 14205, and most unfortunately
    * the problem doesn't show up in "text" reference tests. */
   /*#if !MOZCENTRAL*/
-  span.markedContent {
-    top: 0;
-    height: 0;
+  .markedContent {
+    display: contents;
   }
   /*#endif*/
 
@@ -97,6 +109,7 @@
     &.selected {
       background-color: var(--highlight-selected-bg-color);
       backdrop-filter: var(--highlight-selected-backdrop-filter);
+      scroll-margin-top: 50px;
     }
   }
 

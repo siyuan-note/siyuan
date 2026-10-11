@@ -432,6 +432,12 @@
         "src/protyle/render/imageActions.ts"
       ]
     },
+    "protyle-action__copy-image": {
+      "reason": "图片复制按钮的行为标识和主题钩子，基础外观复用 protyle-icon，不需要独立样式",
+      "references": [
+        "src/protyle/render/imageActions.ts"
+      ]
+    },
     "protyle-action__reload": {
       "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
       "references": [
@@ -1665,7 +1671,7 @@
       "file": "src/assets/scss/pdf/annotation_layer_builder.scss",
       "rule": "declaration-no-important",
       "text": "Disallowed !important (declaration-no-important)",
-      "source": "outline: calc(1.5px * var(--scale-factor)) solid CanvasText !important;",
+      "source": "outline: calc(1.5px * var(--total-scale-factor)) solid CanvasText !important;",
       "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
     },
     {
@@ -1686,7 +1692,7 @@
       "file": "src/assets/scss/pdf/annotation_layer_builder.scss",
       "rule": "declaration-no-important",
       "text": "Disallowed !important (declaration-no-important)",
-      "source": "outline: calc(3px * var(--scale-factor)) solid Highlight !important;",
+      "source": "outline: calc(3px * var(--total-scale-factor)) solid Highlight !important;",
       "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
     },
     {

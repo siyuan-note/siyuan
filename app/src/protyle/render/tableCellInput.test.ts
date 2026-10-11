@@ -85,7 +85,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         const table = wysiwyg.firstElementChild as HTMLElement;
         const queue = Object.assign(new Queue(), {element: wysiwyg, lastHTMLs: {[table.dataset.nodeId]: table.outerHTML}});
         const owner = {element, wysiwyg: queue, lute, contentElement: wysiwyg, options: {typewriterMode: false},
-            hint: {render: noop},
+            hint: {render: noop}, toolbar: {},
             block: {rootID: "root"}, disabled: false} as unknown as IProtyle;
         const range = document.createRange();
         range.selectNodeContents(table.querySelector("th"));
@@ -94,6 +94,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         changes.length = 0;
         return {owner, queue, element, wysiwyg, table, range};
     };
+    let tableExitTarget: HTMLElement;
     const editorDependencies = {
         ...dependencies, ...api, TABLE_CELL_INLINE_ATTRIBUTE: "data-sy-table-cell-inline",
         TABLE_CELL_RICH_ATTRIBUTE: "data-sy-table-cell-rich", TABLE_CELL_SLASH_IDS: new Set(),
@@ -101,6 +102,19 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         getDefaultToolbar: (): string[] => [], updateOutlineCurrentBlock: noop,
         setMobileToolbarUndo: noop, setTableCellRichContext: noop, bindTableCellRichDrag: noop,
         bindLiteCodeActions: noop, highlightRender: noop,
+        isTableCellCaretAtBoundary: () => true,
+        getAdjacentRichTableCell: (): undefined => undefined,
+        getCaretGoalX: () => 80,
+        leaveRichTableCell: () => {
+            if (!tableExitTarget) {
+                return false;
+            }
+            const range = document.createRange();
+            range.selectNodeContents(tableExitTarget);
+            range.collapse(true);
+            focusByRange(range);
+            return true;
+        },
         imgMenu: (protyle: IProtyle, _range: Range, image: HTMLElement) => {
             check.equal(image.closest(".protyle-wysiwyg"), image.closest(".table__cell-editor").querySelector(".protyle-wysiwyg"));
             check.ok(protyle !== tableImageOwner, "the menu must use the cell editor's transaction context");
@@ -512,6 +526,28 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         await Promise.all([first, second]);
         check.equal(cells[0].querySelector(".table__cell-editor"), null);
         check.ok(cells[1].querySelector(".table__cell-editor"));
+        await finish(element);
+    }
+    for (const key of ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]) {
+        const {owner, element, table, wysiwyg} = fixture();
+        const cell = table.querySelector("td");
+        await open(owner, cell);
+        const host = cell.querySelector<HTMLElement>(".table__cell-editor");
+        host.dispatchEvent(new KeyboardEvent("keydown", {key, bubbles: true, cancelable: true}));
+        check.ok(cell.querySelector(".table__cell-editor"), "no adjacent region keeps editing active");
+        tableExitTarget = document.createElement("div");
+        tableExitTarget.contentEditable = "true";
+        tableExitTarget.textContent = "Outside";
+        wysiwyg.appendChild(tableExitTarget);
+        const input = host.querySelector<HTMLElement>('[contenteditable="true"]');
+        input.textContent = "Saved before leaving";
+        input.dispatchEvent(new Event("input", {bubbles: true}));
+        host.dispatchEvent(new KeyboardEvent("keydown", {key, bubbles: true, cancelable: true}));
+        check.equal(cell.querySelector(".table__cell-editor"), null);
+        check.ok(cell.textContent.includes("Saved before leaving"));
+        check.ok(tableExitTarget.contains(getSelection().anchorNode));
+        check.ok(tableExitTarget.contains(owner.toolbar.range.startContainer));
+        tableExitTarget = undefined;
         await finish(element);
     }
     for (const invalidate of ["disabled", "removed"]) {

@@ -49,6 +49,7 @@ require (
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
+	github.com/klauspost/compress v1.19.2
 	github.com/klippa-app/go-pdfium v1.19.8
 	github.com/lxzan/gws v1.10.1
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
@@ -72,7 +73,7 @@ require (
 	github.com/sashabaranov/go-openai v1.42.0
 	github.com/shirou/gopsutil/v4 v4.26.7
 	github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17
-	github.com/siyuan-note/dejavu v0.0.0-20260929110133-2612bd536470
+	github.com/siyuan-note/dejavu v0.0.0-20261011111741-4465ef631977
 	github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044
 	github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce
 	github.com/siyuan-note/filelock v0.0.0-20260831011452-393425122aaa
@@ -99,7 +100,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.9-0.20261002140020-0b744c047833
+require github.com/88250/lute v1.7.9-0.20261011125927-8bf47cd864f7
 
 require (
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect
@@ -185,7 +186,6 @@ require (
 	github.com/jaytaylor/html2text v0.0.0-20260303211410-1a4bdc82ecec // indirect
 	github.com/jolestar/go-commons-pool/v2 v2.1.2 // indirect
 	github.com/juju/errors v1.0.0 // indirect
-	github.com/klauspost/compress v1.19.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/levigross/exp-html v0.0.0-20120902181939-8df60c69a8f5 // indirect

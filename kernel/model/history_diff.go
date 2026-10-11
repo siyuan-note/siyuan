@@ -398,7 +398,7 @@ func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
 	if "" == fileID {
 		return nil, errors.New("snapshot file ID is required")
 	}
-	if 1 > len(Conf.Repo.Key) {
+	if 1 > len(Conf.Repo.Load().Key) {
 		return nil, errors.New(Conf.Language(26))
 	}
 	repo, err := newRepository()

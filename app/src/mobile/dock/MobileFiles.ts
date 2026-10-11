@@ -1,3 +1,4 @@
+import {config as configApi} from "../../config/util/configApi";
 import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
 import {getTreeItemTailHTML} from "../../util/treeItemTail";
@@ -5,6 +6,7 @@ import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
 import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
+import {toggleMenu} from "../../menus/menuToggle";
 import {
     getPublishAccessLevel,
     getPublishAccessOptionByLevel,
@@ -94,7 +96,7 @@ export class MobileFiles extends Model {
             type: "filetree",
             msgCallback: this.handleMsgCallback.bind(this)
         });
-        filesElement.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
+        filesElement.innerHTML = `<div class="toolbar toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">${window.siyuan.languages.fileTree}</div>
     <div class="fn__space"></div>
@@ -297,15 +299,23 @@ export class MobileFiles extends Model {
                             if (type === "new") {
                                 newFileInTree(app, notebookId, pathString);
                             } else if (type === "more-root") {
-                                initNavigationMenu(app, target.parentElement);
-                                this.insertMultiSelectMenu(target.parentElement);
-                                window.siyuan.menus.menu.fullscreen("bottom");
+                                toggleMenu({
+                                    target: target, build: () => {
+                                        initNavigationMenu(app, target.parentElement);
+                                        this.insertMultiSelectMenu(target.parentElement);
+                                        window.siyuan.menus.menu.fullscreen("bottom");
+                                    }
+                                });
                             }
                         }
                         if (type === "more-file") {
-                            initFileMenu(app, notebookId, pathString, target.parentElement);
-                            this.insertMultiSelectMenu(target.parentElement);
-                            window.siyuan.menus.menu.fullscreen("bottom");
+                            toggleMenu({
+                                target: target, build: () => {
+                                    initFileMenu(app, notebookId, pathString, target.parentElement);
+                                    this.insertMultiSelectMenu(target.parentElement);
+                                    window.siyuan.menus.menu.fullscreen("bottom");
+                                }
+                            });
                         }
                     }
                     event.preventDefault();
@@ -834,35 +844,30 @@ export class MobileFiles extends Model {
     }
 
     private genSort() {
-        window.siyuan.menus.menu.remove();
-        const subMenu = sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort) => {
-            if (sort === null) {
-                return;
-            }
-            fetchPost("/api/setting/setFiletree", {
-                ...window.siyuan.config.fileTree,
-                sort,
-            }, (response) => {
-                if (response.code !== 0) {
-                    return;
-                }
-                window.siyuan.config.fileTree = {
-                        ...response.data,
-                        tabStartupMode: response.data.tabStartupMode === 1 ? 1 : response.data.tabStartupMode === 2 ? 2 : 0,
-                    };
-                this.onDocSortModeChanged({
-                    scope: "global",
-                    box: "",
-                    id: "",
-                    path: "/",
-                    sortMode: sort,
+        toggleMenu({
+            target: this.element.querySelector("[data-type=sort]"),
+            build: (_menu, session) => {
+                const subMenu = sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort) => {
+                    if (sort === null) {
+                        return;
+                    }
+                    configApi.set("fileTree.sort", sort, () => {
+                        this.onDocSortModeChanged({
+                            scope: "global",
+                            box: "",
+                            id: "",
+                            path: "/",
+                            sortMode: sort,
+                        });
+                    });
                 });
-            });
+                subMenu.forEach((item) => {
+                    window.siyuan.menus.menu.append(new MenuItem(item).element);
+                });
+                session.show(() => window.siyuan.menus.menu.fullscreen("bottom"));
+
+            },
         });
-        subMenu.forEach((item) => {
-            window.siyuan.menus.menu.append(new MenuItem(item).element);
-        });
-        window.siyuan.menus.menu.fullscreen("bottom");
     }
 
     private updateItemArrow(notebookId: string, filePath: string) {
@@ -993,7 +998,7 @@ export class MobileFiles extends Model {
     ${emojiHTML}
     ${switchHTML}
     <span class="b3-list-item__text${item.closed ? " ft__on-surface" : ""}">${escapeHtml(item.name)}</span>
-    <span data-type="more-root" class="b3-list-item__action${(window.siyuan.config.readonly || item.closed) ? " fn__none" : ""}">
+    <span data-type="more-root" data-menu="true" class="b3-list-item__action${(window.siyuan.config.readonly || item.closed) ? " fn__none" : ""}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </span>
     <span data-type="new" class="b3-list-item__action${(window.siyuan.config.readonly || item.closed) ? " fn__none" : ""}">
@@ -1732,7 +1737,7 @@ export class MobileFiles extends Model {
         const paddingLeft = (item.path.split("/").length - 1) * 20;
         const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
         const defaultIcon = item.subFileCount === 0 ? "file" : "folder";
-        const actionHTML = `<span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
+        const actionHTML = `<span data-type="more-file" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </span>
     <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__nw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newSubDoc}">

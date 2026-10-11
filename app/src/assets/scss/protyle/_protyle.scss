@@ -147,6 +147,8 @@
   box-sizing: border-box;
   z-index: 1;
   text-align: center;
+  // 块标会随指针重新定位，使用自身悬停反馈，避免系统触摸高亮留在原位置。
+  -webkit-tap-highlight-color: transparent;
 
   // 横向超级块的块标需高于分栏宽度调节杆，避免重叠区域被调节杆截获点击
   &--sb-column {
@@ -164,6 +166,11 @@
     padding: 4px 3px;
     cursor: pointer;
     position: relative;
+
+    // 块标自身区域优先接收点击，插入框线和加号的扩展命中区仅在外侧生效。
+    &:not(.protyle-gutters__line):not(.protyle-gutters__plus) {
+      z-index: 5;
+    }
 
     &:hover svg {
       color: var(--b3-theme-on-surface);
@@ -215,7 +222,7 @@
 }
 
 // 块标边缘框线（悬浮块标显示），与 .protyle-gutters 同为 fixed 坐标系，由 JS 贴块标边缘定位
-// 选择器带 button 标签提升特异性，覆盖 .protyle-gutters button 的 position:relative；z-index 高于块标 span 覆盖层
+// 选择器带 button 标签提升特异性，覆盖 .protyle-gutters button 的 position:relative；块标自身位于框线上方
 .protyle-gutters button.protyle-gutters__line {
   position: fixed;
   z-index: 3;

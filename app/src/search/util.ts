@@ -1,4 +1,6 @@
+import {toggleMenu} from "../menus/menuToggle";
 import type {FileTreeGetDocRequestInput} from "../types/api";
+import {updateSearchMethodControls} from "./methodCapabilities";
 import {getAttr} from "./attrs";
 import type {APICallbackResponse, APIPOSTRoutes, BlockQueryRequestInput} from "../types/api";
 import {getAllModels} from "../layout/getAll";
@@ -189,12 +191,12 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
             </span>
-            <input id="searchInput" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" autocomplete="off" autocorrect="off" spellcheck="false">
+            <textarea id="searchInput" rows="1" class="b3-text-field b3-text-field--text search__input" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
         </div>
         <div class="block__icons">
             <span id="searchFilter" aria-label="${window.siyuan.languages.searchType}" class="block__icon ariaLabel" data-position="9south">
                 <svg><use xlink:href="#iconFilter"></use></svg>
-            </span> 
+            </span>
             <span class="fn__space"></span>
             ${genQueryHTML(config.method, "searchSyntaxCheck")}
             <span class="fn__space"></span>
@@ -286,7 +288,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     const criteriaData: Config.IUILayoutTabSearchConfig[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
     const searchPanelElement = element.querySelector("#searchList");
-    const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
+    const searchInputElement = element.querySelector("#searchInput") as HTMLTextAreaElement;
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
     const edit = new Protyle(app, element.querySelector("#searchPreview") as HTMLElement, {
         blockId: "",
@@ -486,7 +488,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.classList.contains("search__rmpath")) {
+            } else if (target.classList.contains("search__rmpath") && !target.hasAttribute("disabled")) {
                 invalidateSearchPathRequests(element);
                 config.idPath = [];
                 config.hPath = "";
@@ -520,7 +522,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.id === "searchPath") {
+            } else if (target.id === "searchPath" && !target.hasAttribute("disabled")) {
                 movePathTo({
                     cb: (toPath, toNotebook) => {
                         const isCurrentPathRequest = beginSearchPathRequest(element);
@@ -588,7 +590,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 config.page = 1;
                 inputEvent(element, config, edit, true);
                 break;
-            } else if (target.id === "searchReplace") {
+            } else if (target.id === "searchReplace" && !target.hasAttribute("disabled")) {
                 if (window.siyuan.isPublish) {
                     return;
                 }
@@ -672,84 +674,90 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.preventDefault();
                 break;
             } else if (target.id === "searchMore") {
-                moreMenu(config, criteriaData, element, () => {
-                    config.page = 1;
-                    inputEvent(element, config, edit, true);
-                }, () => {
-                    config = updateConfig(element, {
-                        removed: true,
-                        sort: 0,
-                        group: 0,
-                        hasReplace: false,
-                        method: 0,
-                        hPath: "",
-                        idPath: [],
-                        k: "",
-                        r: "",
-                        page: 1,
-                        types: getDefaultType(),
-                        subTypes: getDefaultSubType(),
-                        replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
-                    }, config, edit, {clear: true, preserveCurrentPath: true});
-                    element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
-                }, () => {
-                    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-                    const isPopover = hasClosestByClassName(element, "b3-dialog__container");
-                    window.siyuan.menus.menu.append(new MenuItem({
-                        iconHTML: "",
-                        label: window.siyuan.languages.layout,
-                        type: "submenu",
-                        submenu: [{
-                            iconHTML: "",
-                            label: window.siyuan.languages.topBottomLayout,
-                            current: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
-                            click() {
-                                element.querySelector(".search__layout").classList.remove("search__layout--row");
-                                edit.protyle.element.style.width = "";
-                                if ((isPopover && localData.row) || (!isPopover && localData.rowTab)) {
-                                    edit.protyle.element.style.height = isPopover ? localData.row : localData.rowTab;
-                                    edit.protyle.element.classList.remove("fn__flex-1");
-                                } else {
-                                    edit.protyle.element.classList.add("fn__flex-1");
-                                }
-                                resize(edit.protyle);
-                                if (isPopover) {
-                                    localData.layout = 0;
-                                } else {
-                                    localData.layoutTab = 0;
-                                }
-                                setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
-                            }
-                        }, {
-                            iconHTML: "",
-                            label: window.siyuan.languages.leftRightLayout,
-                            current: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
-                            click() {
-                                element.querySelector(".search__layout").classList.add("search__layout--row");
-                                edit.protyle.element.style.height = "";
-                                if ((isPopover && localData.col) || (!isPopover && localData.colTab)) {
-                                    edit.protyle.element.style.width = isPopover ? localData.col : localData.colTab;
-                                    edit.protyle.element.classList.remove("fn__flex-1");
-                                } else {
-                                    edit.protyle.element.classList.add("fn__flex-1");
-                                }
-                                resize(edit.protyle);
-                                if (isPopover) {
-                                    localData.layout = 1;
-                                } else {
-                                    localData.layoutTab = 1;
-                                }
-                                setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
-                            }
-                        }]
-                    }).element);
+                toggleMenu({
+                    target: target,
+                    build: (_menu, session) => {
+                        moreMenu(config, criteriaData, element, () => {
+                            config.page = 1;
+                            inputEvent(element, config, edit, true);
+                        }, () => {
+                            config = updateConfig(element, {
+                                removed: true,
+                                sort: 0,
+                                group: 0,
+                                hasReplace: false,
+                                method: 0,
+                                hPath: "",
+                                idPath: [],
+                                k: "",
+                                r: "",
+                                page: 1,
+                                types: getDefaultType(),
+                                subTypes: getDefaultSubType(),
+                                replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
+                            }, config, edit, {clear: true, preserveCurrentPath: true});
+                            element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
+                        }, () => {
+                            const localData = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
+                            const isPopover = hasClosestByClassName(element, "b3-dialog__container");
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                iconHTML: "",
+                                label: window.siyuan.languages.layout,
+                                type: "submenu",
+                                submenu: [{
+                                    iconHTML: "",
+                                    label: window.siyuan.languages.topBottomLayout,
+                                    current: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
+                                    click() {
+                                        element.querySelector(".search__layout").classList.remove("search__layout--row");
+                                        edit.protyle.element.style.width = "";
+                                        if ((isPopover && localData.row) || (!isPopover && localData.rowTab)) {
+                                            edit.protyle.element.style.height = isPopover ? localData.row : localData.rowTab;
+                                            edit.protyle.element.classList.remove("fn__flex-1");
+                                        } else {
+                                            edit.protyle.element.classList.add("fn__flex-1");
+                                        }
+                                        resize(edit.protyle);
+                                        if (isPopover) {
+                                            localData.layout = 0;
+                                        } else {
+                                            localData.layoutTab = 0;
+                                        }
+                                        setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
+                                    }
+                                }, {
+                                    iconHTML: "",
+                                    label: window.siyuan.languages.leftRightLayout,
+                                    current: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
+                                    click() {
+                                        element.querySelector(".search__layout").classList.add("search__layout--row");
+                                        edit.protyle.element.style.height = "";
+                                        if ((isPopover && localData.col) || (!isPopover && localData.colTab)) {
+                                            edit.protyle.element.style.width = isPopover ? localData.col : localData.colTab;
+                                            edit.protyle.element.classList.remove("fn__flex-1");
+                                        } else {
+                                            edit.protyle.element.classList.add("fn__flex-1");
+                                        }
+                                        resize(edit.protyle);
+                                        if (isPopover) {
+                                            localData.layout = 1;
+                                        } else {
+                                            localData.layoutTab = 1;
+                                        }
+                                        setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
+                                    }
+                                }]
+                            }).element);
+                        });
+                        const rect = target.getBoundingClientRect();
+                        session.show(() => window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true}));
+
+                    },
                 });
-                const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.id === "searchFilter") {
+            } else if (target.id === "searchFilter" && !target.hasAttribute("disabled")) {
                 window.siyuan.menus.menu.remove();
                 filterMenu(config, () => {
                     config.page = 1;
@@ -809,15 +817,21 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.preventDefault();
                 break;
             } else if (target.id === "searchSyntaxCheck") {
-                queryMenu(config, () => {
-                    element.querySelector("#searchSyntaxCheck").outerHTML = genQueryHTML(config.method, "searchSyntaxCheck");
-                    config.page = 1;
-                    inputEvent(element, config, edit, true);
-                    persistSearchConfig(config);
+                toggleMenu({
+                    target: target,
+                    build: (_menu, session) => {
+                        queryMenu(config, () => {
+                            element.querySelector("#searchSyntaxCheck").outerHTML = genQueryHTML(config.method, "searchSyntaxCheck");
+                            config.page = 1;
+                            inputEvent(element, config, edit, true);
+                            persistSearchConfig(config);
+                        });
+                        const rect = target.getBoundingClientRect();
+                        session.show(() => window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true}));
+
+                    },
                 });
-                const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.id === "searchHistoryBtn") {
@@ -877,7 +891,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     if (isClick) {
                         clickTimeout = window.setTimeout(() => {
                             const activeElement = document.activeElement;
-                            const shouldRestoreFocus = (inputElement: HTMLInputElement) =>
+                            const shouldRestoreFocus = (inputElement: HTMLInputElement | HTMLTextAreaElement) =>
                                 !activeElement || activeElement === document.body ||
                                 activeElement === inputElement || target.contains(activeElement);
                             if (searchType === "asset") {
@@ -984,6 +998,11 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
             persistSearchConfig(config);
         }
         saveKeyList("keys", searchInputElement.value, config);
+    });
+    searchInputElement.addEventListener("beforeinput", (event: InputEvent) => {
+        if (event.inputType === "insertLineBreak" && config.method !== 2) {
+            event.preventDefault();
+        }
     });
     searchInputElement.addEventListener("keydown", (event) => {
         electronUndo(event);
@@ -1187,8 +1206,8 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     } else {
         searchIncludeElement.setAttribute("disabled", "disabled");
     }
-    if (runtimeConfig.k || options?.clear) {
-        (element.querySelector("#searchInput") as HTMLInputElement).value = runtimeConfig.k;
+    if (runtimeConfig.k !== undefined || options?.clear) {
+        (element.querySelector("#searchInput") as HTMLTextAreaElement).value = runtimeConfig.k;
     }
     (element.querySelector("#replaceInput") as HTMLInputElement).value = runtimeConfig.r;
     element.querySelector("#searchSyntaxCheck").outerHTML = genQueryHTML(runtimeConfig.method, "searchSyntaxCheck");
@@ -1426,7 +1445,7 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
     }
     const searchPanelElement = element.querySelector("#searchList");
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
-    const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
+    const searchInputElement = element.querySelector("#searchInput") as HTMLTextAreaElement;
 
     const loadElement = element.querySelector("svg.fn__rotate");
     if (!loadElement.classList.contains("fn__none")) {
@@ -1488,7 +1507,7 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
 
 const emitBeforeSearchResultsRender = (blocks: IBlock[], edit: Protyle,
                                        config: Config.IUILayoutTabSearchConfig,
-                                       searchElement: HTMLInputElement) => {
+                                       searchElement: HTMLTextAreaElement) => {
     const detail = {
         protyle: edit,
         config,
@@ -1505,6 +1524,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                                currentId?: string,
                                newId?: string
                            }) => {
+    updateSearchMethodControls(element, config);
     if (rmCurrentCriteria) {
         element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
         element.querySelector("#searchList").innerHTML = "";
@@ -1527,7 +1547,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
         createTask(version) {
             const listElement = element.querySelector("#searchList") as HTMLElement;
             loadingElement.style.top = listElement.offsetTop + "px";
-            const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
+            const searchInputElement = element.querySelector("#searchInput") as HTMLTextAreaElement;
             config.query = searchInputElement.value;
             if (!config.page) {
                 config.page = 1;
@@ -1692,7 +1712,7 @@ ${countHTML}
             edit,
             id: currentData.id,
             config,
-            value: (element.querySelector("#searchInput") as HTMLInputElement).value,
+            value: (element.querySelector("#searchInput") as HTMLTextAreaElement).value,
             matches: getSearchAVMatchesFromHTML(currentData.content),
         });
     } else {
@@ -1703,7 +1723,7 @@ ${countHTML}
         config.method === 0 ? `<div class="b3-list-item b3-list-item--focus" data-type="search-new">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
     <span class="b3-list-item__text">
-        ${window.siyuan.languages.newFile} <mark>${escapeHtml((element.querySelector("#searchInput") as HTMLInputElement).value)}</mark>
+        ${window.siyuan.languages.newFile} <mark>${escapeHtml((element.querySelector("#searchInput") as HTMLTextAreaElement).value)}</mark>
     </span>
     <kbd class="b3-list-item__meta">${window.siyuan.languages.enterNew}</kbd>
 </div>

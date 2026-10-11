@@ -14,19 +14,16 @@
  */
 
 .annotationLayer {
+  color-scheme: only light;
+
   --annotation-unfocused-field-background: url("data:image/svg+xml;charset=UTF-8,<svg width='1px' height='1px' xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' style='fill:rgba(0, 54, 255, 0.13);'/></svg>");
+  --annotation-unfocused-field-filter: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='pdfjsFillableField' x='0%' y='0%' width='100%' height='100%' color-interpolation-filters='sRGB'><feFlood flood-color='rgb(0,54,255)' flood-opacity='0.13' result='f'/><feComposite in='f' in2='SourceGraphic' operator='over'/></filter></svg>#pdfjsFillableField");
   --input-focus-border-color: Highlight;
   --input-focus-outline: 1px solid Canvas;
   --input-unfocused-border-color: transparent;
   --input-disabled-border-color: transparent;
   --input-hover-border-color: black;
   --link-outline: none;
-
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  transform-origin: 0 0;
 
   @media screen and (forced-colors: active) {
     --input-focus-border-color: CanvasText;
@@ -56,7 +53,7 @@
     }
 
     .popupAnnotation .popup {
-      outline: calc(1.5px * var(--scale-factor)) solid CanvasText !important;
+      outline: calc(1.5px * var(--total-scale-factor)) solid CanvasText !important;
       background-color: ButtonFace !important;
       color: ButtonText !important;
     }
@@ -73,9 +70,15 @@
     }
 
     .popupAnnotation.focused .popup {
-      outline: calc(3px * var(--scale-factor)) solid Highlight !important;
+      outline: calc(3px * var(--total-scale-factor)) solid Highlight !important;
     }
   }
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transform-origin: 0 0;
 
   &[data-main-rotation="90"] .norotate {
     transform: rotate(270deg) translateX(-100%);
@@ -108,7 +111,6 @@
       white-space: nowrap;
       font: 10px sans-serif;
       line-height: 1.35;
-      user-select: none;
     }
   }
 
@@ -118,12 +120,34 @@
     pointer-events: auto;
     box-sizing: border-box;
     transform-origin: 0 0;
+    user-select: none;
 
-    &:has(div.annotationContent) {
+    &[data-pdf-overlay] {
       canvas.annotationContent {
         display: none;
       }
     }
+
+    .overlaidText {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      display: inline-block;
+      overflow: hidden;
+    }
+  }
+
+  /* A field rendered to its own canvas shows that canvas and keeps its editable
+     element hidden. Once the field is modified the canvas is outdated, so it's
+     hidden and the element is shown instead. */
+  .hasOwnCanvas:not(.sandboxModified) :is(input, textarea) {
+    display: none;
+  }
+
+  .hasOwnCanvas.sandboxModified canvas.annotationContent {
+    display: none;
   }
 
   .textLayer.selecting ~ & section {
@@ -140,10 +164,9 @@
   }
 
   :is(.linkAnnotation, .buttonWidgetAnnotation.pushButton):not(.hasBorder)
-  > a:hover {
+    > a:hover {
     opacity: 0.2;
     background-color: rgb(255 255 0);
-    box-shadow: 0 2px 10px rgb(255 255 0);
   }
 
   .linkAnnotation.hasBorder:hover {
@@ -166,10 +189,11 @@
   .textWidgetAnnotation :is(input, textarea),
   .choiceWidgetAnnotation select,
   .buttonWidgetAnnotation:is(.checkBox, .radioButton) input {
-    background-color: rgba(0, 54, 255, .13); // NOTE
+    background-color: rgba(0, 54, 255, 0.13);
+    background-image: var(--annotation-unfocused-field-background);
     border: 2px solid var(--input-unfocused-border-color);
     box-sizing: border-box;
-    font: calc(9px * var(--scale-factor)) sans-serif;
+    font: calc(9px * var(--total-scale-factor)) sans-serif;
     height: 100%;
     margin: 0;
     vertical-align: top;
@@ -184,10 +208,6 @@
 
   .choiceWidgetAnnotation select option {
     padding: 0;
-  }
-
-  .buttonWidgetAnnotation.radioButton input {
-    border-radius: 50%;
   }
 
   .textWidgetAnnotation textarea {
@@ -237,56 +257,57 @@
     outline: var(--input-focus-outline);
   }
 
-  .buttonWidgetAnnotation.checkBox input:checked::before,
-  .buttonWidgetAnnotation.checkBox input:checked::after,
-  .buttonWidgetAnnotation.radioButton input:checked::before {
-    background-color: rgba(0, 0, 0, 1); // NOTE
-    content: "";
-    display: block;
-    position: absolute;
-  }
+  .buttonWidgetAnnotation:is(.checkBox, .radioButton) {
+    [data-canvas-name] {
+      filter: var(--annotation-unfocused-field-filter);
+    }
 
-  .buttonWidgetAnnotation.checkBox input:checked::before,
-  .buttonWidgetAnnotation.checkBox input:checked::after {
-    height: 80%;
-    left: 45%;
-    width: 1px;
-  }
+    &:focus-within [data-canvas-name] {
+      filter: none;
+    }
 
-  .buttonWidgetAnnotation.checkBox input:checked::before {
-    transform: rotate(45deg);
-  }
+    &[data-pdf-checked="true"] [data-canvas-name="checked"],
+    &[data-pdf-checked="false"] [data-canvas-name="unchecked"] {
+      display: block;
+    }
 
-  .buttonWidgetAnnotation.checkBox input:checked::after {
-    transform: rotate(-45deg);
-  }
-
-  .buttonWidgetAnnotation.radioButton input:checked::before {
-    border-radius: 50%;
-    height: 50%;
-    left: 25%;
-    top: 25%;
-    width: 50%;
+    &[data-pdf-checked="false"] [data-canvas-name="checked"],
+    &[data-pdf-checked="true"] [data-canvas-name="unchecked"] {
+      display: none;
+    }
   }
 
   .textWidgetAnnotation input.comb {
+    --comb-width: 0px;
+    --comb-letter-spacing: calc(var(--comb-width) - 1ch);
+
     font-family: monospace;
-    padding-left: 2px;
-    padding-right: 0;
+    letter-spacing: var(--comb-letter-spacing);
+    overflow-x: hidden;
+    padding: 0;
+    text-indent: calc(
+      var(--comb-offset, 0) * var(--comb-width) + var(--comb-letter-spacing) / 2
+    );
   }
 
   .textWidgetAnnotation input.comb:focus {
-    /*
-     * Letter spacing is placed on the right side of each character. Hence, the
-     * letter spacing of the last character may be placed outside the visible
-     * area, causing horizontal scrolling. We avoid this by extending the width
-     * when the element has focus and revert this when it loses focus.
-     */
-    width: 103%;
+    background-image: repeating-linear-gradient(
+      to right,
+      transparent 0 calc(var(--comb-width) - 1px),
+      var(--input-focus-border-color) calc(var(--comb-width) - 1px)
+        var(--comb-width)
+    );
   }
 
   .buttonWidgetAnnotation:is(.checkBox, .radioButton) input {
     appearance: none;
+  }
+
+  .buttonWidgetAnnotation[data-pdf-checked-canvas]
+    input:checked,
+  .buttonWidgetAnnotation[data-pdf-unchecked-canvas]
+    input:not(:checked) {
+    background-image: none;
   }
 
   .fileAttachmentAnnotation .popupTriggerArea {
@@ -296,7 +317,7 @@
 
   .popupAnnotation {
     position: absolute;
-    font-size: calc(9px * var(--scale-factor));
+    font-size: calc(9px * var(--total-scale-factor));
     pointer-events: none;
     width: max-content;
     max-width: 45%;
@@ -305,16 +326,18 @@
 
   .popup {
     background-color: rgb(255 255 153);
-    box-shadow: 0 calc(2px * var(--scale-factor))
-    calc(5px * var(--scale-factor)) rgb(136 136 136);
-    border-radius: calc(2px * var(--scale-factor));
+    color: black;
+    box-shadow: 0 calc(2px * var(--total-scale-factor))
+      calc(5px * var(--total-scale-factor)) rgb(136 136 136);
+    border-radius: calc(2px * var(--total-scale-factor));
     outline: 1.5px solid rgb(255 255 74);
-    padding: calc(6px * var(--scale-factor));
+    padding: calc(6px * var(--total-scale-factor));
     cursor: pointer;
     font: message-box;
     white-space: normal;
     word-wrap: break-word;
     pointer-events: auto;
+    user-select: text;
   }
 
   .popupAnnotation.focused .popup {
@@ -322,36 +345,41 @@
   }
 
   .popup * {
-    font-size: calc(9px * var(--scale-factor));
+    font-size: calc(9px * var(--total-scale-factor));
   }
 
   .popup > .header {
     display: inline-block;
   }
 
-  .popup > .header h1 {
+  .popup > .header > .title {
     display: inline;
+    font-weight: bold;
   }
 
   .popup > .header .popupDate {
     display: inline-block;
-    margin-left: calc(5px * var(--scale-factor));
+    margin-left: calc(5px * var(--total-scale-factor));
     width: fit-content;
   }
 
   .popupContent {
     border-top: 1px solid rgb(51 51 51);
-    margin-top: calc(2px * var(--scale-factor));
-    padding-top: calc(2px * var(--scale-factor));
+    margin-top: calc(2px * var(--total-scale-factor));
+    padding-top: calc(2px * var(--total-scale-factor));
   }
 
   .richText > * {
     white-space: pre-wrap;
-    font-size: calc(9px * var(--scale-factor));
+    font-size: calc(9px * var(--total-scale-factor));
   }
 
   .popupTriggerArea {
     cursor: pointer;
+
+    &:hover {
+      backdrop-filter: var(--hcm-highlight-filter);
+    }
   }
 
   section svg {

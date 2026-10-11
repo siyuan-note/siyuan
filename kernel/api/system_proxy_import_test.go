@@ -34,7 +34,7 @@ func TestConfTransferPreservesLocalNetworkProxy(t *testing.T) {
 	} {
 		t.Run("local-"+proxy.Scheme, func(t *testing.T) {
 			model.Conf = model.NewAppConf()
-			model.Conf.System = &conf.System{NetworkProxy: &proxy}
+			model.Conf.System.Store(&conf.System{NetworkProxy: &proxy})
 			recorder := httptest.NewRecorder()
 			engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/export", nil))
 			response := struct {
@@ -54,10 +54,10 @@ func TestConfTransferPreservesLocalNetworkProxy(t *testing.T) {
 			if err = json.Unmarshal(data, exported); err != nil {
 				t.Fatal(err)
 			}
-			if exported.System.NetworkProxy == nil || *exported.System.NetworkProxy != (conf.NetworkProxy{}) {
-				t.Fatalf("export retained network proxy: %+v", exported.System.NetworkProxy)
+			if exported.System.Load().NetworkProxy == nil || *exported.System.Load().NetworkProxy != (conf.NetworkProxy{}) {
+				t.Fatalf("export retained network proxy: %+v", exported.System.Load().NetworkProxy)
 			}
-			if *model.Conf.System.NetworkProxy != proxy {
+			if *model.Conf.System.Load().NetworkProxy != proxy {
 				t.Fatal("export changed local proxy")
 			}
 			for _, payload := range []string{
@@ -89,8 +89,8 @@ func TestConfTransferPreservesLocalNetworkProxy(t *testing.T) {
 				if err = json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || result.Code != 0 {
 					t.Fatalf("import failed: %s (%v)", recorder.Body.String(), err)
 				}
-				if !reflect.DeepEqual(model.Conf.System.NetworkProxy, &proxy) {
-					t.Fatalf("import changed local proxy: %+v", model.Conf.System.NetworkProxy)
+				if !reflect.DeepEqual(model.Conf.System.Load().NetworkProxy, &proxy) {
+					t.Fatalf("import changed local proxy: %+v", model.Conf.System.Load().NetworkProxy)
 				}
 			}
 		})

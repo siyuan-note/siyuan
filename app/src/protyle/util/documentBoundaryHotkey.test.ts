@@ -103,7 +103,6 @@ test("editable and readonly bodies handle configured navigation before local car
     const editor = {...f.protyle, disabled: false, wysiwyg: {element: body}};
     const module = loadModule("src/protyle/wysiwyg/keydown.ts", {window: f.window}, {
         "../util/documentBoundaryHotkey": f.helper,
-        "../../util/keyboardDiagnostic": {logKeyboardDiagnostic: (): void => undefined},
         "./verticalNavigation": {bindVerticalNavigationReset: (): void => undefined},
         "../util/hasClosest": {hasClosestByAttribute: () => false},
         "../render/av/attributeValue": {getAVTemplateInteractiveElement: () => false},
@@ -122,8 +121,9 @@ test("mobile navigation is limited to the current editor and does not dispatch t
     const f = fixture();
     keymapBindings.setKeymapBindings(f.general.goToDocumentEnd, ["End"]);
     const module = loadModule("src/mobile/util/keydown.ts", {window: f.window}, {
+        "../../command/databaseRowShortcut": {handleDatabaseRowShortcut: () => false},
+        "../../command/databaseRowNavigation": {DATABASE_ROW_COMMANDS: ["previousDatabaseRow", "nextDatabaseRow"]},
         "../../protyle/util/documentBoundaryHotkey": f.helper,
-        "../../util/keyboardDiagnostic": {logKeyboardDiagnostic: (): void => undefined},
         "../../boot/globalEvent/commonHotkey": {filterHotkey: () => false},
         "../editor": {getCurrentEditor: () => ({protyle: f.protyle})},
         "../../command/shortcutRuntime": {dispatchPluginShortcut: () => f.calls.push("plugin")},

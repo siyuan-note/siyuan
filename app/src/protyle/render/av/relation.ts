@@ -1,7 +1,7 @@
 import {isTableLikeView} from "./viewType";
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
-import {UDLRHint, upDownHint} from "../../../util/upDownHint";
+import {UDLRHint} from "../../../util/upDownHint";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import type {AVRelationItemPreview, AVRelationItemCellInput} from "../../../types/api";
 import {escapeAttr, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../../util/escape";
@@ -27,6 +27,7 @@ import {renderAVRichTextElements} from "./richText";
 import {getAVBlockIconHTML} from "./blockIcon";
 import {unicode2Emoji} from "../../../emoji";
 import {bindRelationLayout} from "./relationLayout";
+import {getRelationKeyboardTarget} from "./relationKeyboard";
 import {getTopBarHeight} from "../../../layout/getTopBarHeight";
 
 interface IAVItem {
@@ -479,9 +480,11 @@ style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}$
         data-position="north" aria-label="${window.siyuan.languages.openBy}"><svg><use xlink:href="#iconOpen"></use></svg></button>` : ""}
 </span>`;
         } else {
-            html += `<div data-relation-column="${escapeAttr(column.id)}" data-dtype="${column.type}" data-wrap="${column.wrap === true}" class="av__relation-table-cell"
+            const text = cell?.value ? getCellValueText(cell.value, column) : "";
+            html += `<div data-relation-column="${escapeAttr(column.id)}" data-dtype="${column.type}" data-wrap="false" title="${escapeAttr(text)}" class="av__relation-table-cell"
 style="${cell?.bgColor ? `background-color:${cell.bgColor};` : ""}${cell?.color ? `color:${cell.color};` : ""}">${cell?.value ?
-                renderCell(cell.value, 0, true, "table", column.options, column.dateFormat, column.renderTemplate, false) : ""}</div>`;
+                column.type === "text" ? `<span class="av__celltext">${escapeHtmlTextAndAttr(text)}</span>` :
+                    renderCell(cell.value, 0, true, "table", column.options, column.dateFormat, column.renderTemplate, false) : ""}</div>`;
         }
     });
     return html + "</div>";
@@ -734,9 +737,7 @@ ${genRelationLoaderHTML(false)}`;
                 .find(header => header.dataset.relationColumn === focusedColumn)?.focus();
         }
         renderFooter();
-        if (!listElement.querySelector(".b3-menu__item--current")) {
-            listElement.querySelector('[data-type="setRelationCell"]')?.classList.add("b3-menu__item--current");
-        }
+        getRelationKeyboardTarget(listElement, state.keyword.trim() !== "");
         updateCopyRelatedItems(options.menuElement);
     };
     const loadPage = (reset: boolean) => {
@@ -867,6 +868,7 @@ ${genRelationLoaderHTML(false)}`;
     });
     const search = () => {
         state.keyword = inputElement.value;
+        listElement.querySelectorAll(".b3-menu__item--current").forEach(item => item.classList.remove("b3-menu__item--current"));
         relationItemPreviews.delete(options.menuElement);
         renderFooter();
         state.controller?.abort();
@@ -877,20 +879,24 @@ ${genRelationLoaderHTML(false)}`;
             clearTimeout(searchTimer);
         }
         searchTimer = window.setTimeout(() => {
+            searchTimer = undefined;
             loadPage(true);
         }, Constants.TIMEOUT_INPUT);
     };
 
     inputElement.addEventListener("keydown", (event) => {
-        if (event.isComposing) {
+        if (event.isComposing || !["Enter", "ArrowDown", "ArrowUp"].includes(event.key)) {
             return;
         }
-        upDownHint(listElement, event, "b3-menu__item--current");
-        const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
-        if (event.key === "Enter" && currentElement && currentElement.getAttribute("data-type") === "setRelationCell") {
+        event.preventDefault();
+        event.stopPropagation();
+        // 搜索防抖或首页请求完成前，不允许键盘操作旧候选项。
+        if (searchTimer || state.page === 0 || inputElement.value !== state.keyword) {
+            return;
+        }
+        const currentElement = getRelationKeyboardTarget(listElement, state.keyword.trim() !== "", event.key);
+        if (event.key === "Enter" && currentElement) {
             setRelationCell(options.protyle, options.blockElement as HTMLElement, currentElement, options.cellElements);
-            event.preventDefault();
-            event.stopPropagation();
         }
     });
     inputElement.addEventListener("input", (event: InputEvent) => {

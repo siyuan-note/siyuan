@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {Menu} from "../../plugin/Menu";
 import {ToolbarItem} from "./ToolbarItem";
 import {convertFontSize, fontEvent, getFontNodeElements, getFontSizeInfo} from "./Font";
@@ -139,23 +140,32 @@ export class FontControl extends ToolbarItem {
                 });
                 return;
             }
-            const menu = new Menu("inlineFontSize", () => {
-                if (valid()) {
-                    focusByRange(protyle.toolbar.range);
-                }
+
+            toggleMenu({
+                target: this.element,
+                build: (_menu, session) => {
+                    const menu = new Menu("inlineFontSize", () => {
+                        if (valid()) {
+                            focusByRange(protyle.toolbar.range);
+                        }
+                    });
+                    if (menu.isOpen) {
+                        return;
+                    }
+                    menu.addItem({
+                        type: "empty", label: "", bind: element => {
+                            element.append(createFontSizePicker(protyle, value => {
+                                menu.close();
+                                apply("fontSize", value);
+                            }, undefined, () => menu.close()));
+                        }
+                    });
+                    const rect = this.element.getBoundingClientRect();
+                    session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: this.element}));
+                    menu.element.querySelector<HTMLInputElement>('input[type="number"]')?.focus();
+
+                },
             });
-            if (menu.isOpen) {
-                return;
-            }
-            menu.addItem({type: "empty", label: "", bind: element => {
-                element.append(createFontSizePicker(protyle, value => {
-                    menu.close();
-                    apply("fontSize", value);
-                }, undefined, () => menu.close()));
-            }});
-            const rect = this.element.getBoundingClientRect();
-            menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: this.element});
-            menu.element.querySelector<HTMLInputElement>('input[type="number"]')?.focus();
         });
     }
 }

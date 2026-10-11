@@ -851,9 +851,9 @@ func TestValueTextRichInlineRoundTrip(t *testing.T) {
 }
 
 func TestValueTextRichParserIgnoresEditorMarkdownSettings(t *testing.T) {
-	original := *util.MarkdownSettings
+	original := *util.MarkdownSettings.Load()
 	defer func() {
-		*util.MarkdownSettings = original
+		*util.MarkdownSettings.Load() = original
 	}()
 
 	rich := &ValueTextRich{
@@ -865,18 +865,18 @@ func TestValueTextRichParserIgnoresEditorMarkdownSettings(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	util.MarkdownSettings.InlineAsterisk = false
-	util.MarkdownSettings.InlineUnderscore = false
-	util.MarkdownSettings.InlineSup = false
-	util.MarkdownSettings.InlineSub = false
-	util.MarkdownSettings.InlineTag = false
-	util.MarkdownSettings.InlineMath = false
-	util.MarkdownSettings.InlineStrikethrough = false
-	util.MarkdownSettings.InlineFullWidthStrikethrough = false
-	util.MarkdownSettings.InlineMark = false
+	util.MarkdownSettings.Load().InlineAsterisk = false
+	util.MarkdownSettings.Load().InlineUnderscore = false
+	util.MarkdownSettings.Load().InlineSup = false
+	util.MarkdownSettings.Load().InlineSub = false
+	util.MarkdownSettings.Load().InlineTag = false
+	util.MarkdownSettings.Load().InlineMath = false
+	util.MarkdownSettings.Load().InlineStrikethrough = false
+	util.MarkdownSettings.Load().InlineFullWidthStrikethrough = false
+	util.MarkdownSettings.Load().InlineMark = false
 	disabled := false
-	util.MarkdownSettings.BlockFullWidthTaskList = &disabled
-	util.MarkdownSettings.CodeBlockMiddleDot = &disabled
+	util.MarkdownSettings.Load().BlockFullWidthTaskList = &disabled
+	util.MarkdownSettings.Load().CodeBlockMiddleDot = &disabled
 
 	disabledSettingsRich := &ValueTextRich{
 		Spec:    ValueTextRichSpec,

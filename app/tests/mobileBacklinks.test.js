@@ -7,7 +7,7 @@ const sources = () => {
     const ts = require("typescript");
     const preprocess = require("ifdef-loader/preprocessor").parse;
     const modules = {};
-    for (const name of ["layout/dock/BacklinkContent", "layout/dock/backlinkRefresh",
+    for (const name of ["menus/menuToggle", "layout/dock/BacklinkContent", "layout/dock/backlinkRefresh",
         "layout/dock/GlobalBacklinkList", "layout/dock/globalBacklinkPaging",
         "layout/dock/backlinkReadingAnchor", "layout/dock/backlinkSourceFilter", "mobile/util/secondaryEditors",
         "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/MobileEditorDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "menus/sheetOpen", "protyle/util/transactionQueue",
@@ -29,6 +29,8 @@ const runCases = async (sources) => {
     const requests = [];
     const tick = () => new Promise(resolve => setTimeout(resolve, 10));
     const stubs = {
+        "config/util/configApi": {config: {set: (_path, value) => stubs["util/fetch"].fetchSyncPost("/api/setting/patch", {editor: value})}},
+        "dialog/anchoredInput": {getAnchoredInputMask: () => null},
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "editor/assetOpen": {normalizeAssetOpenConfig: value => value},
         "layout/dock/backlinkRefFilterMenu": {loadBacklinkRefFilterMenu: noop},

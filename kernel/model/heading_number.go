@@ -78,15 +78,17 @@ func headingNumberEnabled(tree *parse.Tree, defaultEnabled bool) bool {
 
 // GetHeadingNumbers 返回文档标题块 ID 到显示编号的映射。
 func GetHeadingNumbers(rootID, boxID string) (ret map[string]string, err error) {
+	confEditorSnapshot := Conf.LoadEditor()
+
 	FlushTxQueue()
 	tree, err := loadTreeByBlockIDInBox(rootID, boxID)
 	if err != nil || nil == tree {
 		return map[string]string{}, err
 	}
-	if !headingNumberEnabled(tree, Conf.Editor.HeadingNumber) {
+	if !headingNumberEnabled(tree, confEditorSnapshot.HeadingNumber) {
 		return map[string]string{}, nil
 	}
-	return headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat), nil
+	return headingNumberLabels(tree, confEditorSnapshot.HeadingNumberFormat), nil
 }
 
 func headingNumberLabels(tree *parse.Tree, format string) map[string]string {

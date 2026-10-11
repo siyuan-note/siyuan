@@ -18,11 +18,15 @@ import (
 )
 
 func TestHTML2BlockDOMContractEscapedText(t *testing.T) {
-	originalConf, originalMarkdown := model.Conf, util.MarkdownSettings
+	originalConf, originalMarkdown := model.Conf, util.MarkdownSettings.Load()
 	model.Conf = model.NewAppConf()
-	model.Conf.System = &conf.System{}
+	model.Conf.System.Store(&conf.System{})
 	t.Cleanup(func() {
-		model.Conf, util.MarkdownSettings = originalConf, originalMarkdown
+		{
+			derivedValue0, derivedValue1 := originalConf, originalMarkdown
+			model.Conf = derivedValue0
+			util.MarkdownSettings.Store(derivedValue1)
+		}
 	})
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
@@ -56,7 +60,7 @@ func TestHTML2BlockDOMContractEscapedText(t *testing.T) {
 		settings.InlineAsterisk, settings.InlineUnderscore = syntax, syntax
 		settings.InlineStrikethrough, settings.InlineMark = syntax, syntax
 		settings.InlineSup, settings.InlineSub, settings.InlineMath = syntax, syntax, syntax
-		util.MarkdownSettings = &settings
+		util.MarkdownSettings.Store(&settings)
 		for _, preserve := range []bool{false, true} {
 			for _, test := range tests {
 				t.Run(test.name+"/syntax="+strconv.FormatBool(syntax)+"/preserve="+strconv.FormatBool(preserve), func(t *testing.T) {

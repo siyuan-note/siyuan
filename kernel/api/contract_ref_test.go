@@ -39,7 +39,7 @@ func testBacklinkContextPublishedEncryptedNotebook(t *testing.T, path string) {
 	t.Helper()
 	previousConf, previousData := model.Conf, util.DataDir
 	model.Conf, util.DataDir = model.NewAppConf(), t.TempDir()
-	model.Conf.Editor = conf.NewEditor()
+	model.Conf.Editor.Store(conf.NewEditor())
 	t.Cleanup(func() { model.Conf, util.DataDir = previousConf, previousData })
 	boxID := "20260726000003-encrypt"
 	boxConf := conf.NewBoxConf()

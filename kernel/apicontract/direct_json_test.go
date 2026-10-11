@@ -56,7 +56,7 @@ func TestDirectJSONHTTPResponses(t *testing.T) {
 	if _, err := json.Marshal(SuccessNoContent[directJSONTestResult]()); err == nil {
 		t.Fatal("empty response was serialized")
 	}
-	declarations := string(bundle.TypeScript(nil))
+	declarations := string(bundle.TypeScript(nil, nil))
 	if !strings.Contains(declarations, `output: "directJSON"`) || !strings.Contains(declarations, "noContent: true") {
 		t.Fatal("direct JSON protocol metadata missing")
 	}

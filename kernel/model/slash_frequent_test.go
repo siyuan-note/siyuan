@@ -8,6 +8,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
+func TestMigrateSlashFrequentPreservesInheritedDefaults(t *testing.T) {
+	for _, defaults := range []string{conf.EntryVisibilityProfileSimple, conf.EntryVisibilityProfileFull} {
+		profile := &conf.EntryVisibilityProfile{ID: "custom", Name: "Custom", Defaults: defaults, Entries: map[string]bool{}}
+		config := &conf.EntryVisibility{Version: conf.EntryVisibilityVersion, Active: "custom", Profiles: []*conf.EntryVisibilityProfile{profile}}
+		for range 2 {
+			migrateSlashFrequent(config, func() (map[string]any, error) {
+				t.Fatal("inherited profiles must not read legacy storage")
+				return nil, nil
+			})
+		}
+		if len(profile.Entries) != 0 || profile.Defaults != defaults {
+			t.Fatal("startup migration replaced inherited visibility")
+		}
+	}
+}
+
 func TestMigrateSlashFrequent(t *testing.T) {
 	const key = "editor.slash.menu.frequent"
 	for _, test := range []struct {

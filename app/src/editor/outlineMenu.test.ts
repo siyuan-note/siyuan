@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} from "typescript";
+const {loadMenuToggle, menuAnchor} = require("../../tests/menu-toggle-fixture.cjs");
 
 for (const path of ["src/layout/dock/Outline.ts", "src/mobile/dock/MobileOutline.ts"]) {
     test(`${path}: outline expand menu lists actions first without stale state`, () => {
@@ -13,7 +14,7 @@ for (const path of ["src/layout/dock/Outline.ts", "src/mobile/dock/MobileOutline
         }).outputText;
         const items: IMenu[] = [];
         const locations: unknown[] = [];
-        const menu = {element: {setAttribute: () => {}}, remove: () => {}, append: (item: IMenu) => items.push(item),
+        const menu = {element: {setAttribute: () => {}, classList: {contains: () => true}}, remove: () => {}, append: (item: IMenu) => items.push(item),
             popup: (position: unknown) => locations.push(position), fullscreen: (position: unknown) => locations.push(position)};
         const context = {
             window: {siyuan: {menus: {menu}, languages: new Proxy({}, {get: (_target, key) => String(key)}),
@@ -21,12 +22,14 @@ for (const path of ["src/layout/dock/Outline.ts", "src/mobile/dock/MobileOutline
             Constants: {MENU_OUTLINE_EXPAND_LEVEL: "outline-expand-level"},
             MenuItem: class {element: IMenu; constructor(item: IMenu) { this.element = item; }},
         };
+        Object.assign(context, loadMenuToggle(context));
         const Harness = runInNewContext(`${compiled}\nHarness;`, context);
         const harness = new Harness();
         const actions: unknown[] = [];
         harness.setAllExpanded = (expanded: boolean) => actions.push(expanded);
         harness.expandToLevel = (level: number) => actions.push(level);
-        harness.showExpandLevelMenu({getBoundingClientRect: () => ({left: 10, bottom: 20, height: 30})});
+        harness.element = {querySelector: () => menuAnchor()};
+        harness.showExpandLevelMenu({...menuAnchor(), getBoundingClientRect: () => ({left: 10, bottom: 20, height: 30})});
         assert.deepEqual(items.map(item => item.id), ["expandAll", "foldAll", "separator_all", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6"]);
         assert.ok(items.every(item => item.current === undefined));
         items.forEach(item => item.click?.(undefined, undefined));

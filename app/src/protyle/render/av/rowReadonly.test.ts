@@ -52,6 +52,8 @@ const createPanel = (mobile: boolean) => {
         "../../index": {Protyle},
         "../../../dialog": {Dialog: class { public element = {querySelector: () => element}; }},
         "../protyle/ui/padding": {getEditorHorizontalPadding: () => ({left: 0, right: 0})},
+        "../../../layout/util": {saveLayout() {}},
+        "./databaseRowNavigation": {getDatabaseRowNavigation: (): undefined => undefined, mountDatabaseRowNavigation() {}},
     };
     const load = <T>(file: string) => {
         const exports = {} as T;

@@ -31,8 +31,8 @@ func TestAPIContractAIDecisionConnection(t *testing.T) {
 		}
 	}))
 	defer server.Close()
-	model.Conf.AI.Decision.Profiles["typesafe"].Endpoint = server.URL
-	model.Conf.AI.Decision.Profiles["typesafe"].APIKey = "test-key"
+	model.Conf.AI.Load().Decision.Profiles["typesafe"].Endpoint = server.URL
+	model.Conf.AI.Load().Decision.Profiles["typesafe"].APIKey = "test-key"
 	engine := gin.New()
 	engine.POST("/api/ai/testDecisionModel", testDecisionModel)
 	bundle, err := apicontract.BuildBundle()
@@ -56,7 +56,7 @@ func TestAPIContractAIDecisionConnection(t *testing.T) {
 			t.Fatalf("incorrect connection result: %s", recorder.Body.String())
 		}
 	}
-	if model.Conf.AI.Decision.Enabled || calls.Load() != 2 {
+	if model.Conf.AI.Load().Decision.Enabled || calls.Load() != 2 {
 		t.Fatal("test requires enabled model or retries requests")
 	}
 }
@@ -72,7 +72,7 @@ func TestAPIContractAIDecisionDraftIsolation(t *testing.T) {
 		io.WriteString(w, `{"answers":{}}`)
 	}))
 	defer server.Close()
-	saved := model.Conf.AI.Decision
+	saved := model.Conf.AI.Load().Decision
 	saved.Profiles["typesafe"].APIKey = "saved-secret"
 	before, _ := json.Marshal(saved)
 	engine := gin.New()
@@ -92,7 +92,7 @@ func TestAPIContractAIDecisionDraftIsolation(t *testing.T) {
 			t.Fatalf("incomplete draft fell back to saved configuration: %s", recorder.Body.String())
 		}
 	}
-	after, _ := json.Marshal(model.Conf.AI.Decision)
+	after, _ := json.Marshal(model.Conf.AI.Load().Decision)
 	if string(before) != string(after) || calls.Load() != 1 {
 		t.Fatal("draft saved state or missing draft key borrowed saved key")
 	}
@@ -104,7 +104,7 @@ func TestAPIContractSettingDecisionLegacyProjection(t *testing.T) {
 		"openai":   {Endpoint: "https://openai.example", APIKey: "openai-key", Name: "openai", Timeout: 60},
 	}}
 	payload := settingDecisionPayload(decision)
-	system, err := systemConfPayload(&model.AppConf{AI: &conf.AI{Decision: decision}})
+	system, err := systemConfPayload(&model.AppConf{AI: model.NewConfSection(&conf.AI{Decision: decision})})
 	if err != nil || system.AI.Decision.APIKey != "typesafe-key" || system.AI.Decision.Provider != "openai" {
 		t.Fatal("initial configuration lost legacy projection")
 	}
@@ -118,7 +118,7 @@ func TestAPIContractSettingDecisionPartialSave(t *testing.T) {
 	previousReadOnly := util.ReadOnly
 	util.ReadOnly = true
 	t.Cleanup(func() { util.ReadOnly = previousReadOnly })
-	decision := model.Conf.AI.Decision
+	decision := model.Conf.AI.Load().Decision
 	decision.Provider = "openai"
 	decision.Profiles["openai"].APIKey = "openai-key"
 	decision.Profiles["typesafe"].APIKey = "typesafe-key"
@@ -131,12 +131,12 @@ func TestAPIContractSettingDecisionPartialSave(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("save failed: %s", message)
 		}
-		current := model.Conf.AI.Decision
+		current := model.Conf.AI.Load().Decision
 		if current.Provider != "openai" || current.Profiles["openai"].APIKey != "openai-key" {
 			t.Fatal("partial save lost provider or unrelated credentials")
 		}
 	}
-	if model.Conf.AI.Decision.Profiles["typesafe"].APIKey != "new-key" {
+	if model.Conf.AI.Load().Decision.Profiles["typesafe"].APIKey != "new-key" {
 		t.Fatal("partial profile was not saved")
 	}
 }
@@ -146,7 +146,7 @@ func TestAPIContractSettingDecisionLegacyPatch(t *testing.T) {
 	previousReadOnly := util.ReadOnly
 	util.ReadOnly = true
 	t.Cleanup(func() { util.ReadOnly = previousReadOnly })
-	decision := model.Conf.AI.Decision
+	decision := model.Conf.AI.Load().Decision
 	decision.Provider = "openai"
 	decision.Profiles["openai"].APIKey = "openai-key"
 	for _, body := range []string{
@@ -158,13 +158,13 @@ func TestAPIContractSettingDecisionLegacyPatch(t *testing.T) {
 			t.Fatalf("legacy patch failed: %s", message)
 		}
 	}
-	decision = model.Conf.AI.Decision
+	decision = model.Conf.AI.Load().Decision
 	profile := decision.Profiles["typesafe"]
 	if decision.Provider != "openai" || decision.Profiles["openai"].APIKey != "openai-key" || profile.APIKey != "changed-typesafe-key" || profile.Endpoint != "https://typesafe.example/decision" || profile.Name != "changed-model" || profile.Timeout != 45 {
 		t.Fatal("legacy patch was lost or changed the active provider")
 	}
 	code, message, _ := settingContractRequest(t, "patch", patchSetting, `{"ai":{"decision":{"apiKey":"stale-projection","profiles":{"typesafe":{"apiKey":"modern-key"}}}}}`)
-	if code != 0 || model.Conf.AI.Decision.Profiles["typesafe"].APIKey != "modern-key" {
+	if code != 0 || model.Conf.AI.Load().Decision.Profiles["typesafe"].APIKey != "modern-key" {
 		t.Fatalf("legacy projection overwrote modern patch: %s", message)
 	}
 }

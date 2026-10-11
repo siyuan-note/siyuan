@@ -55,6 +55,8 @@ type SearchBlockRequest struct {
 }
 
 type FullTextSearchBlockRequest struct {
+	// method=2 保留 SQL 原文的换行、注释和字面量大小写，结果需要返回完整块字段。
+	// 支持 SELECT * 和带别名的完整块投影；普通类型与路径筛选不作用于 SQL。
 	SearchBlockRequest
 	Notebook    string `json:"notebook" api:"optional,nullable,ignoretype"`
 	SearchHPath *bool  `json:"searchHPath" api:"optional"`

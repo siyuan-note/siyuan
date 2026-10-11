@@ -2373,7 +2373,7 @@ func writeObsidianTempTree(docsTemp string, tree *parse.Tree) error {
 	if !json.Valid(data) {
 		return fmt.Errorf("generated tree [%s] is not valid JSON", tree.HPath)
 	}
-	if !util.UseSingleLineSave {
+	if !util.UseSingleLineSave.Load() {
 		var buffer bytes.Buffer
 		if err := json.Indent(&buffer, data, "", "\t"); err != nil {
 			return err

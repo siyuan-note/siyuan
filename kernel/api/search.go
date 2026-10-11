@@ -86,7 +86,7 @@ var fullTextSearchAssetContent = contractHandler(apicontract.FullTextSearchAsset
 	searchPage, searchPageSize := page, pageSize
 	if isReadOnlyRole {
 		searchPage = 1
-		searchPageSize = model.Conf.Search.Limit
+		searchPageSize = model.Conf.Search.Load().Limit
 	}
 	assetContents, matchedAssetCount, pageCount, err := model.FullTextSearchAssetContent(query, types, method, orderBy, searchPage, searchPageSize)
 	if err != nil {
@@ -141,7 +141,7 @@ var findReplace = contractHandler(apicontract.FindReplace, func(c *gin.Context, 
 })
 
 var searchAsset = contractHandler(apicontract.SearchAssetByName, func(c *gin.Context, request apicontract.SearchAssetRequest) apicontract.Response[[]*apicontract.SearchAsset] {
-	page, pageSize := 1, model.Conf.Search.Limit
+	page, pageSize := 1, model.Conf.Search.Load().Limit
 	if request.Page != nil {
 		page = *request.Page
 	}

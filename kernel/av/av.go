@@ -166,6 +166,7 @@ const (
 	KeyTypeURL        KeyType = "url"        // URL
 	KeyTypeEmail      KeyType = "email"      // Email
 	KeyTypePhone      KeyType = "phone"      // 电话
+	KeyTypeLocation   KeyType = "location"   // 位置
 	KeyTypeMAsset     KeyType = "mAsset"     // 资源
 	KeyTypeTemplate   KeyType = "template"   // 模板
 	KeyTypeCreated    KeyType = "created"    // 创建时间
@@ -316,6 +317,7 @@ type View struct {
 	PageSize          int                     `json:"pageSize"`          // 每页条目数
 	LayoutType        LayoutType              `json:"type"`              // 当前布局类型
 	Table             *LayoutTable            `json:"table,omitempty"`   // 表格布局
+	LegacyMap         json.RawMessage         `json:"map,omitempty"`     // 仅保留旧地图配置，不参与渲染或修改
 	Calendar          *LayoutCalendar         `json:"calendar,omitempty"`
 	List              *LayoutList             `json:"list,omitempty"`    // 列表布局
 	Gallery           *LayoutGallery          `json:"gallery,omitempty"` // 卡片布局
@@ -332,6 +334,8 @@ type View struct {
 	GroupFolded  bool       `json:"groupFolded"`         // 分组是否折叠
 	GroupHidden  int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
 	GroupSort    int        `json:"groupSort"`           // 分组排序值，用于手动排序
+
+	legacyMapFallback bool
 }
 
 // ViewData 用于序列化视图数据到前端。
@@ -616,6 +620,11 @@ func parseAttributeViewSearchInfo(data []byte) (ret *AttributeViewSearchInfo, er
 	if err = json.Unmarshal(data, ret); err != nil {
 		return
 	}
+	for _, view := range ret.Views {
+		if view != nil && view.LayoutType == "map" {
+			view.LayoutType = LayoutTypeTable
+		}
+	}
 	err = CheckSpec(&AttributeView{Spec: ret.Spec})
 	return
 }
@@ -864,7 +873,16 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 		dataVersion = cache.SetAVDataWithVersionInBox(avID, boxID, data)
 	}
 
-	ret, err = ParseAttributeViewData(avID, data)
+	if normalized, ok := cache.GetAVNormalizedDataInBox(avID, boxID, dataVersion); ok {
+		ret, err = parseAttributeViewData(avID, normalized, false)
+	} else {
+		ret, err = ParseAttributeViewData(avID, data)
+		if err == nil {
+			if normalized, marshalErr := json.Marshal(ret); marshalErr == nil {
+				cache.SetAVNormalizedDataInBox(avID, boxID, dataVersion, data, normalized)
+			}
+		}
+	}
 	if nil == err {
 		if resolveColors {
 			ret.ResolveDirectColors()
@@ -876,6 +894,10 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 
 // ParseAttributeViewData 解析已经完成解密认证的数据库数据，复用现有格式兼容与规范化处理。
 func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err error) {
+	return parseAttributeViewData(avID, data, true)
+}
+
+func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (ret *AttributeView, err error) {
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
 	if err = json.Unmarshal(data, ret); err != nil {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
@@ -940,10 +962,13 @@ func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err e
 		err = fmt.Errorf("unsupported database automation specification [%d]", ret.Automations.Spec)
 	}
 	if nil == err {
-		err = ret.ValidateListLayouts()
+		err = ret.ValidateLayouts()
+	}
+	if nil == err && normalizeRichText {
+		err = ret.NormalizeRichText()
 	}
 	if nil == err {
-		err = ret.NormalizeRichText()
+		err = ret.NormalizeLocations()
 	}
 	return
 }
@@ -961,6 +986,9 @@ func SaveAttributeViewIfUnchanged(av *AttributeView, original []byte) error {
 }
 
 func saveAttributeView(av *AttributeView, original []byte) (err error) {
+	if av.Spec > CurrentSpec {
+		return ErrSpecTooNew
+	}
 	if !ast.IsNodeIDPattern(av.ID) {
 		err = ErrInvalidAttributeViewID
 		logging.LogErrorf("save attribute view failed: %s", err)
@@ -972,7 +1000,10 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		}
 	}()
 
-	if err = av.ValidateListLayouts(); nil != err {
+	if err = av.NormalizeLocations(); nil != err {
+		return
+	}
+	if err = av.ValidateLayouts(); nil != err {
 		return
 	}
 	if err = av.NormalizeRichText(); nil != err {
@@ -1027,7 +1058,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	var data []byte
 	restoreRenderedContents := av.suspendRenderedContents()
 	restoreResolvedColors := av.suspendResolvedColors()
-	if util.UseSingleLineSave {
+	if util.UseSingleLineSave.Load() {
 		data, err = gulu.JSON.MarshalJSON(av)
 	} else {
 		data, err = gulu.JSON.MarshalIndentJSON(av, "", "\t")
@@ -1092,7 +1123,13 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		logging.LogErrorf("create attribute view dir [%s] failed: %s", filepath.Dir(avJSONPath), err)
 		return
 	}
-	if err = util.WriteFileByMmap(avJSONPath, writeData); nil != err {
+	if avBoxID != "" {
+		// 密文通过临时文件原子替换，避免原址覆写中断后丢失可认证的旧数据。
+		if err = filelock.WriteFile(avJSONPath, writeData); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
+			return
+		}
+	} else if err = util.WriteFileByMmap(avJSONPath, writeData); nil != err {
 		if err = filelock.WriteFile(avJSONPath, writeData); nil != err {
 			logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
 			return
@@ -1105,7 +1142,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	}
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
-		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize)
+		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize.Load())
 		util.PushErrMsg(msg, 7000)
 	}
 	return
@@ -1420,6 +1457,7 @@ var (
 	ErrInvalidColumnAlign     = errors.New("invalid column align")
 	ErrSpecTooNew             = errors.New("attribute view spec is too new")
 	ErrRichTextSpecMismatch   = errors.New("attribute view rich text requires storage spec 9")
+	ErrLocationSpecMismatch   = errors.New("attribute view location requires storage spec 13")
 	ErrFilterTooDeep          = errors.New("filter nesting depth exceeds the maximum allowed")
 )
 

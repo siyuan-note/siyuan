@@ -193,10 +193,10 @@ func TestGetConfUILayoutByRole(t *testing.T) {
 
 	oldConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
-	model.Conf.Sync.Enabled = true
-	model.Conf.Sync.Provider = 1
-	model.Conf.System = &conf.System{}
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.Sync.Load().Enabled = true
+	model.Conf.Sync.Load().Provider = 1
+	model.Conf.System.Store(&conf.System{})
 	uiLayout := conf.UILayout{
 		"layout": map[string]any{
 			"instance": "Layout",
@@ -217,7 +217,7 @@ func TestGetConfUILayoutByRole(t *testing.T) {
 			"data": []any{map[string]any{"title": "private-dock-title"}},
 		},
 	}
-	model.Conf.UILayout = &uiLayout
+	model.Conf.UILayout.Store(&uiLayout)
 	t.Cleanup(func() {
 		model.Conf = oldConf
 	})

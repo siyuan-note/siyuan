@@ -43,12 +43,19 @@ var removeUnusedAttributeView = contractHandler(apicontract.RemoveUnusedAttribut
 })
 
 var removeUnusedAttributeViews = contractHandler(apicontract.RemoveUnusedAttributeViews, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.AVPathsData] {
-	defer beginSettingTask("clearAllAV")()
-	return apicontract.Success(apicontract.AVPathsData{Paths: model.RemoveUnusedAttributeViews()})
+	defer beginSettingTask("clearingUnusedAttributeViews")()
+	paths, err := model.RemoveUnusedAttributeViews()
+	if err != nil {
+		return apicontract.Failure[apicontract.AVPathsData](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.AVPathsData{Paths: paths})
 })
 
 var getUnusedAttributeViews = contractHandler(apicontract.GetUnusedAttributeViews, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
-	values := model.UnusedAttributeViews(true)
+	values, err := model.UnusedAttributeViews(true)
+	if err != nil {
+		return apicontract.Failure[[]*apicontract.AssetUnusedItem](-1, err.Error())
+	}
 	total := len(values)
 	if total > 512 {
 		values = values[:512]
@@ -502,38 +509,14 @@ var getAttributeViewCalendarUndated = contractHandler(apicontract.GetAttributeVi
 	search := strings.ToLower(strings.TrimSpace(request.Search))
 	rows := make([]*av.TableRow, 0, len(calendar.UndatedRows))
 	for _, row := range calendar.UndatedRows {
-		if search != "" {
-			matched := false
-			for _, cell := range row.Cells {
-				if cell == nil || cell.Value == nil || cell.Value.Type != av.KeyTypeBlock || cell.Value.Block == nil {
-					continue
-				}
-				matched = strings.Contains(strings.ToLower(cell.Value.Block.Content), search)
-				break
-			}
-			if !matched {
-				continue
-			}
+		if attributeViewRowMatchesTitle(row, search) {
+			rows = append(rows, row)
 		}
-		rows = append(rows, row)
 	}
 	total := len(rows)
-	page, pageSize := avPage(request.Page, 1), avPage(request.PageSize, 50)
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 50
-	} else if pageSize > 100 {
-		pageSize = 100
-	}
-	if page > (total+pageSize-1)/pageSize {
-		return apicontract.Success(apicontract.AVCalendarUndatedData{Rows: []*apicontract.AVTableRow{}, Total: total})
-	}
-	start := (page - 1) * pageSize
-	end := min(total, start+pageSize)
+	rows = paginateAttributeViewRows(rows, avPage(request.Page, 1), avPage(request.PageSize, 50))
 	return apicontract.Success(apicontract.AVCalendarUndatedData{
-		Rows: avContractSlice(rows[start:end], toContractAVTableRow), Total: total,
+		Rows: avContractSlice(rows, toContractAVTableRow), Total: total,
 	})
 })
 

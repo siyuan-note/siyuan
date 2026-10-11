@@ -7,6 +7,7 @@ import {exportConfigApi} from "../tabs/exportRuntime";
 import {searchConfigApi} from "../tabs/searchRuntime";
 import {appearanceConfigApi} from "../tabs/appearanceRuntime";
 import {mountSyncTabExtras, patchSyncConfig} from "../tabs/syncRuntime";
+import {refreshCloudUser} from "../tabs/accountUi";
 import {mountAccessTab} from "../tabs/accessRuntime";
 import {collectAssetsTabSearchStrings, mountAssetsTab} from "../assets";
 import {mountOCRTab, registerOCRTab} from "../ocr";
@@ -120,6 +121,7 @@ const createSettingTabs = () => {
             title: () => window.siyuan.languages.accountSync,
             defaultSave: patchSyncConfig,
             afterMount: mountSyncTabExtras,
+            onShow: (root) => { void refreshCloudUser(false, root); },
         }, registerSyncTab),
         access: setting.tab({
             id: "access",

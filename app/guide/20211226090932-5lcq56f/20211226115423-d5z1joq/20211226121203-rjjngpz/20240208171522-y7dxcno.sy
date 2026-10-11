@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261007101857"
+		"updated": "20261011102158"
 	},
 	"Children": [
 		{
@@ -65,6 +65,117 @@
 				{
 					"Type": "NodeText",
 					"Data": "在文件頂部、資料庫項目頁或區塊屬性對話方塊的資料庫屬性面板中點選欄位名稱，可以將「資料庫面板欄位可見性」設為「始終顯示」「空白時隱藏」或「始終隱藏」。「預設」保留面板原有的顯示設定，其中文件頂部面板沿用全域隱藏空欄位設定。規則對該資料庫的屬性面板生效，不影響資料庫各檢視的欄位顯隱。點選面板的編輯按鈕可以暫時展開隱藏欄位，編輯欄位值或修改顯示規則。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-5oq6h7a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261009034010-5oq6h7a",
+				"updated": "20261011102158"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "位置欄位"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-m2e4n60",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-m2e4n60",
+				"updated": "20261010064719"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新增類型為「位置」的欄位後，點擊儲存格編輯名稱和 WGS84 座標。名稱可留空。經度和緯度須成對填寫，使用十進位度數。經度範圍為 -180 到 180，緯度範圍為 -90 到 90，零是有效值。將兩個座標都留空時，可僅儲存名稱。座標不會自動轉換。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-ue87c6m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-ue87c6m",
+				"updated": "20261011102158"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在經度和緯度輸入框中分別填寫座標，例如經度 116.4074、緯度 39.9042。僅修改名稱時，保留的來源文字維持不變；修改座標會清除來源文字。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-g7jsd2p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-g7jsd2p",
+				"updated": "20261011093258"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 套用修改，點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "取消"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 放棄修改，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清空"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 會移除位置值。文字過濾和排序使用名稱、座標及固定 WGS84 標記組合後的文字。應用程式內依經度、緯度順序顯示；純文字複製和匯出使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "名稱; 緯度, 經度 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 格式，未填寫名稱時省略名稱及分號。可將該文字或 WGS84 的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "緯度, 經度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 座標對貼上至位置儲存格。例如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "北京; 39.9042, 116.4074 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 同時包含名稱和座標。資料庫內的結構化複製保留經緯度各自的具名欄位值。"
 				}
 			]
 		},
@@ -3729,7 +3840,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-f9wjtlr",
-				"updated": "20261003000448"
+				"updated": "20261010222552"
 			},
 			"Children": [
 				{
@@ -3743,7 +3854,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002224707-zvqappp",
-				"updated": "20261003000448"
+				"updated": "20261010222552"
 			},
 			"Children": [
 				{
@@ -3767,6 +3878,10 @@
 				{
 					"Type": "NodeText",
 					"Data": "，新增規則。修改會自動儲存，文字在失焦或按下 Enter 時儲存。新規則預設停用；設定不完整時會自動停用並提示缺少的項目，完善後手動啟用。規則由整個資料庫共用，在任一檢視或鏡像中的條目修改都可觸發"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。引用的欄位被刪除或變更類型、目標資料庫被刪除後，後續條目寫入會自動停用受影響規則，並提示規則名稱及失效引用。使用者修改正常儲存，規則設定保留；修復設定後需手動啟用。資料庫鎖定、驗證失敗、資料損毀或寫入失敗時，使用者修改和自動操作仍會一起回復"
 				}
 			]
 		},

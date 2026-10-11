@@ -93,7 +93,7 @@ func GetDocHistorySnapshots(ctx context.Context, id string, histories []*DocHist
 		key := matchKey{boxID, hash}
 		matches[key] = append(matches[key], history)
 	}
-	if len(Conf.Repo.Key) == 0 {
+	if len(Conf.Repo.Load().Key) == 0 {
 		return nil
 	}
 	repo, err := newRepository()
@@ -253,7 +253,7 @@ func localTaggedSnapshotIndexes(ctx context.Context, repo *dejavu.Repo) (map[str
 			if readErr != nil {
 				return nil, nil, readErr
 			}
-			if index.ID != indexID || !index.VerifyAESKey(Conf.Repo.Key) {
+			if index.ID != indexID || !index.VerifyAESKey(Conf.Repo.Load().Key) {
 				return nil, nil, errors.New("invalid tagged snapshot index")
 			}
 			indexes[indexID] = index

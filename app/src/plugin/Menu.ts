@@ -1,8 +1,30 @@
 import {Menu as SiyuanMenu} from "../menus/Menu";
+import {toggleMenu} from "../menus/menuToggle";
 
 const independentMenus = new WeakMap<HTMLElement, Menu>();
 
 export class Menu {
+    // 在创建共享菜单前按触发元素切换，保留构造器及独立菜单的既有行为。
+    static toggle(options: {
+        target?: Element;
+        toggle?: boolean;
+        id?: string;
+        closeCB?: () => void;
+        build: (menu: Menu) => void;
+        show: (menu: Menu) => void;
+    }) {
+        let menu: Menu;
+        toggleMenu({
+            target: options.target,
+            toggle: options.toggle,
+            build: () => {
+                menu = new Menu(options.id, options.closeCB);
+                options.build(menu);
+            },
+            show: () => options.show(menu),
+        });
+    }
+
     private menu: SiyuanMenu;
     private parentMenu?: Menu;
     private childMenus = new Set<Menu>();

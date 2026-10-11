@@ -531,7 +531,12 @@ func reindexTree0(tree *parse.Tree, i, size int) {
 	if "" == updated {
 		updated = util.TimeFromID(tree.Root.ID)
 		tree.Root.SetIALAttr("updated", updated)
-		indexWriteTreeUpsertQueue(tree)
+		if err := writeTreeUpsertQueue(tree); err != nil {
+			logging.LogErrorf("repair document timestamp [%s] failed: %s", tree.ID, err)
+			util.PushErrMsg(Conf.Language(258), 7000)
+			return
+		}
+		treenode.UpsertBlockTree(tree)
 	} else {
 		treenode.UpsertBlockTree(tree)
 		sql.IndexTreeQueue(tree)

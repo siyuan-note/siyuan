@@ -1,4 +1,4 @@
-import {isMac, isNotCtrl, isOnlyMeta} from "./compatibility";
+import {isInIOS, isMac, isNotCtrl, isOnlyMeta} from "./compatibility";
 import {Constants} from "../../constants";
 import {getKeymapBindings, IShortcutKeymap, normalizeShortcutKey, visitKeymapItems} from "../../util/keymapBindings";
 
@@ -59,9 +59,13 @@ export const matchHotKey = (hotKey: string | IShortcutKeymap, event: KeyboardEve
         return false;
     }
 
+    // iOS 中文输入法可能将未组词的 Command 字母键标记为 229，此时按实际字母匹配。
+    const eventKey = event.keyCode === 229 && event.metaKey && !event.isComposing &&
+        /^[a-z]$/i.test(event.key) && isInIOS() ? event.key.toUpperCase() : Constants.KEYCODELIST[event.keyCode];
+
     // []
     if (hotKey.indexOf("⇧") === -1 && hotKey.indexOf("⌘") === -1 && hotKey.indexOf("⌥") === -1 && hotKey.indexOf("⌃") === -1) {
-        if (isNotCtrl(event) && !event.altKey && !event.shiftKey && hotKey === Constants.KEYCODELIST[event.keyCode]) {
+        if (isNotCtrl(event) && !event.altKey && !event.shiftKey && hotKey === eventKey) {
             return true;
         }
         return false;
@@ -81,7 +85,7 @@ export const matchHotKey = (hotKey: string | IShortcutKeymap, event: KeyboardEve
 
     // 是否匹配 ⇧[]
     if (hotKey.startsWith("⇧") && hotKeys.length === 2) {
-        if (isNotCtrl(event) && !event.altKey && event.shiftKey && hotKeys[1] === Constants.KEYCODELIST[event.keyCode]) {
+        if (isNotCtrl(event) && !event.altKey && event.shiftKey && hotKeys[1] === eventKey) {
             return true;
         }
         return false;
@@ -92,7 +96,7 @@ export const matchHotKey = (hotKey: string | IShortcutKeymap, event: KeyboardEve
         if (hotKeys.length === 4) {
             keyCode = hotKeys[3];
         }
-        const isMatchKey = keyCode === Constants.KEYCODELIST[event.keyCode];
+        const isMatchKey = keyCode === eventKey;
         // 是否匹配 ⌥[] / ⌥⌘[]
         if (isMatchKey && event.altKey && !event.shiftKey && hotKeys.length < 4 &&
             (hotKeys.length === 3 ? (isOnlyMeta(event) && hotKey.startsWith("⌥⌘")) : isNotCtrl(event))) {
@@ -123,7 +127,7 @@ export const matchHotKey = (hotKey: string | IShortcutKeymap, event: KeyboardEve
             keyCode = hotKeys[4];
         }
 
-        const isMatchKey = keyCode === Constants.KEYCODELIST[event.keyCode];
+        const isMatchKey = keyCode === eventKey;
         // 是否匹配 ⌃[] / ⌃⌘[]
         if (isMatchKey && event.ctrlKey && !event.altKey && !event.shiftKey && hotKeys.length < 4 &&
             (hotKeys.length === 3 ? (event.metaKey && hotKey.startsWith("⌃⌘")) : !event.metaKey)) {
@@ -160,7 +164,7 @@ export const matchHotKey = (hotKey: string | IShortcutKeymap, event: KeyboardEve
     // 是否匹配 ⇧⌘[] / ⌘[]
     const hasShift = hotKeys.length > 2 && (hotKeys[0] === "⇧");
     if (isOnlyMeta(event) && !event.altKey && ((!hasShift && !event.shiftKey) || (hasShift && event.shiftKey))) {
-        return (hasShift ? hotKeys[2] : hotKeys[1]) === Constants.KEYCODELIST[event.keyCode];
+        return (hasShift ? hotKeys[2] : hotKeys[1]) === eventKey;
     }
     return false;
 };

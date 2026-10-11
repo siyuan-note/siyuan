@@ -30,6 +30,7 @@ test("OCR declarations drive catalog order, defaults and complete menu actions",
         openResult: () => { clicked.push("result"); }, copyText: () => { clicked.push("copy"); },
         runLocal: () => { clicked.push("local"); }, runAI: () => { clicked.push("ai"); },
     }));
+    assert.equal(menu.icon, "iconOCR");
     assert.deepEqual(menu.submenu.map(item => [item.id, item.label, item.icon, item.type]), [
         ["ocrResult", "ocrResult", "iconEdit", undefined], ["copyOCRText", "copy OCR", "iconCopy", undefined],
         ["separator_reOCR", "", undefined, "separator"], ["reOCR", "performOCR", "iconOCR", undefined],

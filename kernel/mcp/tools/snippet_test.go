@@ -17,7 +17,7 @@ func setupSnippetToolTest(t *testing.T, snippets []*conf.Snippet) {
 	t.Helper()
 	oldConf, oldPath := model.Conf, util.SnippetsPath
 	model.Conf = model.NewAppConf()
-	model.Conf.Snippet = conf.NewSnpt()
+	model.Conf.Snippet.Store(conf.NewSnpt())
 	util.SnippetsPath = t.TempDir()
 	t.Cleanup(func() { model.Conf, util.SnippetsPath = oldConf, oldPath })
 	data, err := json.Marshal(snippets)

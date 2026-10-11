@@ -120,10 +120,10 @@ func TestAPIContractSettingsResetSerializesGraphWrites(t *testing.T) {
 		{"/api/graph/getLocalGraph", getLocalGraph, `{"id":"missing","conf":{"d3":false}}`, false},
 	} {
 		t.Run(entry.path+entry.body, func(t *testing.T) {
-			model.Conf.Graph = conf.NewGraph()
-			model.Conf.Graph.Global.MinRefs = 7
-			model.Conf.Graph.Local.DailyNote = true
-			before := string(graphJSON(t, model.Conf.Graph))
+			model.Conf.Graph.Store(conf.NewGraph())
+			model.Conf.Graph.Load().Global.MinRefs = 7
+			model.Conf.Graph.Load().Local.DailyNote = true
+			before := string(graphJSON(t, model.Conf.Graph.Load()))
 			recorder := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(recorder)
 			c.Set(model.RoleContextKey, model.RoleAdministrator)
@@ -148,7 +148,7 @@ func TestAPIContractSettingsResetSerializesGraphWrites(t *testing.T) {
 				t.Fatal("graph write did not resume after settings reset unlocked")
 			}
 			requireAPIContract(t, http.MethodPost, entry.path, recorder)
-			if changed := before != string(graphJSON(t, model.Conf.Graph)); changed != entry.changed {
+			if changed := before != string(graphJSON(t, model.Conf.Graph.Load())); changed != entry.changed {
 				t.Fatal("graph write or validation changed after unlocking")
 			}
 		})

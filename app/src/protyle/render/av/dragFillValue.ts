@@ -1,3 +1,5 @@
+import {createAVLocationReplacement} from "./locationValue";
+
 interface IAVCellValueTarget {
     id: string;
     keyID: string;
@@ -13,6 +15,9 @@ export const rebindAVCellValue = (source: IAVCellValue, target: IAVCellValueTarg
     value.id = target.id;
     value.keyID = target.keyID;
     value.blockID = target.blockID;
+    if (value.type === "location") {
+        value.location = createAVLocationReplacement(value.location);
+    }
     delete value.createdAt;
     delete value.updatedAt;
     return value;

@@ -49,8 +49,13 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 		return
 	}
 	fixture := setupFileOperationTest(t)
-	Conf.Search, Conf.Editor, Conf.Export = conf.NewSearch(), conf.NewEditor(), conf.NewExport()
-	Conf.OCR = &conf.OCR{Provider: "paddleocr", Model: "tiny", Auto: true}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+		Conf.Search.Store(confSectionValue0)
+		Conf.Editor.Store(confSectionValue1)
+		Conf.Export.Store(confSectionValue2)
+	}
+	Conf.OCR.Store(&conf.OCR{Provider: "paddleocr", Model: "tiny", Auto: true})
 	util.WorkspaceDir = filepath.Dir(util.DataDir)
 	util.TempDir, util.HistoryDir = t.TempDir(), t.TempDir()
 	util.ConfDir = t.TempDir()
@@ -142,12 +147,12 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 	}
 	util.RemoveAssetText(path)
 	provider.err = nil
-	Conf.OCR.Auto = false
+	Conf.OCR.Load().Auto = false
 	autoOCRAssets()
 	if provider.called {
 		t.Fatal("disabled automatic OCR reached provider")
 	}
-	Conf.OCR.Auto = true
+	Conf.OCR.Load().Auto = true
 	autoOCRAssets()
 	if !provider.called || !strings.Contains(util.GetAssetText(path), "nativeocrkeyword") {
 		t.Fatalf("headless automatic OCR did not save text: called=%v text=%q", provider.called, util.GetAssetText(path))
@@ -179,7 +184,7 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 			repairEncryptedBoxStateFromDEK(encryptedBox)
 		}
 		for _, selected := range []string{"paddleocr", "tesseract"} {
-			Conf.OCR.Provider = selected
+			Conf.OCR.Load().Provider = selected
 			for _, path := range []string{"assets/encrypted.png?box=" + encryptedBox, "assets/encrypted.png?box=" + encryptedBox + "#fragment", "assets/missing.png?box=" + encryptedBox + "#fragment"} {
 				provider.called = false
 				if _, _, err := OCRAsset(context.Background(), path); err == nil || provider.called {
@@ -252,7 +257,7 @@ func testOCRNotebookIsolation(t *testing.T, provider *ocrFixtureProvider, firstB
 		sql.IndexTreeQueue(tree)
 	}
 	sql.FlushQueue()
-	Conf.OCR.Provider = "paddleocr"
+	Conf.OCR.Load().Provider = "paddleocr"
 	for _, test := range []struct{ reference, box, text string }{
 		{"  " + first + "&width=100#preview", firstBox, "firstocrkeyword"},
 		{second, secondBox, "secondocrkeyword"},

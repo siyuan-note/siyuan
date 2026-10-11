@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"testing"
 )
 
@@ -98,6 +99,10 @@ func TestIsSensitivePathCredentialDotfiles(t *testing.T) {
 		name string
 		rel  string // 相对 HomeDir 的路径
 	}{
+		// GHSA-q768-4j87-gf3w 点名的 dotenv 配置文件，.env 前缀同时覆盖派生文件。
+		{"env file", ".env"},
+		{"env local file", ".env.local"},
+		{"env production file", ".env.production"},
 		{"git-credentials", ".git-credentials"},
 		{"netrc", ".netrc"},
 		{"pgpass", ".pgpass"},
@@ -118,6 +123,69 @@ func TestIsSensitivePathCredentialDotfiles(t *testing.T) {
 		if got := IsSensitivePath(abs); !got {
 			t.Errorf("IsSensitivePath(%q) = false, want true [%s]", abs, c.name)
 		}
+	}
+}
+
+// TestIsSensitivePathPlatformHomeDirs 覆盖 GHSA-q768-4j87-gf3w 点名的平台应用数据目录：
+// macOS 用户资源库中的钥匙串、Windows 漫游与本地应用数据中的凭据。
+func TestIsSensitivePathPlatformHomeDirs(t *testing.T) {
+	type platformCase struct {
+		name string
+		rel  string
+	}
+	var home string
+	var cases []platformCase
+	if runtime.GOOS == "darwin" {
+		home = t.TempDir()
+		cases = append(cases, platformCase{"macOS keychain", filepath.Join("Library", "Keychains", "login.keychain-db")})
+	}
+	if runtime.GOOS == "windows" {
+		// AppData\Local 条目放行系统临时目录，而 t.TempDir() 正位于该目录中，因此使用真实用户主目录
+		profile, err := os.UserHomeDir()
+		if err != nil || profile == "" {
+			t.Skipf("user home dir unavailable: %v", err)
+		}
+		home = profile
+		cases = append(cases,
+			platformCase{"Windows roaming credentials", filepath.Join("AppData", "Roaming", "gcloud", "credentials.db")},
+			platformCase{"Windows local profile data", filepath.Join("AppData", "Local", "Google", "Chrome", "User Data", "Default", "Cookies")})
+	}
+	if len(cases) == 0 {
+		t.Skipf("no platform-specific home entries on %s", runtime.GOOS)
+	}
+
+	origHome, origWorkspace := HomeDir, WorkspaceDir
+	HomeDir, WorkspaceDir = home, t.TempDir()
+	t.Cleanup(func() { HomeDir, WorkspaceDir = origHome, origWorkspace })
+
+	for _, c := range cases {
+		abs := filepath.Join(home, c.rel)
+		if got := IsSensitivePath(abs); !got {
+			t.Errorf("IsSensitivePath(%q) = false, want true [%s]", abs, c.name)
+		}
+	}
+}
+
+// TestIsSensitivePathSystemTempExemption 验证 Windows 系统临时目录中的剪贴板及 HTML 粘贴资源
+// 不被 AppData\Local 条目误判。
+func TestIsSensitivePathSystemTempExemption(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("the system temp dir lives under AppData only on Windows")
+	}
+	profile, err := os.UserHomeDir()
+	if err != nil || profile == "" {
+		t.Skipf("user home dir unavailable: %v", err)
+	}
+	origHome := HomeDir
+	HomeDir = profile
+	t.Cleanup(func() { HomeDir = origHome })
+
+	p := filepath.Join(os.TempDir(), "siyuan-clipboard-image.png")
+	if IsSensitivePath(p) {
+		t.Errorf("IsSensitivePath(%q) = true, want false", p)
+	}
+	if IsSensitiveHTMLAssetPath(p) {
+		t.Errorf("IsSensitiveHTMLAssetPath(%q) = true, want false", p)
 	}
 }
 

@@ -722,6 +722,11 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
             event.stopPropagation();
             event.preventDefault();
             break;
+        } else if (type === "location") {
+            popTextCell(protyle, [target], "location");
+            event.stopPropagation();
+            event.preventDefault();
+            break;
         } else if (type === "date") {
             popTextCell(protyle, [target], "date");
             event.stopPropagation();

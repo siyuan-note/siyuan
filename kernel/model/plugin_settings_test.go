@@ -13,8 +13,8 @@ import (
 func TestLoadSettingsWindowPetals(t *testing.T) {
 	originalConf, originalDataDir := Conf, util.DataDir
 	Conf = NewAppConf()
-	Conf.Sync = conf.NewSync()
-	Conf.Bazaar = &conf.Bazaar{Trust: true}
+	Conf.Sync.Store(conf.NewSync())
+	Conf.Bazaar.Store(&conf.Bazaar{Trust: true})
 	util.DataDir = t.TempDir()
 	t.Cleanup(func() { Conf, util.DataDir = originalConf, originalDataDir })
 	for _, item := range []struct {
@@ -52,11 +52,11 @@ func TestLoadSettingsWindowPetals(t *testing.T) {
 	if ordinary := LoadPetals("desktop", false); len(ordinary) != 3 {
 		t.Fatal("settings loading changed ordinary loading")
 	}
-	Conf.Bazaar.PetalDisabled = true
+	Conf.Bazaar.Load().PetalDisabled = true
 	if len(LoadSettingsWindowPetals("desktop", false)) != 0 {
 		t.Fatal("globally disabled plugins loaded")
 	}
-	Conf.Bazaar.PetalDisabled, Conf.Bazaar.Trust = false, false
+	Conf.Bazaar.Load().PetalDisabled, Conf.Bazaar.Load().Trust = false, false
 	if util.Container == util.ContainerStd || util.Container == util.ContainerDocker {
 		if len(LoadSettingsWindowPetals("desktop", false)) != 0 {
 			t.Fatal("untrusted plugins loaded")

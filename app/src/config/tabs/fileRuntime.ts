@@ -7,5 +7,5 @@ export const fileConfigApi = createConfigNamespaceApi<Config.IFileTree>({
     setConfig: (data) => {
         window.siyuan.config.fileTree = data;
     },
-    apiPath: "/api/setting/setFiletree",
+
 });

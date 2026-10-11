@@ -12,6 +12,7 @@ const browserCases = async (source: string) => {
     const requests: ((response: unknown) => void)[] = [];
     let tooltip = "";
     const assetRequests: {path: string, signal: AbortSignal, receive: (response: unknown) => void}[] = [];
+    const ocrRequests: ((text: string | undefined) => void)[] = [];
     class Panel {
         element = document.createElement("div");
         editors: {protyle: IProtyle}[] = [];
@@ -37,6 +38,7 @@ const browserCases = async (source: string) => {
     const dependencies = {
         BlockPanel: Panel,
         fetchSyncPost: () => new Promise(resolve => requests.push(resolve)),
+        getImageOCRText: () => new Promise<string | undefined>(resolve => ocrRequests.push(resolve)),
         hideTooltip: () => {},
         showTooltip: (text: string) => { tooltip = text; },
         fetchPost: (_url: string, body: {path: string}, receive: (response: unknown) => void,
@@ -49,6 +51,8 @@ const browserCases = async (source: string) => {
             .replace(/-\d{14}-\w{7}$/, ""),
         Constants: {TIMEOUT_INPUT: 5},
         isTouchDevice: () => false,
+        isTouchHoverInput: () => false,
+        isInteractiveTooltipTarget: () => false,
         isEncryptedBox: () => false,
         isListItemActionElement: () => false,
         isAbove: () => false,
@@ -59,6 +63,7 @@ const browserCases = async (source: string) => {
         config: {editor: {floatWindowMode: 0, floatWindowDelay: 20}},
         menus: {menu: {element: document.createElement("div")}},
         blockPanels: [],
+        languages: {ocrResult: "OCR text", emptyContent: "No related content found"},
     } as unknown as typeof window.siyuan;
     window.JSAndroid = {} as typeof window.JSAndroid;
     const root = document.createElement("div");
@@ -156,6 +161,12 @@ const browserCases = async (source: string) => {
     check.equal(tooltip, "Caption %3Cem%3E &amp; details<br>&lt;literal> description");
     check.equal(image.title, "Caption %3Cem%3E & details");
     check.equal(image.alt, "<literal> description");
+    image.setAttribute("data-title", image.title);
+    image.removeAttribute("title");
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    check.equal(tooltip, "Caption %3Cem%3E &amp; details<br>&lt;literal> description");
+    check.equal(image.hasAttribute("title"), false);
+    image.removeAttribute("data-title");
     image.title = "";
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.equal(tooltip, "&lt;literal> description");
@@ -173,23 +184,62 @@ const browserCases = async (source: string) => {
     check.equal(assetRequests.length, 1);
     assetRequests[0].receive({code: 0, data: {hSize: "2 MiB"}});
     check.match(tooltip, /PNG · 1920 × 1080 · 2 MiB$/);
+    ocrRequests[0]("<script> & text\nsecond line");
+    await Promise.resolve();
+    check.match(tooltip, /OCR text:<br>&lt;script> &amp; text<br>second line$/);
+    check.match(tooltip, /2 MiB/);
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     document.body.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.equal(assetRequests[1].signal.aborted, true);
     tooltip = "later target";
     assetRequests[1].receive({code: 0, data: {hSize: "stale"}});
+    ocrRequests[1]("stale OCR");
+    await Promise.resolve();
     check.equal(tooltip, "later target");
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     const unavailable = tooltip;
     assetRequests[2].receive({code: 1, data: null});
     check.equal(tooltip, unavailable);
+    ocrRequests[2](" \n ");
+    await Promise.resolve();
+    check.match(tooltip, /OCR text:<br>No related content found$/);
     image.setAttribute("data-src", "https://example.com/photo.webp");
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.match(tooltip, /photo.webp.*WEBP · 1920 × 1080/);
     check.equal(assetRequests.length, 3);
+    check.equal(ocrRequests.length, 3, "remote images do not query OCR");
     image.setAttribute("data-src", "assets/encrypted.png?box=encrypted");
     image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
     check.equal(assetRequests.length, 3);
+    check.equal(ocrRequests.length, 3, "encrypted resources do not query OCR");
+    image.setAttribute("data-src", "assets/long-ocr.png");
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    const longText = "x".repeat(201);
+    ocrRequests[3](longText);
+    await Promise.resolve();
+    check.ok(tooltip.endsWith("x".repeat(200) + "..."));
+    check.equal(tooltip.includes(longText), false);
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    ocrRequests[4]("1\r\n2\r3\n4\n5\n6\n7");
+    await Promise.resolve();
+    check.ok(tooltip.endsWith("1<br>2<br>3<br>4<br>5<br>6..."));
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    ocrRequests[5]("😀".repeat(201));
+    await Promise.resolve();
+    check.ok(tooltip.endsWith("😀".repeat(200) + "..."), "truncation does not split surrogate pairs");
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    ocrRequests[6]("<".repeat(201));
+    await Promise.resolve();
+    check.ok(tooltip.endsWith("&lt;".repeat(200) + "..."), "truncation precedes HTML escaping");
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    ocrRequests[7]("x".repeat(200));
+    await Promise.resolve();
+    check.ok(tooltip.endsWith("x".repeat(200)));
+    check.equal(tooltip.endsWith("..."), false, "exact-length text remains complete");
+    image.dispatchEvent(new MouseEvent("mouseover", {bubbles: true}));
+    ocrRequests[8]("1\n2\n3\n4\n5\n6");
+    await Promise.resolve();
+    check.ok(tooltip.endsWith("1<br>2<br>3<br>4<br>5<br>6"), "six complete lines remain unchanged");
     check.equal(image.title, "");
     check.equal(image.alt, "");
     return "Popover interaction cases passed";
@@ -199,7 +249,7 @@ test("mindmap interaction cancels pending popovers and preserves hover preferenc
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 20000,
 }, async () => {
-    const source = ["../protyle/util/hasClosest.ts", "../util/escape.ts", "../protyle/render/imageTooltip.ts", "panelOwnership.ts", "popoverLifecycle.ts", "popover.ts"].map(file => transpileModule(
+    const source = ["../protyle/util/hasClosest.ts", "../util/escape.ts", "../protyle/render/imageTitle.ts", "../protyle/render/imageTooltip.ts", "panelOwnership.ts", "popoverLifecycle.ts", "popover.ts"].map(file => transpileModule(
         readFileSync(path.join(__dirname, file), "utf8").replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}},
     ).outputText).join("\n");

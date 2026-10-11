@@ -59,7 +59,7 @@ func TestAPIContractSearchPermissions(t *testing.T) {
 
 func TestAPIContractSearchAssetFilters(t *testing.T) {
 	assetsDir := setupAssetContractWorkspace(t)
-	model.Conf.Search = conf.NewSearch()
+	model.Conf.Search.Store(conf.NewSearch())
 	files := []string{"alpha-cover.png", "alpha-note.txt", "beta-cover.PNG", "covers/gamma-cover.webp"}
 	for _, name := range files {
 		path := filepath.Join(assetsDir, filepath.FromSlash(name))

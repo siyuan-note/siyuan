@@ -8188,6 +8188,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -8264,6 +8265,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -8891,6 +8893,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -8967,6 +8970,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -9072,6 +9076,7 @@
             "url",
             "email",
             "phone",
+            "location",
             "mAsset",
             "template",
             "created",
@@ -11590,6 +11595,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -11727,6 +11733,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -11891,6 +11898,9 @@
         "keyID": {
           "type": "string"
         },
+        "location": {
+          "$ref": "#/$defs/AVValueLocation"
+        },
         "mAsset": {
           "type": "array",
           "items": {
@@ -11950,6 +11960,7 @@
             "url",
             "email",
             "phone",
+            "location",
             "mAsset",
             "template",
             "created",
@@ -12521,6 +12532,16 @@
             }
           ]
         },
+        "location": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AVValueLocationInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "mAsset": {
           "anyOf": [
             {
@@ -12642,6 +12663,7 @@
             "url",
             "email",
             "phone",
+            "location",
             "mAsset",
             "template",
             "created",
@@ -12684,6 +12706,70 @@
           "anyOf": [
             {
               "$ref": "#/$defs/AVValueURLInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "AVValueLocation": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "originalInput": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AVValueLocationInput": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "longitude": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "originalInput": {
+          "anyOf": [
+            {
+              "type": "string"
             },
             {
               "type": "null"
@@ -20821,6 +20907,39 @@
       ],
       "additionalProperties": false
     },
+    "ClearSyncProviderConfigData": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "local": {
+          "$ref": "#/$defs/SyncLocal"
+        },
+        "s3": {
+          "$ref": "#/$defs/SyncS3"
+        },
+        "webdav": {
+          "$ref": "#/$defs/SyncWebDAV"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "additionalProperties": false
+    },
+    "ClearSyncProviderConfigRequestInput": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "provider"
+      ],
+      "additionalProperties": false
+    },
     "ClipboardFile": {
       "type": "object",
       "properties": {
@@ -23409,33 +23528,6 @@
       ],
       "additionalProperties": false
     },
-    "DynamicIconRequestInput": {
-      "type": "object",
-      "properties": {
-        "color": {
-          "type": "string"
-        },
-        "content": {
-          "type": "string"
-        },
-        "date": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "lang": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string"
-        },
-        "weekdayType": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
     "EditorReadOnlyRequestInput": {
       "type": "object",
       "properties": {
@@ -24137,6 +24229,16 @@
           "type": "string"
         },
         "imgTag": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "preserveTaskMarkers": {
           "anyOf": [
             {
               "type": "boolean"
@@ -35372,6 +35474,32 @@
       ],
       "additionalProperties": false
     },
+    "PatchRepoSettingInput": {
+      "type": "object",
+      "properties": {
+        "indexRetentionDays": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "retentionIndexesDaily": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "PatchSettingRequestInput": {
       "type": "object",
       "properties": {
@@ -35389,6 +35517,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingAppearanceInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bazaar": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingBazaarInput"
             },
             {
               "type": "null"
@@ -35441,6 +35579,36 @@
             "$ref": "#/$defs/JSONValue"
           }
         },
+        "ocr": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingOCRInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publish": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingPublishInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repo": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PatchRepoSettingInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "search": {
           "anyOf": [
             {
@@ -35461,10 +35629,232 @@
             }
           ]
         },
+        "snippet": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingSnptInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sync": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PatchSyncSettingInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "system": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PatchSystemSettingInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "variables": {
           "anyOf": [
             {
               "$ref": "#/$defs/SettingVariablesInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "PatchSyncSettingInput": {
+      "type": "object",
+      "properties": {
+        "assetDownloadMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cloudName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "generateConflictDoc": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "interval": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyncLANRequestInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "local": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyncLocalInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "perception": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "s3": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyncS3Input"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "webdav": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyncWebDAVInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "PatchSystemSettingInput": {
+      "type": "object",
+      "properties": {
+        "autoLaunch2": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "encryptedNotebookFollowSystemLock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lockScreenMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "networkProxy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NetworkProxyInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "networkServe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "networkServeTLS": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "settingsWindow": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -44114,6 +44504,32 @@
       ],
       "additionalProperties": false
     },
+    "SettingBazaarInput": {
+      "type": "object",
+      "properties": {
+        "petalDisabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "trust": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SettingBodyGradient": {
       "type": "object",
       "properties": {
@@ -46146,6 +46562,13 @@
     "SettingEntryVisibilityProfile": {
       "type": "object",
       "properties": {
+        "defaults": {
+          "type": "string",
+          "enum": [
+            "simple",
+            "full"
+          ]
+        },
         "entries": {
           "anyOf": [
             {
@@ -46200,6 +46623,20 @@
     "SettingEntryVisibilityProfileInput": {
       "type": "object",
       "properties": {
+        "defaults": {
+          "enum": [
+            "simple",
+            "full"
+          ],
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "entries": {
           "anyOf": [
             {
@@ -47335,6 +47772,26 @@
       },
       "additionalProperties": false
     },
+    "SettingIssue": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "message",
+        "severity"
+      ],
+      "additionalProperties": false
+    },
     "SettingKeymapRequestInput": {
       "type": "object",
       "properties": {
@@ -48132,6 +48589,28 @@
       ],
       "additionalProperties": false
     },
+    "SettingPatchData": {
+      "type": "object",
+      "properties": {
+        "issues": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SettingIssue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "issues"
+      ],
+      "additionalProperties": false
+    },
     "SettingPetalDisabledData": {
       "type": "object",
       "properties": {
@@ -48468,6 +48947,42 @@
         "port",
         "publish"
       ],
+      "additionalProperties": false
+    },
+    "SettingPublishInput": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingBasicAuthInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "port": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "SettingRerank": {
@@ -49336,6 +49851,32 @@
         "enabledCSS",
         "enabledJS"
       ],
+      "additionalProperties": false
+    },
+    "SettingSnptInput": {
+      "type": "object",
+      "properties": {
+        "enabledCSS": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabledJS": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "SettingStatusBar": {
@@ -51662,190 +52203,6 @@
       },
       "additionalProperties": false
     },
-    "SystemKeyboardLogEntryInput": {
-      "type": "object",
-      "properties": {
-        "command": {
-          "type": "string"
-        },
-        "detail": {
-          "type": "string"
-        },
-        "environment": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SystemKeyboardLogEnvironmentInput"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "event": {
-          "type": "integer"
-        },
-        "keyboard": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SystemKeyboardLogEventInput"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "responseCode": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "seq": {
-          "type": "integer"
-        },
-        "stage": {
-          "type": "string"
-        },
-        "time": {
-          "type": "integer"
-        }
-      },
-      "required": [
-        "seq",
-        "stage",
-        "time"
-      ],
-      "additionalProperties": false
-    },
-    "SystemKeyboardLogEnvironmentInput": {
-      "type": "object",
-      "properties": {
-        "frontend": {
-          "type": "string"
-        },
-        "globalSearch": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "platform": {
-          "type": "string"
-        },
-        "search": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "userAgent": {
-          "type": "string"
-        },
-        "version": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "frontend",
-        "globalSearch",
-        "platform",
-        "search",
-        "userAgent",
-        "version"
-      ],
-      "additionalProperties": false
-    },
-    "SystemKeyboardLogEventInput": {
-      "type": "object",
-      "properties": {
-        "alt": {
-          "type": "boolean"
-        },
-        "cancelBubble": {
-          "type": "boolean"
-        },
-        "code": {
-          "type": "string"
-        },
-        "composing": {
-          "type": "boolean"
-        },
-        "ctrl": {
-          "type": "boolean"
-        },
-        "defaultPrevented": {
-          "type": "boolean"
-        },
-        "key": {
-          "type": "string"
-        },
-        "keyCode": {
-          "type": "integer"
-        },
-        "matchGlobalSearch": {
-          "type": "boolean"
-        },
-        "matchSearch": {
-          "type": "boolean"
-        },
-        "meta": {
-          "type": "boolean"
-        },
-        "repeat": {
-          "type": "boolean"
-        },
-        "shift": {
-          "type": "boolean"
-        },
-        "target": {
-          "type": "string"
-        },
-        "trusted": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "alt",
-        "cancelBubble",
-        "code",
-        "composing",
-        "ctrl",
-        "defaultPrevented",
-        "key",
-        "keyCode",
-        "matchGlobalSearch",
-        "matchSearch",
-        "meta",
-        "repeat",
-        "shift",
-        "target",
-        "trusted"
-      ],
-      "additionalProperties": false
-    },
-    "SystemKeyboardLogRequestInput": {
-      "type": "object",
-      "properties": {
-        "entries": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/SystemKeyboardLogEntryInput"
-          }
-        },
-        "session": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "entries",
-        "session"
-      ],
-      "additionalProperties": false
-    },
     "SystemLANSync": {
       "type": "object",
       "properties": {
@@ -52173,42 +52530,6 @@
         "config",
         "status"
       ],
-      "additionalProperties": false
-    },
-    "SystemOIDCCallbackRequestInput": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "error": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "state": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
       "additionalProperties": false
     },
     "SystemOIDCClaimRule": {
@@ -53095,22 +53416,6 @@
               "additionalProperties": {
                 "$ref": "#/$defs/JSONValue"
               }
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "additionalProperties": false
-    },
-    "SystemUIProcessRequestInput": {
-      "type": "object",
-      "properties": {
-        "pid": {
-          "anyOf": [
-            {
-              "type": "string"
             },
             {
               "type": "null"
@@ -54387,6 +54692,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -54590,6 +54896,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -54793,6 +55100,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -54996,6 +55304,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -55219,6 +55528,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -55442,6 +55752,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -55665,6 +55976,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -55875,6 +56187,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -56095,6 +56408,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -56312,6 +56626,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -56528,6 +56843,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -56738,6 +57054,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -56961,6 +57278,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -57184,6 +57502,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -57400,6 +57719,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -57623,6 +57943,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -57846,6 +58167,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -58056,6 +58378,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -58259,6 +58582,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -58462,6 +58786,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -58672,6 +58997,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -58882,6 +59208,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -59092,6 +59419,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -59312,6 +59640,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -59532,6 +59861,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -59735,6 +60065,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -59955,6 +60286,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -60175,6 +60507,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -60395,6 +60728,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -60605,6 +60939,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -60815,6 +61150,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -61028,6 +61364,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -61238,6 +61575,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -61448,6 +61786,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -61658,6 +61997,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -61868,6 +62208,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -62078,6 +62419,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -62288,6 +62630,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -62498,6 +62841,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -62708,6 +63052,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -62911,6 +63256,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -63121,6 +63467,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -63324,6 +63671,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -63527,6 +63875,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -63737,6 +64086,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -63940,6 +64290,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -64143,6 +64494,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -64346,6 +64698,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -64556,6 +64909,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -64759,6 +65113,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -64979,6 +65334,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -65189,6 +65545,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -65399,6 +65756,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -65609,6 +65967,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -65843,6 +66202,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -66053,6 +66413,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -66256,6 +66617,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -66459,6 +66821,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -66669,6 +67032,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -66879,6 +67243,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -67082,6 +67447,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -67292,6 +67658,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -67502,6 +67869,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -67712,6 +68080,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -67922,6 +68291,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -68125,6 +68495,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -68328,6 +68699,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -68538,6 +68910,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -68741,6 +69114,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -68951,6 +69325,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -69161,6 +69536,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -69371,6 +69747,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -69581,6 +69958,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -69791,6 +70169,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -70001,6 +70380,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -70204,6 +70584,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -70414,6 +70795,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -70617,6 +70999,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -70827,6 +71210,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -71037,6 +71421,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -71247,6 +71632,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -71457,6 +71843,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -71667,6 +72054,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -71877,6 +72265,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -72087,6 +72476,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -72297,6 +72687,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -72507,6 +72898,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -72717,6 +73109,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -72927,6 +73320,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -73137,6 +73531,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -73340,6 +73735,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -73543,6 +73939,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -73746,6 +74143,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -73956,6 +74354,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -74166,6 +74565,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -74376,6 +74776,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -74586,6 +74987,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -74796,6 +75198,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -75006,6 +75409,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -75219,6 +75623,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -75422,6 +75827,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -75625,6 +76031,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -75828,6 +76235,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -76028,6 +76436,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -76395,6 +76804,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -76745,6 +77155,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -77095,6 +77506,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -77445,6 +77857,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -77815,6 +78228,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -78185,6 +78599,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -78555,6 +78970,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -78912,6 +79328,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -79279,6 +79696,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -79643,6 +80061,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -80006,6 +80425,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -80363,6 +80783,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -80733,6 +81154,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -81103,6 +81525,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -81466,6 +81889,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -81836,6 +82260,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -82206,6 +82631,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -82563,6 +82989,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -82913,6 +83340,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -83263,6 +83691,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -83620,6 +84049,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -83977,6 +84407,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -84334,6 +84765,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -84701,6 +85133,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -85068,6 +85501,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -85418,6 +85852,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -85785,6 +86220,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -86152,6 +86588,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -86519,6 +86956,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -86876,6 +87314,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -87233,6 +87672,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -87593,6 +88033,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -87950,6 +88391,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -88307,6 +88749,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -88664,6 +89107,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -89021,6 +89465,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -89378,6 +89823,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -89735,6 +90181,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -90092,6 +90539,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -90449,6 +90897,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -90799,6 +91248,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -91156,6 +91606,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -91506,6 +91957,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -91856,6 +92308,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -92213,6 +92666,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -92563,6 +93017,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -92913,6 +93368,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -93263,6 +93719,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -93620,6 +94077,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -93970,6 +94428,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -94337,6 +94796,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -94694,6 +95154,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -95051,6 +95512,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -95408,6 +95870,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -95789,6 +96252,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -96146,6 +96610,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -96496,6 +96961,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -96846,6 +97312,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -97203,6 +97670,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -97560,6 +98028,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -97910,6 +98379,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -98267,6 +98737,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -98624,6 +99095,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -98981,6 +99453,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -99338,6 +99811,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -99688,6 +100162,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -100038,6 +100513,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -100395,6 +100871,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -100745,6 +101222,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -101102,6 +101580,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -101459,6 +101938,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -101816,6 +102296,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -102173,6 +102654,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -102530,6 +103012,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -102887,6 +103370,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -103237,6 +103721,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -103594,6 +104079,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -103944,6 +104430,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -104301,6 +104788,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -104658,6 +105146,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -105015,6 +105504,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -105372,6 +105862,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -105729,6 +106220,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -106086,6 +106578,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -106443,6 +106936,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -106800,6 +107294,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -107157,6 +107652,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -107514,6 +108010,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -107871,6 +108368,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -108228,6 +108726,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -108578,6 +109077,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -108928,6 +109428,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -109278,6 +109779,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -109635,6 +110137,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -109992,6 +110495,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -110349,6 +110853,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -110706,6 +111211,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -111063,6 +111569,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -111420,6 +111927,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -111780,6 +112288,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -112130,6 +112639,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -112480,6 +112990,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -112830,6 +113341,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -113177,6 +113689,7 @@
                 "url",
                 "email",
                 "phone",
+                "location",
                 "mAsset",
                 "template",
                 "created",
@@ -115728,7 +116241,7 @@
       ],
       "body": "none",
       "request": {
-        "$ref": "#/$defs/DynamicIconRequestInput"
+        "$ref": "#/$defs/EmptyRequestInput"
       },
       "response": {
         "anyOf": [
@@ -116600,7 +117113,7 @@
       ],
       "body": "none",
       "request": {
-        "$ref": "#/$defs/SystemOIDCCallbackRequestInput"
+        "$ref": "#/$defs/EmptyRequestInput"
       },
       "response": {
         "anyOf": [
@@ -160931,7 +161444,14 @@
                 ]
               },
               "data": {
-                "type": "null"
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingPatchData"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "msg": {
                 "type": "string"
@@ -160969,6 +161489,16 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/SettingPatchData"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 ]
               },
@@ -165247,6 +165777,86 @@
     },
     {
       "method": "POST",
+      "path": "/api/sync/clearSyncProviderConfig",
+      "handler": "clearSyncProviderConfig",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ClearSyncProviderConfigRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/ClearSyncProviderConfigData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/sync/createCloudSyncDir",
       "handler": "createCloudSyncDir",
       "authorization": [
@@ -167261,85 +167871,6 @@
       "body": "none",
       "request": {
         "$ref": "#/$defs/EmptyRequestInput"
-      },
-      "response": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  0
-                ]
-              },
-              "data": {
-                "type": "null"
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": false
-          },
-          {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "integer",
-                "enum": [
-                  -1
-                ]
-              },
-              "data": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "closeTimeout": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "closeTimeout"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "msg": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "code",
-              "msg",
-              "data"
-            ],
-            "additionalProperties": true
-          }
-        ]
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/api/system/appendKeyboardLog",
-      "handler": "appendKeyboardLog",
-      "authorization": [
-        "authenticated",
-        "admin"
-      ],
-      "body": "json",
-      "request": {
-        "$ref": "#/$defs/SystemKeyboardLogRequestInput"
       },
       "response": {
         "anyOf": [
@@ -171976,7 +172507,7 @@
       ],
       "body": "none",
       "request": {
-        "$ref": "#/$defs/SystemUIProcessRequestInput"
+        "$ref": "#/$defs/EmptyRequestInput"
       },
       "response": {
         "anyOf": [

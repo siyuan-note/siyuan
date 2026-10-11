@@ -46,7 +46,7 @@ describe("table cell rich text wire format", () => {
         }
     });
 
-    it("round-trips rich cells through the bundled parser and exports an inline Markdown projection", () => {
+    it("round-trips rich cells through the bundled parser and exports structural HTML in Markdown", () => {
         if (typeof Lute === "undefined") {
             require("../../../stage/protyle/js/lute/lute.min.js");
         }
@@ -72,6 +72,8 @@ describe("table cell rich text wire format", () => {
         }
         const markdown = lute.BlockDOM2StdMd(html);
         assert.match(markdown, /first/);
+        assert.match(markdown, /<ul>/);
+        assert.match(markdown, /<pre><code/);
         assert.match(markdown, /a.*b/);
         assert.doesNotMatch(markdown, /table-cell-rich|```go/);
         assert.match(lute.BlockDOM2InlineBlockDOM(html), /a.*b/);

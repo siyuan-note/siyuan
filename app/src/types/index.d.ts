@@ -107,13 +107,39 @@ interface Window {
         }): void;
     };
     MathJax: {
+        loader?: {
+            paths: {[key: string]: string}
+        }
+        output?: {
+            font: string
+            fontPath: string
+            linebreaks?: {
+                inline: boolean
+            }
+        }
+        options?: {
+            enableMenu: boolean
+            enableEnrichment: boolean
+            enableSpeech: boolean
+            enableBraille: boolean
+            enableExplorer: boolean
+            menuOptions?: {
+                settings: {
+                    enrich: boolean
+                    speech: boolean
+                    braille: boolean
+                }
+            }
+        }
         svg: {
             fontCache: string
         }
         startup?: {
-            promise: Promise<void>
+            promise?: Promise<void>
+            typeset?: boolean
         }
         tex2svg?(math: string, options: { display: boolean }): HTMLElement
+        tex2svgPromise?(math: string, options: { display: boolean }): Promise<HTMLElement>
     };
     hljs: {
         listLanguages(): string[];
@@ -132,7 +158,7 @@ interface Window {
             displayMode: boolean;
             output: string;
             macros: IObject;
-            trust: boolean;
+            trust: boolean | ((context: {command: string; url?: string; protocol?: string}) => boolean);
             strict: (errorCode: string) => "ignore" | "warn";
         }): string;
     };
@@ -140,7 +166,7 @@ interface Window {
     mermaidTidyTree: object[],
     mermaid: {
         initialize(options: any): void,
-        render(id: string, text: string): Promise<{ svg: string }>,
+        render(id: string, text: string, container?: HTMLElement): Promise<{ svg: string }>,
         registerExternalDiagrams(ex: object[]): Promise<void>,
         registerLayoutLoaders(layouts: object[]): void,
         registerIconPacks(options: {
@@ -155,6 +181,7 @@ interface Window {
     webkit: {
         nativeCallbacks: { [key: string]: (id: number) => void },
         messageHandlers: {
+            finishKeyboardComposition?: { postMessage: (data: string) => Promise<boolean> }
             saveExportFile: { postMessage: (url: string) => void }
             saveExportFileV2?: { postMessage: (data: {uri: string, requestID: string}) => void }
             openLink: { postMessage: (url: string) => void }
@@ -178,6 +205,7 @@ interface Window {
         }
     };
     htmlToImage: {
+        getFontEmbedCSS: (element: Element, options?: IHtmlToImageOptions) => Promise<string>
         toCanvas: (element: Element, options?: IHtmlToImageOptions) => Promise<HTMLCanvasElement>
         toBlob: (element: Element, options?: IHtmlToImageOptions) => Promise<Blob>
     };
@@ -186,6 +214,7 @@ interface Window {
     };
     siyuan: ISiyuan;
     JSAndroid: {
+        ready?: Promise<void>
         openAuthURL(url: string): void
         returnDesktop(): void
         openExternal(url: string): void
@@ -731,6 +760,7 @@ interface ILayoutJSON extends ILayoutOptions {
     icon?: string
     rootId?: string
     databaseRowId?: string
+    databaseRow?: import("../protyle/render/av/openDatabaseRow").IDatabaseRowOpenData
     active?: boolean
     pin?: boolean
     isPreview?: boolean
@@ -1470,6 +1500,7 @@ interface IAVCellValue {
     phone?: {
         content: string
     }
+    location?: IAVCellLocationValue
     email?: {
         content: string
     }
@@ -1487,6 +1518,18 @@ interface IAVCellValue {
     date?: IAVCellDateValue
     created?: IAVCellDateValue
     updated?: IAVCellDateValue
+}
+
+/**
+ * 坐标统一使用 WGS84，不自动转换；界面按经度、纬度显示，规范复制与导出文本按纬度、经度排列。
+ * 位置字段的文本筛选条件使用 IAVCellValue.text.content，不把查询词解析成坐标。
+ */
+interface IAVCellLocationValue {
+    name?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    /** 原始坐标输入仅作为来源信息，不参与判空、筛选和排序。 */
+    originalInput?: string;
 }
 
 interface IAVCellRelationValue {
@@ -1655,14 +1698,14 @@ interface ISiYuanUriBlockInfo {
 
     /**
      * 是否聚焦该块
-     * 
+     *
      * @defaultValue false
      */
     focus: boolean;
 
     /**
      * 是否全屏显示该块
-     * 
+     *
      * @defaultValue false
      */
     fullscreen: boolean;

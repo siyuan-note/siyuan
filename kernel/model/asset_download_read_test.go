@@ -72,12 +72,12 @@ func TestDeferredAssetReadAndDirectoryExport(t *testing.T) {
 	originalConf := Conf
 	originalWorkspace, originalData, originalRepo := util.WorkspaceDir, util.DataDir, util.RepoDir
 	originalHistory, originalTemp, originalConfDir := util.HistoryDir, util.TempDir, util.ConfDir
-	originalStatusBar := util.StatusBarCfg
+	originalStatusBar := util.StatusBarCfg.Load()
 	t.Cleanup(func() {
 		Conf = originalConf
 		util.WorkspaceDir, util.DataDir, util.RepoDir = originalWorkspace, originalData, originalRepo
 		util.HistoryDir, util.TempDir, util.ConfDir = originalHistory, originalTemp, originalConfDir
-		util.StatusBarCfg = originalStatusBar
+		util.StatusBarCfg.Store(originalStatusBar)
 	})
 	base := t.TempDir()
 	remote := filepath.Join(base, "cloud")
@@ -104,14 +104,20 @@ func TestDeferredAssetReadAndDirectoryExport(t *testing.T) {
 		}
 	}
 	Conf = NewAppConf()
-	util.StatusBarCfg = &util.StatusBar{MsgDataSyncDisabled: true}
-	Conf.Sync, Conf.Repo, Conf.System, Conf.Search = conf.NewSync(), conf.NewRepo(), conf.NewSystem(), conf.NewSearch()
-	Conf.FileTree = conf.NewFileTree()
-	Conf.Sync.Local = &conf.Local{Endpoint: remote}
+	util.StatusBarCfg.Store(&util.StatusBar{MsgDataSyncDisabled: true})
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2, confSectionValue3 := conf.NewSync(), conf.NewRepo(), conf.NewSystem(), conf.NewSearch()
+		Conf.Sync.Store(confSectionValue0)
+		Conf.Repo.Store(confSectionValue1)
+		Conf.System.Store(confSectionValue2)
+		Conf.Search.Store(confSectionValue3)
+	}
+	Conf.FileTree.Store(conf.NewFileTree())
+	Conf.Sync.Load().Local = &conf.Local{Endpoint: remote}
 	Conf.User = &conf.User{UserId: "asset-test", UserSiYuanOneTimePayStatus: 1}
-	Conf.Sync.Provider, Conf.Sync.CloudName, Conf.Sync.Enabled = conf.ProviderLocal, "main", true
-	Conf.Sync.Local.Endpoint, Conf.Sync.AssetDownloadMode = remote, 1
-	Conf.Repo.Key = key
+	Conf.Sync.Load().Provider, Conf.Sync.Load().CloudName, Conf.Sync.Load().Enabled = conf.ProviderLocal, "main", true
+	Conf.Sync.Load().Local.Endpoint, Conf.Sync.Load().AssetDownloadMode = remote, 1
+	Conf.Repo.Load().Key = key
 	util.WorkspaceDir = filepath.Join(base, "partial")
 	util.DataDir, util.RepoDir = filepath.Join(util.WorkspaceDir, "data"), filepath.Join(util.WorkspaceDir, "repo")
 	util.HistoryDir, util.TempDir = filepath.Join(util.WorkspaceDir, "history"), filepath.Join(util.WorkspaceDir, "temp")
@@ -151,14 +157,14 @@ func TestDeferredAssetReadAndDirectoryExport(t *testing.T) {
 	if err != nil || !bytes.Equal(data, []byte("image bytes")) {
 		t.Fatalf("on-demand read: %q, %v", data, err)
 	}
-	Conf.Sync.Enabled = false
+	Conf.Sync.Load().Enabled = false
 	if _, err = ReadAssetBytesInBox("", "assets/image.png"); err != nil {
 		t.Fatalf("cached asset unavailable with sync disabled: %v", err)
 	}
 	if uri, exportErr := ExportResources([]string{"data/assets/site"}, "site"); exportErr == nil || uri != "" {
 		t.Fatalf("offline incomplete directory export succeeded: %q, %v", uri, exportErr)
 	}
-	Conf.Sync.Enabled = true
+	Conf.Sync.Load().Enabled = true
 	uri, err := ExportResources([]string{"data/assets/site"}, "site")
 	if err != nil {
 		t.Fatal(err)

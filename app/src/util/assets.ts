@@ -1,3 +1,4 @@
+import {config as configApi} from "../config/util/configApi";
 import {Constants} from "../constants";
 import {getBodyGradientImage} from "./bodyGradient";
 import {addScript} from "../protyle/util/addScript";
@@ -6,11 +7,6 @@ import {addStyle} from "../protyle/util/addStyle";
 import {getAllEditor, getAllModels} from "../layout/getAll";
 import {invalidateHeadingNumberMeasurements} from "../protyle/util/headingNumberCore";
 import {renderHeadingNumbers} from "../protyle/util/headingNumber";
-/// #if !MOBILE
-import {reloadUI} from "../layout/util";
-import {closeSettingsWindow} from "../config/setting/windowContext";
-/// #endif
-import {fetchPost} from "./fetch";
 import {
     isInAndroid,
     isInHarmony,
@@ -28,7 +24,7 @@ import {getWorkspaceName} from "./processTitle";
 import {ensureSelectedCustomFonts, getExportCustomFontStyle} from "./customFont";
 import {getGlobalFontStyle} from "./globalFont";
 import {getEmojiFontStyle} from "./emojiFont";
-import {isCurrentThemeSupported, shouldUnloadThemeScript} from "./themeCompatibility";
+import {isCurrentThemeSupported} from "./themeCompatibility";
 import {
     getInlineStylesCSS,
     loadInlineStyles
@@ -161,7 +157,7 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
         (window.siyuan.config.appearance.mode === 1 && OSTheme === "light") ||
         (window.siyuan.config.appearance.mode === 0 && OSTheme === "dark")
     )) {
-        fetchPost("/api/system/setAppearanceMode", {mode: OSTheme === "light" ? 0 : 1});
+        configApi.set("appearance.mode", OSTheme === "light" ? 0 : 1);
         window.siyuan.config.appearance.mode = (OSTheme === "light" ? 0 : 1);
     }
     if (previousThemeMode && previousThemeMode !== themeMode) {
@@ -316,25 +312,7 @@ export const initAssets = (keepLoading = false) => {
             (window.siyuan.config.appearance.mode === 1 && OSTheme === "dark")) {
             return;
         }
-        fetchPost("/api/system/setAppearanceMode", {
-            mode: OSTheme === "light" ? 0 : 1
-        }, response => {
-            void enqueueAppearanceUpdate(async () => {
-                const nextAppearance = response.data.appearance as Config.IAppearance;
-                if (shouldUnloadThemeScript(window.siyuan.config.appearance, nextAppearance, getFrontend()) &&
-                    !await unloadThemeScript()) {
-                    markAppearanceReloadPending();
-                    /// #if !MOBILE
-                    if (!closeSettingsWindow()) void reloadUI();
-                    /// #else
-                    window.location.reload();
-                    /// #endif
-                    return;
-                }
-                window.siyuan.config.appearance = nextAppearance;
-                await loadAssets(nextAppearance);
-            });
-        });
+        void configApi.set("appearance.mode", OSTheme === "light" ? 0 : 1);
     });
 };
 
@@ -419,10 +397,10 @@ export const setMode = (modeElementValue: number) => {
             mode = 0;
         }
     }
-    fetchPost("/api/setting/patch", {appearance: {
+    configApi.set("appearance", {
         mode,
         modeOS: modeElementValue === 2,
-    }});
+    });
     /// #endif
 };
 

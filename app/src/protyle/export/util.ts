@@ -17,6 +17,7 @@ import {useShell} from "../../util/pathName";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {copyPNGByLink, writePNGBlob} from "../../menus/util";
 import {getExportImageSize, isExportImageSizeSupported, observeExportImageLayout, updateExportImageLayout} from "./imageLayout";
+import {getExportImageFontCSS, getExportImageLocalFontCSS} from "./imageFonts";
 
 const IMAGE_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
@@ -156,13 +157,21 @@ export const exportImage = (id: string, copyOnly = false) => {
         const style = {boxSizing: "border-box", overflow: "hidden"};
         if (isIPhone() || isIPad() || isSafari()) {
             // modern-screenshot 通过缓存默认样式提高 WebKit/WKWebView 环境下的导出性能。
-            await addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.6.6`, "protyleModernScreenshot");
+            await addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.7.0`, "protyleModernScreenshot");
+            const localFontCSS = getExportImageLocalFontCSS(contentElement.ownerDocument);
             return window.modernScreenshot.domToBlob(
                 contentElement, {
                     ...size,
                     style,
                     type: "image/png",
                     scale: pixelRatio,
+                    onCreateForeignObjectSvg: (svgElement: SVGSVGElement) => {
+                        if (localFontCSS) {
+                            const fontStyle = document.createElementNS(svgElement.namespaceURI, "style");
+                            fontStyle.textContent = localFontCSS;
+                            svgElement.insertBefore(fontStyle, svgElement.firstChild);
+                        }
+                    },
                     fetch: {placeholderImage: IMAGE_PLACEHOLDER}
                 });
         }
@@ -172,6 +181,7 @@ export const exportImage = (id: string, copyOnly = false) => {
                 ...size,
                 style,
                 pixelRatio,
+                fontEmbedCSS: await getExportImageFontCSS(contentElement),
                 imagePlaceholder: IMAGE_PLACEHOLDER,
                 onImageErrorHandler: (event: Event) => {
                     (event.target as HTMLImageElement).src = IMAGE_PLACEHOLDER;
@@ -291,7 +301,9 @@ export const exportImage = (id: string, copyOnly = false) => {
                     const width = Math.max(Math.min(imageElement.clientWidth, contentElement.clientWidth) / 3, 150);
                     watermarkPreviewElement.setAttribute("style", `width: ${width}px;height: ${width}px;display: flex;justify-content: center;align-items: center;color: var(--b3-border-color);font-size: 14px;`);
                     watermarkPreviewElement.innerHTML = sanitizeKernelHTML(`<div style="transform: rotate(-45deg)">${window.siyuan.config.export.imageWatermarkStr}</div>`);
-                    const canvas = await window.htmlToImage.toCanvas(watermarkPreviewElement);
+                    const canvas = await window.htmlToImage.toCanvas(watermarkPreviewElement, {
+                        fontEmbedCSS: await getExportImageFontCSS(watermarkPreviewElement),
+                    });
                     watermarkPreviewElement.innerHTML = "";
                     watermarkPreviewElement.setAttribute("style", `background-image: url(${canvas.toDataURL("image/png")});background-repeat: repeat;position: absolute;top: 0;left: 0;width: 100%;height: 100%;border-radius: var(--b3-border-radius-b);`);
                 }

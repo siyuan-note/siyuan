@@ -13,6 +13,8 @@ var testDecisionModel = contractHandler(apicontract.AITestDecisionModel, testDec
 
 // testDecisionModelContract 使用固定样例测试，不读取笔记或保存草稿。
 func testDecisionModelContract(c *gin.Context, request apicontract.AIDecisionTestRequest) apicontract.Response[apicontract.AIDecisionTestData] {
+	confAISnapshot := model.Conf.LoadAI()
+
 	var decision *conf.Decision
 	if request.HasDraft() {
 		if request.Provider == "" || request.Profile == nil {
@@ -23,8 +25,8 @@ func testDecisionModelContract(c *gin.Context, request apicontract.AIDecisionTes
 		decision = &conf.Decision{Provider: request.Provider, Profiles: map[string]*conf.DecisionProfile{request.Provider: {Endpoint: profile.Endpoint, APIKey: profile.APIKey, Name: profile.Name, Timeout: profile.Timeout}}}
 	} else {
 		settingMutationMu.Lock()
-		if model.Conf.AI != nil {
-			decision = model.Conf.AI.Decision.Clone()
+		if confAISnapshot != nil {
+			decision = confAISnapshot.Decision.Clone()
 		}
 		settingMutationMu.Unlock()
 	}

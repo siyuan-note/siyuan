@@ -156,8 +156,8 @@ func TestFileAnnotationExportEncryptedCompatibility(t *testing.T) {
 func TestFileAnnotationExportRejectsInvalidData(t *testing.T) {
 	originalConf := Conf
 	Conf = NewAppConf()
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	t.Cleanup(func() { Conf = originalConf })
 	oldWorkspace, oldDataDir := util.WorkspaceDir, util.DataDir
 	util.WorkspaceDir = t.TempDir()

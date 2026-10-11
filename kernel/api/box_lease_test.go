@@ -199,8 +199,18 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		}
 	}
 	model.Conf = model.NewAppConf()
-	model.Conf.NotebookCrypto, model.Conf.Sync, model.Conf.FileTree = conf.NewNotebookCrypto(), conf.NewSync(), conf.NewFileTree()
-	model.Conf.Editor, model.Conf.Export, model.Conf.Search = conf.NewEditor(), conf.NewExport(), conf.NewSearch()
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewNotebookCrypto(), conf.NewSync(), conf.NewFileTree()
+		model.Conf.NotebookCrypto = confSectionValue0
+		model.Conf.Sync.Store(confSectionValue1)
+		model.Conf.FileTree.Store(confSectionValue2)
+	}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewEditor(), conf.NewExport(), conf.NewSearch()
+		model.Conf.Editor.Store(confSectionValue0)
+		model.Conf.Export.Store(confSectionValue1)
+		model.Conf.Search.Store(confSectionValue2)
+	}
 	if t.Name() == "TestContractDailyNoteNotebookResponseLease" || t.Name() == "TestContractDailyNoteInfoNotebookResponseLease" {
 		content, err := os.ReadFile(filepath.Join("..", "..", "app", "appearance", "langs", "en.json"))
 		if err != nil {
@@ -215,7 +225,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		model.Conf.Lang = "en"
 		util.TimeLangs = map[string]map[string]any{"en": language.Time}
 	}
-	*model.Conf.FileTree.BoxDocEnabled = true
+	*model.Conf.FileTree.Load().BoxDocEnabled = true
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)

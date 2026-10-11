@@ -62,14 +62,18 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     const unRefElement = element.querySelector("#searchUnRefPanel");
     const searchType = assetsElement.classList.contains("fn__none") ? (unRefElement.classList.contains("fn__none") ? "doc" : "unRef") : "asset";
     const listElement = searchType === "asset" ? assetsElement.querySelector("#searchAssetList") : (searchType === "doc" ? element.querySelector("#searchList") : unRefElement.querySelector("#searchUnRefList"));
-    const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
+    const searchInputElement = element.querySelector("#searchInput") as HTMLTextAreaElement;
+    const targetId = (event.target as HTMLElement).id;
+    if (targetId === "searchInput" && config.method === 2 && !event.altKey && !event.ctrlKey && !event.metaKey &&
+        (event.key === "Enter" || event.key.startsWith("Arrow"))) {
+        return false;
+    }
     if (searchType === "doc" && matchHotKey(window.siyuan.config.keymap.general.newFile, event)) {
         if (config.method === 0) {
             newFile(app, searchInputElement.value);
         }
         return true;
     }
-    const targetId = (event.target as HTMLElement).id;
     if (event.key === "ArrowDown" && event.altKey) {
         if (searchType === "asset") {
             toggleAssetHistory(assetsElement);

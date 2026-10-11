@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -46,6 +47,92 @@ func TestNormalizeListItemBlockUpdateTree(t *testing.T) {
 	}
 	if normalizedTree.Root.FirstChild != updatedNode || normalizedTree.Root.LastChild != updatedNode || nil != updatedNode.Next {
 		t.Fatal("normalized update tree should contain only the first list item")
+	}
+}
+
+func TestSQLQueryEmbedKramdownUpdatePreservesIdentityAndAttributes(t *testing.T) {
+	const (
+		id          = "20261010180000-sqlembd"
+		rootID      = "20261010180000-sqldocu"
+		boxID       = "20261010180000-sqlbox1"
+		originalSQL = "SELECT * FROM blocks WHERE type = 'p' ORDER BY updated DESC LIMIT 10"
+		updatedSQL  = "SELECT * FROM blocks WHERE type = 'h' ORDER BY updated DESC LIMIT 5"
+	)
+	luteEngine := util.NewLute()
+	original := "{{" + originalSQL + "}}\n{: id=\"" + id + "\" updated=\"20261010180000\" " +
+		"custom-test=\"kept\" custom-heading-mode=\"1\" style=\"color: red;\"}\n"
+	load := func() *parse.Tree {
+		dom, err := DataBlockDOM(original, luteEngine)
+		if err != nil {
+			t.Fatal(err)
+		}
+		tree := luteEngine.BlockDOM2Tree(dom)
+		tree.ID, tree.Box, tree.Root.ID = rootID, boxID, rootID
+		return tree
+	}
+	reading := getBlockKramdown0(load(), id, "md", luteEngine)
+	if !strings.Contains(reading, "{{"+originalSQL+"}}") || !strings.Contains(reading, `custom-test="kept"`) {
+		t.Fatalf("Kramdown must return the query and attributes, not rendered matches: %q", reading)
+	}
+	tree := load()
+	build := func(data string) ([]*Operation, error) {
+		operations, _, err := buildBlockUpdateOperations([]BlockUpdateInput{
+			{ID: id, Data: data, DataType: "markdown", LockType: true},
+		}, func(string) *treenode.BlockTree {
+			return &treenode.BlockTree{ID: id, RootID: rootID, BoxID: boxID}
+		}, func(string) (*parse.Tree, error) { return tree, nil })
+		return operations, err
+	}
+	operations, err := build(strings.Replace(reading, originalSQL, updatedSQL, 1))
+	if err != nil || len(operations) != 1 || operations[0].ID != id || !operations[0].LockType {
+		t.Fatalf("embed update failed: %+v, %v", operations, err)
+	}
+	updated := treenode.GetNodeInTree(luteEngine.BlockDOM2Tree(operations[0].Data.(string)), id)
+	if updated == nil || updated.Type != ast.NodeBlockQueryEmbed {
+		t.Fatalf("embed identity, type or SQL changed: %+v", updated)
+	}
+	if script := updated.ChildByType(ast.NodeBlockQueryEmbedScript); script == nil || string(script.Tokens) != updatedSQL {
+		t.Fatalf("updated SQL changed: %+v", script)
+	}
+	for _, attribute := range []string{"custom-test", "custom-heading-mode", "style"} {
+		old := treenode.GetNodeInTree(tree, id)
+		if updated.IALAttr(attribute) != old.IALAttr(attribute) {
+			t.Fatalf("attribute %s changed", attribute)
+		}
+	}
+	if _, err = build("ordinary paragraph"); err == nil {
+		t.Fatal("locked SQL embed must reject conversion to a paragraph")
+	}
+}
+
+func TestSQLQueryEmbedDOMUpdatePreservesCommentsAndAttributes(t *testing.T) {
+	const (
+		id     = "20261010190000-sqlembd"
+		rootID = "20261010190000-sqldocu"
+		query  = "-- literal case and ampersand\nSELECT * FROM blocks WHERE content = 'A&B'"
+	)
+	luteEngine := util.NewLute()
+	data := `<div data-type="NodeBlockQueryEmbed" data-node-id="` + id +
+		`" custom-test="kept" custom-heading-mode="1" data-content="-- literal case and ampersand&#10;SELECT * FROM blocks WHERE content = 'A&amp;B'"></div>`
+	tree := luteEngine.BlockDOM2Tree(data)
+	tree.ID, tree.Root.ID = rootID, rootID
+	readDOM := luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	updatedDOM := strings.Replace(readDOM, "A&amp;B", "C&amp;D", 1)
+	operations, _, err := buildBlockUpdateOperations([]BlockUpdateInput{
+		{ID: id, Data: updatedDOM, DataType: "dom", LockType: true},
+	}, func(string) *treenode.BlockTree { return &treenode.BlockTree{ID: id, RootID: rootID} },
+		func(string) (*parse.Tree, error) { return tree, nil })
+	if err != nil || len(operations) != 1 || operations[0].ID != id {
+		t.Fatalf("DOM embed update failed: %+v, %v", operations, err)
+	}
+	node := treenode.GetNodeInTree(luteEngine.BlockDOM2Tree(operations[0].Data.(string)), id)
+	if node == nil || node.Type != ast.NodeBlockQueryEmbed || node.IALAttr("custom-test") != "kept" ||
+		node.IALAttr("custom-heading-mode") != "1" {
+		t.Fatalf("DOM embed metadata changed: %+v", node)
+	}
+	script := node.ChildByType(ast.NodeBlockQueryEmbedScript)
+	if script == nil || strings.ReplaceAll(string(script.Tokens), editor.IALValEscNewLine, "\n") != strings.Replace(query, "A&B", "C&D", 1) {
+		t.Fatalf("DOM embed SQL changed: %+v", script)
 	}
 }
 

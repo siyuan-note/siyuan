@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {MenuItem} from "../../menus/Menu";
 import {Constants} from "../../constants";
@@ -39,116 +40,121 @@ const copyTag = async (protyle: IProtyle, tag: string) => {
 };
 
 export const openDocTagMenu = (options: IOpenDocTagMenuOptions) => {
-    window.siyuan.menus.menu.remove();
-    const tagName = getSemanticInlineVisibleText(options.tagElement).trim();
-    let inputElement: HTMLInputElement;
-    let skipUpdate = false;
-    window.siyuan.menus.menu.removeCB = () => {
-        if (!skipUpdate) {
-            options.update(inputElement.value.trim());
-        }
-    };
-    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TAG);
-    window.siyuan.menus.menu.append(new MenuItem({
-        id: "tag",
-        iconHTML: "",
-        type: "readonly",
-        label: `<input ${Constants.ATTRIBUTE_MENU_KEYMAP}="true" class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.tag}">
-<div class="fn__none b3-list fn__flex-1 b3-list--background protyle-hint" style="position: fixed"></div>`,
-        bind(element) {
-            const listElement = element.querySelector(".b3-list") as HTMLElement;
-            inputElement = element.querySelector("input");
-            inputElement.value = tagName;
-            const renderTagList = () => {
-                genTagList(listElement, inputElement.value.trim());
-                const inputRect = inputElement.getBoundingClientRect();
-                setPosition(listElement, inputRect.right + 8, inputRect.top, inputRect.height);
+    toggleMenu({
+        target: options.tagElement,
+        build: (_menu, session) => {
+            const tagName = getSemanticInlineVisibleText(options.tagElement).trim();
+            let inputElement: HTMLInputElement;
+            let skipUpdate = false;
+            window.siyuan.menus.menu.removeCB = () => {
+                if (!skipUpdate) {
+                    options.update(inputElement.value.trim());
+                }
             };
-            inputElement.addEventListener("compositionend", renderTagList);
-            inputElement.addEventListener("input", (event: InputEvent) => {
-                event.stopPropagation();
-                if (!event.isComposing) {
-                    renderTagList();
-                }
-            });
-            inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                if (event.isComposing) {
-                    return;
-                }
-                if (!listElement.classList.contains("fn__none")) {
-                    upDownHint(listElement, event);
-                    if (event.key === "Enter" || event.key === "Escape") {
-                        listElement.classList.add("fn__none");
-                    }
-                    if (event.key === "Enter") {
-                        const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
-                        if (currentElement) {
-                            inputElement.value = currentElement.dataset.type === "new" ?
-                                currentElement.querySelector("mark").textContent.trim() : currentElement.textContent.trim();
+            window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TAG);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "tag",
+                iconHTML: "",
+                type: "readonly",
+                label: `<input ${Constants.ATTRIBUTE_MENU_KEYMAP}="true" class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.tag}">
+        <div class="fn__none b3-list fn__flex-1 b3-list--background protyle-hint" style="position: fixed"></div>`,
+                bind(element) {
+                    const listElement = element.querySelector(".b3-list") as HTMLElement;
+                    inputElement = element.querySelector("input");
+                    inputElement.value = tagName;
+                    const renderTagList = () => {
+                        genTagList(listElement, inputElement.value.trim());
+                        const inputRect = inputElement.getBoundingClientRect();
+                        setPosition(listElement, inputRect.right + 8, inputRect.top, inputRect.height);
+                    };
+                    inputElement.addEventListener("compositionend", renderTagList);
+                    inputElement.addEventListener("input", (event: InputEvent) => {
+                        event.stopPropagation();
+                        if (!event.isComposing) {
+                            renderTagList();
                         }
-                    }
-                    event.preventDefault();
-                    event.stopPropagation();
-                    return;
+                    });
+                    inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                        if (event.isComposing) {
+                            return;
+                        }
+                        if (!listElement.classList.contains("fn__none")) {
+                            upDownHint(listElement, event);
+                            if (event.key === "Enter" || event.key === "Escape") {
+                                listElement.classList.add("fn__none");
+                            }
+                            if (event.key === "Enter") {
+                                const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
+                                if (currentElement) {
+                                    inputElement.value = currentElement.dataset.type === "new" ?
+                                        currentElement.querySelector("mark").textContent.trim() : currentElement.textContent.trim();
+                                }
+                            }
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return;
+                        }
+                        if (event.key === "Enter") {
+                            window.siyuan.menus.menu.remove();
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else if (event.key === "Escape") {
+                            window.siyuan.menus.menu.removeCB = null;
+                        }
+                    });
+                    listElement.addEventListener("click", (event) => {
+                        const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
+                        if (!listItemElement) {
+                            return;
+                        }
+                        inputElement.value = listItemElement.dataset.type === "new" ?
+                            listItemElement.querySelector("mark").textContent.trim() : listItemElement.textContent.trim();
+                        listElement.classList.add("fn__none");
+                        inputElement.focus();
+                    });
                 }
-                if (event.key === "Enter") {
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "search",
+                label: window.siyuan.languages.search,
+                accelerator: window.siyuan.languages.click,
+                icon: "iconSearch",
+                click() {
+                    openGlobalSearch(options.protyle.app, `#${tagName}#`, false, {method: 0});
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "rename",
+                label: window.siyuan.languages.rename,
+                icon: "iconEdit",
+                click() {
                     window.siyuan.menus.menu.remove();
-                    event.preventDefault();
-                    event.stopPropagation();
-                } else if (event.key === "Escape") {
-                    window.siyuan.menus.menu.removeCB = null;
+                    renameTag(tagName);
                 }
-            });
-            listElement.addEventListener("click", (event) => {
-                const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
-                if (!listItemElement) {
-                    return;
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "copy",
+                label: window.siyuan.languages.copy,
+                icon: "iconCopy",
+                click() {
+                    void copyTag(options.protyle, tagName);
                 }
-                inputElement.value = listItemElement.dataset.type === "new" ?
-                    listItemElement.querySelector("mark").textContent.trim() : listItemElement.textContent.trim();
-                listElement.classList.add("fn__none");
-                inputElement.focus();
-            });
-        }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        id: "search",
-        label: window.siyuan.languages.search,
-        accelerator: window.siyuan.languages.click,
-        icon: "iconSearch",
-        click() {
-            openGlobalSearch(options.protyle.app, `#${tagName}#`, false, {method: 0});
-        }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        id: "rename",
-        label: window.siyuan.languages.rename,
-        icon: "iconEdit",
-        click() {
-            window.siyuan.menus.menu.remove();
-            renameTag(tagName);
-        }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        id: "copy",
-        label: window.siyuan.languages.copy,
-        icon: "iconCopy",
-        click() {
-            void copyTag(options.protyle, tagName);
-        }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({
-        id: "remove",
-        label: window.siyuan.languages.remove,
-        icon: "iconTrashcan",
-        click() {
-            skipUpdate = true;
-            options.remove();
-        }
-    }).element);
-    window.siyuan.menus.menu.popup(options.position);
-    inputElement.focus();
-    inputElement.select();
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "remove",
+                label: window.siyuan.languages.remove,
+                icon: "iconTrashcan",
+                click() {
+                    skipUpdate = true;
+                    options.remove();
+                }
+            }).element);
+            session.show(() => window.siyuan.menus.menu.popup(options.position));
+            inputElement.focus();
+            inputElement.select();
+
+        },
+    });
 };

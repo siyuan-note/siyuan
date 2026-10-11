@@ -67,7 +67,7 @@ func refBacklinks(args map[string]any) (CallToolResult, error) {
 		sortMode = int(v)
 	}
 
-	_, backlinks, _, _, _ := model.GetBacklink2(id, keyword, "", sortMode, 0, model.Conf.Editor.BacklinkContainChildren)
+	_, backlinks, _, _, _ := model.GetBacklink2(id, keyword, "", sortMode, 0, model.Conf.Editor.Load().BacklinkContainChildren)
 	if len(backlinks) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no backlinks found"}}}, nil
 	}
@@ -88,7 +88,7 @@ func refMentions(args map[string]any) (CallToolResult, error) {
 		sortMode = int(v)
 	}
 
-	_, _, mentions, _, _ := model.GetBacklink2(id, "", keyword, 0, sortMode, model.Conf.Editor.BacklinkContainChildren)
+	_, _, mentions, _, _ := model.GetBacklink2(id, "", keyword, 0, sortMode, model.Conf.Editor.Load().BacklinkContainChildren)
 	if len(mentions) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no mentions found"}}}, nil
 	}

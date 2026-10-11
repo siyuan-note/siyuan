@@ -52,14 +52,20 @@ func TestAnkiConnectWorkspaceIntegration(t *testing.T) {
 	util.DBPath, util.HistoryDBPath = filepath.Join(root, "siyuan.db"), filepath.Join(root, "history.db")
 	util.AssetContentDBPath, util.BlockTreeDBPath = filepath.Join(root, "asset_content.db"), filepath.Join(root, "blocktree.db")
 	Conf = NewAppConf()
-	Conf.Lang, Conf.System, Conf.Flashcard = "en", conf.NewSystem(), conf.NewFlashcard()
+	Conf.Lang = "en"
+	Conf.System.Store(conf.NewSystem())
+	Conf.Flashcard.Store(conf.NewFlashcard())
 	util.TimeLangs["en"] = map[string]any{}
 	for _, key := range []string{"albl", "blbl", "now", "1s", "xs", "1m", "xm", "1h", "xh", "1d", "xd", "1w", "xw", "1M", "xM", "1y", "2y", "xy", "max"} {
 		util.TimeLangs["en"][key] = "time"
 	}
-	Conf.System.ID = "anki-connect-test-device"
-	Conf.FileTree, Conf.Sync, Conf.Search = conf.NewFileTree(), conf.NewSync(), conf.NewSearch()
-	Conf.Editor, Conf.Export, Conf.NotebookCrypto = conf.NewEditor(), conf.NewExport(), conf.NewNotebookCrypto()
+	Conf.System.Load().ID = "anki-connect-test-device"
+	Conf.FileTree.Store(conf.NewFileTree())
+	Conf.Sync.Store(conf.NewSync())
+	Conf.Search.Store(conf.NewSearch())
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
+	Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	const boxID = "20261001000000-ankibox"
 	box := &Box{ID: boxID}
 	boxConf := conf.NewBoxConf()
@@ -67,7 +73,7 @@ func TestAnkiConnectWorkspaceIntegration(t *testing.T) {
 	if err := box.SaveConf(boxConf); err != nil {
 		t.Fatal(err)
 	}
-	Conf.Flashcard.AnkiConnectNotebook = boxID
+	Conf.Flashcard.Load().AnkiConnectNotebook = boxID
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)

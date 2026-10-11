@@ -45,6 +45,7 @@ const ensureUserSkillsView = (root: HTMLElement) => {
 const closeUserSkillsView = (view: HTMLElement) => {
     view.classList.remove("config__view--show");
     delete view.dataset.skillViewRequest;
+    view.dispatchEvent(new CustomEvent("siyuan-setting-detail-closed", {bubbles: true}));
 };
 
 const showUserSkillsLoading = (root: HTMLElement, builtin: boolean) => {

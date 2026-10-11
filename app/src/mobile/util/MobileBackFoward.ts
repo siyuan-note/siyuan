@@ -6,6 +6,7 @@ import {backModel, destroyModel} from "../menu/model";
 import {destroyAVRichTextEditor} from "../../protyle/render/av/richTextEditor";
 import {isAbove} from "../../util/zIndex";
 import {getMobileSelectMenuElement} from "./nativeSelect";
+import {closeAnchoredInput, getAnchoredInputMask} from "../../dialog/anchoredInput";
 
 export const pushBack = () => {
     window.siyuan.mobile.tabs?.pushCurrent();
@@ -21,7 +22,14 @@ export const goBack = () => {
     const richTextElement = document.querySelector<HTMLElement>(".av__richtext-mask");
     const topDialog = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
     const selectMenuElement = getMobileSelectMenuElement();
-    if (selectMenuElement && (!topDialog ||
+    const inputMask = getAnchoredInputMask();
+    const activeMenu = window.siyuan.menus.menu.element;
+    if (inputMask && (!topDialog || isAbove(inputMask, topDialog.element.querySelector(".b3-dialog"))) &&
+        (!selectMenuElement || isAbove(inputMask, selectMenuElement)) &&
+        (activeMenu.classList.contains("fn__none") || isAbove(inputMask, activeMenu))) {
+        closeAnchoredInput(true);
+        return;
+    } else if (selectMenuElement && (!topDialog ||
         isAbove(selectMenuElement, topDialog.element.querySelector(".b3-dialog")))) {
         selectMenuElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
         return;

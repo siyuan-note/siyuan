@@ -58,6 +58,8 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 
 ## Tool Usage Patterns
 - Find: search.fulltext (keyword) → block.get (by ID). For semantic search use search.semantic.
+- Structural search: for block types, inline formats, ancestry or statistics, first fetch sql.schema, then use sql.query. To show matching blocks in the frontend, use native/frontend/open_search(query, method=2) with SELECT b.* FROM blocks b; use projections and aggregates only with sql.query.
+- Dynamic SQL in documents: reuse a complete-block query in a native {{SQL}} embed via block.insert/append/prepend. For single-line embeds, read block.get_kramdown, preserve ID and IAL, and update that block with lockType=true. For multiline SQL or -- comments, read block.dom and write dataType=dom with preserved metadata. Consult sql.schema for the workflow; never replace a dynamic embed with static results unless requested.
 - Explore structure: document.list (children under an hPath) → document.get → block.get_children → block.get. Use block breadcrumb to trace a block's location.
 - Create content: document.create (notebook + hPath) → block.append/prepend/insert.
 - Modify: block.update replaces ONE block's content — it does NOT create or append new blocks. To both modify and add, call block.update first, then block.append/prepend/insert as separate calls.
@@ -492,6 +494,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 	language string, references []Reference, editorCtx EditorContext, frontendCapabilities []FrontendCapability,
 	regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string,
 	requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
+	confAIReadSnapshot := kernelModel.Conf.LoadAI()
+
 	ch := make(chan AgentEvent, 256)
 
 	go func() {
@@ -515,8 +519,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			return
 		}
 
-		if kernelModel.Conf.AI.MCP != nil {
-			mcpclient.EnsureMCPConnected(kernelModel.Conf.AI.MCP.Servers)
+		if confAIReadSnapshot.MCP != nil {
+			mcpclient.EnsureMCPConnected(confAIReadSnapshot.MCP.Servers)
 		}
 		select {
 		case <-ctx.Done():
@@ -535,7 +539,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		rawUserMessage := userMessage
 		// 变量（非敏感）在用户消息注入对话时解析，让 LLM 看到实际值；密钥不进上下文。
 		// 在此统一解析一次，后续 checkpoint 与消息重建均使用解析后的值，保证全链路一致。
-		userMessage = kernelModel.Conf.Variables.Resolve(userMessage)
+		userMessage = kernelModel.Conf.Variables.Load().Resolve(userMessage)
 
 		capabilityContext := capabilityAccessContext{
 			SessionID:  sessionID,
@@ -711,12 +715,12 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 		}()
 
-		temperature := kernelModel.Conf.AI.Agent.Temperature
+		temperature := confAIReadSnapshot.Agent.Temperature
 		if temperature < 0 || 2 < temperature {
 			temperature = 1.0
 		}
-		maxCompletionTokens := max(kernelModel.Conf.AI.Agent.MaxCompletionTokens, 0)
-		maxRounds := kernelModel.Conf.AI.Agent.MaxToolCallRounds
+		maxCompletionTokens := max(confAIReadSnapshot.Agent.MaxCompletionTokens, 0)
+		maxRounds := confAIReadSnapshot.Agent.MaxToolCallRounds
 		modelRound := 0
 		toolCallRounds := 0
 		overflowRetryPending := false
@@ -2083,8 +2087,10 @@ func availableSkillsSegment(skills []util.SkillInfo) string {
 }
 
 func buildSystemPrompt(language string, capabilities *capabilitySet, instructions ...string) string {
-	if kernelModel.Conf != nil && kernelModel.Conf.Appearance != nil && kernelModel.Conf.Appearance.Lang != "" {
-		language = kernelModel.Conf.Appearance.Lang
+	confAppearanceSnapshot := kernelModel.Conf.LoadAppearance()
+
+	if kernelModel.Conf != nil && confAppearanceSnapshot != nil && confAppearanceSnapshot.Lang != "" {
+		language = confAppearanceSnapshot.Lang
 	}
 
 	var sb strings.Builder

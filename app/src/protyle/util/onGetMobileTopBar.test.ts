@@ -25,6 +25,7 @@ const sources = {
     editor: compile(sliceSource("../../mobile/util/setEmpty.ts", "export const setEditor = ")),
     render: compile(sliceSource("onGet.ts", "export const onGet = ", "export const disabledForeverProtyle = ")),
     loading: compile(sliceSource("../ui/initUI.ts", "export const addLoading = ", "export const setPadding = ")),
+    navigation: compile(sliceSource("../render/av/databaseRowNavigation.ts", "export const clearDatabaseRowNavigation = ", "export const mountDatabaseRowNavigation = ")),
     completion: compile(sliceSource("../../mobile/editor.ts", "    let completed = false;", "    if (!isValid()) {")),
 };
 
@@ -86,7 +87,7 @@ const browserCases = (code: typeof sources) => {
             dependencies[name] = noop;
         }
         const runtime = new Function(...Object.keys(dependencies), code.orientation + code.layout + code.editor + code.loading +
-            code.render + code.completion + "\nreturn {onGet, addLoading, complete, fail, updateMobileTopBarLayout};")(
+            code.render + code.navigation + code.completion + "\nreturn {onGet, addLoading, complete, fail, updateMobileTopBarLayout};")(
             ...Object.values(dependencies));
         if (mode !== "desktop") {
             runtime.updateMobileTopBarLayout();
@@ -122,6 +123,33 @@ const browserCases = (code: typeof sources) => {
     return "Mobile top bar loading cases passed";
 };
 
+test("mobile loading completion clears row navigation before settling once", () => {
+    const calls: string[] = [];
+    const container = {
+        querySelector: (selector: string) => {
+            assert.match(selector, /data-database-row-navigation/);
+            return {remove: () => calls.push("remove navigation")};
+        },
+        classList: {remove: (name: string) => calls.push(name)},
+    };
+    const dependencies = {
+        window: {siyuan: {config: {fileTree: {}}}},
+        document: {getElementById: (): HTMLElement | null => null},
+        setEditor: () => calls.push("show editor"),
+        bindMobileBarsScroll: () => calls.push("bind scroll"),
+        isValid: () => true,
+        action: [] as string[], Constants: {CB_GET_OPENNEW: "open-new"},
+        afterOpen: () => calls.push("opened"),
+        onFailure: () => assert.fail("completion must not fail"),
+    };
+    const complete = new Function(...Object.keys(dependencies), sources.navigation + sources.completion + "\nreturn complete;")(
+        ...Object.values(dependencies));
+    const protyle = {element: container, contentElement: {}};
+    complete(protyle);
+    complete(protyle);
+    assert.deepEqual(calls, ["remove navigation", "protyle--database-row-navigation", "show editor", "bind scroll", "opened"]);
+});
+
 test("document rendering preserves landscape title controls and finishes loading", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
@@ -135,8 +163,10 @@ app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + JSON.stringify(sources) + ")")}));
+        const result = await win.webContents.executeJavaScript(${JSON.stringify("(() => { try { const __name = value => value; return {value: (" +
+        browserCases.toString() + ")(" + JSON.stringify(sources) + ")}; } catch (error) { return {error: error.stack || String(error)}; } })()")});
+        if (result.error) throw new Error(result.error);
+        console.log(result.value);
         win.destroy();
         app.exit(0);
     } catch (error) {

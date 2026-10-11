@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {getTabContent, getTabItems, getTabTask, getTabTitle, getTabTitleBlock, hasTabsTasks, revealTabAncestors, tabsRender} from "../render/tabsRender";
 import {repairActiveTab} from "./tabsRemoval";
 import {transaction} from "./transaction";
@@ -158,53 +159,64 @@ export const setTabsPosition = (protyle: IProtyle, tabs: HTMLElement, position: 
     }
 };
 
-export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLElement, anchor: HTMLElement) => {
-    if (!item) {
-        return;
-    }
-    const lang = window.siyuan.languages;
-    const menu = new Menu();
-    menu.addItem({icon: "iconCopy", label: lang.copy, submenu: copySubMenu([item.dataset.nodeId], false)});
-    if (canFocusTabItem(protyle, item)) {
-        menu.addItem({icon: "iconEnter", label: lang.enter, click: () => zoomOut({protyle, id: item.dataset.nodeId})});
-    }
-    if (canEdit(protyle, tabs)) {
-        if (getTabTask(item) !== null) {
-            menu.addSeparator({id: "separator_taskStatusBefore"});
-            getTaskStatusItems(getTabTask(item), marker => setTabTask(protyle, item, marker))
-                .forEach(option => menu.addItem(option));
-            menu.addSeparator({id: "separator_taskStatus"});
-        }
-        menu.addItem({icon: "iconEdit", label: lang.rename, click: () => renameTab(protyle, item)});
-    }
-    if (canEdit(protyle, tabs) && tabs.classList.contains("tabs")) {
-        menu.addItem({icon: "iconCopy", label: lang.duplicateCopy, click: () => {
-            const copy = item.cloneNode(true) as HTMLElement;
-            const ids = new Map<string, string>();
-            [copy, ...Array.from(copy.querySelectorAll<HTMLElement>("[data-node-id]"))].forEach(block => {
-                const id = Lute.NewNodeID();
-                ids.set(block.dataset.nodeId, id);
-                block.dataset.nodeId = id;
-                block.setAttribute("updated", id.substring(0, 14));
-            });
-            remapTabsDOMIDs(copy, ids);
-            remapListMindmapIDs(copy, ids);
-            changeTabs(protyle, [tabs], () => {
-                item.after(copy);
-                tabs.setAttribute("tabs-active-id", copy.dataset.nodeId);
-            });
-        }});
-        menu.addItem({icon: "iconTrashcan", label: lang.delete, click: () => {
-            const ids = getTabItems(tabs).map(entry => entry.dataset.nodeId);
-            changeTabs(protyle, [tabs], () => {
-                item.remove();
-                repairActiveTab(tabs, ids, item.dataset.nodeId);
-            });
-            focusBlock(tabs);
-        }});
-    }
-    const rect = anchor.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
+export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLElement, anchor: HTMLElement, toggle = true) => {
+    toggleMenu({
+        target: anchor,
+        toggle,
+        build: (_menu, session) => {
+            if (!item) {
+                return;
+            }
+            const lang = window.siyuan.languages;
+            const menu = new Menu();
+            menu.addItem({icon: "iconCopy", label: lang.copy, submenu: copySubMenu([item.dataset.nodeId], false)});
+            if (canFocusTabItem(protyle, item)) {
+                menu.addItem({icon: "iconEnter", label: lang.enter, click: () => zoomOut({protyle, id: item.dataset.nodeId})});
+            }
+            if (canEdit(protyle, tabs)) {
+                if (getTabTask(item) !== null) {
+                    menu.addSeparator({id: "separator_taskStatusBefore"});
+                    getTaskStatusItems(getTabTask(item), marker => setTabTask(protyle, item, marker))
+                        .forEach(option => menu.addItem(option));
+                    menu.addSeparator({id: "separator_taskStatus"});
+                }
+                menu.addItem({icon: "iconEdit", label: lang.rename, click: () => renameTab(protyle, item)});
+            }
+            if (canEdit(protyle, tabs) && tabs.classList.contains("tabs")) {
+                menu.addItem({
+                    icon: "iconCopy", label: lang.duplicateCopy, click: () => {
+                        const copy = item.cloneNode(true) as HTMLElement;
+                        const ids = new Map<string, string>();
+                        [copy, ...Array.from(copy.querySelectorAll<HTMLElement>("[data-node-id]"))].forEach(block => {
+                            const id = Lute.NewNodeID();
+                            ids.set(block.dataset.nodeId, id);
+                            block.dataset.nodeId = id;
+                            block.setAttribute("updated", id.substring(0, 14));
+                        });
+                        remapTabsDOMIDs(copy, ids);
+                        remapListMindmapIDs(copy, ids);
+                        changeTabs(protyle, [tabs], () => {
+                            item.after(copy);
+                            tabs.setAttribute("tabs-active-id", copy.dataset.nodeId);
+                        });
+                    }
+                });
+                menu.addItem({
+                    icon: "iconTrashcan", label: lang.delete, click: () => {
+                        const ids = getTabItems(tabs).map(entry => entry.dataset.nodeId);
+                        changeTabs(protyle, [tabs], () => {
+                            item.remove();
+                            repairActiveTab(tabs, ids, item.dataset.nodeId);
+                        });
+                        focusBlock(tabs);
+                    }
+                });
+            }
+            const rect = anchor.getBoundingClientRect();
+            session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height}));
+
+        },
+    });
 };
 
 export const initEditorTabs = (protyle: IProtyle) => {
@@ -221,7 +233,7 @@ export const initEditorTabs = (protyle: IProtyle) => {
             if (item?.parentElement === root && info?.parentElement === item) {
                 event.preventDefault();
                 event.stopPropagation();
-                openTabsMenu(protyle, item, item, info as HTMLElement);
+                openTabsMenu(protyle, item, item, info as HTMLElement, false);
             }
         }, true);
     }

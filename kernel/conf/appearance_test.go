@@ -72,6 +72,29 @@ func TestNormalizeEntryVisibilityDefaults(t *testing.T) {
 	}
 }
 
+func TestNormalizeEntryVisibilityDefaultsCompatibility(t *testing.T) {
+	for _, version := range []int{6, 7} {
+		for _, defaults := range []string{"", "simple", "full", "invalid"} {
+			profile := &EntryVisibilityProfile{ID: "custom", Name: "Custom", Defaults: defaults,
+				Entries: map[string]bool{"editor.toolbar.strong": false, "plugin:unavailable:item": true},
+				Orders:  map[string][]string{"dock": {"plugin:unavailable:dock"}}}
+			config := NormalizeEntryVisibility(&EntryVisibility{Version: version, Active: "custom", Profiles: []*EntryVisibilityProfile{profile}}, EntryVisibilityProfileFull)
+			want := defaults
+			if version < 7 || defaults == "invalid" {
+				want = ""
+			}
+			if profile.Defaults != want || len(profile.Entries) != 2 || profile.Entries["editor.toolbar.strong"] ||
+				!profile.Entries["plugin:unavailable:item"] || profile.Orders["dock"][0] != "plugin:unavailable:dock" {
+				t.Fatalf("profile compatibility lost for version %d defaults %q: %+v", version, defaults, profile)
+			}
+			NormalizeEntryVisibility(config, EntryVisibilityProfileFull)
+			if profile.Defaults != want || len(profile.Entries) != 2 {
+				t.Fatal("normalization changed a normalized profile")
+			}
+		}
+	}
+}
+
 func TestNormalizeEntryVisibilityProfiles(t *testing.T) {
 	entryVisibility := NormalizeEntryVisibility(&EntryVisibility{
 		Version: 99,

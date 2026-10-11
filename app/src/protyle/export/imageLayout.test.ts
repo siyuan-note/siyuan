@@ -18,13 +18,29 @@ test("image limits account for device pixels, side length and bitmap area", () =
     assert.equal(isExportImageSizeSupported({width: 100, height: 100}, NaN), false);
 });
 
-const browserCases = async (layoutSource: string, exportSource: string, mobile: boolean) => {
+const browserCases = async (layoutSource: string, fontSource: string, exportSource: string, mobile: boolean) => {
     const check = require("node:assert/strict");
     const layout: {
         updateExportImageLayout: typeof updateExportImageLayout,
         getExportImageSize: typeof getExportImageSize,
         isExportImageSizeSupported: typeof isExportImageSizeSupported,
     } = new Function("exports", `${layoutSource}; return exports;`)({});
+    const fonts = new Function("exports", `${fontSource}; return exports;`)({});
+    const nativeFonts = document.createElement("style");
+    nativeFonts.textContent = `@font-face {
+font-family: "ExportLocalFont";
+src: local("Arial"), local("Helvetica"), local("Liberation Sans"), local("DejaVu Sans");
+size-adjust: 50%;
+unicode-range: U+0-7f;
+}
+@supports (display: block) {
+@font-face {
+font-family: "ExportEmojiFont";
+src: local("Segoe UI Emoji"), local("Apple Color Emoji"), local("Noto Color Emoji");
+size-adjust: 85%;
+}
+}`;
+    document.head.append(nativeFonts);
     let engine = "html";
     let content = "";
     let dialog: {element: HTMLElement, resize: () => void};
@@ -73,6 +89,7 @@ const browserCases = async (layoutSource: string, exportSource: string, mobile: 
     };
     const dependencies: Record<string, unknown> = {
         "./imageLayout": layout,
+        "./imageFonts": fonts,
         "../../dialog": {Dialog: ExportDialog},
         "../../dialog/message": {showMessage: (message: string) => messages.push(message), hideMessage: () => {}},
         "../../util/fetch": {fetchPost: (url: string, data: {file: File}, callback: (response: unknown) => void) => {
@@ -83,6 +100,7 @@ const browserCases = async (layoutSource: string, exportSource: string, mobile: 
                 rememberBlob(data.file);
                 callback({code: 0, data: {file: "image.png"}});
             }
+            return Promise.resolve();
         }},
         "../../util/contractFormData": {ContractFormData: class {
             file: File;
@@ -151,7 +169,7 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
             const context = canvas.getContext("2d");
             context.drawImage(image, 0, 0);
             const pixel = context.getImageData(Math.floor(captured.x * 2), Math.floor(captured.y * 2), 1, 1).data;
-            check.deepEqual(Array.from(pixel), [255, 0, 0, 255], `Last column was clipped (${engine}, mobile=${mobile})`);
+            check.deepEqual(Array.from(pixel), [255, 0, 0, 255], `PNG marker moved or was clipped (${engine}, mobile=${mobile})`);
         } finally {
             URL.revokeObjectURL(url);
         }
@@ -166,6 +184,18 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         const narrow = await open(table(2, false));
         check.equal(narrow.querySelector<HTMLElement>(".export-img").style.minWidth, "");
         check.equal(narrow.scrollWidth, narrow.clientWidth);
+        await capture();
+
+        const localFontTable = await open(`<div class="table" data-node-id="table"><div><table>
+<colgroup><col style="min-width:60px"><col style="min-width:60px"><col style="min-width:60px"></colgroup>
+<thead><tr><th></th><th></th><th></th></tr></thead>
+<tbody><tr><td>Hello <span style="font-family:ExportEmojiFont,Arial">⭐⭐⭐</span></td><td>Hello ⭐⭐⭐</td><td></td></tr>
+<tr><td>1232 ⭐⭐⭐</td><td><span style="font-family:ExportLocalFont,Arial">WWWWWWWW</span><span class="marker" style="display:inline-block;width:20px;height:20px;background:red"></span></td><td></td></tr></tbody>
+</table></div></div><div class="callout" data-node-id="tip" data-type="NodeCallout" data-subtype="TIP"><div class="callout-info">💡 Tip</div><div class="callout-content"><div class="p" data-node-id="paragraph">12312312</div></div></div>`);
+        await document.fonts.ready;
+        const tableRect = localFontTable.querySelector("table").getBoundingClientRect();
+        check.ok(localFontTable.querySelector(".callout").getBoundingClientRect().top >= tableRect.bottom,
+            "The following block must start below the table");
         await capture();
 
         const wide = await open(table(4));
@@ -259,12 +289,13 @@ ${index === columns - 1 ? '<span class="marker" style="display:block;width:20px;
         "Watermark tiles must be bounded by the viewport");
     await capture();
     document.body.replaceChildren();
+    nativeFonts.remove();
     return `Image exports passed (mobile=${mobile})`;
 };
 
 test("wide PNG exports preserve text and all columns in both screenshot engines and viewport sizes", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 95000,
+    timeout: 185000,
 }, async () => {
     const sass = require("sass");
     const css = sass.compileString('@use "component/dialog"; @use "protyle/wysiwyg"; ' +
@@ -275,6 +306,7 @@ test("wide PNG exports preserve text and all columns in both screenshot engines 
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText;
     const layoutSource = compile("imageLayout.ts");
+    const fontSource = compile("imageFonts.ts");
     const exportSource = compile("util.ts");
     const libraries = ["html-to-image.min.js", "modern-screenshot.min.js"].map(file =>
         readFileSync(path.resolve("stage/protyle/js", file), "utf8"));
@@ -306,7 +338,7 @@ ${libraries.map(source => `new Function("module", "exports", ${JSON.stringify(so
             phase = "export cases " + mobile;
             console.log(await win.webContents.executeJavaScript(
                 "const __name = value => value; (" + ${JSON.stringify(browserCases.toString())} + ")(" +
-                ${JSON.stringify(JSON.stringify(layoutSource) + "," + JSON.stringify(exportSource))} + "," + mobile + ")"));
+                ${JSON.stringify(JSON.stringify(layoutSource) + "," + JSON.stringify(fontSource) + "," + JSON.stringify(exportSource))} + "," + mobile + ")"));
             win.destroy();
         }
         app.exit(0);
@@ -318,7 +350,7 @@ ${libraries.map(source => `new Function("module", "exports", ${JSON.stringify(so
     delete env.ELECTRON_RUN_AS_NODE;
     try {
         const result = await promisify(execFile)(require("electron") as unknown as string, [script], {
-            env, timeout: 90000, windowsHide: true,
+            env, timeout: 180000, windowsHide: true,
         });
         assert.match(result.stdout, /Image exports passed \(mobile=false\)/, result.stderr);
         assert.match(result.stdout, /Image exports passed \(mobile=true\)/, result.stderr);

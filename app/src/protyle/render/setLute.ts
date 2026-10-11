@@ -81,7 +81,7 @@ export const getAgentLute = (options: ILuteOptions): Lute => {
     lute.SetBlockRef(true);
     lute.SetUnorderedListMarker("-");
     lute.SetDataTask(true);
-    lute.SetExportNormalizeTaskListMarker(true);
+    lute.SetExportNormalizeTaskListMarker(false);
     lute.SetArbitraryTaskListItemMarker(true);
     lute.SetEnsureListItemParagraph(true);
     return protectLuteTableVirtualization(protectLuteInlineElementBoundaries(lute));
@@ -135,7 +135,7 @@ const setLute = (options: ILuteOptions) => {
     }
     lute.SetUnorderedListMarker("-");
     lute.SetDataTask(true);
-    lute.SetExportNormalizeTaskListMarker(true);
+    lute.SetExportNormalizeTaskListMarker(false);
     lute.SetArbitraryTaskListItemMarker(true);
     lute.SetEnsureListItemParagraph(true); // 空列表项下创建子列表前补一个空段落
     return protectLuteTableVirtualization(protectLuteInlineElementBoundaries(lute));

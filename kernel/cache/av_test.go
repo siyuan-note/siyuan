@@ -55,6 +55,53 @@ func TestAVSearchDataInvalidation(t *testing.T) {
 	}
 }
 
+func TestAVNormalizedDataSharesVersionAndNotebookBoundary(t *testing.T) {
+	const id = "normalized-cache-test"
+	defer RemoveAVData(id)
+	raw, normalized := []byte("original"), []byte("normalized")
+	version := SetAVDataWithVersionInBox(id, "a", raw)
+	other := SetAVDataWithVersionInBox(id, "b", []byte("other"))
+	if !SetAVNormalizedDataInBox(id, "a", version, raw, normalized) {
+		t.Fatal("normalized data was not admitted")
+	}
+	avCache.Wait()
+	if got, ok := GetAVNormalizedDataInBox(id, "a", version); !ok || !bytes.Equal(got, normalized) {
+		t.Fatal("normalized data was not available")
+	}
+	if got, ok := GetAVDataInBox(id, "a"); !ok || !bytes.Equal(got, raw) {
+		t.Fatal("normalization changed the source cache")
+	}
+	if _, ok := GetAVNormalizedDataInBox(id, "b", other); ok {
+		t.Fatal("normalized plaintext crossed notebooks")
+	}
+	RemoveAVDataInBox(id, "a")
+	if _, ok := GetAVNormalizedDataInBox(id, "a", version); ok {
+		t.Fatal("removed source retained normalized data")
+	}
+	if SetAVNormalizedDataInBox(id, "a", version, raw, normalized) {
+		t.Fatal("stale normalization was admitted after invalidation")
+	}
+	if got, ok := GetAVDataInBox(id, "b"); !ok || string(got) != "other" {
+		t.Fatal("removal crossed notebook boundaries")
+	}
+}
+
+func TestAVNormalizedDataRespectsCacheBudget(t *testing.T) {
+	const id = "normalization-budget-test"
+	previous := avCache.MaxCost()
+	avCache.UpdateMaxCost(1024)
+	defer func() { RemoveAVData(id); avCache.UpdateMaxCost(previous) }()
+	raw := []byte("small source")
+	version := SetAVDataWithVersionInBox(id, "", raw)
+	avCache.Wait()
+	if SetAVNormalizedDataInBox(id, "", version, raw, bytes.Repeat([]byte("x"), 2048)) {
+		t.Fatal("oversize derived data exceeded cache budget")
+	}
+	if cached, ok := GetAVDataInBox(id, ""); !ok || !bytes.Equal(cached, raw) {
+		t.Fatal("rejected normalization removed the source cache")
+	}
+}
+
 func TestAVSearchDataWithoutRawData(t *testing.T) {
 	const avID = "20260801120000-search"
 	const boxID = "20260801120000-box"

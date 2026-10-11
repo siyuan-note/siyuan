@@ -45,19 +45,15 @@ func ocrModelFilesChanged(changes ...[]string) bool {
 
 // 新设备使用内置 PaddleOCR 并关闭自动识别，已有设备缺少 OCR 配置时保留 Tesseract 自动识别。
 func normalizeOCRConfig(value *conf.OCR, confFileExists bool) *conf.OCR {
-	if value != nil {
-		// 内置模型统一为 Tiny，自行导入的模型仍保留内容摘要标识。
-		if value.Model == "small" {
-			value.Model = "tiny"
+	if value == nil {
+		// 已有工作空间缺失 OCR 配置时沿用升级前的 Tesseract 自动识别行为。
+		value = conf.NewOCR()
+		if confFileExists {
+			value.Provider = string(ocr.Tesseract)
+			value.Auto = true
 		}
-		return value
 	}
-	value = conf.NewOCR()
-	if confFileExists {
-		value.Provider = string(ocr.Tesseract)
-		value.Auto = true
-	}
-	return value
+	return conf.NormalizeOCR(value)
 }
 
 func InitOCR() {
@@ -74,21 +70,17 @@ func InitOCR() {
 func (config *AppConf) GetOCR() conf.OCR {
 	config.m.RLock()
 	defer config.m.RUnlock()
-	if config.OCR == nil {
+	if config.OCR.Load() == nil {
 		return *conf.NewOCR()
 	}
-	return *config.OCR
+	return *config.OCR.Load()
 }
 
-func (config *AppConf) SetOCR(value conf.OCR) error {
+func validateOCRSetting(value *conf.OCR) error {
 	switch value.ReasoningEffort {
 	case "", "none", "low", "medium", "high", "xhigh", "max":
 	default:
 		return errors.New("invalid OCR reasoning effort")
-	}
-	// 兼容旧客户端提交的内置 Small 标识，响应和持久化配置均使用 Tiny。
-	if value.Model == "small" {
-		value.Model = "tiny"
 	}
 	if err := (ocr.Thresholds(value.Thresholds)).Validate(); err != nil {
 		return err
@@ -106,26 +98,35 @@ func (config *AppConf) SetOCR(value conf.OCR) error {
 			return err
 		}
 	}
-	config.m.Lock()
-	previous := config.OCR
+	previous := Conf.OCR.Load()
 	if value.Provider == "ai" && (previous == nil || previous.AIModelID == "" || previous.AIModelID != value.AIModelID) {
-		provider, model := getOCRAIModel(value)
+		provider, model := getOCRAIModel(*value)
 		if provider == nil || model == nil {
-			config.m.Unlock()
 			return errors.New(Conf.Language(414))
 		}
 	}
+	return nil
+}
+
+func (config *AppConf) SetOCR(value conf.OCR) error {
+	previous := config.OCR.Load()
 	if value.Provider == "ai" && (previous == nil || previous.Provider != "ai") {
 		value.Auto = false
 	}
-	changed := config.OCR == nil || config.OCR.Provider != value.Provider || config.OCR.Model != value.Model
-	config.OCR = &value
-	config.m.Unlock()
-	config.Save()
-	if changed {
-		go nativePaddle.Close()
+	_, err := ApplyConfSection("ocr", &value)
+	return err
+}
+
+func ocrSectionSpec() *SectionSpec[*conf.OCR] {
+	spec := newSectionSpec("ocr", &Conf.OCR, conf.NormalizeOCR,
+		Reaction[*conf.OCR]{Name: "provider", Changed: func(old, next *conf.OCR) bool { return old.Provider != next.Provider || old.Model != next.Model }, Apply: func(old, next *conf.OCR) { go nativePaddle.Close() }})
+	spec.Validate = func(value *conf.OCR) []Issue {
+		if err := validateOCRSetting(value); err != nil {
+			return []Issue{{Field: "ocr", Severity: "error", Message: err.Error()}}
+		}
+		return nil
 	}
-	return nil
+	return spec
 }
 
 func ocrModelDirectory(id string) string {

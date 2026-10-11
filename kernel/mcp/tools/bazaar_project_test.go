@@ -23,8 +23,8 @@ func bazaarProjectGrant(t *testing.T) (context.Context, *util.PluginDevelopmentG
 
 func TestBazaarProjectOfflineGuardsAndEffects(t *testing.T) {
 	ctx, grant := bazaarProjectGrant(t)
-	model.Conf.Bazaar.Trust = false
-	model.Conf.Bazaar.PetalDisabled = true
+	model.Conf.Bazaar.Load().Trust = false
+	model.Conf.Bazaar.Load().PetalDisabled = true
 	result, err := bazaarHandler(ctx, map[string]any{"action": "prepare_project", "taskId": grant.TaskID})
 	if err != nil || result.IsError {
 		t.Fatal("offline project incorrectly requires trust, frontend or pkgType", probeText(result), err)
@@ -61,7 +61,7 @@ func TestBazaarProjectCandidateInspectionBeforePlan(t *testing.T) {
 		return grant, nil
 	})
 	writeProbeFile(t, filepath.Join(util.WorkspaceDir, "source", "index.js"), "candidate")
-	model.Conf.Bazaar.Trust = false
+	model.Conf.Bazaar.Load().Trust = false
 	result, err := bazaarHandler(ctx, map[string]any{"action": "project_status", "taskId": grant.TaskID, "sourcePath": "source"})
 	if err != nil || result.IsError {
 		t.Fatal(probeText(result), err)

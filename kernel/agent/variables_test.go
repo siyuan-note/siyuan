@@ -25,7 +25,7 @@ func TestAgentChatResolvesSavedUserVariables(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			setupCompactionAgentTest(t)
-			kernelModel.Conf.Variables.Items = []*kernelConf.Variable{{Name: "WORKSPACE", Value: "resolved workspace"}}
+			kernelModel.Conf.Variables.Load().Items = []*kernelConf.Variable{{Name: "WORKSPACE", Value: "resolved workspace"}}
 			const raw = "Inspect {{vars.WORKSPACE}} and $WORKSPACE"
 			const resolved = "Inspect resolved workspace and resolved workspace"
 			session := map[string]any{

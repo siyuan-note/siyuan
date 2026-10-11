@@ -1,3 +1,4 @@
+import {toggleMenu} from "../menus/menuToggle";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
@@ -523,7 +524,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc", 
                     <button class="b3-button b3-button--outline" data-type="genRepo">
                         <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.createSnapshot}
                     </button>
-                </div>    
+                </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
                 <ul data-type="repoList" class="b3-list b3-list--background fn__flex-1" style="padding: 8px 0">
@@ -747,27 +748,33 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (type === "more") {
-                const row = target.closest<HTMLElement>('li[data-type="repoitem"]');
-                const menu = window.siyuan.menus.menu;
-                menu.remove();
-                row.querySelectorAll<HTMLElement>(".history__snapshot-menu-action").forEach(action => {
-                    menu.append(new MenuItem({
-                        icon: action.querySelector("use").getAttribute("xlink:href").substring(1),
-                        label: action.getAttribute("aria-label") || action.textContent.trim(),
-                        click: () => {
-                            menu.remove();
-                            action.click();
-                        },
-                    }).element);
+                toggleMenu({
+                    target: target,
+                    build: (_menu, session) => {
+                        const row = target.closest<HTMLElement>('li[data-type="repoitem"]');
+                        const menu = window.siyuan.menus.menu;
+
+                        row.querySelectorAll<HTMLElement>(".history__snapshot-menu-action").forEach(action => {
+                            menu.append(new MenuItem({
+                                icon: action.querySelector("use").getAttribute("xlink:href").substring(1),
+                                label: action.getAttribute("aria-label") || action.textContent.trim(),
+                                click: () => {
+                                    menu.remove();
+                                    action.click();
+                                },
+                            }).element);
+                        });
+                        menu.append(new MenuItem({
+                            icon: "iconInfo",
+                            label: window.siyuan.languages.info,
+                            click: () => row.querySelectorAll(".b3-list-item__meta").forEach(item => item.classList.toggle("fn__none")),
+                        }).element);
+                        const rect = target.getBoundingClientRect();
+                        session.show(() => menu.popup({x: rect.left, y: rect.bottom, h: rect.height}));
+
+                    },
                 });
-                menu.append(new MenuItem({
-                    icon: "iconInfo",
-                    label: window.siyuan.languages.info,
-                    click: () => row.querySelectorAll(".b3-list-item__meta").forEach(item => item.classList.toggle("fn__none")),
-                }).element);
-                const rect = target.getBoundingClientRect();
-                menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "toggle") {

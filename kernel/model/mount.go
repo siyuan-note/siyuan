@@ -65,6 +65,8 @@ func CreateBox(name string) (id string, err error) {
 }
 
 func createBox(name string, initializeBoxDoc bool) (id string, err error) {
+	confFileTreeSnapshot := Conf.LoadFileTree()
+
 	name = normalizeBoxName(name)
 	if 512 < utf8.RuneCountInString(name) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
@@ -96,7 +98,7 @@ func createBox(name string, initializeBoxDoc bool) (id string, err error) {
 	box := &Box{ID: id, Name: name}
 	boxConf := box.GetConf()
 	boxConf.Name = name
-	boxConf.Sort = newBoxSort(boxes, nil != Conf.FileTree.CreateDocAtTop && *Conf.FileTree.CreateDocAtTop)
+	boxConf.Sort = newBoxSort(boxes, nil != confFileTreeSnapshot.CreateDocAtTop && *confFileTreeSnapshot.CreateDocAtTop)
 	if err := box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", id, err)
 	}
@@ -324,6 +326,9 @@ func RemoveBox(boxID string) (err error) {
 	defer databaseIndexDataLock.Unlock()
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
+	if err = recoverSortConfAppend(filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")); err != nil {
+		return
+	}
 	if !isEncrypted {
 		unmount0(boxID)
 	}
@@ -501,6 +506,8 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 }
 
 func mountBox(boxID string) (alreadyMount bool, err error) {
+	confFileTreeSnapshot := Conf.LoadFileTree()
+
 	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {
 		err = errors.New(Conf.language(239))
 		return
@@ -530,7 +537,7 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 		}
 
 		boxes, _ := ListNotebooks()
-		sort := newBoxSort(boxes, nil != Conf.FileTree.CreateDocAtTop && *Conf.FileTree.CreateDocAtTop)
+		sort := newBoxSort(boxes, nil != confFileTreeSnapshot.CreateDocAtTop && *confFileTreeSnapshot.CreateDocAtTop)
 
 		p := filepath.Join(util.WorkingDir, "guide", boxID)
 		if err = filelock.Copy(p, localPath); err != nil {
@@ -598,7 +605,7 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 	}
 
 	// 缓存根一级的文档树展开
-	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
+	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, confFileTreeSnapshot.MaxListCount)
 	box = Conf.Box(boxID)
 	if 0 < len(files) || (nil != box && box.Exist(boxDocPath(box.ID))) {
 		box.Index()

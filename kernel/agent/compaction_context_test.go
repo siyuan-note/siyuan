@@ -188,7 +188,7 @@ func testAgentChatCompactsCurrentTurnWithoutLosingRecovery(t *testing.T, withVar
 	rawGoal := "complete the whole task"
 	if withVariables {
 		rawGoal = "complete $WORKSPACE task"
-		kernelModel.Conf.Variables.Items = []*conf.Variable{{Name: "WORKSPACE", Value: "the whole"}}
+		kernelModel.Conf.Variables.Load().Items = []*conf.Variable{{Name: "WORKSPACE", Value: "the whole"}}
 	}
 	const toolName = "test_current_turn_compaction"
 	var executions atomic.Int32
@@ -205,7 +205,7 @@ func testAgentChatCompactsCurrentTurnWithoutLosingRecovery(t *testing.T, withVar
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { tools.RemoveTool(toolName) })
-	kernelModel.Conf.AI.Agent.CapabilityPolicy = &conf.CapabilityPolicy{Default: "deny", Overrides: map[string]string{tools.CapabilityIDForTool(tool): "allow"}}
+	kernelModel.Conf.AI.Load().Agent.CapabilityPolicy = &conf.CapabilityPolicy{Default: "deny", Overrides: map[string]string{tools.CapabilityIDForTool(tool): "allow"}}
 	if _, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "title": "long task", "entries": []SessionEntry{{ID: "user", Type: "user", Content: rawGoal}}})); err != nil {
 		t.Fatal(err)
 	}
@@ -394,7 +394,7 @@ func TestAgentChatReusesOnlyCompatibleCompaction(t *testing.T) {
 	for _, name := range []string{"legacy", "same-scope", "other-model", "other-provider"} {
 		t.Run(name, func(t *testing.T) {
 			setupCompactionAgentTest(t)
-			kernelModel.Conf.AI.Agent.CapabilityPolicy = &conf.CapabilityPolicy{Default: "deny"}
+			kernelModel.Conf.AI.Load().Agent.CapabilityPolicy = &conf.CapabilityPolicy{Default: "deny"}
 			entries := []SessionEntry{
 				{ID: "old-user", Type: "user", Content: "old task"},
 				{ID: "old-answer", Type: "assistant", Content: strings.Repeat("old result ", 12000)},
@@ -488,7 +488,7 @@ func testAgentChatNativeCompactsCurrentTurn(t *testing.T, failCompaction bool) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { tools.RemoveTool(toolName) })
-	kernelModel.Conf.AI.Agent.CapabilityPolicy = &conf.CapabilityPolicy{Default: "deny", Overrides: map[string]string{tools.CapabilityIDForTool(tool): "allow"}}
+	kernelModel.Conf.AI.Load().Agent.CapabilityPolicy = &conf.CapabilityPolicy{Default: "deny", Overrides: map[string]string{tools.CapabilityIDForTool(tool): "allow"}}
 	if _, _, err := SaveSessionState(marshalSession(t, map[string]any{"id": testSessionID, "title": "native task", "entries": []SessionEntry{{ID: "user", Type: "user", Content: "complete task"}}})); err != nil {
 		t.Fatal(err)
 	}
@@ -570,7 +570,7 @@ func testAgentChatNativeCompactsCurrentTurn(t *testing.T, failCompaction bool) {
 
 func TestAgentChatCanceledCompactionKeepsCurrentTurn(t *testing.T) {
 	setupCompactionAgentTest(t)
-	kernelModel.Conf.AI.Agent.CapabilityPolicy = &conf.CapabilityPolicy{Default: "deny"}
+	kernelModel.Conf.AI.Load().Agent.CapabilityPolicy = &conf.CapabilityPolicy{Default: "deny"}
 	result := strings.Repeat("completed operation result ", 6000)
 	entries := []SessionEntry{
 		{ID: "user", Type: "user", Content: "complete the task"},

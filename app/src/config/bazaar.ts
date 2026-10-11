@@ -1,4 +1,4 @@
-import {refreshSettingConfig} from "./setting/sync";
+import {config as configApi} from "./util/configApi";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
@@ -1547,14 +1547,7 @@ type="checkbox">
             callback();
             return;
         }
-        fetchPost("/api/setting/patch", {appearance: patch}, response => {
-            if (response.code !== 0) {
-                showMessage(response.msg);
-                callback();
-                return;
-            }
-            void refreshSettingConfig("appearance").then(callback);
-        });
+        void configApi.set("appearance", patch).catch(error => console.warn("Could not update appearance", error)).finally(callback);
     },
     _initBazaarPanel(bazaarType: TBazaarType, panel: HTMLElement) {
         if (panel.getAttribute("data-init")) {
@@ -1742,11 +1735,7 @@ type="checkbox">
         if (!window.siyuan.config.bazaar.trust) {
             bazaar.element.querySelector("button").addEventListener("click", () => {
                 const mount = bazaar._captureMount();
-                fetchPost("/api/setting/setBazaar", {
-                    ...window.siyuan.config.bazaar,
-                    trust: true,
-                }, (response) => {
-                    window.siyuan.config.bazaar = response.data;
+                configApi.set("bazaar.trust", true, () => {
                     if (!bazaar._isMountCurrent(mount)) {
                         return;
                     }

@@ -6,10 +6,31 @@ import (
 	"strings"
 )
 
-// QueryLimitInfo 描述服务端默认限制；Limit 为零表示使用 SQL 自身的限制。
+// QueryLimitInfo 描述查询行数限制；Limit 为零表示使用 SQL 自身的限制。
 type QueryLimitInfo struct {
 	Limit     int  `json:"limit"`
 	Truncated bool `json:"truncated"`
+}
+
+// QueryWithRowLimitInfo 在 SQL 自身限制之外封顶返回行数，并多读取一行判断是否截断。
+// 直接执行原始语句，保留注释、递归查询和解析器不支持的 SQLite 语法。
+func QueryWithRowLimitInfo(stmt string, limit int) (rows []map[string]any, info QueryLimitInfo, err error) {
+	if limit < 1 || limit == math.MaxInt {
+		return nil, info, errors.New("invalid SQL row limit")
+	}
+	info.Limit = limit
+	rows, err = queryRawStmtRows(stmt, limit+1, nil, true)
+	if err != nil {
+		return nil, QueryLimitInfo{}, err
+	}
+	if len(rows) > limit {
+		info.Truncated = true
+		rows = rows[:limit]
+	}
+	if rows == nil {
+		rows = []map[string]any{}
+	}
+	return
 }
 
 // QueryWithLimitInfo 在同一次查询中多读取一行，判断默认限制是否截断了结果。

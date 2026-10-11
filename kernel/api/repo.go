@@ -30,6 +30,7 @@ import (
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -41,8 +42,7 @@ var setRepoIndexRetentionDays = contractHandler(apicontract.SetRepoIndexRetentio
 		daysInt = 180
 	}
 
-	model.Conf.Repo.IndexRetentionDays = daysInt
-	model.Conf.Save()
+	model.UpdateRepoConf(func(s *conf.Repo) { s.IndexRetentionDays = daysInt })
 
 	return apicontract.Success(apicontract.Null{})
 })
@@ -53,8 +53,7 @@ var setRetentionIndexesDaily = contractHandler(apicontract.SetRetentionIndexesDa
 		indexesInt = 180
 	}
 
-	model.Conf.Repo.RetentionIndexesDaily = indexesInt
-	model.Conf.Save()
+	model.UpdateRepoConf(func(s *conf.Repo) { s.RetentionIndexesDaily = indexesInt })
 
 	return apicontract.Success(apicontract.Null{})
 })
@@ -344,7 +343,7 @@ var initRepoKeyFromPassphrase = contractHandler(apicontract.InitRepoKeyFromPassp
 		return apicontract.FailureWithTimeout[apicontract.RepoKeyData](-1, fmt.Sprintf(model.Conf.Language(137), err), 5000)
 	}
 
-	return apicontract.Success(apicontract.RepoKeyData{Key: base64.StdEncoding.EncodeToString(model.Conf.Repo.Key)})
+	return apicontract.Success(apicontract.RepoKeyData{Key: base64.StdEncoding.EncodeToString(model.Conf.Repo.Load().Key)})
 })
 
 var initRepoKey = contractHandler(apicontract.InitRepoKey, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.RepoKeyData] {
@@ -352,7 +351,7 @@ var initRepoKey = contractHandler(apicontract.InitRepoKey, func(c *gin.Context, 
 		return apicontract.FailureWithTimeout[apicontract.RepoKeyData](-1, fmt.Sprintf(model.Conf.Language(137), err), 5000)
 	}
 
-	return apicontract.Success(apicontract.RepoKeyData{Key: base64.StdEncoding.EncodeToString(model.Conf.Repo.Key)})
+	return apicontract.Success(apicontract.RepoKeyData{Key: base64.StdEncoding.EncodeToString(model.Conf.Repo.Load().Key)})
 })
 
 var resetRepo = contractHandler(apicontract.ResetRepo, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {

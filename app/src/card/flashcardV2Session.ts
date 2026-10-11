@@ -1,6 +1,7 @@
 import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
+import {toggleMenu} from "../menus/menuToggle";
 import {Constants} from "../constants";
 import type {App} from "../index";
 import {Protyle} from "../protyle";
@@ -1335,142 +1336,147 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             };
             const openCurrentManagementMenu = (button: HTMLElement) => {
                 const current = queue[index];
-                const menu = new Menu();
-                menu.addItem({
-                    id: "flashcardV2EditSource",
-                    icon: "iconEdit",
-                    label: window.siyuan.languages.edit,
-                    click: () => (dialog.element.querySelector('[data-type="edit-source"]') as HTMLElement).click(),
-                });
-                menu.addItem({
-                    id: "flashcardV2EditLater",
-                    icon: "iconEdit",
-                    label: window.siyuan.languages.flashcardEditLater,
-                    click: () => {
-                        requestPending = true;
-                        void openFlashcardV2EditLater(current.card.id, () => {
-                            lastReview = undefined;
-                            setUndoVisible(dialog, false);
-                            nextCard();
-                        }, () => !sessionFinished).finally(() => { requestPending = false; });
-                    },
-                });
-                menu.addItem({
-                    id: "flashcardV2StudyLater",
-                    label: window.siyuan.languages.flashcardStudyLater,
-                    click: () => (dialog.element.querySelector('[data-type="study-later"]') as HTMLElement).click(),
-                });
-                menu.addItem({
-                    id: "flashcardV2Skip",
-                    label: window.siyuan.languages.skip,
-                    click: () => (dialog.element.querySelector('[data-type="skip"]') as HTMLElement).click(),
-                });
-                menu.addItem({
-                    id: "flashcardV2PendingEdits",
-                    icon: "iconEdit",
-                    label: window.siyuan.languages.flashcardPendingEdits,
-                    click: openPendingEditList,
-                });
-                const buried = (current.reviewState.buriedUntil || 0) > Date.now();
-                menu.addItem({
-                    id: "flashcardV2Bury",
-                    label: buried ? window.siyuan.languages.flashcardUnbury : window.siyuan.languages.flashcardBury,
-                    click: () => {
-                        if (buried) {
-                            manageWithoutSkipping([current.card.id], "unbury", {});
-                            return;
-                        }
-                        manageAndSkip([current.card.id], "bury", {
-                            buriedUntil: nextLocalDay(Date.now()), reason: "user",
-                        }, "userBuried");
-                    },
-                });
-                menu.addItem({
-                    id: "flashcardV2Suspend",
-                    icon: current.reviewState.suspended ? "iconPlay" : "iconPause",
-                    label: current.reviewState.suspended ? window.siyuan.languages.continueReview1 :
-                        window.siyuan.languages.flashcardSuspendCard,
-                    click: () => current.reviewState.suspended ?
-                        manageWithoutSkipping([current.card.id], "resume", {}) :
-                        manageAndSkip([current.card.id], "suspend", {}, "userSuspended"),
-                });
-                menu.addItem({
-                    id: "flashcardV2SuspendSource",
-                    icon: "iconPause",
-                    label: window.siyuan.languages.flashcardSuspendSource,
-                    click: () => {
-                        requestPending = true;
-                        let queried = false;
-                        void fetchPost("/api/flashcard/queryCards", {
-                            query: {version: 1, root: {
-                                operator: "predicate", field: "sourceID", comparator: "equal",
-                                value: current.card.sourceID,
-                            }},
-                            options: {
-                                now: Date.now(), includeInactive: true, includeSuspended: true,
-                                includeBuried: true, includePaused: true, limit: 1000000,
-                            },
-                        }, (response) => {
-                            queried = true;
-                            const cardIDs = (response.data.cards as Array<{ card: { id: string } }>)
-                                .map((item) => item.card.id);
-                            if (cardIDs.length === 0) {
-                                requestPending = false;
-                                return;
-                            }
-                            manageAndSkip(cardIDs, "suspend", {}, "sourceSuspended");
-                        }).then(() => {
-                            if (!queried) {
-                                requestPending = false;
-                            }
+                toggleMenu({
+                    target: button,
+                    build: (_menu, session) => {
+                        const menu = new Menu();
+                        menu.addItem({
+                            id: "flashcardV2EditSource",
+                            icon: "iconEdit",
+                            label: window.siyuan.languages.edit,
+                            click: () => (dialog.element.querySelector('[data-type="edit-source"]') as HTMLElement).click(),
                         });
+                        menu.addItem({
+                            id: "flashcardV2EditLater",
+                            icon: "iconEdit",
+                            label: window.siyuan.languages.flashcardEditLater,
+                            click: () => {
+                                requestPending = true;
+                                void openFlashcardV2EditLater(current.card.id, () => {
+                                    lastReview = undefined;
+                                    setUndoVisible(dialog, false);
+                                    nextCard();
+                                }, () => !sessionFinished).finally(() => { requestPending = false; });
+                            },
+                        });
+                        menu.addItem({
+                            id: "flashcardV2StudyLater",
+                            label: window.siyuan.languages.flashcardStudyLater,
+                            click: () => (dialog.element.querySelector('[data-type="study-later"]') as HTMLElement).click(),
+                        });
+                        menu.addItem({
+                            id: "flashcardV2Skip",
+                            label: window.siyuan.languages.skip,
+                            click: () => (dialog.element.querySelector('[data-type="skip"]') as HTMLElement).click(),
+                        });
+                        menu.addItem({
+                            id: "flashcardV2PendingEdits",
+                            icon: "iconEdit",
+                            label: window.siyuan.languages.flashcardPendingEdits,
+                            click: openPendingEditList,
+                        });
+                        const buried = (current.reviewState.buriedUntil || 0) > Date.now();
+                        menu.addItem({
+                            id: "flashcardV2Bury",
+                            label: buried ? window.siyuan.languages.flashcardUnbury : window.siyuan.languages.flashcardBury,
+                            click: () => {
+                                if (buried) {
+                                    manageWithoutSkipping([current.card.id], "unbury", {});
+                                    return;
+                                }
+                                manageAndSkip([current.card.id], "bury", {
+                                    buriedUntil: nextLocalDay(Date.now()), reason: "user",
+                                }, "userBuried");
+                            },
+                        });
+                        menu.addItem({
+                            id: "flashcardV2Suspend",
+                            icon: current.reviewState.suspended ? "iconPlay" : "iconPause",
+                            label: current.reviewState.suspended ? window.siyuan.languages.continueReview1 :
+                                window.siyuan.languages.flashcardSuspendCard,
+                            click: () => current.reviewState.suspended ?
+                                manageWithoutSkipping([current.card.id], "resume", {}) :
+                                manageAndSkip([current.card.id], "suspend", {}, "userSuspended"),
+                        });
+                        menu.addItem({
+                            id: "flashcardV2SuspendSource",
+                            icon: "iconPause",
+                            label: window.siyuan.languages.flashcardSuspendSource,
+                            click: () => {
+                                requestPending = true;
+                                let queried = false;
+                                void fetchPost("/api/flashcard/queryCards", {
+                                    query: {version: 1, root: {
+                                        operator: "predicate", field: "sourceID", comparator: "equal",
+                                        value: current.card.sourceID,
+                                    }},
+                                    options: {
+                                        now: Date.now(), includeInactive: true, includeSuspended: true,
+                                        includeBuried: true, includePaused: true, limit: 1000000,
+                                    },
+                                }, (response) => {
+                                    queried = true;
+                                    const cardIDs = (response.data.cards as Array<{ card: { id: string } }>)
+                                        .map((item) => item.card.id);
+                                    if (cardIDs.length === 0) {
+                                        requestPending = false;
+                                        return;
+                                    }
+                                    manageAndSkip(cardIDs, "suspend", {}, "sourceSuspended");
+                                }).then(() => {
+                                    if (!queried) {
+                                        requestPending = false;
+                                    }
+                                });
+                            },
+                        });
+                        menu.addItem({
+                            id: "flashcardV2Reset",
+                            icon: "iconRefresh",
+                            label: window.siyuan.languages.reset,
+                            click: () => manageAndSkip([current.card.id], "reset", {}, "userReset"),
+                        });
+                        menu.addItem({
+                            id: "flashcardV2SetDue",
+                            icon: "iconCalendar",
+                            label: window.siyuan.languages.setDueTime,
+                            click: () => openFlashcardV2Due([current.card.id], current.reviewState.due,
+                                () => {
+                                    if (sessionFinished) {
+                                        return;
+                                    }
+                                    requestPending = true;
+                                    skipManagedSessionCards([current.card.id], "dueChanged");
+                                }),
+                        });
+                        menu.addItem({
+                            id: "flashcardV2SetFlag",
+                            icon: "iconBookmark",
+                            label: window.siyuan.languages.flashcardFlag,
+                            submenu: flashcardV2FlagMenuItems(current.card.flag,
+                                [...flagDefinitions].map(([flag, name]) => ({flag, name})), (flag) =>
+                                    manageWithoutSkipping([current.card.id], "setFlag", {flag})),
+                        });
+                        menu.addItem({
+                            id: "flashcardV2CardTags",
+                            icon: "iconTag",
+                            label: `${window.siyuan.languages.tag} - ${window.siyuan.languages.riffCard}`,
+                            click: () => queryCurrentCardTags("card"),
+                        });
+                        menu.addItem({
+                            id: "flashcardV2SourceTags",
+                            icon: "iconTag",
+                            label: `${window.siyuan.languages.tag} - ${window.siyuan.languages.flashcardCardSource}`,
+                            click: () => queryCurrentCardTags("source"),
+                        });
+                        if (isMobile()) {
+                            session.show(() => menu.fullscreen());
+                        } else {
+                            const rect = button.getBoundingClientRect();
+                            session.show(() => menu.open({x: rect.left, y: rect.bottom}));
+                        }
                     },
                 });
-                menu.addItem({
-                    id: "flashcardV2Reset",
-                    icon: "iconRefresh",
-                    label: window.siyuan.languages.reset,
-                    click: () => manageAndSkip([current.card.id], "reset", {}, "userReset"),
-                });
-                menu.addItem({
-                    id: "flashcardV2SetDue",
-                    icon: "iconCalendar",
-                    label: window.siyuan.languages.setDueTime,
-                    click: () => openFlashcardV2Due([current.card.id], current.reviewState.due,
-                        () => {
-                            if (sessionFinished) {
-                                return;
-                            }
-                            requestPending = true;
-                            skipManagedSessionCards([current.card.id], "dueChanged");
-                        }),
-                });
-                menu.addItem({
-                    id: "flashcardV2SetFlag",
-                    icon: "iconBookmark",
-                    label: window.siyuan.languages.flashcardFlag,
-                    submenu: flashcardV2FlagMenuItems(current.card.flag,
-                        [...flagDefinitions].map(([flag, name]) => ({flag, name})), (flag) =>
-                            manageWithoutSkipping([current.card.id], "setFlag", {flag})),
-                });
-                menu.addItem({
-                    id: "flashcardV2CardTags",
-                    icon: "iconTag",
-                    label: `${window.siyuan.languages.tag} - ${window.siyuan.languages.riffCard}`,
-                    click: () => queryCurrentCardTags("card"),
-                });
-                menu.addItem({
-                    id: "flashcardV2SourceTags",
-                    icon: "iconTag",
-                    label: `${window.siyuan.languages.tag} - ${window.siyuan.languages.flashcardCardSource}`,
-                    click: () => queryCurrentCardTags("source"),
-                });
-                if (isMobile()) {
-                    menu.fullscreen();
-                } else {
-                    const rect = button.getBoundingClientRect();
-                    menu.open({x: rect.left, y: rect.bottom});
-                }
             };
             const handleReviewShortcut = (shortcut: string) => {
                 const action = getFlashcardV2ReviewShortcutAction(shortcut);

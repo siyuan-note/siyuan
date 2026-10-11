@@ -40,6 +40,7 @@ const runCases = async (sources) => {
         "../../../mobile/util/mobileAppUtil": {callMobileAppShowKeyboard: () => {}},
         "../../hint/extend": {hintRef, hintSlash: () => []},
         "../../hint/builtinSlash": {registerBuiltinSlashHint: value => value},
+        "../../util/selection": {focusBlock: element => element.focus()},
         "../../toolbar/defaults": {getDefaultToolbar: () => []},
         "../highlightRender": {highlightRender: () => {}},
         "../mathRender": {mathRender: () => {}},

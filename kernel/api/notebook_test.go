@@ -40,10 +40,10 @@ func TestListNotebooksSortsBySubDocCount(t *testing.T) {
 	oldPublishAccess := model.GetPublishAccess()
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	*model.Conf.FileTree.BoxDocEnabled = true
+	*model.Conf.FileTree.Load().BoxDocEnabled = true
 	t.Cleanup(func() {
 		if err := model.SetPublishAccess(oldPublishAccess); err != nil {
 			t.Errorf("restore publish access failed: %v", err)
@@ -85,7 +85,7 @@ func TestListNotebooksSortsBySubDocCount(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			model.Conf.FileTree.Sort = test.sortMode
+			model.Conf.FileTree.Load().Sort = test.sortMode
 			notebooks := requestNotebookList(t, model.RoleAdministrator)
 			if actual := notebookIDs(notebooks); !slices.Equal(actual, test.expected) {
 				t.Fatalf("unexpected notebook order: %v", actual)
@@ -100,7 +100,7 @@ func TestListNotebooksSortsBySubDocCount(t *testing.T) {
 	if err := model.SetPublishAccess(publishAccess); err != nil {
 		t.Fatal(err)
 	}
-	model.Conf.FileTree.Sort = util.SortModeSubDocCountDESC
+	model.Conf.FileTree.Load().Sort = util.SortModeSubDocCountDESC
 	notebooks := requestNotebookList(t, model.RoleReader)
 	expected := []string{boxIDs[1], boxIDs[2], boxIDs[4], boxIDs[0], boxIDs[3]}
 	if actual := notebookIDs(notebooks); !slices.Equal(actual, expected) {

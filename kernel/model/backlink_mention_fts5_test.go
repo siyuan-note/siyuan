@@ -29,7 +29,7 @@ func TestBacklinkMentionFilteredPagination(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			fixture := setupStructureTransactionTest(t)
 			setupFoldTransactionDatabase(t, fixture)
-			Conf.Search = conf.NewSearch()
+			Conf.Search.Store(conf.NewSearch())
 			var trees []*parse.Tree
 			for _, id := range []string{fixture.sourceID, fixture.targetID} {
 				tree, err := LoadTreeByBlockID(id)
@@ -139,7 +139,7 @@ func TestBacklinkMentionFilteredPagination(t *testing.T) {
 			}
 			excluded := hashset.New(ids[4], ids[5], ids[7])
 			for _, limit := range []int{1, 2, 3, 4, 5, 64} {
-				Conf.Search.Limit = limit
+				Conf.Search.Load().Limit = limit
 				want := []string{ids[3], ids[2], ids[1], ids[0]}
 				if limit < len(want) {
 					want = want[:limit]
@@ -165,7 +165,7 @@ func TestBacklinkMentionFilteredPagination(t *testing.T) {
 					}
 				}
 			}
-			Conf.Search.Limit = 2
+			Conf.Search.Load().Limit = 2
 			_, blocks := searchBackmentionInBox([]string{"needle", "broad"}, "", hashset.New(ids[0], ids[1], ids[2], ids[3], ids[4], ids[5], ids[7]), fixture.sourceID, 12, boxID)
 			if len(blocks) != 0 {
 				t.Fatal("fully filtered candidates returned mentions")

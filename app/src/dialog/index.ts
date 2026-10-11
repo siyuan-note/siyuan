@@ -6,6 +6,7 @@ import {isNotCtrl} from "../protyle/util/compatibility";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
 import {destroyDialogBlockPanels, getDialogBlockPanel} from "../block/panelOwnership";
+import {getAnchoredInputMask} from "./anchoredInput";
 
 export class Dialog {
     private destroyCallback: (options?: IObject) => void;
@@ -26,6 +27,10 @@ export class Dialog {
         // 对话框上方的菜单也需要约束 Tab，避免从菜单末尾进入背景。
         const menu = window.siyuan.menus.menu.element;
         const dialog = this.element.querySelector(".b3-dialog") as HTMLElement;
+        const inputMask = getAnchoredInputMask();
+        if (inputMask?.contains(document.activeElement) && isAbove(inputMask, dialog)) {
+            return;
+        }
         const popover = getDialogBlockPanel(this.element, document.activeElement);
         const activePopover = popover && isAbove(popover, dialog) ? popover : undefined;
         // 浮窗正文中的 Tab 由编辑器处理，保留列表、表格和代码块的缩进操作。

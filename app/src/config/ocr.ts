@@ -1,3 +1,4 @@
+import {config as configApi} from "./util/configApi";
 import type {OCRConfigData, OCRThresholds, SettingOCR} from "../types/api";
 import {fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
@@ -43,7 +44,7 @@ const getThresholdFields = () => [
 
 export const registerOCRTab = (tab: SettingTabBuilder) => {
     const languages = window.siyuan.languages;
-    tab.group("general", "OCR").slot({
+    tab.group("general", languages.configGroupOCREngine).slot({
         key: "ocrAuto",
         keywords: [languages.ocrAuto, languages.ocrAutoTip],
         html: () => genSwitchRow("ocrAuto", languages.ocrAuto, languages.ocrAutoTip, false),
@@ -77,7 +78,9 @@ export const registerOCRTab = (tab: SettingTabBuilder) => {
         key: "ocrImportModels",
         keywords: ["ONNX", "YAML", "Tiny", languages.ocrImportModels, languages.ocrDetector, languages.ocrRecognizer],
         html: () => `<div id="ocrImportModels" class="b3-label config-item">${genConfigItemMainHtml(languages.ocrImportModels, languages.ocrImportModelsTip)}
-${getModelFiles().map(file => `<div class="fn__hr"></div><label class="fn__block"><span class="b3-label__text">${file.title}</span><div class="fn__hr--small"></div><input id="${file.id}" class="b3-text-field fn__block" type="file" accept="${file.suffix.split(",").map(suffix => `.${suffix}`).join(",")}"></label>`).join("")}</div>`,
+${getModelFiles().map(file => `<div class="fn__hr"></div><div class="fn__block"><div id="${file.id}Label" class="b3-label__text">${file.title}</div><div class="fn__hr--small"></div>
+<div class="fn__flex"><button type="button" class="b3-button b3-button--outline fn__flex-center" data-ocr-file="${file.id}" aria-describedby="${file.id}Label">${languages.chooseFile}</button><span class="fn__space"></span><span id="${file.id}Name" class="fn__flex-1 fn__flex-center fn__ellipsis" aria-live="polite"></span></div>
+<input id="${file.id}" class="fn__none" type="file" accept="${file.suffix.split(",").map(suffix => `.${suffix}`).join(",")}"></div>`).join("")}</div>`,
     }).slot({
         key: "ocrImport",
         keywords: ["ONNX", "YAML", languages.ocrImportModels, languages.import],
@@ -135,6 +138,11 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
             root.querySelector<HTMLInputElement>(`#ocrThreshold_${field.key}`).disabled = busy || !isPaddleOCR;
         });
         root.querySelector<HTMLButtonElement>("#ocrImport").disabled = busy || pendingSaves > 0 || !isPaddleOCR || files.some(file => !root.querySelector<HTMLInputElement>(`#${file.id}`).files?.length);
+        files.forEach(file => {
+            const name = root.querySelector<HTMLElement>(`#${file.id}Name`);
+            name.textContent = root.querySelector<HTMLInputElement>(`#${file.id}`).files?.[0]?.name || "";
+            name.title = name.textContent;
+        });
     };
     const providerOptions = () => {
         const providers = [...data.providers].sort((left, right) => Number(right.id === "paddleocr") - Number(left.id === "paddleocr"));
@@ -259,12 +267,12 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
                 if (closed) {
                     return false;
                 }
-                const response = await fetchSyncPost("/api/asset/setOCRConfig", config, undefined, true, controller.signal);
-                if (response.code === 0 && !closed) {
-                    data.config = response.data;
-                    window.siyuan.config.ocr = response.data;
-                    saved = true;
-                }
+                await configApi.set("ocr", config, next => {
+                    if (!closed) {
+                        data.config = next as SettingOCR;
+                        saved = true;
+                    }
+                });
             } catch (error) {
                 handleError(error);
             } finally {
@@ -337,7 +345,9 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         if (!button || busy || pendingSaves > 0 || !data) {
             return;
         }
-        if (button.id === "ocrImport") {
+        if (button.dataset.ocrFile && files.some(file => file.id === button.dataset.ocrFile)) {
+            root.querySelector<HTMLInputElement>(`#${button.dataset.ocrFile}`).click();
+        } else if (button.id === "ocrImport") {
             writeRevision++;
             busy = true;
             updateControls();

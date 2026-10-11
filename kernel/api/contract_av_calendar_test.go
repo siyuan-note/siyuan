@@ -323,7 +323,7 @@ func TestAVContractCalendarUndated(t *testing.T) {
 		request map[string]any
 		wantID  string
 	}{
-		{map[string]any{"id": database.ID, "viewID": view.ID, "search": "beta"}, ids[1]},
+		{map[string]any{"id": database.ID, "viewID": view.ID, "search": "  BETA  "}, ids[1]},
 		{map[string]any{"id": database.ID, "viewID": view.ID, "query": "Plan", "search": "alpha"}, ids[0]},
 	} {
 		response = callAttributeViewContextFilterAPI(t, path, test.request, getAttributeViewCalendarUndated)
@@ -332,6 +332,32 @@ func TestAVContractCalendarUndated(t *testing.T) {
 		if result.Code != 0 || result.Data.Total != 1 || len(result.Data.Rows) != 1 || result.Data.Rows[0].ID != test.wantID {
 			t.Fatalf("undated search returned the wrong rows: %s", response.Body.String())
 		}
+	}
+	for _, test := range []struct {
+		name    string
+		options map[string]any
+		start   int
+		count   int
+	}{
+		{"null defaults", map[string]any{"page": nil, "pageSize": nil}, 0, 3},
+		{"fractional", map[string]any{"page": 2.9, "pageSize": 1.9}, 1, 1},
+		{"invalid bounds", map[string]any{"page": -1, "pageSize": 0}, 0, 3},
+		{"beyond", map[string]any{"page": 4, "pageSize": 1}, 0, 0},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			test.options["id"], test.options["viewID"] = database.ID, view.ID
+			response = callAttributeViewContextFilterAPI(t, path, test.options, getAttributeViewCalendarUndated)
+			requireAPIContract(t, http.MethodPost, path, response)
+			decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+			if result.Code != 0 || result.Data.Total != 3 || result.Data.Rows == nil || len(result.Data.Rows) != test.count {
+				t.Fatalf("unexpected undated page: %s", response.Body.String())
+			}
+			for index, row := range result.Data.Rows {
+				if row.ID != ids[test.start+index] {
+					t.Fatalf("undated page skipped or repeated rows: %s", response.Body.String())
+				}
+			}
+		})
 	}
 	response = callAttributeViewContextFilterAPI(t, path, map[string]any{
 		"id": database.ID, "blockID": fixture.databaseID, "viewID": view.ID,

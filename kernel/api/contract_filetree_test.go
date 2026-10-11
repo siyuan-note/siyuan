@@ -210,7 +210,7 @@ func TestAPIContractFileTreeEncryptedAdmission(t *testing.T) {
 	util.WorkspaceDir = t.TempDir()
 	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
 	model.Conf = model.NewAppConf()
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	t.Cleanup(func() { model.Conf, util.DataDir, util.WorkspaceDir = previousConf, previousData, previousWorkspace })
 	boxConf := conf.NewBoxConf()

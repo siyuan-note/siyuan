@@ -129,10 +129,15 @@
     flex-shrink: 0;
     padding: 2px;
 
-    &:hover {
+    &:hover:not([disabled]) {
       // 不明原因 https://github.com/siyuan-note/siyuan/issues/7756#issuecomment-1484057954
       opacity: .99;
       background-color: var(--b3-list-icon-hover);
+    }
+
+    &[disabled] {
+      opacity: .38;
+      cursor: not-allowed;
     }
   }
 

@@ -17,6 +17,8 @@ for (const mobile of [false, true]) {
         const input = {value: "", dispatchEvent: () => actions.push("filter")};
         const dialog = {element: {querySelector: () => input}};
         const constants = {CB_GET_FOCUS: "focus", DIALOG_GLOBALSEARCH: "search"};
+        const searchOptions: Array<{key?: string, method?: number}> = [];
+        const siyuan = {dialogs: [dialog], config: {ai: {embedding: {enabled: true}}}};
         const dependencies: Record<string, unknown> = {
             "../../../config": {openSetting: () => { actions.push("settings"); return dialog; }},
             "../../getAll": {getAllEditor: () => [{protyle: {wysiwyg: {element: {querySelector: (): null => null}}}}, editor]},
@@ -27,8 +29,14 @@ for (const mobile of [false, true]) {
             "../../../editor/util": {openFileById: (options: {id: string, action: string[]}) =>
                 actions.push("document:" + options.id + ":" + options.action[0])},
             "../../../constants": {Constants: constants},
-            "../../../search/spread": {openSearch: (options: {key: string}) => actions.push("search:" + options.key)},
-            "../../../mobile/menu/search": {popSearch: () => actions.push("search")},
+            "../../../search/spread": {openSearch: (options: {key?: string, method?: number}) => {
+                searchOptions.push(options); actions.push("search:" + options.key);
+            }},
+            "../../../mobile/menu/search": {popSearch: (_app: unknown, _config: unknown, _focus: boolean,
+                                                      options: {key?: string, method?: number}) => {
+                searchOptions.push(options); actions.push("search");
+            }},
+            "../../../protyle/util/compatibility": {isDisabledFeature: () => false},
         };
         const source = parse(readFileSync("src/layout/dock/agent/frontendCapabilities.ts", "utf8"),
             {MOBILE: mobile, BROWSER: true}, false, true, "frontendCapabilities.ts");
@@ -39,7 +47,7 @@ for (const mobile of [false, true]) {
         runInNewContext(code, {exports, require: (name: string) => {
             assert.ok(name in dependencies, name);
             return dependencies[name];
-        }, window: {siyuan: {dialogs: [dialog]}}, document: {getElementById: () => input},
+        }, window: {siyuan}, document: {getElementById: () => input},
         Event: class {}, InputEvent: class {}, setTimeout: (callback: () => void) => delayed.push(callback)});
         const capability = (name: string) => exports.lookupCapability("native/frontend/" + name);
         assert.equal(exports.listCapabilityManifests().length, 4);
@@ -60,7 +68,22 @@ for (const mobile of [false, true]) {
         assert.deepEqual(actions, mobile ? ["hide", "document:doc:focus"] : ["document:doc:focus"]);
         actions.length = 0;
         await capability("open_search").handler({query: "  foo  "}, {} as App);
-        assert.deepEqual(actions, mobile ? ["hide", "search", "filter"] : ["search:foo"]);
-        if (mobile) assert.equal(input.value, "foo");
+        assert.deepEqual(actions, mobile ? ["hide", "search"] : ["search:foo"]);
+        assert.equal(searchOptions.at(-1).key, "foo");
+        assert.equal(searchOptions.at(-1).method, undefined);
+        const sql = "-- comment\nSELECT * FROM blocks";
+        await capability("open_search").handler({query: sql, method: 2}, {} as App);
+        assert.equal(searchOptions.at(-1).key, sql);
+        assert.equal(searchOptions.at(-1).method, 2);
+        await capability("open_search").handler({query: "", method: 0}, {} as App);
+        assert.equal(searchOptions.at(-1).key, "");
+        actions.length = 0;
+        for (const method of [-1, 5, 2.5, "2"]) {
+            assert.ok((await capability("open_search").handler({method}, {} as App)).error);
+        }
+        assert.ok((await capability("open_search").handler({query: 2}, {} as App)).error);
+        siyuan.config.ai.embedding.enabled = false;
+        assert.ok((await capability("open_search").handler({method: 4}, {} as App)).error);
+        assert.deepEqual(actions, []);
     });
 }

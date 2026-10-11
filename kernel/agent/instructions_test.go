@@ -21,7 +21,7 @@ import (
 
 func TestAgentInstructionsTurnSnapshot(t *testing.T) {
 	setupCompactionAgentTest(t)
-	kernelModel.Conf.AI.Agent.MaxToolCallRounds = 1
+	kernelModel.Conf.AI.Load().Agent.MaxToolCallRounds = 1
 	initial, err := util.SaveAgentInstructions("original-workspace-preference", "missing")
 	if err != nil {
 		t.Fatal(err)

@@ -32,7 +32,7 @@ import (
 func TestHTML2BlockDOMNormalizesIFramePosition(t *testing.T) {
 	originalConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.System = &conf.System{}
+	model.Conf.System.Store(&conf.System{})
 	t.Cleanup(func() { model.Conf = originalConf })
 
 	tests := []struct {

@@ -97,6 +97,11 @@ var keyCapabilities = map[KeyType]KeyCapability{
 		FilterProfile: FilterProfileRollup,
 		order:         15, ValueKind: "rollup", Editable: false, Filterable: true,
 		Sortable: true, Groupable: false, DefaultOperator: FilterOperatorContains},
+	KeyTypeLocation: {
+		Groups:        KeyGroupAttributePlaceholder | KeyGroupRollupCell | KeyGroupNewItemTemplate | KeyGroupNoFilterDefault,
+		FilterProfile: FilterProfileText,
+		order:         17, ValueKind: "location", Editable: true, Filterable: true,
+		Sortable: true, Groupable: false, DefaultOperator: FilterOperatorContains},
 	KeyTypeLineNumber: {
 		Groups:        KeyGroupNone,
 		FilterProfile: FilterProfileNone,

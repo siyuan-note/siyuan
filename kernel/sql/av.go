@@ -289,7 +289,7 @@ func renderViewWithContext(attrView *av.AttributeView, view *av.View, query stri
 	renderedAttrViews[attrView.ID] = attrView
 	ret = renderView(attrView, view, query, &depth, renderedAttrViews, ignoreRows, deferTemplateValues, renderContext)
 
-	// 元数据、延迟模板和日历区间渲染不写入缓存，避免后续全集渲染读取到不完整条目。
+	// 元数据、延迟模板和日历渲染不写入缓存，避免后续渲染读取已裁剪的条目。
 	if !ignoreRows && !deferTemplateValues && view.LayoutType != av.LayoutTypeCalendar {
 		attrView.RenderedViewables[ret.GetID()] = ret
 	}
@@ -1155,6 +1155,10 @@ func FillAttributeViewNilValue(value *av.Value, typ av.KeyType) {
 		if nil == value.Email {
 			value.Email = &av.ValueEmail{}
 		}
+	case av.KeyTypeLocation:
+		if nil == value.Location {
+			value.Location = &av.ValueLocation{}
+		}
 	case av.KeyTypePhone:
 		if nil == value.Phone {
 			value.Phone = &av.ValuePhone{}
@@ -1264,7 +1268,7 @@ func filterByQuery(query string, collection av.Collection) {
 			for _, cell := range item.GetValues() {
 				allKeywordsHit := true
 				for _, keyword := range keywords {
-					if !util.SearchCaseSensitive {
+					if !util.SearchCaseSensitive.Load() {
 						if !strings.Contains(strings.ToLower(cell.String(true)), strings.ToLower(keyword)) {
 							allKeywordsHit = false
 							break

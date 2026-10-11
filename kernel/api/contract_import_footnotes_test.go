@@ -59,10 +59,23 @@ func TestAPIContractMarkdownFootnotes(t *testing.T) {
 		"xd": "%d days %s", "1w": "1 week %s", "xw": "%d weeks %s", "1M": "1 month %s", "xM": "%d months %s",
 		"1y": "1 year %s", "2y": "2 years %s", "xy": "%d years %s", "max": "a long while %s",
 	}
-	model.Conf.NotebookCrypto, model.Conf.FileTree = conf.NewNotebookCrypto(), conf.NewFileTree()
-	model.Conf.Sync, model.Conf.System = conf.NewSync(), conf.NewSystem()
-	model.Conf.Editor, model.Conf.Search, model.Conf.Export = conf.NewEditor(), conf.NewSearch(), conf.NewExport()
-	model.Conf.Api = &conf.API{Token: "footnotes-test"}
+	{
+		confSectionValue0, confSectionValue1 := conf.NewNotebookCrypto(), conf.NewFileTree()
+		model.Conf.NotebookCrypto = confSectionValue0
+		model.Conf.FileTree.Store(confSectionValue1)
+	}
+	{
+		confSectionValue0, confSectionValue1 := conf.NewSync(), conf.NewSystem()
+		model.Conf.Sync.Store(confSectionValue0)
+		model.Conf.System.Store(confSectionValue1)
+	}
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewEditor(), conf.NewSearch(), conf.NewExport()
+		model.Conf.Editor.Store(confSectionValue0)
+		model.Conf.Search.Store(confSectionValue1)
+		model.Conf.Export.Store(confSectionValue2)
+	}
+	model.Conf.Api.Store(&conf.API{Token: "footnotes-test"})
 	sql.InitDatabase(true)
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)

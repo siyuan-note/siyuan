@@ -422,6 +422,11 @@ func NewAI() *AI {
 		ImageGeneration: defaultImageGeneration(),
 	}
 
+	return ai
+}
+
+// ApplyAIEnvironment 仅由启动适配器调用，环境变量不参与默认值或日常规范化。
+func ApplyAIEnvironment(ai *AI) {
 	apiKey := os.Getenv("SIYUAN_OPENAI_API_KEY")
 	apiModel := os.Getenv("SIYUAN_OPENAI_API_MODEL")
 	apiBaseURL := os.Getenv("SIYUAN_OPENAI_API_BASE_URL")
@@ -511,7 +516,6 @@ func NewAI() *AI {
 		}
 	}
 
-	return ai
 }
 
 func (ai *AI) HasAnyProvider() bool {
@@ -652,7 +656,8 @@ func (ai *AI) Normalize() {
 	serverIDs := map[string]bool{}
 	for i := range ai.MCP.Servers {
 		if ai.MCP.Servers[i].ID == "" || serverIDs[ai.MCP.Servers[i].ID] {
-			ai.MCP.Servers[i].ID = uuid.New().String()
+			data := []byte(fmt.Sprintf("mcp:%d:%s:%s", i, ai.MCP.Servers[i].Name, ai.MCP.Servers[i].Type))
+			ai.MCP.Servers[i].ID = uuid.NewSHA1(uuid.NameSpaceOID, data).String()
 		}
 		serverIDs[ai.MCP.Servers[i].ID] = true
 	}
@@ -754,7 +759,7 @@ func (ai *AI) Normalize() {
 		ai.ImageGeneration.OutputFormat = "png"
 	}
 	providers := make([]*Provider, 0, len(ai.Providers))
-	for _, p := range ai.Providers {
+	for providerIndex, p := range ai.Providers {
 		if p == nil {
 			continue
 		}
@@ -783,10 +788,10 @@ func (ai *AI) Normalize() {
 			p.RequestTimeout = 600
 		}
 		if !ast.IsNodeIDPattern(p.ID) {
-			p.ID = ast.NewNodeID()
+			p.ID = normalizedAIID(fmt.Sprintf("provider:%d:%s", providerIndex, p.DisplayName))
 		}
 		models := make([]*Model, 0, len(p.Models))
-		for _, m := range p.Models {
+		for modelIndex, m := range p.Models {
 			if m == nil {
 				continue
 			}
@@ -799,7 +804,7 @@ func (ai *AI) Normalize() {
 				m.ContextLength = 0
 			}
 			if !ast.IsNodeIDPattern(m.ID) {
-				m.ID = ast.NewNodeID()
+				m.ID = normalizedAIID(fmt.Sprintf("model:%s:%d:%s", p.ID, modelIndex, m.Name))
 			}
 			models = append(models, m)
 		}
@@ -817,7 +822,7 @@ func (ai *AI) Normalize() {
 		ai.Embedding.Dimensions = 0 // 负值非法，归零表示用模型默认维度
 	}
 	if !ast.IsNodeIDPattern(ai.Embedding.ID) {
-		ai.Embedding.ID = ast.NewNodeID()
+		ai.Embedding.ID = normalizedAIID("embedding")
 	}
 	if ai.Rerank == nil {
 		ai.Rerank = defaultRerank()
@@ -839,8 +844,14 @@ func (ai *AI) Normalize() {
 		ai.Rerank.CandidateCount = 100
 	}
 	if !ast.IsNodeIDPattern(ai.Rerank.ID) {
-		ai.Rerank.ID = ast.NewNodeID()
+		ai.Rerank.ID = normalizedAIID("rerank")
 	}
+}
+
+// normalizedAIID 补全缺失标识时仅依赖公开配置位置，保持区块 ID 形态且不包含凭据。
+func normalizedAIID(seed string) string {
+	id := uuid.NewSHA1(uuid.NameSpaceOID, []byte(seed))
+	return "20000101000000-" + hex.EncodeToString(id[:])[:7]
 }
 
 func (ai *AI) pruneOrphanedMCPCapabilityPolicies() {

@@ -169,7 +169,7 @@ func TestGetFileAdminCanFollowAssetsSymlinkOutsideWorkspace(t *testing.T) {
 func TestGetFileReaderCanReadHiddenNotebookFile(t *testing.T) {
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() { model.Conf = previousConf })
 	workspaceDir := testutil.PublicDataDir(t)
 	origWorkspaceDir, origDataDir := util.WorkspaceDir, util.DataDir
@@ -223,7 +223,7 @@ func TestGetFileReaderCanReadHiddenNotebookFile(t *testing.T) {
 func TestGetFileReaderCanReadVisibleNotebookFile(t *testing.T) {
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() { model.Conf = previousConf })
 	workspaceDir := testutil.PublicDataDir(t)
 	origWorkspaceDir, origDataDir := util.WorkspaceDir, util.DataDir
@@ -272,7 +272,7 @@ func TestGetFileReaderCanReadVisibleNotebookFile(t *testing.T) {
 func TestGetFileEditorCanReadHiddenNotebookFile(t *testing.T) {
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() { model.Conf = previousConf })
 	workspaceDir := testutil.PublicDataDir(t)
 	origWorkspaceDir, origDataDir := util.WorkspaceDir, util.DataDir
@@ -321,7 +321,7 @@ func TestGetFileEditorCanReadHiddenNotebookFile(t *testing.T) {
 func TestGetFileDeniesNotebookSiyuanConf(t *testing.T) {
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() { model.Conf = previousConf })
 	workspaceDir := testutil.PublicDataDir(t)
 	origWorkspaceDir, origDataDir := util.WorkspaceDir, util.DataDir

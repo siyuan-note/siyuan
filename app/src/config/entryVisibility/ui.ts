@@ -5,9 +5,7 @@ import {genUUID} from "../../util/genID";
 import {
     entryCatalog,
     getEntryCatalogChildren,
-    getEntryCatalogCustomDefaultVisibility,
     getEntryCatalogPathChain,
-    getEntryPaths,
     IEntryCatalogNode,
     IEntryCatalogSection,
     isEntryCatalogNodeConfigurable,
@@ -16,7 +14,6 @@ import {
     refreshSlashMenuCatalog,
     refreshTopBarCatalog,
     refreshToolbarCatalogEntries,
-    SLASH_MENU_ROOT_PATH,
     SLASH_MENU_FREQUENT_PATH,
     TOP_BAR_ROOT_PATH,
     STATUS_BAR_ROOT_PATH,
@@ -27,7 +24,8 @@ import {
     ENTRY_PROFILE_FULL,
     ENTRY_PROFILE_SIMPLE,
     ENTRY_VISIBILITY_VERSION,
-    getConfiguredEntryVisibility as isEntryVisible,
+    getActiveEntryProfile,
+    getEntryProfileDefaultVisibility,
     saveEntryVisibility,
     TEntryVisibilityTemplate,
 } from "./runtime";
@@ -137,13 +135,15 @@ const createProfile = (template: TEntryVisibilityTemplate, current = false, name
     const profile: Config.IEntryVisibilityProfile = {
         id: genUUID(),
         name: uniqueName(name || window.siyuan.languages.entryCustomProfile),
-        entries: createEntryProfileSnapshot(template),
+        defaults: template,
+        entries: {},
         orders: createEntryOrderSnapshot(current),
     };
     if (current) {
-        getEntryPaths().forEach((path) => {
-            profile.entries[path] = isEntryVisible(path, path === SLASH_MENU_FREQUENT_PATH ? SLASH_MENU_ROOT_PATH : undefined);
-        });
+        const active = getActiveEntryProfile();
+        profile.defaults = active?.defaults || (active ? undefined :
+            window.siyuan.config.appearance.entryVisibility.active === ENTRY_PROFILE_SIMPLE ? ENTRY_PROFILE_SIMPLE : ENTRY_PROFILE_FULL);
+        profile.entries = {...active?.entries};
     }
     return profile;
 };
@@ -271,7 +271,7 @@ const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string
     return `<input class="b3-switch" type="checkbox"
     aria-label="${escapeAttr(label)}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
     ${!parentEnabled && !readOnly ? " disabled" : ""}${getProfileEntryVisibility(profile, path,
-        getEntryCatalogCustomDefaultVisibility(path)) ? " checked" : ""}>`;
+        getEntryProfileDefaultVisibility(profile, path)) ? " checked" : ""}>`;
 };
 
 const renderEntryRows = (profile: Config.IEntryVisibilityProfile, prefix: string,
@@ -320,6 +320,10 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
                            getItemPath = (item: IEntryCatalogNode) => `${prefix}.${item.key}`) => `<section class="config-entry-visibility__column"
     data-entry-column data-entry-depth="${depth}">
     <div class="config-entry-visibility__column-title">
+        ${isMobile() && depth > 0 ? `<button class="block__icon block__icon--show" data-action="back-entry"
+            data-entry-parent="${escapeAttr(prefix)}" aria-label="${escapeAttr(window.siyuan.languages.back)}">
+            <svg><use xlink:href="#iconLeft"></use></svg>
+        </button>` : ""}
         <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
         ${sortable ? renderOrderReset(prefix) : ""}
     </div>
@@ -493,7 +497,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     let title = directDisplayRoot?.label() || section.label();
     let parentEnabled = directDisplayRoot
         ? getProfileEntryVisibility(profile, directDisplayRootPath,
-            getEntryCatalogCustomDefaultVisibility(directDisplayRootPath))
+            getEntryProfileDefaultVisibility(profile, directDisplayRootPath))
         : true;
     let depth = 0;
     while (nodes.length > 0) {
@@ -512,7 +516,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
             break;
         }
         parentEnabled = parentEnabled && getProfileEntryVisibility(profile, selectedPath,
-            getEntryCatalogCustomDefaultVisibility(selectedPath));
+            getEntryProfileDefaultVisibility(profile, selectedPath));
         nodes = selectedNode.children;
         prefix = selectedPath;
         title = selectedNode.label();
@@ -928,15 +932,11 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             return;
         }
         selectedTemplate = target.value as TEntryVisibilityTemplate | "current";
-        draft.entries = createEntryProfileSnapshot(selectedTemplate === "current"
-            ? ENTRY_PROFILE_FULL
-            : selectedTemplate);
-        draft.orders = createEntryOrderSnapshot(selectedTemplate === "current");
-        if (selectedTemplate === "current") {
-            getEntryPaths().forEach((path) => {
-                draft.entries[path] = isEntryVisible(path, path === SLASH_MENU_FREQUENT_PATH ? SLASH_MENU_ROOT_PATH : undefined);
-            });
-        }
+        const template = createProfile(selectedTemplate === "current" ? ENTRY_PROFILE_FULL : selectedTemplate,
+            selectedTemplate === "current");
+        draft.defaults = template.defaults;
+        draft.entries = template.entries;
+        draft.orders = template.orders;
         renderBrowser();
     });
     view.addEventListener("click", (event) => {
@@ -968,6 +968,9 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             const depth = Number(actionElement.dataset.entryDepth);
             selectedPaths = selectedPaths.slice(0, depth);
             selectedPaths[depth] = actionElement.dataset.entryPath;
+            renderBrowser(true);
+        } else if (action === "back-entry") {
+            selectedPaths = getEntryCatalogPathChain(selectedSectionKey, actionElement.dataset.entryParent).slice(0, -1);
             renderBrowser(true);
         } else if (!builtin && action === "confirm") {
             const nameInput = view.querySelector<HTMLInputElement>("[data-profile-field='name']");

@@ -516,10 +516,12 @@ func PrepareAgentMessageImage(assetPath string) (PreparedDocumentImage, error) {
 
 // GenerateImage 使用全局图片生成配置创建图片字节，可供文档资源、编辑器和其他图片入口复用。
 func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateImageResult, error) {
-	if Conf == nil || Conf.AI == nil {
+	confAIReadSnapshot := Conf.LoadAI()
+
+	if Conf == nil || confAIReadSnapshot == nil {
 		return GenerateImageResult{}, errors.New("AI configuration is unavailable")
 	}
-	provider, generationModel := Conf.AI.GetImageGenerationModel()
+	provider, generationModel := confAIReadSnapshot.GetImageGenerationModel()
 	if err := validateImageModel(provider, generationModel); err != nil {
 		return GenerateImageResult{}, err
 	}
@@ -527,14 +529,14 @@ func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateI
 	if prompt == "" {
 		return GenerateImageResult{}, errors.New("prompt is required for image generation")
 	}
-	size := multimodalValueOrDefault(request.Size, Conf.AI.ImageGeneration.Size)
-	quality := multimodalValueOrDefault(request.Quality, Conf.AI.ImageGeneration.Quality)
-	outputFormat := strings.ToLower(multimodalValueOrDefault(request.OutputFormat, Conf.AI.ImageGeneration.OutputFormat))
+	size := multimodalValueOrDefault(request.Size, confAIReadSnapshot.ImageGeneration.Size)
+	quality := multimodalValueOrDefault(request.Quality, confAIReadSnapshot.ImageGeneration.Quality)
+	outputFormat := strings.ToLower(multimodalValueOrDefault(request.OutputFormat, confAIReadSnapshot.ImageGeneration.OutputFormat))
 	if outputFormat != "png" && outputFormat != "jpeg" && outputFormat != "webp" {
 		return GenerateImageResult{}, errors.New("unsupported image output format")
 	}
 	generated, err := util.NewOpenAIImageAdapter(
-		provider.APIKey, provider.BaseURL, generationModel.Name, Conf.AI.ImageGeneration.RequestTimeout, ResolveAIProviderHeaders(provider),
+		provider.APIKey, provider.BaseURL, generationModel.Name, confAIReadSnapshot.ImageGeneration.RequestTimeout, ResolveAIProviderHeaders(provider),
 	).Generate(ctx, util.GenerateImageRequest{
 		Prompt: prompt, Size: size, Quality: quality, OutputFormat: outputFormat,
 	})
@@ -885,6 +887,7 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 			if err = writeTreeUpsertQueue(tree); err != nil {
 				return
 			}
+			invalidateDocumentHistory(tree.ID)
 			util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files, humanize.BytesCustomCeil(uint64(size), 2)), 5000)
 
 			if 0 < forbiddenCount {
@@ -914,14 +917,16 @@ type AssetSearchMatch struct {
 }
 
 func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
-	ret, _ = SearchAssetsByNamePage(keyword, exts, nil, 1, Conf.Search.Limit, false)
+	ret, _ = SearchAssetsByNamePage(keyword, exts, nil, 1, Conf.Search.Load().Limit, false)
 	return
 }
 
 // SearchAssetsByNamePage 筛选资源，可合并图片元数据命中，并按稳定顺序返回指定页。
 func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMatch, page, pageSize int, includeMetadata bool) (ret []*cache.Asset, err error) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	ret = []*cache.Asset{}
-	if page < 1 || pageSize < 1 || pageSize > Conf.Search.Limit {
+	if page < 1 || pageSize < 1 || pageSize > confSearchSnapshot.Limit {
 		return nil, errors.New("invalid asset search page")
 	}
 	allowedExts := map[string]bool{}
@@ -1091,7 +1096,7 @@ func SearchAssetsByNamePage(keyword string, exts []string, match *AssetSearchMat
 	highlightKeyword := strings.Join(keywords, search.TermSep)
 	for _, asset := range ret {
 		if pathHitCount[asset.Path] > 0 {
-			_, asset.HName = search.MarkText(asset.HName, highlightKeyword, 64, Conf.Search.CaseSensitive)
+			_, asset.HName = search.MarkText(asset.HName, highlightKeyword, 64, confSearchSnapshot.CaseSensitive)
 		}
 	}
 	return
@@ -1755,14 +1760,33 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(110))
 	defer util.PushClearProgress()
 
+	oldPath = strings.TrimSpace(oldPath)
+	suffix := ""
+	if idx := strings.IndexAny(oldPath, "?#"); idx >= 0 {
+		suffix = oldPath[idx:]
+	}
+	defer func() {
+		if err != nil {
+			newPath = ""
+		} else if newPath != "" {
+			newPath += suffix
+		}
+	}()
+	// 片段不参与磁盘路径解析，查询参数中的 box 仍用于定位笔记本。
+	if idx := strings.Index(oldPath, "#"); idx >= 0 {
+		oldPath = oldPath[:idx]
+	}
 	oldCleanPath := AssetPathWithoutQuery(oldPath)
 
+	oldAbsPath, err := GetAssetAbsPathInBox(oldPath, "")
+	if err != nil {
+		logging.LogErrorf("get asset [%s] abs path failed: %s", oldPath, err)
+		return
+	}
 	// 加密笔记本的资源磁盘文件名参与 AAD，重命名需要重新封装密文，当前不支持。
-	if absPath, absErr := GetAssetAbsPathInBox(oldPath, ""); absErr == nil {
-		if IsEncryptedAssetPath(absPath) {
-			err = errors.New("renaming assets in encrypted notebooks is not supported")
-			return
-		}
+	if IsEncryptedAssetPath(oldAbsPath) {
+		err = errors.New("renaming assets in encrypted notebooks is not supported")
+		return
 	}
 
 	newName = strings.TrimSpace(newName)
@@ -1782,11 +1806,6 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	newName = util.AssetName(newName+filepath.Ext(oldCleanPath), ast.NewNodeID())
 	parentDir := path.Dir(oldCleanPath)
 	newPath = path.Join(parentDir, newName)
-	oldAbsPath, getErr := GetAssetAbsPathInBox(oldPath, "")
-	if getErr != nil {
-		logging.LogErrorf("get asset [%s] abs path failed: %s", oldPath, getErr)
-		return
-	}
 	if err = ensureReadableAssetLocal(oldAbsPath); err != nil {
 		return
 	}
@@ -1801,11 +1820,11 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	}
 	filelock.Unlock(oldAbsPath)
 
-	oldSya := filepath.Join(util.DataDir, oldPath+".sya")
+	oldSya := oldAbsPath + ".sya"
 	filelock.Lock(oldSya)
 	if gulu.File.IsExist(oldSya) {
 		// Rename the .sya annotation file when renaming a PDF asset https://github.com/siyuan-note/siyuan/issues/9390
-		newSya := filepath.Join(util.DataDir, newPath+".sya")
+		newSya := newAbsPath + ".sya"
 		if err = os.Rename(oldSya, newSya); err != nil {
 			if err = gulu.File.Copy(oldSya, newSya); err != nil {
 				filelock.Unlock(oldSya)
@@ -1816,7 +1835,10 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	}
 	filelock.Unlock(oldSya)
 
-	oldName := path.Base(oldPath)
+	oldName := path.Base(oldCleanPath)
+	oldNameBytes := []byte(oldName)
+	escapedOldNameBytes := []byte((&url.URL{Path: oldName}).EscapedPath())
+	nameReplacer := newAssetRenameReplacer(oldName, newName)
 
 	notebooks, err := ListNotebooks()
 	if err != nil {
@@ -1845,11 +1867,11 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 					return
 				}
 
-				if !bytes.Contains(data, []byte(oldName)) {
+				if !bytes.Contains(data, oldNameBytes) && !bytes.Contains(data, escapedOldNameBytes) {
 					continue
 				}
 
-				data = bytes.Replace(data, []byte(oldName), []byte(newName), -1)
+				data = []byte(nameReplacer.Replace(string(data)))
 				if writeErr := filelock.WriteFile(treeAbsPath, data); nil != writeErr {
 					logging.LogErrorf("write data [path=%s] failed: %s", treeAbsPath, writeErr)
 					err = writeErr
@@ -1890,7 +1912,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 			}
 
 			avJSONPath := filepath.Join(storageAvDir, entry.Name())
-			if _, replaceErr := replaceAttributeViewAssetPath(avJSONPath, avID, oldPath, newPath); nil != replaceErr {
+			if _, replaceErr := replaceAttributeViewAssetPath(avJSONPath, avID, oldCleanPath, newPath); nil != replaceErr {
 				logging.LogErrorf("replace asset path in attribute view [%s] failed: %s", entry.Name(), replaceErr)
 				err = replaceErr
 				return
@@ -1900,7 +1922,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		}
 	}
 
-	if ocrText := util.GetAssetText(oldPath); "" != ocrText {
+	if ocrText := util.GetAssetText(oldCleanPath); "" != ocrText {
 		// 图片重命名后 ocr-texts.json 需要更新 https://github.com/siyuan-note/siyuan/issues/12974
 		util.SetAssetText(newPath, ocrText)
 	}
@@ -1909,13 +1931,31 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	return
 }
 
+// newAssetRenameReplacer 同时替换字面量和百分号编码形式，保留引用的路径前缀、查询参数和片段。
+func newAssetRenameReplacer(oldValue, newValue string) *strings.Replacer {
+	pairs := []string{oldValue, newValue}
+	if escapedOld := (&url.URL{Path: oldValue}).EscapedPath(); escapedOld != oldValue {
+		pairs = append(pairs, escapedOld, (&url.URL{Path: newValue}).EscapedPath())
+	}
+	return strings.NewReplacer(pairs...)
+}
+
 func replaceAttributeViewAssetPath(avJSONPath, avID, oldPath, newPath string) (updated bool, err error) {
 	data, err := filelock.ReadFile(avJSONPath)
-	if nil != err || !bytes.Contains(data, []byte(oldPath)) {
+	if nil != err {
 		return
 	}
 
-	data = bytes.ReplaceAll(data, []byte(oldPath), []byte(newPath))
+	oldPath = strings.SplitN(AssetPathWithoutQuery(oldPath), "#", 2)[0]
+	newPath = strings.SplitN(AssetPathWithoutQuery(newPath), "#", 2)[0]
+	if oldPath == "" || oldPath == newPath {
+		return
+	}
+	replacedData := []byte(newAssetRenameReplacer(oldPath, newPath).Replace(string(data)))
+	if bytes.Equal(data, replacedData) {
+		return
+	}
+	data = replacedData
 	if err = filelock.WriteFile(avJSONPath, data); nil != err {
 		return
 	}
@@ -2550,7 +2590,7 @@ func getQueryEmbedNodesAssetsLinkDests(node *ast.Node) (ret []string) {
 		stmt := n.TokensStr()
 		stmt = html.UnescapeString(stmt)
 		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Load().Limit)
 		for _, sqlBlock := range sqlBlocks {
 			subtree, _ := LoadTreeByBlockID(sqlBlock.ID)
 			if nil == subtree {

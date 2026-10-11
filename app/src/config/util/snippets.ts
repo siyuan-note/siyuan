@@ -1,3 +1,4 @@
+import {config as configApi} from "./configApi";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {showMessage} from "../../dialog/message";
@@ -314,9 +315,7 @@ const setSnippetPost = async (dialog: Dialog, snippets: ISnippet[], removeIds: s
         if (cssChanged) {
             refreshHeadingNumberMeasurements();
         }
-        window.siyuan.config.snippet.enabledCSS = settings.enabledCSS;
-        window.siyuan.config.snippet.enabledJS = settings.enabledJS;
-        fetchPost("/api/setting/setSnippet", window.siyuan.config.snippet);
+        await configApi.set("snippet", settings);
         completedSnippetSaves.add(dialog);
         dialog.destroy({cancel: "true"});
     } catch (error) {

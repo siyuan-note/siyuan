@@ -5,6 +5,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {getEntryCatalogChildren} from "../../config/entryVisibility/catalog";
+const {loadMenuToggle} = require("../../../tests/menu-toggle-fixture.cjs");
 
 const {parse} = require("ifdef-loader/preprocessor");
 const noop = () => {};
@@ -98,6 +99,7 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
         return exports;
     };
     const documentModule = load("documentMenu") as typeof import("./documentMenu");
+    dependencies["../../menus/menuToggle"] = loadMenuToggle(globals);
     dependencies["./documentMenu"] = documentModule;
     const titleModule = load("openTitleMenu") as typeof import("./openTitleMenu");
     const options: Parameters<typeof documentModule.openDocumentMenu>[0] = {

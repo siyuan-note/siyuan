@@ -123,7 +123,7 @@ func (b *Bundle) typeScript(schema *Schema) string {
 	}
 }
 
-func (b *Bundle) TypeScript(legacy []Route) []byte {
+func (b *Bundle) TypeScript(legacy []Route, documentation map[string]string) []byte {
 	var output strings.Builder
 	output.WriteString("// 此文件由内核契约生成，请运行 pnpm run api:generate 更新。\n\n")
 	for _, name := range sortedKeys(b.Definitions) {
@@ -156,6 +156,17 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 		for _, endpoint := range b.Endpoints {
 			if endpoint.Method != method {
 				continue
+			}
+			if text := documentation[endpoint.Handler]; text != "" {
+				output.WriteString("    /**\n")
+				for _, line := range strings.Split(strings.ReplaceAll(text, "*/", "*\\/"), "\n") {
+					if line == "" {
+						output.WriteString("     *\n")
+					} else {
+						fmt.Fprintf(&output, "     * %s\n", line)
+					}
+				}
+				output.WriteString("     */\n")
 			}
 			fmt.Fprintf(&output, "    %s: {\n        request: %s;\n        response: %s;\n        body: %s;\n",
 				quote(endpoint.Path), b.typeScript(endpoint.Request), b.typeScript(endpoint.Response), quote(string(endpoint.Body)))

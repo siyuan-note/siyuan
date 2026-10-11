@@ -71,7 +71,7 @@ func openFlashcardV2Store(ctx context.Context) (*flashcardv2.Store, error) {
 	}
 	flashcardV2Store = nil
 	store, err := flashcardv2.OpenStore(ctx, flashcardv2.V2Root(util.DataDir),
-		flashcardv2.ProjectionPath(util.TempDir), Conf.System.ID, nil)
+		flashcardv2.ProjectionPath(util.TempDir), Conf.LoadSystem().ID, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -374,12 +374,13 @@ func autoMigrateLegacyFlashcards(ctx context.Context, waitForStorageSync bool) (
 }
 
 func legacyFlashcardMigrationOptions() flashcardv2.LegacyMigrationOptions {
+	confFlashcardSnapshot := Conf.LoadFlashcard()
 	return flashcardv2.LegacyMigrationOptions{
-		RequestRetention:   Conf.Flashcard.RequestRetention,
-		MaximumInterval:    Conf.Flashcard.MaximumInterval,
-		Weights:            flashcardV2Weights(),
-		NewLimit:           Conf.Flashcard.NewCardLimit,
-		ReviewLimit:        Conf.Flashcard.ReviewCardLimit,
+		RequestRetention:   confFlashcardSnapshot.RequestRetention,
+		MaximumInterval:    confFlashcardSnapshot.MaximumInterval,
+		Weights:            flashcardV2Weights(confFlashcardSnapshot.Weights),
+		NewLimit:           confFlashcardSnapshot.NewCardLimit,
+		ReviewLimit:        confFlashcardSnapshot.ReviewCardLimit,
 		BuryNewSiblings:    true,
 		BuryReviewSiblings: true,
 		LeechThreshold:     8,
@@ -397,9 +398,9 @@ func legacyFlashcardMigrationOptions() flashcardv2.LegacyMigrationOptions {
 	}
 }
 
-func flashcardV2Weights() []float64 {
+func flashcardV2Weights(weights string) []float64 {
 	ret := make([]float64, 0, 19)
-	for value := range strings.SplitSeq(Conf.Flashcard.Weights, ",") {
+	for value := range strings.SplitSeq(weights, ",") {
 		weight, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
 		if err != nil {
 			return nil
@@ -955,7 +956,8 @@ func StartFlashcardV2Session(ctx context.Context,
 	if err := validateFlashcardV2QueryBoundary(request.Query); err != nil {
 		return flashcardv2.StudyQueueResult{}, err
 	}
-	request = applyFlashcardV2SessionDefaults(request, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
+	confFlashcardSnapshot := Conf.LoadFlashcard()
+	request = applyFlashcardV2SessionDefaults(request, confFlashcardSnapshot.NewCardLimit, confFlashcardSnapshot.ReviewCardLimit)
 	store, err := requireFlashcardV2Store(ctx, true)
 	if err != nil {
 		return flashcardv2.StudyQueueResult{}, err

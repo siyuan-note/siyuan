@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -144,7 +145,7 @@ func TestPasswordChangePreservesDeletedHistoryRecovery(t *testing.T) {
 	}
 	Conf = NewAppConf()
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	if err := EnableEncryptedNotebook("old-review-password"); err != nil {
 		t.Fatal(err)
 	}
@@ -185,12 +186,30 @@ func TestPasswordChangePreservesDeletedHistoryRecovery(t *testing.T) {
 	if !verifyKEKAgainstEncryptedHistory(oldKEK, nil) {
 		t.Fatal("fixture history cannot be decrypted")
 	}
+	checkPersistedKeys := func() {
+		t.Helper()
+		data, readErr := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		persisted := NewAppConf()
+		if readErr = json.Unmarshal(data, persisted); readErr != nil {
+			t.Fatal(readErr)
+		}
+		if !reflect.DeepEqual(persisted.NotebookCrypto, Conf.NotebookCrypto) {
+			t.Fatal("password change left persisted key metadata different from memory")
+		}
+		// 重新加载已落盘的配置，后续改密和历史恢复不得依赖尚未保存的内存状态。
+		Conf.NotebookCrypto = persisted.NotebookCrypto
+	}
 	if err = ChangeMasterPassword("old-review-password", "new-review-password"); err != nil {
 		t.Fatal(err)
 	}
+	checkPersistedKeys()
 	if err = ChangeMasterPassword("new-review-password", "latest-password"); err != nil {
 		t.Fatal(err)
 	}
+	checkPersistedKeys()
 	newKEK, err := deriveKEK("latest-password")
 	if err != nil {
 		t.Fatal(err)
@@ -285,7 +304,11 @@ func TestMasterPasswordMigrationRetainsHistoryKeysAfterBoxRemoval(t *testing.T) 
 		}
 	}
 	Conf = NewAppConf()
-	Conf.NotebookCrypto, Conf.Sync = conf.NewNotebookCrypto(), conf.NewSync()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewNotebookCrypto(), conf.NewSync()
+		Conf.NotebookCrypto = confSectionValue0
+		Conf.Sync.Store(confSectionValue1)
+	}
 	if err := EnableEncryptedNotebook("migration-old"); err != nil {
 		t.Fatal(err)
 	}
@@ -316,6 +339,31 @@ func TestMasterPasswordMigrationRetainsHistoryKeysAfterBoxRemoval(t *testing.T) 
 		t.Fatal("removing last notebook discarded pending recovery keys")
 	}
 	recoverMasterPasswordMigration()
+	confPath := filepath.Join(util.ConfDir, "conf.json")
+	persisted, err := os.ReadFile(confPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Remove(confPath); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.Mkdir(confPath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	failedKey, err := deriveKEK("migration-new")
+	zeroAndClear(failedKey)
+	if err == nil {
+		t.Fatal("migration completed despite failing to save authenticated configuration")
+	}
+	if pending, _ := MasterPasswordMigrationStatus(); !pending {
+		t.Fatal("failed configuration write discarded the recovery manifest")
+	}
+	if err = os.Remove(confPath); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(confPath, persisted, 0644); err != nil {
+		t.Fatal(err)
+	}
 	derived, err := deriveKEK("migration-new")
 	defer zeroAndClear(derived)
 	if err != nil {
@@ -327,6 +375,17 @@ func TestMasterPasswordMigrationRetainsHistoryKeysAfterBoxRemoval(t *testing.T) 
 	backup, err := loadNotebookCryptoBackup()
 	if err != nil || backup == nil || !verifyKEKMAC(backup, newKEK) {
 		t.Fatalf("recovery did not publish authenticated backup: %v", err)
+	}
+	persisted, err = os.ReadFile(confPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reloaded := NewAppConf()
+	if err = json.Unmarshal(persisted, reloaded); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(reloaded.NotebookCrypto, Conf.NotebookCrypto) || !verifyKEKMAC(reloaded.NotebookCrypto, newKEK) {
+		t.Fatal("recovered key metadata was not persisted and authenticated")
 	}
 	keys, err := decryptHistoryKEKs(newKEK, backup.HistoryKEKs)
 	defer clearHistoryKEKs(keys)

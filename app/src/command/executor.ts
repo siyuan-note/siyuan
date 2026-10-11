@@ -5,7 +5,6 @@ import {executeLegacyNativeCommand} from "./nativeRuntime";
 import {getCommandRegistry} from "./service";
 import {ensureContextCommands} from "./contextCommands";
 import type {ICommandContextSnapshot, TCommandSource} from "./types";
-import {createKeyboardSearchTrace} from "../util/keyboardDiagnostic";
 
 interface IExecByCommandOptions {
     command: string;
@@ -31,8 +30,6 @@ export const executeCommandById = (
 ) => ensureCommandSystem(app).execute(commandId, context, args);
 
 export const execByCommand = async (options: IExecByCommandOptions) => {
-    const trace = createKeyboardSearchTrace(options.command);
-    trace("command-enter");
     const app = options.app || window.siyuan.ws.app;
     const context = options.context || captureCommandContext({
         app,
@@ -42,17 +39,9 @@ export const execByCommand = async (options: IExecByCommandOptions) => {
         fileLiElements: options.fileLiElements,
     });
     const commandId = getNativeCommandId(options.command);
-    try {
-        if (commandId) {
-            const result = await ensureCommandSystem(app).execute(commandId, context);
-            trace("command-result", result.status);
-            return result;
-        }
-        await executeLegacyNativeCommand(options.command, context);
-        trace("command-result", "executed");
-        return {status: "executed" as const};
-    } catch (error) {
-        trace("command-error", "exception");
-        throw error;
+    if (commandId) {
+        return ensureCommandSystem(app).execute(commandId, context);
     }
+    await executeLegacyNativeCommand(options.command, context);
+    return {status: "executed" as const};
 };

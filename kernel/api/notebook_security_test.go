@@ -78,8 +78,8 @@ func TestGetNotebookInfoHidesInvisibleNotebookFromReader(t *testing.T) {
 	oldConf, oldDataDir := model.Conf, util.DataDir
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	const testLang = "notebook-security-test"
 	oldTimeLang, hadTimeLang := util.TimeLangs[testLang]
 	util.TimeLangs[testLang] = map[string]any{
@@ -218,8 +218,8 @@ func TestGetNotebookInfoExcludesPublishExcludedDocumentsForReader(t *testing.T) 
 	oldPublishAccess := model.GetPublishAccess()
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	const testLang = "notebook-info-publish-test"
 	installAPITestTimeLangs(t, testLang)
 	model.Conf.Lang = testLang
@@ -348,7 +348,7 @@ func TestSetNotebookIconRejectsPathTraversal(t *testing.T) {
 	oldConf, oldDataDir := model.Conf, util.DataDir
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	t.Cleanup(func() {
 		model.Conf, util.DataDir = oldConf, oldDataDir
 	})
@@ -391,7 +391,7 @@ func TestGetNotebookConfHidesEncryptedNotebookFromReader(t *testing.T) {
 	oldConf, oldDataDir := model.Conf, util.DataDir
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	t.Cleanup(func() {
 		model.Conf, util.DataDir = oldConf, oldDataDir
 	})
@@ -492,7 +492,7 @@ func TestGetEncryptedNotebookStatusAuthorization(t *testing.T) {
 		t.Fatal(err)
 	}
 	model.Conf = model.NewAppConf()
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	t.Cleanup(func() {
 		model.Conf, util.DataDir, util.HistoryDir = oldConf, oldDataDir, oldHistoryDir

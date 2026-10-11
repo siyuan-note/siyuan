@@ -45,8 +45,8 @@ func TestAPIContractOCRAIProviderSettings(t *testing.T) {
 	t.Cleanup(func() { util.ConfDir, util.DisabledFeatures = previousConfDir, previousDisabled })
 	engine.POST("/api/asset/getOCRConfig", getOCRConfig)
 	engine.POST("/api/asset/setOCRConfig", setOCRConfig)
-	model.Conf.OCR = &conf.OCR{Provider: "tesseract", Model: "tiny", Auto: true}
-	provider := model.Conf.AI.Providers[0]
+	model.Conf.OCR.Store(&conf.OCR{Provider: "tesseract", Model: "tiny", Auto: true})
+	provider := model.Conf.AI.Load().Providers[0]
 	provider.DisplayName = "Images"
 	provider.Models = append(provider.Models, &conf.Model{ID: "disabled", Name: "hidden", Enabled: false})
 	get := func() apicontract.OCRConfigData {
@@ -99,9 +99,9 @@ func TestAPIContractOCRUsesIndependentAIModel(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = io.WriteString(w, aiOCRSuccess)
 	})
-	model.Conf.AI.Providers[0].Models = append(model.Conf.AI.Providers[0].Models,
+	model.Conf.AI.Load().Providers[0].Models = append(model.Conf.AI.Load().Providers[0].Models,
 		&conf.Model{ID: "ocr-model", Enabled: true, Name: "independent"})
-	model.Conf.OCR = &conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "ocr-model"}
+	model.Conf.OCR.Store(&conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "ocr-model"})
 	engine.POST("/api/asset/ocr", ocr)
 	const path = "assets/ai-ocr.png"
 	t.Cleanup(func() { util.RemoveAssetText(path) })
@@ -110,15 +110,15 @@ func TestAPIContractOCRUsesIndependentAIModel(t *testing.T) {
 		result.Text != "first  column\nsecond line" || result.OCRJSON == nil || len(result.OCRJSON) != 0 || calls != 1 {
 		t.Fatalf("unified AI OCR response: %+v, calls=%d", result, calls)
 	}
-	model.Conf.OCR.Provider = "tesseract"
+	model.Conf.OCR.Load().Provider = "tesseract"
 	if response := requestAIOCR(t, engine, path); response.Code != 0 || calls != 2 {
 		t.Fatal("manual AI OCR ignored independent model")
 	}
-	model.Conf.OCR.AIModelID = "missing"
+	model.Conf.OCR.Load().AIModelID = "missing"
 	if response := requestAIOCR(t, engine, path); response.Code == 0 || calls != 2 || util.GetAssetText(path) != result.Text {
 		t.Fatal("invalid OCR model fell back to agent or changed text")
 	}
-	model.Conf.OCR.Provider, model.Conf.OCR.AIModelID = "ai", ""
+	model.Conf.OCR.Load().Provider, model.Conf.OCR.Load().AIModelID = "ai", ""
 	if response := requestAIOCR(t, engine, path); response.Code == 0 || calls != 2 {
 		t.Fatal("AI provider without a selected model fell back to agent")
 	}
@@ -129,7 +129,7 @@ func TestAPIContractOCRReasoningSettingsCompatibility(t *testing.T) {
 	previousConfDir := util.ConfDir
 	util.ConfDir = t.TempDir()
 	t.Cleanup(func() { util.ConfDir = previousConfDir })
-	model.Conf.OCR = &conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision"}
+	model.Conf.OCR.Store(&conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision"})
 	engine.POST("/api/asset/setOCRConfig", setOCRConfig)
 	for _, test := range []struct {
 		field, expected string
@@ -202,11 +202,11 @@ func TestAPIContractOCRReasoningProtocols(t *testing.T) {
 						_, _ = io.WriteString(w, `{"choices":[{"finish_reason":"stop","message":{"content":"text"}}]}`)
 					}
 				})
-				model.Conf.AI.Providers[0].Protocol = protocol
+				model.Conf.AI.Load().Providers[0].Protocol = protocol
 				if protocol == "anthropic-messages" {
-					model.Conf.AI.Providers[0].Models[0].Name = "claude-sonnet-4"
+					model.Conf.AI.Load().Providers[0].Models[0].Name = "claude-sonnet-4"
 				}
-				model.Conf.OCR = &conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision", ReasoningEffort: effort}
+				model.Conf.OCR.Store(&conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision", ReasoningEffort: effort})
 				const path = "assets/ai-ocr.png"
 				t.Cleanup(func() { util.RemoveAssetText(path) })
 				if response := requestAIOCR(t, engine, path); response.Code != 0 || response.Data.Text != "text" || calls != 1 {
@@ -229,8 +229,8 @@ func TestAPIContractOCRRejectedReasoningPreservesResult(t *testing.T) {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = io.WriteString(w, `{"error":{"message":"unsupported reasoning effort","type":"invalid_request_error","param":"reasoning.effort"}}`)
 	})
-	model.Conf.AI.Providers[0].Protocol = "openai-responses"
-	model.Conf.OCR = &conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision", ReasoningEffort: "none"}
+	model.Conf.AI.Load().Providers[0].Protocol = "openai-responses"
+	model.Conf.OCR.Store(&conf.OCR{Provider: "ai", Model: "tiny", AIModelID: "vision", ReasoningEffort: "none"})
 	const path = "assets/ai-ocr.png"
 	util.SetAssetText(path, "previous text")
 	t.Cleanup(func() { util.RemoveAssetText(path) })

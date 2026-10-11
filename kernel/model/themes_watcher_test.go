@@ -47,32 +47,32 @@ func TestWatchThemesCurrentThemeOnly(t *testing.T) {
 		}
 	}
 	Conf = NewAppConf()
-	Conf.Appearance = conf.NewAppearance()
+	Conf.Appearance.Store(conf.NewAppearance())
 
 	WatchThemes()
 	assertThemesWatchList(t, themesDir, util.AppearancePackagePath("themes", "daylight"))
 
 	Conf.m.Lock()
-	Conf.Appearance.Mode = 1
+	Conf.Appearance.Load().Mode = 1
 	Conf.m.Unlock()
 	WatchThemes()
 	assertThemesWatchList(t, themesDir, util.AppearancePackagePath("themes", "midnight"))
 
 	Conf.m.Lock()
-	Conf.Appearance.ThemeDark = "unused"
+	Conf.Appearance.Load().ThemeDark = "unused"
 	Conf.m.Unlock()
 	WatchThemes()
 	assertThemesWatchList(t, themesDir, filepath.Join(themesDir, "unused"))
 
 	Conf.m.Lock()
-	Conf.Appearance.Mode = -1
+	Conf.Appearance.Load().Mode = -1
 	Conf.m.Unlock()
 	WatchThemes()
 	assertThemesWatchList(t, themesDir)
 
 	Conf.m.Lock()
-	Conf.Appearance.Mode = 0
-	Conf.Appearance.ThemeLight = ".."
+	Conf.Appearance.Load().Mode = 0
+	Conf.Appearance.Load().ThemeLight = ".."
 	Conf.m.Unlock()
 	WatchThemes()
 	assertThemesWatchList(t, themesDir)

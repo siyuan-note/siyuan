@@ -51,7 +51,7 @@ func TestMoveDocsBatchCustomOrder(t *testing.T) {
 					}
 					treenode.UpsertBlockTree(tree)
 				}
-				Conf.FileTree.CreateDocAtTop = &atTop
+				Conf.FileTree.Load().CreateDocAtTop = &atTop
 				a := addFileOperationTestDoc(t, f, "20260718000003-abcdefg", "A", false)
 				b := addFileOperationTestDoc(t, f, "20260718000004-abcdefg", "B", false)
 				if err := MoveDocs([]string{a.Path, b.Path}, f.box.ID, f.sourcePath, nil); err != nil {
@@ -102,7 +102,7 @@ func TestMoveDocsBatchCustomOrder(t *testing.T) {
 				if atTop {
 					position = "after"
 				}
-				Conf.FileTree.Sort = util.SortModeCustom
+				Conf.FileTree.Load().Sort = util.SortModeCustom
 				if _, err := ReorderDocTree([]string{b.ID, a.ID}, f.targetID, position, false, true); err != nil {
 					t.Fatal(err)
 				}

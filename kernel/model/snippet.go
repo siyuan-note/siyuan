@@ -105,12 +105,12 @@ func loadSnippets() (ret []*conf.Snippet, err error) {
 
 	data, err := filelock.ReadFile(confPath)
 	if err != nil {
-		logging.LogErrorf("load js snippets failed: %s", err)
+		logging.LogErrorf("load snippets failed: %s", err)
 		return
 	}
 
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogErrorf("unmarshal js snippets failed: %s", err)
+		logging.LogErrorf("unmarshal snippets failed: %s", err)
 		return
 	}
 	for _, snippet := range ret {

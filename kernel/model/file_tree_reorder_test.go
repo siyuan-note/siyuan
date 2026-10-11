@@ -16,8 +16,8 @@ import (
 
 func TestDocTreeReorderConflictAndCompleteOrder(t *testing.T) {
 	f := setupFileOperationTest(t)
-	Conf.FileTree.Sort = util.SortModeNameASC
-	Conf.FileTree.MaxListCount = 1
+	Conf.FileTree.Load().Sort = util.SortModeNameASC
+	Conf.FileTree.Load().MaxListCount = 1
 	hidden := addFileOperationTestDoc(t, f, "20260718000003-abcdefg", "Hidden", true)
 	unlisted := addFileOperationTestDoc(t, f, "20260718000004-abcdefg", "Unlisted", false)
 	confPath := filepath.Join(util.DataDir, f.box.ID, ".siyuan", "sort.json")
@@ -45,14 +45,14 @@ func TestDocTreeReorderConflictAndCompleteOrder(t *testing.T) {
 	}
 	assertSiblingCustomOrder(t, f.box.ID, "/", []string{hidden.ID, f.targetID, f.sourceID, unlisted.ID})
 	mode, err := ResolveDocTreeSortMode(f.box.ID, "/")
-	if err != nil || mode != util.SortModeCustom || Conf.FileTree.Sort != util.SortModeNameASC {
+	if err != nil || mode != util.SortModeCustom || Conf.FileTree.Load().Sort != util.SortModeNameASC {
 		t.Fatalf("confirmation did not set only notebook mode: %d, %v", mode, err)
 	}
 }
 
 func TestDocTreeReorderEqualValuesPersist(t *testing.T) {
 	f := setupFileOperationTest(t)
-	Conf.FileTree.Sort = util.SortModeSubDocCountASC
+	Conf.FileTree.Load().Sort = util.SortModeSubDocCountASC
 	result, err := ReorderDocTree([]string{f.sourceID}, f.targetID, "before", false, false)
 	if err != nil || result.Conflict || !result.Changed {
 		t.Fatalf("equal-value move failed: %+v, %v", result, err)
@@ -90,7 +90,7 @@ func TestDocTreeReorderRecoversUnreadableSort(t *testing.T) {
 
 func TestDocTreeReorderRejectsDescendantTargetsWithLocalizedMessage(t *testing.T) {
 	f := setupFileOperationTest(t)
-	Conf.FileTree.Sort = util.SortModeNameASC
+	Conf.FileTree.Load().Sort = util.SortModeNameASC
 	childPath := strings.TrimSuffix(f.sourcePath, ".sy") + "/20260718000003-abcdefg.sy"
 	grandchildPath := strings.TrimSuffix(childPath, ".sy") + "/20260718000004-abcdefg.sy"
 	for _, docPath := range []string{childPath, grandchildPath} {
@@ -136,7 +136,7 @@ func TestDocTreeSortAllModesRespectTies(t *testing.T) {
 
 func TestDocTreeReorderCrossParentPreviewDoesNotMove(t *testing.T) {
 	f := setupFileOperationTest(t)
-	Conf.FileTree.Sort = util.SortModeNameASC
+	Conf.FileTree.Load().Sort = util.SortModeNameASC
 	childPath := "/" + f.sourceID + "/20260718000003-abcdefg.sy"
 	child := treenode.NewTree(f.box.ID, childPath, "/Source/A", "A")
 	if _, err := filesys.WriteTree(child); err != nil {
@@ -163,7 +163,7 @@ func TestDocTreeReorderCrossParentPreviewDoesNotMove(t *testing.T) {
 
 func TestDocTreeReorderMultipleSourcesKeepSelectionOrder(t *testing.T) {
 	f := setupFileOperationTest(t)
-	Conf.FileTree.Sort = util.SortModeNameASC
+	Conf.FileTree.Load().Sort = util.SortModeNameASC
 	extra := addFileOperationTestDoc(t, f, "20260718000003-abcdefg", "Z", false)
 	result, err := ReorderDocTree([]string{extra.ID, f.targetID}, f.sourceID, "before", false, true)
 	if err != nil || !result.Conflict {
@@ -174,7 +174,7 @@ func TestDocTreeReorderMultipleSourcesKeepSelectionOrder(t *testing.T) {
 
 func TestDocTreeReorderInheritsCustomPanelSort(t *testing.T) {
 	f := setupFileOperationTest(t)
-	Conf.FileTree.Sort = util.SortModeCustom
+	Conf.FileTree.Load().Sort = util.SortModeCustom
 	boxConf := f.box.GetConf()
 	boxConf.SortMode = util.SortModeNameASC
 	if err := f.box.SaveConf(boxConf); err != nil {
@@ -188,7 +188,7 @@ func TestDocTreeReorderInheritsCustomPanelSort(t *testing.T) {
 		t.Fatalf("expected panel inheritance, got %d", mode)
 	}
 	assertSiblingCustomOrder(t, f.box.ID, "/", []string{f.targetID, f.sourceID})
-	Conf.FileTree.Sort = util.SortModeCreatedASC
+	Conf.FileTree.Load().Sort = util.SortModeCreatedASC
 	if mode, err := ResolveDocTreeSortMode(f.box.ID, "/"); err != nil || mode != util.SortModeCreatedASC {
 		t.Fatalf("notebook did not follow later panel changes: %d, %v", mode, err)
 	}
@@ -196,7 +196,7 @@ func TestDocTreeReorderInheritsCustomPanelSort(t *testing.T) {
 
 func TestDraggedDocSortModeUsesParentInheritance(t *testing.T) {
 	f := setupFileOperationTest(t)
-	Conf.FileTree.Sort = util.SortModeNameASC
+	Conf.FileTree.Load().Sort = util.SortModeNameASC
 	parent, err := LoadTreeByBlockID(f.sourceID)
 	if err != nil {
 		t.Fatal(err)

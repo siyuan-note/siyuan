@@ -110,13 +110,13 @@ func setupExportRelatedTest(t *testing.T, boxIDs ...string) {
 	util.TempDir = filepath.Join(testRoot, "temp")
 	util.BlockTreeDBPath = filepath.Join(testRoot, "blocktree.db")
 	Conf = NewAppConf()
-	Conf.Export = conf.NewExport()
-	Conf.Export.IncludeSubDocs = false
-	Conf.Export.IncludeRelatedDocs = true
-	Conf.FileTree = conf.NewFileTree()
-	Conf.Flashcard = conf.NewFlashcard()
+	Conf.Export.Store(conf.NewExport())
+	Conf.Export.Load().IncludeSubDocs = false
+	Conf.Export.Load().IncludeRelatedDocs = true
+	Conf.FileTree.Store(conf.NewFileTree())
+	Conf.Flashcard.Store(conf.NewFlashcard())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	if err := os.MkdirAll(util.DataDir, 0755); err != nil {
 		t.Fatal(err)
 	}

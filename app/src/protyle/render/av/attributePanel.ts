@@ -12,6 +12,29 @@ const updateEmptyState = (element: HTMLElement, hideEmpty: boolean) => {
     element.classList.toggle("protyle-db-attr--hide-empty", hideEmpty);
 };
 
+const preparedBodies = new WeakMap<IProtyle, {id: string, element: HTMLElement}>();
+
+// 在替换正文前准备属性，提交时由同一个编辑器接管事件和只读状态。
+export const prepareDatabaseAttributePanel = (protyle: IProtyle, id: string) => {
+    return new Promise<(() => void) | undefined>(resolve => {
+        const element = document.createElement("div");
+        element.className = "custom-attr protyle-db-attr__body";
+        let finished = false;
+        const timeout = window.setTimeout(() => {
+            finished = true;
+            resolve(undefined);
+        }, 60000);
+        renderAVAttribute(element, id, protyle, rendered => {
+            if (finished) {
+                return;
+            }
+            finished = true;
+            window.clearTimeout(timeout);
+            resolve(() => preparedBodies.set(protyle, {id, element: rendered}));
+        });
+    });
+};
+
 const refreshActions = new Set<TOperation>([
     "addAttrViewCol",
     "removeAttrViewCol",
@@ -90,7 +113,9 @@ export class AVAttributePanel {
             return;
         }
         const targetID = this.protyle.block.showAll ? this.protyle.block.id : this.protyle.block.rootID;
-        if (!targetID || (!force && targetID === this.targetID &&
+        const prepared = preparedBodies.get(this.protyle);
+        preparedBodies.delete(this.protyle);
+        if (!targetID || (!force && prepared?.id !== targetID && targetID === this.targetID &&
             (this.element.dataset.rendered === "true" || this.renderingTargetID === targetID))) {
             return;
         }
@@ -113,14 +138,14 @@ export class AVAttributePanel {
             currentBodyElement.replaceWith(bodyElement);
             this.bodyElement = bodyElement;
         }
-        renderAVAttribute(bodyElement, targetID, this.protyle, (renderedElement) => {
+        const rendered = (renderedElement: HTMLElement) => {
             if (token !== this.renderToken) {
                 return;
             }
             this.renderingTargetID = "";
-            if (keepCurrentBody) {
+            if (keepCurrentBody || renderedElement !== bodyElement) {
                 this.updateCollapsedState();
-                currentBodyElement.replaceWith(renderedElement);
+                this.bodyElement.replaceWith(renderedElement);
                 this.bodyElement = renderedElement;
             }
             this.element.dataset.rendered = "true";
@@ -129,7 +154,12 @@ export class AVAttributePanel {
             this.element.classList.toggle("fn__none", !renderedElement.querySelector("[data-av-id], .custom-attr__avbacklinks"));
             const callbacks = this.renderCallbacks.splice(0);
             callbacks.forEach(callback => callback(this.bodyElement));
-        });
+        };
+        if (prepared?.id === targetID) {
+            rendered(prepared.element);
+        } else {
+            renderAVAttribute(bodyElement, targetID, this.protyle, rendered);
+        }
     }
 
     public afterRender(callback: (element: HTMLElement) => void) {
@@ -171,6 +201,10 @@ export class AVAttributePanel {
         this.bodyElement.dataset.readonly = this.element.dataset.readonly;
         this.bodyElement.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea").forEach(item => {
             item.readOnly = Boolean(this.protyle.disabled);
+        });
+        this.bodyElement.querySelectorAll<HTMLButtonElement>('[data-type="av-bind-document"]').forEach(item => {
+            item.disabled = Boolean(this.protyle.disabled || window.siyuan.isPublish ||
+                this.protyle.options.history?.created || this.protyle.options.history?.snapshot);
         });
         this.element.querySelectorAll<HTMLElement>('[data-type="av-tab"]').forEach(item => {
             item.draggable = !this.protyle.disabled;

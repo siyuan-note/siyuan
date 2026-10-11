@@ -134,8 +134,11 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 		maxAge = 60 * 60 * 24 * 30 // 30 days
 	}
 	ginSessions.Default(c).Options(ginSessions.Options{
-		Path:     "/",
-		Secure:   util.SSL,
+		Path: "/",
+		// 按当前连接是否为 TLS 标记 Secure；固定端口反代的明文连接不得标记，
+		// 否则浏览器不会在明文的 6806 端口上回传该 Cookie。
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
+		Secure:   util.SSL || util.IsTLSRequest(c.Request),
 		MaxAge:   maxAge,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
@@ -339,6 +342,15 @@ func CheckAuth(c *gin.Context) {
 				return
 			}
 			if util.WorkspaceName == username && util.AuthCodeEquals(Conf.AccessAuthCode, password) {
+				// 浏览器可能自动附带缓存的 HTTP Basic 凭据，仍须校验请求来源。
+				// 不携带 Origin 和 Fetch Metadata 的普通接口客户端保持兼容。
+				if !util.IsSessionOriginAllowedRequest(c.Request) {
+					logging.LogWarnf("invalid Basic auth request origin [origin=%s, fetch-site=%s, ip=%s]",
+						c.GetHeader("Origin"), c.GetHeader("Sec-Fetch-Site"), c.ClientIP())
+					c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid request origin"})
+					c.Abort()
+					return
+				}
 				util.AuthThrottleReset(ip)
 				c.Set(RoleContextKey, RoleAdministrator)
 				c.Next()
@@ -409,7 +421,7 @@ func authByAPIToken(c *gin.Context, source, token string) (handled bool) {
 		c.Abort()
 		return true
 	}
-	if util.AuthCodeEquals(Conf.Api.Token, token) {
+	if util.AuthCodeEquals(Conf.Api.Load().Token, token) {
 		util.AuthThrottleReset(ip)
 		c.Set(RoleContextKey, RoleAdministrator)
 		c.Next()

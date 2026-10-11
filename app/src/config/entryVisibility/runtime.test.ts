@@ -16,6 +16,39 @@ import {
     mergeDockEntryOrderSnapshot,
 } from "./dockOrder";
 
+test("new profiles follow changed catalog defaults while explicit and legacy values stay fixed", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/runtime.ts"), "utf8");
+    const compiled = transpileModule(source + "\nexports.writable = getWritableEntryProfile;", {
+        compilerOptions: {module: ModuleKind.CommonJS},
+    }).outputText;
+    for (const mobile of [false, true]) {
+        const path = mobile ? "editor.toolbar.mobile-selection.strong" : "editor.toolbar.strong";
+        const node = {simple: true};
+        const config: Config.IEntryVisibility = {version: 7, active: "simple", profiles: []};
+        const window = {siyuan: {config: {appearance: {entryVisibility: config}}, languages: {entryCustomProfile: "Custom"}}};
+        const runtime = {} as typeof import("./runtime") & {writable: (config: Config.IEntryVisibility) => Config.IEntryVisibilityProfile};
+        runInNewContext(compiled, {exports: runtime, window, require: () => ({
+            ...catalog, ...profileVisibility, TOOLBAR_ENTRY_ROOT_PATH, genUUID: () => "custom",
+            getEntryCatalogNode: () => node,
+            getEntryParentPath: (): undefined => undefined,
+            getEntryCatalogDefaultVisibility: () => true,
+            getEntryCatalogCustomDefaultVisibility: () => true,
+        })});
+        const custom = runtime.writable(config);
+        assert.equal(runtime.getConfiguredEntryVisibility(path), true);
+        node.simple = false;
+        assert.equal(runtime.getConfiguredEntryVisibility(path), false);
+        custom.entries[path] = true;
+        assert.equal(runtime.getConfiguredEntryVisibility(path), true);
+        delete custom.entries[path];
+        delete custom.defaults;
+        assert.equal(runtime.getConfiguredEntryVisibility(path), true);
+        custom.entries[path] = false;
+        node.simple = true;
+        assert.equal(runtime.getConfiguredEntryVisibility(path), false);
+    }
+});
+
 test("frequent slash defaults and snapshots follow profiles on desktop and mobile", () => {
     const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/runtime.ts"), "utf8");
     const compiled = transpileModule(source + "\nexports.writable = getWritableEntryProfile;", {
@@ -45,7 +78,9 @@ test("frequent slash defaults and snapshots follow profiles on desktop and mobil
                 assert.equal(runtime.getConfiguredEntryVisibility(path), enabled && !mobile);
                 assert.equal(runtime.createEntryProfileSnapshot(template)[path], enabled);
                 const custom = runtime.writable(config);
-                assert.equal(custom.entries[path], enabled);
+                assert.equal(custom.defaults, template);
+                assert.equal(custom.entries[path], undefined);
+                assert.equal(runtime.getConfiguredEntryVisibility(path, root), enabled);
                 custom.entries[root] = false;
                 for (const visible of [false, true]) {
                     custom.entries[path] = visible;
@@ -61,7 +96,7 @@ test("frequent slash defaults and snapshots follow profiles on desktop and mobil
                 assert.equal(JSON.stringify(custom), saved);
                 assert.equal(runtime.getConfiguredEntryVisibility(path, root), true);
                 delete custom.entries[path];
-                assert.equal(runtime.getConfiguredEntryVisibility(path, root), true);
+                assert.equal(runtime.getConfiguredEntryVisibility(path, root), enabled);
             }
         }
     } finally {
@@ -107,13 +142,14 @@ test("daily note and flashcard presets preserve custom choices and mobile defaul
             config.active = "full";
             const custom = runtime.writable(config);
             for (const path of paths) {
-                assert.equal(custom.entries[path], !mobile);
+                assert.equal(custom.entries[path], undefined);
+                assert.equal(runtime.getConfiguredEntryVisibility(path), !mobile);
                 for (const visible of [false, true]) {
                     custom.entries[path] = visible;
                     assert.equal(runtime.getConfiguredEntryVisibility(path), visible);
                 }
                 delete custom.entries[path];
-                assert.equal(runtime.getConfiguredEntryVisibility(path), false);
+                assert.equal(runtime.getConfiguredEntryVisibility(path), !mobile);
             }
             // 使用完整模板重置时采用当前默认值，不改写其他已保存方案。
             custom.entries = runtime.createEntryProfileSnapshot("full");
@@ -180,7 +216,8 @@ test("simple formatting defaults preserve color and full and custom toolbar choi
             const custom = runtime.writable(config);
             for (const key of [...advanced, "text"]) {
                 const path = `${root}.${key}`;
-                assert.equal(custom.entries[path], key === "text");
+                assert.equal(custom.entries[path], undefined);
+                assert.equal(runtime.isEntryVisible(path), key === "text");
                 for (const visible of [false, true]) {
                     custom.entries[path] = visible;
                     assert.equal(runtime.isEntryVisible(path), visible);
@@ -194,7 +231,7 @@ test("simple formatting defaults preserve color and full and custom toolbar choi
                     }
                     delete custom.entries[legacy];
                 }
-                assert.equal(runtime.isEntryVisible(path), true);
+                assert.equal(runtime.isEntryVisible(path), key === "text");
                 custom.entries[path] = false;
             }
             const saved = JSON.stringify(custom);
@@ -278,7 +315,7 @@ test("dock visibility menus follow profile scope order instead of the catalog or
     assert.deepEqual(Array.from(exports.getEntryOrder("dock")), ["file", "outline"]);
 });
 
-test("entry profile saves in settings windows send requests and flush pending changes", () => {
+test("entry profile saves in settings windows send requests and flush pending changes", async () => {
     const initial: Config.IEntryVisibility = {version: 6, active: "full", profiles: []};
     const events: string[] = [];
     const requests: Array<{url: string; config: Config.IEntryVisibility;
@@ -306,25 +343,28 @@ test("entry profile saves in settings windows send requests and flush pending ch
         getDockEntryOrderSnapshot: () => Object.fromEntries(DOCK_ORDER_SCOPES.map(scope => [scope, []])),
         mergeDockEntryOrderSnapshot,
         applyDockEntryOrderSnapshot: () => {},
-        fetchPost: (url: string, config: Config.IEntryVisibility,
-                    respond: (response: {code: number; data: Config.IEntryVisibility}) => void) => {
-            requests.push({url, config, respond});
-        },
+        config: {set: (path: string, config: Config.IEntryVisibility, applied: (data: unknown) => void) => {
+            return new Promise<{code: number; data: Config.IEntryVisibility}>(resolve => {
+                requests.push({url: path, config, respond: resolve});
+            }).then(response => { if (response.code === 0) applied({entryVisibility: response.data}); });
+        }},
     })});
     const simple = {...initial, active: "simple"};
     const full = {...initial};
     exports.saveEntryVisibility(simple);
     assert.equal(window.siyuan.config.appearance.entryVisibility, simple);
     assert.equal(requests.length, 1);
-    assert.equal(requests[0].url, "/api/setting/setEntryVisibility");
+    assert.equal(requests[0].url, "appearance.entryVisibility");
     assert.equal(requests[0].config, simple);
     assert.deepEqual(events, ["siyuan-entry-visibility"]);
     exports.saveEntryVisibility(full);
     assert.equal(requests.length, 1);
     requests[0].respond({code: 0, data: simple});
+    await new Promise(setImmediate);
     assert.equal(requests.length, 2);
     assert.equal(requests[1].config, full);
     assert.equal(window.siyuan.config.appearance.entryVisibility, full);
     requests[1].respond({code: 0, data: full});
-    assert.deepEqual(events, ["siyuan-entry-visibility", "siyuan-entry-visibility", "siyuan-entry-visibility"]);
+    await new Promise(setImmediate);
+    assert.deepEqual(events, ["siyuan-entry-visibility", "siyuan-entry-visibility"]);
 });

@@ -36,6 +36,8 @@ interface ItemsSettingTabOptions<TId extends string = string> extends SettingTab
     defaultSave?: (controlId: string, value: unknown) => void;
     /** 条目 mount 完成后的 SettingTab 级初始化（如记录根节点、拉取动态数据） */
     afterMount?: (root: HTMLElement, app?: App) => void | Promise<void>;
+    /** 每次进入标签页时调用，已有控件保留时也会执行 */
+    onShow?: (root: HTMLElement) => void;
 }
 
 interface PanelSettingTabOptions<TId extends string = string> extends SettingTabShell<TId> {
@@ -468,7 +470,7 @@ export class SettingBuilder {
         options: ItemsSettingTabOptions<TId>,
         register: (tab: SettingTabBuilder<TId>) => void,
     ): SettingTab {
-        const {afterMount, ...shell} = options;
+        const {afterMount, onShow, ...shell} = options;
         let registered = false;
         let tabSearchTitle: string | undefined;
         const ensureRegistered = () => {
@@ -496,6 +498,7 @@ export class SettingBuilder {
                 if (visibleItemIds && visibleGroupIds) {
                     applySettingTabSearchVisibility(root, visibleItemIds, visibleGroupIds, unavailableItems);
                 }
+                onShow?.(root);
             },
             scanSearch: (keywords) => {
                 ensureRegistered();

@@ -17,12 +17,14 @@ import type {App} from "../index";
 import {Constants} from "../constants";
 import {textMenu} from "./text";
 import {hideTooltip} from "../dialog/tooltip";
+import {bindTouchMenuDismiss} from "./menuClick";
 
 export class Menus {
     public menu: Menu;
 
     constructor(app: App) {
         this.menu = new Menu();
+        bindTouchMenuDismiss();
         /// #if !MOBILE
         window.addEventListener("contextmenu", (event) => {
             if (event.shiftKey) {

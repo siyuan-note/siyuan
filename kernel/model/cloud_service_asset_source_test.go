@@ -35,10 +35,15 @@ func testCloudAssetSourceAllowsOriginalAccountAfterLogout(t *testing.T, logout f
 	key := []byte("0123456789abcdef0123456789abcdef")
 	owner := &conf.User{UserId: "asset-owner", UserName: "owner", UserToken: "asset-token"}
 	Conf = NewAppConf()
-	Conf.Sync, Conf.Repo, Conf.System = conf.NewSync(), conf.NewRepo(), conf.NewSystem()
-	Conf.Sync.Provider, Conf.Sync.CloudName, Conf.Sync.Enabled = conf.ProviderSiYuan, "main", true
-	Conf.Sync.AssetDownloadMode = 1
-	Conf.Repo.Key = key
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewSync(), conf.NewRepo(), conf.NewSystem()
+		Conf.Sync.Store(confSectionValue0)
+		Conf.Repo.Store(confSectionValue1)
+		Conf.System.Store(confSectionValue2)
+	}
+	Conf.Sync.Load().Provider, Conf.Sync.Load().CloudName, Conf.Sync.Load().Enabled = conf.ProviderSiYuan, "main", true
+	Conf.Sync.Load().AssetDownloadMode = 1
+	Conf.Repo.Load().Key = key
 	Conf.SetUser(owner)
 	Conf.CloudRegion, util.CurrentCloudRegion = 0, 0
 	deviceDir := filepath.Join(base, "partial")

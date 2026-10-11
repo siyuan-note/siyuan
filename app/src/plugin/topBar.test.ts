@@ -6,6 +6,7 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {setTopBarContextMenu, fillTopBarContextMenu} from "./topBarContextMenu";
 import {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "./topBarKey";
+const {loadMenuToggle} = require("../../tests/menu-toggle-fixture.cjs");
 
 const buildPluginMenu = (counts: number[], settings: boolean[], mobile = false, readonly = false,
                         initiallyUnpinned: string[] = []) => {
@@ -53,9 +54,11 @@ const buildPluginMenu = (counts: number[], settings: boolean[], mobile = false, 
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
     }).outputText;
     const exports: {openTopBarMenu?: typeof import("./openTopBarMenu").openTopBarMenu} = {};
+    const menu = {element: {classList: {contains: () => true}}, remove() {}};
+    const menuToggle = loadMenuToggle({window: {siyuan: {menus: {menu}}}});
     runInNewContext(compiled, {
         exports,
-        require: () => dependencies,
+        require: (name: string) => name.endsWith("menuToggle") ? menuToggle : dependencies,
         CustomEvent: class {},
         document: {
             contains: (item: {id: string}) => !initiallyUnpinned.includes(item.id) || mounted.includes(item.id),
@@ -63,7 +66,8 @@ const buildPluginMenu = (counts: number[], settings: boolean[], mobile = false, 
         },
         window: {siyuan: {languages: {}, config: {readonly}, storage: {unpinned}}},
     });
-    const target = {getBoundingClientRect: () => ({width: 10, right: 10, bottom: 10, height: 10})};
+    const target = {closest: (): null => null, setAttribute() {},
+        getBoundingClientRect: () => ({width: 10, right: 10, bottom: 10, height: 10})};
     exports.openTopBarMenu({plugins} as never, mobile ? undefined : target as never);
     return {items, opened, clicked, unpinned, mounted, plugins};
 };
@@ -334,7 +338,9 @@ test("plugin menu supports custom content without SVG icons", () => {
     const exports: {openTopBarMenu?: typeof import("./openTopBarMenu").openTopBarMenu} = {};
     runInNewContext(compiled, {
         exports,
-        require: () => dependencies,
+        require: (name: string) => name.endsWith("menuToggle") ? loadMenuToggle({window: {siyuan: {menus: {
+            menu: {element: {classList: {contains: () => true}}, remove() {}},
+        }}}}) : dependencies,
         document: {contains: () => true},
         window: {siyuan: {languages: {}, config: {readonly: false}}},
     });
@@ -342,7 +348,8 @@ test("plugin menu supports custom content without SVG icons", () => {
     element.id = "plugin_test:timer";
     element.setAttribute("aria-label", "Timer");
     Object.assign(element, {querySelector: (): null => null});
-    const target = {getBoundingClientRect: () => ({width: 10, right: 10, bottom: 10, height: 10})};
+    const target = {closest: (): null => null, setAttribute() {},
+        getBoundingClientRect: () => ({width: 10, right: 10, bottom: 10, height: 10})};
     exports.openTopBarMenu({plugins: [{topBarIcons: [element]}]} as never, target as never);
     const item = items.find(entry => entry.id === element.id);
     assert.equal(item.label, "Timer");

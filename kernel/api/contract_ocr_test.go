@@ -168,7 +168,7 @@ func TestAPIContractOCRNativeImportAndHeadlessRecognition(t *testing.T) {
 	util.WorkingDir = filepath.Dir(filepath.Dir(filepath.Dir(models)))
 	util.TempDir, util.ConfDir = t.TempDir(), t.TempDir()
 	t.Cleanup(func() { util.WorkingDir, util.TempDir, util.ConfDir = previousWorking, previousTemp, previousConf })
-	model.Conf.OCR = &conf.OCR{Provider: "paddleocr", Model: "tiny", Auto: true}
+	model.Conf.OCR.Store(&conf.OCR{Provider: "paddleocr", Model: "tiny", Auto: true})
 	engine := gin.New()
 	engine.POST("/api/asset/importOCRModels", importOCRModels)
 	engine.POST("/api/asset/ocr", ocr)
@@ -301,7 +301,7 @@ func TestAPIContractOCRSettings(t *testing.T) {
 		{`{"provider":"tesseract","model":"tiny","auto":"false"}`, false},
 		{`{"provider":"tesseract","model":"tiny"}`, false},
 	} {
-		previousRevision := settingRevision
+		previousRevision := model.ConfSettingRevision.Load()
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/setOCRConfig", strings.NewReader(test.body)))
 		requireAPIContract(t, "POST", "/api/asset/setOCRConfig", recorder)
@@ -322,8 +322,8 @@ func TestAPIContractOCRSettings(t *testing.T) {
 		if test.success {
 			expectedRevision++
 		}
-		if settingRevision != expectedRevision {
-			t.Fatalf("OCR setting revision: got %d, want %d", settingRevision, expectedRevision)
+		if model.ConfSettingRevision.Load() != expectedRevision {
+			t.Fatalf("OCR setting revision: got %d, want %d", model.ConfSettingRevision.Load(), expectedRevision)
 		}
 		if util.GetAssetText(path) != "existing text" {
 			t.Fatal("configuration update changed existing OCR text")
@@ -480,7 +480,7 @@ func TestAPIContractOCRFailurePreservesText(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(assets, "failure.png"), []byte("invalid image"), 0644); err != nil {
 		t.Fatal(err)
 	}
-	model.Conf.OCR = &conf.OCR{Provider: "paddleocr", Model: "tiny"}
+	model.Conf.OCR.Store(&conf.OCR{Provider: "paddleocr", Model: "tiny"})
 	util.SetAssetText(path, "previous result")
 	t.Cleanup(func() { util.RemoveAssetText(path) })
 	engine := gin.New()

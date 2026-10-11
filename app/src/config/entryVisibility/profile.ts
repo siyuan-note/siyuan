@@ -44,6 +44,7 @@ export const resetEntryProfileOrder = (profile: Pick<Config.IEntryVisibilityProf
 export type TEntryVisibilityImportProfile = {
     name?: unknown;
     base?: unknown;
+    defaults?: unknown;
     entries?: unknown;
     orders?: unknown;
 };
@@ -116,10 +117,11 @@ export const normalizeEntryVisibilityImportProfile = (
     profile: TEntryVisibilityImportProfile,
     version: number,
     defaultOrders: Record<string, string[]>,
-): Pick<Config.IEntryVisibilityProfile, "name" | "entries" | "orders"> | undefined => {
+): Pick<Config.IEntryVisibilityProfile, "name" | "defaults" | "entries" | "orders"> | undefined => {
     if (!profile || typeof profile.name !== "string" || !profile.name.trim() || !profile.entries ||
         typeof profile.entries !== "object" || Array.isArray(profile.entries) ||
-        (version < 3 && profile.base !== "simple" && profile.base !== "full")) {
+        (version < 3 && profile.base !== "simple" && profile.base !== "full") ||
+        (version >= 7 && profile.defaults !== undefined && profile.defaults !== "simple" && profile.defaults !== "full")) {
         return;
     }
     const entries = Object.entries(profile.entries)
@@ -175,6 +177,10 @@ export const normalizeEntryVisibilityImportProfile = (
         migrateTaskStatusMenu({entries, orders});
     }
     migrateChartHeightMenu({entries, orders});
-    entries["editor.slash.menu.frequent"] ??= true;
-    return {name: profile.name, entries, orders};
+    const defaults = version >= 7 && (profile.defaults === "simple" || profile.defaults === "full")
+        ? profile.defaults : undefined;
+    if (!defaults) {
+        entries["editor.slash.menu.frequent"] ??= true;
+    }
+    return {name: profile.name, ...(defaults ? {defaults} : {}), entries, orders};
 };

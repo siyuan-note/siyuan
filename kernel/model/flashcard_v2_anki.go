@@ -84,9 +84,10 @@ func ImportFlashcardV2AnkiPackage(ctx context.Context, packagePath, notebookID, 
 		return flashcardv2.AnkiImportReport{}, err
 	}
 	writer := &flashcardV2AnkiContentWriter{notebookID: box.ID, importedAt: importedAt}
+	confFlashcardSnapshot := Conf.LoadFlashcard()
 	return store.ImportAnkiPackage(ctx, flashcardv2.AnkiImportRequest{
 		OperationID: strings.TrimSpace(operationID), PackagePath: packagePath, TargetID: box.ID, ImportedAt: importedAt,
-		NewLimit: Conf.Flashcard.NewCardLimit, ReviewLimit: Conf.Flashcard.ReviewCardLimit, Writer: writer,
+		NewLimit: confFlashcardSnapshot.NewCardLimit, ReviewLimit: confFlashcardSnapshot.ReviewCardLimit, Writer: writer,
 	})
 }
 

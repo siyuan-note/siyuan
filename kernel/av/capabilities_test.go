@@ -113,7 +113,7 @@ func TestKeyCapabilityBehavior(t *testing.T) {
 			t.Fatalf("select behavior changed for %s", typ)
 		}
 		if capability.Filterable != (typ != KeyTypeLineNumber) || capability.Sortable != (typ != KeyTypeLineNumber) ||
-			capability.Groupable != (typ != KeyTypeLineNumber && typ != KeyTypeRollup) {
+			capability.Groupable != (typ != KeyTypeLineNumber && typ != KeyTypeRollup && typ != KeyTypeLocation) {
 			t.Fatalf("filter, sort, or group behavior changed for %s", typ)
 		}
 	}

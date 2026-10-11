@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {DATABASE_ROW_COMMANDS} from "../../command/databaseRowNavigation";
 
 const loadFunction = (path: string, name: string, globals: Record<string, unknown>) => {
     const source = createSourceFile(path, readFileSync(path, "utf8"), ScriptTarget.ES2021, true);
@@ -13,8 +14,9 @@ const loadFunction = (path: string, name: string, globals: Record<string, unknow
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
     const exports: any = {};
-    runInNewContext(compiled, {exports, logKeyboardDiagnostic: (): void => undefined,
-        handleDocumentBoundaryHotkey: () => false, ...globals});
+    runInNewContext(compiled, {exports,
+        handleDocumentBoundaryHotkey: () => false, handleDatabaseRowShortcut: () => false,
+        DATABASE_ROW_COMMANDS, ...globals});
     return exports.subject;
 };
 
@@ -57,6 +59,7 @@ test("readonly body and tab header preserve keyboard defaults and bubbling", asy
         bindVerticalNavigationReset: (): void => undefined,
         getAVTemplateInteractiveElement: () => false,
         hasClosestByAttribute: () => false,
+        handleReadonlyAttributeHotkey: () => false,
     });
     for (const [disabled, header] of [[true, false], [true, true], [false, true]]) {
         let listener: (event: any) => Promise<void>;

@@ -208,7 +208,7 @@ func setupInlineStylesAPITest(t *testing.T) {
 	t.Helper()
 	oldDataDir, oldConf, oldReadOnly := util.DataDir, model.Conf, util.ReadOnly
 	util.DataDir, model.Conf, util.ReadOnly = t.TempDir(), model.NewAppConf(), false
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() {
 		util.DataDir, model.Conf, util.ReadOnly = oldDataDir, oldConf, oldReadOnly
 	})

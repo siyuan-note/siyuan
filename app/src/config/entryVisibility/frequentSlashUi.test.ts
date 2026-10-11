@@ -31,7 +31,7 @@ const loadEditor = (id = "custom", initialEnabled = true, mobile = false) => {
     const entries = [{key: "frequent", label: () => "Frequently used"}, {key: "template", label: () => "Template"}, {key: "heading1", label: () => "Heading 1"}];
     const rootEntry = {key: "menu", label: () => "Slash menu", displayChildrenDirectly: true, children: entries};
     const sections = [{key: "editor.slash", label: () => "Slash menu", children: [rootEntry]}];
-    const config = {active: "custom", profiles: [{id: "custom", name: "Custom", entries: {[frequentPath]: initialEnabled, [rootPath]: !mobile},
+    const config: Config.IEntryVisibility = {version: 7, active: "custom", profiles: [{id: "custom", name: "Custom", entries: {[frequentPath]: initialEnabled, [rootPath]: !mobile},
         orders: {[rootPath]: ["heading1", "template", "frequent"]}},
         {id: "other", name: "Other", entries: {[frequentPath]: initialEnabled}, orders: {}}]};
     const siyuan = {languages: new Proxy({slashMenuFrequent: "Frequently used"}, {
@@ -71,6 +71,10 @@ const loadEditor = (id = "custom", initialEnabled = true, mobile = false) => {
         getEntryCatalogChildren: () => entries,
         getEntryCatalogPathChain: (_section: string, path: string) => [path],
         getEntryCatalogCustomDefaultVisibility: () => true,
+        getActiveEntryProfile: () => siyuan.config.appearance.entryVisibility.profiles.find(profile =>
+            profile.id === siyuan.config.appearance.entryVisibility.active),
+        getEntryProfileDefaultVisibility: (profile: Config.IEntryVisibilityProfile, path: string) =>
+            profile.defaults ? path === frequentPath ? profile.defaults === "full" : !mobile : true,
         isEntryCatalogNodeConfigurable: () => true,
         isEntryOrderSortable: () => true,
         escapeAttr: (value: string) => value,
@@ -172,9 +176,12 @@ for (const mobile of [false, true]) {
 
     test(`copy and template choices preserve frequent semantics on ${mobile ? "mobile" : "desktop"}`, () => {
         const fixture = loadEditor("custom", true, mobile);
-        assert.equal(fixture.create("simple").entries[frequentPath], false);
-        assert.equal(fixture.create("full").entries[frequentPath], true);
+        assert.equal(fixture.create("simple").defaults, "simple");
+        assert.equal(fixture.create("simple").entries[frequentPath], undefined);
+        assert.equal(fixture.create("full").defaults, "full");
+        assert.equal(fixture.create("full").entries[frequentPath], undefined);
         assert.equal(fixture.create("full", true).entries[frequentPath], true);
+        assert.equal(fixture.create("full", true).defaults, undefined);
         const copy = fixture.duplicate(fixture.config().profiles[0]);
         assert.equal(copy.entries[frequentPath], true);
         copy.entries[frequentPath] = false;
@@ -187,6 +194,14 @@ for (const mobile of [false, true]) {
         assert.match(frequentRow(fixture.browser.innerHTML), / checked/);
         fixture.action("cancel");
         assert.equal(fixture.enabled(), true);
+        fixture.config().profiles[0].defaults = "simple";
+        delete fixture.config().profiles[0].entries[frequentPath];
+        const inheritedCopy = fixture.create("full", true);
+        assert.equal(inheritedCopy.defaults, "simple");
+        assert.equal(inheritedCopy.entries[frequentPath], undefined);
+        const inheritedDuplicate = fixture.duplicate(fixture.config().profiles[0]);
+        assert.equal(inheritedDuplicate.defaults, "simple");
+        assert.equal(inheritedDuplicate.entries[frequentPath], undefined);
     });
 }
 

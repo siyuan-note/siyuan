@@ -374,6 +374,7 @@ func TestQueryToolActionEffects(t *testing.T) {
 		needsConfirm bool
 	}{
 		{toolName: "sql", action: "query"},
+		{toolName: "sql", action: "schema"},
 		{toolName: "sql", action: ""},
 		{toolName: "sql", action: "select"},
 		{toolName: "search", action: "fulltext"},

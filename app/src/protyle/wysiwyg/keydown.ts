@@ -1,5 +1,6 @@
+import {config as configApi} from "../../config/util/configApi";
 import type {BlockQueryRequestInput} from "../../types/api";
-import {logKeyboardDiagnostic} from "../../util/keyboardDiagnostic";
+import {handleReadonlyAttributeHotkey} from "../util/attributeHotkey";
 import {isProtyleListItemFragment} from "../runtimeCapabilities";
 import {toggleListMindmap} from "../render/listMindmap";
 import {hideElements} from "../ui/hideElements";
@@ -212,11 +213,11 @@ const showSelectAllTip = () => {
     selectAllTipShown = true;
     document.querySelector(`#message [data-id="${messageId}"] button`)?.addEventListener("click", () => {
         hideMessage(messageId);
-        fetchPost("/api/setting/patch", {appearance: {
+        configApi.set("appearance", {
             notifications: {
                 selectAllTip: false,
             }
-        }});
+        });
     });
 };
 
@@ -301,18 +302,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     bindVerticalNavigationReset(editorElement);
     editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
         if (event.target.localName === "protyle-html" || event.target.localName === "input") {
-            logKeyboardDiagnostic("editor-stop", event, "input-target");
             event.stopPropagation();
             return;
         }
         if (getAVTemplateInteractiveElement(event.target)) {
-            logKeyboardDiagnostic("editor-stop", event, "av-interactive");
             event.stopPropagation();
             return;
         }
         // 组合输入期间保留浏览器的原生选区，避免读取选区时修复光标而打断输入法。
         if (event.isComposing) {
-            logKeyboardDiagnostic("editor-stop", event, "composing");
             event.stopPropagation();
             return;
         }
@@ -328,6 +326,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         // 只读正文和页签标题不执行正文编辑逻辑，保留默认行为并交给全局快捷键处理器。
+        if (handleReadonlyAttributeHotkey(protyle, event)) {
+            return true;
+        }
         if (protyle.disabled || event.target.closest(".tabs-header")) {
             return;
         }
@@ -458,7 +459,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.stopPropagation();
                 return;
             }
-            if (event.key === "Enter" || event.key === "Tab") {
+            if (event.key === "Enter" || event.key === "Tab" ||
+                (event.key === "Escape" && calloutTitleElement.classList.contains("tab-item-title"))) {
                 focusBlock(calloutTitleElement.closest(".tab-item") || nodeElement);
                 event.preventDefault();
                 event.stopPropagation();
@@ -477,6 +479,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 !event.altKey && !event.shiftKey && isNotCtrl(event);
             if ((event.key.startsWith("Arrow") && !isPlainVerticalArrow) ||
                 event.key === "Home" || event.key === "End") {
+                if (calloutTitleElement.classList.contains("tab-item-title") && range.collapsed &&
+                    !event.altKey && !event.shiftKey && isNotCtrl(event)) {
+                    const offset = getSelectionOffset(calloutTitleElement, nodeElement, range);
+                    if (event.key === "ArrowLeft" && offset.start === 0 ||
+                        event.key === "ArrowRight" && offset.end === calloutTitleElement.textContent.length) {
+                        event.preventDefault();
+                    }
+                }
                 event.stopPropagation();
                 return;
             }

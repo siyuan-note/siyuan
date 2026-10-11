@@ -32,14 +32,14 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
     if (mathElements.length === 0) {
         return;
     }
-    addStyle(`${cdn}/js/katex/katex.min.css?v=0.16.9`, "protyleKatexStyle");
+    addStyle(`${cdn}/js/katex/katex.min.css?v=0.19.0`, "protyleKatexStyle");
     const unrenderedMathElements = mathElements.filter(mathElement =>
         mathElement.getAttribute("data-render") !== "true");
     if (unrenderedMathElements.length === 0) {
         return;
     }
-    return addScript(`${cdn}/js/katex/katex.min.js?v=0.16.9`, "protyleKatexScript").then(() => {
-        return addScript(`${cdn}/js/katex/mhchem.min.js?v=0.16.9`, "protyleKatexMhchemScript").then(() => {
+    return addScript(`${cdn}/js/katex/katex.min.js?v=0.19.0`, "protyleKatexScript").then(() => {
+        return addScript(`${cdn}/js/katex/mhchem.min.js?v=0.19.0`, "protyleKatexMhchemScript").then(() => {
             const resizePromises: Promise<void>[] = [];
             unrenderedMathElements.forEach((mathElement: HTMLElement) => {
                 mathElement.setAttribute("data-render", "true");
@@ -71,12 +71,12 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                         mathElement.firstElementChild.firstElementChild.setAttribute("contenteditable", "false");
                         mathElement.firstElementChild.firstElementChild.innerHTML = mathHTML;
                         // https://github.com/siyuan-note/siyuan/issues/3541
-                        const baseElements = mathElement.querySelectorAll(".base");
+                        const baseElements = mathElement.querySelectorAll(".katex-html > .katex-base");
                         if (baseElements.length > 0) {
                             baseElements[baseElements.length - 1].insertAdjacentHTML("afterend", "<span class='fn__flex-1'></span>");
                         }
                         // https://github.com/siyuan-note/siyuan/issues/4334
-                        const newlineElement = mathElement.querySelector(".katex-html > .newline");
+                        const newlineElement = mathElement.querySelector(".katex-html > .katex-newline");
                         if (newlineElement) {
                             newlineElement.parentElement.style.display = "block";
                         }

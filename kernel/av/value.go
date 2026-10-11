@@ -60,6 +60,7 @@ type Value struct {
 	URL      *ValueURL      `json:"url,omitempty"`
 	Email    *ValueEmail    `json:"email,omitempty"`
 	Phone    *ValuePhone    `json:"phone,omitempty"`
+	Location *ValueLocation `json:"location,omitempty"`
 	MAsset   []*ValueAsset  `json:"mAsset,omitempty"`
 	Template *ValueTemplate `json:"template,omitempty"`
 	Created  *ValueCreated  `json:"created,omitempty"`
@@ -139,6 +140,8 @@ func (value *Value) String(format bool) string {
 			return ""
 		}
 		return strings.TrimSpace(value.Email.Content)
+	case KeyTypeLocation:
+		return value.Location.String()
 	case KeyTypePhone:
 		if nil == value.Phone {
 			return ""
@@ -276,6 +279,8 @@ func (value *Value) IsBlank() bool {
 			return true
 		}
 		return "" == strings.TrimSpace(value.Email.Content)
+	case KeyTypeLocation:
+		return value.Location.IsEmpty()
 	case KeyTypePhone:
 		if nil == value.Phone {
 			return true
@@ -354,6 +359,8 @@ func (value *Value) IsEmpty() bool {
 			return true
 		}
 		return "" == value.Email.Content
+	case KeyTypeLocation:
+		return value.Location.IsEmpty()
 	case KeyTypePhone:
 		if nil == value.Phone {
 			return true
@@ -407,6 +414,8 @@ func (value *Value) SetValByType(typ KeyType, val any) {
 		value.URL = val.(*ValueURL)
 	case KeyTypeEmail:
 		value.Email = val.(*ValueEmail)
+	case KeyTypeLocation:
+		value.Location = val.(*ValueLocation)
 	case KeyTypePhone:
 		value.Phone = val.(*ValuePhone)
 	case KeyTypeMAsset:
@@ -452,6 +461,8 @@ func (value *Value) GetValByType(typ KeyType) (ret any) {
 		return value.URL
 	case KeyTypeEmail:
 		return value.Email
+	case KeyTypeLocation:
+		return value.Location
 	case KeyTypePhone:
 		return value.Phone
 	case KeyTypeMAsset:
@@ -553,6 +564,10 @@ func parseValueTextRich(rich *ValueTextRich) (blockDOM string, tree *parse.Tree,
 }
 
 func parseValueTextRichWithImages(rich *ValueTextRich, images bool) (blockDOM string, tree *parse.Tree, err error) {
+	return parseValueTextRichWithLute(rich, images, newValueTextRichLute())
+}
+
+func parseValueTextRichWithLute(rich *ValueTextRich, images bool, luteEngine *lute.Lute) (blockDOM string, tree *parse.Tree, err error) {
 	if nil == rich {
 		return
 	}
@@ -565,7 +580,6 @@ func parseValueTextRichWithImages(rich *ValueTextRich, images bool) (blockDOM st
 		return
 	}
 
-	luteEngine := newValueTextRichLute()
 	content, protectedStyleEntities, protectErr := protectValueTextRichKramdownStyleEntities(rich.Content)
 	if nil != protectErr {
 		err = protectErr
@@ -2160,12 +2174,16 @@ func newValueTextRichBackslashSentinel(content string) string {
 
 // NormalizeValueTextRich 校验并将文本字段的富文本源规范化为 SiYuan Kramdown。
 func NormalizeValueTextRich(rich *ValueTextRich) (tree *parse.Tree, err error) {
-	_, tree, err = parseValueTextRich(rich)
+	return normalizeValueTextRichWithLute(rich, newValueTextRichLute())
+}
+
+func normalizeValueTextRichWithLute(rich *ValueTextRich, luteEngine *lute.Lute) (tree *parse.Tree, err error) {
+	_, tree, err = parseValueTextRichWithLute(rich, false, luteEngine)
 	if nil != err || nil == rich {
 		return tree, err
 	}
 	var normalized string
-	if normalized, tree, err = normalizeValueTextRichTreeSource(tree); nil != err {
+	if normalized, tree, err = normalizeValueTextRichTreeSourceWithLute(tree, false, luteEngine); nil != err {
 		return nil, err
 	}
 	rich.Content = normalized
@@ -2177,13 +2195,16 @@ func normalizeValueTextRichTreeSource(tree *parse.Tree) (content string, normali
 }
 
 func normalizeValueTextRichTreeSourceWithImages(tree *parse.Tree, images bool) (content string, normalizedTree *parse.Tree, err error) {
+	return normalizeValueTextRichTreeSourceWithLute(tree, images, newValueTextRichLute())
+}
+
+func normalizeValueTextRichTreeSourceWithLute(tree *parse.Tree, images bool, luteEngine *lute.Lute) (content string, normalizedTree *parse.Tree, err error) {
 	normalizedTree = tree
 	previous := ""
 	for iteration := 0; iteration < 4; iteration++ {
 		if err = normalizeValueTextRichTreeStyles(normalizedTree, images); nil != err {
 			return "", nil, err
 		}
-		luteEngine := newValueTextRichLute()
 		blockDOM := luteEngine.Tree2BlockDOM(normalizedTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		content = valueTextRichBlockDOM2Kramdown(luteEngine, blockDOM)
 		if 0 < iteration && previous == content {
@@ -2193,7 +2214,7 @@ func normalizeValueTextRichTreeSourceWithImages(tree *parse.Tree, images bool) (
 		candidate := &ValueTextRich{
 			Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: content,
 		}
-		if _, normalizedTree, err = parseValueTextRichWithImages(candidate, images); nil != err {
+		if _, normalizedTree, err = parseValueTextRichWithLute(candidate, images, luteEngine); nil != err {
 			return "", nil, err
 		}
 	}
@@ -3295,6 +3316,8 @@ func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType, k
 		ret.URL = &ValueURL{}
 	case KeyTypeEmail:
 		ret.Email = &ValueEmail{}
+	case KeyTypeLocation:
+		ret.Location = &ValueLocation{}
 	case KeyTypePhone:
 		ret.Phone = &ValuePhone{}
 	case KeyTypeMAsset:

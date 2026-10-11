@@ -64,7 +64,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
         return;
     }
     loadECharts(cdn).then(() => {
-        addScript(`${cdn}/js/echarts/echarts-gl.min.js?v=2.0.9`, "protyleEchartsGLScript").then(() => {
+        addScript(`${cdn}/js/echarts/echarts-gl.min.js?v=2.1.0`, "protyleEchartsGLScript").then(() => {
             const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
             let width: number = undefined;
             if (wysiswgElement && wysiswgElement.clientWidth > 0 && echartsElements[0].firstElementChild.clientWidth === 0 && wysiswgElement.firstElementChild) {

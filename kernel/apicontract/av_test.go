@@ -50,7 +50,10 @@ func TestAVRelationItemNameChoiceCompatibility(t *testing.T) {
 }
 
 func TestAVValuePatchPresence(t *testing.T) {
-	for _, patch := range []string{`{}`, `{"text":{}}`, `{"text":{"content":""}}`, `{"text":null}`, `{"TEXT":{"CONTENT":"x"},"unknown":{"keep":true}}`} {
+	for _, patch := range []string{`{}`, `{"text":{}}`, `{"text":{"content":""}}`, `{"text":null}`, `{"TEXT":{"CONTENT":"x"},"unknown":{"keep":true}}`,
+		`{"location":{}}`, `{"location":null}`, `{"location":{"name":"Home"}}`,
+		`{"location":{"latitude":null,"longitude":null}}`,
+		`{"location":{"latitude":0,"longitude":0,"originalInput":" 0.0, +0 "}}`} {
 		request, err := SetAttributeViewBlockAttr.Decode(strings.NewReader(`{"avID":"av","keyID":"key","itemID":"item","value":` + patch + `}`))
 		if err != nil {
 			t.Fatal(err)
@@ -80,6 +83,89 @@ func TestAVValuePatchPresence(t *testing.T) {
 	}
 	if _, err := SetAttributeViewBlockAttr.Decode(strings.NewReader(`{"avID":"av","keyID":"key","value":{"number":{"content":"invalid"}}}`)); err == nil {
 		t.Fatal("invalid fixed value structure accepted")
+	}
+}
+
+func TestAVLocationContract(t *testing.T) {
+	for _, patch := range []string{
+		`{"location":{"latitude":"0","longitude":0}}`,
+		`{"location":{"latitude":0,"longitude":false}}`,
+		`{"location":{"originalInput":123}}`,
+		`{"location":{"latitude":0,"longitude":0,"coordinateSystem":"wgs84"}}`,
+		`{"location":{"latitude":0,"longitude":0,"coordinateSystem":"gcj02"}}`,
+		`{"location":{"latitude":0,"longitude":0,"coordinateSystem":"unknown"}}`,
+		`{"location":{"name":"Home","unknown":true}}`,
+	} {
+		if _, err := SetAttributeViewBlockAttr.Decode(strings.NewReader(`{"avID":"av","keyID":"key","value":` + patch + `}`)); err == nil {
+			t.Fatalf("invalid location structure accepted: %s", patch)
+		}
+	}
+	filters, err := SetAttrViewFilters.Decode(strings.NewReader(`{"avID":"av","blockID":"block","data":[{"column":"key","operator":"Contains","value":{"type":"location","text":{"content":"Home"}}}]}`))
+	if err != nil || len(filters.Data) != 1 || filters.Data[0].Value.Text.Content != "Home" {
+		t.Fatalf("location text filter: %+v %v", filters, err)
+	}
+	bundle, err := BuildBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, value := range []string{
+		`{"type":"location","location":{"name":"Home","latitude":0,"longitude":0,"originalInput":"0,0"}}`,
+		`{"type":"location","location":{"name":"Home"}}`,
+		`{"type":"location"}`,
+		`{"type":"rollup","rollup":{"contents":[{"type":"location","location":{"latitude":-90,"longitude":180}}]}}`,
+	} {
+		body := []byte(`{"code":0,"msg":"","data":{"values":{"key":` + value + `}}}`)
+		if err := bundle.ValidateResponse("POST", "/api/av/getAttributeViewAddingBlockDefaultValues", body); err != nil {
+			t.Fatalf("location response rejected: %s %v", value, err)
+		}
+	}
+	keyData, err := json.Marshal(map[string]any{"code": 0, "msg": "", "data": []*AVKey{{
+		ID: "location-key", Type: "location",
+	}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := bundle.ValidateResponse("POST", "/api/av/getAttributeViewKeysByID", keyData); err != nil {
+		t.Fatalf("location field rejected: %v", err)
+	}
+	for _, location := range []string{
+		`{"latitude":0,"longitude":0,"coordinateSystem":"wgs84"}`,
+		`{"latitude":0,"longitude":0,"coordinateSystem":"gcj02"}`,
+		`{"latitude":0,"longitude":0,"coordinateSystem":"unknown"}`,
+	} {
+		body := []byte(`{"code":0,"msg":"","data":{"values":{"key":{"type":"location","location":` + location + `}}}}`)
+		if err := bundle.ValidateResponse("POST", "/api/av/getAttributeViewAddingBlockDefaultValues", body); err == nil {
+			t.Fatalf("removed location coordinate system accepted: %s", location)
+		}
+	}
+	legacyKey := []byte(`{"code":0,"msg":"","data":[{"id":"location-key","type":"location","location":{"defaultCoordinateSystem":"wgs84"}}]}`)
+	if err := bundle.ValidateResponse("POST", "/api/av/getAttributeViewKeysByID", legacyKey); err == nil {
+		t.Fatal("removed location field defaults accepted")
+	}
+}
+
+func TestAVLocationSchemaSeparatesInputNulls(t *testing.T) {
+	for _, inputFirst := range []bool{false, true} {
+		builder := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
+		for _, input := range []bool{inputFirst, !inputFirst} {
+			if _, err := builder.schema(reflect.TypeFor[AVValueLocation](), input); err != nil {
+				t.Fatal(err)
+			}
+		}
+		bundle := &Bundle{Definitions: builder.definitions}
+		input, output := builder.definitions["AVValueLocationInput"], builder.definitions["AVValueLocation"]
+		for _, field := range []string{"name", "latitude", "longitude", "originalInput"} {
+			value := map[string]any{field: nil}
+			if err := bundle.validate(input, value, "$"); err != nil {
+				t.Fatalf("location input cannot clear %s: %v", field, err)
+			}
+			if err := bundle.validate(output, value, "$"); err == nil {
+				t.Fatalf("location output accepted omitted field %s as null", field)
+			}
+		}
+		if err := bundle.validate(input, map[string]any{"coordinateSystem": "gcj02"}, "$"); err == nil {
+			t.Fatal("location schema accepted an explicit coordinate system")
+		}
 	}
 }
 

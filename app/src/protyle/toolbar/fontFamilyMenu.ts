@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {Menu} from "../../plugin/Menu";
 import {observeFontPreview} from "../../util/fontPreview";
 import {escapeAttr, escapeHtml} from "../../util/escape";
@@ -298,54 +299,67 @@ export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFami
     if (options.disabled) {
         return;
     }
-    const requestID = ++desktopRequestID;
-    if (!desktopMenuIDs.has(target)) {
-        desktopMenuIDs.set(target, `inlineFontFamily${requestID}`);
-    }
-    let closed = false;
-    let cleanup: () => void = undefined;
-    const menu = new Menu(desktopMenuIDs.get(target), () => {
-        closed = true;
-        cleanup?.();
-        target.setAttribute("aria-expanded", "false");
+    await toggleMenu({
+        target: target,
+        build: async (_menu, session) => {
+            const requestID = ++desktopRequestID;
+            if (!desktopMenuIDs.has(target)) {
+                desktopMenuIDs.set(target, `inlineFontFamily${requestID}`);
+            }
+            let closed = false;
+            let cleanup: () => void = undefined;
+            const menu = new Menu(desktopMenuIDs.get(target), () => {
+                closed = true;
+                cleanup?.();
+                target.setAttribute("aria-expanded", "false");
+            });
+            if (menu.isOpen) {
+                return;
+            }
+            const pickerElement = menu.addItem({
+                iconHTML: "",
+                type: "empty",
+                label: `<div class="b3-menu__filter">${escapeHtml(window.siyuan.languages.loading)}</div>`,
+            });
+            const openMenu = () => {
+                if (!session.isCurrent()) {
+                    return;
+                }
+
+                const rect = target.getBoundingClientRect();
+                session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target}));
+                menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+            };
+            target.setAttribute("aria-expanded", "true");
+            openMenu();
+            const fonts = await loadFontFamilies(options.family);
+            if (!session.isCurrent()) {
+                return;
+            }
+            if (closed) {
+                return;
+            }
+            if (requestID !== desktopRequestID || !target.isConnected || options.isOpenValid?.() === false) {
+                menu.close();
+                return;
+            }
+            if (target.tagName === "INPUT") {
+                (target as HTMLInputElement).value = getInlineFontFamilyLabel(options);
+            }
+            pickerElement.innerHTML = genFontPickerHTML(fonts, options, false);
+            cleanup = bindFontPicker(pickerElement, {
+                ...options,
+                onClose: () => target.focus(),
+                onSelect(family) {
+                    menu.close();
+                    options.onSelect(family);
+                }
+            });
+            openMenu();
+            menu.element.querySelector<HTMLInputElement>('[data-type="font-family-search"]')?.focus();
+
+        },
     });
-    if (menu.isOpen) {
-        return;
-    }
-    const pickerElement = menu.addItem({
-        iconHTML: "",
-        type: "empty",
-        label: `<div class="b3-menu__filter">${escapeHtml(window.siyuan.languages.loading)}</div>`,
-    });
-    const openMenu = () => {
-        const rect = target.getBoundingClientRect();
-        menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target});
-        menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
-    };
-    target.setAttribute("aria-expanded", "true");
-    openMenu();
-    const fonts = await loadFontFamilies(options.family);
-    if (closed) {
-        return;
-    }
-    if (requestID !== desktopRequestID || !target.isConnected || options.isOpenValid?.() === false) {
-        menu.close();
-        return;
-    }
-    if (target.tagName === "INPUT") {
-        (target as HTMLInputElement).value = getInlineFontFamilyLabel(options);
-    }
-    pickerElement.innerHTML = genFontPickerHTML(fonts, options, false);
-    cleanup = bindFontPicker(pickerElement, {
-        ...options,
-        onClose: () => target.focus(),
-        onSelect(family) {
-            menu.close();
-            options.onSelect(family);
-        }
-    });
-    openMenu();
-    menu.element.querySelector<HTMLInputElement>('[data-type="font-family-search"]')?.focus();
 };
 
 let mobileRequestID = 0;

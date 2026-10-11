@@ -64,8 +64,8 @@ func NewFileTree() *FileTree {
 		AllowCreateDeeper:        false,
 		CloseTabsOnStart:         false,
 		TabStartupMode:           new(int),
-		UseSingleLineSave:        util.UseSingleLineSave,
-		LargeFileWarningSize:     util.LargeFileWarningSize,
+		UseSingleLineSave:        util.DefaultUseSingleLineSave,
+		LargeFileWarningSize:     util.DefaultLargeFileWarningSize,
 		CreateDocAtTop:           new(bool),
 		NoSplitScreenWhenOpenTab: false,
 	}

@@ -34,7 +34,7 @@ var databaseActions = []string{
 }
 
 var databaseKeyTypes = []string{
-	"text", "number", "date", "select", "mSelect", "url", "email", "phone", "mAsset", "template", "created", "updated",
+	"text", "number", "date", "select", "mSelect", "url", "email", "phone", "location", "mAsset", "template", "created", "updated",
 	"checkbox", "relation", "rollup", "lineNumber",
 }
 
@@ -45,7 +45,7 @@ type databaseToolOutput struct {
 
 var DatabaseTool = &Tool{
 	Name:        "database",
-	Description: "Attribute view (database) operations. Every successful call returns {action, data}. Actions: create(parentID, name?, primaryKeyName?, layout=table, keys?, previousID?, nextID?), search(keyword), get(id), render(id, viewID?, query?, page=1, pageSize=50), keys(id), key_add(id, name, type, icon?, prev?), key_update(id, keyID, config), key_set_template(id, keyID, template), key_remove(id, keyID, removeRelationDest?), item_add(id, blockID?, content?, viewID?, groupID?, previousID?, detached?, ignoreDefaultFill?), item_remove(id, itemIDs), item_update(id, keyID, itemID, value), view_get(id, blockID, viewID), view_add(id, blockID, layout?, name?), view_duplicate(id, blockID, viewID, name?), view_remove(id, blockID, viewID), view_update(id, blockID, viewID, name?, icon?, desc?), view_move(id, blockID, viewID, previousID), view_visibility_set(id, blockID, viewIDs), view_filters_set(id, blockID, viewID, revision, filters), view_sorts_set(id, blockID, viewID, revision, sorts), view_group_set(id, blockID, viewID, revision, group), view_layout_set(id, blockID, viewID, revision, layout), unused(), clean(id?). view_get returns metadata, ordered views and the carrier block's visibleViewIDs. view_update preserves omitted fields; empty icon or desc clears it. View metadata and order affect all mirrors; visibility affects only blockID and requires at least one visible view. Read view_get before replacing filters, sorts or visibleViewIDs, preserving unmodified entries. Pass its revision for filter, sort, group and layout changes. An empty filters or sorts array clears that setting. The layout string is validated by the kernel. clean only removes unused databases returned by unused(); referenced databases are rejected.",
+	Description: "Attribute view (database) operations. Every successful call returns {action, data}. Actions: create(parentID, name?, primaryKeyName?, layout=table, keys?, previousID?, nextID?), search(keyword), get(id), render(id, viewID?, query?, page=1, pageSize=50), keys(id), key_add(id, name, type, icon?, prev?), key_update(id, keyID, config), key_set_template(id, keyID, template), key_remove(id, keyID, removeRelationDest?), item_add(id, blockID?, content?, viewID?, groupID?, previousID?, detached?, ignoreDefaultFill?), item_remove(id, itemIDs), item_update(id, keyID, itemID, value), view_get(id, blockID, viewID), view_add(id, blockID, layout?, name?), view_duplicate(id, blockID, viewID, name?), view_remove(id, blockID, viewID), view_update(id, blockID, viewID, name?, icon?, desc?), view_move(id, blockID, viewID, previousID), view_visibility_set(id, blockID, viewIDs), view_filters_set(id, blockID, viewID, revision, filters), view_sorts_set(id, blockID, viewID, revision, sorts), view_group_set(id, blockID, viewID, revision, group), view_layout_set(id, blockID, viewID, revision, layout), unused(), clean(id?). view_get returns metadata, ordered views and the carrier block's visibleViewIDs. view_update preserves omitted fields; empty icon or desc clears it. View metadata and order affect all mirrors; visibility affects only blockID and requires at least one visible view. Read view_get before replacing filters, sorts or visibleViewIDs, preserving unmodified entries. Pass its revision for filter, sort, group and layout changes. An empty filters or sorts array clears that setting. Supported layouts: table, list, gallery, kanban, calendar. The layout string is validated by the kernel. clean only removes unused databases returned by unused(); referenced databases are rejected.",
 	EffectScope: EffectScopeLocal,
 	ActionEffects: map[string]ToolEffects{
 		"create":              {LocalWrite: true},
@@ -526,7 +526,10 @@ func databaseItemUpdate(args map[string]any) (CallToolResult, error) {
 }
 
 func databaseUnused(args map[string]any) (CallToolResult, error) {
-	items := model.UnusedAttributeViews(true)
+	items, err := model.UnusedAttributeViews(true)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
 	return databaseSuccess("unused", map[string]any{"count": len(items), "items": items})
 }
 
@@ -538,7 +541,10 @@ func databaseClean(args map[string]any) (CallToolResult, error) {
 		}
 		return databaseSuccess("clean", map[string]any{"count": 1, "ids": []string{id}})
 	}
-	removed := model.RemoveUnusedAttributeViews()
+	removed, err := model.RemoveUnusedAttributeViews()
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
 	return databaseSuccess("clean", map[string]any{"count": len(removed), "ids": removed})
 }
 

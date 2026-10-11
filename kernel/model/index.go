@@ -524,13 +524,16 @@ func subscribeSQLEvents() {
 		util.ContextPushMsg(context, msg)
 	})
 
+	// 持久化索引队列负责崩溃恢复，状态事件只更新供查询使用的运行时标志。
 	eventbus.Subscribe(eventbus.EvtSQLIndexChanged, func() {
+		Conf.m.Lock()
 		Conf.DataIndexState = 1
-		Conf.Save()
+		Conf.m.Unlock()
 	})
 
 	eventbus.Subscribe(eventbus.EvtSQLIndexFlushed, func() {
+		Conf.m.Lock()
 		Conf.DataIndexState = 0
-		Conf.Save()
+		Conf.m.Unlock()
 	})
 }

@@ -7,6 +7,7 @@ import {systemConfig} from "./config/systemConfig";
 import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
 /// #if BROWSER
 import "./util/iosWindowControls";
+import {registerDesktopBackNavigation} from "./boot/globalEvent/nativeBack";
 /// #endif
 import {Menus} from "./menus";
 import {Model} from "./layout/Model";
@@ -412,6 +413,7 @@ window.openFileByURL = (openURL) => {
 };
 
 /// #if BROWSER
+registerDesktopBackNavigation();
 window.showKeyboardToolbar = () => {
     // 防止 Pad 端报错
 };

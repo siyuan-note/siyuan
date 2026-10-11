@@ -51,21 +51,25 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
     const requests: Array<{url: string, data: any}> = [];
     const rendered: Array<{scrollAttr?: IScrollAttr}> = [];
     const constructed: IProtyleOptions[] = [];
+    const presentation: string[] = [];
+    const attributes: Array<(ready: boolean) => void> = [];
     const toolbar = {value: "Document"};
     const window: any = {siyuan: {
         storage: {positions: {root: clone(legacy)}},
-        config: {editor: {dynamicLoadBlocks: 128}, fileTree: {}}, mobile: {},
+        config: {editor: {dynamicLoadBlocks: 128, databaseAttrShow: true}, fileTree: {}}, mobile: {},
     }};
     const document = {querySelector: (): null => null,
         getElementById: (id: string) => id === "toolbarName" ? toolbar : {}};
     const noop = () => {};
     const makeProtyle = (options: IProtyleOptions) => ({
+        element: {querySelector: (): null => null, classList: {remove: noop}},
         options: {mode: "wysiwyg"}, notebookId: options.notebookId, path: "/root.sy",
         block: {id: options.blockId, rootID: options.rootId},
-        title: {element: {removeAttribute: noop}},
+        title: {element: {removeAttribute: () => presentation.push("title")}},
+        databaseAttributePanel: {},
         contentElement: {scrollTop: 0, classList: {contains: () => false}},
         wysiwyg: {element: {querySelectorAll: (): Element[] => [], childElementCount: 1}},
-        undo: {clear: noop},
+        undo: {clear: () => presentation.push("undo")},
     });
     const fetchPost = (url: string, data: any, callback?: (response: any) => void) => {
         requests.push({url, data: clone(data)});
@@ -73,6 +77,7 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
         return Promise.resolve();
     };
     const onGet = (options: any) => {
+        presentation.push("document");
         rendered.push({scrollAttr: clone(options.scrollAttr)});
         options.protyle.contentElement.scrollTop = options.scrollAttr?.scrollTop ?? 0;
         options.afterCB?.();
@@ -115,14 +120,19 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
         "../protyle": {Protyle},
         "../util/fetch": {fetchPost},
         "../util/pathName": {isEncryptedBox: (id: string) => id === "encrypted-box"},
+        "../protyle/util/onGet": {onGet},
         "../protyle/scroll/saveScroll": {getDocByScroll: scroll.getDocByScroll, saveScroll: noop},
         "../protyle/ui/hideElements": {hideElements: noop},
-        "../protyle/ui/initUI": {addLoading: noop},
+        "../protyle/ui/initUI": {addLoading: () => presentation.push("loading")},
+        "../protyle/render/av/attributePanel": {prepareDatabaseAttributePanel: () => new Promise(resolve => {
+            attributes.push(ready => resolve(ready ? () => presentation.push("attributes") : undefined));
+        })},
         "../protyle/util/trackedRange": {invalidateTrackedRanges: noop},
         "../protyle/undo/globalUndo": {initMirror: noop},
         "../protyle/render/av/cellEditor": {closeAVCellEditor: noop},
+        "../protyle/render/av/databaseRowNavigation": execute(compile(read("../protyle/render/av/databaseRowNavigation.ts")), {}),
         "../plugin/EventBusCore": {forEachPluginSubscriber: noop},
-        "./util/setEmpty": {setEditor: noop},
+        "./util/setEmpty": {setEditor: (visible = true) => presentation.push(visible ? "show" : "hide")},
         "./util/closePanel": {closePanel: noop},
         "./util/mobileBars": {bindMobileBarsScroll: noop},
         "./util/mobileTopBar": {restoreMobileTopBarLayout: noop},
@@ -133,7 +143,15 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
         loader.loadMobileFileById({}, "root", [constants.CB_GET_SCROLL], undefined, notebookID, resolve,
             true, () => true, undefined, scrollAttr, false, () => reject(new Error("Loading failed")));
     });
-    return {load, requests, rendered, constructed, window,
+    const switchRow = (id: string, isValid = () => true) => new Promise<boolean>(resolve => {
+        loader.loadMobileFileById({}, id, [constants.CB_GET_ALL, constants.CB_GET_FOCUS], undefined, notebookID,
+            () => resolve(true), true, isValid, undefined, undefined, false,
+            (_invalid: boolean, unchanged: boolean) => {
+                assert.equal(unchanged, true);
+                resolve(false);
+            }, false, true);
+    });
+    return {load, switchRow, requests, rendered, constructed, window, presentation, attributes,
         get docRequest() { return requests.filter(item => item.url === "/api/filetree/getDoc").at(-1)?.data; }};
 };
 
@@ -201,4 +219,38 @@ test("explicit mobile scroll restoration retains encrypted notebook request scop
     assert.equal(state.requests.find(item => item.url === "/api/block/getBlockInfo").data.notebook, "encrypted-box");
     assert.equal(state.docRequest.notebook, "encrypted-box");
     assert.deepEqual(state.rendered[0].scrollAttr, scroll);
+});
+
+test("mobile bound navigation preserves the visible document until attributes are ready", async () => {
+    const state = setup(undefined, true);
+    const protyle = await state.load();
+    protyle.contentElement.scrollTop = 456;
+    state.presentation.length = 0;
+    const switching = state.switchRow("bound");
+    assert.deepEqual(state.presentation, []);
+    assert.equal(protyle.contentElement.scrollTop, 456);
+    assert.equal(state.docRequest.notebook, "encrypted-box");
+    state.attributes[0](true);
+    assert.equal(await switching, true);
+    assert.deepEqual(state.presentation, ["attributes", "title", "undo", "document", "show"]);
+});
+
+test("mobile failed or superseded attribute preparation cannot replace the current document", async () => {
+    const state = setup();
+    await state.load();
+    state.presentation.length = 0;
+    const failed = state.switchRow("missing");
+    state.attributes[0](false);
+    assert.equal(await failed, false);
+    assert.deepEqual(state.presentation, []);
+    let valid = true;
+    const stale = state.switchRow("stale", () => valid);
+    valid = false;
+    const latest = state.switchRow("latest");
+    state.attributes[2](true);
+    assert.equal(await latest, true);
+    const committed = [...state.presentation];
+    state.attributes[1](true);
+    assert.equal(await stale, false);
+    assert.deepEqual(state.presentation, committed);
 });

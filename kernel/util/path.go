@@ -458,7 +458,8 @@ func IsSensitivePath(p string) bool {
 		return true
 	}
 	// 仅对工作空间外的路径解析符号链接，防止用符号链接绕过黑名单指向敏感目标。
-	if gulu.File.IsSubPath(WorkspaceDir, p) {
+	// 归属判断与后续黑名单匹配都使用归一化后的形式，避免命名空间别名被当作工作空间外的路径。
+	if gulu.File.IsSubPath(WorkspaceDir, resolveNamespaceAlias(p)) {
 		return false
 	}
 	resolved := ResolveLongestExistingParent(p)
@@ -481,6 +482,74 @@ func IsSensitiveHTMLAssetPath(p string) bool {
 	return isSensitivePath(p, true) || isSensitivePath(ResolveLongestExistingParent(p), true)
 }
 
+// resolveNamespaceAlias 把 Windows 路径命名空间别名归一化为常规 Win32 路径，供黑名单匹配与工作空间归属判断使用。
+//
+// 扩展长度前缀 `\\?\`（含 `\\?\UNC\`）与设备命名空间前缀 `\\.\` 经 filepath.Clean 后原样保留，
+// 既无法命中按前缀比较的黑名单，也会被文件系统归属判断当作工作空间外的路径，从而绕过敏感路径保护。
+// 本机管理共享（`\\localhost\<盘符>$\...` 或 `\\<本机主机名>\<盘符>$\...`）指向本地卷，同样归一化为盘符路径。
+func resolveNamespaceAlias(p string) string {
+	if runtime.GOOS != "windows" || p == "" {
+		return p
+	}
+
+	// 仅剥离 `\\?\` 与 `\\.\` 前缀，保留其后的 `UNC\` 标记，以便下面还原 UNC 根路径
+	for _, prefix := range []string{`\\?\`, `\\.\`} {
+		if strings.HasPrefix(p, prefix) {
+			p = p[len(prefix):]
+			break
+		}
+	}
+	if strings.HasPrefix(p, `UNC\`) {
+		p = `\\` + p[len(`UNC\`):]
+	}
+
+	cleaned := filepath.Clean(p)
+	if strings.HasPrefix(cleaned, `\\`) {
+		// 仅当主机名是本机且共享名就是盘符时才等价于本地卷，其余 UNC 路径一律按常规路径匹配黑名单
+		if drive, prefixLen := localAdminShareDrive(cleaned); drive != "" {
+			// 用盘符替换主机名与共享名（形如 `\\主机名\D$`），其余路径保持原样
+			rest := cleaned[2+prefixLen:]
+			if !strings.HasPrefix(rest, `\`) {
+				rest = `\` + rest
+			}
+			return drive + rest
+		}
+	}
+	return cleaned
+}
+
+// localAdminShareDrive 判断 UNC 路径是否指向本机管理共享，是则返回对应的盘符与「主机名\共享名」的长度，否则返回空串。
+func localAdminShareDrive(p string) (drive string, prefixLen int) {
+	rest := p[2:]
+	sep := strings.Index(rest, `\`)
+	if sep < 0 {
+		return "", 0
+	}
+
+	host := rest[:sep]
+	rest = rest[sep+1:]
+	shareSep := strings.Index(rest, `\`)
+	share := rest
+	if 0 <= shareSep {
+		share = rest[:shareSep]
+	}
+	if len(share) != 2 || share[1] != '$' || !isASCIILetter(share[0]) {
+		return "", 0
+	}
+
+	if !strings.EqualFold(host, "localhost") {
+		hostname, err := os.Hostname()
+		if err != nil || "" == hostname || !strings.EqualFold(host, hostname) {
+			return "", 0
+		}
+	}
+	return strings.ToUpper(share[:1]) + ":", sep + 1 + len(share)
+}
+
+func isASCIILetter(b byte) bool {
+	return 'a' <= b && b <= 'z' || 'A' <= b && b <= 'Z'
+}
+
 func isHTMLAssetUserPath(p string) bool {
 	for _, root := range []string{os.TempDir(), HomeDir, systemHomeDir} {
 		if root == "" {
@@ -493,8 +562,46 @@ func isHTMLAssetUserPath(p string) bool {
 	return false
 }
 
+// sensitiveHomeDotEntries 是家目录下默认敏感的凭据条目，按名称前缀匹配。
+// .env 使用前缀匹配，以覆盖 .env.local、.env.production 等派生文件。
+var sensitiveHomeDotEntries = []string{
+	".env",
+	".ssh", ".config", ".bashrc", ".zshrc", ".profile", ".git-credentials", ".netrc", ".pgpass",
+	".kube", ".docker", ".gnupg", ".aws", ".azure", ".npmrc", ".pypirc",
+}
+
+// sensitiveHomeEntry 是家目录下的敏感条目，按名称前缀匹配。
+type sensitiveHomeEntry struct {
+	name string
+	// exemptSystemTemp 表示该条目放行系统临时目录：Windows 的 AppData\Local 下即系统临时目录，
+	// 而剪贴板及 HTML 粘贴的本地资源允许取自该目录。
+	exemptSystemTemp bool
+}
+
+// platformSensitiveHomeEntries 是家目录下按平台附加的敏感条目：macOS 的用户资源库包含钥匙串等凭据，
+// Windows 的漫游与本地应用数据包含各类 CLI 与桌面应用的凭据。
+var platformSensitiveHomeEntries = map[string][]sensitiveHomeEntry{
+	"darwin":  {{name: "Library"}},
+	"windows": {{name: filepath.Join("AppData", "Roaming")}, {name: filepath.Join("AppData", "Local"), exemptSystemTemp: true}},
+}
+
+// isSystemTempPath 判断小写路径是否位于系统临时目录中。
+func isSystemTempPath(lowerPath string) bool {
+	for _, root := range []string{os.TempDir(), SystemTempDir} {
+		if root == "" {
+			continue
+		}
+		root = strings.ToLower(filepath.Clean(root))
+		if lowerPath == root || strings.HasPrefix(lowerPath, root+string(filepath.Separator)) {
+			return true
+		}
+	}
+	return false
+}
+
 // isSensitivePath 执行敏感性黑名单匹配，必要时解析工作空间路径，但不解析目标路径。
 func isSensitivePath(p string, htmlAsset bool) bool {
+	p = resolveNamespaceAlias(p)
 	toCheckPathLower := filepath.Clean(strings.ToLower(p))
 	toCheckNameLower := filepath.Base(toCheckPathLower)
 	workspaceDir := WorkspaceDir
@@ -573,8 +680,8 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 	}
 
 	// 用户家目录下的敏感目录与凭据文件（小写比较）。
-	// 覆盖常见凭据 dotfile，防止通过 globalCopyFiles 等接受工作空间外绝对路径的接口把内核用户
-	// 家目录下的凭据复制进工作空间后外泄：Git push token、HTTP/API 凭据、Postgres 密码、
+	// 覆盖常见凭据 dotfile、dotenv 配置文件与平台应用数据目录，防止接受工作空间外绝对路径的接口
+	// 把内核用户家目录下的凭据复制进工作空间后外泄：Git push token、HTTP/API 凭据、Postgres 密码、
 	// K8s/Docker/容器仓库配置、GPG 私钥环、云厂商 CLI 凭据、包管理器 token 等。
 	homeDirs := []string{HomeDir}
 	// 自定义配置主目录不能使系统用户主目录中的凭据失去保护。
@@ -601,14 +708,23 @@ func isSensitivePath(p string, htmlAsset bool) bool {
 		}
 	}
 	for _, homeDir := range homeDirs {
-		for _, name := range []string{
-			".ssh", ".config", ".bashrc", ".zshrc", ".profile", ".git-credentials", ".netrc", ".pgpass",
-			".kube", ".docker", ".gnupg", ".aws", ".azure", ".npmrc", ".pypirc",
-		} {
+		for _, name := range sensitiveHomeDotEntries {
 			for _, checkPath := range homeCheckPaths {
 				if strings.HasPrefix(checkPath, strings.ToLower(filepath.Join(homeDir, name))) {
 					return true
 				}
+			}
+		}
+		for _, entry := range platformSensitiveHomeEntries[runtime.GOOS] {
+			prefix := strings.ToLower(filepath.Join(homeDir, entry.name))
+			for _, checkPath := range homeCheckPaths {
+				if !strings.HasPrefix(checkPath, prefix) {
+					continue
+				}
+				if entry.exemptSystemTemp && isSystemTempPath(checkPath) {
+					continue
+				}
+				return true
 			}
 		}
 	}

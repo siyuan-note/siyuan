@@ -100,11 +100,11 @@ type templateAttributeViewTestFixture struct {
 func addTemplateAttributeViewTestFixture(t *testing.T, fixture *fileOperationTestFixture,
 	avID string) *templateAttributeViewTestFixture {
 	t.Helper()
-	if nil == Conf.Editor {
-		Conf.Editor = conf.NewEditor()
+	if nil == Conf.Editor.Load() {
+		Conf.Editor.Store(conf.NewEditor())
 	}
-	if nil == Conf.Export {
-		Conf.Export = conf.NewExport()
+	if nil == Conf.Export.Load() {
+		Conf.Export.Store(conf.NewExport())
 	}
 	if err := os.MkdirAll(filepath.Join(util.DataDir, "templates"), 0755); nil != err {
 		t.Fatalf("create templates directory failed: %v", err)

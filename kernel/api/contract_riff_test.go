@@ -93,8 +93,8 @@ func TestAPIContractRiffEmptyAndMissing(t *testing.T) {
 func TestAPIContractRiffDeckLifecycle(t *testing.T) {
 	previousConf, previousDecks, previousData := model.Conf, model.Decks, util.DataDir
 	model.Conf, model.Decks, util.DataDir = model.NewAppConf(), map[string]*riff.Deck{}, t.TempDir()
-	model.Conf.Flashcard = conf.NewFlashcard()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Flashcard.Store(conf.NewFlashcard())
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() { model.Conf, model.Decks, util.DataDir = previousConf, previousDecks, previousData })
 	if err := os.MkdirAll(filepath.Join(util.DataDir, "storage", "riff"), 0755); err != nil {
 		t.Fatal(err)
@@ -108,7 +108,7 @@ func TestAPIContractRiffDeckLifecycle(t *testing.T) {
 	if code != 0 || string(data) != "null" || model.Decks[deck.ID].Name != " renamed " {
 		t.Fatalf("deck rename changed: %d %s %s", code, msg, data)
 	}
-	loaded, err := riff.LoadDeck(filepath.Join(util.DataDir, "storage", "riff"), deck.ID, model.Conf.Flashcard.RequestRetention, model.Conf.Flashcard.MaximumInterval, model.Conf.Flashcard.Weights)
+	loaded, err := riff.LoadDeck(filepath.Join(util.DataDir, "storage", "riff"), deck.ID, model.Conf.LoadFlashcard().RequestRetention, model.Conf.LoadFlashcard().MaximumInterval, model.Conf.LoadFlashcard().Weights)
 	if err != nil {
 		t.Fatal(err)
 	}

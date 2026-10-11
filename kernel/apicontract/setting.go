@@ -467,10 +467,11 @@ type SettingEntryVisibility struct {
 }
 
 type SettingEntryVisibilityProfile struct {
-	ID      string              `json:"id" api:"optional,nullable"`
-	Name    string              `json:"name" api:"optional,nullable"`
-	Entries map[string]bool     `json:"entries" api:"optional,nullable"`
-	Orders  map[string][]string `json:"orders" api:"optional,nullable"`
+	ID       string              `json:"id" api:"optional,nullable"`
+	Name     string              `json:"name" api:"optional,nullable"`
+	Defaults string              `json:"defaults,omitempty" api:"optional,nullable,enum=simple|full"`
+	Entries  map[string]bool     `json:"entries" api:"optional,nullable"`
+	Orders   map[string][]string `json:"orders" api:"optional,nullable"`
 }
 
 type SettingPublish struct {

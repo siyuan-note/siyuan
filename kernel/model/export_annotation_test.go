@@ -18,7 +18,11 @@ func TestExportTreeMissingFileAnnotationRef(t *testing.T) {
 	originalWorkspaceDir := util.WorkspaceDir
 	util.WorkspaceDir = filepath.Dir(util.DataDir)
 	t.Cleanup(func() { util.WorkspaceDir = originalWorkspaceDir })
-	Conf.Export, Conf.Editor = conf.NewExport(), conf.NewEditor()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewExport(), conf.NewEditor()
+		Conf.Export.Store(confSectionValue0)
+		Conf.Editor.Store(confSectionValue1)
+	}
 	assetPath := filepath.Join(util.DataDir, "assets", "document.pdf")
 	if err := os.MkdirAll(filepath.Dir(assetPath), 0755); err != nil {
 		t.Fatal(err)

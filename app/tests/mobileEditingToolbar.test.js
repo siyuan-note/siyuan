@@ -319,7 +319,7 @@ const runElectron = async () => {
     let exitCode = 0;
     try {
         const ts = require("typescript");
-        const modules = ["mobile/util/keyboardToolbar", "mobile/util/keyboardSelectionScroll", "mobile/util/toolbarActions",
+        const modules = ["menus/menuToggle", "mobile/util/keyboardToolbar", "mobile/util/keyboardSelectionScroll", "mobile/util/toolbarActions",
             "mobile/util/toolbarEntries", "mobile/util/mobileAppUtil", "mobile/util/mobileKeyboardChange",
             "mobile/util/touchSelection", "mobile/util/visibleViewport", "protyle/util/hasClosest",
             "protyle/toolbar/defaults", "protyle/toolbar/entryVisibility", "config/entryVisibility/order",

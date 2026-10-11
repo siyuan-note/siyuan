@@ -88,7 +88,7 @@ func queryBlockHashes(tx *sql.Tx, rootID string) (ret map[string]string) {
 }
 
 func QueryRootBlockByCondition(condition, exactKeyword string, limit int, args ...any) (ret []*Block) {
-	exactCondition, exactArg := rootBlockExactMatchCondition(exactKeyword, caseSensitive)
+	exactCondition, exactArg := rootBlockExactMatchCondition(exactKeyword, caseSensitive.Load())
 	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition +
 		" ORDER BY CASE WHEN " + exactCondition + " THEN 0 ELSE 1 END ASC, box DESC, lv ASC LIMIT ?"
 	args = append(args, exactArg...)
@@ -112,7 +112,7 @@ func QueryRootBlockByCondition(condition, exactKeyword string, limit int, args .
 }
 
 func QueryRootBlockByConditionInBox(condition, exactKeyword string, limit int, boxID string, args ...any) (ret []*Block) {
-	exactCondition, exactArg := rootBlockExactMatchCondition(exactKeyword, caseSensitive)
+	exactCondition, exactArg := rootBlockExactMatchCondition(exactKeyword, caseSensitive.Load())
 	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition +
 		" ORDER BY CASE WHEN " + exactCondition + " THEN 0 ELSE 1 END ASC, box DESC, lv ASC LIMIT ?"
 	args = append(args, exactArg...)
@@ -575,6 +575,10 @@ func queryRawStmt(stmt string, limit int) (ret []map[string]any, err error) {
 }
 
 func queryRawStmtWithLimitInfo(stmt string, limit int, info *QueryLimitInfo) (ret []map[string]any, err error) {
+	return queryRawStmtRows(stmt, limit, info, false)
+}
+
+func queryRawStmtRows(stmt string, limit int, info *QueryLimitInfo, enforceLimit bool) (ret []map[string]any, err error) {
 	rows, err := query(stmt)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
@@ -616,7 +620,7 @@ func queryRawStmtWithLimitInfo(stmt string, limit int, info *QueryLimitInfo) (re
 
 		ret = append(ret, m)
 		count++
-		if noLimit && (limit < count || (info != nil && limit == count)) {
+		if (noLimit || enforceLimit) && count >= limit {
 			break
 		}
 	}
@@ -1036,35 +1040,48 @@ func GetBlocks(ids []string) (ret []*Block) {
 		return
 	}
 
-	length := len(notHitIDs)
-	stmtBuilder := bytes.Buffer{}
-	stmtBuilder.WriteString("SELECT * FROM blocks WHERE id IN (")
-	var args []any
-	for i, id := range notHitIDs {
-		args = append(args, id)
-		stmtBuilder.WriteByte('?')
-		if i < length-1 {
-			stmtBuilder.WriteByte(',')
-		}
-	}
-	stmtBuilder.WriteString(")")
-	sqlStmt := stmtBuilder.String()
-	rows, err := query(sqlStmt, args...)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
+	if err := queryBlocksInBatches(notHitIDs, "", cached, true); err != nil {
+		logging.LogErrorf("query blocks failed: %s", err)
 		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		if block := scanBlockRows(rows); nil != block {
-			putBlockCache(block)
-			cached[block.ID] = block
-		}
 	}
 	for _, id := range ids {
 		ret = append(ret, cached[id])
 	}
 	return
+}
+
+// queryBlocksInBatches 限制每批参数数量，并在读取下一批前关闭游标，保留笔记本查询边界。
+func queryBlocksInBatches(ids []string, boxID string, blocks map[string]*Block, populateCache bool) error {
+	const batchSize = 512
+	for start := 0; start < len(ids); start += batchSize {
+		batch := ids[start:min(start+batchSize, len(ids))]
+		statement := "SELECT * FROM blocks WHERE id IN (" + strings.Repeat("?,", len(batch)-1) + "?)"
+		args := make([]any, len(batch))
+		for i, id := range batch {
+			args[i] = id
+		}
+		rows, err := queryForBox(boxID, statement, args...)
+		if err != nil {
+			return err
+		}
+		for rows.Next() {
+			if block := scanBlockRows(rows); block != nil {
+				if populateCache {
+					putBlockCache(block)
+				}
+				blocks[block.ID] = block
+			}
+		}
+		err = rows.Err()
+		closeErr := rows.Close()
+		if err != nil {
+			return err
+		}
+		if closeErr != nil {
+			return closeErr
+		}
+	}
+	return nil
 }
 
 func GetContainerText(container *ast.Node) string {

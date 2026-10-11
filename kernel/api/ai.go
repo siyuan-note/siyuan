@@ -83,7 +83,7 @@ func resolveAIProvider(request apicontract.AIProviderRequest) (*conf.Provider, e
 	}
 
 	providerID := request.Provider
-	for _, provider := range model.Conf.AI.Providers {
+	for _, provider := range model.Conf.AI.Load().Providers {
 		if provider != nil && provider.ID == providerID {
 			return provider, nil
 		}
@@ -269,7 +269,7 @@ var testEmbeddingModel = contractHandler(apicontract.AITestEmbeddingModel, testE
 
 func testEmbeddingModelContract(c *gin.Context, req apicontract.EmptyRequest) apicontract.Response[apicontract.AIEmbeddingTestData] {
 
-	embedding := model.Conf.AI.Embedding
+	embedding := model.Conf.AI.Load().Embedding
 	if nil == embedding || "" == embedding.APIKey || "" == embedding.BaseURL || "" == embedding.Name {
 		// 配置不完整时统一以 code=0 返回，把信息放在 data 中由前端控制展示，
 		// 避免返回 code=-1 触发统一错误提示且令前端按钮无法恢复
@@ -295,7 +295,7 @@ var testRerankModel = contractHandler(apicontract.AITestRerankModel, testRerankM
 
 func testRerankModelContract(c *gin.Context, req apicontract.EmptyRequest) apicontract.Response[apicontract.AIRerankTestData] {
 
-	rerank := model.Conf.AI.Rerank
+	rerank := model.Conf.AI.Load().Rerank
 	if nil == rerank || "" == rerank.APIKey || "" == rerank.Endpoint || "" == rerank.Name {
 		// 配置不完整时统一以 code=0 返回，把信息放在 data 中由前端控制展示，
 		// 避免返回 code=-1 触发统一错误提示且令前端按钮无法恢复
@@ -391,17 +391,19 @@ func mcpEnvironmentVariablesContract(c *gin.Context, req apicontract.EmptyReques
 var mcpOAuthAuthorize = contractHandler(apicontract.AIMCPOAuthAuthorize, mcpOAuthAuthorizeContract)
 
 func mcpOAuthAuthorizeContract(c *gin.Context, req apicontract.AIMCPIDRequest) apicontract.Response[apicontract.Null] {
+	confAISnapshot := model.Conf.LoadAI()
+
 	ret := gulu.Ret.NewResult()
 
 	serverID := req.ID
-	if model.Conf.AI == nil || model.Conf.AI.MCP == nil {
+	if confAISnapshot == nil || confAISnapshot.MCP == nil {
 		ret.Code = -1
 		ret.Msg = "MCP server not found"
 		return contractFailure[apicontract.Null](ret)
 	}
-	for _, server := range model.Conf.AI.MCP.Servers {
+	for _, server := range confAISnapshot.MCP.Servers {
 		if server.ID == serverID && server.Enabled && server.Type == "http" {
-			mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers, []string{serverID}, []string{serverID})
+			mcpclient.ReconnectMCPAsync(confAISnapshot.MCP.Servers, []string{serverID}, []string{serverID})
 			return contractFailure[apicontract.Null](ret)
 		}
 	}
@@ -413,6 +415,8 @@ func mcpOAuthAuthorizeContract(c *gin.Context, req apicontract.AIMCPIDRequest) a
 var mcpOAuthDisconnect = contractHandler(apicontract.AIMCPOAuthDisconnect, mcpOAuthDisconnectContract)
 
 func mcpOAuthDisconnectContract(c *gin.Context, req apicontract.AIMCPIDRequest) apicontract.Response[apicontract.Null] {
+	confAISnapshot := model.Conf.LoadAI()
+
 	ret := gulu.Ret.NewResult()
 
 	serverID := req.ID
@@ -420,8 +424,8 @@ func mcpOAuthDisconnectContract(c *gin.Context, req apicontract.AIMCPIDRequest) 
 		ret.Code = -1
 		ret.Msg = err.Error()
 	}
-	if model.Conf.AI != nil && model.Conf.AI.MCP != nil {
-		mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers, []string{serverID}, nil)
+	if confAISnapshot != nil && confAISnapshot.MCP != nil {
+		mcpclient.ReconnectMCPAsync(confAISnapshot.MCP.Servers, []string{serverID}, nil)
 	}
 	return contractFailure[apicontract.Null](ret)
 }

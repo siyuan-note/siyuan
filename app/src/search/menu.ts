@@ -12,8 +12,21 @@ import {goUnRef, updateSearchResult} from "../mobile/menu/search";
 import {bindSearchSubtypeFilters} from "./subTypes";
 import {getDefaultSubType, normalizeSearchTypes} from "./getDefault";
 import {hasSearchConfigTemporaryPath, resolvePersistedSearchConfig} from "./config";
+import {getSearchMethodCapabilities, isSearchSortAvailable, setSearchControlAvailability} from "./methodCapabilities";
+
+const withSearchMethodAvailability = (item: IMenu, enabled: boolean): IMenu => ({
+    ...item,
+    disabled: !enabled,
+    bind: (element) => {
+        item.bind?.(element);
+        setSearchControlAvailability(element, enabled, item.label, !enabled);
+    },
+});
 
 export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => void) => {
+    if (!getSearchMethodCapabilities(config.method, config.group).filter) {
+        return;
+    }
     config.types = normalizeSearchTypes(config.types);
     const filterDialog = new Dialog({
         title: window.siyuan.languages.searchType,
@@ -255,6 +268,9 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
 };
 
 export const replaceFilterMenu = (config: Config.IUILayoutTabSearchConfig) => {
+    if (!getSearchMethodCapabilities(config.method, config.group).replace) {
+        return;
+    }
     let html = "";
     Object.keys(Constants.SIYUAN_DEFAULT_REPLACETYPES).forEach((key: keyof Config.IUILayoutTabSearchConfigReplaceTypes) => {
         html += `<label class="fn__flex b3-label">
@@ -468,6 +484,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                                cb: () => void,
                                removeCriterion: () => void,
                                layoutMenu?: () => void) => {
+    const capabilities = getSearchMethodCapabilities(config.method, config.group);
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_SEARCH_MORE) {
         window.siyuan.menus.menu.remove();
@@ -484,7 +501,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-    window.siyuan.menus.menu.append(new MenuItem({
+    window.siyuan.menus.menu.append(new MenuItem(withSearchMethodAvailability({
         iconHTML: "",
         label: window.siyuan.languages.searchType,
         click() {
@@ -492,14 +509,14 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 updateSearchResult(config, element, true);
             });
         }
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({
+    }, capabilities.filter)).element);
+    window.siyuan.menus.menu.append(new MenuItem(withSearchMethodAvailability({
         iconHTML: "",
         label: window.siyuan.languages.replaceType,
         click() {
             replaceFilterMenu(config);
         }
-    }).element);
+    }, capabilities.replace)).element);
     const searchMethodSubmenu = [{
         icon: "iconExact",
         label: window.siyuan.languages.keyword,
@@ -556,7 +573,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         submenu: searchMethodSubmenu
     }).element);
     /// #endif
-    const sortMenu = [{
+    const sortMenu: IMenu[] = [{
         iconHTML: "",
         label: window.siyuan.languages.type,
         current: config.sort === 0,
@@ -624,13 +641,15 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
             }
         });
     }
-    window.siyuan.menus.menu.append(new MenuItem({
+    const sortValues = [0, 1, 2, 3, 4, 6, 7, 5];
+    window.siyuan.menus.menu.append(new MenuItem(withSearchMethodAvailability({
         iconHTML: "",
         label: window.siyuan.languages.sort,
         type: "submenu",
-        submenu: sortMenu,
-    }).element);
-    window.siyuan.menus.menu.append(new MenuItem({
+        submenu: sortMenu.map((item, index) => withSearchMethodAvailability(item,
+            isSearchSortAvailable(config.method, config.group, sortValues[index]))),
+    }, capabilities.sort)).element);
+    window.siyuan.menus.menu.append(new MenuItem(withSearchMethodAvailability({
         iconHTML: "",
         label: window.siyuan.languages.group,
         type: "submenu",
@@ -665,8 +684,8 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 config.group = 1;
                 cb();
             }
-        }]
-    }).element);
+        }].map(item => withSearchMethodAvailability(item, capabilities.group)),
+    }, capabilities.group)).element);
     if (layoutMenu) {
         layoutMenu();
     }

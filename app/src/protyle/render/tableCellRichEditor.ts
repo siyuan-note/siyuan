@@ -16,7 +16,7 @@ import {getTableBlockHTML, getTableCellInlineHTML, getTableCellRichBlockDOM, ren
 import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
 import {focusByOffset, getUndoFocusContext} from "../util/selection";
 import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
-import {getAdjacentRichTableCell, isTableCellCaretAtBoundary} from "../util/tableCellRichNavigation";
+import {getAdjacentRichTableCell, isTableCellCaretAtBoundary, leaveRichTableCell} from "../util/tableCellRichNavigation";
 import {focusEditableAtGoalX, getCaretGoalX} from "../wysiwyg/verticalCaret";
 import {fixTable} from "../util/table";
 import {updateTableCellContentLayout} from "../util/tableCellRich";
@@ -517,10 +517,16 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
                 event.stopImmediatePropagation();
                 restoreTableVirtualizationDOM(table);
                 const nextCell = getAdjacentRichTableCell(cell, event.key);
+                const goalX = getCaretGoalX(range);
                 if (nextCell) {
-                    const goalX = getCaretGoalX(range);
                     finish();
                     openTableCellRichEditor(owner, nextCell, {key: event.key, goalX});
+                } else {
+                    commit();
+                    if (leaveRichTableCell(owner, table, event.key, goalX)) {
+                        finish();
+                        owner.toolbar.range = getSelection().getRangeAt(0).cloneRange();
+                    }
                 }
                 return;
             }

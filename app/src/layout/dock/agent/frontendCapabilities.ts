@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import type {App} from "../../../index";
+import type {SearchOpenOptions} from "../../../search/openOptions";
+import {isDisabledFeature} from "../../../protyle/util/compatibility";
 
 // 浏览器能力只在当前应用实例中执行，内核持有声明和本轮不可变的调用映射。
 
@@ -214,18 +216,32 @@ registerCapability({
 registerCapability({
     id: "native/frontend/open_search",
     title: "Open search",
-    description: mobileFrontend ? "Open the SiYuan mobile search interface and optionally fill in a query." :
-        "Open the SiYuan search interface and optionally fill in a query.",
-    inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
+    description: `Open the SiYuan ${mobileFrontend ? "mobile search interface" : "search interface"} and optionally set a query and method. Omitted values preserve the current search settings. For SQL (method=2), return complete block rows with SELECT b.* FROM blocks b, rather than projections or aggregates; express filters and LIMIT/OFFSET in SQL. Use sql.query for statistics and arbitrary columns, and sql.schema for structural search guidance. Newlines and SQL comments are preserved.`,
+    inputSchema: {type: "object", properties: {
+        query: {type: "string"},
+        method: {type: "integer", enum: [0, 1, 2, 3, 4],
+            description: "0 keyword, 1 query syntax, 2 SQL, 3 regex, 4 semantic (requires enabled embeddings)"},
+    }, additionalProperties: false},
     source: "native",
     handler: async (args, app) => {
+        if (args.query !== undefined && typeof args.query !== "string") {
+            return {error: "query must be a string"};
+        }
+        if (args.method !== undefined && (!Number.isInteger(args.method) ||
+            (args.method as number) < 0 || (args.method as number) > 4)) {
+            return {error: "method must be an integer from 0 to 4"};
+        }
         const query = (args.query as string | undefined)?.trim();
+        const method = args.method as SearchOpenOptions["method"];
+        if (method === 4 && (isDisabledFeature("ai") || !window.siyuan.config.ai.embedding.enabled)) {
+            return {error: "Semantic search requires enabled AI and embeddings"};
+        }
         /// #if !MOBILE
         const [{openSearch}, {Constants}] = await Promise.all([
             import("../../../search/spread"),
             import("../../../constants"),
         ]);
-        await openSearch({app, hotkey: Constants.DIALOG_GLOBALSEARCH, key: query});
+        await openSearch({app, hotkey: Constants.DIALOG_GLOBALSEARCH, key: query, method});
         return {result: query ? `Opened search dialog with query "${query}".` : "Opened search dialog."};
         /// #else
         const [{popSearch}, {hideMobileAgent}] = await Promise.all([
@@ -233,14 +249,7 @@ registerCapability({
             import("../../../mobile/agent/MobileAgentChat"),
         ]);
         hideMobileAgent();
-        popSearch(app);
-        if (query) {
-            const input = document.getElementById("toolbarSearch") as HTMLInputElement | null;
-            if (input) {
-                input.value = query;
-                input.dispatchEvent(new InputEvent("input", {bubbles: true}));
-            }
-        }
+        popSearch(app, undefined, false, {key: query, method});
         return {result: query ? `Opened mobile search with query "${query}".` : "Opened mobile search."};
         /// #endif
     },

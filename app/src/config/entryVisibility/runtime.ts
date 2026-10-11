@@ -1,4 +1,4 @@
-import {fetchPost} from "../../util/fetch";
+import {config as configApi} from "../util/configApi";
 import {Constants} from "../../constants";
 import {getSettingsOwnerApp} from "../setting/windowContext";
 import {
@@ -41,7 +41,7 @@ import {
     mergeDockEntryOrderSnapshot,
 } from "./dockOrder";
 
-export const ENTRY_VISIBILITY_VERSION = 6;
+export const ENTRY_VISIBILITY_VERSION = 7;
 export const ENTRY_PROFILE_SIMPLE = "simple";
 export const ENTRY_PROFILE_FULL = "full";
 export type TEntryVisibilityTemplate = typeof ENTRY_PROFILE_SIMPLE | typeof ENTRY_PROFILE_FULL;
@@ -62,6 +62,11 @@ const getTemplateVisibility = (path: string, template: TEntryVisibilityTemplate)
         entry?.simpleDefaultVisible,
     );
 };
+
+export const getEntryProfileDefaultVisibility = (profile: Config.IEntryVisibilityProfile | undefined, path: string) =>
+    profile?.defaults === ENTRY_PROFILE_SIMPLE || profile?.defaults === ENTRY_PROFILE_FULL
+        ? getTemplateVisibility(path, profile.defaults)
+        : getEntryCatalogCustomDefaultVisibility(path);
 
 export const isEntryVisible = (path: string): boolean => {
     /// #if MOBILE
@@ -87,7 +92,8 @@ export const getConfiguredEntryVisibility = (path: string, stopAt?: string): boo
     } else if (active === ENTRY_PROFILE_SIMPLE) {
         visible = getTemplateVisibility(path, ENTRY_PROFILE_SIMPLE);
     } else {
-        visible = getProfileEntryVisibility(getActiveEntryProfile(), path, getEntryCatalogCustomDefaultVisibility(path));
+        const profile = getActiveEntryProfile();
+        visible = getProfileEntryVisibility(profile, path, getEntryProfileDefaultVisibility(profile, path));
     }
     if (!visible) {
         return false;
@@ -154,7 +160,8 @@ const getWritableEntryProfile = (config: Config.IEntryVisibility) => {
     const profile: Config.IEntryVisibilityProfile = {
         id: genUUID(),
         name: uniqueEntryProfileName(window.siyuan.languages.entryCustomProfile, config.profiles),
-        entries: createEntryProfileSnapshot(template),
+        defaults: template,
+        entries: {},
         orders: {},
     };
     config.profiles.push(profile);
@@ -202,16 +209,16 @@ const flushEntryVisibility = () => {
     saveRunning = true;
     const next = savePending;
     savePending = undefined;
-    fetchPost("/api/setting/setEntryVisibility", next, (response) => {
+    void configApi.set("appearance.entryVisibility", next, data => {
+        if (!savePending) applyEntryVisibility((data as Config.IAppearance).entryVisibility);
+    }).catch(error => console.warn("Could not save entry visibility", error)).finally(() => {
         saveRunning = false;
-        if (response.code === 0 && !savePending) {
-            applyEntryVisibility(response.data as Config.IEntryVisibility);
-        }
         flushEntryVisibility();
     });
 };
 
 export const saveEntryVisibility = (config: Config.IEntryVisibility) => {
+    config.version = ENTRY_VISIBILITY_VERSION;
     applyEntryVisibilityLocal(config);
     savePending = config;
     flushEntryVisibility();

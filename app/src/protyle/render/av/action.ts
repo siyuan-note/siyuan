@@ -411,7 +411,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (type === "av-add-more" && !protyle.disabled) {
             const templateID = blockElement.querySelector<HTMLElement>(".av__header")?.dataset.defaultTemplateId;
-            if (templateID || blockElement.getAttribute("data-av-type") === "calendar") {
+            if (templateID || viewType === "calendar") {
                 createAttributeViewItem({blockElement, protyle, templateID});
             } else {
                 insertRows({

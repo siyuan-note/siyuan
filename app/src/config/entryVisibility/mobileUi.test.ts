@@ -32,10 +32,21 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         }
         if (id === "config/entryVisibility/runtime") {
             return {
-                ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple", ENTRY_VISIBILITY_VERSION: 1,
+                ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple", ENTRY_VISIBILITY_VERSION: 7,
                 createEntryProfileSnapshot: (template: string) => ({"editor.slash.menu": !mobile,
                     [frequentPath]: template === "full"}), createEntryOrderSnapshot: () => ({}),
                 getConfiguredEntryVisibility: () => true,
+                getActiveEntryProfile: () => window.siyuan.config.appearance.entryVisibility.profiles.find(profile =>
+                    profile.id === window.siyuan.config.appearance.entryVisibility.active),
+                getEntryProfileDefaultVisibility: (profile: Config.IEntryVisibilityProfile, path: string) => {
+                    const catalog = load("config/entryVisibility/catalog");
+                    if (!profile.defaults) {
+                        return catalog.getEntryCatalogCustomDefaultVisibility(path);
+                    }
+                    const node = catalog.getEntryCatalogNode(path);
+                    return load("config/entryVisibility/profile").getBuiltinProfileEntryVisibility(profile.defaults,
+                        node?.simple !== false, catalog.getEntryCatalogDefaultVisibility(path), node?.simpleDefaultVisible);
+                },
                 saveEntryVisibility: (config: Config.IEntryVisibility) => {
                     window.siyuan.config.appearance.entryVisibility = config;
                 },
@@ -85,6 +96,42 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         ui.open(root, id);
         return document.querySelector<HTMLElement>(".config-entry-visibility__view");
     };
+    const checkMobileNavigation = (editor: HTMLElement, editable: boolean) => {
+        const browser = editor.querySelector<HTMLElement>("[data-type='entry-browser']");
+        check(!browser.querySelector("[data-action='back-entry']"), "Root column must not offer a parent navigation action");
+        const saved = JSON.stringify(config());
+        for (const context of ["mobile-input", "mobile-selection"]) {
+            const selector = `[data-entry-path-row='editor.toolbar.${context}']`;
+            browser.querySelector<HTMLElement>(selector).click();
+            const column = browser.querySelector<HTMLElement>("[data-entry-column]:last-child");
+            const back = column.querySelector<HTMLElement>("[data-action='back-entry']");
+            check(back, "Both mobile toolbar contexts must offer a return to their parent");
+            const rect = back.getBoundingClientRect();
+            const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            check(target && back.contains(target), "Return control must be reachable in the visible column");
+            const control = column.querySelector<HTMLInputElement>("input[data-entry-path]:not([disabled])");
+            const entryPath = control.dataset.entryPath;
+            const checked = control.checked;
+            if (editable) {
+                control.click();
+            }
+            browser.querySelector<HTMLElement>("[data-entry-column]:last-child [data-action='back-entry'] svg").dispatchEvent(
+                new MouseEvent("click", {bubbles: true}));
+            check(browser.querySelectorAll("[data-entry-column]").length === 1,
+                "Returning from a context must restore the root column");
+            check(browser.querySelector(selector).getBoundingClientRect().width > 0,
+                "Context choices must remain available after returning");
+            check(editor.classList.contains("config__view--show"), "Returning a level must keep the profile editor open");
+            browser.querySelector<HTMLElement>(selector).click();
+            const updated = browser.querySelector<HTMLInputElement>(`[data-entry-column]:last-child input[data-entry-path='${entryPath}']`);
+            check(updated.checked === (editable ? !checked : checked), "Returning must retain draft visibility changes");
+            if (editable) {
+                updated.click();
+            }
+            browser.querySelector<HTMLElement>("[data-entry-column]:last-child [data-action='back-entry']").click();
+        }
+        check(JSON.stringify(config()) === saved, "Navigating levels must preserve saved profiles and unknown order slots");
+    };
     if (mobileBuild) {
         root.innerHTML = ui.genEntryVisibilityHtml();
         ui.mountEntryVisibility(root);
@@ -102,6 +149,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
             check(editor?.querySelector("[data-type='entry-section']"), "Profile cards must open the mobile editor");
             check(Boolean(editor.querySelector("[data-action='confirm']")) === (id === "custom"),
                 "Built-in profiles must remain read-only and custom profiles editable");
+            checkMobileNavigation(editor, id === "custom");
             const section = editor.querySelector<HTMLSelectElement>("[data-type='entry-section']");
             section.value = "editor.slash";
             section.dispatchEvent(new Event("change", {bubbles: true}));
@@ -127,11 +175,13 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         return "Mobile compiled settings passed";
     }
     let view = open();
+    checkMobileNavigation(view, true);
     const selectSlash = () => {
         const select = view.querySelector<HTMLSelectElement>("[data-type='entry-section']");
         select.value = "editor.image";
         select.dispatchEvent(new Event("change", {bubbles: true}));
         check(view.querySelector("[data-entry-path='editor.image.ocrText']"), "Mobile exposes image OCR visibility");
+        check(view.querySelector("[data-entry-path='editor.image.copyAsPNG']"), "Mobile exposes image copy visibility");
         check(select.options.length === 3, "Mobile must offer toolbar, slash, and image categories");
         select.value = "editor.slash";
         select.dispatchEvent(new Event("change", {bubbles: true}));
@@ -141,6 +191,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
             view = open(id);
             check(Boolean(view.querySelector("[data-profile-field='template']")) === !id,
                 "New profiles must include the template selector");
+            checkMobileNavigation(view, true);
             selectSlash();
             view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']").click();
             const list = view.querySelector<HTMLElement>(".config-entry-visibility__column-list");
@@ -417,7 +468,7 @@ const runEntryUiCases = async (mobileBuild: boolean) => {
         "config/entryVisibility/profile", "config/entryVisibility/mobileToolbarContext",
         "config/entryVisibility/dockOrder", "config/entryVisibility/touchOrder",
         "protyle/toolbar/defaults", "mobile/util/toolbarActions", "protyle/wysiwyg/codeBlockUtil", "protyle/gutter/turnIntoMenu",
-        "plugin/dockKey", "plugin/topBarKey", "util/escape"];
+        "plugin/dockKey", "plugin/topBarKey", "util/escape", "menus/declarations/imageOCRMenu", "menus/declarations/menuDeclaration"];
     if (mobileBuild) {
         modules.push("config/setting/windowContext");
     }

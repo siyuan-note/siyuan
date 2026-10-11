@@ -56,7 +56,11 @@ func ValidateUnusedAttributeView(id string) error {
 	if !ast.IsNodeIDPattern(id) {
 		return fmt.Errorf("invalid attribute view ID: %s", id)
 	}
-	for _, item := range UnusedAttributeViews(false) {
+	items, err := UnusedAttributeViews(false)
+	if err != nil {
+		return err
+	}
+	for _, item := range items {
 		if item.Item == id {
 			return nil
 		}
@@ -103,17 +107,23 @@ func RemoveUnusedAttributeView(id string) (err error) {
 	return
 }
 
-func RemoveUnusedAttributeViews() (ret []string) {
+func RemoveUnusedAttributeViews() (ret []string, err error) {
 	ret = []string{}
+	unusedAttributeViews, err := UnusedAttributeViews(false)
+	if err != nil {
+		return
+	}
 	var size int64
 
 	msgId := util.PushMsg(Conf.Language(100), 30*1000)
 	defer func() {
+		if err != nil {
+			util.PushUpdateMsg(msgId, err.Error(), 7000)
+			return
+		}
 		msg := fmt.Sprintf(Conf.Language(280), len(ret), humanize.BytesCustomCeil(uint64(size), 2))
 		util.PushUpdateMsg(msgId, msg, 7000)
 	}()
-
-	unusedAttributeViews := UnusedAttributeViews(false)
 
 	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
@@ -142,6 +152,7 @@ func RemoveUnusedAttributeViews() (ret []string) {
 			}
 
 			if removeErr := filelock.RemoveWithoutFatal(absPath); removeErr != nil {
+				err = removeErr
 				logging.LogErrorf("remove unused av [%s] failed: %s", absPath, removeErr)
 				util.PushErrMsg(fmt.Sprintf("%s", removeErr), 7000)
 				return
@@ -158,12 +169,21 @@ func RemoveUnusedAttributeViews() (ret []string) {
 	return
 }
 
-func UnusedAttributeViews(sorted bool) (ret []*UnusedItem) {
-	defer logging.Recover()
+func UnusedAttributeViews(sorted bool) (ret []*UnusedItem, err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			ret = nil
+			err = fmt.Errorf("scan database references failed: %v", recovered)
+			logging.LogErrorf("%s", err)
+		}
+	}()
 	ret = []*UnusedItem{}
 
 	allAvIDs, err := getAllAvIDs()
 	if err != nil {
+		if os.IsNotExist(err) {
+			return ret, nil
+		}
 		return
 	}
 
@@ -171,13 +191,19 @@ func UnusedAttributeViews(sorted bool) (ret []*UnusedItem) {
 	luteEngine := util.NewLute()
 	boxes := Conf.GetBoxes()
 	for _, box := range boxes {
-		pages := pagedPaths(filepath.Join(util.DataDir, box.ID), 32)
+		if IsEncryptedBox(box.ID) {
+			continue
+		}
+		pages, walkErr := pagedPathsWithError(filepath.Join(util.DataDir, box.ID), 32)
+		if walkErr != nil {
+			return nil, walkErr
+		}
 		for _, paths := range pages {
 			var trees []*parse.Tree
 			for _, localPath := range paths {
 				tree, loadTreeErr := loadTree(localPath, luteEngine)
 				if nil != loadTreeErr {
-					continue
+					return nil, fmt.Errorf("read database references [%s] failed: %w", localPath, loadTreeErr)
 				}
 				trees = append(trees, tree)
 			}
@@ -1527,7 +1553,7 @@ func changeAttrViewLayout(attrView *av.AttributeView, view *av.View, newLayout a
 	oldLayout := view.LayoutType
 	oldFields := attributeViewFieldIDs(view)
 	view.LayoutType = newLayout
-	if oldLayout == av.LayoutTypeCalendar && view.Name == av.GetAttributeViewI18n("calendar") {
+	if oldLayout == av.LayoutTypeCalendar && view.Name == av.GetAttributeViewI18n(string(oldLayout)) {
 		view.Name = av.GetAttributeViewI18n(string(newLayout))
 	}
 
@@ -2862,7 +2888,7 @@ func relationCandidateMatches(row *av.TableRow, keyword string) bool {
 		content := cell.Value.String(true)
 		allKeywordsHit := true
 		for _, currentKeyword := range keywords {
-			if util.SearchCaseSensitive {
+			if util.SearchCaseSensitive.Load() {
 				if !strings.Contains(content, currentKeyword) {
 					allKeywordsHit = false
 					break
@@ -8200,7 +8226,7 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 	} else {
 		val = context.values[keyID][itemID]
 	}
-	if nil != val {
+	if nil != val && av.KeyTypeLocation != keyValues.Key.Type {
 		val.Type = keyValues.Key.Type
 	}
 
@@ -8211,7 +8237,7 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 	}
 
 	valueID := val.ID
-	valueType := val.Type
+	valueType := keyValues.Key.Type
 	valueCreatedAt := val.CreatedAt
 	oldText := val.Text
 
@@ -8230,8 +8256,8 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		return
 	}
 	updatedVal := val
-	// 文本和主键值先在副本上合并和校验，避免校验失败污染原值，并保留部分更新语义。
-	if av.KeyTypeText == valueType || av.KeyTypeBlock == valueType {
+	// 文本、位置和主键值先在副本上合并和校验，避免校验失败污染原值，并保留部分更新语义。
+	if av.KeyTypeText == valueType || av.KeyTypeBlock == valueType || av.KeyTypeLocation == valueType {
 		updatedVal = val.Clone()
 		if nil == updatedVal {
 			err = fmt.Errorf("clone attribute view text value [%s] failed", valueID)
@@ -8272,6 +8298,12 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		if err = updatedVal.Text.NormalizeRichContent(); nil != err {
 			return
 		}
+	}
+	if av.KeyTypeLocation == valueType {
+		if err = updatedVal.Location.Normalize(); nil != err {
+			return
+		}
+		normalizeAttributeViewLocationProvenance(val.Location, updatedVal.Location, data)
 	}
 	if updatedVal != val {
 		*val = *updatedVal

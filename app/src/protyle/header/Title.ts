@@ -204,7 +204,7 @@ export class Title {
                     });
                 } else {
                     const iconRect = iconElement.getBoundingClientRect();
-                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom, h: iconRect.height}, Constants.MENU_FROM_TITLE_PROTYLE);
+                    openTitleMenu(protyle, {target: iconElement, x: iconRect.left, y: iconRect.bottom, h: iconRect.height}, Constants.MENU_FROM_TITLE_PROTYLE);
                 }
             });
             this.element.addEventListener("contextmenu", async (event) => {

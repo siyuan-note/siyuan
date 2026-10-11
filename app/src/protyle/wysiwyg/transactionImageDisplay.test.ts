@@ -121,9 +121,9 @@ test("local image insertions and updates display names and descriptions before s
     const transactionSource = transpileModule(readFileSync(path.join(__dirname, "transaction.ts"), "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
-    const displaySource = transpileModule(readFileSync(path.join(__dirname, "../render/imageDisplay.ts"), "utf8")
+    const displaySource = ["../render/imageTitle.ts", "../render/imageDisplay.ts"].map(file => transpileModule(readFileSync(path.join(__dirname, file), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
-        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+        {compilerOptions: {target: ScriptTarget.ES2021}}).outputText).join("\n");
     const luteSource = readFileSync("stage/protyle/js/lute/lute.min.js", "utf8");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-image-transaction-test-"));
     const script = path.join(temporary, "run.cjs");

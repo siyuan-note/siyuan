@@ -165,6 +165,31 @@
   }
 }
 
+.config-sync-field {
+  flex-wrap: wrap;
+
+  > .fn__flex-1 {
+    min-width: 0;
+  }
+}
+
+.config-sync-form {
+  min-height: 0;
+}
+
+.config-sync-dialog {
+  max-height: 90vh;
+  max-height: 90dvh;
+}
+
+@media screen and (max-width: 750px) {
+  .config-sync-field > .fn__flex-1 {
+    flex: none;
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+
 .config {
   &__tab-wrap {
     overflow: hidden;

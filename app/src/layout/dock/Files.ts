@@ -1,3 +1,4 @@
+import {config as configApi} from "../../config/util/configApi";
 import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../../util/escape";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
@@ -7,6 +8,7 @@ import {Constants} from "../../constants";
 import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
 import {newFileInTree} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
+import {toggleMenu} from "../../menus/menuToggle";
 import {isDocTreeDragSelectionAllowed} from "../../menus/navigationSelection";
 import {MenuItem} from "../../menus/Menu";
 import {showMessage} from "../../dialog/message";
@@ -109,9 +111,9 @@ export class Files extends Model {
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <div class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></div>
-    <div data-type="more" class="ariaLabel block__icon${window.siyuan.config.readonly ? " fn__none" : ""}" data-position="north" aria-label="${window.siyuan.languages.more}">
+    <div data-type="more" data-menu="true" class="ariaLabel block__icon${window.siyuan.config.readonly ? " fn__none" : ""}" data-position="north" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
-    </div> 
+    </div>
     <span class="fn__space"></span>
     <span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
@@ -219,8 +221,12 @@ export class Files extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "more") {
-                    const rect = target.getBoundingClientRect();
-                    this.initMoreMenu().popup({x: rect.left, y: rect.bottom, h: rect.height});
+                    toggleMenu({
+                        target: target, build: () => {
+                            const rect = target.getBoundingClientRect();
+                            this.initMoreMenu().popup({x: rect.left, y: rect.bottom, h: rect.height});
+                        }
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -349,20 +355,28 @@ export class Files extends Model {
                             if (type === "new") {
                                 newFileInTree(options.app, notebookId, pathString);
                             } else if (type === "more-root") {
-                                const rect = target.getBoundingClientRect();
-                                initNavigationMenu(options.app, target.parentElement).popup({
-                                    x: rect.left,
-                                    y: rect.bottom,
-                                    h: rect.height,
+                                toggleMenu({
+                                    target: target, build: () => {
+                                        const rect = target.getBoundingClientRect();
+                                        initNavigationMenu(options.app, target.parentElement).popup({
+                                            x: rect.left,
+                                            y: rect.bottom,
+                                            h: rect.height,
+                                        });
+                                    }
                                 });
                             }
                         }
                         if (type === "more-file") {
-                            const rect = target.getBoundingClientRect();
-                            initFileMenu(options.app, notebookId, pathString, target.parentElement).popup({
-                                x: rect.left,
-                                y: rect.bottom,
-                                h: rect.height,
+                            toggleMenu({
+                                target: target, build: () => {
+                                    const rect = target.getBoundingClientRect();
+                                    initFileMenu(options.app, notebookId, pathString, target.parentElement).popup({
+                                        x: rect.left,
+                                        y: rect.bottom,
+                                        h: rect.height,
+                                    });
+                                }
                             });
                         }
                         event.preventDefault();
@@ -1481,7 +1495,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     ${emojiHTML}
     ${switchHTML}
     <span class="b3-list-item__text ariaLabel" data-position="parentE">${escapeHtml(item.name)}</span>
-    <span data-type="more-root" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.more}">
+    <span data-type="more-root" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </span>
     <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newSubDoc}">
@@ -2155,7 +2169,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
             window.siyuan.config.fileTree.parentDocTitleClickMode !== 0 && item.subFileCount > 0 ? " file-tree__item--title-expand" : ""}`;
         const defaultIcon = item.subFileCount === 0 ? "file" : "folder";
         return `<li data-node-id="${item.id}" data-name="${escapeHtmlTextAndAttr(item.name)}" draggable="true" data-count="${item.subFileCount}" ${FILE_TREE_CHILDREN_SORT_MODE}="${item.childrenSortMode ?? ""}"
-data-type="navigation-file" 
+data-type="navigation-file"
 style="--file-toggle-width:${paddingLeft + 18}px;--file-action-offset:${paddingLeft + 20}px"
 class="b3-list-item b3-list-item--hide-action${actionClasses}" data-path="${item.path}"${getFileTreeDefaultIconAttr(item.icon, defaultIcon)}>
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
@@ -2165,7 +2179,7 @@ class="b3-list-item b3-list-item--hide-action${actionClasses}" data-path="${item
     <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
     <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE"
 aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
-    <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
+    <span data-type="more-file" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </span>
     <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__nw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newSubDoc}">
@@ -2242,17 +2256,7 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                 if (sort === null) {
                     return;
                 }
-                fetchPost("/api/setting/setFiletree", {
-                    ...window.siyuan.config.fileTree,
-                    sort,
-                }, (response) => {
-                    if (response.code !== 0) {
-                        return;
-                    }
-                    window.siyuan.config.fileTree = {
-                        ...response.data,
-                        tabStartupMode: response.data.tabStartupMode === 1 ? 1 : response.data.tabStartupMode === 2 ? 2 : 0,
-                    };
+                configApi.set("fileTree.sort", sort, () => {
                     this.onDocSortModeChanged({
                         scope: "global",
                         box: "",

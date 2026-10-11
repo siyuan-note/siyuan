@@ -125,6 +125,11 @@ func (tx *Transaction) invalidateAttributeViewHistory(avID string) {
 
 func (tx *Transaction) finishAttributeViewMutation(rollback bool) {
 	if !rollback {
+		if automation := tx.attributeViewAutomations; automation != nil {
+			for _, paused := range automation.paused {
+				util.PushMsg(paused.message(), 7000)
+			}
+		}
 		for avID := range tx.invalidatedAvHistory {
 			GlobalUndoLog.ClearAttributeView(avID)
 		}

@@ -2,6 +2,7 @@ import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
+import {toggleMenu} from "../menus/menuToggle";
 import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {escapeAttr, escapeHtml} from "../util/escape";
@@ -1807,19 +1808,24 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "managementMore") {
-                    const menu = new Menu();
-                    ["saveReviewSet", "scopePolicy", "flagDefinitions", "cleanup", "conflicts"].forEach((action) => {
-                        const button = dialog.element.querySelector<HTMLButtonElement>(`[data-type="${action}"]`);
-                        if (button) {
-                            menu.addItem({label: button.textContent, click: () => button.click()});
-                        }
+                    toggleMenu({
+                        target: target,
+                        build: (_menu, session) => {
+                            const menu = new Menu();
+                            ["saveReviewSet", "scopePolicy", "flagDefinitions", "cleanup", "conflicts"].forEach((action) => {
+                                const button = dialog.element.querySelector<HTMLButtonElement>(`[data-type="${action}"]`);
+                                if (button) {
+                                    menu.addItem({label: button.textContent, click: () => button.click()});
+                                }
+                            });
+                            if (isMobile()) {
+                                session.show(() => menu.fullscreen());
+                            } else {
+                                const rect = target.getBoundingClientRect();
+                                session.show(() => menu.open({x: rect.left, y: rect.bottom}));
+                            }
+                        },
                     });
-                    if (isMobile()) {
-                        menu.fullscreen();
-                    } else {
-                        const rect = target.getBoundingClientRect();
-                        menu.open({x: rect.left, y: rect.bottom});
-                    }
                     return;
                 }
                 if (type === "preview" && item) {
@@ -1944,25 +1950,30 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "sourceMore") {
-                    const menu = new Menu();
-                    ["editSource", "sourceHistory", "sourceTags", "sourcePreset", "documentPolicy", "notebookPolicy", "sourceLifecycle"]
-                        .forEach((action) => {
-                            const actionElement = item.querySelector(`[data-type="${action}"]`) as HTMLElement;
-                            if (!actionElement) {
-                                return;
+                    toggleMenu({
+                        target: target,
+                        build: (_menu, session) => {
+                            const menu = new Menu();
+                            ["editSource", "sourceHistory", "sourceTags", "sourcePreset", "documentPolicy", "notebookPolicy", "sourceLifecycle"]
+                                .forEach((action) => {
+                                    const actionElement = item.querySelector(`[data-type="${action}"]`) as HTMLElement;
+                                    if (!actionElement) {
+                                        return;
+                                    }
+                                    menu.addItem({
+                                        id: `flashcardV2${action}`,
+                                        label: actionElement.getAttribute("aria-label") || "",
+                                        click: () => actionElement.click(),
+                                    });
+                                });
+                            if (isMobile()) {
+                                session.show(() => menu.fullscreen());
+                            } else {
+                                const rect = target.getBoundingClientRect();
+                                session.show(() => menu.open({x: rect.left, y: rect.bottom}));
                             }
-                            menu.addItem({
-                                id: `flashcardV2${action}`,
-                                label: actionElement.getAttribute("aria-label") || "",
-                                click: () => actionElement.click(),
-                            });
-                        });
-                    if (isMobile()) {
-                        menu.fullscreen();
-                    } else {
-                        const rect = target.getBoundingClientRect();
-                        menu.open({x: rect.left, y: rect.bottom});
-                    }
+                        },
+                    });
                     return;
                 }
                 if (type === "more") {
@@ -1970,84 +1981,89 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     if (!card) {
                         return;
                     }
-                    const menu = new Menu();
-                    const addAction = (id: string, label: string, action: string) => {
-                        menu.addItem({
-                            id,
-                            label,
-                            click: () => (item.querySelector(`[data-type="${action}"]`) as HTMLElement)?.click(),
-                        });
-                    };
-                    const addElementAction = (id: string, action: string) => {
-                        const actionElement = item.querySelector(`[data-type="${action}"]`) as HTMLElement;
-                        if (actionElement) {
-                            addAction(id, actionElement.getAttribute("aria-label") || "", action);
-                        }
-                    };
-                    addAction("flashcardV2Preview", window.siyuan.languages.flashcardPreview, "preview");
-                    if (card.sourceBlockID) {
-                        menu.addItem({
-                            id: "flashcardV2EditCard",
-                            icon: "iconEdit",
-                            label: window.siyuan.languages.edit,
-                            click: () => openFlashcardV2SourceEditor(window.siyuan.ws.app, card.sourceBlockID, reloadPage),
-                        });
-                    }
-                    menu.addItem({
-                        id: "flashcardV2EditLater",
-                        icon: "iconEdit",
-                        label: window.siyuan.languages.flashcardEditLater,
-                        click: () => {
-                            void openFlashcardV2EditLater(card.card.id, reloadPage, () => dialog.element.isConnected);
+                    toggleMenu({
+                        target: target,
+                        build: (_menu, session) => {
+                            const menu = new Menu();
+                            const addAction = (id: string, label: string, action: string) => {
+                                menu.addItem({
+                                    id,
+                                    label,
+                                    click: () => (item.querySelector(`[data-type="${action}"]`) as HTMLElement)?.click(),
+                                });
+                            };
+                            const addElementAction = (id: string, action: string) => {
+                                const actionElement = item.querySelector(`[data-type="${action}"]`) as HTMLElement;
+                                if (actionElement) {
+                                    addAction(id, actionElement.getAttribute("aria-label") || "", action);
+                                }
+                            };
+                            addAction("flashcardV2Preview", window.siyuan.languages.flashcardPreview, "preview");
+                            if (card.sourceBlockID) {
+                                menu.addItem({
+                                    id: "flashcardV2EditCard",
+                                    icon: "iconEdit",
+                                    label: window.siyuan.languages.edit,
+                                    click: () => openFlashcardV2SourceEditor(window.siyuan.ws.app, card.sourceBlockID, reloadPage),
+                                });
+                            }
+                            menu.addItem({
+                                id: "flashcardV2EditLater",
+                                icon: "iconEdit",
+                                label: window.siyuan.languages.flashcardEditLater,
+                                click: () => {
+                                    void openFlashcardV2EditLater(card.card.id, reloadPage, () => dialog.element.isConnected);
+                                },
+                            });
+                            menu.addItem({
+                                label: window.siyuan.languages.statistics,
+                                icon: "iconGraph",
+                                click: () => openFlashcardV2Statistics("", {version: 1, root: {
+                                    operator: "predicate", field: "cardID", comparator: "equal", value: card.card.id,
+                                }}),
+                            });
+                            menu.addSeparator();
+                            addElementAction("flashcardV2Direction", "direction");
+                            addElementAction("flashcardV2Preset", "preset");
+                            addAction("flashcardV2Priority", window.siyuan.languages.flashcardPriority, "priority");
+                            addElementAction("flashcardV2Tags", "tags");
+                            addElementAction("flashcardV2Suspend", "suspend");
+                            addAction("flashcardV2Bury", (card.reviewState.buriedUntil || 0) > Date.now() ?
+                                window.siyuan.languages.flashcardUnbury : window.siyuan.languages.flashcardBury, "bury");
+                            addElementAction("flashcardV2Due", "due");
+                            menu.addItem({
+                                id: "flashcardV2Flag",
+                                icon: "iconBookmark",
+                                label: window.siyuan.languages.flashcardFlag,
+                                submenu: flashcardV2FlagMenuItems(card.card.flag, flagDefinitions, (flag) => {
+                                    fetchPost("/api/flashcard/manageCards", {
+                                        operationID: genUUID(), cardIDs: [card.card.id], action: "setFlag", flag,
+                                        changedAt: Date.now(),
+                                    }, reloadPage);
+                                }),
+                            });
+                            addElementAction("flashcardV2History", "history");
+                            addElementAction("flashcardV2SourceHistory", "sourceHistory");
+                            menu.addItem({
+                                id: "flashcardV2DocumentHistory",
+                                label: window.siyuan.languages.fileHistory,
+                                icon: "iconHistory",
+                                click: () => { void openFlashcardV2DocumentHistory(card.sourceRootID || card.sourceBlockID); },
+                            });
+                            if (reviewSetID) {
+                                addElementAction("flashcardV2Exclude", "exclude");
+                            } else {
+                                addAction("flashcardV2Membership", window.siyuan.languages.flashcardReviewSet, "membership");
+                            }
+                            addElementAction("flashcardV2Reset", "reset");
+                            if (isMobile()) {
+                                session.show(() => menu.fullscreen());
+                            } else {
+                                const rect = target.getBoundingClientRect();
+                                session.show(() => menu.open({x: rect.left, y: rect.bottom}));
+                            }
                         },
                     });
-                    menu.addItem({
-                        label: window.siyuan.languages.statistics,
-                        icon: "iconGraph",
-                        click: () => openFlashcardV2Statistics("", {version: 1, root: {
-                            operator: "predicate", field: "cardID", comparator: "equal", value: card.card.id,
-                        }}),
-                    });
-                    menu.addSeparator();
-                    addElementAction("flashcardV2Direction", "direction");
-                    addElementAction("flashcardV2Preset", "preset");
-                    addAction("flashcardV2Priority", window.siyuan.languages.flashcardPriority, "priority");
-                    addElementAction("flashcardV2Tags", "tags");
-                    addElementAction("flashcardV2Suspend", "suspend");
-                    addAction("flashcardV2Bury", (card.reviewState.buriedUntil || 0) > Date.now() ?
-                        window.siyuan.languages.flashcardUnbury : window.siyuan.languages.flashcardBury, "bury");
-                    addElementAction("flashcardV2Due", "due");
-                    menu.addItem({
-                        id: "flashcardV2Flag",
-                        icon: "iconBookmark",
-                        label: window.siyuan.languages.flashcardFlag,
-                        submenu: flashcardV2FlagMenuItems(card.card.flag, flagDefinitions, (flag) => {
-                            fetchPost("/api/flashcard/manageCards", {
-                                operationID: genUUID(), cardIDs: [card.card.id], action: "setFlag", flag,
-                                changedAt: Date.now(),
-                            }, reloadPage);
-                        }),
-                    });
-                    addElementAction("flashcardV2History", "history");
-                    addElementAction("flashcardV2SourceHistory", "sourceHistory");
-                    menu.addItem({
-                        id: "flashcardV2DocumentHistory",
-                        label: window.siyuan.languages.fileHistory,
-                        icon: "iconHistory",
-                        click: () => { void openFlashcardV2DocumentHistory(card.sourceRootID || card.sourceBlockID); },
-                    });
-                    if (reviewSetID) {
-                        addElementAction("flashcardV2Exclude", "exclude");
-                    } else {
-                        addAction("flashcardV2Membership", window.siyuan.languages.flashcardReviewSet, "membership");
-                    }
-                    addElementAction("flashcardV2Reset", "reset");
-                    if (isMobile()) {
-                        menu.fullscreen();
-                    } else {
-                        const rect = target.getBoundingClientRect();
-                        menu.open({x: rect.left, y: rect.bottom});
-                    }
                     return;
                 }
                 if (type === "selectCard") {
@@ -2195,22 +2211,27 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "flag" && selectedCard) {
-                    const menu = new Menu();
-                    flashcardV2FlagMenuItems(selectedCard.card.flag, flagDefinitions, (flag) => {
-                        fetchPost("/api/flashcard/manageCards", {
-                            operationID: genUUID(),
-                            cardIDs: [selectedCard.card.id],
-                            action: "setFlag",
-                            flag,
-                            changedAt: Date.now(),
-                        }, reloadPage);
-                    }).forEach((option) => menu.addItem(option));
-                    if (isMobile()) {
-                        menu.fullscreen();
-                    } else {
-                        const rect = target.getBoundingClientRect();
-                        menu.open({x: rect.left, y: rect.bottom});
-                    }
+                    toggleMenu({
+                        target: target,
+                        build: (_menu, session) => {
+                            const menu = new Menu();
+                            flashcardV2FlagMenuItems(selectedCard.card.flag, flagDefinitions, (flag) => {
+                                fetchPost("/api/flashcard/manageCards", {
+                                    operationID: genUUID(),
+                                    cardIDs: [selectedCard.card.id],
+                                    action: "setFlag",
+                                    flag,
+                                    changedAt: Date.now(),
+                                }, reloadPage);
+                            }).forEach((option) => menu.addItem(option));
+                            if (isMobile()) {
+                                session.show(() => menu.fullscreen());
+                            } else {
+                                const rect = target.getBoundingClientRect();
+                                session.show(() => menu.open({x: rect.left, y: rect.bottom}));
+                            }
+                        },
+                    });
                     return;
                 }
                 let action = "";

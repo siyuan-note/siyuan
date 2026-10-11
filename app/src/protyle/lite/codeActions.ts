@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {MenuItem} from "../../menus/Menu";
 import {Constants} from "../../constants";
 import {showMessage} from "../../dialog/message";
@@ -71,28 +72,35 @@ export const bindLiteCodeActions = (host: HTMLElement, protyle: IProtyle, option
         if (!options.canEdit()) {
             return;
         }
-        const menu = window.siyuan.menus.menu;
-        menu.remove();
-        getLiteCodeMenuItems(code, (attribute, value) => {
-            if (options.signal.aborted || !options.canEdit() || !protyle.wysiwyg.element.contains(code)) {
-                return;
-            }
-            options.beforeChange?.();
-            if (value === "") {
-                code.removeAttribute(attribute);
-            } else {
-                code.setAttribute(attribute, value);
-            }
-            // 属性变化不会触发片段的正文观察器，需显式交由宿主事务保存。
-            options.onChange();
-            content.removeAttribute("data-render");
-            highlightRender(code);
-        }).forEach(item => menu.append(new MenuItem(item).element));
-        if (isMobile()) {
-            menu.fullscreen();
-        } else {
-            const rect = button.getBoundingClientRect();
-            menu.popup({x: rect.left, y: rect.top, isLeft: true});
-        }
+
+        toggleMenu({
+            target: button,
+            build: (_menu, session) => {
+                const menu = window.siyuan.menus.menu;
+
+                getLiteCodeMenuItems(code, (attribute, value) => {
+                    if (options.signal.aborted || !options.canEdit() || !protyle.wysiwyg.element.contains(code)) {
+                        return;
+                    }
+                    options.beforeChange?.();
+                    if (value === "") {
+                        code.removeAttribute(attribute);
+                    } else {
+                        code.setAttribute(attribute, value);
+                    }
+                    // 属性变化不会触发片段的正文观察器，需显式交由宿主事务保存。
+                    options.onChange();
+                    content.removeAttribute("data-render");
+                    highlightRender(code);
+                }).forEach(item => menu.append(new MenuItem(item).element));
+                if (isMobile()) {
+                    session.show(() => menu.fullscreen());
+                } else {
+                    const rect = button.getBoundingClientRect();
+                    session.show(() => menu.popup({x: rect.left, y: rect.top, isLeft: true}));
+                }
+
+            },
+        });
     }, {capture: true, signal: options.signal});
 };

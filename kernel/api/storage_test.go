@@ -34,7 +34,7 @@ func TestCriteriaCRUD(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	oldConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() { model.Conf = oldConf })
 
 	oldDataDir := util.DataDir

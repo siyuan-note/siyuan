@@ -45,8 +45,8 @@ func TestAPIContractPetalInvalidRequests(t *testing.T) {
 func TestAPIContractPetalSettingsWindow(t *testing.T) {
 	originalConf, originalDataDir := model.Conf, util.DataDir
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
-	model.Conf.Bazaar = &conf.Bazaar{Trust: true}
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.Bazaar.Store(&conf.Bazaar{Trust: true})
 	util.DataDir = t.TempDir()
 	t.Cleanup(func() { model.Conf, util.DataDir = originalConf, originalDataDir })
 	for _, name := range []string{"opted", "legacy"} {

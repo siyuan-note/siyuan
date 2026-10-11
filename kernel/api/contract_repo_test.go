@@ -625,13 +625,13 @@ func TestRepoSnapshotIDContractHTTP(t *testing.T) {
 	root, _ := setupArchiveWorkspace(t)
 	previousConf, previousRepo, previousTemp := model.Conf, util.RepoDir, util.TempDir
 	model.Conf = model.NewAppConf()
-	model.Conf.Repo = conf.NewRepo()
-	model.Conf.Sync = conf.NewSync()
-	model.Conf.System = &conf.System{ID: "contract-device", Name: "contract-device", OS: "test"}
-	model.Conf.Repo.Key = bytes.Repeat([]byte{1}, 32)
+	model.Conf.Repo.Store(conf.NewRepo())
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.System.Store(&conf.System{ID: "contract-device", Name: "contract-device", OS: "test"})
+	model.Conf.Repo.Load().Key = bytes.Repeat([]byte{1}, 32)
 	util.RepoDir, util.TempDir = filepath.Join(root, "repo"), filepath.Join(root, "temp")
 	t.Cleanup(func() { model.Conf, util.RepoDir, util.TempDir = previousConf, previousRepo, previousTemp })
-	store, err := dejavu.NewStore(util.RepoDir, model.Conf.Repo.Key)
+	store, err := dejavu.NewStore(util.RepoDir, model.Conf.Repo.Load().Key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -699,13 +699,13 @@ func TestRepoContractLockedFileAdmission(t *testing.T) {
 	root, boxID := setupArchiveWorkspace(t)
 	previousConf, previousRepo, previousTemp := model.Conf, util.RepoDir, util.TempDir
 	model.Conf = model.NewAppConf()
-	model.Conf.Repo = conf.NewRepo()
-	model.Conf.Sync = conf.NewSync()
-	model.Conf.System = &conf.System{ID: "contract-device", Name: "contract-device", OS: "test"}
-	model.Conf.Repo.Key = bytes.Repeat([]byte{1}, 32)
+	model.Conf.Repo.Store(conf.NewRepo())
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.System.Store(&conf.System{ID: "contract-device", Name: "contract-device", OS: "test"})
+	model.Conf.Repo.Load().Key = bytes.Repeat([]byte{1}, 32)
 	util.RepoDir, util.TempDir = filepath.Join(root, "repo"), filepath.Join(root, "temp")
 	t.Cleanup(func() { model.Conf, util.RepoDir, util.TempDir = previousConf, previousRepo, previousTemp })
-	store, err := dejavu.NewStore(util.RepoDir, model.Conf.Repo.Key)
+	store, err := dejavu.NewStore(util.RepoDir, model.Conf.Repo.Load().Key)
 	if err != nil {
 		t.Fatal(err)
 	}

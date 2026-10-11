@@ -66,15 +66,11 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
                     selection.anchorOffset === codeRange.endOffset;
                 let startIndex = 0;
                 if (wbrElement) {
-                    let previousSibling = wbrElement.previousSibling;
-                    while (previousSibling) {
-                        startIndex += previousSibling.textContent.length;
-                        while (!previousSibling.previousSibling && previousSibling.parentElement.tagName !== "DIV") {
-                            // 高亮 span 中输入
-                            previousSibling = previousSibling.parentElement;
-                        }
-                        previousSibling = previousSibling.previousSibling;
-                    }
+                    // 从代码正文起点计算偏移，包含高亮嵌套节点之前的所有文本。
+                    const prefixRange = document.createRange();
+                    prefixRange.selectNodeContents(editable || block);
+                    prefixRange.setEndBefore(wbrElement);
+                    startIndex = prefixRange.toString().length;
                     wbrElement.remove();
                 }
 

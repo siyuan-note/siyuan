@@ -359,6 +359,9 @@
 .custom-attr[data-readonly="true"] {
   [data-type="remove"],
   [data-type="addColumn"],
+  [data-action="bookmark"],
+  [data-action="addCustom"],
+  [data-action="remove"],
   .av__row > .block__icon[draggable] {
     display: none;
   }

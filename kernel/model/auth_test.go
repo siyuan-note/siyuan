@@ -176,8 +176,8 @@ func TestPublishSessionInvalidatedAfterPasswordChange(t *testing.T) {
 	resetPublishSessions(t)
 
 	Conf = NewAppConf()
-	Conf.Publish = conf.NewPublish()
-	Conf.Publish.Auth.Accounts = []*conf.BasicAuthAccount{
+	Conf.Publish.Store(conf.NewPublish())
+	Conf.Publish.Load().Auth.Accounts = []*conf.BasicAuthAccount{
 		{Username: "alice", Password: "old-password"},
 		{Username: "bob", Password: "bob-password"},
 	}
@@ -188,7 +188,7 @@ func TestPublishSessionInvalidatedAfterPasswordChange(t *testing.T) {
 	aliceSessionID := AddSession(alice.Username, alice.CredentialVersion)
 	bobSessionID := AddSession(bob.Username, bob.CredentialVersion)
 
-	Conf.Publish.Auth.Accounts[0].Password = "new-password"
+	Conf.Publish.Load().Auth.Accounts[0].Password = "new-password"
 	InitPublishAccounts()
 
 	if sessionID := AddSession(alice.Username, alice.CredentialVersion); "" != sessionID {
@@ -208,8 +208,8 @@ func TestPublishSessionPreservedWhenCredentialsUnchanged(t *testing.T) {
 	resetPublishSessions(t)
 
 	Conf = NewAppConf()
-	Conf.Publish = conf.NewPublish()
-	Conf.Publish.Auth.Accounts = []*conf.BasicAuthAccount{
+	Conf.Publish.Store(conf.NewPublish())
+	Conf.Publish.Load().Auth.Accounts = []*conf.BasicAuthAccount{
 		{Username: "alice", Password: "same-password"},
 	}
 	InitPublishAccounts()
@@ -282,7 +282,7 @@ func TestInitPublishAccountsWithNilAuth(t *testing.T) {
 	preserveAuthState(t)
 
 	Conf = NewAppConf()
-	Conf.Publish = &conf.Publish{Enable: true, Port: 6808}
+	Conf.Publish.Store(&conf.Publish{Enable: true, Port: 6808})
 
 	defer func() {
 		if e := recover(); nil != e {
@@ -291,7 +291,7 @@ func TestInitPublishAccountsWithNilAuth(t *testing.T) {
 	}()
 	InitPublishAccounts()
 
-	if nil == Conf.Publish.Auth {
+	if nil == Conf.Publish.Load().Auth {
 		t.Fatal("InitPublishAccounts should default Publish.Auth when it is nil")
 	}
 }

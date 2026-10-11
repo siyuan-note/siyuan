@@ -43,7 +43,7 @@ func TestImportNotebookSYAsChildDocuments(t *testing.T) {
 	)
 	setupExportRelatedTest(t, sourceBoxID, targetBoxID)
 	setupNotebookDocumentImportDatabase(t)
-	*Conf.FileTree.CreateDocAtTop = false
+	*Conf.FileTree.Load().CreateDocAtTop = false
 
 	sourceBox := &Box{ID: sourceBoxID}
 	sourceConf := sourceBox.GetConf()

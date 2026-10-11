@@ -354,6 +354,12 @@ func (av *AttributeView) normalizeNewItemTemplateFieldValues(itemTemplate *NewIt
 
 func normalizeNewItemTemplateValue(value *Value, key *Key) (*Value, error) {
 	value = value.Clone()
+	if nil == value {
+		return nil, errors.New("invalid template value")
+	}
+	if KeyTypeLocation != key.Type {
+		value.Location = nil
+	}
 	switch key.Type {
 	case KeyTypeText:
 		if nil == value.Text {
@@ -392,6 +398,14 @@ func normalizeNewItemTemplateValue(value *Value, key *Key) (*Value, error) {
 			return nil, errors.New("email value is missing")
 		}
 		value.Text, value.Number, value.Date, value.MSelect, value.URL, value.Phone, value.MAsset, value.Checkbox, value.Relation = nil, nil, nil, nil, nil, nil, nil, nil, nil
+	case KeyTypeLocation:
+		if nil == value.Location {
+			return nil, errors.New("location value is missing")
+		}
+		if err := value.Location.Normalize(); nil != err {
+			return nil, err
+		}
+		value.Text, value.Number, value.Date, value.MSelect, value.URL, value.Email, value.Phone, value.MAsset, value.Checkbox, value.Relation = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
 	case KeyTypePhone:
 		if nil == value.Phone {
 			return nil, errors.New("phone value is missing")

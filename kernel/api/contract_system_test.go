@@ -65,6 +65,10 @@ func TestAPIContractSystemCompleteConfiguration(t *testing.T) {
 		if err := decoder.Decode(&payloadJSON); err != nil {
 			t.Fatal(err)
 		}
+		delete(sourceJSON.(map[string]any), "confVersion")
+		if _, exposed := payloadJSON.(map[string]any)["confVersion"]; exposed {
+			t.Fatal("internal configuration version was exposed")
+		}
 		if !reflect.DeepEqual(sourceJSON, payloadJSON) {
 			t.Fatalf("complete configuration changed:\n%s\n%s", before, after)
 		}
@@ -215,6 +219,26 @@ func TestAPIContractSystemRawResponses(t *testing.T) {
 		t.Fatalf("initial unnamed SSE frame was lost: %q", recorder.Body.String())
 	}
 	requireAPIContract(t, "GET", "/api/system/bootProgressSSE", recorder)
+}
+
+func TestAPIContractUIProcessQueryParameters(t *testing.T) {
+	const pid = "2147483001"
+	util.UIProcessIDs.Delete(pid)
+	t.Cleanup(func() { util.UIProcessIDs.Delete(pid) })
+	engine := gin.New()
+	engine.POST("/api/system/uiproc", addUIProcess)
+	for _, query := range []string{"", "?pid=" + pid} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/system/uiproc"+query, strings.NewReader(`{"pid":"`+pid+`"}`)))
+		requireAPIContract(t, "POST", "/api/system/uiproc", recorder)
+		if recorder.Code != http.StatusOK || recorder.Body.Len() != 0 {
+			t.Fatalf("UI registration response changed: %d %s", recorder.Code, recorder.Body.String())
+		}
+		_, registered := util.UIProcessIDs.Load(pid)
+		if registered != (query != "") {
+			t.Fatalf("registration must use URL query parameters: query=%q registered=%v", query, registered)
+		}
+	}
 }
 
 func TestAPIContractSystemUploadErrors(t *testing.T) {

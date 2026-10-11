@@ -20,17 +20,22 @@ test("encrypted notebook system lock is offered only for supported local desktop
     ] as const) {
         const switches: Array<{id: string, save: (value: unknown) => void}> = [];
         const requests: Array<{url: string, enabled: boolean}> = [];
+        const system = {os, encryptedNotebookFollowSystemLock: false};
+        let confirmSave: () => void;
         const dependencies = {
             isBrowser: () => browser,
             isMobile: () => mobile,
             getHostCapabilities: () => ({ownsKernel, importExport: ownsKernel}),
-            fetchPost: (url: string, data: {enabled: boolean}) => requests.push({url, enabled: data.enabled}),
+            fetchPost: (url: string, data: {enabled: boolean}, callback: () => void) => {
+                requests.push({url, enabled: data.enabled});
+                confirmSave = callback;
+            },
         };
         const exports = {} as {registerEncryptedNotebookGroup: (tab: unknown) => void};
         runInNewContext(compiled, {
             exports,
             require: () => dependencies,
-            window: {siyuan: {config: {readonly: false, system: {os}}, languages: {}}},
+            window: {siyuan: {config: {readonly: false, system}, languages: {}}},
         });
         exports.registerEncryptedNotebookGroup({group: () => ({
             slot: () => {},
@@ -42,7 +47,13 @@ test("encrypted notebook system lock is offered only for supported local desktop
         if (expected) {
             assert.equal(switches[0].id, "system.encryptedNotebookFollowSystemLock");
             switches[0].save(true);
+            assert.equal(system.encryptedNotebookFollowSystemLock, false);
+            confirmSave();
+            assert.equal(system.encryptedNotebookFollowSystemLock, true);
             switches[0].save(false);
+            assert.equal(system.encryptedNotebookFollowSystemLock, true);
+            confirmSave();
+            assert.equal(system.encryptedNotebookFollowSystemLock, false);
             switches[0].save("true");
             assert.deepEqual(requests, [
                 {url: "/api/notebook/setEncryptedNotebookFollowSystemLock", enabled: true},

@@ -57,7 +57,9 @@ func ocrModelPayload(id string) apicontract.OCRModel {
 	return apicontract.OCRModel{ID: id, Name: name, BuiltIn: id == "tiny"}
 }
 
-var setOCRConfig = contractHandler(apicontract.SetOCRConfig, serializeSetting("ocr", func(c *gin.Context, request apicontract.SettingOCR) apicontract.Response[apicontract.SettingOCR] {
+var setOCRConfig = contractHandler(apicontract.SetOCRConfig, applyOCRSetting)
+
+func applyOCRSetting(c *gin.Context, request apicontract.SettingOCR) apicontract.Response[apicontract.SettingOCR] {
 	value := model.Conf.GetOCR()
 	value.Provider, value.Model, value.Auto = request.Provider, request.Model, request.Auto
 	if request.AIModelID != nil {
@@ -73,7 +75,7 @@ var setOCRConfig = contractHandler(apicontract.SetOCRConfig, serializeSetting("o
 		return apicontract.Failure[apicontract.SettingOCR](-1, err.Error())
 	}
 	return apicontract.Success(ocrConfigPayload(model.Conf.GetOCR()))
-}))
+}
 
 var importOCRModels = contractHandler(apicontract.ImportOCRModels, func(c *gin.Context, request apicontract.ImportOCRModelsRequest) apicontract.Response[apicontract.OCRModel] {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Minute)

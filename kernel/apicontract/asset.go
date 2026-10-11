@@ -21,6 +21,9 @@ type SetAssetOCRTextRequest struct {
 	Text string `json:"text"`
 }
 
+// RenameAssetRequest 重命名普通笔记本资源，并同步字面量及百分号编码的文档、数据库引用。
+// 引用及成功返回的 newPath 保留查询参数和片段；源资源解析失败返回 -1 和 5000 毫秒错误提示。
+// 加密笔记本资源仍拒绝重命名；空名称或与原文件名相同的名称保留成功但 newPath 为空的响应。
 type RenameAssetRequest struct {
 	OldPath string `json:"oldPath"`
 	NewName string `json:"newName"`

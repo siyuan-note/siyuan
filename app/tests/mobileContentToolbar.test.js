@@ -5,7 +5,9 @@ const os = require("node:os");
 
 const runCases = async () => {
     const assert = require("node:assert/strict");
-    window.siyuan = {zIndex: 0, languages: {}, menus: {menu: {remove() {}, fullscreen() {}}}};
+    window.siyuan = {zIndex: 0, languages: {}, menus: {menu: {
+        element: document.createElement("div"), remove() { this.data = undefined; }, fullscreen() {},
+    }}};
     const commands = [];
     document.execCommand = command => {
         commands.push({command, text: getSelection().toString()});
@@ -268,7 +270,8 @@ const runElectron = async () => {
             read("protyle/util/hasClosest"),
             read("protyle/wysiwyg/blockSelection"),
             read("protyle/toolbar/subElementLifecycle"),
-            read("mobile/util/multiSelectToolbar"),
+            read("mobile/util/multiSelectToolbar").replace(/^import .*;\r?\n/gm, ""),
+            read("menus/menuToggle"),
             read("mobile/util/wordSelection"),
             "window.expandAndroidWordSelection = expandAndroidWordSelection;",
             extract("protyle/wysiwyg/getBlock", ["getContenteditableElement"]),

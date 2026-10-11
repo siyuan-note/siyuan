@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261008221006"
+		"updated": "20261011142010"
 	},
 	"Children": [
 		{
@@ -63,6 +63,47 @@
 				{
 					"Type": "NodeText",
 					"Data": " cannot be set as a shortcut."
+				}
+			]
+		},
+		{
+			"ID": "20261011091952-wqpp0rc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011091952-wqpp0rc",
+				"updated": "20261011091952"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Keymap"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "General"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", configure “Previous database entry” and “Next database entry” to switch between entries in the current preview using the source view’s filters and sort order. These shortcuts are unassigned by default and also work with an external keyboard on mobile. Navigation is available when the preview is opened from a database view; it stops at the first and last entries."
 				}
 			]
 		},
@@ -4274,7 +4315,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261008221006"
+				"updated": "20261011142010"
 			},
 			"Children": [
 				{
@@ -4293,7 +4334,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20261008101123"
+				"updated": "20261009184321"
 			},
 			"Children": [
 				{
@@ -4313,7 +4354,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20261008101123"
+				"updated": "20261009181520"
 			},
 			"Children": [
 				{
@@ -5379,7 +5420,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Set block name when selecting content"
+									"Data": "In editable mode, selected text is set as the block name; in read-only mode, opens the attribute panel for viewing without changing the block name"
 								}
 							]
 						}
@@ -10146,12 +10187,26 @@
 			]
 		},
 		{
+			"ID": "20261009184321-hm20nzc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009184321-hm20nzc",
+				"updated": "20261009184321"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Copying editor content or using Copy Markdown preserves task-list states such as [/] (In progress), [-] (Canceled) and custom markers. Markdown export keeps standard compatibility by converting nonstandard task markers to [X]."
+				}
+			]
+		},
+		{
 			"ID": "20260928091724-mshqwvb",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260928091724-mshqwvb",
-				"updated": "20260930171029"
+				"updated": "20261010134815"
 			},
 			"Children": [
 				{
@@ -10211,7 +10266,81 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In custom profiles, use the category selector to switch between the toolbar and slash menu. Drag the six-dot handle on the left of an item to change its order, or use its switch to change visibility. Drag near the list edge to scroll. Clear the search before sorting, and confirm to save the profile. Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices. New profiles based on Simple or Full follow the default order as versions change until you customize a level. Based on Current and duplicate preserve existing custom orders. Clear the search and use the reset icon in a column or dock group title to reset that level. To reset every level, use the refresh icon labeled Reset all orders on the right of the Position column title on desktop, or the Reset all orders button at the bottom on mobile. Confirm to save; Cancel discards the changes. Resetting order preserves visibility and dock placement, and reset levels continue to follow future default order changes."
+					"Data": "In custom profiles, use the category selector to switch between the toolbar and slash menu. Drag the six-dot handle on the left of an item to change its order, or use its switch to change visibility. Drag near the list edge to scroll. Clear the search before sorting, and confirm to save the profile. Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices. New custom profiles based on Simple or Full follow future visibility defaults for entries you have not changed. An entry you toggle remains an explicit choice. Existing profiles retain their original visibility behavior; copying a profile or creating one based on Current preserves its inheritance and explicit choices. New profiles based on Simple or Full follow the default order as versions change until you customize a level. Based on Current and duplicate preserve existing custom orders. Clear the search and use the reset icon in a column or dock group title to reset that level. To reset every level, use the refresh icon labeled Reset all orders on the right of the Position column title on desktop, or the Reset all orders button at the bottom on mobile. Confirm to save; Cancel discards the changes. Resetting order preserves visibility and dock placement, and reset levels continue to follow future default order changes."
+				}
+			]
+		},
+		{
+			"ID": "20261010134815-v9k29uo",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261010134815-v9k29uo",
+				"updated": "20261011142010"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Image title"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261010134815-bb1k769",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010134815-bb1k769",
+				"updated": "20261011142010"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click or tap the title below an image to edit it in a floating input. A full-screen mask appears while editing, and the document layout stays unchanged. When the title is focused, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to start editing. While editing, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to save or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to cancel. Clicking outside the input or leaving the field also saves. On mobile, Back saves and closes the input first. The change applies to this image reference and does not rename the asset file. Read-only documents do not allow title editing."
 				}
 			]
 		},
@@ -13602,7 +13731,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-jeh8w1g",
-				"updated": "20261008221006"
+				"updated": "20261010201951"
 			},
 			"Children": [
 				{
@@ -13635,6 +13764,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20261010201951-9uwktyc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010201951-9uwktyc",
+				"updated": "20261010201951"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "At a table cell boundary, arrow keys move to the adjacent cell. If there is no cell in that direction, they move to the surrounding document content; at a document boundary, the cell remains focused."
 				}
 			]
 		},
@@ -14792,7 +14935,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-pfrny4c",
-				"updated": "20260906013806"
+				"updated": "20261010202520"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -14807,7 +14950,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-dh6bex8",
-				"updated": "20260906013806"
+				"updated": "20261010202520"
 			},
 			"Children": [
 				{
@@ -14835,6 +14978,14 @@
 				{
 					"Type": "NodeText",
 					"Data": " to finish editing and move to the content. Clicking the content also ends title editing."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Up and Down move between surrounding blocks, the active tab title, and its content. At the start or end of a tab title, Left and Right keep the caret inside the title."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Press Esc while editing a tab title to finish editing and keep the current text."
 				}
 			]
 		},

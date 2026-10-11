@@ -28,6 +28,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/sync/singleflight"
 )
@@ -167,11 +168,16 @@ var loadPetalsFlight singleflight.Group
 
 // IsPetalsEnabled returns whether petals are enabled and trusted to be loaded
 func IsPetalsEnabled() bool {
-	if Conf.Bazaar.PetalDisabled {
+	return petalsEnabled(Conf.Bazaar.Load())
+}
+
+func petalsEnabled(confBazaarSnapshot *conf.Bazaar) bool {
+
+	if confBazaarSnapshot.PetalDisabled {
 		return false
 	}
 
-	if !Conf.Bazaar.Trust {
+	if !confBazaarSnapshot.Trust {
 		// 移动端为了兼容通过同步获得的已有插件，不要求先确认集市信任；桌面端和 Docker 容器仍需用户手动确认
 		if util.Container == util.ContainerStd || util.Container == util.ContainerDocker {
 			return false

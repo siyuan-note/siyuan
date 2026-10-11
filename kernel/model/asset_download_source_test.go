@@ -44,7 +44,7 @@ func TestAssetRepositoryCreationWaitsForSourceChange(t *testing.T) {
 	if _, err := os.Stat(assetDownloadStatePath()); !os.IsNotExist(err) {
 		t.Fatalf("old source state was recreated: %v", err)
 	}
-	Conf.Repo.Key = []byte("abcdef0123456789abcdef0123456789")
+	Conf.Repo.Load().Key = []byte("abcdef0123456789abcdef0123456789")
 	assetDownloadSourceMu.Unlock()
 	locked = false
 	select {
@@ -55,7 +55,7 @@ func TestAssetRepositoryCreationWaitsForSourceChange(t *testing.T) {
 	case <-time.After(10 * time.Second):
 		t.Fatal("repository creation did not resume")
 	}
-	if _, err := dejavu.ReadAssetDownloadScope(assetDownloadStatePath(), Conf.Repo.Key); err != nil {
+	if _, err := dejavu.ReadAssetDownloadScope(assetDownloadStatePath(), Conf.Repo.Load().Key); err != nil {
 		t.Fatalf("new source state does not authenticate: %v", err)
 	}
 }
@@ -73,7 +73,7 @@ func TestAssetDownloadIndexIgnoreRequiresAccess(t *testing.T) {
 	if err = os.WriteFile(ignorePath, []byte("/assets/file.bin"), 0644); err != nil {
 		t.Fatal(err)
 	}
-	Conf.Sync.Enabled = false
+	Conf.Sync.Load().Enabled = false
 	if _, err = IndexRepo("offline ignore change"); err == nil {
 		t.Fatal("local snapshot downloaded an ignored resource without access")
 	}

@@ -119,8 +119,8 @@ func initDatabase(forceRebuild bool) {
 		if util.DatabaseVer == getDatabaseVer() {
 			// 老库版本一致但缺少新加的列时，做幂等迁移（不升 DatabaseVer，避免全库重建丢失已嵌入向量）
 			migrateBlockEmbeddingsSchema()
-			if err := ensureBlocksDocHPathIndex(db); err != nil {
-				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document hpath index failed: %s", err)
+			if err := ensureBlocksDocIndexes(db); err != nil {
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document indexes failed: %s", err)
 			}
 			if err := ensureRefsDefIndexes(db); err != nil {
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create refs definition indexes failed: %s", err)
@@ -207,8 +207,8 @@ func initDBTables() {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_blocks_root_id_id_hash] failed: %s", err)
 	}
 
-	if err = ensureBlocksDocHPathIndex(db); err != nil {
-		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document hpath index failed: %s", err)
+	if err = ensureBlocksDocIndexes(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document indexes failed: %s", err)
 	}
 	if err = ensureRecentUpdatedBlocksIndexes(db); err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create recent updated block indexes failed: %s", err)
@@ -352,13 +352,10 @@ func initDBConnection() {
 	util.LogDatabaseSize(util.DBPath)
 	dsn := util.DBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
-		"&_mmap_size=4294967296" +
 		"&_secure_delete=OFF" +
-		"&_cache_size=-128000" +
-		"&_page_size=32768" +
+		util.SQLitePageCacheDSN() +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY" +
 		"&_case_sensitive_like=OFF"
 	var err error
 	db, err = sql.Open("sqlite3_extended", dsn)
@@ -404,13 +401,10 @@ func initHistoryDBConnection() {
 	util.LogDatabaseSize(util.HistoryDBPath)
 	dsn := util.HistoryDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
-		"&_mmap_size=4294967296" +
 		"&_secure_delete=OFF" +
-		"&_cache_size=-128000" +
-		"&_page_size=32768" +
+		util.SQLitePageCacheDSN() +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY" +
 		"&_case_sensitive_like=OFF"
 	var err error
 	historyDB, err = sql.Open("sqlite3_extended", dsn)
@@ -478,13 +472,10 @@ func initAssetContentDBConnection() {
 	util.LogDatabaseSize(util.AssetContentDBPath)
 	dsn := util.AssetContentDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
-		"&_mmap_size=4294967296" +
 		"&_secure_delete=OFF" +
-		"&_cache_size=-128000" +
-		"&_page_size=32768" +
+		util.SQLitePageCacheDSN() +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY" +
 		"&_case_sensitive_like=OFF"
 	var err error
 	assetContentDB, err = sql.Open("sqlite3_extended", dsn)
@@ -519,13 +510,14 @@ func initAssetContentDBTables() {
 }
 
 var (
-	caseSensitive  bool
-	hanSensitive   bool
-	indexAssetPath bool
+	caseSensitive  = util.NewAtomicValue(false)
+	hanSensitive   = util.NewAtomicValue(false)
+	indexAssetPath = util.NewAtomicValue(false)
 )
 
 func SetCaseSensitive(b bool) {
-	caseSensitive = b
+	caseSensitive.Store(b)
+	util.SearchCaseSensitive.Store(b)
 
 	if nil == db {
 		return
@@ -536,30 +528,28 @@ func SetCaseSensitive(b bool) {
 	} else {
 		db.Exec("PRAGMA case_sensitive_like = OFF;")
 	}
-
-	util.SearchCaseSensitive = b
 }
 
 func SetHanSensitive(b bool) {
-	hanSensitive = b
-	util.SearchHanSensitive = b
+	hanSensitive.Store(b)
+	util.SearchHanSensitive.Store(b)
 }
 
 // ftsTokenize 返回 blocks FTS 表的 tokenize 参数。
 // 分词器参数在 CREATE VIRTUAL TABLE 时固化，切换区分大小写或区分繁简后需要重建索引。
 func ftsTokenize() string {
 	ret := "siyuan"
-	if !caseSensitive {
+	if !caseSensitive.Load() {
 		ret += " case_insensitive"
 	}
-	if !hanSensitive {
+	if !hanSensitive.Load() {
 		ret += " han_insensitive"
 	}
 	return ret
 }
 
 func SetIndexAssetPath(b bool) {
-	indexAssetPath = b
+	indexAssetPath.Store(b)
 }
 
 func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) {
@@ -1010,7 +1000,7 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		if !treenode.IsNodeOCRed(n) {
 			util.PushNodeOCRQueue(n)
 		}
-		content = nodeStaticContent(n, nil, true, indexAssetPath, true, true)
+		content = nodeStaticContent(n, nil, true, indexAssetPath.Load(), true, true)
 
 		fc := treenode.FirstLeafBlock(n)
 		if !treenode.IsNodeOCRed(fc) {
@@ -1028,7 +1018,7 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		if !treenode.IsNodeOCRed(n) {
 			util.PushNodeOCRQueue(n)
 		}
-		content = nodeStaticContent(n, nil, true, indexAssetPath, true, true)
+		content = nodeStaticContent(n, nil, true, indexAssetPath.Load(), true, true)
 
 		parentID = n.Parent.ID
 		if h := treenode.HeadingParent(n); nil != h {
@@ -1457,8 +1447,14 @@ func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err
 	return
 }
 
-func ensureBlocksDocHPathIndex(database *sql.DB) (err error) {
-	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocks_doc_hpath ON blocks(hpath) WHERE type = 'd'")
+// 文档部分索引分别支持路径匹配和按根文档聚合，仅包含文档行。
+func ensureBlocksDocIndexes(database *sql.DB) (err error) {
+	for _, column := range []string{"hpath", "root_id"} {
+		if _, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocks_doc_" + column +
+			" ON blocks(" + column + ") WHERE type = 'd'"); err != nil {
+			return
+		}
+	}
 	return
 }
 
@@ -2044,9 +2040,9 @@ func OpenEncryptedDB(boxID string, dek []byte) (err error) {
 	contentKey := util.DeriveSubKey(dek, "siyuan/sqlcipher/content")
 	defer clear(contentKey)
 	// SQLCipher DSN：_key=x'<hex>' 让 go-sqlite3 执行 PRAGMA key；其余 PRAGMA 与全局 siyuan.db 对齐
-	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_mmap_size=4294967296&_secure_delete=OFF" +
-		"&_cache_size=-128000&_page_size=32768&_busy_timeout=7000&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(contentKey) + "'"
+	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_secure_delete=OFF" +
+		util.SQLitePageCacheDSN() + "&_busy_timeout=7000&_ignore_check_constraints=ON" +
+		"&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(contentKey) + "'"
 	boxDB, err := sql.Open("sqlite3_extended", dsn)
 	if err != nil {
 		return err
@@ -2149,7 +2145,7 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 			return
 		}
 	}
-	if err = ensureBlocksDocHPathIndex(boxDB); err != nil {
+	if err = ensureBlocksDocIndexes(boxDB); err != nil {
 		return
 	}
 	if err = ensureRecentUpdatedBlocksIndexes(boxDB); err != nil {

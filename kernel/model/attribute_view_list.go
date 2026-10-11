@@ -26,6 +26,7 @@ func cloneAttributeViewLayouts(target, source *av.View) (err error) {
 		}
 		target.List.ID = ast.NewNodeID()
 	}
+	target.LegacyMap = append(target.LegacyMap[:0:0], source.LegacyMap...)
 	if nil != source.Calendar {
 		target.Calendar = &av.LayoutCalendar{}
 		if err = copier.CopyWithOption(target.Calendar, source.Calendar, copier.Option{DeepCopy: true}); nil != err {

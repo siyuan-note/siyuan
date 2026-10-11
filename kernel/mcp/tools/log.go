@@ -322,6 +322,12 @@ func collectAgentLogSecrets(value reflect.Value, ownerType string, secrets map[s
 	if !value.IsValid() {
 		return
 	}
+	if value.CanInterface() {
+		if section, ok := value.Interface().(interface{ SnapshotValue() any }); ok {
+			collectAgentLogSecrets(reflect.ValueOf(section.SnapshotValue()), ownerType, secrets)
+			return
+		}
+	}
 	for value.Kind() == reflect.Pointer || value.Kind() == reflect.Interface {
 		if value.IsNil() {
 			return

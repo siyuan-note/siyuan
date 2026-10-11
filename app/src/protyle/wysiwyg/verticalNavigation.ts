@@ -157,7 +157,10 @@ const resolveBlockVerticalNavigationTarget = (editorElement: HTMLElement, elemen
     if (editable?.tagName === "TABLE") {
         editable = getTableBoundaryCell(editable as HTMLTableElement, direction, goalX);
     }
-    return editable ? {type: "text", owner: element, editable, scope} :
+    const revealTitle = !!editable && editable === region?.title && !isVerticalNavigationElementVisible(editable);
+    return editable ? {type: "text", owner: element, editable, scope,
+        reveal: revealTitle ? () => !!region.setTitleEditing?.(true) : undefined,
+        rollbackReveal: revealTitle ? () => region.setTitleEditing?.(false) : undefined} :
         {type: "atomic", owner: element, scope};
 };
 

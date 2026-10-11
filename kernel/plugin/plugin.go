@@ -885,7 +885,7 @@ func storageWatchOperations(event fsnotify.Event) (ret []string) {
 	return
 }
 
-// invokeHook calls a lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
+// invokeHook 调用已绑定的生命周期钩子，等待其返回的 Promise；未实现的可选钩子直接跳过。
 func (p *KernelPlugin) invokeHook(name string) {
 	var err error
 	defer func() {
@@ -917,6 +917,10 @@ func (p *KernelPlugin) invokeHook(name string) {
 		}
 
 		hookValue := pluginObj.Get(name)
+		if hookValue == nil || goja.IsNull(hookValue) || goja.IsUndefined(hookValue) {
+			done <- TaskResult{}
+			return
+		}
 		hook, ok := goja.AssertFunction(hookValue)
 		if !ok {
 			err = fmt.Errorf("globalThis.siyuan.plugin.lifecycle.%s not bound to a function", name)

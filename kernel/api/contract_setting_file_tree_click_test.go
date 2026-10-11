@@ -39,8 +39,8 @@ func TestAPIContractSettingFileTreeClickMode(t *testing.T) {
 		{"/api/setting/patch", `{"fileTree":{"parentDocTitleClickMode":9}}`, 0, 0, false},
 	} {
 		model.Conf = model.NewAppConf()
-		model.Conf.FileTree = conf.NewFileTree()
-		model.Conf.FileTree.ParentDocTitleClickMode = 1
+		model.Conf.FileTree.Store(conf.NewFileTree())
+		model.Conf.FileTree.Load().ParentDocTitleClickMode = 1
 		recorder := httptest.NewRecorder()
 		request := httptest.NewRequest("POST", entry.path, strings.NewReader(entry.body))
 		request.Header.Set("Content-Type", "application/json")
@@ -61,10 +61,10 @@ func TestAPIContractSettingFileTreeClickMode(t *testing.T) {
 			response.Data.ParentDocTitleClickMode != entry.title) {
 			t.Fatalf("response lost the click modes: %s", recorder.Body.String())
 		}
-		if model.Conf.FileTree.DocIconClickMode != entry.docIcon ||
-			model.Conf.FileTree.ParentDocTitleClickMode != entry.title {
+		if model.Conf.FileTree.Load().DocIconClickMode != entry.docIcon ||
+			model.Conf.FileTree.Load().ParentDocTitleClickMode != entry.title {
 			t.Fatalf("%s %s: want %d/%d, got %d/%d", entry.path, entry.body, entry.docIcon, entry.title,
-				model.Conf.FileTree.DocIconClickMode, model.Conf.FileTree.ParentDocTitleClickMode)
+				model.Conf.FileTree.Load().DocIconClickMode, model.Conf.FileTree.Load().ParentDocTitleClickMode)
 		}
 	}
 }
@@ -85,7 +85,7 @@ func TestAPIContractSettingFileTreeClickModeRejectsWrongTypes(t *testing.T) {
 	} {
 		for _, path := range []string{"/api/setting/setFiletree", "/api/setting/patch"} {
 			model.Conf = model.NewAppConf()
-			model.Conf.FileTree = conf.NewFileTree()
+			model.Conf.FileTree.Store(conf.NewFileTree())
 			body := entry
 			if path == "/api/setting/patch" {
 				body = `{"fileTree":` + entry + `}`
@@ -104,7 +104,7 @@ func TestAPIContractSettingFileTreeClickModeRejectsWrongTypes(t *testing.T) {
 			if response.Code == 0 {
 				t.Fatalf("%s %s: invalid value accepted", path, body)
 			}
-			if 0 != model.Conf.FileTree.DocIconClickMode || 0 != model.Conf.FileTree.ParentDocTitleClickMode {
+			if 0 != model.Conf.FileTree.Load().DocIconClickMode || 0 != model.Conf.FileTree.Load().ParentDocTitleClickMode {
 				t.Fatalf("%s %s: configuration changed on rejection", path, body)
 			}
 		}

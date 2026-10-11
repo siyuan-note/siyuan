@@ -36,10 +36,14 @@ func TestEmptyQuickFlashcardParagraphIntegration(t *testing.T) {
 	util.AssetContentDBPath, util.BlockTreeDBPath = filepath.Join(root, "asset_content.db"), filepath.Join(root, "blocktree.db")
 	Conf = NewAppConf()
 	Conf.Lang = "en"
-	Conf.System, Conf.Flashcard = conf.NewSystem(), conf.NewFlashcard()
-	Conf.System.ID = "quick-test-device"
-	Conf.FileTree, Conf.Sync = conf.NewFileTree(), conf.NewSync()
-	Conf.Search, Conf.Editor, Conf.Export = conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+	Conf.System.Store(conf.NewSystem())
+	Conf.Flashcard.Store(conf.NewFlashcard())
+	Conf.System.Load().ID = "quick-test-device"
+	Conf.FileTree.Store(conf.NewFileTree())
+	Conf.Sync.Store(conf.NewSync())
+	Conf.Search.Store(conf.NewSearch())
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	const boxID, docID = "20260914000000-quickbx", "20260914000001-quickdc"
 	box := &Box{ID: boxID}

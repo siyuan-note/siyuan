@@ -20,9 +20,9 @@ test("field capability groups preserve supported field behavior", () => {
         ["rich text", isAVRichTextType, ["text", "block", "email", "phone", "template"]],
         ["link", isAVLinkType, ["block", "url", "email", "phone"]],
         ["scalar content", hasAVScalarContent, ["number", "text", "block", "url", "phone", "email", "template", "mAsset"]],
-        ["attribute placeholder", hasAVAttributePlaceholder, ["text", "number", "date", "url", "phone", "template", "email"]],
-        ["rollup cell", usesAVRollupCellRenderer, ["template", "select", "mSelect", "mAsset", "relation"]],
-        ["template fields", isAVNewItemTemplateType, ["text", "number", "date", "select", "mSelect", "url", "email", "phone", "mAsset", "checkbox", "relation"]],
+        ["attribute placeholder", hasAVAttributePlaceholder, ["text", "number", "date", "url", "phone", "template", "email", "location"]],
+        ["rollup cell", usesAVRollupCellRenderer, ["template", "select", "mSelect", "mAsset", "relation", "location"]],
+        ["template fields", isAVNewItemTemplateType, ["text", "number", "date", "select", "mSelect", "url", "email", "phone", "mAsset", "checkbox", "relation", "location"]],
     ];
     for (const [name, predicate, expected] of groups) {
         for (const type of [...AV_KEY_TYPES, "unknown", undefined, null]) {
@@ -35,7 +35,7 @@ test("field capability groups preserve supported field behavior", () => {
         assert.equal(hasAVCapability(type, "editable"), !computed, type);
         assert.equal(hasAVCapability(type, "filterable"), type !== "lineNumber", type);
         assert.equal(hasAVCapability(type, "sortable"), type !== "lineNumber", type);
-        assert.equal(hasAVCapability(type, "groupable"), type !== "lineNumber" && type !== "rollup", type);
+        assert.equal(hasAVCapability(type, "groupable"), type !== "lineNumber" && type !== "rollup" && type !== "location", type);
         const expected = type === "lineNumber" ? undefined : type === "relation" ? "Contains any item" :
             ["select", "number", "date", "created", "updated", "checkbox"].includes(type) ? "=" : "Contains";
         assert.equal(getAVDefaultFilterOperator(type), expected, type);

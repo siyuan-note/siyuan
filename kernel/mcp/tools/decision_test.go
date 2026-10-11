@@ -24,10 +24,10 @@ func configureDecisionTest(t *testing.T, endpoint string) {
 	t.Helper()
 	original := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.AI = conf.NewAI()
-	model.Conf.Editor = conf.NewEditor()
-	model.Conf.Export = conf.NewExport()
-	model.Conf.AI.Decision = &conf.Decision{Enabled: true, Endpoint: endpoint, APIKey: "test-key", Name: "jev-test", Timeout: 1}
+	model.Conf.AI.Store(conf.NewAI())
+	model.Conf.Editor.Store(conf.NewEditor())
+	model.Conf.Export.Store(conf.NewExport())
+	model.Conf.AI.Load().Decision = &conf.Decision{Enabled: true, Endpoint: endpoint, APIKey: "test-key", Name: "jev-test", Timeout: 1}
 	t.Cleanup(func() { model.Conf = original })
 }
 
@@ -76,7 +76,7 @@ func TestDecisionSequentialPartialResults(t *testing.T) {
 	if len(batch.Items) != 3 || batch.Items[0].Status != "completed" || batch.Items[1].Status != "error" || batch.Items[2].Status != "not_run" || batch.Items[1].Result != nil {
 		t.Fatalf("successful or failed results confused: %+v", batch)
 	}
-	model.Conf.AI.Decision.Enabled = false
+	model.Conf.AI.Load().Decision.Enabled = false
 	result, _ = decisionHandler(context.Background(), args)
 	if !result.IsError || calls.Load() != 2 {
 		t.Fatal("disabled decision performed requests")
@@ -114,21 +114,21 @@ func TestDecisionBatchProviderSnapshotAndDisable(t *testing.T) {
 				if calls.Add(1) == 1 {
 					switch change {
 					case "switch":
-						model.Conf.AI.Decision.Provider = "openai"
+						model.Conf.AI.Load().Decision.Provider = "openai"
 					case "edit":
-						model.Conf.AI.Decision.Profiles["typesafe"].APIKey = "changed-key"
-						model.Conf.AI.Decision.Profiles["typesafe"].Endpoint = "http://unused.invalid"
+						model.Conf.AI.Load().Decision.Profiles["typesafe"].APIKey = "changed-key"
+						model.Conf.AI.Load().Decision.Profiles["typesafe"].Endpoint = "http://unused.invalid"
 					case "disable":
-						model.Conf.AI.Decision.Enabled = false
+						model.Conf.AI.Load().Decision.Enabled = false
 					case "deny":
-						model.Conf.AI.Agent.CapabilityPolicy.Overrides["native/backend/decision"] = "deny"
+						model.Conf.AI.Load().Agent.CapabilityPolicy.Overrides["native/backend/decision"] = "deny"
 					}
 				}
 				io.WriteString(w, `{"model":"jev-test","answers":{"q":{"type":"noul","noul":0.1}}}`)
 			}))
 			defer server.Close()
 			configureDecisionTest(t, server.URL)
-			model.Conf.AI.Decision.Normalize()
+			model.Conf.AI.Load().Decision.Normalize()
 			result, err := decisionHandler(context.Background(), decisionArgs(t, `{"action":"evaluate","items":[{"id":"a","text":"first"},{"id":"b","text":"second"},{"id":"c","text":"third"}],"questions":[{"id":"q","type":"noul","instructions":"Relevant?"}]}`))
 			if err != nil {
 				t.Fatal(err)
@@ -161,7 +161,7 @@ func TestDecisionOpenAIRefusalStopsBatch(t *testing.T) {
 	}))
 	defer server.Close()
 	configureDecisionTest(t, server.URL)
-	model.Conf.AI.Decision = &conf.Decision{Enabled: true, Provider: "openai", Profiles: map[string]*conf.DecisionProfile{"openai": {Endpoint: server.URL, APIKey: "key", Name: "gpt-6-luna", Timeout: 1}}}
+	model.Conf.AI.Load().Decision = &conf.Decision{Enabled: true, Provider: "openai", Profiles: map[string]*conf.DecisionProfile{"openai": {Endpoint: server.URL, APIKey: "key", Name: "gpt-6-luna", Timeout: 1}}}
 	result, err := decisionHandler(context.Background(), decisionArgs(t, `{"action":"evaluate","items":[{"id":"a","text":"first"},{"id":"b","text":"second"},{"id":"c","text":"third"}],"questions":[{"id":"q","type":"noul","instructions":"Relevant?"}]}`))
 	if err != nil || !result.IsError || calls.Load() != 2 {
 		t.Fatalf("refusal was retried or ignored: %+v %v", result, err)

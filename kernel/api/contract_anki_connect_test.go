@@ -16,8 +16,10 @@ import (
 func TestAnkiConnectContractAuthenticationAndVersions(t *testing.T) {
 	previous := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Flashcard, model.Conf.Api = conf.NewFlashcard(), conf.NewAPI()
-	model.Conf.Api.Token = "anki-connect-test-token"
+	model.Conf.Flashcard.Store(conf.NewFlashcard())
+	apiConf := conf.NewAPI()
+	apiConf.Token = "anki-connect-test-token"
+	model.Conf.Api.Store(apiConf)
 	model.Conf.AccessAuthCode = "access-code"
 	t.Cleanup(func() { model.Conf = previous })
 	engine := gin.New()
@@ -47,7 +49,9 @@ func TestAnkiConnectContractAuthenticationAndVersions(t *testing.T) {
 		{name: "multi", body: `{"action":"multi","version":6,"key":"anki-connect-test-token","params":{"actions":[{"action":"version","version":6},{"action":"version","version":4},{"action":"unknown","version":6}]}}`, enabled: true, success: true, want: `{"result":[{"result":6,"error":null},6,{"result":null,"error":"unsupported action"}],"error":null}`},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			model.Conf.Flashcard.AnkiConnectEnabled, model.Conf.Flashcard.AnkiConnectLocalWithoutKey = test.enabled, test.local
+			flashcardConf := conf.NewFlashcard()
+			flashcardConf.AnkiConnectEnabled, flashcardConf.AnkiConnectLocalWithoutKey = test.enabled, test.local
+			model.Conf.Flashcard.Store(flashcardConf)
 			request := httptest.NewRequest("POST", "http://127.0.0.1:6806/api/flashcard/ankiConnect", strings.NewReader(test.body))
 			if test.remote != "" {
 				request.RemoteAddr = test.remote
@@ -80,7 +84,9 @@ func TestAnkiConnectContractAuthenticationAndVersions(t *testing.T) {
 	previousReadonly := util.ReadOnly
 	t.Cleanup(func() { util.ReadOnly = previousReadonly })
 	util.ReadOnly = true
-	model.Conf.Flashcard.AnkiConnectEnabled = true
+	flashcardConf := conf.NewFlashcard()
+	flashcardConf.AnkiConnectEnabled = true
+	model.Conf.Flashcard.Store(flashcardConf)
 	recorder := httptest.NewRecorder()
 	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "http://127.0.0.1:6806/api/flashcard/ankiConnect?token=anki-connect-test-token",
 		strings.NewReader(`{"action":"createDeck","version":6,"params":{"deck":"Words"}}`)))

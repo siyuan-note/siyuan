@@ -22,6 +22,15 @@
     &.protyle-wysiwyg--hl::after {
       border-radius: inherit;
     }
+
+    &.protyle-wysiwyg--select-mode {
+      border-color: var(--b3-theme-primary-lighter);
+      outline: 1px solid var(--b3-theme-primary-lighter);
+
+      &::after {
+        box-shadow: none;
+      }
+    }
   }
 
   .tabs-header {
@@ -298,6 +307,10 @@
         border-top-right-radius: 0;
         border-bottom-left-radius: inherit;
         border-bottom-right-radius: inherit;
+      }
+
+      &.protyle-wysiwyg--select-mode > .tabs-header::before {
+        border-color: var(--b3-theme-primary-lighter);
       }
     }
 

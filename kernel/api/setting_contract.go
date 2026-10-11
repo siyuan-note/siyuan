@@ -719,6 +719,7 @@ func settingEntryVisibilityProfilePayload(value *conf.EntryVisibilityProfile) *a
 	result := &apicontract.SettingEntryVisibilityProfile{}
 	result.ID = value.ID
 	result.Name = value.Name
+	result.Defaults = value.Defaults
 	result.Entries = value.Entries
 	result.Orders = value.Orders
 	return result

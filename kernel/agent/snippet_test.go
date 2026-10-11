@@ -11,10 +11,10 @@ import (
 func TestSnippetWritesAlwaysRequireExplicitConfirmation(t *testing.T) {
 	previous := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()
-	kernelModel.Conf.AI = conf.NewAI()
+	kernelModel.Conf.AI.Store(conf.NewAI())
 	t.Cleanup(func() { kernelModel.Conf = previous })
 	registration := &capabilityRegistration{ID: "native/backend/snippet", ModelName: "snippet", Source: "native", Runtime: "kernel", Tool: tools.SnippetTool}
-	kernelModel.Conf.AI.Agent.ApprovalPolicy.Overrides[registration.ID] = &conf.CapabilityApproval{Default: conf.ApprovalDecisionAllow}
+	kernelModel.Conf.AI.Load().Agent.ApprovalPolicy.Overrides[registration.ID] = &conf.CapabilityApproval{Default: conf.ApprovalDecisionAllow}
 	for _, action := range []string{"create", "update", "replace", "enable", "disable", "remove"} {
 		for _, session := range []bool{false, true} {
 			required, forced := capabilityConfirmRequirement(registration, action, nil, session, map[string]bool{"*": true})

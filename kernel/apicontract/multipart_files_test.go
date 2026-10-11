@@ -27,7 +27,7 @@ func TestMultipartFileListAndSuccessMessage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(bundle.TypeScript(nil)), `"files": Array<Blob>`) {
+	if !strings.Contains(string(bundle.TypeScript(nil, nil)), `"files": Array<Blob>`) {
 		t.Fatal("file list declaration is missing")
 	}
 	payload, err := json.Marshal(SuccessWithMessage([]string{"first.txt"}, "second file failed"))

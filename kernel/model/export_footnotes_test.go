@@ -30,7 +30,7 @@ func TestExportFootnotesAcrossNotebooks(t *testing.T) {
 	const sourceBox = "20260927000000-box0001"
 	const targetBox = "20260927000001-box0002"
 	setupExportRelatedTest(t, sourceBox, targetBox)
-	Conf.Editor = conf.NewEditor()
+	Conf.Editor.Store(conf.NewEditor())
 	source := newFootnoteTestDoc(t, sourceBox, "source")
 	target := newFootnoteTestDoc(t, targetBox, "cross notebook content")
 	nested := newFootnoteTestDoc(t, sourceBox, "nested content")
@@ -79,7 +79,7 @@ func TestExportFootnotesRejectCrossCryptoBoundary(t *testing.T) {
 	const sourceBox = "20260927000002-box0003"
 	const targetBox = "20260927000003-box0004"
 	setupExportRelatedTest(t, sourceBox, targetBox)
-	Conf.Editor = conf.NewEditor()
+	Conf.Editor.Store(conf.NewEditor())
 	source := newFootnoteTestDoc(t, sourceBox, "source")
 	target := newFootnoteTestDoc(t, targetBox, "private content")
 	nested := newFootnoteTestDoc(t, sourceBox, "unreachable content")
@@ -108,7 +108,11 @@ func TestExportFootnotesRejectCrossCryptoBoundary(t *testing.T) {
 
 func TestExportFootnotesStayWithinBlockScope(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.Export, Conf.Editor = conf.NewExport(), conf.NewEditor()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewExport(), conf.NewEditor()
+		Conf.Export.Store(confSectionValue0)
+		Conf.Editor.Store(confSectionValue1)
+	}
 	a := newFootnoteTestDoc(t, fixture.box.ID, "selected paragraph")
 	b := newFootnoteTestDoc(t, fixture.box.ID, "unrelated B")
 	c := newFootnoteTestDoc(t, fixture.box.ID, "unrelated C")
@@ -177,7 +181,7 @@ func TestExportBlockAssetsExcludeUnrelatedContent(t *testing.T) {
 	for _, tree := range []*parse.Tree{a, b} {
 		writeAssetDownloadDocumentTest(t, tree)
 	}
-	Conf.Export.IncludeRelatedDocs = true
+	Conf.Export.Load().IncludeRelatedDocs = true
 	if err := prepareExportBlockAssets(a.Root.FirstChild.ID, false); err != nil {
 		t.Fatal(err)
 	}
@@ -237,7 +241,11 @@ func TestExportFootnotesPruneUnreachable(t *testing.T) {
 
 func TestExportFootnotesHeadingAndContainerScopes(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.Export, Conf.Editor = conf.NewExport(), conf.NewEditor()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewExport(), conf.NewEditor()
+		Conf.Export.Store(confSectionValue0)
+		Conf.Editor.Store(confSectionValue1)
+	}
 	source := newFootnoteTestDoc(t, fixture.box.ID, "source")
 	target := newFootnoteTestDoc(t, fixture.box.ID, "target")
 	heading := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeHeading, HeadingLevel: 1}
@@ -307,7 +315,11 @@ func TestExportFootnotesHeadingAndContainerScopes(t *testing.T) {
 
 func TestExportFootnotesUseMaterializedTableContent(t *testing.T) {
 	fixture := setupFileOperationTest(t)
-	Conf.Export, Conf.Editor = conf.NewExport(), conf.NewEditor()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewExport(), conf.NewEditor()
+		Conf.Export.Store(confSectionValue0)
+		Conf.Editor.Store(confSectionValue1)
+	}
 	source := newFootnoteTestDoc(t, fixture.box.ID, "source")
 	target := newFootnoteTestDoc(t, fixture.box.ID, "target")
 	parsed := parse.Parse("", []byte("| Header |\n| --- |\n| value |"), util.NewLute().ParseOptions)

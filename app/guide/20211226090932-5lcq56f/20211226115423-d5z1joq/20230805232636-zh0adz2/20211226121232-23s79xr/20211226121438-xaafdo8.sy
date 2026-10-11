@@ -6,7 +6,7 @@
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
 		"type": "doc",
-		"updated": "20260918195936"
+		"updated": "20261011203418"
 	},
 	"Children": [
 		{
@@ -421,6 +421,99 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-1587etm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261011151543-1587etm",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定第三方同步"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-j3donul",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-j3donul",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "帳號與同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇 S3、WebDAV 或本地檔案系統（僅桌面版），然後點擊同步服務設定一列的設定按鈕。填寫完整後點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。輸入過程不會儲存，關閉已修改的表單時會詢問是否放棄草稿。"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-tvc378w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-tvc378w",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "停止使用某個服務時，可在其設定對話框中點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清除設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 並確認。這會刪除已儲存的位址和憑證；若它是目前的同步服務，也會關閉同步。本地筆記和雲端資料會保留。"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-ard7rnq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-ard7rnq",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "若目前來源的資源或歷史快照尚未補齊，變更來源或清除設定會被阻止。請恢復原同步來源的存取並完成全部下載後重試。儲存或清除失敗時，生效設定和草稿都會保留。"
 				}
 			]
 		},
@@ -1268,7 +1361,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121454-0nlneiq",
-				"updated": "20260614203626"
+				"updated": "20261011203418"
 			},
 			"Children": [
 				{
@@ -1284,7 +1377,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121454-kv5itch",
-				"updated": "20260614203626"
+				"updated": "20261011203418"
 			},
 			"Children": [
 				{
@@ -1436,7 +1529,7 @@
 					},
 					"Properties": {
 						"id": "20231120213105-95jggay",
-						"updated": "20231120213106"
+						"updated": "20261011203418"
 					},
 					"Children": [
 						{
@@ -1444,12 +1537,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20231120213106-0hx9knh",
-								"updated": "20231120213106"
+								"updated": "20261011203418"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "資料同步前進行資料快照如果耗時超過 12 秒會提示清理資料倉儲，若需要變更預設耗時，可透過以下兩種方式"
+									"Data": "資料同步前進行資料快照如果耗時超過 12 秒會提示清理資料倉庫，若需要變更預設耗時，可透過以下兩種方式"
 								}
 							]
 						},

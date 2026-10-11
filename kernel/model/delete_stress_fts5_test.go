@@ -33,7 +33,7 @@ func TestRapidDeletionLargeIndex(t *testing.T) {
 	}
 	f := setupStructureTransactionTest(t)
 	setupFoldTransactionDatabase(t, f)
-	Conf.Search = conf.NewSearch()
+	Conf.Search.Store(conf.NewSearch())
 	source, err := LoadTreeByBlockID(f.sourceID)
 	if err != nil {
 		t.Fatal(err)

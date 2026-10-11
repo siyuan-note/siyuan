@@ -33,7 +33,9 @@ var ankiConnectActions = []string{"version", "apiReflect", "multi", "deckNames",
 
 // AuthorizeAnkiConnect 只为兼容入口接受协议密钥或显式启用的可信本机免密请求。
 func AuthorizeAnkiConnect(c *gin.Context, key string) error {
-	if Conf.Flashcard == nil || !Conf.Flashcard.AnkiConnectEnabled {
+	confFlashcardSnapshot := Conf.LoadFlashcard()
+	confAPISnapshot := Conf.LoadApi()
+	if confFlashcardSnapshot == nil || !confFlashcardSnapshot.AnkiConnectEnabled {
 		return errors.New("AnkiConnect is disabled")
 	}
 	if key == "" {
@@ -54,7 +56,7 @@ func AuthorizeAnkiConnect(c *gin.Context, key string) error {
 			c.Header("Retry-After", strconv.Itoa(retryAfter))
 			return errors.New("too many authentication attempts")
 		}
-		if Conf.Api == nil || Conf.Api.Token == "" || !util.AuthCodeEquals(Conf.Api.Token, key) {
+		if confAPISnapshot == nil || confAPISnapshot.Token == "" || !util.AuthCodeEquals(confAPISnapshot.Token, key) {
 			util.AuthThrottleFail(ip)
 			return errors.New("valid api key must be provided")
 		}
@@ -65,7 +67,7 @@ func AuthorizeAnkiConnect(c *gin.Context, key string) error {
 	if IsAdminRoleContext(c) {
 		return nil
 	}
-	if Conf.Flashcard.AnkiConnectLocalWithoutKey && IsLocalRequest(c) && isLocalHostRequestAllowed(c) &&
+	if confFlashcardSnapshot.AnkiConnectLocalWithoutKey && IsLocalRequest(c) && isLocalHostRequestAllowed(c) &&
 		!util.IsCrossSiteFetchSite(c.GetHeader("Sec-Fetch-Site")) && c.GetHeader("Origin") == "" {
 		c.Set(RoleContextKey, RoleAdministrator)
 		return nil
@@ -89,6 +91,7 @@ func ProcessAnkiConnect(ctx context.Context, request apicontract.AnkiConnectRequ
 }
 
 func (service *ankiConnectService) reply(request apicontract.AnkiConnectRequest, depth int) ([]byte, error) {
+	confAPISnapshot := Conf.LoadApi()
 	version := 4
 	if request.Version != nil {
 		version = *request.Version
@@ -100,7 +103,7 @@ func (service *ankiConnectService) reply(request apicontract.AnkiConnectRequest,
 		err = errors.New("unsupported API version")
 	} else if depth > 4 || service.requests > 100 {
 		err = errors.New("too many AnkiConnect actions")
-	} else if request.Key != "" && (Conf.Api == nil || !util.AuthCodeEquals(Conf.Api.Token, request.Key)) {
+	} else if request.Key != "" && (confAPISnapshot == nil || !util.AuthCodeEquals(confAPISnapshot.Token, request.Key)) {
 		err = errors.New("valid api key must be provided")
 	} else {
 		value, err = service.dispatch(request, depth)
@@ -127,7 +130,7 @@ func (service *ankiConnectService) open(writable bool) error {
 	if writable && service.readOnly {
 		return errors.New("SiYuan is read-only")
 	}
-	notebookID := strings.TrimSpace(Conf.Flashcard.AnkiConnectNotebook)
+	notebookID := strings.TrimSpace(Conf.LoadFlashcard().AnkiConnectNotebook)
 	if IsEncryptedBox(notebookID) {
 		return errors.New("AnkiConnect does not support encrypted notebooks")
 	}

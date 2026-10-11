@@ -80,6 +80,7 @@ const {WindowWorkspaceRegistry, flushWindowWorkspaces} = require("./windowWorksp
 const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = require("./windowGeometry");
 const {createSettingsWindows} = require("./settingsWindows");
 const {createSettingsTaskBridge} = require("./settingsTasks");
+const {bindWebviewDevToolsShortcut} = require("./webviewDevTools");
 const windowWorkspaces = new WindowWorkspaceRegistry();
 const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
 const {
@@ -753,10 +754,11 @@ if (isDevEnv && process.defaultApp && process.argv.length >= 2) {
 
 app.commandLine.appendSwitch("auto-detect", "false");
 if (!remoteKernelTarget) {
-    app.commandLine.appendSwitch("disable-web-security");
     app.commandLine.appendSwitch("no-proxy-server");
 }
-app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
+// 同源窗口共享渲染进程，按来源隔离以保留不同端口工作空间之间的进程隔离。
+app.commandLine.appendSwitch("process-per-site");
+app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport,OriginKeyedProcessesByDefault");
 app.commandLine.appendSwitch("xdg-portal-required-version", "4");
 // 本地 HTTPS 页面加载 HTTP 外链图时，禁止自动升级为 HTTPS
 app.commandLine.appendSwitch("disable-features", "AutoupgradeMixedContent");
@@ -4434,16 +4436,23 @@ app.whenReady().then(() => {
             return;
         }
 
-        workspaces.forEach(item => {
+        await Promise.all(workspaces.map(async item => {
             const server = item.kernelTarget.origin;
             writeLog("sync after system resume [" + server + "/api/sync/performSync" + "]");
-            (item.ownsKernel ? session.defaultSession : getRemoteSession(item.kernelTarget)).fetch(server + "/api/sync/performSync", {
-                method: "POST",
-                credentials: item.ownsKernel ? "omit" : "include",
-                bypassCustomProtocolHandlers: !item.ownsKernel,
-                redirect: item.ownsKernel ? "follow" : "manual",
-            });
-        });
+            try {
+                const response = await (item.ownsKernel ? session.defaultSession : getRemoteSession(item.kernelTarget)).fetch(server + "/api/sync/performSync", {
+                    method: "POST",
+                    credentials: "include",
+                    bypassCustomProtocolHandlers: !item.ownsKernel,
+                    redirect: item.ownsKernel ? "follow" : "manual",
+                });
+                if (!response.ok) {
+                    writeLog("sync after system resume rejected [HTTP " + response.status + "]");
+                }
+            } catch {
+                writeLog("sync after system resume request failed");
+            }
+        }));
     });
     powerMonitor.on("shutdown", () => {
         writeLog("system shutdown");
@@ -4634,6 +4643,7 @@ app.on("activate", () => {
 });
 
 app.on("web-contents-created", (webContentsCreatedEvent, contents) => {
+    bindWebviewDevToolsShortcut(contents, getWindowKernelTarget);
     contents.setWindowOpenHandler((details) => {
         const settings = settingsWindowPolicy(contents, details);
         if (settings) {

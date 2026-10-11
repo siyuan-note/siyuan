@@ -21,9 +21,9 @@ func TestBackmentionNotifierLegacyAndSuppressed(t *testing.T) {
 func TestBackmentionKeywordWarningNotifier(t *testing.T) {
 	previous := Conf
 	Conf = NewAppConf()
-	Conf.Search = conf.NewSearch()
-	Conf.Search.BacklinkMentionKeywordsLimit = 0
-	Conf.Search.Limit = 0
+	Conf.Search.Store(conf.NewSearch())
+	Conf.Search.Load().BacklinkMentionKeywordsLimit = 0
+	Conf.Search.Load().Limit = 0
 	t.Cleanup(func() { Conf = previous })
 	calls := 0
 	notify := func(msg string, timeout int) string {

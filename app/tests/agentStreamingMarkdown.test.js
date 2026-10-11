@@ -422,18 +422,20 @@ const runCases = async (sources, css, luteScript) => {
     check.equal(longBody.querySelector("strong").textContent, "Last");
 
     const switching = chatFixture(true);
-    const run = {};
     switching.appendToken("# First\n\n**partial**");
-    switching.prepareSessionRunForDetach(run);
-    switching.captureSessionRunView(run);
-    const firstBody = run.viewState.currentAIElement.querySelector(".agent-chat__body");
+    switching.prepareRunViewForDetach();
+    const state = switching.captureRunViewState();
+    switching.captureRunView(state);
+    const firstBody = state.currentAIElement.querySelector(".agent-chat__body");
     switching.currentAIElement = null;
     switching.currentContent = "";
     switching.appendToken("# Second");
     await tick();
     check.match(switching.messagesContainer.textContent, /Second/);
     check.doesNotMatch(firstBody.textContent, /Second/);
-    switching.restoreSessionRunState(run);
+    let consumed = false;
+    check.equal(switching.restoreRunView(state, () => { consumed = true; }), true);
+    check.equal(consumed, true);
     switching.appendToken(" more");
     await tick();
     check.match(switching.messagesContainer.textContent, /partial more/);

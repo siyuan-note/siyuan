@@ -209,6 +209,15 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.embedBlockBreadcrumb,
         desc: window.siyuan.languages.embedBlockBreadcrumbTip,
     });
+    group.select("editor.headingEmbedMode", {
+        title: window.siyuan.languages.headingEmbedMode,
+        desc: window.siyuan.languages.headingEmbedModeTip,
+        options: [
+            {value: 0, label: window.siyuan.languages.showHeadingWithBlocks},
+            {value: 1, label: window.siyuan.languages.showHeadingOnlyTitle},
+            {value: 2, label: window.siyuan.languages.showHeadingOnlyBlocks},
+        ],
+    });
     group.switch("editor.headingNumber", {
         title: window.siyuan.languages.headingNumber,
         desc: window.siyuan.languages.headingNumberTip,
@@ -255,15 +264,6 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     group.switch("editor.databaseAttrUseTabs", {
         title: window.siyuan.languages.databaseAttrUseTabs,
         desc: window.siyuan.languages.databaseAttrUseTabsTip,
-    });
-    group.select("editor.headingEmbedMode", {
-        title: window.siyuan.languages.headingEmbedMode,
-        desc: window.siyuan.languages.headingEmbedModeTip,
-        options: [
-            {value: 0, label: window.siyuan.languages.showHeadingWithBlocks},
-            {value: 1, label: window.siyuan.languages.showHeadingOnlyTitle},
-            {value: 2, label: window.siyuan.languages.showHeadingOnlyBlocks},
-        ],
     });
     group.switch("editor.codeLineWrap", {
         title: window.siyuan.languages.md31,

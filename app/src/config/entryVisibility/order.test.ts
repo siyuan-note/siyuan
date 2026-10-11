@@ -97,6 +97,18 @@ test("database list view merges into saved slash orders and preserves plugin slo
         ["databaseTableView", "databaseListView"]);
 });
 
+test("retired database map entry stays hidden without changing saved slash or plugin order", () => {
+    const entries = getEntryCatalogChildren("editor.slash.menu");
+    const defaults = entries.map(item => item.key);
+    const saved = [...defaults];
+    saved.splice(saved.indexOf("databaseCalendarView") + 1, 0, "databaseMapView", "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    assert.equal(defaults.includes("databaseMapView"), false);
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators),
+        saved.filter(key => key !== "databaseMapView"));
+});
+
 test("custom task status merges into saved list menus without moving existing entries", () => {
     const entries = getEntryCatalogChildren("gutter.single.listBlock");
     const defaults = entries.map(item => item.key);

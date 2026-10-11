@@ -9,6 +9,7 @@ import "github.com/siyuan-note/siyuan/kernel/conf"
 // ExportRenderOptions 是导出入口的格式与访问上下文，不属于 HTTP 请求或持久化配置。
 type ExportRenderOptions struct {
 	AssetsDestSpace2Underscore, FillCSSVar, AdjustHeadingLevel, ImgTag bool
+	PreserveTaskMarkers                                                bool
 	AVPublishFilter                                                    AVExportPublishFilter
 	AccessCheckers                                                     []EmbedBlockAccessChecker
 }
@@ -35,6 +36,7 @@ type markdownExportOptions struct {
 	Config                                                             conf.Export
 	CloudAssetsBase                                                    string
 	AssetsDestSpace2Underscore, AdjustHeadingLevel, ImgTag, FillCSSVar bool
+	PreserveTaskMarkers                                                bool
 	Ext                                                                string
 	DefBlockIDs                                                        []string
 	References                                                         *markdownExportReferences

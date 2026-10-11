@@ -70,6 +70,48 @@ func TestQueuedTransactionWaitForCommit(t *testing.T) {
 	requireTransactionFinished(t, waitForTransactionInTest(first))
 }
 
+func TestFlushTxQueueWaitsForDequeuedTransaction(t *testing.T) {
+	FlushTxQueue()
+	flushLock.Lock()
+	isFlushing.Store(true)
+	defer func() {
+		isFlushing.Store(false)
+		flushLock.Unlock()
+	}()
+	tx := &Transaction{}
+	transactions := []*Transaction{tx}
+	PerformTransactions(&transactions)
+	queued := takeQueuedTransactions()
+	if len(queued) != 1 || queued[0] != tx {
+		t.Fatal("transaction was not queued")
+	}
+	done := make(chan struct{})
+	go func() { FlushTxQueue(); close(done) }()
+	requireTransactionWaiting(t, done)
+	flushTx(tx)
+	requireTransactionWaiting(t, done)
+	isFlushing.Store(false)
+	requireTransactionFinished(t, done)
+	if completion := tx.completion.Load(); completion == nil {
+		t.Fatal("transaction completion was not registered")
+	} else {
+		select {
+		case <-completion.done:
+		default:
+			t.Fatal("queue flush returned before commit completion")
+		}
+	}
+}
+
+func BenchmarkFlushTxQueueEmpty(b *testing.B) {
+	FlushTxQueue()
+	flushLock.Lock()
+	b.Cleanup(flushLock.Unlock)
+	for b.Loop() {
+		FlushTxQueue()
+	}
+}
+
 func TestWaitForSubmittedTransactionBatch(t *testing.T) {
 	FlushTxQueue()
 	flushLock.Lock()

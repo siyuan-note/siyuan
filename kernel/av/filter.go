@@ -326,6 +326,9 @@ func resolveFilterValueSource(filter *ViewFilter) *ViewFilter {
 
 	ret := *filter
 	content := filter.Value.String(false)
+	if KeyTypeLocation == filter.Value.Type && nil != filter.Value.Text {
+		content = filter.Value.Text.Content
+	}
 	if KeyTypeNumber == filter.Value.Type && nil != filter.Value.Number && filter.Value.Number.IsNotEmpty {
 		content = strconv.FormatFloat(filter.Value.Number.Content, 'f', -1, 64)
 	}
@@ -747,7 +750,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil == v || reflect.ValueOf(v).IsNil() {
+					if isRollupStoredValueEmpty(c) {
 						return true
 					}
 				}
@@ -758,7 +761,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil != v && !reflect.ValueOf(v).IsNil() {
+					if !isRollupStoredValueEmpty(c) {
 						return true
 					}
 				}
@@ -789,7 +792,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil != v && !reflect.ValueOf(v).IsNil() {
+					if !isRollupStoredValueEmpty(c) {
 						return false
 					}
 				}
@@ -804,7 +807,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil == v || reflect.ValueOf(v).IsNil() {
+					if isRollupStoredValueEmpty(c) {
 						return false
 					}
 				}
@@ -836,7 +839,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil == v || reflect.ValueOf(v).IsNil() {
+					if isRollupStoredValueEmpty(c) {
 						return false
 					}
 				}
@@ -847,7 +850,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil != v && !reflect.ValueOf(v).IsNil() {
+					if !isRollupStoredValueEmpty(c) {
 						return false
 					}
 				}
@@ -1074,10 +1077,21 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 }
 
 // isRollupFilterValueEmpty 判断汇总筛选是否缺少比较值，相对日期仅依赖相对时间配置。
+func isRollupStoredValueEmpty(value *Value) bool {
+	if nil == value || KeyTypeLocation == value.Type {
+		return value.IsEmpty()
+	}
+	v := value.GetValByType(value.Type)
+	return nil == v || reflect.ValueOf(v).IsNil()
+}
+
 func isRollupFilterValueEmpty(filter *ViewFilter) bool {
 	valueType := filter.Value.Rollup.Contents[0].Type
 	if nil != filter.RelativeDate && (IsDateKeyType(valueType)) {
 		return false
+	}
+	if KeyTypeLocation == valueType {
+		return nil == filter.Value.Rollup.Contents[0].Text
 	}
 	v := filter.Value.GetValByType(valueType)
 	return nil == v || reflect.ValueOf(v).IsNil()
@@ -1230,6 +1244,10 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		if nil != value.Email && nil != other && nil != other.Email {
 			return filterTextContent(operator, value.Email.Content, other.Email.Content)
 		}
+	case KeyTypeLocation:
+		if nil != other && nil != other.Text {
+			return filterTextContent(operator, value.String(false), other.Text.Content)
+		}
 	case KeyTypePhone:
 		if nil != value.Phone && nil != other && nil != other.Phone {
 			return filterTextContent(operator, value.Phone.Content, other.Phone.Content)
@@ -1349,7 +1367,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return valueContent == otherValueContent
 		}
 		return strings.EqualFold(valueContent, otherValueContent)
@@ -1357,7 +1375,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return valueContent != otherValueContent
 		}
 		return !strings.EqualFold(valueContent, otherValueContent)
@@ -1365,7 +1383,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return strings.Contains(valueContent, otherValueContent)
 		}
 		return strings.Contains(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
@@ -1373,7 +1391,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return !strings.Contains(valueContent, otherValueContent)
 		}
 		return !strings.Contains(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
@@ -1381,7 +1399,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return strings.HasPrefix(valueContent, otherValueContent)
 		}
 		return strings.HasPrefix(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
@@ -1389,7 +1407,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return strings.HasSuffix(valueContent, otherValueContent)
 		}
 		return strings.HasSuffix(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
@@ -1631,6 +1649,9 @@ func (filter *ViewFilter) IsValid() bool {
 	}
 
 	if FilterOperatorIsEmpty != filter.Operator && FilterOperatorIsNotEmpty != filter.Operator {
+		if KeyTypeLocation == filter.Value.Type {
+			return nil != filter.Value.Text && "" != strings.TrimSpace(filter.Value.Text.Content)
+		}
 		if KeyTypeRelation == filter.Value.Type {
 			return nil != filter.Value.Relation &&
 				(0 < len(filter.Value.Relation.BlockIDs) || 0 < len(filter.Value.Relation.Contents))

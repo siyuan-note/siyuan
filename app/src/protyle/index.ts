@@ -475,6 +475,7 @@ export class Protyle {
         // 多窗口/多端：用广播附带的撤销状态同步本地镜像
         if (data.context?.undoState) {
             syncMirrorFromBroadcast(data.context.undoState);
+            refreshUndoButtons(this.protyle);
         }
         const transactionOperations = getTransactionOperations(data.data);
         queueDatabaseRowRefreshForOperations(this.protyle.id, transactionOperations);

@@ -18,6 +18,8 @@ func TestSyncIgnoreReadFailureRecovers(t *testing.T) {
 	if err := os.WriteFile(p, []byte("/private/**/*"), 0644); err != nil {
 		t.Fatal(err)
 	}
+	invalidateSyncIgnoreRules(p)
+	t.Cleanup(func() { invalidateSyncIgnoreRules(p) })
 	ptr, err := syscall.UTF16PtrFromString(p)
 	if err != nil {
 		t.Fatal(err)
@@ -33,11 +35,9 @@ func TestSyncIgnoreReadFailureRecovers(t *testing.T) {
 			syscall.CloseHandle(h)
 		}
 	}()
-	if _, err = os.Stat(p); err != nil {
-		t.Fatal(err)
-	}
+	requireReadSharingViolation(t, p, h)
 	if _, matcher, loadErr := getSyncIgnoreRules(); loadErr == nil || matcher != nil {
-		t.Fatal("unreadable rules must return an error without a matcher")
+		t.Fatalf("unreadable rules must return an error without a matcher: error=%v, matcher=%v", loadErr, matcher)
 	}
 	if !PathsAffectSync(filepath.Join(util.DataDir, "private", "secret.txt")) {
 		t.Fatal("read failure must conservatively schedule sync")

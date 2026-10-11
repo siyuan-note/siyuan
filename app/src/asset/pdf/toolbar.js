@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import {internalOpt} from "./internal_evt.js";
+
 /** @typedef {import("./event_utils.js").EventBus} EventBus */
 
 import { AnnotationEditorType, ColorPicker, noContextMenu } from "./pdfjs";
@@ -251,21 +253,21 @@ class Toolbar {
     // Suppress context menus for some controls.
     scaleSelect.oncontextmenu = noContextMenu;
 
-    eventBus._on(
+    eventBus.on(
       "annotationeditormodechanged",
-      this.#editorModeChanged.bind(this)
+      this.#editorModeChanged.bind(this), internalOpt
     );
-    eventBus._on("showannotationeditorui", ({ mode }) => {
+    eventBus.on("showannotationeditorui", ({ mode }) => {
       switch (mode) {
         case AnnotationEditorType.HIGHLIGHT:
           editorHighlightButton.click();
           break;
       }
-    });
-    eventBus._on("toolbardensity", this.#updateToolbarDensity.bind(this));
+    }, internalOpt);
+    eventBus.on("toolbardensity", this.#updateToolbarDensity.bind(this), internalOpt);
 
     if (editorHighlightColorPicker) {
-      eventBus._on(
+      eventBus.on(
         "annotationeditoruimanager",
         ({ uiManager }) => {
           this.#setAnnotationEditorUIManager(
@@ -274,7 +276,7 @@ class Toolbar {
           );
         },
         // Once the color picker has been added, we don't want to add it again.
-        { once: true }
+        {once: true, ...internalOpt}
       );
     }
   }

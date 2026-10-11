@@ -1,3 +1,4 @@
+import {toggleMenu} from "../menus/menuToggle";
 import {fetchPost} from "../util/fetch";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Dialog} from "../dialog";
@@ -283,24 +284,34 @@ const openAIActions = (actions: IAIEditorAction[], elements: HTMLElement[], prot
 
 let aiActionsRequestID = 0;
 
-export const AIActions = (elements: Element[], protyle: IProtyle, range?: Range) => {
+export const AIActions = (elements: Element[], protyle: IProtyle, range?: Range, target?: Element) => {
     if (isDisabledFeature("ai")) {
         return;
     }
-    window.siyuan.menus.menu.remove();
-    const sourceElements = elements.filter((item): item is HTMLElement => item instanceof HTMLElement);
-    const sourceRange = range?.cloneRange();
-    if (sourceRange) {
-        protyle.toolbar.range = sourceRange;
-    }
-    const requestID = ++aiActionsRequestID;
-    fetchPost("/api/ai/editor/lsActions", {}, (response) => {
-        if (requestID !== aiActionsRequestID ||
-            (sourceElements.length > 0 && !sourceElements[sourceElements.length - 1].isConnected) ||
-            (sourceRange && (!protyle.wysiwyg.element.contains(sourceRange.startContainer) ||
-                !protyle.wysiwyg.element.contains(sourceRange.endContainer)))) {
-            return;
-        }
-        openAIActions(Array.isArray(response.data) ? response.data : [], sourceElements, protyle, sourceRange);
+    toggleMenu({
+        target: target,
+        build: (_menu, session) => {
+
+            const sourceElements = elements.filter((item): item is HTMLElement => item instanceof HTMLElement);
+            const sourceRange = range?.cloneRange();
+            if (sourceRange) {
+                protyle.toolbar.range = sourceRange;
+            }
+            const requestID = ++aiActionsRequestID;
+            fetchPost("/api/ai/editor/lsActions", {}, (response) => {
+                if (!session.isCurrent()) {
+                    return;
+                }
+
+                if (requestID !== aiActionsRequestID ||
+                    (sourceElements.length > 0 && !sourceElements[sourceElements.length - 1].isConnected) ||
+                    (sourceRange && (!protyle.wysiwyg.element.contains(sourceRange.startContainer) ||
+                        !protyle.wysiwyg.element.contains(sourceRange.endContainer)))) {
+                    return;
+                }
+                session.show(() => openAIActions(Array.isArray(response.data) ? response.data : [], sourceElements, protyle, sourceRange));
+            });
+
+        },
     });
 };

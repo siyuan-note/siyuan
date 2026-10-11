@@ -1070,8 +1070,10 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
 
 .protyle-wysiwyg:not([contenteditable]),
 .protyle-wysiwyg[data-readonly="true"] {
+  // 只读时仅隐藏手柄并禁用交互，保留其占位宽度，避免子块间距变化导致横向布局改变
   .sb__resize {
-    display: none;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .img:hover .protyle-icons {

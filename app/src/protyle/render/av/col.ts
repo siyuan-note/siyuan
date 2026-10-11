@@ -286,6 +286,7 @@ export const getEditHTML = (options: {
     ${genUpdateColItem("url", colData.type)}
     ${genUpdateColItem("email", colData.type)}
     ${genUpdateColItem("phone", colData.type)}
+    ${genUpdateColItem("location", colData.type)}
     ${genUpdateColItem("template", colData.type)}
     ${genUpdateColItem("relation", colData.type)}
     ${genUpdateColItem("rollup", colData.type)}
@@ -697,6 +698,7 @@ export const getColNameByType = (type: TAVCol) => {
         case "date":
         case "phone":
         case "email":
+        case "location":
         case "template":
             return window.siyuan.languages[type];
         case "mSelect":
@@ -751,6 +753,8 @@ export const getColIconByType = (type: TAVCol) => {
             return "iconEmail";
         case "phone":
             return "iconPhone";
+        case "location":
+            return "iconMapPin";
         case "template":
             return "iconMath";
         case "checkbox":
@@ -2092,6 +2096,46 @@ export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: st
             });
             blockElement.setAttribute("updated", newUpdated);
         }
+    });
+    menu.addItem({
+        id: "location",
+        icon: "iconMapPin",
+        label: window.siyuan.languages.location,
+        click() {
+            const id = Lute.NewNodeID();
+            const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+            transaction(protyle, [{
+                action: "addAttrViewCol",
+                blockID: blockId,
+                viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+                name: window.siyuan.languages.location,
+                avID,
+                type: "location",
+                id,
+                previousID,
+            }, {
+                action: "doUpdateUpdated",
+                id: blockId,
+                data: newUpdated,
+            }], [{
+                action: "removeAttrViewCol",
+                id,
+                avID,
+            }, {
+                action: "doUpdateUpdated",
+                id: blockId,
+                data: blockElement.getAttribute("updated"),
+            }]);
+            addAttrViewColAnimation({
+                blockElement,
+                protyle,
+                type: "location",
+                name: window.siyuan.languages.location,
+                id,
+                previousID,
+            });
+            blockElement.setAttribute("updated", newUpdated);
+        },
     });
     menu.addItem({
         id: "template",

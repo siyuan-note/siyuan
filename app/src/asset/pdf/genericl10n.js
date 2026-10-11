@@ -28,13 +28,15 @@ class GenericL10n extends L10n {
         this._setL10n({
             formatMessages: (msg) => {
                 return new Promise(resolve => {
-                    let lang = window.siyuan.languages[msg[0].id] ||msg[0].id
-                    if (msg[0].args) {
-                        Object.keys(msg[0].args).forEach(key => {
-                            lang = lang.replace('${' + key + '}', msg[0].args[key]);
-                        });
-                    }
-                    resolve([{value: lang}]);
+                    resolve(msg.map(({id, args}) => {
+                        let lang = window.siyuan.languages[id] || id;
+                        if (args) {
+                            Object.keys(args).forEach(key => {
+                                lang = lang.replace("${" + key + "}", args[key]);
+                            });
+                        }
+                        return {value: lang};
+                    }));
                 });
             },
             connectRoot: () => {

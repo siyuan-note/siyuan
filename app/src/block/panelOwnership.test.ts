@@ -160,6 +160,7 @@ const fixture = () => {
     const zIndex = loadSource(readFileSync("src/util/zIndex.ts", "utf8"), globals);
     const Dialog = loadDialogMethods({
         ...globals, ...ownership, ...zIndex,
+        getAnchoredInputMask: () => document.querySelector?.(".b3-text-field__mask"),
         Constants: {TIMEOUT_DBLCLICK: 200},
         setTimeout: (callback: () => void) => timers.push(callback),
         getComputedStyle: (node: TestElement) => node.style,
@@ -195,6 +196,24 @@ const fixture = () => {
     };
     return {document, window, element, ownership, dialog, panel, destroyed, timers, removedListeners};
 };
+
+test("dialog focus trap leaves the higher floating input in control of Tab", () => {
+    const f = fixture();
+    const owner = f.dialog();
+    const mask = f.document.body.append(f.element("div", "b3-text-field__mask"));
+    mask.style.zIndex = "100";
+    const input = mask.append(f.element("textarea"));
+    f.document.querySelector = () => mask;
+    input.focus();
+    const event = keyboardEvent();
+    owner.instance.trapFocus(event);
+    assert.equal(event.defaultPrevented, false);
+    assert.equal(f.document.activeElement, input);
+    mask.style.zIndex = "1";
+    owner.instance.trapFocus(event);
+    assert.equal(event.defaultPrevented, true);
+    assert.equal(f.document.activeElement, owner.first);
+});
 
 test("panel ownership survives detached and moved recent-document anchors", () => {
     const f = fixture();

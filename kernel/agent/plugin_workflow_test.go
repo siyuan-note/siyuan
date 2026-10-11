@@ -34,9 +34,9 @@ func setupPluginWorkflow(t *testing.T) {
 		t.Fatal(err)
 	}
 	kernelModel.Conf = kernelModel.NewAppConf()
-	kernelModel.Conf.AI = conf.NewAI()
-	kernelModel.Conf.Bazaar = conf.NewBazaar()
-	kernelModel.Conf.Bazaar.Trust = false
+	kernelModel.Conf.AI.Store(conf.NewAI())
+	kernelModel.Conf.Bazaar.Store(conf.NewBazaar())
+	kernelModel.Conf.Bazaar.Load().Trust = false
 	t.Cleanup(func() {
 		util.WorkspaceDir, util.DataDir, util.ConfDir, util.WorkingDir, util.TempDir, kernelModel.Conf = origWorkspace, origData, origConfDir, origWorking, origTemp, origConf
 		util.ReadOnly = origReadOnly
@@ -383,14 +383,14 @@ func TestPluginWorkflowTimeoutCancelDisableAndRestart(t *testing.T) {
 	if _, err = pluginWorkflowGrant(testSessionID, "write"); err != nil {
 		t.Fatalf("confirmed state did not survive reload: %v", err)
 	}
-	kernelModel.Conf.AI.Agent.Skills.BuiltinDisabled = []string{util.BuiltinPluginSkillID}
+	kernelModel.Conf.AI.Load().Agent.Skills.BuiltinDisabled = []string{util.BuiltinPluginSkillID}
 	if _, err = pluginWorkflowGrant(testSessionID, "write"); err == nil {
 		t.Fatal("disabled skill retained writes")
 	}
 	if got := pluginSkillResultForContext(AgentToolCall{Name: "skill", Arguments: map[string]any{"source": "builtin"}, Result: "private previous content"}); strings.Contains(got, "private previous") {
 		t.Fatal("disabled skill was reinjected")
 	}
-	kernelModel.Conf.AI.Agent.Skills.BuiltinDisabled = nil
+	kernelModel.Conf.AI.Load().Agent.Skills.BuiltinDisabled = nil
 	pausePluginWorkflow(testSessionID)
 	if _, err = pluginWorkflowGrant(testSessionID, "write"); err == nil {
 		t.Fatal("cancelled task retained writes")

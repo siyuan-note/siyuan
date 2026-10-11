@@ -10,6 +10,7 @@ import {useShell} from "../../../util/pathName";
 
 /// #endif
 import {getHostCapabilities} from "../../../util/hostCapabilities";
+import {isPhablet} from "../../../protyle/util/compatibility";
 
 export class AgentSessionPanel {
     private popup: HTMLElement | null = null;
@@ -170,6 +171,12 @@ export class AgentSessionPanel {
                 e.stopPropagation();
             });
             const onResize = () => {
+                if (isPhablet() && this.popup) {
+                    // 平板软键盘改变视口时重新定位，保留会话搜索与列表。
+                    const btnRect = this.triggerBtn.getBoundingClientRect();
+                    setPosition(this.popup, btnRect.right - 280, btnRect.bottom, btnRect.height, btnRect.width);
+                    return;
+                }
                 this.close();
             };
             if (!this.mobile) {
@@ -186,7 +193,7 @@ export class AgentSessionPanel {
                 document.removeEventListener("click", closeOut);
                 window.removeEventListener("resize", onResize);
             };
-            if (!this.mobile) {
+            if (!this.mobile && !isPhablet()) {
                 searchInput.focus();
             }
         } finally {

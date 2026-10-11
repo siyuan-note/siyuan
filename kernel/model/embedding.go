@@ -622,7 +622,9 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 }
 
 func isEmbeddingEnabled() bool {
-	return !util.IsDisabledFeature("ai") && nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && len(Conf.AI.Embedding.APIKey) > 0
+	confAISnapshot := Conf.LoadAI()
+
+	return !util.IsDisabledFeature("ai") && nil != confAISnapshot.Embedding && confAISnapshot.Embedding.Enabled && len(confAISnapshot.Embedding.APIKey) > 0
 }
 
 // rerankSqlBlocks 用重排模型对候选块按 query 逐对精排。未启用或调用失败时原样返回（降级为向量相似度排序）。
@@ -817,8 +819,10 @@ func GetEmbeddingStat() (ret *EmbeddingStat) {
 }
 
 func embeddingKey() string {
-	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && "" != Conf.AI.Embedding.APIKey {
-		return Conf.AI.Embedding.APIKey
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Embedding && confAISnapshot.Embedding.Enabled && "" != confAISnapshot.Embedding.APIKey {
+		return confAISnapshot.Embedding.APIKey
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY"); "" != v {
 		return v
@@ -827,8 +831,10 @@ func embeddingKey() string {
 }
 
 func embeddingBaseURL() string {
-	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && "" != Conf.AI.Embedding.BaseURL {
-		return Conf.AI.Embedding.BaseURL
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Embedding && confAISnapshot.Embedding.Enabled && "" != confAISnapshot.Embedding.BaseURL {
+		return confAISnapshot.Embedding.BaseURL
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL"); "" != v {
 		return v
@@ -837,8 +843,10 @@ func embeddingBaseURL() string {
 }
 
 func embeddingTimeout() int {
-	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && 0 < Conf.AI.Embedding.Timeout {
-		return Conf.AI.Embedding.Timeout
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Embedding && confAISnapshot.Embedding.Enabled && 0 < confAISnapshot.Embedding.Timeout {
+		return confAISnapshot.Embedding.Timeout
 	}
 	return 30
 }
@@ -846,15 +854,19 @@ func embeddingTimeout() int {
 // embeddingDimensions 返回配置的输出向量维度。0 表示用模型默认维度（不传 dimensions 参数给 API），
 // 仅 text-embedding-3 及以上模型支持自定义维度。文档向量与查询向量必须用相同维度，否则相似度计算会维度不匹配。
 func embeddingDimensions() int {
-	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && 0 < Conf.AI.Embedding.Dimensions {
-		return Conf.AI.Embedding.Dimensions
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Embedding && confAISnapshot.Embedding.Enabled && 0 < confAISnapshot.Embedding.Dimensions {
+		return confAISnapshot.Embedding.Dimensions
 	}
 	return 0
 }
 
 func embeddingModel() string {
-	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && "" != Conf.AI.Embedding.Name {
-		return Conf.AI.Embedding.Name
+	confAISnapshot := Conf.LoadAI()
+
+	if nil != confAISnapshot.Embedding && confAISnapshot.Embedding.Enabled && "" != confAISnapshot.Embedding.Name {
+		return confAISnapshot.Embedding.Name
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL"); "" != v {
 		return v

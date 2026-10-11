@@ -1,3 +1,4 @@
+import {toggleMenu} from "./menuToggle";
 import type {BlockQueryRequestInput} from "../types/api";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile, isValidCustomAttrName} from "../util/functions";
@@ -53,6 +54,9 @@ import {activeBlur} from "../mobile/util/keyboardToolbar";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
+        if (inputElement.readOnly) {
+            return;
+        }
         fetchPost("/api/attr/setBlockAttrs", {
             id,
             attrs: {[inputElement.dataset.name]: inputElement.value}
@@ -209,6 +213,8 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
             });
         }
     }
+    const readonly = Boolean(window.siyuan.config.readonly || protyle?.disabled || (!protyle &&
+        (attrs[Constants.CUSTOM_SY_READONLY] === "true" || window.siyuan.config.editor.readOnly)));
     Object.keys(attrs).forEach(item => {
         if (Constants.CUSTOM_RIFF_DECKS === item || item.startsWith("custom-sy-")) {
             return;
@@ -318,6 +324,9 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
     const disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
     /// #endif
     dialog.element.setAttribute("data-key", Constants.DIALOG_ATTR);
+    dialog.element.querySelectorAll<HTMLElement>(".custom-attr").forEach(item => {
+        item.dataset.readonly = String(readonly);
+    });
     (dialog.element.querySelector('.b3-text-field[data-name="bookmark"]') as HTMLInputElement).value = attrs.bookmark || "";
     (dialog.element.querySelector('.b3-text-field[data-name="name"]') as HTMLInputElement).value = attrs.name || "";
     const aliasInput = bindAliasInput(dialog.element.querySelector("[data-alias-input]"), attrs.alias || "", {
@@ -326,6 +335,7 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         removeLabel: window.siyuan.languages.remove,
         placeholder: window.siyuan.languages.attrAliasTip,
         spellcheck: window.siyuan.config.editor.spellcheck,
+        readonly,
         save: async (alias) => {
             try {
                 const response = await fetchSyncPost("/api/attr/setBlockAttrs", {id: attrs.id, attrs: {alias}});
@@ -356,6 +366,11 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         }
         while (target !== dialog.element) {
             const type = target.dataset.action;
+            if (readonly && ["remove", "bookmark", "addCustom"].includes(type)) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             if (target.classList.contains("item--full")) {
                 target.parentElement.querySelector(".item--focus").classList.remove("item--focus");
                 target.classList.add("item--focus");
@@ -379,32 +394,42 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
                 event.preventDefault();
                 break;
             } else if (type === "bookmark") {
-                fetchPost("/api/attr/getBookmarkLabels", {}, (response) => {
-                    window.siyuan.menus.menu.remove();
-                    if (response.data.length === 0) {
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            id: "emptyContent",
-                            iconHTML: "",
-                            label: window.siyuan.languages.emptyContent,
-                            type: "readonly",
-                        }).element);
-                    } else {
-                        response.data.forEach((item: string) => {
-                            window.siyuan.menus.menu.append(new MenuItem({
-                                label: item,
-                                click() {
-                                    const bookmarkInputElement = target.parentElement.parentElement.querySelector("input");
-                                    bookmarkInputElement.value = item;
-                                    bookmarkInputElement.dispatchEvent(new CustomEvent("change"));
-                                }
-                            }).element);
+                toggleMenu({
+                    target: target,
+                    build: (_menu, session) => {
+                        fetchPost("/api/attr/getBookmarkLabels", {}, (response) => {
+                            if (!session.isCurrent()) {
+                                return;
+                            }
+
+                            window.siyuan.menus.menu.remove();
+                            if (response.data.length === 0) {
+                                window.siyuan.menus.menu.append(new MenuItem({
+                                    id: "emptyContent",
+                                    iconHTML: "",
+                                    label: window.siyuan.languages.emptyContent,
+                                    type: "readonly",
+                                }).element);
+                            } else {
+                                response.data.forEach((item: string) => {
+                                    window.siyuan.menus.menu.append(new MenuItem({
+                                        label: item,
+                                        click() {
+                                            const bookmarkInputElement = target.parentElement.parentElement.querySelector("input");
+                                            bookmarkInputElement.value = item;
+                                            bookmarkInputElement.dispatchEvent(new CustomEvent("change"));
+                                        }
+                                    }).element);
+                                });
+                            }
+                            window.siyuan.menus.menu.element.classList.add("b3-menu--list");
+                            const rect = target.getBoundingClientRect();
+                            session.show(() => window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width}));
                         });
-                    }
-                    window.siyuan.menus.menu.element.classList.add("b3-menu--list");
-                    const rect = target.getBoundingClientRect();
-                    window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});
+
+                    },
                 });
-                event.stopPropagation();
+            event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "addCustom") {
@@ -451,13 +476,14 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         }
     });
     dialog.element.querySelectorAll(".b3-text-field[data-name]").forEach((item: HTMLInputElement) => {
-        if (!isMobile() && focusName !== "av" && focusName !== "custom" && focusName === item.getAttribute("data-name")) {
+        item.readOnly = item.readOnly || readonly;
+        if (!readonly && !isMobile() && focusName !== "av" && focusName !== "custom" && focusName === item.getAttribute("data-name")) {
             item.focus();
         }
         bindAttrInput(item, attrs.id);
     });
     if (focusName === "alias") {
-        if (!isMobile()) {
+        if (!readonly && !isMobile()) {
             aliasInput.focus();
         }
     } else if (focusName === "av") {
@@ -573,6 +599,7 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
                     refMode: 3,
                     embedMode: 1,
                     yfm: false,
+                    preserveTaskMarkers: true,
                     fillCSSVar: false,
                     adjustHeadingLevel: false
                 });

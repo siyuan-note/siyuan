@@ -47,6 +47,10 @@ const browserCases = async (source: string) => {
             languages: {snippetConflict: "Keep your draft and reopen"},
         }});
         const dependencies = {
+            config: {set: async (_path: string, value: Config.ISnippet) => {
+                settingsWrites++;
+                Object.assign(window.siyuan.config.snippet, value);
+            }},
             Dialog: FakeDialog, isMobile: () => mobile,
             Constants: {DIALOG_SNIPPETS: "snippets"},
             objEquals: (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b),

@@ -31,7 +31,7 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
     document.body.append(menuElement);
     const menu = {
         element: menuElement,
-        remove() {menuElement.classList.add("fn__none"); menuElement.replaceChildren();},
+        remove() {this.data = undefined; menuElement.classList.add("fn__none"); menuElement.replaceChildren();},
         append(element) {menuElement.append(element);},
         popup() {menuElement.classList.remove("fn__none");},
     };
@@ -324,7 +324,7 @@ if (process.versions.electron && process.type === "browser") {
                     icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"),
                     languages: fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8"),
                 };
-                for (const name of ["template/manager", "template/actionState", "util/fileTree", "util/escape"]) {
+                for (const name of ["menus/menuToggle", "template/manager", "template/actionState", "util/fileTree", "util/escape"]) {
                     sources[name] = ts.transpileModule(preprocess(fs.readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),
                         {MOBILE: mobile, BROWSER: false}, false, true), {
                         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},

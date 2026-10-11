@@ -543,8 +543,16 @@ test("provider view removal invokes its completion once after animation or timeo
     const view = {classList: {remove() {}}, remove: () => connected = false,
         addEventListener: (_name: string, callback: typeof transition) => transition = callback};
     const exports: {removeProviderView?: (root: unknown, view: unknown, callback: () => void) => void} = {};
-    runInNewContext(code, {exports, require: () => ({}), window: {setTimeout: (callback: () => void) => timers.push(callback)}});
-    exports.removeProviderView({}, view, () => {
+    let notified = 0;
+    const root = {dispatchEvent: (event: {type: string, bubbles: boolean}) => {
+        assert.equal(connected, false);
+        assert.equal(event.type, "siyuan-setting-detail-closed");
+        assert.equal(event.bubbles, true);
+        notified++;
+    }};
+    runInNewContext(code, {exports, require: () => ({}), window: {setTimeout: (callback: () => void) => timers.push(callback)},
+        CustomEvent: class {constructor(public type: string, public options: {bubbles: boolean}) {} get bubbles() { return this.options.bubbles; }}});
+    exports.removeProviderView(root, view, () => {
         assert.equal(connected, false);
         completed++;
     });
@@ -556,10 +564,11 @@ test("provider view removal invokes its completion once after animation or timeo
     timers.splice(0).forEach(callback => callback());
     assert.equal(completed, 1);
     connected = true;
-    exports.removeProviderView({}, view, () => { assert.equal(connected, false); completed++; });
+    exports.removeProviderView(root, view, () => { assert.equal(connected, false); completed++; });
     timers.splice(0).forEach(callback => callback());
     transition({propertyName: "opacity"});
     assert.equal(completed, 2);
+    assert.equal(notified, 2);
 });
 
 test("current test results clear on edits and failures restore the test button", async () => {

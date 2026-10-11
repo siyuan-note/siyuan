@@ -70,32 +70,35 @@ type Box struct {
 
 func StatJob() {
 
-	Conf.m.Lock()
-	Conf.Stat.TreeCount = treenode.CountTrees()
-	Conf.Stat.CTreeCount = treenode.CeilTreeCount(Conf.Stat.TreeCount)
-	Conf.Stat.BlockCount = treenode.CountBlocks()
-	Conf.Stat.CBlockCount = treenode.CeilBlockCount(Conf.Stat.BlockCount)
-	Conf.Stat.DataSize, Conf.Stat.AssetsSize = util.DataSize()
-	Conf.Stat.CDataSize = util.CeilSize(Conf.Stat.DataSize)
-	Conf.Stat.CAssetsSize = util.CeilSize(Conf.Stat.AssetsSize)
-	Conf.m.Unlock()
-	Conf.Save()
+	treeCount, blockCount := treenode.CountTrees(), treenode.CountBlocks()
+	dataSize, assetsSize := util.DataSize()
+	stat := UpdateStatConf(func(stat *conf.Stat) {
+		stat.TreeCount = treeCount
+		stat.CTreeCount = treenode.CeilTreeCount(treeCount)
+		stat.BlockCount = blockCount
+		stat.CBlockCount = treenode.CeilBlockCount(blockCount)
+		stat.DataSize, stat.AssetsSize = dataSize, assetsSize
+		stat.CDataSize = util.CeilSize(dataSize)
+		stat.CAssetsSize = util.CeilSize(assetsSize)
+	})
 
-	logging.LogInfof("auto stat [trees=%d, blocks=%d, dataSize=%s, assetsSize=%s]", Conf.Stat.TreeCount, Conf.Stat.BlockCount, humanize.BytesCustomCeil(uint64(Conf.Stat.DataSize), 2), humanize.BytesCustomCeil(uint64(Conf.Stat.AssetsSize), 2))
+	logging.LogInfof("auto stat [trees=%d, blocks=%d, dataSize=%s, assetsSize=%s]", stat.TreeCount, stat.BlockCount, humanize.BytesCustomCeil(uint64(stat.DataSize), 2), humanize.BytesCustomCeil(uint64(stat.AssetsSize), 2))
 
 	// 桌面端检查磁盘可用空间 https://github.com/siyuan-note/siyuan/issues/6873
 	if util.ContainerStd != util.Container {
 		return
 	}
 
-	if util.NeedWarnDiskUsage(Conf.Stat.DataSize) {
+	if util.NeedWarnDiskUsage(Conf.Stat.Load().DataSize) {
 		util.PushMsg(Conf.Language(179), 7000)
 	}
 }
 
 func ListNotebooks() (ret []*Box, err error) {
+	confSyncSnapshot := Conf.LoadSync()
+
 	// 启用数据同步时，缺失配置可能表示其他设备已删除笔记本，不能在列表读取过程中自动重建。
-	repairMissingConf := nil != Conf && nil != Conf.Sync && !Conf.Sync.Enabled
+	repairMissingConf := nil != Conf && nil != confSyncSnapshot && !confSyncSnapshot.Enabled
 	ret, err = listNotebooks(repairMissingConf)
 	return
 }
@@ -246,7 +249,7 @@ func listNotebooks(repairMissingConf bool) (ret []*Box, err error) {
 		ret = append(ret, box)
 	}
 
-	switch Conf.FileTree.Sort {
+	switch Conf.FileTree.Load().Sort {
 	case util.SortModeNameASC:
 		sort.Slice(ret, func(i, j int) bool {
 			return util.PinYinCompare4FileTree(ret[i].Name, ret[j].Name)
@@ -542,7 +545,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 	if oldDir := path.Dir(oldPath); ast.IsNodeIDPattern(path.Base(oldDir)) {
 		fromDir := filepath.Join(boxLocalPath, oldDir)
 		if util.IsEmptyDir(fromDir) {
-			filelock.Remove(fromDir)
+			util.RemoveEmptyDir(fromDir)
 		}
 	}
 	IncSync()
@@ -934,7 +937,7 @@ func clearTempDir(dir string, count *int, size *int64) {
 	}
 
 	if util.IsEmptyDir(dir) {
-		os.Remove(dir)
+		util.RemoveEmptyDir(dir)
 	}
 	return
 }

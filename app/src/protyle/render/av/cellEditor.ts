@@ -1,9 +1,18 @@
 export const AV_CELL_EDITOR_CLOSE_EVENT = "siyuan-av-cell-editor-close";
 
+export const getAVCellEditorOwner = (blockElement: HTMLElement) =>
+    blockElement.closest<HTMLElement>(".protyle-db-row, .b3-dialog__container, .custom-attr") || blockElement;
+
 export const closeAVCellEditor = (owner?: HTMLElement, save = true) => {
-    document.querySelectorAll<HTMLElement>(save ? ".av__mask:not(.av__richtext-mask)" : ".av__mask").forEach(element => {
+    document.querySelectorAll<HTMLElement>(save ? ".av__mask:not(.av__richtext-mask), [data-av-location-editor]" :
+        ".av__mask, [data-av-location-editor]").forEach(element => {
         if (owner && !Array.from(owner.querySelectorAll<HTMLElement>("[data-node-id]"))
             .some(block => block.dataset.nodeId === element.dataset.avBlockId)) {
+            return;
+        }
+        if (element.dataset.avLocationEditor === "true") {
+            // 位置对话框只允许显式保存，导航、锁定与父面板关闭均取消未提交的输入。
+            element.dispatchEvent(new CustomEvent(AV_CELL_EDITOR_CLOSE_EVENT));
             return;
         }
         if (!save) {

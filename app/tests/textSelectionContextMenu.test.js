@@ -42,9 +42,11 @@ const sources = () => {
             return false;
         }).join("\n");
     };
+    const touchSelection = readFileSync(path.join(__dirname, "../src/protyle/wysiwyg/touchBlockSelection.ts"), "utf8")
+        .replace(/^import .*;\r?\n/gm, "").replaceAll("export const ", "const ");
     return [false, true].map(mobile => ts.transpileModule(preprocess(
         `const bind = function(protyle) {let beforeContextmenuRange; ${bindings.join(";\n")};};\n` +
-        range.getText(selection).replace("export ", "") + "\n" + wordSelection, mobile), {
+        range.getText(selection).replace("export ", "") + "\n" + wordSelection + "\n" + touchSelection, mobile), {
         compilerOptions: {target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS},
     }).outputText);
 };
@@ -88,7 +90,17 @@ const cases = async compiled => {
         };
         const bind = Function(...Object.keys(dependencies), `${compiled[Number(mobile)]}\nreturn bind;`)(
             ...Object.values(dependencies));
-        bind.call({element: {addEventListener: (name, callback) => {callbacks[name] = callback;}}}, protyle);
+        const eventErrors = [];
+        const recordEventError = event => { eventErrors.push(event.error); event.preventDefault(); };
+        window.addEventListener("error", recordEventError);
+        bind.call({element: {addEventListener: (name, callback) => {
+            callbacks[name] = callback;
+            if (name === "pointerdown") root.addEventListener(name, callback);
+        }}}, protyle);
+        const pointerdown = (target, pointerType = "mouse") => {
+            target.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true, pointerType, button: 0}));
+            check.deepEqual(eventErrors, [], "pointerdown completes without renderer exceptions");
+        };
         // 使用真实 DOM Range 覆盖正反向跨块选区，菜单操作仍应读取完整选区。
         for (const reversed of [false, true]) {
             for (const target of blocks.slice(0, 3)) {
@@ -97,7 +109,7 @@ const cases = async compiled => {
                 const expected = selection.getRangeAt(0).toString();
                 const visibleText = selection.toString();
                 menus.length = 0;
-                callbacks.pointerdown();
+                pointerdown(target.firstElementChild, mobile ? "touch" : "mouse");
                 await callbacks.contextmenu({shiftKey: false, target: target.firstElementChild, detail: {},
                     clientX: 20, clientY: 20, stopPropagation() {}, preventDefault() {}});
                 check.equal(menus.length, 1, `menu on ${target.dataset.nodeId}, mobile=${mobile}, reversed=${reversed}`);
@@ -110,14 +122,14 @@ const cases = async compiled => {
         // 桌面端在未选中的块中右键，不应误用另一处的非空选区。
         if (!mobile) {
             menus.length = 0;
-            callbacks.pointerdown();
+            pointerdown(blocks[3].firstElementChild);
             await callbacks.contextmenu({shiftKey: false, target: blocks[3].firstElementChild, detail: {},
                 clientX: 20, clientY: 20, stopPropagation() {}, preventDefault() {}});
             check.equal(menus.length, 0);
         }
         selection.collapse(texts[1], 3);
         menus.length = 0;
-        callbacks.pointerdown();
+        pointerdown(blocks[1].firstElementChild, mobile ? "touch" : "mouse");
         await callbacks.contextmenu({shiftKey: false, target: blocks[1].firstElementChild, detail: {},
             clientX: 20, clientY: 20, stopPropagation() {}, preventDefault() {}});
         check.equal(menus.length, 1);
@@ -132,7 +144,7 @@ const cases = async compiled => {
         }};
         selection.setBaseAndExtent(texts[1], 8, texts[1], 9);
         menus.length = 0;
-        callbacks.pointerdown();
+        pointerdown(blocks[1].firstElementChild, mobile ? "touch" : "mouse");
         let prevented = false;
         await callbacks.contextmenu({shiftKey: false, target: blocks[1].firstElementChild, detail: {},
             clientX: 20, clientY: 20, stopPropagation() {}, preventDefault() { prevented = true; }});
@@ -142,6 +154,7 @@ const cases = async compiled => {
         check.equal(menus[0].copy(), "为什么");
         check.equal(selection.toString(), "为什么");
         delete dependencies.window.JSAndroid;
+        window.removeEventListener("error", recordEventError);
     }
     return "Text selection context menu cases passed";
 };

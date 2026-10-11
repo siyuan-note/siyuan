@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
-import {compileString} from "sass";
+import {compile} from "sass";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (sources: string[], css: string) => {
@@ -22,7 +22,7 @@ body {margin:0}.file-tree {position:absolute;top:40px;left:40px;width:232px}
 </div><span class="b3-tooltips" aria-label="More">More</span></div>
 <div id="tooltip" class="tooltip fn__none"></div>`;
     const input = {} as typeof import("../util/hoverInput");
-    new Function("exports", sources[0])(input);
+    new Function("exports", "require", sources[0])(input, () => ({isInIOS: () => false}));
     let pluginShows = 0;
     const tooltip = {} as typeof import("./tooltip");
     window.DOMPurify = {sanitize: (value: string) => value} as typeof window.DOMPurify;
@@ -126,7 +126,7 @@ test("touch hover suppression preserves mouse, validation feedback and toolbar l
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText);
     const css = ["business/_block.scss", "component/_tooltips.scss", "main/_main.scss"]
-        .map(file => compileString(readFileSync("src/assets/scss/" + file, "utf8")).css).join("\n");
+        .map(file => compile("src/assets/scss/" + file).css).join("\n");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-touch-hover-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");

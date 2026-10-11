@@ -11,15 +11,16 @@ const setup = (type = "NodeBlockquote") => {
         contains: (element: Element) => element === block,
     } as unknown as HTMLElement;
     const button = {dataset: {type: "NodeParagraph"}} as unknown as HTMLElement;
+    const buttons = [button];
     const gutter = {
         classList: {contains: () => false},
         getBoundingClientRect: () => ({left: 100, top: 110, bottom: 134}),
-        querySelectorAll: () => [button],
+        querySelectorAll: () => buttons,
     } as unknown as HTMLElement;
     const target = {closest: (): HTMLElement => null} as unknown as HTMLElement;
     const hit = (x = 130, y = 120, currentBlock = block) =>
         isContainerGutterBridge(gutter, container, target, x, y, () => currentBlock);
-    return {block, container, button, gutter, target, hit};
+    return {block, container, button, buttons, gutter, target, hit};
 };
 
 describe("isContainerGutterBridge", () => {
@@ -27,6 +28,21 @@ describe("isContainerGutterBridge", () => {
         ["NodeBlockquote", "NodeCallout", "NodeSuperBlock"].forEach(type => {
             assert.equal(setup(type).hit(), true);
         });
+    });
+
+    it("preserves embedded content gutters across embed and editor padding", () => {
+        const {container, buttons, gutter, target, block} = setup("NodeBlockQueryEmbed");
+        const embedButton = {dataset: {type: "NodeBlockQueryEmbed"}} as unknown as HTMLElement;
+        buttons.unshift(embedButton);
+        const getBlock = (item: HTMLElement) => item === embedButton ? container : block;
+        [139, 130, 110, 100].forEach(x => {
+            assert.equal(isContainerGutterBridge(gutter, container, target, x, 120, getBlock), true);
+        });
+        [[99, 120], [141, 120], [130, 90], [130, 151]].forEach(([x, y]) => {
+            assert.equal(isContainerGutterBridge(gutter, container, target, x, y, getBlock), false);
+        });
+        assert.equal(isContainerGutterBridge(gutter, container, target, 130, 120, () => container), false);
+        assert.equal(isContainerGutterBridge(gutter, container, target, 130, 120, () => ({} as Element)), false);
     });
 
     it("does not retain a gutter outside the path to its block", () => {

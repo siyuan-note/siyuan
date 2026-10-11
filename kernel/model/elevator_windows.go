@@ -31,6 +31,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/internal/elevator"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -76,8 +77,7 @@ func AddMicrosoftDefenderExclusion() (err error) {
 		return
 	}
 
-	Conf.System.MicrosoftDefenderExcluded = true
-	Conf.Save()
+	UpdateSystemConf(func(s *conf.System) { s.MicrosoftDefenderExcluded = true })
 
 	logging.LogInfof("added Windows Defender exclusion path [%s, %s]", installPath, util.WorkspaceDir)
 	util.PushMsg(Conf.language(102), 5000)
@@ -89,7 +89,7 @@ func AutoCheckMicrosoftDefenderJob() {
 	microsoftDefenderLock.Lock()
 	defer microsoftDefenderLock.Unlock()
 
-	if !gulu.OS.IsWindows() || Conf.System.MicrosoftDefenderExcluded {
+	if !gulu.OS.IsWindows() || Conf.System.Load().MicrosoftDefenderExcluded {
 		return
 	}
 

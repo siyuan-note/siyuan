@@ -24,7 +24,7 @@ func TestAPIContractHTMLLocalAssets(t *testing.T) {
 	util.WorkspaceDir, util.HomeDir = t.TempDir(), t.TempDir()
 	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	boxID := "20261002120000-htmlenc"
 	t.Cleanup(func() {
 		model.Conf, util.WorkspaceDir, util.DataDir, util.HomeDir = previousConf, previousWorkspace, previousData, previousHome

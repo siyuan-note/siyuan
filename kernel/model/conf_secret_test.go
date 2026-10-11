@@ -57,7 +57,7 @@ func TestGetMaskedConfHidesCookieKeyAndPreservesOIDCSecret(t *testing.T) {
 func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 	appConf := NewAppConf()
 	appConf.CookieKey = "session-cookie-signing-key"
-	appConf.System = &conf.System{}
+	appConf.System.Store(&conf.System{})
 	kek := bytes.Repeat([]byte{1}, 32)
 	verifier, err := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	if err != nil {
@@ -105,7 +105,7 @@ func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 
 func TestHideConfSecretMasksIncompleteNotebookCryptoAsDisabled(t *testing.T) {
 	appConf := NewAppConf()
-	appConf.System = &conf.System{}
+	appConf.System.Store(&conf.System{})
 	appConf.NotebookCrypto = conf.NewNotebookCrypto()
 	appConf.NotebookCrypto.Enabled = true
 
@@ -118,36 +118,36 @@ func TestHideConfSecretMasksIncompleteNotebookCryptoAsDisabled(t *testing.T) {
 
 func TestHideConfSecretHidesAbsolutePaths(t *testing.T) {
 	appConf := NewAppConf()
-	appConf.Export = &conf.Export{
+	appConf.Export.Store(&conf.Export{
 		AddTitle:  true,
 		PandocBin: `C:\Users\alice\SiYuan\temp\pandoc\bin\pandoc.exe`,
-	}
-	appConf.System = &conf.System{
+	})
+	appConf.System.Store(&conf.System{
 		KernelVersion: "3.3.0",
 		HomeDir:       `C:\Users\alice`,
 		WorkspaceDir:  `C:\Users\alice\SiYuan`,
 		AppDir:        `C:\Program Files\SiYuan`,
 		ConfDir:       `C:\Users\alice\SiYuan\conf`,
 		DataDir:       `C:\Users\alice\SiYuan\data`,
-	}
+	})
 
 	HideConfSecret(appConf)
 
-	if "" != appConf.Export.PandocBin {
-		t.Fatalf("pandoc path was not hidden: %q", appConf.Export.PandocBin)
+	if "" != appConf.Export.Load().PandocBin {
+		t.Fatalf("pandoc path was not hidden: %q", appConf.Export.Load().PandocBin)
 	}
-	if !appConf.Export.AddTitle {
+	if !appConf.Export.Load().AddTitle {
 		t.Fatal("functional export settings should be preserved")
 	}
-	if "" != appConf.System.HomeDir ||
-		"" != appConf.System.WorkspaceDir ||
-		"" != appConf.System.AppDir ||
-		"" != appConf.System.ConfDir ||
-		"" != appConf.System.DataDir {
-		t.Fatalf("system paths were not hidden: %#v", appConf.System)
+	if "" != appConf.System.Load().HomeDir ||
+		"" != appConf.System.Load().WorkspaceDir ||
+		"" != appConf.System.Load().AppDir ||
+		"" != appConf.System.Load().ConfDir ||
+		"" != appConf.System.Load().DataDir {
+		t.Fatalf("system paths were not hidden: %#v", appConf.System.Load())
 	}
-	if "3.3.0" != appConf.System.KernelVersion {
-		t.Fatalf("functional system settings were changed: %#v", appConf.System)
+	if "3.3.0" != appConf.System.Load().KernelVersion {
+		t.Fatalf("functional system settings were changed: %#v", appConf.System.Load())
 	}
 }
 

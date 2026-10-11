@@ -12,14 +12,19 @@ import (
 )
 
 func TestAPIContractSettingPatchConcurrentFields(t *testing.T) {
-	previousConf, previousReadOnly, previousMarkdown := model.Conf, util.ReadOnly, util.MarkdownSettings
+	previousConf, previousReadOnly, previousMarkdown := model.Conf, util.ReadOnly, util.MarkdownSettings.Load()
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = conf.NewEditor()
+	model.Conf.Editor.Store(conf.NewEditor())
 	util.ReadOnly = true
 	t.Cleanup(func() {
-		model.Conf, util.ReadOnly, util.MarkdownSettings = previousConf, previousReadOnly, previousMarkdown
+		{
+			derivedValue0, derivedValue1, derivedValue2 := previousConf, previousReadOnly, previousMarkdown
+			model.Conf = derivedValue0
+			util.ReadOnly = derivedValue1
+			util.MarkdownSettings.Store(derivedValue2)
+		}
 	})
-	fontSize := model.Conf.Editor.FontSize
+	fontSize := model.Conf.Editor.Load().FontSize
 	var group sync.WaitGroup
 	for _, body := range []string{`{"editor":{"displayImgName":true}}`, `{"editor":{"displayImgAlt":true}}`} {
 		group.Add(1)
@@ -32,12 +37,12 @@ func TestAPIContractSettingPatchConcurrentFields(t *testing.T) {
 		}()
 	}
 	group.Wait()
-	if !model.Conf.Editor.DisplayImgName || !model.Conf.Editor.DisplayImgAlt || model.Conf.Editor.FontSize != fontSize {
+	if !model.Conf.Editor.Load().DisplayImgName || !model.Conf.Editor.Load().DisplayImgAlt || model.Conf.Editor.Load().FontSize != fontSize {
 		t.Fatal("independent settings updates must preserve each other and omitted fields")
 	}
-	before := settingRevision
+	before := model.ConfSettingRevision.Load()
 	code, _, _ := settingContractRequest(t, "patch", patchSetting, `{"editor":{"fontSize":"bad"}}`)
-	if code == 0 || settingRevision != before || model.Conf.Editor.FontSize != fontSize {
+	if code == 0 || model.ConfSettingRevision.Load() != before || model.Conf.Editor.Load().FontSize != fontSize {
 		t.Fatal("failed patches must not modify configuration or publish a change")
 	}
 }

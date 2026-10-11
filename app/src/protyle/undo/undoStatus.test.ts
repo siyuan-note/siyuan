@@ -42,3 +42,35 @@ test("local undo and redo refresh statistics after applying operations and resto
         assert.deepEqual(calls, ["apply", "selection", "selected IDs", "statistics"]);
     }
 });
+
+test("history invalidation broadcasts refresh buttons without editor operations", () => {
+    const calls: string[] = [];
+    const protyle = {
+        id: "editor", block: {rootID: "document"},
+        preview: {element: {classList: {contains: () => true}}},
+        wysiwyg: {element: {childElementCount: 1}},
+        element: {dataset: {loading: "finished"}},
+    };
+    const states = {document: {canUndo: false, canRedo: false}};
+    const dependencies = {
+        syncMirrorFromBroadcast: (value: unknown) => {
+            assert.equal(value, states);
+            calls.push("mirror");
+        },
+        refreshUndoButtons: (value: unknown) => {
+            assert.equal(value, protyle);
+            calls.push("buttons");
+        },
+        getTransactionOperations: (): unknown[] => [],
+        queueDatabaseRowRefreshForOperations() {},
+    };
+    const code = transpileModule(readFileSync("src/protyle/index.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    const exports: {Protyle?: {prototype: {onTransaction: (data: unknown) => void}}} = {};
+    runInNewContext(code, {exports, require: () => dependencies});
+    exports.Protyle.prototype.onTransaction.call({protyle}, {
+        data: [], context: {undoState: states, rootIDs: ["document"]},
+    });
+    assert.deepEqual(calls, ["mirror", "buttons"]);
+});

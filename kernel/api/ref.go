@@ -68,7 +68,7 @@ var getBackmentionDoc = contractHandler(apicontract.GetBackmentionDoc, func(c *g
 			return apicontract.Failure[apicontract.BacklinkContextData](1, err.Error())
 		}
 	}
-	containChildren := model.Conf.Editor.BacklinkContainChildren
+	containChildren := model.Conf.Editor.Load().BacklinkContainChildren
 	if request.ContainChildren != nil {
 		containChildren = *request.ContainChildren
 	}
@@ -148,7 +148,7 @@ var getBacklinkDoc = contractHandler(apicontract.GetBacklinkDoc, func(c *gin.Con
 			return apicontract.Failure[apicontract.BacklinkContextData](1, err.Error())
 		}
 	}
-	containChildren := model.Conf.Editor.BacklinkContainChildren
+	containChildren := model.Conf.Editor.Load().BacklinkContainChildren
 	if request.ContainChildren != nil {
 		containChildren = *request.ContainChildren
 	}
@@ -213,7 +213,7 @@ var getBacklink2 = contractHandler(apicontract.GetBacklink2, func(c *gin.Context
 	if request.MentionSort != nil {
 		mentionSort, _ = strconv.Atoi(*request.MentionSort)
 	}
-	containChildren := model.Conf.Editor.BacklinkContainChildren
+	containChildren := model.Conf.Editor.Load().BacklinkContainChildren
 	if request.ContainChildren != nil {
 		containChildren = *request.ContainChildren
 	}

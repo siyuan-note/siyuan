@@ -22,9 +22,9 @@ func setupBazaarToolTest(t *testing.T) string {
 	root := setupProbeWorkspace(t)
 	oldConf, oldReadonly := model.Conf, util.ReadOnly
 	model.Conf = model.NewAppConf()
-	model.Conf.Bazaar = &conf.Bazaar{Trust: true}
-	model.Conf.Sync = conf.NewSync()
-	model.Conf.Sync.Enabled = false
+	model.Conf.Bazaar.Store(&conf.Bazaar{Trust: true})
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.Sync.Load().Enabled = false
 	util.ReadOnly = false
 	t.Cleanup(func() { model.Conf, util.ReadOnly = oldConf, oldReadonly })
 	return root
@@ -61,7 +61,7 @@ func TestBazaarToolGuards(t *testing.T) {
 		}
 	}
 	util.ReadOnly = false
-	model.Conf.Bazaar.Trust = false
+	model.Conf.Bazaar.Load().Trust = false
 	for _, action := range []string{"list", "updates", "readme", "install", "enable"} {
 		result, _ := bazaarHandler(context.Background(), map[string]any{
 			"action": action, "pkgType": "plugins", "packageName": "sample", "frontend": "desktop",
@@ -75,8 +75,8 @@ func TestBazaarToolGuards(t *testing.T) {
 	if result.IsError || json.Unmarshal([]byte(probeText(result)), &page) != nil || page.Total != 0 || page.Packages == nil {
 		t.Fatalf("local listing should remain available: %+v", result)
 	}
-	model.Conf.Bazaar.Trust = true
-	model.Conf.Bazaar.PetalDisabled = true
+	model.Conf.Bazaar.Load().Trust = true
+	model.Conf.Bazaar.Load().PetalDisabled = true
 	for _, action := range []string{"install", "update", "uninstall", "enable", "disable"} {
 		result, _ = bazaarHandler(context.Background(), map[string]any{
 			"action": action, "pkgType": "plugins", "packageName": "sample", "frontend": "mobile",
@@ -179,12 +179,12 @@ func TestBazaarToolUpdateAllTargetsAndFailures(t *testing.T) {
 		t.Fatal("blocked targets must prevent all writes")
 	}
 	broken.Available.DisallowUpdate = false
-	model.Conf.Bazaar.PetalDisabled = true
+	model.Conf.Bazaar.Load().PetalDisabled = true
 	result, _ = bazaarHandler(context.Background(), args)
 	if !result.IsError || len(calls) != 0 {
 		t.Fatal("all targets must be checked before any package is updated")
 	}
-	model.Conf.Bazaar.PetalDisabled = false
+	model.Conf.Bazaar.Load().PetalDisabled = false
 	duplicate := target("widgets", "one").(map[string]any)
 	duplicate["repoHash"] = "different-hash"
 	args["packages"] = []any{target("widgets", "one"), duplicate}
@@ -207,12 +207,12 @@ func TestBazaarToolLocalPluginLifecycle(t *testing.T) {
 		{name: "index.js", body: "export default {};"},
 	})
 	args := map[string]any{"action": "install_local", "path": "sample.zip", "frontend": "mobile"}
-	model.Conf.Bazaar.PetalDisabled = true
+	model.Conf.Bazaar.Load().PetalDisabled = true
 	result, _ := bazaarHandler(context.Background(), args)
 	if !result.IsError || !strings.Contains(probeText(result), "globally disabled") {
 		t.Fatalf("local install bypassed global plugin switch: %+v", result)
 	}
-	model.Conf.Bazaar.PetalDisabled = false
+	model.Conf.Bazaar.Load().PetalDisabled = false
 	result, err := bazaarHandler(context.Background(), args)
 	if err != nil || result.IsError {
 		t.Fatalf("local install failed: %+v, %v", result, err)
@@ -350,7 +350,7 @@ func TestBazaarToolInstalledEnabledFilter(t *testing.T) {
 			t.Fatal("invalid manifests must retain the reason")
 		}
 	}
-	model.Conf.Bazaar.PetalDisabled = true
+	model.Conf.Bazaar.Load().PetalDisabled = true
 	args["enabled"] = true
 	page = readBazaarPage(t, args)
 	if page.Total != 2 || page.Packages[0].Name != "broken" || page.Packages[1].Name != "enabled" {

@@ -1,5 +1,6 @@
 import {isAVNewItemTemplateType, isAVSelectType} from "./capabilities";
-import {bindFieldLunarDates, genFieldValue, getValueInputHTML, openFieldSelectMenu, getRelationOptions, renderRelationFieldValue, openFieldRelationMenu} from "./fieldValueEditor";
+import {bindFieldLunarDates, genFieldValue, getValueInputHTML, openFieldSelectMenu, getRelationOptions, renderRelationFieldValue, openFieldRelationMenu, openFieldLocationEditor} from "./fieldValueEditor";
+import {isAVLocationEmpty} from "./locationValue";
 import {getCalendarCreationDate} from "./calendar/state";
 import {Constants} from "../../../constants";
 import {Dialog} from "../../../dialog";
@@ -71,6 +72,8 @@ const getPrimaryKeyHTML = (primaryKey: IAVColumn | undefined, itemTemplate: IAVN
 
 const hasFieldValue = (column: IAVColumn, value: IAVCellValue) => {
     switch (column.type) {
+        case "location":
+            return !isAVLocationEmpty(value.location);
         case "number":
             return value.number?.isNotEmpty;
         case "date":
@@ -447,7 +450,9 @@ export const openNewItemTemplateDialog = (options: {
             }
             const column = fields.find(field => field.id === item.closest<HTMLElement>("[data-field-id]")?.dataset.fieldId);
             if (column) {
-                if (column.type === "relation") {
+                if (column.type === "location") {
+                    openFieldLocationEditor(item);
+                } else if (column.type === "relation") {
                     openFieldRelationMenu(item, column);
                 } else {
                     openFieldSelectMenu(item, column);

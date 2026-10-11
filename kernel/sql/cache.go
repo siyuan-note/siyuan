@@ -20,6 +20,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -27,6 +28,7 @@ import (
 	"github.com/jinzhu/copier"
 	gcache "github.com/patrickmn/go-cache"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/search"
 )
 
@@ -41,22 +43,33 @@ func disableCache() {
 }
 
 var blockCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 100000,
-	MaxCost:     10240,
+	NumCounters: cache.AdmissionCounters,
+	MaxCost:     cache.LookupMaxCostBytes,
 	BufferItems: 64,
 	OnExit: func(value any) {
 		if entry, ok := value.(*blockCacheEntry); ok {
-			removeBlockCacheKey(entry.block.ID, entry.key)
+			removeBlockCacheKey(entry.block.ID, entry.key, entry)
 		}
 	},
 })
 
-var blockCacheKeys = map[string]map[string]struct{}{}
+var blockCacheKeys = map[string]map[string]*blockCacheEntry{}
 var blockCacheKeysMu sync.Mutex
 
 type blockCacheEntry struct {
 	key   string
 	block *Block
+}
+
+// blockCacheCost 估算块结构、字符串和失效索引的驻留字节数，内部条目成本由缓存另行计入。
+func blockCacheCost(key string, block *Block) int64 {
+	cost := int64(unsafe.Sizeof(Block{})+unsafe.Sizeof(blockCacheEntry{})) + 256 + int64(len(key))
+	for _, value := range []string{block.ID, block.ParentID, block.RootID, block.Hash, block.Box, block.Path,
+		block.HPath, block.Name, block.Alias, block.Memo, block.Tag, block.Content, block.FContent,
+		block.Markdown, block.Type, block.SubType, block.IAL, block.Created, block.Updated} {
+		cost += int64(len(value))
+	}
+	return cost
 }
 
 func encryptedBoxCacheUnavailable(boxID string) bool {
@@ -75,7 +88,7 @@ func blockCacheKey(id, boxID string) string {
 func ClearCache() {
 	blockCache.Clear()
 	blockCacheKeysMu.Lock()
-	blockCacheKeys = map[string]map[string]struct{}{}
+	blockCacheKeys = map[string]map[string]*blockCacheEntry{}
 	blockCacheKeysMu.Unlock()
 	clearRefCache()
 }
@@ -93,9 +106,17 @@ func putBlockCache(block *Block) {
 	cloned.Content = strings.ReplaceAll(cloned.Content, search.SearchMarkLeft, "")
 	cloned.Content = strings.ReplaceAll(cloned.Content, search.SearchMarkRight, "")
 	key := blockCacheKey(cloned.ID, cloned.Box)
-	addBlockCacheKey(cloned.ID, key)
-	if !blockCache.Set(key, &blockCacheEntry{key: key, block: cloned}, 1) {
-		removeBlockCacheKey(cloned.ID, key)
+	cost := blockCacheCost(key, cloned)
+	if cost >= blockCache.MaxCost() {
+		removeBlockCache(cloned.ID)
+		return
+	}
+	// 删除后重新准入，让变大的条目也接受字节预算检查。
+	blockCache.Del(key)
+	entry := &blockCacheEntry{key: key, block: cloned}
+	addBlockCacheKey(cloned.ID, key, entry)
+	if !blockCache.Set(key, entry, cost) {
+		removeBlockCacheKey(cloned.ID, key, entry)
 	}
 }
 
@@ -128,21 +149,25 @@ func removeBlockCache(id string) {
 	removeRefCacheByDefID(id)
 }
 
-func addBlockCacheKey(id, key string) {
+func addBlockCacheKey(id, key string, entry *blockCacheEntry) {
 	blockCacheKeysMu.Lock()
 	defer blockCacheKeysMu.Unlock()
 	keys := blockCacheKeys[id]
 	if keys == nil {
-		keys = map[string]struct{}{}
+		keys = map[string]*blockCacheEntry{}
 		blockCacheKeys[id] = keys
 	}
-	keys[key] = struct{}{}
+	keys[key] = entry
 }
 
-func removeBlockCacheKey(id, key string) {
+func removeBlockCacheKey(id, key string, entry *blockCacheEntry) {
 	blockCacheKeysMu.Lock()
 	defer blockCacheKeysMu.Unlock()
 	if keys := blockCacheKeys[id]; keys != nil {
+		// 异步拒绝或淘汰只能移除对应版本的失效索引。
+		if keys[key] != entry {
+			return
+		}
 		delete(keys, key)
 		if len(keys) == 0 {
 			delete(blockCacheKeys, id)

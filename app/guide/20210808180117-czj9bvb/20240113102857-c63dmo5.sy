@@ -7,7 +7,7 @@
 		"id": "20240113102857-c63dmo5",
 		"title": "移动端 App",
 		"type": "doc",
-		"updated": "20261004052629"
+		"updated": "20261010114821"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113102857-aof1w7f",
-				"updated": "20260921210136"
+				"updated": "20261010114821"
 			},
 			"Children": [
 				{
@@ -95,6 +95,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中调整功能顺序。"
+				}
+			]
+		},
+		{
+			"ID": "20261010114821-9zssb7v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010114821-9zssb7v",
+				"updated": "20261010114821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android 上使用桌面布局时，系统返回键会先关闭当前最上层的弹窗、菜单、编辑浮层、图片预览或浮动抽屉，每次只关闭一层并保留底层浏览状态。没有可关闭的浮层时，才执行原有的页面返回行为。"
 				}
 			]
 		},

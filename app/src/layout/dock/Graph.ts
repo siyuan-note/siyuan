@@ -17,6 +17,7 @@ import {GraphEngine} from "./graph/GraphEngine";
 import {IGraphNodeClick, IGraphNodeContextMenu, IGraphSourceLink, IGraphSourceNode} from "./graph/types";
 import {openDocumentMenu} from "../../protyle/header/documentMenu";
 import {Constants} from "../../constants";
+import {config as configApi} from "../../config/util/configApi";
 
 interface IGraphSearchOptions {
     id?: string;
@@ -630,10 +631,7 @@ export class Graph extends Model {
         if (!this.pendingGraphConf) {
             return;
         }
-        fetchPost("/api/graph/setGraphConf", {
-            type: this.type === "global" ? "global" : "local",
-            conf: this.pendingGraphConf,
-        });
+        void configApi.set(`graph.${this.type === "global" ? "global" : "local"}`, this.pendingGraphConf);
         this.pendingGraphConf = undefined;
     }
 

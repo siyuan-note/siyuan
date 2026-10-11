@@ -188,6 +188,7 @@ export abstract class Constants {
     public static readonly LOCAL_MOBILE_TABS = "local-mobile-tabs"; // only mobile
     public static readonly LOCAL_MOBILE_BOTTOM_BAR = "local-mobile-bottom-bar"; // only mobile
     public static readonly LOCAL_MOBILE_SIDE_PANEL = "local-mobile-side-panel"; // only mobile
+    public static readonly LOCAL_MOBILE_MENU_COLLAPSED = "local-mobile-menu-collapsed";
     public static readonly LOCAL_DAILYNOTEID = "local-dailynoteid"; // string
     public static readonly LOCAL_HISTORY = "local-history";
     public static readonly LOCAL_CODELANG = "local-codelang"; // string
@@ -498,6 +499,8 @@ export abstract class Constants {
     // "⌥↩" 写死，但可自定义
     public static readonly SIYUAN_KEYMAP: Config.IKeymap = {
         general: {
+            previousDatabaseRow: {default: "", custom: ""},
+            nextDatabaseRow: {default: "", custom: ""},
             openContextMenu: {default: "⌘/", custom: "⌘/"},
             mainMenu: {default: "⌥\\", custom: "⌥\\"},
             commandPanel: {default: "⌥⇧P", custom: "⌥⇧P"},

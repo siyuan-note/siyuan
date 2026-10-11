@@ -233,7 +233,7 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false, tab
     template.content.querySelectorAll<HTMLElement>("*").forEach((element) => {
         Array.from(element.attributes).forEach((attribute) => {
             const name = attribute.name.toLowerCase();
-            const imageAttribute = images && ["src", "data-src", "alt", "title", "loading"].includes(name) &&
+            const imageAttribute = images && ["src", "data-src", "alt", "title", "data-title", "loading"].includes(name) &&
                 (element.tagName === "IMG" || element.classList.contains("img"));
             const linkTitleAttribute = tableCellCustomInline && name === "data-title" &&
                 (element.dataset.type || "").split(" ").includes("a");

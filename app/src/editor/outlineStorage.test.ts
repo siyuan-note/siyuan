@@ -18,7 +18,8 @@ for (const path of ["src/layout/dock/Outline.ts", "src/mobile/dock/MobileOutline
         const requests: {url: string, params: any}[] = [];
         const context: any = {
             window: {siyuan: {config: {readonly: false}, isPublish: false}},
-            fetchPost: (url: string, params: unknown) => requests.push({url, params}),
+            saveOutlineState: (docID: string, expandIds: string[]) =>
+                requests.push({url: "/api/storage/setOutlineStorage", params: {docID, val: {expandIds}}}),
         };
         runInNewContext(compiled, context);
         return {context, requests};

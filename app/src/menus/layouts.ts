@@ -1,6 +1,6 @@
+import {saveUILayout} from "../config/util/resourceConfig";
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
-import {fetchPost} from "../util/fetch";
 import {getAllLayout, suspendLayoutSaving} from "../layout/util";
 import {showMessage} from "../dialog/message";
 import {openInputDialog} from "../dialog/inputDialog";
@@ -96,7 +96,7 @@ const openLayout = async (name: string) => {
                 return;
             }
         }
-        await fetchPost("/api/system/setUILayout", {layout: item.layout}, () => {
+        await saveUILayout(item.layout, undefined, () => {
             reloading = true;
             window.location.reload();
         });

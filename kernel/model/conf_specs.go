@@ -9,32 +9,75 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func confSectionSpecs() map[string]registeredSection {
-	return map[string]registeredSection{
-		"appearance": appearanceSectionSpec(false),
-		"fileTree":   newSectionSpec("fileTree", &Conf.FileTree, conf.NormalizeFileTree, fileTreeReactions()...),
-		"tag":        newSectionSpec("tag", &Conf.Tag, conf.NormalizeTag),
-		"editor":     newSectionSpec("editor", &Conf.Editor, conf.NormalizeEditor, editorReactions()...),
-		"export":     newSectionSpec("export", &Conf.Export, conf.NormalizeExport, exportReactions()...),
-		"graph":      newSectionSpec("graph", &Conf.Graph, conf.NormalizeGraph),
-		"uiLayout":   newSectionSpec("uiLayout", &Conf.UILayout, conf.NormalizeUILayout),
-		"system":     newSectionSpec("system", &Conf.System, conf.NormalizeSystem, systemReactions()...),
-		"keymap":     newSectionSpec("keymap", &Conf.Keymap, conf.NormalizeKeymap),
-		"sync":       syncSectionSpec(),
-		"search":     newSectionSpec("search", &Conf.Search, conf.NormalizeSearch, searchReactions()...),
-		"flashcard":  flashcardSectionSpec(),
-		"ai":         newSectionSpec("ai", &Conf.AI, conf.NormalizeAI),
-		"ocr":        ocrSectionSpec(),
-		"secrets":    newSectionSpec("secrets", &Conf.Secrets, conf.NormalizeSecrets),
-		"variables":  newSectionSpec("variables", &Conf.Variables, conf.NormalizeVariables),
-		"bazaar":     newSectionSpec("bazaar", &Conf.Bazaar, conf.NormalizeBazaar, bazaarReactions()...),
-		"stat":       newSectionSpec("stat", &Conf.Stat, conf.NormalizeStat),
-		"api":        newSectionSpec("api", &Conf.Api, conf.NormalizeAPI),
-		"repo":       newSectionSpec("repo", &Conf.Repo, conf.NormalizeRepo),
-		"publish":    publishSectionSpec(),
-		"onboarding": newSectionSpec("onboarding", &Conf.Onboarding, conf.NormalizeOnboarding),
-		"snippet":    newSectionSpec("snippet", &Conf.Snippet, conf.NormalizeSnippet, Reaction[*conf.Snpt]{Name: "reload-snippet", Changed: func(old, next *conf.Snpt) bool { return true }, Apply: func(old, next *conf.Snpt) { PushReloadSnippet(next) }}),
-	}
+// 注册工厂只构建所需配置段的规则，始终绑定当前工作空间，并隔离每次提交的诊断状态。
+var confSectionSpecFactories = map[string]func() registeredSection{
+	"appearance": func() registeredSection { return appearanceSectionSpec(false) },
+	"fileTree": func() registeredSection {
+		return newSectionSpec("fileTree", &Conf.FileTree, conf.NormalizeFileTree, fileTreeReactions()...)
+	},
+	"tag":    func() registeredSection { return tagSectionSpec() },
+	"editor": func() registeredSection { return editorSectionSpec() },
+	"export": func() registeredSection {
+		return newSectionSpec("export", &Conf.Export, conf.NormalizeExport, exportReactions()...)
+	},
+	"graph":    func() registeredSection { return graphSectionSpec() },
+	"uiLayout": func() registeredSection { return newSectionSpec("uiLayout", &Conf.UILayout, conf.NormalizeUILayout) },
+	"system":   func() registeredSection { return systemSectionSpec() },
+	"keymap":   func() registeredSection { return newSectionSpec("keymap", &Conf.Keymap, conf.NormalizeKeymap) },
+	"sync":     func() registeredSection { return syncSectionSpec() },
+	"search": func() registeredSection {
+		return newSectionSpec("search", &Conf.Search, conf.NormalizeSearch, searchReactions()...)
+	},
+	"flashcard":  func() registeredSection { return flashcardSectionSpec() },
+	"ai":         func() registeredSection { return newSectionSpec("ai", &Conf.AI, conf.NormalizeAI) },
+	"ocr":        func() registeredSection { return ocrSectionSpec() },
+	"secrets":    func() registeredSection { return newSectionSpec("secrets", &Conf.Secrets, conf.NormalizeSecrets) },
+	"variables":  func() registeredSection { return newSectionSpec("variables", &Conf.Variables, conf.NormalizeVariables) },
+	"bazaar":     func() registeredSection { return bazaarSectionSpec() },
+	"stat":       func() registeredSection { return statSectionSpec() },
+	"api":        func() registeredSection { return apiSectionSpec() },
+	"repo":       func() registeredSection { return repoSectionSpec() },
+	"publish":    func() registeredSection { return publishSectionSpec() },
+	"onboarding": func() registeredSection { return onboardingSectionSpec() },
+	"snippet": func() registeredSection {
+		return newSectionSpec("snippet", &Conf.Snippet, conf.NormalizeSnippet, Reaction[*conf.Snpt]{Name: "reload-snippet", Changed: func(old, next *conf.Snpt) bool { return true }, Apply: func(old, next *conf.Snpt) { PushReloadSnippet(next) }})
+	},
+}
+
+func tagSectionSpec() *SectionSpec[*conf.Tag] {
+	return newSectionSpec("tag", &Conf.Tag, conf.NormalizeTag)
+}
+
+func editorSectionSpec() *SectionSpec[*conf.Editor] {
+	return newSectionSpec("editor", &Conf.Editor, conf.NormalizeEditor, editorReactions()...)
+}
+
+func graphSectionSpec() *SectionSpec[*conf.Graph] {
+	return newSectionSpec("graph", &Conf.Graph, conf.NormalizeGraph)
+}
+
+func systemSectionSpec() *SectionSpec[*conf.System] {
+	return newSectionSpec("system", &Conf.System, conf.NormalizeSystem, systemReactions()...)
+}
+
+func bazaarSectionSpec() *SectionSpec[*conf.Bazaar] {
+	return newSectionSpec("bazaar", &Conf.Bazaar, conf.NormalizeBazaar, bazaarReactions()...)
+}
+
+func statSectionSpec() *SectionSpec[*conf.Stat] {
+	return newSectionSpec("stat", &Conf.Stat, conf.NormalizeStat)
+}
+
+func apiSectionSpec() *SectionSpec[*conf.API] {
+	return newSectionSpec("api", &Conf.Api, conf.NormalizeAPI)
+}
+
+func repoSectionSpec() *SectionSpec[*conf.Repo] {
+	return newSectionSpec("repo", &Conf.Repo, conf.NormalizeRepo)
+}
+
+func onboardingSectionSpec() *SectionSpec[*conf.Onboarding] {
+	return newSectionSpec("onboarding", &Conf.Onboarding, conf.NormalizeOnboarding)
 }
 
 // syncSectionSpec 在连接信息改变或同步关闭时清除当前来源的索引读取提示。

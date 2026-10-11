@@ -1,18 +1,17 @@
+import {switchWorkspace, importConfiguration} from "../util/resourceConfig";
 import {config as configApi} from "../util/configApi";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import type {SettingTabBuilder} from "../setting/builder";
-import {runSettingsMaintenance} from "../setting/maintenance";
 import {confirmResetSettings} from "../setting/reset";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {ContractFormData} from "../../util/contractFormData";
 /// #if !MOBILE
-import {exportLayout, reloadUI} from "../../layout/util";
+import {reloadUI} from "../../layout/util";
 /// #endif
-import {exitSiYuan} from "../../dialog/processSystem";
 import {showMessage} from "../../dialog/message";
 import {isMac, saveExportFile} from "../../protyle/util/compatibility";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
@@ -113,9 +112,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                             return;
                         }
                         confirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(openPath))}?`, () => {
-                            fetchPost("/api/system/setWorkspaceDir", {path: openPath}, () => {
-                                void exitSiYuan(false);
-                            });
+                            switchWorkspace(openPath);
                         });
                     });
                 });
@@ -166,9 +163,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                     break;
                 }
                 confirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(workspacePath))}?`, () => {
-                    fetchPost("/api/system/setWorkspaceDir", {path: workspacePath}, () => {
-                        void exitSiYuan(false);
-                    });
+                    switchWorkspace(workspacePath);
                 });
                 event.preventDefault();
                 event.stopPropagation();
@@ -458,22 +453,7 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
         afterMount: (root) => {
             root.querySelector("#importConf")?.addEventListener("change", (event: Event) => {
                 const target = event.target as HTMLInputElement;
-                const formData = new ContractFormData({file: [target.files[0]]});
-                void runSettingsMaintenance(() => fetchPost("/api/system/importConf", formData, (response) => {
-                    if (response.code !== 0) {
-                        showMessage(response.msg);
-                        return;
-                    }
-                    showMessage(window.siyuan.languages.imported);
-                    /// #if MOBILE
-                    void exitSiYuan();
-                    /// #else
-                    void exportLayout({
-                        errorExit: true,
-                        cb: exitSiYuan,
-                    });
-                    /// #endif
-                }));
+                void importConfiguration(target.files[0], true);
             });
         },
     });

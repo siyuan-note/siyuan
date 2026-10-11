@@ -1,3 +1,4 @@
+import {saveNotebookConf, saveNotebookConfSync} from "../config/util/resourceConfig";
 import type {BlockQueryRequestInput} from "../types/api";
 import {copySubMenu, exportMd, movePathToMenu, openFileAttr, renameMenu,} from "./commonMenuItem";
 /// #if !BROWSER
@@ -112,10 +113,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                     if (!notebookId) {
                         continue;
                     }
-                    const response = await fetchSyncPost("/api/notebook/setNotebookConf", {
-                        notebook: notebookId,
-                        conf: {sortMode: sort},
-                    });
+                    const response = await saveNotebookConfSync(notebookId, {sortMode: sort});
                     if (response.code !== 0) {
                         continue;
                     }
@@ -531,11 +529,8 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             if (sort === null) {
                 return;
             }
-            fetchPost("/api/notebook/setNotebookConf", {
-                notebook: notebookId,
-                conf: {
-                    sortMode: sort
-                }
+            saveNotebookConf(notebookId, {
+                sortMode: sort
             }, (response) => {
                 if (response.code !== 0) {
                     return;

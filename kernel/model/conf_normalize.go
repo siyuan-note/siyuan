@@ -49,9 +49,9 @@ func normalizeAppConf(c *AppConf) (flashcardWarning string) {
 	c.Search.Store(conf.NormalizeSearch(c.Search.Load()))
 	c.Stat.Store(conf.NormalizeStat(c.Stat.Load()))
 	{
-		confSectionValue0, confSectionValue1 := conf.NormalizeFlashcard(c.Flashcard.Load())
-		c.Flashcard.Store(confSectionValue0)
-		flashcardWarning = confSectionValue1
+		flashcard, warning := conf.NormalizeFlashcard(c.Flashcard.Load())
+		c.Flashcard.Store(flashcard)
+		flashcardWarning = warning
 	}
 	c.OCR.Store(conf.NormalizeOCR(c.OCR.Load()))
 	c.AI.Store(conf.NormalizeAI(c.AI.Load()))

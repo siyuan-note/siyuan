@@ -21,7 +21,7 @@ func TestConfAllSectionsShareStartupAndWriteNormalization(t *testing.T) {
 		t.Fatal(err)
 	}
 	normalizeAppConf(startup)
-	for namespace := range confSectionSpecs() {
+	for namespace := range confSectionSpecFactories {
 		t.Run(namespace, func(t *testing.T) {
 			Conf = NewAppConf()
 			normalizeAppConf(Conf)
@@ -58,6 +58,27 @@ func TestConfAllSectionsShareStartupAndWriteNormalization(t *testing.T) {
 				t.Fatalf("startup and write differ: %s\n%s", expected, actual)
 			}
 		})
+	}
+}
+
+func TestConfSectionLookupBindsOnlyTheCurrentWorkspaceSection(t *testing.T) {
+	prepareConfConsistencyTest(t)
+	Conf = NewAppConf()
+	Conf.Editor = ConfSection[conf.Editor]{}
+	first := Conf
+	first.System.Store(conf.NormalizeSystem(nil))
+	spec, ok := SectionSpecByNamespace("system")
+	if !ok || spec.load() != first.System.Load() || first.Editor.cell != nil {
+		t.Fatal("section lookup initialized unrelated configuration or bound the wrong section")
+	}
+	Conf = NewAppConf()
+	Conf.System.Store(conf.NormalizeSystem(nil))
+	current, ok := SectionSpecByNamespace("system")
+	if !ok || current.load() != Conf.System.Load() || spec.load() != first.System.Load() {
+		t.Fatal("section lookup reused a previous workspace binding")
+	}
+	if _, ok = SectionSpecByNamespace("unknown"); ok {
+		t.Fatal("unknown configuration section was registered")
 	}
 }
 

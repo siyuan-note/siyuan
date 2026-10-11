@@ -17,6 +17,9 @@ const createPreview = async (mobile: boolean) => {
     let hidden = false;
     let hiddenOnClose = false;
     const openedBlocks: string[] = [];
+    let openBound: () => void;
+    let failBound: () => void;
+    let attributesReady: () => void;
     class Body {
         public isConnected = true;
         public style = {};
@@ -77,7 +80,23 @@ const createPreview = async (mobile: boolean) => {
             public destroy() { hiddenOnClose = hidden; closed++; destroy(); }
         }},
         "../../../constants": {Constants: {CB_GET_ALL: "all", CB_GET_FOCUS: "focus"}},
-        "../../../mobile/editor": {openMobileFileById: (_app: unknown, id: string) => openedBlocks.push(id)},
+        "../../../mobile/editor": {openMobileFileById: (_app: unknown, id: string, _action: unknown,
+                                                       _scroll: unknown, _notebook: unknown,
+                                                       afterOpen: (protyle: unknown) => void,
+                                                       forceReload: boolean, waitForAttributes: boolean) => {
+            assert.equal(forceReload, true);
+            assert.equal(waitForAttributes, true);
+            openedBlocks.push(id);
+            return new Promise<boolean>(resolve => {
+                failBound = () => resolve(false);
+                openBound = () => {
+                    afterOpen({element: root, contentElement: content, databaseAttributePanel: {
+                        expand() {}, afterRender(callback: () => void) { attributesReady = callback; },
+                    }});
+                    resolve(true);
+                };
+            });
+        }},
         "./databaseRowNavigation": {
             getDatabaseRowNavigation: (): undefined => undefined,
             mountDatabaseRowNavigation: (_root: unknown, row: IDatabaseRowOpenData,
@@ -146,7 +165,8 @@ const createPreview = async (mobile: boolean) => {
     return {data, title, root, content, requests, complete, refresh: () => refresh(),
         navigate: (next: IDatabaseRowOpenData) => navigate(next), destroy: () => destroy(),
         body: () => body, closed: () => closed, savedRow: () => model?.data.itemID,
-        mountedRow: () => mountedRow, hiddenOnClose: () => hiddenOnClose, openedBlocks};
+        mountedRow: () => mountedRow, hiddenOnClose: () => hiddenOnClose, openedBlocks,
+        openBound: () => openBound(), failBound: () => failBound(), attributesReady: () => attributesReady()};
 };
 
 for (const mobile of [false, true]) {
@@ -185,10 +205,24 @@ for (const mobile of [false, true]) {
     });
 }
 
-test("mobile detached-to-bound navigation hides the old preview before its close animation starts", async () => {
+test("mobile detached-to-bound navigation keeps the preview until the target attributes are ready", async () => {
     const preview = await createPreview(true);
-    assert.equal(await preview.navigate({...preview.data, itemID: "bound", isDetached: false, boundBlockID: "block"}), true);
+    const switching = preview.navigate({...preview.data, itemID: "bound", isDetached: false, boundBlockID: "block"});
+    assert.equal(preview.closed(), 0);
+    preview.openBound();
+    assert.equal(preview.closed(), 0);
+    preview.attributesReady();
+    assert.equal(await switching, true);
     assert.equal(preview.closed(), 1);
     assert.equal(preview.hiddenOnClose(), true);
     assert.deepEqual(preview.openedBlocks, ["block"]);
+});
+
+test("mobile failed bound navigation retains the detached preview", async () => {
+    const preview = await createPreview(true);
+    const switching = preview.navigate({...preview.data, itemID: "bound", isDetached: false, boundBlockID: "block"});
+    preview.failBound();
+    assert.equal(await switching, false);
+    assert.equal(preview.closed(), 0);
+    assert.equal(preview.body().rowID, "first");
 });

@@ -63,6 +63,7 @@ type OpenOptions = {
     recentPreviousRootID?: string;
     recordActivation?: boolean;
     keepPanels?: boolean;
+    waitForDatabaseAttributes?: boolean;
 };
 
 type MobileTabOpenResult = "success" | "cancelled" | "invalid" | "failed";
@@ -478,7 +479,7 @@ export class MobileTabs {
                     this.renderedEntry = renderedEntry;
                 }
                 finish(abortController.signal.aborted ? "cancelled" : (invalid ? "invalid" : "failed"));
-            }, options.keepPanels);
+            }, options.keepPanels, options.waitForDatabaseAttributes);
         });
     }
 

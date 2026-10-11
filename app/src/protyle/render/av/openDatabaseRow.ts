@@ -369,9 +369,8 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
     if (!data.boundBlockID) {
         return false;
     }
-    closeMobileDatabaseRow();
     window.siyuan.menus.menu.remove();
-    openMobileFileById(protyle.app, data.boundBlockID, [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS],
+    return openMobileFileById(protyle.app, data.boundBlockID, [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS],
         undefined, undefined, (editorProtyle) => {
             inheritDatabaseRowReadonly(editorProtyle, protyle);
             editorProtyle.element.dataset.databaseRowId = data.boundBlockID;
@@ -380,11 +379,11 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
             editorProtyle.databaseAttributePanel?.expand(data.avID);
             editorProtyle.contentElement.scrollTop = 0;
             editorProtyle.databaseAttributePanel?.afterRender(() => {
+                closeMobileDatabaseRow();
                 highlightDatabaseRow(editorProtyle, editorProtyle.contentElement, data);
                 focusDatabasePrimary(editorProtyle.contentElement, editorProtyle, data);
             });
-        }, true);
-    return true;
+        }, true, true);
     /// #else
     if (openStandalone) {
         if (!data.databaseBlockID) {

@@ -8,7 +8,7 @@ import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 import {compileString} from "sass";
 
-const browserCases = (source: string, css: string, columnSource: string, blockSource: string, menuSource: string, calendarSource: string) => {
+const browserCases = async (source: string, css: string, columnSource: string, blockSource: string, menuSource: string, calendarSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const config = {editor: {databaseAttrShow: true, databaseAttrHideEmpty: false, databaseAttrViewMode: 0, databaseAttrUseTabs: false}};
     Object.assign(window, {siyuan: {config, languages: {
@@ -63,6 +63,46 @@ const browserCases = (source: string, css: string, columnSource: string, blockSo
         check.equal(visible("hidden"), true, "readonly panels can reveal fields");
         panel.element.remove();
     }
+    const pending: Array<() => void> = [];
+    const preparedAPI = new Function("cancelHeightAnimation", "renderAVAttribute", source +
+        "\nreturn {AVAttributePanel, prepareDatabaseAttributePanel};")(() => {},
+    (element: HTMLElement, id: string, _protyle: unknown, callback: (element: HTMLElement) => void) => {
+        pending.push(() => {
+            element.innerHTML = `<div data-av-id="database">${id}<button data-type="av-bind-document"></button></div>`;
+            callback(element);
+        });
+    });
+    const bound = {disabled: false, options: {}, block: {showAll: true, id: "first"}};
+    const boundPanel = new preparedAPI.AVAttributePanel(bound);
+    document.body.append(boundPanel.element);
+    boundPanel.render();
+    pending.shift()();
+    const firstBody = boundPanel.element.querySelector(".protyle-db-attr__body");
+    const preparing = preparedAPI.prepareDatabaseAttributePanel(bound, "second");
+    check.equal(boundPanel.element.querySelector(".protyle-db-attr__body"), firstBody);
+    check.equal(firstBody.textContent, "first");
+    pending.shift()();
+    const commit = await preparing;
+    check.equal(firstBody.isConnected, true, "preparation does not remove the visible body");
+    commit();
+    bound.block.id = "second";
+    boundPanel.render();
+    check.equal(pending.length, 0, "committing must not start another asynchronous attribute request");
+    check.equal(firstBody.isConnected, false);
+    check.equal(boundPanel.element.querySelector(".protyle-db-attr__body").textContent, "second");
+    let ready = false;
+    boundPanel.afterRender(() => { ready = true; });
+    check.equal(ready, true, "the new body is ready in the same turn as the document");
+    bound.disabled = true;
+    boundPanel.updateReadonly();
+    check.equal(boundPanel.element.querySelector('[data-type="av-bind-document"]').disabled, true);
+    bound.disabled = false;
+    boundPanel.updateReadonly();
+    check.equal(boundPanel.element.querySelector('[data-type="av-bind-document"]').disabled, false);
+    boundPanel.render(true);
+    check.equal(pending.length, 1, "subsequent refreshes request fresh attributes");
+    pending.shift()();
+    boundPanel.element.remove();
     const transactions: unknown[][] = [];
     const escape = (value: string) => value || "";
     let mobile = false;

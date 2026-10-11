@@ -6593,6 +6593,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 保留省略字段，成功后客户端重新读取配置；通知不包含密码或密钥。
+     * export.blockRefMode 的废弃值 0、1、5 在保存前转换为 4，与启动时的转换规则一致。
      */
     "/api/setting/patch": {
         request: PatchSettingRequestInput;
@@ -6696,6 +6697,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 整体替换导出配置，将 blockRefMode 的废弃值 0、1、5 转换为 4 后同步保存并回显。
+     * 其他取值及字段省略、null 的解析行为保持不变。
+     */
     "/api/setting/setExport": {
         request: SetExportRequestInput;
         response: { "code": 0; "data": SettingExport | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7361,7 +7366,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * 导入前按启动和设置接口的相同规则规范化编辑器、文档树、搜索和闪卡偏好，并同步保存。
+     * 导入前按启动和设置接口的相同规则规范化编辑器、导出、文档树、搜索和闪卡偏好，并同步保存。
      */
     "/api/system/importConf": {
         request: SystemImportConfRequestInput;

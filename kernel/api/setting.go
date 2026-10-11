@@ -440,6 +440,7 @@ func applyExportSetting(c *gin.Context, request apicontract.SetExportRequest) (r
 		return
 	}
 
+	export = conf.NormalizeExport(export)
 	previousPandocBin := model.Conf.Export.PandocBin
 	if "" != export.PandocBin {
 		if !util.IsValidPandocBin(export.PandocBin) {

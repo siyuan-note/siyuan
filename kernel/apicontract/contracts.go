@@ -1080,7 +1080,11 @@ var SetFlashcard = define[SetFlashcardRequest, *SettingFlashcard]("setFlashcard"
 var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/setting/setEditor", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // PatchSetting 保留省略字段，成功后客户端重新读取配置；通知不包含密码或密钥。
+// export.blockRefMode 的废弃值 0、1、5 在保存前转换为 4，与启动时的转换规则一致。
 var PatchSetting = define[PatchSettingRequest, Null]("patchSetting", "/api/setting/patch", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// SetExport 整体替换导出配置，将 blockRefMode 的废弃值 0、1、5 转换为 4 后同步保存并回显。
+// 其他取值及字段省略、null 的解析行为保持不变。
 var SetExport = define[SetExportRequest, *SettingExport]("setExport", "/api/setting/setExport", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // SetFiletree 使用与启动、导入相同的路径和数值规范化规则；省略顶层笔记本文档和默认图标选项时保留当前值。
@@ -1319,7 +1323,7 @@ var SystemGetMobileWorkspaces = define[EmptyRequest, []string]("getMobileWorkspa
 var SystemGetSysFonts = define[EmptyRequest, []*SystemFont]("getSysFonts", "/api/system/getSysFonts", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemGetWorkspaces = define[EmptyRequest, []*SystemWorkspace]("getWorkspaces", "/api/system/getWorkspaces", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 
-// SystemImportConf 导入前按启动和设置接口的相同规则规范化编辑器、文档树、搜索和闪卡偏好，并同步保存。
+// SystemImportConf 导入前按启动和设置接口的相同规则规范化编辑器、导出、文档树、搜索和闪卡偏好，并同步保存。
 var SystemImportConf = define[SystemImportConfRequest, Null]("importConf", "/api/system/importConf", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
 var SystemImportCustomFont = define[SystemImportFileRequest, *SystemCustomFont]("importCustomFont", "/api/system/importCustomFont", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{AdditionalCodes: []int{400, 413}}, "POST")
 var SystemImportTLSCABundle = define[SystemImportFileRequest, SystemMessageData]("importTLSCABundle", "/api/system/importTLSCABundle", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")

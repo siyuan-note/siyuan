@@ -63,8 +63,10 @@ func TestAPIContractImportedSettingsNormalization(t *testing.T) {
 	util.TempDir, util.ReadOnly = t.TempDir(), true
 	t.Cleanup(func() { model.Conf, util.TempDir, util.ReadOnly = previous, temp, readOnly })
 	for _, payload := range []string{
-		`{"editor":{"blockRefDynamicAnchorTextMaxLen":1,"fontSize":100},"fileTree":{"maxListCount":0},"search":{"limit":0},"flashcard":{"weights":"invalid"}}`,
-		`{"editor":null,"fileTree":null,"search":null,"flashcard":null}`,
+		`{"editor":{"blockRefDynamicAnchorTextMaxLen":1,"fontSize":100},"export":{"blockRefMode":0},"fileTree":{"maxListCount":0},"search":{"limit":0},"flashcard":{"weights":"invalid"}}`,
+		`{"editor":null,"export":null,"fileTree":null,"search":null,"flashcard":null}`,
+		`{"export":{"blockRefMode":1}}`,
+		`{"export":{"blockRefMode":5}}`,
 	} {
 		model.Conf = model.NewAppConf()
 		originalSync := model.Conf.Sync
@@ -93,6 +95,7 @@ func TestAPIContractImportedSettingsNormalization(t *testing.T) {
 			t.Fatalf("import failed: %s (%v)", recorder.Body.String(), err)
 		}
 		if model.Conf.Editor == nil || model.Conf.Editor.FontSize != 16 || model.Conf.Editor.BlockRefDynamicAnchorTextMaxLen < 1 ||
+			model.Conf.Export == nil || model.Conf.Export.BlockRefMode != 4 ||
 			model.Conf.FileTree.MaxListCount != 512 || model.Conf.Search.Limit != 64 ||
 			model.Conf.Flashcard.Weights != conf.DefaultFSRSWeights() || model.Conf.Sync != originalSync {
 			t.Fatal("import did not normalize preferences or replaced sync configuration")

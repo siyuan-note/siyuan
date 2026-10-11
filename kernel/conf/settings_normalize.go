@@ -128,6 +128,17 @@ func NormalizeEditor(editor *Editor) *Editor {
 	return editor
 }
 
+// NormalizeExport 将已废弃的块引用导出模式统一转换为脚注与锚点哈希模式。
+func NormalizeExport(export *Export) *Export {
+	if export == nil {
+		export = NewExport()
+	}
+	if export.BlockRefMode == 0 || export.BlockRefMode == 1 || export.BlockRefMode == 5 {
+		export.BlockRefMode = 4
+	}
+	return export
+}
+
 // NormalizeSearch 保留非空布尔指针表示的用户选择。
 func NormalizeSearch(search *Search) *Search {
 	if search == nil {

@@ -67,6 +67,7 @@ func defaultWorkspaceSettings(current *AppConf) *AppConf {
 		next.System = &system
 	}
 	next.Editor = conf.NormalizeEditor(next.Editor)
+	next.Export = conf.NormalizeExport(next.Export)
 	next.FileTree = conf.NormalizeFileTree(next.FileTree)
 	next.Search = conf.NormalizeSearch(next.Search)
 	next.Flashcard, _ = conf.NormalizeFlashcard(next.Flashcard)

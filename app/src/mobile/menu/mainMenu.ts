@@ -316,11 +316,11 @@ const renderMobileMainMenuGroupHTML = (group: IMobileMainMenuGroup) =>
     </div>`;
 
 /** 生成主菜单容器 `#menu` 的内容，分组与条目均由 `MOBILE_MAIN_MENU_GROUPS` 推导 */
-export const renderMobileMainMenuHTML = () => `<div class="toolbar toolbar--border" data-type="close-menu">
-    <svg class="toolbar__icon" role="img" aria-label="${escapeAttr(window.siyuan.languages.returnLabel)}"><use xlink:href="#iconLeft"></use></svg>
-</div>
-<div class="mobile-main-menu__search" data-prevent-swipe>
-    <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__block" autocomplete="off" autocorrect="off" spellcheck="false">
+export const renderMobileMainMenuHTML = () => `<div class="toolbar toolbar--border">
+    <svg class="toolbar__icon" data-type="close-menu" role="img" aria-label="${escapeAttr(window.siyuan.languages.returnLabel)}"><use xlink:href="#iconLeft"></use></svg>
+    <div class="mobile-main-menu__search" data-prevent-swipe>
+        <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__block" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
 </div>
 <div class="b3-menu__items b3-menu__groups mobile-main-menu__groups">
     ${MOBILE_MAIN_MENU_GROUPS.map(renderMobileMainMenuGroupHTML).join("")}

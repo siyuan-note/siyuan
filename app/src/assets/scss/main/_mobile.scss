@@ -1320,11 +1320,14 @@ body.mobile-topbar--merged {
   }
 
   .mobile-main-menu {
+    // 搜索框与返回按钮同处顶栏，占满返回按钮右侧的剩余宽度
     &__search {
-      background-color: var(--b3-theme-surface);
       display: flex;
-      flex-shrink: 0;
-      padding: 8px 16px;
+      flex: 1;
+      min-width: 0;
+      padding-right: 11px;
+      -webkit-user-select: text;
+      user-select: text;
     }
 
     &__groups {

@@ -9,8 +9,9 @@ import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {getCloudURL} from "../util/about";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {Dialog} from "../../dialog";
-import {escapeHtml} from "../../util/escape";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {isMobile} from "../../util/functions";
+import {canPurgeRepo} from "../../history/repoPurge";
 
 /** 按当前配置刷新同步 Tab 可见性与动态面板（供 syncRuntime 调用） */
 export const refreshSyncTabPanels = (root: Element) => {
@@ -61,6 +62,7 @@ const setSyncConfigItemVisible = (root: Element) => {
     .forEach((id) => {
         root.querySelector(`#${CSS.escape(id)}`)?.closest(".config-item")?.classList.toggle("fn__none", !visible);
     });
+    root.querySelector("#cloudRepoPurgeBlock")?.classList.toggle("fn__none", !canPurgeRepo("cloud", window.siyuan.config.sync.provider));
     refreshLANSyncConfigItemVisibility(root);
 };
 
@@ -77,6 +79,31 @@ const setSyncModeRelatedConfigItemVisible = (root: Element) => {
 
 /** 同步提供商配置区检索关键词（供 syncTab 注册 slot） */
 export const getSyncProviderConfigKeywords = (): string[] => buildProviderConfigKeywords();
+
+/** 配置行与说明区共用操作和字段关键词，搜索弹窗字段时保留配置入口 */
+export const getSyncProviderConfigRowKeywords = (): string[] => [
+    window.siyuan.languages.syncConfig,
+    window.siyuan.languages.syncConfigTip,
+    window.siyuan.languages.config,
+    window.siyuan.languages.import,
+    window.siyuan.languages.export,
+    window.siyuan.languages.clearSyncConfig,
+    "Endpoint",
+    "Access Key",
+    "Secret Key",
+    "Bucket",
+    "Region ID",
+    "Timeout (s)",
+    "Addressing",
+    "Path-style",
+    "Virtual-hosted-style",
+    "TLS Verify",
+    "Verify",
+    "Skip",
+    "Concurrent Reqs",
+    "Username",
+    "Password",
+];
 
 type SyncProviderConfigKey = Extract<keyof Config.ISync, "s3" | "webdav" | "local">;
 
@@ -258,29 +285,52 @@ const buildProviderConfigKeywords = (): string[] => {
         window.siyuan.languages.syncThirdPartyProviderLocalIntro,
         window.siyuan.languages.proFeature,
         window.siyuan.languages.syncThirdPartyProviderTip,
-        // 操作按钮
-        window.siyuan.languages.cloudStoragePurge,
-        window.siyuan.languages.import,
-        window.siyuan.languages.export,
-        window.siyuan.languages.syncConfig,
-        window.siyuan.languages.clearSyncConfig,
-        // 表单标签与选项（硬编码英文）
-        "Endpoint",
-        "Access Key",
-        "Secret Key",
-        "Bucket",
-        "Region ID",
-        "Timeout (s)",
-        "Addressing",
-        "Path-style",
-        "Virtual-hosted-style",
-        "TLS Verify",
-        "Verify",
-        "Skip",
-        "Concurrent Reqs",
-        "Username",
-        "Password",
+        ...getSyncProviderConfigRowKeywords(),
     ];
+};
+
+/** 第三方同步配置摘要：S3 显示「Bucket · Endpoint」，WebDAV 显示「Username · Endpoint」，未配置时给本地化占位 */
+const getProviderConfigSummary = (def: SyncThirdPartyProviderDef): string => {
+    const endpoint = def.getConfig().endpoint?.trim() || "";
+    if (!endpoint) {
+        return window.siyuan.languages.noProviderConfigured;
+    }
+    // S3 以 Endpoint + Bucket 定位仓库，WebDAV 以 Endpoint + Username；只显示 Endpoint 时换桶看不出变化
+    const sync = window.siyuan.config.sync;
+    const scope = def.configKey === "s3" ? sync.s3?.bucket?.trim() : def.configKey === "webdav" ? sync.webdav?.username?.trim() : "";
+    // 作用域在前：值行末尾会被省略号截断，而作用域才是区分仓库的那一项；分隔符沿用思源既有的「 · 」
+    return scope ? `${scope} · ${endpoint}` : endpoint;
+};
+
+/** 同步服务配置行内容：标题 / 说明 / 当前值 + 操作按钮列；整项显隐由调用方按同一条件控制 */
+const genProviderConfigRowHtml = (def: SyncThirdPartyProviderDef): string => {
+    const L = window.siyuan.languages;
+    const disabled = window.siyuan.config.readonly ? " disabled" : "";
+    const summary = getProviderConfigSummary(def);
+    const canImportExport = getHostCapabilities().importExport && (def.configKey === "s3" || def.configKey === "webdav");
+    // 导入 / 导出仅 S3 与 WebDAV 支持；多个操作按钮竖排，与同分组的数据仓库密钥一致
+    const importExportHtml = canImportExport ? `<div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" style="position: relative"${disabled}>
+        <input id="importSyncConfig" class="b3-form__upload" type="file" data-type="${def.configKey}">
+        <svg><use xlink:href="#iconDownload"></use></svg>${L.import}
+    </button>
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="exportSyncConfig" data-type="${def.configKey}"${disabled}>
+        <svg><use xlink:href="#iconUpload"></use></svg>${L.export}
+    </button>` : "";
+    return `<div class="fn__flex">
+    <div class="fn__flex-1 config-item__main">
+        <div class="config-name">${L.syncConfig}</div>
+        <div class="b3-label__text">${L.syncConfigTip}</div>
+        <div class="b3-label__text fn__ellipsis" title="${escapeHtmlTextAndAttr(summary)}">${escapeHtmlTextAndAttr(summary)}</div>
+    </div>
+    <span class="fn__space"></span>
+    <div class="fn__size200 fn__flex-center">
+        <button class="b3-button b3-button--outline fn__block" data-action="configureSync"${disabled}>
+            <svg><use xlink:href="#iconSettings"></use></svg>${L.config}
+        </button>${importExportHtml}
+    </div>
+</div>`;
 };
 
 const renderProviderConfig = (root: Element) => {
@@ -288,24 +338,26 @@ const renderProviderConfig = (root: Element) => {
     if (!providerConfigElement) {
         return;
     }
+    const rowElement = root.querySelector("#syncProviderConfigRow");
 
     const def = SYNC_PROVIDER_DEFS[window.siyuan.config.sync.provider];
-    let html = "";
+    let introHtml = "";
+    let rowHtml = "";
     if (def) {
-        if (!def.isProviderConfigAllowed()) {
-            html = def.genUnpaidIntro();
-        } else if (isThirdPartySyncProviderDef(def)) {
-            html = `${def.genIntro()}<div class="b3-label b3-label--inner fn__flex">
-    <div class="fn__flex-1">${window.siyuan.languages.syncConfig}<div class="b3-label__text ft__breakword">${escapeHtml(def.getConfig().endpoint || "-")}</div></div>
-    <div class="fn__space"></div><button class="b3-button b3-button--outline fn__flex-center" data-action="configureSync"${window.siyuan.config.readonly ? " disabled" : ""}>${window.siyuan.languages.config}</button>
-</div>${genProviderActionButtons(def.configKey)}`;
-        } else {
-            html = def.genIntro();
+        const allowed = def.isProviderConfigAllowed();
+        introHtml = allowed ? def.genIntro() : def.genUnpaidIntro();
+        // 未订阅或官方云端没有可配置项时整项隐藏，与拆出前的可见规则一致
+        if (allowed && isThirdPartySyncProviderDef(def)) {
+            rowHtml = genProviderConfigRowHtml(def);
         }
     }
 
-    providerConfigElement.innerHTML = html;
-    bindProviderConfigEvent(providerConfigElement, root);
+    providerConfigElement.innerHTML = introHtml;
+    if (rowElement) {
+        rowElement.innerHTML = rowHtml;
+        rowElement.classList.toggle("fn__none", !rowHtml);
+        bindProviderConfigEvent(rowElement, root);
+    }
 };
 
 const genProviderField = (field: SyncProviderFieldDef): string => {
@@ -344,22 +396,6 @@ const genProviderFlexSelect = (label: string, id: string, optionsHtml: string) =
     </select></div>
 </div>`;
 
-const genProviderActionButtons = (dataType: SyncProviderConfigKey) => {
-    const importExportHtml = getHostCapabilities().importExport && (dataType === "s3" || dataType === "webdav") ? `
-    <button class="b3-button b3-button--outline fn__size200" style="position: relative">
-        <input id="importSyncConfig" class="b3-form__upload" type="file" data-type="${dataType}">
-        <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
-    </button>
-    <button class="b3-button b3-button--outline fn__size200" id="exportSyncConfig" data-type="${dataType}">
-        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
-    </button>` : "";
-    return `<div class="b3-label b3-label--inner fn__flex fn__flex-wrap" style="gap: 8px; justify-content: flex-end">
-    <button class="b3-button b3-button--outline fn__size200" id="purgeCloudData">
-        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.cloudStoragePurge}
-    </button>${importExportHtml}
-</div>`;
-};
-
 const bindProviderConfigEvent = (configElement: Element, root: Element) => {
     const importElement = configElement.querySelector("#importSyncConfig") as HTMLInputElement;
     importElement?.addEventListener("change", () => {
@@ -389,12 +425,6 @@ const bindProviderConfigEvent = (configElement: Element, root: Element) => {
         }
         fetchPost(exportButton.getAttribute("data-type") === "s3" ? "/api/sync/exportSyncProviderS3" : "/api/sync/exportSyncProviderWebDAV", {}, (response) => {
             void saveExportFile(response.data.zip);
-        });
-    });
-
-    configElement.querySelector("#purgeCloudData")?.addEventListener("click", () => {
-        confirmDialog("♻️ " + window.siyuan.languages.cloudStoragePurge, `<div class="b3-typography">${window.siyuan.languages.cloudStoragePurgeConfirm}</div>`, () => {
-            fetchPost("/api/repo/purgeCloudRepo");
         });
     });
 

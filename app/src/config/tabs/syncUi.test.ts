@@ -3,6 +3,11 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
+import {canPurgeRepo} from "../../history/repoPurge";
+import {registerSettingGroup} from "../setting/group";
+import {registerSettingItem} from "../setting/item";
+import {scanSettingTabSearch} from "../search/scan";
 
 const source = readFileSync("src/config/tabs/syncUi.ts", "utf8");
 const code = transpileModule(source + "\nexports.open = openSyncProviderConfigDialog;", {
@@ -247,3 +252,76 @@ test("mobile uses the shared dialog and bucket warnings never submit the draft",
     assert.equal(ui.warningHidden(), true);
     assert.equal(ui.requests.length, 0);
 });
+
+const setupPanels = (mobile: boolean) => {
+    const languages = JSON.parse(readFileSync("appearance/langs/en.json", "utf8"));
+    const sync = {provider: 3, enabled: true, s3: {endpoint: "https://s3.example.com", bucket: "notes"},
+        webdav: {endpoint: "https://dav.example.com", username: "user"}, local: {endpoint: "/cloud"}};
+    const createElement = () => {
+        const classes = new Set<string>();
+        return {innerHTML: "", querySelector: (): null => null, classList: {
+            contains: (name: string) => classes.has(name),
+            toggle(name: string, force: boolean) {
+                if (force) classes.add(name); else classes.delete(name);
+                return force;
+            },
+        }};
+    };
+    const intro = createElement();
+    const row = createElement();
+    const purge = createElement();
+    const elements = {"#syncProviderConfig": intro, "#syncProviderConfigRow": row, "#cloudRepoPurgeBlock": purge};
+    const root = {querySelector: (selector: string) => elements[selector as keyof typeof elements] || null};
+    const exports = {} as {refreshSyncTabPanels: (root: unknown) => void;
+        getSyncProviderConfigRowKeywords: () => string[]; getSyncProviderConfigKeywords: () => string[]};
+    runInNewContext(code, {
+        exports, CSS: {escape: (value: string) => value},
+        window: {siyuan: {config: {sync, readonly: false, system: {container: mobile ? "android" : "std"}}, languages}},
+        require: () => ({escapeHtmlTextAndAttr, canPurgeRepo, isPaidUser: () => true, needSubscribe: () => false,
+            getCloudURL: () => "https://example.com", getHostCapabilities: () => ({importExport: !mobile})}),
+    });
+    return {sync, intro, row, purge, root, exports, languages};
+};
+
+for (const mobile of [false, true]) {
+    test(`configuration summaries keep quotes and markup inside text and title (mobile=${mobile})`, () => {
+        const ui = setupPanels(mobile);
+        ui.sync.webdav.username = 'user" onmouseover="alert(1)" data-test="<&';
+        ui.exports.refreshSyncTabPanels(ui.root);
+        const summary = ui.row.innerHTML.match(/title="([^"]*)">([^<]*)<\/div>/);
+        const expected = "user&quot; onmouseover=&quot;alert(1)&quot; data-test=&quot;&lt;&amp; · https://dav.example.com";
+        assert.ok(summary);
+        assert.equal(summary[1], expected);
+        assert.equal(summary[2], expected);
+        assert.doesNotMatch(ui.row.innerHTML, / onmouseover="/);
+    });
+
+    test(`cloud cleanup visibility follows provider changes in the mounted panel (mobile=${mobile})`, () => {
+        const ui = setupPanels(mobile);
+        for (const provider of [0, 2, 3, 4, 0]) {
+            ui.sync.provider = provider;
+            ui.exports.refreshSyncTabPanels(ui.root);
+            assert.equal(ui.purge.classList.contains("fn__none"), provider === 0, String(provider));
+        }
+    });
+
+    test(`field and action searches retain the configuration row (mobile=${mobile})`, () => {
+        const ui = setupPanels(mobile);
+        ui.exports.refreshSyncTabPanels(ui.root);
+        const tabId = `sync-row-search-${mobile}`;
+        registerSettingGroup(tabId, "sync", "Sync");
+        for (const [key, keywords] of [
+            ["intro", ui.exports.getSyncProviderConfigKeywords()],
+            ["row", ui.exports.getSyncProviderConfigRowKeywords()],
+        ] as const) {
+            registerSettingItem({id: `${tabId}.${key}`, tabId, groupId: "sync", kind: "render", html: () => "",
+                searchTexts: () => keywords.filter(keyword => !keyword.includes("<"))});
+        }
+        for (const keyword of ["Endpoint", "Secret Key", "Bucket", "Username", "Password", "Path-style", ui.languages.clearSyncConfig]) {
+            const result = scanSettingTabSearch(tabId, "Account & Sync", keyword.toLowerCase());
+            assert.ok(result.visibleItemIds.has(`${tabId}.row`), keyword);
+        }
+        assert.equal(ui.row.classList.contains("fn__none"), false);
+        assert.match(ui.row.innerHTML, /data-action="configureSync"/);
+    });
+}

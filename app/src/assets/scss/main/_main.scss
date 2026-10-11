@@ -1,4 +1,5 @@
 @use "../component/counter";
+@use "../util/mixin";
 
 /*
 .status: 2
@@ -28,11 +29,7 @@ html {
 }
 
 body {
-  background-image: var(--b3-body-background-gradient, radial-gradient(
-                  ellipse 45% 20% at 0% 0%,
-                  hsla(var(--b3-body-background-hl), calc(var(--b3-body-background-hl-opacity) * 0.5)) 0%,
-                  transparent 100%
-  ));
+  @include mixin.body-gradient;
 }
 
 .fullscreen {

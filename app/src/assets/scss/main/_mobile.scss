@@ -346,6 +346,7 @@ body.mobile-keyboard--open {
 #sidebar,
 #sidebarRight {
   background-color: var(--b3-theme-background);
+  @include mixin.body-gradient;
 
   .toolbar {
     &--dark {
@@ -930,6 +931,7 @@ body.mobile-topbar--merged {
 
     &.config--mobile-items {
       background-color: var(--b3-theme-surface);
+      @include mixin.body-gradient;
       padding: 8px 16px max(16px, env(safe-area-inset-bottom));
     }
 
@@ -1340,6 +1342,7 @@ body.mobile-topbar--merged {
     }
 
     &__groups {
+      @include mixin.body-gradient;
       flex: 1;
       height: auto;
       min-height: 0;

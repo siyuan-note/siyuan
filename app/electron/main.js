@@ -2678,25 +2678,31 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
 
         let apiData;
         let count = 0;
-        let versionTimedOut = false;
         writeLog("checking kernel version");
         for (; ;) {
+            if (bootCanceled()) {
+                resolve(false);
+                return;
+            }
             try {
-                const apiResult = await fetchLocalKernel(getServer(currentKernelPort) + "/api/system/version");
-                apiData = await apiResult.json();
+                apiData = await fetchLocalKernelJSON(getServer(currentKernelPort) + "/api/system/version");
                 break;
             } catch (e) {
-                versionTimedOut = isLocalKernelRequestTimeout(e);
                 writeLog("get kernel version failed: " + e.message);
+                if (bootCanceled()) {
+                    resolve(false);
+                    return;
+                }
                 if (14 < ++count) {
+                    const versionTimedOut = isLocalKernelRequestTimeout(e);
                     writeLog("get kernel ver failed [timeout=" + versionTimedOut + "]");
                     if (versionTimedOut) {
-                        await showKernelUnresponsiveWindow();
+                        showKernelUnresponsiveWindow(lang);
                     } else {
                         showErrorWindow("获取内核服务端口失败", "Failed to Obtain Kernel Service Port", "<div>获取内核服务端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to obtain kernel service port. Please ensure SiYuan has network permissions and is not blocked by firewalls or antivirus software.</div>");
                     }
                     requestKernelExit(currentKernelPort);
-                    bootWindow.destroy();
+                    currentBootWindow.destroy();
                     resolve(false);
                     return;
                 }
@@ -2745,8 +2751,7 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                         break;
                     }
                     try {
-                        const progressResult = await fetchLocalKernel(getServer(currentKernelPort) + "/api/system/bootProgress");
-                        const progressData = await progressResult.json();
+                        const progressData = await fetchLocalKernelJSON(getServer(currentKernelPort) + "/api/system/bootProgress");
                         if (bootCanceled()) {
                             resolve(false);
                             return;
@@ -2773,7 +2778,7 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                             continue;
                         }
                         if (isLocalKernelRequestTimeout(e)) {
-                            await showKernelUnresponsiveWindow();
+                            showKernelUnresponsiveWindow(lang);
                         }
                         requestKernelExit(currentKernelPort);
                         bootWindow.destroy();
@@ -2826,26 +2831,31 @@ const collectWindowsTCPConfig = async () => {
 };
 
 // 内核已经启动但本机请求一直没有响应时的错误窗口，提示用户排查本机访问。
-const showKernelUnresponsiveWindow = async () => {
-    // Windows 上该现象可能与 TCP 拥塞控制 BBR2 和「环回大 Mtu」同时开启有关；这里只说明可能的原因，由用户自行核查。
-    const windowsHint = "win32" === process.platform ?
-        "<div style=\"margin-top:12px\">Windows 上该现象可能与 TCP 拥塞控制 BBR2 和「环回大 Mtu」同时开启有关。</div>" +
-        "<div>On Windows this may be related to TCP congestion control BBR2 combined with \"Loopback Large Mtu\".</div>" : "";
-    showErrorWindow("内核无响应", "The kernel is not responding",
-        "<div>内核已经启动，但本机请求一直没有响应，思源无法进入主界面。请查看 <a href=\"#\" data-log-path>~/.config/siyuan/app.log</a> 获取详细报错信息。</div>" +
-        "<div>The kernel has started but local requests never complete, so SiYuan cannot open the main window. Please check <a href=\"#\" data-log-path>~/.config/siyuan/app.log</a> for details.</div>" +
-        windowsHint,
-        "⚠️", path.join(confDir, "app.log"));
-    const tcpConfig = await collectWindowsTCPConfig();
-    tcpConfig.forEach(line => writeLog(line));
+const showKernelUnresponsiveWindow = (lang) => {
+    const language = resolveAppLanguage(lang ? [lang] : app.getPreferredSystemLanguages());
+    const languages = loadAppMenuLanguages(language);
+    const english = loadAppMenuLanguages("en");
+    const content = [...new Set([languages, english])].map((strings) => {
+        const message = escapeHTML(strings.kernelUnresponsiveMessage)
+            .replace("${log}", "<a href=\"#\" data-log-path>~/.config/siyuan/app.log</a>");
+        const windowsHint = "win32" === process.platform ?
+            "<div>" + escapeHTML(strings.kernelUnresponsiveWindowsHint) + "</div>" : "";
+        return "<div>" + message + "</div>" + windowsHint;
+    }).join("");
+    showErrorWindow(languages.kernelUnresponsiveTitle, english.kernelUnresponsiveTitle,
+        content, "⚠️", path.join(confDir, "app.log"));
+    // 诊断命令在后台执行，不延迟结束本次启动流程。
+    collectWindowsTCPConfig().then(lines => lines.forEach(line => writeLog(line)))
+        .catch(error => writeLog("collect Windows TCP configuration failed: " + error.message));
 };
 
-// 本地内核请求限时失败，避免本机通道异常时请求永久挂起，让启动流程无期限停留在启动窗口。
-const fetchLocalKernel = async (url) => {
+// 超时覆盖响应头和响应体读取，防止本机通道异常时启动查询永久挂起。
+const fetchLocalKernelJSON = async (url) => {
     const abortController = new AbortController();
     const timer = setTimeout(() => abortController.abort(), localKernelRequestTimeout);
     try {
-        return await net.fetch(url, {signal: abortController.signal});
+        const response = await net.fetch(url, {signal: abortController.signal});
+        return await response.json();
     } catch (error) {
         if (abortController.signal.aborted) {
             throw localKernelRequestTimeoutError();

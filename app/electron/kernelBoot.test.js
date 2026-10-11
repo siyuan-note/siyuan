@@ -41,7 +41,13 @@ const setup = (progress, options = {}) => {
     });
     const context = vm.createContext({
         path,
-        process: {platform: "win32", env: {}},
+        process: {platform: options.platform || "win32", env: {}},
+        app: {getPreferredSystemLanguages: () => ["en"]},
+        resolveAppLanguage: languages => languages[0],
+        loadAppMenuLanguages: language => JSON.parse(readFileSync(path.join(__dirname, "../appearance/langs", language + ".json"), "utf8")),
+        escapeHTML: value => String(value).replace(/[&<>"']/g, character => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+        })[character]),
         Date: {now: () => now},
         AbortController,
         // 本地内核请求超时由计时器驱动，测试通过 advance 推进虚拟时间触发超时。
@@ -79,14 +85,16 @@ const setup = (progress, options = {}) => {
                 const value = options.version ? await options.version(versionRequests, fixture) : null;
                 if (value?.hang) return await hangUntilAbort(requestOptions.signal);
                 if (value instanceof Error) throw value;
-                return {json: async () => value || {code: 0, data: "3.8.6"}};
+                return {json: async () => value?.bodyHang ? await hangUntilAbort(requestOptions.signal) :
+                    value || {code: 0, data: "3.8.6"}};
             }
             assert.equal(url, "https://127.0.0.1:6806/api/system/bootProgress");
             requests++;
             const result = await progress(requests, fixture);
             if (result?.hang) return await hangUntilAbort(requestOptions.signal);
             if (result instanceof Error) throw result;
-            return {json: async () => ({code: 0, data: {progress: result}})};
+            return {json: async () => result?.bodyHang ? await hangUntilAbort(requestOptions.signal) :
+                {code: 0, data: {progress: result}}};
         }},
     });
     fixture.context = context;
@@ -216,6 +224,7 @@ test("a hanging kernel version request logs the local TCP configuration for diag
         await fixture.settleMicrotasks();
     }
     assert.equal(await run, false);
+    await fixture.settleMicrotasks();
     const commands = fixture.events.filter(event => Array.isArray(event) && event[0] === "exec-file");
     assert.deepEqual(commands.map(event => event[2]),
         ["int tcp show supplemental", "int ipv4 show global", "int ipv6 show global"]);
@@ -243,4 +252,77 @@ test("completed local kernel requests clear their timeouts", async () => {
     const fixture = setup(() => 100);
     assert.equal(await fixture.run(), 6806);
     assert.equal(fixture.timerCount(), 0);
+});
+
+test("body reads retain the timeout for both startup queries", async () => {
+    for (const version of [false, true]) {
+        const fixture = setup(() => ({bodyHang: true}), version ? {version: () => ({bodyHang: true})} : {});
+        const run = fixture.run();
+        await fixture.settleMicrotasks();
+        assert.deepEqual(fixture.timerDelays(), [5000]);
+        for (let attempt = 0; attempt < 15; attempt++) {
+            fixture.advance(5000);
+            await fixture.settleMicrotasks();
+        }
+        assert.equal(await run, false);
+        assert.equal(version ? fixture.versionRequests() : fixture.requests(), 15);
+        assert.equal(exits(fixture).length, 1);
+        assert.equal(fixture.timerCount(), 0);
+    }
+});
+
+test("startup recovers when a stalled version or progress request succeeds on retry", async () => {
+    for (const version of [false, true]) {
+        const fixture = setup(request => !version && request === 1 ? {hang: true} : 100,
+            version ? {version: request => request === 1 ? {bodyHang: true} : null} : {});
+        const run = fixture.run();
+        await fixture.settleMicrotasks();
+        fixture.advance(5000);
+        await fixture.settleMicrotasks();
+        assert.equal(await run, 6806);
+        assert.equal(exits(fixture).length, 0);
+        assert.equal(fixture.timerCount(), 0);
+    }
+});
+
+test("cancellation during a stalled version request stops retries without touching another window", async () => {
+    for (const cancel of ["close", "replace", "exit"]) {
+        const fixture = setup(() => 100, {version: () => ({bodyHang: true})});
+        const run = fixture.run();
+        await fixture.settleMicrotasks();
+        if (cancel === "close") {
+            fixture.window.destroyed = true;
+        } else if (cancel === "replace") {
+            fixture.context.bootWindow = {isDestroyed: () => false, destroy: () => assert.fail("unrelated window")};
+        } else {
+            fixture.closeKernel(0);
+        }
+        fixture.advance(5000);
+        await fixture.settleMicrotasks();
+        assert.equal(await run, false);
+        assert.equal(fixture.versionRequests(), 1);
+        assert.equal(exits(fixture).length, 0);
+        assert.equal(fixture.events.includes("destroy"), false);
+        assert.equal(fixture.timerCount(), 0);
+    }
+});
+
+test("closing the boot window between version retries stops before another request", async () => {
+    const fixture = setup(() => 100, {version: certificateChange, onSleep: (ms, state) => {
+        state.context.bootWindow = {isDestroyed: () => false, destroy: () => assert.fail("unrelated window")};
+    }});
+    assert.equal(await fixture.run(), false);
+    assert.equal(fixture.versionRequests(), 1);
+    assert.equal(fixture.events.includes("destroy"), false);
+});
+
+test("TCP diagnosis does not delay boot failure or run on other platforms", async () => {
+    for (const platform of ["win32", "linux", "darwin"]) {
+        const fixture = setup(() => 100, {platform});
+        let commands = 0;
+        fixture.context.childProcess.execFile = () => { commands++; };
+        await vm.runInContext("showKernelUnresponsiveWindow('en')", fixture.context);
+        assert.ok(fixture.events.some(event => Array.isArray(event) && event[1] === "The kernel is not responding"));
+        assert.equal(commands, platform === "win32" ? 1 : 0);
+    }
 });

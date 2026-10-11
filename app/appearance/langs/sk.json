@@ -1,4 +1,7 @@
 {
+	"kernelUnresponsiveTitle": "Jadro neodpovedá",
+	"kernelUnresponsiveMessage": "Časový limit lokálnych požiadaviek na jadro uplynul, takže SiYuan nemôže otvoriť hlavné okno. Podrobnosti nájdete v ${log}.",
+	"kernelUnresponsiveWindowsHint": "V systéme Windows to môže súvisieť so súčasným zapnutím riadenia preťaženia TCP BBR2 a Loopback Large Mtu.",
 	"syncConfigTip": "Nakonfigurujte adresu servera, prihlasovacie údaje a parametre pripojenia tejto služby; po uložení sa použijú na cloudovú synchronizáciu a zálohovanie",
 	"dataRepoPurgeCloud": "Vyčistiť cloudový dátový sklad",
 	"dataRepoPurgeCloudTip": "Odstrániť všetky nepotrebné snímky a súvisiace dátové objekty v cloude",

@@ -1,4 +1,7 @@
 {
+	"kernelUnresponsiveTitle": "カーネルが応答していません",
+	"kernelUnresponsiveMessage": "ローカルのカーネルへのリクエストがタイムアウトしたため、思源はメインウィンドウを開けません。詳細は ${log} を確認してください。",
+	"kernelUnresponsiveWindowsHint": "Windows では、TCP 輻輳制御 BBR2 と「ループバックの大きな MTU」の同時有効化が関係している可能性があります。",
 	"syncConfigTip": "このサービスのサーバーアドレス、認証情報、接続パラメータを設定します。保存後はクラウド同期とバックアップに使用されます",
 	"dataRepoPurgeCloud": "クラウドデータリポジトリのクリーンアップ",
 	"dataRepoPurgeCloudTip": "クラウド上の参照されていないすべてのスナップショットと関連するデータオブジェクトを削除します",

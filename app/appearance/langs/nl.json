@@ -1,4 +1,7 @@
 {
+	"kernelUnresponsiveTitle": "De kernel reageert niet",
+	"kernelUnresponsiveMessage": "Lokale verzoeken aan de kernel hebben de tijdslimiet overschreden, waardoor SiYuan het hoofdvenster niet kan openen. Zie ${log} voor meer informatie.",
+	"kernelUnresponsiveWindowsHint": "In Windows kan dit verband houden met de combinatie van TCP-congestiecontrole BBR2 en Loopback Large Mtu.",
 	"syncConfigTip": "Configureer het serveradres, de inloggegevens en de verbindingsparameters van deze dienst; na opslaan worden ze gebruikt voor cloudsynchronisatie en back-up",
 	"dataRepoPurgeCloud": "Cloud data-repo opschonen",
 	"dataRepoPurgeCloudTip": "Verwijder alle niet-gerefereerde momentopnamen en gerelateerde gegevensobjecten in de cloud",

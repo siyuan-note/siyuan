@@ -1987,10 +1987,12 @@ func parseStdMd(markdown []byte, footnotes bool) (ret *parse.Tree, yfmRootID, yf
 	luteEngine := util.NewStdLute()
 	luteEngine.SetFootnotes(footnotes)
 	luteEngine.SetYamlFrontMatter(true) // 解析 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/10878
+	luteEngine.ParseOptions.PreserveTableCellSource = true
 	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
 	if nil == ret {
 		return
 	}
+	lute.NormalizeMarkdownTableCells(ret)
 	if footnotes {
 		convertMarkdownFootnotes(ret)
 	}

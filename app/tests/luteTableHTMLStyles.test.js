@@ -25,8 +25,9 @@ describe("Markdown table HTML styles", () => {
             let dom = lute[convert](markdown);
             for (let round = 0; round < 2; round++) {
                 assert.equal((dom.match(/data-type="NodeTable"/g) || []).length, 1);
-                assert.equal((dom.match(/<td>/g) || []).length, 3);
-                assert.ok(dom.includes("<td>- [ ] 测试文本</td>"));
+                assert.equal((dom.match(/<td\b/g) || []).length, 3);
+                assert.ok(dom.includes('type="checkbox"'));
+                assert.ok(dom.includes('data-sy-table-cell-rich="'));
                 assert.ok(dom.includes("style=\"color: var(--b3-font-color6);\">测试文本 ⭐⭐⭐ / 测试文本</span>⭐⭐⭐"));
                 assert.ok(dom.includes("style=\"color: var(--b3-font-color10);\">原生文本</span><br />"));
                 assert.ok(dom.includes("style=\"color: var(--b3-font-color6);\">测试文本 </span>⭐"));

@@ -173,10 +173,14 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     sb.dataset.nodeId = "sb";
     sb.innerHTML = '<div data-node-id="left">Left</div><div class="sb__resize"></div><div data-node-id="right">Right</div>';
     root.appendChild(sb);
+    const resize = sb.querySelector(".sb__resize") as HTMLElement;
+    const editableRightLeft = sb.lastElementChild.getBoundingClientRect().left;
     root.dataset.readonly = "true";
-    check.equal(getComputedStyle(sb.querySelector(".sb__resize")).display, "none");
+    check.equal(getComputedStyle(resize).visibility, "hidden");
+    check.equal(getComputedStyle(resize).pointerEvents, "none");
+    check.equal(sb.lastElementChild.getBoundingClientRect().left, editableRightLeft, "read-only keeps the column layout");
     root.dataset.readonly = "false";
-    check.notEqual(getComputedStyle(sb.querySelector(".sb__resize")).display, "none");
+    check.equal(getComputedStyle(resize).visibility, "visible");
     root.remove();
     return "Folded rendering cases passed";
 };

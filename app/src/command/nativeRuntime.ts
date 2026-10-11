@@ -9,6 +9,7 @@ import {fetchSyncPost} from "../util/fetch";
 import {globalCommand} from "../boot/globalEvent/command/global";
 import {onlyProtyleCommand} from "../boot/globalEvent/command/protyle";
 import type {ICommandContextSnapshot} from "./types";
+import {DATABASE_ROW_COMMANDS, getDatabaseRowNavigationButton} from "./databaseRowNavigation";
 import {isInIOS} from "../protyle/util/compatibility";
 /// #if MOBILE
 import {popSearch} from "../mobile/menu/search";
@@ -17,6 +18,10 @@ import {openSearch} from "../search/spread";
 /// #endif
 
 export const executeLegacyNativeCommand = async (command: string, context: ICommandContextSnapshot) => {
+    if (DATABASE_ROW_COMMANDS.some(item => item === command)) {
+        getDatabaseRowNavigationButton(context, command)?.click();
+        return;
+    }
     const app = context.app as App;
     const openOnly = ["shortcut", "editorShortcut", "fileTreeShortcut", "dockShortcut", "globalShortcut", "keymap"]
         .includes(context.source);

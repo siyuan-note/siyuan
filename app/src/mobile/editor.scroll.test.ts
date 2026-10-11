@@ -60,6 +60,7 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
         getElementById: (id: string) => id === "toolbarName" ? toolbar : {}};
     const noop = () => {};
     const makeProtyle = (options: IProtyleOptions) => ({
+        element: {querySelector: (): null => null, classList: {remove: noop}},
         options: {mode: "wysiwyg"}, notebookId: options.notebookId, path: "/root.sy",
         block: {id: options.blockId, rootID: options.rootId},
         title: {element: {removeAttribute: noop}},
@@ -121,6 +122,7 @@ const setup = (legacy?: IScrollAttr, encrypted = false) => {
         "../protyle/util/trackedRange": {invalidateTrackedRanges: noop},
         "../protyle/undo/globalUndo": {initMirror: noop},
         "../protyle/render/av/cellEditor": {closeAVCellEditor: noop},
+        "../protyle/render/av/databaseRowNavigation": execute(compile(read("../protyle/render/av/databaseRowNavigation.ts")), {}),
         "../plugin/EventBusCore": {forEachPluginSubscriber: noop},
         "./util/setEmpty": {setEditor: noop},
         "./util/closePanel": {closePanel: noop},

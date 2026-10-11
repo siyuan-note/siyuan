@@ -1,4 +1,6 @@
 {
+	"previousDatabaseRow": "Vorheriger Datenbankeintrag",
+	"nextDatabaseRow": "Nächster Datenbankeintrag",
 	"dynamicRefTextRefreshRetry": "Ihre Änderungen wurden gespeichert, aber einige Referenztexte konnten nicht aktualisiert werden. SiYuan versucht es automatisch erneut.",
 	"clearingUnusedAssets": "Nicht referenzierte Anhänge werden bereinigt...",
 	"clearingUnusedAttributeViews": "Nicht referenzierte Datenbanken werden bereinigt...",

@@ -115,6 +115,7 @@ test("native shortcut sources open panels without toggling while menu commands r
     const source = sourceFile("command/nativeRuntime.ts");
     const calls = [];
     const subject = prefix(source, arrow(source, "executeLegacyNativeCommand"), "const isFileFocus", {
+        DATABASE_ROW_COMMANDS: ["previousDatabaseRow", "nextDatabaseRow"],
         globalCommand: (...args) => {calls.push(args); return true;},
     });
     for (const commandSource of ["shortcut", "editorShortcut", "fileTreeShortcut", "dockShortcut", "globalShortcut", "keymap", "menu", "api", "commandPanel"]) {

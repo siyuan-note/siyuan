@@ -121,6 +121,8 @@ test("mobile navigation is limited to the current editor and does not dispatch t
     const f = fixture();
     keymapBindings.setKeymapBindings(f.general.goToDocumentEnd, ["End"]);
     const module = loadModule("src/mobile/util/keydown.ts", {window: f.window}, {
+        "../../command/databaseRowShortcut": {handleDatabaseRowShortcut: () => false},
+        "../../command/databaseRowNavigation": {DATABASE_ROW_COMMANDS: ["previousDatabaseRow", "nextDatabaseRow"]},
         "../../protyle/util/documentBoundaryHotkey": f.helper,
         "../../boot/globalEvent/commonHotkey": {filterHotkey: () => false},
         "../editor": {getCurrentEditor: () => ({protyle: f.protyle})},

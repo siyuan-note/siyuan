@@ -1,4 +1,6 @@
 {
+	"previousDatabaseRow": "Попередній запис бази даних",
+	"nextDatabaseRow": "Наступний запис бази даних",
 	"dynamicRefTextRefreshRetry": "Зміни збережено, але частину тексту посилань не вдалося оновити. SiYuan автоматично повторить спробу.",
 	"clearingUnusedAssets": "Очищення ресурсів без посилань...",
 	"clearingUnusedAttributeViews": "Очищення баз даних без посилань...",

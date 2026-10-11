@@ -45,6 +45,7 @@ import {escapeHtml} from "../../util/escape";
 import {syncGuide} from "../../sync/syncGuide";
 import {duplicateBlock, getStartEndElement} from "../../protyle/wysiwyg/commonHotkey";
 import {handleDocumentBoundaryHotkey} from "../../protyle/util/documentBoundaryHotkey";
+import {handleDatabaseRowShortcut} from "../../command/databaseRowShortcut";
 import {getNextFileLi, getPreviousFileLi} from "../../protyle/wysiwyg/getBlock";
 import {Backlink} from "../../layout/dock/Backlink";
 /// #if !BROWSER
@@ -1330,6 +1331,10 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
 
     if (bindAVPanelKeydown(event)) {
         event.preventDefault();
+        return;
+    }
+
+    if (handleDatabaseRowShortcut(app, event)) {
         return;
     }
 

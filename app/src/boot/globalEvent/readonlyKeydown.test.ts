@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {DATABASE_ROW_COMMANDS} from "../../command/databaseRowNavigation";
 
 const loadFunction = (path: string, name: string, globals: Record<string, unknown>) => {
     const source = createSourceFile(path, readFileSync(path, "utf8"), ScriptTarget.ES2021, true);
@@ -14,7 +15,8 @@ const loadFunction = (path: string, name: string, globals: Record<string, unknow
     }).outputText;
     const exports: any = {};
     runInNewContext(compiled, {exports,
-        handleDocumentBoundaryHotkey: () => false, ...globals});
+        handleDocumentBoundaryHotkey: () => false, handleDatabaseRowShortcut: () => false,
+        DATABASE_ROW_COMMANDS, ...globals});
     return exports.subject;
 };
 

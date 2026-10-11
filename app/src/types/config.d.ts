@@ -1416,6 +1416,8 @@ declare namespace Config {
      * SiYuan general shortcut keys
      */
     export interface IKeymapGeneral extends IKeys {
+        previousDatabaseRow?: IKey;
+        nextDatabaseRow?: IKey;
         /** 打开当前焦点的上下文菜单，默认 ⌘/，支持多绑定和解绑。 */
         openContextMenu?: IKey;
         mainMenu?: IKey;

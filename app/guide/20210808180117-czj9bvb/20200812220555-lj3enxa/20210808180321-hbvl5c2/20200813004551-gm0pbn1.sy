@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261010202520"
+		"updated": "20261011091952"
 	},
 	"Children": [
 		{
@@ -63,6 +63,47 @@
 				{
 					"Type": "NodeText",
 					"Data": " 组合的单个字符设置为快捷键。"
+				}
+			]
+		},
+		{
+			"ID": "20261011091952-vdfybuu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011091952-vdfybuu",
+				"updated": "20261011091952"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快捷键"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "通用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中设置「上一条数据库条目」和「下一条数据库条目」，可在当前预览中按来源视图的筛选和排序切换条目。默认未绑定快捷键，移动端连接外接键盘后也可使用。从数据库视图打开预览时可切换条目，到达首尾后不再继续切换。"
 				}
 			]
 		},

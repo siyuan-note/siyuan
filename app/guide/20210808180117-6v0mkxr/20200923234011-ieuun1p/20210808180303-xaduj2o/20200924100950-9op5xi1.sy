@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261010202520"
+		"updated": "20261011091952"
 	},
 	"Children": [
 		{
@@ -63,6 +63,47 @@
 				{
 					"Type": "NodeText",
 					"Data": " cannot be set as a shortcut."
+				}
+			]
+		},
+		{
+			"ID": "20261011091952-wqpp0rc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011091952-wqpp0rc",
+				"updated": "20261011091952"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Keymap"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "General"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", configure “Previous database entry” and “Next database entry” to switch between entries in the current preview using the source view’s filters and sort order. These shortcuts are unassigned by default and also work with an external keyboard on mobile. Navigation is available when the preview is opened from a database view; it stops at the first and last entries."
 				}
 			]
 		},

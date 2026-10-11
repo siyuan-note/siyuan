@@ -1,4 +1,6 @@
 {
+	"previousDatabaseRow": "上一筆資料庫項目",
+	"nextDatabaseRow": "下一筆資料庫項目",
 	"dynamicRefTextRefreshRetry": "編輯已儲存，但部分引用文字更新失敗，思源將自動重試。",
 	"clearingUnusedAssets": "正在清理未引用的資源檔案...",
 	"clearingUnusedAttributeViews": "正在清理未引用的資料庫...",

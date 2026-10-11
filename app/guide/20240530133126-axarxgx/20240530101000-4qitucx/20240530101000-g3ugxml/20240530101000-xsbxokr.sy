@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20261010202520"
+		"updated": "20261011091952"
 	},
 	"Children": [
 		{
@@ -61,6 +61,43 @@
 				{
 					"Type": "NodeText",
 					"Data": " と組み合わせた単一文字をショートカットに設定することはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20261011091952-yanstq2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011091952-yanstq2",
+				"updated": "20261011091952"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ショートカット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "一般"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で「前のデータベース項目」と「次のデータベース項目」を設定すると、現在のプレビュー内で元のビューの絞り込みと並び順に従って項目を切り替えられます。初期状態ではショートカットは未割り当てです。モバイル端末でも外付けキーボードで利用できます。データベースのビューからプレビューを開いた場合に利用でき、先頭と末尾では切り替えを停止します。"
 				}
 			]
 		},

@@ -373,7 +373,8 @@ export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data
         undefined, undefined, (editorProtyle) => {
             inheritDatabaseRowReadonly(editorProtyle, protyle);
             editorProtyle.element.dataset.databaseRowId = data.boundBlockID;
-            mountDatabaseRowNavigation(editorProtyle.element, data, next => openDatabaseRowByData(protyle, next));
+            mountDatabaseRowNavigation(editorProtyle.element, data, next => openDatabaseRowByData(protyle, next),
+                editorProtyle.breadcrumb?.element.parentElement);
             editorProtyle.databaseAttributePanel?.expand(data.avID);
             editorProtyle.contentElement.scrollTop = 0;
             editorProtyle.databaseAttributePanel?.afterRender(() => {

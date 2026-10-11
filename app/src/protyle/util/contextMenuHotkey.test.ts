@@ -110,6 +110,7 @@ test("startup adds context menu defaults and preserves an explicitly empty bindi
 test("mobile leaves unhandled context menu shortcuts available to plugin dispatch", () => {
     let dispatched = 0;
     const mobileKeydown = loadFunction("src/mobile/util/keydown.ts", "mobileKeydown", {
+        handleDatabaseRowShortcut: () => false,
         getCurrentEditor: (): undefined => undefined,
         window: {siyuan: {config: {keymap: {general: {openContextMenu: {custom: "⌘/"}}}}}},
         filterHotkey: () => false,

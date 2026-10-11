@@ -1,4 +1,6 @@
 {
+	"previousDatabaseRow": "รายการฐานข้อมูลก่อนหน้า",
+	"nextDatabaseRow": "รายการฐานข้อมูลถัดไป",
 	"dynamicRefTextRefreshRetry": "บันทึกการแก้ไขแล้ว แต่ไม่สามารถอัปเดตข้อความอ้างอิงบางส่วนได้ SiYuan จะลองใหม่โดยอัตโนมัติ",
 	"clearingUnusedAssets": "กำลังล้างไฟล์ทรัพยากรที่ไม่มีการอ้างอิง...",
 	"clearingUnusedAttributeViews": "กำลังล้างฐานข้อมูลที่ไม่มีการอ้างอิง...",

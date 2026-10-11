@@ -26,6 +26,7 @@ import {getActiveMobileSecondaryEditor} from "./util/secondaryEditors";
 import {closeMobileEditorSheets} from "./util/MobileEditorDialog";
 import {invalidateMobileReferenceOpen} from "./util/openReference";
 import {closeAVCellEditor} from "../protyle/render/av/cellEditor";
+import {clearDatabaseRowNavigation} from "../protyle/render/av/databaseRowNavigation";
 
 export const getCurrentEditor = () => {
     return getActiveMobileSecondaryEditor() || window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -94,6 +95,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             return;
         }
         completed = true;
+        clearDatabaseRowNavigation(protyle.element);
         setEditor();
         bindMobileBarsScroll(protyle.contentElement, () => {
             // 面包屑位移后同步数据库吸顶位置，避免数据库使用上一帧的面包屑位置

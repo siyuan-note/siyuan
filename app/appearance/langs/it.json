@@ -1,4 +1,6 @@
 {
+	"previousDatabaseRow": "Voce precedente del database",
+	"nextDatabaseRow": "Voce successiva del database",
 	"dynamicRefTextRefreshRetry": "Le modifiche sono state salvate, ma alcuni testi dei riferimenti non sono stati aggiornati. SiYuan riproverà automaticamente.",
 	"clearingUnusedAssets": "Pulizia delle risorse senza riferimenti...",
 	"clearingUnusedAttributeViews": "Pulizia dei database senza riferimenti...",

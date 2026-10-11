@@ -1,4 +1,6 @@
 {
+	"previousDatabaseRow": "Претходни унос базе података",
+	"nextDatabaseRow": "Следећи унос базе података",
 	"dynamicRefTextRefreshRetry": "Измене су сачуване, али део текста референци није ажуриран. SiYuan ће аутоматски покушати поново.",
 	"clearingUnusedAssets": "Чишћење датотека ресурса без референци...",
 	"clearingUnusedAttributeViews": "Чишћење база података без референци...",

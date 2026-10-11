@@ -1,4 +1,6 @@
 {
+	"previousDatabaseRow": "Predchádzajúca položka databázy",
+	"nextDatabaseRow": "Nasledujúca položka databázy",
 	"dynamicRefTextRefreshRetry": "Vaše zmeny boli uložené, ale niektoré texty odkazov sa nepodarilo aktualizovať. SiYuan to automaticky skúsi znova.",
 	"clearingUnusedAssets": "Čistenie súborov príloh bez odkazov...",
 	"clearingUnusedAttributeViews": "Čistenie databáz bez odkazov...",

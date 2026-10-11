@@ -498,6 +498,8 @@ export abstract class Constants {
     // "⌥↩" 写死，但可自定义
     public static readonly SIYUAN_KEYMAP: Config.IKeymap = {
         general: {
+            previousDatabaseRow: {default: "", custom: ""},
+            nextDatabaseRow: {default: "", custom: ""},
             openContextMenu: {default: "⌘/", custom: "⌘/"},
             mainMenu: {default: "⌥\\", custom: "⌥\\"},
             commandPanel: {default: "⌥⇧P", custom: "⌥⇧P"},

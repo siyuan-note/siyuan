@@ -1,4 +1,6 @@
 {
+	"previousDatabaseRow": "Entrée précédente de la base de données",
+	"nextDatabaseRow": "Entrée suivante de la base de données",
 	"dynamicRefTextRefreshRetry": "Vos modifications ont été enregistrées, mais certains textes de référence n’ont pas pu être actualisés. SiYuan réessaiera automatiquement.",
 	"clearingUnusedAssets": "Nettoyage des ressources non référencées...",
 	"clearingUnusedAttributeViews": "Nettoyage des bases de données non référencées...",

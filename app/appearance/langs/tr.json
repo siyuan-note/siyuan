@@ -1,4 +1,6 @@
 {
+	"previousDatabaseRow": "Önceki veritabanı kaydı",
+	"nextDatabaseRow": "Sonraki veritabanı kaydı",
 	"dynamicRefTextRefreshRetry": "Düzenlemeleriniz kaydedildi ancak bazı başvuru metinleri yenilenemedi. SiYuan otomatik olarak yeniden deneyecek.",
 	"clearingUnusedAssets": "Başvurulmayan kaynak dosyaları temizleniyor...",
 	"clearingUnusedAttributeViews": "Başvurulmayan veritabanları temizleniyor...",

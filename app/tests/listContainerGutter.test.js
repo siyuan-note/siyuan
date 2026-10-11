@@ -35,7 +35,7 @@ const cases = source => {
         hasClosestByClassName: (element, name) => element?.closest("." + name),
         hasTopClosestByClassName: (element, name) => element?.closest("." + name),
         getBlockTypeName: type => type, getIconByType: () => "iconTest",
-        genGutterBlockButtonHTML: data => `<button data-type="${data.type}"></button>`,
+        genGutterBlockButtonHTML: data => `<button data-type="${data.type}" data-node-id="${data.nodeID}"></button>`,
     };
     const render = new Function(...Object.keys(dependencies), source + "\nreturn render;")(...Object.values(dependencies));
     window.siyuan = {languages: {fold: "Fold"}};
@@ -59,10 +59,20 @@ const cases = source => {
                 check.ok(html?.includes(`data-type="${type}"`), `${type}/${id}/${!!extra}: ${html}`);
                 check.ok(html?.includes('data-type="NodeListItem"'), `${type}/${id}/${!!extra}: ${html}`);
             }
+            for (const subtype of ["u", "o", "t"]) {
+                root.querySelector('[data-node-id="list"]').setAttribute("data-subtype", subtype);
+                root.querySelector('[data-node-id="item"]').setAttribute("data-subtype", subtype);
+                const container = root.querySelector('[data-node-id="container"]');
+                const marker = root.querySelector(".protyle-action");
+                check.equal(render.call(gutter, protyle, marker, marker),
+                    render.call(gutter, protyle, container, container), `${type}/${subtype}/${!!extra}: marker gutters`);
+            }
         }
     }
     root.innerHTML = `<div data-node-id="list" data-type="NodeList" class="list"><div data-node-id="item" data-type="NodeListItem" class="li"><div class="protyle-action"></div><div data-node-id="p" data-type="NodeParagraph">Text</div>${attr}</div>${attr}</div>`;
     check.ok(!render.call(gutter, protyle, root.querySelector('[data-node-id="p"]')).includes('data-type="NodeParagraph"'));
+    check.equal(render.call(gutter, protyle, root.querySelector(".protyle-action")),
+        render.call(gutter, protyle, root.querySelector('[data-node-id="p"]')));
     return "List container gutters passed";
 };
 
@@ -73,7 +83,12 @@ if (process.versions.electron && process.type === "browser") {
         await app.whenReady();
         const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
         await win.loadURL("data:text/html,<html><body></body></html>");
-        console.log(await win.webContents.executeJavaScript(`(${cases.toString()})(${JSON.stringify(sources())})`));
+        const result = await win.webContents.executeJavaScript(`(() => {
+            try { return {message: (${cases.toString()})(${JSON.stringify(sources())})}; }
+            catch (error) { return {error: error.stack}; }
+        })()`);
+        assert.ok(!result.error, result.error);
+        console.log(result.message);
         win.destroy();
         app.exit(0);
     })().catch(error => { console.error(error); require("electron").app.exit(1); });

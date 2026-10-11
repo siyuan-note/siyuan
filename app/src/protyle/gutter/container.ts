@@ -3,7 +3,8 @@ export const getListItemGutterContainer = (element: Element) => {
     const item = element.closest('[data-type="NodeListItem"]');
     const first = item?.querySelector(":scope > [data-node-id]");
     if (first && ["NodeTable", "NodeBlockquote", "NodeCallout", "NodeSuperBlock", "NodeTabs"]
-        .includes(first.getAttribute("data-type")) && (element === item || first.contains(element))) {
+        .includes(first.getAttribute("data-type")) && (element === item || first.contains(element) ||
+            element.parentElement === item && element.classList.contains("protyle-action"))) {
         return first;
     }
 };

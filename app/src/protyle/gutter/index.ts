@@ -3717,7 +3717,8 @@ export class Gutter {
         let html = "";
         let nodeElement = selectedElement || element;
         const listItemContainer = isMultiSelect ? undefined : getListItemGutterContainer(nodeElement);
-        if (listItemContainer && nodeElement === listItemContainer.parentElement) {
+        if (listItemContainer && (nodeElement === listItemContainer.parentElement ||
+            nodeElement.classList.contains("protyle-action"))) {
             nodeElement = listItemContainer;
         }
         const mindmapElement = (nodeElement.getAttribute("data-type") === "NodeMindmap" ||

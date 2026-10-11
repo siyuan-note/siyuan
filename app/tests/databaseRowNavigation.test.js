@@ -71,7 +71,7 @@ const runCases = async (sources, css, touch) => {
         const menu = breadcrumb.querySelector('[data-type="mobile-menu"]');
         const control = breadcrumb.querySelector('[data-type="more"]').getBoundingClientRect();
         check.ok(control.right <= window.innerWidth, JSON.stringify({control, width: window.innerWidth}));
-        check.equal(toolbar, breadcrumb.firstElementChild);
+        check.equal(toolbar.nextElementSibling, breadcrumb.querySelector('[data-type="readonly"]'));
         check.equal(menu.getBoundingClientRect().height, 24);
         for (const button of buttons) {
             check.equal(button.disabled, false);
@@ -79,7 +79,8 @@ const runCases = async (sources, css, touch) => {
             check.equal(rect.height, control.height);
             check.equal(rect.width, control.width);
             check.equal(rect.top, control.top);
-            check.ok(rect.right <= menu.getBoundingClientRect().left);
+            check.ok(rect.left >= menu.getBoundingClientRect().right);
+            check.ok(rect.right <= breadcrumb.querySelector('[data-type="readonly"]').getBoundingClientRect().left);
             check.ok(rect.right <= window.innerWidth);
             check.ok(button.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)), "navigation button must not be covered");
         }

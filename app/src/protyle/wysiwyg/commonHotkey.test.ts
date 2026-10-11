@@ -7,6 +7,9 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 const source = transpileModule(readFileSync("src/protyle/wysiwyg/commonHotkey.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
+const caretSource = transpileModule(readFileSync("src/protyle/wysiwyg/verticalCaret.ts", "utf8"), {
+    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+}).outputText;
 
 const copy = (options: {selected?: string[], rangeBlocks?: string[], collapsed?: boolean, outside?: boolean, document?: boolean}) => {
     const block = (id: string) => ({getAttribute: () => id});
@@ -59,6 +62,9 @@ test("collapsed and foreign selections retain the current block and document fal
 // 是否已到达块的首行/末行以选区活动端（光标）为准，否则多行选区会按选区首行处理。
 const expandToBlockEdge = (direction: "up" | "down", options: {
     backward?: boolean,
+    withoutDirection?: boolean,
+    elementFocus?: boolean,
+    missingCaretRect?: boolean,
     start: number,
     end: number,
     focusTop: number,
@@ -66,32 +72,86 @@ const expandToBlockEdge = (direction: "up" | "down", options: {
     extendable?: boolean,
     nextBlock?: boolean,
 }) => {
+    assert.ok(options.start <= options.end);
     const calls: string[] = [];
     const editable = {
+        nodeType: 1,
         innerText: "abcdefghij\nklmnopqrst\nuvwxyz",
+        isConnected: true,
+        childNodes: [] as unknown[],
+        contains: (node: unknown): boolean => node === editable || editable.childNodes.includes(node),
+        ownerDocument: {createRange: () => createCaretRange()},
         getBoundingClientRect: () => ({top: 0, bottom: 100}),
     };
-    const textNode = {nodeType: 3};
+    const textNode = {
+        nodeType: 3,
+        textContent: editable.innerText.substring(0, options.elementFocus ? options.end : editable.innerText.length),
+        parentElement: editable,
+        parentNode: editable,
+        nextSibling: null as unknown,
+        previousSibling: null as unknown,
+    };
+    editable.childNodes.push(textNode);
+    if (options.elementFocus) {
+        const trailingText = {...textNode, textContent: editable.innerText.substring(options.end), previousSibling: textNode};
+        textNode.nextSibling = trailingText;
+        editable.childNodes.push(trailingText);
+    }
     const range = {
         startContainer: textNode,
         startOffset: options.start,
-        endContainer: textNode,
-        endOffset: options.end,
+        endContainer: options.elementFocus ? editable : textNode,
+        endOffset: options.elementFocus ? 1 : options.end,
         collapsed: false,
         getBoundingClientRect: () => ({top: 0, bottom: 100}),
         collapse: () => calls.push("collapse"),
     };
-    const caretRange = {
-        setStart: () => caretRange,
-        collapse: () => caretRange,
-        getClientRects: () => [{
-            top: options.focusTop,
-            bottom: options.focusBottom,
-            height: options.focusBottom - options.focusTop,
-        }],
-    };
+    const createCaretRange = () => ({
+        startContainer: undefined as unknown,
+        startOffset: 0,
+        endOffset: 0,
+        collapsed: true,
+        setStart(node: unknown, offset: number) {
+            this.startContainer = node;
+            this.startOffset = offset;
+            this.endOffset = offset;
+            this.collapsed = true;
+        },
+        setEnd(_node: unknown, offset: number) {
+            this.endOffset = offset;
+            this.collapsed = this.startOffset === offset;
+        },
+        collapse() {
+            this.collapsed = true;
+        },
+        getClientRects() {
+            return options.missingCaretRect && this.collapsed ? [] : [{
+                left: 0,
+                top: options.focusTop,
+                bottom: options.focusBottom,
+                height: options.focusBottom - options.focusTop,
+            }];
+        },
+    });
+    const caretRange = createCaretRange();
+    const caretExports = {} as {getVerticalCaretRect: (element: unknown, range: unknown) => unknown};
+    runInNewContext(caretSource, {
+        exports: caretExports,
+        require: () => ({
+            getFoldedNavigationOwner: (): undefined => undefined,
+            getReachableVerticalRects: (_element: unknown, rects: unknown[]) => rects,
+        }),
+        Node: {TEXT_NODE: 3, ELEMENT_NODE: 1},
+        DOMRect: class {
+            constructor(public left: number, public top: number, public width: number, public height: number) {}
+            get bottom() {
+                return this.top + this.height;
+            }
+        },
+    });
     let prevented = false;
     const dependencies = {
+        getVerticalCaretRect: caretExports.getVerticalCaretRect,
         matchHotKey: () => false,
         isMac: () => true,
         hasClosestByTag: (): undefined => undefined,
@@ -113,7 +173,7 @@ const expandToBlockEdge = (direction: "up" | "down", options: {
         require: () => dependencies,
         getComputedStyle: () => ({paddingTop: "0px", paddingBottom: "0px"}),
         getSelection: () => ({
-            direction: options.backward ? "backward" : "forward",
+            direction: options.withoutDirection ? undefined : options.backward ? "backward" : "forward",
             anchorNode: textNode,
             anchorOffset: options.backward ? options.end : options.start,
         }),
@@ -136,6 +196,8 @@ const expandToBlockEdge = (direction: "up" | "down", options: {
     } else {
         exports.downSelect(selectOptions);
     }
+    assert.equal(caretRange.startContainer, options.backward ? range.startContainer : range.endContainer);
+    assert.equal(caretRange.startOffset, options.backward ? range.startOffset : range.endOffset);
     return {calls, prevented};
 };
 
@@ -160,7 +222,7 @@ test("expand looks at the selection focus instead of the whole range", () => {
     assert.deepEqual(expandToBlockEdge("up", {start: 2, end: 25, focusTop: 64, focusBottom: 82}), noOp);
     assert.deepEqual(expandToBlockEdge("up", {start: 2, end: 25, focusTop: 64, focusBottom: 82, extendable: true}), noOp);
     // 反向选区以偏移较小的一端为活动端，光标在末行时同样不应收至块首
-    const backward = expandToBlockEdge("up", {backward: true, start: 25, end: 2, focusTop: 64, focusBottom: 82,
+    const backward = expandToBlockEdge("up", {backward: true, start: 23, end: 25, focusTop: 64, focusBottom: 82,
         extendable: true});
     assert.deepEqual(backward, noOp);
     // 首行/末行自然换行时活动端不在块的首行/末行，交回浏览器继续向上/下移动一行
@@ -169,6 +231,22 @@ test("expand looks at the selection focus instead of the whole range", () => {
     // 非最后一个块时交由浏览器移动到下一个块
     assert.deepEqual(expandToBlockEdge("down", {start: 2, end: 25, focusTop: 82, focusBottom: 100, nextBlock: true,
         extendable: true}), noOp);
+});
+
+test("backward selections use normalized range offsets with and without Selection.direction", () => {
+    for (const withoutDirection of [false, true]) {
+        assert.deepEqual(expandToBlockEdge("up", {backward: true, withoutDirection, start: 2, end: 25,
+            focusTop: 0, focusBottom: 18, extendable: true}).calls, ["boundary:true:true"]);
+        assert.deepEqual(expandToBlockEdge("down", {backward: true, withoutDirection, start: 2, end: 25,
+            focusTop: 0, focusBottom: 18, extendable: true}), {calls: [], prevented: false});
+    }
+});
+
+test("element focus boundaries still stop at the block edge when the collapsed range has no rectangle", () => {
+    assert.deepEqual(expandToBlockEdge("up", {start: 2, end: 6, elementFocus: true, missingCaretRect: true,
+        focusTop: 0, focusBottom: 18, extendable: true}), {calls: ["boundary:true:true"], prevented: true});
+    assert.deepEqual(expandToBlockEdge("down", {start: 23, end: 25, elementFocus: true, missingCaretRect: true,
+        focusTop: 82, focusBottom: 100, extendable: true}).calls, ["boundary:true:false"]);
 });
 
 test("expand keeps the block selection step when the focus is already at the block edge", () => {

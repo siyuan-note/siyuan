@@ -5,6 +5,7 @@ import {isMac, writeText} from "../util/compatibility";
 import {focusBlock, getBlockElementsByRange, getEditorRange, setFirstNodeRange} from "../util/selection";
 import {getSelectionOffset, setLastNodeRange} from "../util/selectionOffsets";
 import {selectTextToEditorBoundary} from "../util/selectionBoundary";
+import {getVerticalCaretRect} from "./verticalCaret";
 import {getContenteditableElement, getNextBlock} from "./getBlock";
 import {hideElements} from "../ui/hideElements";
 import {countBlockWord} from "../../layout/status";
@@ -141,7 +142,7 @@ const extendSelectionToBlockEdge = (editableElement: HTMLElement, range: Range, 
     if (selectTextToEditorBoundary(editableElement, toStart)) {
         return;
     }
-    // 锚点不在当前块内时（例如跨块选区）保持原有行为
+    // 锚点不在当前块内时（例如跨块选区）直接设置范围边界
     if (toStart) {
         setFirstNodeRange(editableElement, range);
     } else {
@@ -150,7 +151,7 @@ const extendSelectionToBlockEdge = (editableElement: HTMLElement, range: Range, 
 };
 
 // 扩选应以选区活动端（光标所在端）为准：Range 按文档顺序归一化，方向只能从 Selection 判断
-const getSelectionFocus = (range: Range, position: { start: number, end: number }) => {
+const getSelectionFocus = (editableElement: HTMLElement, range: Range, position: { start: number, end: number }) => {
     const selection = getSelection() as Selection & {direction?: "forward" | "backward" | "none"};
     const backward = selection?.direction === "backward" ||
         (selection?.direction !== "forward" && selection?.anchorNode === range.endContainer &&
@@ -159,10 +160,10 @@ const getSelectionFocus = (range: Range, position: { start: number, end: number 
     caretRange.setStart(backward ? range.startContainer : range.endContainer,
         backward ? range.startOffset : range.endOffset);
     caretRange.collapse(true);
-    const rects = Array.from(caretRange.getClientRects()).filter(rect => rect.height > 0.5);
+    // 行内元素边界可能没有折叠矩形，沿相邻内容测量活动端
     return {
         index: backward ? position.start : position.end,
-        rect: rects[rects.length - 1],
+        rect: getVerticalCaretRect(editableElement, caretRange),
     };
 };
 
@@ -184,7 +185,7 @@ export const upSelect = (options: {
         const position = getSelectionOffset(nodeEditableElement, options.editorElement, options.range);
         const innerText = nodeEditableElement.innerText;
         const isExpandUp = matchHotKey(window.siyuan.config.keymap.editor.general.expandUp, options.event);
-        const focus = getSelectionFocus(options.range, position);
+        const focus = getSelectionFocus(nodeEditableElement, options.range, position);
         if (!isMac() && isExpandUp) {
             // Windows 中 ⌥⇧↑ 默认无选中功能会导致 https://ld246.com/article/1716635371149
         } else if (focus.index > 0) {
@@ -234,7 +235,7 @@ export const downSelect = (options: {
         const position = getSelectionOffset(nodeEditableElement, options.editorElement, options.range);
         const innerText = nodeEditableElement.innerText;
         const isExpandDown = matchHotKey(window.siyuan.config.keymap.editor.general.expandDown, options.event);
-        const focus = getSelectionFocus(options.range, position);
+        const focus = getSelectionFocus(nodeEditableElement, options.range, position);
         if (!isMac() && isExpandDown) {
             // Windows 中 ⌥⇧↓ 默认无选中功能会导致 https://ld246.com/article/1716635371149
         } else if (focus.index < innerText.length) {

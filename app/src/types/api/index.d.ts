@@ -3589,6 +3589,7 @@ export interface APIPOSTRoutes {
      * 可选的 `sort: {column, order}` 按关联数据库字段排序，order 为 ASC 或 DESC。
      * 全部候选排序后分页，仅影响本次查询，不修改视图和 selectedRows 顺序。
      * 省略 sort 时按创建时间倒序；不存在的字段或无效方向返回错误。
+     * keyword 在分页前匹配字段内容；无显示模板的空主键也匹配当前语言的未命名占位文字，遵循搜索大小写设置。
      */
     "/api/av/getAttributeViewRelationCandidates": {
         request: GetAttributeViewRelationCandidatesRequestInput;

@@ -9,7 +9,50 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAVRelationCandidateUntitledContract(t *testing.T) {
+	fixture := setupAttributeViewContextFilterAPITest(t)
+	oldWorkingDir := util.WorkingDir
+	util.WorkingDir = "../../app"
+	t.Cleanup(func() { util.WorkingDir = oldWorkingDir })
+	oldCaseSensitive := util.SearchCaseSensitive.Load()
+	util.SearchCaseSensitive.Store(false)
+	t.Cleanup(func() { util.SearchCaseSensitive.Store(oldCaseSensitive) })
+	key := fixture.attrView.GetBlockKey()
+	var ids []string
+	for i := 0; i < 2; i++ {
+		id := ast.NewNodeID()
+		ids = append(ids, id)
+		fixture.attrView.KeyValues[0].Values = append(fixture.attrView.KeyValues[0].Values, &av.Value{
+			ID: ast.NewNodeID(), KeyID: key.ID, BlockID: id, Type: av.KeyTypeBlock, IsDetached: true,
+			CreatedAt: int64(i + 1), Block: &av.ValueBlock{},
+		})
+	}
+	if err := av.SaveAttributeView(fixture.attrView); err != nil {
+		t.Fatal(err)
+	}
+	const path = "/api/av/getAttributeViewRelationCandidates"
+	for page := 1; page <= 2; page++ {
+		response := callAttributeViewContextFilterAPI(t, path, map[string]any{
+			"avID": fixture.attrView.ID, "keyID": fixture.relationKeyID, "keyword": "unt",
+			"page": page, "pageSize": 1, "selectedBlockIDs": []string{ids[0]},
+		}, getAttributeViewRelationCandidates)
+		requireAPIContract(t, http.MethodPost, path, response)
+		var result struct {
+			Code int                                  `json:"code"`
+			Data apicontract.AVRelationCandidatesData `json:"data"`
+		}
+		if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil || result.Code != 0 {
+			t.Fatalf("candidate request failed: %s (%v)", response.Body.String(), err)
+		}
+		if result.Data.Total != 2 || len(result.Data.Rows) != 1 || result.Data.Rows[0].ID != ids[2-page] ||
+			len(result.Data.SelectedRows) != 1 || result.Data.SelectedRows[0].ID != ids[0] {
+			t.Fatalf("unexpected candidate page or selected rows: %s", response.Body.String())
+		}
+	}
+}
 
 func TestAVRelationCandidateSortContract(t *testing.T) {
 	fixture := setupAttributeViewContextFilterAPITest(t)

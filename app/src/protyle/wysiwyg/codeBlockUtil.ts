@@ -1,5 +1,10 @@
 export const CODE_TAB_SPACE_VALUES = [0, 2, 4, 6, 8];
 
+/** 代码块 Tab 空格档位的统一文案：0 档保留制表符，其余显示为 N 个空格 */
+export const getCodeTabSpacesLabel = (spaces: number): string => spaces === 0
+    ? window.siyuan.languages.codeTabSpacesKeepTab
+    : window.siyuan.languages.codeTabSpacesCount.replace("${x}", spaces.toString());
+
 export const resolveCodeTabSpaces = (attributeValue: string | null, globalValue: number) => {
     if (attributeValue !== null && CODE_TAB_SPACE_VALUES.some((value) => value.toString() === attributeValue)) {
         return parseInt(attributeValue);

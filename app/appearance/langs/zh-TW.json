@@ -2,6 +2,8 @@
 	"kernelUnresponsiveTitle": "核心無回應",
 	"kernelUnresponsiveMessage": "本機核心請求逾時，思源無法進入主畫面。請查看 ${log} 取得詳細資訊。",
 	"kernelUnresponsiveWindowsHint": "在 Windows 上，此現象可能與 TCP 壅塞控制 BBR2 和 Loopback Large Mtu (loopbacklargemtu) 同時啟用有關。",
+	"codeTabSpacesCount": "${x} 個空格",
+	"codeTabSpacesKeepTab": "不替換（保留製表符）",
 	"syncConfigTip": "設定此服務的伺服器位址、存取憑證與連線參數，儲存後用於雲端同步與雲端備份",
 	"dataRepoPurgeCloud": "雲端資料倉庫清理",
 	"dataRepoPurgeCloudTip": "刪除雲端所有未引用的快照和相關資料對象",

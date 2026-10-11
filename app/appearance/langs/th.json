@@ -2,6 +2,8 @@
 	"kernelUnresponsiveTitle": "เคอร์เนลไม่ตอบสนอง",
 	"kernelUnresponsiveMessage": "คำขอไปยังเคอร์เนลภายในเครื่องหมดเวลา จึงไม่สามารถเปิดหน้าต่างหลักของ SiYuan ได้ โปรดดูรายละเอียดใน ${log}",
 	"kernelUnresponsiveWindowsHint": "บน Windows ปัญหานี้อาจเกี่ยวข้องกับการเปิดใช้การควบคุมความแออัดของ TCP แบบ BBR2 ร่วมกับ Loopback Large Mtu (loopbacklargemtu)",
+	"codeTabSpacesCount": "${x} ช่องว่าง",
+	"codeTabSpacesKeepTab": "ไม่แทนที่ (คงแท็บไว้)",
 	"syncConfigTip": "กำหนดค่าที่อยู่เซิร์ฟเวอร์ ข้อมูลรับรอง และพารามิเตอร์การเชื่อมต่อของบริการนี้ เมื่อบันทึกแล้วจะใช้สำหรับการซิงค์และสำรองข้อมูลบนคลาวด์",
 	"dataRepoPurgeCloud": "ล้างคลังข้อมูลบนคลาวด์",
 	"dataRepoPurgeCloudTip": "ลบสแนปช็อตและออบเจ็กต์ข้อมูลที่เกี่ยวข้องซึ่งไม่ได้อ้างอิงทั้งหมดบนคลาวด์",

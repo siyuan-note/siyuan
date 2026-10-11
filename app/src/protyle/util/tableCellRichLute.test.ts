@@ -491,7 +491,8 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
     const copied: string[] = [];
     let messages = 0;
     let bubbled = 0;
-    Object.assign(window.siyuan, {languages: {copied: "Copied", default: "Default"}});
+    Object.assign(window.siyuan, {languages: {copied: "Copied", default: "Default",
+        codeTabSpacesCount: "${x} spaces", codeTabSpacesKeepTab: "Keep tab"}});
     const copyController = new AbortController();
     let canEditCode = true;
     let menuItems: IMenu[] = [];
@@ -575,7 +576,8 @@ const browserCases = async (source: string, enterSource: string, hintSource: str
         const previousValue = wysiwyg.firstElementChild.getAttribute(codeTabAttribute);
         wysiwyg.querySelector(".protyle-action__menu").dispatchEvent(new MouseEvent("click", {bubbles: true}));
         const tabItems = menuItems.find(item => item.id === "md29").submenu;
-        check.deepEqual(tabItems.map(item => item.label), ["Default (4)", "0", "2", "4", "6", "8"]);
+        check.deepEqual(tabItems.map(item => item.label),
+            ["Default (4 spaces)", "Keep tab", "2 spaces", "4 spaces", "6 spaces", "8 spaces"]);
         check.equal(tabItems.filter(item => item.checked).length, 1);
         const option = tabItems.find(item => item.id === (value === null ? "default" : `tabSpaces${value}`));
         option.click(document.createElement("button"), new MouseEvent("click"));

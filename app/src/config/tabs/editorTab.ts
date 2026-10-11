@@ -1,6 +1,7 @@
 import {Constants} from "../../constants";
 import {isBrowser, isMobile} from "../../util/functions";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
+import {CODE_TAB_SPACE_VALUES, getCodeTabSpacesLabel} from "../../protyle/wysiwyg/codeBlockUtil";
 import {editorConfigApi} from "./editorRuntime";
 import type {SettingTabBuilder} from "../setting/builder";
 import {controlSelect} from "../setting/control";
@@ -39,12 +40,10 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         afterMount: bindSpellcheckLanguagesChips,
     });
     /// #endif
-    group.range("editor.codeTabSpaces", {
+    group.select("editor.codeTabSpaces", {
         title: window.siyuan.languages.md29,
         desc: window.siyuan.languages.md30,
-        min: 0,
-        max: 8,
-        step: 2,
+        options: CODE_TAB_SPACE_VALUES.map((value) => ({value, label: getCodeTabSpacesLabel(value)})),
     });
     group.number("editor.cursorSurroundingLines", {
         title: window.siyuan.languages.cursorSurroundingLines,

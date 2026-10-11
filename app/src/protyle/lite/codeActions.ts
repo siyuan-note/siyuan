@@ -6,7 +6,7 @@ import {isMobile} from "../../util/functions";
 import {highlightRender} from "../render/highlightRender";
 import {writeText} from "../util/compatibility";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
-import {CODE_TAB_SPACE_VALUES} from "../wysiwyg/codeBlockUtil";
+import {CODE_TAB_SPACE_VALUES, getCodeTabSpacesLabel} from "../wysiwyg/codeBlockUtil";
 
 export const getLiteCodeMenuItems = (node: Element, update: (attribute: string, value: string) => void): IMenu[] => {
     const editor = window.siyuan.config.editor;
@@ -19,13 +19,13 @@ export const getLiteCodeMenuItems = (node: Element, update: (attribute: string, 
         submenu: [{
             id: "default",
             iconHTML: "",
-            label: `${window.siyuan.languages.default} (${editor.codeTabSpaces})`,
+            label: `${window.siyuan.languages.default} (${getCodeTabSpacesLabel(editor.codeTabSpaces)})`,
             checked: codeTabSpaces === null,
             click: () => update(Constants.CUSTOM_SY_CODE_TAB_SPACES, ""),
         }, ...CODE_TAB_SPACE_VALUES.map(value => ({
             id: `tabSpaces${value}`,
             iconHTML: "",
-            label: value.toString(),
+            label: getCodeTabSpacesLabel(value),
             checked: codeTabSpaces === value.toString(),
             click: () => update(Constants.CUSTOM_SY_CODE_TAB_SPACES, value.toString()),
         }))],

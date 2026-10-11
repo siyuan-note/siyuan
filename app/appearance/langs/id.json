@@ -1,4 +1,7 @@
 {
+	"kernelUnresponsiveTitle": "Kernel tidak merespons",
+	"kernelUnresponsiveMessage": "Permintaan lokal ke kernel kehabisan waktu, sehingga SiYuan tidak dapat membuka jendela utama. Lihat ${log} untuk detailnya.",
+	"kernelUnresponsiveWindowsHint": "Di Windows, hal ini mungkin terkait dengan penggunaan kontrol kemacetan TCP BBR2 bersama Loopback Large Mtu.",
 	"syncConfigTip": "Konfigurasikan alamat server, kredensial, dan parameter koneksi layanan ini; setelah disimpan akan digunakan untuk sinkronisasi dan pencadangan cloud",
 	"dataRepoPurgeCloud": "Pembersihan repositori data cloud",
 	"dataRepoPurgeCloudTip": "Hapus semua snapshot yang tidak dirujuk dan objek data terkait di cloud",

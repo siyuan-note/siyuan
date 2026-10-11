@@ -1,4 +1,7 @@
 {
+	"kernelUnresponsiveTitle": "Jądro nie odpowiada",
+	"kernelUnresponsiveMessage": "Upłynął limit czasu lokalnych żądań do jądra, więc SiYuan nie może otworzyć głównego okna. Szczegóły znajdują się w ${log}.",
+	"kernelUnresponsiveWindowsHint": "W systemie Windows może to być związane z jednoczesnym włączeniem kontroli przeciążenia TCP BBR2 i Loopback Large Mtu.",
 	"syncConfigTip": "Skonfiguruj adres serwera, dane uwierzytelniające i parametry połączenia tej usługi; po zapisaniu są używane do synchronizacji i kopii zapasowej w chmurze",
 	"dataRepoPurgeCloud": "Oczyszczanie repozytorium danych w chmurze",
 	"dataRepoPurgeCloudTip": "Usuń wszystkie nieodwołane zrzuty i powiązane obiekty danych w chmurze",

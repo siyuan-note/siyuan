@@ -1,4 +1,7 @@
 {
+	"kernelUnresponsiveTitle": "El núcleo no responde",
+	"kernelUnresponsiveMessage": "Las solicitudes locales al núcleo agotaron el tiempo de espera, por lo que SiYuan no puede abrir la ventana principal. Consulte ${log} para obtener más detalles.",
+	"kernelUnresponsiveWindowsHint": "En Windows, esto puede estar relacionado con la combinación del control de congestión TCP BBR2 y Loopback Large Mtu.",
 	"syncConfigTip": "Configura la dirección del servidor, las credenciales y los parámetros de conexión de este servicio; tras guardar se usan para la sincronización y la copia de seguridad en la nube",
 	"dataRepoPurgeCloud": "Purga del repositorio de datos en la nube",
 	"dataRepoPurgeCloudTip": "Elimina todas las instantáneas sin referencia y los objetos de datos relacionados en la nube",

@@ -1,4 +1,5 @@
 {
+	"chooseFile": "파일 선택",
 	"syncConfigNotSaved": "변경 사항이 아직 저장되지 않았습니다. 필수 항목을 모두 입력해 주세요",
 	"previousDatabaseRow": "이전 데이터베이스 항목",
 	"nextDatabaseRow": "다음 데이터베이스 항목",

@@ -1,4 +1,5 @@
 {
+	"chooseFile": "Dosya seç",
 	"syncConfigNotSaved": "Değişiklikler henüz kaydedilmedi; zorunlu alanları doldurun",
 	"previousDatabaseRow": "Önceki veritabanı kaydı",
 	"nextDatabaseRow": "Sonraki veritabanı kaydı",

@@ -78,7 +78,7 @@ export const registerOCRTab = (tab: SettingTabBuilder) => {
         keywords: ["ONNX", "YAML", "Tiny", languages.ocrImportModels, languages.ocrDetector, languages.ocrRecognizer],
         html: () => `<div id="ocrImportModels" class="b3-label config-item">${genConfigItemMainHtml(languages.ocrImportModels, languages.ocrImportModelsTip)}
 ${getModelFiles().map(file => `<div class="fn__hr"></div><div class="fn__block"><div id="${file.id}Label" class="b3-label__text">${file.title}</div><div class="fn__hr--small"></div>
-<div class="fn__flex"><button type="button" class="b3-button b3-button--outline fn__flex-center" data-ocr-file="${file.id}" aria-describedby="${file.id}Label">${languages.select}</button><span class="fn__space"></span><span id="${file.id}Name" class="fn__flex-1 fn__flex-center fn__ellipsis" aria-live="polite"></span></div>
+<div class="fn__flex"><button type="button" class="b3-button b3-button--outline fn__flex-center" data-ocr-file="${file.id}" aria-describedby="${file.id}Label">${languages.chooseFile}</button><span class="fn__space"></span><span id="${file.id}Name" class="fn__flex-1 fn__flex-center fn__ellipsis" aria-live="polite"></span></div>
 <input id="${file.id}" class="fn__none" type="file" accept="${file.suffix.split(",").map(suffix => `.${suffix}`).join(",")}"></div>`).join("")}</div>`,
     }).slot({
         key: "ocrImport",

@@ -1,4 +1,5 @@
 {
+	"chooseFile": "Изабери датотеку",
 	"syncConfigNotSaved": "Промене нису сачуване; попуните обавезна поља",
 	"previousDatabaseRow": "Претходни унос базе података",
 	"nextDatabaseRow": "Следећи унос базе података",

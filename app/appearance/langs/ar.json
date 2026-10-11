@@ -1,4 +1,5 @@
 {
+	"chooseFile": "اختيار ملف",
 	"syncConfigNotSaved": "لم يتم حفظ التغييرات، يرجى إكمال الحقول المطلوبة",
 	"previousDatabaseRow": "إدخال قاعدة البيانات السابق",
 	"nextDatabaseRow": "إدخال قاعدة البيانات التالي",

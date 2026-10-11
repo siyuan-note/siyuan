@@ -1,4 +1,5 @@
 {
+	"chooseFile": "选择文件",
 	"syncConfigNotSaved": "更改尚未保存，请填写完整的必填项",
 	"previousDatabaseRow": "上一条数据库条目",
 	"nextDatabaseRow": "下一条数据库条目",

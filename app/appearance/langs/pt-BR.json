@@ -1,4 +1,5 @@
 {
+	"chooseFile": "Selecionar arquivo",
 	"syncConfigNotSaved": "As alterações ainda não foram salvas; preencha os campos obrigatórios",
 	"previousDatabaseRow": "Entrada anterior do banco de dados",
 	"nextDatabaseRow": "Próxima entrada do banco de dados",

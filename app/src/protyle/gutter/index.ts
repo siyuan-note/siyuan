@@ -95,7 +95,7 @@ import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {genCellValueByElement} from "../render/av/cell";
 import {getPlainText} from "../util/paste";
-import {CODE_TAB_SPACE_VALUES} from "../wysiwyg/codeBlockUtil";
+import {CODE_TAB_SPACE_VALUES, getCodeTabSpacesLabel} from "../wysiwyg/codeBlockUtil";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getEditorFocusRangeOutsideElement, restoreEditorFocusRange} from "../util/editorFocus";
 import {
@@ -2309,7 +2309,7 @@ export class Gutter {
                     submenu: [{
                         id: "default",
                         iconHTML: "",
-                        label: `${window.siyuan.languages.default} (${window.siyuan.config.editor.codeTabSpaces})`,
+                        label: `${window.siyuan.languages.default} (${getCodeTabSpacesLabel(window.siyuan.config.editor.codeTabSpaces)})`,
                         checked: codeTabSpaces === null,
                         click() {
                             setCodeTabSpaces("");
@@ -2317,7 +2317,7 @@ export class Gutter {
                     }, ...CODE_TAB_SPACE_VALUES.map((value) => ({
                         id: `tabSpaces${value}`,
                         iconHTML: "",
-                        label: value.toString(),
+                        label: getCodeTabSpacesLabel(value),
                         checked: codeTabSpaces === value.toString(),
                         click() {
                             setCodeTabSpaces(value.toString());

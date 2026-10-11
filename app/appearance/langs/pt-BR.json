@@ -2,6 +2,8 @@
 	"kernelUnresponsiveTitle": "O kernel não está respondendo",
 	"kernelUnresponsiveMessage": "As solicitações locais ao kernel excederam o tempo limite, então o SiYuan não pode abrir a janela principal. Consulte ${log} para obter detalhes.",
 	"kernelUnresponsiveWindowsHint": "No Windows, isso pode estar relacionado à combinação do controle de congestionamento TCP BBR2 com Loopback Large Mtu (loopbacklargemtu).",
+	"codeTabSpacesCount": "${x} espaços",
+	"codeTabSpacesKeepTab": "Sem substituição (tab mantido)",
 	"syncConfigTip": "Configure o endereço do servidor, as credenciais e os parâmetros de conexão deste serviço; após salvar, são usados para sincronização e backup na nuvem",
 	"dataRepoPurgeCloud": "Limpar repositório de dados na nuvem",
 	"dataRepoPurgeCloudTip": "Excluir todos os instantâneos não referenciados e objetos de dados relacionados na nuvem",

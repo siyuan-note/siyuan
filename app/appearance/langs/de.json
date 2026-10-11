@@ -2,6 +2,8 @@
 	"kernelUnresponsiveTitle": "Der Kernel antwortet nicht",
 	"kernelUnresponsiveMessage": "Lokale Anfragen an den Kernel haben das Zeitlimit überschritten. SiYuan kann das Hauptfenster nicht öffnen. Weitere Informationen finden Sie in ${log}.",
 	"kernelUnresponsiveWindowsHint": "Unter Windows kann dies mit der Kombination aus TCP-Staukontrolle BBR2 und Loopback Large Mtu (loopbacklargemtu) zusammenhängen.",
+	"codeTabSpacesCount": "${x} Leerzeichen",
+	"codeTabSpacesKeepTab": "Kein Ersatz (Tab bleibt erhalten)",
 	"syncConfigTip": "Serveradresse, Zugangsdaten und Verbindungsparameter dieses Dienstes konfigurieren; nach dem Speichern werden sie für Cloud-Synchronisation und Cloud-Backup verwendet",
 	"dataRepoPurgeCloud": "Cloud-Daten-Repo bereinigen",
 	"dataRepoPurgeCloudTip": "Alle nicht referenzierten Schnappschüsse und zugehörigen Datenobjekte in der Cloud löschen",

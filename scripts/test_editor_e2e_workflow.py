@@ -17,7 +17,7 @@ DESKTOP = (ROOT / ".github/workflows/desktop-build.yml").read_text(encoding="utf
 
 
 def job(name):
-    return re.search(rf"^  {name}:\n(.*?)(?=^  \w+:\n|\Z)", CD, re.M | re.S).group(1)
+    return re.search(rf"^  {name}:\n(.*?)(?=^  [\w-]+:\n|\Z)", CD, re.M | re.S).group(1)
 
 
 def snapshot_command():
@@ -28,13 +28,13 @@ def snapshot_command():
 
 class EditorWorkflowTests(unittest.TestCase):
     def test_windows_kernel_tests_cover_all_packages_with_cgo(self):
-        frontend = job("frontend-tests")
-        compiler = frontend.split("- name: Set up Windows kernel test compiler\n", 1)[1].split("      - ", 1)[0]
+        kernel = job("kernel-tests-windows")
+        compiler = kernel.split("- name: Set up Windows kernel test compiler\n", 1)[1].split("      - ", 1)[0]
         self.assertIn("uses: msys2/setup-msys2@v2", compiler)
         self.assertIn("msystem: UCRT64", compiler)
         self.assertIn("path-type: inherit", compiler)
         self.assertIn("mingw-w64-ucrt-x86_64-gcc", compiler)
-        step = frontend.split("- name: Test all Windows kernel packages\n", 1)[1].split("      - ", 1)[0]
+        step = kernel.split("- name: Test all Windows kernel packages\n", 1)[1].split("      - ", 1)[0]
         self.assertIn('run: go test -tags "fts5 sqlcipher" ./... -count=1', step)
         self.assertIn("shell: msys2 {0}", step)
         self.assertIn("CGO_ENABLED: 1", step)
@@ -74,21 +74,71 @@ class EditorWorkflowTests(unittest.TestCase):
         self.assertNotIn("continue-on-error", ocr)
         self.assertIn('run: python -m unittest discover -s scripts -p "test_*ocr*.py"', ocr)
 
-    def test_release_waits_for_frontend_and_editor_with_existing_failure_rules(self):
+    def test_release_waits_for_all_checks_with_existing_failure_rules(self):
         release = job("create_release")
-        self.assertIn("needs: [prepare, frontend-tests, build, build_macos_arm64, build_android, editor_e2e]", release)
+        self.assertIn("needs: [prepare, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_arm64, build_android, editor_e2e]", release)
         expression = re.search(r"if: >-\s*\$\{\{(.*?)\}\}", release, re.S).group(1)
         expression = expression.replace("always()", "True").replace("!cancelled()", "not cancelled")
         expression = expression.replace("&&", " and ")
         expression = re.sub(r"needs\.([\w-]+)\.result", r'results["\1"]', expression)
         expression = " ".join(expression.split())
+        expression = compile(expression, "release condition", "eval")
         states = ["success", "failure", "skipped", "cancelled"]
-        for values in itertools.product(states, repeat=6):
-            results = dict(zip(["prepare", "frontend-tests", "build", "build_macos_arm64", "build_android", "editor_e2e"], values))
+        for values in itertools.product(states, repeat=8):
+            results = dict(zip(["prepare", "kernel-tests-linux", "kernel-tests-windows", "frontend-tests", "build", "build_macos_arm64", "build_android", "editor_e2e"], values))
             for cancelled in [False, True]:
-                expected = not cancelled and all(value == "success" for value in values[:5]) and values[5] != "cancelled"
+                expected = not cancelled and all(value == "success" for value in values[:7]) and values[7] != "cancelled"
                 actual = eval(expression, {"__builtins__": {}}, {"results": results, "cancelled": cancelled})
                 self.assertEqual(actual, expected, (results, cancelled))
+
+    def test_kernel_checks_are_independent_and_keep_native_prerequisites(self):
+        contracts = job("contracts")
+        frontend = job("frontend-tests")
+        self.assertNotIn("Test all kernel packages", contracts)
+        self.assertNotIn("Test all Windows kernel packages", frontend)
+        for name in ["kernel-tests-linux", "kernel-tests-windows", "frontend-tests"]:
+            check = job(name)
+            self.assertRegex(check, r"(?m)^    needs: prepare$")
+            self.assertIn("contents: read", check)
+            self.assertIn("uses: actions/checkout@v6", check)
+            self.assertIn("uses: actions/setup-node@v6", check)
+            self.assertNotRegex(check, r"(?m)^    continue-on-error:")
+        for name in ["kernel-tests-linux", "kernel-tests-windows"]:
+            check = job(name)
+            self.assertIn("uses: actions/setup-go@v6", check)
+            self.assertIn("go-version-file: kernel/go.mod", check)
+            self.assertIn("cache-dependency-path: kernel/go.sum", check)
+        linux = job("kernel-tests-linux")
+        self.assertIn("runs-on: ubuntu-24.04", linux)
+        self.assertIn("sudo apt-get install -y strace", linux)
+        self.assertIn("python3 scripts/prepare-ocr.py --runtime linux-amd64 --build-worker", linux)
+        full = linux.split("- name: Test all kernel packages\n", 1)[1].split("      - ", 1)[0]
+        self.assertIn('run: go test -tags "fts5 sqlcipher" ./... -count=1', full)
+        self.assertIn("continue-on-error: true", full)
+        self.assertIn("SIYUAN_OCR_TEST_ASSETS: ${{ github.workspace }}/app/stage/ocr/models", full)
+        self.assertIn("SIYUAN_OCR_TEST_LIBRARY: ${{ github.workspace }}/app/stage/ocr/runtime/linux-amd64/libonnxruntime.so", full)
+        paths = linux.split("- name: Test path fixtures with custom temporary directories\n", 1)[1].split("      - ", 1)[0]
+        self.assertIn("continue-on-error: true", paths)
+        self.assertIn(
+            'run: go test -tags "fts5 sqlcipher" ./internal/testutil ./util ./model ./server '
+            "-run 'Test(PublicDataDir|IsSensitivePath|.*Obsidian|RegisterStaticFileHandlers|StaticFile|WidgetResponseCacheControl|"
+            "TemplatesAndExportRequireAdministrator|SnippetPublishAccess|PluginPublish|PublishFile)' -count=1", paths)
+        self.assertIn("TMPDIR: /tmp", paths)
+        self.assertIn("GOTMPDIR: ${{ runner.temp }}", paths)
+        for hard_step in ["Install filesystem fault injection dependency", "Prepare native OCR verification resources"]:
+            step = linux.split(f"- name: {hard_step}\n", 1)[1].split("      - ", 1)[0]
+            self.assertNotIn("continue-on-error:", step)
+
+    def test_go_cache_and_builds_share_job_level_module_directory(self):
+        for build in [DESKTOP.split("jobs:\n  build:\n", 1)[1], job("build_android")]:
+            header, steps = build.split("    steps:\n", 1)
+            self.assertIn("      GOPATH: ${{ github.workspace }}/go", header)
+            self.assertNotIn("GOPATH:", steps)
+            setup = steps.split("uses: actions/setup-go@v6", 1)[1].split("      - ", 1)[0]
+            self.assertIn("cache: true", setup)
+            self.assertIn("cache-dependency-path:", setup)
+        self.assertIn('"$GOPATH/bin/gomobile" init', job("build_android"))
+        self.assertIn("${{ github.workspace }}\\go\\${{ fromJSON(inputs.config).gobin }}\\goversioninfo", DESKTOP)
 
     def test_independent_editor_runners_and_serial_workers(self):
         editor = job("editor_e2e")

@@ -18,6 +18,8 @@ jobs:
     runs-on: ${{ fromJSON(inputs.config).os }}
     name: ${{ fromJSON(inputs.config).name }}
     env:
+      # 缓存恢复、保存与编译共用模块目录。
+      GOPATH: ${{ github.workspace }}/go
       SIYUAN_E2E_SHARDS: ${{ fromJSON(inputs.config).e2e_shards }}
     steps:
       - uses: actions/checkout@v6
@@ -47,7 +49,6 @@ jobs:
           GO111MODULE: on
           CGO_ENABLED: 1
           GOOS: ${{ fromJSON(inputs.config).goos }}
-          GOPATH: ${{ github.workspace }}/go
           GOARCH: ${{ fromJSON(inputs.config).goarch }}
 
       - name: Set up Node
@@ -104,7 +105,6 @@ jobs:
           GO111MODULE: on
           CGO_ENABLED: 1
           GOOS: ${{ fromJSON(inputs.config).goos }}
-          GOPATH: ${{ github.workspace }}/go
           GOARCH: ${{ fromJSON(inputs.config).goarch }}
 
       - name: Snapshot raw ARM editor runtime

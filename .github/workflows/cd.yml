@@ -156,7 +156,7 @@ jobs:
         run: node scripts/report-workflow-outcomes.mjs
 
   contracts:
-    name: API contracts and kernel tests
+    name: API contracts and types
     needs: prepare
     runs-on: ubuntu-24.04
     permissions:
@@ -189,6 +189,23 @@ jobs:
       - name: Check application and strict contract types
         run: pnpm run typecheck
         working-directory: app
+
+  kernel-tests-linux:
+    name: Linux kernel tests
+    # 完整内核检查与构建并行，发布汇总仍等待检查及其硬失败结果。
+    needs: prepare
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: kernel/go.mod
+          cache-dependency-path: kernel/go.sum
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - name: Install filesystem fault injection dependency
         run: |
           sudo apt-get update
@@ -220,8 +237,9 @@ jobs:
           WORKFLOW_STEPS: ${{ toJSON(steps) }}
         run: node scripts/report-workflow-outcomes.mjs
 
-  frontend-tests:
-    name: Frontend, Electron and packaging tests
+  kernel-tests-windows:
+    name: Windows kernel tests
+    # 独立运行内核检查，前端测试不再等待其完成。
     needs: prepare
     runs-on: windows-latest
     timeout-minutes: 30
@@ -229,6 +247,9 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - uses: actions/setup-go@v6
         with:
           go-version-file: kernel/go.mod
@@ -249,6 +270,22 @@ jobs:
         env:
           CGO_ENABLED: 1
           CC: gcc
+
+      - name: Report non-blocking step outcomes
+        if: always()
+        env:
+          WORKFLOW_STEPS: ${{ toJSON(steps) }}
+        run: node scripts/report-workflow-outcomes.mjs
+
+  frontend-tests:
+    name: Frontend, Electron and packaging tests
+    needs: prepare
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -525,6 +562,8 @@ jobs:
   build_android:
     runs-on: ubuntu-24.04
     name: ubuntu build android.apk
+    env:
+      GOPATH: ${{ github.workspace }}/go
     # Android 与桌面构建并行，前端检查由发布汇总等待。
     needs: [prepare, languages, contracts]
     steps:
@@ -608,14 +647,11 @@ jobs:
           go install golang.org/x/mobile/cmd/gomobile@2553ed8ce294
           echo "$GOPATH/bin" >> $GITHUB_PATH
           "$GOPATH/bin/gomobile" init
-        env:
-          GOPATH: ${{ github.workspace }}/go
 
       - name: Building Android Kernel
         run: gomobile bind -tags "fts5 sqlcipher" -ldflags "-s -w" -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
         env:
-          GOPATH: ${{ github.workspace }}/go
           CGO_ENABLED: 1
           JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8
 
@@ -692,11 +728,12 @@ jobs:
   create_release:
     name: Create Release
     runs-on: ubuntu-24.04
-    needs: [prepare, frontend-tests, build, build_macos_arm64, build_android, editor_e2e]
-    # 等待前端检查和两组编辑器测试结束；前端测试的软失败不阻塞发布。
-    # 前端检查的硬失败、构建失败或取消仍会阻止发布，编辑器测试失败只记录结果。
+    needs: [prepare, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_arm64, build_android, editor_e2e]
+    # 等待全部内核、前端检查和两组编辑器测试结束；测试步骤的软失败不阻塞发布。
+    # 检查的硬失败、构建失败或取消仍会阻止发布，编辑器测试失败只记录结果。
     if: >-
       ${{ always() && !cancelled() && needs.prepare.result == 'success' &&
+          needs.kernel-tests-linux.result == 'success' && needs.kernel-tests-windows.result == 'success' &&
           needs.frontend-tests.result == 'success' &&
           needs.build.result == 'success' && needs.build_macos_arm64.result == 'success' &&
           needs.build_android.result == 'success' && needs.editor_e2e.result != 'cancelled' }}

@@ -27,7 +27,14 @@ func installPackageVersion(name string) string {
 }
 
 func clearOldInstallPackages(preservePath string) {
-	checkDownloadInstallPkgLock.Lock()
+	// 退出时不等待正在下载的安装包，下载完成或下次启动时仍会清理旧包。
+	if util.IsExiting.Load() {
+		if !checkDownloadInstallPkgLock.TryLock() {
+			return
+		}
+	} else {
+		checkDownloadInstallPkgLock.Lock()
+	}
 	defer checkDownloadInstallPkgLock.Unlock()
 	clearOldInstallPackagesLocked("v"+util.Ver, preservePath)
 }
@@ -50,9 +57,10 @@ func clearInstallPackagesBefore(installDir, currentVersion, beforeVersion, prese
 		return
 	}
 	for _, entry := range entries {
-		version := installPackageVersion(entry.Name())
+		packageName := strings.TrimSuffix(entry.Name(), ".json")
+		version := installPackageVersion(packageName)
 		pkgPath := filepath.Join(installDir, entry.Name())
-		if version == "" || !entry.Type().IsRegular() || pkgPath == preservePath ||
+		if version == "" || !entry.Type().IsRegular() || filepath.Join(installDir, packageName) == preservePath ||
 			semver.Compare(version, currentVersion) == 0 || semver.Compare(version, beforeVersion) >= 0 {
 			continue
 		}

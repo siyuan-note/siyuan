@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -41,18 +40,13 @@ func getNewVerInstallPkgPath() string {
 		return ""
 	}
 
-	downloadPkgURLs, checksum, err := getUpdatePkg()
-	if err != nil {
-		return ""
-	}
+	return findReadyInstallPackage(filepath.Join(util.TempDir, "install"), util.Ver,
+		Conf.LoadSystem().UpdateChannel, currentInstallPackageSuffix(), Conf.CookieKey)
+}
 
-	pkg := path.Base(downloadPkgURLs[0])
-	pkgPath := filepath.Join(util.TempDir, "install", pkg)
-	localChecksum, _ := sha256Hash(pkgPath)
-	if checksum != localChecksum {
-		return ""
-	}
-	return pkgPath
+type installPackageDownload struct {
+	Metadata installPackageMetadata
+	URLs     []string
 }
 
 var checkDownloadInstallPkgLock = sync.Mutex{}
@@ -70,7 +64,7 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 	}
 	defer checkDownloadInstallPkgLock.Unlock()
 
-	downloadPkgURLs, checksum, err := getUpdatePkg()
+	pkg, err := getUpdatePkg()
 	if err != nil {
 		if notifyPackageUnavailable && errors.Is(err, errUpdatePackageUnavailable) {
 			if release, releaseErr := getUpdateRelease(false); nil == releaseErr && !isVersionUpToDate(release.Version) {
@@ -80,9 +74,13 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 		return
 	}
 
-	existingPkgPath := getNewVerInstallPkgPath()
+	existingPkgPath := verifiedInstallPackagePath(filepath.Join(util.TempDir, "install"), &pkg.Metadata)
 	if "" != existingPkgPath {
-		// 存在经过 sha256Hash 检查的安装包
+		// 为已通过线上校验信息验证的安装包补齐记录，供退出和下次启动时读取。
+		if err = saveInstallPackageMetadata(filepath.Join(util.TempDir, "install"), &pkg.Metadata, Conf.CookieKey); err != nil {
+			logging.LogErrorf("save install package metadata failed: %s", err)
+			return
+		}
 		clearOldInstallPackagesLocked(installPackageVersion(filepath.Base(existingPkgPath)), existingPkgPath)
 		util.PushUpdateMsg("update-pkg-ready", Conf.Language(62), 15*1000)
 		return
@@ -90,10 +88,10 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 
 	util.PushUpdateMsg("update-pkg-downloading", Conf.Language(103), 1000*7)
 	success := false
-	for _, downloadPkgURL := range downloadPkgURLs {
-		err = downloadInstallPkg(downloadPkgURL, checksum)
+	for _, downloadPkgURL := range pkg.URLs {
+		err = downloadInstallPkg(downloadPkgURL, &pkg.Metadata)
 		if err == nil {
-			pkgPath := filepath.Join(util.TempDir, "install", path.Base(downloadPkgURL))
+			pkgPath := filepath.Join(util.TempDir, "install", pkg.Metadata.FileName)
 			clearOldInstallPackagesLocked(installPackageVersion(filepath.Base(pkgPath)), pkgPath)
 			success = true
 			break
@@ -106,7 +104,7 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 	}
 }
 
-func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
+func getUpdatePkg() (ret *installPackageDownload, err error) {
 	release, err := getUpdateRelease(false)
 	if err != nil {
 		return
@@ -131,23 +129,33 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 		err = fmt.Errorf("%w: [%s] checksum is unavailable", errUpdatePackageUnavailable, pkgName)
 		return
 	}
-	downloadPkgURLs = append(downloadPkgURLs, pkg.URLs...)
-	checksum = pkg.Checksum
+	ret = &installPackageDownload{
+		Metadata: installPackageMetadata{
+			FormatVersion: installPackageMetadataVersion,
+			Version:       release.Version,
+			Channel:       release.Channel,
+			FileName:      pkgName,
+			Checksum:      pkg.Checksum,
+		},
+		URLs: append([]string(nil), pkg.URLs...),
+	}
 	return
 }
 
-func downloadInstallPkg(pkgURL, checksum string) (err error) {
-	if "" == pkgURL || "" == checksum {
-		err = errors.New("update package URL or checksum is empty")
+func downloadInstallPkg(pkgURL string, metadata *installPackageMetadata) (err error) {
+	if "" == pkgURL || !validInstallPackageMetadata(metadata) {
+		err = errors.New("update package URL or metadata is invalid")
 		return
 	}
 
-	pkg := path.Base(pkgURL)
+	pkg := metadata.FileName
+	checksum := metadata.Checksum
+	installDir := filepath.Join(util.TempDir, "install")
 	savePath := filepath.Join(util.TempDir, "install", pkg)
 	if gulu.File.IsExist(savePath) {
 		localChecksum, _ := sha256Hash(savePath)
 		if localChecksum == checksum {
-			return
+			return saveInstallPackageMetadata(installDir, metadata, Conf.CookieKey)
 		}
 	}
 
@@ -180,6 +188,10 @@ func downloadInstallPkg(pkgURL, checksum string) (err error) {
 		if removeErr := os.Remove(savePath); nil != removeErr && !os.IsNotExist(removeErr) {
 			logging.LogErrorf("remove invalid install package [%s] failed: %s", savePath, removeErr)
 		}
+		return
+	}
+	if err = saveInstallPackageMetadata(installDir, metadata, Conf.CookieKey); err != nil {
+		logging.LogErrorf("save install package metadata [%s] failed: %s", pkg, err)
 		return
 	}
 	logging.LogInfof("downloaded install package [%s] to [%s]", pkgURL, savePath)

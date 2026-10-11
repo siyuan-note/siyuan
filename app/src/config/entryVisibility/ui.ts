@@ -320,6 +320,10 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
                            getItemPath = (item: IEntryCatalogNode) => `${prefix}.${item.key}`) => `<section class="config-entry-visibility__column"
     data-entry-column data-entry-depth="${depth}">
     <div class="config-entry-visibility__column-title">
+        ${isMobile() && depth > 0 ? `<button class="block__icon block__icon--show" data-action="back-entry"
+            data-entry-parent="${escapeAttr(prefix)}" aria-label="${escapeAttr(window.siyuan.languages.back)}">
+            <svg><use xlink:href="#iconLeft"></use></svg>
+        </button>` : ""}
         <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
         ${sortable ? renderOrderReset(prefix) : ""}
     </div>
@@ -964,6 +968,9 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             const depth = Number(actionElement.dataset.entryDepth);
             selectedPaths = selectedPaths.slice(0, depth);
             selectedPaths[depth] = actionElement.dataset.entryPath;
+            renderBrowser(true);
+        } else if (action === "back-entry") {
+            selectedPaths = getEntryCatalogPathChain(selectedSectionKey, actionElement.dataset.entryParent).slice(0, -1);
             renderBrowser(true);
         } else if (!builtin && action === "confirm") {
             const nameInput = view.querySelector<HTMLInputElement>("[data-profile-field='name']");

@@ -228,6 +228,7 @@ const runElectron = async () => {
             extract("primaryFocus", ["focusDatabasePrimary"]),
             extract("rowReadonly", ["inheritDatabaseRowReadonly"]),
             extract("../../../editor/databaseRow", ["rowReady", "rowSwitchers", "newDatabaseRowModel"]),
+            extract("databaseRowNavigation", ["clearDatabaseRowNavigation", "mountDatabaseRowNavigation"]),
             extract("openDatabaseRow", ["closeMobileDatabaseRow", "openMobileDatabaseRow"])].map(source =>
             ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText);
         await win.loadURL("data:text/html,<html><body></body></html>");

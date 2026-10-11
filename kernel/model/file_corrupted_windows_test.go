@@ -1,7 +1,6 @@
 package model
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"syscall"
@@ -10,7 +9,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/sys/windows"
 )
 
 func TestDocIALSharingViolationRecovers(t *testing.T) {
@@ -42,12 +40,7 @@ func TestDocIALSharingViolationRecovers(t *testing.T) {
 			syscall.CloseHandle(handle)
 		}
 	}()
-	if _, err = os.Stat(filePath); err != nil {
-		t.Fatal(err)
-	}
-	if _, readErr := os.ReadFile(filePath); !errors.Is(readErr, windows.ERROR_SHARING_VIOLATION) {
-		t.Fatalf("read-denying handle did not produce a sharing violation: %v", readErr)
-	}
+	requireReadSharingViolation(t, filePath, handle)
 	if attrs := cache.GetDocIALInBox(document, fixture.box.ID); attrs != nil {
 		t.Fatalf("sharing-violation fixture unexpectedly has cached attributes: %v", attrs)
 	}

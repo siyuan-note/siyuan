@@ -19,7 +19,10 @@ test("verification failures identify the assertion location without exposing pro
     for (const duringSetup of [false, true]) {
         const failure = Object.assign(new Error("https://private.invalid/?token=secret-token"), {
             code: "ERR_ASSERTION", operator: "deepStrictEqual", actual: "secret-token",
-            stack: "Error: https://private.invalid/?token=secret-token\n    at verifyHarness (C:\\private\\harnessSupport.cjs:401:12)\n",
+            stack: "Error: https://private.invalid/?token=secret-token\n" +
+                "    at waitFor (C:\\private\\harnessSupport.cjs:84:16)\n" +
+                "    at async verifyMapCorners (/private/harnessSupport.cjs:196:17)\n" +
+                "    at async verifyHarness (C:\\private\\harnessSupport.cjs:404:5)\n",
         });
         const messages = [];
         let resolveExit;
@@ -36,7 +39,9 @@ test("verification failures identify the assertion location without exposing pro
             },
         });
         assert.equal(await exited, 1);
-        assert.match(messages.join("\n"), /Verification location: harnessSupport\.cjs:401:12/);
+        assert.match(messages.join("\n"), /Verification location: harnessSupport\.cjs:84:16/);
+        assert.match(messages.join("\n"), /Verification location: harnessSupport\.cjs:196:17/);
+        assert.match(messages.join("\n"), /Verification location: harnessSupport\.cjs:404:5/);
         assert.match(messages.join("\n"), /Verification assertion: ERR_ASSERTION; operator: deepStrictEqual/);
         assert.doesNotMatch(messages.join("\n"), /private|secret-token|https:/);
     }

@@ -196,10 +196,14 @@ const runPositionCases = async (dialogSource, positionSource, dialogCSS) => {
         "../constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
         "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "../layout/getTopBarHeight": {getTopBarHeight: () => 0},
+        "../protyle/util/compatibility": {isNotCtrl: () => true},
     };
     const load = source => {
         const exports = {};
-        new Function("require", "exports", source)(name => modules[name] || {}, exports);
+        new Function("require", "exports", source)(name => {
+            assert.ok(Object.hasOwn(modules, name), `Unexpected fixture module: ${name}`);
+            return modules[name];
+        }, exports);
         return exports;
     };
     const {Dialog} = load(dialogSource);
@@ -254,6 +258,17 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
         "../util/zIndex": {isAbove: () => false},
         "./moveResize": {moveResize() {}},
         "../util/functions": {isMobile: () => mobile},
+        "../protyle/util/compatibility": {isNotCtrl: () => true},
+        // 复习正文由 bindCardEvent 夹具隔离，意外访问这些依赖时立即失败。
+        ...Object.fromEntries([
+            "../menus/menuToggle", "../dialog/inputDialog", "../util/fetch", "./fetchDueCards", "../protyle",
+            "../protyle/util/onGet", "../protyle/util/hasClosest", "../protyle/ui/hideElements",
+            "../protyle/breadcrumb/action", "../menus/Menu", "../util/escape", "../editor/util", "dayjs",
+            "../util/pathName", "../protyle/util/resize", "../dialog/message", "../plugin/Menu",
+            "../protyle/wysiwyg/transaction", "./flashcardMode", "../protyle/util/blockFold", "../plugin/EventBusCore",
+        ].map(name => [name, new Proxy({}, {get: (_target, key) => {
+            throw new Error(`Unexpected flashcard fixture dependency: ${name}.${String(key)}`);
+        }})])),
         "../constants": {Constants: constants},
         "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "../protyle/util/selectionOffsets": {focusByRange: range => {
@@ -264,7 +279,10 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
     };
     const load = source => {
         const exports = {};
-        new Function("require", "exports", source)(name => modules[name] || {}, exports);
+        new Function("require", "exports", source)(name => {
+            assert.ok(Object.hasOwn(modules, name), `Unexpected fixture module: ${name}`);
+            return modules[name];
+        }, exports);
         return exports;
     };
     modules["../dialog"] = load(dialogSource);
@@ -336,7 +354,7 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile) => {
     }
 };
 
-const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSource, openOptionsSource) => {
+const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSource, openOptionsSource, navigationSource) => {
     const assert = require("node:assert/strict");
     const tick = () => new Promise(resolve => setTimeout(resolve, 20));
     const constants = {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_SEARCH: "search",
@@ -377,6 +395,11 @@ const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSou
         "../util/pathName": {getNotebookName: () => "Notebook", pathPosix: () => ({join: (...parts) => parts.join("/")})},
         "./config": {hasExplicitSearchScope: () => true, setSearchConfigTemporaryPath() {}},
         "./request": {cancelSearchRequest() {}},
+        // 当前用例只覆盖搜索入口，不应访问其他命令或复用窗口的路径更新。
+        ...Object.fromEntries(["./path", "../protyle/render/av/addToDatabase", "../protyle/util/hasClosest",
+            "../protyle/hint/extend"].map(name => [name, new Proxy({}, {get: (_target, key) => {
+            throw new Error(`Unexpected search fixture dependency: ${name}.${String(key)}`);
+        }})])),
         "./util": {genSearch: (_app, _config, element) => {
             element.innerHTML = '<input id="searchInput" value="previous query"><div id="searchList"></div>';
             return {edit: {destroy() {}}, unRefEdit: {destroy() {}}};
@@ -392,12 +415,16 @@ const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSou
     };
     const load = source => {
         const exports = {};
-        new Function("require", "exports", source)(name => modules[name] || {}, exports);
+        new Function("require", "exports", source)(name => {
+            assert.ok(Object.hasOwn(modules, name), `Unexpected fixture module: ${name}`);
+            return modules[name];
+        }, exports);
         return exports;
     };
     modules["../dialog"] = load(dialogSource);
     modules["./focus"] = modules["../search/focus"] = load(focusSource);
     modules["./openOptions"] = load(openOptionsSource);
+    modules["./databaseRowNavigation"] = load(navigationSource);
     const {openSearch} = load(searchSource);
     const mobile = load(mobileSource);
     const search = () => openSearch({app: {}, hotkey: "search", notebookId: "box", searchPath: "/doc.sy"});
@@ -555,7 +582,8 @@ if (process.versions.electron && process.type === "browser") {
                 ${JSON.stringify(source)}, ${JSON.stringify(compileSearch("search/focus.ts"))},
                 ${JSON.stringify(compileSearch("search/spread.ts"))},
                 ${JSON.stringify(compileSearch("command/nativeRuntime.ts", true))},
-                ${JSON.stringify(compileSearch("search/openOptions.ts"))})`);
+                ${JSON.stringify(compileSearch("search/openOptions.ts"))},
+                ${JSON.stringify(compileSearch("command/databaseRowNavigation.ts"))})`);
             const cardSource = fs.readFileSync(path.join(__dirname, "../src/card/openCard.ts"), "utf8");
             for (const mobile of [false, true]) {
                 const compiled = ts.transpileModule(parse(cardSource, {MOBILE: mobile, BROWSER: true}, false, true), {

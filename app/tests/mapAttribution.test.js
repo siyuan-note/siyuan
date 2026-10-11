@@ -9,6 +9,28 @@ const closeTileServer = server => new Promise(resolve => {
     server.closeAllConnections();
 });
 
+const sampleTilePixel = (tileMap, timeout) => new Promise((resolve, reject) => {
+    if (timeout <= 0) { resolve([0, 0, 0, 0]); return; }
+    const canvas = tileMap.getCanvas();
+    const gl = canvas.getContext("webgl2");
+    const pixel = new Uint8Array(4);
+    const finish = error => {
+        clearTimeout(timer);
+        tileMap.off("render", sample);
+        if (error) reject(error);
+        else resolve(Array.from(pixel));
+    };
+    const sample = () => {
+        try {
+            gl.readPixels(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+            if (pixel[3] > 0) finish();
+        } catch (error) { finish(error); }
+    };
+    const timer = setTimeout(() => finish(), timeout);
+    tileMap.on("render", sample);
+    tileMap.triggerRepaint();
+});
+
 const install = (sources, css, controlledClock) => {
     document.head.innerHTML = "";
     document.body.innerHTML = '<div id="map" class="maplibregl-map"></div>';
@@ -137,7 +159,8 @@ const verifyTileHTTP = async (win, sources, css, sdk) => {
             window.tileHTTP = {errors: [], removed: 0, tileError: null, ready: false, loaded: false};
             class FixtureMap extends sdk.Map {
                 constructor(options) {
-                    super({...options, preserveDrawingBuffer: true, style: {version: 8, sources: {fixture: {type: "raster", tileSize: 256,
+                    super({...options, canvasContextAttributes: {...options.canvasContextAttributes, preserveDrawingBuffer: true},
+                        style: {version: 8, sources: {fixture: {type: "raster", tileSize: 256,
                         tiles: [origin + "/tile/{z}/{x}/{y}.png"], minzoom: 0, maxzoom: 6, attribution: "Fixture data"}},
                         layers: [{id: "fixture", type: "raster", source: "fixture"}]}});
                     window.tileMap = this;
@@ -165,6 +188,9 @@ const verifyTileHTTP = async (win, sources, css, sdk) => {
         await win.webContents.executeJavaScript(`(${installRealMap.toString()})(${JSON.stringify(sources)},
             ${JSON.stringify(css)}, ${JSON.stringify(origin)})`);
         assert.equal(await win.webContents.executeJavaScript("tileHTTP.ready"), true);
+        assert.equal(await win.webContents.executeJavaScript(
+            "tileMap.getCanvas().getContext('webgl2').getContextAttributes().preserveDrawingBuffer"), true,
+        "the fixture requests a retained WebGL buffer through the installed SDK API");
         assert.equal(await win.webContents.executeJavaScript("tileHTTP.loaded"), false);
         await win.webContents.executeJavaScript("tileAdapter.setPoints([{id:'fixture', longitude:121, latitude:31}],1); tileAdapter.fit(); void 0");
         assert.equal(await win.webContents.executeJavaScript("document.querySelectorAll('.maplibregl-marker').length"), 1);
@@ -180,13 +206,8 @@ const verifyTileHTTP = async (win, sources, css, sdk) => {
             await new Promise(resolve => setTimeout(resolve, 50));
         }
         assert.equal(await win.webContents.executeJavaScript("tileHTTP.loaded"), true, "delayed tiles eventually finish rendering");
-        const pixel = await win.webContents.executeJavaScript(`(() => {
-            const canvas = tileMap.getCanvas();
-            const gl = canvas.getContext("webgl2");
-            const pixel = new Uint8Array(4);
-            gl.readPixels(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
-            return Array.from(pixel);
-        })()`);
+        const pixel = await win.webContents.executeJavaScript(`(${sampleTilePixel.toString()})(tileMap,
+            ${Math.max(0, loadDeadline - Date.now())})`);
         assert.ok(pixel[3] > 0, "the real WebGL canvas paints the delayed raster tile");
         failNextTile = true;
         await win.webContents.executeJavaScript("tileMap.setZoom(3); void 0");
@@ -330,6 +351,46 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
+    test("tile pixel checks sample render frames and release their listener on paint or deadline", async t => {
+        assert.deepEqual(await sampleTilePixel({}, 0), [0, 0, 0, 0], "an expired load budget never waits for another frame");
+        for (const outcome of ["painted", "transparent", "error"]) {
+            const painted = outcome === "painted";
+            let deadline, render, reads = 0, repaints = 0;
+            const timer = {}, cleared = [];
+            t.mock.method(global, "setTimeout", (callback, delay) => {
+                assert.equal(delay, 123);
+                deadline = callback;
+                return timer;
+            });
+            t.mock.method(global, "clearTimeout", value => cleared.push(value));
+            const map = {
+                getCanvas: () => ({width: 800, height: 600, getContext: () => ({
+                    RGBA: 1, UNSIGNED_BYTE: 2,
+                    readPixels(x, y, width, height, format, type, pixel) {
+                        assert.deepEqual([x, y, width, height, format, type], [400, 300, 1, 1, 1, 2]);
+                        reads++;
+                        if (outcome === "error") throw new Error("fixture readPixels failure");
+                        pixel[3] = painted ? 255 : 0;
+                    },
+                })}),
+                on(name, callback) { assert.equal(name, "render"); render = callback; },
+                off(name, callback) { assert.equal(name, "render"); assert.equal(callback, render); render = null; },
+                triggerRepaint() { repaints++; },
+            };
+            const pending = sampleTilePixel(map, 123);
+            assert.equal(reads, 0, "sampling waits for a completed render");
+            assert.equal(repaints, 1);
+            const rejected = outcome === "error" ? assert.rejects(pending, /fixture readPixels failure/) : null;
+            assert.doesNotThrow(() => render(), "render callbacks report failures through the awaited promise");
+            if (outcome === "transparent") deadline();
+            if (rejected) await rejected;
+            else assert.deepEqual(await pending, [0, 0, 0, painted ? 255 : 0]);
+            assert.equal(reads, 1);
+            assert.equal(render, null);
+            assert.deepEqual(cleared, [timer]);
+            t.mock.restoreAll();
+        }
+    });
     test("tile fixture cleanup completes even when a failed assertion leaves responses held", async () => {
         const http = require("node:http");
         let response;

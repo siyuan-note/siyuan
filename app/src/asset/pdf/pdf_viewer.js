@@ -286,6 +286,8 @@ class PDFViewer {
 
   #pendingScroll = null;
 
+  #pendingScrollFrame = null;
+
   #resizeObserver = new ResizeObserver(this.#resizeObserverCallback.bind(this));
 
   #scrollModePageState = null;
@@ -403,7 +405,7 @@ class PDFViewer {
     abortSignal?.addEventListener(
       "abort",
       () => {
-        this.#pendingScroll = null;
+        this.#cancelPendingScroll();
         this.#resizeObserver.disconnect();
         this.#resizeObserver = null;
       },
@@ -1359,7 +1361,7 @@ class PDFViewer {
   }
 
   _resetView() {
-    this.#pendingScroll = null;
+    this.#cancelPendingScroll();
     this._pages = [];
     this._currentPageNumber = 1;
     this._currentScale = UNKNOWN_SCALE;
@@ -2674,19 +2676,41 @@ class PDFViewer {
           Math.floor(entry.borderBoxSize[0].blockSize)
         );
         this.#containerTopLeft = null;
-        const pending = this.#pendingScroll;
-        if (pending && this.pdfDocument && this.container.clientWidth && this.container.clientHeight) {
-          this.#pendingScroll = null;
-          if (pending.pageView) {
-            this.#scrollIntoView(pending.pageView, pending.pageSpot);
-          } else {
-            this.scrollPageIntoView(pending);
-          }
-          this.update();
-        }
+        this.#schedulePendingScroll();
         break;
       }
     }
+  }
+
+  #cancelPendingScroll() {
+    this.#pendingScroll = null;
+    if (this.#pendingScrollFrame !== null) {
+      cancelAnimationFrame(this.#pendingScrollFrame);
+      this.#pendingScrollFrame = null;
+    }
+  }
+
+  #schedulePendingScroll() {
+    if (this.#pendingScrollFrame !== null || !this.#pendingScroll || !this.pdfDocument ||
+        !this.container.isConnected || !this.container.clientWidth || !this.container.clientHeight) {
+      return;
+    }
+    // 导航可能改变缩放和滚动条，不能在 ResizeObserver 的同一轮投递中修改布局。
+    this.#pendingScrollFrame = requestAnimationFrame(() => {
+      this.#pendingScrollFrame = null;
+      const pending = this.#pendingScroll;
+      if (this.#abortSignal?.aborted || !pending || !this.pdfDocument ||
+          !this.container.isConnected || !this.container.clientWidth || !this.container.clientHeight) {
+        return;
+      }
+      this.#pendingScroll = null;
+      if (pending.pageView) {
+        this.#scrollIntoView(pending.pageView, pending.pageSpot);
+      } else {
+        this.scrollPageIntoView(pending);
+      }
+      this.update();
+    });
   }
 
   get containerTopLeft() {

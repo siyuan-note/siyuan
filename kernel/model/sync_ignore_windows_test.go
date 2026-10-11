@@ -1,14 +1,12 @@
 package model
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"syscall"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/sys/windows"
 )
 
 func TestSyncIgnoreReadFailureRecovers(t *testing.T) {
@@ -37,12 +35,7 @@ func TestSyncIgnoreReadFailureRecovers(t *testing.T) {
 			syscall.CloseHandle(h)
 		}
 	}()
-	if _, err = os.Stat(p); err != nil {
-		t.Fatal(err)
-	}
-	if _, readErr := os.ReadFile(p); !errors.Is(readErr, windows.ERROR_SHARING_VIOLATION) {
-		t.Fatalf("read-denying handle did not produce a sharing violation: %v", readErr)
-	}
+	requireReadSharingViolation(t, p, h)
 	if _, matcher, loadErr := getSyncIgnoreRules(); loadErr == nil || matcher != nil {
 		t.Fatalf("unreadable rules must return an error without a matcher: error=%v, matcher=%v", loadErr, matcher)
 	}

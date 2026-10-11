@@ -14,9 +14,11 @@ if (!app || !BrowserWindow) {
         if (process.argv.includes("--verify")) {
             // 只输出安全的断言位置和操作符，不泄露探测地址、令牌或断言值。
             const failure = error.cause || error;
-            const location = typeof failure.stack === "string" &&
-                failure.stack.match(/\bharnessSupport\.cjs:(\d+):(\d+)\)?(?:\r?\n|$)/);
-            if (location) console.error("Verification location: harnessSupport.cjs:" + location[1] + ":" + location[2]);
+            const locations = typeof failure.stack === "string" ?
+                failure.stack.matchAll(/\bharnessSupport\.cjs:(\d+):(\d+)\)?(?:\r?\n|$)/g) : [];
+            for (const location of locations) {
+                console.error("Verification location: harnessSupport.cjs:" + location[1] + ":" + location[2]);
+            }
             if (failure.code === "ERR_ASSERTION") {
                 const operators = ["strictEqual", "notStrictEqual", "deepStrictEqual", "notDeepStrictEqual", "==", "!=", "fail"];
                 console.error("Verification assertion: ERR_ASSERTION" +

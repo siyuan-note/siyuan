@@ -52,7 +52,13 @@ const setupEdge = async (mode) => {
     await document.fonts.ready;
     const range = document.createRange();
     range.selectNodeContents(prefix);
-    const width = range.getBoundingClientRect().width;
+    // 先测量整段文字，不能把已换行文本的外接矩形当作单行宽度。
+    editable.style.width = "max-content";
+    editable.style.whiteSpace = "nowrap";
+    const measuredLines = Array.from(range.getClientRects());
+    if (measuredLines.length !== 1) throw new Error("Prefix measurement must occupy one line");
+    const width = measuredLines[0].width;
+    editable.style.removeProperty("white-space");
     editable.style.width = (width + math.getBoundingClientRect().width * (mode === "left" ? 0.5 : 1) + 2) + "px";
     const point = (node, offset) => {
         range.setStart(node, offset);

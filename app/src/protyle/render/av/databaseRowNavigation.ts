@@ -111,21 +111,15 @@ export const mountDatabaseRowNavigation = (container: Element, data: IDatabaseRo
     }
     const toolbar = document.createElement("div");
     const inline = breadcrumb && container.contains(breadcrumb);
-    const mobileRow = inline && container.id === "editor";
     toolbar.className = inline ? "protyle-breadcrumb__navigation fn__flex fn__flex-center fn__flex-shrink" : "block__icons";
-    if (mobileRow) {
+    if (inline && container.id === "editor") {
         container.classList.add("protyle--database-row-navigation");
-        toolbar.classList.add("protyle-breadcrumb__navigation--mobile");
     }
     toolbar.setAttribute("data-database-row-navigation", data.itemID);
     toolbar.innerHTML = ["previous", "next"].map((name, index) =>
-        `<button type="button" data-row-navigation="${name}" disabled class="block__icon block__icon--show block__icon--touch ariaLabel" data-position="8south" aria-label="${escapeAttr(window.siyuan.languages[name])}"><svg><use xlink:href="#${index ? "iconDown" : "iconUp"}"></use></svg></button>`)
+        `<button type="button" data-row-navigation="${name}" disabled class="block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${escapeAttr(window.siyuan.languages[name])}"><svg><use xlink:href="#${index ? "iconDown" : "iconUp"}"></use></svg></button>`)
         .join(inline ? "" : '<span class="fn__space"></span>') + (inline ? '<span class="fn__space"></span>' : "");
-    if (mobileRow) {
-        breadcrumb.append(toolbar);
-    } else {
-        (inline ? breadcrumb : container).prepend(toolbar);
-    }
+    (inline ? breadcrumb : container).prepend(toolbar);
     const buttons = Array.from(toolbar.querySelectorAll("button"));
     let busy = false;
     const update = async () => {

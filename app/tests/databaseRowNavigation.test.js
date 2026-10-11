@@ -8,7 +8,7 @@ const {promisify} = require("node:util");
 const {ModuleKind, ScriptTarget, transpileModule} = require("typescript");
 const sass = require("sass");
 
-const runCases = async (sources, css) => {
+const runCases = async (sources, css, touch) => {
     const check = require("node:assert/strict");
     const load = (source, imports = {}) => {
         const api = {};
@@ -19,6 +19,7 @@ const runCases = async (sources, css) => {
         return api;
     };
     document.head.innerHTML = "<style>" + css + "</style>";
+    check.equal(matchMedia("(pointer: coarse)").matches, touch);
     window.siyuan = {languages: {previous: "Previous", next: "Next"}, config: {keymap: {general: {
         previousDatabaseRow: "ArrowUp", nextDatabaseRow: "ArrowDown",
     }}}};
@@ -57,6 +58,7 @@ const runCases = async (sources, css) => {
             <div class="protyle-breadcrumb"><button class="protyle-breadcrumb__icon" data-type="mobile-menu">Breadcrumb</button>
             <span class="protyle-breadcrumb__space${merged ? " protyle-breadcrumb__space--mobile-title" : ""}"></span>
             <div class="protyle-breadcrumb__plugin"></div>
+            <button class="protyle-breadcrumb__icon" data-type="exit-focus">Exit focus</button>
             ${["command-panel", "readonly", "doc", "more"].map(type => `<button class="block__icon fn__flex-center" data-type="${type}"><svg></svg></button>`).join("")}
             </div><div class="protyle-content"><div class="protyle-wysiwyg" contenteditable="true">Content</div></div></div>`;
         const editor = document.getElementById("editor");
@@ -66,16 +68,23 @@ const runCases = async (sources, css) => {
         const buttons = Array.from(editor.querySelectorAll("[data-row-navigation]"));
         const toolbar = buttons[0].parentElement;
         check.equal(toolbar.parentElement, breadcrumb);
-        const firstRow = breadcrumb.firstElementChild.getBoundingClientRect();
+        const menu = breadcrumb.querySelector('[data-type="mobile-menu"]');
+        const control = breadcrumb.querySelector('[data-type="more"]').getBoundingClientRect();
+        check.ok(control.right <= window.innerWidth, JSON.stringify({control, width: window.innerWidth}));
+        check.equal(toolbar, breadcrumb.firstElementChild);
+        check.equal(menu.getBoundingClientRect().height, 24);
         for (const button of buttons) {
             check.equal(button.disabled, false);
             const rect = button.getBoundingClientRect();
-            check.ok(rect.top >= firstRow.bottom, JSON.stringify({merged, rect, firstRow}));
+            check.equal(rect.height, control.height);
+            check.equal(rect.width, control.width);
+            check.equal(rect.top, control.top);
+            check.ok(rect.right <= menu.getBoundingClientRect().left);
             check.ok(rect.right <= window.innerWidth);
             check.ok(button.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)), "navigation button must not be covered");
         }
         const spacer = parseFloat(getComputedStyle(editor.querySelector(".protyle-content"), "::before").height);
-        check.equal(spacer, merged ? 86 : 134);
+        check.equal(spacer, merged ? 42 : 90);
         check.ok(breadcrumb.getBoundingClientRect().bottom <= spacer);
         editor.style.setProperty("--mobile-bar-translate-y", "calc(-1 * (var(--mobile-topbar-height) + var(--mobile-breadcrumb-height)))");
         if (merged) {
@@ -134,6 +143,11 @@ const runCases = async (sources, css) => {
         const row = tab.firstElementChild;
         navigation.mountDatabaseRowNavigation(row, data, open);
         await tick();
+        const standalone = Array.from(row.querySelectorAll("[data-row-navigation]"), button => button.getBoundingClientRect());
+        check.equal(standalone[0].width, control.width);
+        check.equal(standalone[0].height, control.height);
+        check.equal(standalone[0].left - row.getBoundingClientRect().left, 8);
+        check.equal(standalone[1].left - standalone[0].right, 8);
         context = {environment: "desktop", focus: "global", activeElement: document.body, activeTab: {element: tab}};
         check.equal(commands.getDatabaseRowNavigationButton(context, "nextDatabaseRow"), row.querySelector('[data-row-navigation="next"]'));
         tab.classList.add("fn__none");
@@ -175,9 +189,13 @@ app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
-        for (const width of [320, 390]) {
-            win.setContentSize(width, 844);
-            console.log(await win.webContents.executeJavaScript(${JSON.stringify("(" + runCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(css) + ")")}));
+        win.webContents.debugger.attach("1.3");
+        for (const touch of [false, true]) {
+            await win.webContents.debugger.sendCommand("Emulation.setTouchEmulationEnabled", {enabled: touch});
+            for (const width of [320, 390]) {
+                win.setContentSize(width, 844);
+                console.log(await win.webContents.executeJavaScript(${JSON.stringify("(" + runCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(css) + ",")} + touch + ")"));
+            }
         }
         win.destroy(); app.exit(0);
     } catch (error) { console.error(error); win.destroy(); app.exit(1); }
@@ -186,7 +204,10 @@ app.whenReady().then(async () => {
     delete env.ELECTRON_RUN_AS_NODE;
     try {
         const result = await promisify(execFile)(require("electron"), [script], {env, timeout: 50000, windowsHide: true});
-        assert.equal(result.stdout.match(/Database row navigation cases passed/g)?.length, 2);
+        assert.equal(result.stdout.match(/Database row navigation cases passed/g)?.length, 4);
+    } catch (error) {
+        console.error(error.stdout, error.stderr);
+        throw error;
     } finally {
         if (path.dirname(path.resolve(temporary)) === path.resolve(os.tmpdir()) &&
             path.basename(temporary).startsWith("siyuan-row-navigation-test-")) {

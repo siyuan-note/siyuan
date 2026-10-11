@@ -343,8 +343,6 @@ def create_mobile_assets(destination, version):
                     continue
                 if relative.parts[:3] == ("stage", "ocr", "runtime"):
                     continue
-                if relative.parts[:2] == ("stage", "map") or relative.parts[:3] == ("stage", "build", "map"):
-                    continue
                 archive.write(path, relative.as_posix())
         for filename in ("LICENSE", "THIRD_PARTY_NOTICES.md"):
             archive.write(ROOT / filename, filename)

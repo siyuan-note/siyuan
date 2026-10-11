@@ -407,6 +407,7 @@ declare namespace Config {
     export interface IEntryVisibilityProfile {
         id: string;
         name: string;
+        defaults?: "simple" | "full";
         entries: Record<string, boolean>;
         orders: Record<string, string[]>;
     }

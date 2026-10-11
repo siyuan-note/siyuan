@@ -11,7 +11,8 @@ func migrateSlashFrequent(entryVisibility *conf.EntryVisibility, loadStorage fun
 	}
 	for _, profile := range entryVisibility.Profiles {
 		if nil == profile || "" == profile.ID || "" == profile.Name ||
-			conf.EntryVisibilityProfileSimple == profile.ID || conf.EntryVisibilityProfileFull == profile.ID {
+			conf.EntryVisibilityProfileSimple == profile.ID || conf.EntryVisibilityProfileFull == profile.ID ||
+			conf.EntryVisibilityProfileSimple == profile.Defaults || conf.EntryVisibilityProfileFull == profile.Defaults {
 			continue
 		}
 		if _, exists := profile.Entries[key]; !exists {

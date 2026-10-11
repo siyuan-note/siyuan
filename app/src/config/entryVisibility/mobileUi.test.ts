@@ -32,10 +32,21 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         }
         if (id === "config/entryVisibility/runtime") {
             return {
-                ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple", ENTRY_VISIBILITY_VERSION: 1,
+                ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple", ENTRY_VISIBILITY_VERSION: 7,
                 createEntryProfileSnapshot: (template: string) => ({"editor.slash.menu": !mobile,
                     [frequentPath]: template === "full"}), createEntryOrderSnapshot: () => ({}),
                 getConfiguredEntryVisibility: () => true,
+                getActiveEntryProfile: () => window.siyuan.config.appearance.entryVisibility.profiles.find(profile =>
+                    profile.id === window.siyuan.config.appearance.entryVisibility.active),
+                getEntryProfileDefaultVisibility: (profile: Config.IEntryVisibilityProfile, path: string) => {
+                    const catalog = load("config/entryVisibility/catalog");
+                    if (!profile.defaults) {
+                        return catalog.getEntryCatalogCustomDefaultVisibility(path);
+                    }
+                    const node = catalog.getEntryCatalogNode(path);
+                    return load("config/entryVisibility/profile").getBuiltinProfileEntryVisibility(profile.defaults,
+                        node?.simple !== false, catalog.getEntryCatalogDefaultVisibility(path), node?.simpleDefaultVisible);
+                },
                 saveEntryVisibility: (config: Config.IEntryVisibility) => {
                     window.siyuan.config.appearance.entryVisibility = config;
                 },

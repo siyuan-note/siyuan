@@ -45380,6 +45380,13 @@
     "SettingEntryVisibilityProfile": {
       "type": "object",
       "properties": {
+        "defaults": {
+          "type": "string",
+          "enum": [
+            "simple",
+            "full"
+          ]
+        },
         "entries": {
           "anyOf": [
             {
@@ -45434,6 +45441,20 @@
     "SettingEntryVisibilityProfileInput": {
       "type": "object",
       "properties": {
+        "defaults": {
+          "enum": [
+            "simple",
+            "full"
+          ],
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "entries": {
           "anyOf": [
             {

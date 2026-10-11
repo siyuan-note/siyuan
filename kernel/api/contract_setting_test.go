@@ -245,6 +245,9 @@ func fillSettingPayload(value reflect.Value) {
 				fillSettingPayload(value.Field(i))
 			}
 		}
+		if value.Type() == reflect.TypeFor[conf.EntryVisibilityProfile]() {
+			value.FieldByName("Defaults").SetString(conf.EntryVisibilityProfileSimple)
+		}
 	case reflect.Slice:
 		value.Set(reflect.MakeSlice(value.Type(), 2, 2))
 		fillSettingPayload(value.Index(0))

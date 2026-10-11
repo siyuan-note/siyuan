@@ -80,7 +80,7 @@ func (appearance *Appearance) NormalizeGlobalFontFamilies() {
 }
 
 const (
-	EntryVisibilityVersion       = 6
+	EntryVisibilityVersion       = 7
 	EntryVisibilityProfileSimple = "simple"
 	EntryVisibilityProfileFull   = "full"
 )
@@ -92,10 +92,11 @@ type EntryVisibility struct {
 }
 
 type EntryVisibilityProfile struct {
-	ID      string              `json:"id"`
-	Name    string              `json:"name"`
-	Entries map[string]bool     `json:"entries"`
-	Orders  map[string][]string `json:"orders"`
+	ID       string              `json:"id"`
+	Name     string              `json:"name"`
+	Defaults string              `json:"defaults,omitempty"` // 新方案未覆盖的显隐跟随指定内置方案；旧方案留空。
+	Entries  map[string]bool     `json:"entries"`
+	Orders   map[string][]string `json:"orders"`
 }
 
 func NewEntryVisibility(active string) *EntryVisibility {
@@ -127,6 +128,9 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 		}
 		if nil == profile.Entries {
 			profile.Entries = map[string]bool{}
+		}
+		if version < 7 || (profile.Defaults != EntryVisibilityProfileSimple && profile.Defaults != EntryVisibilityProfileFull) {
+			profile.Defaults = ""
 		}
 		if nil == profile.Orders {
 			profile.Orders = map[string][]string{}

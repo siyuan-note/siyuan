@@ -22,6 +22,25 @@ import {mergeEntryOrderPreservingUnknown, resolveEntryOrder} from "./order";
 
 const frequentPath = "editor.slash.menu.frequent";
 
+test("version 7 profiles preserve sparse defaults and old profiles remain independent", () => {
+    for (const defaults of ["simple", "full"] as const) {
+        const input: Pick<Config.IEntryVisibilityProfile, "name" | "defaults" | "entries" | "orders"> = {
+            name: "Inherited", defaults, entries: {"plugin:disabled:item": false}, orders: {dock: ["plugin:disabled:dock"]},
+        };
+        const imported = normalizeEntryVisibilityImportProfile(input, 7, {});
+        assert.deepEqual(imported, input);
+        assert.deepEqual(normalizeEntryVisibilityImportProfile(JSON.parse(JSON.stringify(imported)), 7, {}), input);
+        assert.equal(imported.entries[frequentPath], undefined);
+        const legacy = normalizeEntryVisibilityImportProfile({...input, base: defaults}, 6, {});
+        assert.equal(legacy.defaults, undefined);
+        assert.equal(legacy.entries[frequentPath], true);
+    }
+    assert.equal(normalizeEntryVisibilityImportProfile({name: "Invalid", defaults: "unknown", entries: {}}, 7, {}), undefined);
+    assert.equal(normalizeEntryVisibilityImportProfile({name: "Legacy", entries: {}}, 7, {}).defaults, undefined);
+    assert.equal(isEntryVisibilityImportVersionSupported(7, 7), true);
+    assert.equal(isEntryVisibilityImportVersionSupported(7, 6), false);
+});
+
 test("mobile toolbar contexts expose relevant entries and hide caret references by default", () => {
     const input = getMobileToolbarContextPath(false);
     const selection = getMobileToolbarContextPath(true);

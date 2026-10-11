@@ -598,7 +598,9 @@ func InitConf() {
 	// 引导用户导入匹配的备份文件后重新验证主密码。
 
 	Conf.Search = conf.NormalizeSearch(Conf.Search)
+	sql.SetCaseSensitive(Conf.Search.CaseSensitive)
 	sql.SetHanSensitive(Conf.Search.HanSensitiveVal())
+	sql.SetIndexAssetPath(Conf.Search.IndexAssetPath)
 
 	if nil == Conf.Stat {
 		Conf.Stat = conf.NewStat()

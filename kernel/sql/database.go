@@ -517,6 +517,7 @@ var (
 
 func SetCaseSensitive(b bool) {
 	caseSensitive = b
+	util.SearchCaseSensitive = b
 
 	if nil == db {
 		return
@@ -527,8 +528,6 @@ func SetCaseSensitive(b bool) {
 	} else {
 		db.Exec("PRAGMA case_sensitive_like = OFF;")
 	}
-
-	util.SearchCaseSensitive = b
 }
 
 func SetHanSensitive(b bool) {

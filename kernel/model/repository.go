@@ -81,6 +81,8 @@ var (
 )
 
 func autoPurgeRepo(cron bool) {
+	confRepoReadSnapshot := Conf.LoadRepo()
+
 	assetDownloadSourceMu.RLock()
 	defer assetDownloadSourceMu.RUnlock()
 	if cron && !autoPurgeRepoAfterFirstSync {
@@ -95,7 +97,7 @@ func autoPurgeRepo(cron bool) {
 		lastAutoPurgeRepo = time.Now()
 	}()
 
-	if 1 > len(Conf.Repo.Load().Key) {
+	if 1 > len(confRepoReadSnapshot.Key) {
 		return
 	}
 
@@ -122,7 +124,7 @@ func autoPurgeRepo(cron bool) {
 
 		tooOld := false
 		for _, index := range indexes {
-			if now.UnixMilli()-index.Created <= int64(Conf.Repo.Load().IndexRetentionDays)*24*60*60*1000 {
+			if now.UnixMilli()-index.Created <= int64(confRepoReadSnapshot.IndexRetentionDays)*24*60*60*1000 {
 				date = time.UnixMilli(index.Created).Format("2006-01-02")
 				if _, ok := dateGroupedIndexes[date]; !ok {
 					dateGroupedIndexes[date] = []*entity.Index{}
@@ -146,7 +148,7 @@ func autoPurgeRepo(cron bool) {
 	// 过滤出每日需要保留的索引
 	var retentionIndexIDs []string
 	for date, indexes := range dateGroupedIndexes {
-		if len(indexes) <= Conf.Repo.Load().RetentionIndexesDaily || todayDate == date {
+		if len(indexes) <= confRepoReadSnapshot.RetentionIndexesDaily || todayDate == date {
 			for _, index := range indexes {
 				retentionIndexIDs = append(retentionIndexIDs, index.ID)
 			}
@@ -156,9 +158,9 @@ func autoPurgeRepo(cron bool) {
 		keepIndexes := hashset.New()
 		keepIndexes.Add(indexes[0]) // 每天最后一个固定保留
 		// 随机保留指定数量的索引
-		for i := 0; i < Conf.Repo.Load().RetentionIndexesDaily*7; i++ {
+		for i := 0; i < confRepoReadSnapshot.RetentionIndexesDaily*7; i++ {
 			keepIndexes.Add(indexes[mathRand.Intn(len(indexes)-1)])
-			if keepIndexes.Size() >= Conf.Repo.Load().RetentionIndexesDaily {
+			if keepIndexes.Size() >= confRepoReadSnapshot.RetentionIndexesDaily {
 				break
 			}
 		}
@@ -2938,7 +2940,9 @@ func cleanupSyncedBoxResiduals(removedBoxIDs map[string]bool) {
 }
 
 func appendLANSyncTrafficStat(message string, trafficStat *dejavu.TrafficStat) string {
-	if nil == Conf.Sync.Load() || nil == Conf.Sync.Load().LAN || !Conf.Sync.Load().LAN.Enabled {
+	confSyncReadSnapshot := Conf.LoadSync()
+
+	if nil == confSyncReadSnapshot || nil == confSyncReadSnapshot.LAN || !confSyncReadSnapshot.LAN.Enabled {
 		return message
 	}
 	traffic := humanize.BytesCustomCeil(uint64(trafficStat.PeerDownloadBytes), 2)
@@ -3358,59 +3362,59 @@ func subscribeRepoEvents() {
 }
 
 func buildCloudConf() (ret *cloud.Conf, err error) {
-	if conf.ProviderS3 != Conf.Sync.Load().Provider && !cloud.IsValidCloudDirName(Conf.Sync.Load().CloudName) {
+	sync := Conf.Sync.Load()
+	if conf.ProviderS3 != sync.Provider && !cloud.IsValidCloudDirName(sync.CloudName) {
 		logging.LogWarnf("invalid cloud repo name, rename it to [main]")
-		UpdateSyncConf(func(s *conf.Sync) { s.CloudName = "main" })
+		sync = UpdateSyncConf(func(s *conf.Sync) { s.CloudName = "main" })
 	}
 
 	userId, token, availableSize := "0", "", int64(1024*1024*1024*1024*2)
-	if nil != Conf.User && conf.ProviderSiYuan == Conf.Sync.Load().Provider {
-		u := Conf.GetUser()
+	if u := Conf.GetUser(); u != nil && conf.ProviderSiYuan == sync.Provider {
 		userId = u.UserId
 		token = u.UserToken
 		availableSize = u.GetCloudRepoAvailableSize()
 	}
 
 	ret = &cloud.Conf{
-		Dir:           Conf.Sync.Load().CloudName,
+		Dir:           sync.CloudName,
 		UserID:        userId,
 		Token:         token,
 		AvailableSize: availableSize,
 		Server:        util.GetCloudServer(),
 	}
 
-	switch Conf.Sync.Load().Provider {
+	switch sync.Provider {
 	case conf.ProviderSiYuan:
 		ret.Endpoint = util.GetCloudSyncServer()
 	case conf.ProviderS3:
 		ret.S3 = &cloud.ConfS3{
-			Endpoint:       Conf.Sync.Load().S3.Endpoint,
-			AccessKey:      Conf.Sync.Load().S3.AccessKey,
-			SecretKey:      Conf.Sync.Load().S3.SecretKey,
-			Bucket:         Conf.Sync.Load().S3.Bucket,
-			Region:         Conf.Sync.Load().S3.Region,
-			PathStyle:      Conf.Sync.Load().S3.PathStyle,
-			SkipTlsVerify:  Conf.Sync.Load().S3.SkipTlsVerify,
-			Timeout:        Conf.Sync.Load().S3.Timeout,
-			ConcurrentReqs: Conf.Sync.Load().S3.ConcurrentReqs,
+			Endpoint:       sync.S3.Endpoint,
+			AccessKey:      sync.S3.AccessKey,
+			SecretKey:      sync.S3.SecretKey,
+			Bucket:         sync.S3.Bucket,
+			Region:         sync.S3.Region,
+			PathStyle:      sync.S3.PathStyle,
+			SkipTlsVerify:  sync.S3.SkipTlsVerify,
+			Timeout:        sync.S3.Timeout,
+			ConcurrentReqs: sync.S3.ConcurrentReqs,
 		}
 	case conf.ProviderWebDAV:
 		ret.WebDAV = &cloud.ConfWebDAV{
-			Endpoint:       Conf.Sync.Load().WebDAV.Endpoint,
-			Username:       Conf.Sync.Load().WebDAV.Username,
-			Password:       Conf.Sync.Load().WebDAV.Password,
-			SkipTlsVerify:  Conf.Sync.Load().WebDAV.SkipTlsVerify,
-			Timeout:        Conf.Sync.Load().WebDAV.Timeout,
-			ConcurrentReqs: Conf.Sync.Load().WebDAV.ConcurrentReqs,
+			Endpoint:       sync.WebDAV.Endpoint,
+			Username:       sync.WebDAV.Username,
+			Password:       sync.WebDAV.Password,
+			SkipTlsVerify:  sync.WebDAV.SkipTlsVerify,
+			Timeout:        sync.WebDAV.Timeout,
+			ConcurrentReqs: sync.WebDAV.ConcurrentReqs,
 		}
 	case conf.ProviderLocal:
 		ret.Local = &cloud.ConfLocal{
-			Endpoint:       Conf.Sync.Load().Local.Endpoint,
-			Timeout:        Conf.Sync.Load().Local.Timeout,
-			ConcurrentReqs: Conf.Sync.Load().Local.ConcurrentReqs,
+			Endpoint:       sync.Local.Endpoint,
+			Timeout:        sync.Local.Timeout,
+			ConcurrentReqs: sync.Local.ConcurrentReqs,
 		}
 	default:
-		err = fmt.Errorf("invalid provider [%d]", Conf.Sync.Load().Provider)
+		err = fmt.Errorf("invalid provider [%d]", sync.Provider)
 		return
 	}
 	return

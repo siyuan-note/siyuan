@@ -6576,7 +6576,9 @@ export interface APIPOSTRoutes {
     };
     /**
      * 保留省略字段，成功后客户端重新读取配置；通知不包含密码或密钥。
-     * export.blockRefMode 的废弃值 0、1、5 在保存前转换为 4，与启动时的转换规则一致。
+     * export.blockRefMode 的旧值 0、1、5 按旧设置接口的兼容语义转换为 4；启动迁移由配置版本控制。
+     * 同步地址沿用专用保存接口的校验，更换来源须保留完整资源检查，间隔使用规范化后的值调度。
+     * 存在字段诊断时在 data.issues 返回；error 阻止写入，warning 随已规范化的成功结果返回。
      */
     "/api/setting/patch": {
         request: PatchSettingRequestInput;

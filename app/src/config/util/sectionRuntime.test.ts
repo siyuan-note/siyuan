@@ -25,3 +25,21 @@ test("reactions compare coherent snapshots and finish asynchronous actions befor
     await runtime.apply(current);
     assert.deepEqual(events, ["font", "complete"]);
 });
+
+test("dependent reactions wait for previous asynchronous actions in declaration order", async () => {
+    let current = 1;
+    let finish: () => void;
+    const events: string[] = [];
+    const runtime = createSectionRuntime({namespace: "editor", get: () => current, set: next => { current = next; },
+        reactions: [{name: "styles", changed: () => true, apply: async () => {
+            events.push("styles");
+            await new Promise<void>(resolve => { finish = resolve; });
+            events.push("styles loaded");
+        }}, {name: "measure", changed: () => true, apply: () => { events.push("measure"); }}],
+    });
+    const pending = runtime.apply(2);
+    assert.deepEqual(events, ["styles"]);
+    finish();
+    await pending;
+    assert.deepEqual(events, ["styles", "styles loaded", "measure"]);
+});

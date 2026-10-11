@@ -516,10 +516,12 @@ func PrepareAgentMessageImage(assetPath string) (PreparedDocumentImage, error) {
 
 // GenerateImage 使用全局图片生成配置创建图片字节，可供文档资源、编辑器和其他图片入口复用。
 func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateImageResult, error) {
-	if Conf == nil || Conf.AI.Load() == nil {
+	confAIReadSnapshot := Conf.LoadAI()
+
+	if Conf == nil || confAIReadSnapshot == nil {
 		return GenerateImageResult{}, errors.New("AI configuration is unavailable")
 	}
-	provider, generationModel := Conf.AI.Load().GetImageGenerationModel()
+	provider, generationModel := confAIReadSnapshot.GetImageGenerationModel()
 	if err := validateImageModel(provider, generationModel); err != nil {
 		return GenerateImageResult{}, err
 	}
@@ -527,14 +529,14 @@ func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateI
 	if prompt == "" {
 		return GenerateImageResult{}, errors.New("prompt is required for image generation")
 	}
-	size := multimodalValueOrDefault(request.Size, Conf.AI.Load().ImageGeneration.Size)
-	quality := multimodalValueOrDefault(request.Quality, Conf.AI.Load().ImageGeneration.Quality)
-	outputFormat := strings.ToLower(multimodalValueOrDefault(request.OutputFormat, Conf.AI.Load().ImageGeneration.OutputFormat))
+	size := multimodalValueOrDefault(request.Size, confAIReadSnapshot.ImageGeneration.Size)
+	quality := multimodalValueOrDefault(request.Quality, confAIReadSnapshot.ImageGeneration.Quality)
+	outputFormat := strings.ToLower(multimodalValueOrDefault(request.OutputFormat, confAIReadSnapshot.ImageGeneration.OutputFormat))
 	if outputFormat != "png" && outputFormat != "jpeg" && outputFormat != "webp" {
 		return GenerateImageResult{}, errors.New("unsupported image output format")
 	}
 	generated, err := util.NewOpenAIImageAdapter(
-		provider.APIKey, provider.BaseURL, generationModel.Name, Conf.AI.Load().ImageGeneration.RequestTimeout, ResolveAIProviderHeaders(provider),
+		provider.APIKey, provider.BaseURL, generationModel.Name, confAIReadSnapshot.ImageGeneration.RequestTimeout, ResolveAIProviderHeaders(provider),
 	).Generate(ctx, util.GenerateImageRequest{
 		Prompt: prompt, Size: size, Quality: quality, OutputFormat: outputFormat,
 	})

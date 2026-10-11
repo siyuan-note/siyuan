@@ -1,10 +1,12 @@
 package model
 
 import (
+	"reflect"
+	"sync/atomic"
+
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"sync/atomic"
 )
 
 func confSectionSpecs() map[string]registeredSection {
@@ -18,7 +20,7 @@ func confSectionSpecs() map[string]registeredSection {
 		"uiLayout":   newSectionSpec("uiLayout", &Conf.UILayout, conf.NormalizeUILayout),
 		"system":     newSectionSpec("system", &Conf.System, conf.NormalizeSystem, systemReactions()...),
 		"keymap":     newSectionSpec("keymap", &Conf.Keymap, conf.NormalizeKeymap),
-		"sync":       newSectionSpec("sync", &Conf.Sync, conf.NormalizeSync),
+		"sync":       syncSectionSpec(),
 		"search":     newSectionSpec("search", &Conf.Search, conf.NormalizeSearch, searchReactions()...),
 		"flashcard":  flashcardSectionSpec(),
 		"ai":         newSectionSpec("ai", &Conf.AI, conf.NormalizeAI),
@@ -33,6 +35,18 @@ func confSectionSpecs() map[string]registeredSection {
 		"onboarding": newSectionSpec("onboarding", &Conf.Onboarding, conf.NormalizeOnboarding),
 		"snippet":    newSectionSpec("snippet", &Conf.Snippet, conf.NormalizeSnippet, Reaction[*conf.Snpt]{Name: "reload-snippet", Changed: func(old, next *conf.Snpt) bool { return true }, Apply: func(old, next *conf.Snpt) { PushReloadSnippet(next) }}),
 	}
+}
+
+// syncSectionSpec 在连接信息改变或同步关闭时清除当前来源的索引读取提示。
+func syncSectionSpec() *SectionSpec[*conf.Sync] {
+	return newSectionSpec("sync", &Conf.Sync, conf.NormalizeSync, Reaction[*conf.Sync]{
+		Name: "cloud-index-notice", Changed: func(old, next *conf.Sync) bool {
+			return !next.Enabled || old.Provider != next.Provider || old.CloudName != next.CloudName ||
+				(old.Provider == conf.ProviderS3 && !reflect.DeepEqual(old.S3, next.S3)) ||
+				(old.Provider == conf.ProviderWebDAV && !reflect.DeepEqual(old.WebDAV, next.WebDAV)) ||
+				(old.Provider == conf.ProviderLocal && !reflect.DeepEqual(old.Local, next.Local))
+		}, Apply: func(old, next *conf.Sync) { syncIndexListNotice.reset(util.PushClearMsg) },
+	})
 }
 
 var BazaarPetalStateRevision atomic.Uint64
@@ -63,6 +77,9 @@ func appearanceSectionSpec() *SectionSpec[*conf.Appearance] {
 	}, Apply: func(old, next *conf.Appearance) {
 		InitAppearance()
 		WatchThemes()
+	}}, Reaction[*conf.Appearance]{Name: "appearance-notify", Changed: func(old, next *conf.Appearance) bool {
+		return true
+	}, Apply: func(old, next *conf.Appearance) {
 		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance.Load())
 	}})
 	spec.Store = func(value *conf.Appearance) {

@@ -181,3 +181,70 @@ func TestConfDirectApplyClonesNestedInputs(t *testing.T) {
 		t.Fatal("published snapshot still shares nested input data")
 	}
 }
+
+func TestConfOnboardingPreservesPublishedSnapshots(t *testing.T) {
+	prepareConfConsistencyTest(t)
+	normalizeAppConf(Conf)
+	if err := os.MkdirAll(util.DataDir, 0700); err != nil {
+		t.Fatal(err)
+	}
+	completed := &conf.Onboarding{State: conf.OnboardingCompleted, Dismissed: true}
+	Conf.Onboarding.Store(completed)
+	TriggerOnboardingIfEmpty()
+	pending := Conf.Onboarding.Load()
+	if completed.State != conf.OnboardingCompleted || !completed.Dismissed ||
+		pending == completed || pending.State != conf.OnboardingPending || !pending.NewUser {
+		t.Fatal("triggering onboarding changed a published snapshot")
+	}
+	DismissOnboarding()
+	if pending.Dismissed || !Conf.Onboarding.Load().Dismissed {
+		t.Fatal("dismissing onboarding changed a held snapshot")
+	}
+	missing := &conf.Onboarding{State: conf.OnboardingCompleted, NewUser: true, NotebookID: "missing", DocumentID: "missing"}
+	Conf.Onboarding.Store(missing)
+	util.ReadOnly = true
+	if _, _, err := EnsureOnboarding(); err == nil {
+		t.Fatal("read-only workspace created onboarding data")
+	}
+	if missing.State != conf.OnboardingCompleted || missing.NotebookID != "missing" ||
+		Conf.Onboarding.Load() == missing || Conf.Onboarding.Load().State != conf.OnboardingPending {
+		t.Fatal("reconciling onboarding changed a published snapshot")
+	}
+}
+
+func TestConfDeltaUpdatePreservesAnInterleavedInternalPublication(t *testing.T) {
+	prepareConfConsistencyTest(t)
+	normalizeAppConf(Conf)
+	util.ReadOnly = true
+	interleaved := false
+	UpdateSystemConf(func(value *conf.System) {
+		if !interleaved {
+			interleaved = true
+			Conf.m.Lock()
+			replaceConfSectionLocked(&Conf.System, func(current *conf.System) bool {
+				current.Name = "updated host"
+				return true
+			})
+			Conf.m.Unlock()
+		}
+		value.SettingsWindow = true
+	})
+	current := Conf.System.Load()
+	if !current.SettingsWindow || current.Name != "updated host" {
+		t.Fatal("delta update overwrote an interleaved internal publication")
+	}
+}
+
+func TestConfAppearancePreferencesDoNotInitializeResources(t *testing.T) {
+	prepareConfConsistencyTest(t)
+	normalizeAppConf(Conf)
+	util.ReadOnly = true
+	previous := util.AppearancePath
+	util.AppearancePath = ""
+	t.Cleanup(func() { util.AppearancePath = previous })
+	held := Conf.Appearance.Load()
+	UpdateAppearanceConf(func(value *conf.Appearance) { value.ThemeJS = !held.ThemeJS })
+	if Conf.Appearance.Load().ThemeJS == held.ThemeJS {
+		t.Fatal("appearance preference did not publish its snapshot")
+	}
+}

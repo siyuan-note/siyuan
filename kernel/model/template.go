@@ -139,6 +139,8 @@ func getTemplateReadmePaths(templateDir string) map[string]struct{} {
 }
 
 func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
+	confSearchReadSnapshot := Conf.LoadSearch()
+
 	ret = []*TemplateSearchResult{}
 
 	templates := filepath.Join(util.DataDir, "templates")
@@ -215,7 +217,7 @@ func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
 					content = strings.TrimPrefix(path, templates)
 					content = strings.TrimSuffix(content, ".md")
 					content = filepath.ToSlash(content)
-					_, content = search.MarkText(content, strings.Join(keywords, search.TermSep), 32, Conf.Search.Load().CaseSensitive)
+					_, content = search.MarkText(content, strings.Join(keywords, search.TermSep), 32, confSearchReadSnapshot.CaseSensitive)
 					relativePath, relErr := filepath.Rel(templates, path)
 					if nil != relErr {
 						return nil
@@ -245,7 +247,7 @@ func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
 			}
 			if hit {
 				content = filepath.ToSlash(content)
-				_, content = search.MarkText(content, strings.Join(keywords, search.TermSep), 32, Conf.Search.Load().CaseSensitive)
+				_, content = search.MarkText(content, strings.Join(keywords, search.TermSep), 32, confSearchReadSnapshot.CaseSensitive)
 				b := &TemplateSearchResult{Path: filepath.Join(templates, group.Name()), RelativePath: group.Name(), Content: content}
 				results = append(results, &result{item: b, score: score})
 			}

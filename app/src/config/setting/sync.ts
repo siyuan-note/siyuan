@@ -48,7 +48,10 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             const namespaces = pending;
             pending = new Set();
             const response = await fetchSyncPost("/api/system/getConf", {});
-            if (response.code !== 0 || !window.siyuan.config) {
+            if (response.code !== 0) {
+                throw new Error(response.msg || "Could not refresh settings");
+            }
+            if (!window.siyuan.config) {
                 continue;
             }
             const next = systemConfig(response.data.conf);
@@ -112,9 +115,10 @@ export const refreshSettingConfig = (namespace = "*"): Promise<void> => {
             remountTabs.forEach(tab => { void remountOpenSettingTab(tab); });
             /// #endif
         }
-    })().catch(error => console.error("Could not refresh settings", error)).finally(() => {
+    })().finally(() => {
         refreshing = undefined;
         if (pending.size) return refreshSettingConfig();
     });
+    void refreshing.catch(error => console.error("Could not refresh settings", error));
     return refreshing;
 };

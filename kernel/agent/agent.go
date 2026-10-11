@@ -494,6 +494,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 	language string, references []Reference, editorCtx EditorContext, frontendCapabilities []FrontendCapability,
 	regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string,
 	requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
+	confAIReadSnapshot := kernelModel.Conf.LoadAI()
+
 	ch := make(chan AgentEvent, 256)
 
 	go func() {
@@ -517,8 +519,8 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			return
 		}
 
-		if kernelModel.Conf.AI.Load().MCP != nil {
-			mcpclient.EnsureMCPConnected(kernelModel.Conf.AI.Load().MCP.Servers)
+		if confAIReadSnapshot.MCP != nil {
+			mcpclient.EnsureMCPConnected(confAIReadSnapshot.MCP.Servers)
 		}
 		select {
 		case <-ctx.Done():
@@ -713,12 +715,12 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 			}
 		}()
 
-		temperature := kernelModel.Conf.AI.Load().Agent.Temperature
+		temperature := confAIReadSnapshot.Agent.Temperature
 		if temperature < 0 || 2 < temperature {
 			temperature = 1.0
 		}
-		maxCompletionTokens := max(kernelModel.Conf.AI.Load().Agent.MaxCompletionTokens, 0)
-		maxRounds := kernelModel.Conf.AI.Load().Agent.MaxToolCallRounds
+		maxCompletionTokens := max(confAIReadSnapshot.Agent.MaxCompletionTokens, 0)
+		maxRounds := confAIReadSnapshot.Agent.MaxToolCallRounds
 		modelRound := 0
 		toolCallRounds := 0
 		overflowRetryPending := false

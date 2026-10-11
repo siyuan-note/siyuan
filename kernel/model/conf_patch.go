@@ -45,11 +45,18 @@ func MergeConfJSON(base, patch []byte) ([]byte, error) {
 func (spec *SectionSpec[C]) patch(patch []byte) ([]Issue, error) {
 	spec.WriteLock.Lock()
 	defer spec.WriteLock.Unlock()
-	next, err := mergeConfSection(spec.Load(), patch)
-	if err != nil {
-		return nil, err
+	for {
+		old := spec.Load()
+		next, err := mergeConfSection(old, patch)
+		if err != nil {
+			return nil, err
+		}
+		issues, err := applySectionLockedAt(spec, next, old, true)
+		if errors.Is(err, errConfSectionChanged) {
+			continue
+		}
+		return issues, err
 	}
-	return applySectionLocked(spec, next)
 }
 
 func mergeConfSection[C any](current C, patch []byte) (next C, err error) {
@@ -77,12 +84,14 @@ func ApplyConfPatch(namespace string, patch []byte) ([]Issue, error) {
 func ApplySyncSettingPatch(patch []byte) ([]Issue, error) {
 	release := lockAssetSourceChange()
 	defer release()
-	spec := newSectionSpec("sync", &Conf.Sync, conf.NormalizeSync)
-	spec.WriteLock.Lock()
-	defer spec.WriteLock.Unlock()
+	spec := syncSectionSpec()
 	old := spec.Load()
 	next, err := mergeConfSection(old, patch)
 	if err != nil {
+		return nil, err
+	}
+	var requested map[string]json.RawMessage
+	if err = json.Unmarshal(patch, &requested); err != nil {
 		return nil, err
 	}
 	if next.Provider != old.Provider {
@@ -91,21 +100,21 @@ func ApplySyncSettingPatch(patch []byte) ([]Issue, error) {
 	if util.ContainerDocker == util.Container {
 		next.Perception = false
 	}
-	if !reflect.DeepEqual(old.S3, next.S3) {
+	if _, present := requested["s3"]; present || !reflect.DeepEqual(old.S3, next.S3) {
 		if err = validateSyncS3(next.S3); err != nil {
 			return nil, err
 		}
 	}
-	if !reflect.DeepEqual(old.WebDAV, next.WebDAV) {
-		if next.WebDAV == nil {
-			return nil, errors.New("invalid WebDAV configuration")
+	if _, present := requested["webdav"]; present || !reflect.DeepEqual(old.WebDAV, next.WebDAV) {
+		if err = validateSyncWebDAV(next.WebDAV); err != nil {
+			return nil, err
 		}
 		if strings.Contains(strings.ToLower(next.WebDAV.Endpoint), "dav.jianguoyun.com") {
 			return nil, errors.New(Conf.Language(194))
 		}
 	}
-	if !reflect.DeepEqual(old.Local, next.Local) {
-		if err = validateSyncLocal(next.Local); err != nil {
+	if _, present := requested["local"]; present || !reflect.DeepEqual(old.Local, next.Local) {
+		if err = validateSyncLocalPath(next.Local); err != nil {
 			return nil, err
 		}
 	}
@@ -125,6 +134,10 @@ func ApplySyncSettingPatch(patch []byte) ([]Issue, error) {
 			return nil, err
 		}
 	}
+	next = conf.NormalizeSync(next)
+	if old.LAN != nil && old.LAN.Enabled && !next.LAN.Enabled {
+		next.Stat = removeLANSyncTrafficStat(next.Stat)
+	}
 	sourceChanged := old.CloudName != next.CloudName ||
 		(old.Provider == conf.ProviderS3 && (next.S3.Endpoint != old.S3.Endpoint || next.S3.Bucket != old.S3.Bucket)) ||
 		(old.Provider == conf.ProviderWebDAV && (next.WebDAV.Endpoint != old.WebDAV.Endpoint || next.WebDAV.Username != old.WebDAV.Username)) ||
@@ -134,10 +147,26 @@ func ApplySyncSettingPatch(patch []byte) ([]Issue, error) {
 			return nil, err
 		}
 	}
+	// 来源检查可能更新同步运行状态，完成后再取得段写锁并以最新快照重新合并。
+	spec.WriteLock.Lock()
+	defer spec.WriteLock.Unlock()
+	old = spec.Load()
+	next, err = mergeConfSection(old, patch)
+	if err != nil {
+		return nil, err
+	}
+	if util.ContainerDocker == util.Container {
+		next.Perception = false
+	}
+	next = conf.NormalizeSync(next)
+	if old.LAN != nil && old.LAN.Enabled && !next.LAN.Enabled {
+		next.Stat = removeLANSyncTrafficStat(next.Stat)
+	}
 	issues, err := applySectionLocked(spec, next)
 	if err != nil {
 		return issues, err
 	}
+	next = spec.Load()
 	refreshLANSyncManager()
 	if old.Interval != next.Interval {
 		planSyncAfter(time.Duration(next.Interval) * time.Second)
@@ -152,9 +181,9 @@ func ApplySyncSettingPatch(patch []byte) ([]Issue, error) {
 	return issues, nil
 }
 
-func validateSyncLocal(local *conf.Local) error {
-	if local == nil {
-		return errors.New("invalid local sync configuration")
+func validateSyncLocalPath(local *conf.Local) error {
+	if err := validateSyncLocal(local); err != nil {
+		return err
 	}
 	absPath, err := filepath.Abs(util.NormalizeLocalPath(local.Endpoint))
 	if err != nil {

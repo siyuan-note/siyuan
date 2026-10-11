@@ -33,17 +33,21 @@ import (
 )
 
 func EnabledUserSkills() []string {
-	if Conf == nil || Conf.AI.Load() == nil || Conf.AI.Load().Agent == nil || Conf.AI.Load().Agent.Skills == nil {
+	confAIReadSnapshot := Conf.LoadAI()
+
+	if Conf == nil || confAIReadSnapshot == nil || confAIReadSnapshot.Agent == nil || confAIReadSnapshot.Agent.Skills == nil {
 		return nil
 	}
-	return append([]string(nil), Conf.AI.Load().Agent.Skills.UserEnabled...)
+	return append([]string(nil), confAIReadSnapshot.Agent.Skills.UserEnabled...)
 }
 
 func DisabledBuiltinSkills() []string {
-	if Conf == nil || Conf.AI.Load() == nil || Conf.AI.Load().Agent == nil || Conf.AI.Load().Agent.Skills == nil {
+	confAIReadSnapshot := Conf.LoadAI()
+
+	if Conf == nil || confAIReadSnapshot == nil || confAIReadSnapshot.Agent == nil || confAIReadSnapshot.Agent.Skills == nil {
 		return nil
 	}
-	return append([]string(nil), Conf.AI.Load().Agent.Skills.BuiltinDisabled...)
+	return append([]string(nil), confAIReadSnapshot.Agent.Skills.BuiltinDisabled...)
 }
 
 func ChatGPT(msg string) (ret string) {

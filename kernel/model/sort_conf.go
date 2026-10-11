@@ -72,8 +72,10 @@ func salvageSortConfMap(data []byte) map[string]int {
 }
 
 func sortConfFromSnapshots(relPath string) (map[string]int, string, error) {
+	confRepoReadSnapshot := Conf.LoadRepo()
+
 	// 未配置快照密钥或没有本地索引时不访问云端，直接使用原文件中的可用条目。
-	if Conf.Repo.Load() == nil || len(Conf.Repo.Load().Key) == 0 {
+	if confRepoReadSnapshot == nil || len(confRepoReadSnapshot.Key) == 0 {
 		return nil, "", nil
 	}
 	if _, err := os.Stat(filepath.Join(util.RepoDir, "indexes")); err != nil {

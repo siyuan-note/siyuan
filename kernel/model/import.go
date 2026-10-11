@@ -399,6 +399,8 @@ func checkEncryptedImportDeck(unzipRootPath string, trees map[string]*parse.Tree
 
 func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, sharedBlockIDs map[string]string,
 	precreatedBox bool) (createdBoxID string, err error) {
+	confFlashcardReadSnapshot := Conf.LoadFlashcard()
+
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
@@ -878,7 +880,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	// 普通笔记本将关联的闪卡数据合并到默认卡包 data/storage/riff/20230218211946-2kw8jgx 中
 	storageRiffDir := filepath.Join(storage, "riff")
 	if gulu.File.IsExist(storageRiffDir) {
-		deckToImport, loadErr := riff.LoadDeck(storageRiffDir, builtinDeckID, Conf.Flashcard.Load().RequestRetention, Conf.Flashcard.Load().MaximumInterval, Conf.Flashcard.Load().Weights)
+		deckToImport, loadErr := riff.LoadDeck(storageRiffDir, builtinDeckID, confFlashcardReadSnapshot.RequestRetention, confFlashcardReadSnapshot.MaximumInterval, confFlashcardReadSnapshot.Weights)
 		if nil != loadErr {
 			logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
 		} else {

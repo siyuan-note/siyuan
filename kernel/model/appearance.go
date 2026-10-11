@@ -348,22 +348,24 @@ func isCurrentUseTheme(themePath string) string {
 }
 
 func currentThemeDir() string {
+	confAppearanceReadSnapshot := Conf.LoadAppearance()
+
 	if nil == Conf {
 		return ""
 	}
 
 	Conf.m.RLock()
 	defer Conf.m.RUnlock()
-	if nil == Conf.Appearance.Load() {
+	if nil == confAppearanceReadSnapshot {
 		return ""
 	}
 
 	var themeName string
-	switch Conf.Appearance.Load().Mode {
+	switch confAppearanceReadSnapshot.Mode {
 	case 0:
-		themeName = Conf.Appearance.Load().ThemeLight
+		themeName = confAppearanceReadSnapshot.ThemeLight
 	case 1:
-		themeName = Conf.Appearance.Load().ThemeDark
+		themeName = confAppearanceReadSnapshot.ThemeDark
 	default:
 		return ""
 	}

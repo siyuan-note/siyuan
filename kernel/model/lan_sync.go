@@ -62,24 +62,30 @@ func refreshLANSyncManager() {
 }
 
 func refreshLANSyncManagerWithForce(force bool) {
+	confRepoReadSnapshot := Conf.LoadRepo()
+
+	confSyncReadSnapshot := Conf.LoadSync()
+
+	confSystemReadSnapshot := Conf.LoadSystem()
+
 	lanSyncLifecycleMu.Lock()
 	defer lanSyncLifecycleMu.Unlock()
 	if lanSyncShuttingDown {
 		return
 	}
-	if nil == Conf || nil == Conf.Sync.Load() || nil == Conf.Sync.Load().LAN || !Conf.Sync.Load().LAN.Enabled || !Conf.Sync.Load().Enabled ||
-		1 > len(Conf.Repo.Load().Key) || util.ContainerDocker == util.Container {
+	if nil == Conf || nil == confSyncReadSnapshot || nil == confSyncReadSnapshot.LAN || !confSyncReadSnapshot.LAN.Enabled || !confSyncReadSnapshot.Enabled ||
+		1 > len(confRepoReadSnapshot.Key) || util.ContainerDocker == util.Container {
 		stopLANSyncManagerLocked()
 		return
 	}
 	nativeDiscovery := util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container
 	config := &lanSyncRuntimeConfig{
-		repoKeyHash:       sha256.Sum256(Conf.Repo.Load().Key),
+		repoKeyHash:       sha256.Sum256(confRepoReadSnapshot.Key),
 		scope:             lanSyncScope(),
-		deviceName:        Conf.System.Load().Name,
-		deviceOS:          Conf.System.Load().OS,
+		deviceName:        confSystemReadSnapshot.Name,
+		deviceOS:          confSystemReadSnapshot.OS,
 		appVersion:        util.Ver,
-		maxConcurrentReqs: Conf.Sync.Load().LAN.MaxConcurrentReqs,
+		maxConcurrentReqs: confSyncReadSnapshot.LAN.MaxConcurrentReqs,
 		nativeDiscovery:   nativeDiscovery,
 	}
 	lanSyncManagerMu.RLock()
@@ -98,14 +104,14 @@ func refreshLANSyncManagerWithForce(force bool) {
 	manager, err := lansync.Start(lansync.Config{
 		RepoPath:          util.RepoDir,
 		IdentityPath:      filepath.Join(util.ConfDir, "lan-sync-identity.json"),
-		RepoKey:           append([]byte(nil), Conf.Repo.Load().Key...),
+		RepoKey:           append([]byte(nil), confRepoReadSnapshot.Key...),
 		Scope:             config.scope,
-		DeviceName:        Conf.System.Load().Name,
-		DeviceOS:          Conf.System.Load().OS,
+		DeviceName:        confSystemReadSnapshot.Name,
+		DeviceOS:          confSystemReadSnapshot.OS,
 		AppVersion:        util.Ver,
 		IPs:               ips,
 		IPsProvider:       collectLANSyncIPs,
-		MaxConcurrentReqs: Conf.Sync.Load().LAN.MaxConcurrentReqs,
+		MaxConcurrentReqs: confSyncReadSnapshot.LAN.MaxConcurrentReqs,
 		NativeDiscovery:   nativeDiscovery,
 		OnCommitHint:      handleLANSyncCommitHint,
 	})

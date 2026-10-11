@@ -292,7 +292,7 @@ for (const mobile of [false, true]) {
         assert.equal(remounted.filter(tab => tab === "access").length, mobile ? 0 : 1);
         failed = true;
         next = {...next, api: {token: "unconfirmed-token"}};
-        await exports.refreshSettingConfig("system");
+        await assert.rejects(exports.refreshSettingConfig("system"), /Could not refresh settings/);
         assert.equal(config.api.token, "latest-token");
     });
 

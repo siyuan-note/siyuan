@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"sync"
@@ -74,7 +75,14 @@ func Apply[C any](spec *SectionSpec[C], next C) ([]Issue, error) {
 }
 
 func applySectionLocked[C any](spec *SectionSpec[C], next C) ([]Issue, error) {
-	old := spec.Load()
+	var expected C
+	return applySectionLockedAt(spec, next, expected, false)
+}
+
+var errConfSectionChanged = errors.New("configuration section changed before commit")
+
+// applySectionLockedAt 在提交前核对增量更新的来源快照，避免覆盖资源刷新或事务路径的并发发布。
+func applySectionLockedAt[C any](spec *SectionSpec[C], next, expected C, checkSource bool) ([]Issue, error) {
 	data, err := json.Marshal(next)
 	if err != nil {
 		return nil, err
@@ -99,6 +107,11 @@ func applySectionLocked[C any](spec *SectionSpec[C], next C) ([]Issue, error) {
 		current = Conf
 	}
 	current.m.Lock()
+	old := spec.Load()
+	if checkSource && !reflect.DeepEqual(old, expected) {
+		current.m.Unlock()
+		return nil, errConfSectionChanged
+	}
 	spec.Store(next)
 	applyConfRuntime(current)
 	if !util.ReadOnly {

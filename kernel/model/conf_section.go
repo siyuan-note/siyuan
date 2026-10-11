@@ -18,6 +18,7 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -58,19 +59,23 @@ func updateConfSection[T any](field *ConfSection[T], normalize func(*T) *T, muta
 	}
 	spec.WriteLock.Lock()
 	defer spec.WriteLock.Unlock()
-	next := cloneConfSection(field.Load())
-	if next == nil {
-		next = normalize(nil)
-	}
-	if !mutate(next) {
+	for {
+		old := field.Load()
+		next := cloneConfSection(old)
+		if next == nil {
+			next = normalize(nil)
+		}
+		if !mutate(next) {
+			return field.Load()
+		}
+		if _, err := applySectionLockedAt(spec, next, old, true); err != nil {
+			if errors.Is(err, errConfSectionChanged) {
+				continue
+			}
+			logging.LogWarnf("update conf section [%s] failed: %s", spec.Namespace, err)
+		}
 		return field.Load()
 	}
-	if _, err := applySectionLocked(spec, next); err != nil {
-		logging.LogWarnf("update conf section [%s] failed: %s", spec.Namespace, err)
-		return field.Load()
-	}
-	next = field.Load()
-	return next
 }
 
 func always[T any](mutate func(*T)) func(*T) bool {

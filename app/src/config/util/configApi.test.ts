@@ -5,7 +5,7 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 import {mergeRecordByDottedPath} from "./dotPath";
 
-const fixture = () => {
+const fixture = (failRefresh = false) => {
     const memory = {editor: {fontSize: 16, markdown: {inlineMath: true}}, sync: {interval: 30}};
     const requests: Array<{body: any; resolve: (response: any) => void}> = [];
     const exports = {} as typeof import("./configApi");
@@ -19,6 +19,10 @@ const fixture = () => {
         if (name === "../setting/pending") return {trackSettingSave: (operation: Promise<void>) => operation};
         if (name === "../setting/sync") return {refreshSettingConfigAfter: async (namespace: keyof typeof memory, save: () => Promise<boolean>) => {
             if (!await save()) return false;
+            if (failRefresh) {
+                failRefresh = false;
+                throw new Error("configuration refresh failed");
+            }
             if (namespace === "editor") memory.editor.fontSize = 24;
             return true;
         }};
@@ -68,4 +72,22 @@ test("config.set allows independent namespaces and retries after a rejected save
     assert.equal(f.requests.length, 3);
     f.requests[2].resolve({code: 0});
     await retry;
+});
+
+test("config.set rejects an unconfirmed refresh without its callback and continues the queue", async () => {
+    const f = fixture(true);
+    let applied = false;
+    const first = f.config.set("editor.fontSize", 20, () => { applied = true; });
+    const second = f.config.set("editor.fontSize", 24);
+    const rejected = assert.rejects(first, /configuration refresh failed/);
+    await settle();
+    f.requests[0].resolve({code: 0});
+    await rejected;
+    assert.equal(applied, false);
+    assert.equal(f.config.get("editor.fontSize"), 16);
+    await settle();
+    assert.equal(f.requests.length, 2);
+    f.requests[1].resolve({code: 0});
+    await second;
+    assert.equal(f.config.get("editor.fontSize"), 24);
 });

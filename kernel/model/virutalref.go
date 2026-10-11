@@ -128,6 +128,8 @@ func CacheVirtualBlockRefJob() {
 }
 
 func ResetVirtualBlockRefCache() {
+	confSearchReadSnapshot := Conf.LoadSearch()
+
 	virtualBlockRefCache.Clear()
 	if nil == Conf {
 		return
@@ -138,10 +140,10 @@ func ResetVirtualBlockRefCache() {
 
 	searchIgnoreLines := getSearchIgnoreLines()
 	refSearchIgnoreLines := getRefSearchIgnoreLines()
-	keywords := sql.QueryVirtualRefKeywords(Conf.Search.Load().VirtualRefName, Conf.Search.Load().VirtualRefAlias, Conf.Search.Load().VirtualRefAnchor, Conf.Search.Load().VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines)
+	keywords := sql.QueryVirtualRefKeywords(confSearchReadSnapshot.VirtualRefName, confSearchReadSnapshot.VirtualRefAlias, confSearchReadSnapshot.VirtualRefAnchor, confSearchReadSnapshot.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines)
 	putVirtualRefCache("virtual_ref", keywords, 0)
 	for _, boxID := range treenode.GetOpenedEncryptedBoxIDs() {
-		boxKeywords := sql.QueryVirtualRefKeywords(Conf.Search.Load().VirtualRefName, Conf.Search.Load().VirtualRefAlias, Conf.Search.Load().VirtualRefAnchor, Conf.Search.Load().VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxID)
+		boxKeywords := sql.QueryVirtualRefKeywords(confSearchReadSnapshot.VirtualRefName, confSearchReadSnapshot.VirtualRefAlias, confSearchReadSnapshot.VirtualRefAnchor, confSearchReadSnapshot.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxID)
 		putVirtualRefCache(boxID+"\x00virtual_ref", boxKeywords, 0)
 	}
 }

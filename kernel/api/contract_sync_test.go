@@ -343,8 +343,8 @@ func TestAPIContractSyncProviderExportContents(t *testing.T) {
 func TestAPIContractSyncWebDAVImportAddressValidation(t *testing.T) {
 	syncTestConfiguration(t)
 	previous := &conf.WebDAV{Endpoint: "https://dav.example", Username: "user", Password: "secret"}
-	model.Conf.Sync.WebDAV = previous
-	model.Conf.Sync.Enabled = true
+	model.Conf.Sync.Load().WebDAV = previous
+	model.Conf.Sync.Load().Enabled = true
 	engine := gin.New()
 	const path = "/api/sync/importSyncProviderWebDAV"
 	engine.POST(path, importSyncProviderWebDAV)
@@ -372,7 +372,7 @@ func TestAPIContractSyncWebDAVImportAddressValidation(t *testing.T) {
 		if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != -1 {
 			t.Fatalf("invalid imported address %q was accepted: %s (%v)", endpoint, recorder.Body.String(), err)
 		}
-		if model.Conf.Sync.WebDAV != previous || !model.Conf.Sync.Enabled {
+		if model.Conf.Sync.Load().WebDAV != previous || !model.Conf.Sync.Load().Enabled {
 			t.Fatal("rejected import replaced the existing configuration")
 		}
 	}

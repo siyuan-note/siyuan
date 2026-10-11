@@ -381,22 +381,24 @@ func completeSyncPerception(cloudPublished bool, err error) {
 }
 
 func checkSync(boot, exit, byHand bool) bool {
-	if 2 == Conf.Sync.Load().Mode && !boot && !exit && !byHand { // 手动模式下只有启动和退出进行同步
+	confSyncReadSnapshot := Conf.LoadSync()
+
+	if 2 == confSyncReadSnapshot.Mode && !boot && !exit && !byHand { // 手动模式下只有启动和退出进行同步
 		return false
 	}
 
-	if 3 == Conf.Sync.Load().Mode && !byHand { // 完全手动模式下只有手动进行同步
+	if 3 == confSyncReadSnapshot.Mode && !byHand { // 完全手动模式下只有手动进行同步
 		return false
 	}
 
-	if !Conf.Sync.Load().Enabled {
+	if !confSyncReadSnapshot.Enabled {
 		if byHand {
 			util.PushMsg(Conf.Language(124), 5000)
 		}
 		return false
 	}
 
-	if conf.ProviderS3 != Conf.Sync.Load().Provider && !cloud.IsValidCloudDirName(Conf.Sync.Load().CloudName) {
+	if conf.ProviderS3 != confSyncReadSnapshot.Provider && !cloud.IsValidCloudDirName(confSyncReadSnapshot.CloudName) {
 		if byHand {
 			util.PushMsg(Conf.Language(123), 5000)
 		}
@@ -406,7 +408,7 @@ func checkSync(boot, exit, byHand bool) bool {
 		return false
 	}
 
-	switch Conf.Sync.Load().Provider {
+	switch confSyncReadSnapshot.Provider {
 	case conf.ProviderSiYuan:
 		if !IsSubscriber() {
 			UpdateSyncConf(func(s *conf.Sync) { s.Enabled = false })
@@ -576,7 +578,6 @@ func SetCloudSyncDir(name string) error {
 	}
 
 	UpdateSyncConf(func(s *conf.Sync) { s.CloudName = name })
-	syncIndexListNotice.reset(util.PushClearMsg)
 	refreshLANSyncManager()
 	return nil
 }
@@ -587,9 +588,6 @@ func SetSyncGenerateConflictDoc(b bool) {
 
 func SetSyncEnable(b bool) {
 	UpdateSyncConf(func(s *conf.Sync) { s.Enabled = b })
-	if !b {
-		syncIndexListNotice.reset(util.PushClearMsg)
-	}
 	refreshLANSyncManager()
 }
 
@@ -644,7 +642,6 @@ func SetSyncProvider(provider int, completeAssets bool) (err error) {
 		}
 	}
 	UpdateSyncConf(func(s *conf.Sync) { s.Provider = provider })
-	syncIndexListNotice.reset(util.PushClearMsg)
 	refreshLANSyncManager()
 	return
 }
@@ -655,6 +652,7 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	if err = validateSyncS3(s3); err != nil {
 		return
 	}
+	s3 = cloneConfSection(s3)
 	s3.Endpoint = strings.TrimSpace(s3.Endpoint)
 	s3.Endpoint = util.NormalizeEndpoint(s3.Endpoint)
 	s3.AccessKey = strings.TrimSpace(s3.AccessKey)
@@ -671,9 +669,6 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	}
 
 	UpdateSyncConf(func(value *conf.Sync) { value.S3 = cloneConfSection(s3) })
-	if Conf.Sync.Load().Provider == conf.ProviderS3 {
-		syncIndexListNotice.reset(util.PushClearMsg)
-	}
 	refreshLANSyncManager()
 	return
 }
@@ -728,6 +723,7 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	if err = validateSyncWebDAV(webdav); err != nil {
 		return
 	}
+	webdav = cloneConfSection(webdav)
 	webdav.Endpoint = strings.TrimSpace(webdav.Endpoint)
 	webdav.Endpoint = util.NormalizeEndpoint(webdav.Endpoint)
 
@@ -749,9 +745,6 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	}
 
 	UpdateSyncConf(func(s *conf.Sync) { s.WebDAV = webdav })
-	if Conf.Sync.Load().Provider == conf.ProviderWebDAV {
-		syncIndexListNotice.reset(util.PushClearMsg)
-	}
 	refreshLANSyncManager()
 	return
 }
@@ -759,38 +752,12 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 func SetSyncProviderLocal(local *conf.Local) (err error) {
 	release := lockAssetSourceChange()
 	defer release()
-	if err = validateSyncLocal(local); err != nil {
+	if err = validateSyncLocalPath(local); err != nil {
 		return
 	}
+	local = cloneConfSection(local)
 	local.Endpoint = strings.TrimSpace(local.Endpoint)
 	local.Endpoint = util.NormalizeLocalPath(local.Endpoint)
-
-	absPath, err := filepath.Abs(local.Endpoint)
-	if nil != err {
-		msg := fmt.Sprintf("get endpoint [%s] abs path failed: %s", local.Endpoint, err)
-		logging.LogError(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
-		return
-	}
-	if !gulu.File.IsExist(absPath) {
-		msg := fmt.Sprintf("endpoint [%s] not exist", local.Endpoint)
-		logging.LogError(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
-		return
-	}
-	if util.IsAbsPathInWorkspace(absPath) || filepath.Clean(absPath) == filepath.Clean(util.WorkspaceDir) {
-		msg := fmt.Sprintf("endpoint [%s] is in workspace", local.Endpoint)
-		logging.LogError(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
-		return
-	}
-
-	if gulu.File.IsSubPath(absPath, util.WorkspaceDir) {
-		msg := fmt.Sprintf("endpoint [%s] is parent of workspace", local.Endpoint)
-		logging.LogError(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
-		return
-	}
 
 	local.Timeout = util.NormalizeTimeout(local.Timeout)
 	local.ConcurrentReqs = util.NormalizeConcurrentReqs(local.ConcurrentReqs, conf.ProviderLocal)
@@ -802,9 +769,6 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 	}
 
 	UpdateSyncConf(func(s *conf.Sync) { s.Local = local })
-	if Conf.Sync.Load().Provider == conf.ProviderLocal {
-		syncIndexListNotice.reset(util.PushClearMsg)
-	}
 	refreshLANSyncManager()
 	return
 }
@@ -1189,9 +1153,11 @@ func closeSyncWebSocket() {
 }
 
 func connectSyncWebSocket() {
+	confSyncReadSnapshot := Conf.LoadSync()
+
 	defer logging.Recover()
 
-	if !Conf.Sync.Load().Enabled || !IsSubscriber() || conf.ProviderSiYuan != Conf.Sync.Load().Provider {
+	if !confSyncReadSnapshot.Enabled || !IsSubscriber() || conf.ProviderSiYuan != confSyncReadSnapshot.Provider {
 		return
 	}
 

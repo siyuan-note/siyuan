@@ -1426,14 +1426,16 @@ func applyRequestedDocCreateTemplate(arg map[string]any, markdown, docID string)
 
 // ResolveDocCreateSaveLocation 按笔记本配置和全局配置解析新建文档的存放位置。
 func ResolveDocCreateSaveLocation(currentBoxID string) (boxID, pathTemplate string) {
-	pathTemplate = Conf.FileTree.Load().DocCreateSavePath
+	confFileTreeReadSnapshot := Conf.LoadFileTree()
+
+	pathTemplate = confFileTreeReadSnapshot.DocCreateSavePath
 	if box := Conf.Box(currentBoxID); nil != box {
 		boxConf := box.GetConf()
 		boxID = boxConf.DocCreateSaveBox
 		pathTemplate = boxConf.DocCreateSavePath
 	}
 	if "" == boxID && "" == pathTemplate {
-		boxID = Conf.FileTree.Load().DocCreateSaveBox
+		boxID = confFileTreeReadSnapshot.DocCreateSaveBox
 	}
 	if "" != boxID && nil == Conf.Box(boxID) {
 		boxID = currentBoxID
@@ -1442,7 +1444,7 @@ func ResolveDocCreateSaveLocation(currentBoxID string) (boxID, pathTemplate stri
 		boxID = currentBoxID
 	}
 	if "" == pathTemplate {
-		pathTemplate = Conf.FileTree.Load().DocCreateSavePath
+		pathTemplate = confFileTreeReadSnapshot.DocCreateSavePath
 	}
 	return
 }

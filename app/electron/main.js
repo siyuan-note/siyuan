@@ -2678,17 +2678,24 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
 
         let apiData;
         let count = 0;
+        let versionTimedOut = false;
         writeLog("checking kernel version");
         for (; ;) {
             try {
-                const apiResult = await net.fetch(getServer(currentKernelPort) + "/api/system/version");
+                const apiResult = await fetchLocalKernel(getServer(currentKernelPort) + "/api/system/version");
                 apiData = await apiResult.json();
                 break;
             } catch (e) {
+                versionTimedOut = isLocalKernelRequestTimeout(e);
                 writeLog("get kernel version failed: " + e.message);
                 if (14 < ++count) {
-                    writeLog("get kernel ver failed");
-                    showErrorWindow("获取内核服务端口失败", "Failed to Obtain Kernel Service Port", "<div>获取内核服务端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to obtain kernel service port. Please ensure SiYuan has network permissions and is not blocked by firewalls or antivirus software.</div>");
+                    writeLog("get kernel ver failed [timeout=" + versionTimedOut + "]");
+                    if (versionTimedOut) {
+                        await showKernelUnresponsiveWindow();
+                    } else {
+                        showErrorWindow("获取内核服务端口失败", "Failed to Obtain Kernel Service Port", "<div>获取内核服务端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to obtain kernel service port. Please ensure SiYuan has network permissions and is not blocked by firewalls or antivirus software.</div>");
+                    }
+                    requestKernelExit(currentKernelPort);
                     bootWindow.destroy();
                     resolve(false);
                     return;
@@ -2738,7 +2745,7 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                         break;
                     }
                     try {
-                        const progressResult = await net.fetch(getServer(currentKernelPort) + "/api/system/bootProgress");
+                        const progressResult = await fetchLocalKernel(getServer(currentKernelPort) + "/api/system/bootProgress");
                         const progressData = await progressResult.json();
                         if (bootCanceled()) {
                             resolve(false);
@@ -2759,11 +2766,14 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                             resolve(false);
                             return;
                         }
-                        // 只读启动查询在证书或网络配置变化后有限重试，不延长总启动期限。
-                        if (retryableProgressErrors.has(e.message) && ++progressFailures < 15) {
+                        // 只读启动查询在证书、网络配置变化或本机请求超时后有限重试，不延长总启动期限。
+                        if ((retryableProgressErrors.has(e.message) || isLocalKernelRequestTimeout(e)) && ++progressFailures < 15) {
                             writeLog("retrying boot progress [attempt=" + progressFailures + "/14]");
                             await sleep(500);
                             continue;
+                        }
+                        if (isLocalKernelRequestTimeout(e)) {
+                            await showKernelUnresponsiveWindow();
                         }
                         requestKernelExit(currentKernelPort);
                         bootWindow.destroy();
@@ -2777,6 +2787,73 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             resolve(false);
         }
     });
+};
+
+// 本地内核请求超时上限：内核可能已经监听端口，但本机请求既不会成功也不会失败，因此必须限时失败。
+const localKernelRequestTimeout = 5000;
+
+const localKernelRequestTimeoutError = () => {
+    const error = new Error("local kernel request timed out");
+    error.name = "LocalKernelRequestTimeoutError";
+    return error;
+};
+
+const isLocalKernelRequestTimeout = error => "LocalKernelRequestTimeoutError" === error?.name;
+
+// 本机请求超时后收集 Windows TCP 配置写入日志，便于排查回环通道异常；show 命令不需要管理员权限。
+const windowsTCPConfigCommands = [["int", "tcp", "show", "supplemental"], ["int", "ipv4", "show", "global"], ["int", "ipv6", "show", "global"]];
+
+const execFileAsync = (file, args, options) => new Promise((resolve, reject) => {
+    childProcess.execFile(file, args, options, (error, stdout) => error ? reject(error) : resolve(stdout));
+});
+
+const collectWindowsTCPConfig = async () => {
+    if ("win32" !== process.platform) {
+        return [];
+    }
+    const lines = [];
+    for (const args of windowsTCPConfigCommands) {
+        const command = "netsh " + args.join(" ");
+        try {
+            // netsh 输出随系统语言本地化，这里只记录输出原文；命令行标记保持 ASCII，便于识别输出来源。
+            const stdout = await execFileAsync("netsh.exe", args, {timeout: 5000, windowsHide: true});
+            lines.push("[tcp config] " + command + ":\n" + String(stdout).trimEnd());
+        } catch (error) {
+            lines.push("[tcp config] " + command + " failed: " + error.message);
+        }
+    }
+    return lines;
+};
+
+// 内核已经启动但本机请求一直没有响应时的错误窗口，提示用户排查本机访问。
+const showKernelUnresponsiveWindow = async () => {
+    // Windows 上该现象可能与 TCP 拥塞控制 BBR2 和「环回大 Mtu」同时开启有关；这里只说明可能的原因，由用户自行核查。
+    const windowsHint = "win32" === process.platform ?
+        "<div style=\"margin-top:12px\">Windows 上该现象可能与 TCP 拥塞控制 BBR2 和「环回大 Mtu」同时开启有关。</div>" +
+        "<div>On Windows this may be related to TCP congestion control BBR2 combined with \"Loopback Large Mtu\".</div>" : "";
+    showErrorWindow("内核无响应", "The kernel is not responding",
+        "<div>内核已经启动，但本机请求一直没有响应，思源无法进入主界面。请查看 <a href=\"#\" data-log-path>~/.config/siyuan/app.log</a> 获取详细报错信息。</div>" +
+        "<div>The kernel has started but local requests never complete, so SiYuan cannot open the main window. Please check <a href=\"#\" data-log-path>~/.config/siyuan/app.log</a> for details.</div>" +
+        windowsHint,
+        "⚠️", path.join(confDir, "app.log"));
+    const tcpConfig = await collectWindowsTCPConfig();
+    tcpConfig.forEach(line => writeLog(line));
+};
+
+// 本地内核请求限时失败，避免本机通道异常时请求永久挂起，让启动流程无期限停留在启动窗口。
+const fetchLocalKernel = async (url) => {
+    const abortController = new AbortController();
+    const timer = setTimeout(() => abortController.abort(), localKernelRequestTimeout);
+    try {
+        return await net.fetch(url, {signal: abortController.signal});
+    } catch (error) {
+        if (abortController.signal.aborted) {
+            throw localKernelRequestTimeoutError();
+        }
+        throw error;
+    } finally {
+        clearTimeout(timer);
+    }
 };
 
 const fetchWithTimeout = async (url, options = {}, timeout = 5000) => {

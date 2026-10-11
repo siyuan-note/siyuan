@@ -11,8 +11,11 @@ const certificateChange = () => new Error("net::ERR_CERT_DATABASE_CHANGED");
 const setup = (progress, options = {}) => {
     const events = [];
     const waits = [];
+    const timers = new Map();
     let now = 0;
+    let timerId = 0;
     let requests = 0;
+    let versionRequests = 0;
     let closeKernel;
     const window = {
         destroyed: false,
@@ -20,11 +23,34 @@ const setup = (progress, options = {}) => {
         destroy() { this.destroyed = true; events.push("destroy"); },
     };
     const fixture = {events, waits, window, closeKernel: code => closeKernel(code, null),
-        requests: () => requests, advance: ms => { now += ms; }};
+        requests: () => requests, versionRequests: () => versionRequests,
+        timerCount: () => timers.size, timerDelays: () => Array.from(timers.values()).map(timer => timer.ms),
+        settleMicrotasks: () => new Promise(resolve => setImmediate(resolve)),
+        advance: ms => {
+            now += ms;
+            for (const [id, timer] of Array.from(timers)) {
+                if (timer.at <= now) {
+                    timers.delete(id);
+                    timer.callback();
+                }
+            }
+        }};
+    const hangUntilAbort = signal => new Promise((resolve, reject) => {
+        // 模拟请求既不会成功也不会失败：只有超时中止才拒绝。
+        signal.addEventListener("abort", () => reject(new Error("The operation was aborted")), {once: true});
+    });
     const context = vm.createContext({
         path,
         process: {platform: "win32", env: {}},
         Date: {now: () => now},
+        AbortController,
+        // 本地内核请求超时由计时器驱动，测试通过 advance 推进虚拟时间触发超时。
+        setTimeout: (callback, ms) => {
+            const id = ++timerId;
+            timers.set(id, {callback, ms, at: now + ms});
+            return id;
+        },
+        clearTimeout: id => timers.delete(id),
         fs: {existsSync: () => true},
         appDir: "app", confDir: "conf", lastWorkspacePath: "workspace", appVer: "3.8.6",
         bootWindow: window, kernelPort: 6806, isDevEnv: false, workspaces: [],
@@ -38,19 +64,27 @@ const setup = (progress, options = {}) => {
         childProcess: {spawn: () => ({pid: 123, on: (event, callback) => {
             assert.equal(event, "close");
             closeKernel = callback;
-        }})},
+        }}), execFile: (file, args, options, callback) => {
+            events.push(["exec-file", file, args.join(" "), options.timeout]);
+            callback(null, "");
+        }},
         sleep: async ms => {
             waits.push(ms);
-            now += ms;
+            fixture.advance(ms);
             await options.onSleep?.(ms, fixture);
         },
-        net: {fetch: async url => {
+        net: {fetch: async (url, requestOptions = {}) => {
             if (url.endsWith("/version")) {
-                return {json: async () => ({code: 0, data: "3.8.6"})};
+                versionRequests++;
+                const value = options.version ? await options.version(versionRequests, fixture) : null;
+                if (value?.hang) return await hangUntilAbort(requestOptions.signal);
+                if (value instanceof Error) throw value;
+                return {json: async () => value || {code: 0, data: "3.8.6"}};
             }
             assert.equal(url, "https://127.0.0.1:6806/api/system/bootProgress");
             requests++;
             const result = await progress(requests, fixture);
+            if (result?.hang) return await hangUntilAbort(requestOptions.signal);
             if (result instanceof Error) throw result;
             return {json: async () => ({code: 0, data: {progress: result}})};
         }},
@@ -154,4 +188,59 @@ test("kernel exit while finishing the startup animation does not open the main w
     const fixture = setup(() => 100, {onSleep: (ms, state) => state.closeKernel(0)});
     assert.equal(await fixture.run(), false);
     assert.equal(exits(fixture).length, 0);
+});
+
+test("a hanging kernel version request fails boot after the retry budget instead of waiting forever", async () => {
+    const fixture = setup(certificateChange, {version: () => ({hang: true})});
+    const run = fixture.run();
+    await fixture.settleMicrotasks();
+    assert.deepEqual(fixture.timerDelays(), [5000]);
+    for (let attempt = 0; attempt < 15; attempt++) {
+        fixture.advance(5000);
+        await fixture.settleMicrotasks();
+    }
+    assert.equal(await run, false);
+    assert.equal(fixture.versionRequests(), 15);
+    assert.equal(fixture.requests(), 0);
+    assert.equal(exits(fixture).length, 1);
+    assert.equal(fixture.window.destroyed, true);
+    assert.ok(fixture.events.some(event => Array.isArray(event) && event[1] === "The kernel is not responding"));
+});
+
+test("a hanging kernel version request logs the local TCP configuration for diagnosis", async () => {
+    const fixture = setup(certificateChange, {version: () => ({hang: true})});
+    const run = fixture.run();
+    await fixture.settleMicrotasks();
+    for (let attempt = 0; attempt < 15; attempt++) {
+        fixture.advance(5000);
+        await fixture.settleMicrotasks();
+    }
+    assert.equal(await run, false);
+    const commands = fixture.events.filter(event => Array.isArray(event) && event[0] === "exec-file");
+    assert.deepEqual(commands.map(event => event[2]),
+        ["int tcp show supplemental", "int ipv4 show global", "int ipv6 show global"]);
+    assert.ok(commands.every(event => event[3] === 5000));
+    assert.equal(fixture.events.filter(event => typeof event === "string" && event.startsWith("[tcp config] ")).length, 3);
+});
+
+test("a hanging progress request cannot block the startup deadline", async () => {
+    const fixture = setup(() => ({hang: true}));
+    const run = fixture.run();
+    await fixture.settleMicrotasks();
+    assert.deepEqual(fixture.timerDelays(), [5000]);
+    for (let attempt = 0; attempt < 15; attempt++) {
+        fixture.advance(5000);
+        await fixture.settleMicrotasks();
+    }
+    assert.equal(await run, false);
+    assert.equal(fixture.requests(), 15);
+    assert.equal(exits(fixture).length, 1);
+    assert.equal(fixture.window.destroyed, true);
+    assert.ok(fixture.events.some(event => Array.isArray(event) && event[1] === "The kernel is not responding"));
+});
+
+test("completed local kernel requests clear their timeouts", async () => {
+    const fixture = setup(() => 100);
+    assert.equal(await fixture.run(), 6806);
+    assert.equal(fixture.timerCount(), 0);
 });

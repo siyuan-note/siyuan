@@ -83,19 +83,6 @@ test("database calendar view merges into saved slash orders and preserves plugin
     assert.equal(entries.find(item => item.key === "databaseCalendarView").simple, true);
 });
 
-test("database map view merges into saved slash orders without changing existing entries", () => {
-    const entries = getEntryCatalogChildren("editor.slash.menu");
-    const defaults = entries.map(item => item.key);
-    const saved = defaults.filter(key => key !== "databaseMapView");
-    saved.splice(1, 0, "plugin:example:item");
-    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
-    assert.deepEqual(merged.filter(key => key !== "databaseMapView"), saved);
-    assert.equal(merged[merged.indexOf("databaseCalendarView") + 1], "databaseMapView");
-    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
-    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
-    assert.equal(entries.find(item => item.key === "databaseMapView").simple, true);
-});
-
 test("database list view merges into saved slash orders and preserves plugin slots", () => {
     const entries = getEntryCatalogChildren("editor.slash.menu");
     const defaults = entries.map(item => item.key);
@@ -108,6 +95,18 @@ test("database list view merges into saved slash orders and preserves plugin slo
     assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
     assert.deepEqual(resolveEntryOrder(["databaseTableView", "databaseListView"], merged, separators),
         ["databaseTableView", "databaseListView"]);
+});
+
+test("retired database map entry stays hidden without changing saved slash or plugin order", () => {
+    const entries = getEntryCatalogChildren("editor.slash.menu");
+    const defaults = entries.map(item => item.key);
+    const saved = [...defaults];
+    saved.splice(saved.indexOf("databaseCalendarView") + 1, 0, "databaseMapView", "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    assert.equal(defaults.includes("databaseMapView"), false);
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators),
+        saved.filter(key => key !== "databaseMapView"));
 });
 
 test("custom task status merges into saved list menus without moving existing entries", () => {

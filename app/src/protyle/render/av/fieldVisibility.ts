@@ -7,8 +7,6 @@ import {setPosition} from "../../../util/setPosition";
 
 const getViewIcon = (type: TAVView) => {
     switch (type) {
-        case "map":
-            return "iconMap";
         case "calendar":
             return "iconCalendar";
         case "list":

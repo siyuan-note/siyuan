@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-// AVViewInstance 表示各布局及其递归分组实例，列表、日历和地图复用表格的行列结构。
+// AVViewInstance 表示各布局及其递归分组实例，列表和日历复用表格的行列结构。
 type AVViewInstance struct {
 	table   *AVTable
 	gallery *AVGallery
@@ -31,9 +31,6 @@ func (value AVViewInstance) MarshalJSON() ([]byte, error) {
 }
 
 func avPayloadSchema(b *schemaBuilder, t reflect.Type, input bool) (*Schema, error) {
-	if t == reflect.TypeFor[AVMapHeight]() {
-		return &Schema{Type: "integer", Enum: []any{320, 480, 640, 800}}, nil
-	}
 	if t == reflect.TypeFor[*AVValueLocation]() {
 		schema, err := b.schema(t.Elem(), input)
 		return nullable(schema), err
@@ -63,7 +60,7 @@ func avPayloadSchema(b *schemaBuilder, t reflect.Type, input bool) (*Schema, err
 	case reflect.TypeFor[AVTable](), reflect.TypeFor[AVTableColumn](), reflect.TypeFor[AVTableCell](),
 		reflect.TypeFor[AVGallery](), reflect.TypeFor[AVGalleryField](), reflect.TypeFor[AVGalleryFieldValue](),
 		reflect.TypeFor[AVKanban](), reflect.TypeFor[AVKanbanField](), reflect.TypeFor[AVKanbanFieldValue](),
-		reflect.TypeFor[AVLayoutMap](), reflect.TypeFor[AVLayoutCalendar](), reflect.TypeFor[AVLayoutTable](), reflect.TypeFor[AVViewTableColumn](), reflect.TypeFor[AVLayoutGallery](),
+		reflect.TypeFor[AVLayoutCalendar](), reflect.TypeFor[AVLayoutTable](), reflect.TypeFor[AVViewTableColumn](), reflect.TypeFor[AVLayoutGallery](),
 		reflect.TypeFor[AVViewGalleryCardField](), reflect.TypeFor[AVLayoutKanban](), reflect.TypeFor[AVViewKanbanField]():
 		return avEmbeddedPayloadSchema(b, t, input)
 	}

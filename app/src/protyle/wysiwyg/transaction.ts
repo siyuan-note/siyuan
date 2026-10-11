@@ -58,7 +58,7 @@ import {
     shouldReloadForHeadingBatch,
 } from "./transactionUpdate";
 import {getMoveAffectedEmbedElements, shouldSyncMoveCopies} from "./transactionEmbed";
-import {cloneMoveElements, getVisibleMoveElements} from "./transactionMove";
+import {getVisibleMoveElements} from "./transactionMove";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {disposeCustomBlocksInElement} from "../../plugin/customBlockRender";
@@ -385,21 +385,21 @@ const promiseTransaction = (options: {
                     if (operation.nextID && updateElements.length > 0) {
                         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.nextID}"]`).forEach(item => {
                             if (!isInEmbedBlock(item) && !item.contains(range.startContainer)) {
-                                item.before(...cloneMoveElements(primaryMoveElements, pendingAVElements));
+                                item.before(...primaryMoveElements.map(element => element.cloneNode(true)));
                                 hasFind = true;
                             }
                         });
                     } else if (operation.previousID && updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
                             if (!isInEmbedBlock(item) && !getNextBlockSibling(item)?.contains(range.startContainer)) {
-                                item.after(...cloneMoveElements(primaryMoveElements, pendingAVElements));
+                                item.after(...primaryMoveElements.map(element => element.cloneNode(true)));
                                 hasFind = true;
                             }
                         });
                     } else if (updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
                             if (!isInEmbedBlock(item) && !getFirstBlock(item).contains(range.startContainer)) {
-                                const cloneElements = cloneMoveElements(primaryMoveElements, pendingAVElements);
+                                const cloneElements = primaryMoveElements.map(element => element.cloneNode(true));
                                 // 列表特殊处理
                                 if (item.firstElementChild?.classList.contains("protyle-action")) {
                                     item.firstElementChild.after(...cloneElements);
@@ -617,18 +617,9 @@ const promiseTransaction = (options: {
         callback: (responseTransaction: {doOperations: IOperation[]}) => {
             // 新增和更新的数据库载体必须在事务成功后渲染，确保内核已登记块及其笔记本归属。
             responseTransaction.doOperations.forEach(operation => {
-                if (operation.action === "insert" || operation.action === "update" || operation.action === "move") {
-                    const ids = operation.action === "move" ? [operation.id, ...(operation.blockIDs || [])] : [operation.id];
-                    ids.forEach(id => {
-                        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`).forEach(item => {
-                            if (operation.action !== "move" || item.getAttribute("data-av-type") === "map") {
-                                pendingAVElements.add(item);
-                            } else {
-                                item.querySelectorAll('[data-type="NodeAttributeView"][data-av-type="map"]').forEach(map => {
-                                    pendingAVElements.add(map);
-                                });
-                            }
-                        });
+                if (operation.action === "insert" || operation.action === "update") {
+                    protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
+                        pendingAVElements.add(item);
                     });
                 }
             });
@@ -1188,7 +1179,6 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             return;
         }
         if (operation.action === "move") {
-            const pendingAVElements = new Set<Element>();
             if (operation.context?.ignoreProcess === "true") {
                 return;
             }
@@ -1264,7 +1254,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             if (operation.nextID && updateElements.length > 0) {
                 protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.nextID}"]`).forEach(item => {
                     if (!isInEmbedBlock(item)) {
-                        item.before(...cloneMoveElements(primaryMoveElements, pendingAVElements));
+                        item.before(...primaryMoveElements.map(element => element.cloneNode(true)));
                         hasFind = true;
                     }
                 });
@@ -1274,13 +1264,13 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     // 反链面板删除超级块中的最后一个段落块后撤销重做
                     const blockElement = hasTopClosestByAttribute(range.startContainer, "data-node-id", null);
                     if (blockElement) {
-                        blockElement.before(...cloneMoveElements(primaryMoveElements, pendingAVElements));
+                        blockElement.before(...primaryMoveElements.map(element => element.cloneNode(true)));
                         hasFind = true;
                     }
                 } else {
                     previousElement.forEach(item => {
                         if (!isInEmbedBlock(item)) {
-                            item.after(...cloneMoveElements(primaryMoveElements, pendingAVElements));
+                            item.after(...primaryMoveElements.map(element => element.cloneNode(true)));
                             hasFind = true;
                         }
                     });
@@ -1288,19 +1278,19 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             } else if (updateElements.length > 0) {
                 const parentElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`);
                 if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID && !protyle.block.showAll) {
-                    protyle.wysiwyg.element.prepend(...cloneMoveElements(primaryMoveElements, pendingAVElements));
+                    protyle.wysiwyg.element.prepend(...primaryMoveElements.map(element => element.cloneNode(true)));
                     hasFind = true;
                 } else if (parentElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
                     // 反链面板删除超级块中的段落块后撤销再重做 https://github.com/siyuan-note/siyuan/issues/14496#issuecomment-2771372486
                     const topBlockElement = hasTopClosestByAttribute(getSelection().getRangeAt(0).startContainer, "data-node-id", null);
                     if (topBlockElement) {
-                        topBlockElement.before(...cloneMoveElements(primaryMoveElements, pendingAVElements));
+                        topBlockElement.before(...primaryMoveElements.map(element => element.cloneNode(true)));
                         hasFind = true;
                     }
                 } else {
                     parentElement.forEach(item => {
                         if (!isInEmbedBlock(item)) {
-                            const cloneElements = cloneMoveElements(primaryMoveElements, pendingAVElements);
+                            const cloneElements = primaryMoveElements.map(element => element.cloneNode(true));
                             // 列表特殊处理
                             if (item.firstElementChild?.classList.contains("protyle-action")) {
                                 item.firstElementChild.after(...cloneElements);
@@ -1358,9 +1348,6 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             // 块移出后刷新源超级块的手柄（originSb 在元素被移除前捕获，仅含移出侧的超级块）
             // https://github.com/siyuan-note/siyuan/issues/9521
             refreshSbs(...originSbs);
-            pendingAVElements.forEach(item => {
-                if (item.isConnected) void avRender(item, protyle);
-            });
             return;
         }
         if (operation.action === "insert") {
@@ -1512,7 +1499,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             "setAttrViewColRollupFilters", "sortAttrViewKey", "setAttrViewColDesc", "setAttrViewColAttributePanelVisibility",
             "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewCoverFrom", "setAttrViewCoverFromAssetKeyID", "setAttrViewCardCoverPosition",
             "setAttrViewBlockView", "setAttrViewBlockVisibleViews", "setAttrViewContextFilter", "setAttrViewCardSize", "setAttrViewCardWidth", "setAttrViewCardAspectRatio",
-            "setAttrViewConditionalColors", "setAttrViewCalendar", "setAttrViewMap", "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow", "hideAttrViewName", "setAttrViewShowIcon",
+            "setAttrViewConditionalColors", "setAttrViewCalendar", "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow", "hideAttrViewName", "setAttrViewShowIcon",
             "setAttrViewWrapField", "setAttrViewGroup", "removeAttrViewGroup", "hideAttrViewGroup", "sortAttrViewGroup",
             "foldAttrViewGroup", "foldAttrViewGroups", "hideAttrViewAllGroups", "setAttrViewFitImage", "setAttrViewDisplayFieldName", "setAttrViewDisplayEmptyFields",
             "insertAttrViewBlock", "setAttrViewColDateFillSpecificTime", "setAttrViewFillColBackgroundColor", "setAttrViewUpdatedIncludeTime",

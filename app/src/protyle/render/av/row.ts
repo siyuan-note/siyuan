@@ -206,7 +206,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
     }
     const tableRow = options.row as IAVRow;
     const tableData = options.data as IAVTable;
-    const isList = options.type === "list" || options.type === "map";
+    const isList = options.type === "list";
     const pinIndex = isList ? -1 : options.pinIndex;
 
     html = `<div class="av__row${tableRow.conditionalColors ? " av__row--conditional" : ""}" data-index="${options.rowIndex}" data-id="${tableRow.id}" style="${getConditionalItemStyle(tableRow)}">`;
@@ -425,7 +425,7 @@ export const insertAttrViewBlockAnimation = (options: {
         return previousElement;
     };
     options.blockElement.querySelector('[data-type="av-search"]').textContent = "";
-    const isList = ["list", "map"].includes(options.blockElement.getAttribute("data-av-type"));
+    const isList = options.blockElement.getAttribute("data-av-type") === "list";
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
     let previousElement = options.blockElement.querySelector(groupQuery + `.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
     // 有排序需要加入最后一行

@@ -500,8 +500,6 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewCardWidth(op)
 			case "setAttrViewConditionalColors":
 				ret = tx.doSetAttrViewConditionalColors(op)
-			case "setAttrViewMap":
-				ret = tx.doSetAttrViewMap(op)
 			case "setAttrViewCalendar":
 				ret = tx.doSetAttrViewCalendar(op)
 			case "setAttrViewCardLayout":

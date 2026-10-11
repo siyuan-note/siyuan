@@ -87,13 +87,13 @@ test("macOS Option-modified characters still match the physical I key", () => {
     assert.equal(host.toggled, 1);
 });
 
-test("map and plugin guests route to their own main, detached or settings window", () => {
+test("plugin guests route to their own main, detached or settings window", () => {
     const hosts = [1, 2, 3].map(id => createContents(id));
     const targets = new Map(hosts.map(host => [host.id, {mode: "local"}]));
     for (const mode of ["local", "remote"]) {
         for (const host of hosts) {
             targets.set(host.id, {mode});
-            for (const partition of ["siyuan-map-test", "plugin-test"]) {
+            for (const partition of ["plugin-test", "persist:plugin-test"]) {
                 const guest = createContents(10 + host.id, "webview");
                 guest.hostWebContents = host;
                 guest.partition = partition;

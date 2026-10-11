@@ -30,8 +30,6 @@ func avContractView(value av.Viewable) apicontract.AVViewInstance {
 	switch view := value.(type) {
 	case *av.Table:
 		return apicontract.NewAVTableInstance(toContractAVTable(view))
-	case *av.Map:
-		return apicontract.NewAVTableInstance(toContractAVTable(view.Table))
 	case *av.Calendar:
 		return apicontract.NewAVTableInstance(toContractAVTable(view.Table))
 	case *av.List:
@@ -50,8 +48,6 @@ func toContractAVTable(value *av.Table) *apicontract.AVTable {
 	}
 	return &apicontract.AVTable{
 		AVBaseInstance:     toContractAVBaseInstance(value.BaseInstance),
-		Map:                toContractAVMapSettings(value.Map),
-		MapMarkerScope:     value.MapMarkerScope,
 		Calendar:           toContractAVCalendarSettings(value.Calendar),
 		CalendarRange:      toContractAVCalendarRange(value.CalendarRange),
 		CalendarTargetDate: value.CalendarTargetDate,
@@ -1033,7 +1029,6 @@ func toContractAVView(value *av.View) *apicontract.AVView {
 		LayoutType:        string(value.LayoutType),
 		Table:             toContractAVLayoutTable(value.Table),
 		List:              toContractAVLayoutTable(value.List),
-		Map:               toContractAVLayoutMap(value.Map),
 		Calendar:          toContractAVLayoutCalendar(value.Calendar),
 		Gallery:           toContractAVLayoutGallery(value.Gallery),
 		Kanban:            toContractAVLayoutKanban(value.Kanban),

@@ -494,8 +494,6 @@ func databaseViewBase(viewable av.Viewable) (ret *av.BaseInstance) {
 		ret = view.BaseInstance
 	case *av.List:
 		ret = view.BaseInstance
-	case *av.Map:
-		ret = view.BaseInstance
 	case *av.Gallery:
 		ret = view.BaseInstance
 	case *av.Kanban:

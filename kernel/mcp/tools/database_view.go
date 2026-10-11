@@ -348,7 +348,7 @@ func databaseValidateViewGroup(attrView *av.AttributeView, view *av.View, group 
 		}
 		return nil
 	}
-	if view.LayoutType == av.LayoutTypeCalendar || view.LayoutType == av.LayoutTypeMap {
+	if view.LayoutType == av.LayoutTypeCalendar {
 		return fmt.Errorf("%s views do not support grouping", view.LayoutType)
 	}
 	key, err := attrView.GetKey(group.Field)

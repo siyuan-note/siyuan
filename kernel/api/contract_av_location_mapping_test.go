@@ -40,7 +40,7 @@ func TestAVContractLocationFieldAndRenderMapping(t *testing.T) {
 		table := &av.Table{BaseInstance: &av.BaseInstance{ID: "view"},
 			Columns: []*av.TableColumn{{BaseInstanceField: field}},
 			Rows:    []*av.TableRow{{ID: "item", Cells: []*av.TableCell{{BaseValue: &av.BaseValue{Value: value, ValueType: key.Type}}}}}}
-		for _, view := range []av.Viewable{table, &av.List{Table: table}, &av.Map{Table: table}} {
+		for _, view := range []av.Viewable{table, &av.List{Table: table}} {
 			assertAVContractJSONEqual(t, view, avContractView(view))
 		}
 	}

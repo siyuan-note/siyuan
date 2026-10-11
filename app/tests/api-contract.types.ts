@@ -6,20 +6,10 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
-fetchPost("/api/av/getAttributeViewMapUnplaced", {id: "database", viewID: "map", query: "current", search: "title", page: 2, pageSize: 50}, response => {
-    if (response.code === 0) {
-        const total: number = response.data.total;
-        const itemID: string | undefined = response.data.rows?.[0]?.id;
-        void [total, itemID];
-    }
-});
-fetchPost("/api/av/getAttributeViewMapUnplaced", {id: "database", viewID: "map", blockID: null, page: null});
-// @ts-expect-error 未定位条目查询必须指定地图视图。
-fetchPost("/api/av/getAttributeViewMapUnplaced", {id: "database"});
-// @ts-expect-error 未定位条目页码必须为数字。
-fetchPost("/api/av/getAttributeViewMapUnplaced", {id: "database", viewID: "map", page: "2"});
-// @ts-expect-error 未定位条目查询仅支持 POST。
-fetchGet("/api/av/getAttributeViewMapUnplaced", () => undefined);
+// @ts-expect-error 地图未定位条目接口已移除。
+fetchPost("/api/av/getAttributeViewMapUnplaced", {id: "database", viewID: "retired-view"});
+// @ts-expect-error 在线地图运行时接口已移除。
+fetchPost("/api/map/getRuntime", {});
 
 fetchPost("/api/ai/agent/manageSkills", {action: "list"}, response => {
     if (response.code === 0) {

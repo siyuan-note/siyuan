@@ -61,7 +61,7 @@ test("location cells display longitude first in every layout, row attributes and
     const value: IAVCellValue = {type: "location", location: {
         name: "<Home>", latitude: 0, longitude: 180, originalInput: "untrusted raw",
     }};
-    for (const type of ["table", "list", "gallery", "kanban", "map"] as TAVView[]) {
+    for (const type of ["table", "list", "gallery", "kanban"] as TAVView[]) {
         const html = cell.renderCell(value, 0, false, type);
         assert.match(html, /&lt;Home&gt; 180, 0/);
         assert.doesNotMatch(html, /\[WGS84\]/);

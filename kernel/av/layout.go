@@ -16,11 +16,9 @@
 
 package av
 
-// ValidateLayouts 统一校验地图、日历和列表布局，拒绝损坏数据并保留原始文件。
+// ValidateLayouts 统一校验日历和列表布局，拒绝损坏数据并保留原始文件。
 func (attrView *AttributeView) ValidateLayouts() error {
-	if err := attrView.ValidateMapLayouts(); err != nil {
-		return err
-	}
+	attrView.restoreLegacyMapColumns()
 	if err := attrView.ValidateCalendarLayouts(); err != nil {
 		return err
 	}
@@ -87,7 +85,7 @@ type BaseInstance struct {
 func NewViewBaseInstance(view *View) *BaseInstance {
 	showIcon, wrapField := true, false
 	switch view.LayoutType {
-	case LayoutTypeTable, LayoutTypeList, LayoutTypeCalendar, LayoutTypeMap:
+	case LayoutTypeTable, LayoutTypeList, LayoutTypeCalendar:
 		showIcon = view.GetTableLayout().ShowIcon
 		wrapField = view.GetTableLayout().WrapField
 	case LayoutTypeGallery:

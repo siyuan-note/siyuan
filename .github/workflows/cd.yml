@@ -680,7 +680,7 @@ jobs:
           cd ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
           node scripts/trimChangelogs.js
           python3 ../scripts/prepare-ocr.py
-          zip -r app.zip appearance guide stage $([ -d changelogs ] && echo changelogs) -x 'stage/ocr/runtime/*'
+          zip -r app.zip appearance guide stage $([ -d changelogs ] && echo changelogs) -x 'stage/ocr/runtime/*' 'stage/map/*' 'stage/build/map/*'
           zip -j app.zip ../LICENSE ../THIRD_PARTY_NOTICES.md
           mkdir -p ${{ github.workspace }}/siyuan-android/app/src/main/assets
           cp app.zip ${{ github.workspace }}/siyuan-android/app/src/main/assets/app.zip

@@ -46,7 +46,7 @@ extraResources:
     to: "changelogs"
   - from: "stage"
     to: "stage"
-    filter: ["**/*", "!ocr/runtime/**/*"]
+    filter: ["**/*", "!ocr/runtime/**/*", "!map/**/*", "!build/map/**/*"]
   - from: "stage/ocr/runtime/darwin-amd64"
     to: "stage/ocr/runtime/darwin-amd64"
   - from: "guide"

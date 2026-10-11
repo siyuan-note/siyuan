@@ -35,7 +35,7 @@ for (const enable of [false, true]) {
                     state = reduceMobileBarsState(state, {type: "set-programmatic-scrolling", active: true});
                 },
                 hideElements() {}, updateMobileTitleReadonly() {}, disabledWYSIWYG() {},
-                refreshCalendarReadonly() {}, refreshMapReadonly() {}, hideTooltip() {}, isMobile: () => true,
+                refreshCalendarReadonly() {}, hideTooltip() {}, isMobile: () => true,
                 isIPhone: () => false, isAndroid: () => true,
             });
             (enable ? exports.enable : exports.disable)();

@@ -25,7 +25,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "kernel-plugin-state-change" |
     "before-show-tooltip" | "before-hide-tooltip" |
     "common-menu-open" | "common-menu-closed"
-type TAVView = "table" | "list" | "gallery" | "kanban" | "calendar" | "map";
+type TAVView = "table" | "list" | "gallery" | "kanban" | "calendar";
 type TAVAlign = "" | "left" | "center" | "right"
 type TAVDateFormat = "" | "full" | "month-day-year" | "day-month-year" | "year-month-day" | "lunar"
 type TAVCol = import("./av").AVKeyType;
@@ -1293,17 +1293,7 @@ interface IAVCalendarRange {
 }
 
 // 表格、列表和日历共用行列结构，布局由 viewType 区分。
-interface IAVMapSettings {
-    /** 位置字段引用；空值按视图顺序使用首个位置字段而不写回；显式字段缺失或类型变化时保留，不自动改绑。 */
-    locationKeyID: string;
-    /** 按视图保存的地图高度（CSS px）；省略时为 480，显式 0 和 null 无效。 */
-    height?: 320 | 480 | 640 | 800;
-}
-
 interface IAVTable extends IAVView {
-    /** 地图只渲染当前加载页中的 WGS84 坐标。 */
-    map?: IAVMapSettings;
-    mapMarkerScope?: "page";
     /** 仅日历布局返回的持久化字段设置。 */
     calendar?: IAVCalendarSettings;
     /** 回显本次请求的日期范围，省略范围的请求不返回此字段。 */

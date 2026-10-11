@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261011093258"
+		"updated": "20261011102158"
 	},
 	"Children": [
 		{
@@ -74,7 +74,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009034010-5oq6h7a",
-				"updated": "20261011093258"
+				"updated": "20261011102158"
 			},
 			"Children": [
 				{
@@ -102,30 +102,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-ue87c6m",
-				"updated": "20261011093258"
+				"updated": "20261011102158"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在經度和緯度輸入框中分別填寫座標，例如經度 116.4074、緯度 39.9042。也可點擊 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "地圖選點"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 開啟位置編輯器內嵌的地圖。點擊地圖會填入草稿座標，再點擊 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "保存"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 才會套用。僅修改名稱時，保留的來源文字維持不變；手動修改座標或地圖選點會清除來源文字。地圖無法使用時，仍可手動填寫座標。"
+					"Data": "在經度和緯度輸入框中分別填寫座標，例如經度 116.4074、緯度 39.9042。僅修改名稱時，保留的來源文字維持不變；修改座標會清除來源文字。"
 				}
 			]
 		},
@@ -3984,123 +3966,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "加密資料庫只能操作同一加密筆記本內的資料庫。請先解鎖相關筆記本；目標資料庫或欄位無法使用時，需要修正或暫停規則。複製資料庫後規則保留但處於暫停狀態，請檢查目標與關聯欄位後再啟用"
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-7n1yzkx",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20261009050034-7n1yzkx",
-				"updated": "20261011093258"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "地圖檢視"
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-ctek3na",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-ctek3na",
-				"updated": "20261010233500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "地圖使用內建 OpenFreeMap。未指定位置欄位時，預設使用檢視中的第一個位置欄位，也可在檢視設定中變更。在可編輯檢視中，點擊摘要右側的「未定位項目」按鈕，可查看目前篩選和搜尋結果中該欄位尚無座標的項目，包括僅填寫地點名稱的項目。清單支援搜尋和分批載入，點擊項目可開啟並編輯。瀏覽全部記錄可切換到表格檢視。 視圖設定中的高度提供小（320 px）、中（480 px）、大（640 px）和超大（800 px）四種尺寸，預設使用中尺寸。高度依視圖獨立儲存，並適配小螢幕。"
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-ezfsjzw",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-ezfsjzw",
-				"updated": "20261010064719"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "OpenFreeMap 不需要 API Key 或全域服務設定。請保留地圖上的提供商和地圖資料署名。"
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-0pe5w4a",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-0pe5w4a",
-				"updated": "20261010064719"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "地圖顯示 WGS84 座標，不進行轉換。OpenFreeMap 使用麥卡托投影，緯度超出 ±85.0511287798066° 的合法位置會保留原值並計入投影不支援數量，不會靜默裁切。"
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-3r0lsdq",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-3r0lsdq",
-				"updated": "20261011093258"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "篩選和排序同樣作用於地圖。標記只代表已載入的記錄，不代表整個資料庫；介面會說明已載入範圍及跳過的位置數量。標記過多時請縮小分頁或使用篩選。點擊標記開啟對應記錄。點擊地圖空白處會彈出所選點的 WGS84 座標，可點擊 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "複製"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 複製座標；在可編輯檢視中，還可選擇 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "在此建立項目"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，建立項目並將該點寫入檢視選定的位置欄位。僅點擊地圖不會變更任何記錄。"
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-fadq3xu",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-fadq3xu",
-				"updated": "20261010064719"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "地圖需要外部網路連線。隔離的地圖頁面僅接收座標和不含正文的記錄 ID，不接收記錄標題或完整內容。發佈頁面不載入即時地圖，文件匯出保留記錄表格。"
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-8jfc6yh",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-8jfc6yh",
-				"updated": "20261011093258"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "宿主配色跟隨應用程式主題，底圖保留預設樣式。地圖透過隔離的 Web 頁面執行；桌面客戶端使用獨立的安全宿主，行動客戶端需搭配限制原生橋和導覽僅用於可信主文件的外殼。無法建立隔離邊界時不載入地圖。桌面地圖隨頁面捲動並裁剪置頂分頁列覆蓋的區域，選單或對話方塊遮擋時可能暫時隱藏。離線、WebGL 不相容、地圖載入失敗或啟用鑑權繞過模式時，可切換到表格檢視存取記錄。本功能不提供地址搜尋、地理編碼、路線規劃或座標轉換。"
 				}
 			]
 		},

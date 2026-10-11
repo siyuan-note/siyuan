@@ -168,7 +168,7 @@ func Serve(fastMode bool, cookieKey string) {
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
 	ginServer.Use(tlsEnforceMiddleware())
 	ginServer.Use(sessions.Sessions("siyuan", sessionStore))
-	ginServer.Use(mapHostMiddleware())
+	ginServer.Use(retiredStaticResourcesMiddleware())
 
 	serveDebug(ginServer)
 	serveAssets(ginServer)

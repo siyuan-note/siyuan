@@ -3,18 +3,18 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-import {DOMFixture} from "./map/testDOM";
+import {DOMFixture} from "./testDOM";
 
 const compiled = transpileModule(readFileSync("src/protyle/render/av/render.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-test("switching one database carrier refreshes only its copies and preserves other map hosts", () => {
+test("switching one database carrier refreshes only its copies and preserves other carriers", () => {
     const document = new DOMFixture();
     const root = document.createElement("div");
     document.body.append(root);
     root.innerHTML = ["carrier", "mirror", "carrier"].map(id =>
-        `<div class="av" data-av-id="database" data-node-id="${id}" data-render="true"><div class="av__header" data-view-pages="pages"></div><div class="av__body" data-page-size="100"></div><div class="av__map"></div></div>`).join("");
+        `<div class="av" data-av-id="database" data-node-id="${id}" data-render="true"><div class="av__header" data-view-pages="pages"></div><div class="av__body" data-page-size="100"></div></div>`).join("");
     const blocks = root.children;
     const rendered: unknown[] = [];
     const exports: any = {};

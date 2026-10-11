@@ -887,13 +887,6 @@ func applyTemplateAttributeViewPlan(node *ast.Node, plan *templateAttributeViewP
 
 func templateAttributeViewPreviewTable(node *ast.Node, plan *templateAttributeViewPlan) *ast.Node {
 	view := *plan.selectedView
-	if nil != plan.selectedView.Map {
-		mapLayout := *plan.selectedView.Map
-		table := *mapLayout.LayoutTable
-		table.Columns = append([]*av.ViewTableColumn(nil), table.Columns...)
-		mapLayout.LayoutTable = &table
-		view.Map = &mapLayout
-	}
 	if nil != plan.selectedView.Calendar {
 		calendar := *plan.selectedView.Calendar
 		table := *calendar.LayoutTable

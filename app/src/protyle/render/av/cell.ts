@@ -559,7 +559,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
     if (!bodyElement) {
         return;
     }
-    const isList = ["list", "map"].includes(blockElement.getAttribute("data-av-type"));
+    const isList = blockElement.getAttribute("data-av-type") === "list";
     const avHeaderRect = (isList ? blockElement.querySelector(".av__views") :
         bodyElement.querySelector(".av__row--header")).getBoundingClientRect();
     if (avHeaderRect.bottom > cellRect.top) {

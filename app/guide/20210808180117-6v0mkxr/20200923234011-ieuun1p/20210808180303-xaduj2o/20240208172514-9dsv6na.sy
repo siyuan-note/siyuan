@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261011093258"
+		"updated": "20261011102158"
 	},
 	"Children": [
 		{
@@ -74,7 +74,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009034010-6kd9rk5",
-				"updated": "20261011093258"
+				"updated": "20261011102158"
 			},
 			"Children": [
 				{
@@ -102,30 +102,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-h9vridq",
-				"updated": "20261011093258"
+				"updated": "20261011102158"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Enter longitude and latitude in their separate fields, for example longitude 116.4074 and latitude 39.9042. Or click "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Pick on map"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to open the embedded map in the location editor. Clicking the map fills the draft coordinates; click "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Save"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to apply them. Source text stays unchanged when you only edit the name. Changing the coordinates manually or by picking on the map clears that source text. If the map is unavailable, you can still enter coordinates manually."
+					"Data": "Enter longitude and latitude in their separate fields, for example longitude 116.4074 and latitude 39.9042. Source text stays unchanged when you only edit the name. Changing the coordinates clears that source text."
 				}
 			]
 		},
@@ -3984,123 +3966,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "Encrypted databases can only act on databases in the same encrypted notebook. Unlock the notebook first. If a target database or field is unavailable, correct or pause the rule. Copying a database preserves its rules in a paused state; check their targets and relation fields before enabling them"
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-byowtq3",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20261009050034-byowtq3",
-				"updated": "20261011093258"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Map view"
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-yqulacv",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-yqulacv",
-				"updated": "20261010233500"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The map uses built-in OpenFreeMap. When no Location field is selected, the first Location field in the view is used; you can change it in the view settings. In an editable view, use the Unplaced records button to the right of the summary to browse records without coordinates in that field under the current filters and search, including records with only a place name. The list supports search and loading more records in batches. Click a record to open and edit it. Switch to a Table view to browse all records. In the view settings, Height offers Small (320 px), Medium (480 px), Large (640 px), and Extra large (800 px), with Medium as the default. The height is saved separately for each view and adapts to small screens."
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-2ja6x7k",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-2ja6x7k",
-				"updated": "20261010064719"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "OpenFreeMap requires no API key or global service configuration. Keep the map's provider and data attribution visible."
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-w0l8ys9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-w0l8ys9",
-				"updated": "20261010064719"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The map displays WGS84 coordinates without conversion. OpenFreeMap uses Web Mercator: latitudes beyond ±85.0511287798066° are valid stored coordinates but are skipped with an unsupported-projection count rather than silently clamped."
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-kpnifml",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-kpnifml",
-				"updated": "20261011093258"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Filters and sorting also apply to the map. Markers represent only the loaded records, not the entire database. The displayed counts identify the loaded scope and skipped locations. If there are too many markers, use filters or a smaller page size. Click a marker to open its record. Click an empty area of the map to show a popup with the selected WGS84 coordinates. Use "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Copy"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to copy them, or in an editable view choose "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Create record here"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to create a record with that point in the view's selected Location field. Clicking the map alone does not change any record."
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-x0kdedj",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-x0kdedj",
-				"updated": "20261010064719"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Maps require an external network connection. The isolated map page receives coordinates and opaque record IDs, but no record titles or full contents. Published pages do not load a live map, and document exports retain a table of records."
-				}
-			]
-		},
-		{
-			"ID": "20261009050034-wflckkb",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261009050034-wflckkb",
-				"updated": "20261011093258"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The host follows the app theme; the basemap keeps its default style. Maps run in isolated Web pages. Desktop clients use a separate secure host; mobile clients require an app shell that restricts native bridges and navigation to trusted documents. Maps do not load if these boundaries cannot be established. Desktop maps follow page scrolling and clip areas covered by sticky tabs; menus or dialogs may hide them temporarily. When offline, incompatible with WebGL, unable to load the map, or using authentication bypass, switch to a Table view to access records. Address search, geocoding, routing, and coordinate conversion are not provided."
 				}
 			]
 		},

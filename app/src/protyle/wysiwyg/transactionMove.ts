@@ -32,17 +32,3 @@ export const getVisibleMoveElements = (sourceElement: Element, blockIDs?: string
     }
     return elements;
 };
-
-export const cloneMoveElements = (elements: Element[], pendingMapElements?: Set<Element>) =>
-    elements.map(item => {
-        const clone = item.cloneNode(true) as Element;
-        const maps = Array.from(clone.querySelectorAll('[data-type="NodeAttributeView"][data-av-type="map"]'));
-        if (clone.matches('[data-type="NodeAttributeView"][data-av-type="map"]')) maps.unshift(clone);
-        maps.forEach(map => {
-            // 宿主连接和临时分区不能随块 DOM 复制，插入完成后重新创建地图。
-            map.querySelector(":scope > .av__container > .av__map")?.remove();
-            map.removeAttribute("data-render");
-            pendingMapElements?.add(map);
-        });
-        return clone;
-    });

@@ -267,8 +267,6 @@ func getAttributeViewBaseInstance(viewable av.Viewable) (ret *av.BaseInstance) {
 		ret = instance.BaseInstance
 	case *av.Calendar:
 		ret = instance.BaseInstance
-	case *av.Map:
-		ret = instance.BaseInstance
 	case *av.List:
 		ret = instance.BaseInstance
 	case *av.Gallery:
@@ -498,7 +496,7 @@ func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 func newAttributeViewWithLayout(avID string, initialLayout av.LayoutType) (ret *av.AttributeView) {
 	ret = av.NewAttributeView(avID)
 	switch initialLayout {
-	case av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeMap, av.LayoutTypeGallery, av.LayoutTypeKanban:
+	case av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeGallery, av.LayoutTypeKanban:
 	default:
 		return
 	}
@@ -549,14 +547,8 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	// 渲染视图
 	renderContext := sql.NewAttributeViewRenderContext()
 	renderContext.ReadOnly = !writable
-	if shouldPushAttributeViewTemplateErrors(view.LayoutType, writable) {
-		defer renderContext.PushTemplateErrors()
-	}
+	defer renderContext.PushTemplateErrors()
 	deferTemplateValues := shouldDeferAttributeViewTemplateValues(attrView, view, query, ignoreRows)
-	if view.LayoutType == av.LayoutTypeMap && !writable {
-		// 发布权限过滤可能改变分页边界，完整行集的模板值必须在重新分页前准备好。
-		deferTemplateValues = false
-	}
 	if deferTemplateValues {
 		viewable = sql.RenderViewWithDeferredTemplatesContext(attrView, view, query, ignoreRows, renderContext)
 	} else {
@@ -588,7 +580,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	}
 
 	// 渲染分组视图。当 ignoreRows 时若有已生成的分组则渲染元数据供面板使用，无分组则跳过（生成分组需要行数据）
-	if view.LayoutType != av.LayoutTypeCalendar && view.LayoutType != av.LayoutTypeMap && (!ignoreRows || len(view.Groups) > 0) {
+	if view.LayoutType != av.LayoutTypeCalendar && (!ignoreRows || len(view.Groups) > 0) {
 		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, groupRenderSource,
 			ignoreRows, writable, target, targetGroupID, renderContext, filterContext)
 	}
@@ -742,7 +734,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 
 		// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）
 		switch groupView.LayoutType {
-		case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeMap:
+		case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
 			groupView.GetTableLayout().Columns = nil
 		case av.LayoutTypeGallery:
 			groupView.Gallery.CardFields = nil
@@ -789,7 +781,7 @@ func hideEmptyGroupViews(view *av.View, viewable av.Viewable) {
 
 	itemCount := 0
 	switch viewable.GetType() {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeMap:
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
 		itemCount = av.TableFromViewable(viewable).RowCount
 	case av.LayoutTypeGallery:
 		itemCount = viewable.(*av.Gallery).CardCount
@@ -1035,7 +1027,7 @@ func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av
 		return templateKeyIDs[fieldID] && nil != calc && av.CalcOperatorNone != calc.Operator
 	}
 	switch view.LayoutType {
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar, av.LayoutTypeMap:
+	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeCalendar:
 		for _, column := range view.GetTableLayout().Columns {
 			if nil != column && nil != column.BaseField && checkField(column.ID, column.Calc) {
 				return false
@@ -1102,7 +1094,7 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 			return
 		}
 		targetIndex = findAttributeViewTargetIndex(targetItemID, len(calendar.Rows), func(index int) string { return calendar.Rows[index].ID })
-	case av.LayoutTypeTable, av.LayoutTypeList, av.LayoutTypeMap:
+	case av.LayoutTypeTable, av.LayoutTypeList:
 		table := av.TableFromViewable(viewable)
 		targetIndex = findAttributeViewTargetIndex(targetItemID, len(table.Rows), func(index int) string { return table.Rows[index].ID })
 		table.RowCount = len(table.Rows)
@@ -1113,9 +1105,6 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 		start, end := getAttributeViewRenderRange(page, pageSize, targetIndex, table.PageSize, len(table.Rows))
 		if targetIndex >= 0 {
 			targetOffset = start
-		}
-		if mapped, ok := viewable.(*av.Map); ok {
-			mapped.RowsBeforePagination = table.Rows
 		}
 		table.Rows = table.Rows[start:end]
 	case av.LayoutTypeGallery:
@@ -1534,7 +1523,7 @@ func parseHistoricalAttributeViewData(avID string, data []byte) (*av.AttributeVi
 	if err := av.CheckSpec(view); nil != err {
 		return nil, err
 	}
-	if err := view.ValidateMapLayouts(); nil != err {
+	if err := view.ValidateLayouts(); nil != err {
 		return nil, err
 	}
 	if err := view.NormalizeLocations(); nil != err {

@@ -39,6 +39,17 @@ describe("AI provider presets", () => {
         assert.equal(getResponsesSupport("https://example.com/v1"), "experimental");
     });
 
+    it("registers LiteLLM as a local OpenAI-compatible gateway", () => {
+        const preset = PROVIDER_PRESETS.find((item) => item.id === "litellm");
+        assert.equal(preset?.name, "LiteLLM");
+        assert.equal(preset?.baseURL, "http://localhost:4000/v1");
+        assert.equal(preset?.category, "local");
+        assert.equal(findProviderPreset("http://localhost:4000/v1/")?.id, "litellm");
+        assert.equal(findProviderPreset("http://localhost:4000")?.id, "litellm");
+        assert.equal(getDefaultProviderProtocol("litellm"), "openai");
+        assert.equal(getResponsesSupport("http://localhost:4000/v1"), "supported");
+    });
+
     it("switches DeepSeek standard endpoints with the selected protocol", () => {
         for (const baseURL of [
             "https://api.deepseek.com", "https://api.deepseek.com/v1/",

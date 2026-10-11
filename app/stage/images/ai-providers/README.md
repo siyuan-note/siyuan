@@ -12,6 +12,8 @@ The `zhipu.svg` file is extracted from the 24-by-24 `pure-logo.svg` symbol bundl
 
 The `volcengine.svg` file comes from [theSVG](https://github.com/glincker/thesvg/blob/aa0605996b4ad4fdda98502f84021b3c3a64847d/public/icons/volcengine/default.svg), distributed under the MIT license. The depicted logo remains a trademark of Volcengine.
 
+The `litellm.svg` file comes from the [LiteLLM repository](https://github.com/BerriAI/litellm/blob/main/ui/litellm-dashboard/public/assets/logos/litellm_monogram.svg), distributed under the MIT license. It preserves the original path geometry and applies the brand color (`#0117BE`). The depicted logo remains a trademark of BerriAI.
+
 The `groq.svg` file uses the standalone lightning symbol from the official [Groq favicon](https://groq.com/favicon.svg), preserving its original path geometry. The square background is omitted and its brand orange (`#F43E01`) is applied to the symbol for transparent display. The depicted logo remains a trademark of Groq; see its [trademark policy](https://groq.com/trademark-policy).
 
 Custom providers use generated initial avatars.

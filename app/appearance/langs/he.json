@@ -1,7 +1,7 @@
 {
 	"kernelUnresponsiveTitle": "הליבה אינה מגיבה",
 	"kernelUnresponsiveMessage": "תם הזמן שהוקצב לבקשות המקומיות לליבה, ולכן SiYuan אינו יכול לפתוח את החלון הראשי. לפרטים נוספים, ראו ${log}.",
-	"kernelUnresponsiveWindowsHint": "ב-Windows, ייתכן שהדבר קשור לשילוב של בקרת גודש TCP מסוג BBR2 עם Loopback Large Mtu.",
+	"kernelUnresponsiveWindowsHint": "ב-Windows, ייתכן שהדבר קשור לשילוב של בקרת גודש TCP מסוג BBR2 עם Loopback Large Mtu (loopbacklargemtu).",
 	"syncConfigTip": "הגדר את כתובת השרת, פרטי ההתחברות ופרמטרי החיבור של שירות זה; לאחר השמירה הם ישמשו לסנכרון ולגיבוי בענן",
 	"dataRepoPurgeCloud": "ניקוי מאגר נתונים בענן",
 	"dataRepoPurgeCloudTip": "מחק את כל הצילומים הלא מתייחסים ואת האוביקטים הקשורים בענן",

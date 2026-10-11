@@ -1,7 +1,7 @@
 {
 	"kernelUnresponsiveTitle": "Ядро не відповідає",
 	"kernelUnresponsiveMessage": "Час очікування локальних запитів до ядра вичерпано, тому SiYuan не може відкрити головне вікно. Докладніше див. у ${log}.",
-	"kernelUnresponsiveWindowsHint": "У Windows це може бути пов’язано з одночасним увімкненням керування перевантаженням TCP BBR2 і Loopback Large Mtu.",
+	"kernelUnresponsiveWindowsHint": "У Windows це може бути пов’язано з одночасним увімкненням керування перевантаженням TCP BBR2 і Loopback Large Mtu (loopbacklargemtu).",
 	"syncConfigTip": "Налаштуйте адресу сервера, облікові дані та параметри підключення цієї служби; після збереження вони використовуються для хмарної синхронізації та резервного копіювання",
 	"dataRepoPurgeCloud": "Очищення хмарного сховища даних",
 	"dataRepoPurgeCloudTip": "Видалити всі незв'язані знімки та пов'язані об'єкти даних у хмарі",

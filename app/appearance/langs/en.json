@@ -1,7 +1,7 @@
 {
 	"kernelUnresponsiveTitle": "The kernel is not responding",
 	"kernelUnresponsiveMessage": "Local requests to the kernel timed out, so SiYuan cannot open the main window. Check ${log} for details.",
-	"kernelUnresponsiveWindowsHint": "On Windows, this may be related to TCP congestion control BBR2 combined with Loopback Large Mtu.",
+	"kernelUnresponsiveWindowsHint": "On Windows, this may be related to TCP congestion control BBR2 combined with Loopback Large Mtu (loopbacklargemtu).",
 	"syncConfigTip": "Configure the server address, credentials and connection parameters for this service; after saving they are used for cloud sync and backup",
 	"dataRepoPurgeCloud": "Cloud data repo purge",
 	"dataRepoPurgeCloudTip": "Delete all unreferenced snapshots and related data objects in the cloud",

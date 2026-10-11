@@ -1,7 +1,7 @@
 {
 	"kernelUnresponsiveTitle": "Le noyau ne répond pas",
 	"kernelUnresponsiveMessage": "Les requêtes locales au noyau ont dépassé le délai d’attente. SiYuan ne peut donc pas ouvrir la fenêtre principale. Consultez ${log} pour plus de détails.",
-	"kernelUnresponsiveWindowsHint": "Sous Windows, cela peut être lié à l’utilisation simultanée du contrôle de congestion TCP BBR2 et de Loopback Large Mtu.",
+	"kernelUnresponsiveWindowsHint": "Sous Windows, cela peut être lié à l’utilisation simultanée du contrôle de congestion TCP BBR2 et de Loopback Large Mtu (loopbacklargemtu).",
 	"syncConfigTip": "Configurer l'adresse du serveur, les identifiants et les paramètres de connexion de ce service ; après l'enregistrement, ils sont utilisés pour la synchronisation et la sauvegarde cloud",
 	"dataRepoPurgeCloud": "Purger le référentiel de données cloud",
 	"dataRepoPurgeCloudTip": "Purger tous les instantanés non référencés et les objets de données associés dans le cloud",

@@ -1,7 +1,7 @@
 {
 	"kernelUnresponsiveTitle": "Ядро не отвечает",
 	"kernelUnresponsiveMessage": "Время ожидания локальных запросов к ядру истекло, поэтому SiYuan не может открыть главное окно. Подробности см. в ${log}.",
-	"kernelUnresponsiveWindowsHint": "В Windows это может быть связано с одновременным включением управления перегрузкой TCP BBR2 и Loopback Large Mtu.",
+	"kernelUnresponsiveWindowsHint": "В Windows это может быть связано с одновременным включением управления перегрузкой TCP BBR2 и Loopback Large Mtu (loopbacklargemtu).",
 	"syncConfigTip": "Настройте адрес сервера, учётные данные и параметры подключения этой службы; после сохранения они используются для облачной синхронизации и резервного копирования",
 	"dataRepoPurgeCloud": "Очистка облачного репозитория данных",
 	"dataRepoPurgeCloudTip": "Удалить все безссыльные снимки и связанные объекты данных в облаке",

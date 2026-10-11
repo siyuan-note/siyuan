@@ -1,7 +1,7 @@
 {
 	"kernelUnresponsiveTitle": "Çekirdek yanıt vermiyor",
 	"kernelUnresponsiveMessage": "Çekirdeğe yapılan yerel istekler zaman aşımına uğradığı için SiYuan ana pencereyi açamıyor. Ayrıntılar için ${log} dosyasına bakın.",
-	"kernelUnresponsiveWindowsHint": "Windows'ta bu durum, TCP tıkanıklık denetimi BBR2 ile Loopback Large Mtu'nun birlikte etkinleştirilmesiyle ilgili olabilir.",
+	"kernelUnresponsiveWindowsHint": "Windows'ta bu durum, TCP tıkanıklık denetimi BBR2 ile Loopback Large Mtu (loopbacklargemtu)'nun birlikte etkinleştirilmesiyle ilgili olabilir.",
 	"syncConfigTip": "Bu hizmetin sunucu adresini, kimlik bilgilerini ve bağlantı parametrelerini yapılandırın; kaydettikten sonra bulut eşitleme ve yedekleme için kullanılır",
 	"dataRepoPurgeCloud": "Bulut veri deposunu temizle",
 	"dataRepoPurgeCloudTip": "Buluttaki referanssız tüm anlık görüntüleri ve ilgili veri nesnelerini sil",

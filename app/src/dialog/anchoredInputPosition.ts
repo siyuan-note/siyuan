@@ -4,6 +4,16 @@ export const bindAnchoredInputPosition = (inputElement: HTMLElement, getAnchor: 
     let frame = 0;
     let disposed = false;
     let observedAnchor: HTMLElement;
+    // 记录最近一次写入的尺寸；内联尺寸与之不同说明用户拖拽调整过大小，此后仅更新位置
+    let appliedWidth = "";
+    let appliedHeight = "";
+    let keepSize = false;
+    const applySize = (width: number, height: number) => {
+        appliedWidth = `${width}px`;
+        appliedHeight = `${height}px`;
+        inputElement.style.width = appliedWidth;
+        inputElement.style.height = appliedHeight;
+    };
     const update = () => {
         frame = 0;
         const anchorElement = getAnchor();
@@ -22,6 +32,10 @@ export const bindAnchoredInputPosition = (inputElement: HTMLElement, getAnchor: 
             resizeObserver?.observe(anchorElement);
             observedAnchor = anchorElement;
         }
+        if (!keepSize && appliedWidth &&
+            (inputElement.style.width !== appliedWidth || inputElement.style.height !== appliedHeight)) {
+            keepSize = true;
+        }
         const cellRect = anchorElement.getBoundingClientRect();
         const maskRect = maskElement.getBoundingClientRect();
         const contentRect = contentElement?.getBoundingClientRect();
@@ -31,20 +45,24 @@ export const bindAnchoredInputPosition = (inputElement: HTMLElement, getAnchor: 
             const viewportTop = viewport?.offsetTop || 0;
             const viewportWidth = viewport?.width || window.innerWidth;
             const viewportHeight = viewport?.height || window.innerHeight;
-            const width = Math.min(Math.max(cellRect.width, 240), Math.max(0, viewportWidth - 16));
-            inputElement.style.width = `${width}px`;
-            inputElement.style.height = "auto";
-            const height = Math.min(Math.max(cellRect.height, inputElement.scrollHeight), Math.max(0, viewportHeight - 16));
+            let width = parseFloat(inputElement.style.width);
+            let height = parseFloat(inputElement.style.height);
+            if (!keepSize) {
+                width = Math.min(Math.max(cellRect.width, 240), Math.max(0, viewportWidth - 16));
+                inputElement.style.width = `${width}px`;
+                inputElement.style.height = "auto";
+                height = Math.min(Math.max(cellRect.height, inputElement.scrollHeight), Math.max(0, viewportHeight - 16));
+                applySize(width, height);
+            }
             const left = Math.max(viewportLeft + 8, Math.min(cellRect.left, viewportLeft + viewportWidth - width - 8));
             const top = Math.max(viewportTop + 8, Math.min(cellRect.top, viewportTop + viewportHeight - height - 8));
             inputElement.style.left = `${left - maskRect.left}px`;
             inputElement.style.top = `${top - maskRect.top}px`;
-            inputElement.style.height = `${height}px`;
             inputElement.style.visibility = "";
             return;
         }
-        const width = contentRect ? Math.min(Math.max(cellRect.width, 25), contentRect.width) :
-            Math.max(cellRect.width, 25);
+        const width = keepSize ? parseFloat(inputElement.style.width) :
+            contentRect ? Math.min(Math.max(cellRect.width, 25), contentRect.width) : Math.max(cellRect.width, 25);
         const left = contentRect && (cellRect.left < contentRect.left || cellRect.left + width > contentRect.right) ?
             contentRect.left : cellRect.left;
         const height = contentRect ? Math.max(0, Math.min(cellRect.bottom, contentRect.bottom) - cellRect.top) :
@@ -52,8 +70,9 @@ export const bindAnchoredInputPosition = (inputElement: HTMLElement, getAnchor: 
         // 输入框位于独立遮罩中，使用当前单元格坐标并扣除遮罩原点，保持滚动和视口变化后的对齐。
         inputElement.style.top = `${cellRect.top - maskRect.top}px`;
         inputElement.style.left = `${left - maskRect.left}px`;
-        inputElement.style.width = `${width}px`;
-        inputElement.style.height = `${height}px`;
+        if (!keepSize) {
+            applySize(width, height);
+        }
         inputElement.style.visibility = height > 0 ? "" : "hidden";
     };
     const schedule = () => {

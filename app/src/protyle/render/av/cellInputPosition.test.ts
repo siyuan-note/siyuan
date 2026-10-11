@@ -267,3 +267,28 @@ test("batch inputs opened below a menu keep menu positioning instead of cell tra
     assert.equal(fixture.menuPositioned, true);
     assert.equal(fixture.getAnchor, undefined);
 });
+
+test("anchored input keeps a manually resized size while it follows the anchor", () => {
+    const fixture = setup();
+    assert.equal(fixture.input.style.width, "220px");
+    // 模拟拖拽输入框右下角后浏览器写入的内联尺寸
+    fixture.input.style.width = "300px";
+    fixture.input.style.height = "120px";
+    fixture.anchor.rect = rect(40, 280, 220, 36);
+    fixture.window.dispatchEvent(new Event("scroll"));
+    fixture.flush();
+    assert.equal(fixture.input.style.width, "300px");
+    assert.equal(fixture.input.style.height, "120px");
+    assert.equal(fixture.input.style.top, "280px");
+    fixture.dispose();
+
+    const fit = setup(true);
+    fit.input.style.width = "200px";
+    fit.input.style.height = "90px";
+    fit.input.dispatchEvent(new Event("input"));
+    fit.flush();
+    assert.equal(fit.input.style.width, "200px");
+    assert.equal(fit.input.style.height, "90px");
+    assert.equal(fit.input.style.top, "500px");
+    fit.dispose();
+});

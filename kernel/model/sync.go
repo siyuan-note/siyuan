@@ -679,11 +679,11 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 
 func validateSyncS3(s3 *conf.S3) error {
 	if s3 == nil {
-		return errors.New(Conf.Language(249))
+		return errors.New(Conf.Language(142))
 	}
 	for _, value := range []string{s3.Endpoint, s3.AccessKey, s3.SecretKey, s3.Bucket, s3.Region} {
 		if strings.TrimSpace(value) == "" {
-			return errors.New(Conf.Language(249))
+			return errors.New(Conf.Language(142))
 		}
 	}
 	rawEndpoint := strings.TrimSpace(s3.Endpoint)

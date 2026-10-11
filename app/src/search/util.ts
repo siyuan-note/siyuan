@@ -999,10 +999,12 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         }
         saveKeyList("keys", searchInputElement.value, config);
     });
-    searchInputElement.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" && config.method !== 2) {
+    searchInputElement.addEventListener("beforeinput", (event: InputEvent) => {
+        if (event.inputType === "insertLineBreak" && config.method !== 2) {
             event.preventDefault();
         }
+    });
+    searchInputElement.addEventListener("keydown", (event) => {
         electronUndo(event);
     });
     replaceInputElement.addEventListener("keydown", (event) => {

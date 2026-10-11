@@ -37,7 +37,7 @@ const setup = async (source, suffix) => {
     return {before, after, end: {x: formulas[1].getBoundingClientRect().right + 30, y: before.y}};
 };
 
-const setupEdge = async (mode) => {
+const setupEdge = async (mode, direction) => {
     window.mathSelectionDiagnosticAbort?.abort();
     document.body.innerHTML = '<div class="protyle-wysiwyg" contenteditable="false" data-readonly="false">' +
         '<div data-node-id="20261010232335-t6hx5pb" data-type="NodeParagraph" class="p">' +
@@ -72,14 +72,18 @@ const setupEdge = async (mode) => {
     const before = point(prefix.firstChild, prefix.textContent.length - 2);
     const diagnosticAbort = new AbortController();
     window.mathSelectionDiagnosticAbort = diagnosticAbort;
-    window.mathSelectionDiagnostics = {mode, events: []};
+    const geometry = {mode, requestedWidth: editable.style.width, measuredPrefixWidth: width,
+        editable: editable.getBoundingClientRect().toJSON(), math: rect.toJSON(),
+        prefixLines: Array.from(prefix.getClientRects(), item => item.toJSON()),
+        fontsStatus: document.fonts.status, devicePixelRatio: window.devicePixelRatio};
+    window.mathSelectionDiagnostics = {mode, direction, geometry, events: []};
     const recordSelection = (phase, event) => {
         const selection = getSelection();
         const describe = node => node ? {name: node.nodeName,
             text: node.textContent?.slice(0, 180), parent: node.parentElement?.outerHTML.slice(0, 512)} : null;
         const events = window.mathSelectionDiagnostics.events;
         if (events.length >= 48) return;
-        events.push({phase, text: selection?.toString(), collapsed: selection?.isCollapsed,
+        events.push({phase, text: selection?.toString().slice(0, 512), collapsed: selection?.isCollapsed,
             anchor: describe(selection?.anchorNode), anchorOffset: selection?.anchorOffset,
             focus: describe(selection?.focusNode), focusOffset: selection?.focusOffset,
             pointer: event && typeof event.clientX === "number" ? {x: event.clientX, y: event.clientY,
@@ -98,14 +102,11 @@ const setupEdge = async (mode) => {
                 recordSelection("after-caret-normalization");
             }
         }, 0);
-    }, {once: true});
+    }, {once: true, signal: diagnosticAbort.signal});
     return {before, after, left: {x: rect.left + 0.5, y: after.y},
         mathEnd: {x: rect.right + 1, y: after.y}, right: {x: rect.right + 1, y: before.y},
         width: editable.clientWidth, mathLeft: rect.left, prefixLeft: prefix.getBoundingClientRect().left,
-        geometry: {mode, requestedWidth: editable.style.width, measuredPrefixWidth: width,
-            editable: editable.getBoundingClientRect().toJSON(), math: rect.toJSON(),
-            prefixLines: Array.from(prefix.getClientRects(), item => item.toJSON()),
-            fontsStatus: document.fonts.status, devicePixelRatio: window.devicePixelRatio}};
+        geometry};
 };
 
 const runElectron = async () => {
@@ -192,11 +193,13 @@ const runElectron = async () => {
                     return {...window.mathSelectionDiagnostics,
                         from: describePoint(${JSON.stringify(from)}), to: describePoint(${JSON.stringify(to)}),
                         math: math?.getBoundingClientRect().toJSON(), viewport: [innerWidth, innerHeight],
-                        selection: {text: getSelection().toString(), collapsed: getSelection().isCollapsed}};
+                        selection: {text: getSelection().toString().slice(0, 512), collapsed: getSelection().isCollapsed}};
                         })()`);
-                        error.message += "\nSelection diagnostics: " + JSON.stringify(diagnostics);
-                    } catch {
+                        // AssertionError 缓存 stack，仅改 message 不会出现在子进程 stderr 中。
+                        console.error("Selection diagnostics: " + JSON.stringify(diagnostics));
+                    } catch (diagnosticError) {
                         // 页面关闭或诊断失败时仍保留原始选区断言。
+                        console.error("Selection diagnostics unavailable: " + String(diagnosticError).slice(0, 512));
                     }
                     throw error;
                 }
@@ -222,7 +225,8 @@ const runElectron = async () => {
             'document.querySelectorAll("[data-type=inline-math]")[1].lastChild.textContent'), "\ufeff");
         for (const mode of ["left", "right"]) {
             for (const direction of mode === "left" ? ["forward", "backward", "cross-line"] : ["forward", "cross-line"]) {
-                const points = await win.webContents.executeJavaScript(`(${setupEdge.toString()})(${JSON.stringify(mode)})`);
+                const points = await win.webContents.executeJavaScript(
+                    `(${setupEdge.toString()})(${JSON.stringify(mode)}, ${JSON.stringify(direction)})`);
                 if (mode === "left") {
                     assert.ok(Math.abs(points.mathLeft - points.prefixLeft) < 1, JSON.stringify(points));
                     await drag(direction === "forward" ? points.left : direction === "backward" ? points.after : points.before,
@@ -247,7 +251,7 @@ const runElectron = async () => {
             window.mathSelectionAPI.normalizeInlineMathCaret(range);
             return {collapsed: getSelection().isCollapsed, outside: !math.contains(getSelection().anchorNode)};
         })()`), {collapsed: true, outside: true});
-        const points = await win.webContents.executeJavaScript(`(${setupEdge.toString()})("right")`);
+        const points = await win.webContents.executeJavaScript(`(${setupEdge.toString()})("right", "delete")`);
         await drag(points.before, points.right, true);
         assert.equal(await win.webContents.executeJavaScript(`document.execCommand("delete");
             document.querySelectorAll('[data-type="inline-math"]').length;`), 0);

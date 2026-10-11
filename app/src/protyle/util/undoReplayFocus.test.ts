@@ -241,8 +241,12 @@ const browserCases = async (source: string) => {
     getSelection().removeAllRanges();
     getSelection().addRange(range);
     const mindmapSaved = api.getUndoFocusContext(editor, range, true);
+    check.equal(mindmapSaved.undoFocusStart, "3");
+    check.equal(mindmapSaved.undoFocusEnd, "1");
     const fragmentRoot = document.createElement("div");
     fragmentRoot.className = "protyle-wysiwyg";
+    // 桌面片段编辑器使用统一编辑根，否则 Chromium 会把文本选区截在第一个独立编辑宿主内。
+    fragmentRoot.contentEditable = "true";
     document.body.append(fragmentRoot);
     const unregisterText = api.registerListMindmapRoot(editor, noop,
         (_id: string, ids: string[], selection: Record<string, string>, source: Element) => {
@@ -253,8 +257,13 @@ const browserCases = async (source: string) => {
         });
     check.equal(api.restoreUndoFocus(protyle, [{context: {undoFocusId: "child", undoFocusStart: "0", undoFocusEnd: "0",
         undoFocusMindmapSelection: JSON.stringify(mindmapSaved)}}]), true);
-    check.equal(getSelection().toString(), "BC中");
-    check.equal(getSelection().getRangeAt(0).startOffset, 3);
+    const restoredRange = getSelection().getRangeAt(0);
+    // Range 的正文序列不包含 Selection 按渲染块边界附加的换行。
+    check.equal(restoredRange.toString(), "BC中");
+    check.equal(restoredRange.startContainer, fragmentRoot.firstElementChild.firstElementChild.firstChild);
+    check.equal(restoredRange.startOffset, 3);
+    check.equal(restoredRange.endContainer, fragmentRoot.lastElementChild.firstElementChild.firstChild.firstChild);
+    check.equal(restoredRange.endOffset, 1);
     check.ok(fragmentRoot.contains(getSelection().anchorNode));
     unregisterText();
     fragmentRoot.remove();

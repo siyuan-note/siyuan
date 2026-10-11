@@ -57,3 +57,45 @@ for (const scenario of [
         }
     });
 }
+
+test("Android converts SVG before handing a temporary PNG to the native clipboard", async () => {
+    const code = transpileModule(source.substring(source.indexOf("export const writePNGBlob =")), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    const png = new Blob(["png bytes"], {type: "image/png"});
+    const nativeImages: string[] = [];
+    const uploads: Array<{file: File; type: string}> = [];
+    const errors: string[] = [];
+    let failUpload = false;
+    const exports = {} as {copyPNGByLink: (link: string) => void};
+    runInNewContext(code, {
+        exports, File,
+        isInAndroid: () => true,
+        genUUID: () => "unique-id",
+        ContractFormData: class {constructor(public fields: unknown) {}},
+        fetchSyncPost: async (url: string, form: {fields: typeof uploads[number]}) => {
+            assert.equal(url, "/api/export/exportAsFile");
+            uploads.push(form.fields);
+            return failUpload ? {code: -1} : {code: 0, data: {file: "/export/file-clipboard-unique-id.png"}};
+        },
+        showMessage: (message: string) => errors.push(message),
+        window: {devicePixelRatio: 1, siyuan: {languages: {copied: "copied", imageCopyFailed: "failed"}},
+            JSAndroid: {writeImageClipboard: (link: string) => nativeImages.push(link)}},
+        fetch: async () => ({ok: true, blob: async () => new Blob(["svg"], {type: "image/svg+xml"})}),
+        URL: {createObjectURL: () => "blob:svg", revokeObjectURL() {}},
+        document: {createElement: (tag: string) => tag === "canvas" ? {
+            getContext: () => ({drawImage() {}}), toBlob: (callback: (blob: Blob) => void) => callback(png),
+        } : {naturalWidth: 100, naturalHeight: 50, onload() {}, set src(_value: string) {this.onload();}}},
+    });
+    exports.copyPNGByLink("assets/vector.svg");
+    await new Promise(setImmediate);
+    assert.equal(uploads[0].type, "image/png");
+    assert.equal(await uploads[0].file.text(), "png bytes");
+    assert.deepEqual(nativeImages, ["/export/file-clipboard-unique-id.png"]);
+    assert.deepEqual(errors, ["copied"]);
+    failUpload = true;
+    exports.copyPNGByLink("assets/vector.svg");
+    await new Promise(setImmediate);
+    assert.equal(nativeImages.length, 1);
+    assert.deepEqual(errors, ["copied", "failed"]);
+});

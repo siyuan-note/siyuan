@@ -479,9 +479,11 @@ style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}$
         data-position="north" aria-label="${window.siyuan.languages.openBy}"><svg><use xlink:href="#iconOpen"></use></svg></button>` : ""}
 </span>`;
         } else {
-            html += `<div data-relation-column="${escapeAttr(column.id)}" data-dtype="${column.type}" data-wrap="${column.wrap === true}" class="av__relation-table-cell"
+            const text = cell?.value ? getCellValueText(cell.value, column) : "";
+            html += `<div data-relation-column="${escapeAttr(column.id)}" data-dtype="${column.type}" data-wrap="false" title="${escapeAttr(text)}" class="av__relation-table-cell"
 style="${cell?.bgColor ? `background-color:${cell.bgColor};` : ""}${cell?.color ? `color:${cell.color};` : ""}">${cell?.value ?
-                renderCell(cell.value, 0, true, "table", column.options, column.dateFormat, column.renderTemplate, false) : ""}</div>`;
+                column.type === "text" ? `<span class="av__celltext">${escapeHtmlTextAndAttr(text)}</span>` :
+                    renderCell(cell.value, 0, true, "table", column.options, column.dateFormat, column.renderTemplate, false) : ""}</div>`;
         }
     });
     return html + "</div>";

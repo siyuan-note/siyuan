@@ -173,7 +173,64 @@ const runCases = sources => {
     assert.deepEqual(window.siyuan.storage["local-av-relation-layout"].defaults.hidden, ["other", "third", "fourth", "fifth"]);
     fields().querySelector('[data-all="show"]').click();
     assert.deepEqual(window.siyuan.storage["local-av-relation-layout"].defaults.hidden, []);
+    defaults.querySelectorAll(".av__relation-table-header, .av__relation-table-row").forEach(row => {
+        for (const id of ["third", "fourth", "fifth"]) {
+            const cell = document.createElement("span");
+            cell.dataset.relationColumn = id;
+            row.append(cell);
+        }
+    });
+    const dragField = (source, target) => {
+        const transfer = new DataTransfer();
+        const from = fields().querySelector(`[data-column="${source}"]`);
+        const to = fields().querySelector(`[data-column="${target}"]`);
+        from.dispatchEvent(new DragEvent("dragstart", {bubbles: true, cancelable: true, dataTransfer: transfer}));
+        to.dispatchEvent(new DragEvent("dragover", {bubbles: true, cancelable: true, dataTransfer: transfer,
+            clientY: to.getBoundingClientRect().top - 1}));
+        to.dispatchEvent(new DragEvent("drop", {bubbles: true, cancelable: true, dataTransfer: transfer}));
+    };
+    dragField("fourth", "other");
+    const order = element => Array.from(element.querySelectorAll(".av__relation-table-header [data-relation-column]"))
+        .map(cell => cell.dataset.relationColumn);
+    assert.deepEqual(order(defaults), ["primary", "fourth", "other", "third", "fifth"]);
+    assert.deepEqual(window.siyuan.storage["local-av-relation-layout"].defaults.order, order(defaults));
+    dragField("other", "primary");
+    dragField("primary", "third");
+    assert.deepEqual(order(defaults), ["primary", "fourth", "other", "third", "fifth"]);
+    const childChanges = new MutationObserver(() => {});
+    childChanges.observe(defaults, {childList: true, subtree: true});
+    updateDefaults(many, "32px 240px 120px 130px 140px 150px");
+    assert.equal(childChanges.takeRecords().length, 0);
+    childChanges.disconnect();
+    assert.match(defaults.querySelector(".av__relation-table-header").style.gridTemplateColumns, /140px 120px 130px 150px/);
     updateDefaults.close();
+    const restored = defaults.cloneNode(true);
+    restored.querySelectorAll('[data-relation-column="third"]').forEach(cell => {
+        cell.dataset.relationColumn = "new";
+    });
+    const restoreLayout = bindRelationLayout(restored, "defaults", () => {});
+    restoreLayout([many[0], many[1], many[3], many[4], {id: "new", name: "New"}], "32px 240px 120px 140px 150px 160px");
+    assert.deepEqual(order(restored), ["primary", "fourth", "other", "fifth", "new"]);
+    const style = document.createElement("style");
+    style.textContent = sources.relationCSS;
+    document.head.append(style);
+    const preview = document.createElement("div");
+    preview.className = "av__relation-panel";
+    const {renderRow} = load("./relationPreview");
+    const previewColumns = [{id: "primary", type: "block"}, {id: "text", type: "text", wrap: true}];
+    for (const fontSize of [14, 24]) {
+        preview.style.fontSize = fontSize + "px";
+        preview.innerHTML = ["", "Text", "First\nSecond\nThird", '<img src=x onerror="bad()">'].map(text =>
+            renderRow({id: "row", cells: [{value: {type: "block", keyID: "primary", isDetached: true,
+                block: {content: "Entry"}}}, {value: {type: "text", keyID: "text", text: {content: text}}}]},
+            previewColumns, "candidate", "32px 180px 100px")).join("");
+        document.body.append(preview);
+        const heights = Array.from(preview.querySelectorAll(".av__relation-table-row")).map(row => row.getBoundingClientRect().height);
+        assert.ok(heights.every(height => height === heights[0]));
+        assert.equal(preview.querySelectorAll('[data-wrap="true"]').length, 0);
+        assert.equal(preview.querySelectorAll("img").length, 0);
+        assert.equal(preview.children[2].querySelector('[data-dtype="text"]').title, "First\nSecond\nThird");
+    }
 };
 
 const runElectron = async () => {
@@ -189,6 +246,21 @@ const runElectron = async () => {
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
         const relationSource = readFileSync(path.join(__dirname, "../src/protyle/render/av/relation.ts"), "utf8");
+        const rowStart = relationSource.indexOf("const genRelationRowHTML =");
+        const rowEnd = relationSource.indexOf("const genRelationRowsHTML =", rowStart);
+        sources["./relationPreview"] = ts.transpileModule(`
+const escapeAttr = require("../../../util/escape").escapeAttr;
+const escapeHtmlTextAndAttr = require("../../../util/escape").escapeHtmlTextAndAttr;
+const getRelationPrimaryCell = row => row.cells[0];
+const hasAVRenderTemplateResult = () => false;
+const getAVBlockIconHTML = () => "";
+const getCellValueText = value => value.text.content;
+${relationSource.slice(rowStart, rowEnd)}
+export const renderRow = genRelationRowHTML;`,
+            {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
+        const avCSS = readFileSync(path.join(__dirname, "../src/assets/scss/business/_av.scss"), "utf8");
+        sources.relationCSS = require("sass").compileString(avCSS.slice(avCSS.indexOf(".av__relation-panel {"),
+            avCSS.indexOf(".av__option-colors {"))).css;
         const valueStart = relationSource.indexOf("const getRelationValue =");
         const valueEnd = relationSource.indexOf("const genCreatedRelationRowHTML =", valueStart);
         const deselectStart = relationSource.indexOf('            target.dataset.relationType = "candidate";');

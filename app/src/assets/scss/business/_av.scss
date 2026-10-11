@@ -2867,6 +2867,12 @@ img.av__cellassetimg {
     padding: 4px 8px;
   }
 
+  .av__relation-table-row > .av__relation-table-cell,
+  .av__relation-table-row > .av__relation-table-check {
+    height: max(34px, calc(1.625em + 8px));
+    white-space: nowrap;
+  }
+
   .av__relation-table-check {
     background-color: var(--b3-menu-background);
     left: 0;

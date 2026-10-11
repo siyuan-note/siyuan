@@ -9,11 +9,12 @@ const STORAGE_KEY = "local-av-relation-layout";
 interface IRelationLayout {
     hidden: string[];
     widths: Record<string, number>;
+    order: string[];
 }
 
 export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResize: () => void) => {
     const saved = window.siyuan.storage[STORAGE_KEY]?.[databaseID] as IRelationLayout | undefined;
-    const layout: IRelationLayout = {hidden: [...(saved?.hidden || [])], widths: {...saved?.widths}};
+    const layout: IRelationLayout = {hidden: [...(saved?.hidden || [])], widths: {...saved?.widths}, order: [...(saved?.order || [])]};
     const fields = document.createElement("div");
     fields.className = "av__relation-fields";
     const button = root.querySelector<HTMLElement>('[data-type="relationFields"]');
@@ -25,20 +26,39 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
     let columns: IAVColumn[] = [];
     let defaultWidths: string[] = [];
     let initialized = !!saved;
+    const orderedColumns = () => {
+        const byID = new Map(columns.slice(1).map(column => [column.id, column]));
+        const ordered = columns.length ? [columns[0]] : [];
+        [...layout.order, ...byID.keys()].forEach(id => {
+            if (byID.has(id)) {
+                ordered.push(byID.get(id));
+                byID.delete(id);
+            }
+        });
+        return ordered;
+    };
     const widthOf = (index: number) => {
         const width = layout.widths[columns[index].id];
         return Number.isFinite(width) ? `${Math.max(64, Math.min(800, width))}px` : defaultWidths[index];
     };
     const apply = () => {
-        const template = ["32px", ...columns.map((column, index) =>
+        const ordered = orderedColumns();
+        const template = ["32px", ...ordered.map((column, index) =>
             index > 0 && layout.hidden.includes(column.id) ? "" : index === 0 ?
-                `min(${widthOf(index)}, calc(100vw - 96px))` : widthOf(index)).filter(Boolean)].join(" ");
+                `min(${widthOf(0)}, calc(100vw - 96px))` : widthOf(columns.indexOf(column))).filter(Boolean)].join(" ");
         root.querySelectorAll<HTMLElement>(".av__relation-table-header, .av__relation-table-row").forEach(row => {
             row.style.gridTemplateColumns = template;
             row.querySelectorAll<HTMLElement>("[data-relation-column]").forEach(cell => {
                 cell.classList.toggle("fn__none", cell.dataset.relationColumn !== columns[0]?.id &&
                     layout.hidden.includes(cell.dataset.relationColumn));
             });
+            const currentCells = Array.from(row.querySelectorAll<HTMLElement>("[data-relation-column]"));
+            const cells = new Map(currentCells.map(cell => [cell.dataset.relationColumn, cell]));
+            const nextCells = ordered.map(column => cells.get(column.id)).filter(Boolean);
+            // 列宽拖动期间保持节点不动，避免中断指针捕获。
+            if (nextCells.some((cell, index) => cell !== currentCells[index])) {
+                nextCells.forEach(cell => row.append(cell));
+            }
         });
     };
     const save = () => {
@@ -48,7 +68,7 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
     };
     const renderFields = () => {
         fields.innerHTML = [false, true].map(hidden => {
-            const group = columns.filter((column, index) => (index > 0 && layout.hidden.includes(column.id)) === hidden);
+            const group = orderedColumns().filter((column, index) => (index > 0 && layout.hidden.includes(column.id)) === hidden);
             if (group.length === 0) {
                 return "";
             }
@@ -58,7 +78,8 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
     <span class="block__icon block__icon--show" data-all="${hidden ? "show" : "hide"}">${window.siyuan.languages[hidden ? "showAll" : "hideAll"]}
         <span class="fn__space"></span><svg><use xlink:href="#${hidden ? "iconEye" : "iconEyeoff"}"></use></svg>
     </span>
-</button>${group.map(column => `<button class="b3-menu__item" data-column="${escapeAttr(column.id)}" ${column === columns[0] ? 'data-type="nobg" aria-disabled="true"' : ""}>
+</button>${group.map(column => `<button class="b3-menu__item" data-column="${escapeAttr(column.id)}" ${column === columns[0] ? 'data-type="nobg" aria-disabled="true"' : 'draggable="true"'}>
+    ${column === columns[0] ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
     ${column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
     <span class="b3-menu__label">${escapeHtml(column.name) || "&nbsp;"}</span>
     <svg class="b3-menu__action b3-menu__action--show${column === columns[0] ? " fn__none" : ""}"><use xlink:href="#${hidden ? "iconEye" : "iconEyeoff"}"></use></svg>
@@ -72,6 +93,7 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
             return;
         }
         menu = new Menu("av-relation-fields", () => {
+            clearDrag();
             fields.remove();
             menu = undefined;
             button.setAttribute("aria-expanded", "false");
@@ -83,6 +105,56 @@ export const bindRelationLayout = (root: HTMLElement, databaseID: string, onResi
         positionMenu();
     });
     button.addEventListener("mousedown", event => event.preventDefault());
+    let draggedID: string;
+    let dropTarget: HTMLElement;
+    const clearDrag = () => {
+        fields.querySelectorAll(".dragover__top, .dragover__bottom").forEach(element =>
+            element.classList.remove("dragover__top", "dragover__bottom"));
+        draggedID = undefined;
+        dropTarget = undefined;
+    };
+    fields.addEventListener("dragstart", (event: DragEvent) => {
+        const row = (event.target as HTMLElement).closest<HTMLElement>("[data-column]");
+        if (!row || row.dataset.column === columns[0]?.id) {
+            event.preventDefault();
+            return;
+        }
+        draggedID = row.dataset.column;
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", draggedID);
+        event.stopPropagation();
+    });
+    fields.addEventListener("dragover", (event: DragEvent) => {
+        fields.querySelectorAll(".dragover__top, .dragover__bottom").forEach(element =>
+            element.classList.remove("dragover__top", "dragover__bottom"));
+        dropTarget = undefined;
+        const row = (event.target as HTMLElement).closest<HTMLElement>("[data-column]");
+        if (!draggedID || !row || row.dataset.column === draggedID || row.dataset.column === columns[0]?.id ||
+            layout.hidden.includes(row.dataset.column) !== layout.hidden.includes(draggedID)) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        dropTarget = row;
+        const rect = row.getBoundingClientRect();
+        row.classList.add(event.clientY < rect.top + rect.height / 2 ? "dragover__top" : "dragover__bottom");
+    });
+    fields.addEventListener("drop", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (draggedID && dropTarget) {
+            const order = orderedColumns().map(column => column.id).filter(id => id !== draggedID);
+            const index = order.indexOf(dropTarget.dataset.column) + (dropTarget.classList.contains("dragover__bottom") ? 1 : 0);
+            order.splice(index, 0, draggedID);
+            layout.order = order;
+            apply();
+            save();
+            renderFields();
+            onResize();
+        }
+        clearDrag();
+    });
+    fields.addEventListener("dragend", clearDrag);
     button.addEventListener("keydown", event => {
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();

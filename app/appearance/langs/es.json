@@ -1,4 +1,5 @@
 {
+	"syncConfigNotSaved": "Los cambios no se han guardado; completa los campos obligatorios",
 	"previousDatabaseRow": "Entrada anterior de la base de datos",
 	"nextDatabaseRow": "Siguiente entrada de la base de datos",
 	"dynamicRefTextRefreshRetry": "Tus cambios se han guardado, pero no se ha podido actualizar parte del texto de las referencias. SiYuan lo intentará de nuevo automáticamente.",

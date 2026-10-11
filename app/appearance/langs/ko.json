@@ -1,4 +1,5 @@
 {
+	"syncConfigNotSaved": "변경 사항이 아직 저장되지 않았습니다. 필수 항목을 모두 입력해 주세요",
 	"previousDatabaseRow": "이전 데이터베이스 항목",
 	"nextDatabaseRow": "다음 데이터베이스 항목",
 	"dynamicRefTextRefreshRetry": "편집 내용은 저장되었지만 일부 참조 텍스트를 갱신하지 못했습니다. 자동으로 다시 시도합니다.",

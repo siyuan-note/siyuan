@@ -17,13 +17,21 @@ const setup = (initial: {endpoint?: string, bucket?: string} = {}) => {
     const inputs = Object.fromEntries(Object.keys(s3).map((key) => [key, {
         value: "",
         focus: () => {},
+        attributes: {} as Record<string, string>,
+        setAttribute(name: string, value: string) {this.attributes[name] = value;},
     }]));
+    const errors = Object.fromEntries(Object.keys(s3).map(key => [`sync-${key}-error`, {
+        textContent: "", classList: {toggle() {}},
+    }]));
+    let unsaved = false;
+    const status = {classList: {toggle: (_name: string, hidden: boolean) => { unsaved = !hidden; }}};
     const messages: string[] = [];
     const events: Record<string, (event: unknown) => void> = {};
     let warningHidden = true;
     const warning = {classList: {toggle: (_name: string, hidden: boolean) => { warningHidden = hidden; }}};
     const element = {
-        querySelector: (selector: string) => selector === '[data-type="s3-endpoint-warning"]' ? warning : inputs[selector.slice(1)] || null,
+        querySelector: (selector: string) => selector === '[data-type="s3-endpoint-warning"]' ? warning :
+            selector === '[data-type="sync-config-unsaved"]' ? status : inputs[selector.slice(1)] || errors[selector.slice(1)] || null,
         addEventListener: (name: string, callback: (event: unknown) => void) => { events[name] = callback; },
     };
     const requests: {data: {s3: typeof s3}, resolve: (response: unknown) => void, reject: (error: Error) => void}[] = [];
@@ -54,7 +62,7 @@ const setup = (initial: {endpoint?: string, bucket?: string} = {}) => {
             events.change({target: {matches: () => true}});
         }
     };
-    return {sync, inputs, requests, messages, fill, warningHidden: () => warningHidden,
+    return {sync, inputs, requests, messages, fill, errors, unsaved: () => unsaved, warningHidden: () => warningHidden,
         input: () => events.input({}), change: () => events.change({target: {matches: () => true}})};
 };
 
@@ -113,10 +121,18 @@ test("S3 configuration saves automatically once required fields are complete", a
     await settle();
     assert.equal(ui.messages.length, 0);
     assert.equal(ui.requests.length, 0);
+    assert.equal(ui.unsaved(), true);
+    assert.equal(ui.inputs.endpoint.attributes["aria-invalid"], "true");
+    assert.equal(ui.errors["sync-endpoint-error"].textContent, "Input can not be empty");
     ui.fill();
     await settle();
     assert.equal(ui.requests.length, 1);
     assert.equal(ui.requests[0].data.s3.region, "region");
+    assert.equal(ui.unsaved(), false);
+    ui.inputs.endpoint.value = "";
+    ui.input();
+    assert.equal(ui.unsaved(), true);
+    assert.equal(ui.inputs.endpoint.attributes["aria-invalid"], "true");
 });
 
 test("failed S3 saves retain all inputs and allow retry", async () => {

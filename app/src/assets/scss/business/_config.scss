@@ -165,6 +165,14 @@
   }
 }
 
+@media screen and (max-width: 750px) {
+  .config-sync-field > .fn__flex-1 {
+    flex: none;
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+
 .config {
   &__tab-wrap {
     overflow: hidden;

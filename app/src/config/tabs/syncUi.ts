@@ -89,6 +89,7 @@ type SyncProviderIntroDef = {
 
 type SyncThirdPartyProviderDef = SyncProviderIntroDef & {
     configKey: SyncProviderConfigKey;
+    requiredFields: string[];
     api: string;
     getConfig: () => Config.ISync[SyncProviderConfigKey];
     fields: SyncProviderFieldDef[];
@@ -144,6 +145,7 @@ const SYNC_PROVIDER_DEFS: Record<Config.ISync["provider"], SyncProviderDef> = {
     2: {
         isProviderConfigAllowed: isPaidUser,
         configKey: "s3",
+        requiredFields: ["endpoint", "accessKey", "secretKey", "bucket", "region"],
         api: "/api/sync/setSyncProviderS3",
         getConfig: () => window.siyuan.config.sync.s3,
         genIntro: () => `<div class="b3-label b3-label--inner">
@@ -175,6 +177,7 @@ const SYNC_PROVIDER_DEFS: Record<Config.ISync["provider"], SyncProviderDef> = {
     3: {
         isProviderConfigAllowed: isPaidUser,
         configKey: "webdav",
+        requiredFields: ["endpoint"],
         api: "/api/sync/setSyncProviderWebDAV",
         getConfig: () => window.siyuan.config.sync.webdav,
         genIntro: () => `<div class="b3-label b3-label--inner">
@@ -200,6 +203,7 @@ const SYNC_PROVIDER_DEFS: Record<Config.ISync["provider"], SyncProviderDef> = {
     4: {
         isProviderConfigAllowed: isPaidUser,
         configKey: "local",
+        requiredFields: ["endpoint"],
         api: "/api/sync/setSyncProviderLocal",
         getConfig: () => window.siyuan.config.sync.local,
         genIntro: () => `<div class="b3-label b3-label--inner">
@@ -286,7 +290,7 @@ const renderProviderConfig = (root: Element) => {
             html = def.genUnpaidIntro();
         } else if (isThirdPartySyncProviderDef(def)) {
             const warning = def.configKey === "s3" ? `<div data-type="s3-endpoint-warning" class="b3-label b3-label--inner ft__error fn__none" role="status">${window.siyuan.languages.s3EndpointBucketWarning}</div>` : "";
-            html = `${def.genIntro()}${def.fields.map(genProviderField).join("")}${warning}${genProviderActionButtons(def.configKey)}`;
+            html = `${def.genIntro()}${def.fields.map(genProviderField).join("")}${warning}<div data-type="sync-config-unsaved" class="b3-label b3-label--inner ft__error fn__none" role="status">${window.siyuan.languages.syncConfigNotSaved}</div>${genProviderActionButtons(def.configKey)}`;
         } else {
             html = def.genIntro();
         }
@@ -308,19 +312,20 @@ const genProviderField = (field: SyncProviderFieldDef): string => {
     }
 };
 
-const genProviderFlexInput = (label: string, id: string, attrs = "") => `<div class="b3-label b3-label--inner fn__flex">
-    <div class="fn__flex-center fn__size200">${label}</div>
+const genProviderFlexInput = (label: string, id: string, attrs = "") => `<div class="b3-label b3-label--inner fn__flex config-sync-field">
+    <label for="${id}" class="fn__flex-center fn__size200">${label}</label>
     <div class="fn__space"></div>
-    <input spellcheck="false" id="${id}" class="b3-text-field fn__block"${attrs ? ` ${attrs}` : ""}>
+    <div class="fn__flex-1"><input spellcheck="false" id="${id}" class="b3-text-field fn__block" aria-describedby="sync-${id}-error"${attrs ? ` ${attrs}` : ""}>
+    <div id="sync-${id}-error" class="ft__error fn__none" role="status"></div></div>
 </div>`;
 
-const genProviderFlexPassword = (label: string, id: string) => `<div class="b3-label b3-label--inner fn__flex">
-    <div class="fn__flex-center fn__size200">${label}</div>
+const genProviderFlexPassword = (label: string, id: string) => `<div class="b3-label b3-label--inner fn__flex config-sync-field">
+    <label for="${id}" class="fn__flex-center fn__size200">${label}</label>
     <div class="fn__space"></div>
-    <div class="b3-form__icona fn__block">
-        <input spellcheck="false" id="${id}" type="password" class="b3-text-field b3-form__icona-input">
+    <div class="fn__flex-1"><div class="b3-form__icona fn__block">
+        <input spellcheck="false" id="${id}" type="password" class="b3-text-field b3-form__icona-input" aria-describedby="sync-${id}-error">
         <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
-    </div>
+    </div><div id="sync-${id}-error" class="ft__error fn__none" role="status"></div></div>
 </div>`;
 
 const genProviderFlexSelect = (label: string, id: string, optionsHtml: string) => `<div class="b3-label b3-label--inner fn__flex">
@@ -403,7 +408,12 @@ const bindProviderConfigEvent = (configElement: Element, root: Element) => {
         return;
     }
     syncProviderConfigBoundElements.add(configElement);
-    configElement.addEventListener("input", () => updateS3EndpointWarning(configElement));
+    configElement.addEventListener("input", () => {
+        updateS3EndpointWarning(configElement);
+        if (syncProviderValidationShown.has(configElement)) {
+            validateSyncProviderRequiredFields(configElement, def);
+        }
+    });
     configElement.addEventListener("change", (event: Event) => {
         const target = event.target as HTMLElement;
         if (!target.matches(".b3-text-field, .b3-select")) {
@@ -414,10 +424,31 @@ const bindProviderConfigEvent = (configElement: Element, root: Element) => {
     });
 };
 
+const syncProviderValidationShown = new WeakSet<Element>();
+
+const validateSyncProviderRequiredFields = (configElement: Element, def: SyncThirdPartyProviderDef) => {
+    let valid = true;
+    def.requiredFields.forEach(key => {
+        const input = configElement.querySelector<HTMLInputElement>(`#${key}`);
+        const missing = !input.value.trim();
+        input.setAttribute("aria-invalid", String(missing));
+        const error = configElement.querySelector<HTMLElement>(`#sync-${key}-error`);
+        error.textContent = missing ? window.siyuan.languages._kernel[142] : "";
+        error.classList.toggle("fn__none", !missing);
+        valid &&= !missing;
+    });
+    configElement.querySelector('[data-type="sync-config-unsaved"]').classList.toggle("fn__none", valid);
+    return valid;
+};
+
 const saveSyncProviderConfigValues = (configElement: Element) => {
     const provider = window.siyuan.config.sync.provider;
     const def = SYNC_PROVIDER_DEFS[provider];
     if (!isThirdPartySyncProviderDef(def)) {
+        return;
+    }
+    syncProviderValidationShown.add(configElement);
+    if (!validateSyncProviderRequiredFields(configElement, def)) {
         return;
     }
     const template = def.getConfig();
@@ -434,14 +465,6 @@ const saveSyncProviderConfigValues = (configElement: Element) => {
     }
     const data = readProviderConfigFields(configElement, template);
     const configKey = def.configKey;
-    if (configKey === "s3") {
-        for (const key of ["endpoint", "accessKey", "secretKey", "bucket", "region"]) {
-            const input = configElement.querySelector<HTMLInputElement>(`#${key}`);
-            if (!input.value.trim()) {
-                return;
-            }
-        }
-    }
     // 记录提交时的控件和值，仅回填未被继续编辑的控件，失败时保留输入。
     const fields = def.fields.map((field) => {
         const element = configElement.querySelector<HTMLInputElement | HTMLSelectElement>(`#${field.id}`);

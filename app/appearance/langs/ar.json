@@ -1,4 +1,5 @@
 {
+	"syncConfigNotSaved": "لم يتم حفظ التغييرات، يرجى إكمال الحقول المطلوبة",
 	"previousDatabaseRow": "إدخال قاعدة البيانات السابق",
 	"nextDatabaseRow": "إدخال قاعدة البيانات التالي",
 	"dynamicRefTextRefreshRetry": "تم حفظ تعديلاتك، ولكن تعذر تحديث بعض نصوص المراجع. سيعيد SiYuan المحاولة تلقائيًا.",

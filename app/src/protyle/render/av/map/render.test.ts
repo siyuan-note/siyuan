@@ -12,15 +12,18 @@ import {DOMElement, DOMFixture, requireFixture} from "./testDOM";
 const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?: boolean | Promise<boolean>;
     online?: boolean; protocol?: string; source?: string; failDuringCreate?: boolean; runtime?: () => Promise<unknown>} = {}) => {
     const document = new DOMFixture();
+    const editor = document.createElement("div");
+    editor.className = "protyle-wysiwyg";
+    document.body.append(editor);
     const roots: DOMElement[] = [];
     const block = document.createElement("div");
     block.dataset.avId = "database";
     block.dataset.nodeId = "carrier";
     block.innerHTML = '<div class="av__container"><div class="av__scroll"></div></div>';
-    document.body.append(block);
+    editor.append(block);
     const records = block.querySelector(".av__scroll");
     let root: DOMElement;
-    let lifecycle: {root: DOMElement; destroy: () => void};
+    let lifecycle: {root: DOMElement; destroy: () => void; remount: () => void};
     const languages = new Proxy<Record<string, string>>({mapPageScope: "Map covers ${shown} loaded records of ${total} filtered records",
         mapLoadedCount: "Loaded ${shown}/${total}", mapSkippedCount: "Skipped ${count}",
         mapSkippedLocations: "Skipped locations: ${empty} missing, ${invalid} invalid, ${projection} unsupported projection"},
@@ -41,6 +44,7 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
     const calls: string[] = [];
     const transactions: Array<{perform: IOperation[]; undo: IOperation[]; callback: () => void}> = [];
     const unplaced: Array<{options: Parameters<typeof import("./unplaced").bindMapUnplaced>[0]; destroyed: boolean}> = [];
+    const picking: Array<{points: protocol.AVMapCoordinate[]; destroyed: boolean}> = [];
     let settleTransaction: () => void;
     let transactionPromise = Promise.resolve();
     let refreshes = 0;
@@ -53,7 +57,7 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
         {id: "primary-value", valueType: "block", value: {type: "block", isDetached: true,
             block: {content: "Private title"}}}]}],
     }} as IAV;
-    const protyle = {options: {}, app: {}, notebookId: "notebook"} as IProtyle;
+    const protyle = {options: {}, app: {}, notebookId: "notebook", wysiwyg: {element: editor}} as unknown as IProtyle;
     const destroyMap = () => {
         lifecycle?.destroy();
         lifecycle = undefined;
@@ -86,6 +90,12 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
             const binding = {options, destroyed: false};
             unplaced.push(binding);
             return () => { binding.destroyed = true; };
+        }},
+        "./pointPicking": {bindMapPointPicking: () => {
+            const binding = {points: [] as protocol.AVMapCoordinate[], destroyed: false};
+            picking.push(binding);
+            return {show: (point: protocol.AVMapCoordinate) => binding.points.push(point),
+                destroy: () => { binding.destroyed = true; }};
         }},
         "../openDatabaseRow": {openDatabaseRowByData: (_protyle: unknown, row: unknown) => opened.push(row)},
         "./host": {isAVMapHostEnvironmentSupported: () => options.hostSupported ?? true,
@@ -132,7 +142,14 @@ const setup = (options: {published?: boolean; desktop?: boolean; hostSupported?:
             documentElement: document.documentElement},
         MutationObserver: Observer, ResizeObserver: class {constructor() { assert.fail("Map hosts own their resize observers"); }},
         Lute: {NewNodeID: () => "new-location"}});
-    return {data, protyle, calls, hosts, roots, records, block, opened, openedLinks, events, observers, destroyMap, transactions, context, unplaced,
+    return {data, protyle, calls, hosts, roots, records, block, opened, openedLinks, events, observers, destroyMap, transactions, context, unplaced, picking,
+        remount: () => lifecycle.remount(),
+        moveToOtherEditor: () => {
+            const destination = document.createElement("div");
+            destination.className = "protyle-wysiwyg";
+            document.body.append(destination);
+            destination.append(block);
+        },
         refreshes: () => refreshes,
         completeTransaction: async (success = true) => {
             if (success) transactions[transactions.length - 1].callback();
@@ -224,11 +241,13 @@ test("map summary retains skipped counts when every loaded row lacks a compatibl
     const view = scenario.data.view as IAVTable;
     view.rows[0].cells[0].value.location.latitude = 90;
     await scenario.render();
+    scenario.hosts[0].options.onReady();
     assert.equal(scenario.status(), "mapNoMarkers");
     assert.equal(scenario.control(".av__map-skipped").textContent, "Skipped 1");
     assert.equal(scenario.control(".av__map-summary").getAttribute("aria-label"),
         "Map covers 1 loaded records of 12 filtered records\nSkipped locations: 0 missing, 0 invalid, 1 unsupported projection");
-    assert.deepEqual(scenario.calls, []);
+    assert.deepEqual(scenario.calls, ["/api/map/getRuntime"]);
+    assert.deepEqual(scenario.hosts[0].points, []);
 });
 
 test("map attribution stays inside the control and parent opens only fixed current destinations", async () => {
@@ -253,7 +272,7 @@ test("published maps render a status without inline settings, runtime admission,
     assert.doesNotMatch(scenario.roots[0].innerHTML, /av__map-settings|data-map-setting|data-map-configure|av__map-actions|data-map-fit|data-map-retry/);
 });
 
-test("missing field, unavailable host, offline and unsupported projection maps never request runtime admission", async () => {
+test("missing field, unavailable host, offline and empty readonly maps never request runtime admission", async () => {
     for (const option of [{hostSupported: false}, {online: false}, {}]) {
         const scenario = setup(option);
         if (!Object.keys(option).length) (scenario.data.view as IAVTable).columns = [];
@@ -262,10 +281,32 @@ test("missing field, unavailable host, offline and unsupported projection maps n
         assert.equal(scenario.hosts.length, 0);
     }
     const incompatible = setup();
+    incompatible.protyle.disabled = true;
     (incompatible.data.view as IAVTable).rows[0].cells[0].value.location.latitude = 90;
     await incompatible.render();
     assert.deepEqual(incompatible.calls, []);
     assert.equal(incompatible.status(), "mapNoMarkers");
+});
+
+test("empty editable maps permit first-point picking and stale or disposed callbacks cannot open popovers", async () => {
+    const scenario = setup();
+    (scenario.data.view as IAVTable).rows = [];
+    await scenario.render();
+    const host = scenario.hosts[0];
+    const point = {longitude: 0, latitude: 0};
+    assert.deepEqual(host.points, []);
+    host.options.onPointClick(point, host.revision - 1);
+    host.options.onPointClick(point, host.revision);
+    assert.deepEqual(scenario.picking[0].points, [point]);
+    await scenario.render();
+    host.options.onPointClick(point, host.revision);
+    assert.equal(scenario.picking[0].destroyed, true);
+    assert.equal(scenario.picking[0].points.length, 1);
+    scenario.events.get("offline")();
+    const next = scenario.hosts[1];
+    next.options.onPointClick(point, next.revision);
+    assert.equal(scenario.picking[1].destroyed, true);
+    assert.equal(scenario.picking[1].points.length, 0);
 });
 
 test("deleted and changed-type map fields show a repairable location setup", async () => {
@@ -601,6 +642,54 @@ test("a host that fails synchronously during creation never acquires view observ
     assert.equal(scenario.unplaced[0].destroyed, false);
     scenario.destroyMap();
     assert.equal(scenario.hosts[0].destroys, 1);
+});
+
+test("moving a live map remounts its host and ignores replies from the old host", async () => {
+    const scenario = setup();
+    await scenario.render();
+    const original = scenario.hosts[0];
+    scenario.remount();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(original.destroys, 1);
+    assert.equal(scenario.hosts.length, 2);
+    original.options.onMarkerClick("row", original.revision);
+    original.options.onError("hostUnavailable");
+    assert.equal(scenario.opened.length, 0);
+    assert.equal(scenario.hosts[1].destroyed, false);
+    assert.equal(scenario.unplaced[0].destroyed, true);
+});
+
+test("a moved guest can recover when its disconnect error arrives before the DOM observer", async () => {
+    const scenario = setup();
+    await scenario.render();
+    scenario.hosts[0].options.onError("hostUnavailable");
+    assert.equal(scenario.hosts[0].destroys, 1);
+    scenario.remount();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(scenario.hosts.length, 2);
+    assert.equal(scenario.hosts[1].destroyed, false);
+});
+
+test("cross-editor moves invalidate active and hostless maps before destination transactions rehydrate them", async () => {
+    for (const mode of ["live", "setup", "offline", "pending"]) {
+        let finish: (response: unknown) => void;
+        const scenario = setup({online: mode !== "offline", runtime: mode === "pending" ?
+            () => new Promise(resolve => { finish = resolve; }) : undefined});
+        if (mode === "setup") (scenario.data.view as IAVTable).columns = [];
+        scenario.block.setAttribute("data-render", "true");
+        const rendering = scenario.render();
+        await new Promise(resolve => setImmediate(resolve));
+        scenario.moveToOtherEditor();
+        scenario.remount();
+        if (finish) finish({code: 0, data: {provider: "openfreemap"}});
+        await rendering;
+        assert.equal(scenario.block.getAttribute("data-render"), null);
+        assert.equal(scenario.block.querySelector(".av__map"), null);
+        assert.equal(scenario.hosts.length, mode === "live" ? 1 : 0);
+        assert.ok(scenario.hosts.every(host => host.destroyed));
+        assert.ok(scenario.unplaced.every(binding => binding.destroyed));
+        assert.ok(scenario.picking.every(binding => binding.destroyed));
+    }
 });
 
 test("non-HTTP, both history modes and published views retain their own safe fallbacks", async () => {

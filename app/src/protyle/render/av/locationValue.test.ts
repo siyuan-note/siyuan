@@ -24,22 +24,62 @@ describe("database location values", () => {
         }
     });
     it("keeps ordinary text as names without inference and replaces stale coordinates", () => {
-        for (const text of ["  Office  ", "https://maps.example.com/?lat=31&lon=121", "geo:31,121"]) {
+        for (const text of ["  Office  ", "https://maps.example.com/?lat=31&lon=121", "geo:31,121",
+            "Cafe, 12 Main Street", "Paris, France", "Office; Cafe", "123, Main Street", "Office [WGS84]"]) {
             assert.deepEqual(createAVLocationFromText(text), {
                 name: text.trim(), latitude: null, longitude: null, originalInput: text,
             });
         }
     });
 
-    it("requires the location editor for coordinate-looking or canonical pasted text", () => {
-        for (const source of ["31.2,121.5", "(102.42,25.04)", " (20,30) ", "31,", ",121", "31,121,0", "181,91", "1e-7,-1e-7", "NaN,Infinity", "0,0 [WGS84]",
-            "Office; 0, 0 [GCJ-02]", "Office; 0, 0 [BD-09]"]) {
+    it("accepts latitude-first WGS84 decimal text without swapping coordinates or discarding provenance", () => {
+        for (const [source, name, latitude, longitude] of [
+            ["31.20, 121.40", "", 31.2, 121.4],
+            ["  +31.20, +121.40 [WGS84]  ", "", 31.2, 121.4],
+            ["Home; 0, 0 [WGS84]", "Home", 0, 0],
+            ["  Office; Campus; -90, 180 [WGS84]  ", "Office; Campus", -90, 180],
+            ["90,-180", "", 90, -180],
+            ["+.5,-.25", "", .5, -.25],
+            ["1.,-0", "", 1, -0],
+            ["0.0000001, -0.00000001 [WGS84]", "", 1e-7, -1e-8],
+            ["20,30", "", 20, 30],
+        ] as const) {
             assert.equal(isAVLocationCoordinateInput(source), true, source);
-            assert.throws(() => createAVLocationFromText(source));
+            assert.deepEqual(createAVLocationFromText(source), {name, latitude, longitude, originalInput: source}, source);
+        }
+    });
+
+    it("rejects malformed, ambiguous, nondecimal, out-of-range and non-WGS84 coordinate candidates", () => {
+        for (const source of ["(102.42,25.04)", " (20,30) ", "[20,30]", "(20,30", "20,30)",
+            "31,", ",121", ",", "31,+", "-,121", "31,121,0", "181,91", "91,0", "-90.01,0", "0,180.01", "0,-181",
+            "121.40,31.20", "1e-7,-1e-7", "NaN,Infinity", "0x10,0x20", "31..2,121", "--31,121", "1e,0",
+            "Office; 0, 0", "Office; 31,", "Office; 91, 0 [WGS84]", "; 0, 0 [WGS84]",
+            "Office; 0, 0 [GCJ-02]", "Office; 0, 0 [BD-09]", "0,0 [unknown]", "0,0 [wgs84]",
+            "0,0 [WGS84", "0,0 [WGS84] extra", "0,0 []", "0,0 [GCJ-02; BD-09]",
+            "Office; 0,0 [GCJ-02, BD-09]", "(0,0) [GCJ-02]", `${"9".repeat(400)}, 0`]) {
+            assert.equal(isAVLocationCoordinateInput(source), true, source);
+            assert.throws(() => createAVLocationFromText(source), /Invalid WGS84 location/, source);
         }
         assert.equal(isAVLocationCoordinateInput("Cafe, 12 Main Street"), false);
         assert.equal(isAVLocationCoordinateInput("Paris, France"), false);
         assert.equal(isAVLocationCoordinateInput("Office; Cafe"), false);
+    });
+
+    it("round-trips canonical coordinates with delimiter-containing and coordinate-like names", () => {
+        for (const name of ["", ";", "Office;", "Office; Campus", "20, 30", "Origin; 0, 0 [GCJ-02]", "[WGS84]", "Office\nCampus"]) {
+            const value = {name, latitude: 31.2, longitude: 121.4};
+            const text = getAVLocationText(value);
+            assert.deepEqual(createAVLocationFromText(text), {...value, originalInput: text});
+        }
+    });
+
+    it("preserves long ordinary names with whitespace after a semicolon", () => {
+        for (const separator of [";", ""]) {
+            const name = "Office" + separator + " ".repeat(10000) + "Campus";
+            assert.deepEqual(createAVLocationFromText(name), {
+                name, latitude: null, longitude: null, originalInput: name,
+            });
+        }
     });
 
     it("produces complete replacement payloads for clearing merged backend values", () => {
@@ -106,7 +146,9 @@ describe("database location values", () => {
         assert.equal(getAVLocationDisplayText(location), "Office 30, 20");
         assert.equal(getAVLocationText(location), `Office; 20, 30 [${label}]`);
         assert.deepEqual(location, before);
-        assert.throws(() => createAVLocationFromText(getAVLocationText(location)));
+        assert.deepEqual(createAVLocationFromText(getAVLocationText(location)), {
+            ...location, originalInput: getAVLocationText(location),
+        });
         assert.equal(getAVLocationDisplayText({latitude: 1e-7, longitude: -1e-8}), "-0.00000001, 0.0000001");
         assert.equal(getAVLocationDisplayText({name: " 昆明 ", latitude: 25.04, longitude: 102.71}), "昆明 102.71, 25.04");
         assert.equal(getAVLocationDisplayText({latitude: 0, longitude: 0}), "0, 0");

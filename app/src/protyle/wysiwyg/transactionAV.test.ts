@@ -13,8 +13,8 @@ const compiled = transpileModule(readFileSync("src/protyle/wysiwyg/transaction.t
 const fixture = () => {
     const rendered: Element[] = [];
     const carriers = [
-        {isConnected: true, closest: (): Element => null, getAttribute: () => "NodeAttributeView"},
-        {isConnected: true, closest: (): Element => null, getAttribute: () => "NodeAttributeView"},
+        {isConnected: true, closest: (): Element => null, getAttribute: (name: string) => name === "data-av-type" ? "map" : "NodeAttributeView"},
+        {isConnected: true, closest: (): Element => null, getAttribute: (name: string) => name === "data-av-type" ? "map" : "NodeAttributeView"},
     ];
     let finish: (success: boolean) => void;
     const exports: any = {};
@@ -69,7 +69,9 @@ const fixture = () => {
     const insert = () => exports.transaction(protyle, [{
         action: "insert", id: "carrier", previousID: "paragraph", data: '<div data-type="NodeAttributeView"></div>',
     }]);
-    return {protyle, carriers, rendered, insert, finish: (success: boolean) => finish(success)};
+    const move = () => exports.transaction(protyle, [{action: "move", id: "carrier", previousID: "paragraph"}], undefined,
+        {skipSync: true});
+    return {protyle, carriers, rendered, insert, move, finish: (success: boolean) => finish(success)};
 };
 
 test("本地模板数据库及其副本在插入事务成功后才渲染", async () => {
@@ -90,6 +92,18 @@ test("插入事务失败时不渲染尚未保存的数据库", async () => {
     f.finish(false);
     await waitForPendingTransactions(f.protyle);
     assert.equal(f.rendered.length, 0);
+});
+
+test("moved database carriers rehydrate in the destination only after a successful transaction", async () => {
+    for (const success of [true, false]) {
+        const f = fixture();
+        f.move();
+        await new Promise(resolve => setImmediate(resolve));
+        assert.equal(f.rendered.length, 0);
+        f.finish(success);
+        await waitForPendingTransactions(f.protyle);
+        assert.deepEqual(f.rendered, success ? f.carriers : []);
+    }
 });
 
 test("等待插入事务期间移除的数据库副本不再渲染", async () => {

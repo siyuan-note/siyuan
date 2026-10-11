@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "Elegir en el mapa",
+	"mapPickedPoint": "Ubicación seleccionada",
+	"mapCreateAtPoint": "Crear registro aquí",
 	"syncConfig": "Configuración del servicio de sincronización",
 	"clearSyncConfig": "Borrar configuración",
 	"clearSyncConfigConfirm": "¿Borrar la dirección y las credenciales guardadas de este servicio? Si es el servicio de sincronización actual, también se desactivará la sincronización. No se eliminarán las notas locales ni los datos en la nube.",
@@ -33,7 +36,7 @@
 	"mapOffline": "El mapa está sin conexión. Sus registros siguen disponibles",
 	"mapPublicFallback": "Los mapas no se cargan en páginas publicadas ni en exportaciones",
 	"mapTooManyMarkers": "Esta página tiene más de ${limit} ubicaciones. Use filtros o reduzca el tamaño de página para mostrar el mapa",
-	"locationPasteInEditor": "Introduce la longitud y la latitud por separado en el editor de ubicación y confirma el sistema de coordenadas",
+	"locationPasteInEditor": "Usa latitud, longitud en WGS84 (latitud de -90 a 90; longitud de -180 a 180), o Nombre; latitud, longitud [WGS84]",
 	"location": "Ubicación",
 	"locationName": "Nombre (opcional)",
 	"latitude": "Latitud",

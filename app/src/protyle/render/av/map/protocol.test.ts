@@ -10,6 +10,29 @@ import {getAVMapLockedPolicy} from "./bootstrap";
 
 describe("isolated map protocol", () => {
     const point = {id: "row-1", longitude: 0, latitude: 0};
+    it("enables picking explicitly and shares a bounded coordinate reply whitelist with Electron", () => {
+        const {parseMapCreate, parseMapReply} = require("../../../../../electron/mapHostPolicy");
+        const init = {version: 1, instanceID: "a".repeat(48), type: "init", provider: "openfreemap", theme: "light"};
+        for (const picking of [undefined, false, true]) {
+            const expected = {...init, ...(picking && {picking: true})};
+            assert.deepEqual(parseAVMapCommand({...init, picking}, init.instanceID), expected);
+            assert.deepEqual(parseMapCreate({...init, picking}), expected);
+        }
+        for (const picking of ["true", 1, null, {}]) {
+            assert.equal(parseAVMapCommand({...init, picking}, init.instanceID), undefined);
+            assert.equal(parseMapCreate({...init, picking}), undefined);
+        }
+        const reply = {version: 1, instanceID: init.instanceID, type: "pointClick", revision: 0,
+            longitude: 180, latitude: AV_MAP_MERCATOR_MAX_LATITUDE};
+        for (const parse of [parseAVMapReply, parseMapReply]) {
+            assert.deepEqual(parse({...reply, name: "private", url: "https://private.invalid"}, init.instanceID), reply);
+            for (const invalid of [{longitude: 181}, {latitude: 90}, {latitude: Infinity}, {longitude: NaN},
+                {longitude: "0"}, {latitude: null}, {revision: -1}, {revision: 1.5}, {coordinateSystem: "wgs84"},
+                {coordinateSystem: undefined}, {version: 2}, {instanceID: "foreign"}]) {
+                assert.equal(parse({...reply, ...invalid}, init.instanceID), undefined);
+            }
+        }
+    });
     it("keeps attribution destinations in a fixed official allowlist", () => {
         assert.deepEqual(AV_MAP_ATTRIBUTION_LINKS.openfreemap.map((link) => link.href), [
             "https://openfreemap.org", "https://www.openmaptiles.org/", "https://www.openstreetmap.org/copyright", "https://maplibre.org/",

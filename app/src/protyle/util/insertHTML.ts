@@ -27,7 +27,7 @@ import {
 import {focusByRange, getSelectionOffset, setLastNodeRange} from "./selectionOffsets";
 import {Constants} from "../../constants";
 import {showMessage} from "../../dialog/message";
-import {createAVLocationReplacement, isAVLocationCoordinateInput} from "../render/av/locationValue";
+import {createAVLocationFromText, createAVLocationReplacement} from "../render/av/locationValue";
 import {highlightRender} from "../render/highlightRender";
 import {scrollCenter} from "../../util/highlightById";
 import {updateAttrViewCellAnimation, updateAVName} from "../render/av/action";
@@ -360,7 +360,7 @@ const pasteAVMatrix = async (options: {
         return;
     }
     const availableColumns = visibleColumns.slice(startColumnIndex);
-    const requiresLocationEditor = availableColumns.some((column, index) => column.type === "location" &&
+    const invalidLocationInput = availableColumns.some((column, index) => column.type === "location" &&
         !(options.header && inferableKeyIDs.has(column.id)) && options.values.some(row => {
             const value = row[index];
             if (typeof value === "undefined") {
@@ -368,9 +368,14 @@ const pasteAVMatrix = async (options: {
             }
             const pasteValue = getAVPasteValueForType(value, "location");
             const text = typeof pasteValue === "string" ? pasteValue : pasteValue.type === "text" ? pasteValue.text?.content : "";
-            return isAVLocationCoordinateInput(text || "");
+            try {
+                createAVLocationFromText(text || "");
+                return false;
+            } catch {
+                return true;
+            }
         }));
-    if (requiresLocationEditor) {
+    if (invalidLocationInput) {
         showMessage(window.siyuan.languages.locationPasteInEditor, 6000, "error");
         return;
     }

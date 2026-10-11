@@ -57,10 +57,13 @@ export const AV_MAP_ATTRIBUTION_LINKS: Readonly<Record<AVMapProvider,
 export const isAVMapAttributionLink = (value: unknown): value is AVMapAttributionLink =>
     AV_MAP_ATTRIBUTION_LINKS.openfreemap.some(link => link.id === value);
 
-export interface AVMapPoint {
-    id: string;
+export interface AVMapCoordinate {
     longitude: number;
     latitude: number;
+}
+
+export interface AVMapPoint extends AVMapCoordinate {
+    id: string;
 }
 
 interface AVMapEnvelope {
@@ -72,6 +75,7 @@ export interface AVMapInit extends AVMapEnvelope {
     type: "init";
     provider: AVMapProvider;
     theme: AVMapTheme;
+    picking?: true;
 }
 
 export type AVMapCommand = AVMapInit |
@@ -83,6 +87,7 @@ export type AVMapCommand = AVMapInit |
 export type AVMapReply = (AVMapEnvelope & {type: "ready"}) |
     (AVMapEnvelope & {type: "attributionClick"; link: AVMapAttributionLink}) |
     (AVMapEnvelope & {type: "markerClick"; id: string; revision: number}) |
+    (AVMapEnvelope & {type: "pointClick"; revision: number} & AVMapCoordinate) |
     (AVMapEnvelope & {type: "error"; code: AVMapErrorCode});
 
 export const isAVMapProvider = (value: unknown): value is AVMapProvider =>
@@ -124,6 +129,14 @@ export const sanitizeAVMapPoints = (input: unknown): AVMapPoint[] => {
 const asRecord = (value: unknown): Record<string, unknown> | undefined =>
     value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
 
+export const parseAVMapCoordinate = (value: unknown): AVMapCoordinate | undefined => {
+    const point = asRecord(value);
+    if (!point || "coordinateSystem" in point || typeof point.longitude !== "number" ||
+        !Number.isFinite(point.longitude) || Math.abs(point.longitude) > 180 ||
+        typeof point.latitude !== "number" || !isAVMapProjectionSupported(point.latitude)) return;
+    return {longitude: point.longitude, latitude: point.latitude};
+};
+
 const parseAVMapViewport = (value: unknown): AVMapViewport | undefined => {
     const rect = asRecord(value);
     if (!rect || ![rect.x, rect.y, rect.width, rect.height].every(number =>
@@ -140,10 +153,12 @@ export const parseAVMapCommand = (value: unknown, instanceID: string, provider?:
     const envelope = {version: AV_MAP_PROTOCOL_VERSION, instanceID} as const;
     switch (input.type) {
         case "init":
-            if (!isAVMapProvider(input.provider) || !isAVMapTheme(input.theme)) {
+            if (!isAVMapProvider(input.provider) || !isAVMapTheme(input.theme) ||
+                input.picking !== undefined && typeof input.picking !== "boolean") {
                 return;
             }
-            return {...envelope, type: "init", provider: input.provider, theme: input.theme};
+            return {...envelope, type: "init", provider: input.provider, theme: input.theme,
+                ...(input.picking === true && {picking: true})};
         case "setPoints":
             if (!provider || !isAVMapRevision(input.revision) || !Array.isArray(input.points)) {
                 return;
@@ -176,6 +191,10 @@ export const parseAVMapReply = (value: unknown, instanceID: string): AVMapReply 
     }
     if (input.type === "markerClick" && isAVMapIdentifier(input.id) && isAVMapRevision(input.revision)) {
         return {...envelope, type: "markerClick", id: input.id, revision: input.revision};
+    }
+    if (input.type === "pointClick" && isAVMapRevision(input.revision)) {
+        const point = parseAVMapCoordinate(input);
+        return point ? {...envelope, type: "pointClick", revision: input.revision, ...point} : undefined;
     }
     if (input.type === "attributionClick" && isAVMapAttributionLink(input.link)) {
         return {...envelope, type: "attributionClick", link: input.link};

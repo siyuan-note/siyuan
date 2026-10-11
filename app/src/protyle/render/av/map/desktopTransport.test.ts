@@ -32,7 +32,7 @@ const load = (ipc: unknown, browser = false, warnings: unknown[][] = []) => {
     return result;
 };
 
-const fixture = (warnings: unknown[][] = [], origin = "http://127.0.0.1:6806") => {
+const fixture = (warnings: unknown[][] = [], origin = "http://127.0.0.1:6806", picking = false) => {
     const calls: Array<[string, any]> = [];
     const listeners = new Map<string, (...args: any[]) => void>();
     const domListeners = new Map<string, () => void>();
@@ -85,15 +85,16 @@ const fixture = (warnings: unknown[][] = [], origin = "http://127.0.0.1:6806") =
     const container: any = {ownerDocument: doc, isConnected: true, parentElement: null, closest: (): HTMLElement | null => null,
         clientWidth: 400, clientHeight: 300, append: (guest: unknown) => attachments.push(guest),
         getClientRects: () => [rect], getBoundingClientRect: () => rect, contains: (target: unknown) => target === container || attachments.includes(target)};
-    const errors: string[] = [], clicks: unknown[] = [], attributionClicks: string[] = [];
+    const errors: string[] = [], clicks: unknown[] = [], attributionClicks: string[] = [], pointClicks: unknown[] = [];
     let ready = 0;
     const api = load(ipc, false, warnings);
     const host = api.createDesktopAVMapHost(container, {provider: "openfreemap", theme: "light",
         onError: (value: string) => errors.push(value),
         onAttributionClick: (link: string) => attributionClicks.push(link),
+        ...(picking && {onPointClick: (...args: unknown[]) => pointClicks.push(args)}),
         onMarkerClick: (...args: unknown[]) => clicks.push(args), onReady: () => ready++});
     const instanceID = calls[0][1].instanceID;
-    return {host, calls, listeners, domListeners, frames, timers, errors, clicks, attributionClicks, doc, container, rect, guests, attachments,
+    return {host, calls, listeners, domListeners, frames, timers, errors, clicks, attributionClicks, pointClicks, doc, container, rect, guests, attachments,
         api, instanceID,
         ready: () => ready,
         reply: (value: object) => listeners.get("siyuan-map-reply")?.({}, {version: 1, instanceID, ...value}),
@@ -115,6 +116,36 @@ const fixture = (warnings: unknown[][] = [], origin = "http://127.0.0.1:6806") =
 };
 
 describe("desktop map transport", () => {
+    it("opts in once and passes only current visible coordinate selections to the parent", async () => {
+        const oldResize = globalThis.ResizeObserver;
+        globalThis.ResizeObserver = class { observe() {} disconnect() {} } as any;
+        try {
+            for (const picking of [false, true]) {
+                const f = fixture([], "http://127.0.0.1:6806", picking);
+                assert.equal(f.calls[0][1].picking, picking ? true : undefined);
+                f.host.setPoints([], 1);
+                await f.created();
+                const point = {type: "pointClick", longitude: 121.4, latitude: 31.2, revision: 1};
+                f.reply(point);
+                assert.deepEqual(f.pointClicks, []);
+                f.reply({type: "ready"});
+                f.reply({...point, revision: 0});
+                f.reply({...point, latitude: 90});
+                f.doc.hidden = true; f.reply(point); f.doc.hidden = false;
+                f.container.isConnected = false; f.reply(point); f.container.isConnected = true;
+                assert.deepEqual(f.pointClicks, []);
+                f.reply({...point, name: "private"});
+                assert.deepEqual(f.pointClicks, picking ? [[{longitude: 121.4, latitude: 31.2}, 1]] : []);
+                f.host.setPoints([], 2);
+                f.reply(point);
+                f.host.destroy();
+                f.reply({...point, revision: 2});
+                assert.equal(f.pointClicks.length, picking ? 1 : 0);
+            }
+        } finally {
+            globalThis.ResizeObserver = oldResize;
+        }
+    });
     it("accepts only the fixed owner-origin map document and ephemeral webview partition", () => {
         const api = load({});
         const instanceID = "a".repeat(48);

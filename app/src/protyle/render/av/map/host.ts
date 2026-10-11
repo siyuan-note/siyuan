@@ -1,5 +1,5 @@
 import {
-    AV_MAP_PROTOCOL_VERSION, AVMapAttributionLink, AVMapCommand, AVMapErrorCode, AVMapPoint, AVMapProvider, AVMapTheme, AVMapVisibility,
+    AV_MAP_PROTOCOL_VERSION, AVMapAttributionLink, AVMapCommand, AVMapCoordinate, AVMapErrorCode, AVMapPoint, AVMapProvider, AVMapTheme, AVMapVisibility,
     isAVMapBootstrapMessage, isAVMapLoadErrorCode, isAVMapProvider, isAVMapRevision, isAVMapTheme, parseAVMapReply,
     sanitizeAVMapPoints,
 } from "./protocol";
@@ -12,6 +12,7 @@ export interface AVMapHostOptions {
     title?: string;
     onReady?: () => void;
     onMarkerClick: (id: string, revision: number) => void;
+    onPointClick?: (point: AVMapCoordinate, revision: number) => void;
     onError: (code: AVMapErrorCode) => void;
     onAttributionClick?: (link: AVMapAttributionLink) => void;
 }
@@ -189,6 +190,10 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
                 tickVisibility();
             } else if (reply?.type === "markerClick" && ready && reply.revision === revision && ids.has(reply.id)) {
                 options.onMarkerClick(reply.id, reply.revision);
+            } else if (reply?.type === "pointClick" && ready && reply.revision === revision && revision >= 0 &&
+                options.onPointClick && visible && getAVMapVisibility(container).visible &&
+                (scope.navigator as Navigator & {userActivation?: {isActive: boolean}}).userActivation?.isActive) {
+                options.onPointClick({longitude: reply.longitude, latitude: reply.latitude}, reply.revision);
             } else if (reply?.type === "attributionClick" && ready && visible &&
                 getAVMapVisibility(container).visible &&
                 (scope.navigator as Navigator & {userActivation?: {isActive: boolean}}).userActivation?.isActive) {
@@ -200,7 +205,8 @@ export const createAVMapHost = (container: HTMLElement, options: AVMapHostOption
         port.start();
         iframe.contentWindow.postMessage({...envelope(), type: "connect", nonce}, scope.location.origin, [channel.port2]);
         // 端口建立后清除全局监听；地图初始化期间不再接受窗口消息。
-        send({...envelope(), type: "init", provider: options.provider, theme});
+        send({...envelope(), type: "init", provider: options.provider, theme,
+            ...(options.onPointClick && {picking: true})});
     };
 
     const host: AVMapHost = {

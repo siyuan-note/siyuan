@@ -1,7 +1,7 @@
-const decimalCoordinate = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/;
-const coordinateInputNumber = "[+-]?(?:(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:e[+-]?\\d+)?|Infinity|NaN)";
-const coordinateInput = new RegExp(`^${coordinateInputNumber}$`, "i");
-const canonicalInput = new RegExp(`(?:^|;\\s*)${coordinateInputNumber}\\s*,\\s*${coordinateInputNumber}\\s*\\[[^\\]]+\\]\\s*$`, "i");
+const decimalCoordinateNumber = "[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)";
+const decimalCoordinate = new RegExp(`^${decimalCoordinateNumber}$`);
+const coordinateInput = /^[+-]*(?:[\d.]+(?:e[+-]*\d*)?|Infinity|NaN|0[xob][\da-f]*)?$/i;
+const canonicalInput = new RegExp(`^(?:([\\s\\S]+);\\s*)?(${decimalCoordinateNumber})\\s*,\\s*(${decimalCoordinateNumber})(\\s*\\[WGS84\\])?$`);
 const locationFields = new Set(["name", "latitude", "longitude", "originalInput"]);
 
 const isLocationObject = (location: unknown): location is IAVCellLocationValue =>
@@ -80,17 +80,31 @@ export const createAVLocationReplacement = (location?: IAVCellLocationValue): IA
 };
 
 export const isAVLocationCoordinateInput = (text: string) => {
-    const trimmed = text.trim();
-    const unwrapped = trimmed.startsWith("(") && trimmed.endsWith(")") ? trimmed.slice(1, -1) : trimmed;
-    const parts = unwrapped.split(",").map(part => part.trim());
-    return (parts.length > 1 && parts.some(part => part !== "") &&
-        parts.every(part => part === "" || coordinateInput.test(part))) || canonicalInput.test(text);
+    // 名称可以包含分号；坐标候选采用更宽的语法，避免将格式错误或其他坐标系保存成名称。
+    const isCoordinateSuffix = (value: string) => {
+        const suffix = value.slice(value.lastIndexOf(";") + 1).trim();
+        const unwrapped = suffix.replace(/^[([]/, "");
+        const coordinates = unwrapped.replace(/\[[\s\S]*$/, "").trim().replace(/[)\]]$/, "");
+        const parts = coordinates.split(",").map(part => part.trim());
+        return parts.length > 1 && parts.every(part => coordinateInput.test(part));
+    };
+    // 无效坐标系标签中的分号、逗号也不应被识别为名称或另一组坐标。
+    return isCoordinateSuffix(text) || isCoordinateSuffix(text.replace(/\[[^\]]*(?:\]|$)/g, "["));
 };
 
-// 普通粘贴只记录地点名称；坐标必须在编辑器中按具名字段输入。
+// 文本交换固定为纬度、经度；只接受十进制 WGS84，不推断顺序或转换坐标系。
 export const createAVLocationFromText = (text: string): IAVCellLocationValue => {
+    const coordinates = canonicalInput.exec(text.trim());
+    if (coordinates && (coordinates[1] === undefined || (coordinates[1].trim() && coordinates[4]))) {
+        return createAVLocationReplacement({
+            name: coordinates[1]?.trim() || "",
+            latitude: Number(coordinates[2]),
+            longitude: Number(coordinates[3]),
+            originalInput: text,
+        });
+    }
     if (isAVLocationCoordinateInput(text)) {
-        throw new Error("Location coordinates require explicit latitude, longitude input");
+        throw new Error("Invalid WGS84 location coordinate text");
     }
     return createAVLocationReplacement({name: text.trim(), originalInput: text});
 };

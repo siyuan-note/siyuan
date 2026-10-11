@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "Pick on map",
+	"mapPickedPoint": "Selected location",
+	"mapCreateAtPoint": "Create record here",
 	"syncConfig": "Sync service configuration",
 	"clearSyncConfig": "Clear configuration",
 	"clearSyncConfigConfirm": "Clear this service's saved address and credentials? If it is the current sync service, sync will also be disabled. Local notes and cloud data will not be deleted.",
@@ -33,7 +36,7 @@
 	"mapOffline": "Map is offline. Your records are still available",
 	"mapPublicFallback": "Maps are not loaded in published pages or exports",
 	"mapTooManyMarkers": "This page has more than ${limit} locations. Use filters or a smaller page size to display the map",
-	"locationPasteInEditor": "Enter longitude and latitude separately in the location editor and confirm the coordinate system",
+	"locationPasteInEditor": "Use WGS84 latitude, longitude (latitude -90 to 90; longitude -180 to 180), or Name; latitude, longitude [WGS84]",
 	"location": "Location",
 	"locationName": "Name (optional)",
 	"latitude": "Latitude",

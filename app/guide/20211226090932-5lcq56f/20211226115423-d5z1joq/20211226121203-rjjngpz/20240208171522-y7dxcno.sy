@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261010233500"
+		"updated": "20261011093258"
 	},
 	"Children": [
 		{
@@ -74,7 +74,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009034010-5oq6h7a",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
@@ -102,12 +102,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-ue87c6m",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "請在經度和緯度輸入框中分別填寫座標，例如經度 116.4074、緯度 39.9042。僅修改名稱時，保留的來源文字維持不變；手動修改座標會清除來源文字。"
+					"Data": "在經度和緯度輸入框中分別填寫座標，例如經度 116.4074、緯度 39.9042。也可點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "地圖選點"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開啟位置編輯器內嵌的地圖。點擊地圖會填入草稿座標，再點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 才會套用。僅修改名稱時，保留的來源文字維持不變；手動修改座標或地圖選點會清除來源文字。地圖無法使用時，仍可手動填寫座標。"
 				}
 			]
 		},
@@ -116,12 +134,66 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-g7jsd2p",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "點擊「保存」套用修改，點擊「取消」放棄修改，「清空」會移除位置值。文字過濾和排序使用名稱、座標及固定 WGS84 標記組合後的文字。此欄位不呼叫外部位置服務。應用程式內依經度、緯度順序顯示；純文字複製和匯出使用緯度、經度順序。資料庫內的結構化複製保留經緯度各自的具名欄位值。"
+					"Data": "點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 套用修改，點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "取消"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 放棄修改，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清空"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 會移除位置值。文字過濾和排序使用名稱、座標及固定 WGS84 標記組合後的文字。應用程式內依經度、緯度順序顯示；純文字複製和匯出使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "名稱; 緯度, 經度 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 格式，未填寫名稱時省略名稱及分號。可將該文字或 WGS84 的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "緯度, 經度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 座標對貼上至位置儲存格。例如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "北京; 39.9042, 116.4074 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 同時包含名稱和座標。資料庫內的結構化複製保留經緯度各自的具名欄位值。"
 				}
 			]
 		},
@@ -3921,7 +3993,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009050034-7n1yzkx",
-				"updated": "20261010233500"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
@@ -3977,12 +4049,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-3r0lsdq",
-				"updated": "20261009050034"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "篩選和排序同樣作用於地圖。標記只代表已載入的記錄，不代表整個資料庫；介面會說明已載入範圍及跳過的位置數量。標記過多時請縮小分頁或使用篩選。點擊標記開啟對應記錄，點擊地圖不會儲存座標"
+					"Data": "篩選和排序同樣作用於地圖。標記只代表已載入的記錄，不代表整個資料庫；介面會說明已載入範圍及跳過的位置數量。標記過多時請縮小分頁或使用篩選。點擊標記開啟對應記錄。點擊地圖空白處會彈出所選點的 WGS84 座標，可點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "複製"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 複製座標；在可編輯檢視中，還可選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "在此建立項目"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，建立項目並將該點寫入檢視選定的位置欄位。僅點擊地圖不會變更任何記錄。"
 				}
 			]
 		},
@@ -4005,12 +4095,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-8jfc6yh",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "宿主配色跟隨應用程式主題，底圖保留預設樣式。地圖透過隔離的 Web 頁面執行；桌面客戶端使用獨立的安全宿主，行動客戶端需搭配限制原生橋和導覽僅用於可信主文件的外殼。無法建立隔離邊界時不載入地圖。桌面地圖隨頁面捲動並裁剪置頂分頁列覆蓋的區域，選單或對話方塊遮擋時可能暫時隱藏。離線、WebGL 不相容、地圖載入失敗或啟用鑑權繞過模式時，可切換到表格檢視存取記錄。本功能不提供地址搜尋、地理編碼、路線規劃或點擊地圖儲存位置。"
+					"Data": "宿主配色跟隨應用程式主題，底圖保留預設樣式。地圖透過隔離的 Web 頁面執行；桌面客戶端使用獨立的安全宿主，行動客戶端需搭配限制原生橋和導覽僅用於可信主文件的外殼。無法建立隔離邊界時不載入地圖。桌面地圖隨頁面捲動並裁剪置頂分頁列覆蓋的區域，選單或對話方塊遮擋時可能暫時隱藏。離線、WebGL 不相容、地圖載入失敗或啟用鑑權繞過模式時，可切換到表格檢視存取記錄。本功能不提供地址搜尋、地理編碼、路線規劃或座標轉換。"
 				}
 			]
 		},

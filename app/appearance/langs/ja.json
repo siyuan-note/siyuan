@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "地図で選択",
+	"mapPickedPoint": "選択した位置",
+	"mapCreateAtPoint": "ここに項目を作成",
 	"syncConfig": "同期サービスの設定",
 	"clearSyncConfig": "設定を消去",
 	"clearSyncConfigConfirm": "このサービスの保存済みアドレスと認証情報を消去しますか？現在の同期サービスの場合は同期も無効になります。ローカルのノートとクラウドのデータは削除されません。",
@@ -33,7 +36,7 @@
 	"mapOffline": "地図はオフラインです。レコードは引き続き利用できます",
 	"mapPublicFallback": "公開ページやエクスポートでは地図を読み込みません",
 	"mapTooManyMarkers": "このページには ${limit} 件を超える位置があります。フィルターを使用するか、ページあたりの件数を減らして地図を表示してください",
-	"locationPasteInEditor": "位置エディターで経度と緯度を別々に入力し、座標系を確認してください",
+	"locationPasteInEditor": "WGS84 の緯度, 経度（緯度は -90 から 90、経度は -180 から 180）、または 名前; 緯度, 経度 [WGS84] の形式で入力してください",
 	"location": "位置",
 	"locationName": "名前（任意）",
 	"latitude": "緯度",

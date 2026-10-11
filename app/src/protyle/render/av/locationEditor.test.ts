@@ -19,6 +19,8 @@ class Control {
     classes = new Set<string>();
     classList = {
         toggle: (name: string, enabled: boolean) => enabled ? this.classes.add(name) : this.classes.delete(name),
+        add: (name: string) => this.classes.add(name),
+        remove: (name: string) => this.classes.delete(name),
     };
     focused = false;
     focus() {
@@ -29,7 +31,7 @@ class Control {
         this.listeners.set(name, handler);
     }
     dispatch(name: string, event = {}) {
-        this.listeners.get(name)?.(event);
+        this.listeners.get(name)?.({currentTarget: this, ...event});
     }
 }
 
@@ -42,9 +44,13 @@ const createEditor = (options: {
 } = {}) => {
     const fields = Object.fromEntries(["name", "latitude", "longitude"]
         .map(name => [name, new Control()]));
-    const buttons = Object.fromEntries(["save", "clear", "cancel"].map(name => [name, new Control()]));
+    const buttons = Object.fromEntries(["save", "clear", "cancel", "pick"].map(name => [name, new Control()]));
     const container = new Control();
     const error = new Control();
+    const mapCanvas = new Control();
+    const mapStatus = new Control();
+    const pickers: Array<{options: Parameters<typeof import("./map/locationPicker").createAVLocationPicker>[0];
+        points: unknown[]; destroyed: boolean}> = [];
     const lifecycle: string[] = [];
     const saved: IAVCellLocationValue[] = [];
     const owner = {isConnected: true};
@@ -57,6 +63,8 @@ const createEditor = (options: {
             if (selector === '[data-role="error"]') {
                 return error;
             }
+            if (selector === '[data-role="map-canvas"]') return mapCanvas;
+            if (selector === '[data-role="map-status"]') return mapStatus;
             const field = selector.match(/data-field="(\w+)"/);
             const action = selector.match(/data-action="(\w+)"/);
             return field ? fields[field[1]] : buttons[action[1]];
@@ -95,6 +103,17 @@ const createEditor = (options: {
         }},
         "./locationValue": locationValue,
         "./cellEditor": {AV_CELL_EDITOR_CLOSE_EVENT: "siyuan-av-cell-editor-close"},
+        "./map/locationPicker": {createAVLocationPicker: (options: typeof pickers[number]["options"]) => {
+            const picker = {options, points: [] as unknown[], destroyed: false};
+            pickers.push(picker);
+            return {
+                setPoint: (point: unknown) => picker.points.push(point),
+                destroy: () => {
+                    picker.destroyed = true;
+                    lifecycle.push("destroy-picker");
+                },
+            };
+        }},
     };
     runInNewContext(compiled, {
         exports: methods,
@@ -128,7 +147,7 @@ const createEditor = (options: {
         onDestroy: () => lifecycle.push("on-destroy"),
     });
     return {
-        fields, buttons, error, root, lifecycle, saved, owner, dialog, markup,
+        fields, buttons, error, root, lifecycle, saved, owner, dialog, markup, pickers, mapCanvas, mapStatus,
         ownerChanged: () => ownerChanged(),
         closeSheet: () => closeSheet(),
         settle: () => new Promise<void>(resolve => setImmediate(resolve)),
@@ -375,6 +394,118 @@ describe("database location editor", () => {
         await editor.closeSheet();
         assert.equal(editor.saved.length, 0);
         assert.equal(editor.lifecycle.includes("blur"), true);
+    });
+
+    it("opens one lazy embedded picker and commits its latest draft only on Save on desktop and mobile", async () => {
+        for (const mobile of [false, true]) {
+            const editor = createEditor({mobile, value: {name: "Office", latitude: 20, longitude: 30,
+                originalInput: "Legacy source"}});
+            assert.equal(editor.pickers.length, 0);
+            editor.buttons.pick.dispatch("click");
+            editor.buttons.pick.dispatch("click");
+            assert.equal(editor.pickers.length, 1);
+            const picker = editor.pickers[0];
+            assert.equal(picker.options.canvas, editor.mapCanvas);
+            assert.deepEqual(JSON.parse(JSON.stringify(picker.options.point)), {longitude: 30, latitude: 20});
+            assert.equal(picker.options.onPick({longitude: 110, latitude: 40}), true);
+            assert.equal(picker.options.onPick({longitude: -0.0000001, latitude: 0}), true);
+            assert.equal(editor.fields.longitude.value, "-0.0000001");
+            assert.equal(editor.fields.latitude.value, "0");
+            assert.equal(editor.fields.name.value, "Office");
+            assert.equal(editor.saved.length, 0);
+            editor.buttons.save.dispatch("click");
+            await editor.settle();
+            assert.deepEqual(editor.saved, [{name: "Office", longitude: -0.0000001, latitude: 0, originalInput: ""}]);
+            assert.equal(picker.destroyed, true);
+            assert.equal(editor.lifecycle.filter(item => item === "destroy-picker").length, 1);
+        }
+    });
+
+    it("updates the same picker with manual coordinate drafts without committing", () => {
+        const editor = createEditor();
+        editor.buttons.pick.dispatch("click");
+        editor.fields.longitude.value = "102.42";
+        editor.fields.latitude.value = "25.04";
+        editor.fields.latitude.dispatch("input");
+        assert.deepEqual(JSON.parse(JSON.stringify(editor.pickers[0].points)), [{longitude: 102.42, latitude: 25.04}]);
+        assert.equal(editor.saved.length, 0);
+        editor.fields.latitude.value = "invalid";
+        editor.fields.latitude.dispatch("input");
+        assert.equal(editor.pickers[0].points.length, 2);
+        assert.equal(editor.fields.latitude.value, "invalid");
+    });
+
+    it("does not change the saved value or provenance merely by opening the map", async () => {
+        const editor = createEditor({value: {name: "Office", longitude: 30, latitude: 20, originalInput: "Legacy source"}});
+        editor.buttons.pick.dispatch("click");
+        editor.buttons.save.dispatch("click");
+        await editor.settle();
+        assert.equal(editor.saved.length, 0);
+        assert.equal(editor.pickers[0].destroyed, true);
+    });
+
+    it("keeps manual fields and Save available while an opened picker is loading or unavailable", async () => {
+        const editor = createEditor();
+        editor.buttons.pick.dispatch("click");
+        editor.mapStatus.textContent = "mapLoadError";
+        assert.equal(editor.buttons.save.disabled, false);
+        assert.equal(editor.fields.latitude.disabled, false);
+        assert.equal(editor.fields.longitude.disabled, false);
+        editor.fields.latitude.value = "20";
+        editor.fields.longitude.value = "30";
+        editor.fields.latitude.dispatch("input");
+        editor.buttons.save.dispatch("click");
+        await editor.settle();
+        assert.deepEqual(editor.saved, [{name: "", longitude: 30, latitude: 20, originalInput: ""}]);
+    });
+
+    it("discards picked coordinates and disposes the picker on Cancel, Escape, navigation and mobile dismissal", async () => {
+        for (const action of ["cancel", "escape", "navigation", "sheet", "disconnect"]) {
+            const editor = createEditor({mobile: action === "sheet"});
+            editor.buttons.pick.dispatch("click");
+            const picker = editor.pickers[0];
+            picker.options.onPick({longitude: 110, latitude: 40});
+            if (action === "escape") editor.key("Escape");
+            else if (action === "navigation") editor.root.dispatch("siyuan-av-cell-editor-close");
+            else if (action === "sheet") await editor.closeSheet();
+            else if (action === "disconnect") {
+                editor.owner.isConnected = false;
+                editor.ownerChanged();
+            } else editor.buttons.cancel.dispatch("click");
+            assert.equal(picker.options.isCurrent(), false);
+            assert.equal(picker.options.onPick({longitude: 111, latitude: 41}), false);
+            editor.buttons.save.dispatch("click");
+            await editor.settle();
+            assert.equal(editor.saved.length, 0);
+            assert.equal(editor.fields.longitude.value, "110");
+            assert.equal(editor.lifecycle.filter(item => item === "destroy-picker").length, 1);
+        }
+    });
+
+    it("rejects stale owner identity during map callbacks and does not open a picker for a stale owner", () => {
+        let valid = true;
+        const editor = createEditor({isValid: () => valid});
+        editor.buttons.pick.dispatch("click");
+        valid = false;
+        assert.equal(editor.pickers[0].options.isCurrent(), false);
+        assert.equal(editor.pickers[0].destroyed, true);
+        assert.equal(editor.saved.length, 0);
+        const stale = createEditor({isValid: () => false});
+        stale.buttons.pick.dispatch("click");
+        assert.equal(stale.pickers.length, 0);
+    });
+
+    it("ignores map clicks while saving and preserves the committed draft", async () => {
+        let complete: () => void;
+        const editor = createEditor({save: () => new Promise<void>(resolve => complete = resolve)});
+        editor.buttons.pick.dispatch("click");
+        editor.pickers[0].options.onPick({longitude: 110, latitude: 40});
+        editor.buttons.save.dispatch("click");
+        assert.equal(editor.pickers[0].options.onPick({longitude: 111, latitude: 41}), false);
+        assert.equal(editor.fields.longitude.value, "110");
+        assert.deepEqual(editor.saved, [{name: "", longitude: 110, latitude: 40, originalInput: ""}]);
+        complete();
+        await editor.settle();
     });
 
 });

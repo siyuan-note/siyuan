@@ -12,6 +12,7 @@ import {createDesktopAVMapHost, isDesktopAVMapHostSupported} from "./desktopTran
 import type {AVMapHost} from "./host";
 import {AV_MAP_ATTRIBUTION_LINKS, AV_MAP_MAX_POINTS} from "./protocol";
 import {bindMapUnplaced} from "./unplaced";
+import {bindMapPointPicking} from "./pointPicking";
 
 const getTheme = () => document.documentElement.getAttribute("data-theme-mode") === "dark" ? "dark" : "light";
 
@@ -119,8 +120,10 @@ ${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class
     const status = root.querySelector<HTMLElement>(".av__map-status");
     const canvas = root.querySelector<HTMLElement>(".av__map-canvas");
     let host: AVMapHost;
+    let hostMounted = false;
     let themeObserver: MutationObserver;
     let destroyUnplaced: () => void;
+    let picking: ReturnType<typeof bindMapPointPicking>;
     let revision = 0;
     const offline = () => fallback(window.siyuan.languages.mapOffline);
     const releaseHost = () => {
@@ -130,12 +133,26 @@ ${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class
         themeObserver?.disconnect();
         themeObserver = undefined;
         window.removeEventListener("offline", offline);
+        picking?.destroy();
+        picking = undefined;
         previousHost?.destroy();
     };
-    const current = registerMap(blockElement, {root, destroy: () => {
+    const current = registerMap(blockElement, {root, remount: () => {
+        const ownerElement = blockElement.closest(".protyle-wysiwyg");
+        if (ownerElement !== protyle.wysiwyg.element) {
+            // 跨编辑器移动后由目标事务重新读取上下文，旧请求和菜单不得沿用源笔记本。
+            destroyMap(blockElement);
+            root.remove();
+            blockElement.removeAttribute("data-render");
+        } else if (hostMounted) {
+            void renderMap(blockElement, protyle, data);
+        }
+    }, destroy: () => {
         releaseHost();
         destroyUnplaced?.();
         destroyUnplaced = undefined;
+        picking?.destroy();
+        picking = undefined;
     }});
     const fallback = (message: string) => {
         if (!current()) {
@@ -181,7 +198,7 @@ ${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class
             fallback(window.siyuan.languages.mapUnsupportedClient);
             return;
         }
-        if (!points.length) {
+        if (!points.length && !canEditMapSettings(protyle)) {
             fallback(window.siyuan.languages.mapNoMarkers);
             return;
         }
@@ -206,7 +223,9 @@ ${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class
         const rowByID = new Map(view.rows.map(row => [row.id, row]));
         const pointIDs = new Set(points.map(point => point.id));
         const activeRevision = ++revision;
+        picking = bindMapPointPicking({canvas, blockElement, protyle, data, current});
         canvas.classList.remove("fn__none");
+        hostMounted = true;
         const nextHost = (desktopHost ? createDesktopAVMapHost : createAVMapHost)(canvas, {
             provider: "openfreemap",
             theme: getTheme(),
@@ -215,7 +234,7 @@ ${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class
                 if (!current() || revision !== activeRevision) {
                     return;
                 }
-                status.textContent = "";
+                status.textContent = points.length ? "" : window.siyuan.languages.mapNoMarkers;
             },
             onAttributionClick: id => {
                 if (!current() || revision !== activeRevision) return;
@@ -231,6 +250,11 @@ ${hasLocationField && canEditMapSettings(protyle) ? `<button type="button" class
             onMarkerClick: (id, markerRevision) => {
                 if (current() && markerRevision === activeRevision && revision === activeRevision && pointIDs.has(id)) {
                     void openMapRecord(protyle, blockElement, rowByID.get(id));
+                }
+            },
+            onPointClick: (point, pointRevision) => {
+                if (current() && pointRevision === activeRevision && revision === activeRevision) {
+                    picking?.show(point);
                 }
             },
         });

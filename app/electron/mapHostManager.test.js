@@ -321,6 +321,39 @@ managerTest("points and clicks are bounded by current revision and membership; r
     s.manager.destroyAll();
 });
 
+managerTest("picked coordinates require opt-in, a current revision and one recent visible pointer gesture", (t, mode) => {
+    let now = 100000;
+    t.mock.method(Date, "now", () => now);
+    for (const picking of [false, true]) {
+        const s = setup(undefined, mode); s.create({picking}); s.load();
+        s.reply({type: "bootstrapReady"}); s.reply({type: "ready"});
+        s.command({type: "setPoints", revision: 1, points: []});
+        s.command({type: "visibility", visible: true});
+        const contents = s.guests[0];
+        const click = () => contents.emit("before-mouse-event", {}, {type: "mouseUp", button: "left"});
+        const point = {type: "pointClick", revision: 1, longitude: 0, latitude: 0};
+        const replies = () => s.owner.sent.filter(entry => entry[1].type === "pointClick");
+        s.reply(point);
+        contents.emit("before-input-event", {}, {type: "keyDown", key: "Enter", isAutoRepeat: false});
+        s.reply(point);
+        assert.equal(replies().length, 0);
+        click(); s.reply({...point, revision: 0}); s.reply({...point, longitude: 181});
+        assert.equal(replies().length, 0);
+        s.reply({...point, name: "private"}); s.reply(point);
+        assert.equal(replies().length, picking ? 1 : 0);
+        if (picking) assert.deepEqual(replies()[0][1], {...envelope, ...point});
+        click(); s.win.emit("blur"); s.reply(point);
+        click(); s.command({type: "visibility", visible: false}); s.command({type: "visibility", visible: true}); s.reply(point);
+        click(); now += 1001; s.reply(point);
+        assert.equal(replies().length, picking ? 1 : 0);
+        click(); s.command({type: "setPoints", revision: 2, points: []}); s.reply(point);
+        s.reply({...point, revision: 2});
+        assert.equal(replies().length, picking ? 1 : 0);
+        s.manager.destroyAll();
+        assert.equal(contents.listenerCount("before-mouse-event"), 0);
+    }
+});
+
 managerTest("attribution links require one recent trusted guest input in a ready visible focused map", (t, mode) => {
     let now = 100000;
     t.mock.method(Date, "now", () => now);

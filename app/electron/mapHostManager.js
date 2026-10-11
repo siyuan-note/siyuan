@@ -237,7 +237,10 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, MessageChan
     };
     const setVisible = (host, visible) => {
         host.visible = visible && host.ready && host.win.isVisible() && !host.win.isMinimized();
-        if (!host.visible) host.attributionGestureUntil = 0;
+        if (!host.visible) {
+            host.attributionGestureUntil = 0;
+            host.pointGestureUntil = 0;
+        }
         const visibility = host.visible ? host.visibility : {visible: false};
         const key = JSON.stringify(visibility);
         if (host.ready && key !== host.lastVisibility) {
@@ -419,7 +422,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, MessageChan
             host = {key, init, owner: event.sender, frame: event.senderFrame, win: owner.win, origin: owner.origin, diagnostics: new Set(), report,
                 mode: owner.mode, kernelMode: owner.kernelMode, session: ses, partition, entryURL, router, listeners: [], ids: new Set(), revision: -1,
                 loaded: false, ready: false, bootstrapped: false, destroyed: false,
-                visible: false, attributionGestureUntil: 0};
+                visible: false, attributionGestureUntil: 0, pointGestureUntil: 0};
             hosts.set(key, host);
             listen(host, event.sender, "destroyed", () => destroy(host));
             listen(host, event.sender, "render-process-gone", () => destroy(host));
@@ -428,8 +431,8 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, MessageChan
                 if (details.isMainFrame && !details.isSameDocument) destroy(host);
             });
             for (const name of ["hide", "minimize"]) listen(host, owner.win, name, () => hide(host));
-            // 失焦仅撤销署名外链手势，DOM 处理地图的裁剪和叠层。
-            listen(host, owner.win, "blur", () => { host.attributionGestureUntil = 0; });
+            // 失焦撤销外链与选点手势，DOM 处理地图的裁剪和叠层。
+            listen(host, owner.win, "blur", () => { host.attributionGestureUntil = 0; host.pointGestureUntil = 0; });
             for (const name of ["focus", "show", "restore"]) listen(host, owner.win, name, () => applyVisibility(host));
             host.attachContents = contents => {
                 host.contents = contents;
@@ -447,7 +450,12 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, MessageChan
                             sendOwner(host, {version: 1, instanceID: host.init.instanceID, type: "dismissMenu"});
                         }
                     }
-                    if (input.type === "mouseUp" && input.button === "left") armAttributionClick();
+                    if (input.type === "mouseUp" && input.button === "left") {
+                        armAttributionClick();
+                        if (host.init.picking && host.attributionGestureUntil > Date.now()) {
+                            host.pointGestureUntil = Date.now() + 1000;
+                        }
+                    }
                 });
                 listen(host, contents, "before-input-event", (_event, input) => {
                     if (input.type === "keyDown" && input.key === "Enter" && !input.isAutoRepeat) armAttributionClick();
@@ -519,10 +527,17 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, MessageChan
                                     sendOwner(host, reply);
                                 } else if (reply.type === "markerClick" && host.ready && reply.revision === host.revision && host.ids.has(reply.id)) {
                                     sendOwner(host, reply);
+                                } else if (reply.type === "pointClick" && host.init.picking && host.ready && host.visible &&
+                                    reply.revision === host.revision && host.revision >= 0 && host.win.isFocused() &&
+                                    host.win.isVisible() && !host.win.isMinimized() && host.pointGestureUntil > Date.now()) {
+                                    host.pointGestureUntil = 0;
+                                    host.attributionGestureUntil = 0;
+                                    sendOwner(host, reply);
                                 } else if (reply.type === "attributionClick" && host.ready && host.visible &&
                                     host.win.isFocused() && host.win.isVisible() && !host.win.isMinimized() &&
                                     host.attributionGestureUntil > Date.now()) {
                                     host.attributionGestureUntil = 0;
+                                    host.pointGestureUntil = 0;
                                     sendOwner(host, reply);
                                 } else if (reply.type === "error") {
                                     fail(host, reply.code === "hostUnavailable" ?
@@ -560,6 +575,7 @@ const createMapHostManager = ({app, ipcMain, session, BrowserWindow, MessageChan
         if (command.type === "destroy") { destroy(host); return; }
         if (command.type === "setPoints") {
             if (command.revision <= host.revision) return;
+            host.pointGestureUntil = 0;
             host.revision = command.revision;
             host.points = command;
             host.ids = new Set(command.points.map(point => point.id));

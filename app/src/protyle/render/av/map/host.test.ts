@@ -113,11 +113,13 @@ describe("map host boundary", () => {
             getBoundingClientRect: () => rect, contains: (element: unknown) => element === iframe};
         let ready = 0;
         const clicked: any[] = [];
+        const pointsClicked: any[] = [];
         const links: string[] = [];
         const host = createAVMapHost(container as unknown as HTMLElement, {
             provider: "openfreemap", theme: "light",
             onReady: () => ready++, onMarkerClick: (...args) => clicked.push(args), onError: () => assert.fail("unexpected error"),
             onAttributionClick: link => links.push(link),
+            onPointClick: (...args) => pointsClicked.push(args),
         });
         cleanups.push(host.destroy);
         await new Promise<void>((resolve) => setImmediate(resolve));
@@ -150,7 +152,7 @@ describe("map host boundary", () => {
         assert.equal(transfers.length, 2);
         const port = channels[0].port1 as Port;
         assert.deepEqual(port.messages[0], {version: 1, instanceID, type: "init", provider: "openfreemap",
-            theme: "light"});
+            theme: "light", picking: true});
         const reply = (data: Record<string, unknown>) => port.onmessage({data: {version: 1, instanceID, ...data}});
         reply({type: "attributionClick", link: "maplibre"});
         assert.equal(links.length, 0);
@@ -176,7 +178,19 @@ describe("map host boundary", () => {
         reply({type: "markerClick", id: "missing", revision: 1});
         reply({type: "markerClick", id: "row-1", revision: 1});
         assert.deepEqual(clicked, [["row-1", 1]]);
+        reply({type: "pointClick", longitude: 0, latitude: 0, revision: 0});
+        scope.navigator.userActivation.isActive = false;
+        reply({type: "pointClick", longitude: 0, latitude: 0, revision: 1});
+        scope.navigator.userActivation.isActive = true;
+        doc.hidden = true;
+        reply({type: "pointClick", longitude: 0, latitude: 0, revision: 1});
+        doc.hidden = false;
+        assert.equal(pointsClicked.length, 0);
+        reply({type: "pointClick", longitude: 0, latitude: 0, revision: 1, name: "private"});
+        assert.deepEqual(pointsClicked, [[{longitude: 0, latitude: 0}, 1]]);
         host.setPoints([], 2);
+        reply({type: "pointClick", longitude: 0, latitude: 0, revision: 1});
+        assert.equal(pointsClicked.length, 1);
         reply({type: "markerClick", id: "row-1", revision: 1});
         reply({type: "markerClick", id: "row-1", revision: 2});
         assert.equal(clicked.length, 1);

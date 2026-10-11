@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "Wybierz na mapie",
+	"mapPickedPoint": "Wybrana lokalizacja",
+	"mapCreateAtPoint": "Utwórz wpis tutaj",
 	"syncConfig": "Konfiguracja usługi synchronizacji",
 	"clearSyncConfig": "Wyczyść konfigurację",
 	"clearSyncConfigConfirm": "Wyczyścić zapisany adres i dane uwierzytelniające tej usługi? Jeśli jest to bieżąca usługa synchronizacji, synchronizacja również zostanie wyłączona. Lokalne notatki i dane w chmurze nie zostaną usunięte.",
@@ -33,7 +36,7 @@
 	"mapOffline": "Mapa jest offline. Twoje rekordy są nadal dostępne",
 	"mapPublicFallback": "Mapy nie są wczytywane na opublikowanych stronach ani w eksportach",
 	"mapTooManyMarkers": "Ta strona zawiera więcej niż ${limit} lokalizacji. Użyj filtrów lub zmniejsz rozmiar strony, aby wyświetlić mapę",
-	"locationPasteInEditor": "Wprowadź długość i szerokość geograficzną osobno w edytorze lokalizacji i sprawdź układ współrzędnych",
+	"locationPasteInEditor": "Użyj szerokości i długości geograficznej WGS84 (szerokość od -90 do 90; długość od -180 do 180) w formacie szerokość, długość lub Nazwa; szerokość, długość [WGS84]",
 	"location": "Lokalizacja",
 	"locationName": "Nazwa (opcjonalna)",
 	"latitude": "Szerokość geograficzna",

@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261010233500"
+		"updated": "20261011093258"
 	},
 	"Children": [
 		{
@@ -74,7 +74,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009034010-6kd9rk5",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
@@ -102,12 +102,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-h9vridq",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Enter longitude and latitude in their separate fields, for example longitude 116.4074 and latitude 39.9042. Source text stays unchanged when you only edit the name. Manually changing the coordinates clears that source text."
+					"Data": "Enter longitude and latitude in their separate fields, for example longitude 116.4074 and latitude 39.9042. Or click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Pick on map"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to open the embedded map in the location editor. Clicking the map fills the draft coordinates; click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Save"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to apply them. Source text stays unchanged when you only edit the name. Changing the coordinates manually or by picking on the map clears that source text. If the map is unavailable, you can still enter coordinates manually."
 				}
 			]
 		},
@@ -116,12 +134,66 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-dub50kq",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Click Save to apply edits or Cancel to discard them. Clear removes the location value. Text filters and sorting use the combined name, coordinates, and fixed WGS84 label. This field does not contact external location services. The app displays longitude, latitude; plain-text copying and export use latitude, longitude. Structured database copying preserves the named latitude and longitude values."
+					"Data": "Click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Save"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to apply edits or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cancel"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to discard them. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Clear"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " removes the location value. Text filters and sorting use the combined name, coordinates, and fixed WGS84 label. The app displays longitude, latitude; plain-text copying and export use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Name; latitude, longitude [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", omitting the name and semicolon when no name is set. You can paste this text or a WGS84 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "latitude, longitude"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " pair into a Location cell. For example, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Beijing; 39.9042, 116.4074 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " includes both the name and coordinates. Structured database copying preserves the named latitude and longitude values."
 				}
 			]
 		},
@@ -3921,7 +3993,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009050034-byowtq3",
-				"updated": "20261010233500"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
@@ -3977,12 +4049,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-kpnifml",
-				"updated": "20261009050034"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Filters and sorting also apply to the map. Markers represent only the loaded records, not the entire database. The displayed counts identify the loaded scope and skipped locations. If there are too many markers, use filters or a smaller page size. Click a marker to open its record; map clicks do not save coordinates"
+					"Data": "Filters and sorting also apply to the map. Markers represent only the loaded records, not the entire database. The displayed counts identify the loaded scope and skipped locations. If there are too many markers, use filters or a smaller page size. Click a marker to open its record. Click an empty area of the map to show a popup with the selected WGS84 coordinates. Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Copy"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to copy them, or in an editable view choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Create record here"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to create a record with that point in the view's selected Location field. Clicking the map alone does not change any record."
 				}
 			]
 		},
@@ -4005,12 +4095,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-wflckkb",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The host follows the app theme; the basemap keeps its default style. Maps run in isolated Web pages. Desktop clients use a separate secure host; mobile clients require an app shell that restricts native bridges and navigation to trusted documents. Maps do not load if these boundaries cannot be established. Desktop maps follow page scrolling and clip areas covered by sticky tabs; menus or dialogs may hide them temporarily. When offline, incompatible with WebGL, unable to load the map, or using authentication bypass, switch to a Table view to access records. Address search, geocoding, routing, and clicking the map to save a location are not provided."
+					"Data": "The host follows the app theme; the basemap keeps its default style. Maps run in isolated Web pages. Desktop clients use a separate secure host; mobile clients require an app shell that restricts native bridges and navigation to trusted documents. Maps do not load if these boundaries cannot be established. Desktop maps follow page scrolling and clip areas covered by sticky tabs; menus or dialogs may hide them temporarily. When offline, incompatible with WebGL, unable to load the map, or using authentication bypass, switch to a Table view to access records. Address search, geocoding, routing, and coordinate conversion are not provided."
 				}
 			]
 		},

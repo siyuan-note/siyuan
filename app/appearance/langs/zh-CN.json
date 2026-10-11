@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "地图选点",
+	"mapPickedPoint": "已选位置",
+	"mapCreateAtPoint": "在此创建条目",
 	"syncConfig": "同步服务配置",
 	"clearSyncConfig": "清除配置",
 	"clearSyncConfigConfirm": "清除该服务保存的地址和凭据？如果它是当前同步服务，将同时关闭同步。本地笔记和云端数据不会被删除。",
@@ -33,7 +36,7 @@
 	"mapOffline": "地图处于离线状态，记录仍然可用",
 	"mapPublicFallback": "发布页面和导出内容不加载地图",
 	"mapTooManyMarkers": "当前页面的位置超过 ${limit} 个，请使用筛选或减小每页记录数以显示地图",
-	"locationPasteInEditor": "请在位置编辑器中分别填写经度和纬度，并确认坐标系",
+	"locationPasteInEditor": "请使用 WGS84 纬度, 经度（纬度 -90 到 90；经度 -180 到 180），或 名称; 纬度, 经度 [WGS84] 格式",
 	"location": "位置",
 	"locationName": "名称（可选）",
 	"latitude": "纬度",

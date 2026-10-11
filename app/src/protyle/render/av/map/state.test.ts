@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import {test} from "node:test";
 import {canLoadMapHost, destroyMap, getMapPoints, getMapSettings, registerMap} from "./state";
 import {AV_MAP_MAX_POINTS} from "./protocol";
+import {DOMFixture} from "./testDOM";
 
 const table = (locations: IAVCellLocationValue[]) => ({
     rowCount: locations.length,
@@ -99,10 +100,10 @@ test("map host requires an HTTP document protocol", () => {
 test("map lifecycle is independent per editor and releases removed or replaced hosts", () => {
     const previousObserver = Object.getOwnPropertyDescriptor(globalThis, "MutationObserver");
     const previousDocument = Object.getOwnPropertyDescriptor(globalThis, "document");
-    let removal: () => void;
+    let removal: (records: MutationRecord[]) => void;
     let disconnected = 0;
     Object.assign(globalThis, {document: {body: {}}, MutationObserver: class {
-        constructor(callback: () => void) { removal = callback; }
+        constructor(callback: typeof removal) { removal = callback; }
         observe() {}
         disconnect() { disconnected++; }
     }});
@@ -122,7 +123,7 @@ test("map lifecycle is independent per editor and releases removed or replaced h
         assert.equal(first(), false);
         assert.equal(replacement(), true);
         Object.assign(rootA, {isConnected: false});
-        removal();
+        removal([]);
         assert.equal(disposedA, 2);
         assert.equal(second(), true);
         assert.equal(disposedB, 0);
@@ -132,6 +133,60 @@ test("map lifecycle is independent per editor and releases removed or replaced h
     } finally {
         destroyMap(blockA);
         destroyMap(blockB);
+        if (previousObserver) Object.defineProperty(globalThis, "MutationObserver", previousObserver);
+        else Reflect.deleteProperty(globalThis, "MutationObserver");
+        if (previousDocument) Object.defineProperty(globalThis, "document", previousDocument);
+        else Reflect.deleteProperty(globalThis, "document");
+    }
+});
+
+test("map moves remount once per mutation batch without revisiting newly registered hosts", () => {
+    const previousObserver = Object.getOwnPropertyDescriptor(globalThis, "MutationObserver");
+    const previousDocument = Object.getOwnPropertyDescriptor(globalThis, "document");
+    const document = new DOMFixture();
+    let observe: (records: MutationRecord[]) => void;
+    Object.assign(globalThis, {document, MutationObserver: class {
+        constructor(callback: typeof observe) { observe = callback; }
+        observe() {}
+        disconnect() {}
+    }});
+    const parent = document.createElement("div");
+    const block = document.createElement("div");
+    const root = document.createElement("div");
+    const mirror = document.createElement("div");
+    const mirrorRoot = document.createElement("div");
+    document.body.append(parent);
+    parent.append(block);
+    block.append(root);
+    document.body.append(mirror);
+    mirror.append(mirrorRoot);
+    let remounts = 0;
+    let destroyed = 0;
+    let mirrorRemounts = 0;
+    const element = block as unknown as HTMLElement;
+    const register = () => registerMap(element, {root: root as unknown as HTMLElement,
+        destroy: () => { destroyed++; }, remount: () => { remounts++; register(); }});
+    const removed = (node: unknown) => ({removedNodes: [node]}) as unknown as MutationRecord;
+    try {
+        const initial = register();
+        registerMap(mirror as unknown as HTMLElement, {root: mirrorRoot as unknown as HTMLElement,
+            destroy() {}, remount: () => { mirrorRemounts++; }});
+        observe([removed(parent), removed(block)]);
+        assert.equal(remounts, 1);
+        assert.equal(destroyed, 1);
+        assert.equal(initial(), false);
+        assert.equal(mirrorRemounts, 0);
+        observe([removed(document.createElement("div"))]);
+        assert.equal(remounts, 1);
+        observe([removed(block)]);
+        assert.equal(remounts, 2);
+        block.remove();
+        observe([removed(block)]);
+        assert.equal(remounts, 2);
+        assert.equal(destroyed, 3);
+    } finally {
+        destroyMap(element);
+        destroyMap(mirror as unknown as HTMLElement);
         if (previousObserver) Object.defineProperty(globalThis, "MutationObserver", previousObserver);
         else Reflect.deleteProperty(globalThis, "MutationObserver");
         if (previousDocument) Object.defineProperty(globalThis, "document", previousDocument);

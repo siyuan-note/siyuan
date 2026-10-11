@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20261010233500"
+		"updated": "20261011093258"
 	},
 	"Children": [
 		{
@@ -74,7 +74,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009034010-m7nwg3o",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
@@ -102,12 +102,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-grvs8hv",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "请在经度和纬度输入框中分别填写坐标，例如经度 116.4074、纬度 39.9042。仅修改名称时，保留的来源文本保持不变；手动修改坐标会清除来源文本。"
+					"Data": "在经度和纬度输入框中分别填写坐标，例如经度 116.4074、纬度 39.9042。也可点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "地图选点"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 打开位置编辑器内嵌的地图。点击地图会填入草稿坐标，再点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 才会应用。仅修改名称时，保留的来源文本保持不变；手动修改坐标或地图选点会清除来源文本。地图不可用时，仍可手动填写坐标。"
 				}
 			]
 		},
@@ -116,12 +134,66 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009034010-kag8uox",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "点击「保存」应用修改，点击「取消」放弃修改，「清空」会移除位置值。文本过滤和排序使用名称、坐标及固定 WGS84 标记组合后的文本。此字段不调用外部位置服务。应用内按经度、纬度顺序显示；纯文本复制和导出使用纬度、经度顺序。数据库内的结构化复制保留经纬度各自的命名字段值。"
+					"Data": "点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 应用修改，点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "取消"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 放弃修改，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清空"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 会移除位置值。文本过滤和排序使用名称、坐标及固定 WGS84 标记组合后的文本。应用内按经度、纬度顺序显示；纯文本复制和导出使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "名称; 纬度, 经度 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 格式，未填写名称时省略名称及分号。可将该文本或 WGS84 的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "纬度, 经度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 坐标对粘贴到位置单元格。例如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "北京; 39.9042, 116.4074 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 同时包含名称和坐标。数据库内的结构化复制保留经纬度各自的命名字段值。"
 				}
 			]
 		},
@@ -3921,7 +3993,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261009050034-dfwj4cb",
-				"updated": "20261010233500"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
@@ -3977,12 +4049,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-ughi4hh",
-				"updated": "20261009050034"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "筛选和排序同样作用于地图。标记只代表已加载的记录，不代表整个数据库；界面会说明已加载范围及跳过的位置数量。标记过多时请缩小分页或使用筛选。点击标记打开对应记录，点击地图不会保存坐标"
+					"Data": "筛选和排序同样作用于地图。标记只代表已加载的记录，不代表整个数据库；界面会说明已加载范围及跳过的位置数量。标记过多时请缩小分页或使用筛选。点击标记打开对应记录。点击地图空白处会弹出所选点的 WGS84 坐标，可点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "复制"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 复制坐标；在可编辑视图中，还可选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "在此创建条目"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，创建条目并将该点写入视图选定的位置字段。仅点击地图不会更改任何记录。"
 				}
 			]
 		},
@@ -4005,12 +4095,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261009050034-wy69fcu",
-				"updated": "20261010064719"
+				"updated": "20261011093258"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "宿主配色跟随应用主题，底图保留默认样式。地图通过隔离的 Web 页面运行；桌面客户端使用独立的安全宿主，移动客户端需搭配限制原生桥和导航仅用于可信主文档的外壳。无法建立隔离边界时不加载地图。桌面地图随页面滚动并裁剪吸顶栏覆盖的区域，菜单或对话框遮挡时可能暂时隐藏。离线、WebGL 不兼容、地图加载失败或启用鉴权绕过模式时，可切换到表格视图访问记录。本功能不提供地址搜索、地理编码、路线规划或点击地图保存位置。"
+					"Data": "宿主配色跟随应用主题，底图保留默认样式。地图通过隔离的 Web 页面运行；桌面客户端使用独立的安全宿主，移动客户端需搭配限制原生桥和导航仅用于可信主文档的外壳。无法建立隔离边界时不加载地图。桌面地图随页面滚动并裁剪吸顶栏覆盖的区域，菜单或对话框遮挡时可能暂时隐藏。离线、WebGL 不兼容、地图加载失败或启用鉴权绕过模式时，可切换到表格视图访问记录。本功能不提供地址搜索、地理编码、路线规划或坐标转换。"
 				}
 			]
 		},

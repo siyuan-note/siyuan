@@ -1,6 +1,6 @@
 import {
-    AVMapAttributionLink, AVMapErrorCode, AVMapPoint, AVMapProvider, AVMapTheme, AVMapViewport,
-    sanitizeAVMapPoints,
+    AVMapAttributionLink, AVMapCoordinate, AVMapErrorCode, AVMapPoint, AVMapProvider, AVMapTheme, AVMapViewport,
+    parseAVMapCoordinate, sanitizeAVMapPoints,
 } from "./protocol";
 import {AVMapAttributionController, createAVMapAttribution} from "./attribution";
 
@@ -30,6 +30,7 @@ export interface AVMapAdapter {
 
 export interface AVMapAdapterCallbacks {
     onMarkerClick: (id: string, revision: number) => void;
+    onPointClick?: (point: AVMapCoordinate, revision: number) => void;
     onError: (code: AVMapErrorCode) => void;
     onReady?: () => void;
     onAttributionClick?: (link: AVMapAttributionLink) => void;
@@ -54,6 +55,17 @@ export const createAVMapAdapter = (provider: AVMapProvider, sdk: any, container:
         attributionControl: false, trackResize: false});
     let attribution: AVMapAttributionController;
     let ready = false, loaded = false;
+    const onPointClick = (event: any) => {
+        if (destroyed || !ready || revision < 0 || !event?.originalEvent?.isTrusted ||
+            event.originalEvent.button !== undefined && event.originalEvent.button !== 0) return;
+        // 世界副本仅归一化经度，不转换坐标系；名称和供应商要素属性不离开隔离页面。
+        const longitude = event.lngLat?.lng;
+        if (typeof longitude !== "number" || !Number.isFinite(longitude)) return;
+        const point = parseAVMapCoordinate({longitude: Math.abs(longitude) <= 180 ? longitude :
+            ((longitude + 180) % 360 + 360) % 360 - 180,
+            latitude: event.lngLat?.lat});
+        if (point) callbacks.onPointClick?.(point, revision);
+    };
     const onReady = () => {
         if (!destroyed && !ready) {
             ready = true;
@@ -75,6 +87,7 @@ export const createAVMapAdapter = (provider: AVMapProvider, sdk: any, container:
             map.off("style.load", onReady);
             map.off("load", onLoad);
             map.off("error", error);
+            if (callbacks.onPointClick) map.off("click", onPointClick);
             cleanMarkers();
             points = [];
         } finally {
@@ -90,6 +103,7 @@ export const createAVMapAdapter = (provider: AVMapProvider, sdk: any, container:
         map.on("error", error);
         map.on("style.load", onReady);
         map.on("load", onLoad);
+        if (callbacks.onPointClick) map.on("click", onPointClick);
     } catch (error) {
         destroy();
         throw error;
@@ -102,7 +116,8 @@ export const createAVMapAdapter = (provider: AVMapProvider, sdk: any, container:
             cleanMarkers();
             points = sanitizeAVMapPoints(input);
             points.forEach(point => {
-                const onClick = () => {
+                const onClick = (event?: Event) => {
+                    event?.stopPropagation();
                     if (!destroyed && nextRevision === revision && points.some(item => item.id === point.id)) {
                         callbacks.onMarkerClick(point.id, nextRevision);
                     }

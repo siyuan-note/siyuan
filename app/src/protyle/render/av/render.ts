@@ -892,6 +892,21 @@ const waitForAddingCellPosition = async (options: {
 };
 
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
+    if (operation.action === "setAttrViewBlockView" && operation.blockID) {
+        getAVElements(protyle, operation.avID).forEach(item => {
+            if (item.dataset.nodeId !== operation.blockID) return;
+            const pageSize = getAVViewPageSize(
+                item.querySelector(".av__header")?.getAttribute("data-view-pages"), operation.id
+            );
+            item.querySelectorAll<HTMLElement>(".av__body").forEach(body => {
+                if (pageSize) body.dataset.pageSize = pageSize;
+                else body.removeAttribute("data-page-size");
+            });
+            item.removeAttribute("data-render");
+            void avRender(item, protyle);
+        });
+        return;
+    }
     if (operation.action === "insertAttrViewBlock") {
         inspectAVInsertedItem(protyle, operation);
     }

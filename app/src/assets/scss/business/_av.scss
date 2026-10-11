@@ -1,5 +1,15 @@
 @use "../component/record-inbox";
 
+.av__location-picker {
+  margin-top: 8px;
+}
+
+.av__location-picker-canvas {
+  height: clamp(180px, 35vh, 280px);
+  position: relative;
+  overflow: hidden;
+}
+
 .av__map {
   width: 100%;
   min-width: 0;

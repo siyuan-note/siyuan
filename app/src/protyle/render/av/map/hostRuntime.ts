@@ -1,6 +1,6 @@
 import {
     AV_MAP_PROTOCOL_VERSION, AVMapErrorCode, AVMapInit, AVMapReply, getAVMapLoadErrorCode, isAVMapAttributionLink, isAVMapBootstrapMessage, isAVMapProvider,
-    parseAVMapCommand,
+    parseAVMapCommand, parseAVMapCoordinate,
 } from "./protocol";
 import {AVMapAdapter, AVMapAdapterCallbacks} from "./providers";
 import {loadAVMapAdapter} from "./providersLoader";
@@ -80,6 +80,12 @@ export const startAVMapRuntime = (port: MessagePort, instanceID: string, provide
                             send({...envelope, type: "markerClick", id, revision});
                         }
                     },
+                    ...(command.picking && {onPointClick: (input, clickedRevision) => {
+                        const point = parseAVMapCoordinate(input);
+                        if (adapter && point && clickedRevision === revision && revision >= 0) {
+                            send({...envelope, type: "pointClick", ...point, revision});
+                        }
+                    }}),
                     onError: fail,
                     onAttributionClick: link => {
                         if (adapter && isAVMapAttributionLink(link)) {

@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "Pilih di peta",
+	"mapPickedPoint": "Lokasi terpilih",
+	"mapCreateAtPoint": "Buat entri di sini",
 	"syncConfig": "Konfigurasi layanan sinkronisasi",
 	"clearSyncConfig": "Hapus konfigurasi",
 	"clearSyncConfigConfirm": "Hapus alamat dan kredensial yang tersimpan untuk layanan ini? Jika ini layanan sinkronisasi saat ini, sinkronisasi juga akan dinonaktifkan. Catatan lokal dan data cloud tidak akan dihapus.",
@@ -33,7 +36,7 @@
 	"mapOffline": "Peta sedang luring. Rekaman Anda tetap tersedia",
 	"mapPublicFallback": "Peta tidak dimuat pada halaman yang dipublikasikan atau hasil ekspor",
 	"mapTooManyMarkers": "Halaman ini memiliki lebih dari ${limit} lokasi. Gunakan filter atau ukuran halaman yang lebih kecil untuk menampilkan peta",
-	"locationPasteInEditor": "Masukkan bujur dan lintang secara terpisah di editor lokasi dan pastikan sistem koordinatnya benar",
+	"locationPasteInEditor": "Gunakan lintang, bujur WGS84 (lintang -90 hingga 90; bujur -180 hingga 180), atau Nama; lintang, bujur [WGS84]",
 	"location": "Lokasi",
 	"locationName": "Nama (opsional)",
 	"latitude": "Lintang",

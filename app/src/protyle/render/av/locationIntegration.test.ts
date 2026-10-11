@@ -106,7 +106,8 @@ test("location copies preserve canonical text for cells, nested leaves and templ
     assert.equal(cell.getCellText(attributeTemplate), "Custom display");
     assert.equal(cell.getCellText(attributeTemplate, "display"), "Custom display");
     assert.equal(cell.getCellValueText(first), "20, 30 [WGS84]");
-    assert.throws(() => cell.genCellValue("location", cell.getCellValueText(first)));
+    assert.deepEqual(cell.genCellValue("location", cell.getCellValueText(first)).location,
+        locationValue.createAVLocationReplacement({...first.location, originalInput: "20, 30 [WGS84]"}));
 });
 
 test("location hover text explicitly uses display order instead of clipboard order", () => {
@@ -129,7 +130,7 @@ test("selected location copies keep structured values and latitude-first TSV ind
     assert.deepEqual(cell.genCellValue("location", copied.json[0][0].location).location, value.location);
 });
 
-test("location generic paste keeps place names and rejects coordinates without guessing", () => {
+test("location generic paste keeps place names and accepts only latitude-first WGS84 coordinates", () => {
     for (const coordinateSystem of ["wgs84", "gcj02", "bd09", "unknown"]) {
         const tagged = {latitude: 20, longitude: 30, coordinateSystem};
         assert.throws(() => cell.genCellValue("location", tagged), /Invalid WGS84 location/);
@@ -142,7 +143,10 @@ test("location generic paste keeps place names and rejects coordinates without g
     assert.equal("coordinateSystem" in value.location, false);
     assert.equal(value.location.latitude, null);
     assert.equal(value.location.longitude, null);
-    for (const text of ["31.20, 121.40", "91, 0", "Home; 0, 0 [WGS84]"]) {
+    for (const text of ["31.20, 121.40", "Home; 0, 0 [WGS84]"]) {
+        assert.deepEqual(cell.genCellValue("location", text).location, locationValue.createAVLocationFromText(text));
+    }
+    for (const text of ["91, 0", "121.40, 31.20", "Home; 0, 0 [GCJ-02]"]) {
         assert.throws(() => cell.genCellValue("location", text));
     }
     assert.equal(inferAVPasteColumnType(["31.20, 121.40", "0, 0"]), "text");
@@ -226,9 +230,22 @@ test("location update, clear, structured paste and undo send full replacement pa
     if (undo.action === "updateAttrViewCell") {
         assert.deepEqual(JSON.parse(JSON.stringify(undo.data.location)), locationValue.createAVLocationReplacement());
     }
-    for (const input of ["91, 0", "31,", "Home; 0, 0 [WGS84]"]) {
+    for (const input of ["91, 0", "31,", "Home; 0, 0 [GCJ-02]"]) {
         const result = await update(input);
         assert.equal(result.doOperations.length, 0);
+    }
+    assert.equal(warnings.length, 3);
+    for (const input of ["31.20, 121.40", "Home; 0, 0 [WGS84]",
+        {type: "text", text: {content: "Office; Campus; -90, 180 [WGS84]"}}]) {
+        const result = await update(input);
+        const operation = result.doOperations[0];
+        const undo = result.undoOperations[0];
+        if (operation.action !== "updateAttrViewCell" || undo.action !== "updateAttrViewCell") {
+            assert.fail("expected text location paste and undo");
+        }
+        const text = typeof input === "string" ? input : input.text.content;
+        assert.deepEqual(JSON.parse(JSON.stringify(operation.data.location)), locationValue.createAVLocationFromText(text));
+        assert.deepEqual(JSON.parse(JSON.stringify(undo.data.location)), oldLocation);
     }
     assert.equal(warnings.length, 3);
 });

@@ -56,8 +56,10 @@ const sanitizeMapPoints = value => {
 };
 const parseMapCreate = value => {
     if (!isRecord(value) || value.version !== 1 || !isMapInstanceID(value.instanceID) ||
-        value.provider !== "openfreemap" || !isMapTheme(value.theme)) return;
-    return {version: 1, instanceID: value.instanceID, type: "init", provider: "openfreemap", theme: value.theme};
+        value.provider !== "openfreemap" || !isMapTheme(value.theme) ||
+        value.picking !== undefined && typeof value.picking !== "boolean") return;
+    return {version: 1, instanceID: value.instanceID, type: "init", provider: "openfreemap", theme: value.theme,
+        ...(value.picking === true && {picking: true})};
 };
 const parseMapCommand = (value, instanceID) => {
     if (!isRecord(value) || value.version !== 1 || value.instanceID !== instanceID) return;
@@ -85,6 +87,11 @@ const parseMapReply = (value, instanceID) => {
     if (["ready", "bootstrapReady"].includes(value.type)) return {...base, type: value.type};
     if (value.type === "markerClick" && isMapIdentifier(value.id) && isMapRevision(value.revision)) {
         return {...base, type: value.type, id: value.id, revision: value.revision};
+    }
+    if (value.type === "pointClick" && isMapRevision(value.revision) && !("coordinateSystem" in value) &&
+        Number.isFinite(value.longitude) && Math.abs(value.longitude) <= 180 &&
+        Number.isFinite(value.latitude) && Math.abs(value.latitude) <= 85.0511287798066) {
+        return {...base, type: value.type, revision: value.revision, longitude: value.longitude, latitude: value.latitude};
     }
     if (value.type === "attributionClick" && ["openfreemap", "openmaptiles", "openstreetmap", "maplibre"].includes(value.link)) {
         return {...base, type: value.type, link: value.link};

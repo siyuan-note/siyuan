@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "Auf Karte auswählen",
+	"mapPickedPoint": "Ausgewählter Standort",
+	"mapCreateAtPoint": "Eintrag hier erstellen",
 	"syncConfig": "Konfiguration des Synchronisierungsdienstes",
 	"clearSyncConfig": "Konfiguration löschen",
 	"clearSyncConfigConfirm": "Gespeicherte Adresse und Zugangsdaten dieses Dienstes löschen? Wenn dies der aktuelle Synchronisierungsdienst ist, wird auch die Synchronisierung deaktiviert. Lokale Notizen und Cloud-Daten werden nicht gelöscht.",
@@ -33,7 +36,7 @@
 	"mapOffline": "Die Karte ist offline. Ihre Datensätze sind weiterhin verfügbar",
 	"mapPublicFallback": "In veröffentlichten Seiten oder Exporten werden keine Karten geladen",
 	"mapTooManyMarkers": "Diese Seite enthält mehr als ${limit} Standorte. Filter verwenden oder die Seitengröße verkleinern, um die Karte anzuzeigen",
-	"locationPasteInEditor": "Längengrad und Breitengrad im Standorteditor getrennt eingeben und das Koordinatensystem überprüfen",
+	"locationPasteInEditor": "WGS84-Koordinaten als Breitengrad, Längengrad eingeben (Breitengrad -90 bis 90; Längengrad -180 bis 180) oder Name; Breitengrad, Längengrad [WGS84]",
 	"location": "Standort",
 	"locationName": "Name (optional)",
 	"latitude": "Breitengrad",

@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "지도에서 선택",
+	"mapPickedPoint": "선택한 위치",
+	"mapCreateAtPoint": "여기에 항목 만들기",
 	"syncConfig": "동기화 서비스 설정",
 	"clearSyncConfig": "설정 지우기",
 	"clearSyncConfigConfirm": "이 서비스에 저장된 주소와 인증 정보를 지우시겠습니까? 현재 동기화 서비스인 경우 동기화도 비활성화됩니다. 로컬 노트와 클라우드 데이터는 삭제되지 않습니다.",
@@ -33,7 +36,7 @@
 	"mapOffline": "지도가 오프라인 상태입니다. 레코드는 계속 사용할 수 있습니다",
 	"mapPublicFallback": "게시된 페이지나 내보낸 콘텐츠에서는 지도를 불러오지 않습니다",
 	"mapTooManyMarkers": "이 페이지의 위치가 ${limit}개를 초과합니다. 지도를 표시하려면 필터를 사용하거나 페이지 크기를 줄이세요",
-	"locationPasteInEditor": "위치 편집기에서 경도와 위도를 각각 입력하고 좌표계를 확인하세요",
+	"locationPasteInEditor": "WGS84 위도, 경도(위도 -90~90, 경도 -180~180) 또는 이름; 위도, 경도 [WGS84] 형식으로 입력하세요",
 	"location": "위치",
 	"locationName": "이름(선택 사항)",
 	"latitude": "위도",

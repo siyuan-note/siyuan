@@ -7,6 +7,7 @@ import {activeBlur} from "../../../mobile/util/keyboardToolbar";
 /// #endif
 import {beginAVEditorSession} from "./editorSession";
 import {AV_CELL_EDITOR_CLOSE_EVENT} from "./cellEditor";
+import {createAVLocationPicker} from "./map/locationPicker";
 import {
     areAVLocationsEqual,
     createAVLocationReplacement,
@@ -38,6 +39,7 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     let composing = false;
     let disposeSheet: (() => void) | undefined;
     let ownerObserver: MutationObserver | undefined;
+    let mapPicker: ReturnType<typeof createAVLocationPicker> | undefined;
     const endEditorSession = options.ownerElement ? beginAVEditorSession(options.ownerElement) : undefined;
     const dialog = new Dialog({
         title: escapeHtml(languages.location),
@@ -56,6 +58,11 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
         <label class="fn__flex-1">${escapeHtml(languages.latitude)}
             <span class="fn__hr"></span><input class="b3-text-field fn__block" data-field="latitude" type="text" inputmode="decimal" spellcheck="false">
         </label>
+    </div>
+    <div class="av__location-picker">
+        <button type="button" class="b3-button b3-button--outline" data-action="pick">${escapeHtml(languages.locationPickOnMap)}</button>
+        <div class="ft__on-surface" data-role="map-status" role="status" aria-live="polite"></div>
+        <div class="av__location-picker-canvas fn__none" data-role="map-canvas"></div>
     </div>
     <div class="ft__error fn__none" style="margin-top:8px" data-role="error" role="alert" aria-live="polite"></div>
 </div>
@@ -96,6 +103,7 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
         }
         closing = true;
         ownerObserver?.disconnect();
+        mapPicker?.destroy();
         disposeSheet?.();
         /// #if MOBILE
         if (mobile && root.contains(document.activeElement)) {
@@ -108,6 +116,40 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
 
     const isOwnerConnected = () => (!options.ownerElement || options.ownerElement.isConnected) &&
         (!options.isValid || options.isValid());
+    const currentPoint = () => ({
+        longitude: parseAVLocationCoordinate(longitudeInput.value),
+        latitude: parseAVLocationCoordinate(latitudeInput.value),
+    });
+    root.querySelector<HTMLButtonElement>('[data-action="pick"]').addEventListener("click", event => {
+        if (mapPicker || saving || closing || composing) return;
+        if (!isOwnerConnected()) {
+            dialog.destroy();
+            return;
+        }
+        (event.currentTarget as HTMLElement).classList.add("fn__none");
+        /// #if MOBILE
+        if (mobile) activeBlur(true);
+        /// #endif
+        mapPicker = createAVLocationPicker({
+            canvas: root.querySelector<HTMLElement>('[data-role="map-canvas"]'),
+            status: root.querySelector<HTMLElement>('[data-role="map-status"]'),
+            point: currentPoint(),
+            isCurrent: () => {
+                if (closing) return false;
+                if (isOwnerConnected()) return true;
+                dialog.destroy();
+                return false;
+            },
+            onPick: point => {
+                if (saving || closing || composing) return false;
+                longitudeInput.value = formatAVLocationCoordinate(point.longitude);
+                latitudeInput.value = formatAVLocationCoordinate(point.latitude);
+                originalInput = undefined;
+                setError();
+                return true;
+            },
+        });
+    });
     const submit = async (clear = false) => {
         if (saving || closing || composing) {
             return;
@@ -164,6 +206,7 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     const clearProvenance = () => {
         originalInput = undefined;
         setError();
+        mapPicker?.setPoint(currentPoint());
     };
     [latitudeInput, longitudeInput].forEach(input => input.addEventListener("input", clearProvenance));
     root.addEventListener("compositionstart", () => composing = true);

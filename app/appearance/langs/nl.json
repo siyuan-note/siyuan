@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "Op kaart kiezen",
+	"mapPickedPoint": "Geselecteerde locatie",
+	"mapCreateAtPoint": "Hier item maken",
 	"syncConfig": "Configuratie van synchronisatiedienst",
 	"clearSyncConfig": "Configuratie wissen",
 	"clearSyncConfigConfirm": "Het opgeslagen adres en de inloggegevens van deze dienst wissen? Als dit de huidige synchronisatiedienst is, wordt synchronisatie ook uitgeschakeld. Lokale notities en cloudgegevens worden niet verwijderd.",
@@ -33,7 +36,7 @@
 	"mapOffline": "De kaart is offline. Uw records zijn nog beschikbaar",
 	"mapPublicFallback": "Kaarten worden niet geladen in gepubliceerde pagina’s of exports",
 	"mapTooManyMarkers": "Deze pagina heeft meer dan ${limit} locaties. Gebruik filters of verklein de paginagrootte om de kaart weer te geven",
-	"locationPasteInEditor": "Voer lengtegraad en breedtegraad afzonderlijk in de locatie-editor in en controleer het coördinatenstelsel",
+	"locationPasteInEditor": "Gebruik WGS84-breedtegraad, lengtegraad (breedtegraad -90 tot 90; lengtegraad -180 tot 180), of Naam; breedtegraad, lengtegraad [WGS84]",
 	"location": "Locatie",
 	"locationName": "Naam (optioneel)",
 	"latitude": "Breedtegraad",

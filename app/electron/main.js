@@ -82,6 +82,7 @@ const {captureWindowGeometry, normalizeWindowGeometry, restoreWindowGeometry} = 
 const {createSettingsWindows} = require("./settingsWindows");
 const {createSettingsTaskBridge} = require("./settingsTasks");
 const {createMapHostManager} = require("./mapHostManager");
+const {bindWebviewDevToolsShortcut} = require("./webviewDevTools");
 const windowWorkspaces = new WindowWorkspaceRegistry();
 const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
 const {
@@ -4645,6 +4646,7 @@ app.on("activate", () => {
 });
 
 app.on("web-contents-created", (webContentsCreatedEvent, contents) => {
+    bindWebviewDevToolsShortcut(contents, getWindowKernelTarget);
     contents.setWindowOpenHandler((details) => {
         const settings = settingsWindowPolicy(contents, details);
         if (settings) {

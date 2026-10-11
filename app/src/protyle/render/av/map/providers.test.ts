@@ -146,6 +146,33 @@ test("OpenFreeMap preserves longitude/latitude, attribution and cleans stale cal
     assert.equal(calls.filter(call => call[0] === "clear").length, 1);
 });
 
+test("point picking accepts only genuine current map clicks and normalizes world copies without forwarding metadata", () => {
+    const f = fixture();
+    const clicked: unknown[] = [];
+    const adapter = createAVMapAdapter("openfreemap", f.sdk, f.container, {
+        onMarkerClick() {}, onError() {}, onPointClick: (...args) => clicked.push(args),
+    });
+    const click = f.instances[0].callbacks.get("click");
+    const event = {originalEvent: {isTrusted: true, button: 0}, lngLat: {lng: 121.4, lat: 31.2}, features: [{name: "private"}]};
+    click(event);
+    f.ready();
+    click(event);
+    assert.deepEqual(clicked, []);
+    adapter.setPoints([], 1);
+    click({...event, originalEvent: {isTrusted: false, button: 0}});
+    click({...event, originalEvent: {isTrusted: true, button: 1}});
+    click({...event, lngLat: {lng: 0, lat: 90}});
+    click({...event, lngLat: {lng: Infinity, lat: 0}});
+    assert.deepEqual(clicked, []);
+    click(event);
+    click({...event, lngLat: {lng: 540, lat: 0}, originalEvent: {isTrusted: true}});
+    assert.deepEqual(clicked, [[{longitude: 121.4, latitude: 31.2}, 1], [{longitude: -180, latitude: 0}, 1]]);
+    adapter.destroy();
+    click(event);
+    assert.equal(clicked.length, 2);
+    assert.equal(f.instances[0].callbacks.has("click"), false);
+});
+
 test("attribution waits for five continuously visible seconds after load and stays expandable", () => {
     const f = fixture();
     const adapter = createAVMapAdapter("openfreemap", f.sdk, f.container, {onMarkerClick() {}, onError() {}});

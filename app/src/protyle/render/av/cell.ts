@@ -64,7 +64,7 @@ import {getAVData, getAVPrimaryCell} from "./virtualScroll";
 import {AV_CELL_EDITOR_CLOSE_EVENT, getAVCellEditorOwner} from "./cellEditor";
 import {getAVBlockIconHTML, renderAVBlockIcon} from "./blockIcon";
 import {bindAnchoredInputPosition} from "../../../dialog/anchoredInputPosition";
-import {createAVLocationFromText, createAVLocationReplacement, getAVLocationDisplayText, getAVLocationText, isAVLocationCoordinateInput, isAVLocationEmpty} from "./locationValue";
+import {createAVLocationFromText, createAVLocationReplacement, getAVLocationDisplayText, getAVLocationText, isAVLocationEmpty} from "./locationValue";
 import {openAVLocationEditor} from "./locationEditor";
 import {showMessage} from "../../../dialog/message";
 
@@ -1156,7 +1156,9 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         if (type === "location" && (typeof newValue === "string" ||
             (newValue?.type && newValue.type !== "location" && !cellValueIsEmpty(newValue)))) {
             const content = typeof newValue === "string" ? newValue : getCellValueContent(newValue) || "";
-            if (isAVLocationCoordinateInput(content)) {
+            try {
+                createAVLocationFromText(content);
+            } catch {
                 showMessage(window.siyuan.languages.locationPasteInEditor, 6000, "error");
                 continue;
             }

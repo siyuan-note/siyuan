@@ -42,6 +42,7 @@ export const canLoadMapHost = (protocol: string) => ["http:", "https:"].includes
 interface IMapLifecycle {
     root: HTMLElement;
     destroy: () => void;
+    remount?: () => void;
 }
 
 const lifecycles = new WeakMap<HTMLElement, IMapLifecycle>();
@@ -64,11 +65,15 @@ export const registerMap = (blockElement: HTMLElement, state: IMapLifecycle) => 
     lifecycles.set(blockElement, state);
     mountedBlocks.add(blockElement);
     if (!removalObserver) {
-        removalObserver = new MutationObserver(() => {
-            mountedBlocks.forEach(block => {
-                const current = lifecycles.get(block);
+        removalObserver = new MutationObserver(records => {
+            // 移动节点也会重置 iframe/webview；先快照，避免重建时修改集合导致重复遍历。
+            Array.from(mountedBlocks, block => ({block, current: lifecycles.get(block)})).forEach(({block, current}) => {
+                if (lifecycles.get(block) !== current) return;
                 if (!block.isConnected || !current?.root.isConnected || !block.contains(current.root)) {
                     destroyMap(block);
+                } else if (records.some(record => Array.from(record.removedNodes).some(node =>
+                    node.contains(current.root)))) {
+                    current.remount?.();
                 }
             });
         });

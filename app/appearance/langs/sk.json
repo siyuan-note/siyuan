@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "Vybrať na mape",
+	"mapPickedPoint": "Vybraná poloha",
+	"mapCreateAtPoint": "Vytvoriť záznam tu",
 	"syncConfig": "Nastavenie služby synchronizácie",
 	"clearSyncConfig": "Vymazať nastavenie",
 	"clearSyncConfigConfirm": "Vymazať uloženú adresu a prihlasovacie údaje tejto služby? Ak ide o aktuálnu službu synchronizácie, synchronizácia sa tiež vypne. Lokálne poznámky a údaje v cloude sa neodstránia.",
@@ -33,7 +36,7 @@
 	"mapOffline": "Mapa je offline. Vaše záznamy sú naďalej dostupné",
 	"mapPublicFallback": "Mapy sa nenačítavajú na publikovaných stránkach ani v exportoch",
 	"mapTooManyMarkers": "Táto stránka obsahuje viac ako ${limit} polôh. Na zobrazenie mapy použite filtre alebo menšiu veľkosť stránky",
-	"locationPasteInEditor": "Zemepisnú dĺžku a zemepisnú šírku zadajte v editore polohy samostatne a overte súradnicový systém",
+	"locationPasteInEditor": "Použite zemepisnú šírku, zemepisnú dĺžku WGS84 (šírka od -90 do 90; dĺžka od -180 do 180) alebo Názov; zemepisná šírka, zemepisná dĺžka [WGS84]",
 	"location": "Poloha",
 	"locationName": "Názov (voliteľný)",
 	"latitude": "Zemepisná šírka",

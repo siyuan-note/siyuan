@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "地圖選點",
+	"mapPickedPoint": "已選位置",
+	"mapCreateAtPoint": "在此建立項目",
 	"syncConfig": "同步服務設定",
 	"clearSyncConfig": "清除設定",
 	"clearSyncConfigConfirm": "清除這項服務儲存的位址和憑證？如果它是目前的同步服務，也會關閉同步。本機筆記和雲端資料不會被刪除。",
@@ -33,7 +36,7 @@
 	"mapOffline": "地圖處於離線狀態，記錄仍然可用",
 	"mapPublicFallback": "發佈頁面和匯出內容不載入地圖",
 	"mapTooManyMarkers": "目前頁面的位置超過 ${limit} 個，請使用篩選或減少每頁記錄數以顯示地圖",
-	"locationPasteInEditor": "請在位置編輯器中分別填寫經度和緯度，並確認座標系",
+	"locationPasteInEditor": "請使用 WGS84 緯度, 經度（緯度 -90 到 90；經度 -180 到 180），或 名稱; 緯度, 經度 [WGS84] 格式",
 	"location": "位置",
 	"locationName": "名稱（選填）",
 	"latitude": "緯度",

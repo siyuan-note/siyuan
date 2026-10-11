@@ -1,4 +1,7 @@
 {
+	"locationPickOnMap": "Haritada seç",
+	"mapPickedPoint": "Seçilen konum",
+	"mapCreateAtPoint": "Burada kayıt oluştur",
 	"syncConfig": "Eşitleme hizmeti yapılandırması",
 	"clearSyncConfig": "Yapılandırmayı temizle",
 	"clearSyncConfigConfirm": "Bu hizmetin kayıtlı adresi ve kimlik bilgileri temizlensin mi? Geçerli eşitleme hizmetiyse eşitleme de devre dışı bırakılır. Yerel notlar ve bulut verileri silinmez.",
@@ -33,7 +36,7 @@
 	"mapOffline": "Harita çevrimdışı. Kayıtlarınız hâlâ kullanılabilir",
 	"mapPublicFallback": "Yayımlanan sayfalarda veya dışa aktarılan içerikte haritalar yüklenmez",
 	"mapTooManyMarkers": "Bu sayfada ${limit} konumdan fazla konum var. Haritayı göstermek için filtreleri kullanın veya sayfa boyutunu küçültün",
-	"locationPasteInEditor": "Konum düzenleyicisinde boylam ve enlemi ayrı ayrı girin ve koordinat sistemini doğrulayın",
+	"locationPasteInEditor": "WGS84 enlem, boylam biçimini (enlem -90 ile 90; boylam -180 ile 180) veya Ad; enlem, boylam [WGS84] biçimini kullanın",
 	"location": "Konum",
 	"locationName": "Ad (isteğe bağlı)",
 	"latitude": "Enlem",

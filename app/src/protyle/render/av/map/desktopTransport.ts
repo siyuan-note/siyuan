@@ -198,6 +198,9 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
             options.onReady?.();
         } else if (reply?.type === "markerClick" && ready && reply.revision === revision && ids.has(reply.id)) {
             options.onMarkerClick(reply.id, reply.revision);
+        } else if (reply?.type === "pointClick" && ready && reply.revision === revision && revision >= 0 &&
+            getAVMapVisibility(container).visible) {
+            options.onPointClick?.({longitude: reply.longitude, latitude: reply.latitude}, reply.revision);
         } else if (reply?.type === "attributionClick" && ready) {
             // 主进程已校验 guest 可见区域，并消费一次可信用户输入。
             options.onAttributionClick?.(reply.link);
@@ -241,7 +244,8 @@ export const createDesktopAVMapHost = (container: HTMLElement, options: AVMapHos
         timeout = scope.setTimeout(() => fail("hostReadyTimeout"), AV_MAP_OWNER_TIMEOUT);
         let reply: {version?: number; instanceID?: string; error?: unknown; diagnostic?: unknown};
         try {
-            reply = await ipc.invoke("siyuan-map-create", {...envelope(), provider: options.provider, theme});
+            reply = await ipc.invoke("siyuan-map-create", {...envelope(), provider: options.provider, theme,
+                ...(options.onPointClick && {picking: true})});
         } catch (_error) {
             fail("hostCreateRejected");
             return;

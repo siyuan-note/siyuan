@@ -21,6 +21,31 @@ const fixture = () => {
 };
 
 describe("isolated map runtime lifecycle", () => {
+    it("keeps picking opt-in and gates sanitized coordinate replies by the latest snapshot and lifetime", async () => {
+        for (const picking of [false, true]) {
+            const f = fixture();
+            let callbacks: AVMapAdapterCallbacks;
+            const stop = startAVMapRuntime(f.port as unknown as MessagePort, "one", "openfreemap", {} as HTMLElement,
+                async (_init, _container, value) => { callbacks = value; return f.adapter; });
+            await f.send({type: "init", provider: "openfreemap", theme: "light", picking});
+            assert.equal(typeof callbacks.onPointClick, picking ? "function" : "undefined");
+            if (picking) {
+                const point = {longitude: 0, latitude: 0};
+                callbacks.onPointClick(point, -1);
+                await f.send({type: "setPoints", points: [], revision: 2});
+                callbacks.onPointClick(point, 1);
+                callbacks.onPointClick({...point, latitude: 90}, 2);
+                callbacks.onPointClick({...point, name: "private"} as any, 2);
+                assert.deepEqual(f.replies.filter(reply => reply.type === "pointClick"), [
+                    {version: 1, instanceID: "one", type: "pointClick", longitude: 0, latitude: 0, revision: 2},
+                ]);
+                stop();
+                callbacks.onPointClick(point, 2);
+                assert.equal(f.replies.length, 2);
+            }
+            stop();
+        }
+    });
     it("rejects duplicate init, other providers, old revisions and nonmember marker clicks", async () => {
         const {port, adapter, replies, calls, send} = fixture();
         let callbacks: AVMapAdapterCallbacks;

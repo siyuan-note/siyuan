@@ -35,13 +35,13 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-func getNewVerInstallPkgPath() string {
+func getNewVerInstallPkgPath(preserve bool) string {
 	if skipNewVerInstallPkg() {
 		return ""
 	}
 
-	return findReadyInstallPackage(filepath.Join(util.TempDir, "install"), util.Ver,
-		Conf.LoadSystem().UpdateChannel, currentInstallPackageSuffix(), Conf.CookieKey)
+	return readyInstallPackagePath(filepath.Join(util.TempDir, "install"), util.Ver,
+		Conf.LoadSystem().UpdateChannel, currentInstallPackageSuffix(), Conf.CookieKey, preserve)
 }
 
 type installPackageDownload struct {
@@ -74,13 +74,12 @@ func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 		return
 	}
 
-	existingPkgPath := verifiedInstallPackagePath(filepath.Join(util.TempDir, "install"), &pkg.Metadata)
+	existingPkgPath, err := reuseInstallPackage(filepath.Join(util.TempDir, "install"), &pkg.Metadata, Conf.CookieKey)
+	if err != nil {
+		logging.LogErrorf("prepare existing install package failed: %s", err)
+		return
+	}
 	if "" != existingPkgPath {
-		// 为已通过线上校验信息验证的安装包补齐记录，供退出和下次启动时读取。
-		if err = saveInstallPackageMetadata(filepath.Join(util.TempDir, "install"), &pkg.Metadata, Conf.CookieKey); err != nil {
-			logging.LogErrorf("save install package metadata failed: %s", err)
-			return
-		}
 		clearOldInstallPackagesLocked(installPackageVersion(filepath.Base(existingPkgPath)), existingPkgPath)
 		util.PushUpdateMsg("update-pkg-ready", Conf.Language(62), 15*1000)
 		return
@@ -152,16 +151,27 @@ func downloadInstallPkg(pkgURL string, metadata *installPackageMetadata) (err er
 	checksum := metadata.Checksum
 	installDir := filepath.Join(util.TempDir, "install")
 	savePath := filepath.Join(util.TempDir, "install", pkg)
-	if gulu.File.IsExist(savePath) {
-		localChecksum, _ := sha256Hash(savePath)
-		if localChecksum == checksum {
-			return saveInstallPackageMetadata(installDir, metadata, Conf.CookieKey)
-		}
+	if existingPath, reuseErr := reuseInstallPackage(installDir, metadata, Conf.CookieKey); reuseErr != nil || existingPath != "" {
+		return reuseErr
 	}
 
 	err = os.MkdirAll(filepath.Join(util.TempDir, "install"), 0755)
 	if err != nil {
 		logging.LogErrorf("create temp install dir failed: %s", err)
+		return
+	}
+	temporaryFile, err := os.CreateTemp(installDir, pkg+".*.part")
+	if err != nil {
+		logging.LogErrorf("create temporary install package failed: %s", err)
+		return
+	}
+	temporaryPath := temporaryFile.Name()
+	defer func() {
+		if removeErr := os.Remove(temporaryPath); removeErr != nil && !os.IsNotExist(removeErr) {
+			logging.LogErrorf("remove incomplete install package [%s] failed: %s", temporaryPath, removeErr)
+		}
+	}()
+	if err = temporaryFile.Close(); err != nil {
 		return
 	}
 
@@ -172,26 +182,20 @@ func downloadInstallPkg(pkgURL string, metadata *installPackageMetadata) (err er
 		// logging.LogDebugf("downloading install package [%s %s]", pkgURL, progress)
 		util.PushStatusBar(fmt.Sprintf(Conf.Language(133), progress))
 	}
-	_, err = client.R().SetOutputFile(savePath).SetDownloadCallbackWithInterval(callback, 1*time.Second).Get(pkgURL)
+	_, err = client.R().SetOutputFile(temporaryPath).SetDownloadCallbackWithInterval(callback, 1*time.Second).Get(pkgURL)
 	if err != nil {
 		logging.LogErrorf("download install package [%s] failed: %s", pkgURL, err)
-		if removeErr := os.Remove(savePath); nil != removeErr && !os.IsNotExist(removeErr) {
-			logging.LogErrorf("remove incomplete install package [%s] failed: %s", savePath, removeErr)
-		}
 		return
 	}
 
-	localChecksum, _ := sha256Hash(savePath)
+	localChecksum, _ := sha256Hash(temporaryPath)
 	if checksum != localChecksum {
-		err = fmt.Errorf("verify checksum failed, download install package [%s] checksum [%s] not equal to downloaded [%s] checksum [%s]", pkgURL, checksum, savePath, localChecksum)
+		err = fmt.Errorf("verify checksum failed, download install package [%s] checksum [%s] not equal to downloaded [%s] checksum [%s]", pkgURL, checksum, temporaryPath, localChecksum)
 		logging.LogError(err.Error())
-		if removeErr := os.Remove(savePath); nil != removeErr && !os.IsNotExist(removeErr) {
-			logging.LogErrorf("remove invalid install package [%s] failed: %s", savePath, removeErr)
-		}
 		return
 	}
-	if err = saveInstallPackageMetadata(installDir, metadata, Conf.CookieKey); err != nil {
-		logging.LogErrorf("save install package metadata [%s] failed: %s", pkg, err)
+	if err = publishInstallPackage(temporaryPath, installDir, metadata, Conf.CookieKey); err != nil {
+		logging.LogErrorf("publish install package [%s] failed: %s", pkg, err)
 		return
 	}
 	logging.LogInfof("downloaded install package [%s] to [%s]", pkgURL, savePath)

@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -90,23 +91,40 @@ func readInstallPackageMetadata(path, key string) (*installPackageMetadata, erro
 
 // verifiedInstallPackagePath 每次读取都重新校验文件，拒绝缺失、不完整或被修改的安装包。
 func verifiedInstallPackagePath(installDir string, metadata *installPackageMetadata) string {
+	path, _ := verifyInstallPackagePath(installDir, metadata)
+	return path
+}
+
+func verifyInstallPackagePath(installDir string, metadata *installPackageMetadata) (string, error) {
 	if !validInstallPackageMetadata(metadata) {
-		return ""
+		return "", errors.New("invalid install package metadata")
 	}
 	path := filepath.Join(installDir, metadata.FileName)
 	info, err := os.Lstat(path)
-	if err != nil || !info.Mode().IsRegular() {
-		return ""
+	if err != nil {
+		return "", fmt.Errorf("stat install package: %w", err)
+	}
+	if !info.Mode().IsRegular() {
+		return "", errors.New("install package is not a regular file")
 	}
 	checksum, err := sha256Hash(path)
-	if err != nil || metadata.Checksum != checksum {
-		return ""
+	if err != nil {
+		return "", fmt.Errorf("read install package checksum: %w", err)
 	}
-	return path
+	if metadata.Checksum != checksum {
+		return "", errors.New("install package checksum mismatch")
+	}
+	return path, nil
 }
 
 // findReadyInstallPackage 只使用本地已验证记录，不访问更新服务，也不等待下载任务。
 func findReadyInstallPackage(installDir, currentVersion, channel, suffix, key string) string {
+	diagnostics := readyInstallPackageDiagnostics{}
+	defer func() {
+		if message := diagnostics.summary(); message != "" {
+			logging.LogWarn(message)
+		}
+	}()
 	if !isValidUpdateChannel(channel) || suffix == "" || !semver.IsValid(normalizeReleaseVersion(currentVersion)) {
 		return ""
 	}
@@ -124,16 +142,36 @@ func findReadyInstallPackage(installDir, currentVersion, channel, suffix, key st
 			continue
 		}
 		metadata, readErr := readInstallPackageMetadata(filepath.Join(installDir, entry.Name()), key)
-		if readErr != nil || !validInstallPackageMetadata(metadata) ||
-			entry.Name() != metadata.FileName+".json" ||
-			metadata.FileName != "siyuan-"+metadata.Version+"-"+suffix ||
-			!isReleaseAllowed(channel, metadata.Version) ||
-			semver.Compare(normalizeReleaseVersion(metadata.Version), normalizeReleaseVersion(currentVersion)) <= 0 {
+		if readErr != nil {
+			if message := diagnostics.rejected(entry.Name(), readErr); message != "" {
+				logging.LogWarn(message)
+			}
+			continue
+		}
+		if !readyInstallPackageMatches(metadata, currentVersion, channel, suffix) ||
+			entry.Name() != metadata.FileName+".json" {
 			continue
 		}
 		if selected == nil || semver.Compare(normalizeReleaseVersion(metadata.Version), normalizeReleaseVersion(selected.Version)) > 0 {
 			selected = metadata
 		}
 	}
-	return verifiedInstallPackagePath(installDir, selected)
+	if selected == nil {
+		return ""
+	}
+	path, err := verifyInstallPackagePath(installDir, selected)
+	if err != nil {
+		if message := diagnostics.rejected(selected.FileName, err); message != "" {
+			logging.LogWarn(message)
+		}
+	}
+	return path
+}
+
+func readyInstallPackageMatches(metadata *installPackageMetadata, currentVersion, channel, suffix string) bool {
+	return validInstallPackageMetadata(metadata) && isValidUpdateChannel(channel) && suffix != "" &&
+		semver.IsValid(normalizeReleaseVersion(currentVersion)) &&
+		metadata.FileName == "siyuan-"+metadata.Version+"-"+suffix &&
+		isReleaseAllowed(channel, metadata.Version) &&
+		semver.Compare(normalizeReleaseVersion(metadata.Version), normalizeReleaseVersion(currentVersion)) > 0
 }

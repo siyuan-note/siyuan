@@ -139,6 +139,10 @@ func TestReadyInstallPackageRejectsTamperingAndPreservesFiles(t *testing.T) {
 func prepareInstallPackageTest(t *testing.T) string {
 	t.Helper()
 	oldConf, oldTemp, oldSkip, oldExiting := Conf, util.TempDir, skipInstallPkgPlatformCached, util.IsExiting.Load()
+	installPackageFiles.Lock()
+	oldPreserved := installPackageFiles.preservedPath
+	installPackageFiles.preservedPath = ""
+	installPackageFiles.Unlock()
 	Conf = NewAppConf()
 	Conf.CookieKey = installPackageTestKey
 	Conf.System.Store(conf.NewSystem())
@@ -150,6 +154,9 @@ func prepareInstallPackageTest(t *testing.T) string {
 	t.Cleanup(func() {
 		Conf, util.TempDir, skipInstallPkgPlatformCached = oldConf, oldTemp, oldSkip
 		util.IsExiting.Store(oldExiting)
+		installPackageFiles.Lock()
+		installPackageFiles.preservedPath = oldPreserved
+		installPackageFiles.Unlock()
 	})
 	dir := filepath.Join(util.TempDir, "install")
 	if err := os.MkdirAll(dir, 0700); err != nil {
@@ -185,7 +192,7 @@ func TestExitInstallPackageCheckDoesNotWaitForDownload(t *testing.T) {
 	checkDownloadInstallPkgLock.Lock()
 	defer checkDownloadInstallPkgLock.Unlock()
 	done := make(chan string, 1)
-	go func() { done <- getNewVerInstallPkgPath() }()
+	go func() { done <- getNewVerInstallPkgPath(false) }()
 	select {
 	case path := <-done:
 		if path != filepath.Join(dir, metadata.FileName) {
@@ -208,14 +215,14 @@ func TestExitInstallPackageCheckDoesNotWaitForDownload(t *testing.T) {
 	if err := os.Remove(filepath.Join(dir, metadata.FileName+".json")); err != nil {
 		t.Fatal(err)
 	}
-	if got := getNewVerInstallPkgPath(); got != "" {
+	if got := getNewVerInstallPkgPath(false); got != "" {
 		t.Fatalf("package without a trusted record became ready: %s", got)
 	}
 	if requests.Load() != 0 {
 		t.Fatalf("exit made %d update requests", requests.Load())
 	}
 	Conf.System.Load().DownloadInstallPkg = false
-	if got := getNewVerInstallPkgPath(); got != "" {
+	if got := getNewVerInstallPkgPath(false); got != "" {
 		t.Fatalf("disabled automatic installation returned a package: %s", got)
 	}
 }
@@ -286,8 +293,20 @@ func TestDownloadInstallPackageMigratesExistingAndAuthenticatesNewPackage(t *tes
 	if err := downloadInstallPkg(server.URL+"/package", metadata); err == nil {
 		t.Fatal("checksum mismatch accepted")
 	}
-	if got := findReadyInstallPackage(dir, "98.0.0", conf.UpdateChannelStable, "win.exe", installPackageTestKey); got != "" {
-		t.Fatalf("failed download became ready: %s", got)
+	if got := findReadyInstallPackage(dir, "98.0.0", conf.UpdateChannelStable, "win.exe", installPackageTestKey); got != packagePath {
+		t.Fatalf("failed replacement removed the previously verified package: %s", got)
+	}
+	if err := os.Remove(packagePath); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(packagePath + ".json"); err != nil {
+		t.Fatal(err)
+	}
+	if err := downloadInstallPkg(server.URL+"/package", metadata); err == nil {
+		t.Fatal("new package checksum mismatch accepted")
+	}
+	if entries, err := os.ReadDir(dir); err != nil || len(entries) != 0 {
+		t.Fatalf("failed new download left a package or metadata behind: %v, %v", entries, err)
 	}
 }
 
@@ -332,7 +351,7 @@ func TestDownloadInstallPackageRemainsUnreadableUntilComplete(t *testing.T) {
 		t.Fatalf("unfinished download has a ready record: %v", err)
 	}
 	checked := make(chan string, 1)
-	go func() { checked <- getNewVerInstallPkgPath() }()
+	go func() { checked <- getNewVerInstallPkgPath(false) }()
 	select {
 	case path := <-checked:
 		if path != "" {

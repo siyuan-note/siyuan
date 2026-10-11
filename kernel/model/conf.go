@@ -735,7 +735,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 			if 0 != ExitSyncSucc {
 				exitCode = 1
 				if 1 != execInstallPkg && !skipNewVerInstallPkg() {
-					installPkgPath = getNewVerInstallPkgPath()
+					installPkgPath = getNewVerInstallPkgPath(false)
 				}
 				return
 			}
@@ -756,7 +756,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	hpathRefresh.Lock()
 	hpathRefresh.Unlock()
 	diagnostic.Stage("check install package")
-	newVerInstallPkgPath := getNewVerInstallPkgPath()
+	newVerInstallPkgPath := getNewVerInstallPkgPath(2 == execInstallPkg || (force && 0 == execInstallPkg))
 	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {
 		if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 将新版本安装包交给桌面宿主执行
 			installPkgPath = newVerInstallPkgPath

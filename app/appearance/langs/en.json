@@ -3198,6 +3198,7 @@
 		"416": "The model input budget is unavailable. Check the context length and maximum token settings",
 		"417": "Agent context compaction failed. Your conversation has been preserved; please retry: %s",
 		"418": "This model requires the current tool history to remain intact. Use a model with a larger context window or split the task",
-		"419": "Agent context compaction reached its request or time limit. Your conversation has been preserved"
+		"419": "Agent context compaction reached its request or time limit. Your conversation has been preserved",
+		"420": "Unable to list cloud sync indexes (%s). This does not mean the cloud is empty. Check the network, sync configuration, and listing permissions."
 	}
 }

@@ -3198,6 +3198,7 @@
 		"416": "Le modèle ne dispose d’aucun budget d’entrée. Vérifiez les paramètres de longueur du contexte et du nombre maximal de tokens",
 		"417": "La compression du contexte de l’agent a échoué. Votre conversation a été conservée ; réessayez: %s",
 		"418": "Ce modèle exige de conserver intégralement l’historique des appels d’outils du tour actuel. Utilisez un modèle avec une fenêtre de contexte plus grande ou divisez la tâche",
-		"419": "La compression du contexte de l’agent a atteint la limite de requêtes ou de durée. Votre conversation a été conservée"
+		"419": "La compression du contexte de l’agent a atteint la limite de requêtes ou de durée. Votre conversation a été conservée",
+		"420": "Impossible de lister les index de synchronisation dans le cloud (%s). Cela ne signifie pas que le cloud est vide. Vérifiez le réseau, la configuration de synchronisation et les autorisations de listage."
 	}
 }

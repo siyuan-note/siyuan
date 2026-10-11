@@ -3051,10 +3051,17 @@ func newRepository() (ret *dejavu.Repo, err error) {
 
 // newCloudRepositoryWithAssetSourceLocked 在访问云端前校验配置，保留未配置云端时的本地快照功能。
 func newCloudRepositoryWithAssetSourceLocked() (*dejavu.Repo, error) {
-	if Conf.Sync.Provider == conf.ProviderS3 {
-		if err := validateSyncS3(Conf.Sync.S3); err != nil {
-			return nil, err
-		}
+	var err error
+	switch Conf.Sync.Provider {
+	case conf.ProviderS3:
+		err = validateSyncS3(Conf.Sync.S3)
+	case conf.ProviderWebDAV:
+		err = validateSyncWebDAV(Conf.Sync.WebDAV)
+	case conf.ProviderLocal:
+		err = validateSyncLocal(Conf.Sync.Local)
+	}
+	if err != nil {
+		return nil, err
 	}
 	return newRepositoryWithAssetSourceLocked()
 }
@@ -3099,11 +3106,13 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 		return nil, err
 	}
 	dataDir := util.DataDir
+	scope := assetDownloadScope(Conf.Sync.Provider, cloudConf, Conf.Repo.Key)
 	ret, err = dejavu.NewRepoWithOptions(dejavu.Options{
 		DataPath: util.DataDir, RepoPath: util.RepoDir, HistoryPath: util.HistoryDir, TempPath: util.TempDir,
 		DeviceID: Conf.System.ID, DeviceName: Conf.System.Name, DeviceOS: Conf.System.OS,
 		AESKey: Conf.Repo.Key, IgnoreLines: ignoreLines, Cloud: cloudRepo,
 		IgnoreRulePath: syncIgnoreRulePath, HiddenDirectoryNames: []string{".siyuan"},
+		OnCloudIndexList: newSyncCloudIndexListObserver(scope, Conf.Sync.Provider),
 		PathFilter: func(info os.FileInfo, absPath string) (bool, error) {
 			return syncPathFilter(dataDir, info, absPath)
 		},
@@ -3112,7 +3121,6 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 		logging.LogErrorf("init data repo failed: %s", err)
 		return
 	}
-	scope := assetDownloadScope(Conf.Sync.Provider, cloudConf, Conf.Repo.Key)
 	if Conf.Sync.Provider == conf.ProviderSiYuan && Conf.GetUser() == nil {
 		stored, readErr := dejavu.ReadAssetDownloadScope(assetDownloadStatePath(), Conf.Repo.Key)
 		if readErr != nil {

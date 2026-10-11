@@ -3198,6 +3198,7 @@
 		"416": "Modelin kullanılabilir girdi bütçesi yok. Bağlam uzunluğu ve en fazla token sayısı ayarlarını kontrol edin",
 		"417": "Ajan bağlamı sıkıştırılamadı. Görüşmeniz korundu; yeniden deneyin: %s",
 		"418": "Bu model, mevcut turdaki araç çağrısı geçmişinin tamamının korunmasını gerektirir. Daha geniş bağlam penceresine sahip bir model kullanın veya görevi bölün",
-		"419": "Ajan bağlamı sıkıştırma işlemi istek veya süre sınırına ulaştı. Görüşmeniz korundu"
+		"419": "Ajan bağlamı sıkıştırma işlemi istek veya süre sınırına ulaştı. Görüşmeniz korundu",
+		"420": "Bulut eşitleme dizinleri (%s) listelenemiyor. Bu, bulutun boş olduğu anlamına gelmez. Ağı, eşitleme yapılandırmasını ve listeleme izinlerini kontrol edin."
 	}
 }

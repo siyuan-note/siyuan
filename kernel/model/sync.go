@@ -576,6 +576,7 @@ func SetCloudSyncDir(name string) error {
 
 	Conf.Sync.CloudName = name
 	Conf.Save()
+	syncIndexListNotice.reset(util.PushClearMsg)
 	refreshLANSyncManager()
 	return nil
 }
@@ -588,6 +589,9 @@ func SetSyncGenerateConflictDoc(b bool) {
 func SetSyncEnable(b bool) {
 	Conf.Sync.Enabled = b
 	Conf.Save()
+	if !b {
+		syncIndexListNotice.reset(util.PushClearMsg)
+	}
 	refreshLANSyncManager()
 }
 
@@ -646,6 +650,7 @@ func SetSyncProvider(provider int, completeAssets bool) (err error) {
 	}
 	Conf.Sync.Provider = provider
 	Conf.Save()
+	syncIndexListNotice.reset(util.PushClearMsg)
 	refreshLANSyncManager()
 	return
 }
@@ -673,6 +678,9 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 
 	Conf.Sync.S3 = s3
 	Conf.Save()
+	if Conf.Sync.Provider == conf.ProviderS3 {
+		syncIndexListNotice.reset(util.PushClearMsg)
+	}
 	refreshLANSyncManager()
 	return
 }
@@ -686,7 +694,15 @@ func validateSyncS3(s3 *conf.S3) error {
 			return errors.New(Conf.Language(142))
 		}
 	}
-	rawEndpoint := strings.TrimSpace(s3.Endpoint)
+	return validateSyncHTTPEndpoint(s3.Endpoint)
+}
+
+// validateSyncHTTPEndpoint 在归一化前拒绝空地址，保留省略协议和协议占位符的兼容写法。
+func validateSyncHTTPEndpoint(value string) error {
+	rawEndpoint := strings.TrimSpace(value)
+	if rawEndpoint == "" {
+		return errors.New(Conf.Language(142))
+	}
 	rawEndpoint = strings.Replace(rawEndpoint, "http://http(s)://", "https://", 1)
 	rawEndpoint = strings.Replace(rawEndpoint, "http(s)://", "https://", 1)
 	if strings.Contains(rawEndpoint, "://") && !strings.HasPrefix(rawEndpoint, "http://") && !strings.HasPrefix(rawEndpoint, "https://") {
@@ -699,9 +715,26 @@ func validateSyncS3(s3 *conf.S3) error {
 	return nil
 }
 
+func validateSyncWebDAV(webdav *conf.WebDAV) error {
+	if webdav == nil {
+		return errors.New(Conf.Language(142))
+	}
+	return validateSyncHTTPEndpoint(webdav.Endpoint)
+}
+
+func validateSyncLocal(local *conf.Local) error {
+	if local == nil || strings.TrimSpace(local.Endpoint) == "" {
+		return errors.New(Conf.Language(142))
+	}
+	return nil
+}
+
 func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	release := lockAssetSourceChange()
 	defer release()
+	if err = validateSyncWebDAV(webdav); err != nil {
+		return
+	}
 	webdav.Endpoint = strings.TrimSpace(webdav.Endpoint)
 	webdav.Endpoint = util.NormalizeEndpoint(webdav.Endpoint)
 
@@ -724,6 +757,9 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 
 	Conf.Sync.WebDAV = webdav
 	Conf.Save()
+	if Conf.Sync.Provider == conf.ProviderWebDAV {
+		syncIndexListNotice.reset(util.PushClearMsg)
+	}
 	refreshLANSyncManager()
 	return
 }
@@ -731,6 +767,9 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 func SetSyncProviderLocal(local *conf.Local) (err error) {
 	release := lockAssetSourceChange()
 	defer release()
+	if err = validateSyncLocal(local); err != nil {
+		return
+	}
 	local.Endpoint = strings.TrimSpace(local.Endpoint)
 	local.Endpoint = util.NormalizeLocalPath(local.Endpoint)
 
@@ -772,6 +811,9 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 
 	Conf.Sync.Local = local
 	Conf.Save()
+	if Conf.Sync.Provider == conf.ProviderLocal {
+		syncIndexListNotice.reset(util.PushClearMsg)
+	}
 	refreshLANSyncManager()
 	return
 }

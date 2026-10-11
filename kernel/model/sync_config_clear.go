@@ -29,6 +29,9 @@ func ClearSyncProviderConfig(provider int) error {
 	if err := persistClearedSyncProviderConfig(provider); err != nil {
 		return err
 	}
+	if provider == Conf.Sync.Provider {
+		syncIndexListNotice.reset(util.PushClearMsg)
+	}
 	refreshLANSyncManager()
 	return nil
 }

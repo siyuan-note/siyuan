@@ -1,5 +1,5 @@
-export const bindAVCellInputPosition = (inputElement: HTMLElement, getAnchor: () => HTMLElement,
-                                       contentElement?: HTMLElement) => {
+export const bindAnchoredInputPosition = (inputElement: HTMLElement, getAnchor: () => HTMLElement,
+                                         contentElement?: HTMLElement, fitContent = false) => {
     const maskElement = inputElement.parentElement;
     let frame = 0;
     let disposed = false;
@@ -25,6 +25,24 @@ export const bindAVCellInputPosition = (inputElement: HTMLElement, getAnchor: ()
         const cellRect = anchorElement.getBoundingClientRect();
         const maskRect = maskElement.getBoundingClientRect();
         const contentRect = contentElement?.getBoundingClientRect();
+        if (fitContent) {
+            const viewport = window.visualViewport;
+            const viewportLeft = viewport?.offsetLeft || 0;
+            const viewportTop = viewport?.offsetTop || 0;
+            const viewportWidth = viewport?.width || window.innerWidth;
+            const viewportHeight = viewport?.height || window.innerHeight;
+            const width = Math.min(Math.max(cellRect.width, 240), Math.max(0, viewportWidth - 16));
+            inputElement.style.width = `${width}px`;
+            inputElement.style.height = "auto";
+            const height = Math.min(Math.max(cellRect.height, inputElement.scrollHeight), Math.max(0, viewportHeight - 16));
+            const left = Math.max(viewportLeft + 8, Math.min(cellRect.left, viewportLeft + viewportWidth - width - 8));
+            const top = Math.max(viewportTop + 8, Math.min(cellRect.top, viewportTop + viewportHeight - height - 8));
+            inputElement.style.left = `${left - maskRect.left}px`;
+            inputElement.style.top = `${top - maskRect.top}px`;
+            inputElement.style.height = `${height}px`;
+            inputElement.style.visibility = "";
+            return;
+        }
         const width = contentRect ? Math.min(Math.max(cellRect.width, 25), contentRect.width) :
             Math.max(cellRect.width, 25);
         const left = contentRect && (cellRect.left < contentRect.left || cellRect.left + width > contentRect.right) ?
@@ -69,11 +87,17 @@ export const bindAVCellInputPosition = (inputElement: HTMLElement, getAnchor: ()
         window.removeEventListener("resize", schedule);
         viewport?.removeEventListener("resize", schedule);
         viewport?.removeEventListener("scroll", schedule);
+        if (fitContent) {
+            inputElement.removeEventListener("input", schedule);
+        }
     };
     window.addEventListener("scroll", schedule, {capture: true, passive: true});
     window.addEventListener("resize", schedule);
     viewport?.addEventListener("resize", schedule);
     viewport?.addEventListener("scroll", schedule);
+    if (fitContent) {
+        inputElement.addEventListener("input", schedule);
+    }
     ownerObserver.observe(document.body, {childList: true, subtree: true, attributes: true, attributeFilter: ["class"]});
     update();
     // 焦点及键盘桥接调用结束后再次测量，避免沿用聚焦前的布局位置。

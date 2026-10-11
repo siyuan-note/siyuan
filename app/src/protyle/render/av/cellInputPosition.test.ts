@@ -5,7 +5,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 
-const compiled = transpileModule(readFileSync("src/protyle/render/av/cellInputPosition.ts", "utf8"), {
+const compiled = transpileModule(readFileSync("src/dialog/anchoredInputPosition.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS},
 }).outputText;
 
@@ -13,11 +13,13 @@ const rect = (left: number, top: number, width: number, height: number) => ({
     left, top, width, height, right: left + width, bottom: top + height,
 });
 
-const setup = () => {
+const setup = (fitContent = false) => {
     const frames = new Map<number, FrameRequestCallback>();
     let nextFrame = 0;
     class TestWindow extends EventTarget {
-        visualViewport = new EventTarget();
+        visualViewport = Object.assign(new EventTarget(), {offsetLeft: 0, offsetTop: 0, width: 360, height: 800});
+        innerWidth = 360;
+        innerHeight = 800;
         requestAnimationFrame(callback: FrameRequestCallback) {
             frames.set(++nextFrame, callback);
             return nextFrame;
@@ -52,12 +54,14 @@ const setup = () => {
     const mask = {isConnected: true, rect: rect(0, 0, 360, 800), getBoundingClientRect() {return this.rect;}};
     let anchor = {isConnected: true, rect: rect(40, 500, 220, 36), getBoundingClientRect() {return this.rect;}};
     const content = {rect: rect(16, 90, 328, 710), getBoundingClientRect() {return this.rect;}};
-    const input = {parentElement: mask, style: {} as Record<string, string>, value: "draft"};
-    const exports: {bindAVCellInputPosition?: (input: unknown, anchor: () => unknown, content?: unknown) => () => void} = {};
+    const input = Object.assign(new EventTarget(), {parentElement: mask, style: {} as Record<string, string>,
+        value: "draft", scrollHeight: 400});
+    const exports: {bindAnchoredInputPosition?: (input: unknown, anchor: () => unknown, content?: unknown,
+        fitContent?: boolean) => () => void} = {};
     runInNewContext(compiled, {
         exports, window, document: {body: {}}, MutationObserver: TestObserver, ResizeObserver: TestObserver,
     });
-    const dispose = exports.bindAVCellInputPosition(input, () => anchor, content);
+    const dispose = exports.bindAnchoredInputPosition(input, () => anchor, content, fitContent);
     const flush = () => {
         const pending = Array.from(frames.values());
         frames.clear();
@@ -66,6 +70,34 @@ const setup = () => {
     return {window, observers, mask, content, input, frames, dispose, flush,
         get anchor() {return anchor;}, set anchor(value) {anchor = value;}};
 };
+
+test("floating input fits its draft inside the visible viewport when the mobile keyboard opens", () => {
+    const f = setup(true);
+    assert.equal(f.input.style.width, "240px");
+    assert.equal(f.input.style.height, "400px");
+    assert.equal(f.input.style.top, "392px");
+    f.window.visualViewport.height = 320;
+    f.window.visualViewport.dispatchEvent(new Event("resize"));
+    f.flush();
+    assert.equal(f.input.style.height, "304px");
+    assert.equal(f.input.style.top, "8px");
+    Object.assign(f.window.visualViewport, {width: 180, height: 250, offsetLeft: 12, offsetTop: 150});
+    f.mask.rect = rect(8, 120, 180, 250);
+    f.window.visualViewport.dispatchEvent(new Event("scroll"));
+    f.flush();
+    assert.equal(f.input.style.width, "164px");
+    assert.equal(f.input.style.left, "12px");
+    assert.equal(f.input.style.top, "38px");
+    assert.equal(f.input.style.height, "234px");
+    f.input.scrollHeight = 60;
+    f.input.dispatchEvent(new Event("input"));
+    f.flush();
+    assert.equal(f.input.style.height, "60px");
+    assert.equal(f.input.value, "draft");
+    f.dispose();
+    f.input.dispatchEvent(new Event("input"));
+    assert.equal(f.frames.size, 0);
+});
 
 test("cell input follows native keyboard opening and closing without replacing the draft", () => {
     const fixture = setup();
@@ -212,7 +244,7 @@ const openInput = (positionByMenu = false) => {
         AV_CELL_EDITOR_CLOSE_EVENT: "close", callMobileAppShowKeyboard: () => {},
         window: {siyuan: {menus: {menu: {remove: () => {}}}, zIndex: 0}},
         document: {querySelector: () => inserted ? mask : null, body: {insertAdjacentHTML: () => {inserted = true;}}},
-        bindAVCellInputPosition: (_input: unknown, getter: () => unknown) => {getAnchor = getter;},
+        bindAnchoredInputPosition: (_input: unknown, getter: () => unknown) => {getAnchor = getter;},
         setPosition: () => {menuPositioned = true;},
     });
     exports.popTextCell({}, cells, "block", {scrollIntoView: false, positionByMenu});

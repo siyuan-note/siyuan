@@ -20,7 +20,7 @@ const unusedDependencies = [
     "../../../util/pathName", "./select", "../../undo", "./dateFormat", "./row", "./view", "../../../util/image",
     "../../../util/imageURL", "../../../mobile/util/mobileAppUtil", "../../../mobile/util/keyboardToolbar",
     "../../../util/setPosition", "./selectionState", "./color", "./richText", "./richTextEditor", "./virtualScroll",
-    "./cellEditor", "./blockIcon", "./cellInputPosition", "./locationEditor", "../../../dialog/message",
+    "./cellEditor", "./blockIcon", "../../../dialog/anchoredInputPosition", "./locationEditor", "../../../dialog/message",
     "../../../util/hostCapabilities", "../../../plugin/Menu", "../../../util/upDownHint", "./richTextValue",
     "../../../emoji/fileTreeIcon", "./lunarDate",
 ];

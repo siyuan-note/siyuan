@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261011091952"
+		"updated": "20261011142010"
 	},
 	"Children": [
 		{
@@ -4313,7 +4313,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20261010202520"
+				"updated": "20261011142010"
 			},
 			"Children": [
 				{
@@ -10263,7 +10263,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261010134815-nlwueda",
-				"updated": "20261010134815"
+				"updated": "20261011142010"
 			},
 			"Children": [
 				{
@@ -10278,12 +10278,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010134815-gzdtswz",
-				"updated": "20261010134815"
+				"updated": "20261011142010"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "点击图片下方的标题可就地编辑，移动端可轻点标题。标题获得焦点时，按 "
+					"Data": "点击图片下方的标题可通过悬浮输入框编辑，移动端可轻点标题。输入框显示时有全局遮罩，不影响正文布局。标题获得焦点时，按 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -10310,6 +10310,15 @@
 				},
 				{
 					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
 					"Data": " 保存，按 "
 				},
 				{
@@ -10319,7 +10328,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 取消，离开输入框也会保存。修改仅作用于当前图片引用，不会重命名资源文件。只读文档不支持编辑标题。"
+					"Data": " 取消。点击输入框外部或离开输入框也会保存，移动端返回会先保存并关闭输入框。修改仅作用于当前图片引用，不会重命名资源文件。只读文档不支持编辑标题。"
 				}
 			]
 		},

@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261011091952"
+		"updated": "20261011142010"
 	},
 	"Children": [
 		{
@@ -4315,7 +4315,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261010202520"
+				"updated": "20261011142010"
 			},
 			"Children": [
 				{
@@ -10275,7 +10275,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261010134815-v9k29uo",
-				"updated": "20261010134815"
+				"updated": "20261011142010"
 			},
 			"Children": [
 				{
@@ -10290,12 +10290,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010134815-bb1k769",
-				"updated": "20261010134815"
+				"updated": "20261011142010"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Click or tap the title below an image to edit it inline. When the title is focused, press "
+					"Data": "Click or tap the title below an image to edit it in a floating input. A full-screen mask appears while editing, and the document layout stays unchanged. When the title is focused, press "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -10322,6 +10322,15 @@
 				},
 				{
 					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
 					"Data": " to save or "
 				},
 				{
@@ -10331,7 +10340,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to cancel. Leaving the field also saves. The change applies to this image reference and does not rename the asset file. Read-only documents do not allow title editing."
+					"Data": " to cancel. Clicking outside the input or leaving the field also saves. On mobile, Back saves and closes the input first. The change applies to this image reference and does not rename the asset file. Read-only documents do not allow title editing."
 				}
 			]
 		},

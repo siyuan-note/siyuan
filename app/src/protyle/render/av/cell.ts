@@ -63,7 +63,7 @@ import {openAVRichTextEditor} from "./richTextEditor";
 import {getAVData, getAVPrimaryCell} from "./virtualScroll";
 import {AV_CELL_EDITOR_CLOSE_EVENT, getAVCellEditorOwner} from "./cellEditor";
 import {getAVBlockIconHTML, renderAVBlockIcon} from "./blockIcon";
-import {bindAVCellInputPosition} from "./cellInputPosition";
+import {bindAnchoredInputPosition} from "../../../dialog/anchoredInputPosition";
 import {createAVLocationFromText, createAVLocationReplacement, getAVLocationDisplayText, getAVLocationText, isAVLocationCoordinateInput, isAVLocationEmpty} from "./locationValue";
 import {openAVLocationEditor} from "./locationEditor";
 import {showMessage} from "../../../dialog/message";
@@ -858,7 +858,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             const anchorSelector = anchorRow && fieldID ?
                 `${groupID ? `.av__body[data-group-id="${escapeAttr(groupID)}"] ` : ""}` +
                 `.${anchorRow.classList.contains("av__row") ? "av__row" : "av__gallery-item"}[data-id="${anchorRow.dataset.id}"] .av__cell[${fieldAttr}="${fieldID}"]` : "";
-            bindAVCellInputPosition(inputElement, () => {
+            bindAnchoredInputPosition(inputElement, () => {
                 if (!cellElements[0].isConnected && anchorSelector && blockElement.isConnected) {
                     // 行重绘后按原分组、行和字段重新绑定，输入内容继续保留在同一个编辑框中。
                     const anchor = blockElement.querySelector<HTMLElement>(anchorSelector);

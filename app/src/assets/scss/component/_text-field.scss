@@ -1,3 +1,14 @@
+.b3-text-field__mask,
+.av__mask {
+  position: fixed;
+  inset: 0;
+}
+
+.b3-text-field__mask > .b3-text-field {
+  position: absolute;
+  resize: none;
+}
+
 .b3-text-field {
   border: 0;
   border-radius: var(--b3-border-radius);

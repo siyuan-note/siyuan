@@ -9,8 +9,9 @@ import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {getCloudURL} from "../util/about";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {Dialog} from "../../dialog";
-import {escapeHtml} from "../../util/escape";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {isMobile} from "../../util/functions";
+import {canPurgeRepo} from "../../history/repoPurge";
 
 /** 按当前配置刷新同步 Tab 可见性与动态面板（供 syncRuntime 调用） */
 export const refreshSyncTabPanels = (root: Element) => {
@@ -61,6 +62,7 @@ const setSyncConfigItemVisible = (root: Element) => {
     .forEach((id) => {
         root.querySelector(`#${CSS.escape(id)}`)?.closest(".config-item")?.classList.toggle("fn__none", !visible);
     });
+    root.querySelector("#cloudRepoPurgeBlock")?.classList.toggle("fn__none", !canPurgeRepo("cloud", window.siyuan.config.sync.provider));
     refreshLANSyncConfigItemVisibility(root);
 };
 
@@ -78,13 +80,29 @@ const setSyncModeRelatedConfigItemVisible = (root: Element) => {
 /** 同步提供商配置区检索关键词（供 syncTab 注册 slot） */
 export const getSyncProviderConfigKeywords = (): string[] => buildProviderConfigKeywords();
 
-/** 同步服务配置行检索关键词；重叠部分与配置区共用，避免行隐藏时搜索落到空分组 */
+/** 配置行与说明区共用操作和字段关键词，搜索弹窗字段时保留配置入口 */
 export const getSyncProviderConfigRowKeywords = (): string[] => [
     window.siyuan.languages.syncConfig,
     window.siyuan.languages.syncConfigTip,
     window.siyuan.languages.config,
     window.siyuan.languages.import,
     window.siyuan.languages.export,
+    window.siyuan.languages.clearSyncConfig,
+    "Endpoint",
+    "Access Key",
+    "Secret Key",
+    "Bucket",
+    "Region ID",
+    "Timeout (s)",
+    "Addressing",
+    "Path-style",
+    "Virtual-hosted-style",
+    "TLS Verify",
+    "Verify",
+    "Skip",
+    "Concurrent Reqs",
+    "Username",
+    "Password",
 ];
 
 type SyncProviderConfigKey = Extract<keyof Config.ISync, "s3" | "webdav" | "local">;
@@ -267,28 +285,7 @@ const buildProviderConfigKeywords = (): string[] => {
         window.siyuan.languages.syncThirdPartyProviderLocalIntro,
         window.siyuan.languages.proFeature,
         window.siyuan.languages.syncThirdPartyProviderTip,
-        // 操作按钮
-        window.siyuan.languages.import,
-        window.siyuan.languages.export,
-        window.siyuan.languages.syncConfig,
-        window.siyuan.languages.syncConfigTip,
-        window.siyuan.languages.clearSyncConfig,
-        // 表单标签与选项（硬编码英文）
-        "Endpoint",
-        "Access Key",
-        "Secret Key",
-        "Bucket",
-        "Region ID",
-        "Timeout (s)",
-        "Addressing",
-        "Path-style",
-        "Virtual-hosted-style",
-        "TLS Verify",
-        "Verify",
-        "Skip",
-        "Concurrent Reqs",
-        "Username",
-        "Password",
+        ...getSyncProviderConfigRowKeywords(),
     ];
 };
 
@@ -325,7 +322,7 @@ const genProviderConfigRowHtml = (def: SyncThirdPartyProviderDef): string => {
     <div class="fn__flex-1 config-item__main">
         <div class="config-name">${L.syncConfig}</div>
         <div class="b3-label__text">${L.syncConfigTip}</div>
-        <div class="b3-label__text fn__ellipsis" title="${escapeHtml(summary)}">${escapeHtml(summary)}</div>
+        <div class="b3-label__text fn__ellipsis" title="${escapeHtmlTextAndAttr(summary)}">${escapeHtmlTextAndAttr(summary)}</div>
     </div>
     <span class="fn__space"></span>
     <div class="fn__size200 fn__flex-center">

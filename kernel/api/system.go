@@ -691,6 +691,10 @@ var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Conte
 		importedConf.System.NetworkProxy = model.Conf.System.NetworkProxy
 	}
 
+	importedConf.FileTree = conf.NormalizeFileTree(importedConf.FileTree)
+	importedConf.Editor = conf.NormalizeEditor(importedConf.Editor)
+	importedConf.Search = conf.NormalizeSearch(importedConf.Search)
+	importedConf.Flashcard, _ = conf.NormalizeFlashcard(importedConf.Flashcard)
 	model.Conf.FileTree = importedConf.FileTree
 	model.Conf.Tag = importedConf.Tag
 	model.Conf.Editor = importedConf.Editor

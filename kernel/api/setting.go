@@ -19,7 +19,6 @@ package api
 import (
 	"fmt"
 	"reflect"
-	"strings"
 	"sync"
 
 	"github.com/88250/gulu"
@@ -352,13 +351,7 @@ func applyFlashcardSetting(c *gin.Context, request apicontract.SetFlashcardReque
 		return
 	}
 
-	if 0 > flashcard.NewCardLimit {
-		flashcard.NewCardLimit = 20
-	}
-
-	if 0 > flashcard.ReviewCardLimit {
-		flashcard.ReviewCardLimit = 200
-	}
+	flashcard, _ = conf.NormalizeFlashcard(flashcard)
 
 	model.Conf.Flashcard = flashcard
 	model.Conf.Save()
@@ -398,30 +391,7 @@ func applyEditorSetting(c *gin.Context, request apicontract.SetEditorRequest) (r
 	if !request.HasFieldFold("displayImgAlt") {
 		editor.DisplayImgAlt = model.Conf.Editor.DisplayImgAlt
 	}
-	editor.NormalizeFontFamilies()
-
-	if "" == editor.PlantUMLServePath {
-		editor.PlantUMLServePath = "https://www.plantuml.com/plantuml/svg/~1"
-	}
-
-	if "" == editor.KaTexMacros {
-		editor.KaTexMacros = "{}"
-	}
-
-	if 1 > editor.HistoryRetentionDays {
-		editor.HistoryRetentionDays = 30
-	}
-	if 3650 < editor.HistoryRetentionDays {
-		editor.HistoryRetentionDays = 3650
-	}
-
-	if nil == editor.FloatWindowDelay {
-		editor.FloatWindowDelay = new(620)
-	} else {
-		*editor.FloatWindowDelay = max(0, min(2000, *editor.FloatWindowDelay))
-	}
-	editor.CursorSurroundingLines = conf.NormalizeCursorSurroundingLines(editor.CursorSurroundingLines)
-	editor.AssetOpen = conf.NormalizeAssetOpen(editor.AssetOpen)
+	editor = conf.NormalizeEditor(editor)
 
 	oldVirtualBlockRef := model.Conf.Editor.VirtualBlockRef
 	oldVirtualBlockRefInclude := model.Conf.Editor.VirtualBlockRefInclude
@@ -535,47 +505,7 @@ func applyFiletreeSetting(c *gin.Context, request apicontract.SetFiletreeRequest
 	}
 	oldBoxDocEnabled := model.IsBoxDocEnabled()
 
-	fileTree.DocCreateSavePath = util.TrimSpaceInPath(fileTree.DocCreateSavePath)
-	fileTree.DocCreateTemplatePath = util.NormalizeTemplatePath(fileTree.DocCreateTemplatePath)
-
-	fileTree.RefCreateSavePath = util.TrimSpaceInPath(fileTree.RefCreateSavePath)
-
-	fileTree.ShorthandSavePath = util.TrimSpaceInPath(fileTree.ShorthandSavePath)
-	if "" != fileTree.ShorthandSavePath {
-		if !strings.HasPrefix(fileTree.ShorthandSavePath, "/") {
-			fileTree.ShorthandSavePath = "/" + fileTree.ShorthandSavePath
-		}
-	}
-
-	if 1 > fileTree.MaxOpenTabCount {
-		fileTree.MaxOpenTabCount = 8
-	}
-	if 32 < fileTree.MaxOpenTabCount {
-		fileTree.MaxOpenTabCount = 32
-	}
-	if 0 > fileTree.DocIconClickMode || 1 < fileTree.DocIconClickMode {
-		fileTree.DocIconClickMode = 0
-	}
-	if 0 > fileTree.ParentDocTitleClickMode || 2 < fileTree.ParentDocTitleClickMode {
-		fileTree.ParentDocTitleClickMode = 0
-	}
-	if nil == fileTree.TabStartupMode {
-		fileTree.TabStartupMode = new(int)
-		if fileTree.CloseTabsOnStart {
-			*fileTree.TabStartupMode = 2
-		}
-	}
-	if 0 > *fileTree.TabStartupMode || 2 < *fileTree.TabStartupMode {
-		*fileTree.TabStartupMode = 0
-	}
-	fileTree.CloseTabsOnStart = 2 == *fileTree.TabStartupMode
-
-	if conf.MinFileTreeRecentDocsListCount > fileTree.RecentDocsMaxListCount {
-		fileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount
-	}
-	if conf.MaxFileTreeRecentDocsListCount < fileTree.RecentDocsMaxListCount {
-		fileTree.RecentDocsMaxListCount = conf.MaxFileTreeRecentDocsListCount
-	}
+	fileTree = conf.NormalizeFileTree(fileTree)
 
 	model.Conf.FileTree = fileTree
 	model.Conf.Save()
@@ -624,9 +554,7 @@ func applySearchSetting(c *gin.Context, request apicontract.SetSearchRequest) (r
 		s.MindmapItem = new(model.Conf.Search.MindmapItemEnabled())
 	}
 
-	if 32 > s.Limit {
-		s.Limit = 32
-	}
+	s = conf.NormalizeSearch(s)
 
 	oldCaseSensitive := model.Conf.Search.CaseSensitive
 	oldHanSensitive := model.Conf.Search.HanSensitiveVal()

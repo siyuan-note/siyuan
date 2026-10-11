@@ -6660,6 +6660,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 使用与启动、导入相同的规范化规则并同步保存。锚文本长度 1–5120 保持不变，小于 1 回退 64。
+     * 字体大小超出 9–72 回退 16；省略字体列表和图片标题字段时继续保留原有兼容行为。
+     */
     "/api/setting/setEditor": {
         request: SetEditorRequestInput;
         response: { "code": 0; "data": SettingEditor | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6695,6 +6699,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 使用与启动、导入相同的路径和数值规范化规则；省略顶层笔记本文档和默认图标选项时保留当前值。
+     */
     "/api/setting/setFiletree": {
         request: SetFiletreeRequestInput;
         response: { "code": 0; "data": SettingFileTree | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6702,6 +6709,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 使用与启动、导入相同的规范化规则；保留零张上限，非法记忆参数和权重恢复默认值。
+     */
     "/api/setting/setFlashcard": {
         request: SetFlashcardRequestInput;
         response: { "code": 0; "data": SettingFlashcard | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6730,6 +6740,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 使用与启动、导入相同的规范化规则；limit 小于 1 回退 64，1–31 提升至 32。
+     * 省略汉字敏感、自定义块和脑图选项时保留当前值；反链提及关键词上限小于 1 回退 512。
+     */
     "/api/setting/setSearch": {
         request: SetSearchRequestInput;
         response: { "code": 0; "data": SettingSearch | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -7342,6 +7356,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 导入前按启动和设置接口的相同规则规范化编辑器、文档树、搜索和闪卡偏好，并同步保存。
+     */
     "/api/system/importConf": {
         request: SystemImportConfRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

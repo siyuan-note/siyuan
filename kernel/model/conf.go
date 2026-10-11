@@ -405,48 +405,9 @@ func InitConf() {
 	}
 	util.NotificationsCfg = Conf.Appearance.Notifications
 	Conf.FileTree = normalizeFileTreeDefaultIcon(Conf.FileTree, confFileExists)
-	if 1 > Conf.FileTree.MaxListCount {
-		Conf.FileTree.MaxListCount = 512
-	}
-	if 1 > Conf.FileTree.MaxOpenTabCount {
-		Conf.FileTree.MaxOpenTabCount = 8
-	}
-	if 32 < Conf.FileTree.MaxOpenTabCount {
-		Conf.FileTree.MaxOpenTabCount = 32
-	}
-	if nil == Conf.FileTree.TabStartupMode {
-		Conf.FileTree.TabStartupMode = new(int)
-		if Conf.FileTree.CloseTabsOnStart {
-			*Conf.FileTree.TabStartupMode = 2
-		}
-	}
-	if 0 > *Conf.FileTree.TabStartupMode || 2 < *Conf.FileTree.TabStartupMode {
-		*Conf.FileTree.TabStartupMode = 0
-	}
-	Conf.FileTree.CloseTabsOnStart = 2 == *Conf.FileTree.TabStartupMode
-	Conf.FileTree.DocCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.DocCreateSavePath)
-	Conf.FileTree.DocCreateTemplatePath = util.NormalizeTemplatePath(Conf.FileTree.DocCreateTemplatePath)
-	Conf.FileTree.RefCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.RefCreateSavePath)
-	Conf.FileTree.ShorthandSavePath = util.TrimSpaceInPath(Conf.FileTree.ShorthandSavePath)
+	Conf.FileTree = conf.NormalizeFileTree(Conf.FileTree)
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
-	if 2 > Conf.FileTree.LargeFileWarningSize {
-		Conf.FileTree.LargeFileWarningSize = 8
-	}
 	util.LargeFileWarningSize = Conf.FileTree.LargeFileWarningSize
-	if nil == Conf.FileTree.CreateDocAtTop { // v3.4.0 之前的版本没有该字段，设置默认值为 true，即在顶部创建新文档，不改变用户习惯
-		Conf.FileTree.CreateDocAtTop = new(true)
-	}
-	if nil == Conf.FileTree.BoxDocEnabled {
-		// 配置缺失时默认关闭顶层笔记本文档。
-		Conf.FileTree.BoxDocEnabled = new(bool)
-	}
-
-	if conf.MinFileTreeRecentDocsListCount > Conf.FileTree.RecentDocsMaxListCount {
-		Conf.FileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount
-	}
-	if conf.MaxFileTreeRecentDocsListCount < Conf.FileTree.RecentDocsMaxListCount {
-		Conf.FileTree.RecentDocsMaxListCount = conf.MaxFileTreeRecentDocsListCount
-	}
 
 	util.CurrentCloudRegion = Conf.CloudRegion
 
@@ -454,81 +415,8 @@ func InitConf() {
 		Conf.Tag = conf.NewTag()
 	}
 
-	defaultEditor := conf.NewEditor()
-	if nil == Conf.Editor {
-		Conf.Editor = defaultEditor
-	}
-
-	// 新增字段的默认值，使用指针类型来区分字段不存在（nil）和用户设置为 0（非 nil）
-	if nil == Conf.Editor.BacklinkSort {
-		Conf.Editor.BacklinkSort = defaultEditor.BacklinkSort
-	}
-	if nil == Conf.Editor.BackmentionSort {
-		Conf.Editor.BackmentionSort = defaultEditor.BackmentionSort
-	}
-	if nil == Conf.Editor.DatabaseAttrShow {
-		Conf.Editor.DatabaseAttrShow = defaultEditor.DatabaseAttrShow
-	}
-	if nil == Conf.Editor.DatabaseAttrUseTabs {
-		Conf.Editor.DatabaseAttrUseTabs = defaultEditor.DatabaseAttrUseTabs
-	}
-	if nil == Conf.Editor.CheckBlockRef {
-		Conf.Editor.CheckBlockRef = defaultEditor.CheckBlockRef
-	}
-	if nil == Conf.Editor.HashTagSearch {
-		Conf.Editor.HashTagSearch = defaultEditor.HashTagSearch
-	}
-	Conf.Editor.AssetOpen = conf.NormalizeAssetOpen(Conf.Editor.AssetOpen)
-	Conf.Editor.NormalizeFontFamilies()
+	Conf.Editor = conf.NormalizeEditor(Conf.Editor)
 	Conf.Appearance.NormalizeGlobalFontFamilies()
-	Conf.Editor.Emoji = util.FilterRecentIconValues(Conf.Editor.Emoji)
-	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
-		Conf.Editor.FontSize = 16
-	}
-	if "" == Conf.Editor.PlantUMLServePath {
-		Conf.Editor.PlantUMLServePath = "https://www.plantuml.com/plantuml/svg/~1"
-	}
-	if 1 > Conf.Editor.BlockRefDynamicAnchorTextMaxLen {
-		Conf.Editor.BlockRefDynamicAnchorTextMaxLen = 64
-	}
-	if 5120 < Conf.Editor.BlockRefDynamicAnchorTextMaxLen {
-		Conf.Editor.BlockRefDynamicAnchorTextMaxLen = 5120
-	}
-	if 1440 < Conf.Editor.GenerateHistoryInterval {
-		Conf.Editor.GenerateHistoryInterval = 1440
-	}
-	if 1 > Conf.Editor.HistoryRetentionDays {
-		Conf.Editor.HistoryRetentionDays = 30
-	}
-	if 3650 < Conf.Editor.HistoryRetentionDays {
-		Conf.Editor.HistoryRetentionDays = 3650
-	}
-	if nil == Conf.Editor.FloatWindowDelay {
-		Conf.Editor.FloatWindowDelay = new(620)
-	} else {
-		*Conf.Editor.FloatWindowDelay = max(0, min(2000, *Conf.Editor.FloatWindowDelay))
-	}
-	Conf.Editor.CursorSurroundingLines = conf.NormalizeCursorSurroundingLines(Conf.Editor.CursorSurroundingLines)
-	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
-		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
-	}
-	if 1 > len(Conf.Editor.SpellcheckLanguages) {
-		Conf.Editor.SpellcheckLanguages = []string{"en-US"}
-	}
-	Conf.Editor.BacklinkExpandCount = conf.NormalizeBacklinkExpandCount(Conf.Editor.BacklinkExpandCount)
-	Conf.Editor.BackmentionExpandCount = conf.NormalizeBacklinkExpandCount(Conf.Editor.BackmentionExpandCount)
-	if "" == Conf.Editor.HeadingNumberFormat {
-		Conf.Editor.HeadingNumberFormat = conf.DefaultHeadingNumberFormat
-	}
-	if nil == Conf.Editor.Markdown {
-		Conf.Editor.Markdown = &util.Markdown{}
-	}
-	if nil == Conf.Editor.Markdown.CodeBlockMiddleDot {
-		Conf.Editor.Markdown.CodeBlockMiddleDot = defaultEditor.Markdown.CodeBlockMiddleDot
-	}
-	if nil == Conf.Editor.Markdown.BlockFullWidthTaskList {
-		Conf.Editor.Markdown.BlockFullWidthTaskList = defaultEditor.Markdown.BlockFullWidthTaskList
-	}
 	util.MarkdownSettings = Conf.Editor.Markdown
 
 	if nil == Conf.Export {
@@ -709,79 +597,20 @@ func InitConf() {
 	// Enabled=true 但备份缺失/无效属配置不完整，解锁时由 deriveKEK 返回恢复提示（Language 315），
 	// 引导用户导入匹配的备份文件后重新验证主密码。
 
-	if nil == Conf.Search {
-		Conf.Search = conf.NewSearch()
-	}
-	if nil == Conf.Search.CustomBlock {
-		Conf.Search.CustomBlock = new(true)
-	}
-	if nil == Conf.Search.Mindmap {
-		Conf.Search.Mindmap = new(true)
-	}
-	if nil == Conf.Search.MindmapItem {
-		Conf.Search.MindmapItem = new(false)
-	}
-	if 1 > Conf.Search.Limit {
-		Conf.Search.Limit = 64
-	}
-	if 32 > Conf.Search.Limit {
-		Conf.Search.Limit = 32
-	}
-	if 1 > Conf.Search.BacklinkMentionKeywordsLimit {
-		Conf.Search.BacklinkMentionKeywordsLimit = 512
-	}
-	if nil == Conf.Search.HanSensitive {
-		Conf.Search.SetHanSensitive(true)
-	}
+	Conf.Search = conf.NormalizeSearch(Conf.Search)
 	sql.SetHanSensitive(Conf.Search.HanSensitiveVal())
 
 	if nil == Conf.Stat {
 		Conf.Stat = conf.NewStat()
 	}
 
-	if nil == Conf.Flashcard {
-		Conf.Flashcard = conf.NewFlashcard()
-	}
-	if 0 > Conf.Flashcard.NewCardLimit {
-		Conf.Flashcard.NewCardLimit = 20
-	}
-	if 0 > Conf.Flashcard.ReviewCardLimit {
-		Conf.Flashcard.ReviewCardLimit = 200
-	}
-	if 0 >= Conf.Flashcard.RequestRetention || 1 <= Conf.Flashcard.RequestRetention {
-		Conf.Flashcard.RequestRetention = conf.NewFlashcard().RequestRetention
-	}
-	if 0 >= Conf.Flashcard.MaximumInterval || 36500 <= Conf.Flashcard.MaximumInterval {
-		Conf.Flashcard.MaximumInterval = conf.NewFlashcard().MaximumInterval
-	}
-	if "" == Conf.Flashcard.Weights {
-		Conf.Flashcard.Weights = conf.NewFlashcard().Weights
-	}
-	if 19 != len(strings.Split(Conf.Flashcard.Weights, ",")) {
-		defaultWeights := conf.DefaultFSRSWeights()
-		msg := "fsrs store weights length must be [19]"
-		logging.LogWarnf("%s , given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
-		Conf.Flashcard.Weights = defaultWeights
+	var flashcardWarning string
+	Conf.Flashcard, flashcardWarning = conf.NormalizeFlashcard(Conf.Flashcard)
+	if flashcardWarning != "" {
+		logging.LogWarnf("%s, reset to default weights [%s]", flashcardWarning, Conf.Flashcard.Weights)
 		go func() {
 			util.WaitForUILoaded()
-			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
-		}()
-	}
-	isInvalidFlashcardWeights := false
-	for w := range strings.SplitSeq(Conf.Flashcard.Weights, ",") {
-		if _, err := strconv.ParseFloat(strings.TrimSpace(w), 64); err != nil {
-			isInvalidFlashcardWeights = true
-			break
-		}
-	}
-	if isInvalidFlashcardWeights {
-		defaultWeights := conf.DefaultFSRSWeights()
-		msg := "fsrs store weights contain invalid number"
-		logging.LogWarnf("%s, given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
-		Conf.Flashcard.Weights = defaultWeights
-		go func() {
-			util.WaitForUILoaded()
-			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
+			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, flashcardWarning, 15000)
 		}()
 	}
 

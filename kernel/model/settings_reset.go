@@ -27,7 +27,6 @@ func defaultWorkspaceSettings(current *AppConf) *AppConf {
 	next := *current
 	next.Editor = conf.NewEditor()
 	next.Editor.Markdown = util.NewMarkdown()
-	next.Editor.NormalizeFontFamilies()
 	if current.Editor != nil {
 		next.Editor.HistoryRetentionDays = current.Editor.HistoryRetentionDays
 		next.Editor.Emoji = current.Editor.Emoji
@@ -67,6 +66,10 @@ func defaultWorkspaceSettings(current *AppConf) *AppConf {
 		system.SettingsWindow = false
 		next.System = &system
 	}
+	next.Editor = conf.NormalizeEditor(next.Editor)
+	next.FileTree = conf.NormalizeFileTree(next.FileTree)
+	next.Search = conf.NormalizeSearch(next.Search)
+	next.Flashcard, _ = conf.NormalizeFlashcard(next.Flashcard)
 	return &next
 }
 

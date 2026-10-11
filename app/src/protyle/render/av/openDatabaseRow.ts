@@ -58,6 +58,8 @@ const highlightDatabaseRow = (protyle: IProtyle, rootElement: HTMLElement, data:
 const closeMobileDatabaseRow = () => {
     for (let i = window.siyuan.dialogs.length - 1; i >= 0; i--) {
         if (window.siyuan.dialogs[i].element.querySelector(".protyle-db-row--mobile")) {
+            // 条目预览直接替换，隐藏旧弹层后继续执行销毁清理。
+            window.siyuan.dialogs[i].element.classList.add("fn__none");
             window.siyuan.dialogs[i].destroy();
             break;
         }

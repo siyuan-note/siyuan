@@ -14,6 +14,9 @@ const createPreview = async (mobile: boolean) => {
     const title = {textContent: "", style: {}};
     const content = {scrollTop: 25};
     let body: Body;
+    let hidden = false;
+    let hiddenOnClose = false;
+    const openedBlocks: string[] = [];
     class Body {
         public isConnected = true;
         public style = {};
@@ -30,6 +33,7 @@ const createPreview = async (mobile: boolean) => {
     body = new Body();
     const listeners = new Map<string, (event: {detail: unknown}) => void>();
     const root = {
+        classList: {add: (name: string) => { hidden ||= name === "fn__none"; }},
         dataset: {}, clientWidth: 800, isConnected: true, scrollTop: 25,
         querySelector: (selector: string): unknown => {
             if (selector.includes("__body")) { return body; }
@@ -41,6 +45,7 @@ const createPreview = async (mobile: boolean) => {
         addEventListener: (name: string, listener: (event: {detail: unknown}) => void) => listeners.set(name, listener),
     };
     let closed = 0;
+    const dialogs: {element: typeof root, destroy: () => void}[] = [];
     const tab = {updateTitle: (value: string) => { title.textContent = value; }, parent: {removeTab: () => { closed++; }}};
     let destroy: () => void;
     let loaded: () => void;
@@ -68,9 +73,11 @@ const createPreview = async (mobile: boolean) => {
         "../protyle/ui/padding": {getEditorHorizontalPadding: () => ({left: 0, right: 0})},
         "../../../dialog": {Dialog: class {
             public element = root;
-            constructor(options: {destroyCallback: () => void}) { destroy = options.destroyCallback; }
-            public destroy() { closed++; destroy(); }
+            constructor(options: {destroyCallback: () => void}) { destroy = options.destroyCallback; dialogs.push(this); }
+            public destroy() { hiddenOnClose = hidden; closed++; destroy(); }
         }},
+        "../../../constants": {Constants: {CB_GET_ALL: "all", CB_GET_FOCUS: "focus"}},
+        "../../../mobile/editor": {openMobileFileById: (_app: unknown, id: string) => openedBlocks.push(id)},
         "./databaseRowNavigation": {
             getDatabaseRowNavigation: (): undefined => undefined,
             mountDatabaseRowNavigation: (_root: unknown, row: IDatabaseRowOpenData,
@@ -87,7 +94,7 @@ const createPreview = async (mobile: boolean) => {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText, {
             exports, document: {createElement: () => new Body()},
-            window: {siyuan: {dialogs: [], languages: {untitled: "Untitled"}, config: {editor: {databaseAttrShow: true}}}},
+            window: {siyuan: {dialogs, menus: {menu: {remove() {}}}, languages: {untitled: "Untitled"}, config: {editor: {databaseAttrShow: true}}}},
             ResizeObserver: class { observe() {} disconnect() {} },
             require: (name: string) => {
                 if (name === "../protyle" || name === "../../index") {
@@ -139,7 +146,7 @@ const createPreview = async (mobile: boolean) => {
     return {data, title, root, content, requests, complete, refresh: () => refresh(),
         navigate: (next: IDatabaseRowOpenData) => navigate(next), destroy: () => destroy(),
         body: () => body, closed: () => closed, savedRow: () => model?.data.itemID,
-        mountedRow: () => mountedRow};
+        mountedRow: () => mountedRow, hiddenOnClose: () => hiddenOnClose, openedBlocks};
 };
 
 for (const mobile of [false, true]) {
@@ -177,3 +184,11 @@ for (const mobile of [false, true]) {
         assert.equal(preview.body().rowID, "second");
     });
 }
+
+test("mobile detached-to-bound navigation hides the old preview before its close animation starts", async () => {
+    const preview = await createPreview(true);
+    assert.equal(await preview.navigate({...preview.data, itemID: "bound", isDetached: false, boundBlockID: "block"}), true);
+    assert.equal(preview.closed(), 1);
+    assert.equal(preview.hiddenOnClose(), true);
+    assert.deepEqual(preview.openedBlocks, ["block"]);
+});

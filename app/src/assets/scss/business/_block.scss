@@ -112,6 +112,7 @@
     transition: var(--b3-transition), opacity .3s cubic-bezier(0, 0, .2, 1) 0ms;
     line-height: 16px;
 
+    &--tap:active:not([disabled]),
     &:hover:not([disabled]):not(.block__icon--text):not(.block__icon--warning):not(.block__icon--subtle),
     &--active {
       color: var(--b3-theme-on-background);
@@ -147,6 +148,10 @@
         min-height: 44px;
         justify-content: center;
       }
+    }
+
+    &--tap {
+      -webkit-tap-highlight-color: transparent;
     }
 
     &--subtle {

@@ -70,12 +70,14 @@ func TestAPIContractAppearanceSameSelectionRefreshesPackages(t *testing.T) {
 			selected := conf.NewAppearance()
 			selected.ThemeLight, selected.ThemeDark, selected.Icon = "custom", "custom", "custom"
 			selected.ModeOS, selected.HideStatusBar = false, true
+			selected.CloseButtonBehavior = 5
 			body, err := json.Marshal(selected)
 			if err != nil {
 				t.Fatal(err)
 			}
 			code, message, _ := settingContractRequest(t, "setAppearance", setAppearance, string(body))
-			if code != 0 || model.Conf.Appearance.Load().ThemeLight != "custom" || model.Conf.Appearance.Load().Icon != "custom" {
+			if code != 0 || model.Conf.Appearance.Load().ThemeLight != "custom" || model.Conf.Appearance.Load().Icon != "custom" ||
+				model.Conf.Appearance.Load().CloseButtonBehavior != 0 {
 				t.Fatalf("initial package selection failed: %d %s", code, message)
 			}
 			model.CloseWatchThemes()
@@ -90,7 +92,7 @@ func TestAPIContractAppearanceSameSelectionRefreshesPackages(t *testing.T) {
 				code, message, data = settingContractRequest(t, endpoint, setAppearance, string(body))
 			} else {
 				code, message, data = settingContractRequest(t, endpoint, patchSetting,
-					`{"appearance":{"themeLight":"custom","themeDark":"custom","icon":"custom"}}`)
+					`{"appearance":{"themeLight":"custom","themeDark":"custom","icon":"custom","closeButtonBehavior":5}}`)
 			}
 			if code != 0 {
 				t.Fatalf("refresh failed: %d %s", code, message)
@@ -98,7 +100,7 @@ func TestAPIContractAppearanceSameSelectionRefreshesPackages(t *testing.T) {
 			assertFallback := func(value *conf.Appearance) {
 				t.Helper()
 				if value.ThemeLight != "daylight" || value.ThemeDark != "midnight" || value.Icon != "litheness" ||
-					value.ThemeVer != "1.0.0" || value.IconVer != "1.0.0" || !value.HideStatusBar {
+					value.ThemeVer != "1.0.0" || value.IconVer != "1.0.0" || !value.HideStatusBar || value.CloseButtonBehavior != 0 {
 					t.Fatalf("refresh did not expose the final fallback snapshot: %+v", value)
 				}
 			}

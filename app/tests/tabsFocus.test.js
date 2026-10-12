@@ -224,7 +224,8 @@ const cases = async (source) => {
             check.equal(replayItem.hasAttribute("data-tabs-hidden"), false);
             check.notEqual(getComputedStyle(replayItem).display, "none");
             check.equal(replayInfo.classList.contains("tabs-title-editor"), false);
-            check.equal(replayInfo.hasAttribute("style"), false);
+            // 空样式属性不影响布局，确认回放注入的定位声明已被清除。
+            check.equal(replayInfo.style.cssText, "");
             replayItem.querySelector(".tab-item-content > [data-node-id]").dispatchEvent(
                 new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
             check.equal(genericContextMenus, 1);

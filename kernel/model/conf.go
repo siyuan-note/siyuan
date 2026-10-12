@@ -272,6 +272,9 @@ func InitConf() {
 	}
 	clearEncryptedExportTempOnBoot()
 	clearOldInstallPackages("")
+	if err := CleanupRetiredInstallResources(); err != nil {
+		logging.LogWarnf("clean up retired install resources failed: %s", err)
+	}
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	confFileExists := gulu.File.IsExist(confPath)
 	var confData []byte
@@ -418,26 +421,6 @@ func InitConf() {
 		util.Lang = Conf.Lang
 	}
 	Conf.Appearance.Load().Lang = Conf.Lang
-
-	// 历史下划线命名的 i18n 文件（zh_CN.json 等）已重命名为 BCP 47（zh-CN.json 等），
-	// 清理 ConfDir/appearance/langs/ 下的旧名残留，避免僵尸文件。
-	if langsDir := filepath.Join(util.AppearancePath, "langs"); gulu.File.IsDir(langsDir) {
-		if entries, err := os.ReadDir(langsDir); err == nil {
-			for _, entry := range entries {
-				name := entry.Name()
-				if entry.IsDir() || !strings.HasSuffix(name, ".json") {
-					continue
-				}
-				stem := strings.TrimSuffix(name, ".json")
-				if _, ok := util.LangLegacyToBCP47[stem]; !ok {
-					continue
-				}
-				os.RemoveAll(filepath.Join(langsDir, name))
-			}
-		}
-	}
-	os.RemoveAll(filepath.Join(util.AppearancePath, "icons", "ant"))
-	os.RemoveAll(filepath.Join(util.AppearancePath, "icons", "material"))
 
 	util.CurrentCloudRegion = Conf.CloudRegion
 

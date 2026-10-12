@@ -18,28 +18,26 @@ test("frontend scripts and dependencies no longer build or include the map SDK",
     }
 });
 
-test("all desktop packages exclude stale map sources and generated output", () => {
+test("desktop packages filter the OCR runtime out of the shipped stage folder", () => {
     const configs = fs.readdirSync(app).filter(name => /^electron-builder(?:-[\w-]+)?\.yml$/.test(name));
     assert.equal(configs.length, 6);
     for (const name of configs) {
         const stage = read(name).match(/from: "stage"\s+to: "stage"\s+filter: (\[[^\n]+\])/);
         assert.ok(stage, name);
-        const filters = JSON.parse(stage[1]);
-        assert.ok(filters.includes("**/*"), name);
-        for (const excluded of ["!map/**/*", "!build/map/**/*", "!ocr/runtime/**/*"]) {
-            assert.ok(filters.includes(excluded), name + ": " + excluded);
-        }
+        // 精确匹配：已撤回的地图产物不应再出现在打包过滤项里
+        assert.deepEqual(JSON.parse(stage[1]), ["**/*", "!ocr/runtime/**/*"], name);
     }
 });
 
-test("Docker and mobile packaging exclude stale map resources", () => {
-    const docker = read("../.dockerignore").trim().split(/\r?\n/);
-    assert.ok(docker.includes("app/stage/map"));
-    assert.ok(docker.includes("app/stage/build/map"));
-    const android = read("../scripts/android-dev-run.mjs");
+test("no packaging path special-cases the withdrawn map output", () => {
+    // 已撤回产物由内核启动清理负责；打包路径不应再枚举它们。
+    assert.doesNotMatch(read("../scripts/android-dev-run.mjs"), /stage\/build\/map/);
+    assert.doesNotMatch(read("../scripts/build-release.py"), /"build", "map"/);
+});
+
+test("the release pipeline rebuilds generated bundles instead of enumerating stale map output", () => {
     const ci = read("../.github/workflows/cd.yml");
-    for (const root of ["stage/map", "stage/build/map"]) {
-        assert.ok(android.includes('"--exclude=' + root + '"'));
-        assert.ok(ci.includes("'" + root + "/*'"));
-    }
+    // 移动端 app.zip 前的聚合构建会先清理 stage/build，因此无需再逐个排除已撤回的地图产物。
+    assert.match(ci, /run: pnpm run build\s*\n/);
+    assert.doesNotMatch(ci, /stage\/build\/map/);
 });

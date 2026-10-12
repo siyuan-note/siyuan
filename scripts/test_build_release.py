@@ -53,11 +53,10 @@ class BuildTests(unittest.TestCase):
             build.copy_verified(source, self.root / "outside", self.root / "allowed")
         self.assertFalse((self.root / "outside").exists())
 
-    def test_mobile_assets_exclude_retired_map_files(self):
+    def test_mobile_assets_exclude_ocr_runtime(self):
         kept = {"stage/build/mobile/index.html", "stage/map-icons/pin.svg", "appearance/theme.css",
                 "guide/document.sy", "LICENSE", "THIRD_PARTY_NOTICES.md"}
-        removed = {"stage/map/index.html", "stage/map/wrapper.html", "stage/build/map/host.js",
-                   "stage/build/map/maplibre-gl.js", "stage/ocr/runtime/library"}
+        removed = {"stage/ocr/runtime/library"}
         for name in kept | removed:
             self.write(self.root / (name if name in {"LICENSE", "THIRD_PARTY_NOTICES.md"} else "app/" + name))
         destination = self.root / "mobile/app.zip"

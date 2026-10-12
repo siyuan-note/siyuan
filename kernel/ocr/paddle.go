@@ -243,6 +243,13 @@ func (p *PaddleProvider) Validate(ctx context.Context) error {
 }
 
 func runWorker(ctx context.Context, cfg PaddleConfig, path string) ([]map[string]string, error) {
+	if path != "" {
+		file, err := openImage(path)
+		if err != nil {
+			return nil, err
+		}
+		file.Close()
+	}
 	worker := cfg.Worker
 	cfg.Worker = ""
 	request, err := json.Marshal(WorkerRequest{cfg, path})
@@ -326,30 +333,55 @@ func (p *PaddleProvider) Recognize(ctx context.Context, path string) ([]map[stri
 }
 
 func decodeImage(path string) (image.Image, error) {
-	file, err := os.Open(path)
+	file, err := openImage(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
-	info, err := file.Stat()
-	if err != nil {
-		return nil, err
-	}
-	if info.Size() > 32*1024*1024 {
-		return nil, errors.New("OCR image exceeds 32 MiB")
-	}
-	cfg, _, err := image.DecodeConfig(file)
-	if err != nil {
-		return nil, err
-	}
-	if cfg.Width <= 0 || cfg.Height <= 0 || int64(cfg.Width)*int64(cfg.Height) > 24000000 {
-		return nil, errors.New("OCR image exceeds 24 million pixels")
-	}
-	if _, err = file.Seek(0, io.SeekStart); err != nil {
-		return nil, err
-	}
 	img, _, err := image.Decode(file)
 	return img, err
+}
+
+// 在调用原生辅助进程前检查格式，使不支持的图片保留可判断的错误类型。
+func openImage(path string) (*os.File, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	if err = validateImage(file); err != nil {
+		file.Close()
+		return nil, err
+	}
+	return file, nil
+}
+
+func validateImage(file *os.File) error {
+	info, err := file.Stat()
+	if err != nil {
+		return err
+	}
+	if info.Size() > 32*1024*1024 {
+		return errors.New("OCR image exceeds 32 MiB")
+	}
+	cfg, format, err := image.DecodeConfig(file)
+	if err != nil {
+		if errors.Is(err, image.ErrFormat) {
+			return fmt.Errorf("%w: %w", ErrUnsupportedImage, err)
+		}
+		return err
+	}
+	if cfg.Width <= 0 || cfg.Height <= 0 || int64(cfg.Width)*int64(cfg.Height) > 24000000 {
+		return errors.New("OCR image exceeds 24 million pixels")
+	}
+	if format == "webp" {
+		// VP8X 块的动画标志表示图像数据位于 ANMF 块，静态 WebP 解码器不支持此格式。
+		var header [30]byte
+		if _, err = file.ReadAt(header[:], 0); err == nil && string(header[12:16]) == "VP8X" && header[20]&0x02 != 0 {
+			return fmt.Errorf("%w: animated WebP", ErrUnsupportedImage)
+		}
+	}
+	_, err = file.Seek(0, io.SeekStart)
+	return err
 }
 
 func imageTensor(img image.Image, w, h int, detector bool) []float32 {

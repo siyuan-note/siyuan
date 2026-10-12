@@ -15,8 +15,9 @@ const (
 )
 
 var (
-	ErrUnknownProvider = errors.New("unknown OCR provider")
-	ErrUnavailable     = errors.New("OCR provider is unavailable")
+	ErrUnknownProvider  = errors.New("unknown OCR provider")
+	ErrUnavailable      = errors.New("OCR provider is unavailable")
+	ErrUnsupportedImage = errors.New("unsupported OCR image format")
 )
 
 // Provider 只负责识别，结果存储和搜索索引由调用方统一维护。

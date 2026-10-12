@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -153,6 +154,7 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 		t.Fatal("disabled automatic OCR reached provider")
 	}
 	Conf.OCR.Load().Auto = true
+	testAutomaticOCRUnsupportedLogging(t, path, provider)
 	autoOCRAssets()
 	if !provider.called || !strings.Contains(util.GetAssetText(path), "nativeocrkeyword") {
 		t.Fatalf("headless automatic OCR did not save text: called=%v text=%q", provider.called, util.GetAssetText(path))
@@ -208,6 +210,37 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 		t.Fatal("encrypted OCR changed source ciphertext")
 	}
 	testOCRNotebookIsolation(t, provider, fixture.box.ID)
+}
+
+func testAutomaticOCRUnsupportedLogging(t *testing.T, path string, provider *ocrFixtureProvider) {
+	t.Helper()
+	logPath := filepath.Join(t.TempDir(), "ocr.log")
+	previousLogPath := logging.LogPath
+	logging.SetLogPath(logPath)
+	defer logging.SetLogPath(previousLogPath)
+	value := Conf.GetOCR()
+	key := fmt.Sprintf("%s:%s:%s:%s:%s", value.Provider, value.Model, value.AIModelID, value.ReasoningEffort, path)
+	defer ocrRetry.Delete(key)
+	for _, unsupported := range []bool{true, false} {
+		ocrRetry.Delete(key)
+		provider.called = false
+		provider.err = errors.New("webp: invalid format")
+		if unsupported {
+			provider.err = fmt.Errorf("decode image: %w", ocr.ErrUnsupportedImage)
+		}
+		autoOCRAssets()
+		if !provider.called || util.ExistsAssetText(path) {
+			t.Fatal("failed automatic OCR was skipped or saved a result")
+		}
+		data, err := os.ReadFile(logPath)
+		if err != nil && !os.IsNotExist(err) {
+			t.Fatal(err)
+		}
+		if warned := strings.Contains(string(data), "automatic OCR [provider="); warned == unsupported {
+			t.Fatalf("unsupported=%v, unexpected automatic OCR warning: %s", unsupported, data)
+		}
+	}
+	provider.err = nil
 }
 
 func testOCRNotebookIsolation(t *testing.T, provider *ocrFixtureProvider, firstBox string) {

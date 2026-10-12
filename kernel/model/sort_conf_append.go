@@ -106,9 +106,15 @@ func verifySortConfAppend(file *os.File, record *sortConfAppendRecord) error {
 	if fmt.Sprintf("%x", digest.Sum(nil)) != record.PrefixHash {
 		return errors.New("sort conf prefix changed outside incremental write")
 	}
-	decoder := json.NewDecoder(io.NewSectionReader(file, 0, record.Offset))
+	// 补齐对象结尾后读取首个键或结束符，明确区分空对象与已有条目的对象。
+	decoder := json.NewDecoder(io.MultiReader(io.NewSectionReader(file, 0, record.Offset), strings.NewReader("}")))
 	token, err := decoder.Token()
-	if err != nil || token != json.Delim('{') || decoder.More() != (record.Suffix[0] == ',') {
+	if err != nil || token != json.Delim('{') {
+		return errors.New("sort append separator does not match the source object")
+	}
+	token, err = decoder.Token()
+	_, hasEntries := token.(string)
+	if err != nil || (!hasEntries && token != json.Delim('}')) || hasEntries != (record.Suffix[0] == ',') {
 		return errors.New("sort append separator does not match the source object")
 	}
 	tail, err := io.ReadAll(io.NewSectionReader(file, record.Offset, info.Size()-record.Offset))

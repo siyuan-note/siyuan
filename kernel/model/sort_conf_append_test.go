@@ -141,6 +141,33 @@ func TestSortConfAppendPreservesLegacyJSONAndBoundsWrittenBytes(t *testing.T) {
 	t.Logf("120 creates: incremental data and recovery records %d bytes, whole-file baseline %d bytes", totalIncrementalBytes, totalFullBytes)
 }
 
+func TestSortConfAppendAcceptsEmptyObjects(t *testing.T) {
+	for _, initial := range []string{"{}", " \t{\r\n\t } \r\n"} {
+		t.Run(fmt.Sprintf("source=%q", initial), func(t *testing.T) {
+			data := []byte(initial)
+			confPath := prepareSortConfAppendTest(t, data)
+			if err := appendSortConfMap(confPath, data, map[string]int{appendSortNewID: 8}); err != nil {
+				t.Fatal(err)
+			}
+			actual, err := os.ReadFile(confPath)
+			if err != nil || !bytes.HasPrefix(actual, data[:bytes.LastIndexByte(data, '}')]) {
+				t.Fatalf("append changed the empty object prefix: %q, %v", actual, err)
+			}
+			sorts, err := readSortConfMap(confPath)
+			if err != nil || !reflect.DeepEqual(sorts, map[string]int{appendSortNewID: 8}) {
+				t.Fatalf("empty object append lost sorting: %v, %v", sorts, err)
+			}
+			recordPath, err := sortConfAppendPath(confPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err = os.Stat(recordPath); !os.IsNotExist(err) {
+				t.Fatalf("completed append retained recovery record: %v", err)
+			}
+		})
+	}
+}
+
 func TestSortConfAppendRecoveryAtEveryWriteStage(t *testing.T) {
 	for _, empty := range []bool{false, true} {
 		initial := []byte(`{"` + appendSortOldID + `":-7}`)
@@ -192,9 +219,12 @@ func TestSortConfAppendRecoveryAtEveryWriteStage(t *testing.T) {
 }
 
 func TestSortConfAppendRecoveryRejectsChangedSourceAndUnknownRecords(t *testing.T) {
-	for _, mode := range []string{"prefix", "length", "version", "entries", "separator", "replacement"} {
+	for _, mode := range []string{"prefix", "length", "version", "entries", "separator", "empty-separator", "replacement"} {
 		t.Run(mode, func(t *testing.T) {
 			initial := []byte(`{"` + appendSortOldID + `":7}`)
+			if mode == "empty-separator" {
+				initial = []byte(" \t{\n }\r\n")
+			}
 			confPath := prepareSortConfAppendTest(t, initial)
 			record, err := newSortConfAppendRecord(initial, map[string]int{appendSortNewID: 8})
 			if err != nil {
@@ -212,6 +242,8 @@ func TestSortConfAppendRecoveryRejectsChangedSourceAndUnknownRecords(t *testing.
 				record.Suffix = []byte(`,"invalid":"value"}`)
 			case "separator":
 				record.Suffix = bytes.TrimPrefix(record.Suffix, []byte{','})
+			case "empty-separator":
+				record.Suffix = append([]byte{','}, record.Suffix...)
 			case "replacement":
 				actual = append(bytes.Clone(initial[:record.Offset]), []byte(`,"20261010000003-abcdefg":9}`)...)
 			}

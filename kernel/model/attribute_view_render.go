@@ -431,26 +431,9 @@ func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 		return
 	}
 
-	// 已知载体时只在同一加密边界内查找；无载体的兼容调用保留全局回退。
-	var existPath string
-	if exactBox {
-		existPath, _ = av.FindAttributeViewPathInBox(avID, avBoxID)
-	} else {
-		existPath, _ = av.FindAttributeViewPath(avID)
-	}
-	if "" == existPath {
-		if exactBox {
-			if foreignPath, foreignBoxID := av.FindAttributeViewPath(avID); "" != foreignPath &&
-				foreignBoxID != avBoxID {
-				err = av.ErrAttributeViewNotFound
-				return
-			}
-		}
-		if avBoxID != "" {
-			existPath = filepath.Join(util.DataDir, avBoxID, "storage", "av", avID+".json")
-		} else {
-			existPath = av.GetAttributeViewDataPath(avID)
-		}
+	existPath, err := attributeViewRenderPath(avID, avBoxID, exactBox)
+	if nil != err {
+		return
 	}
 	if !filelock.IsExist(existPath) {
 		if !createIfNotExist {
@@ -458,22 +441,11 @@ func renderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 			return
 		}
 
-		// 加密笔记本首次创建：仅设置 pending 用于 SaveAttributeView 路径路由，创建后立即清除
-		if avBoxID != "" {
-			av.SetAVBoxID(avID, avBoxID)
-			defer av.SetAVBoxID(avID, "") // 创建完成立即清除，避免污染后续路由
-		}
-		attrView = newAttributeViewWithLayout(avID, initialLayout)
-		if err = av.SaveAttributeView(attrView); err != nil {
-			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		if attrView, err = initializeAttributeViewForRender(blockID, avID, avBoxID, exactBox, initialLayout); nil != err {
+			logging.LogErrorf("initialize attribute view [%s] failed: %s", avID, err)
 			return
 		}
-		if blockID != "" {
-			av.UpsertBlockRel(avID, blockID)
-		}
-	}
-
-	if exactBox {
+	} else if exactBox {
 		attrView, err = av.ParseAttributeViewInBox(avID, avBoxID)
 	} else {
 		attrView, err = av.ParseAttributeView(avID)

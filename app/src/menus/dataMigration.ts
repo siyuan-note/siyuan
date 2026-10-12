@@ -1,3 +1,4 @@
+import {importConfiguration} from "../config/util/resourceConfig";
 import {openInputDialog} from "../dialog/inputDialog";
 import {Dialog} from "../dialog";
 import {Constants} from "../constants";
@@ -9,10 +10,6 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
 import {importObsidianVault} from "./importObsidian";
 import {saveExportFile, writeText} from "../protyle/util/compatibility";
-import {exitSiYuan} from "../dialog/processSystem";
-/// #if !MOBILE
-import {exportLayout} from "../layout/util";
-/// #endif
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import * as path from "path";
@@ -258,18 +255,7 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
     });
     bindFileInput("conf", (file, input) => {
         input.value = "";
-        postFile("/api/system/importConf", file, {}, (response) => {
-            if (response.code !== 0) {
-                showMessage(response.msg);
-                return;
-            }
-            showMessage(window.siyuan.languages.imported);
-            /// #if MOBILE
-            void exitSiYuan();
-            /// #else
-            void exportLayout({errorExit: true, cb: exitSiYuan});
-            /// #endif
-        });
+        void importConfiguration(file);
     });
     ["s3", "webdav"].forEach((provider) => {
         bindFileInput(provider, (file, input) => {

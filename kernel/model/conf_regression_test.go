@@ -15,13 +15,22 @@ import (
 
 func TestConfAllSectionsShareStartupAndWriteNormalization(t *testing.T) {
 	prepareConfConsistencyTest(t)
-	raw := []byte(`{"editor":{"fontSize":200},"sync":{"interval":1},"repo":{"indexRetentionDays":0},"ocr":{"provider":"tesseract","model":"tiny"}}`)
+	raw := []byte(`{
+		"editor":{"fontSize":200,"backlinkGlobalSort":7,"backlinkBlockSort":-9,"floatWindowMode":42,
+			"headingEmbedMode":-3,"databaseAttrClickMode":99,"databaseAttrViewMode":-1,"codeTabSpaces":5},
+		"export":{"blockEmbedMode":9,"fileAnnotationRefMode":-5},
+		"appearance":{"closeButtonBehavior":5},"sync":{"interval":1,"assetDownloadMode":7},
+		"system":{"autoLaunch2":9,"lockScreenMode":3},"flashcard":{"reviewMode":7},
+		"search":{"limit":1000000},"fileTree":{"maxListCount":1000000,"largeFileWarningSize":1000000},
+		"repo":{"indexRetentionDays":100000},"ocr":{"provider":"tesseract","model":"tiny"},
+		"ai":{"agent":{"maxToolCallRounds":-7,"confirmTimeout":-9,"temperature":-3,"maxCompletionTokens":-2}}
+	}`)
 	startup := NewAppConf()
 	if err := json.Unmarshal(raw, startup); err != nil {
 		t.Fatal(err)
 	}
 	normalizeAppConf(startup)
-	for namespace := range confSectionSpecs() {
+	for namespace := range confSectionSpecFactories {
 		t.Run(namespace, func(t *testing.T) {
 			Conf = NewAppConf()
 			normalizeAppConf(Conf)
@@ -58,6 +67,27 @@ func TestConfAllSectionsShareStartupAndWriteNormalization(t *testing.T) {
 				t.Fatalf("startup and write differ: %s\n%s", expected, actual)
 			}
 		})
+	}
+}
+
+func TestConfSectionLookupBindsOnlyTheCurrentWorkspaceSection(t *testing.T) {
+	prepareConfConsistencyTest(t)
+	Conf = NewAppConf()
+	Conf.Editor = ConfSection[conf.Editor]{}
+	first := Conf
+	first.System.Store(conf.NormalizeSystem(nil))
+	spec, ok := SectionSpecByNamespace("system")
+	if !ok || spec.load() != first.System.Load() || first.Editor.cell != nil {
+		t.Fatal("section lookup initialized unrelated configuration or bound the wrong section")
+	}
+	Conf = NewAppConf()
+	Conf.System.Store(conf.NormalizeSystem(nil))
+	current, ok := SectionSpecByNamespace("system")
+	if !ok || current.load() != Conf.System.Load() || spec.load() != first.System.Load() {
+		t.Fatal("section lookup reused a previous workspace binding")
+	}
+	if _, ok = SectionSpecByNamespace("unknown"); ok {
+		t.Fatal("unknown configuration section was registered")
 	}
 }
 

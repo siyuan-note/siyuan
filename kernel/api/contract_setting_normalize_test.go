@@ -71,11 +71,15 @@ func TestAPIContractImportedSettingsNormalization(t *testing.T) {
 	previous, temp, readOnly := model.Conf, util.TempDir, util.ReadOnly
 	util.TempDir, util.ReadOnly = t.TempDir(), true
 	t.Cleanup(func() { model.Conf, util.TempDir, util.ReadOnly = previous, temp, readOnly })
-	for _, payload := range []string{
-		`{"editor":{"blockRefDynamicAnchorTextMaxLen":1,"fontSize":100},"export":{"blockRefMode":0},"fileTree":{"maxListCount":0},"search":{"limit":0},"flashcard":{"weights":"invalid"}}`,
-		`{"editor":null,"export":null,"fileTree":null,"search":null,"flashcard":null}`,
-		`{"export":{"blockRefMode":1}}`,
-		`{"export":{"blockRefMode":5}}`,
+	for _, entry := range []struct {
+		payload                   string
+		maxListCount, searchLimit int
+	}{
+		{`{"editor":{"blockRefDynamicAnchorTextMaxLen":1,"fontSize":100},"export":{"blockRefMode":0},"fileTree":{"maxListCount":0},"search":{"limit":0},"flashcard":{"weights":"invalid"}}`, 512, 64},
+		{`{"editor":null,"export":null,"fileTree":null,"search":null,"flashcard":null}`, 512, 64},
+		{`{"export":{"blockRefMode":1}}`, 512, 64},
+		{`{"export":{"blockRefMode":5}}`, 512, 64},
+		{`{"editor":{"backlinkGlobalSort":7,"codeTabSpaces":5},"export":{"blockRefMode":0,"blockEmbedMode":9,"fileAnnotationRefMode":-5},"fileTree":{"maxListCount":1000000},"search":{"limit":1000000},"flashcard":{"reviewMode":7}}`, 10240, 10240},
 	} {
 		model.Conf = model.NewAppConf()
 		originalSync := model.Conf.Sync.Load()
@@ -85,7 +89,7 @@ func TestAPIContractImportedSettingsNormalization(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if _, err = part.Write([]byte(payload)); err != nil {
+		if _, err = part.Write([]byte(entry.payload)); err != nil {
 			t.Fatal(err)
 		}
 		if err = writer.Close(); err != nil {
@@ -105,9 +109,14 @@ func TestAPIContractImportedSettingsNormalization(t *testing.T) {
 		}
 		if model.Conf.Editor.Load() == nil || model.Conf.Editor.Load().FontSize != 16 || model.Conf.Editor.Load().BlockRefDynamicAnchorTextMaxLen < 1 ||
 			model.Conf.Export.Load() == nil || model.Conf.Export.Load().BlockRefMode != 4 ||
-			model.Conf.FileTree.Load().MaxListCount != 512 || model.Conf.Search.Load().Limit != 64 ||
+			model.Conf.FileTree.Load().MaxListCount != entry.maxListCount || model.Conf.Search.Load().Limit != entry.searchLimit ||
+			model.Conf.Editor.Load().BacklinkGlobalSort != 0 || model.Conf.Editor.Load().CodeTabSpaces != 0 ||
+			model.Conf.Export.Load().FileAnnotationRefMode != 0 || model.Conf.Flashcard.Load().ReviewMode != 0 ||
 			model.Conf.Flashcard.Load().Weights != conf.DefaultFSRSWeights() || model.Conf.Sync.Load() != originalSync {
 			t.Fatal("import did not normalize preferences or replaced sync configuration")
+		}
+		if entry.maxListCount == 10240 && model.Conf.Export.Load().BlockEmbedMode != 1 {
+			t.Fatal("import did not restore the default block embed mode")
 		}
 	}
 }

@@ -1,3 +1,4 @@
+import {switchWorkspace} from "../config/util/resourceConfig";
 import {toggleMenu} from "./menuToggle";
 import {getLayoutSubMenu} from "./layouts";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -293,11 +294,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false, t
                                         return;
                                     }
                                     confirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(openPath))}?`, () => {
-                                        fetchPost("/api/system/setWorkspaceDir", {
-                                            path: openPath
-                                        }, () => {
-                                            exitSiYuan(false);
-                                        });
+                                        switchWorkspace(openPath);
                                     });
                                 });
                             });
@@ -327,11 +324,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect, openOnly = false, t
                                         return;
                                     }
                                     confirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(item.path))}?`, () => {
-                                        fetchPost("/api/system/setWorkspaceDir", {
-                                            path: item.path
-                                        }, () => {
-                                            exitSiYuan(false);
-                                        });
+                                        switchWorkspace(item.path);
                                     });
                                 });
                             }
@@ -560,9 +553,7 @@ const openWorkspace = (workspace: string) => {
     if (workspace === window.siyuan.config.system.workspaceDir) {
         return;
     }
-    fetchPost("/api/system/setWorkspaceDir", {
-        path: workspace
-    }, () => {
+    switchWorkspace(workspace, () => {
         ipcRenderer.send(Constants.SIYUAN_OPEN_WORKSPACE, {
             workspace,
             lang: window.siyuan.config.appearance.lang

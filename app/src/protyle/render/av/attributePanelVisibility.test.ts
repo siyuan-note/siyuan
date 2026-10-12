@@ -11,7 +11,8 @@ import {compileString} from "sass";
 const browserCases = async (source: string, css: string, columnSource: string, blockSource: string, menuSource: string, calendarSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const config = {editor: {databaseAttrShow: true, databaseAttrHideEmpty: false, databaseAttrViewMode: 0, databaseAttrUseTabs: false}};
-    Object.assign(window, {siyuan: {config, languages: {
+    const dialogs: {element: HTMLElement, destroy: () => void}[] = [];
+    Object.assign(window, {siyuan: {config, dialogs, languages: {
         database: "Database", edit: "Edit", displayEmptyFields: "Show", hideEmptyFields: "Hide",
         default: "Default", attributePanelVisibility: "Database panel field visibility",
         alwaysShow: "Always show", hideWhenEmpty: "Hide when empty", alwaysHide: "Always hide",
@@ -241,14 +242,21 @@ const browserCases = async (source: string, css: string, columnSource: string, b
             values: [{type: "text", text: {content}, blockID: "item"}],
         })),
     }));
+    const openedLinks: string[] = [];
     const renderAttributes = new Function("fetchPost", "createEmptyAVValue", "getColIconByType", "cellValueIsEmpty",
-        "genAVAttributeRowHTML", "preserveAVBindingRange", "renderAVRichTextElements", blockSource + "\nreturn renderAVAttribute;")(
+        "genAVAttributeRowHTML", "preserveAVBindingRange", "renderAVRichTextElements", "getAVTemplateInteractiveElement",
+        "hasClosestByClassName", "hasClosestByAttribute", "hasClosestBlock", "openLink", blockSource + "\nreturn renderAVAttribute;")(
         (url: string, _data: unknown, callback: (response: {data: unknown}) => void) => {
             callback({data: url === "/api/av/getAttributeViewKeys" ? tables : {total: 0}});
         }, () => ({}), () => "iconText", (value: IAVCellValue) => !value.text.content,
         (options: {keyID: string, attributePanelVisibility: string, empty: boolean}) =>
             `<div class="av__row" data-col-id="${options.keyID}" data-panel-visibility="${options.attributePanelVisibility}" data-empty="${options.empty}"></div>`,
-        () => () => {}, () => {});
+        () => () => {}, () => {}, (): HTMLElement | null => null,
+        (element: HTMLElement, className: string) => element?.closest("." + className),
+        (element: HTMLElement, attribute: string, value: string) => element?.closest(
+            value ? `[${attribute}="${value}"]` : `[${attribute}]`),
+        (element: HTMLElement) => element?.closest('[data-type="NodeAttributeView"]'),
+        (_app: unknown, link: string) => openedLinks.push(link));
     for (const className of ["custom-attr protyle-db-row__body", "custom-attr"]) {
         const body = document.createElement("div");
         body.className = className;
@@ -288,6 +296,36 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     topBody.className = "custom-attr protyle-db-attr__body";
     renderAttributes(topBody, "document", {disabled: false});
     check.equal(topBody.querySelector('[data-type="toggle-panel-visibility"]'), null, "top panels reuse their existing edit button");
+    const dialog = document.createElement("div");
+    dialog.className = "b3-dialog--open";
+    document.body.append(dialog);
+    dialog.append(topBody);
+    let dialogClosed = 0;
+    dialogs.push({element: dialog, destroy: () => { dialogClosed++; }});
+    tables[0].blockIDs = ["20261012120000-later01", "20261011120000-first01"];
+    const blockIDs = [...tables[0].blockIDs];
+    renderAttributes(topBody, "document", {disabled: true});
+    const databaseTitle = topBody.querySelector<HTMLElement>('[data-av-id="database-a"] .popover__block');
+    check.equal(databaseTitle.classList.contains("popover__block"), true, "database titles retain mirror previews");
+    check.deepEqual(JSON.parse(databaseTitle.dataset.id), blockIDs, "hover previews retain all database carriers");
+    let bubbled = false;
+    dialog.addEventListener("click", () => { bubbled = true; });
+    for (const pointerType of ["mouse", "touch"]) {
+        const click = new PointerEvent("click", {bubbles: true, cancelable: true, pointerType});
+        databaseTitle.querySelector("span").dispatchEvent(click);
+        check.equal(click.defaultPrevented, true);
+        check.equal(bubbled, false, "database navigation does not trigger parent click handlers");
+        check.equal(openedLinks.at(-1), "siyuan://blocks/20261011120000-first01");
+    }
+    check.equal(dialogClosed, 2, "navigation closes the containing attribute dialog");
+    check.deepEqual(tables[0].blockIDs, blockIDs, "target selection does not reorder mirror previews");
+    tables[0].blockIDs = [];
+    renderAttributes(topBody, "document", {disabled: true});
+    topBody.querySelector<HTMLElement>('[data-av-id="database-a"] .popover__block span').click();
+    check.equal(openedLinks.length, 2, "databases without carriers do not open an invalid link");
+    check.equal(dialogClosed, 2, "databases without carriers keep the attribute dialog open");
+    dialogs.pop();
+    dialog.remove();
     return "Attribute panel visibility cases passed";
 };
 

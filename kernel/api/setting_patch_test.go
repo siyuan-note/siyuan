@@ -48,7 +48,7 @@ func TestAPIContractSettingPatchConcurrentFields(t *testing.T) {
 }
 
 func TestAPIContractSettingPatchRecursiveMerge(t *testing.T) {
-	merged, err := mergeSettingJSON([]byte(`{"object":{"left":1,"right":2},"array":[1,2],"keep":true}`),
+	merged, err := model.MergeConfJSON([]byte(`{"object":{"left":1,"right":2},"array":[1,2],"keep":true}`),
 		[]byte(`{"object":{"right":3},"array":[],"null":null}`))
 	if err != nil {
 		t.Fatal(err)
@@ -60,6 +60,35 @@ func TestAPIContractSettingPatchRecursiveMerge(t *testing.T) {
 	if string(value["object"]) != `{"left":1,"right":3}` || string(value["array"]) != "[]" ||
 		string(value["keep"]) != "true" || string(value["null"]) != "null" {
 		t.Fatalf("unexpected merged settings: %s", merged)
+	}
+}
+
+func TestAPIContractSettingPatchKeymapEnvelopeAndNullableFields(t *testing.T) {
+	previousConf, previousReadOnly := model.Conf, util.ReadOnly
+	t.Cleanup(func() { model.Conf, util.ReadOnly = previousConf, previousReadOnly })
+	model.Conf = model.NewAppConf()
+	model.Conf.Editor.Store(conf.NewEditor())
+	keymap := conf.Keymap{"general": map[string]any{"keep": "F1", "quoted\"key": "F2"}}
+	model.Conf.Keymap.Store(&keymap)
+	util.ReadOnly = true
+	code, message, data := settingContractRequest(t, "patch", patchSetting,
+		`{"keymap":{"general":{"quoted\"key":"Ctrl+\\","cleared":null}}}`)
+	if code != 0 || string(data) != "null" {
+		t.Fatalf("keymap patch failed: %d %s %s", code, message, data)
+	}
+	actual, _ := json.Marshal(model.Conf.Keymap.Load())
+	if string(actual) != `{"general":{"cleared":null,"keep":"F1","quoted\"key":"Ctrl+\\"}}` {
+		t.Fatalf("keymap section was wrapped or escaped incorrectly: %s", actual)
+	}
+	code, message, _ = settingContractRequest(t, "patch", patchSetting,
+		`{"editor":{"fontSize":null,"displayImgAlt":null}}`)
+	if code != 0 || model.Conf.Editor.Load().FontSize != conf.NewEditor().FontSize || model.Conf.Editor.Load().DisplayImgAlt {
+		t.Fatalf("nullable settings were not normalized: %d %s", code, message)
+	}
+	before := model.Conf.Editor.Load()
+	code, _, _ = settingContractRequest(t, "patch", patchSetting, `{"editor":{"markdown":{"inlineMath":"bad"}}}`)
+	if code == 0 || model.Conf.Editor.Load() != before {
+		t.Fatal("merged settings bypassed the nested request contract")
 	}
 }
 

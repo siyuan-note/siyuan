@@ -29,7 +29,9 @@ if (!process.versions.electron) {
     const start = source.indexOf('app.commandLine.appendSwitch("auto-detect"');
     const end = source.indexOf("// Support set Chromium command line arguments", start);
     assert.ok(start >= 0 && end > start);
-    vm.runInNewContext(source.slice(start, end), {app, remoteKernelTarget: false});
+    vm.runInNewContext(source.slice(start, end), {
+        app, remoteKernelTarget: false, ...require("./chromiumSwitches"),
+    });
     app.setPath("userData", process.argv[2]);
     app.disableHardwareAcceleration();
 

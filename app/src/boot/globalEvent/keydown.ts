@@ -82,6 +82,7 @@ import {copyTextByType} from "../../protyle/toolbar/util";
 import {onlyProtyleCommand} from "./command/protyle";
 import {cancelDrag} from "./dragover";
 import {bindAVPanelKeydown} from "../../protyle/render/av/keydown";
+import {getAVCellPanelTarget} from "../../protyle/render/av/panelTarget";
 import {formatPainter} from "../../protyle/toolbar/FormatPainter";
 import {adjustEditorFontSize, type TEditorFontSizeAction} from "../../util/editorFontSize";
 import {areProtylePluginExtensionsEnabled} from "../../protyle/runtimeCapabilities";
@@ -1654,9 +1655,9 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         // 需放在 dialog 前，否则属性面板中修改日期会先关闭 dialog，只剩修改界面
         const avElement = document.querySelector(".av__panel");
         if (avElement) {
-            const selectCellElement = document.querySelector(".av__cell--select");
-            if (selectCellElement) {
-                focusBlock(hasClosestBlock(selectCellElement) as HTMLElement);
+            const blockElement = getAVCellPanelTarget(avElement);
+            if (blockElement?.classList.contains("av") && blockElement.getClientRects().length > 0) {
+                focusBlock(blockElement);
             }
             avElement.remove();
             return;

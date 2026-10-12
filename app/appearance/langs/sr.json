@@ -1,4 +1,9 @@
 {
+	"kernelUnresponsiveTitle": "Језгро не одговара",
+	"kernelUnresponsiveMessage": "Истекло је време чекања за локалне захтеве језгру, па SiYuan не може да отвори главни прозор. Детаље погледајте у ${log}.",
+	"kernelUnresponsiveWindowsHint": "На Windows-у ово може бити повезано са истовременим укључивањем контроле загушења TCP BBR2 и Loopback Large Mtu (loopbacklargemtu).",
+	"codeTabSpacesCount": "${x} razmaka",
+	"codeTabSpacesKeepTab": "Bez zamene (tabulator se zadržava)",
 	"syncConfigTip": "Podesite adresu servera, akreditive i parametre veze ove usluge; nakon čuvanja koriste se za sinhronizaciju i rezervnu kopiju u oblaku",
 	"dataRepoPurgeCloud": "Čišćenje riznice podataka u oblaku",
 	"dataRepoPurgeCloudTip": "Briše sve snimke na koje ništa ne upućuje i povezane objekte podataka u oblaku",
@@ -552,7 +557,7 @@
 	"backlinkHideReference": "Sakrij blokove referenci u prenetim povratnim vezama",
 	"backlinkHideReferenceTip": "Sakrij blokove koji sadrže samo reference na blokove u prenetim povratnim vezama kada ostali sadržaj ostaje vidljiv, i prikaži ih ponovo tokom uređivanja",
 	"uploadInsertTargetUnavailable": "Prvobitno odredište otpremanja više nije dostupno. Rezultat nije umetnut; otpremljeni fajlovi su sačuvani.",
-	"mobileToolbarEntryTip": "Подесите видљивост и редослед ставки мобилне траке алатки и менија косе црте, као и видљивост OCR дугмета слике; профили се чувају на овом уређају и не синхронизују се између уређаја",
+	"mobileToolbarEntryTip": "Подесите видљивост и редослед ставки мобилне траке алатки и менија косе црте; профили се чувају на овом уређају и не синхронизују се између уређаја",
 	"keymapAssigned": "Dodeljeno",
 	"keymapCustomized": "Moje izmene",
 	"keymapUnassigned": "Nedodeljeno",

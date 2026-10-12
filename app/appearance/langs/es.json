@@ -1,4 +1,9 @@
 {
+	"kernelUnresponsiveTitle": "El núcleo no responde",
+	"kernelUnresponsiveMessage": "Las solicitudes locales al núcleo agotaron el tiempo de espera, por lo que SiYuan no puede abrir la ventana principal. Consulte ${log} para obtener más detalles.",
+	"kernelUnresponsiveWindowsHint": "En Windows, esto puede estar relacionado con la combinación del control de congestión TCP BBR2 y Loopback Large Mtu (loopbacklargemtu).",
+	"codeTabSpacesCount": "${x} espacios",
+	"codeTabSpacesKeepTab": "Sin sustitución (se mantiene el tabulador)",
 	"syncConfigTip": "Configura la dirección del servidor, las credenciales y los parámetros de conexión de este servicio; tras guardar se usan para la sincronización y la copia de seguridad en la nube",
 	"dataRepoPurgeCloud": "Purga del repositorio de datos en la nube",
 	"dataRepoPurgeCloudTip": "Elimina todas las instantáneas sin referencia y los objetos de datos relacionados en la nube",
@@ -481,7 +486,7 @@
 	"backlinkHideReference": "Ocultar bloques de referencia en enlaces inversos propagados",
 	"backlinkHideReferenceTip": "Ocultar los bloques que solo contienen referencias a bloques en los enlaces inversos propagados cuando queda otro contenido visible y mostrarlos de nuevo al editar",
 	"uploadInsertTargetUnavailable": "El destino original de la carga ya no está disponible. No se insertó el resultado; los archivos cargados se conservan.",
-	"mobileToolbarEntryTip": "Configura la visibilidad y el orden de la barra de herramientas móvil y el menú de barra, y la visibilidad del botón OCR de las imágenes; los perfiles se guardan en este dispositivo y no se sincronizan entre dispositivos",
+	"mobileToolbarEntryTip": "Configura la visibilidad y el orden de la barra de herramientas móvil y el menú de barra; los perfiles se guardan en este dispositivo y no se sincronizan entre dispositivos",
 	"keymapAssigned": "Asignados",
 	"keymapCustomized": "Personalizados por mí",
 	"keymapUnassigned": "Sin asignar",

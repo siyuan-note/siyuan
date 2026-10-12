@@ -27,6 +27,9 @@ If you want to contribute a feature, or refactoring, or bug fix, please submit a
 
 If your contribution involves text updates or adding new languages, please submit directly, and we will evaluate.
 如果你的贡献涉及文案修改或增加新语言，请直接提交，我们会进行评估。
+
+PRs that only add AI provider presets are currently not accepted. Please use the custom OpenAI-compatible provider settings instead.
+目前暂不接受仅新增 AI 服务商预设的 PR，请使用自定义 OpenAI 兼容服务商设置。
 -->
 
 ## Checklist / 检查清单

@@ -20,6 +20,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/url"
 	"os"
 	"strconv"
@@ -719,6 +720,14 @@ func (ai *AI) Normalize() {
 		} else if ai.Agent.MaxRetries > 10 {
 			ai.Agent.MaxRetries = 10
 		}
+		if ai.Agent.ConfirmTimeout < 0 {
+			ai.Agent.ConfirmTimeout = DefaultAgentConfirmTimeout
+		}
+		ai.Agent.MaxToolCallRounds = max(0, ai.Agent.MaxToolCallRounds)
+		if ai.Agent.Temperature < 0 || ai.Agent.Temperature > 2 || math.IsNaN(ai.Agent.Temperature) {
+			ai.Agent.Temperature = defaultAgent().Temperature
+		}
+		ai.Agent.MaxCompletionTokens = max(0, ai.Agent.MaxCompletionTokens)
 	}
 	ai.pruneOrphanedMCPCapabilityPolicies()
 	if ai.Editing == nil {

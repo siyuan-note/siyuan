@@ -26,7 +26,7 @@ test("resizing uses one source update with both dimensions and retains the exact
     }
     globalThis.Controller = Controller;`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     let title = "Before editing";
-    const list = {isConnected: true, parentElement: {classList: {contains: () => false}},
+    const list = {isConnected: true, dataset: {nodeId: "map-resize"}, parentElement: {classList: {contains: () => false}},
         style: {width: "50%", height: "40vh", flex: ""},
         get outerHTML() { return JSON.stringify({style: this.style, title}); }};
     const transactions: {before: string, after: string}[] = [];
@@ -36,7 +36,12 @@ test("resizing uses one source update with both dimensions and retains the exact
         getListMindmapSiblingIDs: () => new Map(), normalizeListMindmapSummaryMetadata: () => {},
         cleanListMindmapHTML: (html: string) => html,
         setBlockHeight: (block: typeof list, height: string) => block.style.height = height,
-        updateTransaction: (_owner: unknown, _list: unknown, before: string) => transactions.push({before, after: list.outerHTML}),
+        updateTransaction: (_owner: unknown, _list: unknown, before: string, undoContext: Record<string, string>,
+                            additional: {context: Record<string, string>}) => {
+            assert.equal(undoContext.mindmapSnapshotId, list.dataset.nodeId);
+            assert.equal(additional.context.mindmapSnapshotId, list.dataset.nodeId);
+            transactions.push({before, after: list.outerHTML});
+        },
         showMessage: (message: string) => assert.fail(message), window: {siyuan: {languages: {listMindmapInvalid: "Invalid"}}}, console,
     };
     runInNewContext(compiled, context);

@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261011142010"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -4315,7 +4315,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261011142010"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -10201,81 +10201,51 @@
 			]
 		},
 		{
-			"ID": "20260928091724-mshqwvb",
+			"ID": "20261012014537-ld1hkpc",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260928091724-mshqwvb",
-				"updated": "20261010134815"
+				"id": "20261012014537-ld1hkpc",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Slash menu and toolbar customization"
 				}
-			]
+			],
+			"HeadingLevel": 3
 		},
 		{
-			"ID": "20260927164841-n9zgr7r",
+			"ID": "20261012014537-5839olo",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260927164841-n9zgr7r",
-				"updated": "20260928175046"
+				"id": "20261012014537-5839olo",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On mobile, open "
+					"Data": "Type / to open the slash menu. For configuration, see "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Settings"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260928091724-mshqwvb",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Slash menu and toolbar customization"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Appearance"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Menu and button visibility and order"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " and select the slash menu category while editing a custom profile. Mobile and desktop use the same profile settings for the total switch, candidate visibility, and order. The default is on for desktop and off for mobile. Enable the switch, confirm to save, and activate the profile; then type / to search for content blocks and select a result to insert at the original cursor position."
+					"Data": "."
 				}
 			]
 		},
 		{
-			"ID": "20260927164841-clwu05c",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260927164841-clwu05c",
-				"updated": "20260930171029"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "In custom profiles, use the category selector to switch between the toolbar and slash menu. Drag the six-dot handle on the left of an item to change its order, or use its switch to change visibility. Drag near the list edge to scroll. Clear the search before sorting, and confirm to save the profile. Built-in profiles are read-only; duplicate one to customize it, then activate the saved profile. Profiles are stored on this device and are not synced across devices. New custom profiles based on Simple or Full follow future visibility defaults for entries you have not changed. An entry you toggle remains an explicit choice. Existing profiles retain their original visibility behavior; copying a profile or creating one based on Current preserves its inheritance and explicit choices. New profiles based on Simple or Full follow the default order as versions change until you customize a level. Based on Current and duplicate preserve existing custom orders. Clear the search and use the reset icon in a column or dock group title to reset that level. To reset every level, use the refresh icon labeled Reset all orders on the right of the Position column title on desktop, or the Reset all orders button at the bottom on mobile. Confirm to save; Cancel discards the changes. Resetting order preserves visibility and dock placement, and reset levels continue to follow future default order changes."
-				}
-			]
-		},
-		{
-			"ID": "20261010134815-v9k29uo",
+			"ID": "20261012014537-q45fm5t",
 			"Type": "NodeHeading",
 			"Properties": {
-				"id": "20261010134815-v9k29uo",
-				"updated": "20261011142010"
+				"id": "20261012014537-q45fm5t",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -10286,61 +10256,41 @@
 			"HeadingLevel": 3
 		},
 		{
-			"ID": "20261010134815-bb1k769",
+			"ID": "20261012014537-z4vcy15",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261010134815-bb1k769",
-				"updated": "20261011142010"
+				"id": "20261012014537-z4vcy15",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Click or tap the title below an image to edit it in a floating input. A full-screen mask appears while editing, and the document layout stays unchanged. When the title is focused, press "
+					"Data": "When the title is focused, press Enter or Space to edit it. While editing, press Enter or Tab to save, or Esc to cancel."
+				}
+			]
+		},
+		{
+			"ID": "20261012014537-fzd38rm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014537-fzd38rm",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "See "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261010134815-v9k29uo",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Image title"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " or "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Space"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to start editing. While editing, press "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " or "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to save or "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Esc"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to cancel. Clicking outside the input or leaving the field also saves. On mobile, Back saves and closes the input first. The change applies to this image reference and does not rename the asset file. Read-only documents do not allow title editing."
+					"Data": "."
 				}
 			]
 		},

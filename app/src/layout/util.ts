@@ -1,3 +1,4 @@
+import {resetUILayout, saveUILayout} from "../config/util/resourceConfig";
 import {Layout} from "./index";
 import {openStandaloneDatabaseItemByURI} from "../protyle/render/av/openStandaloneDatabaseItem";
 import {withFetchTimeout} from "../util/fetchTimeout";
@@ -16,7 +17,6 @@ import {Search} from "../search";
 import {Dock} from "./dock";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {hideElements} from "../protyle/ui/hideElements";
-import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
 import {saveScroll} from "../protyle/scroll/saveScroll";
@@ -203,7 +203,7 @@ export const resetLayout = async () => {
             return;
         }
         resume = await suspendLayoutSaving();
-        const response = await fetchSyncPost("/api/system/setUILayout", {layout: {}});
+        const response = await resetUILayout();
         if (response.code !== 0) throw new Error(response.msg);
         window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
         window.siyuan.storage[Constants.LOCAL_DIALOGPOSITION] = {};
@@ -274,11 +274,7 @@ export const saveLayout = () => {
             window.dispatchEvent(new Event("siyuan-window-layout"));
         } else {
             if (!window.siyuan.config.readonly) {
-                const request = {
-                    layout: layoutJSON,
-                    errorExit: false    // 后台不接受该参数，用于请求发生错误时退出程序
-                };
-                const saving = fetchPost("/api/system/setUILayout", request);
+                const saving = saveUILayout(layoutJSON, false);
                 layoutSaveRequests.add(saving);
                 void saving.then(() => layoutSaveRequests.delete(saving), () => layoutSaveRequests.delete(saving));
             }
@@ -340,11 +336,7 @@ export const exportLayout = async (options: {
     if (window.siyuan.config.readonly) {
         options.cb();
     } else {
-        const request = {
-            layout: layoutJSON,
-            errorExit: options.errorExit    // 后台不接受该参数，用于请求发生错误时退出程序
-        };
-        await fetchPost("/api/system/setUILayout", request, (response) => {
+        await saveUILayout(layoutJSON, options.errorExit, (response) => {
             if (response.code === 0) options.cb();
         });
     }

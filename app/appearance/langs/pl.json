@@ -1,4 +1,9 @@
 {
+	"kernelUnresponsiveTitle": "Jądro nie odpowiada",
+	"kernelUnresponsiveMessage": "Upłynął limit czasu lokalnych żądań do jądra, więc SiYuan nie może otworzyć głównego okna. Szczegóły znajdują się w ${log}.",
+	"kernelUnresponsiveWindowsHint": "W systemie Windows może to być związane z jednoczesnym włączeniem kontroli przeciążenia TCP BBR2 i Loopback Large Mtu (loopbacklargemtu).",
+	"codeTabSpacesCount": "${x} spacji",
+	"codeTabSpacesKeepTab": "Bez zamiany (tabulator pozostaje)",
 	"syncConfigTip": "Skonfiguruj adres serwera, dane uwierzytelniające i parametry połączenia tej usługi; po zapisaniu są używane do synchronizacji i kopii zapasowej w chmurze",
 	"dataRepoPurgeCloud": "Oczyszczanie repozytorium danych w chmurze",
 	"dataRepoPurgeCloudTip": "Usuń wszystkie nieodwołane zrzuty i powiązane obiekty danych w chmurze",
@@ -481,7 +486,7 @@
 	"backlinkHideReference": "Ukryj bloki odwołań w propagowanych linkach zwrotnych",
 	"backlinkHideReferenceTip": "Ukrywaj bloki zawierające wyłącznie odwołania do bloków w propagowanych linkach zwrotnych, gdy pozostaje inna widoczna treść, i pokazuj je ponownie podczas edycji",
 	"uploadInsertTargetUnavailable": "Pierwotny cel przesyłania nie jest już dostępny. Wynik nie został wstawiony; przesłane pliki zostały zachowane.",
-	"mobileToolbarEntryTip": "Ustaw widoczność i kolejność elementów mobilnego paska narzędzi i menu ukośnika oraz widoczność przycisku OCR obrazu; profile są przechowywane na tym urządzeniu i nie są synchronizowane między urządzeniami",
+	"mobileToolbarEntryTip": "Ustaw widoczność i kolejność elementów mobilnego paska narzędzi i menu ukośnika; profile są przechowywane na tym urządzeniu i nie są synchronizowane między urządzeniami",
 	"keymapAssigned": "Przypisane",
 	"keymapCustomized": "Dostosowane przeze mnie",
 	"keymapUnassigned": "Nieprzypisane",

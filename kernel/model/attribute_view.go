@@ -2787,8 +2787,12 @@ func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, 
 func filterSortPageRelationCandidates(table *av.Table, attrView *av.AttributeView, keyword string, page, pageSize int, candidateSort *av.ViewSort) (
 	rows []*av.TableRow, total int,
 ) {
+	untitled := ""
+	if strings.TrimSpace(keyword) != "" {
+		untitled = util.I18nTerm(util.Lang, "untitled")
+	}
 	for _, row := range table.Rows {
-		if relationCandidateMatches(row, keyword) {
+		if relationCandidateMatches(row, keyword, untitled, table.Columns...) {
 			rows = append(rows, row)
 		}
 	}
@@ -2876,7 +2880,7 @@ func renderAttributeViewRelationCandidates(attrView *av.AttributeView) (ret *av.
 	return
 }
 
-func relationCandidateMatches(row *av.TableRow, keyword string) bool {
+func relationCandidateMatches(row *av.TableRow, keyword, untitled string, columns ...*av.TableColumn) bool {
 	keywords := strings.Fields(strings.TrimSpace(keyword))
 	if 1 > len(keywords) {
 		return true
@@ -2886,6 +2890,20 @@ func relationCandidateMatches(row *av.TableRow, keyword string) bool {
 			continue
 		}
 		content := cell.Value.String(true)
+		// 仅匹配主键实际显示的未命名占位文字，不改变字段内容或显示模板的语义。
+		if cell.ValueType == av.KeyTypeBlock && (cell.Value.Block == nil || cell.Value.Block.Content == "") &&
+			!cell.Value.HasRenderTemplate && cell.Value.RenderedContent == "" {
+			hasTemplate := false
+			for _, column := range columns {
+				if column.ID == cell.Value.KeyID && strings.TrimSpace(column.RenderTemplate) != "" {
+					hasTemplate = true
+					break
+				}
+			}
+			if !hasTemplate {
+				content = untitled
+			}
+		}
 		allKeywordsHit := true
 		for _, currentKeyword := range keywords {
 			if util.SearchCaseSensitive.Load() {

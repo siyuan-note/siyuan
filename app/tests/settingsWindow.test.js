@@ -459,6 +459,7 @@ if (process.versions.electron && process.type === "browser") {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
             }).outputText;
         }
+        sources.dialog = require("./fixtures/anchoredInputRuntime.cjs").withAnchoredInputRuntime(sources.dialog);
         const pluginSource = ts.createSourceFile("plugin/index.ts", fs.readFileSync(path.join(__dirname, "../src/plugin/index.ts"), "utf8"),
             ts.ScriptTarget.ES2021, true);
         const pluginSetting = pluginSource.statements.find(statement => ts.isVariableStatement(statement) &&

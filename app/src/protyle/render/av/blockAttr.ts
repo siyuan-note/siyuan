@@ -13,7 +13,7 @@ import {previewImages} from "../../preview/image";
 /// #if !BROWSER
 import {webUtils} from "electron";
 /// #endif
-import {isBrowser, isTouchDevice} from "../../../util/functions";
+import {isBrowser} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {removeCompressURL} from "../../../util/image";
 import {openDatabaseRowByData} from "./openDatabaseRow";
@@ -26,7 +26,6 @@ import {
     getAVTemplateInteractiveElement,
     isAVTemplateLink
 } from "./attributeValue";
-import {isLastPointerMouse} from "../../../util/touchDragBridge";
 import {getLocalDropFiles, hasDataTransferFiles} from "../../upload/localDropFiles";
 import {cloneAVCellValueSnapshot} from "./cellValue";
 import {getEditorFocusRange, restoreEditorFocusRange} from "../../util/editorFocus";
@@ -399,8 +398,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     return;
                 }
                 const databaseElement = hasClosestByClassName(event.target as HTMLElement, "popover__block");
-                if (databaseElement && isTouchDevice() && !isLastPointerMouse() &&
-                    hasClosestByClassName(databaseElement, "custom-attr__avheader")) {
+                if (databaseElement && hasClosestByClassName(databaseElement, "custom-attr__avheader")) {
                     const blockElement = hasClosestBlock(databaseElement);
                     const table = blockElement && attributeTableData.get(blockElement as HTMLElement);
                     const databaseBlockID = table ? [...table.blockIDs].sort()[0] : "";

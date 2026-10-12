@@ -39,7 +39,7 @@ const setup = (options: {host?: object; fail?: boolean; readonly?: boolean; stor
             cb();
         },
         suspendLayoutSaving: async () => { calls.push("suspend"); return () => calls.push("resume"); },
-        fetchSyncPost: async () => { calls.push("clear"); return {code: options.fail ? -1 : 0}; },
+        resetUILayout: async () => { calls.push("clear"); return {code: options.fail ? -1 : 0}; },
         Constants: {LOCAL_FILEPOSITION: "file", LOCAL_DIALOGPOSITION: "dialog"},
         setStorageVal: async (key: string) => { calls.push(key); failedStorage ||= options.storageFail; },
         showMessage: () => calls.push("error"),

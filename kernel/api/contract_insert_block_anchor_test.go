@@ -68,6 +68,8 @@ func testAPIContractInsertBlockAnchors(t *testing.T, boxID, docID, paragraphID s
 				{"missing", missingID, "not found"},
 			} {
 				t.Run("insert-anchor/"+dataType+"/"+field+"/"+anchor.name, func(t *testing.T) {
+					// 强制从源文件加载，避免缓存命中掩盖拒绝请求期间的落盘修改。
+					cache.RemoveTreeDataInBox(docID, boxID)
 					before := readDocument(t)
 					response := post(t, map[string]any{
 						"data": data, "dataType": dataType, "parentID": docID, field: anchor.id,
@@ -76,8 +78,8 @@ func testAPIContractInsertBlockAnchors(t *testing.T, boxID, docID, paragraphID s
 						!strings.Contains(response.Msg, anchor.message) || strings.Contains(response.Msg, "panic") {
 						t.Fatalf("expected explicit anchor error, got %+v", response)
 					}
-					if !bytes.Equal(before, readDocument(t)) {
-						t.Fatal("rejected insert changed the document")
+					if after := readDocument(t); !bytes.Equal(before, after) {
+						t.Fatalf("rejected insert changed the document:\nbefore: %s\nafter: %s", before, after)
 					}
 				})
 			}

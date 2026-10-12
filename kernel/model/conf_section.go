@@ -22,7 +22,6 @@ import (
 
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // 配置段按快照更新：写入方在配置锁内复制当前段、在副本上修改并规范化后整体替换指针，
@@ -46,27 +45,19 @@ func cloneConfSection[T any](section *T) *T {
 	return ret
 }
 
-// updateConfSection 在配置锁内基于 field 当前值的副本执行 mutate，规范化后整体替换并持久化，返回替换后的段。
+// updateConfSection 使用指定配置段的提交规则更新当前快照，规范化后整体替换并持久化，返回替换后的段。
 // mutate 返回 false 时放弃本次修改，不替换也不持久化。
-func updateConfSection[T any](field *ConfSection[T], normalize func(*T) *T, mutate func(*T) bool) *T {
-	spec := newSectionSpec("", field, normalize)
-	// 从注册表取得同一配置段的反应声明。
-	for _, registered := range confSectionSpecs() {
-		if candidate, ok := registered.(*SectionSpec[*T]); ok && candidate.WriteLock == spec.WriteLock {
-			spec = candidate
-			break
-		}
-	}
+func updateConfSection[T any](spec *SectionSpec[*T], mutate func(*T) bool) *T {
 	spec.WriteLock.Lock()
 	defer spec.WriteLock.Unlock()
 	for {
-		old := field.Load()
+		old := spec.Load()
 		next := cloneConfSection(old)
 		if next == nil {
-			next = normalize(nil)
+			next = spec.Normalize(nil)
 		}
 		if !mutate(next) {
-			return field.Load()
+			return spec.Load()
 		}
 		if _, err := applySectionLockedAt(spec, next, old, true); err != nil {
 			if errors.Is(err, errConfSectionChanged) {
@@ -74,7 +65,7 @@ func updateConfSection[T any](field *ConfSection[T], normalize func(*T) *T, muta
 			}
 			logging.LogWarnf("update conf section [%s] failed: %s", spec.Namespace, err)
 		}
-		return field.Load()
+		return spec.Load()
 	}
 }
 
@@ -87,64 +78,62 @@ func always[T any](mutate func(*T)) func(*T) bool {
 
 // UpdateSyncConf 以快照方式更新同步配置段。
 func UpdateSyncConf(mutate func(*conf.Sync)) *conf.Sync {
-	return updateConfSection(&Conf.Sync, conf.NormalizeSync, always(mutate))
+	return updateConfSection(syncSectionSpec(), always(mutate))
 }
 
 // UpdateSystemConf 以快照方式更新系统配置段。
 func UpdateSystemConf(mutate func(*conf.System)) *conf.System {
-	return updateConfSection(&Conf.System, conf.NormalizeSystem, always(mutate))
+	return updateConfSection(systemSectionSpec(), always(mutate))
 }
 
 // UpdateRepoConf 以快照方式更新数据仓库配置段。
 func UpdateRepoConf(mutate func(*conf.Repo)) *conf.Repo {
-	return updateConfSection(&Conf.Repo, conf.NormalizeRepo, always(mutate))
+	return updateConfSection(repoSectionSpec(), always(mutate))
 }
 
 // UpdateEditorConf 以快照方式更新编辑器配置段。
 func UpdateEditorConf(mutate func(*conf.Editor)) *conf.Editor {
-	return updateConfSection(&Conf.Editor, conf.NormalizeEditor, always(mutate))
+	return updateConfSection(editorSectionSpec(), always(mutate))
 }
 
 // UpdateAppearanceConf 以快照方式更新外观配置段。
 func UpdateAppearanceConf(mutate func(*conf.Appearance)) *conf.Appearance {
-	return updateConfSection(&Conf.Appearance, func(appearance *conf.Appearance) *conf.Appearance {
-		return conf.NormalizeAppearance(appearance, util.IsMobileContainer())
-	}, always(mutate))
+	return updateConfSection(appearanceSectionSpec(false), always(mutate))
 }
 
 // UpdateBazaarConf 以快照方式更新集市配置段。
 func UpdateBazaarConf(mutate func(*conf.Bazaar)) *conf.Bazaar {
-	return updateConfSection(&Conf.Bazaar, conf.NormalizeBazaar, always(mutate))
+	return updateConfSection(bazaarSectionSpec(), always(mutate))
 }
 
 // UpdateGraphConf 以快照方式更新关系图配置段；mutate 返回 false 表示没有变化。
 func UpdateGraphConf(mutate func(*conf.Graph) bool) *conf.Graph {
-	return updateConfSection(&Conf.Graph, conf.NormalizeGraph, mutate)
+	return updateConfSection(graphSectionSpec(), mutate)
 }
 
 // UpdateTagConf 以快照方式更新标签面板配置段。
 func UpdateTagConf(mutate func(*conf.Tag)) *conf.Tag {
-	return updateConfSection(&Conf.Tag, conf.NormalizeTag, always(mutate))
+	return updateConfSection(tagSectionSpec(), always(mutate))
 }
 
 // UpdateAPIConf 以快照方式更新 API 配置段。
 func UpdateAPIConf(mutate func(*conf.API)) *conf.API {
-	return updateConfSection(&Conf.Api, conf.NormalizeAPI, always(mutate))
+	return updateConfSection(apiSectionSpec(), always(mutate))
 }
 
 // UpdatePublishConf 以快照方式更新发布服务配置段。
 func UpdatePublishConf(mutate func(*conf.Publish)) *conf.Publish {
-	return updateConfSection(&Conf.Publish, conf.NormalizePublish, always(mutate))
+	return updateConfSection(publishSectionSpec(), always(mutate))
 }
 
 // UpdateOnboardingConf 以快照方式更新首次使用引导状态。
 func UpdateOnboardingConf(mutate func(*conf.Onboarding)) *conf.Onboarding {
-	return updateConfSection(&Conf.Onboarding, conf.NormalizeOnboarding, always(mutate))
+	return updateConfSection(onboardingSectionSpec(), always(mutate))
 }
 
 // UpdateStatConf 以快照方式更新统计配置段。
 func UpdateStatConf(mutate func(*conf.Stat)) *conf.Stat {
-	return updateConfSection(&Conf.Stat, conf.NormalizeStat, always(mutate))
+	return updateConfSection(statSectionSpec(), always(mutate))
 }
 
 // replaceConfSectionLocked 要求调用方已持有配置锁：在 field 当前值的副本上执行 mutate 后整体替换，

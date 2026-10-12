@@ -493,7 +493,7 @@ func removeCloudSyncDirContract(c *gin.Context, request apicontract.SyncNameRequ
 		return
 	}
 	settingMutationMu.Lock()
-	notifySettingChanged("sync")
+	model.NotifyConfChanged("sync")
 	settingMutationMu.Unlock()
 
 	ret = apicontract.Success(model.Conf.Sync.Load().CloudName)

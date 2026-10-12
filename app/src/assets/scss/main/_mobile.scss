@@ -1324,6 +1324,12 @@ body.mobile-topbar--merged {
   }
 
   .mobile-main-menu {
+    &__collapse {
+      // 将按钮超出标题行高的部分放入标题留白，保持分组间距
+      margin: -2px 0;
+      align-self: center;
+    }
+
     // 搜索框与返回按钮同处顶栏，占满返回按钮右侧的剩余宽度
     &__search {
       display: flex;

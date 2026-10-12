@@ -556,6 +556,10 @@ export const disabledProtyle = (protyle: IProtyle) => {
     window.siyuan.menus.menu.remove();
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
     protyle.disabled = true;
+    if (!wasDisabled) {
+        protyle.wysiwyg.tableControl?.clear();
+        protyle.wysiwyg.element.querySelectorAll(".table__select").forEach(item => item.removeAttribute("style"));
+    }
     protyle.databaseAttributePanel?.updateReadonly();
     if (protyle.title && protyle.title.editElement) {
         protyle.title.editElement.setAttribute("contenteditable", "false");
@@ -599,6 +603,10 @@ export const enableProtyle = (protyle: IProtyle) => {
     }
     /// #endif
     protyle.disabled = false;
+    if (wasDisabled) {
+        protyle.wysiwyg.tableControl?.clear();
+        protyle.wysiwyg.element.querySelectorAll(".table__select").forEach(item => item.removeAttribute("style"));
+    }
     protyle.databaseAttributePanel?.updateReadonly();
     if (isMobile()) {
         /// #if MOBILE

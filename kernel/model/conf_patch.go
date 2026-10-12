@@ -60,16 +60,30 @@ func (spec *SectionSpec[C]) patch(patch []byte) ([]Issue, error) {
 }
 
 func mergeConfSection[C any](current C, patch []byte) (next C, err error) {
-	data, err := json.Marshal(current)
-	if err != nil {
-		return next, err
-	}
-	data, err = MergeConfJSON(data, patch)
+	data, err := MergeConfSectionJSON(current, patch)
 	if err != nil {
 		return next, err
 	}
 	err = json.Unmarshal(data, &next)
 	return
+}
+
+// MergeConfSectionJSON 基于当前配置段合并补丁，供模型更新和入站契约校验共用。
+func MergeConfSectionJSON(current any, patch []byte) ([]byte, error) {
+	data, err := json.Marshal(current)
+	if err != nil {
+		return nil, err
+	}
+	return MergeConfJSON(data, patch)
+}
+
+// ConfSectionPatchJSON 返回合并后的配置段，调用方在发布前保留契约校验与专用领域动作。
+func ConfSectionPatchJSON(namespace string, patch []byte) ([]byte, error) {
+	spec, ok := SectionSpecByNamespace(namespace)
+	if !ok {
+		return nil, fmt.Errorf("unsupported configuration section: %s", namespace)
+	}
+	return MergeConfSectionJSON(spec.load(), patch)
 }
 
 func ApplyConfPatch(namespace string, patch []byte) ([]Issue, error) {

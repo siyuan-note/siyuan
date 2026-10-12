@@ -1,4 +1,9 @@
 {
+	"kernelUnresponsiveTitle": "Jadro neodpovedá",
+	"kernelUnresponsiveMessage": "Časový limit lokálnych požiadaviek na jadro uplynul, takže SiYuan nemôže otvoriť hlavné okno. Podrobnosti nájdete v ${log}.",
+	"kernelUnresponsiveWindowsHint": "V systéme Windows to môže súvisieť so súčasným zapnutím riadenia preťaženia TCP BBR2 a Loopback Large Mtu (loopbacklargemtu).",
+	"codeTabSpacesCount": "${x} medzier",
+	"codeTabSpacesKeepTab": "Bez nahradenia (tabulátor zostane)",
 	"syncConfigTip": "Nakonfigurujte adresu servera, prihlasovacie údaje a parametre pripojenia tejto služby; po uložení sa použijú na cloudovú synchronizáciu a zálohovanie",
 	"dataRepoPurgeCloud": "Vyčistiť cloudový dátový sklad",
 	"dataRepoPurgeCloudTip": "Odstrániť všetky nepotrebné snímky a súvisiace dátové objekty v cloude",
@@ -481,7 +486,7 @@
 	"backlinkHideReference": "Skryť bloky odkazov v prenesených spätných odkazoch",
 	"backlinkHideReferenceTip": "Skryť bloky obsahujúce iba odkazy na bloky v prenesených spätných odkazoch, ak zostáva viditeľný iný obsah, a znova ich zobraziť pri úpravách",
 	"uploadInsertTargetUnavailable": "Pôvodný cieľ nahrávania už nie je dostupný. Výsledok nebol vložený; nahrané súbory zostávajú zachované.",
-	"mobileToolbarEntryTip": "Nastavte viditeľnosť a poradie položiek mobilného panela nástrojov a ponuky lomky, ako aj viditeľnosť tlačidla OCR obrázka; profily sa ukladajú na tomto zariadení a nesynchronizujú sa medzi zariadeniami",
+	"mobileToolbarEntryTip": "Nastavte viditeľnosť a poradie položiek mobilného panela nástrojov a ponuky lomky; profily sa ukladajú na tomto zariadení a nesynchronizujú sa medzi zariadeniami",
 	"keymapAssigned": "Priradené",
 	"keymapCustomized": "Upravené mnou",
 	"keymapUnassigned": "Nepriradené",

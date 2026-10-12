@@ -47,10 +47,22 @@ import {addListMindmapSummaryRanges, getListMindmapSiblingIDs, getListMindmapSum
     getListMindmapSummarySnapshot} from "./summary";
 import {isProtyleListItemFragment} from "../../runtimeCapabilities";
 import {isFoldedRenderContent} from "../foldedContent";
+import {disposeCustomBlocksInElement} from "../../../plugin/customBlockRender";
+import {processRender} from "../../util/processCode";
+import {highlightRender} from "../highlightRender";
+import {avRender} from "../av/render";
+import {blockRender} from "../blockRender";
 
 const roots = new WeakMap<IProtyle, {refresh: () => void, mountNew: (list: HTMLElement) => void,
-    restoreFocus: (listID: string, candidateIDs: string[]) => void, focusRevision: number,
+    restoreFocus: (listID: string, candidateIDs: string[], selection?: Record<string, string>, source?: HTMLElement) => void, focusRevision: number,
+    interactionRevision?: number, focusGuard?: () => boolean, undoPending?: boolean,
     finish: () => Promise<boolean>, destroy: () => void}>();
+
+const hasMindmapFocusOverlay = () => {
+    const active = document.activeElement;
+    return !!active?.closest(".b3-dialog, #commonMenu, #keyboardToolbar") &&
+        !active.closest('[data-type="undo"], [data-type="redo"]');
+};
 
 export const finishListMindmaps = async (owner: IProtyle) => roots.get(owner)?.finish() ?? true;
 
@@ -560,7 +572,8 @@ class ListMindmapController {
         return this.taskChanges;
     }
 
-    private async change(change: () => unknown, editing = false, focusID?: string) {
+    private async change(change: () => unknown, editing = false, focusID?: string,
+                         selection?: {undo?: Record<string, string>, redo?: Record<string, string>}) {
         if (this.disposed || !this.list.isConnected || !canEdit(this.owner, this.list)) {
             return false;
         }
@@ -589,8 +602,12 @@ class ListMindmapController {
                 // 将操作前后的节点分别记录在事务中，重做时可定位到重新插入的节点。
                 updateTransaction(this.owner, this.list, before, {
                     undoFocusId: selectedID, undoFocusStart: "0", undoFocusEnd: "0",
+                    mindmapSnapshotId: this.list.dataset.nodeId,
+                    ...(selection?.undo ? {undoFocusMindmapSelection: JSON.stringify(selection.undo)} : {}),
                 }, {doOperations: [], undoOperations: [], context: {
                     undoFocusId: nextID, undoFocusStart: "0", undoFocusEnd: "0",
+                    mindmapSnapshotId: this.list.dataset.nodeId,
+                    ...(selection?.redo ? {undoFocusMindmapSelection: JSON.stringify(selection.redo)} : {}),
                 }});
             }
             this.refresh();
@@ -629,10 +646,17 @@ class ListMindmapController {
         }
     }
 
-    private async edit(id: string, host: HTMLElement, replaceFirstParagraph?: string, images?: File[]) {
+    private async edit(id: string, host: HTMLElement, replaceFirstParagraph?: string, images?: File[],
+                       selection?: Record<string, string>, guard?: () => boolean) {
+        if (guard && !guard()) {
+            return;
+        }
+        if (!guard && roots.has(this.owner)) {
+            roots.get(this.owner).interactionRevision = (roots.get(this.owner).interactionRevision || 0) + 1;
+        }
         const request = ++this.editRequest;
         if (!canEdit(this.owner, this.list) || (this.activeEditor && !await this.activeEditor.finish()) ||
-            request !== this.editRequest || this.disposed || !host?.isConnected) {
+            request !== this.editRequest || this.disposed || !host?.isConnected || guard && !guard()) {
             return;
         }
         const node = this.model.nodes.get(id);
@@ -640,21 +664,25 @@ class ListMindmapController {
             return;
         }
         this.view.setEditing(id);
-        this.activeEditor = openListMindmapEditor({
-            owner: this.owner, node, host, replaceFirstParagraph,
+        const editor = openListMindmapEditor({
+            owner: this.owner, node, host, replaceFirstParagraph, selection,
             canEdit: () => !this.disposed && this.list.isConnected && canEdit(this.owner, this.list),
-            onSave: html => this.change(() => replaceListMindmapContent(this.list, id, html), true),
+            onSave: (html, undo, redo) => this.change(() => replaceListMindmapContent(this.list, id, html), true, id, {undo, redo}),
             onResize: () => this.view.refreshLayout(),
             onAdd: kind => this.add(id, kind),
             onFinish: () => {
+                if (this.activeEditor !== editor) {
+                    return;
+                }
                 this.activeEditor = undefined;
                 this.view.setEditing(undefined);
                 if (!this.disposed) {
                     this.view.update(this.model);
                 }
             },
-            onUndo: redo => this.undo(redo, id),
+            onUndo: (redo, currentSelection) => this.undo(redo, id, currentSelection),
         });
+        this.activeEditor = editor;
         if (!this.activeEditor) {
             this.view.setEditing(undefined);
             this.view.update(this.model);
@@ -663,30 +691,116 @@ class ListMindmapController {
         }
     }
 
-    private async undo(redo: boolean, editingID?: string) {
+    private async undo(redo: boolean, editingID?: string, selection?: Record<string, string>) {
+        const root = roots.get(this.owner);
+        if (root?.undoPending) {
+            return;
+        }
         const selectedID = editingID || this.view.getSelectedId();
         const selected = selectedID ? this.model.nodes.get(selectedID) : undefined;
         const siblings = selected?.parentId ? this.model.nodes.get(selected.parentId)?.children || [] : [];
         const index = siblings.findIndex(node => node.id === selectedID);
         const candidateIDs = [selectedID, siblings[index - 1]?.id, siblings[index + 1]?.id,
             selected?.parentId].filter((id): id is string => !!id);
-        if (!canEdit(this.owner, this.list) || (this.activeEditor && !await this.activeEditor.finish())) {
-            return;
+        const interactionRevision = root?.interactionRevision;
+        const editorRoot = this.owner.wysiwyg.element;
+        const documentID = this.owner.block.rootID;
+        const notebookID = this.owner.notebookId;
+        const guard = () => roots.get(this.owner) === root && editorRoot.isConnected &&
+            this.owner.block.rootID === documentID && this.owner.notebookId === notebookID &&
+            root?.interactionRevision === interactionRevision && !hasMindmapFocusOverlay();
+        if (root) {
+            root.undoPending = true;
+            root.focusGuard = guard;
         }
-        const root = roots.get(this.owner);
-        const focusRevision = root?.focusRevision;
-        if (redo) {
-            await this.owner.undo.redo(this.owner);
-        } else {
-            await this.owner.undo.undo(this.owner);
-        }
-        if (root?.focusRevision === focusRevision) {
-            root?.restoreFocus(this.list.dataset.nodeId, candidateIDs);
+        try {
+            if (!canEdit(this.owner, this.list) || (this.activeEditor && !await this.activeEditor.finish())) {
+                return;
+            }
+            const before = cleanListMindmapHTML(this.list.outerHTML);
+            if (editingID && guard()) {
+                this.view.focusNode(editingID);
+            }
+            const focusRevision = root?.focusRevision;
+            if (redo) {
+                await this.owner.undo.redo(this.owner);
+            } else {
+                await this.owner.undo.undo(this.owner);
+            }
+            if (root?.focusRevision === focusRevision && guard()) {
+                // 空栈或取消确认时恢复原编辑位置；结构回放仍只恢复节点选择。
+                const unchanged = this.list.isConnected && cleanListMindmapHTML(this.list.outerHTML) === before;
+                root?.restoreFocus(this.list.dataset.nodeId, candidateIDs, unchanged ? selection : undefined, this.list);
+            }
+        } finally {
+            if (root?.focusGuard === guard) {
+                root.focusGuard = undefined;
+                root.undoPending = false;
+            }
         }
     }
 
-    public focusNode(candidateIDs: string[]) {
-        this.view.focusNode(candidateIDs.find(id => this.model.nodes.has(id)) || this.model.root.id);
+    public focusNode(candidateIDs: string[], selection?: Record<string, string>, guard?: () => boolean) {
+        if (guard && !guard()) {
+            return;
+        }
+        const id = candidateIDs.find(id => this.model.nodes.has(id)) || this.model.root.id;
+        this.view.focusNode(id);
+        const node = this.model.nodes.get(id);
+        const content = selection && node && !node.virtual && this.view.getContentHost(id);
+        const ids = new Set(node?.contentBlocks?.flatMap(block => [block, ...Array.from(block.querySelectorAll("[data-node-id]"))])
+            .map(block => block.getAttribute("data-node-id")));
+        if (content && ids.has(selection.undoFocusId) && ids.has(selection.undoFocusEndId || selection.undoFocusId)) {
+            void this.edit(id, content, undefined, undefined, selection, guard);
+        }
+    }
+
+    public replay(html: string) {
+        if (this.disposed || !this.list.isConnected || this.activeEditor || !canEdit(this.owner, this.list) ||
+            this.list.dataset.type !== "NodeMindmap" && this.list.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1") {
+            return false;
+        }
+        const template = this.list.ownerDocument.createElement("template");
+        template.innerHTML = cleanListMindmapHTML(normalizeHTMLAssetIFrameBlockDOM(html));
+        const next = template.content.firstElementChild as HTMLElement;
+        if (template.content.childElementCount !== 1 || next?.dataset.nodeId !== this.list.dataset.nodeId ||
+            next.dataset.type !== this.list.dataset.type || next.dataset.type !== "NodeMindmap" &&
+            next.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) !== "1") {
+            return false;
+        }
+        try {
+            readListMindmap(next);
+        } catch (_error) {
+            return false;
+        }
+        Array.from(this.list.attributes).forEach(attribute => this.list.removeAttribute(attribute.name));
+        Array.from(next.attributes).forEach(attribute => this.list.setAttribute(attribute.name, attribute.value));
+        this.list.dataset.mindmapViewRendered = "true";
+        // 全屏时画布位于 body，原位置的标记也必须保留，才能正常退出全屏。
+        const retained = Array.from(this.list.childNodes).filter(child => child === this.host ||
+            child.nodeType === Node.COMMENT_NODE && child.nodeValue === "mindmap-view");
+        Array.from(this.list.childNodes).forEach(child => {
+            if (!retained.includes(child)) {
+                if (child instanceof Element) {
+                    disposeCustomBlocksInElement(child);
+                }
+                child.remove();
+            }
+        });
+        const children = Array.from(next.childNodes);
+        children.forEach(child => this.list.insertBefore(child, retained[0] || null));
+        children.forEach(child => {
+            if (child instanceof Element) {
+                processRender(child);
+                highlightRender(child);
+                avRender(child, this.owner);
+                blockRender(this.owner, child);
+            }
+        });
+        // 即使序列化正文相同，源 Element 已替换，模型也必须重新绑定新节点。
+        this.snapshot = "";
+        this.refresh();
+        return true;
     }
 
     public async finish() {
@@ -762,7 +876,7 @@ export const initListMindmaps = (owner: IProtyle) => {
     const placeholders = new Map<HTMLElement, HTMLElement>();
     const failed = new WeakSet<HTMLElement>();
     const newlyCreated = new WeakSet<HTMLElement>();
-    let pendingFocus: {listID: string, candidateIDs: string[]};
+    let pendingFocus: {list: HTMLElement, candidateIDs: string[], selection?: Record<string, string>, guard?: () => boolean};
     let frame = 0;
     let disposed = false;
     const clearPlaceholder = (list: HTMLElement) => {
@@ -828,8 +942,8 @@ export const initListMindmaps = (owner: IProtyle) => {
                     const instance = new ListMindmapController(owner, list);
                     instances.set(list, instance);
                     placeholders.delete(list);
-                    if (pendingFocus?.listID === list.dataset.nodeId) {
-                        instance.focusNode(pendingFocus.candidateIDs);
+                    if (pendingFocus?.list === list) {
+                        instance.focusNode(pendingFocus.candidateIDs, pendingFocus.selection, pendingFocus.guard);
                         pendingFocus = undefined;
                     }
                 } catch (error) {
@@ -879,21 +993,53 @@ export const initListMindmaps = (owner: IProtyle) => {
             });
         }
     };
-    const restoreFocus = (listID: string, candidateIDs: string[]) => {
-        const list = getListMindmapElements(root).find(item => item.dataset.nodeId === listID);
+    const restoreFocus = (listID: string, candidateIDs: string[], selection?: Record<string, string>, source?: HTMLElement) => {
+        const state = roots.get(owner);
+        const revision = state?.interactionRevision;
+        const requestGuard = state?.focusGuard;
+        const guard = () => !disposed && roots.get(owner) === state && state?.interactionRevision === revision &&
+            !hasMindmapFocusOverlay() && (!requestGuard || requestGuard());
+        if (guard && !guard()) {
+            state.focusRevision++;
+            return;
+        }
+        const lists = getListMindmapElements(root);
+        const list = source && lists.includes(source) ? source : lists.find(item => item.dataset.nodeId === listID &&
+            !item.closest(".protyle-wysiwyg__embed"));
         if (!list) {
             return;
         }
         roots.get(owner).focusRevision++;
-        pendingFocus = {listID, candidateIDs};
+        pendingFocus = {list, candidateIDs, selection, guard};
         refresh();
         const instance = instances.get(list);
         if (instance) {
-            instance.focusNode(candidateIDs);
+            instance.focusNode(candidateIDs, selection, guard);
             pendingFocus = undefined;
         }
     };
-    const unregister = registerListMindmapRoot(root, schedule, restoreFocus);
+    const unregister = registerListMindmapRoot(root, schedule, restoreFocus,
+        (source, html) => instances.get(source as HTMLElement)?.replay(html) ?? false);
+    const interactions = new AbortController();
+    const invalidateFocus = (event: Event) => {
+        if (event.target instanceof Element) {
+            if (event.target.closest(".b3-dialog")?.querySelector('[data-undo-confirmation="true"]') ||
+                event.target.closest("#keyboardToolbar") && event.target.closest('[data-type="undo"], [data-type="redo"]')) {
+                return;
+            }
+        }
+        if (event instanceof KeyboardEvent &&
+            (matchHotKey(window.siyuan.config.keymap.editor.general.undo, event) ||
+                matchHotKey(window.siyuan.config.keymap.editor.general.redo, event))) {
+            return;
+        }
+        const state = roots.get(owner);
+        if (state) {
+            state.interactionRevision = (state.interactionRevision || 0) + 1;
+        }
+    };
+    document.addEventListener("pointerdown", invalidateFocus, {capture: true, signal: interactions.signal});
+    document.addEventListener("keydown", invalidateFocus, {capture: true, signal: interactions.signal});
     const observer = new MutationObserver(records => {
         if (records.some(record => {
             const element = record.target instanceof Element ? record.target : record.target.parentElement;
@@ -916,8 +1062,9 @@ export const initListMindmaps = (owner: IProtyle) => {
             newlyCreated.add(list);
             refresh();
         }
-    }, restoreFocus, focusRevision: 0, destroy: () => {
+    }, restoreFocus, focusRevision: 0, interactionRevision: 0, destroy: () => {
         disposed = true;
+        interactions.abort();
         unregister();
         observer.disconnect();
         cancelAnimationFrame(frame);

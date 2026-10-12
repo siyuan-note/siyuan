@@ -236,7 +236,7 @@ const zipPath = path.join(os.tmpdir(), "siyuan-android-app.zip");
 if (existsSync(zipPath)) {
   unlinkSync(zipPath);
 }
-const tarArgs = ["-a", "-cf", zipPath, "--exclude=stage/map", "--exclude=stage/build/map",
+const tarArgs = ["-a", "-cf", zipPath,
   "-C", appDir, "appearance", "guide", "stage"];
 const changelogsDir = path.join(appDir, "changelogs");
 if (existsSync(changelogsDir)) {

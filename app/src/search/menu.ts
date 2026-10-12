@@ -1,3 +1,4 @@
+import {removeSearchCriterion} from "../config/util/resourceConfig";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
 import {isMobile, objEquals} from "../util/functions";
@@ -454,7 +455,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                                 item.remove();
                             }
                         });
-                        fetchPost("/api/storage/removeCriterion", {name: removeName});
+                        removeSearchCriterion(removeName);
                         removeCriterionData(criteriaData, [hasSameConfig, hasSameName]);
                         saveCriterionData(config, criteriaData, element, value, saveDialog);
                     });
@@ -466,7 +467,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                             item.remove();
                         }
                     });
-                    fetchPost("/api/storage/removeCriterion", {name: hasSameConfig});
+                    removeSearchCriterion(hasSameConfig);
                     removeCriterionData(criteriaData, [hasSameConfig]);
                     saveCriterionData(config, criteriaData, element, value, saveDialog);
                 });

@@ -7,7 +7,7 @@
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
 		"type": "doc",
-		"updated": "20261010114821"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110114-xav9o1n",
-				"updated": "20261010114821"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -56,6 +56,21 @@
 					"Data": "​ in the app store."
 				}
 			]
+		},
+		{
+			"ID": "20261012014537-535lvyo",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-535lvyo",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Interface navigation"
+				}
+			],
+			"HeadingLevel": 2
 		},
 		{
 			"ID": "20260921090531-lx0v0bv",

@@ -1,6 +1,6 @@
 import {IMAGE_OCR_MENU} from "../../menus/declarations/imageOCRMenu";
 import {declaredMenuCatalog} from "../../menus/declarations/menuDeclaration";
-import {CODE_TAB_SPACE_VALUES} from "../../protyle/wysiwyg/codeBlockUtil";
+import {CODE_TAB_SPACE_VALUES, getCodeTabSpacesLabel} from "../../protyle/wysiwyg/codeBlockUtil";
 import {orderGutterTurnIntoItems} from "../../protyle/gutter/turnIntoMenu";
 import {
     DESKTOP_TOOLBAR_ENTRIES,
@@ -68,8 +68,8 @@ const fixed = (key: string, label: () => string): IEntryCatalogNode =>
     node(key, label, true, undefined, undefined, {fixed: true});
 
 const codeTabSpacesChildren = () => [
-    node("default", () => `${window.siyuan.languages.default} (${window.siyuan.config.editor.codeTabSpaces})`),
-    ...CODE_TAB_SPACE_VALUES.map((value) => node(`tabSpaces${value}`, literal(value.toString()))),
+    node("default", () => `${window.siyuan.languages.default} (${getCodeTabSpacesLabel(window.siyuan.config.editor.codeTabSpaces)})`),
+    ...CODE_TAB_SPACE_VALUES.map((value) => node(`tabSpaces${value}`, () => getCodeTabSpacesLabel(value))),
 ];
 
 const copyChildren = () => [

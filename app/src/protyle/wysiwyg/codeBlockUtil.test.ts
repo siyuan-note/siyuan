@@ -5,6 +5,7 @@ import {
     getCodeBlockOutdentRange,
     getCodeBlockLineRange,
     getCodeTabSpace,
+    getCodeTabSpacesLabel,
     resolveCodeTabSpaces,
     updateCodeBlockLines,
 } from "./codeBlockUtil";
@@ -18,6 +19,24 @@ test("code block Tab spaces inherit the global value unless explicitly overridde
     assert.equal(resolveCodeTabSpaces("8", 4), 8);
     assert.equal(getCodeTabSpace(0), "\t");
     assert.equal(getCodeTabSpace(4), "    ");
+});
+
+test("code block Tab spaces labels share one wording across settings and menus", () => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", {configurable: true, value: {siyuan: {languages: {
+        codeTabSpacesCount: "${x} spaces", codeTabSpacesKeepTab: "Keep tab"}}}});
+    try {
+        assert.equal(getCodeTabSpacesLabel(0), "Keep tab");
+        for (const spaces of [2, 4, 6, 8]) {
+            assert.equal(getCodeTabSpacesLabel(spaces), `${spaces} spaces`);
+        }
+    } finally {
+        if (descriptor) {
+            Object.defineProperty(globalThis, "window", descriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
 });
 
 test("code block indentation detection recognizes consistent tabs and supported space widths", () => {

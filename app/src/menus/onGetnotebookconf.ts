@@ -1,5 +1,5 @@
+import {saveNotebookConf} from "../config/util/resourceConfig";
 import {Dialog} from "../dialog";
-import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {escapeHtml} from "../util/escape";
 import {writeText} from "../protyle/util/compatibility";
@@ -133,17 +133,14 @@ const bindSettingEvent = (contentElement: Element, data: INotebookConf) => {
     dailyNoteTemplatePathElement.value = data.conf.dailyNoteTemplatePath;
     contentElement.querySelectorAll("input, select").forEach((item) => {
         item.addEventListener("change", () => {
-            fetchPost("/api/notebook/setNotebookConf", {
-                notebook: data.box,
-                conf: {
-                    refCreateSavePath: refCreateSavePathElement.value,
-                    refCreateSaveBox: (contentElement.querySelector("#refCreateSaveBox") as HTMLInputElement).value,
-                    docCreateSaveBox: (contentElement.querySelector("#docCreateSaveBox") as HTMLInputElement).value,
-                    docCreateSavePath: docCreateSavePathElement.value,
-                    docCreateTemplatePath: docCreateTemplatePathElement.value,
-                    dailyNoteSavePath: dailyNoteSavePathElement.value,
-                    dailyNoteTemplatePath: dailyNoteTemplatePathElement.value,
-                }
+            saveNotebookConf(data.box, {
+                refCreateSavePath: refCreateSavePathElement.value,
+                refCreateSaveBox: (contentElement.querySelector("#refCreateSaveBox") as HTMLInputElement).value,
+                docCreateSaveBox: (contentElement.querySelector("#docCreateSaveBox") as HTMLInputElement).value,
+                docCreateSavePath: docCreateSavePathElement.value,
+                docCreateTemplatePath: docCreateTemplatePathElement.value,
+                dailyNoteSavePath: dailyNoteSavePathElement.value,
+                dailyNoteTemplatePath: dailyNoteTemplatePathElement.value,
             });
         });
     });

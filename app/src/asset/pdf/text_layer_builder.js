@@ -269,7 +269,7 @@ class TextLayerBuilder {
 
     if (typeof PDFJSDev === "undefined" || !PDFJSDev.test("MOZCENTRAL")) {
       // eslint-disable-next-line no-var
-      var isFirefoxOrModernChromium, prevRange;
+      var isFirefox, prevRange;
     }
 
     document.addEventListener(
@@ -309,33 +309,19 @@ class TextLayerBuilder {
         if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("MOZCENTRAL")) {
           return;
         }
-        if (isFirefoxOrModernChromium === undefined) {
-          if (typeof PDFJSDev === "undefined" || !PDFJSDev.test("CHROME")) {
-            isFirefoxOrModernChromium =
-              getComputedStyle(
-                this.#textLayers.values().next().value
-              ).getPropertyValue("-moz-user-select") === "none";
-          }
-          if (
-            (typeof PDFJSDev !== "undefined" && PDFJSDev.test("CHROME")) ||
-            !isFirefoxOrModernChromium
-          ) {
-            // navigator.userAgentData is only available in secure contexts
-            const chromiumVersion = navigator.userAgentData
-              ? navigator.userAgentData.brands.find(
-                  ({ brand }) => brand === "Chromium"
-                )?.version
-              : /\bChrome\/(\d+)\b/.exec(navigator.userAgent)?.[1];
-
-            isFirefoxOrModernChromium =
-              !!chromiumVersion && parseInt(chromiumVersion, 10) >= 148;
-          }
+        if (isFirefox === undefined) {
+          isFirefox =
+            (typeof PDFJSDev === "undefined" || !PDFJSDev.test("CHROME")) &&
+            getComputedStyle(
+              this.#textLayers.values().next().value
+            ).getPropertyValue("-moz-user-select") === "none";
         }
-        if (isFirefoxOrModernChromium) {
+        if (isFirefox) {
           return;
         }
 
-        // In browsers other than Firefox or Chromium 148+, when hovering over
+        // Chromium 154 仍会在非选中的 endOfContent 上冻结选区，不能按版本跳过补偿。
+        // In browsers other than Firefox, when hovering over
         // an empty space (thus, on .endOfContent), the selection will expand to
         // cover all the text between the current selection and .endOfContent.
         // By moving .endOfContent to right after (or before, depending on which

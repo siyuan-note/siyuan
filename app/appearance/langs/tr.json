@@ -1,4 +1,9 @@
 {
+	"kernelUnresponsiveTitle": "Çekirdek yanıt vermiyor",
+	"kernelUnresponsiveMessage": "Çekirdeğe yapılan yerel istekler zaman aşımına uğradığı için SiYuan ana pencereyi açamıyor. Ayrıntılar için ${log} dosyasına bakın.",
+	"kernelUnresponsiveWindowsHint": "Windows'ta bu durum, TCP tıkanıklık denetimi BBR2 ile Loopback Large Mtu (loopbacklargemtu)'nun birlikte etkinleştirilmesiyle ilgili olabilir.",
+	"codeTabSpacesCount": "${x} boşluk",
+	"codeTabSpacesKeepTab": "Değiştirme yok (sekme korunur)",
 	"syncConfigTip": "Bu hizmetin sunucu adresini, kimlik bilgilerini ve bağlantı parametrelerini yapılandırın; kaydettikten sonra bulut eşitleme ve yedekleme için kullanılır",
 	"dataRepoPurgeCloud": "Bulut veri deposunu temizle",
 	"dataRepoPurgeCloudTip": "Buluttaki referanssız tüm anlık görüntüleri ve ilgili veri nesnelerini sil",
@@ -481,7 +486,7 @@
 	"backlinkHideReference": "Aktarılan geri bağlantılarda referans bloklarını gizle",
 	"backlinkHideReferenceTip": "Başka içerik görünür kaldığında aktarılan geri bağlantılarda yalnızca blok referansları içeren blokları gizle ve düzenleme sırasında yeniden göster",
 	"uploadInsertTargetUnavailable": "Özgün yükleme hedefi artık kullanılamıyor. Sonuç eklenmedi; yüklenen dosyalar korunuyor.",
-	"mobileToolbarEntryTip": "Mobil araç çubuğu ve eğik çizgi menüsü öğelerinin görünürlüğünü ve sırasını, ayrıca görsel OCR düğmesinin görünürlüğünü ayarlayın; profiller bu cihazda saklanır ve cihazlar arasında eşitlenmez",
+	"mobileToolbarEntryTip": "Mobil araç çubuğu ve eğik çizgi menüsü öğelerinin görünürlüğünü ve sırasını ayarlayın; profiller bu cihazda saklanır ve cihazlar arasında eşitlenmez",
 	"keymapAssigned": "Atanmış",
 	"keymapCustomized": "Benim özelleştirdiklerim",
 	"keymapUnassigned": "Atanmamış",

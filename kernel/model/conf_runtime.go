@@ -59,22 +59,20 @@ func applyConfRuntime(configs ...*AppConf) {
 	if current == nil {
 		return
 	}
-	confAppearanceSnapshot := current.LoadAppearance()
+	appearance := current.LoadAppearance()
+	editor := current.LoadEditor()
+	fileTree := current.LoadFileTree()
 
-	confEditorSnapshot := current.LoadEditor()
-
-	confFileTreeSnapshot := current.LoadFileTree()
-
-	if nil != confEditorSnapshot {
-		util.MarkdownSettings.Store(confEditorSnapshot.Markdown)
+	if nil != editor {
+		util.MarkdownSettings.Store(editor.Markdown)
 	}
-	if nil != confFileTreeSnapshot {
-		util.UseSingleLineSave.Store(confFileTreeSnapshot.UseSingleLineSave)
-		util.LargeFileWarningSize.Store(confFileTreeSnapshot.LargeFileWarningSize)
+	if nil != fileTree {
+		util.UseSingleLineSave.Store(fileTree.UseSingleLineSave)
+		util.LargeFileWarningSize.Store(fileTree.LargeFileWarningSize)
 	}
-	if nil != confAppearanceSnapshot {
-		util.StatusBarCfg.Store(confAppearanceSnapshot.StatusBar)
-		util.NotificationsCfg.Store(confAppearanceSnapshot.Notifications)
+	if nil != appearance {
+		util.StatusBarCfg.Store(appearance.StatusBar)
+		util.NotificationsCfg.Store(appearance.Notifications)
 	}
 	applySearchRuntime(current)
 }

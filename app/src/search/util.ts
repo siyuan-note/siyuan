@@ -1,3 +1,4 @@
+import {removeSearchCriterion} from "../config/util/resourceConfig";
 import {toggleMenu} from "../menus/menuToggle";
 import type {FileTreeGetDocRequestInput} from "../types/api";
 import {updateSearchMethodControls} from "./methodCapabilities";
@@ -460,7 +461,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 break;
             } else if (target.classList.contains("b3-chip__close") && type === "remove-criteria") {
                 const name = target.parentElement.textContent;
-                fetchPost("/api/storage/removeCriterion", {name});
+                removeSearchCriterion(name);
                 criteriaData.find((item, index) => {
                     if (item.name === name) {
                         criteriaData.splice(index, 1);

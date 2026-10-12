@@ -562,9 +562,10 @@ if (process.versions.electron && process.type === "browser") {
                 }
             });
             const ts = require("typescript");
-            const source = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/dialog/index.ts"), "utf8"), {
+            const {withAnchoredInputRuntime} = require("./fixtures/anchoredInputRuntime.cjs");
+            const source = withAnchoredInputRuntime(ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/dialog/index.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
-            }).outputText;
+            }).outputText);
             await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(source)})`);
             const positionSource = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/util/setPosition.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},

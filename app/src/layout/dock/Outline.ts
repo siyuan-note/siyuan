@@ -1,3 +1,4 @@
+import {saveOutlineState} from "../../config/util/resourceConfig";
 import {toggleMenu} from "../../menus/menuToggle";
 import {bindPanelSearch} from "./panelSearch";
 import type {BlockBreadcrumbRequestInput} from "../../types/api";
@@ -768,12 +769,7 @@ export class Outline extends Model {
         }
 
         if (!this.isPreview && this.type === "pin") {
-            fetchPost("/api/storage/setOutlineStorage", {
-                docID: this.blockId,
-                val: {
-                    expandIds: this.tree.getExpandIds()
-                }
-            });
+            saveOutlineState(this.blockId, this.tree.getExpandIds());
         }
     }
 

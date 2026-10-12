@@ -1,4 +1,9 @@
 {
+	"kernelUnresponsiveTitle": "The kernel is not responding",
+	"kernelUnresponsiveMessage": "Local requests to the kernel timed out, so SiYuan cannot open the main window. Check ${log} for details.",
+	"kernelUnresponsiveWindowsHint": "On Windows, this may be related to TCP congestion control BBR2 combined with Loopback Large Mtu (loopbacklargemtu).",
+	"codeTabSpacesCount": "${x} spaces",
+	"codeTabSpacesKeepTab": "No replacement (tab character kept)",
 	"syncConfigTip": "Configure the server address, credentials and connection parameters for this service; after saving they are used for cloud sync and backup",
 	"dataRepoPurgeCloud": "Cloud data repo purge",
 	"dataRepoPurgeCloudTip": "Delete all unreferenced snapshots and related data objects in the cloud",
@@ -481,7 +486,7 @@
 	"backlinkHideReference": "Hide reference blocks in propagated backlinks",
 	"backlinkHideReferenceTip": "Hide blocks containing only block references in propagated backlinks when other content remains visible, and show them again while editing",
 	"uploadInsertTargetUnavailable": "The original upload target is no longer available. The result was not inserted; uploaded files are retained.",
-	"mobileToolbarEntryTip": "Configure visibility and order for mobile toolbar and slash menu entries, and visibility for the image OCR button; profiles are stored on this device and do not sync across devices",
+	"mobileToolbarEntryTip": "Configure visibility and order for mobile toolbar and slash menu entries; profiles are stored on this device and do not sync across devices",
 	"keymapAssigned": "Assigned",
 	"keymapCustomized": "Customized by me",
 	"keymapUnassigned": "Unassigned",

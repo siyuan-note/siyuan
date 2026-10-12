@@ -1,7 +1,7 @@
 {
   "name": "SiYuan",
   "desktopName": "org.b3log.siyuan",
-  "version": "3.8.7-alpha.9",
+  "version": "3.8.7-beta.3",
   "description": "From thought to insight, with agents",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
@@ -19,7 +19,7 @@
     "dev:mobile": "webpack --mode development --config webpack.mobile.js",
     "dev:desktop": "webpack --mode development --config webpack.desktop.js",
     "dev:export": "webpack --mode development --config webpack.export.js",
-    "build": "pnpm run /build:.*/",
+    "build": "node scripts/clean-stage.mjs && pnpm run /build:.*/",
     "build:app": "webpack --mode production --config webpack.config.js",
     "build:mobile": "webpack --mode production --config webpack.mobile.js",
     "build:desktop": "webpack --mode production --config webpack.desktop.js",

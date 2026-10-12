@@ -92,6 +92,7 @@ import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
+import {replayListMindmap} from "../render/listMindmap/render";
 import {
     invalidateTrackedRangesByOperations,
     type ITrackedRangeInsertion,
@@ -781,6 +782,15 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: Ex
         // 前序局部回放可能已替换包含该块的祖先，跳过失效引用。
         if (!item.parentElement) {
             return;
+        }
+        // 完整脑图快照保留画布实例；必须先于折叠正文裁剪和整个视图的销毁。
+        if (isUndo && operation.context?.mindmapSnapshotId === operation.id) {
+            const selectionModeState = captureBlockSelectionModeState(item);
+            if (replayListMindmap(protyle.wysiwyg.element, item, operation)) {
+                focusRestoredBlockSelectionMode(restoreBlockSelectionModeState(protyle.wysiwyg.element, item,
+                    selectionModeState));
+                return;
+            }
         }
         let isRangeBlock = false;
         if (range && item.contains(range.startContainer)) {

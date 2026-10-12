@@ -19,7 +19,6 @@ package util
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
 	"fmt"
 	"net/url"
 	"os"
@@ -379,8 +378,7 @@ func checkFileSysStatus() {
 
 	for range 7 {
 		tmp := filepath.Join(dir, "check_consistency")
-		data := make([]byte, 1024*4)
-		_, err := rand.Read(data)
+		data, err := newFileSysStatusCheckData()
 		if err != nil {
 			ReportFileSysFatalError(err)
 			return
@@ -396,7 +394,7 @@ func checkFileSysStatus() {
 		for range 32 {
 			renamed := tmp + "_renamed"
 			if err = os.Rename(tmp, renamed); err != nil {
-				ReportFileSysFatalError(err)
+				ReportFileSysFatalError(fileSysStatusCheckError(err))
 				break
 			}
 
@@ -404,7 +402,7 @@ func checkFileSysStatus() {
 
 			f, err := os.Open(renamed)
 			if err != nil {
-				ReportFileSysFatalError(err)
+				ReportFileSysFatalError(fileSysStatusCheckError(err))
 				return
 			}
 
@@ -414,7 +412,7 @@ func checkFileSysStatus() {
 			}
 
 			if err = os.Rename(renamed, tmp); err != nil {
-				ReportFileSysFatalError(err)
+				ReportFileSysFatalError(fileSysStatusCheckError(err))
 				return
 			}
 

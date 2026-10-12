@@ -308,7 +308,9 @@ func autoOCRAssets() {
 		processed++
 		if _, _, err = ocrAsset(ctx, asset.Path, value, true); err != nil {
 			ocrRetry.Store(key, time.Now().Add(10*time.Minute))
-			logging.LogWarnf("automatic OCR failed: %s", err)
+			if !errors.Is(err, ocr.ErrUnsupportedImage) {
+				logging.LogWarnf("automatic OCR [provider=%s, path=%s] failed: %s", value.Provider, asset.Path, err)
+			}
 		} else {
 			ocrRetry.Delete(key)
 		}

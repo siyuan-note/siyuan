@@ -37,7 +37,8 @@ const setup = async (source, suffix) => {
     return {before, after, end: {x: formulas[1].getBoundingClientRect().right + 30, y: before.y}};
 };
 
-const setupEdge = async (mode) => {
+const setupEdge = async (mode, direction) => {
+    window.mathSelectionDiagnosticAbort?.abort();
     document.body.innerHTML = '<div class="protyle-wysiwyg" contenteditable="false" data-readonly="false">' +
         '<div data-node-id="20261010232335-t6hx5pb" data-type="NodeParagraph" class="p">' +
         '<div contenteditable="true" spellcheck="false"><span data-inline-wrap="token"></span>' +
@@ -51,15 +52,31 @@ const setupEdge = async (mode) => {
     await window.mathSelectionAPI.mathRender(editable);
     await document.fonts.ready;
     const range = document.createRange();
-    range.selectNodeContents(prefix);
     // 先测量整段文字，不能把已换行文本的外接矩形当作单行宽度。
     editable.style.width = "max-content";
     editable.style.whiteSpace = "nowrap";
-    const measuredLines = Array.from(range.getClientRects());
-    if (measuredLines.length !== 1) throw new Error("Prefix measurement must occupy one line");
-    const width = measuredLines[0].width;
+    const measurePrefix = () => {
+        range.selectNodeContents(prefix);
+        const measuredLines = Array.from(range.getClientRects());
+        if (measuredLines.length !== 1 || !Number.isFinite(measuredLines[0].width) || measuredLines[0].width <= 0) {
+            throw new Error("Prefix measurement must occupy one nonempty line");
+        }
+        return measuredLines[0].width;
+    };
+    const mathWidth = math.getBoundingClientRect().width;
+    const availableWidth = innerWidth - editable.getBoundingClientRect().left - 32;
+    let width = measurePrefix();
+    // 窗口实际视口可能小于请求尺寸，按字体实测宽度保留能完整显示的最长数字前缀。
+    while (width + mathWidth + 2 > availableWidth && prefix.textContent.length > 3) {
+        prefix.textContent = prefix.textContent.slice(0, -1);
+        width = measurePrefix();
+    }
+    if (!Number.isFinite(mathWidth) || mathWidth <= 0 || width + mathWidth + 2 > availableWidth) {
+        throw new Error("Viewport cannot contain the inline math edge fixture: " +
+            JSON.stringify({viewport: innerWidth, availableWidth, width, mathWidth}));
+    }
     editable.style.removeProperty("white-space");
-    editable.style.width = (width + math.getBoundingClientRect().width * (mode === "left" ? 0.5 : 1) + 2) + "px";
+    editable.style.width = (width + mathWidth * (mode === "left" ? 0.5 : 1) + 2) + "px";
     const point = (node, offset) => {
         range.setStart(node, offset);
         range.setEnd(node, offset + 1);
@@ -69,22 +86,69 @@ const setupEdge = async (mode) => {
     const rect = math.getBoundingClientRect();
     const after = point(math.nextSibling, 1);
     const before = point(prefix.firstChild, prefix.textContent.length - 2);
+    const diagnosticAbort = new AbortController();
+    window.mathSelectionDiagnosticAbort = diagnosticAbort;
+    const geometry = {mode, requestedWidth: editable.style.width, measuredPrefixWidth: width,
+        prefixLength: prefix.textContent.length, viewport: [innerWidth, innerHeight],
+        editable: editable.getBoundingClientRect().toJSON(), math: rect.toJSON(),
+        prefixLines: Array.from(prefix.getClientRects(), item => item.toJSON()),
+        fontsStatus: document.fonts.status, devicePixelRatio: window.devicePixelRatio};
+    const prefixLine = geometry.prefixLines[0];
+    if (geometry.prefixLines.length !== 1 || geometry.editable.right > innerWidth - 32 ||
+        !(after.y > before.y) || (mode === "left" ?
+            Math.abs(rect.left - prefixLine.left) >= 1 || rect.top < prefixLine.bottom ||
+                after.y < rect.top || after.y >= rect.bottom :
+            rect.top >= prefixLine.bottom || rect.bottom <= prefixLine.top ||
+                after.y <= Math.max(rect.bottom, prefixLine.bottom))) {
+        throw new Error("Invalid inline math edge layout: " + JSON.stringify(geometry));
+    }
+    window.mathSelectionDiagnostics = {mode, direction, geometry, events: []};
+    const recordSelection = (phase, event) => {
+        const selection = getSelection();
+        const describe = node => node ? {name: node.nodeName,
+            text: node.textContent?.slice(0, 180), parent: node.parentElement?.outerHTML.slice(0, 512)} : null;
+        const events = window.mathSelectionDiagnostics.events;
+        if (events.length >= 48) return;
+        events.push({phase, text: selection?.toString().slice(0, 512), collapsed: selection?.isCollapsed,
+            anchor: describe(selection?.anchorNode), anchorOffset: selection?.anchorOffset,
+            focus: describe(selection?.focusNode), focusOffset: selection?.focusOffset,
+            pointer: event && typeof event.clientX === "number" ? {x: event.clientX, y: event.clientY,
+                target: event.target?.outerHTML?.slice(0, 512)} : null});
+    };
+    for (const type of ["mousedown", "selectionchange", "mouseup", "click"]) {
+        document.addEventListener(type, event => recordSelection(type, event), {signal: diagnosticAbort.signal});
+    }
     document.addEventListener("click", () => {
         // 使用编辑器的延迟光标校正，验证鼠标释放后的选区不会被折叠。
         setTimeout(() => {
             const selection = getSelection();
             if (selection.rangeCount) {
+                recordSelection("before-caret-normalization");
                 window.mathSelectionAPI.normalizeInlineMathCaret(selection.getRangeAt(0));
+                recordSelection("after-caret-normalization");
             }
         }, 0);
-    }, {once: true});
+    }, {once: true, signal: diagnosticAbort.signal});
     return {before, after, left: {x: rect.left + 0.5, y: after.y},
         mathEnd: {x: rect.right + 1, y: after.y}, right: {x: rect.right + 1, y: before.y},
         width: editable.clientWidth, mathLeft: rect.left, prefixLeft: prefix.getBoundingClientRect().left,
-        geometry: {mode, requestedWidth: editable.style.width, measuredPrefixWidth: width,
-            editable: editable.getBoundingClientRect().toJSON(), math: rect.toJSON(),
-            prefixLines: Array.from(prefix.getClientRects(), item => item.toJSON()),
-            fontsStatus: document.fonts.status, devicePixelRatio: window.devicePixelRatio}};
+        geometry};
+};
+
+const validateDragPoints = (from, to) => {
+    const editable = document.querySelector('[contenteditable="true"]');
+    for (const [name, point] of Object.entries({from, to})) {
+        const inViewport = Number.isFinite(point.x) && Number.isFinite(point.y) &&
+            point.x >= 0 && point.x < innerWidth && point.y >= 0 && point.y < innerHeight;
+        const hit = inViewport ? document.elementFromPoint(point.x, point.y) : null;
+        const caret = inViewport ? document.caretRangeFromPoint(point.x, point.y) : null;
+        if (!inViewport || !hit || !editable?.contains(hit) || !caret || !editable.contains(caret.startContainer)) {
+            throw new Error("Invalid native selection drag " + name + ": " + JSON.stringify({point,
+                viewport: [innerWidth, innerHeight], hit: hit?.outerHTML?.slice(0, 512),
+                caretText: caret?.startContainer.textContent?.slice(0, 180), caretOffset: caret?.startOffset}));
+        }
+    }
+    return true;
 };
 
 const runElectron = async () => {
@@ -144,7 +208,13 @@ const runElectron = async () => {
         win.webContents.debugger.attach("1.3");
         const send = params => win.webContents.debugger.sendCommand("Input.dispatchMouseEvent", params);
         const drag = async (from, to, edge = false) => {
-            await win.webContents.executeJavaScript("getSelection().removeAllRanges(); true;");
+            // 校验与派发使用相同的整数坐标，避免边缘点取整后落到编辑器之外。
+            from = {x: Math.floor(from.x), y: Math.floor(from.y)};
+            to = {x: Math.floor(to.x), y: Math.floor(to.y)};
+            await win.webContents.executeJavaScript(
+                `(${validateDragPoints.toString()})(${JSON.stringify(from)}, ${JSON.stringify(to)})`);
+            await win.webContents.executeJavaScript(`getSelection().removeAllRanges();
+                if (window.mathSelectionDiagnostics) window.mathSelectionDiagnostics.events = []; true;`);
             await send({type: "mouseMoved", ...from});
             await send({type: "mousePressed", ...from, button: "left", clickCount: 1});
             for (let step = 1; step <= 15; step++) {
@@ -155,7 +225,31 @@ const runElectron = async () => {
             await new Promise(resolve => setTimeout(resolve, 30));
             const text = await win.webContents.executeJavaScript("getSelection().toString()");
             if (edge) {
-                assert.match(text, /I[\s\S]*E/, JSON.stringify(text));
+                try {
+                    assert.match(text, /I[\s\S]*E/, JSON.stringify(text));
+                } catch (error) {
+                    try {
+                        const diagnostics = await win.webContents.executeJavaScript(`(() => {
+                    const math = document.querySelector('[data-type="inline-math"]');
+                    const describePoint = point => {
+                        const hit = document.elementFromPoint(point.x, point.y);
+                        const caret = document.caretRangeFromPoint(point.x, point.y);
+                        return {point, hit: hit?.outerHTML.slice(0, 512),
+                            caretText: caret?.startContainer.textContent?.slice(0, 180), caretOffset: caret?.startOffset};
+                    };
+                    return {...window.mathSelectionDiagnostics,
+                        from: describePoint(${JSON.stringify(from)}), to: describePoint(${JSON.stringify(to)}),
+                        math: math?.getBoundingClientRect().toJSON(), viewport: [innerWidth, innerHeight],
+                        selection: {text: getSelection().toString().slice(0, 512), collapsed: getSelection().isCollapsed}};
+                        })()`);
+                        // AssertionError 缓存 stack，仅改 message 不会出现在子进程 stderr 中。
+                        console.error("Selection diagnostics: " + JSON.stringify(diagnostics));
+                    } catch (diagnosticError) {
+                        // 页面关闭或诊断失败时仍保留原始选区断言。
+                        console.error("Selection diagnostics unavailable: " + String(diagnosticError).slice(0, 512));
+                    }
+                    throw error;
+                }
                 const markdown = await win.webContents.executeJavaScript(`(() => {
                     const copy = document.createElement("div");
                     copy.append(getSelection().getRangeAt(0).cloneContents());
@@ -178,7 +272,8 @@ const runElectron = async () => {
             'document.querySelectorAll("[data-type=inline-math]")[1].lastChild.textContent'), "\ufeff");
         for (const mode of ["left", "right"]) {
             for (const direction of mode === "left" ? ["forward", "backward", "cross-line"] : ["forward", "cross-line"]) {
-                const points = await win.webContents.executeJavaScript(`(${setupEdge.toString()})(${JSON.stringify(mode)})`);
+                const points = await win.webContents.executeJavaScript(
+                    `(${setupEdge.toString()})(${JSON.stringify(mode)}, ${JSON.stringify(direction)})`);
                 if (mode === "left") {
                     assert.ok(Math.abs(points.mathLeft - points.prefixLeft) < 1, JSON.stringify(points));
                     await drag(direction === "forward" ? points.left : direction === "backward" ? points.after : points.before,
@@ -203,7 +298,7 @@ const runElectron = async () => {
             window.mathSelectionAPI.normalizeInlineMathCaret(range);
             return {collapsed: getSelection().isCollapsed, outside: !math.contains(getSelection().anchorNode)};
         })()`), {collapsed: true, outside: true});
-        const points = await win.webContents.executeJavaScript(`(${setupEdge.toString()})("right")`);
+        const points = await win.webContents.executeJavaScript(`(${setupEdge.toString()})("right", "delete")`);
         await drag(points.before, points.right, true);
         assert.equal(await win.webContents.executeJavaScript(`document.execCommand("delete");
             document.querySelectorAll('[data-type="inline-math"]').length;`), 0);

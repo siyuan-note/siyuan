@@ -145,8 +145,11 @@ func newSectionSpecFor[T any](current *AppConf, namespace string, field *ConfSec
 
 // SectionSpecByNamespace 返回当前工作空间的注册项，不缓存可替换的 AppConf 地址。
 func SectionSpecByNamespace(namespace string) (registeredSection, bool) {
-	spec, ok := confSectionSpecs()[namespace]
-	return spec, ok
+	factory, ok := confSectionSpecFactories[namespace]
+	if !ok {
+		return nil, false
+	}
+	return factory(), true
 }
 
 func ApplyConfSection(namespace string, value any) ([]Issue, error) {

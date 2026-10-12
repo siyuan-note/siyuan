@@ -55,7 +55,7 @@ extraResources:
     to: "changelogs"
   - from: "stage"
     to: "stage"
-    filter: ["**/*", "!ocr/runtime/**/*", "!map/**/*", "!build/map/**/*"]
+    filter: ["**/*", "!ocr/runtime/**/*"]
   - from: "stage/ocr/runtime/linux-arm64"
     to: "stage/ocr/runtime/linux-arm64"
   - from: "guide"

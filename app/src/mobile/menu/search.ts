@@ -1,3 +1,4 @@
+import {removeSearchCriterion} from "../../config/util/resourceConfig";
 import {toggleMenu} from "../../menus/menuToggle";
 import {closePanel} from "../util/closePanel";
 import {updateSearchMethodControls} from "../../search/methodCapabilities";
@@ -471,7 +472,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                 break;
             } else if (type === "remove-criteria") {
                 const name = target.parentElement.innerText.trim();
-                fetchPost("/api/storage/removeCriterion", {name});
+                removeSearchCriterion(name);
                 criteriaData.find((item, index) => {
                     if (item.name === name) {
                         criteriaData.splice(index, 1);

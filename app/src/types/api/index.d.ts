@@ -3676,6 +3676,7 @@ export interface APIPOSTRoutes {
      * 可选的 `sort: {column, order}` 按关联数据库字段排序，order 为 ASC 或 DESC。
      * 全部候选排序后分页，仅影响本次查询，不修改视图和 selectedRows 顺序。
      * 省略 sort 时按创建时间倒序；不存在的字段或无效方向返回错误。
+     * keyword 在分页前匹配字段内容；无显示模板的空主键也匹配当前语言的未命名占位文字，遵循搜索大小写设置。
      */
     "/api/av/getAttributeViewRelationCandidates": {
         request: GetAttributeViewRelationCandidatesRequestInput;
@@ -6695,6 +6696,9 @@ export interface APIPOSTRoutes {
      * export.blockRefMode 的旧值 0、1、5 按旧设置接口的兼容语义转换为 4；启动迁移由配置版本控制。
      * 同步地址沿用专用保存接口的校验，更换来源须保留完整资源检查，间隔使用规范化后的值调度。
      * 存在字段诊断时在 data.issues 返回；error 阻止写入，warning 随已规范化的成功结果返回。
+     * 编辑器、导出、搜索、文档树、外观、闪卡和智能体字段使用对应设置接口的范围规范化规则。
+     * system.autoLaunch2 仅接受 0、1、2，lockScreenMode 仅接受 0、1，越界值回退 0。
+     * sync.assetDownloadMode 的非法值仍拒绝写入；repo.indexRetentionDays 的正值不设上限。
      */
     "/api/setting/patch": {
         request: PatchSettingRequestInput;
@@ -6727,6 +6731,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。
+     * 工具调用轮数和输出 token 上限的负数归零；温度超出 0–2 回退 1。
+     */
     "/api/setting/setAI": {
         request: SetAIRequestInput;
         response: { "code": 0; "data": SettingAI | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6734,6 +6742,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 限定关闭按钮行为：closeButtonBehavior 仅接受 0、1，越界值回退 0。
+     */
     "/api/setting/setAppearance": {
         request: SetAppearanceRequestInput;
         response: { "code": 0; "data": SettingAppearance | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6765,6 +6776,8 @@ export interface APIPOSTRoutes {
     /**
      * 使用与启动、导入相同的规范化规则并同步保存。锚文本长度 1–5120 保持不变，小于 1 回退 64。
      * 字体大小超出 9–72 回退 16；省略字体列表和图片标题字段时继续保留原有兼容行为。
+     * backlinkGlobalSort、backlinkBlockSort、floatWindowMode、headingEmbedMode 仅接受 0、1、2，越界值回退 0。
+     * databaseAttrClickMode、databaseAttrViewMode 仅接受 0、1；codeTabSpaces 仅接受 0、2、4、6、8，越界值回退 0。
      */
     "/api/setting/setEditor": {
         request: SetEditorRequestInput;
@@ -6800,7 +6813,8 @@ export interface APIPOSTRoutes {
     };
     /**
      * 整体替换导出配置，将 blockRefMode 的废弃值 0、1、5 转换为 4 后同步保存并回显。
-     * 其他取值及字段省略、null 的解析行为保持不变。
+     * blockEmbedMode 仅接受 0、1，越界值回退 1；fileAnnotationRefMode 仅接受 0、1，越界值回退 0。
+     * blockRefMode 的其他取值及字段省略、null 的解析行为保持不变。
      */
     "/api/setting/setExport": {
         request: SetExportRequestInput;
@@ -6811,6 +6825,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 使用与启动、导入相同的路径和数值规范化规则；省略顶层笔记本文档和默认图标选项时保留当前值。
+     * maxListCount 小于 1 回退 512，largeFileWarningSize 小于 2 回退 8，两者大于 10240 时截断至 10240。
      */
     "/api/setting/setFiletree": {
         request: SetFiletreeRequestInput;
@@ -6821,6 +6836,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 使用与启动、导入相同的规范化规则；保留零张上限，非法记忆参数和权重恢复默认值。
+     * reviewMode 仅接受 0、1、2，越界值回退 0。
      */
     "/api/setting/setFlashcard": {
         request: SetFlashcardRequestInput;
@@ -6852,6 +6868,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 使用与启动、导入相同的规范化规则；limit 小于 1 回退 64，1–31 提升至 32。
+     * limit 大于 10240 时截断至 10240。
      * 省略汉字敏感、自定义块和脑图选项时保留当前值；反链提及关键词上限小于 1 回退 512。
      */
     "/api/setting/setSearch": {

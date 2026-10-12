@@ -1,4 +1,9 @@
 {
+	"kernelUnresponsiveTitle": "Le noyau ne répond pas",
+	"kernelUnresponsiveMessage": "Les requêtes locales au noyau ont dépassé le délai d’attente. SiYuan ne peut donc pas ouvrir la fenêtre principale. Consultez ${log} pour plus de détails.",
+	"kernelUnresponsiveWindowsHint": "Sous Windows, cela peut être lié à l’utilisation simultanée du contrôle de congestion TCP BBR2 et de Loopback Large Mtu (loopbacklargemtu).",
+	"codeTabSpacesCount": "${x} espaces",
+	"codeTabSpacesKeepTab": "Aucun remplacement (tabulation conservée)",
 	"syncConfigTip": "Configurer l'adresse du serveur, les identifiants et les paramètres de connexion de ce service ; après l'enregistrement, ils sont utilisés pour la synchronisation et la sauvegarde cloud",
 	"dataRepoPurgeCloud": "Purger le référentiel de données cloud",
 	"dataRepoPurgeCloudTip": "Purger tous les instantanés non référencés et les objets de données associés dans le cloud",
@@ -481,7 +486,7 @@
 	"backlinkHideReference": "Masquer les blocs de référence dans les liens retour propagés",
 	"backlinkHideReferenceTip": "Masquer les blocs contenant uniquement des références de bloc dans les liens retour propagés si un autre contenu reste visible, et les réafficher pendant la modification",
 	"uploadInsertTargetUnavailable": "La cible initiale du téléversement n’est plus disponible. Le résultat n’a pas été inséré ; les fichiers téléversés sont conservés.",
-	"mobileToolbarEntryTip": "Configurer la visibilité et l’ordre des entrées de la barre d’outils mobile et du menu slash, ainsi que la visibilité du bouton OCR des images ; les profils restent sur cet appareil et ne sont pas synchronisés entre appareils",
+	"mobileToolbarEntryTip": "Configurer la visibilité et l’ordre des entrées de la barre d’outils mobile et du menu slash ; les profils restent sur cet appareil et ne sont pas synchronisés entre appareils",
 	"keymapAssigned": "Attribués",
 	"keymapCustomized": "Personnalisés par moi",
 	"keymapUnassigned": "Non attribués",

@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261011151543"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721112403-8no39l4",
-				"updated": "20260918195936"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -44,20 +44,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ folder logically consistent across devices, including assets, custom icons, third-party theme and icon packages, plugins, code snippets, templates, widgets, and document data. With on-demand downloads, some asset content may not yet be stored on this device."
-				}
-			]
-		},
-		{
-			"ID": "20260917190844-p6hrspl",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260917190844-p6hrspl",
-				"updated": "20260918195936"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Theme and icon package files, updates, and uninstallations sync between devices; each device chooses its own theme and icons. Images, fonts, and other package resources are always downloaded completely. Synchronization, deletion, and conflicts follow the same file-level rules as plugins, widgets, and templates. Restoring a snapshot without a package removes it."
 				}
 			]
 		},
@@ -184,6 +170,35 @@
 				{
 					"Type": "NodeText",
 					"Data": "Before changing the sync target, resetting the data repository, or opening this workspace with an older version, switch to Download all and finish downloading to preserve access to assets that are not yet stored locally."
+				}
+			]
+		},
+		{
+			"ID": "20261012014537-ws3euhl",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-ws3euhl",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Themes and icons"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260917190844-p6hrspl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260917190844-p6hrspl",
+				"updated": "20260918195936"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Theme and icon package files, updates, and uninstallations sync between devices; each device chooses its own theme and icons. Images, fonts, and other package resources are always downloaded completely. Synchronization, deletion, and conflicts follow the same file-level rules as plugins, widgets, and templates. Restoring a snapshot without a package removes it."
 				}
 			]
 		},

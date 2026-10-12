@@ -37,6 +37,7 @@ const {
     powerMonitor
 } = require("electron");
 const {updateGlobalShortcutBindings} = require("./globalShortcutBindings");
+const {appendChromiumSwitch} = require("./chromiumSwitches");
 const path = require("path");
 const fs = require("fs");
 const {pathToFileURL} = require("url");
@@ -758,10 +759,10 @@ if (!remoteKernelTarget) {
 }
 // 同源窗口共享渲染进程，按来源隔离以保留不同端口工作空间之间的进程隔离。
 app.commandLine.appendSwitch("process-per-site");
-app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport,OriginKeyedProcessesByDefault");
+appendChromiumSwitch(app.commandLine, "--enable-features=PlatformHEVCDecoderSupport,OriginKeyedProcessesByDefault");
 app.commandLine.appendSwitch("xdg-portal-required-version", "4");
 // 本地 HTTPS 页面加载 HTTP 外链图时，禁止自动升级为 HTTPS
-app.commandLine.appendSwitch("disable-features", "AutoupgradeMixedContent");
+appendChromiumSwitch(app.commandLine, "--disable-features=AutoupgradeMixedContent");
 
 // Support set Chromium command line arguments on the desktop https://github.com/siyuan-note/siyuan/issues/9696
 writeLog("app is packaged [" + app.isPackaged + "], command line args [" + process.argv.join(", ") + "]");
@@ -789,8 +790,9 @@ for (let i = argStart; i < process.argv.length; i++) {
         continue;
     }
 
-    app.commandLine.appendSwitch(arg);
-    writeLog("command line switch [" + arg + "]");
+    if (appendChromiumSwitch(app.commandLine, arg)) {
+        writeLog("command line switch [" + arg + "]");
+    }
 }
 
 // 桌面端辅助功能配置在创建窗口前应用，对本机所有工作空间生效。
@@ -2680,16 +2682,29 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
         let count = 0;
         writeLog("checking kernel version");
         for (; ;) {
+            if (bootCanceled()) {
+                resolve(false);
+                return;
+            }
             try {
-                const apiResult = await net.fetch(getServer(currentKernelPort) + "/api/system/version");
-                apiData = await apiResult.json();
+                apiData = await fetchLocalKernelJSON(getServer(currentKernelPort) + "/api/system/version");
                 break;
             } catch (e) {
                 writeLog("get kernel version failed: " + e.message);
+                if (bootCanceled()) {
+                    resolve(false);
+                    return;
+                }
                 if (14 < ++count) {
-                    writeLog("get kernel ver failed");
-                    showErrorWindow("获取内核服务端口失败", "Failed to Obtain Kernel Service Port", "<div>获取内核服务端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to obtain kernel service port. Please ensure SiYuan has network permissions and is not blocked by firewalls or antivirus software.</div>");
-                    bootWindow.destroy();
+                    const versionTimedOut = isLocalKernelRequestTimeout(e);
+                    writeLog("get kernel ver failed [timeout=" + versionTimedOut + "]");
+                    if (versionTimedOut) {
+                        showKernelUnresponsiveWindow(lang);
+                    } else {
+                        showErrorWindow("获取内核服务端口失败", "Failed to Obtain Kernel Service Port", "<div>获取内核服务端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to obtain kernel service port. Please ensure SiYuan has network permissions and is not blocked by firewalls or antivirus software.</div>");
+                    }
+                    requestKernelExit(currentKernelPort);
+                    currentBootWindow.destroy();
                     resolve(false);
                     return;
                 }
@@ -2738,8 +2753,7 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                         break;
                     }
                     try {
-                        const progressResult = await net.fetch(getServer(currentKernelPort) + "/api/system/bootProgress");
-                        const progressData = await progressResult.json();
+                        const progressData = await fetchLocalKernelJSON(getServer(currentKernelPort) + "/api/system/bootProgress");
                         if (bootCanceled()) {
                             resolve(false);
                             return;
@@ -2759,11 +2773,14 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                             resolve(false);
                             return;
                         }
-                        // 只读启动查询在证书或网络配置变化后有限重试，不延长总启动期限。
-                        if (retryableProgressErrors.has(e.message) && ++progressFailures < 15) {
+                        // 只读启动查询在证书、网络配置变化或本机请求超时后有限重试，不延长总启动期限。
+                        if ((retryableProgressErrors.has(e.message) || isLocalKernelRequestTimeout(e)) && ++progressFailures < 15) {
                             writeLog("retrying boot progress [attempt=" + progressFailures + "/14]");
                             await sleep(500);
                             continue;
+                        }
+                        if (isLocalKernelRequestTimeout(e)) {
+                            showKernelUnresponsiveWindow(lang);
                         }
                         requestKernelExit(currentKernelPort);
                         bootWindow.destroy();
@@ -2777,6 +2794,78 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             resolve(false);
         }
     });
+};
+
+// 本地内核请求超时上限：内核可能已经监听端口，但本机请求既不会成功也不会失败，因此必须限时失败。
+const localKernelRequestTimeout = 5000;
+
+const localKernelRequestTimeoutError = () => {
+    const error = new Error("local kernel request timed out");
+    error.name = "LocalKernelRequestTimeoutError";
+    return error;
+};
+
+const isLocalKernelRequestTimeout = error => "LocalKernelRequestTimeoutError" === error?.name;
+
+// 本机请求超时后收集 Windows TCP 配置写入日志，便于排查回环通道异常；show 命令不需要管理员权限。
+const windowsTCPConfigCommands = [["int", "tcp", "show", "supplemental"], ["int", "ipv4", "show", "global"], ["int", "ipv6", "show", "global"]];
+
+const execFileAsync = (file, args, options) => new Promise((resolve, reject) => {
+    childProcess.execFile(file, args, options, (error, stdout) => error ? reject(error) : resolve(stdout));
+});
+
+const collectWindowsTCPConfig = async () => {
+    if ("win32" !== process.platform) {
+        return [];
+    }
+    const lines = [];
+    for (const args of windowsTCPConfigCommands) {
+        const command = "netsh " + args.join(" ");
+        try {
+            // netsh 输出随系统语言本地化，这里只记录输出原文；命令行标记保持 ASCII，便于识别输出来源。
+            const stdout = await execFileAsync("netsh.exe", args, {timeout: 5000, windowsHide: true});
+            lines.push("[tcp config] " + command + ":\n" + String(stdout).trimEnd());
+        } catch (error) {
+            lines.push("[tcp config] " + command + " failed: " + error.message);
+        }
+    }
+    return lines;
+};
+
+// 内核已经启动但本机请求一直没有响应时的错误窗口，提示用户排查本机访问。
+const showKernelUnresponsiveWindow = (lang) => {
+    const language = resolveAppLanguage(lang ? [lang] : app.getPreferredSystemLanguages());
+    const languages = loadAppMenuLanguages(language);
+    const english = loadAppMenuLanguages("en");
+    const content = [...new Set([languages, english])].map((strings) => {
+        const message = escapeHTML(strings.kernelUnresponsiveMessage)
+            .replace("${log}", "<a href=\"#\" data-log-path>~/.config/siyuan/app.log</a>");
+        const windowsHint = "win32" === process.platform ?
+            "<div>" + escapeHTML(strings.kernelUnresponsiveWindowsHint) + "</div>" : "";
+        return "<div>" + message + "</div>" + windowsHint;
+    }).join("");
+    showErrorWindow(languages.kernelUnresponsiveTitle, english.kernelUnresponsiveTitle,
+        content, "⚠️", path.join(confDir, "app.log"));
+    // 诊断命令在后台执行，不延迟结束本次启动流程。
+    collectWindowsTCPConfig().then(lines => lines.forEach(line => writeLog(line)))
+        .catch(error => writeLog("collect Windows TCP configuration failed: " + error.message));
+};
+
+// 超时覆盖响应头和响应体读取，防止本机通道异常时启动查询永久挂起。
+const fetchLocalKernelJSON = async (url) => {
+    const abortController = new AbortController();
+    const timer = setTimeout(() => abortController.abort(), localKernelRequestTimeout);
+    try {
+        const response = await net.fetch(url, {signal: abortController.signal});
+        return await response.json();
+    } catch (error) {
+        if (abortController.signal.aborted) {
+            throw localKernelRequestTimeoutError();
+        }
+        throw error;
+    } finally {
+        clearTimeout(timer);
+    }
 };
 
 const fetchWithTimeout = async (url, options = {}, timeout = 5000) => {

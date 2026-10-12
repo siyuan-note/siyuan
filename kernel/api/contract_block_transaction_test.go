@@ -107,9 +107,11 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 	tree := treenode.NewTree(box.ID, "/"+docID+".sy", "/Contract", "Contract")
 	paragraphID := tree.Root.FirstChild.ID
 	heading := &ast.Node{Type: ast.NodeHeading, ID: ast.NewNodeID(), HeadingLevel: 1}
+	heading.SetIALAttr("id", heading.ID)
 	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Contract heading")})
 	tree.Root.AppendChild(heading)
 	child := &ast.Node{Type: ast.NodeHeading, ID: ast.NewNodeID(), HeadingLevel: 2}
+	child.SetIALAttr("id", child.ID)
 	child.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Contract child")})
 	tree.Root.AppendChild(child)
 	if _, err := filesys.WriteTree(tree); err != nil {

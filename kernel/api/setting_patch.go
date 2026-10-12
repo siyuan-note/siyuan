@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
-	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -54,10 +53,6 @@ func beginSettingTask(messageKey string) func() {
 	return func() { notify(false) }
 }
 
-func notifySettingChanged(namespace string) {
-	model.NotifyConfChanged(namespace)
-}
-
 // 批量操作独占设置闸门，单段写入只串行化同一命名空间。
 func lockSetting(namespace string) func() {
 	if namespace == "*" {
@@ -79,35 +74,10 @@ func serializeSetting[Request, Data any](namespace string,
 		previous := model.ConfNamespaceRevision(namespace)
 		response := apply(c, request)
 		if response.Code() == 0 && previous == model.ConfNamespaceRevision(namespace) {
-			notifySettingChanged(namespace)
+			model.NotifyConfChanged(namespace)
 		}
 		return response
 	}
-}
-
-func mergeSettingJSON(base, patch []byte) ([]byte, error) {
-	var current, changes map[string]json.RawMessage
-	if err := json.Unmarshal(base, &current); err != nil {
-		return nil, err
-	}
-	if err := json.Unmarshal(patch, &changes); err != nil {
-		return nil, err
-	}
-	if current == nil {
-		current = map[string]json.RawMessage{}
-	}
-	for key, value := range changes {
-		if bytes.HasPrefix(bytes.TrimSpace(value), []byte("{")) && bytes.HasPrefix(bytes.TrimSpace(current[key]), []byte("{")) {
-			merged, err := mergeSettingJSON(current[key], value)
-			if err != nil {
-				return nil, err
-			}
-			current[key] = merged
-		} else {
-			current[key] = value
-		}
-	}
-	return json.Marshal(current)
 }
 
 // migrateDecisionSettingPatch 在合并前识别旧客户端的平铺字段，避免被现有 profiles 遮蔽。
@@ -152,15 +122,19 @@ func migrateDecisionSettingPatch(patch []byte) ([]byte, error) {
 	return json.Marshal(ai)
 }
 
-func applySettingPatch[Request, Data, Config any](c *gin.Context, patch []byte, config Config,
+func applySettingPatch[Request, Data any](c *gin.Context, patch []byte, namespace string,
 	endpoint apicontract.Endpoint[Request, Data], apply func(*gin.Context, Request) apicontract.Response[Data]) apicontract.Response[*apicontract.SettingPatchData] {
-	base, err := json.Marshal(config)
+	merged, err := model.ConfSectionPatchJSON(namespace, patch)
 	if err != nil {
 		return apicontract.Failure[*apicontract.SettingPatchData](-1, err.Error())
 	}
-	merged, err := mergeSettingJSON(base, patch)
-	if err != nil {
-		return apicontract.Failure[*apicontract.SettingPatchData](-1, err.Error())
+	if namespace == "keymap" {
+		merged, err = json.Marshal(struct {
+			Data json.RawMessage `json:"data"`
+		}{merged})
+		if err != nil {
+			return apicontract.Failure[*apicontract.SettingPatchData](-1, err.Error())
+		}
 	}
 	request, err := endpoint.Decode(bytes.NewReader(merged))
 	if err != nil {
@@ -181,26 +155,23 @@ var patchSetting = contractHandler(apicontract.PatchSetting, func(c *gin.Context
 	var response apicontract.Response[*apicontract.SettingPatchData]
 	switch request.Namespace() {
 	case "editor":
-		response = applySettingPatch(c, patch, model.Conf.Editor.Load(), apicontract.SetEditor, applyEditorSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetEditor, applyEditorSetting)
 	case "export":
-		response = applySettingPatch(c, patch, model.Conf.Export.Load(), apicontract.SetExport, applyExportSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetExport, applyExportSetting)
 	case "fileTree":
-		response = applySettingPatch(c, patch, model.Conf.FileTree.Load(), apicontract.SetFiletree, applyFiletreeSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetFiletree, applyFiletreeSetting)
 	case "search":
-		response = applySettingPatch(c, patch, model.Conf.Search.Load(), apicontract.SetSearch, applySearchSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetSearch, applySearchSetting)
 	case "appearance":
-		response = applySettingPatch(c, patch, model.Conf.Appearance.Load(), apicontract.SetAppearance, applyAppearanceSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetAppearance, applyAppearanceSetting)
 	case "flashcard":
-		response = applySettingPatch(c, patch, model.Conf.Flashcard.Load(), apicontract.SetFlashcard, applyFlashcardSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetFlashcard, applyFlashcardSetting)
 	case "secrets":
-		response = applySettingPatch(c, patch, model.Conf.Secrets.Load(), apicontract.SetSecrets, applySecretsSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetSecrets, applySecretsSetting)
 	case "variables":
-		response = applySettingPatch(c, patch, model.Conf.Variables.Load(), apicontract.SetVariables, applyVariablesSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetVariables, applyVariablesSetting)
 	case "keymap":
-		response = applySettingPatch(c, append(append([]byte(`{"data":`), patch...), '}'),
-			struct {
-				Data *conf.Keymap `json:"data"`
-			}{model.Conf.Keymap.Load()}, apicontract.SetKeymap, applyKeymapSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetKeymap, applyKeymapSetting)
 	case "ai":
 		if util.IsDisabledFeature("ai") {
 			return apicontract.Failure[*apicontract.SettingPatchData](-1, util.I18nTerm(model.Conf.Lang, "agentCapabilitiesUnavailable"))
@@ -210,15 +181,15 @@ var patchSetting = contractHandler(apicontract.PatchSetting, func(c *gin.Context
 		if err != nil {
 			return apicontract.Failure[*apicontract.SettingPatchData](-1, err.Error())
 		}
-		response = applySettingPatch(c, patch, model.Conf.AI.Load(), apicontract.SetAI, applyAISetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetAI, applyAISetting)
 	case "ocr":
-		response = applySettingPatch(c, patch, model.Conf.OCR.Load(), apicontract.SetOCRConfig, applyOCRSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetOCRConfig, applyOCRSetting)
 	case "bazaar":
-		response = applySettingPatch(c, patch, model.Conf.Bazaar.Load(), apicontract.SetBazaar, applyBazaarSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetBazaar, applyBazaarSetting)
 	case "publish":
-		response = applySettingPatch(c, patch, model.Conf.Publish.Load(), apicontract.SetPublish, applyPublishSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetPublish, applyPublishSetting)
 	case "snippet":
-		response = applySettingPatch(c, patch, model.Conf.Snippet.Load(), apicontract.SetConfSnippet, applySnippetSetting)
+		response = applySettingPatch(c, patch, request.Namespace(), apicontract.SetConfSnippet, applySnippetSetting)
 	case "system", "repo", "sync":
 		var err error
 		var issues []model.Issue
@@ -236,7 +207,7 @@ var patchSetting = contractHandler(apicontract.PatchSetting, func(c *gin.Context
 		return apicontract.Failure[*apicontract.SettingPatchData](-1, fmt.Sprintf("unsupported settings namespace: %s", request.Namespace()))
 	}
 	if response.Code() == 0 && previous == model.ConfNamespaceRevision(request.Namespace()) {
-		notifySettingChanged(request.Namespace())
+		model.NotifyConfChanged(request.Namespace())
 	}
 	if response.Code() == 0 {
 		return apicontract.Success(settingPatchDiagnostics(c))

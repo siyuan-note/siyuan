@@ -16,6 +16,7 @@ func NormalizeFileTree(fileTree *FileTree) *FileTree {
 	if fileTree.MaxListCount < 1 {
 		fileTree.MaxListCount = 512
 	}
+	fileTree.MaxListCount = min(10240, fileTree.MaxListCount)
 	if fileTree.MaxOpenTabCount < 1 {
 		fileTree.MaxOpenTabCount = 8
 	}
@@ -46,6 +47,7 @@ func NormalizeFileTree(fileTree *FileTree) *FileTree {
 	if fileTree.LargeFileWarningSize < 2 {
 		fileTree.LargeFileWarningSize = 8
 	}
+	fileTree.LargeFileWarningSize = min(10240, fileTree.LargeFileWarningSize)
 	if fileTree.CreateDocAtTop == nil {
 		fileTree.CreateDocAtTop = new(true)
 	}
@@ -85,6 +87,29 @@ func NormalizeEditor(editor *Editor) *Editor {
 	editor.Emoji = util.FilterRecentIconValues(editor.Emoji)
 	if editor.FontSize < 9 || editor.FontSize > 72 {
 		editor.FontSize = 16
+	}
+	if editor.BacklinkGlobalSort < 0 || editor.BacklinkGlobalSort > 2 {
+		editor.BacklinkGlobalSort = defaults.BacklinkGlobalSort
+	}
+	if editor.BacklinkBlockSort < 0 || editor.BacklinkBlockSort > 2 {
+		editor.BacklinkBlockSort = defaults.BacklinkBlockSort
+	}
+	if editor.FloatWindowMode < 0 || editor.FloatWindowMode > 2 {
+		editor.FloatWindowMode = defaults.FloatWindowMode
+	}
+	if editor.HeadingEmbedMode < 0 || editor.HeadingEmbedMode > 2 {
+		editor.HeadingEmbedMode = defaults.HeadingEmbedMode
+	}
+	if editor.DatabaseAttrClickMode < 0 || editor.DatabaseAttrClickMode > 1 {
+		editor.DatabaseAttrClickMode = defaults.DatabaseAttrClickMode
+	}
+	if editor.DatabaseAttrViewMode < 0 || editor.DatabaseAttrViewMode > 1 {
+		editor.DatabaseAttrViewMode = defaults.DatabaseAttrViewMode
+	}
+	switch editor.CodeTabSpaces {
+	case 0, 2, 4, 6, 8:
+	default:
+		editor.CodeTabSpaces = defaults.CodeTabSpaces
 	}
 	if editor.PlantUMLServePath == "" {
 		editor.PlantUMLServePath = defaults.PlantUMLServePath
@@ -130,8 +155,15 @@ func NormalizeEditor(editor *Editor) *Editor {
 
 // NormalizeExport 补全缺失的导出配置，不推断配置格式版本。
 func NormalizeExport(export *Export) *Export {
+	defaults := NewExport()
 	if export == nil {
-		export = NewExport()
+		export = defaults
+	}
+	if export.BlockEmbedMode < 0 || export.BlockEmbedMode > 1 {
+		export.BlockEmbedMode = defaults.BlockEmbedMode
+	}
+	if export.FileAnnotationRefMode < 0 || export.FileAnnotationRefMode > 1 {
+		export.FileAnnotationRefMode = defaults.FileAnnotationRefMode
 	}
 	return export
 }
@@ -162,7 +194,7 @@ func NormalizeSearch(search *Search) *Search {
 	if search.Limit < 1 {
 		search.Limit = 64
 	}
-	search.Limit = max(32, search.Limit)
+	search.Limit = max(32, min(10240, search.Limit))
 	if search.BacklinkMentionKeywordsLimit < 1 {
 		search.BacklinkMentionKeywordsLimit = 512
 	}
@@ -180,6 +212,9 @@ func NormalizeFlashcard(flashcard *Flashcard) (*Flashcard, string) {
 	}
 	if flashcard.OpenMode < 0 || flashcard.OpenMode > 3 {
 		flashcard.OpenMode = defaults.OpenMode
+	}
+	if flashcard.ReviewMode < 0 || flashcard.ReviewMode > 2 {
+		flashcard.ReviewMode = defaults.ReviewMode
 	}
 	if flashcard.NewCardLimit < 0 {
 		flashcard.NewCardLimit = defaults.NewCardLimit
@@ -221,6 +256,9 @@ func NormalizeAppearance(appearance *Appearance, mobile bool) *Appearance {
 	if appearance == nil {
 		appearance = NewAppearanceForContainer(mobile)
 	}
+	if appearance.CloseButtonBehavior < 0 || appearance.CloseButtonBehavior > 1 {
+		appearance.CloseButtonBehavior = 0
+	}
 	if "ant" == appearance.Icon || "material" == appearance.Icon {
 		// v3.7.0 移除了 ant/material 图标包 https://github.com/siyuan-note/siyuan/issues/7976
 		appearance.Icon = "litheness"
@@ -244,6 +282,9 @@ func NormalizeAppearance(appearance *Appearance, mobile bool) *Appearance {
 func NormalizeSync(sync *Sync) *Sync {
 	if sync == nil {
 		sync = NewSync()
+	}
+	if sync.AssetDownloadMode < 0 || sync.AssetDownloadMode > 1 {
+		sync.AssetDownloadMode = 0
 	}
 	if 0 == sync.Mode {
 		sync.Mode = 1
@@ -281,6 +322,12 @@ func NormalizeSync(sync *Sync) *Sync {
 func NormalizeSystem(system *System) *System {
 	if system == nil {
 		system = NewSystem()
+	}
+	if system.AutoLaunch2 < 0 || system.AutoLaunch2 > 2 {
+		system.AutoLaunch2 = 0
+	}
+	if system.LockScreenMode < 0 || system.LockScreenMode > 1 {
+		system.LockScreenMode = 0
 	}
 	if nil == system.NetworkProxy {
 		system.NetworkProxy = &NetworkProxy{}

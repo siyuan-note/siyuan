@@ -1,4 +1,9 @@
 {
+	"kernelUnresponsiveTitle": "커널이 응답하지 않습니다",
+	"kernelUnresponsiveMessage": "로컬 커널 요청 시간이 초과되어 SiYuan이 기본 창을 열 수 없습니다. 자세한 내용은 ${log} 파일을 확인하세요.",
+	"kernelUnresponsiveWindowsHint": "Windows에서는 TCP 혼잡 제어 BBR2와 Loopback Large Mtu (loopbacklargemtu)를 동시에 활성화한 것과 관련이 있을 수 있습니다.",
+	"codeTabSpacesCount": "${x}개의 공백",
+	"codeTabSpacesKeepTab": "대체하지 않음(탭 유지)",
 	"syncConfigTip": "이 서비스의 서버 주소, 자격 증명 및 연결 매개변수를 구성합니다. 저장 후 클라우드 동기화 및 백업에 사용됩니다",
 	"dataRepoPurgeCloud": "클라우드 데이터 저장소 정리",
 	"dataRepoPurgeCloudTip": "클라우드의 참조되지 않은 모든 스냅샷 및 관련 데이터 객체 삭제",
@@ -481,7 +486,7 @@
 	"backlinkHideReference": "전파된 백링크의 참조 블록 숨기기",
 	"backlinkHideReferenceTip": "전파된 백링크에서 다른 표시할 내용이 있으면 블록 참조만 포함된 블록을 숨기고 편집 중에는 다시 표시",
 	"uploadInsertTargetUnavailable": "원래 업로드 대상이 더 이상 유효하지 않습니다. 결과를 삽입하지 않았으며 업로드된 파일은 유지됩니다.",
-	"mobileToolbarEntryTip": "모바일 도구 모음과 슬래시 메뉴 항목의 표시 여부와 순서, 이미지 OCR 버튼의 표시 여부를 설정합니다. 프로필은 이 기기에 저장되며 다른 기기와 동기화되지 않습니다",
+	"mobileToolbarEntryTip": "모바일 도구 모음과 슬래시 메뉴 항목의 표시 여부와 순서를 설정합니다. 프로필은 이 기기에 저장되며 다른 기기와 동기화되지 않습니다",
 	"keymapAssigned": "할당됨",
 	"keymapCustomized": "내가 사용자 지정함",
 	"keymapUnassigned": "할당되지 않음",

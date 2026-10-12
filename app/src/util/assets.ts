@@ -31,6 +31,7 @@ import {
 } from "../protyle/toolbar/inlineStyle";
 import {refreshChartTheme} from "../protyle/render/chartRender";
 import {getHostCapabilities} from "./hostCapabilities";
+import {initSelectionStyle} from "./selectionStyle";
 
 let headingNumberMeasurementRefreshTimer: number;
 let appearanceUpdate = Promise.resolve();
@@ -132,6 +133,7 @@ export const refreshThemeStyle = (themeAddress: string) => {
 };
 
 export const loadAssets = async (appearance: Config.IAppearance) => {
+    initSelectionStyle();
     const scriptLoads: Promise<unknown>[] = [];
     setBodyHighlight(appearance.bodyGradient);
     const data = getHostCapabilities().customAppearance ? appearance : {

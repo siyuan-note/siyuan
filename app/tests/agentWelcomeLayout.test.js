@@ -27,7 +27,7 @@ const declarations = (css, selector) => {
 };
 
 for (const name of ["base", "mobile"]) {
-    test(`${name} welcome stretches across the message area without changing suggestion widths or centering`, () => {
+    test(`${name} welcome isolates greetings while suggestions size to their contents within the available width`, () => {
         const css = stylesheet(name);
         const messages = declarations(css, ".agent-chat__messages");
         assert.equal(messages.display, "flex");
@@ -40,8 +40,9 @@ for (const name of ["base", "mobile"]) {
         assert.equal(welcome["align-items"], "center");
         assert.equal(welcome["text-align"], "center");
         const examples = declarations(css, ".agent-welcome__examples");
-        assert.equal(examples.width, "100%");
-        assert.equal(examples["max-width"], "300px");
+        assert.equal(examples.width, "max-content");
+        assert.equal(examples["max-width"], "min(100%, 300px)");
+        assert.equal(declarations(css, ".agent-welcome__example")["overflow-wrap"], "anywhere");
         assert.equal(declarations(css, ".agent-welcome__greeting")["white-space"], "pre-line");
     });
 }
@@ -79,7 +80,9 @@ const browserCases = ({css, languages, mobile}) => {
     for (const width of [240, 320, 380, 760]) {
         host.style.width = width + "px";
         for (const language of languages) {
+            host.dir = ["ar.json", "he.json"].includes(language.locale) ? "rtl" : "ltr";
             let firstWidth;
+            let naturalWidth;
             for (const greeting of language.greetings) {
                 for (const hasModel of [true, false]) {
                     messages.innerHTML = hasModel ? greeting.html : greeting.noModelHTML;
@@ -90,12 +93,24 @@ const browserCases = ({css, languages, mobile}) => {
                     const messagePadding = getComputedStyle(messages);
                     const available = messages.clientWidth - parseFloat(messagePadding.paddingLeft) - parseFloat(messagePadding.paddingRight);
                     near(outer.width, available, `welcome includes padding ${label}`);
-                    near(outer.left, messages.getBoundingClientRect().left + parseFloat(messagePadding.paddingLeft), `left edge ${label}`);
+                    near(outer.left, messages.getBoundingClientRect().left + messages.clientLeft +
+                        parseFloat(messagePadding.paddingLeft), `left edge ${label}`);
                     if (hasModel) {
                         const innerWidth = outer.width - parseFloat(padding.paddingLeft) - parseFloat(padding.paddingRight);
-                        const expected = Math.min(300, innerWidth);
                         const buttons = [...document.querySelectorAll(".agent-welcome__example")];
                         check.equal(buttons.length, 4, label);
+                        if (naturalWidth === undefined) {
+                            // 克隆真实按钮以保留字体和盒模型，单独测量各条文案未换行的外宽。
+                            naturalWidth = Math.max(...buttons.map(button => {
+                                const probe = button.cloneNode(true);
+                                probe.style.cssText = "position:fixed;visibility:hidden;width:max-content;max-width:none;white-space:nowrap";
+                                button.parentElement.append(probe);
+                                const measured = probe.getBoundingClientRect().width;
+                                probe.remove();
+                                return measured;
+                            }));
+                        }
+                        const expected = Math.min(naturalWidth, 300, innerWidth);
                         for (const button of buttons) {
                             const bounds = button.getBoundingClientRect();
                             near(bounds.width, expected, `button width ${label}`);
@@ -110,6 +125,27 @@ const browserCases = ({css, languages, mobile}) => {
                     }
                 }
             }
+        }
+    }
+    for (const direction of ["ltr", "rtl"]) {
+        host.dir = direction;
+        for (const width of [240, 760]) {
+            host.style.width = width + "px";
+            messages.innerHTML = languages[0].greetings[0].html;
+            const buttons = [...document.querySelectorAll(".agent-welcome__example")];
+            buttons[0].textContent = "W".repeat(120);
+            const welcome = document.querySelector(".agent-welcome");
+            const padding = getComputedStyle(welcome);
+            const innerWidth = welcome.getBoundingClientRect().width - parseFloat(padding.paddingLeft) - parseFloat(padding.paddingRight);
+            const expected = Math.min(300, innerWidth);
+            const label = `${mobile}/${direction}/${width}`;
+            for (const button of buttons) {
+                near(button.getBoundingClientRect().width, expected, `long token keeps equal bounded widths ${label}`);
+            }
+            check.ok(buttons[0].scrollWidth <= buttons[0].clientWidth + 1, `long token stays inside the button ${label}`);
+            const range = document.createRange();
+            range.selectNodeContents(buttons[0]);
+            check.ok(range.getClientRects().length > 1, `long token wraps ${label}`);
         }
     }
     return "Agent welcome layout cases passed";

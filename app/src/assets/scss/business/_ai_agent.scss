@@ -132,8 +132,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 100%;
-  max-width: 300px;
+  width: max-content;
+  max-width: min(100%, 300px);
   margin-top: 8px;
 }
 
@@ -146,6 +146,7 @@
   color: var(--b3-theme-on-surface);
   cursor: pointer;
   text-align: left;
+  overflow-wrap: anywhere;
   transition: var(--b3-transition);
 }
 

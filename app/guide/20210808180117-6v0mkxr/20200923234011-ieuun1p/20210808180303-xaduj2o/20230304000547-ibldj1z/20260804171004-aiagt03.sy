@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20261010173100"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -1140,7 +1140,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261010113646-aewwqju",
-				"updated": "20261010173100"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -1155,12 +1155,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010113646-f4xjowe",
-				"updated": "20261010113646"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "For block types, inline formatting, ancestry, combined filters or statistics, the agent can request sql.schema for index definitions and examples, then query with sql.query. Results include original rows and clickable block links. Statistics can be used directly in an answer; complete block queries can be displayed in search using open_search with method=2. Omitting the method keeps the current setting; subsequent calls update the query and method in the existing window."
+					"Data": "Ask the agent to query notes by block type, inline formatting, ancestry or combined conditions, and summarize the results."
 				}
 			]
 		},
@@ -1169,12 +1169,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010172554-3btkysw",
-				"updated": "20261010172554"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "To display matching blocks dynamically in a document, ask the agent to create a native SQL query embed with block.insert, block.append or block.prepend. General SQL queries serve statistics and analysis; the search interface serves inspection and navigation; embeds store the query and display current matches. Displaying blocks requires complete block columns, rather than aggregates or projections."
+					"Data": "For example: “Count the tasks updated in the past week” or “Find unfinished task items in the project documents.”"
 				}
 			]
 		},
@@ -1183,21 +1183,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010172554-6q4hhil",
-				"updated": "20261010172554"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "A native SQL embed is a standalone Markdown block, for example "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "{{SELECT * FROM blocks WHERE type = 'p' ORDER BY updated DESC LIMIT 10}}"
-				},
-				{
-					"Type": "NodeText",
-					"Data": ". When writing it, omit code fences and inline code markers, and separate it from surrounding content with blank lines."
+					"Data": "Ask to show results in the search window to inspect and locate them, or create a dynamic SQL embed to keep displaying matching blocks in a document. Statistical results can be used in an answer but cannot be displayed directly as embedded blocks."
 				}
 			]
 		},
@@ -1206,12 +1197,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010172554-kw579hi",
-				"updated": "20261010172554"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Before modifying an existing embed, read its stored SQL and block attributes with block.get_kramdown. Change only the SQL inside the outer double braces, retain the block ID, returned attributes and embed display settings, then update the same block with block.update and explicitly set lockType=true. Do not delete/recreate it or replace the whole document. Read it again to confirm the update. To reuse its SQL with sql.query or search, remove only the outer double braces. Unlock encrypted notebooks first and pass the owning notebook on block read/write and SQL query calls; their embeds query that notebook's isolated index."
+					"Data": "When changing an existing embed, describe the query changes and ask to keep the existing block and display settings."
 				}
 			]
 		},
@@ -1220,12 +1211,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010173100-8r4pamm",
-				"updated": "20261010173100"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The double braces and SQL of a Markdown embed must be on one physical line. For SQL requiring newlines, especially -- line comments, create a NodeBlockQueryEmbed using block.insert, block.append or block.prepend with dataType=dom. Put HTML-escaped SQL in data-content; encode a newline as &#10;. To modify it, read block.dom, preserve data-node-id and other attributes, change only data-content, then use block.update with dataType=dom and lockType=true. Never remove newlines or replace them with spaces. Kramdown may serialize embed newlines as _esc_newline_; restore actual newlines before querying or searching, or extract and decode SQL from block DOM."
+					"Data": "Unlock an encrypted notebook before querying it and specify which notebook to use. Its embeds can query only content in that notebook."
 				}
 			]
 		},
@@ -1278,7 +1269,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261008115720-pkk1ilo",
-				"updated": "20261008115720"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -1292,12 +1283,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261008115720-m2rknxh",
-				"updated": "20261008115720"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Ask the AI agent to list, read, create, update, enable, disable, or delete CSS/JS snippets. For example: “Create a disabled CSS snippet that increases the interface font size so I can review it.” Long snippet contents are read in pages."
+					"Data": "Ask the AI agent to list, read, create, update, enable, disable, or delete CSS/JS snippets. For example: “Create a disabled CSS snippet that increases the interface font size so I can review it.”"
 				}
 			]
 		},
@@ -1334,12 +1325,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261008125238-rndmbrz",
-				"updated": "20261008125238"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "You can search snippet names and code, rename a snippet without resending its code, or request a local replacement that matches the original text exactly once. Large existing snippets can still be enabled, renamed, and locally edited. Later pages of code require the same revision. If snippets change while the snippet dialog is open, saving is rejected and your draft is retained; copy your edits, reopen the dialog, and merge them with the latest snippets."
+					"Data": "You can search snippet names and code, rename snippets, or request changes to part of a snippet. If snippets change while the management dialog is open, saving is rejected and your draft is retained; copy your edits, reopen the dialog, and merge them with the latest snippets."
 				}
 			]
 		},

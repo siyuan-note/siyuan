@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20261011142010"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -4265,7 +4265,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20261011142010"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -10114,81 +10114,51 @@
 			]
 		},
 		{
-			"ID": "20260928091724-dfq9c2s",
+			"ID": "20261012014537-bo67ulk",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260928091724-dfq9c2s",
-				"updated": "20261010134815"
+				"id": "20261012014537-bo67ulk",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "スラッシュメニューとツールバーの設定"
 				}
-			]
+			],
+			"HeadingLevel": 3
 		},
 		{
-			"ID": "20260927164841-exxixvw",
+			"ID": "20261012014537-k54rp2a",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260927164841-exxixvw",
-				"updated": "20260928175046"
+				"id": "20261012014537-k54rp2a",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "モバイルでは "
+					"Data": "/ を入力するとスラッシュメニューが開きます。設定方法は "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260928091724-dfq9c2s",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "スラッシュメニューとツールバーの設定"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "スタイル"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "メニューとボタンの表示と順序"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " を開き、カスタムプロファイルを編集してスラッシュメニューの分類を選択します。モバイルとデスクトップは、有効・無効、候補の表示・非表示、順序を同じプロファイル設定で管理します。初期値はデスクトップでは有効、モバイルでは無効です。スイッチを有効にして確認・保存し、そのプロファイルを有効にすると、/ を入力してコンテンツブロックを検索でき、候補を選択すると元のカーソル位置に挿入されます。"
+					"Data": "を参照してください。"
 				}
 			]
 		},
 		{
-			"ID": "20260927164841-2wtv9yz",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260927164841-2wtv9yz",
-				"updated": "20260930171029"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "カスタムプロファイルでは、分類の選択欄でツールバーとスラッシュメニューを切り替えます。項目の左側にある6つの点のハンドルをドラッグして順序を変更し、スイッチで表示・非表示を設定します。リストの端までドラッグするとスクロールします。並べ替える前に検索欄を空にし、変更後は確認してプロファイルを保存します。組み込みプロファイルは読み取り専用です。複製してカスタマイズし、保存したプロファイルを有効にしてください。プロファイルはこの端末に保存され、端末間では同期されません。シンプルまたは完全を基に作成した新しいカスタムプロファイルでは、変更していない項目の表示・非表示は今後のバージョンの初期値に従います。手動で切り替えた項目は、その選択を維持します。既存のプロファイルは従来の表示動作を維持し、複製または現在の設定を基に作成する場合は、継承方法と明示的な選択を引き継ぎます。シンプルまたは完全を基に作成した新しいプロファイルでは、カスタマイズしていない階層の並び順はバージョンごとの初期順序に従います。現在の設定を基に作成する場合や複製する場合は、既存のカスタム順序を引き継ぎます。検索欄を空にし、列またはドックグループの見出しにあるリセットアイコンを押すと、その階層をリセットできます。全階層をリセットするには、デスクトップでは「位置」列の見出し右側にある更新アイコン（「すべての並び順をリセット」）、モバイルでは下部の「すべての並び順をリセット」ボタンを押します。確認すると保存され、キャンセルすると変更を破棄します。並び順のリセットでは表示設定とドック項目の配置場所は維持され、リセットした階層は今後の初期順序の変更にも従います。"
-				}
-			]
-		},
-		{
-			"ID": "20261010134815-h903uwh",
+			"ID": "20261012014537-d20p785",
 			"Type": "NodeHeading",
 			"Properties": {
-				"id": "20261010134815-h903uwh",
-				"updated": "20261011142010"
+				"id": "20261012014537-d20p785",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -10199,61 +10169,41 @@
 			"HeadingLevel": 3
 		},
 		{
-			"ID": "20261010134815-pbj3gz0",
+			"ID": "20261012014537-g1tryas",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261010134815-pbj3gz0",
-				"updated": "20261011142010"
+				"id": "20261012014537-g1tryas",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "画像の下にあるタイトルをクリックまたはタップすると、フローティング入力欄で編集できます。編集中は画面全体を覆うマスクが表示され、本文のレイアウトは変わりません。タイトルにフォーカスがあるときは "
+					"Data": "タイトルにフォーカスがあるとき、Enter または Space で編集を開始します。編集中は Enter または Tab で保存し、Esc でキャンセルします。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014537-2kv8rqp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014537-2kv8rqp",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "詳しくは "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261010134815-h903uwh",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "画像のタイトル"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " または "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Space"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " で編集を開始します。編集中は "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " または "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " で保存、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Esc"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " でキャンセルできます。入力欄の外側をクリックするか、フォーカスを移しても保存されます。モバイルで戻る操作を行うと、まず保存して入力欄を閉じます。変更は現在の画像参照にのみ適用され、アセットファイル名は変更されません。読み取り専用ドキュメントでは編集できません。"
+					"Data": " を参照してください。"
 				}
 			]
 		},

@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20261011142010"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -4313,7 +4313,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20261011142010"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -10189,81 +10189,51 @@
 			]
 		},
 		{
-			"ID": "20260928091724-31ks0a6",
+			"ID": "20261012014537-f2684ok",
 			"Type": "NodeHeading",
-			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260928091724-31ks0a6",
-				"updated": "20261010134815"
+				"id": "20261012014537-f2684ok",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "斜杠菜单与工具栏配置"
 				}
-			]
+			],
+			"HeadingLevel": 3
 		},
 		{
-			"ID": "20260927164841-yjk81pw",
+			"ID": "20261012014537-m07j83y",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260927164841-yjk81pw",
-				"updated": "20260928175046"
+				"id": "20261012014537-m07j83y",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在移动端打开 "
+					"Data": "输入 / 可打开斜杠菜单。配置方法见"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260928091724-31ks0a6",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "斜杠菜单与工具栏配置"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "外观"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "菜单和按钮的显隐与排序"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，编辑自定义方案并选择斜杠菜单分类。移动端与桌面端共用方案中的总开关、候选显隐和排序配置，默认值为桌面端开启、移动端关闭。开启总开关，确认保存并启用该方案后，输入 / 可搜索内容块，选择候选后在原光标处插入。"
+					"Data": "。"
 				}
 			]
 		},
 		{
-			"ID": "20260927164841-y6wu08m",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260927164841-y6wu08m",
-				"updated": "20260930171029"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "编辑自定义方案时，可通过分类选择框切换工具栏与斜杠菜单。拖动项目左侧的六点手柄调整顺序，使用项目开关调整显隐；拖至列表边缘可滚动。排序前需清空搜索，修改后确认保存方案。内置方案只读，可复制后自定义，再启用保存的方案。方案保存在本设备，不跨设备同步。基于简洁或完整创建的新自定义方案，未修改过的入口显隐会跟随后续版本的默认值；手动切换过的入口保留用户选择。旧方案保持原有显隐行为，复制方案或基于当前方案创建时保留其继承方式和明确选择。基于简洁或完整创建的新方案，其未自定义的层级排序会随版本默认顺序更新；基于当前创建或复制方案会保留已有自定义排序。清空搜索后，可点击列标题或停靠栏分组标题上的重置图标重置该层级。重置全部排序时，桌面端可点击“位置”列标题右侧的刷新图标，提示为“重置全部排序”；移动端可点击底部的重置全部排序按钮。确认后保存，取消则放弃修改。重置排序会保留显隐和停靠栏入口所在位置，重置后的层级持续跟随后续版本的默认排序。"
-				}
-			]
-		},
-		{
-			"ID": "20261010134815-nlwueda",
+			"ID": "20261012014537-avp1gl4",
 			"Type": "NodeHeading",
 			"Properties": {
-				"id": "20261010134815-nlwueda",
-				"updated": "20261011142010"
+				"id": "20261012014537-avp1gl4",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -10274,61 +10244,41 @@
 			"HeadingLevel": 3
 		},
 		{
-			"ID": "20261010134815-gzdtswz",
+			"ID": "20261012014537-r8ebqv4",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261010134815-gzdtswz",
-				"updated": "20261011142010"
+				"id": "20261012014537-r8ebqv4",
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "点击图片下方的标题可通过悬浮输入框编辑，移动端可轻点标题。输入框显示时有全局遮罩，不影响正文布局。标题获得焦点时，按 "
+					"Data": "标题获得焦点时，按 Enter 或 Space 开始编辑；编辑时按 Enter 或 Tab 保存，按 Esc 取消。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014537-a8nnoe5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014537-a8nnoe5",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "详见"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261010134815-nlwueda",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "图片标题"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 或 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Space"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 开始编辑；编辑时按 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 或 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Tab"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 保存，按 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Esc"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 取消。点击输入框外部或离开输入框也会保存，移动端返回会先保存并关闭输入框。修改仅作用于当前图片引用，不会重命名资源文件。只读文档不支持编辑标题。"
+					"Data": "。"
 				}
 			]
 		},

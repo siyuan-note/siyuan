@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20261010140118"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -107,7 +107,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-lr6v0s2",
-				"updated": "20260809232000"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -450,6 +450,80 @@
 				{
 					"Type": "NodeText",
 					"Data": "鼠标悬浮图片可查看文件名、格式、已加载图片的原始尺寸、标题和提示文本，无标题的图片也会显示这些信息。本地工作空间图片还会显示可获取的文件大小。网络图片和加密笔记本图片不显示文件大小。"
+				}
+			]
+		},
+		{
+			"ID": "20261010134815-nlwueda",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261010134815-nlwueda",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "图片标题"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261010134815-gzdtswz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010134815-gzdtswz",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击图片下方的标题可通过悬浮输入框编辑，移动端可轻点标题。输入框显示时有全局遮罩，不影响正文布局。标题获得焦点时，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 开始编辑；编辑时按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 保存，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 取消。点击输入框外部或离开输入框也会保存，移动端返回会先保存并关闭输入框。修改仅作用于当前图片引用，不会重命名资源文件。只读文档不支持编辑标题。"
 				}
 			]
 		},
@@ -979,7 +1053,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117002036-vmc0mx4",
-				"updated": "20261010140118"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -1091,7 +1165,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230202231309-pcjl7c2",
-				"updated": "20261001013550"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -1276,7 +1350,7 @@
 					},
 					"Properties": {
 						"id": "20230211102440-0qik4dd",
-						"updated": "20261001013550"
+						"updated": "20261012014859"
 					},
 					"Children": [
 						{
@@ -1284,12 +1358,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230211102440-09cmf75",
-								"updated": "20261001013550"
+								"updated": "20261012014859"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "两种提供商均支持 PNG、JPEG、TIFF、BMP、GIF 和 WebP 图片，Tesseract 还支持 PBM、PGM、PPM 和 PNM"
+									"Data": "Tesseract 和 PaddleOCR 均支持 PNG、JPEG、TIFF、BMP、GIF 和 WebP 图片，Tesseract 还支持 PBM、PGM、PPM 和 PNM"
 								}
 							]
 						}
@@ -1358,12 +1432,128 @@
 			]
 		},
 		{
+			"ID": "20261012014537-q4np9m7",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-q4np9m7",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AI OCR"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261003224949-weus2iw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003224949-weus2iw",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在图片菜单中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "使用 AI 进行 OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，将本地图片发送给独立选择的 OCR AI 模型进行文字识别。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择 AI 和模型；启用 AI 功能且存在已启用的提供商和模型时，才显示 AI 选项。模型须支持图片输入，系统不会自动验证这一能力。手动和自动 OCR 均使用该模型。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014737-6d7y3m3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014737-6d7y3m3",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "从本地提供商切换到 AI 时关闭自动识别；明确开启后，后台会将未识别的非加密笔记本图片发送给提供商，可能产生费用。所选模型被禁用或删除后，不会自动换模型或提供商。使用本地提供商且未配置独立 AI 模型时，单独的 AI 手动入口兼容沿用智能体模型。结果沿用现有 OCR 文本、编辑、复制和搜索索引，失败时保留原结果。加密笔记本图片不支持此功能。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014737-ae2h18d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014737-ae2h18d",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "支持 PNG、JPEG、GIF 和 WebP；BMP、TIFF 转为 PNG，HEIC/HEIF 转为 JPEG，保留原图分辨率。原始图片和转换后的图片均不得超过 20 MiB，转换后的图片不得超过四千万像素。网络图片隐藏识别入口，加密笔记本图片隐藏 OCR 菜单；AVIF、SVG、ICO 等不支持的格式隐藏 AI OCR 入口。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014737-hcikh93",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014737-hcikh93",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "思考强度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 独立设置手动和自动 AI OCR 的推理等级。默认沿用模型行为，无表示关闭或尽量减少思考，是否支持取决于提供商和模型。不支持时返回错误并保留原 OCR 结果。"
+				}
+			]
+		},
+		{
 			"ID": "20230414202710-a51lo76",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202710-a51lo76",
-				"updated": "20261010140118"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -1562,69 +1752,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "OCR 悬浮预览最多显示 200 个字符、6 行，超出部分用三个点标记。双击 OCR 图标可查看完整文字。"
-				}
-			]
-		},
-		{
-			"ID": "20261003224949-weus2iw",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20261003224949-weus2iw",
-				"updated": "20261006110222"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "在图片菜单中选择 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "OCR"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "使用 AI 进行 OCR"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，将本地图片发送给独立选择的 OCR AI 模型进行文字识别。在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "OCR"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 中选择 AI 和模型；启用 AI 功能且存在已启用的提供商和模型时，才显示 AI 选项。模型须支持图片输入，系统不会自动验证这一能力。手动和自动 OCR 均使用该模型。从本地提供商切换到 AI 时关闭自动识别；明确开启后，后台会将未识别的非加密笔记本图片发送给提供商，可能产生费用。所选模型被禁用或删除后，不会自动换模型或提供商。使用本地提供商且未配置独立 AI 模型时，单独的 AI 手动入口兼容沿用智能体模型。结果沿用现有 OCR 文本、编辑、复制和搜索索引，失败时保留原结果。加密笔记本图片不支持此功能。支持 PNG、JPEG、GIF 和 WebP；BMP、TIFF 转为 PNG，HEIC/HEIF 转为 JPEG，保留原图分辨率。原始图片和转换后的图片均不得超过 20 MiB，转换后的图片不得超过四千万像素。网络图片隐藏识别入口，加密笔记本图片隐藏 OCR 菜单；AVIF、SVG、ICO 等不支持的格式隐藏 AI OCR 入口。"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "可通过 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "思考强度"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 独立设置手动和自动 AI OCR 的推理等级。默认沿用模型行为，无表示关闭或尽量减少思考，是否支持取决于提供商和模型。不支持时返回错误并保留原 OCR 结果。"
 				}
 			]
 		}

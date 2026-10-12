@@ -114,6 +114,7 @@ size-adjust: 85%;
         "../../constants": {Constants: {LOCAL_EXPORTIMG: "image", DIALOG_EXPORTIMAGE: "image", TIMEOUT_LOAD: 0}},
         "../render/highlightRender": {highlightRender: () => {}, lineNumberRender: () => {}},
         "../util/processCode": {processRender: () => {}},
+        "../render/chartRender": {renderChartsForImage: async () => {}},
         "../util/compatibility": {isIPhone: () => mobile && engine === "modern", isIPad: () => false,
             isSafari: () => engine === "modern", isInAndroid: () => false, setStorageVal: () => {},
             saveExportFile: async () => {}},

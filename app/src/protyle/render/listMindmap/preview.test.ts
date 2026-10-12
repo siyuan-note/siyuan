@@ -22,7 +22,6 @@ const extract = (file: string, names: string[]) => {
 const cases = async (source: string, css: string) => {
     const check = require("node:assert/strict");
     const requests: {url: string, data: Record<string, string>}[] = [];
-    const chartRefreshes: Element[] = [];
     const dependencies = {
         isFoldedRenderContent: () => false,
         fetchPost: (url: string, data: Record<string, string>) => requests.push({url, data}),
@@ -30,7 +29,6 @@ const cases = async (source: string, css: string) => {
         genRenderFrame: () => {},
         isEncryptedBox: () => false,
         hasClosestByClassName: (element: HTMLElement, name: string) => element.closest(`.${name}`),
-        chartRender: (element: Element) => chartRefreshes.push(element),
         mathRender: (): undefined => undefined,
     };
     const api = new Function(...Object.keys(dependencies), source + "; return {customBlockRender, " +
@@ -61,7 +59,7 @@ const cases = async (source: string, css: string) => {
     const updates: string[] = [];
     window.siyuan = {
         languages: new Proxy({}, {get: (_target, key) => String(key)}),
-        config: {editor: {embedBlockBreadcrumb: false, headingEmbedMode: 0}},
+        config: {editor: {embedBlockBreadcrumb: false, headingEmbedMode: 0}, appearance: {mode: 1}},
         ws: {app: {plugins: [{name: "preview-test", customBlockRenders: {test: {
             render: (options: {element: HTMLElement, setContent: (content: string) => boolean}) => {
                 renders++;
@@ -127,10 +125,19 @@ const cases = async (source: string, css: string) => {
     chart.dataset.subtype = "echarts";
     preview(chart);
     const disposedCharts: Element[] = [];
-    window.echarts = {dispose: (element: Element) => disposedCharts.push(element)} as unknown as typeof window.echarts;
+    const chartThemes: string[] = [];
+    const chartIDs: string[] = [];
+    window.echarts = {
+        dispose: (element: Element) => disposedCharts.push(element),
+        getInstanceById: (id: string) => {
+            chartIDs.push(id);
+            return {setTheme: (theme: string) => chartThemes.push(theme)};
+        },
+    } as unknown as typeof window.echarts;
     api.refreshChartTheme(root);
-    check.deepEqual(disposedCharts, [chart.firstElementChild], "theme changes never dispose the source through a preview copy");
-    check.deepEqual(chartRefreshes, [chart]);
+    check.deepEqual(disposedCharts, [], "theme changes preserve the source instance");
+    check.deepEqual(chartIDs, ["source-instance"], "theme changes exclude preview copies");
+    check.deepEqual(chartThemes, ["dark"]);
 
     const table = block("NodeTable", "<table><tbody><tr><td>Cell</td></tr></tbody></table>" +
         '<div class="protyle-action__table"></div>');

@@ -12,6 +12,7 @@ import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {highlightRender, lineNumberRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
+import {renderChartsForImage} from "../render/chartRender";
 import {isInAndroid, isIPad, isIPhone, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
 import {useShell} from "../../util/pathName";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
@@ -336,6 +337,10 @@ export const exportImage = (id: string, copyOnly = false) => {
         previewElement.querySelectorAll(".code-block").forEach(item => {
             item.setAttribute("linewrap", "true");
         });
+        await renderChartsForImage(previewElement);
+        if (revision !== previewRevision || !document.body.contains(exportDialog.element)) {
+            return;
+        }
         processRender(previewElement);
         highlightRender(previewElement);
         stopObservingLayout?.();

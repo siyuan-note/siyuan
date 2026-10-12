@@ -92,6 +92,7 @@ interface Window {
         };
         dispose(element: Element): void;
         getInstanceById(id: string): {
+            setTheme: (theme: string) => void
             resize: () => void
             clear: () => void
             getOption: () => { series: { type: string }[] }

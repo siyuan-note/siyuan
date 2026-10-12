@@ -2,10 +2,14 @@ package model
 
 import (
 	"archive/zip"
+	"errors"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -13,6 +17,16 @@ import (
 )
 
 func TestBlockedTransactionWaitSavesDiagnostic(t *testing.T) {
+	// 在独立进程中验证诊断，隔离全局限流状态及其他用例的后台任务。
+	const childEnv = "SIYUAN_TEST_BLOCKED_TRANSACTION_DIAGNOSTIC"
+	if os.Getenv(childEnv) != "1" {
+		command := exec.Command(os.Args[0], "-test.run=^TestBlockedTransactionWaitSavesDiagnostic$", "-test.timeout=30s")
+		command.Env = append(os.Environ(), childEnv+"=1")
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("blocked transaction diagnostic subprocess failed: %v\n%s", err, output)
+		}
+		return
+	}
 	oldTemp := util.TempDir
 	util.TempDir = t.TempDir()
 	t.Cleanup(func() { util.TempDir = oldTemp })
@@ -41,7 +55,9 @@ func TestBlockedTransactionWaitSavesDiagnostic(t *testing.T) {
 			}
 			return
 		}
-		if !os.IsNotExist(err) {
+		// Windows 上快照文件可能暂时被占用，继续在既有超时范围内等待可读取状态。
+		sharingViolation := runtime.GOOS == "windows" && errors.Is(err, syscall.Errno(32))
+		if !os.IsNotExist(err) && !sharingViolation {
 			t.Fatal(err)
 		}
 		if time.Now().After(deadline) {

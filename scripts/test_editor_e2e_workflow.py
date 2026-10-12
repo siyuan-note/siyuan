@@ -35,7 +35,7 @@ class EditorWorkflowTests(unittest.TestCase):
         self.assertIn("path-type: inherit", compiler)
         self.assertIn("mingw-w64-ucrt-x86_64-gcc", compiler)
         step = kernel.split("- name: Test all Windows kernel packages\n", 1)[1].split("      - ", 1)[0]
-        self.assertIn('run: go test -tags "fts5 sqlcipher" ./... -count=1', step)
+        self.assertIn('run: node ../scripts/test-kernel.mjs --shards 4 --output "${{ runner.temp }}/kernel-test-results"', step)
         self.assertIn("shell: msys2 {0}", step)
         self.assertIn("CGO_ENABLED: 1", step)
         self.assertIn("CC: gcc", step)
@@ -113,7 +113,7 @@ class EditorWorkflowTests(unittest.TestCase):
         self.assertIn("sudo apt-get install -y strace", linux)
         self.assertIn("python3 scripts/prepare-ocr.py --runtime linux-amd64 --build-worker", linux)
         full = linux.split("- name: Test all kernel packages\n", 1)[1].split("      - ", 1)[0]
-        self.assertIn('run: go test -tags "fts5 sqlcipher" ./... -count=1', full)
+        self.assertIn('run: node ../scripts/test-kernel.mjs --shards 4 --output "${{ runner.temp }}/kernel-test-results"', full)
         self.assertIn("continue-on-error: true", full)
         self.assertIn("SIYUAN_OCR_TEST_ASSETS: ${{ github.workspace }}/app/stage/ocr/models", full)
         self.assertIn("SIYUAN_OCR_TEST_LIBRARY: ${{ github.workspace }}/app/stage/ocr/runtime/linux-amd64/libonnxruntime.so", full)
@@ -128,6 +128,15 @@ class EditorWorkflowTests(unittest.TestCase):
         for hard_step in ["Install filesystem fault injection dependency", "Prepare native OCR verification resources"]:
             step = linux.split(f"- name: {hard_step}\n", 1)[1].split("      - ", 1)[0]
             self.assertNotIn("continue-on-error:", step)
+
+    def test_kernel_shard_runner_and_logs_are_checked_on_both_platforms(self):
+        for platform in ["linux", "windows"]:
+            kernel = job(f"kernel-tests-{platform}")
+            self.assertIn("run: node --test scripts/test-kernel.test.mjs", kernel)
+            upload = kernel.split("- name: Upload kernel test logs\n", 1)[1].split("      - ", 1)[0]
+            self.assertIn("if: always()", upload)
+            self.assertIn(f"name: kernel-tests-{platform}", upload)
+            self.assertIn("path: ${{ runner.temp }}/kernel-test-results", upload)
 
     def test_go_cache_and_builds_share_job_level_module_directory(self):
         for build in [DESKTOP.split("jobs:\n  build:\n", 1)[1], job("build_android")]:

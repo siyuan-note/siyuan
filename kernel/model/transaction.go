@@ -2166,12 +2166,11 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	if avNames := getAvNames(updatedNode.IALAttr(av.NodeAttrNameAvs)); "" != avNames {
 		// updateBlock 会清空数据库角标 https://github.com/siyuan-note/siyuan/issues/16549
-		go func() {
-			time.Sleep(200 * time.Millisecond)
+		runBackgroundRefresh(200*time.Millisecond, func() {
 			oldAttrs := parse.IAL2Map(updatedNode.KramdownIAL)
 			updatedNode.SetIALAttr(av.NodeAttrViewNames, avNames)
 			pushBlockAttrs(oldAttrs, updatedNode)
-		}()
+		})
 	}
 
 	treenode.CreatedUpdated(updatedNode)
@@ -2325,8 +2324,7 @@ func upsertAvBlockRel(node *ast.Node) {
 		})
 	}
 
-	go func() {
-		time.Sleep(100 * time.Millisecond)
+	runBackgroundRefresh(100*time.Millisecond, func() {
 
 		affectedAvIDs = gulu.Str.RemoveDuplicatedElem(affectedAvIDs)
 		relatedAvIDs := av.GetSrcAvIDsForRefresh(affectedAvIDs)
@@ -2340,7 +2338,7 @@ func upsertAvBlockRel(node *ast.Node) {
 
 			ReloadAttrView(avID)
 		}
-	}()
+	})
 }
 
 func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {

@@ -85,6 +85,10 @@ func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
 	}
 
 	t.Cleanup(func() {
+		FlushTxQueue()
+		backgroundRefreshWaitGroup.Wait()
+		// 测试文档即将删除，其待处理索引不能留给后续用例刷新。
+		sql.ClearQueue()
 		cache.RemoveTreeData(sourceTree.ID)
 		cache.RemoveTreeData(targetTree.ID)
 		cache.RemoveDocIAL(sourceTree.Path)

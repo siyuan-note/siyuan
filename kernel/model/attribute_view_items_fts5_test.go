@@ -418,6 +418,9 @@ func setupAttributeViewItemsTest(t *testing.T, bound bool) (*fileOperationTestFi
 	GlobalUndoLog = newUndoLog(64)
 	cache.ClearAVCache()
 	t.Cleanup(func() {
+		// 等待事务和后台分组刷新结束，再恢复测试语言及工作区状态。
+		FlushTxQueue()
+		backgroundRefreshWaitGroup.Wait()
 		util.Lang, util.AttrViewLangs, GlobalUndoLog = oldLang, oldAVLangs, oldUndoLog
 		cache.ClearAVCache()
 	})

@@ -1,0 +1,430 @@
+{
+  "prefixLength": 6,
+  "defaultSeconds": 0.2,
+  "buckets": {
+    "TestAI": {
+      "seconds": 0.07,
+      "tests": 5
+    },
+    "TestAc": {
+      "seconds": 0.05,
+      "tests": 5
+    },
+    "TestAd": {
+      "seconds": 0.16,
+      "tests": 9
+    },
+    "TestAg": {
+      "seconds": 0.24,
+      "tests": 6
+    },
+    "TestAl": {
+      "seconds": 0.02,
+      "tests": 1
+    },
+    "TestAn": {
+      "seconds": 0.21,
+      "tests": 3
+    },
+    "TestAp": {
+      "seconds": 2.28,
+      "tests": 20
+    },
+    "TestAs": {
+      "seconds": 8.27,
+      "tests": 28
+    },
+    "TestAt": {
+      "seconds": 74.77,
+      "tests": 137
+    },
+    "TestAu": {
+      "seconds": 10.77,
+      "tests": 22
+    },
+    "TestBa": {
+      "seconds": 5.82,
+      "tests": 23
+    },
+    "TestBl": {
+      "seconds": 20.4,
+      "tests": 7
+    },
+    "TestBo": {
+      "seconds": 3.64,
+      "tests": 18
+    },
+    "TestBu": {
+      "seconds": 0.01,
+      "tests": 39
+    },
+    "TestCa": {
+      "seconds": 1.95,
+      "tests": 5
+    },
+    "TestCh": {
+      "seconds": 0.95,
+      "tests": 22
+    },
+    "TestCl": {
+      "seconds": 1.67,
+      "tests": 37
+    },
+    "TestCo": {
+      "seconds": 1.08,
+      "tests": 36
+    },
+    "TestCr": {
+      "seconds": 11.39,
+      "tests": 16
+    },
+    "TestCu": {
+      "seconds": 0.14,
+      "tests": 4
+    },
+    "TestDA": {
+      "seconds": 0,
+      "tests": 1
+    },
+    "TestDa": {
+      "seconds": 0.2,
+      "tests": 2
+    },
+    "TestDe": {
+      "seconds": 1.78,
+      "tests": 18
+    },
+    "TestDo": {
+      "seconds": 10.22,
+      "tests": 46
+    },
+    "TestDr": {
+      "seconds": 0.07,
+      "tests": 1
+    },
+    "TestDu": {
+      "seconds": 2.61,
+      "tests": 7
+    },
+    "TestDy": {
+      "seconds": 0.6,
+      "tests": 3
+    },
+    "TestEf": {
+      "seconds": 0,
+      "tests": 1
+    },
+    "TestEm": {
+      "seconds": 0.05,
+      "tests": 12
+    },
+    "TestEn": {
+      "seconds": 3.6,
+      "tests": 27
+    },
+    "TestEs": {
+      "seconds": 0,
+      "tests": 1
+    },
+    "TestEx": {
+      "seconds": 9.6,
+      "tests": 53
+    },
+    "TestFT": {
+      "seconds": 0,
+      "tests": 2
+    },
+    "TestFi": {
+      "seconds": 5.52,
+      "tests": 45
+    },
+    "TestFl": {
+      "seconds": 0.52,
+      "tests": 9
+    },
+    "TestFo": {
+      "seconds": 0.01,
+      "tests": 3
+    },
+    "TestFr": {
+      "seconds": 0,
+      "tests": 4
+    },
+    "TestFu": {
+      "seconds": 0.01,
+      "tests": 1
+    },
+    "TestGe": {
+      "seconds": 1.08,
+      "tests": 44
+    },
+    "TestGl": {
+      "seconds": 10.04,
+      "tests": 4
+    },
+    "TestGr": {
+      "seconds": 0.02,
+      "tests": 4
+    },
+    "TestHT": {
+      "seconds": 0.02,
+      "tests": 5
+    },
+    "TestHa": {
+      "seconds": 0.01,
+      "tests": 4
+    },
+    "TestHe": {
+      "seconds": 0,
+      "tests": 10
+    },
+    "TestHi": {
+      "seconds": 0.32,
+      "tests": 10
+    },
+    "TestIO": {
+      "seconds": 1.42,
+      "tests": 1
+    },
+    "TestIm": {
+      "seconds": 1.82,
+      "tests": 18
+    },
+    "TestIn": {
+      "seconds": 3.94,
+      "tests": 31
+    },
+    "TestIs": {
+      "seconds": 0.04,
+      "tests": 17
+    },
+    "TestJW": {
+      "seconds": 0,
+      "tests": 1
+    },
+    "TestLA": {
+      "seconds": 0,
+      "tests": 2
+    },
+    "TestLa": {
+      "seconds": 0.53,
+      "tests": 1
+    },
+    "TestLe": {
+      "seconds": 0.27,
+      "tests": 9
+    },
+    "TestLi": {
+      "seconds": 14.96,
+      "tests": 23
+    },
+    "TestLo": {
+      "seconds": 0.6,
+      "tests": 13
+    },
+    "TestMa": {
+      "seconds": 5.93,
+      "tests": 30
+    },
+    "TestMe": {
+      "seconds": 0.07,
+      "tests": 6
+    },
+    "TestMi": {
+      "seconds": 1.78,
+      "tests": 21
+    },
+    "TestMo": {
+      "seconds": 4.71,
+      "tests": 16
+    },
+    "TestMu": {
+      "seconds": 0.15,
+      "tests": 7
+    },
+    "TestNe": {
+      "seconds": 0.04,
+      "tests": 11
+    },
+    "TestNo": {
+      "seconds": 12.99,
+      "tests": 38
+    },
+    "TestOC": {
+      "seconds": 0.55,
+      "tests": 3
+    },
+    "TestOI": {
+      "seconds": 0.01,
+      "tests": 8
+    },
+    "TestOb": {
+      "seconds": 0.23,
+      "tests": 4
+    },
+    "TestOr": {
+      "seconds": 0,
+      "tests": 1
+    },
+    "TestPD": {
+      "seconds": 3.08,
+      "tests": 2
+    },
+    "TestPa": {
+      "seconds": 1.21,
+      "tests": 20
+    },
+    "TestPe": {
+      "seconds": 1.39,
+      "tests": 8
+    },
+    "TestPi": {
+      "seconds": 0.59,
+      "tests": 6
+    },
+    "TestPl": {
+      "seconds": 0.48,
+      "tests": 6
+    },
+    "TestPr": {
+      "seconds": 0.69,
+      "tests": 28
+    },
+    "TestPu": {
+      "seconds": 1.25,
+      "tests": 8
+    },
+    "TestQu": {
+      "seconds": 0.1,
+      "tests": 3
+    },
+    "TestRa": {
+      "seconds": 0,
+      "tests": 1
+    },
+    "TestRe": {
+      "seconds": 14.18,
+      "tests": 109
+    },
+    "TestRo": {
+      "seconds": 0.04,
+      "tests": 2
+    },
+    "TestS3": {
+      "seconds": 0.3,
+      "tests": 4
+    },
+    "TestSH": {
+      "seconds": 0,
+      "tests": 1
+    },
+    "TestSQ": {
+      "seconds": 0.28,
+      "tests": 3
+    },
+    "TestSa": {
+      "seconds": 0.01,
+      "tests": 5
+    },
+    "TestSc": {
+      "seconds": 0,
+      "tests": 2
+    },
+    "TestSe": {
+      "seconds": 3.79,
+      "tests": 41
+    },
+    "TestSh": {
+      "seconds": 0.01,
+      "tests": 9
+    },
+    "TestSi": {
+      "seconds": 0,
+      "tests": 1
+    },
+    "TestSn": {
+      "seconds": 0.64,
+      "tests": 5
+    },
+    "TestSo": {
+      "seconds": 7.43,
+      "tests": 15
+    },
+    "TestSt": {
+      "seconds": 0.04,
+      "tests": 6
+    },
+    "TestSw": {
+      "seconds": 0.09,
+      "tests": 1
+    },
+    "TestSy": {
+      "seconds": 15.07,
+      "tests": 48
+    },
+    "TestTa": {
+      "seconds": 1.29,
+      "tests": 12
+    },
+    "TestTe": {
+      "seconds": 5.46,
+      "tests": 23
+    },
+    "TestTh": {
+      "seconds": 0.06,
+      "tests": 2
+    },
+    "TestTo": {
+      "seconds": 0,
+      "tests": 1
+    },
+    "TestTr": {
+      "seconds": 0.59,
+      "tests": 5
+    },
+    "TestTw": {
+      "seconds": 0.05,
+      "tests": 1
+    },
+    "TestTx": {
+      "seconds": 0,
+      "tests": 1
+    },
+    "TestUn": {
+      "seconds": 0.93,
+      "tests": 17
+    },
+    "TestUp": {
+      "seconds": 0.19,
+      "tests": 24
+    },
+    "TestVa": {
+      "seconds": 0.14,
+      "tests": 13
+    },
+    "TestVe": {
+      "seconds": 0.05,
+      "tests": 1
+    },
+    "TestVi": {
+      "seconds": 0.02,
+      "tests": 4
+    },
+    "TestWa": {
+      "seconds": 0.07,
+      "tests": 4
+    },
+    "TestWi": {
+      "seconds": 0,
+      "tests": 1
+    },
+    "TestWo": {
+      "seconds": 0.01,
+      "tests": 1
+    },
+    "TestWr": {
+      "seconds": 0.01,
+      "tests": 4
+    }
+  }
+}

@@ -212,11 +212,13 @@ jobs:
           sudo apt-get install -y strace
       - name: Prepare native OCR verification resources
         run: python3 scripts/prepare-ocr.py --runtime linux-amd64 --build-worker
+      - name: Test kernel test runner
+        run: node --test scripts/test-kernel.test.mjs
       - name: Test all kernel packages
         id: test_all_kernel_packages
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true
-        run: go test -tags "fts5 sqlcipher" ./... -count=1
+        run: node ../scripts/test-kernel.mjs --shards 4 --output "${{ runner.temp }}/kernel-test-results"
         working-directory: kernel
         env:
           SIYUAN_OCR_TEST_ASSETS: ${{ github.workspace }}/app/stage/ocr/models
@@ -230,6 +232,14 @@ jobs:
         env:
           TMPDIR: /tmp
           GOTMPDIR: ${{ runner.temp }}
+
+      - name: Upload kernel test logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: kernel-tests-linux
+          path: ${{ runner.temp }}/kernel-test-results
+          if-no-files-found: ignore
 
       - name: Report non-blocking step outcomes
         if: always()
@@ -260,16 +270,26 @@ jobs:
           msystem: UCRT64
           path-type: inherit
           install: mingw-w64-ucrt-x86_64-gcc
+      - name: Test kernel test runner
+        run: node --test scripts/test-kernel.test.mjs
       - name: Test all Windows kernel packages
         id: test_windows_kernel_packages
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true
         shell: msys2 {0}
-        run: go test -tags "fts5 sqlcipher" ./... -count=1
+        run: node ../scripts/test-kernel.mjs --shards 4 --output "${{ runner.temp }}/kernel-test-results"
         working-directory: kernel
         env:
           CGO_ENABLED: 1
           CC: gcc
+
+      - name: Upload kernel test logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: kernel-tests-windows
+          path: ${{ runner.temp }}/kernel-test-results
+          if-no-files-found: ignore
 
       - name: Report non-blocking step outcomes
         if: always()

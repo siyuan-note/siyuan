@@ -136,6 +136,8 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
     - When changing functionality shared by desktop and mobile, inspect the corresponding mobile implementation under `app/src/mobile/` and update it in the same task. This includes menus, toolbars, dialogs, interactions, and their event handlers; do not assume that desktop changes automatically apply to mobile
     - Before finishing, verify both implementations and their shared dependencies, preserving platform-appropriate interactions. If no corresponding mobile feature exists or the change is desktop-only, state why mobile changes are not needed in the task response
 
+12. **UI copy and user guides:** Change wording only when needed, following nearby style and keeping necessary guidance and warnings. Put specific instructions beside the relevant control or in the corresponding guide section; do not overload general descriptions with feature lists or implementation details
+
 ---
 
 ## 3. Coding conventions

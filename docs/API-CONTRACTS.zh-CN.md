@@ -205,4 +205,4 @@ go test -tags "fts5 sqlcipher" ./... -count=1
 
 导入和静态文件测试数据使用 `internal/testutil.PublicDataDir` 创建并清理经过显式验证的非敏感目录，不依赖 `TMPDIR` 和 `GOTMPDIR`。该辅助函数依次尝试用户主目录、当前目录和文件系统根目录；若没有安全且可写的位置，则报告测试数据准备失败。CI 还会将 `TMPDIR` 设为 `/tmp`，并使用独立的 `GOTMPDIR` 重新运行受影响的路径测试，以覆盖环境变量覆盖的情况。
 
-CI 在 Linux 上运行所有内核包的测试，在 Windows 上运行所有前端、Electron 和打包脚本测试。前端测试发现范围限定为 `src/**/*.test.ts`、`tests/**/*.test.js`、`electron/**/*.test.js` 和 `scripts/**/*.test.js`，因此排除 `app/build` 下的打包副本。测试文件串行执行，以避免 Electron 进程启动争用。这些位置新增的回归测试会自动纳入；新增测试位置或文件命名约定时，须同步更新测试命令和本文档。Go 契约回归测试的名称应保留 `Contract`，以便单独运行。
+CI 在 Linux 上运行所有内核包的测试，在 Windows 上运行所有前端、Electron 和打包脚本测试。前端测试发现范围限定为 `src/**/*.test.ts`、`tests/**/*.test.js`、`electron/**/*.test.js` 和 `scripts/**/*.test.js`，因此排除 `app/build` 下的打包副本。测试文件在独立进程中运行，根据可用 CPU 核心数选择并发度，上限为 4，以限制 Electron 进程启动争用。通过 `pnpm test --test-concurrency=1` 可串行执行。这些位置新增的回归测试会自动纳入；新增测试位置或文件命名约定时，须同步更新测试命令和本文档。Go 契约回归测试的名称应保留 `Contract`，以便单独运行。

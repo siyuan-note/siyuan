@@ -37,6 +37,7 @@ const {
     powerMonitor
 } = require("electron");
 const {updateGlobalShortcutBindings} = require("./globalShortcutBindings");
+const {appendChromiumSwitch} = require("./chromiumSwitches");
 const path = require("path");
 const fs = require("fs");
 const {pathToFileURL} = require("url");
@@ -758,10 +759,10 @@ if (!remoteKernelTarget) {
 }
 // 同源窗口共享渲染进程，按来源隔离以保留不同端口工作空间之间的进程隔离。
 app.commandLine.appendSwitch("process-per-site");
-app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport,OriginKeyedProcessesByDefault");
+appendChromiumSwitch(app.commandLine, "--enable-features=PlatformHEVCDecoderSupport,OriginKeyedProcessesByDefault");
 app.commandLine.appendSwitch("xdg-portal-required-version", "4");
 // 本地 HTTPS 页面加载 HTTP 外链图时，禁止自动升级为 HTTPS
-app.commandLine.appendSwitch("disable-features", "AutoupgradeMixedContent");
+appendChromiumSwitch(app.commandLine, "--disable-features=AutoupgradeMixedContent");
 
 // Support set Chromium command line arguments on the desktop https://github.com/siyuan-note/siyuan/issues/9696
 writeLog("app is packaged [" + app.isPackaged + "], command line args [" + process.argv.join(", ") + "]");
@@ -789,8 +790,9 @@ for (let i = argStart; i < process.argv.length; i++) {
         continue;
     }
 
-    app.commandLine.appendSwitch(arg);
-    writeLog("command line switch [" + arg + "]");
+    if (appendChromiumSwitch(app.commandLine, arg)) {
+        writeLog("command line switch [" + arg + "]");
+    }
 }
 
 // 桌面端辅助功能配置在创建窗口前应用，对本机所有工作空间生效。

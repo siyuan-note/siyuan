@@ -321,30 +321,38 @@ app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
 app.on("window-all-closed", () => {});
 app.whenReady().then(async () => {
-    let win;
-    let phase;
     try {
-        for (const mobile of [false, true]) {
-            phase = "load viewport " + mobile;
-            win = new BrowserWindow({show:false,width:mobile ? 390 : 1000,height:850,
-                webPreferences:{nodeIntegration:true,contextIsolation:false,backgroundThrottling:false}});
-            await win.loadURL("data:text/html,<html><head></head><body></body></html>");
-            await win.webContents.executeJavaScript(${JSON.stringify(`const style = document.createElement("style");
+        const results = await Promise.allSettled([false, true].map(async mobile => {
+            let win;
+            let phase;
+            try {
+                phase = "load viewport " + mobile;
+                win = new BrowserWindow({show:false,width:mobile ? 390 : 1000,height:850,
+                    webPreferences:{nodeIntegration:true,contextIsolation:false,backgroundThrottling:false}});
+                await win.loadURL("data:text/html,<html><head></head><body></body></html>");
+                await win.webContents.executeJavaScript(${JSON.stringify(`const style = document.createElement("style");
 style.textContent = ${JSON.stringify(css)}; document.head.append(style);
 ${libraries.map(source => `new Function("module", "exports", ${JSON.stringify(source)})(undefined, undefined);`).join("\n")}`)});
-            if (mobile) {
-                phase = "mobile styles";
-                await win.webContents.executeJavaScript(${JSON.stringify(`style.textContent += ${JSON.stringify(mobileCSS)};`)});
+                if (mobile) {
+                    phase = "mobile styles";
+                    await win.webContents.executeJavaScript(${JSON.stringify(`style.textContent += ${JSON.stringify(mobileCSS)};`)});
+                }
+                phase = "export cases " + mobile;
+                console.log(await win.webContents.executeJavaScript(
+                    "const __name = value => value; (" + ${JSON.stringify(browserCases.toString())} + ")(" +
+                    ${JSON.stringify(JSON.stringify(layoutSource) + "," + JSON.stringify(fontSource) + "," + JSON.stringify(exportSource))} + "," + mobile + ")"));
+            } catch (error) {
+                console.error(phase, error);
+                throw error;
+            } finally {
+                if (win && !win.isDestroyed()) win.destroy();
             }
-            phase = "export cases " + mobile;
-            console.log(await win.webContents.executeJavaScript(
-                "const __name = value => value; (" + ${JSON.stringify(browserCases.toString())} + ")(" +
-                ${JSON.stringify(JSON.stringify(layoutSource) + "," + JSON.stringify(fontSource) + "," + JSON.stringify(exportSource))} + "," + mobile + ")"));
-            win.destroy();
-        }
+        }));
+        const failure = results.find(result => result.status === "rejected");
+        if (failure) throw failure.reason;
         app.exit(0);
     } catch (error) {
-        console.error(phase, error); if (win && !win.isDestroyed()) win.destroy(); app.exit(1);
+        console.error(error); app.exit(1);
     }
 });`, "utf8");
     const env = {...process.env};

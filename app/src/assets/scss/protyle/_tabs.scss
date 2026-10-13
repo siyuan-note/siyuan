@@ -280,6 +280,7 @@
         border-bottom-width: 1px;
         border-bottom-style: solid;
         border-bottom-color: var(--b3-theme-background-light);
+        border-radius: tokens.token("--tabs-border-top-left-radius") tokens.token("--tabs-border-top-right-radius") 0 0;
 
         &::before {
           content: "";

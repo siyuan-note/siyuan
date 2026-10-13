@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const {readFileSync} = require("node:fs");
 const path = require("node:path");
+const {pathToFileURL} = require("node:url");
 const {test} = require("node:test");
 const vm = require("node:vm");
 
@@ -21,6 +22,8 @@ const setup = (progress, options = {}) => {
         destroyed: false,
         isDestroyed() { return this.destroyed; },
         destroy() { this.destroyed = true; events.push("destroy"); },
+        loadFile: async (file, options) => { events.push(["load-file", file, options]); },
+        webContents: {executeJavaScript: async script => { events.push(["boot-script", script]); }},
     };
     const fixture = {events, waits, window, closeKernel: code => closeKernel(code, null),
         requests: () => requests, versionRequests: () => versionRequests,
@@ -41,6 +44,7 @@ const setup = (progress, options = {}) => {
     });
     const context = vm.createContext({
         path,
+        pathToFileURL,
         process: {platform: options.platform || "win32", env: {}},
         app: {getPreferredSystemLanguages: () => ["en"]},
         resolveAppLanguage: languages => languages[0],
@@ -60,8 +64,11 @@ const setup = (progress, options = {}) => {
         fs: {existsSync: () => true},
         appDir: "app", confDir: "conf", lastWorkspacePath: "workspace", appVer: "3.8.6",
         bootWindow: window, kernelPort: 6806, isDevEnv: false, workspaces: [],
+        bootIndexPath: "app/electron/boot.html",
+        loadBootWindow: () => events.push("resume-boot"),
         kernelProcesses: new Map(), expectedKernelExitPorts: new Set(),
         createBootWindow: () => {}, showLocalBootWindow: () => {}, showAppleSiliconWarning: async () => true,
+        waitForPreviousWorkspaceExit: options.previousExit || (async () => true),
         getAvailablePort: async () => 6806, getServer: port => "https://127.0.0.1:" + port,
         writeLog: message => events.push(message),
         requestKernelExit: port => events.push(["exit-kernel", port]),
@@ -104,6 +111,42 @@ const setup = (progress, options = {}) => {
 };
 
 const exits = fixture => fixture.events.filter(event => Array.isArray(event) && event[0] === "exit-kernel");
+
+test("startup shows previous-exit waiting and spawns only after it completes", async () => {
+    let finish;
+    const pending = new Promise(resolve => { finish = resolve; });
+    const state = setup(() => 100, {previousExit: async (_workspace, options) => {
+        await options.onWaiting();
+        return pending;
+    }});
+    const run = state.run();
+    await state.settleMicrotasks();
+    assert.equal(state.versionRequests(), 0);
+    assert.equal(state.events.some(event => typeof event === "string" && event.startsWith("spawned kernel")), false);
+    assert.equal(state.window.previousExitWaiting, "Waiting for the previous shutdown to finish...");
+    assert.ok(state.events.some(event => Array.isArray(event) && event[0] === "boot-script" &&
+        event[1].includes(JSON.stringify(state.window.previousExitWaiting))));
+    assert.equal(state.events.some(event => Array.isArray(event) && event[0] === "load-file"), false);
+    finish(true);
+    assert.equal(await run, 6806);
+    assert.equal(state.window.previousExitWaiting, "");
+    assert.ok(state.events.some(event => Array.isArray(event) && event[0] === "boot-script" &&
+        event[1] === 'window.setPreviousExitWaiting("")'));
+    assert.equal(state.events.includes("resume-boot"), false);
+});
+
+test("canceled or failed previous-exit waiting never spawns or kills a kernel", async () => {
+    for (const failure of [false, true]) {
+        const state = setup(() => 100, {previousExit: async () => {
+            if (failure) throw new Error("timeout");
+            return false;
+        }});
+        assert.equal(await state.run(), false);
+        assert.equal(state.versionRequests(), 0);
+        assert.equal(exits(state).length, 0);
+        assert.equal(state.events.some(event => typeof event === "string" && event.startsWith("spawned kernel")), false);
+    }
+});
 
 test("boot progress recovers from certificate and network changes without exiting the kernel", async () => {
     for (const error of ["CERT_DATABASE_CHANGED", "CERT_VERIFIER_CHANGED", "NETWORK_CHANGED"]) {

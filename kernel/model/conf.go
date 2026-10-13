@@ -663,6 +663,7 @@ func loadLangs() (ret []*conf.Lang) {
 }
 
 var exitLock = sync.Mutex{}
+var exitFinished bool // 由 exitLock 保护，防止排队的重试请求再次关闭数据库。
 
 // Close 退出内核进程.
 //
@@ -685,12 +686,20 @@ var exitLock = sync.Mutex{}
 // 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且新版本安装包已经准备就绪时，将安装包路径返回给桌面宿主
 // https://github.com/siyuan-note/siyuan/issues/10288
 func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, installPkgPath string) {
-	confSyncSnapshot := Conf.LoadSync()
-
 	diagnostic := util.WatchOperationWithTiming("exit kernel", "wait for exit lock")
 	defer diagnostic.Finish()
 	exitLock.Lock()
 	defer exitLock.Unlock()
+	if exitFinished {
+		return
+	}
+	confSyncSnapshot := Conf.LoadSync()
+	clearExitMarker := util.MarkWorkspaceExiting()
+	defer func() {
+		if clearExitMarker != nil {
+			clearExitMarker()
+		}
+	}()
 
 	logging.LogInfof("exiting kernel [force=%v, setCurrentWorkspace=%v, execInstallPkg=%d]", force, setCurrentWorkspace, execInstallPkg)
 	defer func() {
@@ -792,12 +801,15 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	}
 
 	diagnostic.Stage("unlock workspace")
+	clearExitMarker()
+	clearExitMarker = nil
 	util.UnlockWorkspace()
 
 	diagnostic.Stage("wait for frontend events")
 	time.Sleep(500 * time.Millisecond)
 	diagnostic.Stage("close sync websocket")
 	closeSyncWebSocket()
+	exitFinished = true
 
 	go func() {
 		diagnostic := util.WatchOperationWithTiming("exit kernel servers", "wait for exit response")

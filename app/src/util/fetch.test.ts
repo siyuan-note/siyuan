@@ -118,8 +118,14 @@ it("preserves FormData request bodies for upload endpoints", async () => {
     await fetchPost("/api/file/putFile", body);
 });
 
-it("falls back to desktop quit when exit or closing layout requests stall", async () => {
-    for (const url of ["/api/system/exit", "/api/system/setUILayout", "/api/system/setWorkspaceDir"]) {
+it("keeps the desktop alive when an exit request stalls", async () => {
+    const {fetchPost, sends} = loadFetchPost();
+    await fetchPost("/api/system/exit", {}, () => assert.fail("unexpected success"));
+    assert.deepEqual(sends, []);
+});
+
+it("retains the existing fallback for closing layout and workspace requests", async () => {
+    for (const url of ["/api/system/setUILayout", "/api/system/setWorkspaceDir"]) {
         const {fetchPost, sends, timeouts} = loadFetchPost();
         await fetchPost(url, {errorExit: true}, () => assert.fail("unexpected success"));
         assert.deepEqual(timeouts, [30000]);

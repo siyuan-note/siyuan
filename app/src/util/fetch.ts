@@ -119,7 +119,7 @@ export const fetchPost = ((
             return;
         }
         /// #if !BROWSER
-        if (url === "/api/system/exit" || url === "/api/system/setWorkspaceDir" || (
+        if (url === "/api/system/setWorkspaceDir" || (
             ["/api/system/setUILayout"].includes(url) && data.errorExit // 内核中断，点关闭处理
         )) {
             ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);

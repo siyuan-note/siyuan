@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "Opslaan en synchroniseren, even geduld...",
+	"exitWaitFailed": "Het is niet bevestigd dat het afsluiten is voltooid. Probeer het opnieuw of sluit dit dialoogvenster en blijf wachten.",
+	"previousExitWaiting": "Wachten tot het vorige afsluitproces is voltooid...",
+	"previousExitWaitFailed": "Het is niet bevestigd dat het vorige afsluitproces is voltooid. Controleer het andere SiYuan-venster en werkruimte/temp/siyuan.log en probeer het opnieuw.",
 	"ocrImportModelsTitle": "PP-OCRv6-modellen importeren",
 	"kernelUnresponsiveTitle": "De kernel reageert niet",
 	"kernelUnresponsiveMessage": "Lokale verzoeken aan de kernel hebben de tijdslimiet overschreden, waardoor SiYuan het hoofdvenster niet kan openen. Zie ${log} voor meer informatie.",

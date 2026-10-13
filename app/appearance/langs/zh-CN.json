@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "正在保存并同步，请稍候...",
+	"exitWaitFailed": "暂时无法确认退出是否完成。可以重试，或关闭此提示继续等待。",
+	"previousExitWaiting": "正在等待上次退出完成...",
+	"previousExitWaitFailed": "暂时无法确认上次退出是否完成。请检查其他思源窗口及工作空间/temp/siyuan.log，然后重试。",
 	"ocrImportModelsTitle": "导入 PP-OCRv6 模型",
 	"kernelUnresponsiveTitle": "内核无响应",
 	"kernelUnresponsiveMessage": "本机内核请求超时，思源无法进入主界面。请查看 ${log} 获取详细信息。",

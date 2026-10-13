@@ -66,7 +66,7 @@ test("mobile normal exit waits for save and remains open on failure", async () =
                 saveMobileLayout: () => pending.promise,
                 getHostCapabilities: () => ({ownsKernel}),
                 forceQuit: () => events.push("quit"),
-                fetchPost: (url: string) => events.push(url),
+                requestSystemExit: async () => { events.push("/api/system/exit"); },
                 showMessage: () => events.push("error"),
                 window: {siyuan: {languages: {mobileLayoutSaveError: "Save failed"}}},
             });

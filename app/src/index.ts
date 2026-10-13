@@ -34,13 +34,13 @@ import {
     downloadProgress,
     processSync,
     progressBackgroundTask,
-    progressLoading,
     progressStatus,
     processBacklinkIndexCommit,
     setDefRefCount,
     setRefDynamicText,
     transactionError
 } from "./dialog/processSystem";
+import {progressLoading} from "./dialog/progress";
 import {initMessage, showMessage} from "./dialog/message";
 import {getAllModels, getAllTabs} from "./layout/getAll";
 import {getLocalStorage, isChromeBrowser, isInMobileApp, isIOSDevice} from "./protyle/util/compatibility";

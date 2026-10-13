@@ -17,13 +17,13 @@ import {openFileById} from "../editor/util";
 import {
     processSync,
     progressBackgroundTask,
-    progressLoading,
     progressStatus,
     processBacklinkIndexCommit,
     setDefRefCount,
     setRefDynamicText,
     transactionError
 } from "../dialog/processSystem";
+import {progressLoading} from "../dialog/progress";
 import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";

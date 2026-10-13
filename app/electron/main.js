@@ -38,6 +38,7 @@ const {
 } = require("electron");
 const {updateGlobalShortcutBindings} = require("./globalShortcutBindings");
 const {appendChromiumSwitch} = require("./chromiumSwitches");
+const {waitForPreviousWorkspaceExit} = require("./workspaceExit");
 const path = require("path");
 const fs = require("fs");
 const {pathToFileURL} = require("url");
@@ -2474,6 +2475,9 @@ const loadBootWindow = (disableAppearance = false) => {
         bootAppearanceFallback = true;
     }
     const query = {v: appVer, port: kernelPort, lang: getArg("--lang") || resolveAppLanguage(app.getPreferredSystemLanguages())};
+    if (bootWindow.previousExitWaiting) {
+        query.previousExitWaiting = bootWindow.previousExitWaiting;
+    }
     if (remoteKernelTarget) {
         query.remote = remoteKernelTarget.origin;
         query.appearance = "0";
@@ -2606,6 +2610,43 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
         const currentBootWindow = bootWindow;
         let kernelExited = false;
         const bootCanceled = () => kernelExited || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow;
+        if (!isDevEnv || workspaces.length > 0) {
+            let waiting = false;
+            const language = lang || resolveAppLanguage(app.getPreferredSystemLanguages());
+            const languages = loadAppMenuLanguages(language);
+            try {
+                const ready = await waitForPreviousWorkspaceExit(currentWorkspace, {
+                    canceled: bootCanceled,
+                    onWaiting: async () => {
+                        waiting = true;
+                        writeLog("waiting for previous workspace exit");
+                        currentBootWindow.previousExitWaiting = languages.previousExitWaiting;
+                        await currentBootWindow.webContents.executeJavaScript(
+                            `window.setPreviousExitWaiting(${JSON.stringify(languages.previousExitWaiting)})`);
+                    },
+                });
+                if (!ready || bootCanceled()) {
+                    resolve(false);
+                    return;
+                }
+                if (waiting) {
+                    currentBootWindow.previousExitWaiting = "";
+                    await currentBootWindow.webContents.executeJavaScript("window.setPreviousExitWaiting(\"\")");
+                    if (bootCanceled()) {
+                        resolve(false);
+                        return;
+                    }
+                }
+            } catch (error) {
+                writeLog("wait for previous workspace exit failed: " + error);
+                if (!bootCanceled()) {
+                    showErrorWindow(languages.previousExitWaiting, "", escapeHTML(languages.previousExitWaitFailed));
+                    currentBootWindow.destroy();
+                }
+                resolve(false);
+                return;
+            }
+        }
         const cmds = ["serve", "--port", currentKernelPort, "--wd", appDir, "--attach-ui"];
         if (isDevEnv && workspaces.length === 0) {
             cmds.push("--mode", "dev");

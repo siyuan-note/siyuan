@@ -1,6 +1,7 @@
 import {config as configApi} from "../util/configApi";
 import {fetchSyncPost} from "../../util/fetch";
-import {processSync, progressLoading} from "../../dialog/processSystem";
+import {processSync} from "../../dialog/processSystem";
+import {progressLoading} from "../../dialog/progress";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {updateAccountPanelVisibility} from "./accountUi";
 import {hideMessage, showMessage} from "../../dialog/message";

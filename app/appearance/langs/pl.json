@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "Zapisywanie i synchronizacja, proszę czekać...",
+	"exitWaitFailed": "Nie można potwierdzić zakończenia zamykania. Możesz spróbować ponownie lub zamknąć to okno dialogowe i nadal czekać.",
+	"previousExitWaiting": "Oczekiwanie na zakończenie poprzedniego zamykania...",
+	"previousExitWaitFailed": "Nie można potwierdzić zakończenia poprzedniego zamykania. Sprawdź inne okno SiYuan i obszar roboczy/temp/siyuan.log, a następnie spróbuj ponownie.",
 	"ocrImportModelsTitle": "Importuj modele PP-OCRv6",
 	"kernelUnresponsiveTitle": "Jądro nie odpowiada",
 	"kernelUnresponsiveMessage": "Upłynął limit czasu lokalnych żądań do jądra, więc SiYuan nie może otworzyć głównego okna. Szczegóły znajdują się w ${log}.",

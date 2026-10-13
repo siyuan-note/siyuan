@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "שומר ומסנכרן, נא להמתין...",
+	"exitWaitFailed": "לא ניתן לאשר שהסגירה הושלמה. אפשר לנסות שוב או לסגור את תיבת הדו־שיח ולהמשיך להמתין.",
+	"previousExitWaiting": "ממתין להשלמת הסגירה הקודמת...",
+	"previousExitWaitFailed": "לא ניתן לאשר שהסגירה הקודמת הושלמה. יש לבדוק את חלון SiYuan האחר ואת הקובץ temp/siyuan.log במרחב העבודה, ואז לנסות שוב.",
 	"ocrImportModelsTitle": "ייבוא מודלי PP-OCRv6",
 	"kernelUnresponsiveTitle": "הליבה אינה מגיבה",
 	"kernelUnresponsiveMessage": "תם הזמן שהוקצב לבקשות המקומיות לליבה, ולכן SiYuan אינו יכול לפתוח את החלון הראשי. לפרטים נוספים, ראו ${log}.",

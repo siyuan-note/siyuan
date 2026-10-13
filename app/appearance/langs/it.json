@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "Salvataggio e sincronizzazione in corso, attendere...",
+	"exitWaitFailed": "Impossibile confermare il completamento della chiusura. Puoi riprovare oppure chiudere questa finestra di dialogo e continuare ad attendere.",
+	"previousExitWaiting": "In attesa del completamento della chiusura precedente...",
+	"previousExitWaitFailed": "Impossibile confermare il completamento della chiusura precedente. Controlla l’altra finestra di SiYuan e spazio di lavoro/temp/siyuan.log, quindi riprova.",
 	"ocrImportModelsTitle": "Importa modelli PP-OCRv6",
 	"kernelUnresponsiveTitle": "Il kernel non risponde",
 	"kernelUnresponsiveMessage": "Le richieste locali al kernel hanno superato il tempo limite, quindi SiYuan non può aprire la finestra principale. Consultare ${log} per i dettagli.",

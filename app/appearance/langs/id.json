@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "Menyimpan dan menyinkronkan, harap tunggu...",
+	"exitWaitFailed": "Tidak dapat memastikan bahwa proses penutupan telah selesai. Anda dapat mencoba lagi atau menutup dialog ini dan terus menunggu.",
+	"previousExitWaiting": "Menunggu proses penutupan sebelumnya selesai...",
+	"previousExitWaitFailed": "Tidak dapat memastikan bahwa proses penutupan sebelumnya telah selesai. Periksa jendela SiYuan lainnya dan ruang kerja/temp/siyuan.log, lalu coba lagi.",
 	"ocrImportModelsTitle": "Impor model PP-OCRv6",
 	"kernelUnresponsiveTitle": "Kernel tidak merespons",
 	"kernelUnresponsiveMessage": "Permintaan lokal ke kernel kehabisan waktu, sehingga SiYuan tidak dapat membuka jendela utama. Lihat ${log} untuk detailnya.",

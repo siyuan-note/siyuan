@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "Saving and syncing, please wait...",
+	"exitWaitFailed": "Could not confirm that shutdown has completed. You can retry or close this dialog and continue waiting.",
+	"previousExitWaiting": "Waiting for the previous shutdown to finish...",
+	"previousExitWaitFailed": "Could not confirm that the previous shutdown has completed. Please check the other SiYuan window and workspace/temp/siyuan.log, then try again.",
 	"ocrImportModelsTitle": "Import PP-OCRv6 models",
 	"kernelUnresponsiveTitle": "The kernel is not responding",
 	"kernelUnresponsiveMessage": "Local requests to the kernel timed out, so SiYuan cannot open the main window. Check ${log} for details.",

@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "Speichern und Synchronisieren. Bitte warten...",
+	"exitWaitFailed": "Der Abschluss des Beendens konnte nicht bestätigt werden. Versuchen Sie es erneut oder schließen Sie diesen Dialog und warten Sie weiter.",
+	"previousExitWaiting": "Warten, bis der vorherige Beendigungsvorgang abgeschlossen ist...",
+	"previousExitWaitFailed": "Der Abschluss des vorherigen Beendigungsvorgangs konnte nicht bestätigt werden. Prüfen Sie das andere SiYuan-Fenster und Arbeitsbereich/temp/siyuan.log und versuchen Sie es erneut.",
 	"ocrImportModelsTitle": "PP-OCRv6-Modelle importieren",
 	"kernelUnresponsiveTitle": "Der Kernel antwortet nicht",
 	"kernelUnresponsiveMessage": "Lokale Anfragen an den Kernel haben das Zeitlimit überschritten. SiYuan kann das Hauptfenster nicht öffnen. Weitere Informationen finden Sie in ${log}.",

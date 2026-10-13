@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "Enregistrement et synchronisation en cours, veuillez patienter...",
+	"exitWaitFailed": "Impossible de confirmer la fin de la fermeture. Vous pouvez réessayer ou fermer cette boîte de dialogue et continuer à patienter.",
+	"previousExitWaiting": "En attente de la fin de la fermeture précédente...",
+	"previousExitWaitFailed": "Impossible de confirmer la fin de la fermeture précédente. Vérifiez l’autre fenêtre SiYuan et espace de travail/temp/siyuan.log, puis réessayez.",
 	"ocrImportModelsTitle": "Importer des modèles PP-OCRv6",
 	"kernelUnresponsiveTitle": "Le noyau ne répond pas",
 	"kernelUnresponsiveMessage": "Les requêtes locales au noyau ont dépassé le délai d’attente. SiYuan ne peut donc pas ouvrir la fenêtre principale. Consultez ${log} pour plus de détails.",

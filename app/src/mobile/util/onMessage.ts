@@ -9,11 +9,11 @@ import {
     forceQuit,
     processBacklinkIndexCommit,
     processSync,
-    progressLoading,
     setDefRefCount,
     setRefDynamicText,
     transactionError
 } from "../../dialog/processSystem";
+import {progressLoading} from "../../dialog/progress";
 import type {App} from "../../index";
 import {applyPluginReload, syncGlobalPluginConfig} from "../../plugin/globalState";
 import {reloadEmoji} from "../../emoji";

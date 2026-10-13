@@ -1,4 +1,4 @@
-import {progressLoading} from "../../dialog/processSystem";
+import {progressLoading} from "../../dialog/progress";
 
 const tasks = new Set<string>();
 let revision = 0;

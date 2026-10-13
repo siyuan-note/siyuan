@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "Kaydediliyor ve eşitleniyor, lütfen bekleyin...",
+	"exitWaitFailed": "Kapanmanın tamamlandığı doğrulanamadı. Yeniden deneyebilir veya bu iletişim kutusunu kapatıp beklemeye devam edebilirsiniz.",
+	"previousExitWaiting": "Önceki kapanma işleminin tamamlanması bekleniyor...",
+	"previousExitWaitFailed": "Önceki kapanma işleminin tamamlandığı doğrulanamadı. Diğer SiYuan penceresini ve çalışma alanı/temp/siyuan.log dosyasını kontrol edip yeniden deneyin.",
 	"ocrImportModelsTitle": "PP-OCRv6 modellerini içe aktar",
 	"kernelUnresponsiveTitle": "Çekirdek yanıt vermiyor",
 	"kernelUnresponsiveMessage": "Çekirdeğe yapılan yerel istekler zaman aşımına uğradığı için SiYuan ana pencereyi açamıyor. Ayrıntılar için ${log} dosyasına bakın.",

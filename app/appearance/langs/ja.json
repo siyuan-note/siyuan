@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "保存と同期を実行しています。お待ちください...",
+	"exitWaitFailed": "終了が完了したか確認できませんでした。再試行するか、このダイアログを閉じてお待ちください。",
+	"previousExitWaiting": "前回の終了処理が完了するのを待っています...",
+	"previousExitWaitFailed": "前回の終了処理が完了したか確認できませんでした。他の思源ウィンドウとワークスペース/temp/siyuan.log を確認してから、再試行してください。",
 	"ocrImportModelsTitle": "PP-OCRv6 モデルをインポート",
 	"kernelUnresponsiveTitle": "カーネルが応答していません",
 	"kernelUnresponsiveMessage": "ローカルのカーネルへのリクエストがタイムアウトしたため、思源はメインウィンドウを開けません。詳細は ${log} を確認してください。",

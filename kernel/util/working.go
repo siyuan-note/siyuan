@@ -618,6 +618,7 @@ func tryLockWorkspace() {
 	WorkspaceLock = flock.New(filepath.Join(WorkspaceDir, ".lock"))
 	ok, err := WorkspaceLock.TryLock()
 	if ok {
+		ClearWorkspaceExitMarker()
 		return
 	}
 	if err != nil {

@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "正在儲存並同步，請稍候...",
+	"exitWaitFailed": "暫時無法確認是否已結束。可以重試，或關閉此提示繼續等待。",
+	"previousExitWaiting": "正在等待上次結束作業完成...",
+	"previousExitWaitFailed": "暫時無法確認上次結束作業是否完成。請檢查其他思源視窗及工作空間/temp/siyuan.log，然後重試。",
 	"ocrImportModelsTitle": "匯入 PP-OCRv6 模型",
 	"kernelUnresponsiveTitle": "核心無回應",
 	"kernelUnresponsiveMessage": "本機核心請求逾時，思源無法進入主畫面。請查看 ${log} 取得詳細資訊。",

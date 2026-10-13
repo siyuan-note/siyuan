@@ -1,4 +1,8 @@
 {
+	"exitWaiting": "Guardando y sincronizando, espere...",
+	"exitWaitFailed": "No se pudo confirmar que el cierre haya terminado. Puede reintentar o cerrar este diálogo y seguir esperando.",
+	"previousExitWaiting": "Esperando a que termine el cierre anterior...",
+	"previousExitWaitFailed": "No se pudo confirmar que el cierre anterior haya terminado. Revise la otra ventana de SiYuan y espacio de trabajo/temp/siyuan.log, y vuelva a intentarlo.",
 	"ocrImportModelsTitle": "Importar modelos PP-OCRv6",
 	"kernelUnresponsiveTitle": "El núcleo no responde",
 	"kernelUnresponsiveMessage": "Las solicitudes locales al núcleo agotaron el tiempo de espera, por lo que SiYuan no puede abrir la ventana principal. Consulte ${log} para obtener más detalles.",

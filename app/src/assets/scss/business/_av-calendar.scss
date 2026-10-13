@@ -272,6 +272,17 @@
       min-height: 20px;
     }
 
+    > .av__cellprimary {
+      display: inline-flex;
+      min-width: 0;
+      max-width: 100%;
+      vertical-align: top;
+
+      > .b3-menu__avemoji {
+        align-self: flex-start;
+      }
+    }
+
     .av__celltext {
       min-width: 0;
       overflow: hidden;

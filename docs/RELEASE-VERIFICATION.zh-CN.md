@@ -70,7 +70,7 @@ git push origin v3.8.7-beta.1
 python -X utf8 scripts/prepare-release.py 3.8.7
 ```
 
-脚本更新本文版本示例（包括下载地址）、内核、前端、Appx、Android、鸿蒙和 `b3log-index` 官网版本。本地须已有 `b3log-index` 官网源码仓库，默认放在主仓库同级目录；放在其他位置时用 `--index-dir` 指定仓库根目录。检查计划中的版本和路径后，选择以下一种方式执行。
+脚本更新本文版本示例（包括下载地址）、内核、前端、Appx、Android、鸿蒙和 `b3log-index` 官网版本。本地须已有 `b3log-index` 仓库，默认放在主仓库同级目录。检查计划中的版本和路径后，选择以下一种方式执行。
 
 仅修改文件，留待人工检查和提交：
 
@@ -78,7 +78,7 @@ python -X utf8 scripts/prepare-release.py 3.8.7
 python -X utf8 scripts/prepare-release.py 3.8.7 --execute
 ```
 
-确认主仓库、Android、鸿蒙已跟踪的改动均需发布。对于 `b3log-index`，确认当前分支是本次要推送的分支，没有未解决冲突或官网版本文件、编译页面以外的改动，且环境能运行 `pnpm` 并有权限推送该仓库的 `origin`。官网版本更新和页面构建由脚本完成，无需提前手动操作。满足这些条件后，查看提交推送计划，再执行：
+确认主仓库、Android、鸿蒙已跟踪的改动均需发布，且 `b3log-index` 分支正确、无冲突或无关改动后，查看提交推送计划，再执行：
 
 ```powershell
 python -X utf8 scripts/prepare-release.py 3.8.7 --publish

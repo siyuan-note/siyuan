@@ -40,10 +40,11 @@ export const getImageTooltip = (image: HTMLImageElement, size?: string, ocrText?
     // 原始尺寸不受编辑器缩放和图片排版宽度影响。
     const dimensions = image.naturalWidth && image.naturalHeight ? `${image.naturalWidth} × ${image.naturalHeight}` : "";
     const information = [format, dimensions, size].filter(Boolean).map(value => escapeHtml(value)).join(" · ");
-    const tooltip = text + (text && information ? '<div class="fn__hr"></div>' : "") + information;
-    if (ocrText === undefined) {
+    const tooltip = text + (text && information ? "<br>" : "") + information;
+    const preview = ocrText === undefined ? "" : getOCRPreview(ocrText);
+    if (!preview) {
         return tooltip;
     }
-    const ocr = escapeHtml(getOCRPreview(ocrText) || window.siyuan.languages.emptyContent).replace(/\n/g, "<br>");
-    return tooltip + '<div class="fn__hr"></div>' + escapeHtml(window.siyuan.languages.ocrResult) + ":<br>" + ocr;
+    const ocr = escapeHtml(preview).replace(/\n/g, "<br>");
+    return (tooltip ? tooltip + "<br>" : "") + escapeHtml(window.siyuan.languages.ocrResult) + ":<br>" + ocr;
 };

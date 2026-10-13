@@ -482,11 +482,21 @@ func IsSensitiveHTMLAssetPath(p string) bool {
 	return isSensitivePath(p, true) || isSensitivePath(ResolveLongestExistingParent(p), true)
 }
 
+// deviceNamespacePath 标记无法归一化的设备命名空间路径。
+//
+// 这类路径只能由内核对象管理器解析，无法转换为常规 Win32 路径参与黑名单匹配，因此一律按敏感路径处理（fail-closed）。
+// 该值不是合法 Windows 路径的形态，故按字面量比较即可，无需解析。
+const deviceNamespacePath = "<device-namespace>"
+
 // resolveNamespaceAlias 把 Windows 路径命名空间别名归一化为常规 Win32 路径，供黑名单匹配与工作空间归属判断使用。
 //
 // 扩展长度前缀 `\\?\`（含 `\\?\UNC\`）与设备命名空间前缀 `\\.\` 经 filepath.Clean 后原样保留，
 // 既无法命中按前缀比较的黑名单，也会被文件系统归属判断当作工作空间外的路径，从而绕过敏感路径保护。
 // 本机管理共享（`\\localhost\<盘符>$\...` 或 `\\<本机主机名>\<盘符>$\...`）指向本地卷，同样归一化为盘符路径。
+//
+// 设备命名空间（`\\?\GLOBALROOT\Device\HarddiskVolumeN\...` 等）只能由内核对象管理器解析，无法用盘符表达，
+// 故不尝试映射为卷路径，而是返回 deviceNamespacePath 由调用方按敏感路径拒绝。匹配在剥离 `\\?\`、`\\.\` 之后进行，
+// 因此正斜杠写法（`//?/GLOBALROOT/...`）经 filepath.Clean 归一化后同样被识别。
 func resolveNamespaceAlias(p string) string {
 	if runtime.GOOS != "windows" || p == "" {
 		return p
@@ -499,11 +509,19 @@ func resolveNamespaceAlias(p string) string {
 			break
 		}
 	}
+	// 剥离前缀后设备命名空间只剩 `GLOBALROOT\...`、`Device\...`、`Volume{...}` 形态
+	if isDeviceNamespacePath(p) {
+		return deviceNamespacePath
+	}
 	if strings.HasPrefix(p, `UNC\`) {
 		p = `\\` + p[len(`UNC\`):]
 	}
 
 	cleaned := filepath.Clean(p)
+	// 正斜杠写法（`//?/GLOBALROOT/...`）未命中上面的字面量前缀，但经 filepath.Clean 会归一化为 `\\?\GLOBALROOT\...`，故再判定一次
+	if isDeviceNamespacePath(cleaned) {
+		return deviceNamespacePath
+	}
 	if strings.HasPrefix(cleaned, `\\`) {
 		// 仅当主机名是本机且共享名就是盘符时才等价于本地卷，其余 UNC 路径一律按常规路径匹配黑名单
 		if drive, prefixLen := localAdminShareDrive(cleaned); drive != "" {
@@ -548,6 +566,36 @@ func localAdminShareDrive(p string) (drive string, prefixLen int) {
 
 func isASCIILetter(b byte) bool {
 	return 'a' <= b && b <= 'z' || 'A' <= b && b <= 'Z'
+}
+
+// hasAnyPrefixFold 判断 p 是否以任一前缀开头，忽略大小写。
+//
+// Windows 的路径与设备命名空间组件都不区分大小写，故前缀比较必须忽略大小写，否则 `GLOBALROOT` 的小写写法仍会漏过。
+func hasAnyPrefixFold(p string, prefixes ...string) bool {
+	for _, prefix := range prefixes {
+		if len(p) >= len(prefix) && strings.EqualFold(p[:len(prefix)], prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+// deviceNamespacePrefixes 是设备命名空间路径的起始形态：`GLOBALROOT\Device\...`、`\Device\...` 与卷 GUID 写法。
+var deviceNamespacePrefixes = []string{
+	`GLOBALROOT\Device\`,
+	`GLOBALROOT\Volume{`,
+	`Device\`,
+	`Volume{`,
+}
+
+// isDeviceNamespacePath 判断路径是否为设备命名空间形式（如 `GLOBALROOT\Device\HarddiskVolumeN\...`）。
+//
+// 这类路径无盘符等价形式，无法参与黑名单前缀匹配，故一律按敏感路径拒绝（fail-closed）。
+// 调用点传入的是剥离 `\\?\`、`\\.\` 之后的路径或 filepath.Clean 结果，故同时接受带前导反斜杠与命名空间前缀的写法。
+func isDeviceNamespacePath(p string) bool {
+	return hasAnyPrefixFold(p, deviceNamespacePrefixes...) ||
+		hasAnyPrefixFold(p, `\\?\GLOBALROOT\`, `\\.\GLOBALROOT\`, `\\?\Device\`, `\\.\Device\`,
+			`\\?\Volume{`, `\\.\Volume{`)
 }
 
 func isHTMLAssetUserPath(p string) bool {
@@ -602,6 +650,9 @@ func isSystemTempPath(lowerPath string) bool {
 // isSensitivePath 执行敏感性黑名单匹配，必要时解析工作空间路径，但不解析目标路径。
 func isSensitivePath(p string, htmlAsset bool) bool {
 	p = resolveNamespaceAlias(p)
+	if p == deviceNamespacePath {
+		return true
+	}
 	toCheckPathLower := filepath.Clean(strings.ToLower(p))
 	toCheckNameLower := filepath.Base(toCheckPathLower)
 	workspaceDir := WorkspaceDir

@@ -88,6 +88,21 @@ func TestIsSensitivePathNamespaceAlias(t *testing.T) {
 		{"扩展长度 UNC 本机管理共享的 conf 目录", `\\?\UNC\localhost\` + strings.ToUpper(drive[:1]) + "$" + confDir[len(drive):]},
 		{"UNC 本机管理共享的 conf 目录", `\\localhost\` + strings.ToUpper(drive[:1]) + "$" + confDir[len(drive):]},
 	}
+	// GLOBALROOT 与卷 GUID 指向同一位置，但只能由内核对象管理器解析，无法归一化为盘符路径
+	// （GHSA-gg3p-r4g8-vxg2），必须与常规路径一样按敏感路径拒绝，不能以任一种拼写放行
+	deviceNamespaces := []string{
+		`\\?\GLOBALROOT\Device\HarddiskVolume1`,
+		`\\.\GLOBALROOT\Device\HarddiskVolume1`,
+		`//?/GLOBALROOT/Device/HarddiskVolume1`,
+		`\\?\globalroot\device\harddiskvolume1`,
+		`\\.\GLOBALROOT\Device\HarddiskVolumeShadowCopy1`,
+		`\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy4`,
+		`\\?\Volume{01234567-89ab-cdef-0123-456789abcdef}`,
+		`\\.\Device\HarddiskVolume1`,
+	}
+	for _, ns := range deviceNamespaces {
+		variants = append(variants, pathVariant{ns, ns + confDir[len(drive):]})
+	}
 	if hostname, err := os.Hostname(); err == nil && "" != hostname {
 		variants = append(variants, pathVariant{"UNC 本机主机名管理共享的 conf 目录", `\\` + hostname + `\` + strings.ToUpper(drive[:1]) + "$" + confDir[len(drive):]})
 	} else {
@@ -105,6 +120,16 @@ func TestIsSensitivePathNamespaceAlias(t *testing.T) {
 	for _, p := range []string{`\\?\` + WorkspaceDir, `\\.\` + WorkspaceDir, `\\localhost\` + strings.ToUpper(drive[:1]) + "$" + WorkspaceDir[len(drive):]} {
 		if IsSensitivePath(p) {
 			t.Errorf("IsSensitivePath(%q) = true, want false (workspace root)", p)
+		}
+	}
+
+	// 设备命名空间无盘符等价形式，无法判断归属，故工作空间路径同样按 fail-closed 拒绝
+	for _, p := range []string{
+		`\\?\GLOBALROOT\Device\HarddiskVolume1` + WorkspaceDir[len(drive):],
+		`\\?\GLOBALROOT\Device\HarddiskVolume1` + filepath.Join(WorkspaceDir, "data", "assets", "image.png")[len(drive):],
+	} {
+		if !IsSensitivePath(p) {
+			t.Errorf("IsSensitivePath(%q) = false, want true (device namespace must fail closed)", p)
 		}
 	}
 }
@@ -131,6 +156,14 @@ func TestResolveNamespaceAlias(t *testing.T) {
 		{"远程共享保持 UNC 形式", `\\server\share\ws`, `\\server\share\ws`},
 		{"非盘符共享不映射", `\\localhost\data\ws`, `\\localhost\data\ws`},
 		{"普通路径不变", `D:\ws\conf`, `D:\ws\conf`},
+		{"GLOBALROOT 设备命名空间不可归一化", `\\?\GLOBALROOT\Device\HarddiskVolume3\ws\conf`, deviceNamespacePath},
+		{"设备命名空间 GLOBALROOT 不可归一化", `\\.\GLOBALROOT\Device\HarddiskVolume3\ws\conf`, deviceNamespacePath},
+		{"正斜杠 GLOBALROOT 不可归一化", `//?/GLOBALROOT/Device/HarddiskVolume3/ws/conf`, deviceNamespacePath},
+		{"小写 GLOBALROOT 不可归一化", `\\?\globalroot\device\harddiskvolume3\ws\conf`, deviceNamespacePath},
+		{"卷影副本不可归一化", `\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\ws\conf`, deviceNamespacePath},
+		{"设备对象路径不可归一化", `\\.\Device\HarddiskVolume3\ws\conf`, deviceNamespacePath},
+		{"卷 GUID 不可归一化", `\\?\Volume{01234567-89ab-cdef-0123-456789abcdef}\ws\conf`, deviceNamespacePath},
+		{"UNC 仍正常归一化", `\\?\UNC\localhost\D$\ws\conf`, `D:\ws\conf`},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			if got := resolveNamespaceAlias(test.in); !strings.EqualFold(got, test.want) {

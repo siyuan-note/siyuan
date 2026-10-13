@@ -118,12 +118,8 @@ export const mountDatabaseRowNavigation = (container: Element, data: IDatabaseRo
     toolbar.setAttribute("data-database-row-navigation", data.itemID);
     toolbar.innerHTML = ["previous", "next"].map((name, index) =>
         `<button type="button" data-row-navigation="${name}" disabled class="block__icon block__icon--show block__icon--tap ariaLabel" data-position="8south" aria-label="${escapeAttr(window.siyuan.languages[name])}"><svg><use xlink:href="#${index ? "iconDown" : "iconUp"}"></use></svg></button>`)
-        .join(inline ? "" : '<span class="fn__space"></span>');
-    if (inline) {
-        breadcrumb.insertBefore(toolbar, breadcrumb.querySelector(':scope > [data-type="readonly"]'));
-    } else {
-        container.prepend(toolbar);
-    }
+        .join(inline ? "" : '<span class="fn__space"></span>') + (inline ? '<span class="fn__space"></span>' : "");
+    (inline ? breadcrumb : container).prepend(toolbar);
     const buttons = Array.from(toolbar.querySelectorAll("button"));
     let busy = false;
     const update = async () => {

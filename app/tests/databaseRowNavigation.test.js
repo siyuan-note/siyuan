@@ -71,7 +71,7 @@ const runCases = async (sources, css, touch) => {
         const menu = breadcrumb.querySelector('[data-type="mobile-menu"]');
         const control = breadcrumb.querySelector('[data-type="more"]').getBoundingClientRect();
         check.ok(control.right <= window.innerWidth, JSON.stringify({control, width: window.innerWidth}));
-        check.equal(toolbar.nextElementSibling, breadcrumb.querySelector('[data-type="readonly"]'));
+        check.equal(toolbar, breadcrumb.firstElementChild);
         check.equal(menu.getBoundingClientRect().height, 24);
         for (const button of buttons) {
             check.equal(button.disabled, false);
@@ -79,11 +79,11 @@ const runCases = async (sources, css, touch) => {
             check.equal(rect.height, control.height);
             check.equal(rect.width, control.width);
             check.equal(rect.top, control.top);
-            check.ok(rect.left >= menu.getBoundingClientRect().right);
-            check.ok(rect.right <= breadcrumb.querySelector('[data-type="readonly"]').getBoundingClientRect().left);
+            check.ok(rect.right <= menu.getBoundingClientRect().left);
             check.ok(rect.right <= window.innerWidth);
             check.ok(button.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)), "navigation button must not be covered");
         }
+        const inlinePositions = buttons.map(button => button.getBoundingClientRect().left - breadcrumb.getBoundingClientRect().left);
         const spacer = parseFloat(getComputedStyle(editor.querySelector(".protyle-content"), "::before").height);
         check.equal(spacer, merged ? 42 : 90);
         check.ok(breadcrumb.getBoundingClientRect().bottom <= spacer);
@@ -149,6 +149,9 @@ const runCases = async (sources, css, touch) => {
         check.equal(standalone[0].height, control.height);
         check.equal(standalone[0].left - row.getBoundingClientRect().left, 8);
         check.equal(standalone[1].left - standalone[0].right, 8);
+        inlinePositions.forEach((left, index) => {
+            check.equal(left, standalone[index].left - row.getBoundingClientRect().left);
+        });
         context = {environment: "desktop", focus: "global", activeElement: document.body, activeTab: {element: tab}};
         check.equal(commands.getDatabaseRowNavigationButton(context, "nextDatabaseRow"), row.querySelector('[data-row-navigation="next"]'));
         tab.classList.add("fn__none");

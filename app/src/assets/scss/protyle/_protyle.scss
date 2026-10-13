@@ -315,6 +315,10 @@
     }
   }
 
+  &__navigation .block__icon:first-child {
+    margin-left: 0;
+  }
+
   &__space {
     min-width: 8px;
     transition: var(--b3-transition);

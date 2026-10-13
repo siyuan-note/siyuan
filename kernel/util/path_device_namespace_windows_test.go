@@ -86,6 +86,53 @@ func TestDeviceNamespaceAliasRejected(t *testing.T) {
 	f.Close()
 }
 
+// TestIsSensitivePathDosDeviceAliases 使用真实文件验证对象管理器别名不能绕过敏感路径检查。
+func TestIsSensitivePathDosDeviceAliases(t *testing.T) {
+	originalHome, originalWorkspace := HomeDir, WorkspaceDir
+	HomeDir, WorkspaceDir = t.TempDir(), t.TempDir()
+	t.Cleanup(func() { HomeDir, WorkspaceDir = originalHome, originalWorkspace })
+
+	drive := filepath.VolumeName(WorkspaceDir)
+	if len(drive) != 2 || drive[1] != ':' {
+		t.Skipf("workspace volume is not a drive letter: %s", drive)
+	}
+	confPath := filepath.Join(WorkspaceDir, "conf", "conf.json")
+	if err := os.MkdirAll(filepath.Dir(confPath), 0700); err != nil {
+		t.Fatal(err)
+	}
+	const fixture = "namespace alias fixture"
+	if err := os.WriteFile(confPath, []byte(fixture), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, prefix := range []string{`\\?\`, `\\.\`} {
+		for _, alias := range []string{`GLOBALROOT\GLOBAL??\`, `GLOBALROOT\??\`, `GLOBALROOT\DosDevices\`, `Global\`} {
+			p := prefix + alias + confPath
+			t.Run(prefix+alias, func(t *testing.T) {
+				// 先核实别名确实读取同一文件，避免仅凭构造出的路径判断修复是否有效。
+				data, err := os.ReadFile(p)
+				if err != nil {
+					t.Fatalf("read fixture through alias: %v", err)
+				}
+				if string(data) != fixture {
+					t.Fatalf("alias read %q, want %q", data, fixture)
+				}
+				for _, variant := range []string{p, strings.ToLower(p), strings.ReplaceAll(p, `\`, "/")} {
+					// 同时覆盖新建目标，不能依赖文件存在或符号链接解析才能识别命名空间。
+					for _, target := range []string{variant, filepath.Join(filepath.Dir(variant), "new", "conf.json")} {
+						if !IsSensitivePath(target) {
+							t.Errorf("IsSensitivePath(%q) = false, want true", target)
+						}
+						if !IsSensitiveHTMLAssetPath(target) {
+							t.Errorf("IsSensitiveHTMLAssetPath(%q) = false, want true", target)
+						}
+					}
+				}
+			})
+		}
+	}
+}
+
 // globalRootVolumePath 返回形如 `GLOBALROOT\Device\HarddiskVolume3\` 的卷设备路径前缀。
 func globalRootVolumePath(t *testing.T, drive string) string {
 	t.Helper()

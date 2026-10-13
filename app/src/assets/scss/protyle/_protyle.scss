@@ -1116,8 +1116,20 @@
   text-align: inherit;
 }
 
-.table__cell-rich > :is(.p, .h1, .h2, .h3, .h4, .h5, .h6)[data-table-cell-node],
-.table__cell-editor .protyle-wysiwyg > :is(.p, .h1, .h2, .h3, .h4, .h5, .h6) {
+.table__cell-rich > .p[data-table-cell-node],
+.table__cell-rich > .h1[data-table-cell-node],
+.table__cell-rich > .h2[data-table-cell-node],
+.table__cell-rich > .h3[data-table-cell-node],
+.table__cell-rich > .h4[data-table-cell-node],
+.table__cell-rich > .h5[data-table-cell-node],
+.table__cell-rich > .h6[data-table-cell-node],
+.table__cell-editor .protyle-wysiwyg > .p,
+.table__cell-editor .protyle-wysiwyg > .h1,
+.table__cell-editor .protyle-wysiwyg > .h2,
+.table__cell-editor .protyle-wysiwyg > .h3,
+.table__cell-editor .protyle-wysiwyg > .h4,
+.table__cell-editor .protyle-wysiwyg > .h5,
+.table__cell-editor .protyle-wysiwyg > .h6 {
   // 单元格已提供侧边留白，多段落和标题与普通文本使用相同的对齐边界。
   padding-inline: 0;
 }

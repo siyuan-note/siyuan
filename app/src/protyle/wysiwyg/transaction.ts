@@ -24,6 +24,7 @@ import {
 } from "./getBlock";
 import {Constants} from "../../constants";
 import {blockRender} from "../render/blockRender";
+import {renderBlockDirection, syncBlockDirection} from "../render/blockDirection";
 import {renderEmbedHeadings} from "../render/embedHeading";
 import {processRender} from "../util/processCode";
 import {renderImageDisplay} from "../render/imageDisplay";
@@ -1163,6 +1164,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                         }, 450);
                     }
                 });
+                syncBlockDirection(item);
                 // 已渲染数据库的布局类型随新内容一起更新，避免旧内容提前套用新布局样式。
                 if (data["data-av-type"] && !item.querySelector(".av__container")) {
                     item.setAttribute("data-av-type", data["data-av-type"]);
@@ -2787,6 +2789,7 @@ export const updateBatchTransaction = (nodeElements: Element[], protyle: IProtyl
             context: index === 0 ? focusContext : undefined,
         });
         cb(element as HTMLElement);
+        renderBlockDirection(element);
         element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         operations.push({
             action: "update",

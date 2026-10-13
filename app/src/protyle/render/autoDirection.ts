@@ -1,3 +1,5 @@
+import {clearBlockDirection, renderBlockDirection, syncBlockDirection} from "./blockDirection";
+
 const textSelector = '[data-type="NodeParagraph"] > div[contenteditable]:not(.protyle-attr), ' +
     '[data-type="NodeHeading"] > div[contenteditable]:not(.protyle-attr), p, h1, h2, h3, h4, h5, h6';
 const excludedSelector = 'pre, code, .render-node, [data-type="NodeCodeBlock"], ' +
@@ -41,6 +43,7 @@ export const destroyAutoDirection = (root: HTMLElement) => {
 /** 自动方向用于正文和各列表项的布局，不持久化推导出的方向。 */
 export const setAutoDirection = (root: HTMLElement, enabled: boolean) => {
     destroyAutoDirection(root);
+    renderBlockDirection(root);
     const managed = new Set<HTMLElement>();
     const applyDirection = (element: HTMLElement, direction: string) => {
         managed.add(element);
@@ -148,13 +151,18 @@ export const setAutoDirection = (root: HTMLElement, enabled: boolean) => {
                     scopes.add(record.target.parentElement);
                 }
             } else if (record.type === "attributes") {
-                scopes.add(record.target as HTMLElement);
+                const element = record.target as HTMLElement;
+                syncBlockDirection(element);
+                if (enabled) {
+                    scopes.add(element);
+                }
             } else {
                 if ((record.target as HTMLElement).closest(listSelector)) {
                     scopes.add(record.target as HTMLElement);
                 }
                 record.addedNodes.forEach(node => {
                     if (node.nodeType === 1) {
+                        renderBlockDirection(node as Element);
                         scopes.add(node as HTMLElement);
                     }
                 });
@@ -174,11 +182,14 @@ export const setAutoDirection = (root: HTMLElement, enabled: boolean) => {
         });
         scopes.forEach(update);
     });
-    observer.observe(root, {subtree: true, childList: true, ...(enabled ? {
-        characterData: true, attributes: true, attributeFilter: ["style", "dir", "contenteditable", "data-type"],
-    } : {})});
+    observer.observe(root, {
+        subtree: true, childList: true, attributes: true, characterData: enabled,
+        attributeFilter: ["style", "data-node-id", "data-table-cell-node",
+            ...(enabled ? ["dir", "contenteditable", "data-type"] : [])],
+    });
     disposers.set(root, () => {
         observer.disconnect();
         managed.forEach(clearDirection);
+        clearBlockDirection(root);
     });
 };

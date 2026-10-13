@@ -17,6 +17,7 @@ import {renderLongTextRuns} from "./longTextWrap";
 import {renderImageActions} from "../render/imageActions";
 import {renderImageDisplay} from "../render/imageDisplay";
 import {renderIFrameResize} from "../render/iframeResize";
+import {renderBlockDirection} from "../render/blockDirection";
 
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
@@ -66,6 +67,7 @@ const RENDER_MAP: Record<string, (previewPanel: Element) => void> = {
 };
 
 export const processRender = (previewPanel: Element) => {
+    renderBlockDirection(previewPanel);
     renderImageActions(previewPanel);
     renderImageDisplay(previewPanel);
     normalizeInlineElementBoundaries(previewPanel);

@@ -40,7 +40,7 @@ const optionHTML = (value: string, label: string, selected: string) =>
     `<option value="${escapeAttr(value)}"${value === selected ? " selected" : ""}>${escapeHtml(label)}</option>`;
 
 const iconButton = (action: string, icon: string, label: string, warning = false) =>
-    `<svg class="b3-menu__action b3-menu__action--show${warning ? " b3-menu__action--warning" : ""} ariaLabel" data-action="${action}" role="button" tabindex="0" data-position="north" aria-label="${escapeAttr(label)}"><use xlink:href="#${icon}"></use></svg>`;
+    `<svg class="b3-menu__action b3-menu__action--show${warning ? " b3-menu__action--warning" : ""} fn__pointer ariaLabel" data-action="${action}" role="button" tabindex="0" data-position="north" aria-label="${escapeAttr(label)}"><use xlink:href="#${icon}"></use></svg>`;
 
 export const openAutomationMenu = async (options: {
     protyle: IProtyle,

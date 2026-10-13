@@ -22,6 +22,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = json.loads(Path(__file__).with_name("ocr-assets.json").read_text(encoding="utf-8"))
 STAGE = ROOT / "app/stage/ocr"
+CACHE = ROOT / ".cache/ocr"
 RUNTIME_STAMP = "onnxruntime-files.json"
 
 
@@ -338,7 +339,7 @@ def prepare_runtime(target, build_worker, prerequisites=None):
     if runtime_is_verified(entry, directory):
         print(f"Reusing verified OCR runtime: {target}")
     else:
-        cache = Path(tempfile.gettempdir()) / "siyuan-ocr-assets" / entry["url"].rsplit("/", 1)[1]
+        cache = CACHE / entry["url"].rsplit("/", 1)[1]
         download(entry, cache)
         record_runtime(entry, directory, extract_runtime(entry, cache, directory))
     # 本地依赖每次重新准备，复用归档产物不跳过 CRT 校验或工作进程构建。

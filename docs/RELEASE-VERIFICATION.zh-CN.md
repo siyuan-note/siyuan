@@ -106,6 +106,7 @@ WSL 同步安排在环境检查和签名证书检查之前。如果 SSH 需要�
 ### 3. 准备构建环境
 
 - 准备 Go、Node、pnpm、Windows 双架构编译器、gomobile、Android SDK/NDK、DevEco Studio 和 7-Zip；Appx 还需 `electron-windows-store`
+- OCR 运行库归档缓存位于项目的 `.cache/ocr/`；手动下载时保留原文件名，不解压，脚本校验摘要后复用
 - 停止正在运行的前端开发构建
 - 插好 YubiKey，签名时按系统提示输入 PIN
 - 确认 Android、鸿蒙签名配置可用

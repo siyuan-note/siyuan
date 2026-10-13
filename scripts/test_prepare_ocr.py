@@ -255,7 +255,7 @@ class ResourceTests(unittest.TestCase):
     def extract(self, archive, target, library):
         entry = self.entry(archive)
         entry["library"] = library
-        with patch.object(prepare, "STAGE", self.root / "stage"), patch.object(prepare, "MANIFEST", {"runtime": {target: entry}}), patch.object(prepare.tempfile, "gettempdir", return_value=str(self.root / "cache")):
+        with patch.object(prepare, "STAGE", self.root / "stage"), patch.object(prepare, "MANIFEST", {"runtime": {target: entry}}), patch.object(prepare, "CACHE", self.root / "cache"):
             prepare.prepare_runtime(target, False)
 
     def runtime_archive(self):
@@ -272,10 +272,10 @@ class ResourceTests(unittest.TestCase):
         entry = {**self.entry(archive), "library": "libonnxruntime.so"}
         with patch.object(prepare, "STAGE", self.root / "stage"), \
                 patch.object(prepare, "MANIFEST", {"runtime": {"linux-amd64": entry}}), \
-                patch.object(prepare.tempfile, "gettempdir", return_value=str(self.root / "cache")):
+                patch.object(prepare, "CACHE", self.root / "cache"):
             prepare.prepare_runtime("linux-amd64", False)
             archive.unlink()
-            (self.root / "cache/siyuan-ocr-assets/runtime.tgz").unlink()
+            (self.root / "cache/runtime.tgz").unlink()
             with patch.object(prepare, "download") as download:
                 prepare.prepare_runtime("linux-amd64", False)
                 download.assert_not_called()
@@ -323,7 +323,7 @@ class ResourceTests(unittest.TestCase):
         entry = {**self.entry(archive), "library": "libonnxruntime.so"}
         with patch.object(prepare, "STAGE", self.root / "stage"), \
                 patch.object(prepare, "MANIFEST", {"runtime": {"linux-amd64": entry}}), \
-                patch.object(prepare.tempfile, "gettempdir", return_value=str(self.root / "cache")):
+                patch.object(prepare, "CACHE", self.root / "cache"):
             prepare.prepare_runtime("linux-amd64", False)
             library = self.root / "stage/runtime/linux-amd64/libonnxruntime.so"
             library.write_bytes(b"damaged")
@@ -339,7 +339,7 @@ class ResourceTests(unittest.TestCase):
         with patch.dict(os.environ, {"SIYUAN_OCR_VC_REDIST_DIR": str(source)}), \
                 patch.object(prepare, "STAGE", self.root / "stage"), \
                 patch.object(prepare, "MANIFEST", {"runtime": {"windows-amd64": entry}}), \
-                patch.object(prepare.tempfile, "gettempdir", return_value=str(self.root / "cache")):
+                patch.object(prepare, "CACHE", self.root / "cache"):
             prepare.prepare_runtime("windows-amd64", False)
             dependency = self.root / "stage/runtime/windows-amd64/msvcp140.dll"
             dependency.unlink()
@@ -353,7 +353,7 @@ class ResourceTests(unittest.TestCase):
         entry = {**self.entry(archive), "library": "libonnxruntime.so"}
         with patch.object(prepare, "STAGE", self.root / "stage"), \
                 patch.object(prepare, "MANIFEST", {"runtime": {"linux-amd64": entry}}), \
-                patch.object(prepare.tempfile, "gettempdir", return_value=str(self.root / "cache")):
+                patch.object(prepare, "CACHE", self.root / "cache"):
             prepare.prepare_runtime("linux-amd64", False)
             with patch.object(prepare, "download") as download, patch.object(prepare.subprocess, "run") as build:
                 prepare.prepare_runtime("linux-amd64", True, {"CC": "gcc"})

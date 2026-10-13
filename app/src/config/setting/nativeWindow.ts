@@ -15,6 +15,7 @@ import {getDockEntryOrderSnapshot} from "../entryVisibility/dockOrder";
 import {getEditorToolbarCatalogSnapshot} from "../../protyle/toolbar/catalogSnapshot";
 import {hasNativeSettingTasks} from "./taskBlocker";
 import {openBazaarPath} from "../bazaar/openPath";
+import {acceptSettingInterfaceRevision, watchSettingInterface} from "./interface";
 import type {App} from "../../index";
 import type {ISettingsWindowHost} from "./windowContext";
 import type {TSettingTab} from "./tabs";
@@ -57,6 +58,7 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
                                          plugin?: ISettingsWindowHost["plugin"], key = "builtin") => {
     /// #if !BROWSER
     if (!ownerActive) return;
+    if (key === "builtin") watchSettingInterface();
     openSequence++;
     if (!listening) {
         listening = true;
@@ -179,7 +181,8 @@ export const openNativeSettings = async (app: App, command: ISettingsCommand = {
             dispose(false, false);
             return;
         }
-        if (!isActive() || (plugin && !plugin.isOpen())) {
+        if (!isActive() || (plugin && !plugin.isOpen()) ||
+            (key === "builtin" && !acceptSettingInterfaceRevision(prepared.revision))) {
             try {
                 ipcRenderer.send("siyuan-settings-close", {key, token});
             } finally {

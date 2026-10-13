@@ -142,6 +142,8 @@ const settingsWindowPolicy = createSettingsWindows({
     screen,
     icon: path.join(appDir, "stage", "icon-large.png"),
     getTarget: id => getWindowKernelTarget(id),
+    getWindows: origin => BrowserWindow.getAllWindows().filter(win =>
+        initializedWindowIds.has(win.webContents.id) && windowKernelTargets.get(win.webContents.id)?.origin === origin),
     show: win => showWindow(win),
     log: message => writeLog(message),
     initialize: (win, target) => {

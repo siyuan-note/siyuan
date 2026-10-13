@@ -55,8 +55,10 @@ const setup = ({mobile = false, browser = false, settingsWindow = false, native 
         "./tabs/workspaceStorage": {unmountWorkspaceStorage() {}},
         "./setting/nativeWindow": {
             openNativeSettings: async (...args) => calls.push(["native", ...args]),
-            closeNativeSettings: key => calls.push(["closeNative", key]),
         },
+        "./setting/interface": {prepareSettingDialog: () => calls.push(["prepareDialog"]),
+            closeSettingDialog: () => window.siyuan.dialogs.find(item =>
+                item.element.querySelector(".config__tab-container"))?.destroy()},
         "./setting/windowContext": {isSettingsWindow: () => settingsWindow},
         "./setting/windowDialog": {fitSettingsWindowDialog: () => calls.push(["fit"])},
     };
@@ -76,13 +78,13 @@ const setup = ({mobile = false, browser = false, settingsWindow = false, native 
 test("opening a settings dialog closes the builtin native window before mounting", () => {
     const {api, app, calls} = setup();
     api.openSetting(app, "app");
-    assert.deepEqual(calls.slice(0, 2), [["closeNative", "builtin"], ["dialog"]]);
+    assert.deepEqual(calls.slice(0, 2), [["prepareDialog"], ["dialog"]]);
 });
 
 test("the plugin settings API also closes the builtin native window", () => {
     const {api, app, calls} = setup({native: true});
     api.openPluginSetting(app);
-    assert.deepEqual(calls.slice(0, 2), [["closeNative", "builtin"], ["dialog"]]);
+    assert.deepEqual(calls.slice(0, 2), [["prepareDialog"], ["dialog"]]);
     assert.equal(calls.some(call => call[0] === "native"), false);
 });
 
@@ -112,7 +114,7 @@ test("settings window boot and tab reuse do not close the current native window"
     const {api, app, calls} = setup({settingsWindow: true, native: true});
     const dialog = api.openSettingDialog(app);
     assert.equal(api.openSetting(app, "ai", {aiProvider: "chatgpt"}), dialog);
-    assert.equal(calls.some(call => ["closeNative", "destroy", "closeSelf", "native"].includes(call[0])), false);
+    assert.equal(calls.some(call => ["prepareDialog", "destroy", "closeSelf", "native"].includes(call[0])), false);
     assert.equal(calls.filter(call => call[0] === "dialog").length, 1);
     assert.equal(calls.filter(call => call[0] === "fit").length, 1);
     assert.deepEqual(calls.slice(-2), [["tab", "ai"], ["chatgpt"]]);
@@ -132,7 +134,7 @@ for (const mobile of [false, true]) {
     test(`browser and mobile settings retain their opening paths (mobile=${mobile})`, () => {
         const {api, app, calls} = setup({mobile, browser: true, native: true});
         api.openSetting(app, "app");
-        assert.equal(calls.some(call => call[0] === "native" || call[0] === "closeNative"), false);
+        assert.equal(calls.some(call => call[0] === "native" || call[0] === "prepareDialog"), false);
         assert.equal(calls[0][0], mobile ? "mobile" : "dialog");
     });
 }

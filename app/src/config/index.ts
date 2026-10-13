@@ -25,20 +25,17 @@ import {unmountOCRTab} from "./ocr";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {unmountWorkspaceStorage} from "./tabs/workspaceStorage";
 /// #if !MOBILE
-import {closeNativeSettings, openNativeSettings} from "./setting/nativeWindow";
+import {openNativeSettings} from "./setting/nativeWindow";
+import {closeSettingDialog, prepareSettingDialog} from "./setting/interface";
 import {isSettingsWindow} from "./setting/windowContext";
 import {fitSettingsWindowDialog} from "./setting/windowDialog";
 /// #endif
 
 /// #if !MOBILE
-const closeSettingDialog = () => {
-    window.siyuan.dialogs.find((item) => item.element.querySelector(".config__tab-container"))?.destroy();
-};
-
 export const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
     /// #if !BROWSER
     if (!isSettingsWindow()) {
-        closeNativeSettings("builtin");
+        prepareSettingDialog();
     }
     /// #endif
     closeSettingDialog();

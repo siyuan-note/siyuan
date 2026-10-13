@@ -23,6 +23,7 @@ const setup = (platform = "win32") => {
             if (name === "siyuan-settings-ready") ready = callback;
         }},
         screen: {}, getTarget: id => [1, 2].includes(id) ? target : undefined,
+        getWindows: () => [{webContents: owner, isDestroyed: () => false}],
         initialize: (...args) => initialized.push(args), show: win => shown.push(win), log() {},
     });
     const event = {sender: owner, senderFrame: owner.mainFrame};

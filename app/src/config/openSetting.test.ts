@@ -26,6 +26,7 @@ const fixture = (browser = false, mobile = false) => {
         exports: entry, isSettingsWindow: () => native,
         isBazaarAvailable: () => true, getHostCapabilities: () => ({documentImportExport: true}),
         openNativeSettings: (...args: unknown[]) => calls.push(["native", ...args]),
+        closeSettingDialog() {},
         openSettingDialog: (...args: unknown[]) => { calls.push(["dialog", ...args]); return dialog; },
         openMobileSetting: (...args: unknown[]) => calls.push(["mobile", ...args]),
         openChatGPTProvider: () => calls.push(["chatgpt"]),

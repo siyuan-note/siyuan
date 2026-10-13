@@ -292,3 +292,136 @@ test("anchored input keeps a manually resized size while it follows the anchor",
     assert.equal(fit.input.style.top, "500px");
     fit.dispose();
 });
+
+test("resized cell input stays aligned while constrained and restores its requested dimensions", () => {
+    const f = setup();
+    f.flush();
+    assert.ok(f.observers[0].targets.includes(f.input));
+    f.input.style.width = "300px";
+    f.input.style.height = "120px";
+    f.observers[0].notify();
+    f.flush();
+    f.content.rect = rect(16, 90, 250, 450);
+    f.observers[0].notify();
+    f.flush();
+    assert.equal(f.input.style.left, "40px");
+    assert.equal(f.input.style.top, "500px");
+    assert.equal(f.input.style.width, "226px");
+    assert.equal(f.input.style.height, "40px");
+    // 自身尺寸变化产生的后续通知不能覆盖用户设置。
+    f.observers[0].notify();
+    f.flush();
+    f.content.rect = rect(16, 90, 328, 710);
+    f.observers[0].notify();
+    f.flush();
+    assert.equal(f.input.style.width, "300px");
+    assert.equal(f.input.style.height, "120px");
+    assert.equal(f.input.value, "draft");
+    f.dispose();
+});
+
+test("resizing one constrained dimension preserves the requested size on the other axis", () => {
+    const f = setup();
+    f.input.style.width = "300px";
+    f.input.style.height = "120px";
+    f.content.rect = rect(16, 90, 250, 450);
+    f.observers[0].notify();
+    f.flush();
+    f.input.style.width = "180px";
+    f.observers[0].notify();
+    f.flush();
+    f.content.rect = rect(16, 90, 328, 710);
+    f.observers[0].notify();
+    f.flush();
+    assert.equal(f.input.style.width, "180px");
+    assert.equal(f.input.style.height, "120px");
+    f.content.rect = rect(16, 90, 160, 450);
+    f.observers[0].notify();
+    f.flush();
+    f.input.style.height = "30px";
+    f.observers[0].notify();
+    f.flush();
+    f.content.rect = rect(16, 90, 328, 710);
+    f.observers[0].notify();
+    f.flush();
+    assert.equal(f.input.style.width, "180px");
+    assert.equal(f.input.style.height, "30px");
+    f.dispose();
+});
+
+test("cell input respects the mobile visual viewport even when the layout viewport stays large", () => {
+    const f = setup();
+    f.input.style.width = "300px";
+    f.input.style.height = "120px";
+    f.anchor.rect = rect(40, 280, 220, 36);
+    Object.assign(f.window.visualViewport, {offsetLeft: 20, offsetTop: 100, width: 240, height: 220});
+    f.mask.rect = rect(8, 120, 360, 800);
+    f.window.visualViewport.dispatchEvent(new Event("resize"));
+    f.flush();
+    assert.equal(f.input.style.left, "32px");
+    assert.equal(f.input.style.top, "160px");
+    assert.equal(f.input.style.width, "220px");
+    assert.equal(f.input.style.height, "40px");
+    Object.assign(f.window.visualViewport, {offsetLeft: 0, offsetTop: 0, width: 360, height: 800});
+    f.window.visualViewport.dispatchEvent(new Event("resize"));
+    f.flush();
+    assert.equal(f.input.style.width, "300px");
+    assert.equal(f.input.style.height, "120px");
+    f.dispose();
+});
+
+test("resized input hides with an offscreen cell and restores its size when the cell returns", () => {
+    const f = setup();
+    f.input.style.width = "300px";
+    f.input.style.height = "120px";
+    for (const position of [rect(40, 40, 220, 36), rect(40, 810, 220, 36),
+        rect(-220, 500, 220, 36), rect(350, 500, 220, 36)]) {
+        f.anchor.rect = position;
+        f.window.dispatchEvent(new Event("scroll"));
+        f.flush();
+        assert.equal(f.input.style.visibility, "hidden");
+    }
+    f.anchor.rect = rect(40, 500, 220, 36);
+    f.window.dispatchEvent(new Event("scroll"));
+    f.flush();
+    assert.equal(f.input.style.width, "300px");
+    assert.equal(f.input.style.height, "120px");
+    assert.equal(f.input.style.visibility, "");
+    f.dispose();
+});
+
+test("a partially visible cell keeps its input within the editor without changing automatic sizing", () => {
+    const f = setup();
+    f.anchor.rect = rect(240, 70, 220, 36);
+    f.window.dispatchEvent(new Event("scroll"));
+    f.flush();
+    assert.equal(f.input.style.left, "240px");
+    assert.equal(f.input.style.top, "90px");
+    assert.equal(f.input.style.width, "104px");
+    assert.equal(f.input.style.height, "16px");
+    f.anchor.rect = rect(40, 500, 240, 40);
+    f.window.dispatchEvent(new Event("scroll"));
+    f.flush();
+    assert.equal(f.input.style.width, "240px");
+    assert.equal(f.input.style.height, "40px");
+    f.dispose();
+});
+
+test("floating inputs also restore manually requested dimensions after a viewport constraint", () => {
+    const f = setup(true);
+    f.input.style.width = "300px";
+    f.input.style.height = "200px";
+    Object.assign(f.window.visualViewport, {width: 180, height: 150});
+    f.window.visualViewport.dispatchEvent(new Event("resize"));
+    f.flush();
+    assert.equal(f.input.style.width, "164px");
+    assert.equal(f.input.style.height, "134px");
+    assert.equal(f.input.style.left, "8px");
+    assert.equal(f.input.style.top, "8px");
+    Object.assign(f.window.visualViewport, {width: 360, height: 800});
+    f.window.visualViewport.dispatchEvent(new Event("resize"));
+    f.flush();
+    assert.equal(f.input.style.width, "300px");
+    assert.equal(f.input.style.height, "200px");
+    f.dispose();
+});

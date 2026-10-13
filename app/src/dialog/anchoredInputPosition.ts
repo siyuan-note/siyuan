@@ -4,15 +4,15 @@ export const bindAnchoredInputPosition = (inputElement: HTMLElement, getAnchor: 
     let frame = 0;
     let disposed = false;
     let observedAnchor: HTMLElement;
-    // 记录最近一次写入的尺寸；内联尺寸与之不同说明用户拖拽调整过大小，此后仅更新位置
+    // 分别记录用户设置的尺寸和当前显示尺寸，空间恢复后还原用户设置。
     let appliedWidth = "";
     let appliedHeight = "";
-    let keepSize = false;
+    let preferredSize: {width: number, height: number};
     const applySize = (width: number, height: number) => {
-        appliedWidth = `${width}px`;
-        appliedHeight = `${height}px`;
-        inputElement.style.width = appliedWidth;
-        inputElement.style.height = appliedHeight;
+        inputElement.style.width = `${width}px`;
+        inputElement.style.height = `${height}px`;
+        appliedWidth = inputElement.style.width;
+        appliedHeight = inputElement.style.height;
     };
     const update = () => {
         frame = 0;
@@ -32,28 +32,34 @@ export const bindAnchoredInputPosition = (inputElement: HTMLElement, getAnchor: 
             resizeObserver?.observe(anchorElement);
             observedAnchor = anchorElement;
         }
-        if (!keepSize && appliedWidth &&
+        if (appliedWidth &&
             (inputElement.style.width !== appliedWidth || inputElement.style.height !== appliedHeight)) {
-            keepSize = true;
+            // 仅更新用户实际拖动的轴，避免将另一轴临时受限的尺寸记作用户设置。
+            preferredSize = {
+                width: inputElement.style.width !== appliedWidth ? parseFloat(inputElement.style.width) :
+                    preferredSize?.width ?? parseFloat(appliedWidth),
+                height: inputElement.style.height !== appliedHeight ? parseFloat(inputElement.style.height) :
+                    preferredSize?.height ?? parseFloat(appliedHeight),
+            };
         }
         const cellRect = anchorElement.getBoundingClientRect();
         const maskRect = maskElement.getBoundingClientRect();
         const contentRect = contentElement?.getBoundingClientRect();
+        const viewport = window.visualViewport;
+        const viewportLeft = viewport?.offsetLeft || 0;
+        const viewportTop = viewport?.offsetTop || 0;
+        const viewportWidth = viewport?.width ?? window.innerWidth;
+        const viewportHeight = viewport?.height ?? window.innerHeight;
         if (fitContent) {
-            const viewport = window.visualViewport;
-            const viewportLeft = viewport?.offsetLeft || 0;
-            const viewportTop = viewport?.offsetTop || 0;
-            const viewportWidth = viewport?.width || window.innerWidth;
-            const viewportHeight = viewport?.height || window.innerHeight;
-            let width = parseFloat(inputElement.style.width);
-            let height = parseFloat(inputElement.style.height);
-            if (!keepSize) {
-                width = Math.min(Math.max(cellRect.width, 240), Math.max(0, viewportWidth - 16));
+            const width = Math.min(preferredSize?.width ?? Math.max(cellRect.width, 240), Math.max(0, viewportWidth - 16));
+            let height = preferredSize?.height;
+            if (!preferredSize) {
                 inputElement.style.width = `${width}px`;
                 inputElement.style.height = "auto";
-                height = Math.min(Math.max(cellRect.height, inputElement.scrollHeight), Math.max(0, viewportHeight - 16));
-                applySize(width, height);
+                height = Math.max(cellRect.height, inputElement.scrollHeight);
             }
+            height = Math.min(height, Math.max(0, viewportHeight - 16));
+            applySize(width, height);
             const left = Math.max(viewportLeft + 8, Math.min(cellRect.left, viewportLeft + viewportWidth - width - 8));
             const top = Math.max(viewportTop + 8, Math.min(cellRect.top, viewportTop + viewportHeight - height - 8));
             inputElement.style.left = `${left - maskRect.left}px`;
@@ -61,19 +67,20 @@ export const bindAnchoredInputPosition = (inputElement: HTMLElement, getAnchor: 
             inputElement.style.visibility = "";
             return;
         }
-        const width = keepSize ? parseFloat(inputElement.style.width) :
-            contentRect ? Math.min(Math.max(cellRect.width, 25), contentRect.width) : Math.max(cellRect.width, 25);
-        const left = contentRect && (cellRect.left < contentRect.left || cellRect.left + width > contentRect.right) ?
-            contentRect.left : cellRect.left;
-        const height = contentRect ? Math.max(0, Math.min(cellRect.bottom, contentRect.bottom) - cellRect.top) :
-            cellRect.height;
+        const visibleLeft = Math.max(viewportLeft, contentRect?.left ?? viewportLeft);
+        const visibleTop = Math.max(viewportTop, contentRect?.top ?? viewportTop);
+        const visibleRight = Math.min(viewportLeft + viewportWidth, contentRect?.right ?? viewportLeft + viewportWidth);
+        const visibleBottom = Math.min(viewportTop + viewportHeight, contentRect?.bottom ?? viewportTop + viewportHeight);
+        const left = Math.max(cellRect.left, visibleLeft);
+        const top = Math.max(cellRect.top, visibleTop);
+        const width = Math.min(preferredSize?.width ?? Math.max(cellRect.width, 25), Math.max(0, visibleRight - left));
+        const height = Math.max(0, Math.min(preferredSize?.height ?? cellRect.bottom - top, visibleBottom - top));
         // 输入框位于独立遮罩中，使用当前单元格坐标并扣除遮罩原点，保持滚动和视口变化后的对齐。
-        inputElement.style.top = `${cellRect.top - maskRect.top}px`;
+        inputElement.style.top = `${top - maskRect.top}px`;
         inputElement.style.left = `${left - maskRect.left}px`;
-        if (!keepSize) {
-            applySize(width, height);
-        }
-        inputElement.style.visibility = height > 0 ? "" : "hidden";
+        applySize(width, height);
+        inputElement.style.visibility = width > 0 && height > 0 && cellRect.right > visibleLeft &&
+            cellRect.bottom > visibleTop ? "" : "hidden";
     };
     const schedule = () => {
         if (!disposed && !frame) {
@@ -82,6 +89,7 @@ export const bindAnchoredInputPosition = (inputElement: HTMLElement, getAnchor: 
     };
     const viewport = window.visualViewport;
     const resizeObserver = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(schedule);
+    resizeObserver?.observe(inputElement);
     if (contentElement) {
         resizeObserver?.observe(contentElement);
     }

@@ -575,10 +575,12 @@ class Builder:
         env["PATH"] = str(self.args.deveco / "tools/node") + os.pathsep + env.get("PATH", "")
         run([self.args.deveco / "tools/ohpm/bin/ohpm.bat", "install", "--all"], self.args.harmony_dir, env)
         command = [self.args.deveco / "tools/node/node.exe", self.args.deveco / "tools/hvigor/bin/hvigorw.js",
-                   "--mode", "project", "-p", "product=default", "-p", "buildMode=release", "--no-daemon"]
-        run(command + ["clean"], self.args.harmony_dir, env)
+                   "-p", "product=default", "-p", "buildMode=release", "--no-daemon"]
+        # 模块级清理移除 CMake 中间库，项目级清理移除 APP 输出。
+        run(command + ["--mode", "module", "-p", "module=entry@default", "clean"], self.args.harmony_dir, env)
+        run(command + ["--mode", "project", "clean"], self.args.harmony_dir, env)
         started = time.time()
-        run(command + ["assembleApp"], self.args.harmony_dir, env)
+        run(command + ["--mode", "project", "assembleApp"], self.args.harmony_dir, env)
         app = self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-signed.app"
         self.collect([app], "鸿蒙", started)
 

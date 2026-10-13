@@ -218,6 +218,8 @@ class BuildTests(unittest.TestCase):
         remote = self.root / "wsl"
         self.builder.wsl_root = remote
         assets = self.write(self.root / "app.zip", b"current assets")
+        stale_kernel = self.write(self.args.harmony_dir / "entry/build/default/intermediates/cmake/libkernel.so",
+                                  b"stale kernel")
 
         def fake_wsl(command, directory=None, capture=False):
             architecture = "arm64" if command[-1] == "build.sh" else "amd64"
@@ -226,7 +228,11 @@ class BuildTests(unittest.TestCase):
             self.write(remote / "kernel/harmony/lan_sync_bridge.h", b"bridge")
 
         def fake_run(command, cwd, env=None, capture=False):
+            if command[-1] == "clean" and "module=entry@default" in command:
+                self.assertEqual(command[command.index("--mode") + 1], "module")
+                stale_kernel.unlink()
             if command[-1] == "assembleApp":
+                self.assertFalse(stale_kernel.exists())
                 self.assertIn("buildMode=release", command)
                 self.write(self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-unsigned.app")
                 self.write(self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-signed.app", b"signed app")

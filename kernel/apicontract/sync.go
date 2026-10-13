@@ -28,6 +28,17 @@ type ClearSyncProviderConfigRequest struct {
 	Provider int `json:"provider"`
 }
 
+type SyncProviderConfigRulesRequest struct {
+	Provider int    `json:"provider"`
+	Endpoint string `json:"endpoint" api:"optional"`
+	Bucket   string `json:"bucket" api:"optional"`
+}
+
+type SyncProviderConfigRulesData struct {
+	RequiredFields        []string `json:"requiredFields" api:"nonnullable"`
+	EndpointBucketWarning bool     `json:"endpointBucketWarning"`
+}
+
 type ClearSyncProviderConfigData struct {
 	Enabled bool        `json:"enabled"`
 	S3      *SyncS3     `json:"s3,omitempty"`

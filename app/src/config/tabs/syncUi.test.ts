@@ -14,7 +14,7 @@ const code = transpileModule(source + "\nexports.open = openSyncProviderConfigDi
     compilerOptions: {module: ModuleKind.CommonJS},
 }).outputText;
 
-const setup = (provider = 2, mobile = false) => {
+const setup = (provider = 2, mobile = false, manualRules = false) => {
     const s3 = {endpoint: "storage.example.com", accessKey: "key", secretKey: "secret", bucket: "notes", region: "auto",
         timeout: 30, pathStyle: true, skipTlsVerify: false, concurrentReqs: 4};
     const webdav = {endpoint: "dav.example.com", username: "user", password: "password", timeout: 30, skipTlsVerify: false, concurrentReqs: 4};
@@ -26,7 +26,7 @@ const setup = (provider = 2, mobile = false) => {
     const inputs = Object.fromEntries(Object.entries(template).map(([key, value]) => [key, {
         value: "", type: typeof value === "number" ? "number" : "text", disabled: false,
         attributes: {} as Record<string, string>, focused: false, validationMessage: "Invalid number",
-        focus() { this.focused = true; },
+        focus() { if (!this.disabled) this.focused = true; },
         setAttribute(name: string, value: string) { this.attributes[name] = value; },
         getAttribute(name: string) { return this.attributes[name]; },
         checkValidity() { return this.value.trim() !== "" && Number.isInteger(Number(this.value)) && Number(this.value) > 0; },
@@ -58,22 +58,27 @@ const setup = (provider = 2, mobile = false) => {
     const enabled = {checked: true};
     const replacement = {querySelector: (selector: string) => selector === '[id="sync.enabled"]' ? enabled : null};
     const requests: {url: string, data: any, resolve: (response: any) => void, reject: () => void}[] = [];
+    const ruleRequests: typeof requests = [];
+    const rules = {requiredFields: provider === 2 ? ["endpoint", "accessKey", "secretKey", "bucket", "region"] : ["endpoint"], endpointBucketWarning: false};
+    let rulesTimer: (() => void) | undefined;
     const confirmations: {confirm: () => void, cancel: () => void}[] = [];
     let closed = 0;
     let dialog: {destroy: () => void};
-    let dialogOptions: {width: string, content: string};
+    let dialogOptions: {width: string, content: string, destroyCallback: () => void};
     const exports = {} as {open: (root: unknown) => void};
     runInNewContext(code, {
         URL, CSS: {escape: (value: string) => value}, exports,
+        setTimeout: (callback: () => void) => {rulesTimer = callback; return 1;},
+        clearTimeout: () => {rulesTimer = undefined;},
         document: {querySelector: () => ({closest: () => replacement})},
         window: {siyuan: {config, languages: {syncConfigNotSaved: "Required fields missing", syncConfigSaveFailed: "Not confirmed",
-            _kernel: {142: "Input cannot be empty"}}}},
+            loadingError: "Loading failed", _kernel: {142: "Input cannot be empty"}}}},
         require(name: string) {
             if (name === "../../dialog") {
                 return {Dialog: class {
                     element = element;
                     constructor(options: any) {dialog = {destroy: () => this.destroy()}; dialogOptions = options;}
-                    destroy() {closed++;}
+                    destroy() {closed++; dialogOptions.destroyCallback();}
                 }};
             }
             if (name === "../../dialog/confirmDialog") {
@@ -94,7 +99,14 @@ const setup = (provider = 2, mobile = false) => {
                 }}};
             }
             if (name === "../../util/fetch") {
-                return {fetchSyncPost: (url: string, data: any) => new Promise((resolve, reject) => requests.push({url, data, resolve, reject}))};
+                return {fetchSyncPost: (url: string, data: any) => new Promise((resolve, reject) => {
+                    if (url === "/api/sync/getSyncProviderConfigRules") {
+                        ruleRequests.push({url, data, resolve, reject});
+                        if (!manualRules) resolve({code: 0, data: {...rules}});
+                    } else {
+                        requests.push({url, data, resolve, reject});
+                    }
+                })};
             }
             if (name === "../../util/functions") { return {isMobile: () => mobile}; }
             if (name === "../../util/needSubscribe") { return {isPaidUser: () => true, needSubscribe: () => false}; }
@@ -102,7 +114,7 @@ const setup = (provider = 2, mobile = false) => {
         },
     });
     exports.open(root);
-    return {inputs, sync, config, requests, confirmations, buttons, status, root, events, enabled,
+    return {inputs, sync, config, requests, ruleRequests, rules, refreshRules: () => rulesTimer?.(), confirmations, buttons, status, root, events, enabled,
         options: () => dialogOptions, close: () => dialog.destroy(), closed: () => closed,
         click: (action: string) => buttons[action].callback(), input: () => events.input({}),
         warningHidden: () => warningHidden};
@@ -120,6 +132,7 @@ for (const provider of [2, 3, 4]) {
         const key = provider === 2 ? "s3" : provider === 3 ? "webdav" : "local";
         ui.click("save");
         ui.click("save");
+        await settle();
         assert.equal(ui.requests.length, 1);
         assert.equal(ui.requests[0].data.sync[key].endpoint, "new.example.com");
         assert.equal(ui.buttons.save.disabled, true);
@@ -132,19 +145,22 @@ for (const provider of [2, 3, 4]) {
     });
 }
 
-test("required and numeric validation keeps empty or invalid draft values without saving", () => {
+test("required and numeric validation keeps empty or invalid draft values without saving", async () => {
     for (const key of ["endpoint", "secretKey", "timeout", "concurrentReqs"]) {
         const ui = setup();
         ui.inputs[key].value = "";
         ui.click("save");
+        await settle();
         assert.equal(ui.requests.length, 0, key);
         assert.equal(ui.inputs[key].value, "");
         assert.equal(ui.inputs[key].attributes["aria-invalid"], "true");
+        assert.equal(ui.inputs[key].focused, true);
         assert.equal(ui.status.textContent, "Required fields missing");
     }
     const ui = setup();
     ui.inputs.timeout.value = "1.5";
     ui.click("save");
+    await settle();
     assert.equal(ui.requests.length, 0);
 });
 
@@ -173,6 +189,7 @@ test("failed saves keep drafts after panel replacement and allow retry", async (
     ui.inputs.endpoint.value = "new.example.com";
     ui.root.isConnected = false;
     ui.click("save");
+    await settle();
     ui.requests[0].resolve({code: -1, msg: "Download resources first"});
     await settle();
     assert.equal(ui.status.textContent, "Download resources first");
@@ -180,11 +197,13 @@ test("failed saves keep drafts after panel replacement and allow retry", async (
     assert.equal(ui.sync.s3.endpoint, "storage.example.com");
     assert.equal(ui.closed(), 0);
     ui.click("save");
+    await settle();
     ui.requests[1].reject();
     await settle();
     assert.equal(ui.status.textContent, "Not confirmed");
     assert.equal(ui.buttons.save.disabled, false);
     ui.click("save");
+    await settle();
     ui.requests[2].resolve({code: 0, data: {s3: ui.requests[2].data.sync.s3}});
     await settle();
     assert.equal(ui.closed(), 1);
@@ -220,6 +239,7 @@ test("clear requires confirmation and preserves the source when the kernel refus
 test("read-only transitions do not re-enable writes after a pending save", async () => {
     const ui = setup();
     ui.click("save");
+    await settle();
     ui.config.readonly = true;
     ui.requests[0].resolve({code: -1, msg: "Read only"});
     await settle();
@@ -232,25 +252,102 @@ test("read-only transitions do not re-enable writes after a pending save", async
     assert.equal(ui.confirmations.length, 0);
 });
 
-test("draft stays bound to the opened provider even if another window changes the provider", () => {
+test("draft stays bound to the opened provider even if another window changes the provider", async () => {
     const ui = setup();
     ui.sync.provider = 3;
     ui.inputs.endpoint.value = "changed.example.com";
     ui.click("save");
+    await settle();
     assert.equal(ui.requests[0].url, "/api/setting/patch");
     assert.equal(ui.requests[0].data.sync.s3.endpoint, "changed.example.com");
 });
 
-test("mobile uses the shared dialog and bucket warnings never submit the draft", () => {
+test("mobile uses kernel bucket warnings without submitting the draft", async () => {
     const ui = setup(2, true);
     assert.equal(ui.options().width, "92vw");
     ui.inputs.endpoint.value = "https://notes.s3.example.com";
+    ui.rules.endpointBucketWarning = true;
     ui.input();
+    ui.refreshRules();
+    await settle();
     assert.equal(ui.warningHidden(), false);
     ui.inputs.endpoint.value = "https://s3.example.com";
+    ui.rules.endpointBucketWarning = false;
     ui.input();
+    ui.refreshRules();
+    await settle();
     assert.equal(ui.warningHidden(), true);
     assert.equal(ui.requests.length, 0);
+});
+
+test("kernel required fields control the form and warnings do not block Save", async () => {
+    const ui = setup(3);
+    ui.rules.requiredFields = ["username"];
+    ui.inputs.username.value = "";
+    ui.click("save");
+    await settle();
+    assert.equal(ui.inputs.username.attributes["aria-invalid"], "true");
+    assert.equal(ui.requests.length, 0);
+    const s3 = setup();
+    s3.rules.endpointBucketWarning = true;
+    s3.click("save");
+    await settle();
+    assert.equal(s3.warningHidden(), false);
+    assert.equal(s3.requests.length, 1);
+    for (const request of s3.ruleRequests) {
+        assert.deepEqual(Object.keys(request.data).sort(), ["bucket", "endpoint", "provider"]);
+    }
+});
+
+test("rule loading failures preserve drafts and Save retries before persisting", async () => {
+    const ui = setup(2, false, true);
+    ui.ruleRequests[0].reject();
+    await settle();
+    assert.equal(ui.status.textContent, "Loading failed");
+    ui.inputs.secretKey.value = "new secret";
+    ui.click("save");
+    ui.ruleRequests[1].reject();
+    await settle();
+    assert.equal(ui.requests.length, 0);
+    assert.equal(ui.inputs.secretKey.value, "new secret");
+    assert.equal(ui.buttons.save.disabled, false);
+    ui.click("save");
+    ui.ruleRequests[2].resolve({code: 0, data: ui.rules});
+    await settle();
+    assert.equal(ui.requests[0].data.sync.s3.secretKey, "new secret");
+});
+
+test("new input and closing invalidate old rule results and failures", async () => {
+    const ui = setup(2, false, true);
+    ui.inputs.endpoint.value = "new.example.com";
+    ui.input();
+    ui.refreshRules();
+    ui.ruleRequests[1].resolve({code: 0, data: {...ui.rules, endpointBucketWarning: true}});
+    await settle();
+    ui.ruleRequests[0].reject();
+    await settle();
+    assert.equal(ui.warningHidden(), false);
+    assert.equal(ui.status.textContent, "");
+    ui.input();
+    ui.refreshRules();
+    ui.inputs.endpoint.value = ui.sync.s3.endpoint;
+    ui.close();
+    ui.ruleRequests[2].resolve({code: 0, data: {...ui.rules, endpointBucketWarning: true}});
+    await settle();
+    assert.equal(ui.closed(), 1);
+    assert.equal(ui.warningHidden(), true);
+    assert.equal(ui.status.textContent, "");
+});
+
+test("a read-only transition during rule loading prevents saving", async () => {
+    const ui = setup(2, false, true);
+    ui.click("save");
+    ui.config.readonly = true;
+    ui.ruleRequests[1].resolve({code: 0, data: ui.rules});
+    await settle();
+    assert.equal(ui.requests.length, 0);
+    assert.equal(ui.buttons.save.disabled, true);
+    assert.equal(ui.buttons.cancel.disabled, false);
 });
 
 const setupPanels = (mobile: boolean) => {

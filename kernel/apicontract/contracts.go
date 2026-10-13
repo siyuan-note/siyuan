@@ -841,6 +841,12 @@ var SetSyncProviderLocal = define[SetSyncLocalRequest, SyncLocalData]("setSyncPr
 // 响应包含当前同步开关及被清除服务的默认配置；其他服务配置、仓库密钥和下载模式保持不变。
 var ClearSyncProviderConfig = define[ClearSyncProviderConfigRequest, ClearSyncProviderConfigData]("clearSyncProviderConfig", "/api/sync/clearSyncProviderConfig", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 
+// GetSyncProviderConfigRules 返回服务类型 2（S3）、3（WebDAV）或 4（本地文件系统）的共用必填清单。
+// endpoint、bucket 可省略；仅 S3 返回地址主机名重复包含桶名的提示，提示不阻断保存或同步。
+// 此接口只做内存中的静态判定，不读取或保存用户配置，不接收凭据，不访问云端或文件系统。
+// 未知服务返回 code -1；规则提示不替代保存时的完整校验和资源来源保护。只读模式下也可调用。
+var GetSyncProviderConfigRules = define[SyncProviderConfigRulesRequest, SyncProviderConfigRulesData]("getSyncProviderConfigRules", "/api/sync/getSyncProviderConfigRules", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
 var SetCloudSyncDir = define[SyncNameRequest, Null]("setCloudSyncDir", "/api/sync/setCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 var SetSyncAssetDownloadMode = define[SyncModeRequest, SyncAssetDownloadModeData]("setSyncAssetDownloadMode", "/api/sync/setSyncAssetDownloadMode", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "sync"}}, "POST")
 var CreateCloudSyncDir = define[SyncNameRequest, Null]("createCloudSyncDir", "/api/sync/createCloudSyncDir", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

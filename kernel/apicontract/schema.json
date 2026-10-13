@@ -49772,6 +49772,43 @@
       ],
       "additionalProperties": false
     },
+    "SyncProviderConfigRulesData": {
+      "type": "object",
+      "properties": {
+        "endpointBucketWarning": {
+          "type": "boolean"
+        },
+        "requiredFields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "endpointBucketWarning",
+        "requiredFields"
+      ],
+      "additionalProperties": false
+    },
+    "SyncProviderConfigRulesRequestInput": {
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "provider"
+      ],
+      "additionalProperties": false
+    },
     "SyncProviderExportData": {
       "type": "object",
       "properties": {
@@ -164761,6 +164798,85 @@
               },
               "data": {
                 "$ref": "#/$defs/SyncLANStatus"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/sync/getSyncProviderConfigRules",
+      "handler": "getSyncProviderConfigRules",
+      "authorization": [
+        "authenticated",
+        "admin"
+      ],
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SyncProviderConfigRulesRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SyncProviderConfigRulesData"
               },
               "msg": {
                 "type": "string"

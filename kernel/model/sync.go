@@ -677,10 +677,10 @@ func validateSyncS3(s3 *conf.S3) error {
 	if s3 == nil {
 		return errors.New(Conf.Language(142))
 	}
-	for _, value := range []string{s3.Endpoint, s3.AccessKey, s3.SecretKey, s3.Bucket, s3.Region} {
-		if strings.TrimSpace(value) == "" {
-			return errors.New(Conf.Language(142))
-		}
+	if conf.MissingSyncProviderField(conf.ProviderS3, map[string]string{
+		"endpoint": s3.Endpoint, "accessKey": s3.AccessKey, "secretKey": s3.SecretKey, "bucket": s3.Bucket, "region": s3.Region,
+	}) {
+		return errors.New(Conf.Language(142))
 	}
 	return validateSyncHTTPEndpoint(s3.Endpoint)
 }
@@ -704,14 +704,14 @@ func validateSyncHTTPEndpoint(value string) error {
 }
 
 func validateSyncWebDAV(webdav *conf.WebDAV) error {
-	if webdav == nil {
+	if webdav == nil || conf.MissingSyncProviderField(conf.ProviderWebDAV, map[string]string{"endpoint": webdav.Endpoint}) {
 		return errors.New(Conf.Language(142))
 	}
 	return validateSyncHTTPEndpoint(webdav.Endpoint)
 }
 
 func validateSyncLocal(local *conf.Local) error {
-	if local == nil || strings.TrimSpace(local.Endpoint) == "" {
+	if local == nil || conf.MissingSyncProviderField(conf.ProviderLocal, map[string]string{"endpoint": local.Endpoint}) {
 		return errors.New(Conf.Language(142))
 	}
 	return nil

@@ -2176,6 +2176,10 @@ export type SyncNameRequestInput = { "name": string; };
 
 export type SyncOnlineKernel = { "hostname": string; "id": string; "os": string; "ver": string; };
 
+export type SyncProviderConfigRulesData = { "endpointBucketWarning": boolean; "requiredFields": Array<string>; };
+
+export type SyncProviderConfigRulesRequestInput = { "bucket"?: string; "endpoint"?: string; "provider": number; };
+
 export type SyncProviderExportData = { "name": string; "zip": string; };
 
 export type SyncProviderImportRequestInput = { "file"?: Blob; };
@@ -7053,6 +7057,19 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SyncLANStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 返回服务类型 2（S3）、3（WebDAV）或 4（本地文件系统）的共用必填清单。
+     * endpoint、bucket 可省略；仅 S3 返回地址主机名重复包含桶名的提示，提示不阻断保存或同步。
+     * 此接口只做内存中的静态判定，不读取或保存用户配置，不接收凭据，不访问云端或文件系统。
+     * 未知服务返回 code -1；规则提示不替代保存时的完整校验和资源来源保护。只读模式下也可调用。
+     */
+    "/api/sync/getSyncProviderConfigRules": {
+        request: SyncProviderConfigRulesRequestInput;
+        response: { "code": 0; "data": SyncProviderConfigRulesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };

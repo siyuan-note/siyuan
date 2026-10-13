@@ -37,7 +37,7 @@ const setup = (type = "NodeBlockquote") => {
 
 describe("isContainerGutterBridge", () => {
     it("preserves a child gutter while crossing nested container padding", () => {
-        ["NodeBlockquote", "NodeCallout", "NodeSuperBlock"].forEach(type => {
+        ["NodeBlockquote", "NodeCallout", "NodeSuperBlock", "NodeList", "NodeListItem"].forEach(type => {
             assert.equal(setup(type).hit(), true);
         });
     });
@@ -79,6 +79,9 @@ describe("isContainerGutterBridge", () => {
         const fold = setup();
         fold.button.dataset.type = "fold";
         assert.equal(fold.hit(), false);
+        const row = setup("NodeListItem");
+        row.button.dataset.rowId = "row";
+        assert.equal(row.hit(), false, "database row actions must not become the list marker's block actions");
     });
 
     it("keeps callout titles directly accessible", () => {

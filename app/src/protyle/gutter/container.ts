@@ -18,13 +18,14 @@ export const getListItemGutterContainer = (element: Element) => {
 export const isContainerGutterBridge = (gutter: HTMLElement, container: HTMLElement, target: HTMLElement,
                                        x: number, y: number, getBlock: (button: HTMLElement) => Element) => {
     if (gutter.classList.contains("fn__none") ||
-        !["NodeBlockquote", "NodeCallout", "NodeSuperBlock", "NodeBlockQueryEmbed"].includes(container.dataset.type) ||
+        !["NodeBlockquote", "NodeCallout", "NodeSuperBlock", "NodeBlockQueryEmbed", "NodeList", "NodeListItem"]
+            .includes(container.dataset.type) ||
         target.closest(".callout-info")) {
         return false;
     }
     const gutterRect = gutter.getBoundingClientRect();
     return Array.from(gutter.querySelectorAll<HTMLElement>("button[data-node-id]")).some(button => {
-        if (button.dataset.type === "fold") {
+        if (button.dataset.type === "fold" || button.dataset.rowId) {
             return false;
         }
         const block = getBlock(button);

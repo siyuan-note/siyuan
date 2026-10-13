@@ -3822,7 +3822,8 @@ export class Gutter {
                     }
                 }
                 // - > # 1 \n  > 2
-                if (type === "NodeListItem" && index > 0 && nodeElement !== listItemContainer?.parentElement) {
+                const containsListItemContainer = listItemContainer && nodeElement.contains(listItemContainer);
+                if (type === "NodeListItem" && index > 0 && !containsListItemContainer) {
                     // 列表项内的块不显示块标
                     html = "";
                 }
@@ -3867,7 +3868,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 if (type === "NodeListItem" || type === "NodeList") {
                     listItem = nodeElement;
                     if (type === "NodeListItem" && nodeElement.childElementCount > 3) {
-                        html = nodeElement === listItemContainer?.parentElement ?
+                        html = containsListItemContainer ?
                             html + foldHTML : buttonHTML + foldHTML;
                     }
                 }
@@ -3962,8 +3963,9 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 titleElement?.getBoundingClientRect().bottom,
             );
         }
-        // 脑图中的原始列表项已隐藏，使用可见面板定位列表块标。
-        let rect = (listItemContainer || mindmapElement || element).getBoundingClientRect();
+        // 数据库行操作跟随当前行，其余列表容器使用统一锚点，独立脑图使用可见面板。
+        let rect = (element.classList.contains("av__row") ? element :
+            listItemContainer || mindmapElement || element).getBoundingClientRect();
         let marginHeight = 0;
         const autoListDirection = getAutoListDirection(element);
         const isRTL = autoListDirection ? autoListDirection === "rtl" :
@@ -4039,7 +4041,8 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 marginHeight = gutterMarginHeight;
             } else if (
                 (nodeElement.getAttribute("data-type") === "NodeAttributeView" ||
-                    element.getAttribute("data-type") === "NodeAttributeView") &&
+                    element.getAttribute("data-type") === "NodeAttributeView" ||
+                    listItemContainer?.getAttribute("data-type") === "NodeAttributeView") &&
                 contentTop < rect.top) {
                 marginHeight = 8;
             }

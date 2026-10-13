@@ -1,5 +1,5 @@
 import {spawn, spawnSync} from "node:child_process";
-import {createWriteStream, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync} from "node:fs";
+import {copyFileSync, createWriteStream, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync} from "node:fs";
 import {availableParallelism, tmpdir} from "node:os";
 import {basename, dirname, join, resolve} from "node:path";
 import {performance} from "node:perf_hooks";
@@ -8,12 +8,22 @@ import {fileURLToPath} from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const kernel = join(root, "kernel");
 const modelPackage = "github.com/siyuan-note/siyuan/kernel/model";
+const apiPackage = "github.com/siyuan-note/siyuan/kernel/api";
 const tags = ["-tags", "fts5 sqlcipher"];
-// 为模型分片保留内存，限制其余包同时进行重型原生链接的数量。
+// 分片构建与其他包分别限制原生编译并发，多个大包分片时分阶段执行。
 const packageParallelism = Math.min(2, availableParallelism());
 const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const listTests = output => output.split(/\r?\n/).filter(name => /^(Test|Example|Fuzz)\S*$/.test(name));
+
+// 核数较少时保留包间并行，避免 API 分片占用模型包有限的运行名额。
+export const testPackageConfigurations = (shards, modelOnly, cores) => {
+    const configurations = [{name: "model", package: modelPackage, count: shards}];
+    if (!modelOnly && cores >= 4) {
+        configurations.push({name: "api", package: apiPackage, count: Math.min(2, shards)});
+    }
+    return configurations;
+};
 
 // 按短前缀聚合，再按历史耗时均衡分配；每次从当前测试二进制读取用例，避免遗漏新增测试。
 export const planShards = (names, count, durations) => {
@@ -51,19 +61,29 @@ export const planShards = (names, count, durations) => {
 };
 
 // 每个进程使用独立的当前目录，测试资源通过目录链接复用，隔离相对路径写入。
-export const prepareModelWorkspace = (repository, workspace) => {
-    const cwd = join(workspace, "kernel", "model");
+export const preparePackageWorkspace = (repository, workspace, name) => {
+    if (!["model", "api"].includes(name)) {
+        throw new Error("Unsupported test package workspace: " + name);
+    }
+    const cwd = join(workspace, "kernel", name);
     mkdirSync(cwd, {recursive: true});
     const link = (source, destination) => symlinkSync(source, destination, process.platform === "win32" ? "junction" : "dir");
-    link(join(repository, "app"), join(workspace, "app"));
+    for (const resource of ["app", "docs", "scripts"]) {
+        if (existsSync(join(repository, resource))) {
+            link(join(repository, resource), join(workspace, resource));
+        }
+    }
     for (const entry of readdirSync(join(repository, "kernel"), {withFileTypes: true})) {
-        if (entry.isDirectory() && entry.name !== "model") {
+        if (entry.isDirectory() && entry.name !== name) {
             link(join(repository, "kernel", entry.name), join(workspace, "kernel", entry.name));
         }
     }
-    for (const entry of readdirSync(join(repository, "kernel", "model"), {withFileTypes: true})) {
+    for (const entry of readdirSync(join(repository, "kernel", name), {withFileTypes: true})) {
         if (entry.isDirectory()) {
-            link(join(repository, "kernel", "model", entry.name), join(cwd, entry.name));
+            link(join(repository, "kernel", name, entry.name), join(cwd, entry.name));
+        } else if (entry.isFile() && entry.name.endsWith(".go")) {
+            // API 用例会解析同目录的处理器源文件，副本保留检查且隔离运行时文件。
+            copyFileSync(join(repository, "kernel", name, entry.name), join(cwd, entry.name));
         }
     }
     return cwd;
@@ -174,41 +194,62 @@ const main = async () => {
     let otherJob;
     let otherFinished = false;
     try {
-        // 其他包的编译和测试与 model 测试二进制的编译重叠，保留完整套件的包间并行。
-        if (!options.modelOnly) {
-            const packages = command(["list", ...tags, "./..."]).trim().split(/\r?\n/).filter(name => name !== modelPackage);
+        const configurations = testPackageConfigurations(options.shards, options.modelOnly, availableParallelism());
+        const startOtherPackages = () => {
+            const sharded = new Set(configurations.map(configuration => configuration.package));
+            const packages = command(["list", ...tags, "./..."]).trim().split(/\r?\n/).filter(name => !sharded.has(name));
             otherJob = runJSONJob({name: "other-packages", cwd: kernel,
                 args: ["test", ...tags, "-p", String(packageParallelism), "-json", "-count=1", ...packages]}, output)
                 .finally(() => { otherFinished = true; });
+        };
+        if (!options.modelOnly && configurations.length === 1) {
+            startOtherPackages();
         }
-        const binary = join(workspace, process.platform === "win32" ? "model.test.exe" : "model.test");
+        const binaries = join(workspace, "binaries");
+        mkdirSync(binaries);
+        // 同一次 Go 构建共享依赖，每个包只链接一次，原生编译与测试运行分开控制并发。
         await new Promise((resolve, reject) => {
-            const compiler = spawn("go", ["test", ...tags, "-p", String(packageParallelism), "-c", "-o", binary, "./model"], {
+            const compiler = spawn("go", ["test", ...tags, "-p", String(packageParallelism), "-c", "-o", binaries,
+                ...configurations.map(configuration => "./" + configuration.name)], {
                 cwd: kernel, windowsHide: true, stdio: "inherit",
             });
             compiler.on("error", reject);
-            compiler.on("close", code => code === 0 ? resolve() : reject(new Error("Model test compilation failed: " + code)));
+            compiler.on("close", code => code === 0 ? resolve() : reject(new Error("Sharded test compilation failed: " + code)));
         });
-        const listed = spawnSync(binary, ["-test.list=."], {cwd: join(kernel, "model"), encoding: "utf8", windowsHide: true});
-        if (listed.error || listed.status !== 0) {
-            throw listed.error ?? new Error(listed.stderr);
+        const jobs = [];
+        const inventory = {};
+        for (const configuration of configurations) {
+            const base = join(binaries, configuration.name + ".test");
+            const binary = process.platform === "win32" && existsSync(base + ".exe") ? base + ".exe" : base;
+            const listed = spawnSync(binary, ["-test.list=."], {
+                cwd: join(kernel, configuration.name), encoding: "utf8", windowsHide: true,
+            });
+            if (listed.error || listed.status !== 0) {
+                throw listed.error ?? new Error(listed.stderr);
+            }
+            const names = listTests(listed.stdout);
+            if (!names.length) {
+                throw new Error("No tests discovered for " + configuration.package);
+            }
+            const durations = JSON.parse(readFileSync(join(root, "scripts", "kernel-" + configuration.name + "-test-durations.json"), "utf8"));
+            const shards = planShards(names, configuration.count, durations);
+            inventory[configuration.name] = {tests: names.length, shards: shards.length};
+            jobs.push(...shards.map((shard, i) => ({name: configuration.name + "-" + (i + 1), seconds: shard.seconds, expectedTests: shard.names,
+                cwd: preparePackageWorkspace(root, join(workspace, configuration.name + "-shard-" + i), configuration.name),
+                args: ["tool", "test2json", "-t", "-p", configuration.package, binary, "-test.v=test2json", "-test.count=1", "-test.timeout=10m", "-test.run=" + shard.regex]})));
         }
-        const names = listTests(listed.stdout);
-        if (!names.length) {
-            throw new Error("No model tests discovered");
+        if (!options.modelOnly && !otherJob) {
+            startOtherPackages();
         }
-        const durations = JSON.parse(readFileSync(join(root, "scripts", "kernel-model-test-durations.json"), "utf8"));
-        const shards = planShards(names, options.shards, durations);
-        const jobs = shards.map((shard, i) => ({name: "model-" + (i + 1), expectedTests: shard.names,
-            cwd: prepareModelWorkspace(root, join(workspace, "shard-" + i)),
-            args: ["tool", "test2json", "-t", "-p", modelPackage, binary, "-test.v=test2json", "-test.count=1", "-test.timeout=10m", "-test.run=" + shard.regex]}));
         const concurrency = Math.min(4, Math.max(1, availableParallelism() - (otherJob && !otherFinished ? 1 : 0)));
-        console.log(`Running ${names.length} model tests in ${shards.length} shards; ${concurrency} concurrent jobs; logs: ${output}`);
-        const results = await runJobs(jobs, concurrency, job => runJSONJob(job, output));
+        console.log(`Running ${jobs.length} model/API shards; ${concurrency} concurrent jobs; logs: ${output}`);
+        const results = await runJobs(jobs.sort((a, b) => b.seconds - a.seconds || a.name.localeCompare(b.name, "en")),
+            concurrency, job => runJSONJob(job, output));
         if (otherJob) {
             results.unshift(await otherJob);
         }
-        const summary = {seconds: (performance.now() - started) / 1000, modelTests: names.length, shards: shards.length, results};
+        const summary = {seconds: (performance.now() - started) / 1000, modelTests: inventory.model.tests, shards: inventory.model.shards,
+            apiTests: inventory.api?.tests ?? 0, apiShards: inventory.api?.shards ?? 0, results};
         writeFileSync(join(output, "summary.json"), JSON.stringify(summary, null, 2) + "\n");
         console.log(`Kernel tests: ${summary.seconds.toFixed(1)}s; summary: ${join(output, "summary.json")}`);
         process.exitCode = results.some(result => result.code) ? 1 : 0;

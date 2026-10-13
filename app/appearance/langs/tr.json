@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "PP-OCRv6 modellerini içe aktar",
 	"kernelUnresponsiveTitle": "Çekirdek yanıt vermiyor",
 	"kernelUnresponsiveMessage": "Çekirdeğe yapılan yerel istekler zaman aşımına uğradığı için SiYuan ana pencereyi açamıyor. Ayrıntılar için ${log} dosyasına bakın.",
 	"kernelUnresponsiveWindowsHint": "Windows'ta bu durum, TCP tıkanıklık denetimi BBR2 ile Loopback Large Mtu (loopbacklargemtu)'nun birlikte etkinleştirilmesiyle ilgili olabilir.",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "OCR sonucu olmayan şifrelenmemiş defter görüntülerini işler; yapay zekâ görüntüleri seçilen sağlayıcıya arka planda gönderir",
 	"ocrModel": "OCR modeli",
 	"ocrModelTip": "Yalnızca Tiny yerleşiktir; model değişikliği mevcut sonuçları korur; görsel menüsünden OCR işlemini yeniden çalıştırın",
-	"ocrImportModels": "OCR modellerini içe aktar",
-	"ocrImportModelsTip": "Uyumlu PP-OCRv6 algılama ve tanıma ONNX dosyalarını ve inference.yml dosyalarını seçin; içe aktarılan dosyalar çalışma alanıyla eşitlenir",
+	"ocrImportModelsTip": "Aynı modelin algılama ve tanıma ONNX dosyalarını ve bunların inference.yml dosyalarını seçin. İçe aktarılan modeller çalışma alanında saklanır ve onunla eşitlenir",
 	"ocrDetector": "Algılama modeli",
 	"ocrRecognizer": "Tanıma modeli",
 	"ocrUnavailable": "Kullanılamıyor",

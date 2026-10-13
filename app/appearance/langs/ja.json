@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "PP-OCRv6 モデルをインポート",
 	"kernelUnresponsiveTitle": "カーネルが応答していません",
 	"kernelUnresponsiveMessage": "ローカルのカーネルへのリクエストがタイムアウトしたため、思源はメインウィンドウを開けません。詳細は ${log} を確認してください。",
 	"kernelUnresponsiveWindowsHint": "Windows では、TCP 輻輳制御 BBR2 と Loopback Large Mtu (loopbacklargemtu) の同時有効化が関係している可能性があります。",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "OCR 結果がない暗号化されていないノートブックの画像のみを処理します。AI は選択したプロバイダーに画像をバックグラウンドで送信します",
 	"ocrModel": "OCR モデル",
 	"ocrModelTip": "Tiny のみ内蔵されています。切り替えても既存の結果は保持され、画像メニューから再認識できます",
-	"ocrImportModels": "OCR モデルをインポート",
-	"ocrImportModelsTip": "対応する PP-OCRv6 の検出・認識 ONNX ファイルとそれぞれの inference.yml を選択します。インポートしたファイルはワークスペースと同期されます",
+	"ocrImportModelsTip": "同じモデルの検出・認識 ONNX ファイルとそれぞれの inference.yml を選択します。インポートしたモデルはワークスペースに保存され、同期の対象になります",
 	"ocrDetector": "検出モデル",
 	"ocrRecognizer": "認識モデル",
 	"ocrUnavailable": "利用不可",

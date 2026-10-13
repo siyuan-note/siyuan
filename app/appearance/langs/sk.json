@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "Importovať modely PP-OCRv6",
 	"kernelUnresponsiveTitle": "Jadro neodpovedá",
 	"kernelUnresponsiveMessage": "Časový limit lokálnych požiadaviek na jadro uplynul, takže SiYuan nemôže otvoriť hlavné okno. Podrobnosti nájdete v ${log}.",
 	"kernelUnresponsiveWindowsHint": "V systéme Windows to môže súvisieť so súčasným zapnutím riadenia preťaženia TCP BBR2 a Loopback Large Mtu (loopbacklargemtu).",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "Spracovať obrázky z nešifrovaných zápisníkov bez výsledkov OCR; AI odosiela obrázky vybranému poskytovateľovi na pozadí",
 	"ocrModel": "Model OCR",
 	"ocrModelTip": "Zabudovaný je iba Tiny; zmena modelu zachová existujúce výsledky; OCR možno znova spustiť z ponuky obrázka",
-	"ocrImportModels": "Importovať modely OCR",
-	"ocrImportModelsTip": "Vyberte kompatibilné súbory ONNX detekcie a rozpoznávania PP-OCRv6 a ich súbory inference.yml; importované súbory sa synchronizujú s pracovným priestorom",
+	"ocrImportModelsTip": "Vyberte súbory ONNX detekcie a rozpoznávania toho istého modelu a ich súbory inference.yml. Importované modely sa ukladajú do pracovného priestoru a synchronizujú sa s ním",
 	"ocrDetector": "Detekčný model",
 	"ocrRecognizer": "Model rozpoznávania",
 	"ocrUnavailable": "Nedostupné",

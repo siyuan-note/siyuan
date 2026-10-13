@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "استيراد نماذج PP-OCRv6",
 	"kernelUnresponsiveTitle": "النواة لا تستجيب",
 	"kernelUnresponsiveMessage": "انتهت مهلة الطلبات المحلية إلى النواة، لذا لا يستطيع SiYuan فتح النافذة الرئيسية. راجع ${log} لمزيد من التفاصيل.",
 	"kernelUnresponsiveWindowsHint": "في Windows، قد يكون هذا مرتبطًا بتفعيل التحكم في ازدحام TCP باستخدام BBR2 مع Loopback Large Mtu (loopbacklargemtu).",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "يعالج صور دفاتر الملاحظات غير المشفرة التي ليس لها نتائج OCR؛ يرسل الذكاء الاصطناعي الصور إلى المزود المحدد في الخلفية",
 	"ocrModel": "نموذج OCR",
 	"ocrModelTip": "نموذج Tiny وحده مدمج؛ تبديل النموذج يحافظ على النتائج الحالية؛ أعد تشغيل OCR من قائمة الصورة",
-	"ocrImportModels": "استيراد نماذج OCR",
-	"ocrImportModelsTip": "اختر ملفات ONNX المتوافقة للكشف والتعرّف في PP-OCRv6 وملفات inference.yml الخاصة بها؛ تتزامن الملفات المستوردة مع مساحة العمل",
+	"ocrImportModelsTip": "حدّد ملفات ONNX للكشف والتعرّف الخاصة بالنموذج نفسه وملفات inference.yml الخاصة بها. تُحفظ النماذج المستوردة في مساحة العمل وتشارك في المزامنة",
 	"ocrDetector": "نموذج الكشف",
 	"ocrRecognizer": "نموذج التعرّف",
 	"ocrUnavailable": "غير متوفر",

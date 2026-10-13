@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "PP-OCRv6 모델 가져오기",
 	"kernelUnresponsiveTitle": "커널이 응답하지 않습니다",
 	"kernelUnresponsiveMessage": "로컬 커널 요청 시간이 초과되어 SiYuan이 기본 창을 열 수 없습니다. 자세한 내용은 ${log} 파일을 확인하세요.",
 	"kernelUnresponsiveWindowsHint": "Windows에서는 TCP 혼잡 제어 BBR2와 Loopback Large Mtu (loopbacklargemtu)를 동시에 활성화한 것과 관련이 있을 수 있습니다.",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "OCR 결과가 없는 암호화되지 않은 노트북 이미지만 처리합니다. AI는 선택한 제공업체에 이미지를 백그라운드로 전송합니다",
 	"ocrModel": "OCR 모델",
 	"ocrModelTip": "Tiny만 내장되어 있습니다. 모델을 전환해도 기존 결과는 유지되며 이미지 메뉴에서 OCR을 다시 실행할 수 있습니다",
-	"ocrImportModels": "OCR 모델 가져오기",
-	"ocrImportModelsTip": "호환되는 PP-OCRv6 감지 및 인식 ONNX 파일과 각각의 inference.yml을 선택하세요. 가져온 파일은 작업 공간과 동기화됩니다",
+	"ocrImportModelsTip": "같은 모델의 감지·인식 ONNX 파일과 각각의 inference.yml을 선택하세요. 가져온 모델은 작업 공간에 저장되며 동기화에 포함됩니다",
 	"ocrDetector": "감지 모델",
 	"ocrRecognizer": "인식 모델",
 	"ocrUnavailable": "사용 불가",

@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "นำเข้าโมเดล PP-OCRv6",
 	"kernelUnresponsiveTitle": "เคอร์เนลไม่ตอบสนอง",
 	"kernelUnresponsiveMessage": "คำขอไปยังเคอร์เนลภายในเครื่องหมดเวลา จึงไม่สามารถเปิดหน้าต่างหลักของ SiYuan ได้ โปรดดูรายละเอียดใน ${log}",
 	"kernelUnresponsiveWindowsHint": "บน Windows ปัญหานี้อาจเกี่ยวข้องกับการเปิดใช้การควบคุมความแออัดของ TCP แบบ BBR2 ร่วมกับ Loopback Large Mtu (loopbacklargemtu)",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "ประมวลผลเฉพาะภาพในสมุดบันทึกที่ไม่เข้ารหัสและยังไม่มีผล OCR โดย AI จะส่งภาพไปยังผู้ให้บริการที่เลือกในเบื้องหลัง",
 	"ocrModel": "โมเดล OCR",
 	"ocrModelTip": "มีเฉพาะ Tiny ในตัว การเปลี่ยนโมเดลจะเก็บผลลัพธ์เดิมไว้ สามารถเรียกใช้ OCR อีกครั้งจากเมนูรูปภาพ",
-	"ocrImportModels": "นำเข้าโมเดล OCR",
-	"ocrImportModelsTip": "เลือกไฟล์ ONNX สำหรับตรวจจับและรู้จำ PP-OCRv6 ที่เข้ากันได้ พร้อม inference.yml ของแต่ละโมเดล ไฟล์ที่นำเข้าจะซิงค์กับพื้นที่ทำงาน",
+	"ocrImportModelsTip": "เลือกไฟล์ ONNX สำหรับตรวจจับและรู้จำของโมเดลเดียวกันพร้อมไฟล์ inference.yml ของแต่ละโมเดล โมเดลที่นำเข้าจะถูกเก็บไว้ในพื้นที่ทำงานและซิงค์ไปด้วย",
 	"ocrDetector": "โมเดลตรวจจับ",
 	"ocrRecognizer": "โมเดลรู้จำ",
 	"ocrUnavailable": "ใช้งานไม่ได้",

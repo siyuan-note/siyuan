@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "PP-OCRv6-Modelle importieren",
 	"kernelUnresponsiveTitle": "Der Kernel antwortet nicht",
 	"kernelUnresponsiveMessage": "Lokale Anfragen an den Kernel haben das Zeitlimit überschritten. SiYuan kann das Hauptfenster nicht öffnen. Weitere Informationen finden Sie in ${log}.",
 	"kernelUnresponsiveWindowsHint": "Unter Windows kann dies mit der Kombination aus TCP-Staukontrolle BBR2 und Loopback Large Mtu (loopbacklargemtu) zusammenhängen.",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "Bilder aus unverschlüsselten Notizbüchern ohne OCR-Ergebnis verarbeiten; KI sendet Bilder im Hintergrund an den gewählten Anbieter",
 	"ocrModel": "OCR-Modell",
 	"ocrModelTip": "Nur Tiny ist integriert; beim Wechsel bleiben vorhandene Ergebnisse erhalten; OCR lässt sich über das Bildmenü erneut ausführen",
-	"ocrImportModels": "OCR-Modelle importieren",
-	"ocrImportModelsTip": "Kompatible PP-OCRv6-ONNX-Dateien für Erkennung und Texterfassung sowie deren inference.yml auswählen; importierte Dateien werden mit dem Arbeitsbereich synchronisiert",
+	"ocrImportModelsTip": "Wählen Sie die ONNX-Dateien für Erkennung und Texterfassung desselben Modells sowie die zugehörigen inference.yml-Dateien. Importierte Modelle werden im Arbeitsbereich gespeichert und mit ihm synchronisiert",
 	"ocrDetector": "Erkennungsmodell",
 	"ocrRecognizer": "Texterfassungsmodell",
 	"ocrUnavailable": "Nicht verfügbar",

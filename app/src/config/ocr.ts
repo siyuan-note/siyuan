@@ -1,10 +1,10 @@
 import {config as configApi} from "./util/configApi";
 import type {OCRConfigData, OCRThresholds, SettingOCR} from "../types/api";
 import {fetchSyncPost} from "../util/fetch";
-import {ContractFormData} from "../util/contractFormData";
 import {escapeAttr, escapeHtml} from "../util/escape";
+import {openOCRImportModelsDialog} from "./ocrImport";
 import {genConfigItemMainHtml, genSwitchRow} from "./render/fragments";
-import {genButtonRowHtml, genNumberInputHtml} from "./render/render";
+import {genNumberInputHtml} from "./render/render";
 import {showMessage} from "../dialog/message";
 import {OCR_CHANGED_EVENT} from "./ocrRuntime";
 import {objEquals} from "../util/functions";
@@ -29,13 +29,6 @@ const selectRow = (id: string, title: string, desc: string) =>
     `<label class="fn__flex b3-label config-item">${genConfigItemMainHtml(title, desc)}
 <span class="fn__space"></span><select id="${id}" class="b3-select fn__flex-center fn__size200" disabled></select></label>`;
 
-const getModelFiles = () => [
-    {id: "detector", title: window.siyuan.languages.ocrDetector, suffix: "onnx"},
-    {id: "detectorConfig", title: `${window.siyuan.languages.ocrDetector} - YAML`, suffix: "yml,yaml"},
-    {id: "recognizer", title: window.siyuan.languages.ocrRecognizer, suffix: "onnx"},
-    {id: "recognizerConfig", title: `${window.siyuan.languages.ocrRecognizer} - YAML`, suffix: "yml,yaml"},
-];
-
 const getThresholdFields = () => [
     {key: "detection", title: window.siyuan.languages.ocrDetectionThreshold, placeholder: window.siyuan.languages.ocrModelDefault},
     {key: "box", title: window.siyuan.languages.ocrBoxThreshold, placeholder: window.siyuan.languages.ocrModelDefault},
@@ -56,6 +49,13 @@ export const registerOCRTab = (tab: SettingTabBuilder) => {
         key: "ocrModel",
         keywords: ["PaddleOCR", "Tiny", languages.ocrModel, languages.ocrModelTip],
         html: () => selectRow("ocrModel", languages.ocrModel, languages.ocrModelTip),
+    }).button({
+        id: "ocrImport",
+        title: languages.ocrImportModelsTitle,
+        desc: languages.ocrImportModelsTip,
+        label: languages.import,
+        icon: "iconDownload",
+        keywords: ["ONNX", "YAML", "Tiny", languages.ocrDetector, languages.ocrRecognizer],
     }).slot({
         key: "ocrAIModel",
         keywords: ["AI", languages.ocrAIModel, languages.ocrAIModelTip],
@@ -74,32 +74,20 @@ export const registerOCRTab = (tab: SettingTabBuilder) => {
 <span class="fn__space"></span>${genNumberInputHtml(`ocrThreshold_${field.key}`, "", 0, 1, "any")}</div>`,
         });
     });
-    tab.group("models", languages.ocrImportModels).slot({
-        key: "ocrImportModels",
-        keywords: ["ONNX", "YAML", "Tiny", languages.ocrImportModels, languages.ocrDetector, languages.ocrRecognizer],
-        html: () => `<div id="ocrImportModels" class="b3-label config-item">${genConfigItemMainHtml(languages.ocrImportModels, languages.ocrImportModelsTip)}
-${getModelFiles().map(file => `<div class="fn__hr"></div><div class="fn__block"><div id="${file.id}Label" class="b3-label__text">${file.title}</div><div class="fn__hr--small"></div>
-<div class="fn__flex"><button type="button" class="b3-button b3-button--outline fn__flex-center" data-ocr-file="${file.id}" aria-describedby="${file.id}Label">${languages.chooseFile}</button><span class="fn__space"></span><span id="${file.id}Name" class="fn__flex-1 fn__flex-center fn__ellipsis" aria-live="polite"></span></div>
-<input id="${file.id}" class="fn__none" type="file" accept="${file.suffix.split(",").map(suffix => `.${suffix}`).join(",")}"></div>`).join("")}</div>`,
-    }).slot({
-        key: "ocrImport",
-        keywords: ["ONNX", "YAML", languages.ocrImportModels, languages.import],
-        html: () => genButtonRowHtml("ocrImport", "", undefined, languages.import, "iconDownload"),
-    });
 };
 
 export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     const controller = new AbortController();
     let closed = false;
     let data: OCRConfigData;
-    let busy = false;
+    const busy = false;
     let pendingSaves = 0;
     let saveQueue = Promise.resolve(false);
     let refreshPending = false;
     let refreshTask: Promise<void>;
     let writeRevision = 0;
+    let importDialog: ReturnType<typeof openOCRImportModelsDialog> | undefined;
     const languages = window.siyuan.languages;
-    const files = getModelFiles();
     const thresholdFields = getThresholdFields();
     const dirtyThresholds = new Set<keyof OCRThresholds>();
     let thresholdValues: OCRThresholds;
@@ -118,16 +106,16 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         });
     };
     const updateControls = () => {
-        const isPaddleOCR = root.querySelector<HTMLSelectElement>("#ocrProvider").value === "paddleocr";
-        const isAI = root.querySelector<HTMLSelectElement>("#ocrProvider").value === "ai";
-        ["ocrModel", "ocrImportModels", "ocrImport"].forEach(id => {
+        // 提供商取自启动配置，首次渲染和切换后都由配置刷新，不依赖下拉框在配置返回时才有值
+        const provider = window.siyuan.config.ocr.provider;
+        const isPaddleOCR = provider === "paddleocr";
+        const isAI = provider === "ai";
+        ["ocrModel", "ocrImport"].forEach(id => {
             root.querySelector(`#${id}`).closest(".config-item").classList.toggle("fn__none", !isPaddleOCR);
         });
         root.querySelector("#ocrAIModel").closest(".config-item").classList.toggle("fn__none", !isAI);
         root.querySelector("#ocrReasoningEffort").closest(".config-item").classList.toggle("fn__none", !isAI);
-        ["advanced", "models"].forEach(group => {
-            root.querySelector(`[data-config-group-id="${group}"]`)?.classList.toggle("fn__none", !isPaddleOCR);
-        });
+        root.querySelector('[data-config-group-id="advanced"]')?.classList.toggle("fn__none", !isPaddleOCR);
         root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
             element.disabled = busy || (element.tagName === "BUTTON" && pendingSaves > 0);
         });
@@ -137,11 +125,13 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         thresholdFields.forEach(field => {
             root.querySelector<HTMLInputElement>(`#ocrThreshold_${field.key}`).disabled = busy || !isPaddleOCR;
         });
-        root.querySelector<HTMLButtonElement>("#ocrImport").disabled = busy || pendingSaves > 0 || !isPaddleOCR || files.some(file => !root.querySelector<HTMLInputElement>(`#${file.id}`).files?.length);
-        files.forEach(file => {
-            const name = root.querySelector<HTMLElement>(`#${file.id}Name`);
-            name.textContent = root.querySelector<HTMLInputElement>(`#${file.id}`).files?.[0]?.name || "";
-            name.title = name.textContent;
+        root.querySelector<HTMLButtonElement>("#ocrImport").disabled = busy || pendingSaves > 0 || !isPaddleOCR;
+        // 隐藏的条目仍占末尾子节点，`b3-label:last-child` 选不中，最后一行的下边框需要显式去掉
+        root.querySelectorAll<HTMLElement>("[data-config-group-id]").forEach(group => {
+            const items = Array.from(group.querySelectorAll<HTMLElement>(".config-item"));
+            items.forEach(item => item.classList.remove("b3-label--noborder"));
+            items.filter(item => !item.classList.contains("fn__none") && !item.classList.contains("config-search-hidden"))
+                .at(-1)?.classList.add("b3-label--noborder");
         });
     };
     const providerOptions = () => {
@@ -237,11 +227,13 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
             showMessage(error.message);
         }
     };
-    root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
-        element.disabled = true;
-    });
     thresholdFields.forEach(field => {
         root.querySelector<HTMLInputElement>(`#ocrThreshold_${field.key}`).placeholder = field.placeholder;
+    });
+    // 首次响应到达前先按已加载配置设定可见性，随后统一禁用，等配置读取完成再启用
+    updateControls();
+    root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>("input, select, button").forEach(element => {
+        element.disabled = true;
     });
     window.addEventListener(OCR_CHANGED_EVENT, () => { void load().catch(handleError); }, {signal: controller.signal});
     window.addEventListener(AI_CONFIG_CHANGED_EVENT, () => { void load().catch(handleError); }, {signal: controller.signal});
@@ -309,10 +301,6 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     root.addEventListener("change", async event => {
         event.stopPropagation();
         const target = event.target as HTMLInputElement | HTMLSelectElement;
-        if (files.some(file => file.id === target.id)) {
-            updateControls();
-            return;
-        }
         if (!data) return;
         const field = thresholdFields.find(field => target.id === `ocrThreshold_${field.key}`);
         if (field) {
@@ -339,40 +327,25 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
         updateControls();
         await saveConfig();
     }, {signal: controller.signal});
-    root.addEventListener("click", async event => {
+    root.addEventListener("click", event => {
         event.stopPropagation();
         const button = (event.target as HTMLElement).closest("button");
-        if (!button || busy || pendingSaves > 0 || !data) {
+        if (!button || busy || pendingSaves > 0 || !data || button.id !== "ocrImport" || importDialog) {
             return;
         }
-        if (button.dataset.ocrFile && files.some(file => file.id === button.dataset.ocrFile)) {
-            root.querySelector<HTMLInputElement>(`#${button.dataset.ocrFile}`).click();
-        } else if (button.id === "ocrImport") {
-            writeRevision++;
-            busy = true;
-            updateControls();
-            try {
-                const response = await fetchSyncPost("/api/asset/importOCRModels", new ContractFormData({
-                    detector: root.querySelector<HTMLInputElement>("#detector").files[0],
-                    detectorConfig: root.querySelector<HTMLInputElement>("#detectorConfig").files[0],
-                    recognizer: root.querySelector<HTMLInputElement>("#recognizer").files[0],
-                    recognizerConfig: root.querySelector<HTMLInputElement>("#recognizerConfig").files[0],
-                }), undefined, true, controller.signal);
-                if (response.code === 0 && !closed) {
-                    showMessage(languages.imported);
-                    files.forEach(file => { root.querySelector<HTMLInputElement>(`#${file.id}`).value = ""; });
-                    await load();
-                }
-            } catch (error) {
-                handleError(error);
-            } finally {
-                busy = false;
+        // 标记写入版本，避免导入期间到达的旧配置响应覆盖导入后的模型列表。
+        writeRevision++;
+        importDialog = openOCRImportModelsDialog({
+            signal: controller.signal,
+            onImported: () => {
                 if (!closed) {
-                    updateControls();
-                    if (refreshPending) void load().catch(handleError);
+                    void load().catch(handleError);
                 }
-            }
-        }
+            },
+            onClosed: () => {
+                importDialog = undefined;
+            },
+        });
     }, {signal: controller.signal});
     void load().catch(error => {
         handleError(error);
@@ -380,5 +353,6 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
     return () => {
         closed = true;
         controller.abort();
+        importDialog?.destroy();
     };
 };

@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "Importar modelos PP-OCRv6",
 	"kernelUnresponsiveTitle": "O kernel não está respondendo",
 	"kernelUnresponsiveMessage": "As solicitações locais ao kernel excederam o tempo limite, então o SiYuan não pode abrir a janela principal. Consulte ${log} para obter detalhes.",
 	"kernelUnresponsiveWindowsHint": "No Windows, isso pode estar relacionado à combinação do controle de congestionamento TCP BBR2 com Loopback Large Mtu (loopbacklargemtu).",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "Processa imagens de cadernos não criptografados sem resultados OCR; a IA envia imagens ao provedor selecionado em segundo plano",
 	"ocrModel": "Modelo de OCR",
 	"ocrModelTip": "Apenas Tiny está integrado; trocar de modelo preserva os resultados existentes; execute o OCR novamente pelo menu da imagem",
-	"ocrImportModels": "Importar modelos de OCR",
-	"ocrImportModelsTip": "Selecione arquivos ONNX compatíveis de detecção e reconhecimento PP-OCRv6 e seus arquivos inference.yml; os arquivos importados são sincronizados com o espaço de trabalho",
+	"ocrImportModelsTip": "Selecione os arquivos ONNX de detecção e reconhecimento do mesmo modelo e seus arquivos inference.yml. Os modelos importados são armazenados no espaço de trabalho e sincronizados com ele",
 	"ocrDetector": "Modelo de detecção",
 	"ocrRecognizer": "Modelo de reconhecimento",
 	"ocrUnavailable": "Indisponível",

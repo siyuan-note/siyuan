@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "Увези PP-OCRv6 моделе",
 	"kernelUnresponsiveTitle": "Језгро не одговара",
 	"kernelUnresponsiveMessage": "Истекло је време чекања за локалне захтеве језгру, па SiYuan не може да отвори главни прозор. Детаље погледајте у ${log}.",
 	"kernelUnresponsiveWindowsHint": "На Windows-у ово може бити повезано са истовременим укључивањем контроле загушења TCP BBR2 и Loopback Large Mtu (loopbacklargemtu).",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "Обрађује слике из нешифрованих бележница без OCR резултата; AI у позадини шаље слике изабраном добављачу",
 	"ocrModel": "OCR модел",
 	"ocrModelTip": "Уграђен је само Tiny; промена модела чува постојеће резултате; поново покрените OCR из менија слике",
-	"ocrImportModels": "Увези OCR моделе",
-	"ocrImportModelsTip": "Изаберите компатибилне PP-OCRv6 ONNX датотеке за детекцију и препознавање и њихове inference.yml датотеке; увезене датотеке се синхронизују са радним простором",
+	"ocrImportModelsTip": "Изаберите ONNX датотеке за детекцију и препознавање истог модела и њихове inference.yml датотеке. Увезени модели се чувају у радном простору и синхронизују се са њим",
 	"ocrDetector": "Модел детекције",
 	"ocrRecognizer": "Модел препознавања",
 	"ocrUnavailable": "Недоступно",

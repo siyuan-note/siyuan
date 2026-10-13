@@ -6,6 +6,9 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import type {OCRThresholds, SettingOCR} from "../types/api";
 import {getReasoningEffortOptions} from "../ai/reasoningEffort";
 
+const generalRowNames = ["ocrAuto", "ocrProvider", "ocrModel", "ocrImport", "ocrAIModel", "ocrReasoningEffort"];
+const advancedRowNames = ["ocrThreshold_detection", "ocrThreshold_box", "ocrThreshold_recognition"];
+
 test("OCR settings register separate searchable rows in shared desktop and mobile groups", () => {
     const compiled = transpileModule(readFileSync("src/config/ocr.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -17,6 +20,7 @@ test("OCR settings register separate searchable rows in shared desktop and mobil
         genSwitchRow: (id: string) => `<label><input id="${id}"></label>`,
         genButtonRowHtml: (id: string) => `<label><button id="${id}"></button></label>`,
         genNumberInputHtml: (id: string) => `<input class="b3-text-field" id="${id}" type="number">`,
+        openOCRImportModelsDialog: () => ({destroy() {}}),
     })});
     let group = "";
     const groupTitles = new Map<string, string>();
@@ -24,14 +28,31 @@ test("OCR settings register separate searchable rows in shared desktop and mobil
     const tab = {
         group: (id: string, title: string) => { group = id; groupTitles.set(id, title); return tab; },
         slot: (spec: Omit<typeof rows[number], "group">) => { rows.push({...spec, group}); return tab; },
+        // 与 SettingGroupBuilder.button 一致：条目 id 为 button_<id>，检索词含标题、按钮文字与补充词
+        button: (spec: {id: string, title: string, label: string, keywords?: string[]}) => {
+            rows.push({
+                group, key: `button_${spec.id}`,
+                keywords: [spec.title, spec.label, ...(spec.keywords ?? [])],
+                html: () => `<button id="${spec.id}"></button>`,
+            });
+            return tab;
+        },
     };
     exports.registerOCRTab(tab);
     assert.deepEqual(rows.filter(row => row.group === "general").map(row => row.key),
-        ["ocrAuto", "ocrProvider", "ocrModel", "ocrAIModel", "ocrReasoningEffort"]);
+        ["ocrAuto", "ocrProvider", "ocrModel", "button_ocrImport", "ocrAIModel", "ocrReasoningEffort"]);
     const aiRow = rows.find(row => row.key === "ocrAIModel");
     assert.ok(aiRow.keywords.includes("ocrAIModelTip"));
     assert.match(aiRow.html(), /class="b3-select/);
-    assert.deepEqual(rows.filter(row => row.group === "models").map(row => row.key), ["ocrImportModels", "ocrImport"]);
+    // 导入设置项就在 OCR 模型后面，不再单独分组，标题、说明与按钮合并在同一项里
+    const importRow = rows.find(row => row.key === "button_ocrImport");
+    assert.equal(importRow.group, "general");
+    assert.equal(groupTitles.has("models"), false);
+    assert.ok(importRow.keywords.includes("ocrImportModelsTitle"));
+    assert.ok(importRow.keywords.includes("ocrDetector"));
+    assert.match(importRow.html(), /<button id="ocrImport"><\/button>/);
+    assert.doesNotMatch(importRow.html(), /type="file"/);
+    assert.match(readFileSync("src/config/ocr.ts", "utf8"), /openOCRImportModelsDialog\(/);
     const thresholds = rows.filter(row => row.group === "advanced");
     assert.equal(groupTitles.get("advanced"), "ocrThresholdSettings");
     assert.deepEqual(thresholds.map(row => row.key), ["ocrThreshold_detection", "ocrThreshold_box", "ocrThreshold_recognition"]);
@@ -46,11 +67,11 @@ test("OCR settings register separate searchable rows in shared desktop and mobil
     assert.match(readFileSync("src/mobile/menu/settingPanel.ts", "utf8"), /tabId === "ocr"[\s\S]*?unmountOCRTab\(root\)/);
 });
 
-const createOCRPanel = async () => {
+const createOCRPanel = async (initial?: {config?: SettingOCR}) => {
     const compiled = transpileModule(readFileSync("src/config/ocr.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
-    const config: {ocr: SettingOCR} = {ocr: {provider: "paddleocr", model: "tiny", auto: false}};
+    const config: {ocr: SettingOCR} = {ocr: initial?.config ?? {provider: "paddleocr", model: "tiny", auto: false}};
     let serverConfig = {...config.ocr};
     let models = [{id: "tiny", name: "Tiny", builtIn: true}];
     let aiModels: Array<{id: string; name: string; provider: string}> = [];
@@ -60,26 +81,44 @@ const createOCRPanel = async () => {
     const snapshot = () => ({code: 0, data: {config: {...serverConfig},
         providers: [{id: "paddleocr", available: true}, ...(aiModels.length || serverConfig.provider === "ai" ?
             [{id: "ai", available: aiModels.some(model => model.id === serverConfig.aiModelId)}] : [])], models, aiModels}});
-    const controls = Object.fromEntries([
-        "ocrProvider", "ocrModel", "ocrAIModel", "ocrReasoningEffort", "ocrAuto", "ocrImportModels", "ocrImport",
-        "detector", "detectorConfig", "recognizer", "recognizerConfig",
-        "detectorName", "detectorConfigName", "recognizerName", "recognizerConfigName",
-        "ocrThreshold_detection", "ocrThreshold_box", "ocrThreshold_recognition",
-    ].map(id => [id, {
+    const generalIds = generalRowNames;
+    const advancedIds = advancedRowNames;
+    const createClassList = () => {
+        const classes = new Set<string>();
+        return {
+            toggle(name: string, value?: boolean) {
+                const on = value === undefined ? !classes.has(name) : value;
+                if (on) { classes.add(name); } else { classes.delete(name); }
+                return on;
+            },
+            add(name: string) { classes.add(name); },
+            remove(name: string) { classes.delete(name); },
+            contains(name: string) { return classes.has(name); },
+        };
+    };
+    const controls = Object.fromEntries([...generalIds, ...advancedIds].map(id => [id, {
         id, value: id === "ocrProvider" ? "paddleocr" : id === "ocrAIModel" || id === "ocrReasoningEffort" ? "" : "tiny", checked: false, disabled: false, innerHTML: "",
-        files: [{name: `${id}.onnx`}],
         tagName: id === "ocrImport" ? "BUTTON" : "INPUT",
         validationMessage: "", validity: {badInput: false},
         setCustomValidity(message: string) { this.validationMessage = message; },
         reportValidity() { return !this.validationMessage; },
-        closest: () => ({classList: {toggle() {}}}),
+        classList: createClassList(),
+        // 控件自身即配置项，与真实 DOM 中 closest(".config-item") 返回同一元素一致
+        closest() { return this as unknown as {classList: ReturnType<typeof createClassList>}; },
     }]));
+    const groupElement = (ids: string[]) => ({
+        classList: createClassList(),
+        querySelectorAll: () => ids.map(id => controls[id]),
+    });
+    const groups: Record<string, ReturnType<typeof groupElement>> = {
+        general: groupElement(generalIds), advanced: groupElement(advancedIds),
+    };
     const listeners = new Map<string, (event: unknown) => Promise<void>>();
     let renders = 0;
     const root = {
         set innerHTML(_value: string) { renders++; },
-        querySelector: (selector: string) => controls[selector.slice(1)],
-        querySelectorAll: () => Object.values(controls).filter(element => element.id !== "ocrImportModels"),
+        querySelector: (selector: string) => groups[/data-config-group-id="(\w+)"/.exec(selector)?.[1] ?? ""] ?? controls[selector.slice(1)],
+        querySelectorAll: (selector: string) => selector === "[data-config-group-id]" ? Object.values(groups) : Object.values(controls),
         addEventListener: (name: string, callback: (event: unknown) => Promise<void>) => listeners.set(name, callback),
     };
     const requests: Array<{
@@ -89,6 +128,7 @@ const createOCRPanel = async () => {
     }> = [];
     const errors: string[] = [];
     const notifications = new Map<string, () => void>();
+    const dialogs: Array<{options: {onImported: () => void, onClosed?: () => void}, destroy: () => void}> = [];
     const exports = {} as {mountOCRSettings: (element: unknown) => () => void};
     runInNewContext(compiled, {exports, AbortController, window: {siyuan: {config, languages: {ocrThresholdRange: "invalid threshold"}},
         addEventListener: (name: string, callback: () => void, options: {signal: AbortSignal}) => {
@@ -123,6 +163,11 @@ const createOCRPanel = async () => {
         },
         escapeAttr: (value: string) => value, escapeHtml: (value: string) => value,
         genConfigItemMainHtml: () => "", genSwitchRow: () => "", genButtonRowHtml: () => "",
+        openOCRImportModelsDialog: (options: typeof dialogs[number]["options"]) => {
+            const dialog = {options, destroy: () => options.onClosed?.()};
+            dialogs.push(dialog);
+            return dialog;
+        },
         showMessage: (message: string) => errors.push(message),
     })});
     const close = exports.mountOCRSettings(root);
@@ -134,7 +179,8 @@ const createOCRPanel = async () => {
         listeners.get("input")({target: control});
     };
     return {
-        controls, config, requests, errors, close, renders: () => renders,
+        controls, config, requests, errors, close, renders: () => renders, dialogs, groups,
+        clickImport: () => listeners.get("click")({target: {closest: () => controls.ocrImport}, stopPropagation() {}}),
         inputThreshold,
         changeThreshold: (key: keyof OCRThresholds, value: string, badInput = false) => {
             inputThreshold(key, value, badInput);
@@ -175,11 +221,12 @@ test("selecting AI uses a separate model and requires opting into automatic reco
     await new Promise(setImmediate);
     assert.equal(panel.requests[0].config.aiModelId, "vision");
     assert.equal(panel.requests[0].config.auto, false);
+    panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
+    await saving;
+    // 可见性与禁用状态以已保存的配置为准
     assert.equal(panel.controls.ocrModel.disabled, true);
     assert.equal(panel.controls.ocrAIModel.disabled, false);
     assert.equal(panel.controls.ocrThreshold_detection.disabled, true);
-    panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
-    await saving;
     assert.doesNotMatch(panel.controls.ocrAIModel.innerHTML, /value=""/);
     const automatic = panel.changeAuto(true);
     await new Promise(setImmediate);
@@ -246,16 +293,62 @@ test("switching to AI preserves an unavailable imported local model independentl
     panel.close();
 });
 
+test("the first paint hides provider-specific rows before the config response arrives", async () => {
+    const visible = (panel: Awaited<ReturnType<typeof createOCRPanel>>) => generalRowNames
+        .filter(id => !panel.controls[id].classList.contains("fn__none"));
+    // 提供商取自启动配置：AI 不应先显示 PaddleOCR 的模型与导入行
+    const ai = await createOCRPanel({config: {provider: "ai", model: "tiny", auto: false}});
+    assert.deepEqual(visible(ai), ["ocrAuto", "ocrProvider", "ocrAIModel", "ocrReasoningEffort"]);
+    assert.equal(ai.groups.advanced.classList.contains("fn__none"), true);
+    ai.close();
+    // Tesseract 同理：只保留开关与提供商
+    const tesseract = await createOCRPanel({config: {provider: "tesseract", model: "tiny", auto: false}});
+    assert.deepEqual(visible(tesseract), ["ocrAuto", "ocrProvider"]);
+    assert.equal(tesseract.groups.advanced.classList.contains("fn__none"), true);
+    tesseract.close();
+    // PaddleOCR 保留模型、导入行与阈值分组
+    const paddle = await createOCRPanel({config: {provider: "paddleocr", model: "tiny", auto: false}});
+    assert.deepEqual(visible(paddle), ["ocrAuto", "ocrProvider", "ocrModel", "ocrImport"]);
+    assert.equal(paddle.groups.advanced.classList.contains("fn__none"), false);
+    paddle.close();
+    // 配置读取完成后以配置为准
+    const replied = await createOCRPanel({config: {provider: "ai", model: "tiny", auto: false}});
+    replied.updateServer({provider: "paddleocr", model: "tiny", auto: false});
+    replied.notify();
+    await new Promise(setImmediate);
+    assert.deepEqual(visible(replied), ["ocrAuto", "ocrProvider", "ocrModel", "ocrImport"]);
+    replied.close();
+});
+
+test("hidden trailing rows keep the last visible OCR row borderless for every provider", async () => {
+    const panel = await createOCRPanel();
+    const marked = () => Object.values(panel.controls)
+        .filter(control => control.classList.contains("b3-label--noborder")).map(control => control.id);
+    // PaddleOCR：末尾两项隐藏，导入行成为最后可见项
+    assert.deepEqual(marked(), ["ocrImport", "ocrThreshold_recognition"]);
+    const tesseract = panel.changeProvider("tesseract");
+    await new Promise(setImmediate);
+    panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
+    await tesseract;
+    // Tesseract：模型与导入行也隐藏，提供商行成为最后可见项
+    assert.deepEqual(marked(), ["ocrProvider", "ocrThreshold_recognition"]);
+    const ai = panel.changeProvider("ai");
+    await new Promise(setImmediate);
+    panel.requests[1].resolve({code: 0, data: panel.requests[1].config});
+    await ai;
+    // AI：末尾两项可见，仅隐藏模型与导入行
+    assert.deepEqual(marked(), ["ocrReasoningEffort", "ocrThreshold_recognition"]);
+    panel.close();
+});
+
 test("OCR switches save in order without replacing the panel or disabling ordinary controls", async () => {
     const panel = await createOCRPanel();
     const renders = panel.renders();
-    const files = panel.controls.detector.files;
     const first = panel.changeAuto(true);
     await new Promise(setImmediate);
     assert.equal(panel.controls.ocrAuto.disabled, false);
     assert.equal(panel.controls.ocrProvider.disabled, false);
     assert.equal(panel.controls.ocrModel.disabled, false);
-    assert.equal(panel.controls.detector.disabled, false);
     assert.equal(panel.controls.ocrImport.disabled, true);
     const second = panel.changeAuto(false);
     assert.equal(panel.requests.length, 1);
@@ -270,7 +363,6 @@ test("OCR switches save in order without replacing the panel or disabling ordina
     await second;
     assert.equal(panel.config.ocr.auto, false);
     assert.equal(panel.controls.ocrImport.disabled, false);
-    assert.equal(panel.controls.detector.files, files);
     assert.equal(panel.renders(), renders);
     panel.close();
 });
@@ -401,10 +493,9 @@ test("closing the OCR panel cancels queued saves while confirmed shared configur
     assert.equal(panel.controls.ocrAuto.checked, false);
 });
 
-test("OCR notifications update configuration and model options without replacing the form or file choices", async () => {
+test("OCR notifications update configuration and model options without replacing the form", async () => {
     const panel = await createOCRPanel();
     const renders = panel.renders();
-    const files = panel.controls.detector.files;
     panel.updateServer({provider: "paddleocr", model: "imported", auto: true});
     panel.addModel("imported");
     panel.notify();
@@ -412,7 +503,6 @@ test("OCR notifications update configuration and model options without replacing
     assert.equal(panel.controls.ocrAuto.checked, true);
     assert.equal(panel.controls.ocrModel.value, "imported");
     assert.match(panel.controls.ocrModel.innerHTML, /value="imported"/);
-    assert.equal(panel.controls.detector.files, files);
     assert.equal(panel.renders(), renders);
     const reads = panel.reads();
     panel.close();
@@ -489,4 +579,32 @@ test("closing the panel ignores a late notification response", async () => {
     await new Promise(setImmediate);
     assert.equal(panel.config.ocr.auto, false);
     assert.equal(panel.renders(), renders);
+});
+
+test("the import button opens one model dialog and refreshes the model list after importing", async () => {
+    const panel = await createOCRPanel();
+    panel.clickImport();
+    assert.equal(panel.dialogs.length, 1);
+    assert.equal(panel.requests.length, 0);
+    // 弹窗已打开时不重复打开，也不由面板直接发起导入
+    panel.clickImport();
+    assert.equal(panel.dialogs.length, 1);
+    const reads = panel.reads();
+    panel.dialogs[0].options.onImported();
+    await new Promise(setImmediate);
+    assert.equal(panel.reads(), reads + 1);
+    // 关闭后可以重新打开
+    panel.dialogs[0].destroy();
+    panel.clickImport();
+    assert.equal(panel.dialogs.length, 2);
+    panel.close();
+});
+
+test("closing the panel closes an open import dialog", async () => {
+    const panel = await createOCRPanel();
+    panel.clickImport();
+    let closed = 0;
+    panel.dialogs[0].options.onClosed = () => { closed++; };
+    panel.close();
+    assert.equal(closed, 1);
 });

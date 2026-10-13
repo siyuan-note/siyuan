@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "Impor model PP-OCRv6",
 	"kernelUnresponsiveTitle": "Kernel tidak merespons",
 	"kernelUnresponsiveMessage": "Permintaan lokal ke kernel kehabisan waktu, sehingga SiYuan tidak dapat membuka jendela utama. Lihat ${log} untuk detailnya.",
 	"kernelUnresponsiveWindowsHint": "Di Windows, hal ini mungkin terkait dengan penggunaan kontrol kemacetan TCP BBR2 bersama Loopback Large Mtu (loopbacklargemtu).",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "Memproses gambar buku catatan tidak terenkripsi tanpa hasil OCR; AI mengirim gambar ke penyedia yang dipilih di latar belakang",
 	"ocrModel": "Model OCR",
 	"ocrModelTip": "Hanya Tiny yang disertakan; pergantian model mempertahankan hasil yang ada; jalankan ulang OCR dari menu gambar",
-	"ocrImportModels": "Impor model OCR",
-	"ocrImportModelsTip": "Pilih berkas ONNX deteksi dan pengenalan PP-OCRv6 yang kompatibel beserta inference.yml masing-masing; berkas impor disinkronkan dengan ruang kerja",
+	"ocrImportModelsTip": "Pilih berkas ONNX deteksi dan pengenalan dari model yang sama beserta berkas inference.yml masing-masing. Model yang diimpor disimpan di ruang kerja dan ikut disinkronkan",
 	"ocrDetector": "Model deteksi",
 	"ocrRecognizer": "Model pengenalan",
 	"ocrUnavailable": "Tidak tersedia",

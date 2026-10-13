@@ -362,9 +362,11 @@ class Builder:
             prefix += ["--distribution", self.args.wsl_distro]
         prefix += ["--user", self.args.wsl_user, "--cd", directory or self.args.wsl_repo,
                    "--exec", "bash", "-lc", "exec " + shlex.join([str(item) for item in command])]
+        # WSL 诊断输出统一为 UTF-8，与日志解码一致。
+        env = dict(os.environ, WSL_UTF8="1")
         if command[:2] == ["git", "fetch"]:
-            return run(prefix, ROOT, capture=capture, interactive=True)
-        return run(prefix, ROOT, capture=capture)
+            return run(prefix, ROOT, env=env, capture=capture, interactive=True)
+        return run(prefix, ROOT, env=env, capture=capture)
 
     def stage(self, key):
         return self.record.stage(key) if self.record else nullcontext()

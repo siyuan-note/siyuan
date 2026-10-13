@@ -10,11 +10,77 @@ const runRendererCase = async (sources, expected) => {
         new Function("require", "exports", source)(name => modules[name] || {}, exports);
         return exports;
     };
-    window.siyuan = {languages: {loading: "Loading..."}, config: {appearance: {mode: expected.mode === "dark" ? 1 : 0}}};
+    window.siyuan = {
+        languages: {loading: "Loading...", pinWindow: "Pin", unpinWindow: "Unpin", min: "Minimize",
+            max: "Maximize", restore: "Restore", close: "Close"},
+        storage: {zoom: 1},
+        config: {appearance: {mode: expected.mode === "dark" ? 1 : 0}, editor: {spellcheckLanguages: ["en-US"]}},
+        menus: {menu: {element: document.createElement("div")}},
+    };
     const assets = load(sources.assets);
     const appearance = load(sources.appearance, {"../util/assets": assets});
     const {waitForWindowPaint} = load(sources.paint);
     const {initWindowWithLoading} = load(sources.loading, {"../util/windowPaint": {waitForWindowPaint}});
+    const deferred = () => {
+        let resolve;
+        const promise = new Promise(done => { resolve = done; });
+        return {promise, resolve};
+    };
+    const windowState = deferred();
+    const snippets = deferred();
+    const workspace = deferred();
+    const calls = [];
+    const constants = {LOCAL_ZOOM: "zoom", SIZE_ZOOM: [{zoom: 1, position: {x: 0, y: 0}}],
+        SIYUAN_CMD: "cmd", SIYUAN_GET: "get", TIMEOUT_SNIPPET_LOAD: 5000};
+    const electron = {ipcRenderer: {send: (_channel, command) => calls.push(command), on() {},
+        invoke: async (_channel, data) => data.cmd === "isFullScreen" ? windowState.promise : false},
+        webFrame: {setZoomFactor() {}}};
+    const functions = {isWindow: () => true, setToolbarLeftMac() {}};
+    const compatibility = {isMac: () => false};
+    const controls = load(sources.controls, {electron, "../constants": {Constants: constants}, "../util/functions": functions});
+    const {initWindow} = load(sources.host, {
+        electron, "../constants": {Constants: constants}, "../util/functions": functions,
+        "../protyle/util/compatibility": compatibility, "./windowControls": controls,
+        "./globalEvent/commonHotkey": {syncAppMenuShortcuts() {}},
+        "../window/closeWin": {closeWindow: () => calls.push("close")},
+        "../window/workspace": {initWindowWorkspace: async () => {
+            await workspace.promise;
+            const button = document.createElement("button");
+            button.id = "windowWorkspace";
+            button.textContent = "Workspace";
+            document.querySelector(".toolbar__window").prepend(button);
+        }},
+    });
+    const app = {layout: {layout: {addWnd() {}}}};
+    window.siyuan.layout = app.layout;
+    const {init} = load(sources.init, {
+        electron, "../constants": {Constants: constants},
+        "../boot/onGetConfig": {initDesktopHost: async () => {}, initWindow},
+        "../boot/globalEvent/event": {initWindowEvent() {}},
+        "../layout/status": {initStatus() {}},
+        "../layout/tabUtil": {setTabPosition() {}},
+        "../layout/getAll": {getAllWnds: (_layout, wnds) => wnds.push({children: [{}]})},
+        "../layout/util": {JSONToCenter() {}, adjustLayout() {}},
+        "../util/functions": {getSearch: () => "[]"},
+        "../protyle/util/compatibility": {initWindowOpenOverride() {}, initNativeDialogOverride() {}},
+        "../util/assets": {initAssets: keepLoading => assert.equal(keepLoading, true),
+            enqueueAppearanceUpdate: apply => apply(), setInlineStyle: async () => {}},
+        "../config/tabs/appearanceRuntime": {appearanceConfigApi: {apply: () => {
+            const theme = document.createElement("link");
+            theme.rel = "stylesheet";
+            theme.href = "/pending-theme.css";
+            document.head.appendChild(theme);
+        }}},
+        "../config/util/snippets": {renderSnippet: timeout => {
+            assert.equal(timeout, 5000);
+            return snippets.promise;
+        }},
+        "../util/fetch": {fetchPost: (_url, _data, callback) => {
+            window.releaseLayout = () => callback({data: []});
+        }},
+        "../plugin/loader": {afterLayoutReady() {}},
+        "./workspace": {getWindowWorkspaceLayout() {}, activateWindowWorkspace() {}},
+    });
     const loader = document.getElementById("loading");
     assert.equal(getComputedStyle(loader).backgroundColor, expected.background);
     assert.equal(document.documentElement.getAttribute("data-theme-mode"), expected.mode);
@@ -28,18 +94,40 @@ const runRendererCase = async (sources, expected) => {
     assert.ok(Math.abs(imgRect.x + imgRect.width / 2 - innerWidth / 2) < 1);
     assert.ok(Math.abs(imgRect.y + imgRect.height / 2 - innerHeight / 2) < 1);
     assert.equal(appearance.getWindowAppearance().backgroundColor, expected.hex);
-    let release;
     let done = false;
-    const initialized = initWindowWithLoading(async () => {
-        const theme = document.createElement("link");
-        theme.rel = "stylesheet";
-        theme.href = "/pending-theme.css";
-        document.head.appendChild(theme);
-        await new Promise(resolve => { release = resolve; });
-        document.getElementById("layouts").textContent = "Ready";
-    }).then(() => { done = true; });
+    let renderDone = false;
+    const initialized = initWindowWithLoading(() => init(app).then(() => { renderDone = true; }, error => {
+        window.initError = error.stack;
+        throw error;
+    }))
+        .then(() => { done = true; });
     assert.equal(loader.getAttribute("aria-label"), "Loading...");
-    window.releaseInitialization = release;
+    window.releaseInitialization = async () => {
+        window.releaseLayout();
+        const gates = {workspace, state: windowState, snippets};
+        Object.entries(gates).forEach(([name, gate]) => {
+            if (name !== expected.gate) gate.resolve(false);
+        });
+        await new Promise(resolve => setTimeout(resolve, 40));
+        assert.equal(renderDone, false, expected.gate + " still pending");
+        gates[expected.gate].resolve(false);
+        await new Promise(resolve => setTimeout(resolve, 40));
+        assert.equal(renderDone, true, window.initError);
+        assert.ok(document.getElementById("closeWindow"));
+        assert.ok(document.getElementById("windowWorkspace"));
+        assert.equal(done, false, "theme stylesheet still pending");
+        const close = document.getElementById("closeWindow");
+        const bounds = close.getBoundingClientRect();
+        assert.ok(loader.contains(document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)),
+            "loading layer covers early window controls");
+    };
+    window.assertReadyControls = () => {
+        const close = document.getElementById("closeWindow");
+        const bounds = close.getBoundingClientRect();
+        assert.ok(close.contains(document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)));
+        close.click();
+        assert.equal(calls.at(-1), "close");
+    };
     window.loadingResult = initialized;
     await new Promise(resolve => setTimeout(resolve, 80));
     assert.equal(done, false);
@@ -57,8 +145,11 @@ if (process.versions.electron && process.type === "browser") {
         const sources = {};
         const ts = require("typescript");
         for (const [key, file] of Object.entries({assets: "util/assets.ts", appearance: "window/appearance.ts",
-            paint: "util/windowPaint.ts", loading: "window/loading.ts"})) {
-            sources[key] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", file), "utf8"), {
+            paint: "util/windowPaint.ts", loading: "window/loading.ts", init: "window/init.ts",
+            host: "boot/onGetConfig.ts", controls: "boot/windowControls.ts"})) {
+            const source = require("ifdef-loader/preprocessor").parse(
+                fs.readFileSync(path.join(__dirname, "../src", file), "utf8"), {MOBILE: false, BROWSER: false}, false, true);
+            sources[key] = ts.transpileModule(source, {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
             }).outputText;
         }
@@ -97,9 +188,9 @@ if (process.versions.electron && process.type === "browser") {
         let code = 0;
         try {
             for (const expected of [
-                {mode: "light", hex: "#ffffff", background: "rgb(255, 255, 255)"},
-                {mode: "dark", hex: "#1e1e1e", background: "rgb(30, 30, 30)"},
-                {mode: "dark", hex: "#234567", background: "rgb(35, 69, 103)"},
+                {mode: "light", hex: "#ffffff", background: "rgb(255, 255, 255)", gate: "workspace"},
+                {mode: "dark", hex: "#1e1e1e", background: "rgb(30, 30, 30)", gate: "state"},
+                {mode: "dark", hex: "#234567", background: "rgb(35, 69, 103)", gate: "snippets"},
             ]) {
                 win = new BrowserWindow({show: false, backgroundColor: expected.hex, width: 640, height: 480,
                     webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
@@ -128,6 +219,7 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(await win.webContents.executeJavaScript('document.getElementById("windowAppearanceStyle")'), null);
                 assert.equal(await win.webContents.executeJavaScript('document.body.hasAttribute("aria-busy")'), false);
                 assert.equal(await win.webContents.executeJavaScript("getComputedStyle(document.body).backgroundColor"), "rgb(86, 120, 144)");
+                await win.webContents.executeJavaScript("window.assertReadyControls()");
                 win.destroy();
             }
         } catch (error) {

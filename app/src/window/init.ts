@@ -83,7 +83,7 @@ export const init = async (app: App) => {
         });
     });
     initStatus(true);
-    initWindow(app);
+    const windowReady = initWindow(app);
     initWindowOpenOverride(app);
     /// #if !BROWSER
     initNativeDialogOverride();
@@ -93,7 +93,7 @@ export const init = async (app: App) => {
     await enqueueAppearanceUpdate(async () => {
         await setInlineStyle();
     });
-    renderSnippet();
+    const snippetReady = renderSnippet(Constants.TIMEOUT_SNIPPET_LOAD);
     let resizeTimeout = 0;
     window.addEventListener("resize", () => {
         window.clearTimeout(resizeTimeout);
@@ -115,7 +115,7 @@ export const init = async (app: App) => {
             });
         }, Constants.TIMEOUT_RESIZE);
     });
-    return layoutReady;
+    await Promise.all([layoutReady, windowReady, snippetReady]);
 };
 
 const afterLayout = (app: App) => {

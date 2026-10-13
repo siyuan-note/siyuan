@@ -355,7 +355,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     </svg>
 </div></div>`);
         const pinElement = document.getElementById("pinWindow");
-        void import("../window/workspace").then(({initWindowWorkspace}) => initWindowWorkspace());
+        await import("../window/workspace").then(({initWindowWorkspace}) => initWindowWorkspace());
         pinElement.addEventListener("click", () => {
             if (pinElement.getAttribute("aria-label") === window.siyuan.languages.pinWindow) {
                 pinElement.querySelector("use").setAttribute("xlink:href", "#iconUnpin");

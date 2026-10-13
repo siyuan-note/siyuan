@@ -19,7 +19,7 @@ export const getPdfViewerHTML = () => `<div class="pdf__outer" id="outerContaine
           </div>
           <div class="fn__flex-1"></div>
           <div id="toolbarSidebarRight">
-            <div id="outlineOptionsContainer" class="fn__hidden">
+            <div id="outlineOptionsContainer" class="fn__none">
               <button id="currentOutlineItem" class="toolbarButton b3-tooltips b3-tooltips__nw" disabled="disabled" aria-label="${window.siyuan.languages.focusOutline}">
                 <svg><use xlink:href="#iconFocus"></use></svg>
               </button>

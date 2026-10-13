@@ -129,6 +129,7 @@ function getViewerConfiguration(element) {
       attachmentsView: element.querySelector("#attachmentsView"),
       layersView: element.querySelector("#layersView"),
       // View-specific options
+      outlineOptionsContainer: element.querySelector("#outlineOptionsContainer"),
       currentOutlineItemButton: element.querySelector("#currentOutlineItem"),
     },
     findBar: {

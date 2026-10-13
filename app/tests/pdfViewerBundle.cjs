@@ -38,6 +38,10 @@ module.exports = async ({annotations = false} = {}) => {
                 export {getPdfSelectionText} from '../pdfSelectionText.ts';
                 export {TextLayerBuilder} from './text_layer_builder.js';
                 export {PDFViewer} from './pdf_viewer.js';
+                export {PDFSidebar} from './pdf_sidebar.js';
+                export {PDFOutlineViewer} from './pdf_outline_viewer.js';
+                export {EventBus} from './event_utils.js';
+                export {SidebarView} from './ui_utils.js';
                 export {PDFThumbnailViewer} from './pdf_thumbnail_viewer.js';`,
             resolveDir: path.resolve(__dirname, "../src/asset/pdf"),
         },

@@ -1,3 +1,8 @@
+.window-loading {
+  background-color: var(--b3-theme-background);
+  -webkit-app-region: drag;
+}
+
 .window-workspace {
   &__list {
     width: min(256px, 70vw);

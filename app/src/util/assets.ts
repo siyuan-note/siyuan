@@ -434,6 +434,10 @@ const cssVarToRgba = (varName: string) => {
     return rgba;
 };
 
+export const getThemeColor = (varName: string, fallback: string) => {
+    return rgbaToHex(cssVarToRgba(varName)).slice(0, 7) || fallback;
+};
+
 const updateMobileTheme = (OSTheme: string) => {
     if (isInMobileApp()) {
         setTimeout(() => {

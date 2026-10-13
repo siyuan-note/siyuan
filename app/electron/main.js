@@ -130,7 +130,6 @@ const notebookSystemLock = createNotebookSystemLock({
 });
 const windowKernelTargets = new Map();
 const initializedWindowIds = new Set();
-const pendingWindowIds = new Set();
 createSettingsTaskBridge({
     ipcMain,
     getTarget: id => getWindowKernelTarget(id),
@@ -3967,19 +3966,26 @@ app.whenReady().then(() => {
             }
             const existingWindow = windowWorkspaces.get(kernelTarget.origin, workspaceID);
             if (existingWindow) {
-                if (!pendingWindowIds.has(existingWindow.webContents.id)) {
-                    showWindow(existingWindow);
-                }
+                showWindow(existingWindow);
                 return;
             }
         }
+        const themeMode = data.themeMode === "dark" ? "dark" : "light";
+        const backgroundColor = /^#[\da-f]{6}$/i.test(data.backgroundColor) ? data.backgroundColor :
+            (themeMode === "dark" ? "#1e1e1e" : "#ffffff");
+        const foregroundColor = /^#[\da-f]{6}$/i.test(data.foregroundColor) ? data.foregroundColor :
+            (themeMode === "dark" ? "#d4d4d4" : "#222222");
+        windowURL.searchParams.set("windowThemeMode", themeMode);
+        windowURL.searchParams.set("windowBackground", backgroundColor);
+        windowURL.searchParams.set("windowForeground", foregroundColor);
         const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
         const mainBounds = mainWindow.getBounds();
         const mainScreen = screen.getDisplayNearestPoint({x: mainBounds.x, y: mainBounds.y});
         const geometry = workspaceID ? normalizeWindowGeometry(data.windowGeometry, screen) : undefined;
         const win = new BrowserWindow({
             title: "SiYuan",
-            show: false,
+            show: true,
+            backgroundColor,
             trafficLightPosition: {x: 8, y: 13},
             width: Math.floor(data.width || mainScreen.size.width * 0.7),
             height: Math.floor(data.height || mainScreen.size.height * 0.9),
@@ -3991,7 +3997,6 @@ app.whenReady().then(() => {
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",
             webPreferences: {
-                backgroundThrottling: false,
                 contextIsolation: false,
                 nodeIntegration: true,
                 nodeIntegrationInSubFrames: false,
@@ -4010,57 +4015,12 @@ app.whenReady().then(() => {
             windowWorkspaces.associate(win, kernelTarget.origin, workspaceID);
         }
 
-        // 原生窗口和主题内容均完成绘制后再显示，最大化和全屏也延后到此时执行。
-        const windowId = win.webContents.id;
-        pendingWindowIds.add(windowId);
-        let painted = false;
-        let initialized = false;
-        const stopWaiting = () => {
-            clearTimeout(readyTimeout);
-            ipcMain.removeListener("siyuan-window-ready", onWindowReady);
-            pendingWindowIds.delete(windowId);
-        };
-        const revealWindow = () => {
-            if (!painted || !initialized || win.isDestroyed() || !pendingWindowIds.has(windowId)) {
-                return;
-            }
-            stopWaiting();
-            if (geometry && data.windowGeometry.maximized) {
-                win.maximize();
-            }
-            if (geometry && data.windowGeometry.fullscreen) {
-                win.setFullScreen(true);
-            }
-            showWindow(win);
-            win.webContents.setBackgroundThrottling(true);
-        };
-        const onWindowReady = readyEvent => {
-            if (readyEvent.sender.id === windowId) {
-                initialized = true;
-                revealWindow();
-            }
-        };
-        ipcMain.on("siyuan-window-ready", onWindowReady);
-        win.once("ready-to-show", () => {
-            painted = true;
-            revealWindow();
-        });
-        win.webContents.on("did-finish-load", () => {
-            if (getWindowPathname(win) !== "/stage/build/app/window.html") {
-                initialized = true;
-                revealWindow();
-            }
-        });
-        // 初始化失败时显示窗口供用户处理，避免留下无法访问的隐藏窗口。
-        const readyTimeout = setTimeout(() => {
-            if (!win.isDestroyed()) {
-                writeLog("siyuan-window-ready timeout, force showing detached window");
-                painted = true;
-                initialized = true;
-                revealWindow();
-            }
-        }, 60000);
-        win.once("closed", stopWaiting);
+        if (geometry && data.windowGeometry.maximized) {
+            win.maximize();
+        }
+        if (geometry && data.windowGeometry.fullscreen) {
+            win.setFullScreen(true);
+        }
 
         if (!geometry && data.position) {
             win.setPosition(data.position.x, data.position.y);
@@ -4073,8 +4033,8 @@ app.whenReady().then(() => {
         win.loadURL(windowURL.href);
         windowNavigate(win, "window", kernelTarget.origin, kernelTarget.mode === "remote");
         win.on("close", (event) => {
-            if (kernelTarget.mode === "remote" && (getWindowPathname(win) !== "/stage/build/app/window.html" ||
-                !initializedWindowIds.has(win.webContents.id))) {
+            if (!initializedWindowIds.has(win.webContents.id) ||
+                (kernelTarget.mode === "remote" && getWindowPathname(win) !== "/stage/build/app/window.html")) {
                 event.preventDefault();
                 markExpectedRendererExit(win);
                 win.destroy();

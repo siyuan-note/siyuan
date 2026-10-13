@@ -1,6 +1,6 @@
 const FRAME_WAIT_LIMIT = 250;
 
-// 等主题样式和窗口内容绘制完成，再通知主进程显示原生窗口。
+// 等主题样式加载完成并绘制窗口内容。
 export const waitForWindowPaint = async (render: () => Promise<void>) => {
     const initialStyles = new Set(document.head.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]'));
     const styles = new Map<HTMLLinkElement, () => void>();
@@ -36,7 +36,7 @@ export const waitForWindowPaint = async (render: () => Promise<void>) => {
                 cancelAnimationFrame(frame);
                 resolve();
             };
-            // 帧回调未及时执行时允许继续显示，原生窗口仍需满足 ready-to-show。
+            // 帧回调未及时执行时也允许完成初始化。
             const timer = window.setTimeout(finish, FRAME_WAIT_LIMIT);
             frame = requestAnimationFrame(() => { frame = requestAnimationFrame(finish); });
         });

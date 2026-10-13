@@ -89,7 +89,7 @@ export const init = async (app: App) => {
     initNativeDialogOverride();
     /// #endif
     appearanceConfigApi.apply(window.siyuan.config.appearance);
-    initAssets();
+    initAssets(true);
     await enqueueAppearanceUpdate(async () => {
         await setInlineStyle();
     });

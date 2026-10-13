@@ -1128,7 +1128,8 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
     const isInMobile = isInMobileApp();
     const mobileHtml = isInMobile ? {
         js: exportOption.type === "pdf" ? "" : `document.body.style.minWidth = "${getScreenWidth()}px";`,
-        css: `@page { size: A4; margin: 10mm 0 10mm 0; background-color: var(--b3-theme-background); }
+        css: `@page { size: A4; margin: 10mm; background-color: var(--b3-theme-background); }
+@media print { body { margin: 0; } }
 .protyle-wysiwyg {padding: 0; margin: 0;}`
     } : {js: "", css: ""};
     const html = `<!DOCTYPE html>

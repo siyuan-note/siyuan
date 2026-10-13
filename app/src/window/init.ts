@@ -75,10 +75,6 @@ export const init = async (app: App) => {
             });
             afterLayout(app);
             activateWindowWorkspace();
-            // 等待 dock 面板动画结束
-            setTimeout(() => {
-                setTabPosition();
-            }, Constants.TIMEOUT_TRANSITION);
             resolve();
         });
     });
@@ -116,6 +112,7 @@ export const init = async (app: App) => {
         }, Constants.TIMEOUT_RESIZE);
     });
     await Promise.all([layoutReady, windowReady, snippetReady]);
+    setTabPosition();
 };
 
 const afterLayout = (app: App) => {

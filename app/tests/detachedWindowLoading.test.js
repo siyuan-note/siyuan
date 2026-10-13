@@ -51,16 +51,29 @@ const runRendererCase = async (sources, expected) => {
             document.querySelector(".toolbar__window").prepend(button);
         }},
     });
-    const app = {layout: {layout: {addWnd() {}}}};
+    let wnd;
+    const getAllWnds = (_layout, wnds) => { if (wnd) wnds.push(wnd); };
+    const tabUtil = load(sources.tabs, {"../util/functions": functions, "./getAll": {getAllWnds}});
+    const app = {layout: {layout: {element: document.getElementById("layouts"), addWnd() {}}}};
     window.siyuan.layout = app.layout;
     const {init} = load(sources.init, {
         electron, "../constants": {Constants: constants},
         "../boot/onGetConfig": {initDesktopHost: async () => {}, initWindow},
         "../boot/globalEvent/event": {initWindowEvent() {}},
         "../layout/status": {initStatus() {}},
-        "../layout/tabUtil": {setTabPosition() {}},
-        "../layout/getAll": {getAllWnds: (_layout, wnds) => wnds.push({children: [{}]})},
-        "../layout/util": {JSONToCenter() {}, adjustLayout() {}},
+        "../layout/tabUtil": tabUtil,
+        "../layout/getAll": {getAllWnds},
+        "../layout/util": {JSONToCenter() {
+            const element = document.createElement("div");
+            element.className = "fn__flex-1 fn__flex";
+            element.innerHTML = `<div data-type="wnd" class="fn__flex-column fn__flex fn__flex-1">
+<div class="fn__flex"><ul class="fn__flex layout-tab-bar"><li class="item item--focus">Document</li></ul>
+<ul class="layout-tab-bar layout-tab-bar--readonly fn__flex-1"><li class="item item--readonly"><span class="fn__flex-1"></span></li></ul></div>
+<div class="layout-tab-container fn__flex-1"><div class="protyle" id="initialEditor"></div>
+<div class="protyle fn__none" id="backgroundEditor"></div></div></div>`;
+            app.layout.layout.element.appendChild(element);
+            wnd = {element, headersElement: element.querySelector(".layout-tab-bar"), children: [{}]};
+        }, adjustLayout() {}},
         "../util/functions": {getSearch: () => "[]"},
         "../protyle/util/compatibility": {initWindowOpenOverride() {}, initNativeDialogOverride() {}},
         "../util/assets": {initAssets: keepLoading => assert.equal(keepLoading, true),
@@ -127,6 +140,18 @@ const runRendererCase = async (sources, expected) => {
         assert.ok(close.contains(document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)));
         close.click();
         assert.equal(calls.at(-1), "close");
+        assert.ok(wnd.element.classList.contains("layout__wnd--center"), "tab position finalized before reveal");
+        assert.equal(getComputedStyle(wnd.headersElement).backgroundColor, "rgba(0, 0, 0, 0)");
+        assert.ok(document.getElementById("backgroundEditor"), "unloaded background editor does not hold loading");
+    };
+    window.releaseDocument = () => {
+        const editor = document.getElementById("initialEditor");
+        if (expected.document === "removed") editor.remove();
+        else if (expected.document === "hidden") editor.classList.add("fn__none");
+        else if (expected.document !== "timeout") {
+            editor.textContent = "Document toolbar and content";
+            editor.dataset.loading = "finished";
+        }
     };
     window.loadingResult = initialized;
     await new Promise(resolve => setTimeout(resolve, 80));
@@ -138,6 +163,7 @@ const runRendererCase = async (sources, expected) => {
 if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow} = require("electron");
     const {createServer} = require("node:http");
+    app.on("window-all-closed", () => {});
     app.disableHardwareAcceleration();
     app.setPath("userData", process.argv[2]);
     app.whenReady().then(async () => {
@@ -146,7 +172,7 @@ if (process.versions.electron && process.type === "browser") {
         const ts = require("typescript");
         for (const [key, file] of Object.entries({assets: "util/assets.ts", appearance: "window/appearance.ts",
             paint: "util/windowPaint.ts", loading: "window/loading.ts", init: "window/init.ts",
-            host: "boot/onGetConfig.ts", controls: "boot/windowControls.ts"})) {
+            host: "boot/onGetConfig.ts", controls: "boot/windowControls.ts", tabs: "layout/tabUtil.ts"})) {
             const source = require("ifdef-loader/preprocessor").parse(
                 fs.readFileSync(path.join(__dirname, "../src", file), "utf8"), {MOBILE: false, BROWSER: false}, false, true);
             sources[key] = ts.transpileModule(source, {
@@ -188,9 +214,10 @@ if (process.versions.electron && process.type === "browser") {
         let code = 0;
         try {
             for (const expected of [
-                {mode: "light", hex: "#ffffff", background: "rgb(255, 255, 255)", gate: "workspace"},
-                {mode: "dark", hex: "#1e1e1e", background: "rgb(30, 30, 30)", gate: "state"},
-                {mode: "dark", hex: "#234567", background: "rgb(35, 69, 103)", gate: "snippets"},
+                {mode: "light", hex: "#ffffff", background: "rgb(255, 255, 255)", gate: "workspace", document: "finished"},
+                {mode: "dark", hex: "#1e1e1e", background: "rgb(30, 30, 30)", gate: "state", document: "hidden"},
+                {mode: "dark", hex: "#234567", background: "rgb(35, 69, 103)", gate: "snippets", document: "removed"},
+                {mode: "dark", hex: "#1e1e1e", background: "rgb(30, 30, 30)", gate: "state", document: "timeout"},
             ]) {
                 win = new BrowserWindow({show: false, backgroundColor: expected.hex, width: 640, height: 480,
                     webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
@@ -214,6 +241,10 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(pending.length, 1);
                 pending.pop().writeHead(200, {"Content-Type": "text/css"}).end(
                     ":root{--b3-theme-background:#567890;--b3-body-background:#567890;}");
+                await new Promise(resolve => setTimeout(resolve, 300));
+                assert.equal(await win.webContents.executeJavaScript('!!document.getElementById("loading")'), true,
+                    "visible document is still loading after styles are ready");
+                await win.webContents.executeJavaScript("window.releaseDocument()");
                 await win.webContents.executeJavaScript("window.loadingResult");
                 assert.equal(await win.webContents.executeJavaScript('document.getElementById("loading")'), null);
                 assert.equal(await win.webContents.executeJavaScript('document.getElementById("windowAppearanceStyle")'), null);
@@ -222,6 +253,7 @@ if (process.versions.electron && process.type === "browser") {
                 await win.webContents.executeJavaScript("window.assertReadyControls()");
                 win.destroy();
             }
+            console.log("Verified 4 detached window loading cases");
         } catch (error) {
             console.error(error);
             code = 1;
@@ -242,7 +274,9 @@ if (process.versions.electron && process.type === "browser") {
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
         try {
-            await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 55000});
+            const {stdout} = await promisify(execFile)(require("electron"), [__filename, profile],
+                {env, windowsHide: true, timeout: 55000});
+            assert.ok(stdout.includes("Verified 4 detached window loading cases"));
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});

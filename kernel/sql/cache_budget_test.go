@@ -50,3 +50,31 @@ func TestBlockCacheReplacementRemainsInvalidatable(t *testing.T) {
 		t.Fatal("replacement survived invalidation")
 	}
 }
+
+func TestBlockCacheGrowingReplacementRespectsBudget(t *testing.T) {
+	previousDisabled, previousCost := cacheDisabled, blockCache.MaxCost()
+	cacheDisabled = false
+	ClearCache()
+	t.Cleanup(func() { ClearCache(); cacheDisabled = previousDisabled; blockCache.UpdateMaxCost(previousCost) })
+	ids := []string{"a", "b", "c"}
+	budget := 3*blockCacheCost("a", &Block{ID: "a", Content: strings.Repeat("x", 64)}) + 512
+	blockCache.UpdateMaxCost(budget)
+	for _, id := range ids {
+		putBlockCache(&Block{ID: id, Content: strings.Repeat("x", 64)})
+		blockCache.Wait()
+		if getBlockCache(id) == nil {
+			t.Fatal("initial block was not admitted")
+		}
+	}
+	putBlockCache(&Block{ID: "b", Content: strings.Repeat("x", int(budget/2))})
+	blockCache.Wait()
+	var used int64
+	for _, id := range ids {
+		if block := getBlockCache(id); block != nil {
+			used += blockCacheCost(id, block)
+		}
+	}
+	if used > budget {
+		t.Fatalf("growing replacement exceeded budget: %d > %d", used, budget)
+	}
+}

@@ -14,11 +14,11 @@ export const isCompactModeEnabled = () =>
 export const applyCompactMode = () => {
     const root = document.documentElement;
     const enabled = isCompactModeEnabled();
-    const changed = root.hasAttribute(Constants.CUSTOM_SY_UI_DENSITY) !== enabled;
+    const changed = root.hasAttribute(Constants.ATTRIBUTE_UI_DENSITY) !== enabled;
     if (enabled) {
-        root.setAttribute(Constants.CUSTOM_SY_UI_DENSITY, "compact");
+        root.setAttribute(Constants.ATTRIBUTE_UI_DENSITY, "compact");
     } else {
-        root.removeAttribute(Constants.CUSTOM_SY_UI_DENSITY);
+        root.removeAttribute(Constants.ATTRIBUTE_UI_DENSITY);
     }
     document.querySelectorAll<HTMLInputElement>('input[id="compactMode"]').forEach(input => {
         input.checked = enabled;

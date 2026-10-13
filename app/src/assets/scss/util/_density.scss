@@ -31,7 +31,7 @@ $compact-sizes: (
   "config-nav-margin": 6px
 );
 
-:where(:root[custom-sy-ui-density="compact"]) {
+:where(:root[data-ui-density="compact"]) {
   @each $name, $value in $compact-sizes {
     --b3-ui-#{$name}: #{$value};
   }

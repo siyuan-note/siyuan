@@ -30,7 +30,7 @@ const fixture = (frontend = "desktop", mobileApp = false) => {
             querySelectorAll: () => [input],
         },
         require: () => ({
-            Constants: {LOCAL_COMPACT_MODE: "compact", CUSTOM_SY_UI_DENSITY: "density"},
+            Constants: {LOCAL_COMPACT_MODE: "compact", ATTRIBUTE_UI_DENSITY: "data-ui-density"},
             getFrontend: () => frontend,
             isInMobileApp: () => mobileApp,
             setStorageVal: (...args: unknown[]) => saved.push(args),
@@ -45,7 +45,7 @@ test("compact mode defaults to off and only accepts an explicit boolean preferen
     for (const value of [undefined, null, false, "true", 1]) {
         f.storage.compact = value;
         f.api.applyCompactMode();
-        assert.equal(f.attributes.has("density"), false);
+        assert.equal(f.attributes.has("data-ui-density"), false);
         assert.equal(f.input.checked, false);
     }
     assert.deepEqual(f.events, []);
@@ -56,13 +56,13 @@ test("compact mode persists through the workspace preference store and updates o
     f.api.setCompactModeEnabled(true);
     assert.deepEqual(f.saved, [["compact", true]]);
     assert.equal(f.storage.compact, true);
-    assert.equal(f.attributes.get("density"), "compact");
+    assert.equal(f.attributes.get("data-ui-density"), "compact");
     assert.equal(f.input.checked, true);
     f.api.applyCompactMode();
     assert.deepEqual(f.events, ["resize"]);
     delete f.storage.compact;
     f.api.onCompactModeStorageChanged("compact");
-    assert.equal(f.attributes.has("density"), false);
+    assert.equal(f.attributes.has("data-ui-density"), false);
     assert.equal(f.input.checked, false);
     assert.deepEqual(f.events, ["resize", "resize"]);
     f.api.onCompactModeStorageChanged("unrelated");
@@ -76,7 +76,7 @@ test("mobile frontends and mobile apps retain their density and do not persist d
         f.api.applyCompactMode();
         f.api.setCompactModeEnabled(false);
         await f.api.refreshCompactMode();
-        assert.equal(f.attributes.has("density"), false);
+        assert.equal(f.attributes.has("data-ui-density"), false);
         assert.equal(f.storage.compact, true);
         assert.equal(f.saved.length, 0);
         assert.equal(f.requests.length, 0);
@@ -102,11 +102,11 @@ test("reconnection restores changes made while offline and removes a missing pre
     let refresh = f.api.refreshCompactMode();
     f.requests.shift()({code: 0, data: {compact: true}});
     await refresh;
-    assert.equal(f.attributes.get("density"), "compact");
+    assert.equal(f.attributes.get("data-ui-density"), "compact");
     refresh = f.api.refreshCompactMode();
     f.requests.shift()({code: 0, data: {}});
     await refresh;
-    assert.equal(f.attributes.has("density"), false);
+    assert.equal(f.attributes.has("data-ui-density"), false);
     assert.equal(f.saved.length, 0);
 });
 

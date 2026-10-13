@@ -96,14 +96,13 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_TABLE_HEADER_COLUMN: string = "custom-sy-table-header-column";
     public static readonly CUSTOM_SY_AV_STATIC_TEXT: string = "custom-sy-av-s-text-";
 
-    // 界面密度标记仅用于根元素，不写入笔记内容。
-    public static readonly CUSTOM_SY_UI_DENSITY = "custom-sy-ui-density";
-
     // 临时标记 DOM 属性以辅助完成其功能
     public static readonly ATTRIBUTE_EDITING = "data-editing";
     public static readonly ATTRIBUTE_V_SCROLL = "data-v-scroll";
     public static readonly ATTRIBUTE_DOCK_WIDTH = "data-dock-width";
     public static readonly ATTRIBUTE_MENU_KEYMAP = "data-menu-keymap";
+    // 界面密度标记仅用于根元素，不写入笔记内容。
+    public static readonly ATTRIBUTE_UI_DENSITY = "data-ui-density";
 
     // size
     public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;

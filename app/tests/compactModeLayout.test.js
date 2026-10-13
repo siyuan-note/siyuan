@@ -62,7 +62,7 @@ const browserCases = ({css, desktop, community}) => {
             near(normal[key].height, expected, `${key} retains the default size`);
         }
     }
-    document.documentElement.setAttribute("custom-sy-ui-density", "compact");
+    document.documentElement.setAttribute("data-ui-density", "compact");
     settle();
     const compact = snapshot();
     if (!desktop) {
@@ -116,7 +116,7 @@ const browserCases = ({css, desktop, community}) => {
         find("#navigation").style.removeProperty("font-size");
         find(".b3-menu").style.removeProperty("font-size");
     }
-    document.documentElement.removeAttribute("custom-sy-ui-density");
+    document.documentElement.removeAttribute("data-ui-density");
     settle();
     check.deepEqual(snapshot(), normal, "disabling restores the theme's original component dimensions");
     if (!community) {
@@ -124,7 +124,7 @@ const browserCases = ({css, desktop, community}) => {
         const theme = document.createElement("style");
         theme.textContent = ":root{--b3-ui-list-height:36px}.b3-menu__item{line-height:38px}";
         document.head.prepend(theme);
-        document.documentElement.setAttribute("custom-sy-ui-density", "compact");
+        document.documentElement.setAttribute("data-ui-density", "compact");
         settle();
         near(height("#navigation .b3-list-item"), 36, "theme root variable wins");
         near(height(".b3-menu__item"), 26, "same-specificity early component style follows source order");

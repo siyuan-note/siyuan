@@ -26,7 +26,9 @@ const runCases = async sources => {
     const owner = {appId: "owner", plugins: [{name: "dynamic", data: {color: "owner"}}]};
     const app = settingsApps.createSettingsPluginApp("settings");
     const host = {app: owner, applyPluginReload: data => { notifications.push(data); return Promise.resolve(); },
-        openPluginSetting: () => Promise.resolve()};
+        openPluginSetting: () => Promise.resolve(),
+        loadPlugin() { throw new Error("settings delegated plugin loading to the owner"); },
+        unloadPlugin() { throw new Error("settings delegated plugin unloading to the owner"); }};
     const windowContext = load(sources.windowContext, {electron: require("electron")});
     windowContext.setSettingsWindowHost(host);
     const dependencies = {
@@ -102,6 +104,21 @@ const runCases = async sources => {
         "./loader": loader, "./settingsApp": settingsApps,
         "./globalStateCoordinator": {GlobalPluginStateCoordinator}, "../util/fetch": {fetchSyncPost},
     });
+    const bazaar = load(sources.bazaar, {
+        "../plugin/loader": loader,
+        "./setting/windowContext": windowContext,
+        "../constants": {Constants: {SIYUAN_APPID: "settings"}},
+        "../util/fetch": {fetchPost: (url, data, callback) => {
+            check.equal(url, "/api/petal/setPetalEnabled");
+            check.equal(data.app, "settings");
+            callback({code: 0, data: data.packageName === "dynamic" ? declared : legacy});
+            return Promise.resolve();
+        }},
+    }).bazaar;
+    Object.assign(bazaar, {_pluginEnablePending: new Set(), _updateReadmePluginAction() {}, _getPackageDetail() {}});
+    const setEnabled = (name, enabled) => new Promise(resolve => {
+        bazaar._setPluginEnabled(owner, {name, enabled: !enabled}, enabled, resolve);
+    });
     const control = document.createElement("div");
     control.className = "dynamic-control";
     control.textContent = "Settings";
@@ -134,15 +151,23 @@ const runCases = async sources => {
         check.equal(notifications.length, 0);
         await state.applyPluginReload(owner, {reloadPlugins: ["dynamic"]});
         check.equal(notifications.length, 1);
-        await state.applyPluginReload(app, {unloadPlugins: ["dynamic"]});
+        await setEnabled("dynamic", false);
         check.equal(app.plugins.length, 0);
         check.equal(document.getElementById("dynamicStyle"), null);
         check.equal(document.body.classList.contains("dynamic-enabled"), false);
         events.emitToPlugins("ws-main", {});
         check.equal(window.pluginMessages, 1);
-        await state.applyPluginReload(app, {reloadPlugins: ["dynamic"]});
+        await setEnabled("dynamic", true);
         check.equal(app.plugins.length, 1);
         check.notEqual(app.plugins[0], first);
+        check.equal(getComputedStyle(control).color, "rgb(0, 0, 255)");
+        check.equal(document.body.classList.contains("dynamic-enabled"), true);
+        check.equal(owner.plugins.length, 1);
+        check.equal(owner.plugins[0].data.color, "owner");
+        await setEnabled("legacy", true);
+        check.equal(app.plugins.length, 1);
+        check.equal(window.legacyExecuted, undefined);
+        check.equal(bazaar._pluginEnablePending.size, 0);
         await state.applyPluginReload(app, {globalPetalEnabled: false, globalPetalDisabled: true,
             globalPetalRevision: 1, globalPetalChanged: true, unloadPlugins: ["dynamic"]});
         check.equal(app.plugins.length, 0);
@@ -195,6 +220,19 @@ if (process.versions.electron && process.type === "browser") {
                 "../src/config/setting/windowContext.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
             }).outputText;
+            const bazaarSource = ts.createSourceFile("bazaar.ts", fs.readFileSync(path.join(__dirname,
+                "../src/config/bazaar.ts"), "utf8"), ts.ScriptTarget.ES2021, true);
+            const declaration = bazaarSource.statements.find(statement => ts.isVariableStatement(statement) &&
+                statement.declarationList.declarations.some(item => item.name.getText(bazaarSource) === "bazaar"));
+            const method = declaration.declarationList.declarations[0].initializer.properties.find(property =>
+                property.name?.getText(bazaarSource) === "_setPluginEnabled");
+            sources.bazaar = ts.transpileModule(`
+                import {loadPlugin, unloadPlugin} from "../plugin/loader";
+                import {getSettingsWindowHost} from "./setting/windowContext";
+                import {Constants} from "../constants";
+                import {fetchPost} from "../util/fetch";
+                export const bazaar = {${method.getText(bazaarSource)}};
+            `, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021}}).outputText;
             for (const [key, file] of Object.entries({layouts: "getAll.ts", tabs: "tabUtil.ts"})) {
                 sources[key] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/layout", file), "utf8"), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},

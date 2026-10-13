@@ -1459,15 +1459,16 @@ type="checkbox">
                 installed.enabled = enabled;
             }
             bazaar._updateReadmePluginAction(item.name, enabled, true);
+            const pluginApp = getSettingsWindowHost() ? window.siyuan.ws.app : app;
             if (!enabled) {
-                pluginOperation = getSettingsWindowHost()?.unloadPlugin(item.name) || unloadPlugin(app, item.name);
+                pluginOperation = unloadPlugin(pluginApp, item.name);
                 return;
             }
             if (window.siyuan.config.bazaar.petalDisabled) {
                 showMessage(window.siyuan.languages.pluginGlobalDisabledTip);
                 return;
             }
-            pluginOperation = getSettingsWindowHost()?.loadPlugin(response.data) || loadPlugin(app, response.data);
+            pluginOperation = loadPlugin(pluginApp, response.data);
         }).finally(async () => {
             try {
                 await pluginOperation;

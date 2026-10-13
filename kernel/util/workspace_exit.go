@@ -12,20 +12,29 @@ import (
 
 const workspaceExitFile = "kernel-exit.json"
 
+type WorkspaceExitState struct {
+	Version   int    `json:"version"`
+	PID       int    `json:"pid"`
+	StartedAt int64  `json:"startedAt"`
+	Port      string `json:"port"`
+	Phase     string `json:"phase"`
+}
+
 // MarkWorkspaceExiting 记录当前退出请求，供桌面宿主在重新启动时等待旧内核结束。
 // 该文件只用于提示，工作空间的独占访问仍由文件锁保证。
-func MarkWorkspaceExiting() func() {
+func MarkWorkspaceExiting() *WorkspaceExitState {
+	state := &WorkspaceExitState{Version: 2, PID: os.Getpid(), StartedAt: time.Now().UnixMilli(), Port: ServerPort}
+	state.SetPhase("exiting")
+	return state
+}
+
+// SetPhase 保留退出批次，等待更新选择或同步失败处理时仍允许宿主识别并接管。
+func (state *WorkspaceExitState) SetPhase(phase string) {
+	state.Phase = phase
 	marker := filepath.Join(TempDir, workspaceExitFile)
-	data, _ := json.Marshal(struct {
-		Version   int   `json:"version"`
-		PID       int   `json:"pid"`
-		StartedAt int64 `json:"startedAt"`
-	}{1, os.Getpid(), time.Now().UnixMilli()})
+	data, _ := json.Marshal(state)
 	if err := gulu.File.WriteFileSafer(marker, data, 0600); err != nil {
 		logging.LogWarnf("write workspace exit marker failed: %s", err)
-	}
-	return func() {
-		ClearWorkspaceExitMarker()
 	}
 }
 

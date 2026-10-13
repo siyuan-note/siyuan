@@ -2232,7 +2232,7 @@ export type SystemEmojiGroup = { "id": string; "items": Array<SystemEmoji | null
 
 export type SystemExitData = { "closeTimeout": number; "installPkgPath"?: string; };
 
-export type SystemExitRequestInput = { "execInstallPkg"?: number | null; "force"?: boolean | null; "setCurrentWorkspace"?: boolean | null; };
+export type SystemExitRequestInput = { "execInstallPkg"?: number | null; "force"?: boolean | null; "recoverExit"?: SystemRecoverExitInput | null; "setCurrentWorkspace"?: boolean | null; };
 
 export type SystemExportConfData = { "name": string; "zip": string; };
 
@@ -2299,6 +2299,8 @@ export type SystemOnboarding = { "dismissed": boolean; "documentID": string; "ne
 export type SystemPathData = { "path": string; };
 
 export type SystemPathRequestInput = { "path": string; };
+
+export type SystemRecoverExitInput = { "pid": number; "startedAt": number; };
 
 export type SystemRemoveCustomFontData = { "appearance": SettingAppearance | null; "editor": SettingEditor | null; "font": SystemCustomFont | null; };
 
@@ -7280,9 +7282,15 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 默认保留退出同步及更新选择，返回 0 表示完成、1 表示同步失败、2 表示等待更新选择。
+     * 可选 recoverExit 绑定当前进程和退出批次，只接管没有活动会话的桌面退出；不匹配返回 -1，有会话返回 3。
+     * 接管固定使用正常同步、跳过安装提示且不修改工作空间顺序，忽略 force、execInstallPkg、setCurrentWorkspace。
+     * 省略或传入 null 时保持原行为及数字截断规则，认证、管理员权限及加密笔记本关闭流程不变。
+     */
     "/api/system/exit": {
         request: SystemExitRequestInput;
-        response: { "code": 0; "data": SystemExitData; "msg": string; } | { "code": -1 | 1 | 2; "data": ({ "closeTimeout": number; } & { "installPkgPath"?: never; }) | null | SystemExitData; "msg": string; };
+        response: { "code": 0; "data": SystemExitData; "msg": string; } | { "code": -1 | 1 | 2 | 3; "data": ({ "closeTimeout": number; } & { "installPkgPath"?: never; }) | null | SystemExitData; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];

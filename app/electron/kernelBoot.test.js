@@ -69,6 +69,14 @@ const setup = (progress, options = {}) => {
         kernelProcesses: new Map(), expectedKernelExitPorts: new Set(),
         createBootWindow: () => {}, showLocalBootWindow: () => {}, showAppleSiliconWarning: async () => true,
         waitForPreviousWorkspaceExit: options.previousExit || (async () => true),
+        requestWorkspaceExitRecovery: async (workspace, marker, signal) => {
+            events.push(["recover-exit", workspace, marker.pid, signal]);
+            return 1;
+        },
+        dialog: {showMessageBox: async (_window, message) => {
+            events.push(["recovery-dialog", message]);
+            return {response: options.recoveryResponse ?? 1};
+        }},
         getAvailablePort: async () => 6806, getServer: port => "https://127.0.0.1:" + port,
         writeLog: message => events.push(message),
         requestKernelExit: port => events.push(["exit-kernel", port]),
@@ -146,6 +154,23 @@ test("canceled or failed previous-exit waiting never spawns or kills a kernel", 
         assert.equal(exits(state).length, 0);
         assert.equal(state.events.some(event => typeof event === "string" && event.startsWith("spawned kernel")), false);
     }
+});
+
+test("boot recovery reports sync failure and cancel closes only the waiting window", async () => {
+    const signal = new AbortController().signal;
+    const state = setup(() => 100, {previousExit: async (workspace, options) => {
+        assert.equal(options.hasActiveWindow(), false);
+        assert.equal(await options.recover({pid: 123}, signal), 1);
+        return options.onRecoveryFailed(true);
+    }});
+    assert.equal(await state.run(), false);
+    assert.ok(state.events.some(event => Array.isArray(event) && event[0] === "recover-exit" && event[3] === signal));
+    const prompt = state.events.find(event => Array.isArray(event) && event[0] === "recovery-dialog")[1];
+    assert.match(prompt.message, /Synchronization failed/);
+    assert.deepEqual(Array.from(prompt.buttons), ["Retry", "Cancel"]);
+    assert.equal(state.window.destroyed, true);
+    assert.equal(state.versionRequests(), 0);
+    assert.equal(exits(state).length, 0);
 });
 
 test("boot progress recovers from certificate and network changes without exiting the kernel", async () => {

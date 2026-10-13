@@ -17,23 +17,30 @@ func TestWorkspaceExitMarker(t *testing.T) {
 		t.Fatal(err)
 	}
 	before := time.Now().UnixMilli()
-	clear := MarkWorkspaceExiting()
+	marked := MarkWorkspaceExiting()
 	data, err := os.ReadFile(marker)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var state struct {
-		Version   int   `json:"version"`
-		PID       int   `json:"pid"`
-		StartedAt int64 `json:"startedAt"`
+	var state WorkspaceExitState
+	if err = json.Unmarshal(data, &state); err != nil {
+		t.Fatal(err)
+	}
+	if state.Version != 2 || state.PID != os.Getpid() || state.StartedAt < before || state.Phase != "exiting" || state.Port != ServerPort {
+		t.Fatalf("invalid exit marker: %s", data)
+	}
+	marked.SetPhase("waiting")
+	data, err = os.ReadFile(marker)
+	if err != nil {
+		t.Fatal(err)
 	}
 	if err = json.Unmarshal(data, &state); err != nil {
 		t.Fatal(err)
 	}
-	if state.Version != 1 || state.PID != os.Getpid() || state.StartedAt < before {
-		t.Fatalf("invalid exit marker: %s", data)
+	if state.Phase != "waiting" || state.StartedAt != marked.StartedAt {
+		t.Fatalf("exit batch lost: %s", data)
 	}
-	clear()
+	ClearWorkspaceExitMarker()
 	if _, err = os.Stat(marker); !os.IsNotExist(err) {
 		t.Fatalf("marker was not removed: %v", err)
 	}

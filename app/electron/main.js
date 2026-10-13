@@ -38,7 +38,7 @@ const {
 } = require("electron");
 const {updateGlobalShortcutBindings} = require("./globalShortcutBindings");
 const {appendChromiumSwitch} = require("./chromiumSwitches");
-const {waitForPreviousWorkspaceExit} = require("./workspaceExit");
+const {waitForPreviousWorkspaceExit, requestWorkspaceExitRecovery} = require("./workspaceExit");
 const path = require("path");
 const fs = require("fs");
 const {pathToFileURL} = require("url");
@@ -2617,6 +2617,20 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             try {
                 const ready = await waitForPreviousWorkspaceExit(currentWorkspace, {
                     canceled: bootCanceled,
+                    hasActiveWindow: () => workspaces.some(item => item.workspaceDir === currentWorkspace &&
+                        item.browserWindow && !item.browserWindow.isDestroyed()),
+                    recover: (marker, signal) => requestWorkspaceExitRecovery(currentWorkspace, marker, signal, net.fetch),
+                    onRecoveryFailed: async syncFailed => {
+                        if (bootCanceled()) return false;
+                        const {response} = await dialog.showMessageBox(currentBootWindow, {
+                            type: "warning",
+                            message: syncFailed ? languages._kernel[96] : languages.previousExitWaitFailed,
+                            buttons: [languages.retry, languages.cancel],
+                            defaultId: 0,
+                            cancelId: 1,
+                        });
+                        return response === 0 && !bootCanceled();
+                    },
                     onWaiting: async () => {
                         waiting = true;
                         writeLog("waiting for previous workspace exit");
@@ -2626,6 +2640,7 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                     },
                 });
                 if (!ready || bootCanceled()) {
+                    if (!bootCanceled()) currentBootWindow.destroy();
                     resolve(false);
                     return;
                 }

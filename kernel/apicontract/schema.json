@@ -50870,6 +50870,16 @@
             }
           ]
         },
+        "recoverExit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemRecoverExitInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "setCurrentWorkspace": {
           "anyOf": [
             {
@@ -51763,6 +51773,22 @@
       },
       "required": [
         "path"
+      ],
+      "additionalProperties": false
+    },
+    "SystemRecoverExitInput": {
+      "type": "object",
+      "properties": {
+        "pid": {
+          "type": "integer"
+        },
+        "startedAt": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pid",
+        "startedAt"
       ],
       "additionalProperties": false
     },
@@ -167234,7 +167260,8 @@
                 "enum": [
                   -1,
                   1,
-                  2
+                  2,
+                  3
                 ]
               },
               "data": {

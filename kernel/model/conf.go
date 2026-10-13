@@ -663,7 +663,8 @@ func loadLangs() (ret []*conf.Lang) {
 }
 
 var exitLock = sync.Mutex{}
-var exitFinished bool // 由 exitLock 保护，防止排队的重试请求再次关闭数据库。
+var exitFinished bool                             // 由 exitLock 保护，防止排队的重试请求再次关闭数据库。
+var pendingWorkspaceExit *util.WorkspaceExitState // 由 exitLock 保护，绑定可接管的退出批次。
 
 // Close 退出内核进程.
 //
@@ -686,18 +687,47 @@ var exitFinished bool // 由 exitLock 保护，防止排队的重试请求再次
 // 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且新版本安装包已经准备就绪时，将安装包路径返回给桌面宿主
 // https://github.com/siyuan-note/siyuan/issues/10288
 func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, installPkgPath string) {
+	return closeKernel(force, setCurrentWorkspace, execInstallPkg, nil)
+}
+
+// RecoverWorkspaceExit 仅接管指定批次且没有活动会话的桌面退出，不跳过同步或触发安装更新。
+func RecoverWorkspaceExit(pid int, startedAt int64) (int, string) {
+	return closeKernel(false, false, 1, &util.WorkspaceExitState{PID: pid, StartedAt: startedAt})
+}
+
+func workspaceExitRecoveryCode(expected *util.WorkspaceExitState) int {
+	if util.Container != util.ContainerStd || !util.AttachUI || expected.PID != os.Getpid() ||
+		pendingWorkspaceExit == nil || expected.StartedAt != pendingWorkspaceExit.StartedAt {
+		return -1
+	}
+	if !exitFinished && util.CountSessions() > 0 {
+		return 3
+	}
+	return 0
+}
+
+func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *util.WorkspaceExitState) (exitCode int, installPkgPath string) {
 	diagnostic := util.WatchOperationWithTiming("exit kernel", "wait for exit lock")
 	defer diagnostic.Finish()
 	exitLock.Lock()
 	defer exitLock.Unlock()
+	if recovery != nil {
+		if code := workspaceExitRecoveryCode(recovery); code != 0 {
+			return code, ""
+		}
+	}
 	if exitFinished {
 		return
 	}
 	confSyncSnapshot := Conf.LoadSync()
-	clearExitMarker := util.MarkWorkspaceExiting()
+	if recovery == nil {
+		pendingWorkspaceExit = util.MarkWorkspaceExiting()
+	} else {
+		pendingWorkspaceExit.SetPhase("exiting")
+	}
 	defer func() {
-		if clearExitMarker != nil {
-			clearExitMarker()
+		if exitCode == 1 || exitCode == 2 || exitCode == 3 {
+			pendingWorkspaceExit.SetPhase("waiting")
 		}
 	}()
 
@@ -732,6 +762,11 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 				return
 			}
 		}
+	}
+
+	// 同步期间可能重新连接界面；在关闭数据前再次确认，交还给仍可操作的窗口。
+	if recovery != nil && util.CountSessions() > 0 {
+		return 3, ""
 	}
 
 	// Close the user guide when exiting https://github.com/siyuan-note/siyuan/issues/10322
@@ -801,8 +836,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	}
 
 	diagnostic.Stage("unlock workspace")
-	clearExitMarker()
-	clearExitMarker = nil
+	util.ClearWorkspaceExitMarker()
 	util.UnlockWorkspace()
 
 	diagnostic.Stage("wait for frontend events")

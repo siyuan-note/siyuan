@@ -136,11 +136,12 @@ func TestAPIContractSystemExitCompatibility(t *testing.T) {
 	model.Conf = model.NewAppConf()
 	t.Cleanup(func() { closeSystem, model.Conf = previousClose, previousConf })
 	for _, code := range []int{0, 1, 2} {
-		for _, body := range []string{`{}`, `{"force":true,"execInstallPkg":2.9,"setCurrentWorkspace":false}`} {
+		for _, body := range []string{`{}`, `{"recoverExit":null}`, `{"force":true,"execInstallPkg":2.9,"setCurrentWorkspace":false}`} {
 			called := false
 			closeSystem = func(force, current bool, install int) (int, string) {
 				called = true
-				if body == `{}` && (force || !current || install != 0) || body != `{}` && (!force || current || install != 2) {
+				defaults := body == `{}` || body == `{"recoverExit":null}`
+				if defaults && (force || !current || install != 0) || !defaults && (!force || current || install != 2) {
 					t.Fatalf("exit defaults or numeric truncation changed: %v %v %d", force, current, install)
 				}
 				return code, "installer"
@@ -154,6 +155,31 @@ func TestAPIContractSystemExitCompatibility(t *testing.T) {
 				t.Fatalf("exit response changed: %s (%v)", recorder.Body.String(), err)
 			}
 		}
+	}
+}
+
+func TestAPIContractSystemExitRecovery(t *testing.T) {
+	previousClose, previousRecover, previousConf := closeSystem, recoverSystemExit, model.Conf
+	t.Cleanup(func() { closeSystem, recoverSystemExit, model.Conf = previousClose, previousRecover, previousConf })
+	model.Conf = model.NewAppConf()
+	closeSystem = func(bool, bool, int) (int, string) { t.Fatal("recovery bypassed guards"); return 0, "" }
+	for _, code := range []int{-1, 0, 1, 3} {
+		called := false
+		recoverSystemExit = func(pid int, startedAt int64) (int, string) {
+			called = true
+			if pid != 123 || startedAt != 456 {
+				t.Fatalf("wrong recovery identity: %d %d", pid, startedAt)
+			}
+			return code, ""
+		}
+		recorder := systemContractRequest(t, "POST", "exit", exit, strings.NewReader(`{"force":true,"execInstallPkg":2,"recoverExit":{"pid":123,"startedAt":456}}`))
+		var result struct {
+			Code int `json:"code"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || !called || result.Code != code {
+			t.Fatalf("unexpected recovery response: %s", recorder.Body.String())
+		}
+		requireAPIContract(t, "POST", "/api/system/exit", recorder)
 	}
 }
 

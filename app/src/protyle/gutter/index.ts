@@ -3967,12 +3967,12 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
             );
         }
         // 脑图中的原始列表项已隐藏，使用可见面板定位列表块标。
-        let rect = (mindmapElement || element).getBoundingClientRect();
+        let rect = (listItemContainer || mindmapElement || element).getBoundingClientRect();
         let marginHeight = 0;
         const autoListDirection = getAutoListDirection(element);
         const isRTL = autoListDirection ? autoListDirection === "rtl" :
             window.siyuan.config.editor.rtl || getComputedStyle(element).direction === "rtl";
-        if (mindmapElement) {
+        if (mindmapElement && !listItemContainer) {
             space = 0;
         } else if (listItem && !isRTL) {
             rect = listItem.firstElementChild.getBoundingClientRect();

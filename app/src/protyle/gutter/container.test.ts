@@ -1,6 +1,18 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {isContainerGutterBridge} from "./container";
+
+const buildGlobals = ["SIYUAN_VERSION", "NODE_ENV"].map(name => ({
+    name, descriptor: Object.getOwnPropertyDescriptor(globalThis, name),
+}));
+buildGlobals.forEach(({name}) => Object.defineProperty(globalThis, name, {value: "test", configurable: true}));
+const {isContainerGutterBridge} = require("./container") as typeof import("./container");
+buildGlobals.forEach(({name, descriptor}) => {
+    if (descriptor) {
+        Object.defineProperty(globalThis, name, descriptor);
+    } else {
+        Reflect.deleteProperty(globalThis, name);
+    }
+});
 
 const setup = (type = "NodeBlockquote") => {
     const block = {

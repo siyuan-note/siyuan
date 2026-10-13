@@ -1,9 +1,14 @@
+import {Constants} from "../../constants";
+
 // 列表项的首个容器保留独立块标，段落仍沿用列表项的合并操作。
 export const getListItemGutterContainer = (element: Element) => {
     const item = element.closest('[data-type="NodeListItem"]');
     const first = item?.querySelector(":scope > [data-node-id]");
-    if (first && ["NodeTable", "NodeBlockquote", "NodeCallout", "NodeSuperBlock", "NodeTabs"]
-        .includes(first.getAttribute("data-type")) && (element === item || first.contains(element) ||
+    const type = first?.getAttribute("data-type");
+    if (first && (["NodeTable", "NodeBlockquote", "NodeCallout", "NodeSuperBlock", "NodeTabs",
+        "NodeMindmap", "NodeAttributeView", "NodeCodeBlock", "NodeIFrame"].includes(type) ||
+        type === "NodeList" && first.getAttribute(Constants.CUSTOM_SY_LIST_MINDMAP) === "1") &&
+        (element === item || first.contains(element) ||
             element.parentElement === item && element.classList.contains("protyle-action"))) {
         return first;
     }

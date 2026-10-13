@@ -586,7 +586,8 @@ class ListMindmapController {
         const before = cleanListMindmapHTML(this.list.outerHTML);
         try {
             const model = readListMindmap(this.list);
-            const selectedID = this.view.getSelectedId() || model.root.id;
+            // 文本保存可能晚于画布选择变化，撤销定位始终使用本次编辑的节点。
+            const selectedID = editing && model.nodes.has(focusID) ? focusID : this.view.getSelectedId() || model.root.id;
             const selected = model.nodes.get(selectedID);
             const siblings = selected?.parentId ? model.nodes.get(selected.parentId)?.children || [] : [];
             const index = siblings.findIndex(node => node.id === selectedID);

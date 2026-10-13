@@ -2302,7 +2302,10 @@ export class WYSIWYG {
                 });
             };
             this.element.classList.add("fn__pointer-none");
-            hideElements(["gutter"], protyle);
+            // 单元格点击保留表格块标，进入跨单元格拖选后再隐藏。
+            if (!targetCellElement || startsFromPadding) {
+                hideElements(["gutter"], protyle);
+            }
             // 容器类元素判断（划选时 elementFromPoint 命中它们的边缘/空白需继续探测子块）
             const isContainer = (el: Element) => el.classList.contains("protyle-wysiwyg") || el.classList.contains("list") ||
                 el.classList.contains("li") || el.classList.contains("sb") || el.classList.contains("callout") ||
@@ -2352,6 +2355,7 @@ export class WYSIWYG {
                         }
                         if (moveTarget && (moveTarget.tagName === "TH" || moveTarget.tagName === "TD") &&
                             (!moveCellElement || moveCellElement !== moveTarget)) {
+                            hideElements(["gutter"], protyle);
                             // @ts-ignore
                             tableBlockElement.firstElementChild.style.webkitUserModify = "read-only";
                             const tableElement = tableBlockElement.querySelector("table");

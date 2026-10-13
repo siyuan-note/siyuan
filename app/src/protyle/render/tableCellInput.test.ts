@@ -5,10 +5,10 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
-import {createSourceFile, isClassDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, forEachChild, isCallExpression, isClassDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (source: string, queueSource: string, editorSource: string, menuSource: string,
-                            transactionSource: string, copyPlainSource: string, gutterSource: string) => {
+                            transactionSource: string, copyPlainSource: string, gutterSource: string, mouseDownSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const noop = () => {};
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -50,7 +50,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     };
     const api = new Function(...Object.keys(dependencies), source + "\nreturn {input, insertRow, insertRowAbove, insertColumn, " +
         "getAgentLute, configureAVRichTextLute, getTableCellEditorLute, getAVRichTextLute, " +
-        "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, " +
+        "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, buildTableGrid, " +
         "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, " +
         "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
         "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM};")(...Object.values(dependencies)) as
@@ -218,6 +218,68 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
             check.equal(rendered.at(-1), table, `${type} restores the owning table gutter`);
         }
         check.equal(gutterRenderTarget(owner, child, child), table, "cell fragments cannot expose their own block menu");
+        await finish(element);
+    }
+
+    // 执行外层编辑器的完整鼠标监听器，区分单元格点击与真正的跨单元格拖选。
+    for (const mobile of [false, true]) {
+        const {owner, element, wysiwyg, table} = fixture();
+        const absent = () => false;
+        const services = {
+            ...dependencies, buildTableGrid: api.buildTableGrid,
+            isMobile: () => mobile, isPhablet: absent, isHiddenTabContent: absent,
+            getAVTemplateInteractiveElement: absent, getAVSelectionRoot: absent, isAVDragSelectSupported: absent,
+            shouldFoldEmbeddedListByAlt: absent, shouldOpenListItemAttr: absent, isTableLikeView: absent,
+            isOnlyMeta: absent, repairHiddenTabSelection: noop, clearSelect: noop,
+            countBlockWord: noop, hideAllElements: noop, globalClickHideMenu: noop,
+            dragOverScroll: noop, stopScrollAnimation: noop,
+        };
+        element.style.cssText = "width:640px;height:480px";
+        wysiwyg.style.cssText = "padding:20px 64px;box-sizing:border-box";
+        table.querySelectorAll<HTMLElement>("th, td").forEach(cell => {
+            cell.style.cssText = "width:100px;height:40px";
+        });
+        owner.options.render = {breadcrumb: false};
+        owner.selectElement = document.createElement("div");
+        owner.toolbar.isMultiSelectMode = absent;
+        const selectedRanges: HTMLTableCellElement[][] = [];
+        owner.wysiwyg.tableControl = {setHidden: noop, clear: noop, selectCellRange: (...cells: HTMLTableCellElement[]) => {
+            selectedRanges.push(cells);
+            return true;
+        }} as unknown as IProtyle["wysiwyg"]["tableControl"];
+        new Function("protyle", "services", `const {${Object.keys(services).join(",")}} = services;\n` + mouseDownSource)
+            .call(owner.wysiwyg, owner, services);
+        const errors: string[] = [];
+        const collectError = (event: ErrorEvent) => errors.push(event.message);
+        window.addEventListener("error", collectError);
+        const mouse = (target: HTMLElement, type: string) => {
+            const rect = target.getBoundingClientRect();
+            target.dispatchEvent(new MouseEvent(type, {bubbles: true, cancelable: true, button: 0,
+                clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2}));
+            check.deepEqual(errors, []);
+        };
+        const cells = Array.from(table.querySelectorAll<HTMLTableCellElement>("th, td"));
+        for (const index of [0, 1, 3, 4, 0]) {
+            gutterHidden = false;
+            getSelection().removeAllRanges();
+            mouse(cells[index], "mousedown");
+            check.equal(gutterHidden, false, "pressing a cell preserves the table gutter");
+            mouse(cells[index], "mousemove");
+            check.equal(gutterHidden, false, "movement within the pressed cell preserves the table gutter");
+            mouse(cells[index], "mouseup");
+            check.equal(gutterHidden, false, "releasing a cell preserves the table gutter");
+            await open(owner, cells[index]);
+            check.equal(gutterHidden, false, "opening the next cell does not interrupt the table gutter");
+        }
+        getSelection().removeAllRanges();
+        mouse(cells[1], "mousedown");
+        mouse(cells[4], "mousemove");
+        check.equal(gutterHidden, true, "cross-cell selection still hides the gutter");
+        check.ok(table.querySelector(".table__select").getAttribute("style"));
+        mouse(cells[4], "mouseup");
+        check.deepEqual(selectedRanges, [[cells[1], cells[4]]]);
+        check.equal(wysiwyg.classList.contains("fn__pointer-none"), false);
+        window.removeEventListener("error", collectError);
         await finish(element);
     }
 
@@ -685,6 +747,22 @@ test("table cell editors wait for outer input and table menu Enter is consumed",
     assert.ok(gutterStart >= 0 && gutterEnd > gutterStart);
     const gutterSource = compile("function render(protyle, element, target) {" +
         gutterText.substring(gutterStart, gutterEnd) + "return element; }");
+    let mouseDownBinding: import("typescript").CallExpression;
+    const findMouseDown = (node: import("typescript").Node) => {
+        if (isCallExpression(node) && node.expression.getText(wysiwyg) === "this.element.addEventListener" &&
+            node.arguments[0]?.getText(wysiwyg) === '"mousedown"') {
+            mouseDownBinding = node;
+        }
+        forEachChild(node, findMouseDown);
+    };
+    findMouseDown(wysiwyg);
+    assert.ok(mouseDownBinding);
+    const mouseDownSource = ["../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../wysiwyg/blockDragSelect.ts",
+        "../util/tableSelection.ts", "../util/tableVirtualizationDOM.ts"]
+        .map(file => compile(read(file))).join("\n") + "\n" +
+        "const {getBlockSelectionModeElement, clearBlockSelectionMode} = (() => {" +
+        compile(read("../wysiwyg/blockSelection.ts")) +
+        "return {getBlockSelectionModeElement, clearBlockSelectionMode};})();\n" + compile(mouseDownBinding.getText(wysiwyg));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cell-input-test-"));
     const script = path.join(temporary, "run.cjs");
     const lutePath = path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js");
@@ -699,7 +777,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource, gutterSource]
+        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource, gutterSource, mouseDownSource]
             .map(value => JSON.stringify(value)).join(",") + ")")}));
         win.destroy();
         app.exit(0);

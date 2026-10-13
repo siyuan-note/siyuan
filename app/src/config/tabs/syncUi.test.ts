@@ -45,7 +45,7 @@ const setup = (provider = 2, mobile = false) => {
         querySelector(selector: string) {
             if (selector === ".b3-dialog__container") { return {focus() {}}; }
             if (selector === '[data-type="sync-config-error"]') { return status; }
-            if (selector === '[data-type="s3-endpoint-warning"]') { return provider === 2 ? warning : null; }
+            if (selector === "#sync-endpoint-warning") { return provider === 2 ? warning : null; }
             if (selector === '[aria-invalid="true"]') { return Object.values(inputs).find(input => input.attributes["aria-invalid"] === "true"); }
             if (selector.startsWith('[data-action="')) { return buttons[selector.slice(14, -2)] || null; }
             return inputs[selector.slice(1)] || errors[selector.slice(1)] || null;

@@ -360,10 +360,10 @@ const renderProviderConfig = (root: Element) => {
     }
 };
 
-const genProviderField = (field: SyncProviderFieldDef): string => {
+const genProviderField = (field: SyncProviderFieldDef, warning = ""): string => {
     switch (field.type) {
         case "input":
-            return genProviderFlexInput(field.label, field.id, field.attrs);
+            return genProviderFlexInput(field.label, field.id, field.attrs, warning);
         case "password":
             return genProviderFlexPassword(field.label, field.id);
         case "select":
@@ -372,11 +372,12 @@ const genProviderField = (field: SyncProviderFieldDef): string => {
     }
 };
 
-const genProviderFlexInput = (label: string, id: string, attrs = "") => `<div class="b3-label b3-label--inner fn__flex config-sync-field">
+const genProviderFlexInput = (label: string, id: string, attrs = "", warning = "") => `<div class="b3-label b3-label--inner fn__flex config-sync-field">
     <label for="${id}" class="fn__flex-center fn__size200">${label}</label>
     <div class="fn__space"></div>
-    <div class="fn__flex-1"><input spellcheck="false" id="${id}" class="b3-text-field fn__block" aria-describedby="sync-${id}-error"${attrs ? ` ${attrs}` : ""}>
-    <div id="sync-${id}-error" class="ft__error fn__none" role="status"></div></div>
+    <div class="fn__flex-1"><input spellcheck="false" id="${id}" class="b3-text-field fn__block" aria-describedby="sync-${id}-error${warning ? ` sync-${id}-warning` : ""}"${attrs ? ` ${attrs}` : ""}>
+    <div id="sync-${id}-error" class="ft__error fn__none" role="status"></div>${warning ? `
+    <div id="sync-${id}-warning" class="ft__error fn__none" role="status">${warning}</div>` : ""}</div>
 </div>`;
 
 const genProviderFlexPassword = (label: string, id: string) => `<div class="b3-label b3-label--inner fn__flex config-sync-field">
@@ -466,12 +467,12 @@ const openSyncProviderConfigDialog = (root: Element) => {
         return;
     }
     const L = window.siyuan.languages;
-    const warning = def.configKey === "s3" ? `<div data-type="s3-endpoint-warning" class="b3-label b3-label--inner ft__error fn__none" role="status">${L.s3EndpointBucketWarning}</div>` : "";
+    const warning = def.configKey === "s3" ? L.s3EndpointBucketWarning : "";
     const dialog = new Dialog({
         title: `${L.syncConfig} - ${def.configKey === "s3" ? "S3" : def.configKey === "webdav" ? "WebDAV" : L.localFileSystem}`,
         width: isMobile() ? "92vw" : "680px",
         containerClassName: "config-sync-dialog",
-        content: `<div class="b3-dialog__content config-sync-form">${def.fields.map(genProviderField).join("")}${warning}
+        content: `<div class="b3-dialog__content config-sync-form">${def.fields.map(field => genProviderField(field, field.id === "endpoint" ? warning : "")).join("")}
 <div data-type="sync-config-error" class="ft__error fn__none" role="status"></div></div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--remove" data-action="clear">${L.clearSyncConfig}</button><div class="fn__flex-1"></div><div class="fn__space"></div>
@@ -627,7 +628,7 @@ const fillSyncProviderConfigValues = (configElement: Element, data: Config.ISync
 };
 
 const updateS3EndpointWarning = (configElement: Element) => {
-    const warning = configElement.querySelector('[data-type="s3-endpoint-warning"]');
+    const warning = configElement.querySelector("#sync-endpoint-warning");
     if (!warning) {
         return;
     }

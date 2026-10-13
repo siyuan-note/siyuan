@@ -25,14 +25,23 @@ import {unmountOCRTab} from "./ocr";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {unmountWorkspaceStorage} from "./tabs/workspaceStorage";
 /// #if !MOBILE
-import {openNativeSettings} from "./setting/nativeWindow";
+import {closeNativeSettings, openNativeSettings} from "./setting/nativeWindow";
 import {isSettingsWindow} from "./setting/windowContext";
 import {fitSettingsWindowDialog} from "./setting/windowDialog";
 /// #endif
 
 /// #if !MOBILE
-export const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
+const closeSettingDialog = () => {
     window.siyuan.dialogs.find((item) => item.element.querySelector(".config__tab-container"))?.destroy();
+};
+
+export const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
+    /// #if !BROWSER
+    if (!isSettingsWindow()) {
+        closeNativeSettings("builtin");
+    }
+    /// #endif
+    closeSettingDialog();
     let range: Range;
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
@@ -144,6 +153,7 @@ export const openSetting = (app: App, tab?: TSettingTab, options?: {aiProvider?:
     /// #if !BROWSER
     // 是否在独立窗口中打开设置界面，仅桌面端 Electron 客户端生效
     if (!isSettingsWindow() && window.siyuan.config.system.settingsWindow) {
+        closeSettingDialog();
         void openNativeSettings(app, {tab, ...options});
         return;
     }
@@ -209,6 +219,7 @@ export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemNa
 
     /// #if !BROWSER && !MOBILE
     if (!isSettingsWindow() && window.siyuan.config.system.settingsWindow) {
+        closeSettingDialog();
         await openNativeSettings(app, {tab: "bazaar", readme: {type: bazaarType, from, resource}});
         return;
     }

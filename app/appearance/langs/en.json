@@ -1,5 +1,5 @@
 {
-	"exitWaiting": "Saving and syncing, please wait...",
+	"exitWaiting": "Exiting, please wait...",
 	"exitWaitFailed": "Could not confirm that shutdown has completed. You can retry or close this dialog and continue waiting.",
 	"previousExitWaiting": "Waiting for the previous shutdown to finish...",
 	"previousExitWaitFailed": "Could not confirm that the previous shutdown has completed. Please check the other SiYuan window and workspace/temp/siyuan.log, then try again.",

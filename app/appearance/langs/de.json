@@ -1,5 +1,5 @@
 {
-	"exitWaiting": "Speichern und Synchronisieren. Bitte warten...",
+	"exitWaiting": "Wird beendet, bitte warten...",
 	"exitWaitFailed": "Der Abschluss des Beendens konnte nicht bestätigt werden. Versuchen Sie es erneut oder schließen Sie diesen Dialog und warten Sie weiter.",
 	"previousExitWaiting": "Warten, bis der vorherige Beendigungsvorgang abgeschlossen ist...",
 	"previousExitWaitFailed": "Der Abschluss des vorherigen Beendigungsvorgangs konnte nicht bestätigt werden. Prüfen Sie das andere SiYuan-Fenster und Arbeitsbereich/temp/siyuan.log und versuchen Sie es erneut.",

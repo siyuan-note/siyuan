@@ -1,5 +1,5 @@
 {
-	"exitWaiting": "저장 및 동기화 중입니다. 잠시 기다려 주세요...",
+	"exitWaiting": "종료 중입니다. 잠시 기다려 주세요...",
 	"exitWaitFailed": "종료 완료 여부를 확인할 수 없습니다. 다시 시도하거나 이 대화 상자를 닫고 계속 기다려 주세요.",
 	"previousExitWaiting": "이전 종료 작업이 완료되기를 기다리는 중...",
 	"previousExitWaitFailed": "이전 종료 작업의 완료 여부를 확인할 수 없습니다. 다른 SiYuan 창과 작업 공간/temp/siyuan.log를 확인한 후 다시 시도해 주세요.",

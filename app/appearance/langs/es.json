@@ -1,5 +1,5 @@
 {
-	"exitWaiting": "Guardando y sincronizando, espere...",
+	"exitWaiting": "Saliendo, espere...",
 	"exitWaitFailed": "No se pudo confirmar que el cierre haya terminado. Puede reintentar o cerrar este diálogo y seguir esperando.",
 	"previousExitWaiting": "Esperando a que termine el cierre anterior...",
 	"previousExitWaitFailed": "No se pudo confirmar que el cierre anterior haya terminado. Revise la otra ventana de SiYuan y espacio de trabajo/temp/siyuan.log, y vuelva a intentarlo.",

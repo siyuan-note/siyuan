@@ -1,5 +1,5 @@
 {
-	"exitWaiting": "Ukladanie a synchronizácia, čakajte...",
+	"exitWaiting": "Ukončovanie, čakajte...",
 	"exitWaitFailed": "Nepodarilo sa potvrdiť dokončenie ukončovania. Môžete to skúsiť znova alebo zavrieť toto dialógové okno a ďalej čakať.",
 	"previousExitWaiting": "Čaká sa na dokončenie predchádzajúceho ukončovania...",
 	"previousExitWaitFailed": "Nepodarilo sa potvrdiť dokončenie predchádzajúceho ukončovania. Skontrolujte druhé okno SiYuan a pracovný priestor/temp/siyuan.log a skúste to znova.",

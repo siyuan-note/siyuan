@@ -1,5 +1,5 @@
 {
-	"exitWaiting": "Menyimpan dan menyinkronkan, harap tunggu...",
+	"exitWaiting": "Menutup aplikasi, harap tunggu...",
 	"exitWaitFailed": "Tidak dapat memastikan bahwa proses penutupan telah selesai. Anda dapat mencoba lagi atau menutup dialog ini dan terus menunggu.",
 	"previousExitWaiting": "Menunggu proses penutupan sebelumnya selesai...",
 	"previousExitWaitFailed": "Tidak dapat memastikan bahwa proses penutupan sebelumnya telah selesai. Periksa jendela SiYuan lainnya dan ruang kerja/temp/siyuan.log, lalu coba lagi.",

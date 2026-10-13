@@ -1,5 +1,5 @@
 {
-	"exitWaiting": "正在保存并同步，请稍候...",
+	"exitWaiting": "正在退出，请稍候...",
 	"exitWaitFailed": "暂时无法确认退出是否完成。可以重试，或关闭此提示继续等待。",
 	"previousExitWaiting": "正在等待上次退出完成...",
 	"previousExitWaitFailed": "暂时无法确认上次退出是否完成。请检查其他思源窗口及工作空间/temp/siyuan.log，然后重试。",

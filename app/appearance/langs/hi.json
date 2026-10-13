@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "PP-OCRv6 मॉडल आयात करें",
 	"kernelUnresponsiveTitle": "कर्नेल प्रतिक्रिया नहीं दे रहा है",
 	"kernelUnresponsiveMessage": "कर्नेल को भेजे गए स्थानीय अनुरोधों का समय समाप्त हो गया, इसलिए SiYuan मुख्य विंडो नहीं खोल सकता। विवरण के लिए ${log} देखें।",
 	"kernelUnresponsiveWindowsHint": "Windows पर यह TCP कंजेशन नियंत्रण BBR2 और Loopback Large Mtu (loopbacklargemtu) के एक साथ सक्षम होने से संबंधित हो सकता है।",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "केवल बिना OCR परिणाम वाली अनएन्क्रिप्टेड नोटबुक छवियाँ संसाधित करें; AI पृष्ठभूमि में छवियाँ चुने गए प्रदाता को भेजता है",
 	"ocrModel": "OCR मॉडल",
 	"ocrModelTip": "केवल Tiny अंतर्निहित है; मॉडल बदलने पर मौजूदा परिणाम बने रहते हैं; चित्र मेनू से OCR फिर चलाएँ",
-	"ocrImportModels": "OCR मॉडल आयात करें",
-	"ocrImportModelsTip": "संगत PP-OCRv6 पहचान और पाठ-पठन ONNX फ़ाइलें तथा उनकी inference.yml फ़ाइलें चुनें; आयातित फ़ाइलें कार्यक्षेत्र के साथ सिंक होती हैं",
+	"ocrImportModelsTip": "एक ही मॉडल की पहचान और पाठ-पठन ONNX फ़ाइलें तथा उनकी inference.yml फ़ाइलें चुनें। आयातित मॉडल कार्यक्षेत्र में सहेजे जाते हैं और उसके साथ सिंक होते हैं",
 	"ocrDetector": "पहचान मॉडल",
 	"ocrRecognizer": "पाठ-पठन मॉडल",
 	"ocrUnavailable": "अनुपलब्ध",

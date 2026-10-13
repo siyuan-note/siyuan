@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "Import PP-OCRv6 models",
 	"kernelUnresponsiveTitle": "The kernel is not responding",
 	"kernelUnresponsiveMessage": "Local requests to the kernel timed out, so SiYuan cannot open the main window. Check ${log} for details.",
 	"kernelUnresponsiveWindowsHint": "On Windows, this may be related to TCP congestion control BBR2 combined with Loopback Large Mtu (loopbacklargemtu).",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "Process unencrypted notebook images without OCR results; AI sends images to its provider in the background",
 	"ocrModel": "OCR model",
 	"ocrModelTip": "Only Tiny is built in; switching preserves existing results; rerun OCR from the image menu",
-	"ocrImportModels": "Import OCR models",
-	"ocrImportModelsTip": "Select compatible PP-OCRv6 detection and recognition ONNX files and their inference.yml files; imported files sync with the workspace",
+	"ocrImportModelsTip": "Select the detection and recognition ONNX files of the same model and their inference.yml files. Imported models are stored in the workspace and synchronized with it",
 	"ocrDetector": "Detection model",
 	"ocrRecognizer": "Recognition model",
 	"ocrUnavailable": "Unavailable",

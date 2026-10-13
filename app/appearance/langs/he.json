@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "ייבוא מודלי PP-OCRv6",
 	"kernelUnresponsiveTitle": "הליבה אינה מגיבה",
 	"kernelUnresponsiveMessage": "תם הזמן שהוקצב לבקשות המקומיות לליבה, ולכן SiYuan אינו יכול לפתוח את החלון הראשי. לפרטים נוספים, ראו ${log}.",
 	"kernelUnresponsiveWindowsHint": "ב-Windows, ייתכן שהדבר קשור לשילוב של בקרת גודש TCP מסוג BBR2 עם Loopback Large Mtu (loopbacklargemtu).",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "מעבד תמונות ממחברות לא מוצפנות שאין להן תוצאות OCR; הבינה המלאכותית שולחת תמונות לספק שנבחר ברקע",
 	"ocrModel": "מודל OCR",
 	"ocrModelTip": "רק Tiny מובנה; החלפת מודל שומרת על התוצאות הקיימות; ניתן להפעיל OCR מחדש מתפריט התמונה",
-	"ocrImportModels": "ייבוא מודלי OCR",
-	"ocrImportModelsTip": "בחרו קובצי ONNX תואמים לזיהוי אזורים וטקסט של PP-OCRv6 ואת קובצי inference.yml שלהם; הקבצים המיובאים מסונכרנים עם סביבת העבודה",
+	"ocrImportModelsTip": "בחרו קובצי ONNX לזיהוי אזורים ולזיהוי טקסט של אותו מודל וקובצי inference.yml שלהם. מודלים מיובאים נשמרים בסביבת העבודה ומסונכרנים איתה",
 	"ocrDetector": "מודל זיהוי אזורים",
 	"ocrRecognizer": "מודל זיהוי טקסט",
 	"ocrUnavailable": "לא זמין",

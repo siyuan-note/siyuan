@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "Importer des modèles PP-OCRv6",
 	"kernelUnresponsiveTitle": "Le noyau ne répond pas",
 	"kernelUnresponsiveMessage": "Les requêtes locales au noyau ont dépassé le délai d’attente. SiYuan ne peut donc pas ouvrir la fenêtre principale. Consultez ${log} pour plus de détails.",
 	"kernelUnresponsiveWindowsHint": "Sous Windows, cela peut être lié à l’utilisation simultanée du contrôle de congestion TCP BBR2 et de Loopback Large Mtu (loopbacklargemtu).",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "Traite les images des carnets non chiffrés sans résultat OCR ; l’IA envoie les images au fournisseur sélectionné en arrière-plan",
 	"ocrModel": "Modèle OCR",
 	"ocrModelTip": "Seul Tiny est intégré ; changer de modèle conserve les résultats existants ; relancez la reconnaissance depuis le menu de l’image",
-	"ocrImportModels": "Importer des modèles OCR",
-	"ocrImportModelsTip": "Sélectionnez les fichiers ONNX compatibles de détection et de reconnaissance PP-OCRv6 et leurs fichiers inference.yml ; les fichiers importés sont synchronisés avec l’espace de travail",
+	"ocrImportModelsTip": "Sélectionnez les fichiers ONNX de détection et de reconnaissance du même modèle ainsi que leurs fichiers inference.yml. Les modèles importés sont stockés dans l’espace de travail et synchronisés avec lui",
 	"ocrDetector": "Modèle de détection",
 	"ocrRecognizer": "Modèle de reconnaissance",
 	"ocrUnavailable": "Indisponible",

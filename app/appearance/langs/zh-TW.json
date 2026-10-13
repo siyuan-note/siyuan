@@ -1,4 +1,5 @@
 {
+	"ocrImportModelsTitle": "匯入 PP-OCRv6 模型",
 	"kernelUnresponsiveTitle": "核心無回應",
 	"kernelUnresponsiveMessage": "本機核心請求逾時，思源無法進入主畫面。請查看 ${log} 取得詳細資訊。",
 	"kernelUnresponsiveWindowsHint": "在 Windows 上，此現象可能與 TCP 壅塞控制 BBR2 和 Loopback Large Mtu (loopbacklargemtu) 同時啟用有關。",
@@ -154,8 +155,7 @@
 	"ocrAutoTip": "僅處理尚無 OCR 結果的一般筆記本圖片；AI 會在背景將圖片傳送給所選提供商",
 	"ocrModel": "OCR 模型",
 	"ocrModelTip": "僅內建 Tiny；切換後保留現有結果，可在圖片選單中重新辨識",
-	"ocrImportModels": "匯入 OCR 模型",
-	"ocrImportModelsTip": "選取配套的 PP-OCRv6 偵測、辨識 ONNX 檔案及各自的 inference.yml；匯入檔案隨工作空間同步",
+	"ocrImportModelsTip": "選取同一模型的偵測、辨識 ONNX 檔案及各自的 inference.yml。匯入的模型儲存在工作空間並參與同步",
 	"ocrDetector": "偵測模型",
 	"ocrRecognizer": "辨識模型",
 	"ocrUnavailable": "無法使用",

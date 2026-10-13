@@ -55,7 +55,7 @@ func TestExportExplicitEmbedHeadingLevels(t *testing.T) {
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)
 	t.Cleanup(func() {
-		sql.CloseDatabase()
+		closeModelTestDatabases()
 		util.DBPath, util.QueueDir = oldDB, oldQueue
 		util.HistoryDBPath, util.AssetContentDBPath = oldHistoryDB, oldAssetDB
 	})

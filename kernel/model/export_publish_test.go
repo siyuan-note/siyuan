@@ -78,8 +78,8 @@ func setupExportPublishTest(t *testing.T) {
 	invalidateEncryptedPublishAccessCache()
 
 	t.Cleanup(func() {
+		closeModelTestDatabases()
 		treenode.CloseDatabase()
-		sql.CloseDatabase()
 		Conf = oldConf
 		util.WorkspaceDir = oldWorkspaceDir
 		util.ConfDir = oldConfDir

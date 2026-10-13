@@ -478,7 +478,7 @@ func setupTemplateDocTreeTransactionTest(t *testing.T) *fileOperationTestFixture
 		sql.FlushQueue()
 		sql.FlushHistoryQueue()
 		sql.FlushAssetContentQueue()
-		sql.CloseDatabase()
+		closeModelTestDatabases()
 		util.TempDir = originalTempDir
 		util.QueueDir = originalQueueDir
 		util.ConfDir = originalConfDir

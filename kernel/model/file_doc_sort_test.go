@@ -72,7 +72,7 @@ func TestSetDocSortModeValidationAndPersistence(t *testing.T) {
 		treenode.UpsertBlockTree(tree)
 	}
 	t.Cleanup(func() {
-		sql.CloseDatabase()
+		closeModelTestDatabases()
 		util.TempDir = originalTempDir
 		util.QueueDir = originalQueueDir
 		util.ConfDir = originalConfDir

@@ -85,15 +85,23 @@ export const updatePublishConfig = (
     }
 };
 
-export const renderPublishAuthAccounts = () => {
-    const publishAuthAccounts = accessTabElement?.querySelector("#publishAuthAccounts");
+export const renderPublishAuthAccounts = (root = accessTabElement) => {
+    const publishAuthAccounts = root?.querySelector("#publishAuthAccounts");
     if (!publishAuthAccounts) {
+        return;
+    }
+    const accounts = window.siyuan.config.publish.auth.accounts;
+    const empty = accounts.length === 0;
+    publishAuthAccounts.closest(".config-item")?.classList.toggle("fn__none", empty);
+    root.querySelector("#publishAuthAccountAdd")?.closest(".config-item")?.classList.toggle("b3-label--noborder", empty);
+    if (empty) {
+        publishAuthAccounts.innerHTML = "";
         return;
     }
     const removeButtonHtml = isMobile() ?
         `<button class="b3-button b3-button--outline fn__block" data-action="remove"><svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.delete}</button>`
         : '<span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconTrashcan"></use></svg></span>';
-    const listItemHtml = window.siyuan.config.publish.auth.accounts.map((account, index) => `
+    const listItemHtml = accounts.map((account, index) => `
 <li class="b3-label b3-label--inner fn__flex" data-index="${index}">
     <input class="b3-text-field fn__block" data-name="username" value="${escapeHtmlTextAndAttr(account.username)}" placeholder="${window.siyuan.languages.userName}">
     <span class="fn__space"></span>

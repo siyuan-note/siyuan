@@ -3672,11 +3672,7 @@ export class Gutter {
         const cellFragment = element.closest(".table__cell-rich, .table__cell-editor") ||
             target?.closest(".table__cell-rich, .table__cell-editor");
         if (cellFragment) {
-            if (cellFragment.classList.contains("table__cell-editor")) {
-                hideElements(["gutter"], protyle);
-                return;
-            }
-            // 单元格预览中的片段不提供块级操作，块标始终定位到所属表格。
+            // 单元格预览和编辑片段不提供块级操作，块标始终定位到所属表格。
             const table = cellFragment.closest('[data-type="NodeTable"][data-node-id]');
             if (!table) {
                 return;

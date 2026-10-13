@@ -8,12 +8,15 @@ import {promisify} from "node:util";
 import {createSourceFile, isClassDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (source: string, queueSource: string, editorSource: string, menuSource: string,
-                            transactionSource: string, copyPlainSource: string) => {
+                            transactionSource: string, copyPlainSource: string, gutterSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const noop = () => {};
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
     const changes: {doOperations: IOperation[], undoOperations: IOperation[]}[] = [];
     const enteredCells: Element[] = [];
+    let gutterHidden = false;
+    const gutterRenderTarget = new Function("hideElements", gutterSource + "\nreturn render;")(
+        () => { gutterHidden = true; });
     const focusByRange = (range: Range) => {
         getSelection().removeAllRanges();
         getSelection().addRange(range);
@@ -29,7 +32,11 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         normalizeSemanticInlineElements: noop, removeEmptySemanticInlineElement: noop,
         getSemanticMarkerPrefixLengthForNode: () => 0, getTextWithoutSemanticMarkers: (node: Node) => node.textContent,
         turnIntoTaskList: () => false, headingTurnIntoList: () => false, isProtyleListItemFirstParagraph: () => false,
-        mathRender: noop, hideElements: noop, scrollCenter: noop, focusByRange,
+        mathRender: noop, hideElements: (names: string[]) => {
+            if (names.includes("gutter")) {
+                gutterHidden = true;
+            }
+        }, scrollCenter: noop, focusByRange,
         transaction: (_owner: IProtyle, doOperations: IOperation[], undoOperations: IOperation[]) => {
             changes.push({doOperations, undoOperations});
         },
@@ -189,6 +196,30 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         element.remove();
         await tick();
     };
+
+    for (const index of [0, 1]) {
+        const {owner, element, table} = fixture();
+        const cell = table.querySelectorAll("th")[index];
+        const rendered: Element[] = [];
+        owner.gutter = {render: (protyle: IProtyle, block: Element, target: Element) => {
+            check.equal(protyle, owner);
+            rendered.push(gutterRenderTarget(protyle, block, target));
+        }} as IProtyle["gutter"];
+        gutterHidden = false;
+        await open(owner, cell);
+        check.equal(rendered.at(-1), table, "opening a cell retains the owning table gutter");
+        check.equal(gutterHidden, false);
+        const host = cell.querySelector<HTMLElement>(".table__cell-editor");
+        const child = host.querySelector<HTMLElement>("[data-node-id]");
+        for (const type of ["mouseover", "pointerover"]) {
+            rendered.length = 0;
+            child.dispatchEvent(new Event(type, {bubbles: true}));
+            check.equal(gutterHidden, false, `${type} must not hide the owning table gutter`);
+            check.equal(rendered.at(-1), table, `${type} restores the owning table gutter`);
+        }
+        check.equal(gutterRenderTarget(owner, child, child), table, "cell fragments cannot expose their own block menu");
+        await finish(element);
+    }
 
     {
         const {element, table} = fixture();
@@ -644,6 +675,16 @@ test("table cell editors wait for outer input and table menu Enter is consumed",
     const copyEnd = wysiwygSource.indexOf("copyPlainText(textPlain.slice(0, -1));") + "copyPlainText(textPlain.slice(0, -1));".length;
     const copyStart = wysiwygSource.lastIndexOf('let textPlain = "";', copyEnd);
     const copyPlainSource = compile(wysiwygSource.substring(copyStart, copyEnd));
+    const gutterFile = createSourceFile("gutter.ts", read("../gutter/index.ts"), ScriptTarget.Latest, true);
+    const gutterClass = gutterFile.statements.find(node => isClassDeclaration(node) && node.name.text === "Gutter");
+    assert.ok(isClassDeclaration(gutterClass));
+    const gutterRender = gutterClass.members.find(member => member.name?.getText(gutterFile) === "render");
+    const gutterText = gutterRender.getText(gutterFile);
+    const gutterStart = gutterText.indexOf("const cellFragment");
+    const gutterEnd = gutterText.indexOf("// https://github.com/siyuan-note/siyuan/issues/4659", gutterStart);
+    assert.ok(gutterStart >= 0 && gutterEnd > gutterStart);
+    const gutterSource = compile("function render(protyle, element, target) {" +
+        gutterText.substring(gutterStart, gutterEnd) + "return element; }");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cell-input-test-"));
     const script = path.join(temporary, "run.cjs");
     const lutePath = path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js");
@@ -658,7 +699,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource]
+        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource, gutterSource]
             .map(value => JSON.stringify(value)).join(",") + ")")}));
         win.destroy();
         app.exit(0);

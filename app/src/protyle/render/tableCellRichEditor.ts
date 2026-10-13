@@ -217,7 +217,7 @@ const mountTableCellRichEditor = async (request: object, previousEditor: typeof 
     }));
     ["mouseover", "pointerover"].forEach(type => host.addEventListener(type, event => {
         event.stopPropagation();
-        hideElements(["gutter"], owner);
+        owner.gutter?.render(owner, table, host);
     }));
     owner.gutter?.render(owner, table, host);
     const toolbar = getDefaultToolbar(isMobile()).filter(item => typeof item === "string" ? item !== "ai" : item.name !== "ai");

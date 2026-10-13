@@ -252,12 +252,20 @@ func TestAttributeViewRichTextExport(t *testing.T) {
 		t.Fatal(err)
 	}
 	preview := normalizeExportPreviewTree(tree, luteEngine)
+	// 节点 ID 包含内容标记，验证导出文本的断言不会把属性中的数字计入正文。
+	const collisionID = "20261013000000-nh123sr"
+	table := preview.Root.FirstChild
+	table.ID = collisionID
+	table.SetIALAttr("id", collisionID)
 	for name, output := range map[string]string{
 		"preview": luteEngine.ProtylePreview(preview, luteEngine.RenderOptions, luteEngine.ParseOptions),
 		"html":    string(render.NewProtyleExportRenderer(preview, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()),
 		"word":    string(render.NewProtyleExportDocxRenderer(preview, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()),
 	} {
 		t.Run(name, func(t *testing.T) {
+			if name != "preview" && !strings.Contains(output, collisionID) {
+				t.Fatal("export fixture must retain the node ID containing the content marker")
+			}
 			// 各输出对嵌套列表与加粗使用的标记不同：预览为原生 ul/span，HTML 导出为带 data-type 的块级结构，Word 导出沿用 ul/strong
 			listMarker, boldMarker := "<ul", "<strong"
 			if name == "preview" {
@@ -266,8 +274,9 @@ func TestAttributeViewRichTextExport(t *testing.T) {
 			if name == "html" {
 				listMarker, boldMarker = `data-type="NodeList"`, `data-type="strong"`
 			}
+			text := luteEngine.HTML2Text(output)
 			if strings.Count(output, listMarker) != 2 || !strings.Contains(output, boldMarker) ||
-				!strings.Contains(output, "foo") || strings.Count(output, "123") != 2 {
+				!strings.Contains(text, "foo") || strings.Count(text, "123") != 2 {
 				t.Fatalf("database rich text lost nested lists or formatting (markers %q/%q): %s", listMarker, boldMarker, output)
 			}
 		})

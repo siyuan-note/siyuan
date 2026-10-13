@@ -1,5 +1,9 @@
 import {spawnSync} from "node:child_process";
 import {availableParallelism} from "node:os";
+import {createRequire} from "node:module";
+
+// 在启动并行测试前完成 Electron 安装，避免多个子进程同时解压同一运行时。
+createRequire(import.meta.url)("electron");
 
 // 按可用核心数并行执行，限制上限以避免多个 Electron 子进程耗尽运行资源。
 const concurrency = Math.min(4, availableParallelism());

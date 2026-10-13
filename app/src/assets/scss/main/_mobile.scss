@@ -282,6 +282,7 @@ body.mobile-keyboard--open {
     &--sql {
       height: auto;
       min-height: 48px;
+      align-items: flex-start;
     }
   }
 

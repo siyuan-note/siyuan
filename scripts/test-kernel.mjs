@@ -9,6 +9,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const kernel = join(root, "kernel");
 const modelPackage = "github.com/siyuan-note/siyuan/kernel/model";
 const apiPackage = "github.com/siyuan-note/siyuan/kernel/api";
+const toolsPackage = "github.com/siyuan-note/siyuan/kernel/mcp/tools";
+const utilPackage = "github.com/siyuan-note/siyuan/kernel/util";
 const tags = ["-tags", "fts5 sqlcipher"];
 // 分片构建与其他包分别限制原生编译并发，多个大包分片时分阶段执行。
 const packageParallelism = Math.min(2, availableParallelism());
@@ -16,11 +18,13 @@ const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const listTests = output => output.split(/\r?\n/).filter(name => /^(Test|Example|Fuzz)\S*$/.test(name));
 
-// 核数较少时保留包间并行，避免 API 分片占用模型包有限的运行名额。
+// 核数较少时保留包间并行，避免其他包分片占用模型包有限的运行名额。
 export const testPackageConfigurations = (shards, modelOnly, cores) => {
     const configurations = [{name: "model", package: modelPackage, count: shards}];
     if (!modelOnly && cores >= 4) {
         configurations.push({name: "api", package: apiPackage, count: Math.min(2, shards)});
+        configurations.push({name: "mcp/tools", package: toolsPackage, count: Math.min(2, shards)});
+        configurations.push({name: "util", package: utilPackage, count: Math.min(2, shards)});
     }
     return configurations;
 };
@@ -62,7 +66,7 @@ export const planShards = (names, count, durations) => {
 
 // 每个进程使用独立的当前目录，测试资源通过目录链接复用，隔离相对路径写入。
 export const preparePackageWorkspace = (repository, workspace, name) => {
-    if (!["model", "api"].includes(name)) {
+    if (!["model", "api", "mcp/tools", "util"].includes(name)) {
         throw new Error("Unsupported test package workspace: " + name);
     }
     const cwd = join(workspace, "kernel", name);
@@ -73,16 +77,21 @@ export const preparePackageWorkspace = (repository, workspace, name) => {
             link(join(repository, resource), join(workspace, resource));
         }
     }
-    for (const entry of readdirSync(join(repository, "kernel"), {withFileTypes: true})) {
-        if (entry.isDirectory() && entry.name !== name) {
-            link(join(repository, "kernel", entry.name), join(workspace, "kernel", entry.name));
+    // 嵌套包的祖先目录也必须独立，不能经由目录链接在源码树中创建运行时文件。
+    const parts = name.split("/");
+    for (let i = 0; i < parts.length; i++) {
+        const relative = join("kernel", ...parts.slice(0, i));
+        for (const entry of readdirSync(join(repository, relative), {withFileTypes: true})) {
+            if (entry.isDirectory() && entry.name !== parts[i]) {
+                link(join(repository, relative, entry.name), join(workspace, relative, entry.name));
+            }
         }
     }
     for (const entry of readdirSync(join(repository, "kernel", name), {withFileTypes: true})) {
         if (entry.isDirectory()) {
             link(join(repository, "kernel", name, entry.name), join(cwd, entry.name));
         } else if (entry.isFile() && entry.name.endsWith(".go")) {
-            // API 用例会解析同目录的处理器源文件，副本保留检查且隔离运行时文件。
+            // 源码检查用例读取同目录的 Go 文件，副本保留检查且隔离运行时文件。
             copyFileSync(join(repository, "kernel", name, entry.name), join(cwd, entry.name));
         }
     }
@@ -170,6 +179,10 @@ export const runJobs = async (jobs, concurrency, run) => {
     return results;
 };
 
+// 未分片作业还包含构建耗时，优先启动，避免仅按分片测试耗时排序将其推后。
+export const orderJobs = jobs => jobs.sort((a, b) => Number(b.name === "other-packages") - Number(a.name === "other-packages") ||
+    b.seconds - a.seconds || a.name.localeCompare(b.name, "en"));
+
 const main = async () => {
     const options = {shards: Math.min(4, availableParallelism()), modelOnly: false, output: undefined};
     for (let i = 2; i < process.argv.length; i++) {
@@ -195,11 +208,14 @@ const main = async () => {
     let otherFinished = false;
     try {
         const configurations = testPackageConfigurations(options.shards, options.modelOnly, availableParallelism());
-        const startOtherPackages = () => {
+        const otherPackagesJob = parallelism => {
             const sharded = new Set(configurations.map(configuration => configuration.package));
             const packages = command(["list", ...tags, "./..."]).trim().split(/\r?\n/).filter(name => !sharded.has(name));
-            otherJob = runJSONJob({name: "other-packages", cwd: kernel,
-                args: ["test", ...tags, "-p", String(packageParallelism), "-json", "-count=1", ...packages]}, output)
+            return {name: "other-packages", cwd: kernel, seconds: 0,
+                args: ["test", ...tags, "-p", String(parallelism), "-json", "-count=1", ...packages]};
+        };
+        const startOtherPackages = () => {
+            otherJob = runJSONJob(otherPackagesJob(packageParallelism), output).then(result => [result])
                 .finally(() => { otherFinished = true; });
         };
         if (!options.modelOnly && configurations.length === 1) {
@@ -217,9 +233,11 @@ const main = async () => {
             compiler.on("close", code => code === 0 ? resolve() : reject(new Error("Sharded test compilation failed: " + code)));
         });
         const jobs = [];
+        const backgroundJobs = [];
         const inventory = {};
         for (const configuration of configurations) {
-            const base = join(binaries, configuration.name + ".test");
+            const jobName = configuration.name.replaceAll("/", "-");
+            const base = join(binaries, basename(configuration.name) + ".test");
             const binary = process.platform === "win32" && existsSync(base + ".exe") ? base + ".exe" : base;
             const listed = spawnSync(binary, ["-test.list=."], {
                 cwd: join(kernel, configuration.name), encoding: "utf8", windowsHide: true,
@@ -231,25 +249,32 @@ const main = async () => {
             if (!names.length) {
                 throw new Error("No tests discovered for " + configuration.package);
             }
-            const durations = JSON.parse(readFileSync(join(root, "scripts", "kernel-" + configuration.name + "-test-durations.json"), "utf8"));
+            const durations = JSON.parse(readFileSync(join(root, "scripts", "kernel-" + jobName + "-test-durations.json"), "utf8"));
             const shards = planShards(names, configuration.count, durations);
             inventory[configuration.name] = {tests: names.length, shards: shards.length};
-            jobs.push(...shards.map((shard, i) => ({name: configuration.name + "-" + (i + 1), seconds: shard.seconds, expectedTests: shard.names,
-                cwd: preparePackageWorkspace(root, join(workspace, configuration.name + "-shard-" + i), configuration.name),
+            const destination = ["model", "api"].includes(configuration.name) ? jobs : backgroundJobs;
+            destination.push(...shards.map((shard, i) => ({name: jobName + "-" + (i + 1), seconds: shard.seconds, expectedTests: shard.names,
+                cwd: preparePackageWorkspace(root, join(workspace, jobName + "-shard-" + i), configuration.name),
                 args: ["tool", "test2json", "-t", "-p", configuration.package, binary, "-test.v=test2json", "-test.count=1", "-test.timeout=10m", "-test.run=" + shard.regex]})));
         }
-        if (!options.modelOnly && !otherJob) {
+        if (backgroundJobs.length) {
+            // 复用其他包原有的两个运行名额，避免新分片挤占模型与 API 的名额。
+            // 未分片包使用一个名额并限制为 -p 1，测试进程上限与原有 -p 2 作业一致。
+            backgroundJobs.push(otherPackagesJob(1));
+            otherJob = runJobs(orderJobs(backgroundJobs), packageParallelism, job => runJSONJob(job, output))
+                .finally(() => { otherFinished = true; });
+        } else if (!options.modelOnly && !otherJob) {
             startOtherPackages();
         }
         const concurrency = Math.min(4, Math.max(1, availableParallelism() - (otherJob && !otherFinished ? 1 : 0)));
-        console.log(`Running ${jobs.length} model/API shards; ${concurrency} concurrent jobs; logs: ${output}`);
-        const results = await runJobs(jobs.sort((a, b) => b.seconds - a.seconds || a.name.localeCompare(b.name, "en")),
-            concurrency, job => runJSONJob(job, output));
+        console.log(`Running ${jobs.length} model/API shards (${concurrency} workers) and ${backgroundJobs.length} other jobs ` +
+            `(${backgroundJobs.length ? packageParallelism : 0} workers); logs: ${output}`);
+        const results = await runJobs(orderJobs(jobs), concurrency, job => runJSONJob(job, output));
         if (otherJob) {
-            results.unshift(await otherJob);
+            results.unshift(...await otherJob);
         }
         const summary = {seconds: (performance.now() - started) / 1000, modelTests: inventory.model.tests, shards: inventory.model.shards,
-            apiTests: inventory.api?.tests ?? 0, apiShards: inventory.api?.shards ?? 0, results};
+            apiTests: inventory.api?.tests ?? 0, apiShards: inventory.api?.shards ?? 0, packages: inventory, results};
         writeFileSync(join(output, "summary.json"), JSON.stringify(summary, null, 2) + "\n");
         console.log(`Kernel tests: ${summary.seconds.toFixed(1)}s; summary: ${join(output, "summary.json")}`);
         process.exitCode = results.some(result => result.code) ? 1 : 0;

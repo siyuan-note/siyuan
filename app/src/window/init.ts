@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {ipcRenderer, webFrame} from "electron";
 import {fetchPost} from "../util/fetch";
 import {adjustLayout, getInstanceById, JSONToCenter} from "../layout/util";
-import {newCenterEmptyTab, resizeTabs, setTabPosition} from "../layout/tabUtil";
+import {newCenterEmptyTab, resizeTabs} from "../layout/tabUtil";
 import {initStatus} from "../layout/status";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {enqueueAppearanceUpdate, initAssets, setInlineStyle} from "../util/assets";
@@ -112,7 +112,6 @@ export const init = async (app: App) => {
         }, Constants.TIMEOUT_RESIZE);
     });
     await Promise.all([layoutReady, windowReady, snippetReady]);
-    setTabPosition();
 };
 
 const afterLayout = (app: App) => {

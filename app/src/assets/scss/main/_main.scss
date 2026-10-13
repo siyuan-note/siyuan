@@ -20,6 +20,10 @@ window.siyuan.zIndex: 10
 .b3-tooltips: 1000000
 */
 
+.app-loading {
+  z-index: 10;
+}
+
 html {
   position: fixed;
   top: 0;

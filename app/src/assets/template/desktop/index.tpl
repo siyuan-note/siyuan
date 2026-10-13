@@ -11,8 +11,8 @@
     <link rel="apple-touch-icon" href="../../icon.png">
     <script src="../../protyle/js/pdf/pdf.min.mjs?v=6.4.299-siyuan.1" type="module"></script>
 </head>
-<body class="fn__flex-column">
-<div id="loading" class="b3-dialog b3-dialog--open">
+<body class="fn__flex-column" aria-busy="true">
+<div id="loading" class="b3-dialog b3-dialog--open app-loading" role="status">
     <div class="b3-dialog__scrim" style="background-color: #1e1e1e"></div>
     <img style="position: absolute;width: 24vh;" src="../../icon.svg">
 </div>

@@ -1,4 +1,5 @@
 import {waitForWindowPaint} from "../util/windowPaint";
+import {Constants} from "../constants";
 
 const INITIAL_EDITOR_WAIT_LIMIT = 5000;
 
@@ -26,11 +27,32 @@ const waitForInitialEditors = async () => {
     });
 };
 
-export const initWindowWithLoading = async (render: () => Promise<void>) => {
+// 等当前 Dock 的布局动画结束，避免首次显示后再调整顶部页签。
+const waitForLayoutTransitions = async () => {
+    const animations = Array.from(document.querySelectorAll<HTMLElement>(".layout__dockl, .layout__dockr, .layout__dockb"))
+        .flatMap(element => element.getAnimations())
+        .filter(animation => animation.playState === "running" &&
+            Number.isFinite(animation.effect?.getComputedTiming().endTime));
+    if (!animations.length) return;
+    let timer: number;
+    try {
+        // 自定义动画超过内置过渡时长时继续进入界面，避免动画阻塞加载。
+        await Promise.race([
+            Promise.all(animations.map(animation => animation.finished.catch(() => {}))),
+            new Promise<void>(resolve => { timer = window.setTimeout(resolve, Constants.TIMEOUT_TRANSITION); }),
+        ]);
+    } finally {
+        window.clearTimeout(timer);
+    }
+};
+
+export const initWindowWithLoading = async (render: () => Promise<void>, finalizeLayout?: () => void) => {
     document.getElementById("loading")?.setAttribute("aria-label", window.siyuan.languages.loading);
     await waitForWindowPaint(async () => {
         await render();
         await waitForInitialEditors();
+        await waitForLayoutTransitions();
+        finalizeLayout?.();
     });
     document.getElementById("windowAppearanceStyle")?.remove();
     document.getElementById("loading")?.remove();

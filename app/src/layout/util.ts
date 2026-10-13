@@ -738,10 +738,6 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         window.siyuan.layout.bottomDock.layout.children[1].element.classList.contains("fn__none")) {
         window.siyuan.layout.bottomDock.layout.element.style.height = "0px";
     }
-    // 等待 dock 面板动画结束
-    setTimeout(() => {
-        setTabPosition();
-    }, Constants.TIMEOUT_TRANSITION);
 };
 
 export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, breakObj?: IObject) => {

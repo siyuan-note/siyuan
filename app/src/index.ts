@@ -57,7 +57,7 @@ import {emitToPlugins} from "./plugin/EventBusCore";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
-import {getDockByType} from "./layout/tabUtil";
+import {getDockByType, setTabPosition} from "./layout/tabUtil";
 import {Files} from "./layout/dock/Files";
 import {Tag} from "./layout/dock/Tag";
 import {appearanceConfigApi, refreshAppearance} from "./config/tabs/appearanceRuntime";
@@ -71,6 +71,7 @@ import {removeBlockPanelEditors} from "./block/panelRemoval";
 import {initializeEnglishCommandTranslations} from "./command/english";
 import {loadLanguages} from "./boot/loadLanguages";
 import {installPluginStorageFetchAppId} from "./util/fetchAppId";
+import {initWindowWithLoading} from "./boot/loading";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -355,7 +356,7 @@ export class App {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
                         await setNoteBook();
-                        await onGetConfig(response.data.start, this);
+                        await initWindowWithLoading(() => onGetConfig(response.data.start, this), setTabPosition);
                         onSetaccount();
                         setTitle("", true);
                         initMessage();

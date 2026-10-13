@@ -15,7 +15,7 @@ import {applyWindowState, initWindowControls} from "./windowControls";
 import {Constants} from "../constants";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {initAssets, setInlineStyle} from "../util/assets";
+import {enqueueAppearanceUpdate, initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
 import {openFile} from "../editor/util";
 import {exitSiYuan} from "../dialog/processSystem";
@@ -69,11 +69,11 @@ export const initDesktopHost = async () => {
     /// #endif
 };
 
-export const onGetConfig = (isStart: boolean, app: App) => {
+export const onGetConfig = async (isStart: boolean, app: App) => {
     correctHotkey(app);
     document.body.classList.toggle("body--windows", isWindows());
     /// #if !BROWSER
-    void initDesktopHost();
+    await initDesktopHost();
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;
     ipcRenderer.send(Constants.SIYUAN_CMD, {
@@ -94,9 +94,6 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             snippetReady.then(() => {
                 try {
                     JSONToLayout(app, isStart);
-                    setTimeout(() => {
-                        adjustLayout();
-                    }); // 等待浮动 Dock 的初始化完成
                     /// #if !BROWSER
                     sendGlobalShortcut(app);
                     /// #endif
@@ -111,14 +108,16 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     });
     initBar(app);
     initStatus();
-    initWindow(app);
+    const windowReady = initWindow(app);
     initWindowOpenOverride(app);
     /// #if !BROWSER
     initNativeDialogOverride();
     /// #endif
     appearanceConfigApi.apply(window.siyuan.config.appearance);
-    initAssets();
-    setInlineStyle();
+    initAssets(true);
+    const inlineStyleReady = enqueueAppearanceUpdate(async () => {
+        await setInlineStyle();
+    });
     if (window.siyuan.config.system.safeMode) {
         // 安全模式已禁用代码片段、插件、自定义主题和图标
         showMessage(window.siyuan.languages.safeModeTip);
@@ -153,7 +152,8 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             });
         }, Constants.TIMEOUT_RESIZE);
     });
-    return layoutReady;
+    await Promise.all([layoutReady, windowReady, inlineStyleReady]);
+    adjustLayout();
 };
 
 export const initWindow = async (app: App) => {

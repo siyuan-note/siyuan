@@ -47,7 +47,8 @@ import {emitToPlugins} from "../plugin/EventBusCore";
 import {initializeEnglishCommandTranslations} from "../command/english";
 import {loadLanguages} from "../boot/loadLanguages";
 import {installPluginStorageFetchAppId} from "../util/fetchAppId";
-import {initWindowWithLoading} from "./loading";
+import {initWindowWithLoading} from "../boot/loading";
+import {setTabPosition} from "../layout/tabUtil";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -257,7 +258,7 @@ class App {
                     window.siyuan.menus = new Menus(this);
                     fetchPost("/api/setting/getCloudUser", {cached: true}, async userResponse => {
                         window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
-                        await initWindowWithLoading(() => init(this));
+                        await initWindowWithLoading(() => init(this), setTabPosition);
                         setTitle("", true);
                         initMessage();
                         window.siyuan.isReady = true;

@@ -20,7 +20,8 @@ const runRendererCase = async (sources, expected) => {
     const assets = load(sources.assets);
     const appearance = load(sources.appearance, {"../util/assets": assets});
     const {waitForWindowPaint} = load(sources.paint);
-    const {initWindowWithLoading} = load(sources.loading, {"../util/windowPaint": {waitForWindowPaint}});
+    const {initWindowWithLoading} = load(sources.loading, {"../util/windowPaint": {waitForWindowPaint},
+        "../constants": {Constants: {TIMEOUT_TRANSITION: 300}}});
     const deferred = () => {
         let resolve;
         const promise = new Promise(done => { resolve = done; });
@@ -112,7 +113,7 @@ const runRendererCase = async (sources, expected) => {
     const initialized = initWindowWithLoading(() => init(app).then(() => { renderDone = true; }, error => {
         window.initError = error.stack;
         throw error;
-    }))
+    }), tabUtil.setTabPosition)
         .then(() => { done = true; });
     assert.equal(loader.getAttribute("aria-label"), "Loading...");
     window.releaseInitialization = async () => {
@@ -171,7 +172,7 @@ if (process.versions.electron && process.type === "browser") {
         const sources = {};
         const ts = require("typescript");
         for (const [key, file] of Object.entries({assets: "util/assets.ts", appearance: "window/appearance.ts",
-            paint: "util/windowPaint.ts", loading: "window/loading.ts", init: "window/init.ts",
+            paint: "util/windowPaint.ts", loading: "boot/loading.ts", init: "window/init.ts",
             host: "boot/onGetConfig.ts", controls: "boot/windowControls.ts", tabs: "layout/tabUtil.ts"})) {
             const source = require("ifdef-loader/preprocessor").parse(
                 fs.readFileSync(path.join(__dirname, "../src", file), "utf8"), {MOBILE: false, BROWSER: false}, false, true);

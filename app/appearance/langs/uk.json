@@ -1,4 +1,6 @@
 {
+	"compactMode": "Компактний режим",
+	"compactModeTip": "Зменшує відступи інтерфейсу, зберігаючи розмір тексту; результат може відрізнятися в темах спільноти",
 	"kernelUnresponsiveTitle": "Ядро не відповідає",
 	"kernelUnresponsiveMessage": "Час очікування локальних запитів до ядра вичерпано, тому SiYuan не може відкрити головне вікно. Докладніше див. у ${log}.",
 	"kernelUnresponsiveWindowsHint": "У Windows це може бути пов’язано з одночасним увімкненням керування перевантаженням TCP BBR2 і Loopback Large Mtu (loopbacklargemtu).",

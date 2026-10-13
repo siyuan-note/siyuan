@@ -7,7 +7,7 @@
 		"id": "20210808180303-axh6q1d",
 		"title": "Custom Appearance",
 		"type": "doc",
-		"updated": "20240508004341"
+		"updated": "20261013113128"
 	},
 	"Children": [
 		{
@@ -41,6 +41,85 @@
 					"TextMarkBlockRefID": "20200924095938-a9p5450",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "Theme"
+				}
+			]
+		},
+		{
+			"ID": "20261013113128-1if2gvn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261013113128-1if2gvn",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Compact mode"
+				}
+			]
+		},
+		{
+			"ID": "20261013113128-l0hhnte",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261013113128-l0hhnte",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Interface"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Compact mode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reduce spacing in desktop toolbars, tabs, navigation lists, menus and dialogs. The change takes effect immediately and is off by default. Editor text size, document and database content, exports and the mobile interface are unchanged."
+				}
+			]
+		},
+		{
+			"ID": "20261013113128-w8t5pmt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261013113128-w8t5pmt",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Built-in light and dark themes support compact mode. With community themes, the effect depends on the theme's layout styles; some areas may retain their original spacing."
 				}
 			]
 		}

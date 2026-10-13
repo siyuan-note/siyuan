@@ -96,6 +96,9 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_TABLE_HEADER_COLUMN: string = "custom-sy-table-header-column";
     public static readonly CUSTOM_SY_AV_STATIC_TEXT: string = "custom-sy-av-s-text-";
 
+    // 界面密度标记仅用于根元素，不写入笔记内容。
+    public static readonly CUSTOM_SY_UI_DENSITY = "custom-sy-ui-density";
+
     // 临时标记 DOM 属性以辅助完成其功能
     public static readonly ATTRIBUTE_EDITING = "data-editing";
     public static readonly ATTRIBUTE_V_SCROLL = "data-v-scroll";
@@ -218,6 +221,7 @@ export abstract class Constants {
     public static readonly LOCAL_CLOSED_TABS = "local-closed-tabs";
     public static readonly LOCAL_AV_CALENDAR_MODES = "local-av-calendar-modes";
     public static readonly LOCAL_TABS_READING = "local-tabs-reading";
+    public static readonly LOCAL_COMPACT_MODE = "local-compact-mode";
     public static readonly LOCAL_PAGE_SCROLL_BUTTONS = "local-page-scroll-buttons";
 
     // dialog

@@ -1,4 +1,6 @@
 {
+	"compactMode": "संक्षिप्त मोड",
+	"compactModeTip": "टेक्स्ट का आकार बनाए रखते हुए इंटरफ़ेस में खाली जगह कम करें; समुदाय की थीम के साथ प्रभाव अलग हो सकता है",
 	"kernelUnresponsiveTitle": "कर्नेल प्रतिक्रिया नहीं दे रहा है",
 	"kernelUnresponsiveMessage": "कर्नेल को भेजे गए स्थानीय अनुरोधों का समय समाप्त हो गया, इसलिए SiYuan मुख्य विंडो नहीं खोल सकता। विवरण के लिए ${log} देखें।",
 	"kernelUnresponsiveWindowsHint": "Windows पर यह TCP कंजेशन नियंत्रण BBR2 और Loopback Large Mtu (loopbacklargemtu) के एक साथ सक्षम होने से संबंधित हो सकता है।",

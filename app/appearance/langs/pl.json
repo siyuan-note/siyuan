@@ -1,4 +1,6 @@
 {
+	"compactMode": "Tryb kompaktowy",
+	"compactModeTip": "Zmniejsza odstępy w interfejsie bez zmiany rozmiaru tekstu; efekt może się różnić w motywach społeczności",
 	"kernelUnresponsiveTitle": "Jądro nie odpowiada",
 	"kernelUnresponsiveMessage": "Upłynął limit czasu lokalnych żądań do jądra, więc SiYuan nie może otworzyć głównego okna. Szczegóły znajdują się w ${log}.",
 	"kernelUnresponsiveWindowsHint": "W systemie Windows może to być związane z jednoczesnym włączeniem kontroli przeciążenia TCP BBR2 i Loopback Large Mtu (loopbacklargemtu).",

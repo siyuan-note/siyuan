@@ -1,4 +1,6 @@
 {
+	"compactMode": "الوضع المضغوط",
+	"compactModeTip": "تقليل المسافات في الواجهة مع الحفاظ على حجم النص؛ قد يختلف التأثير مع سمات المجتمع",
 	"kernelUnresponsiveTitle": "النواة لا تستجيب",
 	"kernelUnresponsiveMessage": "انتهت مهلة الطلبات المحلية إلى النواة، لذا لا يستطيع SiYuan فتح النافذة الرئيسية. راجع ${log} لمزيد من التفاصيل.",
 	"kernelUnresponsiveWindowsHint": "في Windows، قد يكون هذا مرتبطًا بتفعيل التحكم في ازدحام TCP باستخدام BBR2 مع Loopback Large Mtu (loopbacklargemtu).",

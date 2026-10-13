@@ -1,4 +1,6 @@
 {
+	"compactMode": "Kompakt mod",
+	"compactModeTip": "Metin boyutunu koruyarak arayüz boşluklarını azaltır; etki topluluk temalarına göre değişebilir",
 	"kernelUnresponsiveTitle": "Çekirdek yanıt vermiyor",
 	"kernelUnresponsiveMessage": "Çekirdeğe yapılan yerel istekler zaman aşımına uğradığı için SiYuan ana pencereyi açamıyor. Ayrıntılar için ${log} dosyasına bakın.",
 	"kernelUnresponsiveWindowsHint": "Windows'ta bu durum, TCP tıkanıklık denetimi BBR2 ile Loopback Large Mtu (loopbacklargemtu)'nun birlikte etkinleştirilmesiyle ilgili olabilir.",

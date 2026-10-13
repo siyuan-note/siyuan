@@ -7,7 +7,7 @@
 		"id": "20211226121109-f060fkg",
 		"title": "自定義外觀",
 		"type": "doc",
-		"updated": "20240508002918"
+		"updated": "20261013113128"
 	},
 	"Children": [
 		{
@@ -41,6 +41,85 @@
 					"TextMarkBlockRefID": "20211226121326-v5kpxfp",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "主題"
+				}
+			]
+		},
+		{
+			"ID": "20261013113128-r6s9loi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261013113128-r6s9loi",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "緊湊模式"
+				}
+			]
+		},
+		{
+			"ID": "20261013113128-tpz11qw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261013113128-tpz11qw",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外觀"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "介面"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "緊湊模式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後，桌面端的工具列、頁籤、導覽清單、選單和對話方塊會縮小間距。此選項預設關閉，切換後立即生效；不會改變編輯器文字大小、文件和資料庫內容版面、匯出結果或行動端介面。"
+				}
+			]
+		},
+		{
+			"ID": "20261013113128-hb8h7e0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261013113128-hb8h7e0",
+				"updated": "20261013113128"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "內建明亮和暗黑佈景主題支援緊湊模式。社群佈景主題下的效果取決於主題本身的版面樣式，部分區域可能維持原有間距。"
 				}
 			]
 		}

@@ -146,12 +146,12 @@ body {
   &.body--toolbar-hide {
 
     #dockLeft, #dockRight {
-      height: calc(100% - 42px);
-      margin-top: 42px;
+      height: calc(100% - var(--b3-ui-panel-height, 42px));
+      margin-top: var(--b3-ui-panel-height, 42px);
     }
 
     .toolbar {
-      height: 42px;
+      height: var(--b3-ui-panel-height, 42px);
       position: absolute;
       width: 100%;
 
@@ -163,7 +163,7 @@ body {
 
     .layout__dockl:not(.layout--float),
     .layout__dockr:not(.layout--float) {
-      margin-top: 42px;
+      margin-top: var(--b3-ui-panel-height, 42px);
     }
 
     .layout__wnd--left .layout-tab-container {
@@ -175,13 +175,13 @@ body {
     }
 
     .layout__wnd--center .layout-tab-bar .item {
-      margin: 6px 4px;
+      margin: var(--b3-ui-tab-margin, 6px 4px);
     }
 
     .toolbar #drag {
       -webkit-app-region: none;
       color: transparent;
-      height: 42px;
+      height: var(--b3-ui-panel-height, 42px);
       position: relative;
 
       .toolbar__title-icon {
@@ -192,7 +192,7 @@ body {
       &::after {
         content: "";
         width: var(--b3-toolbar-drag-left);
-        height: 42px;
+        height: var(--b3-ui-panel-height, 42px);
         position: absolute;
         left: 0;
         top: 0;
@@ -218,8 +218,8 @@ body {
 
     .toolbar__item--win,
     .toolbar__item--close {
-      padding: 13.25px;
-      height: 42px;
+      padding: var(--b3-ui-window-control-padding, 13.25px);
+      height: var(--b3-ui-panel-height, 42px);
     }
   }
 

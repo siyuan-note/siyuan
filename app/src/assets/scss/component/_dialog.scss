@@ -105,7 +105,7 @@
 
   &__header {
     cursor: default;
-    padding: 9px 24px;
+    padding: var(--b3-ui-dialog-header-padding, 9px 24px);
     line-height: 24px;
     font-size: 16px;
     font-weight: 500;
@@ -120,14 +120,14 @@
   }
 
   &__content {
-    padding: 16px 24px;
+    padding: var(--b3-ui-dialog-content-padding, 16px 24px);
     word-break: break-all;
     flex: 1;
     overflow: auto;
   }
 
   &__action {
-    padding: 7px 24px;
+    padding: var(--b3-ui-dialog-action-padding, 7px 24px);
     border-top: 1px solid var(--b3-theme-surface-lighter);
     display: flex;
     flex-shrink: 0;
@@ -147,7 +147,7 @@
     width: 18px;
     opacity: .68;
     color: var(--b3-theme-on-surface);
-    padding: 8px;
+    padding: var(--b3-ui-dialog-close-padding, 8px);
     z-index: 1;
 
     &:hover {

@@ -1,4 +1,6 @@
 {
+	"compactMode": "โหมดกะทัดรัด",
+	"compactModeTip": "ลดระยะห่างในส่วนติดต่อโดยคงขนาดข้อความไว้ ผลลัพธ์อาจแตกต่างกันตามธีมของชุมชน",
 	"kernelUnresponsiveTitle": "เคอร์เนลไม่ตอบสนอง",
 	"kernelUnresponsiveMessage": "คำขอไปยังเคอร์เนลภายในเครื่องหมดเวลา จึงไม่สามารถเปิดหน้าต่างหลักของ SiYuan ได้ โปรดดูรายละเอียดใน ${log}",
 	"kernelUnresponsiveWindowsHint": "บน Windows ปัญหานี้อาจเกี่ยวข้องกับการเปิดใช้การควบคุมความแออัดของ TCP แบบ BBR2 ร่วมกับ Loopback Large Mtu (loopbacklargemtu)",

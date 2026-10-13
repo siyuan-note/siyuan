@@ -1,4 +1,6 @@
 {
+	"compactMode": "紧凑模式",
+	"compactModeTip": "缩小界面间距并保持文字大小，社区主题下的效果可能有所不同",
 	"kernelUnresponsiveTitle": "内核无响应",
 	"kernelUnresponsiveMessage": "本机内核请求超时，思源无法进入主界面。请查看 ${log} 获取详细信息。",
 	"kernelUnresponsiveWindowsHint": "在 Windows 上，该现象可能与 TCP 拥塞控制 BBR2 和 Loopback Large Mtu (loopbacklargemtu) 同时开启有关。",

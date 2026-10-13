@@ -300,7 +300,7 @@
   background-color: var(--b3-theme-background);
   flex-shrink: 0;
   box-sizing: border-box;
-  min-height: 42px;
+  min-height: var(--b3-ui-panel-height, 42px);
   // 需高于选区容器，并低于 .protyle-toolbar
   z-index: 5;
   font-size: 14px;

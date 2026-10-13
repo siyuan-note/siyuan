@@ -1,4 +1,6 @@
 {
+	"compactMode": "コンパクトモード",
+	"compactModeTip": "文字サイズを維持したまま画面の間隔を狭くします。コミュニティテーマでは効果が異なる場合があります",
 	"kernelUnresponsiveTitle": "カーネルが応答していません",
 	"kernelUnresponsiveMessage": "ローカルのカーネルへのリクエストがタイムアウトしたため、思源はメインウィンドウを開けません。詳細は ${log} を確認してください。",
 	"kernelUnresponsiveWindowsHint": "Windows では、TCP 輻輳制御 BBR2 と Loopback Large Mtu (loopbacklargemtu) の同時有効化が関係している可能性があります。",

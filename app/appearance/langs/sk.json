@@ -1,4 +1,6 @@
 {
+	"compactMode": "Kompaktný režim",
+	"compactModeTip": "Zmenší rozostupy v rozhraní pri zachovaní veľkosti textu; účinok sa môže líšiť pri témach komunity",
 	"kernelUnresponsiveTitle": "Jadro neodpovedá",
 	"kernelUnresponsiveMessage": "Časový limit lokálnych požiadaviek na jadro uplynul, takže SiYuan nemôže otvoriť hlavné okno. Podrobnosti nájdete v ${log}.",
 	"kernelUnresponsiveWindowsHint": "V systéme Windows to môže súvisieť so súčasným zapnutím riadenia preťaženia TCP BBR2 a Loopback Large Mtu (loopbacklargemtu).",

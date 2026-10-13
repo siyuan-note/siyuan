@@ -1,4 +1,6 @@
 {
+	"compactMode": "Compacte modus",
+	"compactModeTip": "Verklein de tussenruimte in de interface met behoud van de tekstgrootte; het effect kan per communitythema verschillen",
 	"kernelUnresponsiveTitle": "De kernel reageert niet",
 	"kernelUnresponsiveMessage": "Lokale verzoeken aan de kernel hebben de tijdslimiet overschreden, waardoor SiYuan het hoofdvenster niet kan openen. Zie ${log} voor meer informatie.",
 	"kernelUnresponsiveWindowsHint": "In Windows kan dit verband houden met de combinatie van TCP-congestiecontrole BBR2 en Loopback Large Mtu (loopbacklargemtu).",

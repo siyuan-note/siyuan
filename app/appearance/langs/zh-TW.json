@@ -1,4 +1,6 @@
 {
+	"compactMode": "緊湊模式",
+	"compactModeTip": "縮小介面間距並保持文字大小，社群佈景主題下的效果可能有所不同",
 	"kernelUnresponsiveTitle": "核心無回應",
 	"kernelUnresponsiveMessage": "本機核心請求逾時，思源無法進入主畫面。請查看 ${log} 取得詳細資訊。",
 	"kernelUnresponsiveWindowsHint": "在 Windows 上，此現象可能與 TCP 壅塞控制 BBR2 和 Loopback Large Mtu (loopbacklargemtu) 同時啟用有關。",

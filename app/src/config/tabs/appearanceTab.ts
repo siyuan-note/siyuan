@@ -52,6 +52,7 @@ import {genMobileBarsSettingHTML, mountMobileBarsSetting} from "../../mobile/uti
 /// #endif
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
 import {genBodyGradientHtml, mountBodyGradient} from "./bodyGradient";
+import {isCompactModeAvailable, isCompactModeEnabled, setCompactModeEnabled} from "./compactMode";
 import {isPageScrollButtonsEnabled, setPageScrollButtonsEnabled} from "../../protyle/scroll/pageButtons";
 
 interface IBootAppearanceListData {
@@ -764,6 +765,14 @@ const mountBootAppearance = async (root: HTMLElement) => {
 const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("interface", window.siyuan.languages.configGroupInterface);
 
+    if (isCompactModeAvailable()) {
+        group.switch("compactMode", {
+            title: window.siyuan.languages.compactMode,
+            desc: window.siyuan.languages.compactModeTip,
+            readConfig: isCompactModeEnabled,
+            save: value => setCompactModeEnabled(value as boolean),
+        });
+    }
     group.select("appearance.lang", {
         title: window.siyuan.languages.language,
         desc: window.siyuan.languages.language1,

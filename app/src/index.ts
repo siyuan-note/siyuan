@@ -2,6 +2,7 @@ import {Constants} from "./constants";
 import {refreshSettingConfig} from "./config/setting/sync";
 import {onAgentStreamingMarkdownStorageChanged} from "./config/tabs/ai/agentStreamingMarkdown";
 import {onPageScrollButtonsStorageChanged} from "./protyle/scroll/pageButtons";
+import {onCompactModeStorageChanged, refreshCompactMode} from "./config/tabs/compactMode";
 import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
 import {systemConfig} from "./config/systemConfig";
 import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
@@ -90,6 +91,11 @@ export class App {
         mainWs.connect({
             id: genUUID(),
             type: "main",
+            callback: () => {
+                if (window.siyuan.isReady) {
+                    void refreshCompactMode().catch(error => console.error("Could not refresh compact mode", error));
+                }
+            },
             msgCallback: (data) => {
                 emitToPlugins("ws-main", data);
                 if (data) {
@@ -179,6 +185,7 @@ export class App {
                                 window.siyuan.storage[data.data.key] = data.data.val;
                                 onAgentStreamingMarkdownStorageChanged(data.data.key);
                                 onPageScrollButtonsStorageChanged(data.data.key);
+                                onCompactModeStorageChanged(data.data.key);
                             }
                             break;
                         case "setLocalStorageVals":
@@ -186,18 +193,21 @@ export class App {
                                 window.siyuan.storage[k] = data.data.keyVals[k];
                                 onAgentStreamingMarkdownStorageChanged(k);
                                 onPageScrollButtonsStorageChanged(k);
+                                onCompactModeStorageChanged(k);
                             });
                             break;
                         case "removeLocalStorageVal":
                             delete window.siyuan.storage[data.data.key];
                             onAgentStreamingMarkdownStorageChanged(data.data.key);
                             onPageScrollButtonsStorageChanged(data.data.key);
+                            onCompactModeStorageChanged(data.data.key);
                             break;
                         case "removeLocalStorageVals":
                             data.data.keys.forEach((k: string) => {
                                 delete window.siyuan.storage[k];
                                 onAgentStreamingMarkdownStorageChanged(k);
                                 onPageScrollButtonsStorageChanged(k);
+                                onCompactModeStorageChanged(k);
                             });
                             break;
                         case "rename":

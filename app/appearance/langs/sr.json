@@ -1,4 +1,6 @@
 {
+	"compactMode": "Компактни режим",
+	"compactModeTip": "Смањује размаке у интерфејсу уз задржавање величине текста; ефекат може да се разликује у темама заједнице",
 	"kernelUnresponsiveTitle": "Језгро не одговара",
 	"kernelUnresponsiveMessage": "Истекло је време чекања за локалне захтеве језгру, па SiYuan не може да отвори главни прозор. Детаље погледајте у ${log}.",
 	"kernelUnresponsiveWindowsHint": "На Windows-у ово може бити повезано са истовременим укључивањем контроле загушења TCP BBR2 и Loopback Large Mtu (loopbacklargemtu).",

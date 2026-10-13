@@ -1,4 +1,6 @@
 {
+	"compactMode": "Modo compacto",
+	"compactModeTip": "Reduce el espaciado de la interfaz sin cambiar el tamaño del texto; el efecto puede variar con los temas de la comunidad",
 	"kernelUnresponsiveTitle": "El núcleo no responde",
 	"kernelUnresponsiveMessage": "Las solicitudes locales al núcleo agotaron el tiempo de espera, por lo que SiYuan no puede abrir la ventana principal. Consulte ${log} para obtener más detalles.",
 	"kernelUnresponsiveWindowsHint": "En Windows, esto puede estar relacionado con la combinación del control de congestión TCP BBR2 y Loopback Large Mtu (loopbacklargemtu).",

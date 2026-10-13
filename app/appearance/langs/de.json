@@ -1,4 +1,6 @@
 {
+	"compactMode": "Kompaktmodus",
+	"compactModeTip": "Abstände der Oberfläche bei gleicher Textgröße verringern; die Wirkung kann je nach Community-Theme variieren",
 	"kernelUnresponsiveTitle": "Der Kernel antwortet nicht",
 	"kernelUnresponsiveMessage": "Lokale Anfragen an den Kernel haben das Zeitlimit überschritten. SiYuan kann das Hauptfenster nicht öffnen. Weitere Informationen finden Sie in ${log}.",
 	"kernelUnresponsiveWindowsHint": "Unter Windows kann dies mit der Kombination aus TCP-Staukontrolle BBR2 und Loopback Large Mtu (loopbacklargemtu) zusammenhängen.",

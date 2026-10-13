@@ -32,6 +32,7 @@ import {
 import {refreshChartTheme} from "../protyle/render/chartRender";
 import {getHostCapabilities} from "./hostCapabilities";
 import {initSelectionStyle} from "./selectionStyle";
+import {applyCompactMode} from "../config/tabs/compactMode";
 
 let headingNumberMeasurementRefreshTimer: number;
 let appearanceUpdate = Promise.resolve();
@@ -149,6 +150,7 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
     const previousThemeMode = htmlElement.getAttribute("data-theme-mode");
     const themeMode = getThemeMode();
     htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
+    applyCompactMode();
     htmlElement.setAttribute("data-frontend", getFrontend()); // https://github.com/siyuan-note/siyuan/issues/12549
     htmlElement.setAttribute("data-backend", getBackend());
     htmlElement.setAttribute("data-theme-mode", themeMode);

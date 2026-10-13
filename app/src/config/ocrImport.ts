@@ -95,9 +95,13 @@ export const openOCRImportModelsDialog = (options: {
                 recognizerConfig: fileInput(files[3]).files[0],
             }), undefined, true, options.signal);
             imported = response.code === 0;
+        } catch (error) {
+            if (!closed && !options.signal.aborted && error.name !== "AbortError") {
+                showMessage(error.message);
+            }
         } finally {
             busy = false;
-            if (imported) {
+            if (imported && !closed && !options.signal.aborted) {
                 showMessage(languages.imported);
                 dialog.destroy();
                 options.onImported();

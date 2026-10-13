@@ -33,7 +33,7 @@ const createImportDialog = () => {
         addEventListener: (name: string, callback: (event: unknown) => unknown) => listeners.set(name, callback),
     };
     const requests: Array<{url: string, process: boolean, body: Record<string, unknown>,
-        resolve: (response: {code: number, msg?: string}) => void}> = [];
+        resolve: (response: {code: number, msg?: string}) => void, reject: (error: Error) => void}> = [];
     const messages: string[] = [];
     let options: {title?: string, content: string, width?: string, destroyCallback?: () => void};
     let destroyed = 0;
@@ -53,8 +53,8 @@ const createImportDialog = () => {
             },
             showMessage: (message: string) => messages.push(message),
             fetchSyncPost: (url: string, data: {apiRequest: Record<string, unknown>}, _headers: unknown, process: boolean) =>
-                new Promise<{code: number, msg?: string}>(resolve =>
-                    requests.push({url, process, body: data.apiRequest, resolve})),
+                new Promise<{code: number, msg?: string}>((resolve, reject) =>
+                    requests.push({url, process, body: data.apiRequest, resolve, reject})),
             Dialog: class {
                 public element = element;
                 constructor(value: typeof options) { options = value; }
@@ -62,13 +62,14 @@ const createImportDialog = () => {
             },
         }),
     });
+    const controller = new AbortController();
     const dialog = exports.openOCRImportModelsDialog({
-        signal: new AbortController().signal,
+        signal: controller.signal,
         onImported: () => opened.push(1),
         onClosed: () => { closed++; },
     }) as {destroy: () => void};
     return {
-        options, controls, requests, messages, element, dialog,
+        options, controls, requests, messages, element, dialog, controller,
         destroyed: () => destroyed, imported: () => opened.length, closed: () => closed,
         choose: (id: string) => {
             listeners.get("click")({target: {closest: () => ({dataset: {ocrFile: id}})}});
@@ -146,3 +147,54 @@ test("cancel closes the dialog without importing", () => {
     assert.equal(panel.requests.length, 0);
     assert.equal(panel.imported(), 0);
 });
+
+for (const error of [new TypeError("Failed to fetch"), new SyntaxError("Unexpected end of JSON input")]) {
+    test(`a rejected import reports ${error.name}, preserves file choices and allows retrying`, async () => {
+        const panel = createImportDialog();
+        fileIds.forEach(id => panel.select(id, `${id}.bin`));
+        const choices = fileIds.map(id => panel.controls[id].files);
+        const pending = panel.confirm();
+        panel.requests[0].reject(error);
+        await pending;
+        assert.deepEqual(panel.messages, [error.message]);
+        assert.equal(panel.destroyed(), 0);
+        assert.equal(panel.imported(), 0);
+        assert.equal(panel.controls.ocrImportConfirm.disabled, false);
+        fileIds.forEach((id, index) => assert.equal(panel.controls[id].files, choices[index]));
+        const retry = panel.confirm();
+        panel.requests[1].resolve({code: 0});
+        await retry;
+        assert.equal(panel.imported(), 1);
+    });
+}
+
+for (const state of ["abortError", "aborted", "closed"]) {
+    test(`a rejected import stays quiet when ${state}`, async () => {
+        const panel = createImportDialog();
+        fileIds.forEach(id => panel.select(id, `${id}.bin`));
+        const pending = panel.confirm();
+        if (state === "aborted") panel.controller.abort();
+        if (state === "closed") panel.cancel();
+        const error = new Error("request cancelled");
+        if (state === "abortError") error.name = "AbortError";
+        panel.requests[0].reject(error);
+        await pending;
+        assert.deepEqual(panel.messages, []);
+        assert.equal(panel.imported(), 0);
+    });
+}
+
+for (const state of ["aborted", "closed"]) {
+    test(`a late successful import stays quiet when ${state}`, async () => {
+        const panel = createImportDialog();
+        fileIds.forEach(id => panel.select(id, `${id}.bin`));
+        const pending = panel.confirm();
+        if (state === "aborted") panel.controller.abort();
+        else panel.cancel();
+        panel.requests[0].resolve({code: 0});
+        await pending;
+        assert.deepEqual(panel.messages, []);
+        assert.equal(panel.imported(), 0);
+        assert.equal(panel.destroyed(), state === "closed" ? 1 : 0);
+    });
+}

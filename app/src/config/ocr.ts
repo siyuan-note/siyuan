@@ -25,6 +25,16 @@ export const mountOCRTab = (root: HTMLElement) => {
     mounts.set(root, mountOCRSettings(root));
 };
 
+/** 按提供商和搜索状态标记每组最后一个可见条目 */
+export const updateOCRTabBorders = (root: HTMLElement) => {
+    root.querySelectorAll<HTMLElement>("[data-config-group-id]").forEach(group => {
+        const items = Array.from(group.querySelectorAll<HTMLElement>(".config-item"));
+        items.forEach(item => item.classList.remove("b3-label--noborder"));
+        items.filter(item => !item.classList.contains("fn__none") && !item.classList.contains("config-search-hidden"))
+            .at(-1)?.classList.add("b3-label--noborder");
+    });
+};
+
 const selectRow = (id: string, title: string, desc: string) =>
     `<label class="fn__flex b3-label config-item">${genConfigItemMainHtml(title, desc)}
 <span class="fn__space"></span><select id="${id}" class="b3-select fn__flex-center fn__size200" disabled></select></label>`;
@@ -126,13 +136,7 @@ export const mountOCRSettings = (root: HTMLElement): (() => void) => {
             root.querySelector<HTMLInputElement>(`#ocrThreshold_${field.key}`).disabled = busy || !isPaddleOCR;
         });
         root.querySelector<HTMLButtonElement>("#ocrImport").disabled = busy || pendingSaves > 0 || !isPaddleOCR;
-        // 隐藏的条目仍占末尾子节点，`b3-label:last-child` 选不中，最后一行的下边框需要显式去掉
-        root.querySelectorAll<HTMLElement>("[data-config-group-id]").forEach(group => {
-            const items = Array.from(group.querySelectorAll<HTMLElement>(".config-item"));
-            items.forEach(item => item.classList.remove("b3-label--noborder"));
-            items.filter(item => !item.classList.contains("fn__none") && !item.classList.contains("config-search-hidden"))
-                .at(-1)?.classList.add("b3-label--noborder");
-        });
+        updateOCRTabBorders(root);
     };
     const providerOptions = () => {
         const providers = [...data.providers].sort((left, right) => Number(right.id === "paddleocr") - Number(left.id === "paddleocr"));

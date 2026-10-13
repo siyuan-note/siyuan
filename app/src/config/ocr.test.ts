@@ -5,6 +5,8 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import type {OCRThresholds, SettingOCR} from "../types/api";
 import {getReasoningEffortOptions} from "../ai/reasoningEffort";
+import type {SettingBuilder} from "./setting/builder";
+import type {applySettingTabSearchVisibility, clearSettingTabSearch} from "./setting/mount";
 
 const generalRowNames = ["ocrAuto", "ocrProvider", "ocrModel", "ocrImport", "ocrAIModel", "ocrReasoningEffort"];
 const advancedRowNames = ["ocrThreshold_detection", "ocrThreshold_box", "ocrThreshold_recognition"];
@@ -60,6 +62,7 @@ test("OCR settings register separate searchable rows in shared desktop and mobil
     assert.doesNotMatch(readFileSync("src/config/ocr.ts", "utf8"), /openOCRThresholds/);
     const tabs = readFileSync("src/config/setting/tabs.ts", "utf8");
     assert.match(tabs, /ocr: setting\.tab\([\s\S]*?afterMount: mountOCRTab,[\s\S]*?registerOCRTab/);
+    assert.match(tabs, /ocr: setting\.tab\([\s\S]*?onShow: updateOCRTabBorders,[\s\S]*?registerOCRTab/);
     assert.match(tabs, /ocr: setting\.tab\([\s\S]*?icon: "iconOCR"/);
     assert.match(readFileSync("appearance/icons/litheness/icon.js", "utf8"), /<symbol id="iconOCR"/);
     assert.match(readFileSync("appearance/icons/index.html", "utf8"), /xlink:href="#iconOCR"/);
@@ -92,7 +95,7 @@ const createOCRPanel = async (initial?: {config?: SettingOCR}) => {
                 return on;
             },
             add(name: string) { classes.add(name); },
-            remove(name: string) { classes.delete(name); },
+            remove(...names: string[]) { names.forEach(name => classes.delete(name)); },
             contains(name: string) { return classes.has(name); },
         };
     };
@@ -103,22 +106,30 @@ const createOCRPanel = async (initial?: {config?: SettingOCR}) => {
         setCustomValidity(message: string) { this.validationMessage = message; },
         reportValidity() { return !this.validationMessage; },
         classList: createClassList(),
+        getAttribute: () => `ocr.__slot.${id === "ocrImport" ? "button_ocrImport" : id}`,
         // 控件自身即配置项，与真实 DOM 中 closest(".config-item") 返回同一元素一致
         closest() { return this as unknown as {classList: ReturnType<typeof createClassList>}; },
     }]));
-    const groupElement = (ids: string[]) => ({
+    const groupElement = (id: string, ids: string[]) => ({
         classList: createClassList(),
+        getAttribute: () => id,
         querySelectorAll: () => ids.map(id => controls[id]),
     });
     const groups: Record<string, ReturnType<typeof groupElement>> = {
-        general: groupElement(generalIds), advanced: groupElement(advancedIds),
+        general: groupElement("general", generalIds), advanced: groupElement("advanced", advancedIds),
     };
     const listeners = new Map<string, (event: unknown) => Promise<void>>();
     let renders = 0;
     const root = {
+        get innerHTML() { return "controls"; },
         set innerHTML(_value: string) { renders++; },
         querySelector: (selector: string) => groups[/data-config-group-id="(\w+)"/.exec(selector)?.[1] ?? ""] ?? controls[selector.slice(1)],
-        querySelectorAll: (selector: string) => selector === "[data-config-group-id]" ? Object.values(groups) : Object.values(controls),
+        querySelectorAll: (selector: string) => {
+            if (selector === "[data-config-search-unavailable-id]") return [];
+            if (selector === "[data-config-group-id]") return Object.values(groups);
+            if (selector === "[data-config-group-id], [data-config-item-id]") return [...Object.values(groups), ...Object.values(controls)];
+            return Object.values(controls);
+        },
         addEventListener: (name: string, callback: (event: unknown) => Promise<void>) => listeners.set(name, callback),
     };
     const requests: Array<{
@@ -129,7 +140,10 @@ const createOCRPanel = async (initial?: {config?: SettingOCR}) => {
     const errors: string[] = [];
     const notifications = new Map<string, () => void>();
     const dialogs: Array<{options: {onImported: () => void, onClosed?: () => void}, destroy: () => void}> = [];
-    const exports = {} as {mountOCRSettings: (element: unknown) => () => void};
+    const exports = {} as {
+        mountOCRSettings: (element: unknown) => () => void;
+        updateOCRTabBorders: (element: HTMLElement) => void;
+    };
     runInNewContext(compiled, {exports, AbortController, window: {siyuan: {config, languages: {ocrThresholdRange: "invalid threshold"}},
         addEventListener: (name: string, callback: () => void, options: {signal: AbortSignal}) => {
             notifications.set(name, callback);
@@ -172,6 +186,20 @@ const createOCRPanel = async (initial?: {config?: SettingOCR}) => {
     })});
     const close = exports.mountOCRSettings(root);
     await new Promise(setImmediate);
+    const searchRuntime = {} as {
+        applySettingTabSearchVisibility: typeof applySettingTabSearchVisibility;
+        clearSettingTabSearch: typeof clearSettingTabSearch;
+    };
+    runInNewContext(transpileModule(readFileSync("src/config/setting/mount.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText, {exports: searchRuntime, require: () => ({})});
+    const builderRuntime = {} as {SettingBuilder: typeof SettingBuilder};
+    runInNewContext(transpileModule(readFileSync("src/config/setting/builder.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText, {exports: builderRuntime, require: (name: string) => name === "./mount" ? searchRuntime : {}});
+    const tab = new builderRuntime.SettingBuilder().tab({
+        id: "ocr", icon: "iconOCR", title: () => "OCR", onShow: exports.updateOCRTabBorders,
+    }, () => {});
     const inputThreshold = (key: keyof OCRThresholds, value: string, badInput = false) => {
         const control = controls[`ocrThreshold_${key}`];
         control.value = value;
@@ -180,6 +208,13 @@ const createOCRPanel = async (initial?: {config?: SettingOCR}) => {
     };
     return {
         controls, config, requests, errors, close, renders: () => renders, dialogs, groups,
+        search: (ids: string[]) => tab.mount(root as unknown as HTMLElement, {
+            visibleItemIds: new Set(ids.map(id => controls[id].getAttribute())), visibleGroupIds: new Set(["general"]),
+        }),
+        clearSearch: () => {
+            searchRuntime.clearSettingTabSearch(root as unknown as HTMLElement);
+            return tab.mount(root as unknown as HTMLElement);
+        },
         clickImport: () => listeners.get("click")({target: {closest: () => controls.ocrImport}, stopPropagation() {}}),
         inputThreshold,
         changeThreshold: (key: keyof OCRThresholds, value: string, badInput = false) => {
@@ -340,6 +375,26 @@ test("hidden trailing rows keep the last visible OCR row borderless for every pr
     assert.deepEqual(marked(), ["ocrReasoningEffort", "ocrThreshold_recognition"]);
     panel.close();
 });
+
+for (const [provider, last] of [["paddleocr", "ocrImport"], ["ai", "ocrReasoningEffort"], ["tesseract", "ocrProvider"]]) {
+    test(`search changes and clearing after a save restore the last visible row for ${provider}`, async () => {
+        const panel = await createOCRPanel({config: {provider, model: "tiny", auto: false}});
+        const borderless = () => generalRowNames.filter(id => panel.controls[id].classList.contains("b3-label--noborder"));
+        await panel.search(["ocrAuto", "ocrProvider"]);
+        assert.deepEqual(borderless(), ["ocrProvider"]);
+        await panel.search(["ocrAuto"]);
+        assert.deepEqual(borderless(), ["ocrAuto"]);
+        const saving = panel.changeAuto(true);
+        await new Promise(setImmediate);
+        panel.requests[0].resolve({code: 0, data: panel.requests[0].config});
+        await saving;
+        await panel.clearSearch();
+        assert.deepEqual(borderless(), [last]);
+        assert.equal(panel.controls.ocrAuto.checked, true);
+        assert.equal(panel.renders(), 0);
+        panel.close();
+    });
+}
 
 test("OCR switches save in order without replacing the panel or disabling ordinary controls", async () => {
     const panel = await createOCRPanel();

@@ -40,6 +40,7 @@ import {setPosition} from "../../util/setPosition";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
+import * as dayjs from "dayjs";
 import {highlightRender} from "../render/highlightRender";
 import {renderIFrameResize} from "../render/iframeResize";
 import {spinListMindmapDOM} from "../render/listMindmap/create";
@@ -1144,6 +1145,10 @@ ${genHintItemHTML(item)}
             } else if (value === Constants.ZWSP + 5) {
                 range.deleteContents();
                 AIChat(protyle, nodeElement);
+                return;
+            } else if (value === Constants.ZWSP + 7) {
+                // 用当前时间替换斜杠命令文本
+                insertHTML(dayjs().format("HH:mm"), protyle, false, true, false, undefined, undoContext);
                 return;
             } else if (Constants.INLINE_TYPE.includes(value)) {
                 range.deleteContents();

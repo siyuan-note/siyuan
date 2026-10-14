@@ -1,4 +1,5 @@
 {
+	"currentTime": "Ora attuale",
 	"exitWaiting": "Chiusura in corso, attendere...",
 	"exitWaitFailed": "Impossibile confermare il completamento della chiusura. Puoi riprovare oppure chiudere questa finestra di dialogo e continuare ad attendere.",
 	"previousExitWaiting": "In attesa del completamento della chiusura precedente...",

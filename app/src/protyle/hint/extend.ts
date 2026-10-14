@@ -347,6 +347,11 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         value: "inline-math",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMath"></use></svg><span class="b3-list-item__text">${window.siyuan.languages["inline-math"]}</span><span class="b3-menu__accelerator b3-menu__accelerator--hotkey">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert["inline-math"].custom))}</span></div>`,
     }, {
+        filter: [window.siyuan.languages.currentTime, "current time", "time", "now", "当前时间", "dangqianshijian", "dqsj", "时间", "shijian", "sj"],
+        id: "currentTime",
+        value: Constants.ZWSP + 7,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconClock"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.currentTime}</span></div>`,
+    }, {
         value: "",
         id: "separator_3",
         html: "separator",

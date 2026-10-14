@@ -595,6 +595,7 @@ const slashMenuBuiltinChildren = [
     node("kbd", lang("kbd")),
     node("tag", lang("tag")),
     node("inlineMath", lang("inline-math")),
+    node("currentTime", lang("currentTime")),
     separator("separator_3"),
     node("insertAsset", lang("insertAsset")),
     node("insertHTMLFile", lang("insertHTMLFile")),

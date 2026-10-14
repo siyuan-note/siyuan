@@ -784,6 +784,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("insertVideoURL", '<video controls="controls" src=""></video>', "iconVideo", window.siyuan.languages.insertVideoURL, "true")}
     ${getSlashItem("insertAudioURL", '<audio controls="controls" src=""></audio>', "iconRecord", window.siyuan.languages.insertAudioURL, "true")}
     ${getSlashItem("emoji", "emoji", "iconEmoji", window.siyuan.languages.emoji, "true")}
+    ${getSlashItem("currentTime", Constants.ZWSP + 7, "iconClock", window.siyuan.languages.currentTime, "true")}
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">

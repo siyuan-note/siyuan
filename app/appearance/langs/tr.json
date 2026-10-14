@@ -1,4 +1,5 @@
 {
+	"currentTime": "Geçerli Saat",
 	"exitWaiting": "Kapatılıyor, lütfen bekleyin...",
 	"exitWaitFailed": "Kapanmanın tamamlandığı doğrulanamadı. Yeniden deneyebilir veya bu iletişim kutusunu kapatıp beklemeye devam edebilirsiniz.",
 	"previousExitWaiting": "Önceki kapanma işleminin tamamlanması bekleniyor...",

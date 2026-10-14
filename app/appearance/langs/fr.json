@@ -1,4 +1,5 @@
 {
+	"currentTime": "Heure actuelle",
 	"exitWaiting": "Fermeture en cours, veuillez patienter...",
 	"exitWaitFailed": "Impossible de confirmer la fin de la fermeture. Vous pouvez réessayer ou fermer cette boîte de dialogue et continuer à patienter.",
 	"previousExitWaiting": "En attente de la fin de la fermeture précédente...",

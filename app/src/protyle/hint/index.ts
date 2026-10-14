@@ -85,6 +85,8 @@ import {
     isBlockHintQueryAtCaret,
     shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
+    shouldAutoCloseRefBrackets,
+    shouldDeleteRefBracketPair,
     stripBlockHintCloseKey,
 } from "./blockHintRange";
 import {getMobileHintPosition} from "./mobileHintPosition";
@@ -133,6 +135,10 @@ export class Hint {
     private enableEmoji = true;
     public enableExtend = false;
     public splitChar = "";
+    // 当前查询末尾是否手动输入了闭合符（如 ]]）
+    public closeKeyTyped = false;
+    // 选中候选项时是否一并替换光标后自动补全的闭合符
+    private consumeCloseKey = false;
     public lastIndex = -1;
     public hashTagSearchElement?: HTMLElement;
     private source: THintSource;
@@ -390,6 +396,62 @@ export class Hint {
                 }, protyle.options.hint.delay);
             }
         });
+    }
+
+    // 输入 [[ 后在光标后补全 ]]，光标保持在括号内
+    public autoCloseRefBrackets(protyle: IProtyle, range: Range) {
+        const context = this.getRefBracketContext(protyle, range);
+        if (context && shouldAutoCloseRefBrackets(context.textBeforeCaret, context.textAfterCaret)) {
+            context.textNode.insertData(range.startOffset, "]]");
+        }
+    }
+
+    // 输入 ] 时跳过已补全的闭合符，跳过第二个 ] 后完成引用；在空括号对之间退格时一并删除 ]
+    // 返回 true 表示已处理并需要阻止默认输入
+    public handleRefBracketBeforeInput(protyle: IProtyle, event: InputEvent) {
+        if (event.isComposing || getSelection().rangeCount === 0) {
+            return false;
+        }
+        const range = getSelection().getRangeAt(0);
+        const context = this.getRefBracketContext(protyle, range);
+        if (!context) {
+            return false;
+        }
+        if (event.inputType === "insertText" && event.data === "]" && context.textAfterCaret.startsWith("]") &&
+            this.splitChar === "[[" && this.canResumeBlockHint(protyle, range)) {
+            range.setStart(context.textNode, range.startOffset + 1);
+            range.collapse(true);
+            focusByRange(range);
+            this.enableExtend = true;
+            this.render(protyle);
+            return true;
+        }
+        if (event.inputType === "deleteContentBackward" &&
+            shouldDeleteRefBracketPair(context.textBeforeCaret, context.textAfterCaret)) {
+            context.textNode.deleteData(range.startOffset, 1);
+        }
+        return false;
+    }
+
+    private getRefBracketContext(protyle: IProtyle, range: Range) {
+        if (!window.siyuan.config.editor?.autoCloseRefBrackets || !range.collapsed ||
+            range.startContainer.nodeType !== 3 || !protyle.wysiwyg.element.contains(range.startContainer) ||
+            hasClosestByAttribute(range.startContainer, "data-type", "code") ||
+            hasClosestByAttribute(range.startContainer, "data-type", "inline-math") ||
+            hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
+            return undefined;
+        }
+        // 输入过程中文本可能被拆分为多个相邻文本节点，合并后才能判断光标前后的括号
+        range.startContainer.parentNode?.normalize();
+        if (range.startContainer.nodeType !== 3) {
+            return undefined;
+        }
+        const textNode = range.startContainer as Text;
+        return {
+            textNode,
+            textBeforeCaret: textNode.data.substring(0, range.startOffset),
+            textAfterCaret: textNode.data.substring(range.startOffset),
+        };
     }
 
     public canResumeBlockHint(protyle: IProtyle, range: Range) {
@@ -962,6 +1024,14 @@ ${genHintItemHTML(item)}
             range.setStart(range.startContainer, this.lastIndex);
             focusByRange(range);
         }
+        // 自动闭合时，光标后的闭合符随查询一起被替换
+        if (this.consumeCloseKey && Constants.BLOCK_HINT_KEYS.includes(this.splitChar)) {
+            const closeKey = Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar];
+            range.endContainer.parentNode?.normalize();
+            if (range.endContainer.nodeType === 3 && range.endContainer.textContent.startsWith(closeKey, range.endOffset)) {
+                range.setEnd(range.endContainer, range.endOffset + closeKey.length);
+            }
+        }
         if (["[[", "【【"].includes(this.splitChar) && /^daily-note:\d{4}-\d{2}-\d{2}:[a-z0-9-]*$/.test(value)) {
             const [, date, notebookID] = value.split(":");
             const target = captureDailyNoteSelection(protyle, range);
@@ -1495,6 +1565,8 @@ ${genHintItemHTML(item)}
         const prevLastIndex = this.lastIndex;
         this.lastIndex = -1;
         this.splitChar = "";
+        this.closeKeyTyped = false;
+        this.consumeCloseKey = false;
         const disableHashTagSearch = window.siyuan.config.editor.hashTagSearch === false;
         extend.forEach((item) => {
             // 关闭标签搜索后 # 不再作为触发符，避免影响 / 等后续提示
@@ -1540,7 +1612,10 @@ ${genHintItemHTML(item)}
                 return "";
             }
             if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar)) {
-                return stripBlockHintCloseKey(lastItem, Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar]);
+                const query = stripBlockHintCloseKey(lastItem, Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar]);
+                this.closeKeyTyped = query !== lastItem;
+                this.consumeCloseKey = !!window.siyuan.config.editor.autoCloseRefBrackets;
+                return query;
             }
             return lastItem;
         }

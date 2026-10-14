@@ -1,4 +1,6 @@
 {
+	"autoCloseRefBrackets": "<code class='fn__code'>[[</code> を自動で閉じる",
+	"autoCloseRefBracketsTip": "[[ を入力すると ]] を自動挿入し、]] を入力するとタイトルが完全一致するドキュメントへの参照を完成させるか、新しいドキュメントを作成します",
 	"exitWaiting": "終了しています。お待ちください...",
 	"exitWaitFailed": "終了が完了したか確認できませんでした。再試行するか、このダイアログを閉じてお待ちください。",
 	"previousExitWaiting": "前回の終了処理が完了するのを待っています...",

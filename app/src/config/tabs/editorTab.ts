@@ -284,6 +284,10 @@ const registerEditorBidirectionalGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.onlySearchForDoc,
         desc: window.siyuan.languages.onlySearchForDocTip,
     });
+    group.switch("editor.autoCloseRefBrackets", {
+        title: window.siyuan.languages.autoCloseRefBrackets,
+        desc: window.siyuan.languages.autoCloseRefBracketsTip,
+    });
     group.number("editor.blockRefDynamicAnchorTextMaxLen", {
         title: window.siyuan.languages.md37,
         desc: window.siyuan.languages.md38,

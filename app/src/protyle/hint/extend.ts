@@ -57,6 +57,7 @@ import {
 import {countBlockWord} from "../../layout/status";
 import {genTemplateDocTreePlanHTML} from "../../template/docTree";
 import {getDailyNoteHints} from "./dailyNote";
+import {findExactDocTitleIndex} from "./blockHintRange";
 
 const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
     infoStyle: "info",
@@ -610,6 +611,9 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
     if (protyle.lite && isEncryptedBox(protyle.notebookId)) {
         refParam.notebook = protyle.notebookId;
     }
+    // 自动闭合时输入 ]] 直接完成引用
+    const commitOnClose = source === "hint" && !protyle.lite && protyle.hint.splitChar === "[[" && key.trim() !== "" &&
+        protyle.hint.closeKeyTyped && window.siyuan.config.editor?.autoCloseRefBrackets;
     const dailyNotes = source === "hint" ? getDailyNoteHints(key, protyle).catch((): IHintData[] => []) : Promise.resolve([] as IHintData[]);
     fetchPost("/api/search/searchRefBlock", refParam, (response) => {
         Promise.all([createTarget.promise, dailyNotes]).then(([hideConfiguredCreate, dateHints]) => {
@@ -660,6 +664,20 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
                     html: genHintItemHTML(item),
                 });
             });
+            if (commitOnClose) {
+                // 依次选择标题完全一致的文档、日记、新建文档
+                const exactIndex = findExactDocTitleIndex(response.data.blocks.map((item: IBlock) => ({
+                    type: item.type,
+                    titles: [item.refText, item.content].filter(Boolean).map((title) =>
+                        Lute.UnEscapeHTMLStr(stripSearchMark(title)).replaceAll(Constants.ZWSP, "")),
+                })), key);
+                const commitItem = exactIndex > -1 ? dataList[createItemCount + exactIndex] :
+                    (createItemCount > 0 ? dataList[0] : undefined);
+                if (commitItem) {
+                    protyle.hint.fill(commitItem.value, protyle);
+                    return;
+                }
+            }
             if (source === "search") {
                 protyle.hint.splitChar = "((";
                 protyle.hint.lastIndex = -1;

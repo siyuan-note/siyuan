@@ -18,6 +18,31 @@ export const isBlockHintQueryAtCaret = (textBeforeCaret: string, textAfterCaret:
     return query.trimStart() === query && query.length < maxLength;
 };
 
+// 自动闭合：光标前刚输入 [[ 且光标后没有闭合符时补全 ]]
+export const shouldAutoCloseRefBrackets = (textBeforeCaret: string, textAfterCaret: string) => {
+    return textBeforeCaret.endsWith("[[") && !textAfterCaret.startsWith("]");
+};
+
+// 自动闭合：在空括号对之间退格时一并删除光标后的 ]
+export const shouldDeleteRefBracketPair = (textBeforeCaret: string, textAfterCaret: string) => {
+    return textBeforeCaret.endsWith("[") && textAfterCaret.startsWith("]");
+};
+
+// 输入 ]] 完成引用时，优先匹配标题完全一致的文档，其次忽略大小写匹配
+export const findExactDocTitleIndex = (items: { type: string, titles: string[] }[], key: string) => {
+    const title = key.trim();
+    if (!title) {
+        return -1;
+    }
+    const index = items.findIndex((item) => item.type === "NodeDocument" && item.titles.includes(title));
+    if (index > -1) {
+        return index;
+    }
+    const lowerTitle = title.toLowerCase();
+    return items.findIndex((item) => item.type === "NodeDocument" &&
+        item.titles.some((itemTitle) => itemTitle.toLowerCase() === lowerTitle));
+};
+
 // 手动输入的闭合标记（如 [[标题]] 中的 ]]）不属于查询内容，选中候选项时随触发符一起被替换
 export const stripBlockHintCloseKey = (query: string, endSplit: string) => {
     return endSplit && query.endsWith(endSplit) ? query.substring(0, query.length - endSplit.length) : query;

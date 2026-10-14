@@ -2,10 +2,13 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     endsWithMultiCharHintPrefix,
+    findExactDocTitleIndex,
     getBlockHintTriggerOffset,
     getBlockRefStaticText,
     isBlockHintQueryAtCaret,
+    shouldAutoCloseRefBrackets,
     shouldCaptureHintUndoFocus,
+    shouldDeleteRefBracketPair,
     shouldIgnoreHintTrigger,
     stripBlockHintCloseKey,
 } from "./blockHintRange";
@@ -156,5 +159,35 @@ describe("endsWithMultiCharHintPrefix", () => {
     it("keeps the current hint active for ordinary query text", () => {
         assert.equal(endsWithMultiCharHintPrefix("2级", hintKeys), false);
         assert.equal(endsWithMultiCharHintPrefix("2", hintKeys), false);
+    });
+});
+
+describe("auto-closing reference brackets", () => {
+    it("inserts closing brackets only right after a new [[", () => {
+        assert.equal(shouldAutoCloseRefBrackets("note [[", ""), true);
+        assert.equal(shouldAutoCloseRefBrackets("[[", " tail"), true);
+        assert.equal(shouldAutoCloseRefBrackets("[[", "]]"), false);
+        assert.equal(shouldAutoCloseRefBrackets("[", ""), false);
+        assert.equal(shouldAutoCloseRefBrackets("[[Title", ""), false);
+    });
+
+    it("deletes the paired bracket only between empty brackets", () => {
+        assert.equal(shouldDeleteRefBracketPair("[[", "]]"), true);
+        assert.equal(shouldDeleteRefBracketPair("[", "]"), true);
+        assert.equal(shouldDeleteRefBracketPair("[[Title", "]]"), false);
+        assert.equal(shouldDeleteRefBracketPair("[[", "text"), false);
+    });
+
+    it("prefers an exact document title, then a case-insensitive one", () => {
+        const items = [
+            {type: "NodeParagraph", titles: ["Roam"]},
+            {type: "NodeDocument", titles: ["roam"]},
+            {type: "NodeDocument", titles: ["Roam"]},
+        ];
+        assert.equal(findExactDocTitleIndex(items, "Roam"), 2);
+        assert.equal(findExactDocTitleIndex(items, "ROAM"), 1);
+        assert.equal(findExactDocTitleIndex(items, " Roam "), 2);
+        assert.equal(findExactDocTitleIndex(items, "Roam Research"), -1);
+        assert.equal(findExactDocTitleIndex(items, ""), -1);
     });
 });

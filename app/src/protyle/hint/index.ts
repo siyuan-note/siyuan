@@ -85,6 +85,7 @@ import {
     isBlockHintQueryAtCaret,
     shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
+    stripBlockHintCloseKey,
 } from "./blockHintRange";
 import {getMobileHintPosition} from "./mobileHintPosition";
 import {getLiteSlashMenuHTML} from "../../mobile/util/liteSlashMenu";
@@ -1016,7 +1017,8 @@ ${genHintItemHTML(item)}
             tempElement = tempElement.firstElementChild as HTMLDivElement;
             if (refIsS) {
                 const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
-                const staticText = getBlockRefStaticText(selectedText, this.splitChar, this.lastIndex > -1);
+                const staticText = getBlockRefStaticText(selectedText, this.splitChar, this.lastIndex > -1,
+                    Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar]);
                 if (staticText) {
                     tempElement.setAttribute("data-subtype", "s");
                     tempElement.innerText = staticText;
@@ -1536,6 +1538,9 @@ ${genHintItemHTML(item)}
             // 输入法自动补全 https://github.com/siyuan-note/insider/issues/100
             if (this.splitChar === "【【" && currentLineValue.endsWith("【【】")) {
                 return "";
+            }
+            if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar)) {
+                return stripBlockHintCloseKey(lastItem, Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar]);
             }
             return lastItem;
         }

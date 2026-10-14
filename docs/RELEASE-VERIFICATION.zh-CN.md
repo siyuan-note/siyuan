@@ -62,7 +62,7 @@ git push origin v3.8.7-beta.1
 
 ### 1. 完成发布准备
 
-生成本次正式版 changelogs，确认各仓库已切到待发布分支。
+生成本次正式版 changelogs，主仓库在 `dev` 上完成发布准备，其他仓库确认已切到各自的待发布分支。`master` 用于正式发布，通过发布 PR 接收 `dev` 的代码。
 
 在主仓库根目录指定本次正式版版本，先查看准备计划：
 
@@ -95,11 +95,13 @@ python -X utf8 scripts/prepare-release.py 3.8.7 --tag-android --execute
 
 准备脚本默认使用主仓库同级的 `siyuan-android`、`siyuan-harmony`、`b3log-index`，可用 `--android-dir`、`--harmony-dir`、`--index-dir` 指定路径。主仓库正式版标签在 GitHub 发布 Release 时创建，iOS 仓库仍需手动准备和同步。
 
+全部发布改动提交并推送后，用 `git rev-parse HEAD` 记录主仓库本次构建提交的完整 SHA，并记录其他平台仓库的对应提交。从开始构建到发布 PR 合并期间保持 `dev` 停留在该提交，各构建机器使用同一主仓库提交。期间若增加了需要纳入本次发布的改动，先提交并推送，再从前端构建开始重新打包，重新记录构建提交并校验产物；不能仅凭版本号相同复用旧包。
+
 ### 2. 确认 WSL 自动同步条件
 
 构建包含 Linux 或鸿蒙时，`build-release.py --execute` 会在预检阶段自动同步 WSL 仓库，无需手动拉取。默认使用用户 `d` 和 `/home/d/88250/siyuan`，目录须已有仓库及可用的 `origin` 远端。
 
-WSL 同步安排在环境检查和签名证书检查之前。如果 SSH 需要私钥口令，启动脚本后按提示输入即可；同步完成后才继续检查和构建，后续构建不会再次拉取仓库。已通过 SSH 代理解锁或两端提交一致时不会提示输入。脚本不保存口令。Windows 签名期间仍可能提示输入 YubiKey PIN 或要求触摸，不能保证全程无人值守。
+WSL 同步安排在环境检查和签名证书检查之前。如果 SSH 需要私钥口令，启动脚本后按提示输入即可；同步完成后才继续检查和构建，后续构建不会再次拉取仓库。已通过 SSH 代理解锁或两端提交一致时不会提示输入。脚本不保存口令。Windows 默认启动时隐藏输入一次签名 PIN，预检通过后自动签名；设备要求触摸或使用 `--signing-ui` 时仍需人工交互。
 
 两端提交不同时，脚本要求 Windows 和 WSL 工作区均无未提交或未跟踪文件，从 WSL 的 `origin` 获取 Windows 当前分支，确认 Windows 当前提交已在该远端分支中，且包含 WSL 当前提交，再以分离 HEAD 方式检出 Windows 的确切提交。不会跟随远端后续新增的提交，也不会强制重置、清理或暂存本地改动；遇到未推送提交、分叉或 WSL 超前时停止，由发布者处理。两端已是同一提交时跳过同步，继续检查构建输入一致性。只查看计划时不执行同步。
 
@@ -187,7 +189,17 @@ python -X utf8 scripts/verify-release.py check --version 3.8.7
 
 ### 9. 手动发布与上架
 
-将发布代码合并并推送到 `master`，确认其构建输入与已验证安装包对应的发布提交一致。
+在 GitHub 创建发布 PR，来源分支选择 `dev`，目标分支选择 `master`，确认来源提交就是步骤 1 记录的构建提交。正式发布允许直接使用 `dev` 作为 PR 来源；普通开发 PR 仍使用独立任务分支并合入 `dev`。[分支检查工作流](../.github/workflows/target-branch.yml) 已通过 `exclude: dev` 支持该发布流程，其他来源分支向 `master` 提 PR 时会被自动改为合入 `dev`。
+
+检查通过后使用 **Create a merge commit** 合并发布 PR，保留 `dev` 的完整提交历史，避免长期分支反复 squash 导致后续 PR 重复列出旧提交。仓库设置须启用 **Allow merge commits**，不要为发布 PR 选择 squash 或 rebase。通过 PR 更新 `master`，无需直接向 `master` 推送。
+
+合并后获取最新 `master`，将下面的 `<构建提交的完整 SHA>` 替换为步骤 1 记录的完整 SHA，核对其文件树与构建提交一致；差异检查必须无输出且退出码为 `0`，存在差异时停止发布并核对原因：
+
+```powershell
+git fetch origin master
+$releaseCommit = "<构建提交的完整 SHA>"
+git diff --exit-code $releaseCommit origin/master
+```
 
 在 GitHub 创建 Release 时输入新标签 `v3.8.7`，选择创建新标签，目标分支选择 `master`，核对目标提交。发布 Release 时由 GitHub 创建标签，无需在本地手动打标签或推送标签。已有同名标签时先核对其指向，不覆盖或重复创建。
 
@@ -225,7 +237,15 @@ GitHub 源地址：https://github.com/siyuan-note/siyuan/releases/download/v3.8.
 - [360软件开放平台](https://open.soft.360.cn/softlist.php)
 - [腾讯电脑管家软件开放平台](https://guanjia.qq.com/software-platform/softwarelibrary)
 
-### 10. 清理发布产物
+### 10. 将发布历史同步回 dev
+
+正式发布后、继续开发前，在工作区干净的 `dev` 上获取最新远端提交，将已发布的 `master` 合并回 `dev` 并推送。使用普通合并保留两边历史，不重置或强推 `dev`。如果发布后两边没有新增代码改动，同步前后的文件树应完全相同；存在其他改动或冲突时先核对并处理。
+
+历史上使用 squash 的发布也需要这次同步，它能让 `dev` 包含发布提交并更新共同祖先，但不会消除原始提交在后续 PR 提交列表中的重复。后续发布统一使用普通合并，让这些原始提交进入 `master` 的历史。
+
+由代理协助操作时，分支合并和推送须获得相应明确授权；仅要求修改文档或构建安装包，不包含提交、推送、打标签或公开发布。
+
+### 11. 清理发布产物
 
 发布完成、确认桌面 `siyuan` 中的安装包已收齐并校验通过后，停止所有构建任务，在 Windows 主仓库执行：
 
@@ -241,7 +261,7 @@ python -X utf8 scripts/clean-release.py --execute
 
 自定义过构建参数时，清理时传入相同的 `--android-dir`、`--harmony-dir`、`--wsl-distro`、`--wsl-user`、`--wsl-repo`；使用自定义收集目录时，必须同时传入 `--output` 保护该目录，使用自定义记录目录时传入相同的 `--records-dir`。默认的 `release-records` 发布记录始终保留。`--skip-wsl` 可只清理 Windows 本地。脚本拒绝越界路径、与保留目录重叠的目标以及自身或上级为链接的清理入口；构建目录内部的符号链接和目录联接只删除链接本身，不清理其指向的目录。不会清理其他电脑上的 macOS 或 iOS 构建产物。
 
-### 11. 等待 GitHub Actions 完成并部署用户指南
+### 12. 等待 GitHub Actions 完成并部署用户指南
 
 最后等待本次发布相关的 GitHub Actions 执行完成，确认用于用户指南部署的构建成功、版本与本次发布一致，再部署用户指南。工作流失败时先处理失败原因，成功后再部署。
 

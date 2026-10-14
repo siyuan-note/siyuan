@@ -13,7 +13,10 @@ import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {scrollCenter} from "../../util/highlightById";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {filesize} from "filesize";
-import {captureUploadDocument, createUploadInsertPosition, getAvailableUploadInsertRange, isUploadDocumentAvailable} from "./insertPosition";
+import {
+    captureUploadDocument, createUploadInsertPosition, getAvailableUploadInsertRange,
+    getUploadDocumentElement, isUploadDocumentAvailable
+} from "./insertPosition";
 import type {IUploadDocument, IUploadInsertPosition} from "./insertPosition";
 import {
     type IAssetUploadEventContext,
@@ -348,7 +351,7 @@ const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "loc
                     fromHTMLPaste: options?.fromHTMLPaste,
                 });
                 hideMessage(msgId);
-                const detached = !document.body.contains(protyle.element);
+                const detached = !document.body.contains(getUploadDocumentElement(protyle, options.document));
                 if (detached) {
                     destroy(protyle);
                 }
@@ -498,7 +501,7 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
                 try {
                     protyle.upload.isUploading = false;
                     hideMessage(validateResult.msgId);
-                    const detached = !document.body.contains(protyle.element);
+                    const detached = !document.body.contains(getUploadDocumentElement(protyle, options.document));
                     if (detached) {
                         // 网络较慢时，页签已经关闭
                         destroy(protyle);

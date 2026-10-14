@@ -7,6 +7,7 @@ import {
     isBlockHintQueryAtCaret,
     shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
+    stripBlockHintCloseKey,
 } from "./blockHintRange";
 
 describe("getBlockHintTriggerOffset", () => {
@@ -85,6 +86,23 @@ describe("getBlockRefStaticText", () => {
     it("removes the trigger from an inline block hint", () => {
         assert.equal(getBlockRefStaticText("[[旧的开始", "[[", true), "旧的开始");
         assert.equal(getBlockRefStaticText("((query", "((", true), "query");
+    });
+
+    it("removes a manually typed closing marker from an inline block hint", () => {
+        assert.equal(getBlockRefStaticText("[[Title]]", "[[", true, "]]"), "Title");
+        assert.equal(getBlockRefStaticText("【【标题】】", "【【", true, "】】"), "标题");
+        assert.equal(getBlockRefStaticText("[[Title]]", "[[", false, "]]"), "[[Title]]");
+    });
+});
+
+describe("stripBlockHintCloseKey", () => {
+    it("removes only a complete trailing closing marker", () => {
+        assert.equal(stripBlockHintCloseKey("Title]]", "]]"), "Title");
+        assert.equal(stripBlockHintCloseKey("query))", "))"), "query");
+        assert.equal(stripBlockHintCloseKey("Title]", "]]"), "Title]");
+        assert.equal(stripBlockHintCloseKey("[draft] notes", "]]"), "[draft] notes");
+        assert.equal(stripBlockHintCloseKey("]]", "]]"), "");
+        assert.equal(stripBlockHintCloseKey("Title]]", undefined), "Title]]");
     });
 });
 

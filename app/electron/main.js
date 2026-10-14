@@ -91,7 +91,7 @@ const {
 
 const {
     readLinuxInputMethodSetting, writeLinuxInputMethodSetting, readLinuxInputMethodArguments,
-    getLinuxInputMethodOverride, configureLinuxInputMethod,
+    prepareLinuxInputMethodLaunch, linuxInputMethodRelaunchEnvironment,
 } = require("./linuxInputMethod");
 
 process.noAsar = true;
@@ -103,6 +103,40 @@ const confDir = path.join(app.getPath("home"), ".config", "siyuan");
 const windowStatePath = path.join(confDir, "windowState.json");
 const linuxInputMethodSettingPath = path.join(confDir, "linux-input-method.json");
 const accessibilitySettingPath = path.join(confDir, "accessibility.json");
+
+// 在单实例锁、窗口和内核启动前完成兼容模式重启，不修改已经选定的原生后端。
+let linuxInputMethodOverride = null;
+let linuxInputMethodArgumentsError = null;
+let linuxInputMethodEnabled = false;
+let linuxInputMethodLaunchArguments = process.argv;
+if (process.platform === "linux") {
+    try {
+        linuxInputMethodEnabled = readLinuxInputMethodSetting(linuxInputMethodSettingPath);
+    } catch (error) {
+        writeLog("read Linux input method setting failed: " + error.message);
+    }
+    try {
+        const launch = prepareLinuxInputMethodLaunch(readLinuxInputMethodArguments(), linuxInputMethodEnabled,
+            process.platform, process.env[linuxInputMethodRelaunchEnvironment]);
+        linuxInputMethodOverride = launch.override;
+        linuxInputMethodLaunchArguments = launch.args;
+        if (launch.relaunchArgs) {
+            if (launch.relaunchToken) {
+                process.env[linuxInputMethodRelaunchEnvironment] = launch.relaunchToken;
+            } else {
+                delete process.env[linuxInputMethodRelaunchEnvironment];
+            }
+            if (app.relaunch({args: launch.relaunchArgs}) === false) {
+                throw new Error("Linux input method relaunch failed");
+            }
+            app.exit(0);
+        }
+    } catch (error) {
+        linuxInputMethodArgumentsError = error;
+        writeLog("prepare Linux input method launch failed: " + error.message);
+    }
+}
+
 const appCrashLogPath = path.join(confDir, "app.crash.log");
 const appCrashMarkerPath = path.join(confDir, "app.crash.json");
 const systemShutdownNone = 0;
@@ -774,8 +808,11 @@ if (!app.isPackaged) {
     argStart = 2;
 }
 
-for (let i = argStart; i < process.argv.length; i++) {
-    let arg = process.argv[i];
+for (let i = argStart; i < linuxInputMethodLaunchArguments.length; i++) {
+    let arg = linuxInputMethodLaunchArguments[i];
+    if (arg === "--") {
+        break;
+    }
     if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") ||
         arg.startsWith("--safe-mode=") || arg.startsWith("--lang=") || arg.startsWith("--connection-session=") || arg === "--remote" ||
         arg.startsWith("--remote=") || arg === "--trust-remote-extensions" ||
@@ -808,26 +845,6 @@ try {
     writeLog("read accessibility setting failed: " + error.message);
 }
 configureAccessibility(app.commandLine, accessibilityEnabled);
-
-// Linux 输入法兼容设置在窗口创建前应用，显式显示后端参数保持优先。
-let linuxInputMethodOverride = null;
-let linuxInputMethodArgumentsError = null;
-let linuxInputMethodEnabled = false;
-if (process.platform === "linux") {
-    try {
-        linuxInputMethodEnabled = readLinuxInputMethodSetting(linuxInputMethodSettingPath);
-    } catch (error) {
-        writeLog("read Linux input method setting failed: " + error.message);
-    }
-    try {
-        const args = readLinuxInputMethodArguments();
-        linuxInputMethodOverride = getLinuxInputMethodOverride(args);
-        configureLinuxInputMethod(app.commandLine, linuxInputMethodEnabled, process.platform, args);
-    } catch (error) {
-        linuxInputMethodArgumentsError = error;
-        writeLog("read Linux process command line failed: " + error.message);
-    }
-}
 
 try {
     firstOpen = !remoteKernelTarget && !fs.existsSync(path.join(confDir, "workspace.json"));
@@ -3118,7 +3135,7 @@ app.whenReady().then(() => {
             if (pendingConnectionArgs || updateInstallPromise || systemShutdownState !== systemShutdownNone) {
                 return;
             }
-            pendingConnectionArgs = connectionArgs(process.argv.slice(1), target, remoteKernelTarget?.origin);
+            pendingConnectionArgs = connectionArgs(linuxInputMethodLaunchArguments.slice(1), target, remoteKernelTarget?.origin);
             try {
                 await closeConnectionWindows(BrowserWindow.getAllWindows().filter(window =>
                     windowKernelTargets.has(window.webContents.id) &&

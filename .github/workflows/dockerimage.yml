@@ -27,13 +27,28 @@ jobs:
     permissions:
       packages: write
       contents: read
+    defaults:
+      run:
+        working-directory: source
 
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.sha }}
+          # 手动重建使用正式版标签的源码，避免混入工作流分支上的后续开发内容。
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || github.sha }}
+          path: source
           submodules: recursive
+
+      - name: Checkout Docker build configuration
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          path: docker-config
+          sparse-checkout: Dockerfile
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
 
       - name: Extract version from package.json
         id: version
@@ -61,6 +76,16 @@ jobs:
             exit 1
           fi
           echo "Release version matches package.json: $VERSION"
+
+      - name: Apply Docker build configuration
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        # 只复制工作流提交中的 Dockerfile，应用源码和资源保持正式版标签的内容。
+        run: cp ../docker-config/Dockerfile Dockerfile
+
+      - name: Record source and build configuration
+        run: |
+          echo "Source commit: $(git rev-parse HEAD)"
+          sha256sum Dockerfile
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main

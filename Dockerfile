@@ -54,6 +54,21 @@ RUN git clone --no-checkout https://github.com/microsoft/onnxruntime /onnxruntim
     && cd /onnxruntime \
     && git checkout 3a728b75062256951b6e19ce718907cf1a1d4cf0 \
     && git submodule update --init --recursive
+# Release 构建不生成栈回溯，将 execinfo.h 限定为 Debug 构建所需的头文件。
+RUN <<EORUN
+#!/bin/sh -e
+cd /onnxruntime
+patch --fuzz=0 -p1 <<'EOPATCH'
+--- a/onnxruntime/core/platform/posix/stacktrace.cc
++++ b/onnxruntime/core/platform/posix/stacktrace.cc
+@@ -6,4 +6,4 @@
+-#if !defined(__ANDROID__) && !defined(__wasm__) && !defined(_OPSCHEMA_LIB_) && !defined(_AIX)
++#if !defined(NDEBUG) && !defined(__ANDROID__) && !defined(__wasm__) && !defined(_OPSCHEMA_LIB_) && !defined(_AIX)
+ #include <execinfo.h>
+ #endif
+ #include <vector>
+EOPATCH
+EORUN
 RUN python3 /onnxruntime/tools/ci_build/build.py --build_dir /onnxruntime/build \
     --config Release --update --build --parallel 2 --build_shared_lib \
     --skip_tests --allow_running_as_root --compile_no_warning_as_error

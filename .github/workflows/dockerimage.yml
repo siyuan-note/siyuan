@@ -8,6 +8,11 @@ on:
       - '!*beta*'
       - '!*rc*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Stable version to build, without the v prefix'
+        required: true
+        type: string
 
 env:
   package_json: "app/package.json"
@@ -27,7 +32,7 @@ jobs:
       - name: Checkout repository and submodules
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.ref }}
+          ref: ${{ github.sha }}
           submodules: recursive
 
       - name: Extract version from package.json
@@ -35,17 +40,27 @@ jobs:
         run: |
           echo "value=$(jq .version ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
 
-      - name: Verify tag matches package.json version
-        # 去掉 tag 前导 v 后与 package.json 中的版本号比对，
-        # 不一致说明开发者推 tag 前忘记同步版本号，直接终止整个流程。
+      - name: Verify release version matches package.json
+        # 标签触发时校验标签，手动触发时校验指定版本，两种方式均只发布正式版。
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED_VERSION: ${{ inputs.version }}
+          PACKAGE_VERSION: ${{ steps.version.outputs.value }}
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          VERSION="${{ steps.version.outputs.value }}"
-          if [ "$TAG" != "$VERSION" ]; then
-            echo "Tag (v$TAG) does not match version in package.json ($VERSION), stopping"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            VERSION="$REQUESTED_VERSION"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Expected a stable version without a v prefix, stopping"
             exit 1
           fi
-          echo "Tag matches version: $TAG"
+          if [ "$VERSION" != "$PACKAGE_VERSION" ]; then
+            echo "Requested version ($VERSION) does not match package.json ($PACKAGE_VERSION), stopping"
+            exit 1
+          fi
+          echo "Release version matches package.json: $VERSION"
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main

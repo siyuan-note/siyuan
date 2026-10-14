@@ -14,6 +14,7 @@ pnpm install --silent
 EORUN
 
 ADD app/ .
+COPY kernel/av/lunar_calendar_data.json /kernel/av/lunar_calendar_data.json
 ADD scripts/prepare-ocr.py scripts/ocr-assets.json /scripts/
 RUN <<EORUN
 #!/bin/bash -e

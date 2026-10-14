@@ -224,6 +224,27 @@ const browserCases = async (sourceCode: string, css: string, cleanupSource: stri
         }}},
     } as unknown as typeof window.siyuan;
 
+    // 节点编辑器透传未处理的组合快捷键，已消费的编辑操作和组合输入仍保持隔离。
+    const shortcutEditor = create();
+    const received: KeyboardEvent[] = [];
+    shortcutEditor.container.addEventListener("keydown", event => received.push(event));
+    for (const key of ["p", "f", "e"]) {
+        for (const modifiers of [{ctrlKey: true}, {metaKey: true}]) {
+            const event = new KeyboardEvent("keydown", {key, ...modifiers, bubbles: true, cancelable: true});
+            shortcutEditor.wysiwyg.dispatchEvent(event);
+            check.equal(received[received.length - 1], event);
+        }
+    }
+    const beforeHandled = received.length;
+    for (const init of [{key: "x"}, {key: "p", ctrlKey: true, isComposing: true}]) {
+        shortcutEditor.wysiwyg.dispatchEvent(new KeyboardEvent("keydown", {...init, bubbles: true}));
+    }
+    const consumed = new KeyboardEvent("keydown", {key: "p", ctrlKey: true, bubbles: true, cancelable: true});
+    consumed.preventDefault();
+    shortcutEditor.wysiwyg.dispatchEvent(consumed);
+    check.equal(received.length, beforeHandled);
+    await shortcutEditor.remove();
+
     // 直接键入只替换首个段落，保留其余内容块。
     const paragraph = (id: string, html: string) =>
         `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true">${html}</div></div>`;

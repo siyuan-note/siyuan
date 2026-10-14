@@ -483,6 +483,37 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     focusHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
     check.equal(mindmapKeys, 1);
     check.equal(documentKeys, 0, "new mindmap keys never reach the hidden source list");
+    // 普通、只读和锁定脑图均透传未处理的应用快捷键，脑图自身操作仍保持隔离。
+    const shortcutEvents: KeyboardEvent[] = [];
+    const receiveShortcut = (event: KeyboardEvent) => shortcutEvents.push(event);
+    window.addEventListener("keydown", receiveShortcut);
+    for (const mode of ["editable", "readonly", "locked"]) {
+        focusView.setReadOnly(mode === "readonly");
+        const focusModel = api.readListMindmap(focusList);
+        focusModel.metadata.viewLocked = mode === "locked";
+        focusView.update(focusModel);
+        for (const key of ["p", "f", "e"]) {
+            for (const modifiers of [{ctrlKey: true}, {metaKey: true}]) {
+                const event = new KeyboardEvent("keydown", {key, ...modifiers, bubbles: true, cancelable: true});
+                const before = shortcutEvents.length;
+                focusHost.dispatchEvent(event);
+                check.equal(shortcutEvents.length, before + 1, `${mode}: ${key} reaches application shortcuts`);
+                check.equal(shortcutEvents[before], event, "the original keyboard event is preserved");
+                check.equal(event.defaultPrevented, false);
+            }
+        }
+        const composing = new KeyboardEvent("keydown", {key: "p", ctrlKey: true, isComposing: true, bubbles: true});
+        const before = shortcutEvents.length;
+        focusHost.dispatchEvent(composing);
+        check.equal(shortcutEvents.length, before, "composition stays inside the mindmap");
+    }
+    focusView.update(api.readListMindmap(focusList));
+    focusView.setReadOnly(false);
+    focusView.selectNode(focusList.querySelector<HTMLElement>('[data-type="NodeMindmapItem"]').dataset.nodeId);
+    const beforeLocalKey = shortcutEvents.length;
+    focusHost.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
+    check.equal(shortcutEvents.length, beforeLocalKey, "mindmap node insertion remains local");
+    window.removeEventListener("keydown", receiveShortcut);
     const elsewhere = document.createElement("input");
     document.body.append(elsewhere);
     elsewhere.focus();

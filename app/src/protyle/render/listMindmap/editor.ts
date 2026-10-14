@@ -404,7 +404,11 @@ export const openListMindmapEditor = (options: ListMindmapEditorOptions) => {
         "pointerdown", "pointerup", "pointermove", "mousedown", "mouseup", "mousemove", "click", "dblclick",
         "contextmenu", "dragstart", "dragover", "drop", "focusin", "focusout", "keyup"]
         .forEach(type => host.addEventListener(type, event => event.stopPropagation(), {signal}));
-    host.addEventListener("keydown", event => event.stopPropagation(), {signal});
+    host.addEventListener("keydown", event => {
+        if (event.defaultPrevented || event.isComposing || composing || !(event.ctrlKey || event.metaKey || event.altKey)) {
+            event.stopPropagation();
+        }
+    }, {signal});
     host.addEventListener("keydown", event => {
         if (event.target instanceof Element &&
             fragment.wysiwyg.contains(event.target.closest(".mindmap-view"))) {

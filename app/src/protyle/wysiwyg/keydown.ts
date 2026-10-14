@@ -314,6 +314,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
+        const mindmap = event.target.closest(".mindmap-view");
+        if (mindmap && !mindmap.contains(editorElement)) {
+            // 脑图未处理的快捷键复用通用命令，不能进入隐藏源块的正文编辑逻辑。
+            if (!protyle.disabled && event.target.closest(".protyle-wysiwyg") === editorElement) {
+                commonHotkey(protyle, event, hasClosestBlock(mindmap) || undefined);
+            }
+            return;
+        }
         if (hasClosestByAttribute(event.target, "data-type", "av-search")) {
             if (matchHotKey("⌘A", event)) {
                 event.preventDefault();

@@ -287,6 +287,10 @@ export class ListMindmapView {
             "dblclick", "contextmenu", "dragstart", "dragover", "drop", "beforeinput", "input", "compositionstart",
             "compositionupdate", "compositionend", "copy", "cut", "paste", "focusin", "focusout", "keydown", "keyup",
             "wheel"].forEach(type => this.listen(options.host, type, event => {
+                // 未由脑图处理的按键交给应用快捷键入口，组合输入仍留在节点编辑器内。
+                if (type === "keydown" && !event.defaultPrevented && !(event as KeyboardEvent).isComposing) {
+                    return;
+                }
                 if (type === "click" && !event.defaultPrevented && !this.options.onOpenLink &&
                     (event.target as Element).closest(".mindmap-view__content a[href]")) {
                     return;

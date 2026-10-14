@@ -6,7 +6,7 @@
 		"id": "20230808120347-3cob0nb",
 		"title": "数据同步",
 		"type": "doc",
-		"updated": "20260918195936"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230808120347-wx5cr4v",
-				"updated": "20260918195936"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -44,20 +44,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ 文件夹中的数据在逻辑上保持一致，包括资源文件、自定义图标、第三方主题和图标包、插件、代码片段、模板、挂件和文档数据。按需下载模式允许资源文件的内容暂不保存到本机。"
-				}
-			]
-		},
-		{
-			"ID": "20260917190844-x6jwutu",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260917190844-x6jwutu",
-				"updated": "20260918195936"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "主题和图标包的文件、更新和卸载会在设备间同步，各设备独立选择使用的主题和图标。包内图片、字体等资源始终完整下载。同步、删除和冲突与插件、挂件、模板共用文件级规则。恢复的快照中没有某个包时，该包会被删除。"
 				}
 			]
 		},
@@ -184,6 +170,35 @@
 				{
 					"Type": "NodeText",
 					"Data": "更换同步目标、重置数据仓库或使用旧版本打开此工作空间前，请先切换为全部下载并完成下载，避免失去未下载资源文件的获取途径。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014537-e8z1u63",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-e8z1u63",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主题和图标"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260917190844-x6jwutu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260917190844-x6jwutu",
+				"updated": "20260918195936"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主题和图标包的文件、更新和卸载会在设备间同步，各设备独立选择使用的主题和图标。包内图片、字体等资源始终完整下载。同步、删除和冲突与插件、挂件、模板共用文件级规则。恢复的快照中没有某个包时，该包会被删除。"
 				}
 			]
 		},
@@ -421,6 +436,99 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-be59rg9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261011151543-be59rg9",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "配置第三方同步"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-x2jg56f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-x2jg56f",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "账号与同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择 S3、WebDAV 或本地文件系统（仅桌面端），然后点击同步服务配置一行的设置按钮。填写完整后点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。输入过程中不会保存，关闭有修改的表单时会询问是否放弃草稿。"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-p38jv4a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-p38jv4a",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "停止使用某个服务时，可在其配置弹窗中点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清除配置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 并确认。这会删除已保存的地址和凭据；如果它是当前同步服务，还会关闭同步。本地笔记和云端数据会保留。"
+				}
+			]
+		},
+		{
+			"ID": "20261011151543-986cazk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261011151543-986cazk",
+				"updated": "20261011151543"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果当前来源的资源或历史快照尚未补齐，修改来源或清除配置会被阻止。请恢复原同步源的访问并完成全部下载后重试。保存或清除失败时，生效配置和草稿都会保留。"
 				}
 			]
 		},

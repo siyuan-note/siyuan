@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import test from "node:test";
 import {
     getCloudLoginUserName,
+    createCloudUserRefresh,
     resolveCloudUserRefresh,
     setCloudUser,
     type TCloudUser,
@@ -17,6 +18,60 @@ test("cloud user refresh applies successful responses", () => {
         user,
         userName: "",
     });
+});
+
+test("automatic cloud refreshes share pending manual requests and respect a one-minute cooldown", async () => {
+    let now = 1000;
+    let requests = 0;
+    let finish: (value: number) => void;
+    const refresh = createCloudUserRefresh(() => {
+        requests++;
+        return new Promise<number>(resolve => { finish = resolve; });
+    }, () => now);
+    const pending = refresh("china:alice");
+    assert.equal(refresh("china:alice", true), pending);
+    await Promise.resolve();
+    assert.equal(requests, 1);
+    finish(1);
+    assert.equal(await pending, 1);
+    now += 59999;
+    assert.equal(await refresh("china:alice"), undefined);
+    assert.equal(requests, 1);
+    now++;
+    const automatic = refresh("china:alice");
+    await Promise.resolve();
+    finish(2);
+    assert.equal(await automatic, 2);
+    const manual = refresh("china:alice", true);
+    await Promise.resolve();
+    finish(3);
+    assert.equal(await manual, 3);
+    assert.equal(requests, 3);
+});
+
+test("failed cloud refreshes retain the automatic cooldown and allow manual retries", async () => {
+    let requests = 0;
+    const refresh = createCloudUserRefresh(async () => {
+        requests++;
+        throw new Error("offline");
+    }, () => 1000);
+    await assert.rejects(refresh("alice"), /offline/);
+    assert.equal(await refresh("alice"), undefined);
+    await assert.rejects(refresh("alice", true), /offline/);
+    assert.equal(requests, 2);
+});
+
+test("completing an old account refresh does not clear a new account's pending request", async () => {
+    const completions: Array<(value: string) => void> = [];
+    const refresh = createCloudUserRefresh(() => new Promise<string>(resolve => completions.push(resolve)));
+    const oldAccount = refresh("china:alice");
+    const newAccount = refresh("global:bob");
+    await Promise.resolve();
+    completions[0]("alice");
+    await oldAccount;
+    assert.equal(refresh("global:bob", true), newAccount);
+    completions[1]("bob");
+    assert.equal(await newAccount, "bob");
 });
 
 test("cloud user refresh preserves state after temporary failures", () => {

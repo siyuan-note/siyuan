@@ -2,6 +2,20 @@
 @use "../component/form";
 
 .search {
+  &__input {
+    resize: none;
+
+    &--sql {
+      height: 100px;
+      max-height: 30vh;
+    }
+  }
+
+  &__av-content {
+    -webkit-line-clamp: 7;
+    overflow-wrap: anywhere;
+  }
+
   &__layout {
     display: flex;
     flex: 1;
@@ -42,8 +56,8 @@
     border-top: 1px solid var(--b3-theme-surface-lighter);
     min-height: 40px;
 
-    .block__icon {
-      opacity: 1;
+    > .block__icons {
+      align-self: flex-start;
     }
 
     .b3-text-field--text {
@@ -54,6 +68,10 @@
       padding: 5px 8px 5px 44px !important;
       box-shadow: none;
       width: 100%;
+
+      &.search__input--sql {
+        height: 100px;
+      }
     }
 
     .b3-form__icon-icon {

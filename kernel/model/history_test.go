@@ -173,7 +173,7 @@ func setupNotebookHistoryRollbackTest(t *testing.T) (historyPath, boxID string) 
 	util.DataDir = filepath.Join(tempDir, "data")
 	util.HistoryDir = filepath.Join(tempDir, "history")
 	Conf = NewAppConf()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() {
 		Conf = originalConf
 		util.WorkspaceDir = originalWorkspaceDir

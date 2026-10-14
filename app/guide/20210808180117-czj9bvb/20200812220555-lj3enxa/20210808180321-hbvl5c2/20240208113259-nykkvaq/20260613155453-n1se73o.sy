@@ -6,7 +6,7 @@
 		"id": "20260613155453-n1se73o",
 		"title": "字段类型",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-unck12x",
-				"updated": "20260613155453"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -45,7 +45,7 @@
 		{
 			"ID": "20260613155453-vj5a9bx",
 			"Type": "NodeTable",
-			"Data": "| 字段类型 | 适用场景 | 可排序 | 可过滤 | 可汇总 | 特殊模板后缀 |\n|---------|---------|--------|--------|--------|------------|\n| 文本 | 标题、描述、任意文字 | √ | √ | × | — |\n| 数字 | 金额、数量、评分 | √ | √ | √ | — |\n| 日期 | 截止日、生日、创建日 | √ | √ | × | `_end` |\n| 单选 | 状态、分类、优先级 | √ | √ | × | — |\n| 多选 | 标签、多分类 | √ | √ | × | `_str` |\n| 网址 | 外部链接、参考来源 | × | √ | × | — |\n| 邮箱 | 联系人邮箱 | × | √ | × | — |\n| 电话 | 联系人电话 | × | √ | × | — |\n| 复选框 | 是否完成、是否启用 | √ | √ | × | — |\n| 主键（绑定块） | 记录的唯一标识，可绑定内容块 | √ | √ | × | `_created` |\n| 资源 | 附件、图片、文件 | × | × | × | — |\n| 关联 | 跨数据库关联记录 | × | √ | × | — |\n| 汇总 | 基于关联字段的统计计算 | √ | √ | √ | — |\n| 模板 | 自动填充默认值 | × | × | × | — |\n| 创建时间 | 记录创建时间（自动） | √ | √ | × | — |\n| 更新时间 | 记录更新时间（自动） | √ | √ | × | — |\n| 行号 | 自动递增序号 | √ | √ | × | — |",
+			"Data": "| 字段类型 | 适用场景 | 可排序 | 可过滤 | 可汇总 | 特殊模板后缀 |\n|---------|---------|--------|--------|--------|------------|\n| 文本 | 标题、描述、任意文字 | √ | √ | × | — |\n| 数字 | 金额、数量、评分 | √ | √ | √ | — |\n| 日期 | 截止日、生日、创建日 | √ | √ | × | `_end` |\n| 单选 | 状态、分类、优先级 | √ | √ | × | — |\n| 多选 | 标签、多分类 | √ | √ | × | `_str` |\n| 网址 | 外部链接、参考来源 | × | √ | × | — |\n| 邮箱 | 联系人邮箱 | × | √ | × | — |\n| 电话 | 联系人电话 | × | √ | × | — |\n| 复选框 | 是否完成、是否启用 | √ | √ | × | — |\n| 主键（绑定块） | 记录的唯一标识，可绑定内容块 | √ | √ | × | `_created` |\n| 资源 | 附件、图片、文件 | × | × | × | — |\n| 关联 | 跨数据库关联记录 | × | √ | × | — |\n| 汇总 | 基于关联字段的统计计算 | √ | √ | √ | — |\n| 模板 | 自动填充默认值 | × | × | × | — |\n| 创建时间 | 记录创建时间（自动） | √ | √ | × | — |\n| 更新时间 | 记录更新时间（自动） | √ | √ | × | — |\n| 行号 | 自动递增序号 | √ | √ | × | — |\n| 位置 | 地点名称和经纬度 | √ | √ | √ | — |",
 			"TableAligns": [
 				0,
 				0,
@@ -56,7 +56,7 @@
 			],
 			"Properties": {
 				"id": "20260613155453-vj5a9bx",
-				"updated": "20260613155453"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -1264,6 +1264,73 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "位置"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "地点名称和经纬度"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -1277,7 +1344,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e "
+					"Data": "> "
 				},
 				{
 					"ID": "20260613155453-82c6kgs",
@@ -2053,7 +2120,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-n6oj93a",
-				"updated": "20260613155453"
+				"updated": "20261009120841"
 			},
 			"Children": [
 				{
@@ -2071,12 +2138,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-xsf0r9j",
-				"updated": "20260613155453"
+				"updated": "20261009120841"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "用于存储日期或日期时间。"
+					"Data": "用于存储日期或日期时间，支持公历和农历。"
 				}
 			]
 		},
@@ -5534,6 +5601,117 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-m7nwg3o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261009034010-m7nwg3o",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "位置字段"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-8ihp92l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-8ihp92l",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "添加类型为「位置」的字段后，点击单元格编辑名称和 WGS84 坐标。名称可留空。经度和纬度须成对填写，使用十进制度数。经度范围为 -180 到 180，纬度范围为 -90 到 90，零是有效值。将两个坐标都留空时，可仅保存名称。坐标不会自动转换。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-grvs8hv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-grvs8hv",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在经度和纬度输入框中分别填写坐标，例如经度 116.4074、纬度 39.9042。仅修改名称时，保留的来源文本保持不变；修改坐标会清除来源文本。"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-kag8uox",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-kag8uox",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 应用修改，点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "取消"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 放弃修改，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清空"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 会移除位置值。文本过滤和排序使用名称、坐标及固定 WGS84 标记组合后的文本。应用内按经度、纬度顺序显示；纯文本复制和导出使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "名称; 纬度, 经度 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 格式，未填写名称时省略名称及分号。可将该文本或 WGS84 的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "纬度, 经度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 坐标对粘贴到位置单元格。例如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "北京; 39.9042, 116.4074 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 同时包含名称和坐标。数据库内的结构化复制保留经纬度各自的命名字段值。"
 				}
 			]
 		},

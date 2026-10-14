@@ -18,7 +18,7 @@ package util
 
 import (
 	"bytes"
-	"crypto/rand"
+	"context"
 	"fmt"
 	"net/url"
 	"os"
@@ -60,13 +60,16 @@ func IsDisabledFeature(feature string) bool {
 	return false
 }
 
+const DefaultUseSingleLineSave = true
+const DefaultLargeFileWarningSize = 8
+
 var (
-	UseSingleLineSave    = true // UseSingleLineSave 是否使用单行保存 .sy 和数据库 .json 文件。
-	LargeFileWarningSize = 8    // LargeFileWarningSize 大文件警告大小，单位：MB
+	UseSingleLineSave    = NewAtomicValue(DefaultUseSingleLineSave)    // UseSingleLineSave 是否使用单行保存 .sy 和数据库 .json 文件。
+	LargeFileWarningSize = NewAtomicValue(DefaultLargeFileWarningSize) // LargeFileWarningSize 大文件警告大小，单位：MB
 )
 
 func ExceedLargeFileWarningSize(fileSize int) bool {
-	return fileSize > LargeFileWarningSize*1024*1024
+	return fileSize > LargeFileWarningSize.Load()*1024*1024
 }
 
 // IsUILoaded 是否已经加载了 UI。
@@ -134,7 +137,7 @@ func logBootInfo() {
 				WaitForUILoaded()
 				time.Sleep(3 * time.Second)
 			}
-			if nil == NotificationsCfg || NotificationsCfg.WorkspaceNotSSD {
+			if nil == NotificationsCfg.Load() || NotificationsCfg.Load().WorkspaceNotSSD {
 				PushErrMsg(Langs[Lang][278], 15000)
 			}
 		}
@@ -149,7 +152,7 @@ func getWorkspaceDriveType() string {
 	if IsMobileContainer() {
 		return ghw.DriveTypeSSD.String()
 	}
-	return detectWorkspaceDriveType()
+	return workspaceDrive.get(context.Background(), detectWorkspaceDriveType)
 }
 
 // detectWorkspaceDriveType 仅返回实际检测到的磁盘类型，不根据平台推断。
@@ -375,8 +378,7 @@ func checkFileSysStatus() {
 
 	for range 7 {
 		tmp := filepath.Join(dir, "check_consistency")
-		data := make([]byte, 1024*4)
-		_, err := rand.Read(data)
+		data, err := newFileSysStatusCheckData()
 		if err != nil {
 			ReportFileSysFatalError(err)
 			return
@@ -392,7 +394,7 @@ func checkFileSysStatus() {
 		for range 32 {
 			renamed := tmp + "_renamed"
 			if err = os.Rename(tmp, renamed); err != nil {
-				ReportFileSysFatalError(err)
+				ReportFileSysFatalError(fileSysStatusCheckError(err))
 				break
 			}
 
@@ -400,7 +402,7 @@ func checkFileSysStatus() {
 
 			f, err := os.Open(renamed)
 			if err != nil {
-				ReportFileSysFatalError(err)
+				ReportFileSysFatalError(fileSysStatusCheckError(err))
 				return
 			}
 
@@ -410,7 +412,7 @@ func checkFileSysStatus() {
 			}
 
 			if err = os.Rename(renamed, tmp); err != nil {
-				ReportFileSysFatalError(err)
+				ReportFileSysFatalError(fileSysStatusCheckError(err))
 				return
 			}
 
@@ -489,12 +491,17 @@ func isICloudPath(workspaceAbsPath string) bool {
 	}
 
 	// macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
-	iCloudRoot := filepath.Join(HomeDir, "Library", "Mobile Documents")
-	if resolvedRoot, matched := matchICloudRoot(HomeDir, iCloudRoot, workspacePath); matched {
+	if resolvedRoot, matched := matchSystemICloudRoot(workspacePath); matched {
 		logging.LogWarnf("workspace [%s] is in iCloud path [%s]", workspaceAbsPath, resolvedRoot)
 		return true
 	}
 	return false
+}
+
+// matchSystemICloudRoot 使用系统用户主目录，避免配置目录覆盖改变真实 iCloud 的检测位置。
+func matchSystemICloudRoot(workspacePath string) (resolvedRoot string, matched bool) {
+	iCloudRoot := filepath.Join(systemHomeDir, "Library", "Mobile Documents")
+	return matchICloudRoot(systemHomeDir, iCloudRoot, workspacePath)
 }
 
 func longestExistingPath(path string) string {
@@ -625,7 +632,7 @@ const (
 	EvtSQLAssetContentRebuild = "sql.assetContent.rebuild"
 )
 
-var SearchCaseSensitive bool
+var SearchCaseSensitive = NewAtomicValue(false)
 
 // SearchHanSensitive 是否区分繁简，由 sql.SetHanSensitive 维护；默认 true 与既往行为一致
-var SearchHanSensitive = true
+var SearchHanSensitive = NewAtomicValue(true)

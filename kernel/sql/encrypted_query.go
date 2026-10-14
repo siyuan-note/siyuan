@@ -32,6 +32,23 @@ import (
 // 本文件提供加密笔记本的 box-scoped 读查询。每个函数接收 boxID，路由到加密 db（已打开）或全局 db。
 // 调用方（model 层）在加密笔记本上下文里改用这些 InBox 版；全局功能继续用原函数。
 
+// QueryDailyNoteRootIDsInBox 按日记属性查询文档，限定笔记本并保留数据库错误。
+func QueryDailyNoteRootIDsInBox(boxID, name, date string) (ids []string, err error) {
+	rows, err := queryForBox(boxID, "SELECT DISTINCT block_id FROM attributes WHERE box = ? AND name = ? AND value = ? AND block_id = root_id ORDER BY block_id", boxID, name, date)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, rows.Err()
+}
+
 // GetBlockInBox 按 id 在指定 box 的 db 里查 block。boxID 为空则查全局 db。
 func GetBlockInBox(id, boxID string) (ret *Block) {
 	ret = getBlockCacheInBox(id, boxID)
@@ -72,21 +89,9 @@ func GetBlocksInBox(ids []string, boxID string) (ret []*Block) {
 		return
 	}
 
-	sqlStmt := "SELECT * FROM blocks WHERE id IN (" + strings.Repeat("?,", len(notHitIDs)-1) + "?)"
-	args := make([]any, len(notHitIDs))
-	for i, id := range notHitIDs {
-		args[i] = id
-	}
-	rows, err := queryForBox(boxID, sqlStmt, args...)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
+	if err := queryBlocksInBatches(notHitIDs, boxID, cached, false); err != nil {
+		logging.LogErrorf("query blocks in box [%s] failed: %s", boxID, err)
 		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		if block := scanBlockRows(rows); nil != block {
-			cached[block.ID] = block
-		}
 	}
 	for _, id := range ids {
 		ret = append(ret, cached[id])

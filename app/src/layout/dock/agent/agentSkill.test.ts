@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
-import {createSourceFile, isClassDeclaration, isMethodDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isClassDeclaration, isExpressionStatement, isFunctionDeclaration, isMethodDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (source: string) => {
     const check: typeof assert = require("node:assert/strict");
@@ -14,8 +14,16 @@ const browserCases = async (source: string) => {
     const insertItems: IHintData[] = [{id: "bold", value: "strong", html: "Bold"}];
     let inserted = "";
     let marked = "";
+    const deletions: {before: string; after: string}[] = [];
     const dependencies = {
         hintSlash: () => insertItems,
+        getFrequentSlashItems: (): IHintData[] => [],
+        getSlashEntryKey: (item: IHintData) => item.id || "",
+        escapeAttr: (text: string) => {
+            const element = document.createElement("div");
+            element.textContent = text;
+            return element.innerHTML.replaceAll('"', "&quot;");
+        },
         fetchPost: (_url: string, _data: unknown, callback: typeof requests[number]) => requests.push(callback),
         escapeHtml: (text: string) => {
             const element = document.createElement("div");
@@ -23,14 +31,21 @@ const browserCases = async (source: string) => {
             return element.innerHTML;
         },
         Constants: {BLOCK_HINT_KEYS: ["((", "[["], INLINE_TYPE: ["strong"], ZWSP: "\u200b"},
-        hideElements: () => {}, getUndoFocusContext: (): undefined => undefined, focusByRange: () => {},
+        hideElements: () => {}, getUndoFocusContext: (): undefined => undefined,
+        focusByRange: (range: Range) => {
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+        },
+        updateTransaction: (_protyle: IProtyle, block: Element, before: string) => {
+            deletions.push({before, after: block.outerHTML});
+        },
         isProtyleListItemFragment: () => false,
         hasClosestBlock: (node: Node) => (node instanceof Element ? node : node.parentElement).closest("[data-node-id]"),
         insertHTML: (html: string) => { inserted = html; },
     };
     const api = new Function(...Object.keys(dependencies), source +
-        "\nreturn {hintSkill, mountLiteSlashMenu, normalizeAgentSkills, expandAgentSkillSelection, " +
-        "AGENT_SKILL_SELECTOR, Hint, isBuiltinSlashHint};")(...Object.values(dependencies));
+        "\nreturn {hintSkill, mountLiteSlashMenu, normalizeAgentSkills, expandAgentSkillSelection, deleteAgentSkill, " +
+        "AGENT_SKILL_SELECTOR, Hint, isBuiltinSlashHint, bindComposerInput};")(...Object.values(dependencies));
     const element = document.createElement("div");
     element.className = "protyle-hint fn__none";
     document.body.appendChild(element);
@@ -143,6 +158,72 @@ const browserCases = async (source: string) => {
     document.execCommand("insertText", false, "suffix");
     check.equal(skill.textContent, "test111");
     check.ok(editor.textContent.includes("test111suffix"));
+
+    const deleteSkill = (inputType = "deleteContentBackward", isComposing = false) => {
+        const event = new InputEvent("beforeinput", {inputType, isComposing, cancelable: true});
+        const handled = api.deleteAgentSkill(protyle, event);
+        check.equal(event.defaultPrevented, handled);
+        return handled;
+    };
+    for (const forward of [false, true]) {
+        for (const position of ["element", "text", "placeholder", "inside"]) {
+            skill = prepare();
+            const parent = skill.parentNode;
+            const index = Array.from(parent.childNodes).indexOf(skill);
+            if (position === "inside") {
+                select(skill.firstChild, 3);
+            } else if (position === "element") {
+                select(parent, index + (forward ? 0 : 1));
+            } else {
+                const text = document.createTextNode(position === "placeholder" ? "\u200b\ufeff" : "");
+                parent.insertBefore(text, forward ? skill : skill.nextSibling);
+                select(text, forward ? 0 : text.length);
+            }
+            check.equal(deleteSkill(forward ? "deleteContentForward" : "deleteContentBackward"), true, position);
+            check.equal(editor.querySelector(api.AGENT_SKILL_SELECTOR), null);
+            check.ok(editor.textContent.includes("before") && editor.textContent.includes("after"));
+            check.ok(editor.contains(getSelection().anchorNode));
+            const operation = deletions.at(-1);
+            editor.innerHTML = operation.before;
+            api.normalizeAgentSkills(editor);
+            check.equal(editor.querySelector(api.AGENT_SKILL_SELECTOR).textContent, "test111", "undo snapshot preserves skill");
+            editor.innerHTML = operation.after;
+            check.equal(editor.querySelector(api.AGENT_SKILL_SELECTOR), null, "redo snapshot removes skill");
+        }
+    }
+    skill = prepare();
+    select(skill.firstChild, 2, skill.firstChild, 4);
+    check.equal(deleteSkill(), true, "partial touch selections delete the whole skill");
+    check.equal(editor.querySelector(api.AGENT_SKILL_SELECTOR), null);
+    skill = prepare();
+    select(skill.nextSibling, 1);
+    check.equal(deleteSkill(), false, "ordinary space is deleted before the skill");
+    select(skill.parentNode, Array.from(skill.parentNode.childNodes).indexOf(skill) + 1);
+    check.equal(deleteSkill("deleteContentBackward", true), false, "composition remains native");
+    check.equal(deleteSkill("insertText"), false, "typing remains native");
+    protyle.disabled = true;
+    check.equal(deleteSkill(), false, "disabled composers cannot delete skills");
+    protyle.disabled = false;
+    getSelection().removeAllRanges();
+    check.equal(deleteSkill(), false, "missing selection remains with the editor recovery handler");
+    api.bindComposerInput(protyle);
+    for (const input of ["soft", "hardware", "recovered"]) {
+        skill = prepare();
+        select(skill.parentNode, Array.from(skill.parentNode.childNodes).indexOf(skill) + 1);
+        const event = input === "soft" ? new InputEvent("beforeinput", {
+            bubbles: true, cancelable: true, inputType: "deleteContentBackward",
+        }) : new KeyboardEvent("keydown", {bubbles: true, cancelable: true, key: "Backspace"});
+        editor.dispatchEvent(event);
+        check.equal(event.defaultPrevented, true);
+        check.equal(editor.querySelector(api.AGENT_SKILL_SELECTOR), null);
+        if (input !== "hardware") {
+            // 模拟 Android 在 Unidentified 的 keyup 中清空选区，及编辑器恢复后派发 Backspace 的路径。
+            getSelection().removeAllRanges();
+            editor.dispatchEvent(new KeyboardEvent("keyup", {key: "Unidentified", bubbles: true}));
+            check.equal(getSelection().rangeCount, 1);
+            check.ok(editor.contains(getSelection().anchorNode));
+        }
+    }
     return "Agent skill cases passed";
 };
 
@@ -156,13 +237,23 @@ test("agent mobile commands coexist with skills and skill names remain atomic", 
     const composerSource = composer.statements.filter(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(declaration => selected.has(declaration.name.getText(composer))))
         .map(statement => statement.getText(composer)).join("\n");
+    const mount = composer.statements.find(statement => isFunctionDeclaration(statement) && statement.name?.text === "mountComposer");
+    assert.ok(mount && isFunctionDeclaration(mount));
+    const inputBindings = mount.body.statements.filter(statement => {
+        if (isVariableStatement(statement)) {
+            return statement.declarationList.declarations.some(declaration =>
+                ["prepareSkillSelection", "skillDeletionRange", "handleSkillDeletion"].includes(declaration.name.getText(composer)));
+        }
+        return isExpressionStatement(statement) && /^wysiwyg\.element\.addEventListener\("(?:beforeinput|keydown|keyup)"/.test(statement.getText(composer));
+    }).map(statement => statement.getText(composer)).join("\n");
     const hint = createSourceFile("hint.ts", read("../../../protyle/hint/index.ts"), ScriptTarget.Latest, true);
     const hintSource = hint.statements.find(isClassDeclaration).members.filter(member => isMethodDeclaration(member) &&
         ["fill", "getHTMLByData"].includes(member.name.getText(hint))).map(member => member.getText(hint)).join("\n");
     const source = transpileModule([read("../../../protyle/hint/builtinSlash.ts"),
         read("../../../protyle/hint/blockHintRange.ts"), read("agentHintState.ts"),
         read("agentSkill.ts"), read("../../../mobile/util/liteSlashMenu.ts"), composerSource,
-        "class Hint {" + hintSource + "}"].join("\n").replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""), {
+        "class Hint {" + hintSource + "}",
+        "const bindComposerInput = p => { const wysiwyg = p.wysiwyg; " + inputBindings + "};"].join("\n").replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""), {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-agent-skill-test-"));

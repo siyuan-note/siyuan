@@ -74,10 +74,12 @@ type capabilityAuthorizer interface {
 type configCapabilityAuthorizer struct{}
 
 func (configCapabilityAuthorizer) Allows(id string, _ capabilityAccessContext) bool {
-	if kernelModel.Conf == nil || kernelModel.Conf.AI == nil || kernelModel.Conf.AI.Agent == nil {
+	confAIReadSnapshot := kernelModel.Conf.LoadAI()
+
+	if kernelModel.Conf == nil || confAIReadSnapshot == nil || confAIReadSnapshot.Agent == nil {
 		return true
 	}
-	return kernelModel.Conf.AI.Agent.CapabilityPolicy.Allows(id)
+	return confAIReadSnapshot.Agent.CapabilityPolicy.Allows(id)
 }
 
 var currentCapabilityAuthorizer capabilityAuthorizer = configCapabilityAuthorizer{}
@@ -89,10 +91,12 @@ type capabilityApprover interface {
 type configCapabilityApprover struct{}
 
 func (configCapabilityApprover) Decision(id, action string, _ capabilityAccessContext) string {
-	if kernelModel.Conf == nil || kernelModel.Conf.AI == nil || kernelModel.Conf.AI.Agent == nil {
+	confAIReadSnapshot := kernelModel.Conf.LoadAI()
+
+	if kernelModel.Conf == nil || confAIReadSnapshot == nil || confAIReadSnapshot.Agent == nil {
 		return conf.ApprovalDecisionRisk
 	}
-	return kernelModel.Conf.AI.Agent.ApprovalPolicy.Decision(id, action)
+	return confAIReadSnapshot.Agent.ApprovalPolicy.Decision(id, action)
 }
 
 var currentCapabilityApprover capabilityApprover = configCapabilityApprover{}
@@ -170,16 +174,18 @@ func capabilityAllowed(id string, context capabilityAccessContext) bool {
 }
 
 func capabilityOwnerAvailable(source, runtime, ownerID string) bool {
+	confAIReadSnapshot := kernelModel.Conf.LoadAI()
+
 	if source != "mcp" && runtime != "mcp" {
 		return true
 	}
 	if ownerID == "" {
 		return true
 	}
-	if kernelModel.Conf == nil || kernelModel.Conf.AI == nil || kernelModel.Conf.AI.MCP == nil {
+	if kernelModel.Conf == nil || confAIReadSnapshot == nil || confAIReadSnapshot.MCP == nil {
 		return false
 	}
-	for _, server := range kernelModel.Conf.AI.MCP.Servers {
+	for _, server := range confAIReadSnapshot.MCP.Servers {
 		if server.ID == ownerID {
 			return server.Enabled
 		}

@@ -115,6 +115,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     private latestLoadBatch = 0;
     private started = false;
     private layoutReady = false;
+    private disposed = false;
 
     constructor(adapter: IPluginLifecycleAdapter<TData, TPlugin>, options: IPluginLifecycleOptions = {}) {
         this.adapter = adapter;
@@ -125,7 +126,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     }
 
     public start() {
-        if (this.started) {
+        if (this.started || this.disposed) {
             return;
         }
         this.started = true;
@@ -148,13 +149,21 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         return batch.id === this.latestLoadBatch;
     }
 
-    public requestBatchLoad(name: string, data: TData, batch: IPluginLoadBatch) {
+    public requestBatchLoad(name: string, data: TData, batch: IPluginLoadBatch, reload = false) {
         this.sequence = Math.max(this.sequence, batch.sequence);
         const record = this.getRecord(name);
         if (batch.id !== this.latestLoadBatch || record.lastStructuralSequence > batch.sequence) {
             return Promise.resolve();
         }
-        return this.enqueueStructural(record, "load", async () => data, batch.sequence);
+        return this.enqueueStructural(record, reload ? "reload" : "load", async () => data, batch.sequence);
+    }
+
+    public requestBatchUnload(name: string, batch: IPluginLoadBatch) {
+        const record = this.getRecord(name);
+        if (batch.id !== this.latestLoadBatch || record.lastStructuralSequence > batch.sequence) {
+            return Promise.resolve();
+        }
+        return this.enqueueStructural(record, "unload", undefined, batch.sequence);
     }
 
     public requestLoad(name: string, dataProvider: () => Promise<TData | undefined>) {
@@ -196,7 +205,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     }
 
     public setLayoutReady() {
-        if (this.layoutReady) {
+        if (this.layoutReady || this.disposed) {
             return Promise.resolve();
         }
         this.layoutReady = true;
@@ -225,6 +234,29 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
 
     public getInstance(name: string) {
         return this.records.get(name)?.instance;
+    }
+
+    public dispose() {
+        if (this.disposed) return;
+        this.disposed = true;
+        this.latestLoadBatch = ++this.loadBatchSequence;
+        this.records.forEach(record => {
+            record.lastStructuralSequence = ++this.sequence;
+            this.signalRemoval(record, this.now());
+            record.tasks.splice(0).forEach(task => task.waiters.forEach(resolve => resolve()));
+            const plugin = record.instance;
+            const unloading = record.state === "unloading" || record.state === "uninstalling";
+            record.instance = undefined;
+            record.state = "absent";
+            if (!plugin) return;
+            this.markDisposed(record.name, plugin);
+            if (!unloading) void this.observe(record.name, "onunload", () => this.adapter.onunload(plugin));
+            try {
+                this.adapter.dispose(plugin, false);
+            } catch (error) {
+                this.adapter.onError(record.name, "dispose", error);
+            }
+        });
     }
 
     private getRecord(name: string) {
@@ -269,6 +301,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     }
 
     private enqueue(record: IPluginLifecycleRecord<TData, TPlugin>, task: IPluginLifecycleTask<TData>) {
+        if (this.disposed) return Promise.resolve();
         const promise = new Promise<void>((resolve) => task.waiters.push(resolve));
         record.tasks.push(task);
         this.schedule(record);
@@ -276,7 +309,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     }
 
     private schedule(record: IPluginLifecycleRecord<TData, TPlugin>) {
-        if (!this.started || record.processing || record.tasks.length === 0 ||
+        if (this.disposed || !this.started || record.processing || record.tasks.length === 0 ||
             this.isDataChangeWaitingForReady(record)) {
             return;
         }
@@ -460,6 +493,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
             deadlineReached = true;
             this.reportTimeout(record.name, "onunload");
         }
+        if (record.instance !== plugin) return;
         uninstall = uninstall || this.hasPendingUninstall(record);
         if (uninstall) {
             record.state = "uninstalling";
@@ -469,6 +503,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
             }
             this.markPendingUninstallsHandled(record, task);
         }
+        if (record.instance !== plugin) return;
         this.markDisposed(record.name, plugin);
         record.instance = undefined;
         record.state = "absent";

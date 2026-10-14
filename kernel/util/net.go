@@ -117,6 +117,50 @@ func IsLocalHost(host string) bool {
 	}
 }
 
+// IsTLSRequest 判断这条客户端连接是否使用 TLS。
+//
+// 内核在同一端口上通过 cmux 同时承载 HTTP 与 HTTPS，入站方向由 request.TLS 区分；
+// 固定端口反代以 HTTPS 回源内核，由它写入的 ClientTLSHeader 标记客户端侧的真实连接方式。
+// 该头部仅在直连对端为本机时采信，避免调用方伪造 https 让 Cookie 被错误标记为 Secure。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
+func IsTLSRequest(request *http.Request) bool {
+	if nil == request {
+		return false
+	}
+	if nil != request.TLS {
+		return true
+	}
+	return ClientTLSHeaderValue == request.Header.Get(ClientTLSHeader) && IsLocalHost(request.RemoteAddr)
+}
+
+// IsValidRedirectHost 校验 Host 是否为可以直接拼接跳转地址的合法 authority。
+//
+// 仅接受 host 或 host:port 形式，拒绝凭据、路径、查询、片段与空白字符，
+// 避免被污染的 Host 让 HTTPS 跳转指向站外地址。
+func IsValidRedirectHost(host string) bool {
+	if "" == host || host != strings.TrimSpace(host) || strings.ContainsAny(host, "/\\?#@,; \t\r\n") {
+		return false
+	}
+
+	hostname, port, err := net.SplitHostPort(host)
+	if err != nil {
+		// 不含端口时按纯主机名处理，但要排除 "host:" 这类残留冒号的写法
+		if strings.Contains(host, ":") {
+			return false
+		}
+		hostname, port = host, ""
+	}
+	if "" == hostname || (strings.Contains(host, ":") && "" == port) {
+		return false
+	}
+	if "" != port {
+		if portNum, portErr := strconv.Atoi(port); nil != portErr || 1 > portNum || 65535 < portNum {
+			return false
+		}
+	}
+	return true
+}
+
 func IsLocalOrigin(origin string) bool {
 	if u, err := url.Parse(origin); err == nil {
 		return IsLocalHostname(u.Hostname())
@@ -147,13 +191,14 @@ func IsCrossSiteFetchSite(site string) bool {
 	return "" != site && "same-origin" != site && "none" != site
 }
 
-// IsSessionOriginAllowedRequest 校验会话认证请求：同站子域的应用页面导航可放行，
+// IsSessionOriginAllowedRequest 校验会话认证请求：应用入口的顶层 GET 页面导航可放行，
 // 其他跨源请求拒绝，其余请求继续校验 Origin。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
 func IsSessionOriginAllowedRequest(r *http.Request) bool {
 	if IsCrossSiteFetchSite(r.Header.Get("Sec-Fetch-Site")) {
-		// 已登录用户可从同站子域进入应用页面；跨站导航和同站 API 请求仍须拒绝。
-		return r.Header.Get("Sec-Fetch-Site") == "same-site" &&
+		// 已登录用户可从子域、外部链接或 PWA 图标进入应用；API、资源和嵌入页面请求仍须拒绝。
+		site := r.Header.Get("Sec-Fetch-Site")
+		return (site == "same-site" || site == "cross-site") &&
 			r.Method == http.MethodGet && r.Header.Get("Origin") == "" &&
 			r.Header.Get("Sec-Fetch-Mode") == "navigate" &&
 			r.Header.Get("Sec-Fetch-Dest") == "document" && isAppEntryPath(r.URL.Path)
@@ -406,33 +451,6 @@ func GetRequestUrlStringParam(c *gin.Context, key string) string {
 	}
 
 	return ""
-}
-
-// GetRequestStringParam extracts a string parameter from the request (URL or JSON body), with validation and error handling.
-func GetRequestStringParam(c *gin.Context, key string, result *gulu.Result) string {
-	// /path/:name
-	if value := GetRequestUrlStringParam(c, key); value != "" {
-		return value
-	}
-
-	// /path with JSON body {key: "xxx"}
-	arg, ok := JsonArg(c, result)
-	if !ok {
-		return ""
-	}
-	if arg[key] == nil {
-		result.Code = 1
-		result.Msg = fmt.Sprintf("Request body prop [%s] does not exist", key)
-		return ""
-	}
-
-	value, ok := arg[key].(string)
-	if !ok {
-		result.Code = 2
-		result.Msg = fmt.Sprintf("Request body prop [%s] is not a string", key)
-		return ""
-	}
-	return value
 }
 
 // ParseJsonArg 使用泛型从 JSON 参数中提取指定键的值。

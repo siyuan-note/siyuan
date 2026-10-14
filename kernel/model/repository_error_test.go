@@ -41,7 +41,7 @@ func TestFormatSyncRepoErrorMsg(t *testing.T) {
 					Conf = &AppConf{
 						userLock: &sync.RWMutex{},
 						Lang:     lang,
-						Sync:     &conf.Sync{Provider: provider},
+						Sync:     NewConfSection(&conf.Sync{Provider: provider}),
 						User:     &conf.User{UserSiYuanRepoSize: 8 * 1000 * 1000 * 1000, UserSiYuanSubscriptionPlan: plan},
 					}
 					want := "Sync failed: " + html.EscapeString(repoErr.Error()) + " (Provider: " + conf.ProviderToStr(provider) + ")"

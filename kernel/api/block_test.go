@@ -70,9 +70,18 @@ func testGetBlockInfoRecovery(t *testing.T, name string) {
 	util.AssetContentDBPath = filepath.Join(root, "asset_content.db")
 	util.BlockTreeDBPath = filepath.Join(root, "blocktree.db")
 	model.Conf = model.NewAppConf()
-	model.Conf.FileTree, model.Conf.Sync = conf.NewFileTree(), conf.NewSync()
+	{
+		confSectionValue0, confSectionValue1 := conf.NewFileTree(), conf.NewSync()
+		model.Conf.FileTree.Store(confSectionValue0)
+		model.Conf.Sync.Store(confSectionValue1)
+	}
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
-	model.Conf.Search, model.Conf.Editor, model.Conf.Export = conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+		model.Conf.Search.Store(confSectionValue0)
+		model.Conf.Editor.Store(confSectionValue1)
+		model.Conf.Export.Store(confSectionValue2)
+	}
 	box := &model.Box{ID: ast.NewNodeID()}
 	boxConf := conf.NewBoxConf()
 	boxConf.Name, boxConf.Closed = "Recovery", false
@@ -182,7 +191,7 @@ func TestCheckBlockRefRejectsDeletedIDsOutsideIDs(t *testing.T) {
 func TestFilterBlockAndRefIDsByPublishAccess(t *testing.T) {
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() { model.Conf = previousConf })
 	const (
 		boxID             = "20260724000000-boxid01"
@@ -255,7 +264,7 @@ func TestFilterBlockAndRefIDsByPublishAccess(t *testing.T) {
 func TestGetBlockInfoPublishAccess(t *testing.T) {
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() { model.Conf = previousConf })
 	const (
 		boxID             = "20260806000020-box0020"
@@ -372,7 +381,7 @@ type docBlocksOrdersResponse struct {
 func TestBlockPublishAccessGuards(t *testing.T) {
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() { model.Conf = previousConf })
 	const (
 		boxID             = "20260724000000-boxid03"

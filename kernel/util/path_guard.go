@@ -30,6 +30,9 @@ import (
 // conf 目录下的 conf.json 与 TLS 密钥材料、data/snippets/conf.json、data/templates 目录、
 // data/.siyuan/publishAccess.json、笔记本目录下的 .siyuan 内部文件以及 temp 目录下的 siyuan.log 日志文件。
 func IsForbiddenAbsPath(abs string) bool {
+	if IsPluginDevelopmentRawPathForbidden(abs, false) {
+		return true
+	}
 	fileNorm := NormalizeAndResolve(abs)
 	// 插件发布授权及快照只能通过专用接口读取，其他原始文件和静态资源入口不得暴露它们。
 	publishRoot := NormalizeAndResolve(filepath.Join(ConfDir, "plugin-publish"))
@@ -76,6 +79,21 @@ func IsForbiddenAbsPath(abs string) bool {
 func IsForbiddenDataRelPath(rel string) bool {
 	// 统一为斜杠并清理（path.Clean 使用斜杠语义，避免 Windows 上分隔符差异）
 	rel = path.Clean("/" + filepath.ToSlash(rel))
+	protectedRel := pluginDevelopmentLexicalPath(rel)
+	for _, component := range strings.Split(protectedRel, "/") {
+		if strings.HasPrefix(component, ".siyuan-package-install-") {
+			return true
+		}
+	}
+	if strings.HasPrefix(protectedRel, "/storage/ai/agent/plugin-projects/") ||
+		protectedRel == "/storage/ai/agent/plugin-projects" {
+		return true
+	}
+	stateParts := strings.Split(strings.TrimPrefix(protectedRel, "/"), "/")
+	if len(stateParts) == 6 && strings.EqualFold(strings.Join(stateParts[:4], "/"), "storage/ai/agent/sessions") &&
+		strings.HasPrefix(strings.ToLower(stateParts[5]), "runtime.json") {
+		return true
+	}
 	// 在 Windows 和 macOS 上文件系统通常为不区分大小写，使用小写统一比较
 	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
 		rel = strings.ToLower(rel)

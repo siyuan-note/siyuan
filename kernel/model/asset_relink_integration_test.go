@@ -74,10 +74,12 @@ func TestAssetRelinkPersistenceAndHistory(t *testing.T) {
 	if err != nil || len(preview.References) != 3 {
 		t.Fatalf("preview: %+v %v", preview, err)
 	}
+	seedDocumentHistory(t, tree.ID, fixture.targetID)
 	result, err := RelinkAsset("assets/a.png", "assets/b.webp", false)
 	if err != nil || result.Updated != 3 || result.HistoryPath == "" || len(result.References) != len(preview.References) {
 		t.Fatalf("apply: %+v %v", result, err)
 	}
+	requireDocumentHistoryCleared(t, tree.ID, fixture.targetID)
 	checkAssetRelinkUnavailable(t, result, orphan)
 	orphanAfter, _ := os.ReadFile(filepath.Join(util.DataDir, orphan.Box, orphan.Path))
 	if !bytes.Equal(orphanBefore, orphanAfter) {

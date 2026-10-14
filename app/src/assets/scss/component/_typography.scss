@@ -1,10 +1,6 @@
 @use "../util/function";
 @use "../protyle/task";
 
-:root {
-  --b3-font-family-emoji-reset: "Emojis Additional", "Emojis Reset";
-}
-
 @font-face {
   font-family: 'JetBrainsMono-Regular';
   /*! /* webpackIgnore: true */
@@ -25,6 +21,11 @@
   &.mindmap-view__content {
     // 富文本预览沿用所在单元格或脑图节点的字号。
     font-size: inherit;
+  }
+
+  &.table__cell-rich {
+    // 富文本预览沿用所在单元格的字体。
+    font-family: inherit;
   }
 
   img {
@@ -87,7 +88,7 @@
 
   span[data-type~="inline-math"] {
     direction: ltr;
-    user-select: text;
+    user-select: all;
     display: inline;
     // https://github.com/siyuan-note/siyuan/issues/17211
     &:after {
@@ -190,6 +191,13 @@
 
     .callout-info {
       color: var(--b3-callout-note);
+    }
+
+    > .callout-info > .callout-title {
+      mark,
+      span[data-type~="mark"] {
+        color: inherit;
+      }
     }
 
     .callout-icon {
@@ -568,7 +576,7 @@
         flex: 1;
       }
 
-      & > .tag {
+      & > .katex-tag {
         position: initial;
         margin-right: 2px;
         margin-left: 8px;
@@ -635,6 +643,7 @@
       max-width: 100%;
       min-height: 100%;
       max-height: 100%;
+      vertical-align: bottom;
     }
   }
 
@@ -685,7 +694,8 @@
       }
     }
 
-    .protyle-action__title {
+    .protyle-action__title,
+    .img__alt {
       display: flex;
       font-size: 85%;
       color: var(--b3-theme-on-surface);
@@ -743,6 +753,22 @@
   ol {
     padding: revert-layer;
     margin: 4px 0;
+
+    &[data-auto-direction="list"] {
+      padding-left: 0;
+      padding-right: 0;
+
+      & > li {
+        margin-left: 2em;
+        margin-right: 0;
+      }
+
+      & > li[data-auto-list-direction="rtl"],
+      & > li[dir="rtl"] {
+        margin-left: 0;
+        margin-right: 2em;
+      }
+    }
   }
 
   hr {

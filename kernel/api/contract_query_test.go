@@ -13,9 +13,9 @@ import (
 // testSQLContractQueries 使用契约测试进程的独立数据库，避免修改运行中的工作空间。
 func testSQLContractQueries(t *testing.T) {
 	t.Helper()
-	limit := model.Conf.Search.Limit
-	model.Conf.Search.Limit = 2
-	defer func() { model.Conf.Search.Limit = limit }()
+	limit := model.Conf.Search.Load().Limit
+	model.Conf.Search.Load().Limit = 2
+	defer func() { model.Conf.Search.Load().Limit = limit }()
 	engine := gin.New()
 	engine.POST("/api/query/sql", SQL)
 	for _, entry := range []struct {

@@ -5,13 +5,19 @@ export const shouldShowDockSplit = (hasVisibleEntryBefore: boolean, hasVisibleEn
     hasVisibleEntryBefore && hasVisibleEntryAfter;
 
 export const adjustDockPadding = () => {
-    const layoutElement = window.siyuan.layout.layout.children[0].element;
-    if (window.siyuan.layout.leftDock.elements[0].parentElement.classList.contains("fn__none")) {
+    const layoutElement = window.siyuan.layout?.layout?.children[0]?.element;
+    const leftDockElement = window.siyuan.layout?.leftDock?.elements[0]?.parentElement;
+    const rightDockElement = window.siyuan.layout?.rightDock?.elements[0]?.parentElement;
+    // 设置窗口和独立编辑窗口没有主窗口的停靠栏，布局初始化完成后才调整间距。
+    if (!layoutElement || !leftDockElement || !rightDockElement) {
+        return;
+    }
+    if (leftDockElement.classList.contains("fn__none")) {
         layoutElement.style.marginLeft = "var(--b3-layout-space)";
     } else {
         layoutElement.style.marginLeft = "";
     }
-    if (window.siyuan.layout.rightDock.elements[0].parentElement.classList.contains("fn__none")) {
+    if (rightDockElement.classList.contains("fn__none")) {
         layoutElement.style.marginRight = "var(--b3-layout-space)";
     } else {
         layoutElement.style.marginRight = "";

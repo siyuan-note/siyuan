@@ -4,15 +4,13 @@ import {captureTabsRemoval} from "./tabsRemoval";
 import {
     focusBlock,
     focusByOffset,
-    focusByRange,
     focusByWbr,
     getBlockRanges,
     getEditorRange,
-    getSelectionOffset,
     getUndoFocusContext,
-    restoreFocusContext,
-    setLastNodeRange
+    restoreFocusContext
 } from "../util/selection";
+import {focusByRange, getSelectionOffset, setLastNodeRange} from "../util/selectionOffsets";
 import {
     fixAdjacentTags,
     getContenteditableElement,
@@ -20,6 +18,7 @@ import {
     getEmbedChildOperationParentID,
     getLastBlock,
     getNextBlock,
+    getNextBlockSibling,
     getParentBlock,
     getPreviousBlock,
     getPreviousBlockSibling,
@@ -1420,6 +1419,31 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     }
 
     let isCallout = blockElement.parentElement.classList.contains("callout-content");
+    const nextCalloutBlock = isCallout && getNextBlockSibling(blockElement);
+    if (type === "Backspace" && blockType === "NodeParagraph" && isCallout &&
+        !getPreviousBlockSibling(blockElement) && nextCalloutBlock &&
+        !hasMeaningfulContent(getContenteditableElement(blockElement))) {
+        // 删除提示块首个空段落时保留容器和后续内容，光标停留在提示块内。
+        const id = blockElement.getAttribute("data-node-id");
+        if (!await confirmRefRemoval(protyle, [id], [blockElement]) ||
+            nextCalloutBlock.parentElement !== blockElement.parentElement) {
+            return;
+        }
+        range.insertNode(document.createElement("wbr"));
+        transaction(protyle, [{
+            action: "delete",
+            id,
+        }], [{
+            action: "insert",
+            id,
+            data: blockElement.outerHTML,
+            parentID: getOperationParentID(blockElement, protyle.block.parentID),
+            context: {setRange: "true"},
+        }]);
+        blockElement.remove();
+        focusBlock(nextCalloutBlock);
+        return;
+    }
     if (type === "Delete") {
         const bqCaElement = hasClosestByClassName(blockElement, "bq") || hasClosestByClassName(blockElement, "callout");
         if (bqCaElement && getContenteditableElement(bqCaElement) === getContenteditableElement(blockElement)) {
@@ -1504,7 +1528,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         if (embedContext && !canRemoveLiInEmbed(blockElement, embedContext)) {
             return;
         }
-        removeLi(protyle, blockElement, range, type === "Delete");
+        await removeLi(protyle, blockElement, range, type === "Delete");
         return;
     }
     if (type === "Delete") {
@@ -1513,7 +1537,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             if (embedContext && !canRemoveLiInEmbed(liElement.firstElementChild.nextElementSibling, embedContext)) {
                 return;
             }
-            removeLi(protyle, liElement.firstElementChild.nextElementSibling, range, true);
+            await removeLi(protyle, liElement.firstElementChild.nextElementSibling, range, true);
             return;
         }
     }
@@ -1962,6 +1986,31 @@ const confirmRefRemoval = async (protyle: IProtyle, ids: string[], elements: Ele
 };
 
 const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, isDelete = false) => {
+    if (!isDelete && blockElement.getAttribute("data-type") === "NodeParagraph") {
+        const listItemElement = blockElement.parentElement;
+        const listElement = listItemElement.parentElement;
+        const nextListItem = getNextBlockSibling(listItemElement);
+        if (!getPreviousBlockSibling(listItemElement) && nextListItem &&
+            listElement.parentElement.classList.contains("sb") &&
+            listElement.parentElement.getAttribute("data-sb-layout") === "col" &&
+            !getNextBlockSibling(blockElement) && !hasMeaningfulContent(getContenteditableElement(blockElement))) {
+            // 横向超级块中的首个空列表项直接删除，保留列表及所在列的宽度。
+            const itemID = listItemElement.getAttribute("data-node-id");
+            if (!await confirmRefRemoval(protyle, [itemID, blockElement.getAttribute("data-node-id")],
+                [listItemElement], [itemID]) || listItemElement.parentElement !== listElement ||
+                nextListItem.parentElement !== listElement || blockElement.parentElement !== listItemElement) {
+                return;
+            }
+            range.insertNode(document.createElement("wbr"));
+            const html = listElement.outerHTML;
+            const start = getOrderedListStart(listElement);
+            listItemElement.remove();
+            updateListOrder(listElement, start);
+            updateTransaction(protyle, listElement, html);
+            focusBlock(nextListItem);
+            return;
+        }
+    }
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
         await listOutdent(protyle, [blockElement.parentElement], range, isDelete, blockElement);
         return;

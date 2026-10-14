@@ -1,3 +1,4 @@
+import {fetchWithAppId} from "./fetchWithAppId";
 import {Constants} from "../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -6,6 +7,8 @@ import {processMessage} from "./processMessage";
 import {kernelError} from "./kernelFault";
 import {withFetchTimeout} from "./fetchTimeout";
 import type {FetchGet, FetchPost, FetchSyncPost} from "../types/api";
+import {trackSettingRequest} from "../config/setting/pending";
+import {trackEditorSaveRequest} from "../protyle/util/editorSave";
 
 export const fetchPost = ((
     url: string,
@@ -45,7 +48,7 @@ export const fetchPost = ((
         init.signal = signal;
     }
     let isGetFile202 = false;
-    return withFetchTimeout((requestSignal) => fetch(url, {...init, signal: requestSignal}).then((response) => {
+    return trackEditorSaveRequest(url, data, trackSettingRequest(url, withFetchTimeout((requestSignal) => fetchWithAppId(url, {...init, signal: requestSignal}).then((response) => {
         switch (response.status) {
             case 403:
             case 404:
@@ -75,7 +78,7 @@ export const fetchPost = ((
                     return response.text();
                 }
         }
-    }), signal, timeout).then((response: IWebSocketData) => {
+    }), signal, timeout), url === "/api/storage/setLocalStorageVal" && data?.key === Constants.LOCAL_SLASH_USAGE)).then((response: IWebSocketData) => {
         if (failCallback && url === "/api/file/getFile" && isGetFile202) {
             failCallback(response);
             return;
@@ -116,7 +119,7 @@ export const fetchPost = ((
             return;
         }
         /// #if !BROWSER
-        if (url === "/api/system/exit" || url === "/api/system/setWorkspaceDir" || (
+        if (url === "/api/system/setWorkspaceDir" || (
             ["/api/system/setUILayout"].includes(url) && data.errorExit // 内核中断，点关闭处理
         )) {
             ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
@@ -141,16 +144,17 @@ export const fetchSyncPost = (async (url: string, data?: any, headers?: Record<s
             init.body = JSON.stringify(data);
         }
     }
-    const res = await fetch(url, init);
-    const res2 = await res.json() as IWebSocketData;
-    if (process) {
-        processMessage(res2);
-    }
-    return res2;
+    return trackSettingRequest(url, trackEditorSaveRequest(url, data,
+        fetchWithAppId(url, init).then(res => res.json() as Promise<IWebSocketData>)).then(res2 => {
+        if (process) {
+            processMessage(res2);
+        }
+        return res2;
+    }), url === "/api/storage/setLocalStorageVal" && data?.key === Constants.LOCAL_SLASH_USAGE);
 }) as FetchSyncPost<IWebSocketData>;
 
 export const fetchGet = ((url: string, cb: (response: IWebSocketData | IObject | string) => void) => {
-    fetch(url, {cache: "no-store"}).then((response) => {
+    fetchWithAppId(url, {cache: "no-store"}).then((response) => {
         if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
             return response.json();
         } else {

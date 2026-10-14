@@ -43,7 +43,7 @@ func TestImportNotebookSYAsChildDocuments(t *testing.T) {
 	)
 	setupExportRelatedTest(t, sourceBoxID, targetBoxID)
 	setupNotebookDocumentImportDatabase(t)
-	*Conf.FileTree.CreateDocAtTop = false
+	*Conf.FileTree.Load().CreateDocAtTop = false
 
 	sourceBox := &Box{ID: sourceBoxID}
 	sourceConf := sourceBox.GetConf()
@@ -160,7 +160,7 @@ func setupNotebookDocumentImportDatabase(t *testing.T) {
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)
 	t.Cleanup(func() {
-		sql.CloseDatabase()
+		closeModelTestDatabases()
 		util.ConfDir = originalConfDir
 		util.QueueDir = originalQueueDir
 		util.DBPath = originalDBPath

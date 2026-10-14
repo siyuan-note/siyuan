@@ -47,8 +47,6 @@ type Optional[T any] struct {
 
 func (o Optional[T]) IsZero() bool { return !o.Exists }
 
-func (o Optional[T]) IsNullValue() bool { return o.Exists && o.IsNull }
-
 func (o Optional[T]) HasValue() bool { return o.Exists && !o.IsNull }
 
 func (o *Optional[T]) UnmarshalJSON(data []byte) error {
@@ -68,14 +66,19 @@ func (o Optional[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o.Value)
 }
 
+var (
+	duplicateNamePattern = regexp.MustCompile(`^(.*) \((\d+)\)$`)
+	htmlCommentPattern   = regexp.MustCompile(`<!--[\s\S]*?-->`)
+	htmlTagPattern       = regexp.MustCompile(`<(/?)([a-zA-Z0-9]+)[^>]*?>`)
+)
+
 func GetDuplicateName(master string) (ret string) {
 	if "" == master {
 		return
 	}
 
 	ret = master + " (1)"
-	r := regexp.MustCompile(`^(.*) \((\d+)\)$`)
-	m := r.FindStringSubmatch(master)
+	m := duplicateNamePattern.FindStringSubmatch(master)
 	if nil == m || 3 > len(m) {
 		return
 	}
@@ -96,23 +99,6 @@ func RandString(length int) string {
 		b[i] = letter[rand.Intn(len(letter))]
 	}
 	return string(b)
-}
-
-// InsertElem inserts value at index into s.
-// 0 <= index <= len(s)
-func InsertElem[T any](s []T, index int, value T) []T {
-	if len(s) == index { // nil or empty slice or after last element
-		return append(s, value)
-	}
-
-	s = append(s[:index+1], s[index:]...) // index < len(s)
-	s[index] = value
-	return s
-}
-
-// RemoveElem removes the element at index i from s.
-func RemoveElem[T any](s []T, index int) []T {
-	return append(s[:index], s[index+1:]...)
 }
 
 func EscapeHTML(s string) (ret string) {
@@ -152,15 +138,14 @@ func HasUnclosedHtmlTag(htmlStr string) bool {
 	}
 
 	// 去除所有注释内容
-	commentRe := regexp.MustCompile(`<!--[\s\S]*?-->`)
-	htmlStr = commentRe.ReplaceAllString(htmlStr, "")
+	htmlStr = htmlCommentPattern.ReplaceAllString(htmlStr, "")
 
-	tagRe := regexp.MustCompile(`<(/?)([a-zA-Z0-9]+)[^>]*?>`)
 	selfClosing := map[string]bool{
-		"br": true, "img": true, "hr": true, "input": true, "meta": true, "link": true,
+		"area": true, "base": true, "br": true, "col": true, "embed": true, "hr": true, "img": true,
+		"input": true, "link": true, "meta": true, "param": true, "source": true, "track": true, "wbr": true,
 	}
 	stack := []string{}
-	matches := tagRe.FindAllStringSubmatch(htmlStr, -1)
+	matches := htmlTagPattern.FindAllStringSubmatch(htmlStr, -1)
 	for _, m := range matches {
 		isClose := m[1] == "/"
 		tag := strings.ToLower(m[2])
@@ -177,14 +162,6 @@ func HasUnclosedHtmlTag(htmlStr string) bool {
 		}
 	}
 	return len(stack) != 0
-}
-
-func Reverse(s string) string {
-	runes := []rune(s)
-	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
-		runes[i], runes[j] = runes[j], runes[i]
-	}
-	return string(runes)
 }
 
 func RemoveRedundantSpace(str string) string {

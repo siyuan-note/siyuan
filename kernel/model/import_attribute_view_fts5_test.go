@@ -187,7 +187,7 @@ func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
 			if err = exportAv(avID, "", exportDir, exportDir, nil); err != nil {
 				t.Fatalf("original database export failed after import: %v", err)
 			}
-			Conf.Export.IncludeRelatedDocs = false
+			Conf.Export.Load().IncludeRelatedDocs = false
 			if exportPath := ExportSYs([]string{externalID}); exportPath == "" {
 				t.Fatal("original document export failed after import")
 			}

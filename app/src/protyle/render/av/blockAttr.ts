@@ -1,10 +1,10 @@
+import {isAVTextType} from "./capabilities";
 import {fetchPost} from "../../../util/fetch";
 import {addCol, getColIconByType} from "./col";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
-import {cellValueIsEmpty, popTextCell, updateCellsValue} from "./cell";
+import {cellValueIsEmpty, openAVCellIcon, popTextCell, updateCellsValue} from "./cell";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
-import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
-import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
+import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {openLink} from "../../../editor/openLink";
@@ -13,10 +13,12 @@ import {previewImages} from "../../preview/image";
 /// #if !BROWSER
 import {webUtils} from "electron";
 /// #endif
-import {isBrowser, isTouchDevice} from "../../../util/functions";
+import {isBrowser} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {removeCompressURL} from "../../../util/image";
 import {openDatabaseRowByData} from "./openDatabaseRow";
+import {openAVBindBlock} from "./bindBlock";
+import {preserveAVBindingRange} from "./binding";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {
     createEmptyAVValue,
@@ -24,7 +26,6 @@ import {
     getAVTemplateInteractiveElement,
     isAVTemplateLink
 } from "./attributeValue";
-import {isLastPointerMouse} from "../../../util/touchDragBridge";
 import {getLocalDropFiles, hasDataTransferFiles} from "../../upload/localDropFiles";
 import {cloneAVCellValueSnapshot} from "./cellValue";
 import {getEditorFocusRange, restoreEditorFocusRange} from "../../util/editorFocus";
@@ -132,18 +133,22 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         if (element.dataset.avAttributeRenderId !== renderID) {
             return;
         }
+        const restoreBindingRange = preserveAVBindingRange(protyle, element);
         let html = "";
         const tables = Array.isArray(response.data) ? response.data : [];
         tables.forEach((table) => {
             // 条目 ID 仅用于读取行数据，编辑菜单和更新时间使用真实数据库载体块。
             const blockID = row ? row.databaseBlockID : id;
             const primaryValue = table.keyValues.find(item => item.key.type === "block")?.values?.[0] || table.keyValues[0]?.values?.[0];
+            const hasHiddenFields = table.keyValues.some(item => ["hide", "hide-empty"].includes(item.key.attributePanelVisibility));
+            const showAll = hasHiddenFields && element.querySelector<HTMLElement>(`[data-av-id="${table.avID}"]`)?.dataset.panelShowAll === "true";
             let innerHTML = `<div class="custom-attr__avheader">
     <div class="block__logo block__logo--icon popover__block" style="max-width:calc(100% - 40px)" data-id='${JSON.stringify(table.blockIDs)}'>
         <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg>
         <span class="fn__ellipsis">${table.avName || window.siyuan.languages.database}</span>
     </div>
     <div class="fn__flex-1"></div>
+    ${element.classList.contains("protyle-db-attr__body") ? "" : `<button type="button" data-type="toggle-panel-visibility" class="block__icon block__icon--show ariaLabel${hasHiddenFields ? "" : " fn__none"}" data-position="4west" aria-label="${window.siyuan.languages.edit}" aria-pressed="${showAll}"><svg><use xlink:href="#iconEdit"></use></svg></button>`}
     <span data-type="remove" data-row-id="${primaryValue?.blockID || ""}" class="block__icon block__icon--warning block__icon--show b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.removeAV}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
 </div>`;
             table.keyValues?.forEach(item => {
@@ -165,12 +170,13 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     renderTemplate: item.key.renderTemplate,
                     value,
                     empty: cellValueIsEmpty(value, true, item.key.renderTemplate),
+                    attributePanelVisibility: item.key.attributePanelVisibility,
                 });
             });
             innerHTML += `<div class="fn__hr"></div>
 <button data-type="addColumn" class="b3-button b3-button--cancel"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.newCol}</button>
 <div class="fn__hr--b"></div><div class="fn__hr--b"></div>`;
-            const tableHTML = `<div data-av-id="${table.avID}" data-av-type="table" data-node-id="${blockID}" data-attribute-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
+            const tableHTML = `<div data-av-id="${table.avID}" data-panel-show-all="${showAll}" data-av-type="table" data-node-id="${blockID}" data-attribute-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
             html += tableHTML;
 
             if (element.innerHTML) {
@@ -178,6 +184,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 const blockElement = element.querySelector<HTMLElement>(`[data-attribute-id="${id}"][data-av-id="${table.avID}"]`);
                 if (blockElement) {
                     blockElement.dataset.nodeId = blockID;
+                    blockElement.dataset.panelShowAll = String(showAll);
                     blockElement.innerHTML = innerHTML;
                 } else {
                     element.insertAdjacentHTML("beforeend", tableHTML);
@@ -343,6 +350,10 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 }
             });
             element.addEventListener("mousedown", (event) => {
+                if (hasClosestByAttribute(event.target as HTMLElement, "data-type", "av-bind-document")) {
+                    event.preventDefault();
+                    return;
+                }
                 if (!hasClosestByAttribute(event.target as HTMLElement, "data-type", "remove")) {
                     return;
                 }
@@ -353,7 +364,26 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 event.preventDefault();
             });
             element.addEventListener("click", (event) => {
+                const visibilityElement = (event.target as HTMLElement).closest<HTMLElement>('[data-type="toggle-panel-visibility"]');
+                if (visibilityElement) {
+                    const databaseElement = visibilityElement.closest<HTMLElement>("[data-av-id]");
+                    const showAll = databaseElement.dataset.panelShowAll !== "true";
+                    databaseElement.dataset.panelShowAll = String(showAll);
+                    visibilityElement.setAttribute("aria-pressed", String(showAll));
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 if (handleTemplateInteraction(protyle, event) || handleRichTextInteraction(protyle, event)) {
+                    return;
+                }
+                const relationRefElement = (event.target as HTMLElement).closest<HTMLElement>(
+                    '.av__cell--relation [data-type~="block-ref"][data-id]');
+                if (relationRefElement?.dataset.id) {
+                    openLink(protyle.app, `siyuan://blocks/${relationRefElement.dataset.id}`, event,
+                        event.ctrlKey || event.metaKey);
+                    event.preventDefault();
+                    event.stopPropagation();
                     return;
                 }
                 const urlElement = (event.target as HTMLElement).closest<HTMLAnchorElement>(
@@ -368,8 +398,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     return;
                 }
                 const databaseElement = hasClosestByClassName(event.target as HTMLElement, "popover__block");
-                if (databaseElement && isTouchDevice() && !isLastPointerMouse() &&
-                    hasClosestByClassName(databaseElement, "custom-attr__avheader")) {
+                if (databaseElement && hasClosestByClassName(databaseElement, "custom-attr__avheader")) {
                     const blockElement = hasClosestBlock(databaseElement);
                     const table = blockElement && attributeTableData.get(blockElement as HTMLElement);
                     const databaseBlockID = table ? [...table.blockIDs].sort()[0] : "";
@@ -408,6 +437,15 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                         boundBlockID: backlinkOpenElement.dataset.boundBlockId,
                         isDetached: backlinkOpenElement.dataset.detached === "true",
                     });
+                    event.stopPropagation();
+                    return;
+                }
+                const bindElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "av-bind-document");
+                if (bindElement) {
+                    const field = bindElement.closest<HTMLElement>("[data-row-id][data-col-id]");
+                    if (field) {
+                        openAVBindBlock(protyle, field);
+                    }
                     event.stopPropagation();
                     return;
                 }
@@ -521,9 +559,14 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             element.innerHTML = html;
         }
         renderAVRichTextElements(element);
+        restoreBindingRange(element);
         element.dataset.readonly = String(Boolean(protyle.disabled));
         element.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea").forEach(item => {
             item.readOnly = Boolean(protyle.disabled);
+        });
+        element.querySelectorAll<HTMLButtonElement>('[data-type="av-bind-document"]').forEach(item => {
+            item.disabled = Boolean(protyle.disabled || window.siyuan.isPublish ||
+                protyle.options.history?.created || protyle.options.history?.snapshot);
         });
         tables.forEach((table: IAVAttributeTableData) => {
             const blockElement = element.querySelector<HTMLElement>(`[data-attribute-id="${id}"][data-av-id="${table.avID}"]`);
@@ -637,15 +680,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
     while (target && element !== target) {
         const type = target.getAttribute("data-type");
         if (target.classList.contains("b3-menu__avemoji")) {
-            const rect = target.getBoundingClientRect();
-            openEmojiPanel(target.nextElementSibling.getAttribute("data-id"), "doc", {
-                x: rect.left,
-                y: rect.bottom,
-                h: rect.height,
-                w: rect.width,
-            }, (unicode) => {
-                target.innerHTML = getFileTreeIconHTML(unicode, "file");
-            }, target.querySelector("img"), {ownerElement: protyle.element});
+            openAVCellIcon(protyle, target);
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -678,10 +713,15 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
             event.stopPropagation();
             event.preventDefault();
             break;
-        } else if (["text", "url", "email", "phone", "block"].includes(type) &&
-            (target.querySelector(":scope > .av__celltext--template") ||
+        } else if ((isAVTextType(type) && type !== "template") &&
+            (target.querySelector(":scope > .av__celltext--template, :scope > .av__cellprimary > .av__celltext--template") ||
                 (type === "text" && target.querySelector(":scope > .av__celltext")))) {
             popTextCell(protyle, [target], type as TAVCol);
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (type === "location") {
+            popTextCell(protyle, [target], "location");
             event.stopPropagation();
             event.preventDefault();
             break;

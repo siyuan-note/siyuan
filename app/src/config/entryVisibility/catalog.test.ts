@@ -1,3 +1,9 @@
+import {IMAGE_OCR_MENU} from "../../menus/declarations/imageOCRMenu";
+import {createDeclaredMenu} from "../../menus/declarations/menuDeclaration";
+const imageOCRContext = {
+    textAvailable: true, localAvailable: true, aiAvailable: true,
+    getStatus: async () => false, openResult: () => {}, copyText: () => {}, runLocal: () => {}, runAI: () => {},
+};
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
@@ -33,14 +39,48 @@ import {
     refreshSlashMenuCatalog,
     refreshTopBarCatalog,
     refreshToolbarCatalog,
+    refreshToolbarCatalogEntries,
     SLASH_MENU_ROOT_PATH,
     TOP_BAR_ROOT_PATH,
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
-test("remove list leads single and multiple block conversion menus", () => {
+test("image OCR actions retain their configurable paths and order", t => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", {configurable: true, value: {siyuan: {languages: {}}}});
+    t.after(() => {
+        if (descriptor) {
+            Object.defineProperty(globalThis, "window", descriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    });
+    const imageAction = getEntryCatalogNode("editor.image.ocrText");
+    assert.equal(imageAction.type, "entry");
+    assert.equal(imageAction.simple, false);
+    assert.equal(imageAction.sortable, false);
+    assert.equal(getEntryParentPath("editor.image.ocrText"), "editor.image");
+    assert.deepEqual(getEntryCatalogChildren("editor.image").map(item => item.key), ["ocrText", "copyAsPNG"]);
+    const copyImage = getEntryCatalogNode("editor.image.copyAsPNG");
+    assert.equal(copyImage.type, "entry");
+    assert.equal(copyImage.simple, false);
+    assert.equal(copyImage.sortable, false);
+    assert.equal(getEntryParentPath("editor.image.copyAsPNG"), "editor.image");
+    assert.deepEqual(getEntryCatalogChildren("inline.image.ocr").map(item => item.key), [
+        "ocrResult", "copyOCRText", "separator_reOCR", "reOCR", "reAIOCR",
+    ]);
+    assert.equal(getEntryCatalogNode("inline.image.ocr.copyOCRText").simple, false);
+    assert.equal(getEntryParentPath("inline.image.ocr.copyOCRText"), "inline.image.ocr");
+    assert.equal(getEntryCatalogNode("inline.image.ocr.reAIOCR").simple, false);
+    assert.equal(getEntryParentPath("inline.image.ocr.reAIOCR"), "inline.image.ocr");
+    assert.deepEqual(createDeclaredMenu(IMAGE_OCR_MENU, imageOCRContext).submenu.map(item => item.id),
+        getEntryCatalogChildren("inline.image.ocr").map(item => item.key));
+});
+
+test("remove list precedes list types in single and multiple block conversion menus", () => {
     for (const path of ["gutter.single.turnInto", "gutter.multi.turnInto"]) {
-        assert.deepEqual(getEntryCatalogChildren(path).slice(0, 2).map(item => item.key), ["removeList", "list"]);
+        const keys = getEntryCatalogChildren(path).map(item => item.key);
+        assert.equal(keys[keys.indexOf("list") - 1], "removeList");
         const entry = getEntryCatalogNode(`${path}.removeList`);
         assert.equal(entry.type, "entry");
         assert.equal(entry.simple, true);
@@ -95,6 +135,8 @@ const slashMenuBuiltinOrder = [
     "orderedList",
     "check",
     "quote",
+    "horizontalSuperBlock",
+    "verticalSuperBlock",
     "tabs",
     "mindmap",
     "calloutNote",
@@ -219,16 +261,16 @@ test("top bar markup stays aligned with its configurable built-in catalog", () =
     assert.doesNotMatch(source, /id="drag"[^>]*data-topbar-entry/);
 });
 
-test("daily note and flashcard top bar entries default to visible only in the Simple profile", () => {
+test("desktop daily note and flashcard top bar entries are visible in both built-in profiles", () => {
     for (const key of ["barDailyNote", "barRiffCard"]) {
         const path = `${TOP_BAR_ROOT_PATH}.${key}`;
         const entry = getEntryCatalogNode(path)!;
         const defaultVisible = getEntryCatalogDefaultVisibility(path);
-        assert.equal(defaultVisible, false);
+        assert.equal(defaultVisible, true);
         assert.equal(entry.simpleDefaultVisible, true);
         assert.equal(getEntryCatalogCustomDefaultVisibility(path), false);
         assert.equal(getBuiltinProfileEntryVisibility("full", entry.simple, defaultVisible,
-            entry.simpleDefaultVisible), false);
+            entry.simpleDefaultVisible), true);
         assert.equal(getBuiltinProfileEntryVisibility("simple", entry.simple, defaultVisible,
             entry.simpleDefaultVisible), true);
     }
@@ -346,13 +388,17 @@ test("plugin top bar entries use the legacy unpinned list as their default visib
 });
 
 test("toolbar catalog follows the default toolbar declaration", () => {
-    const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH);
+    const blockType = getEntryCatalogNode("editor.toolbar.block-type");
+    assert.equal(blockType.simple, true);
+    assert.equal(blockType.key, "block-type");
+    const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH).filter(item => !item.key.startsWith("mobile-"));
     assert.deepEqual(children.map((item) => item.key), DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key));
     assert.equal(children.filter((item) => item.type === "separator").length, 2);
     const familyIndex = children.findIndex(item => item.key === "font-family");
     assert.deepEqual(children.slice(familyIndex, familyIndex + 3).map(item => item.key),
         ["font-family", "font-size", "text"]);
-    assert.deepEqual(children.filter((item) => !item.simple).map(item => item.key), ["font-family", "font-size"]);
+    assert.deepEqual(children.filter((item) => !item.simple).map(item => item.key),
+        ["font-family", "font-size", "sup", "sub", "kbd", "inline-math"]);
 });
 
 test("inline text paste entries follow the menu order", () => {
@@ -375,7 +421,7 @@ test("toolbar catalog follows plugin insertion slots and removes unloaded plugin
             [defaults[0], pluginItem, "|", ...defaults.slice(1)], "plugin.name", () => "Plugin Name - Shared Item")
             .map((item) => typeof item === "string" ? {name: item} : item);
         refreshToolbarCatalog(toolbar);
-        const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH);
+        const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH).filter(item => !item.key.startsWith("mobile-"));
         assert.deepEqual(children.slice(0, 4).map((item) => item.key), [
             DESKTOP_TOOLBAR_ENTRIES[0].key,
             pluginKey,
@@ -390,6 +436,24 @@ test("toolbar catalog follows plugin insertion slots and removes unloaded plugin
         refreshToolbarCatalog(defaults);
     }
     assert.equal(getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginKey}`), undefined);
+});
+
+test("toolbar catalog accepts plugin entries from the owner window snapshot", () => {
+    const pluginKey = getPluginToolbarEntryKey("owner", "action");
+    const defaults = getDefaultToolbar(false).map((item) => typeof item === "string" ? {name: item} : item);
+    try {
+        refreshToolbarCatalogEntries([
+            {key: "block-type", label: "Block type", separator: false},
+            {key: pluginKey, label: "Owner - Action", separator: false},
+            {key: "block-ref", label: "Block reference", separator: false},
+        ]);
+        const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH)
+            .filter(item => !item.key.startsWith("mobile-"));
+        assert.deepEqual(children.slice(0, 3).map(item => item.key), ["block-type", pluginKey, "block-ref"]);
+        assert.equal(getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginKey}`)?.label(), "Owner - Action");
+    } finally {
+        refreshToolbarCatalog(defaults);
+    }
 });
 
 test("dock catalog refreshes unique plugin docks and removes unloaded entries", () => {
@@ -507,10 +571,10 @@ test("slash menu catalog follows the built-in hint order", () => {
     const section = getEntryCatalogSection("editor.slash");
     assert.deepEqual(section?.children.map((item) => item.key), ["menu"]);
     const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
-    assert.deepEqual(children.map((item) => item.key), slashMenuBuiltinOrder);
-    assert.equal(children.filter((item) => item.type === "entry").length, 66);
+    assert.deepEqual(children.map((item) => item.key), ["frequent", ...slashMenuBuiltinOrder]);
+    assert.equal(children.filter((item) => item.type === "entry").length, 69);
     assert.equal(children.filter((item) => item.type === "separator").length, 5);
-    assert.equal(children.every((item) => item.simple), true);
+    assert.equal(children.filter(item => item.key !== "frequent").every((item) => item.simple), true);
 });
 
 test("slash menu catalog stays aligned with the built-in hint declarations", () => {
@@ -677,15 +741,18 @@ test("callout presets stay aligned across block menu scopes", () => {
     });
 });
 
-test("heading conversions follow list conversions across block menu scopes", () => {
+test("paragraph and headings precede list conversions across block menu scopes", () => {
     const headingKeys = ["heading1", "heading2", "heading3", "heading4", "heading5", "heading6"];
     ["gutter.single.turnInto", "gutter.multi.turnInto"].forEach((path) => {
         const keys = getEntryCatalogChildren(path).map(item => item.key);
-        assert.equal(keys[0], "removeList");
+        assert.equal(keys[0], "paragraph");
         assert.equal(getEntryCatalogNode(`${path}.paragraph`)?.simple, true);
         const headingIndex = keys.indexOf("heading1");
-        assert.equal(headingIndex, keys.indexOf(path === "gutter.single.turnInto" ? "tabs" : "calloutCustom") + 1);
+        assert.equal(headingIndex, 1);
         assert.deepEqual(keys.slice(headingIndex, headingIndex + headingKeys.length), headingKeys);
+        assert.deepEqual(keys.filter(key => ["list", "orderedList", "check", "quote", "callout"].includes(key)),
+            ["list", "orderedList", "check", "quote", "callout"]);
+        assert.equal(keys[headingIndex + headingKeys.length], "removeList");
         headingKeys.forEach(key => {
             const entry = getEntryCatalogNode(`${path}.${key}`);
             assert.equal(entry?.type, "entry");
@@ -697,11 +764,11 @@ test("heading conversions follow list conversions across block menu scopes", () 
 test("tab conversion belongs to the single block conversion menu", () => {
     const keys = getEntryCatalogChildren("gutter.single.turnInto").map(item => item.key);
     assert.equal(keys[keys.indexOf("tabs") - 1], "calloutCustom");
-    assert.equal(keys[keys.indexOf("tabs") + 1], "heading1");
+    assert.equal(keys[keys.indexOf("tabs") + 1], "superBlock");
     assert.equal(getEntryCatalogNode("gutter.single.turnInto.tabs")?.simple, true);
     assert.equal(getEntryCatalogNode("gutter.single.turnInto.tabs")?.type, "entry");
     assert.equal(getEntryCatalogNode("gutter.multi.turnInto.tabs"), undefined);
-    assert.equal(keys[keys.indexOf("superBlock") - 1], "heading6");
+    assert.equal(keys[keys.indexOf("superBlock") - 1], "tabs");
     assert.equal(keys[keys.indexOf("superBlock") + 1], "code");
     assert.equal(getEntryCatalogNode("gutter.single.turnInto.superBlock")?.simple, true);
     assert.equal(getEntryCatalogNode("gutter.single.turnInto.superBlock")?.type, "entry");
@@ -819,6 +886,10 @@ test("super block actions and vertical alignment use their respective menu group
         "cancelSuperBlock",
         "turnIntoVLayout",
         "turnIntoHLayout",
+        "prependSuperBlockColumn",
+        "prependSuperBlockChild",
+        "appendSuperBlockColumn",
+        "appendSuperBlockChild",
     ]);
 
     const singleLayoutKeys = getEntryCatalogChildren("gutter.single.layout").map((item) => item.key);
@@ -871,11 +942,13 @@ test("gutter height menus follow width and stay aligned across selection scopes"
 test("super block column insertion actions follow block insertion actions", () => {
     const keys = getEntryCatalogChildren("gutter.single").map((item) => item.key);
     const insertBeforeIndex = keys.indexOf("insertBefore");
-    assert.deepEqual(keys.slice(insertBeforeIndex, insertBeforeIndex + 4), [
+    assert.deepEqual(keys.slice(insertBeforeIndex, insertBeforeIndex + 6), [
         "insertBefore",
         "insertAfter",
         "insertSuperBlockLeft",
         "insertSuperBlockRight",
+        "createSuperBlockLeft",
+        "createSuperBlockRight",
     ]);
 });
 
@@ -1246,6 +1319,13 @@ test("multiple document and notebook settings have distinct labels", () => {
     }
 });
 
+test("HTML attachment embedding follows rename in the link menu", () => {
+    const children = getEntryCatalogChildren("inline.link");
+    const renameIndex = children.findIndex((item) => item.key === "rename");
+    assert.ok(renameIndex >= 0);
+    assert.equal(children[renameIndex + 1]?.key, "embedHTMLFileBelow");
+});
+
 test("HTML file insertion follows general asset insertion", () => {
     const children = getEntryCatalogChildren("document.more");
     const insertAssetIndex = children.findIndex((item) => item.key === "insertAsset");
@@ -1311,12 +1391,13 @@ test("simple profile follows the reviewed defaults", () => {
     hidden.forEach((path) => assert.equal(getEntryCatalogNode(path)?.simple, false, path));
 });
 
-test("list conversion prioritizes list actions and keeps recursive entry identities", () => {
+test("list conversion groups list actions and keeps recursive entry identities", () => {
     for (const root of ["gutter.single", "gutter.multi"]) {
         const keys = getEntryCatalogChildren(`${root}.turnInto`).map(item => item.key);
-        assert.deepEqual(keys.slice(0, root === "gutter.single" ? 7 : 6), [
+        const start = keys.indexOf("removeList");
+        assert.deepEqual(keys.slice(start, start + (root === "gutter.single" ? 6 : 5)), [
             "removeList", "list", "orderedList", "check",
-            ...(root === "gutter.single" ? ["listMindmap"] : []), "includeSublists", "paragraph",
+            ...(root === "gutter.single" ? ["listMindmap"] : []), "includeSublists",
         ]);
         const children = getEntryCatalogChildren(`${root}.turnInto.includeSublists`);
         assert.deepEqual(children.map(item => item.key), [

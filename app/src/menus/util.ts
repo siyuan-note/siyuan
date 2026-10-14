@@ -2,7 +2,9 @@
 import {ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {ContractFormData} from "../util/contractFormData";
+import {genUUID} from "../util/genID";
 import {getAssetExtension, getAssetName, useShell} from "../util/pathName";
 import {openFileById} from "../editor/util";
 import {Constants} from "../constants";
@@ -221,6 +223,23 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
 };
 
 export const writePNGBlob = async (blob: Blob): Promise<boolean> => {
+    if (isInAndroid()) {
+        try {
+            // 通过已有临时导出通道向原生剪贴板传递 PNG，支持 WebView 渲染的矢量图片。
+            const response = await fetchSyncPost("/api/export/exportAsFile", new ContractFormData({
+                file: new File([blob], `clipboard-${genUUID()}.png`, {type: "image/png"}),
+                type: "image/png",
+            }));
+            if (response.code !== 0 || !response.data?.file) {
+                throw new Error("could not prepare clipboard image");
+            }
+            window.JSAndroid.writeImageClipboard(response.data.file);
+            return true;
+        } catch (e) {
+            showMessage(window.siyuan.languages.imageCopyFailed, 6000, "error");
+            return false;
+        }
+    }
     try {
         if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
             throw new Error("image clipboard is unavailable");
@@ -239,10 +258,6 @@ export const writePNGBlob = async (blob: Blob): Promise<boolean> => {
 };
 
 export const copyPNGByLink = (link: string) => {
-    if (isInAndroid()) {
-        window.JSAndroid.writeImageClipboard(link);
-        return;
-    }
     const showCopyError = () => showMessage(window.siyuan.languages.imageCopyFailed, 6000, "error");
     const copyBlob = async (blob: Blob) => {
         if (await writePNGBlob(blob)) {

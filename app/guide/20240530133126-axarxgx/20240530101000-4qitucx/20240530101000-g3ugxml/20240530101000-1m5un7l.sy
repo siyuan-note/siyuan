@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20260820133158"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -107,7 +107,7 @@
 			"Properties": {
 				"ID": "20240530101000-o6et1uc",
 				"id": "20240530101000-m11xu1w",
-				"updated": "20260809232000"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -351,6 +351,182 @@
 			]
 		},
 		{
+			"ID": "20260930085927-1t89t26",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930085927-1t89t26",
+				"updated": "20260930085927"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "既存のアセットを挿入するときは、画像のタイトル、ツールチップのテキスト、既存の OCR テキストでも検索できます。同じ画像にドキュメントごとに異なるタイトルや説明が付いている場合、いずれかの参照が一致すればアセットを検索できます。このグローバル検索には暗号化ノートブックのアセットは含まれません。"
+				}
+			]
+		},
+		{
+			"ID": "20260930092043-zd8vt2u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930092043-zd8vt2u",
+				"updated": "20260930092043"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像のファイル名を表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にすると、ローカル画像の上にパスと生成 ID を除いたファイル名が拡張子付きで表示されます。名前をクリックすると名前変更ダイアログが開きます。変更を確定すると、このアセットを参照するすべてのリンクが更新され、キャンセルすると元の名前が保持されます。読み取り専用表示と暗号化ノートブックでは、画像のファイル名から名前を変更できません。"
+				}
+			]
+		},
+		{
+			"ID": "20260930092955-e9bzngv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930092955-e9bzngv",
+				"updated": "20260930092955"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像のツールチップのテキストを表示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にすると、画像の説明がタイトルの下に表示されます。この設定が無効でも、画像にマウスを合わせるとタイトルとツールチップテキストの両方が表示されます。説明には既存の代替テキストを使用し、アセットの挿入時に検索できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260930093600-nnyntle",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930093600-nnyntle",
+				"updated": "20260930093600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "画像にマウスを合わせると、タイトルがなくてもファイル名、形式、読み込み済み画像の元のサイズ、タイトル、ツールチップテキストを確認できます。ローカルワークスペースの画像では、取得できる場合にファイルサイズも表示されます。ネットワーク画像と暗号化ノートブックの画像ではファイルサイズは表示されません。"
+				}
+			]
+		},
+		{
+			"ID": "20261010134815-h903uwh",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261010134815-h903uwh",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "画像のタイトル"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261010134815-pbj3gz0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010134815-pbj3gz0",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "画像の下にあるタイトルをクリックまたはタップすると、フローティング入力欄で編集できます。編集中は画面全体を覆うマスクが表示され、本文のレイアウトは変わりません。タイトルにフォーカスがあるときは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で編集を開始します。編集中は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で保存、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でキャンセルできます。入力欄の外側をクリックするか、フォーカスを移しても保存されます。モバイルで戻る操作を行うと、まず保存して入力欄を閉じます。変更は現在の画像参照にのみ適用され、アセットファイル名は変更されません。読み取り専用ドキュメントでは編集できません。"
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-m2u22gy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -391,7 +567,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;img\u0026gt;"
+					"TextMarkTextContent": "&lt;img&gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -400,7 +576,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+					"TextMarkTextContent": "&lt;iframe&gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -903,7 +1079,7 @@
 			"Properties": {
 				"ID": "20240530101000-5bix8t1",
 				"id": "20240530101000-9evyuhr",
-				"updated": "20240530101000"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -918,22 +1094,68 @@
 			"Properties": {
 				"ID": "20240530101000-fl1bsnw",
 				"id": "20240530101000-t4ud4y2",
-				"updated": "20240530101000"
+				"updated": "20261005192208"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で Tesseract、PaddleOCR、AI のいずれかを選択し、自動認識を設定します。ローカルプロバイダーはカーネルでオフライン実行され、画面を開く必要はありません。Tesseract はデスクトップに別途インストールしてください。"
+				}
+			]
+		},
+		{
+			"ID": "20261001000112-ooz689o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001000112-ooz689o",
+				"updated": "20261003234011"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "この機能はデスクトップ版のみサポートされており、事前に "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/tesseract-ocr/tesseract",
-					"TextMarkTextContent": "Tesseract OCR"
-				},
+					"Data": "PaddleOCR には PP-OCRv6 Tiny のみが内蔵され、ダウンロードせずにオフラインで使用できます。デスクトップとモバイルの両方で Tiny がデフォルトです。Small、Medium などの互換 PP-OCRv6 モデルは、検出と認識の ONNX ファイルと各 inference.yml を選択してインポートできます。インポートしたモデルはワークスペースと同期され、プロバイダーと使用モデルの選択は端末ごとに保存されます。新規ユーザーはデフォルトで PaddleOCR を使用し、自動 OCR は無効です。既存のプロバイダー、自動 OCR、しきい値の設定は保持されます。旧内蔵モデル Small の選択は Tiny に移行し、インポートしたモデルには影響しません。OCR プロバイダー設定のないバージョンからの更新では Tesseract を引き続き使用します。"
+				}
+			]
+		},
+		{
+			"ID": "20261003073646-o8u40dy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003073646-o8u40dy",
+				"updated": "20261006114009"
+			},
+			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": " プログラムをインストールしておく必要があります。"
+					"Data": "PaddleOCR を選択すると、認識のしきい値グループで検出、テキスト領域の信頼度、認識の信頼度のしきい値を直接編集できます。入力の編集を終えると自動保存されます。検出とテキスト領域のしきい値は 0 より大きく 1 未満、認識しきい値は 0 以上 1 以下です。空欄では現在のモデルの検出パラメーター、またはデフォルトの認識しきい値 0.5 を使用します。無効な入力は編集できる状態で残り、保存されません。値を上げるとアイコンの誤認識を減らせますが、ぼやけた文字や薄い文字を見落とす場合があります。しきい値は端末ごとに保存され、手動認識と自動認識に適用されます。既存の結果は変更されません。必要に応じて画像メニューから再認識してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261001000112-87qzkfr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001000112-87qzkfr",
+				"updated": "20261001000112"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動認識と自動認識は選択したプロバイダーを使用します。切り替えても既存の結果は保持され、画像メニューから明示的に再認識できます。失敗した場合は前回の結果を保持し、プロバイダーを自動切り替えしません。テキストは画像の文字検索と結果の編集に引き続き使用されます。暗号化ノートブックは OCR の対象外です。"
 				}
 			]
 		},
@@ -968,7 +1190,7 @@
 			"Properties": {
 				"ID": "20240530101000-mbaa8ar",
 				"id": "20240530101000-qmvr8rd",
-				"updated": "20240530101000"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -981,7 +1203,7 @@
 					"Properties": {
 						"ID": "20240530101000-lw8ri1k",
 						"id": "20240530101000-vuyib46",
-						"updated": "20240530101000"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -990,7 +1212,7 @@
 							"Properties": {
 								"ID": "20240530101000-9ucri2d",
 								"id": "20240530101000-ciyew7k",
-								"updated": "20240530101000"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
@@ -1022,12 +1244,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ と表示されます。OCR を無効にしたい場合は、環境変数に "
+									"Data": "​ と表示されます。Tesseract を無効にしたい場合は、環境変数に "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "SIYUAN\\_TESSERACT\\_ENABLED=false"
+									"TextMarkTextContent": "SIYUAN_TESSERACT_ENABLED=false"
 								},
 								{
 									"Type": "NodeText",
@@ -1047,7 +1269,7 @@
 					"Properties": {
 						"ID": "20240530101000-xjhk4ih",
 						"id": "20240530101000-yp8d881",
-						"updated": "20240530101000"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1056,12 +1278,12 @@
 							"Properties": {
 								"ID": "20240530101000-04xwhm0",
 								"id": "20240530101000-juctxsf",
-								"updated": "20240530101000"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "SiYuan はインストールされたすべての言語パックを有効にするわけではありません。言語パックが多すぎると、OCR が遅くなったり、タイムアウトして空の結果が返されたり、システムリソースを過剰に消費する可能性があるためです。そのため、デフォルトでは、最大で "
+									"Data": "SiYuan はインストールされたすべての言語パックを有効にするわけではありません。言語パックが多すぎると、OCR が遅くなったり、タイムアウトしたり、システムリソースを過剰に消費する可能性があるためです。そのため、デフォルトでは、最大で "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1158,7 +1380,7 @@
 					"Properties": {
 						"ID": "20240530101000-prezj3g",
 						"id": "20240530101000-8vlvsns",
-						"updated": "20240530101000"
+						"updated": "20261012014859"
 					},
 					"Children": [
 						{
@@ -1167,12 +1389,12 @@
 							"Properties": {
 								"ID": "20240530101000-9as1nfh",
 								"id": "20240530101000-ack0scp",
-								"updated": "20240530101000"
+								"updated": "20261012014859"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "png と jpg 形式の画像のみがサポートされています。"
+									"Data": "Tesseract と PaddleOCR は PNG、JPEG、TIFF、BMP、GIF、WebP 画像をサポートし、Tesseract は PBM、PGM、PPM、PNM もサポートします"
 								}
 							]
 						}
@@ -1188,7 +1410,7 @@
 					"Properties": {
 						"ID": "20240530101000-w91nsfc",
 						"id": "20240530101000-5mse6p6",
-						"updated": "20240530101000"
+						"updated": "20261001013550"
 					},
 					"Children": [
 						{
@@ -1197,12 +1419,12 @@
 							"Properties": {
 								"ID": "20240530101000-oiv9z77",
 								"id": "20240530101000-vsrr7lg",
-								"updated": "20240530101000"
+								"updated": "20261001013550"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デフォルトでは 2MB 以下の画像のみが処理されます。変更する場合は環境変数 "
+									"Data": "Tesseract は、デフォルトでは 2MB 以下の画像のみが処理されます。変更する場合は環境変数 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1220,7 +1442,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ は上限を 4MB に変更します)。"
+									"Data": "​ は上限を 4MB に変更します)。PaddleOCR は 32 MiB 以下、2400 万画素以下の画像をサポートします"
 								}
 							]
 						}
@@ -1234,12 +1456,128 @@
 			"Properties": {
 				"ID": "20240530101000-bhe8w6i",
 				"id": "20240530101000-hvmv9gg",
-				"updated": "20240530101000"
+				"updated": "20261001000112"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "画像の OCR はバックグラウンドで自動的に行われます。現在、PNG と JPG 画像のみをサポートしています。抽出されたテキストは検索機能で使用され、テキストキーワードによって画像を見つけることができます。"
+					"Data": "自動 OCR を有効にすると、カーネルは OCR 結果のない画像を処理します。抽出したテキストは検索に使用され、文字のキーワードで画像を見つけられます。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014537-ms18ll3",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-ms18ll3",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AI OCR"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261003224949-qenn1ez",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261003224949-qenn1ez",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "画像メニューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI で OCR を実行"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択すると、ローカル画像を独立して選択した OCR AI モデルに送信して文字を認識します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で AI とモデルを選択してください。AI 機能が有効で、有効なプロバイダーとモデルがある場合に AI が表示されます。モデルは画像入力に対応している必要がありますが、この能力は自動検証されません。手動認識と自動認識はこのモデルを使用します。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014737-0p7a8dy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014737-0p7a8dy",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ローカルプロバイダーから AI に切り替えると自動認識は無効になります。明示的に有効にすると、未認識の非暗号化ノートブック画像をバックグラウンドでプロバイダーに送信し、料金が発生する場合があります。選択したモデルを無効化または削除しても、別のモデルやプロバイダーに自動切り替えしません。ローカルプロバイダーを選択し、独立した AI モデルを設定していない場合、個別の手動 AI 項目は互換性のためエージェントモデルを使用します。結果は既存の OCR テキスト、編集、コピー、検索インデックスを利用し、失敗時は元の結果を保持します。暗号化ノートブックの画像には対応していません。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014737-zygbw3w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014737-zygbw3w",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PNG、JPEG、GIF、WebP に対応しています。BMP と TIFF は PNG に、HEIC/HEIF は JPEG に変換し、元の解像度を保持します。元画像と変換後の画像はそれぞれ 20 MiB 以下、変換後の画像は 4,000 万画素以下である必要があります。ネットワーク画像では認識項目を、暗号化ノートブックの画像では OCR メニューを非表示にします。AVIF、SVG、ICO などの未対応形式では AI OCR 項目を表示しません。"
+				}
+			]
+		},
+		{
+			"ID": "20261012014737-ejf7gge",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261012014737-ejf7gge",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動認識と自動認識の AI OCR は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "思考の強さ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で独立して設定できます。デフォルトはモデルの動作に従います。「なし」は思考を無効化または最小化しますが、対応状況はプロバイダーとモデルによって異なります。未対応の場合はエラーを返し、以前の OCR 結果を保持します。"
 				}
 			]
 		},
@@ -1250,7 +1588,7 @@
 			"Properties": {
 				"ID": "20240530101000-aefldsk",
 				"id": "20240530101000-cpod2qy",
-				"updated": "20240530101000"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -1370,12 +1708,12 @@
 			"Properties": {
 				"ID": "20240530101000-ys1z20f",
 				"id": "20240530101000-rq0etyj",
-				"updated": "20260720201253"
+				"updated": "20261001013550"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "調整後は手動でアセットコンテンツインデックスを再構築する必要があります。"
+					"Data": "画像の結果編集画面で保存すると検索インデックスが自動更新されます。SiYuan の外部で JSON ファイルを編集した場合は、アセットコンテンツインデックスを手動で再構築してください"
 				}
 			]
 		},
@@ -1386,6 +1724,86 @@
 				"ID": "20240530101000-8x52yt3",
 				"id": "20240530101000-52fjbe1"
 			}
+		},
+		{
+			"ID": "20260930090802-fdfc9yh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930090802-fdfc9yh",
+				"updated": "20261010140118"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "画像の OCR アイコンをクリックすると認識テキストをコピーでき、ダブルクリックすると元画像とテキストを並べた移動可能な編集ウィンドウが開きます。画像メニューからも OCR テキストのコピーや結果の編集ができます。保存で変更を確定し、キャンセルで破棄します。ウィンドウの外側をクリックしても閉じません。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 画像の OCR ボタンは、OCR テキストがあり、外観プロファイルで表示が許可されている場合にのみ表示されます。シンプルプロファイルでは非表示です。カスタム外観プロファイルの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR テキスト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で表示を切り替えられます。画像メニューからも OCR テキストのコピーと編集ができます。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ローカル画像にマウスを合わせると OCR テキストを確認でき、認識結果が空の場合も表示されます。文字認識アイコンは OCR 操作を示し、画像アイコンは OCR テキストの有無にかかわらず画像を PNG としてコピーします。カスタム外観プロファイルでは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディター"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "PNG としてコピー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で画像コピーボタンの表示を切り替えられます。シンプルプロファイルでは既定で非表示です。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " OCR のホバープレビューは最大 200 文字、6 行まで表示され、長いテキストは末尾の 3 つのドットで省略を示します。OCR アイコンをダブルクリックすると全文を確認できます。"
+				}
+			]
 		}
 	]
 }

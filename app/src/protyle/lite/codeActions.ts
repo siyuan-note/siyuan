@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {MenuItem} from "../../menus/Menu";
 import {Constants} from "../../constants";
 import {showMessage} from "../../dialog/message";
@@ -5,7 +6,7 @@ import {isMobile} from "../../util/functions";
 import {highlightRender} from "../render/highlightRender";
 import {writeText} from "../util/compatibility";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
-import {CODE_TAB_SPACE_VALUES} from "../wysiwyg/codeBlockUtil";
+import {CODE_TAB_SPACE_VALUES, getCodeTabSpacesLabel} from "../wysiwyg/codeBlockUtil";
 
 export const getLiteCodeMenuItems = (node: Element, update: (attribute: string, value: string) => void): IMenu[] => {
     const editor = window.siyuan.config.editor;
@@ -18,13 +19,13 @@ export const getLiteCodeMenuItems = (node: Element, update: (attribute: string, 
         submenu: [{
             id: "default",
             iconHTML: "",
-            label: `${window.siyuan.languages.default} (${editor.codeTabSpaces})`,
+            label: `${window.siyuan.languages.default} (${getCodeTabSpacesLabel(editor.codeTabSpaces)})`,
             checked: codeTabSpaces === null,
             click: () => update(Constants.CUSTOM_SY_CODE_TAB_SPACES, ""),
         }, ...CODE_TAB_SPACE_VALUES.map(value => ({
             id: `tabSpaces${value}`,
             iconHTML: "",
-            label: value.toString(),
+            label: getCodeTabSpacesLabel(value),
             checked: codeTabSpaces === value.toString(),
             click: () => update(Constants.CUSTOM_SY_CODE_TAB_SPACES, value.toString()),
         }))],
@@ -71,28 +72,35 @@ export const bindLiteCodeActions = (host: HTMLElement, protyle: IProtyle, option
         if (!options.canEdit()) {
             return;
         }
-        const menu = window.siyuan.menus.menu;
-        menu.remove();
-        getLiteCodeMenuItems(code, (attribute, value) => {
-            if (options.signal.aborted || !options.canEdit() || !protyle.wysiwyg.element.contains(code)) {
-                return;
-            }
-            options.beforeChange?.();
-            if (value === "") {
-                code.removeAttribute(attribute);
-            } else {
-                code.setAttribute(attribute, value);
-            }
-            // 属性变化不会触发片段的正文观察器，需显式交由宿主事务保存。
-            options.onChange();
-            content.removeAttribute("data-render");
-            highlightRender(code);
-        }).forEach(item => menu.append(new MenuItem(item).element));
-        if (isMobile()) {
-            menu.fullscreen();
-        } else {
-            const rect = button.getBoundingClientRect();
-            menu.popup({x: rect.left, y: rect.top, isLeft: true});
-        }
+
+        toggleMenu({
+            target: button,
+            build: (_menu, session) => {
+                const menu = window.siyuan.menus.menu;
+
+                getLiteCodeMenuItems(code, (attribute, value) => {
+                    if (options.signal.aborted || !options.canEdit() || !protyle.wysiwyg.element.contains(code)) {
+                        return;
+                    }
+                    options.beforeChange?.();
+                    if (value === "") {
+                        code.removeAttribute(attribute);
+                    } else {
+                        code.setAttribute(attribute, value);
+                    }
+                    // 属性变化不会触发片段的正文观察器，需显式交由宿主事务保存。
+                    options.onChange();
+                    content.removeAttribute("data-render");
+                    highlightRender(code);
+                }).forEach(item => menu.append(new MenuItem(item).element));
+                if (isMobile()) {
+                    session.show(() => menu.fullscreen());
+                } else {
+                    const rect = button.getBoundingClientRect();
+                    session.show(() => menu.popup({x: rect.left, y: rect.top, isLeft: true}));
+                }
+
+            },
+        });
     }, {capture: true, signal: options.signal});
 };

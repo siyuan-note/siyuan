@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {getBlockInsertionContext} from "../protyle/wysiwyg/blockInsertion";
 import {
     BLOCK_SELECTION_CLASS,
     BLOCK_SELECTION_MODE_CLASS,
@@ -21,6 +22,8 @@ const compiled = transpileModule(
     }).outputText;
 
 class TestElement {
+    nodeType = 1;
+    tagName = "DIV";
     parentElement: TestElement;
     children: TestElement[] = [];
     attributes = new Map<string, string>();
@@ -72,7 +75,7 @@ class TestElement {
 }
 
 for (const position of ["beforebegin", "afterend"]) {
-    for (const targetKind of ["cursor", "element", "id", "multiple", "editing"]) {
+    for (const targetKind of ["cursor", "element", "id", "multiple", "editing", "embed"]) {
         for (const type of ["NodeParagraph", "NodeHeading", "NodeCodeBlock"]) {
             test(`${position} from ${targetKind} at ${type} clears the old input target`, async () => {
                 const editor = new TestElement("editor");
@@ -80,6 +83,11 @@ for (const position of ["beforebegin", "afterend"]) {
                 const first = new TestElement("first", type);
                 const last = new TestElement("last");
                 editor.append(first, last);
+                if (targetKind === "embed") {
+                    first.attributes.set("data-type", "NodeBlockQueryEmbed");
+                    first.classes.add(BLOCK_SELECTION_CLASS);
+                    first.append(new TestElement("inner"));
+                }
                 if (targetKind !== "editing") {
                     first.classes.add(BLOCK_SELECTION_MODE_CLASS);
                 }
@@ -90,7 +98,7 @@ for (const position of ["beforebegin", "afterend"]) {
                     last.attributes.set("select-end", "true");
                 }
                 const inserted = new TestElement("inserted");
-                const range = {startContainer: first};
+                const range = {startContainer: targetKind === "embed" ? first.children[0] : first};
                 const context = {undoFocusId: "first"};
                 const protyle = {wysiwyg: {element: editor}};
                 const exports: {insertEmptyBlock?: (...args: unknown[]) => Promise<void>} = {};
@@ -125,8 +133,13 @@ for (const position of ["beforebegin", "afterend"]) {
                     callMobileAppShowKeyboard: () => keyboardRequests++,
                 });
 
+                const insertion = targetKind === "embed" ? getBlockInsertionContext(editor as unknown as Element,
+                    range.startContainer as unknown as Element, position as "beforebegin" | "afterend") : undefined;
+                if (insertion) {
+                    assert.equal(insertion.allowed, true);
+                }
                 await exports.insertEmptyBlock(protyle, position,
-                    targetKind === "element" ? first : targetKind === "id" ? "first" : undefined);
+                    insertion?.target || (targetKind === "element" ? first : targetKind === "id" ? "first" : undefined));
 
                 assert.equal(getBlockSelectionModeElement(editor as unknown as Element), undefined);
                 assert.equal(editor.querySelectorAll(`.${BLOCK_SELECTION_CLASS}`).length, 0);
@@ -144,6 +157,9 @@ for (const position of ["beforebegin", "afterend"]) {
                 assert.equal(inverse[0].action, "delete");
                 assert.equal(inverse[0].id, "inserted");
                 assert.equal(inverse[0].context, context);
+                if (targetKind === "embed") {
+                    assert.deepEqual(first.children.map(child => child.getAttribute("data-node-id")), ["inner"]);
+                }
             });
         }
     }

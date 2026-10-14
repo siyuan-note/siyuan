@@ -5,19 +5,22 @@ import {
     ListMindmapNodeStyle,
     ListMindmapPosition,
     ListMindmapRelation,
+    readListMindmap,
 } from "./model";
 import {routeMindmapRelation, routeManualMindmapRelation, adjustMindmapRoute,
-    MindmapRoutePoint, MindmapManualRoute} from "./routing";
+    MindmapRoutePoint, MindmapManualRoute, MindmapRelationAnchor,
+    projectMindmapRelationAnchor, getMindmapRelationAnchorPoint} from "./routing";
 import {mathRender} from "../mathRender";
 import {getAVRichTextSafeURL} from "../av/richTextValue";
 import {Constants} from "../../../constants";
 import {findMindmapDrop} from "./drop";
 import {destroyTabsRender, tabsRender} from "../tabsRender";
-import {getListMindmapFoldStates} from "./fold";
+import {getListMindmapFoldStates, getListMindmapSiblingFoldStates} from "./fold";
 import type {ListMindmapFoldTarget} from "./fold";
 import {clampMindmapPanOffset} from "./pan";
-import {getListMindmapSummaryRange, layoutListMindmapSummaries} from "./summary";
-import type {ListMindmapSummary, ListMindmapSummaryPosition} from "./summary";
+import {getListMindmapSummaryParentID, getListMindmapSummaryRange, getListMindmapSummarySelection, getListMindmapSummarySnapshot,
+    layoutListMindmapSummaries} from "./summary";
+import type {ListMindmapSummary, ListMindmapSummaryPosition, ListMindmapSummaryRange} from "./summary";
 
 export interface ListMindmapViewOptions {
     host: HTMLElement;
@@ -38,6 +41,7 @@ export interface ListMindmapViewOptions {
     onFullscreen?: (enter: boolean, button: HTMLButtonElement) => void;
     onInteractionStart?: (event: PointerEvent) => () => void;
     onEdit?: (id: string, contentHost: HTMLElement, replaceFirstParagraph?: string) => void;
+    onPasteImages?: (id: string, files: File[]) => void;
     isAddSiblingShortcut?: (event: KeyboardEvent) => boolean;
     isAddChildShortcut?: (event: KeyboardEvent) => boolean;
     onRootTitleChange?: (title: string) => void;
@@ -46,6 +50,7 @@ export interface ListMindmapViewOptions {
     onAdd?: (id: string, kind: "child" | "sibling") => void;
     onDelete?: (id: string) => boolean | void | Promise<boolean | void>;
     onFold?: (id: string) => void;
+    onFoldSiblings?: (id: string) => Promise<boolean>;
     onFoldLevel?: (level: ListMindmapFoldTarget) => Promise<boolean>;
     onExpandLevelMenu?: (anchor: HTMLElement, select: (level: ListMindmapFoldTarget) => void) => void;
     onTaskToggle?: (id: string, cycle?: boolean) => void;
@@ -61,6 +66,7 @@ export interface ListMindmapViewOptions {
     onRelationChange?: (id: string, patch: Partial<ListMindmapRelation>, expected?: string) => void;
     onRelationDelete?: (id: string) => void;
     onSummaryAdd?: (from: string, to: string) => Promise<string | undefined>;
+    onSummaryBatchAdd?: (ranges: ListMindmapSummaryRange[], expected: string) => Promise<string[] | undefined>;
     onSummaryChange?: (id: string, patch: Pick<Partial<ListMindmapSummary>, "label" | "color">, expected?: string) => void;
     onSummaryDelete?: (id: string) => void;
     onExit: () => void;
@@ -75,6 +81,7 @@ interface PointerState {
     x: number;
     y: number;
     moved: boolean;
+    summary?: boolean;
     targetId?: string;
     placement?: "before" | "child" | "after";
     relation?: {
@@ -88,6 +95,8 @@ interface PointerState {
         endpoint?: "from" | "to";
         targetId?: string;
         route?: MindmapManualRoute;
+        anchor?: MindmapRelationAnchor;
+        routeFallback?: boolean;
     };
 }
 
@@ -109,6 +118,7 @@ export class ListMindmapView {
     private readonly zoomLabel: HTMLSpanElement;
     private readonly zoomSlider = createElement("input", "b3-slider");
     private readonly nodeElements = new Map<string, HTMLDivElement>();
+    private readonly nestedViews = new Map<string, ListMindmapView[]>();
     private readonly previewID = `mindmap-view-${Lute.NewNodeID()}-`;
     private readonly relationElements = new Map<string, HTMLButtonElement>();
     private readonly summaryElements = new Map<string, HTMLDivElement>();
@@ -116,6 +126,14 @@ export class ListMindmapView {
     private readonly summaryStatus = createElement("div", "mindmap-view__route-status");
     private selectedSummary?: string;
     private summaryFrom?: string;
+    private summarySelecting = false;
+    private summarySnapshot?: string;
+    private summarySelected = new Set<string>();
+    private summaryRanges: ListMindmapSummaryRange[] = [];
+    private readonly summaryControls = createElement("div", "mindmap-view__inspector mindmap-view__summary-controls");
+    private readonly summaryCount = createElement("span", "");
+    private readonly summaryConfirm = createElement("button", "b3-button b3-button--text");
+    private readonly summaryBox = createElement("div", "mindmap-view__selection-box");
     private finishSummaryEdit?: (save: boolean) => void;
     private editingSummary?: string;
     private readonly buttons = new Map<string, HTMLButtonElement>();
@@ -132,8 +150,9 @@ export class ListMindmapView {
     private selectedEdge?: string;
     private hoveredLine?: string;
     private finishRelationEdit?: (save: boolean) => void;
-    private linePaths: {id: string, relation: boolean, summary?: boolean, path: Path2D, end?: MindmapRoutePoint}[] = [];
+    private linePaths: {id: string, relation: boolean, summary?: boolean, path: Path2D, arrows?: MindmapRoutePoint[]}[] = [];
     private relationRoutes = new Map<string, MindmapRoutePoint[]>();
+    private anchorFallbackRoutes = new Set<string>();
     private readonly routeHandles = new Map<string, HTMLButtonElement>();
     private readonly routeStatus = createElement("div", "mindmap-view__route-status");
     private readonly fallbackRoutes = new Set<string>();
@@ -198,6 +217,24 @@ export class ListMindmapView {
         this.summaryStatus.setAttribute("role", "status");
         this.summaryStatus.textContent = this.label("listMindmapSummarySelect");
         options.host.append(this.summaryStatus);
+        this.summaryControls.hidden = true;
+        this.summaryCount.setAttribute("role", "status");
+        this.summaryConfirm.type = "button";
+        this.summaryConfirm.textContent = this.label("confirm");
+        this.summaryConfirm.addEventListener("click", () => void this.confirmSummarySelection());
+        const cancelSummary = createElement("button", "b3-button b3-button--cancel");
+        cancelSummary.type = "button";
+        cancelSummary.textContent = this.label("cancel");
+        cancelSummary.addEventListener("click", () => {
+            this.cancelSummarySelection();
+            this.updateSelection();
+        });
+        const summaryActions = createElement("div", "mindmap-view__summary-actions");
+        summaryActions.append(cancelSummary, this.summaryConfirm);
+        this.summaryControls.append(this.summaryCount, summaryActions);
+        options.host.append(this.summaryControls);
+        this.summaryBox.hidden = true;
+        this.viewport.append(this.summaryBox);
         this.createToolbar();
         this.listen(document, "pointerdown", this.dismissControls, {capture: true});
         this.listen(options.host, "pointerover", this.showButtonTooltip);
@@ -244,6 +281,7 @@ export class ListMindmapView {
         this.listen(this.viewport, "wheel", this.wheel, {passive: false});
         this.listen(this.viewport, "dragstart", (event: Event) => event.preventDefault());
         this.listen(options.host, "keydown", this.keyDown);
+        this.listen(options.host, "paste", this.pasteImages);
         // 脑图内部先处理交互，再阻止外层文档将节点操作识别为列表块编辑。
         ["pointerdown", "pointerup", "pointermove", "pointercancel", "mousedown", "mouseup", "mousemove", "click",
             "dblclick", "contextmenu", "dragstart", "dragover", "drop", "beforeinput", "input", "compositionstart",
@@ -288,7 +326,7 @@ export class ListMindmapView {
         this.disposers.push(() => target.removeEventListener(event, handler, options));
     }
 
-    private makeButton(key: string, icon: string, action: () => void, className = "") {
+    private makeButton(key: string, icon: string, action: (event: MouseEvent) => void, className = "") {
         const button = createElement("button", "block__icon block__icon--show " + className);
         button.type = "button";
         button.setAttribute("aria-label", this.label(key));
@@ -298,15 +336,16 @@ export class ListMindmapView {
         }
         button.addEventListener("click", (event) => {
             event.stopPropagation();
-            this.finishThen(action);
+            this.finishThen(() => action(event));
         });
         return button;
     }
 
     private showButtonTooltip = (event: Event) => {
         const button = (event.target as Element).closest<HTMLButtonElement>("button[aria-label]");
-        if (!button || !this.options.host.contains(button) || button.classList.contains("mindmap-view__relation") ||
-            button.classList.contains("mindmap-view__summary")) {
+        if (!button || button.closest(".mindmap-view") !== this.options.host ||
+            !(this.toolbar.contains(button) || this.inspector.contains(button) ||
+                button.classList.contains("mindmap-view__add-child") || button.classList.contains("mindmap-view__fold"))) {
             this.tooltip.hidden = true;
             return;
         }
@@ -336,7 +375,7 @@ export class ListMindmapView {
     private clearSelection() {
         this.inspector.hidden = true;
         if (!this.selectedId && !this.selectedRelation && !this.selectedEdge && !this.relationFrom &&
-            !this.selectedSummary && !this.summaryFrom) {
+            !this.selectedSummary && !this.summarySelecting) {
             return;
         }
         this.selectedId = undefined;
@@ -344,13 +383,16 @@ export class ListMindmapView {
         this.selectedEdge = undefined;
         this.relationFrom = undefined;
         this.selectedSummary = undefined;
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.updateSelection();
     }
 
     private dismissControls = (event: PointerEvent) => {
         const target = event.target as Node;
         this.tooltip.hidden = true;
+        if (this.summarySelecting && (this.viewport.contains(target) || this.summaryControls.contains(target))) {
+            return;
+        }
         if (target instanceof Element && target.closest(".mindmap-view__relation-editor, .mindmap-view__route-handle, .mindmap-view__summary-editor")) {
             return;
         }
@@ -410,7 +452,7 @@ export class ListMindmapView {
     private refreshControls() {
         const value = !!this.readOnly;
         this.finishSummaryEdit?.(false);
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.cancelPointer();
         this.relationFrom = undefined;
         this.inspector.hidden = true;
@@ -454,20 +496,31 @@ export class ListMindmapView {
             }).catch(error => console.error(error)).finally(() => button.disabled = false);
         });
         this.buttons.get("lock").setAttribute("aria-pressed", String(this.locked));
+        this.buttons.get("lock").setAttribute("data-subtype", this.locked ? "lock" : "unlock");
         if (this.locked) {
             add("fullscreen", "fullscreen", "iconFullscreen", () => this.toggleFullscreen());
             return;
         }
         if (!this.readOnly) {
             add("summary", "listMindmapSummary", "iconGroups", () => {
-                this.setPanning(false);
-                this.inspector.hidden = true;
-                this.relationFrom = undefined;
-                this.summaryFrom = this.summaryFrom ? undefined : this.selectedId;
-                this.updateSelection();
+                this.finishThen(() => {
+                    const selecting = !this.summarySelecting;
+                    this.cancelPointer();
+                    this.cancelSummarySelection();
+                    this.setPanning(false);
+                    this.inspector.hidden = true;
+                    this.relationFrom = undefined;
+                    this.summarySelecting = selecting;
+                    if (selecting) {
+                        this.summarySnapshot = getListMindmapSummarySnapshot(this.model);
+                        this.summaryFrom = getListMindmapSummaryRange(this.model, this.selectedId, this.selectedId).length ?
+                            this.selectedId : undefined;
+                    }
+                    this.updateSelection();
+                });
             });
             add("relation", "connect", "iconRoute", () => {
-                this.summaryFrom = undefined;
+                this.cancelSummarySelection();
                 this.setPanning(false);
                 this.inspector.hidden = true;
                 this.relationFrom = this.relationFrom ? undefined : this.selectedId;
@@ -532,7 +585,7 @@ export class ListMindmapView {
 
     private setPanning(value: boolean) {
         if (value) {
-            this.summaryFrom = undefined;
+            this.cancelSummarySelection();
         }
         this.panning = value;
         this.viewport.classList.toggle("mindmap-view__viewport--pan", value);
@@ -542,7 +595,7 @@ export class ListMindmapView {
     }
 
     public update(model: ListMindmapModel) {
-        if (this.pointer?.relation) {
+        if (this.pointer?.relation || this.pointer?.summary) {
             this.cancelPointer();
         }
         if (this.destroyed) {
@@ -553,7 +606,7 @@ export class ListMindmapView {
             this.persistedLocked = !!model.metadata.viewLocked;
             this.setLocked(this.persistedLocked);
         }
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         if (this.levelSelect) {
             const placeholder = new Option(this.label("expandLevel"), "");
             placeholder.disabled = true;
@@ -576,7 +629,7 @@ export class ListMindmapView {
         }
         this.nodeElements.forEach((element, id) => {
             if (!model.nodes.has(id)) {
-                destroyTabsRender(this.getContentHost(id));
+                this.destroyContentViews(id);
                 this.resizeObserver.unobserve(element);
                 element.remove();
                 this.nodeElements.delete(id);
@@ -593,7 +646,13 @@ export class ListMindmapView {
                 addBridge.hidden = !!this.readOnly;
                 addBridge.setAttribute("aria-hidden", "true");
                 element.append(addBridge);
-                const fold = this.makeButton("collapse", "iconLeft", () => this.toggleFold(id), "mindmap-view__fold");
+                const fold = this.makeButton("collapse", "iconLeft", event => {
+                    if (event.altKey) {
+                        void this.toggleSiblingFold(id).catch(error => console.error(error));
+                    } else {
+                        this.toggleFold(id);
+                    }
+                }, "mindmap-view__fold");
                 fold.append(createElement("span", "mindmap-view__fold-count"));
                 element.append(fold);
                 const addChild = this.makeButton("listMindmapChild", "iconAdd", () => {
@@ -631,14 +690,14 @@ export class ListMindmapView {
                 content.querySelectorAll<HTMLElement>('.tab-item[data-tabs-hidden="false"]').forEach(item => {
                     activeTabs.set(item.parentElement.id, item.id);
                 });
-                destroyTabsRender(content);
+                this.destroyContentViews(id);
                 content.replaceChildren();
                 const sourceTabIDs = new Map<string, string>();
                 if (node.virtual) {
                     content.textContent = this.model.metadata.rootTitle || "";
                 } else {
                     node.contentBlocks.forEach((block) => {
-                        const clone = block.cloneNode(true) as HTMLElement;
+                        let clone = block.cloneNode(true) as HTMLElement;
                         const sourceCanvases = block.querySelectorAll("canvas");
                         clone.querySelectorAll("canvas").forEach((canvas, index) => {
                             const source = sourceCanvases[index];
@@ -647,7 +706,25 @@ export class ListMindmapView {
                             }
                         });
                         const previewTabIDs = new Map<string, string>();
-                        clone.querySelectorAll(".protyle-attr, .protyle-action, .protyle-action__table, .protyle-icons, .mindmap-view")
+                        // 嵌套脑图使用独立模型生成静态预览，双击仍由外层节点打开正文编辑。
+                        const nested: {host: HTMLElement, model: ListMindmapModel}[] = [];
+                        const selector = '[data-type="NodeMindmap"], [data-type="NodeList"][custom-sy-list-mindmap="1"]';
+                        const nestedLists = Array.from(clone.querySelectorAll<HTMLElement>(selector));
+                        if (clone.matches(selector)) {
+                            nestedLists.unshift(clone);
+                        }
+                        nestedLists.filter(list => !list.parentElement?.closest(selector)).forEach(list => {
+                            const host = createElement("div", "mindmap-view--nested");
+                            nested.push({host, model: readListMindmap(list)});
+                            if (list === clone) {
+                                clone = host;
+                            } else {
+                                list.replaceWith(host);
+                            }
+                        });
+                        // 富文本单元格的列表标记保留为只读内容，其他编辑控件不进入预览。
+                        clone.querySelectorAll(".protyle-attr, .protyle-action:not(.li[data-table-cell-node] > .protyle-action), " +
+                            ".protyle-action__table, .protyle-icons, .mindmap-view")
                             .forEach(item => item.remove());
                         [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))].forEach((item) => {
                             // 页签预览使用独立 DOM 标识切换正文，不携带可提交事务的块身份。
@@ -679,6 +756,20 @@ export class ListMindmapView {
                                 }
                             });
                         content.append(clone);
+                        nested.forEach(({host, model}) => {
+                            const view = new ListMindmapView({host, model, readOnly: true,
+                                printLayout: this.options.printLayout, labels: this.options.labels,
+                                cdn: this.options.cdn, onExit: () => {}});
+                            host.setAttribute("role", "img");
+                            host.setAttribute("aria-label", Array.from(model.nodes.values()).map(node =>
+                                node.virtual ? model.metadata.rootTitle || "" :
+                                    node.contentBlocks.map(block => block.textContent).join("\n")).join("\n") || this.label("mindmap"));
+                            Array.from(host.children).forEach((child: HTMLElement) => child.inert = true);
+                            host.tabIndex = -1;
+                            const views = this.nestedViews.get(id) || [];
+                            views.push(view);
+                            this.nestedViews.set(id, views);
+                        });
                     });
                 }
                 const hasBlankLines = node.contentBlocks.length > 1 || content.textContent.includes("\n") ||
@@ -689,6 +780,7 @@ export class ListMindmapView {
                 content.dataset.placeholder = this.label("listMindmapPlaceholder");
                 if (content.querySelector('.tabs[data-type="NodeTabs"]')) {
                     tabsRender(content, {
+                        label: this.label("tabItem"),
                         readonly: () => true,
                         taskReadonly: () => !!this.readOnly || !this.options.onTabTaskToggle,
                         taskLabel: this.label("taskList"),
@@ -737,6 +829,12 @@ export class ListMindmapView {
 
     public getContentHost(id: string): HTMLElement | undefined {
         return this.nodeElements.get(id)?.querySelector<HTMLElement>(".mindmap-view__content");
+    }
+
+    private destroyContentViews(id: string) {
+        this.nestedViews.get(id)?.forEach(view => view.destroy());
+        this.nestedViews.delete(id);
+        destroyTabsRender(this.getContentHost(id));
     }
 
     public getBlockById(id: string) {
@@ -795,7 +893,7 @@ export class ListMindmapView {
         }
         this.editingId = id;
         if (id) {
-            destroyTabsRender(this.getContentHost(id));
+            this.destroyContentViews(id);
             this.selectNode(id);
             this.nodeElements.get(id)?.classList.add("mindmap-view__node--editing");
         }
@@ -886,6 +984,7 @@ export class ListMindmapView {
             this.summaryPositions = layoutListMindmapSummaries(this.model, this.positions, summarySizes);
             this.relationRoutes.clear();
             this.fallbackRoutes.clear();
+            this.anchorFallbackRoutes.clear();
             this.edges = result.edges;
             this.bounds = result;
             let top = 0;
@@ -951,7 +1050,7 @@ export class ListMindmapView {
                 this.fitPrint();
             } else if (this.initialFit) {
                 this.initialFit = false;
-                this.fit(1);
+                this.fit();
             } else {
                 const bounded = this.boundedPan(this.offsetX, this.offsetY);
                 this.offsetX = bounded.x;
@@ -1009,7 +1108,7 @@ export class ListMindmapView {
         this.selectedRelation = undefined;
         this.selectedEdge = undefined;
         this.relationFrom = undefined;
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.inspector.hidden = !!this.readOnly;
         this.updateSelection();
         this.renderInspector();
@@ -1020,7 +1119,7 @@ export class ListMindmapView {
         if (!from || !getListMindmapSummaryRange(this.model, from, id).length) {
             return;
         }
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.updateSelection();
         void this.options.onSummaryAdd?.(from, id).then(summaryId => {
             if (summaryId && !this.destroyed) {
@@ -1032,6 +1131,55 @@ export class ListMindmapView {
                 });
             }
         }).catch(error => console.error(error));
+    }
+
+    private cancelSummarySelection() {
+        this.summarySelecting = false;
+        this.summaryFrom = undefined;
+        this.summarySnapshot = undefined;
+        this.summarySelected.clear();
+        this.summaryRanges = [];
+        this.summaryControls.hidden = true;
+        this.summaryBox.hidden = true;
+    }
+
+    private previewSummarySelection() {
+        const {ranges, conflict} = getListMindmapSummarySelection(this.model, this.summarySelected);
+        this.summaryRanges = ranges;
+        this.summaryConfirm.disabled = conflict || !ranges.length || !this.options.onSummaryBatchAdd;
+        this.summaryCount.textContent = conflict ? this.label("listMindmapSummaryConflict") :
+            this.label("listMindmapSummaryBatch").replace("${count}", String(ranges.length));
+        this.summaryControls.hidden = false;
+        this.updateSelection();
+    }
+
+    private async confirmSummarySelection() {
+        if (!this.summarySelecting || this.summaryConfirm.disabled || this.readOnly) {
+            return;
+        }
+        const ranges = this.summaryRanges;
+        const expected = this.summarySnapshot;
+        this.summaryConfirm.disabled = true;
+        let ids: string[];
+        try {
+            ids = await this.options.onSummaryBatchAdd?.(ranges, expected);
+        } catch (error) {
+            console.error(error);
+        }
+        if (this.destroyed) {
+            return;
+        }
+        this.cancelSummarySelection();
+        if (ids?.length === 1) {
+            this.selectSummary(ids[0]);
+            requestAnimationFrame(() => {
+                if (!this.destroyed && this.selectedSummary === ids[0]) {
+                    this.editSummaryLabel(ids[0]);
+                }
+            });
+        } else {
+            this.updateSelection();
+        }
     }
 
     private editSummaryLabel(id: string) {
@@ -1141,7 +1289,7 @@ export class ListMindmapView {
                     this.finishThen(() => {
                         this.selectedRelation = relation.id;
                         this.selectedSummary = undefined;
-                        this.summaryFrom = undefined;
+                        this.cancelSummarySelection();
                         this.selectedEdge = undefined;
                         this.relationFrom = undefined;
                         this.selectedId = undefined;
@@ -1185,6 +1333,8 @@ export class ListMindmapView {
         }
         const end = points[points.length - 1];
         const previous = points[points.length - 2];
+        const start = points[0];
+        const next = points[1];
         // 按整条路径限制箭头大小，短尾段不会把长关系线的箭头压小。
         const arrowSizeLimit = points.slice(1).reduce((length, point, i) =>
             length + Math.hypot(point.x - points[i].x, point.y - points[i].y), 0) / 3;
@@ -1205,7 +1355,7 @@ export class ListMindmapView {
         const drawingEnd = drawingPoints[drawingPoints.length - 1];
         path.lineTo(drawingEnd.x, drawingEnd.y);
         if (!label) {
-            return {path, end, previous, arrowSizeLimit, labelPoint: undefined as MindmapRoutePoint | undefined};
+            return {path, start, next, end, previous, arrowSizeLimit, labelPoint: undefined as MindmapRoutePoint | undefined};
         }
         const width = label.offsetWidth;
         const height = label.offsetHeight;
@@ -1229,21 +1379,40 @@ export class ListMindmapView {
         // 调整关系线时隐藏文字，保留测量尺寸，避免遮挡手柄或改变节点布局。
         label.style.visibility = !labelPoint || (id === this.selectedRelation && !this.readOnly &&
             !this.printTransform && !this.options.printLayout) ? "hidden" : "";
-        return {path, end, previous, arrowSizeLimit, labelPoint};
+        return {path, start, next, end, previous, arrowSizeLimit, labelPoint};
+    }
+
+    private resolveRelationRoute(relation: ListMindmapRelation | undefined, from: ListMindmapPosition,
+                                 to: ListMindmapPosition, allowAnchorFallback = true) {
+        const obstacles = this.routingObstacles();
+        if (relation?.route) {
+            const points = routeManualMindmapRelation(from, to, obstacles, relation.route, relation);
+            if (points.length >= 2) {
+                return {points, routeFallback: false, anchorFallback: false};
+            }
+        }
+        const points = routeMindmapRelation(from, to, obstacles, undefined, relation);
+        const routeFallback = !!relation?.route;
+        if (points.length >= 2 || !allowAnchorFallback || (!relation?.fromAnchor && !relation?.toAnchor)) {
+            return {points, routeFallback, anchorFallback: false};
+        }
+        // 布局变化时保留原约束，临时自动选取接入点；再次可用后恢复保存的位置。
+        return {points: routeMindmapRelation(from, to, obstacles), routeFallback, anchorFallback: true};
     }
 
     private calculateRelationRoute(relation: ListMindmapRelation | undefined, from: ListMindmapPosition, to: ListMindmapPosition) {
+        const result = this.resolveRelationRoute(relation, from, to);
         if (relation) {
             this.fallbackRoutes.delete(relation.id);
-            if (relation.route) {
-                const points = routeManualMindmapRelation(from, to, this.routingObstacles(), relation.route);
-                if (points.length >= 2) {
-                    return points;
-                }
+            this.anchorFallbackRoutes.delete(relation.id);
+            if (result.routeFallback) {
                 this.fallbackRoutes.add(relation.id);
             }
+            if (result.anchorFallback) {
+                this.anchorFallbackRoutes.add(relation.id);
+            }
         }
-        return routeMindmapRelation(from, to, this.routingObstacles());
+        return result.points;
     }
 
     private renderRouteControls() {
@@ -1289,11 +1458,15 @@ export class ListMindmapView {
                 this.routeHandles.delete(key);
             }
         });
-        const invalid = this.pointer?.relation && !this.pointer.relation.valid;
+        const invalid = drag && !drag.valid;
+        const anchorFallback = !drag && this.anchorFallbackRoutes.size > 0;
+        const routeFallback = drag ? drag.valid && drag.routeFallback :
+            this.readOnly ? this.fallbackRoutes.size > 0 : this.fallbackRoutes.has(id);
         this.viewport.classList.toggle("mindmap-view__viewport--route-invalid", !!invalid);
-        this.routeStatus.hidden = this.readOnly || !!this.options.printLayout || !!this.printTransform ||
-            (!invalid && !this.fallbackRoutes.has(id));
-        this.routeStatus.textContent = this.label(invalid ? "invalid" : "listMindmapRouteFallback");
+        this.routeStatus.hidden = !!this.options.printLayout || !!this.printTransform ||
+            (!invalid && !anchorFallback && !routeFallback);
+        this.routeStatus.textContent = this.label(invalid ? drag.anchor ? "listMindmapAnchorInvalid" : "invalid" :
+            anchorFallback ? "listMindmapAnchorFallback" : "listMindmapRouteFallback");
     }
 
     private getRouteHandle(id: string, part: number | "from" | "to") {
@@ -1375,26 +1548,35 @@ export class ListMindmapView {
         const from = this.positions.get(relation.from);
         const to = this.positions.get(relation.to);
         drag.valid = false;
+        if (!from || !to) {
+            this.draw();
+            return;
+        }
         if (drag.endpoint) {
             const target = this.positions.get(drag.targetId);
             const point = target || {id: "", ...drag.handle, width: 0, height: 0};
             const nextFrom = drag.endpoint === "from" ? point : from;
             const nextTo = drag.endpoint === "to" ? point : to;
-            const points = target?.id === relation[drag.endpoint] ? drag.points :
-                routeMindmapRelation(nextFrom, nextTo, this.routingObstacles());
-            drag.valid = !!target && this.canReconnectRelation(relation, drag.endpoint, target.id) && points.length >= 2;
+            const anchorKey = drag.endpoint === "from" ? "fromAnchor" : "toAnchor";
+            const sameNode = target?.id === relation[drag.endpoint];
+            const preview = {...relation, [drag.endpoint]: target?.id || relation[drag.endpoint],
+                [anchorKey]: sameNode ? drag.anchor : undefined, route: sameNode ? relation.route : undefined};
+            const {points, routeFallback} = this.resolveRelationRoute(preview, nextFrom, nextTo, false);
+            drag.valid = !!target && (!sameNode || !!drag.anchor) &&
+                this.canReconnectRelation(relation, drag.endpoint, target.id) && points.length >= 2;
+            drag.routeFallback = routeFallback;
             if (points.length >= 2) {
                 this.relationRoutes.set(drag.id, points);
             }
             this.nodeElements.forEach((element, id) => element.classList.toggle("mindmap-view__node--relation",
-                drag.valid && id === drag.targetId));
+                id === drag.targetId && (sameNode || drag.valid)));
             this.draw();
             return;
         }
         const route = from && to && adjustMindmapRoute(drag.points, drag.segment, drag.offset, from, to,
             this.fallbackRoutes.has(drag.id) ? undefined : relation.route);
         if (route) {
-            const points = routeManualMindmapRelation(from, to, this.routingObstacles(), route);
+            const points = routeManualMindmapRelation(from, to, this.routingObstacles(), route, relation);
             if (points.length >= 2) {
                 drag.route = route;
                 drag.valid = true;
@@ -1421,6 +1603,19 @@ export class ListMindmapView {
             const relation = this.model.metadata.relations.find(item => item.id === id);
             if (!this.readOnly && relation?.route) {
                 this.options.onRelationChange?.(id, {route: undefined}, JSON.stringify(relation));
+            }
+        });
+    }
+
+    private resetRelationAnchors(id: string) {
+        if (this.readOnly) {
+            return;
+        }
+        this.cancelPointer();
+        this.finishThen(() => {
+            const relation = this.model.metadata.relations.find(item => item.id === id);
+            if (!this.readOnly && (relation?.fromAnchor || relation?.toAnchor)) {
+                this.options.onRelationChange?.(id, {fromAnchor: undefined, toAnchor: undefined}, JSON.stringify(relation));
             }
         });
     }
@@ -1525,8 +1720,16 @@ export class ListMindmapView {
                 element.hidden = true;
                 return;
             }
-            const {path, end, previous, arrowSizeLimit, labelPoint} = route;
-            this.linePaths.push({id: relation.id, relation: true, path, end});
+            const {path, start, next, end, previous, arrowSizeLimit, labelPoint} = route;
+            const direction = relation.arrowDirection || "forward";
+            const arrows = [];
+            if (direction === "forward" || direction === "both") {
+                arrows.push({tip: end, previous});
+            }
+            if (direction === "reverse" || direction === "both") {
+                arrows.push({tip: start, previous: next});
+            }
+            this.linePaths.push({id: relation.id, relation: true, path, arrows: arrows.map(arrow => arrow.tip)});
             context.beginPath();
             const selected = relation.id === this.selectedRelation;
             const hovered = this.hoveredLine === `relation:${relation.id}`;
@@ -1539,20 +1742,22 @@ export class ListMindmapView {
             context.setLineDash(relation.dash === false ? [] : [5, 4]);
             context.stroke(path);
             context.setLineDash([]);
-            context.beginPath();
-            const direction = Math.atan2(end.y - previous.y, end.x - previous.x);
             // 短线上的双向箭头预留间隙，避免合并成菱形。
             const arrowSize = Math.min(Math.max(7 / this.scale, baseWidth * 2), arrowSizeLimit);
             // 箭头随线条状态加宽，保持长度不变以保留双向箭头之间的间隙。
             const halfWidth = arrowSize / 2 + emphasis / 2;
-            const baseX = end.x - arrowSize * Math.cos(Math.PI / 6) * Math.cos(direction);
-            const baseY = end.y - arrowSize * Math.cos(Math.PI / 6) * Math.sin(direction);
             context.fillStyle = context.strokeStyle;
-            context.moveTo(baseX - halfWidth * Math.sin(direction), baseY + halfWidth * Math.cos(direction));
-            context.lineTo(end.x, end.y);
-            context.lineTo(baseX + halfWidth * Math.sin(direction), baseY - halfWidth * Math.cos(direction));
-            context.closePath();
-            context.fill();
+            arrows.forEach(({tip, previous}) => {
+                const angle = Math.atan2(tip.y - previous.y, tip.x - previous.x);
+                const baseX = tip.x - arrowSize * Math.cos(Math.PI / 6) * Math.cos(angle);
+                const baseY = tip.y - arrowSize * Math.cos(Math.PI / 6) * Math.sin(angle);
+                context.beginPath();
+                context.moveTo(baseX - halfWidth * Math.sin(angle), baseY + halfWidth * Math.cos(angle));
+                context.lineTo(tip.x, tip.y);
+                context.lineTo(baseX + halfWidth * Math.sin(angle), baseY - halfWidth * Math.cos(angle));
+                context.closePath();
+                context.fill();
+            });
             if (labelPoint) {
                 element.style.left = `${labelPoint.x}px`;
                 element.style.top = `${labelPoint.y}px`;
@@ -1561,6 +1766,31 @@ export class ListMindmapView {
         this.drawRelationPreview(context, resolveColor(relationStyles[0].color, primary), relationStyles[0].width || 1.5);
         this.drawSummaries(context, (color, selected, hovered) =>
             resolveLineStyle(summaryStyles, color, undefined, defaultLine, selected, hovered));
+        if (this.summarySelecting && !this.printTransform && !this.options.printLayout && this.summaryRanges.length) {
+            const previews = this.summaryRanges.map((range, index) => ({...range, id: `preview:${index}`, label: ""}));
+            const sizes = new Map([...this.summaryPositions].map(([id, position]) =>
+                [id, {width: position.width, height: position.height}]));
+            previews.forEach(preview => sizes.set(preview.id, {width: 0, height: 0}));
+            const model = {...this.model, metadata: {...this.model.metadata,
+                summaries: [...(this.model.metadata.summaries || []), ...previews]}};
+            const positions = layoutListMindmapSummaries(model, this.positions, sizes);
+            context.save();
+            context.strokeStyle = primary;
+            context.lineWidth = 1.5 / this.scale;
+            context.setLineDash([4 / this.scale, 4 / this.scale]);
+            previews.forEach(preview => {
+                const position = positions.get(preview.id);
+                if (position) {
+                    context.beginPath();
+                    context.moveTo(position.x - 10, position.top);
+                    context.lineTo(position.x, position.top);
+                    context.lineTo(position.x, position.bottom);
+                    context.lineTo(position.x - 10, position.bottom);
+                    context.stroke();
+                }
+            });
+            context.restore();
+        }
         this.renderRouteControls();
     }
 
@@ -1639,7 +1869,7 @@ export class ListMindmapView {
         this.selectedRelation = undefined;
         this.selectedEdge = undefined;
         this.updateSelection();
-        if (!this.readOnly && !this.relationFrom && !this.summaryFrom) {
+        if (!this.readOnly && !this.relationFrom && !this.summarySelecting) {
             this.inspector.hidden = false;
         }
         if (changed || !this.inspector.hidden) {
@@ -1652,17 +1882,18 @@ export class ListMindmapView {
             this.relationPreview = undefined;
         }
         this.nodeElements.forEach((element, id) => {
-            element.classList.toggle("mindmap-view__node--selected", this.selectedId === id);
+            const selected = this.selectedId === id || this.summarySelected.has(id);
+            element.classList.toggle("mindmap-view__node--selected", selected);
             element.classList.toggle("mindmap-view__node--relation", this.relationFrom === id ||
                 this.relationPreview?.targetId === id || !!this.summaryFrom &&
                 getListMindmapSummaryRange(this.model, this.summaryFrom, id).length > 0);
-            element.setAttribute("aria-selected", String(this.selectedId === id));
+            element.setAttribute("aria-selected", String(selected));
         });
         this.relationElements.forEach((element, id) => element.classList.toggle("mindmap-view__relation--selected", this.selectedRelation === id));
         const node = this.model.nodes.get(this.selectedId);
         const disabled: Record<string, boolean> = {
             relation: !node || node.virtual,
-            summary: !this.summaryFrom && (!node || !getListMindmapSummaryRange(this.model, node.id, node.id).length),
+            summary: false,
             style: !node && !this.selectedRelation && !this.selectedEdge,
         };
         Object.keys(disabled).forEach((key) => {
@@ -1672,9 +1903,10 @@ export class ListMindmapView {
             }
         });
         this.buttons.get("relation")?.classList.toggle("block__icon--active", !!this.relationFrom);
-        this.buttons.get("summary")?.classList.toggle("block__icon--active", !!this.summaryFrom);
-        this.buttons.get("summary")?.setAttribute("aria-pressed", String(!!this.summaryFrom));
-        this.summaryStatus.hidden = !this.summaryFrom;
+        this.buttons.get("summary")?.classList.toggle("block__icon--active", this.summarySelecting);
+        this.buttons.get("summary")?.setAttribute("aria-pressed", String(this.summarySelecting));
+        this.summaryStatus.hidden = !this.summarySelecting || !this.summaryControls.hidden;
+        this.viewport.classList.toggle("mindmap-view__viewport--summary", this.summarySelecting);
         this.draw();
     }
 
@@ -1695,6 +1927,25 @@ export class ListMindmapView {
         }
     }
 
+    private async toggleSiblingFold(id: string) {
+        if (this.locked) {
+            return;
+        }
+        const states = getListMindmapSiblingFoldStates(this.model, id, this.folded);
+        if (!states.size) {
+            return;
+        }
+        const selectedId = this.selectedId;
+        this.finishRelationEdit?.(true);
+        this.cancelPointer();
+        if (!this.readOnly && !await this.options.onFoldSiblings?.(id)) {
+            return;
+        }
+        if (!this.destroyed) {
+            this.updateFoldStates(states, selectedId);
+        }
+    }
+
     private async expandToLevel(level: ListMindmapFoldTarget, selectedId = this.selectedId) {
         if (this.locked) {
             return;
@@ -1707,7 +1958,11 @@ export class ListMindmapView {
         if (this.destroyed) {
             return;
         }
-        getListMindmapFoldStates(this.model.root, level).forEach((collapsed, id) => {
+        this.updateFoldStates(getListMindmapFoldStates(this.model.root, level), selectedId);
+    }
+
+    private updateFoldStates(states: Map<string, boolean>, selectedId: string) {
+        states.forEach((collapsed, id) => {
             if (this.readOnly || this.model.nodes.get(id)?.virtual) {
                 this.folded.set(id, collapsed);
             } else {
@@ -1724,7 +1979,7 @@ export class ListMindmapView {
         }
         this.selectedId = selected.id;
         this.selectedSummary = undefined;
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.selectedRelation = undefined;
         this.selectedEdge = undefined;
         this.relationFrom = undefined;
@@ -1763,7 +2018,8 @@ export class ListMindmapView {
     private pinchStart = (event: TouchEvent) => {
         if (this.locked || event.touches.length !== 2 || Array.from(event.touches).some(touch =>
             !this.viewport.contains(touch.target as Node) ||
-            (touch.target as Element).closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing"))) {
+            ((touch.target as Element).closest("button, input, select, textarea, audio, video, iframe") ||
+                this.viewport.contains((touch.target as Element).closest(".mindmap-view__node--editing"))))) {
             this.pinch = undefined;
             return;
         }
@@ -1813,7 +2069,8 @@ export class ListMindmapView {
         this.suppressLinkClick = false;
         this.suppressPanContextMenu = false;
         const target = event.target as HTMLElement;
-        if (![0, 2].includes(event.button) || target.closest("button, input, select, textarea, audio, video, iframe, .mindmap-view__node--editing")) {
+        if (![0, 2].includes(event.button) || target.closest("button, input, select, textarea, audio, video, iframe") ||
+            this.viewport.contains(target.closest(".mindmap-view__node--editing"))) {
             return;
         }
         if (event.button === 0 && !this.panning && target.closest(".mindmap-view__summary")) {
@@ -1837,10 +2094,39 @@ export class ListMindmapView {
     }
 
     private beginPointer(event: PointerEvent, id?: string) {
-        if (this.summaryFrom && id && !this.readOnly && event.button === 0 && !this.panning) {
+        if (this.summarySelecting && !this.readOnly && event.button === 0 && !this.panning) {
             event.preventDefault();
             this.suppressLinkClick = true;
-            this.finishSummaryRange(id);
+            if (id) {
+                if (this.summaryFrom) {
+                    this.finishSummaryRange(id);
+                } else if (!this.model.nodes.get(id)?.virtual && getListMindmapSummaryParentID(this.model, id)) {
+                    if (this.summarySelected.has(id)) {
+                        this.summarySelected.delete(id);
+                    } else {
+                        this.summarySelected.add(id);
+                    }
+                    this.selectedId = undefined;
+                    this.previewSummarySelection();
+                }
+                this.cancelPointer();
+                return;
+            }
+            this.summaryFrom = undefined;
+            this.selectedId = undefined;
+            this.summarySelected.clear();
+            this.summaryRanges = [];
+            this.summaryControls.hidden = true;
+            this.options.host.focus({preventScroll: true});
+            this.pointer = {pointerId: event.pointerId, startX: event.clientX, startY: event.clientY,
+                x: this.offsetX, y: this.offsetY, moved: false, summary: true};
+            try {
+                this.pointerCapture = this.viewport;
+                this.viewport.setPointerCapture(event.pointerId);
+            } catch {
+                this.cancelPointer();
+            }
+            this.updateSelection();
             return;
         }
         if (this.panning || event.button === 2) {
@@ -1940,6 +2226,31 @@ export class ListMindmapView {
         }
         event.preventDefault();
         pointer.moved = true;
+        if (pointer.summary) {
+            const viewport = this.viewport.getBoundingClientRect();
+            const left = Math.min(pointer.startX, event.clientX);
+            const right = Math.max(pointer.startX, event.clientX);
+            const top = Math.min(pointer.startY, event.clientY);
+            const bottom = Math.max(pointer.startY, event.clientY);
+            this.summaryBox.hidden = false;
+            this.summaryBox.style.left = `${left - viewport.left}px`;
+            this.summaryBox.style.top = `${top - viewport.top}px`;
+            this.summaryBox.style.width = `${right - left}px`;
+            this.summaryBox.style.height = `${bottom - top}px`;
+            this.summarySelected.clear();
+            this.positions.forEach((position, id) => {
+                const node = this.model.nodes.get(id);
+                const x = viewport.left + this.offsetX + (position.x + position.width / 2) * this.scale;
+                const y = viewport.top + this.offsetY + (position.y - (id === this.model.root.id ? 1 : 3) +
+                    position.height / 2) * this.scale;
+                if (!node.virtual && getListMindmapSummaryParentID(this.model, id) &&
+                    x >= left && x <= right && y >= top && y <= bottom) {
+                    this.summarySelected.add(id);
+                }
+            });
+            this.previewSummarySelection();
+            return;
+        }
         if (pointer.relation) {
             const drag = pointer.relation;
             if (drag.endpoint) {
@@ -1949,6 +2260,20 @@ export class ListMindmapView {
                 drag.targetId = [...this.positions.values()].find(node => drag.handle.x >= node.x &&
                     drag.handle.x <= node.x + node.width && drag.handle.y >= node.y &&
                     drag.handle.y <= node.y + node.height)?.id;
+                const relation = this.model.metadata.relations.find(item => item.id === drag.id);
+                const original = this.positions.get(relation?.[drag.endpoint]);
+                const tolerance = (event.pointerType === "touch" ? 16 : 8) / this.scale;
+                // 真实节点命中优先于原节点的近边吸附，避免缩小时抢占换接目标。
+                if (original && (!drag.targetId || drag.targetId === original.id) &&
+                    drag.handle.x >= original.x - tolerance && drag.handle.x <= original.x + original.width + tolerance &&
+                    drag.handle.y >= original.y - tolerance && drag.handle.y <= original.y + original.height + tolerance) {
+                    drag.targetId = original.id;
+                    const anchor = relation[drag.endpoint === "from" ? "fromAnchor" : "toAnchor"];
+                    drag.anchor = {...anchor, ...projectMindmapRelationAnchor(original, drag.handle, drag.anchor || anchor)};
+                    drag.handle = getMindmapRelationAnchorPoint(original, drag.anchor, 3);
+                } else {
+                    drag.anchor = undefined;
+                }
             } else {
                 drag.offset = (drag.points[drag.segment].y === drag.points[drag.segment + 1].y ? dy : dx) / this.scale;
             }
@@ -2046,6 +2371,13 @@ export class ListMindmapView {
             return;
         }
         const {id, targetId, placement, moved} = pointer;
+        if (pointer.summary) {
+            this.suppressLinkClick = true;
+            pointer.summary = false;
+            this.cancelPointer();
+            this.previewSummarySelection();
+            return;
+        }
         if (pointer.relation) {
             if (moved) {
                 this.previewRouteDrag();
@@ -2054,8 +2386,19 @@ export class ListMindmapView {
             this.cancelPointer();
             const relation = this.model.metadata.relations.find(item => item.id === drag.id);
             if (moved && drag.endpoint && drag.valid && relation && !this.readOnly &&
-                relation[drag.endpoint] !== drag.targetId && this.canReconnectRelation(relation, drag.endpoint, drag.targetId)) {
-                this.options.onRelationChange?.(drag.id, {[drag.endpoint]: drag.targetId, route: undefined}, drag.original);
+                this.canReconnectRelation(relation, drag.endpoint, drag.targetId)) {
+                const anchorKey = drag.endpoint === "from" ? "fromAnchor" : "toAnchor";
+                if (relation[drag.endpoint] === drag.targetId) {
+                    if (drag.anchor && JSON.stringify(relation[anchorKey]) !== JSON.stringify(drag.anchor)) {
+                        this.options.onRelationChange?.(drag.id, {[anchorKey]: drag.anchor}, drag.original);
+                    }
+                } else {
+                    const patch: Partial<ListMindmapRelation> = {[drag.endpoint]: drag.targetId, route: undefined};
+                    if (relation[anchorKey]) {
+                        patch[anchorKey] = undefined;
+                    }
+                    this.options.onRelationChange?.(drag.id, patch, drag.original);
+                }
             } else if (moved && !drag.endpoint && Math.abs(drag.offset) > .01 && drag.valid && drag.route && !this.readOnly) {
                 this.options.onRelationChange?.(drag.id, {route: drag.route}, drag.original);
             }
@@ -2102,14 +2445,13 @@ export class ListMindmapView {
         let arrow: typeof lines[number];
         let distance = 12 / this.scale;
         lines.forEach(item => {
-            if (!item.end) {
-                return;
-            }
-            const current = Math.hypot(item.end.x - x, item.end.y - y);
-            if (current < distance) {
-                distance = current;
-                arrow = item;
-            }
+            item.arrows?.forEach(tip => {
+                const current = Math.hypot(tip.x - x, tip.y - y);
+                if (current < distance || (arrow && current === distance && item.id === this.selectedRelation)) {
+                    distance = current;
+                    arrow = item;
+                }
+            });
         });
         const hits = lines.filter(item => context.isPointInStroke(item.path, x, y));
         // 沿线移动或双击时保持已选关系，避免重新选中覆盖在上方的反向连接。
@@ -2128,7 +2470,7 @@ export class ListMindmapView {
             return;
         }
         this.selectedSummary = undefined;
-        this.summaryFrom = undefined;
+        this.cancelSummarySelection();
         this.selectedId = undefined;
         this.relationFrom = undefined;
         this.selectedRelation = line.relation ? line.id : undefined;
@@ -2153,6 +2495,13 @@ export class ListMindmapView {
         this.clearDrop();
         const pointer = this.pointer;
         this.pointer = undefined;
+        this.summaryBox.hidden = true;
+        if (pointer?.summary) {
+            this.summarySelected.clear();
+            this.summaryRanges = [];
+            this.summaryControls.hidden = true;
+            this.updateSelection();
+        }
         if (pointer && this.pointerCapture?.hasPointerCapture(pointer.pointerId)) {
             this.pointerCapture.releasePointerCapture(pointer.pointerId);
         }
@@ -2175,7 +2524,7 @@ export class ListMindmapView {
 
     private contentClick = (event: MouseEvent) => {
         const target = event.target as Element;
-        if (target.closest(".mindmap-view__node--editing")) {
+        if (this.viewport.contains(target.closest(".mindmap-view__node--editing"))) {
             return;
         }
         const link = target.closest<HTMLElement>('a[href], [data-type~="a"][data-href], [data-type~="block-ref"][data-id]');
@@ -2183,7 +2532,7 @@ export class ListMindmapView {
             return;
         }
         clearTimeout(this.linkTimer);
-        if (this.panning || this.suppressLinkClick || this.relationFrom || this.summaryFrom || event.detail > 1) {
+        if (this.panning || this.suppressLinkClick || this.relationFrom || this.summarySelecting || event.detail > 1) {
             event.preventDefault();
             return;
         }
@@ -2206,7 +2555,7 @@ export class ListMindmapView {
 
     private doubleClick = (event: MouseEvent) => {
         clearTimeout(this.linkTimer);
-        if (this.readOnly || this.relationFrom || this.summaryFrom || this.panning || this.pinching) {
+        if (this.readOnly || this.relationFrom || this.summarySelecting || this.panning || this.pinching) {
             return;
         }
         const target = event.target as HTMLElement;
@@ -2219,7 +2568,8 @@ export class ListMindmapView {
             this.editRelationLabel(event);
             return;
         }
-        if (target.closest("button, input, select, audio, video, iframe, .mindmap-view__node--editing")) {
+        if (target.closest("button, input, select, audio, video, iframe") ||
+            this.viewport.contains(target.closest(".mindmap-view__node--editing"))) {
             return;
         }
         const id = target.closest<HTMLElement>(".mindmap-view__node")?.dataset.mindmapId;
@@ -2239,12 +2589,16 @@ export class ListMindmapView {
         event.stopPropagation();
         this.cancelPointer();
         this.finishThen(() => {
+            const content = this.getContentHost(id);
+            if (!content?.isConnected || !this.model.nodes.has(id)) {
+                return;
+            }
             if (this.model.nodes.get(id)?.virtual) {
                 this.editRootTitle(id);
                 return;
             }
             this.setEditing(id);
-            this.options.onEdit?.(id, this.getContentHost(id));
+            this.options.onEdit?.(id, content);
         });
     };
 
@@ -2347,7 +2701,7 @@ export class ListMindmapView {
     }
 
     private wheel = (event: WheelEvent) => {
-        if (this.locked || (event.target as HTMLElement).closest(".mindmap-view__node--editing")) {
+        if (this.locked || this.viewport.contains((event.target as HTMLElement).closest(".mindmap-view__node--editing"))) {
             return;
         }
         if (this.pointer?.relation) {
@@ -2369,6 +2723,13 @@ export class ListMindmapView {
             this.zoomAt(this.scale * Math.exp(-delta * .01),
                 event.clientX - bounds.left, event.clientY - bounds.top);
             return;
+        }
+        if (!this.fullscreenMarker && !event.shiftKey && !event.deltaX && event.deltaY) {
+            const {left, top, right, bottom} = this.contentBounds();
+            if (left * this.scale + this.offsetX >= 0 && right * this.scale + this.offsetX <= this.viewport.clientWidth &&
+                top * this.scale + this.offsetY >= 0 && bottom * this.scale + this.offsetY <= this.viewport.clientHeight) {
+                return;
+            }
         }
         const next = this.boundedPan(this.offsetX - (event.shiftKey ?
             (event.deltaX ? event.deltaX : event.deltaY) * unitX : event.deltaX * unitX),
@@ -2449,7 +2810,7 @@ export class ListMindmapView {
         this.draw();
     }
 
-    public fit(maxScale = 2.5) {
+    public fit(maxScale = 1) {
         const width = this.viewport.clientWidth;
         const height = this.viewport.clientHeight;
         if (!this.positions.size || !width || !height) {
@@ -2459,8 +2820,8 @@ export class ListMindmapView {
         this.draw();
         const {left, top, right, bottom} = this.contentBounds();
         const insetTop = 16;
-        // 菜单打开前后保持相同的底部留白，避免选中节点时画布跳动。
-        const insetBottom = 42;
+        // 底部为菜单、外侧间距和横向滚动条留出空间，避免选中节点时画布跳动。
+        const insetBottom = 66;
         const availableWidth = Math.max(1, width - 48);
         const availableHeight = Math.max(1, height - insetTop - insetBottom);
         this.scale = Math.min(maxScale, Math.max(.15, Math.min(availableWidth / Math.max(1, right - left),
@@ -2469,6 +2830,27 @@ export class ListMindmapView {
         this.offsetY = insetTop + availableHeight / 2 - (top + bottom) * this.scale / 2;
         this.draw();
     }
+
+    private pasteImages = (event: ClipboardEvent) => {
+        if (event.defaultPrevented || this.readOnly || this.editingId || this.relationFrom || this.summarySelecting ||
+            !this.options.onPasteImages || !this.selectedId ||
+            (event.target as HTMLElement).isContentEditable ||
+            (event.target as HTMLElement).closest("input, textarea, select")) {
+            return;
+        }
+        const id = this.selectedId;
+        const node = this.model.nodes.get(id);
+        const files = Array.from(event.clipboardData?.files || []).filter(file => file.type.startsWith("image/"));
+        if (!node || node.virtual || files.length === 0) {
+            return;
+        }
+        event.preventDefault();
+        this.finishThen(() => {
+            if (!this.readOnly && this.selectedId === id && this.model.nodes.has(id)) {
+                this.options.onPasteImages(id, files);
+            }
+        });
+    };
 
     private keyDown = (event: KeyboardEvent) => {
         if (this.locked) {
@@ -2481,19 +2863,27 @@ export class ListMindmapView {
         const target = event.target as HTMLElement;
         const startingComposition = event.isComposing || event.key === "Process" || event.key === "Dead" ||
             event.keyCode === 229;
-        if (target.closest("input, textarea, select, audio, video, iframe, .mindmap-view__node--editing")) {
+        if (target.closest("input, textarea, select, audio, video, iframe") ||
+            this.viewport.contains(target.closest(".mindmap-view__node--editing"))) {
+            return;
+        }
+        if (this.summaryControls.contains(target) && target.closest("button") && event.key !== "Escape") {
             return;
         }
         if (this.pointer?.relation && event.key !== "Escape") {
             return;
         }
-        if (this.summaryFrom && event.key !== "Escape") {
+        if (this.summarySelecting && event.key !== "Escape") {
             if (startingComposition || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
                 return;
             }
             if (event.key === "Enter") {
-                this.finishSummaryRange(this.selectedId);
-            } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                if (this.summaryFrom) {
+                    this.finishSummaryRange(this.selectedId);
+                } else {
+                    void this.confirmSummarySelection();
+                }
+            } else if (this.summaryFrom && (event.key === "ArrowUp" || event.key === "ArrowDown")) {
                 const parent = this.model.nodes.get(this.model.nodes.get(this.summaryFrom)?.parentId);
                 const index = parent?.children.findIndex(node => node.id === this.selectedId) ?? -1;
                 const next = parent?.children[index + (event.key === "ArrowUp" ? -1 : 1)];
@@ -2628,6 +3018,7 @@ export class ListMindmapView {
             });
         } else if (!startingComposition && event.key === "Escape") {
             const draggingRoute = !!this.pointer?.relation;
+            const selectingSummary = this.summarySelecting;
             this.cancelPointer();
             if (draggingRoute) {
                 event.preventDefault();
@@ -2635,9 +3026,9 @@ export class ListMindmapView {
                 return;
             }
             this.relationFrom = undefined;
-            this.summaryFrom = undefined;
+            this.cancelSummarySelection();
             this.inspector.hidden = true;
-            if (this.fullscreenMarker) {
+            if (this.fullscreenMarker && !selectingSummary) {
                 this.exitFullscreen();
             }
             this.updateSelection();
@@ -2652,6 +3043,7 @@ export class ListMindmapView {
         if (this.inspector.hidden || this.readOnly) {
             return;
         }
+        const focusArrowDirection = this.inspector.querySelector("select") === document.activeElement;
         this.inspector.replaceChildren();
         const lineSelected = !!this.selectedRelation || !!this.selectedEdge || !!this.selectedSummary;
         this.inspector.classList.toggle("mindmap-view__inspector--node", !lineSelected);
@@ -2699,8 +3091,26 @@ export class ListMindmapView {
             }
             const change = (patch: Partial<ListMindmapRelation>) => this.options.onRelationChange?.(relation.id, patch);
             color(relation.color, value => change({color: value}));
+            const direction = createElement("select", "b3-select");
+            direction.setAttribute("aria-label", this.label("listMindmapArrowDirection"));
+            for (const [value, key] of [["forward", "listMindmapArrowForward"], ["reverse", "listMindmapArrowReverse"],
+                ["both", "listMindmapArrowBoth"], ["none", "listMindmapArrowNone"]]) {
+                const option = document.createElement("option");
+                option.value = value;
+                option.textContent = this.label(key);
+                direction.append(option);
+            }
+            direction.value = relation.arrowDirection || "forward";
+            direction.addEventListener("change", () => change({arrowDirection: direction.value as ListMindmapRelation["arrowDirection"]}));
+            this.inspector.append(direction);
+            if (focusArrowDirection) {
+                direction.focus({preventScroll: true});
+            }
             this.inspector.append(squareButton("edit", "iconEdit", () => this.editRelationLabel()),
                 squareButton("delete", "iconTrashcan", () => this.options.onRelationDelete?.(relation.id)));
+            if (relation.fromAnchor || relation.toAnchor) {
+                this.inspector.append(squareButton("listMindmapAnchorReset", "iconRefresh", () => this.resetRelationAnchors(relation.id)));
+            }
             return;
         }
         if (this.selectedEdge) {
@@ -2812,7 +3222,7 @@ export class ListMindmapView {
         this.resizeObserver.disconnect();
         this.disposers.forEach(dispose => dispose());
         this.exitFullscreen();
-        this.nodeElements.forEach((_element, id) => destroyTabsRender(this.getContentHost(id)));
+        this.nodeElements.forEach((_element, id) => this.destroyContentViews(id));
         this.nodeElements.clear();
         this.relationElements.clear();
         this.summaryElements.clear();

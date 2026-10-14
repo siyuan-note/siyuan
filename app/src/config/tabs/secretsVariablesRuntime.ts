@@ -7,7 +7,7 @@ export const secretsConfigApi = createConfigNamespaceApi<Config.ISecrets>({
     setConfig: (data) => {
         window.siyuan.config.secrets = data;
     },
-    apiPath: "/api/setting/setSecrets",
+
 });
 
 /** 变量库 Tab 命名空间：设置面板注册项 save */
@@ -17,5 +17,5 @@ export const variablesConfigApi = createConfigNamespaceApi<Config.IVariables>({
     setConfig: (data) => {
         window.siyuan.config.variables = data;
     },
-    apiPath: "/api/setting/setVariables",
+
 });

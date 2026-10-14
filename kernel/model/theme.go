@@ -33,16 +33,18 @@ const maxCSSVarResolveDepth = 64
 
 // 将文档中的 CSS 变量替换为具体的主题样式值
 func fillThemeStyleVar(tree *parse.Tree) {
+	confAppearanceSnapshot := Conf.LoadAppearance()
+
 	if nil == tree || nil == tree.Root {
 		return
 	}
 
-	isDarkMode := 1 == Conf.Appearance.Mode
+	isDarkMode := 1 == confAppearanceSnapshot.Mode
 	var themeStyles map[string]string
 	if isDarkMode {
-		themeStyles = getThemeStyleVar(Conf.Appearance.ThemeDark, true)
+		themeStyles = getThemeStyleVar(confAppearanceSnapshot.ThemeDark, true)
 	} else {
-		themeStyles = getThemeStyleVar(Conf.Appearance.ThemeLight, false)
+		themeStyles = getThemeStyleVar(confAppearanceSnapshot.ThemeLight, false)
 	}
 	inlineStyles, err := GetInlineStyles()
 	if err != nil {

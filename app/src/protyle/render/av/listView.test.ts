@@ -1,3 +1,4 @@
+import * as capabilities from "./capabilities";
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
@@ -23,7 +24,7 @@ const loadModule = (name: string) => {
     runInNewContext(ts.transpileModule(readFileSync(join(__dirname, `${name}.ts`), "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
     }).outputText, {
-        module, exports: module.exports, require: (id: string) => mocks[id] || {},
+        module, exports: module.exports, require: (id: string) => id === "./capabilities" || id === "../capabilities" ? capabilities : (mocks[id] || {}),
         window: {siyuan: {languages: {freezeDrag: "Freeze"}}},
     });
     return module.exports;

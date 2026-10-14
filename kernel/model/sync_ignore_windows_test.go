@@ -3,7 +3,6 @@ package model
 import (
 	"os"
 	"path/filepath"
-	"syscall"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -18,36 +17,21 @@ func TestSyncIgnoreReadFailureRecovers(t *testing.T) {
 	if err := os.WriteFile(p, []byte("/private/**/*"), 0644); err != nil {
 		t.Fatal(err)
 	}
-	ptr, err := syscall.UTF16PtrFromString(p)
-	if err != nil {
-		t.Fatal(err)
-	}
-	h, err := syscall.CreateFile(ptr, syscall.GENERIC_READ, syscall.FILE_SHARE_WRITE|syscall.FILE_SHARE_DELETE,
-		nil, syscall.OPEN_EXISTING, syscall.FILE_ATTRIBUTE_NORMAL, 0)
-	if err != nil {
-		t.Fatal(err)
-	}
-	closed := false
-	defer func() {
-		if !closed {
-			syscall.CloseHandle(h)
-		}
-	}()
-	if _, err = os.Stat(p); err != nil {
-		t.Fatal(err)
-	}
+	invalidateSyncIgnoreRules(p)
+	t.Cleanup(func() { invalidateSyncIgnoreRules(p) })
+	release := lockFirstByteForTest(t, p)
 	if _, matcher, loadErr := getSyncIgnoreRules(); loadErr == nil || matcher != nil {
-		t.Fatal("unreadable rules must return an error without a matcher")
+		t.Fatalf("unreadable rules must return an error without a matcher: error=%v, matcher=%v", loadErr, matcher)
 	}
 	if !PathsAffectSync(filepath.Join(util.DataDir, "private", "secret.txt")) {
 		t.Fatal("read failure must conservatively schedule sync")
 	}
-	if err = syscall.CloseHandle(h); err != nil {
-		t.Fatal(err)
+	release()
+	if data, err := os.ReadFile(p); err != nil || string(data) != "/private/**/*" {
+		t.Fatalf("locked read changed ignore rules: %q, %v", data, err)
 	}
-	closed = true
 	_, matcher := mustSyncIgnoreRules(t)
 	if !matcher.MatchesPath("/private/secret.txt") {
-		t.Fatal("rules did not recover after the sharing violation ended")
+		t.Fatal("rules did not recover after the read lock ended")
 	}
 }

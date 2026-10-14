@@ -1,0 +1,94 @@
+# 适用于 PDF.js v6.4.299（d0991a0d5）。后续升级时需迁移并运行 PDF 标注交互测试。
+# 在对应版本的 PDF.js 源码目录中使用 git apply 应用本补丁，再运行 gulp minified-legacy。
+# 同步生成的 pdf.min.mjs 和 pdf.worker.min.mjs；仅在思源文字层中启用 separateWords。
+--- a/src/display/api.js
++++ b/src/display/api.js
+@@ -1147,6 +1147,7 @@
+  * @typedef {object} getTextContentParameters
+  * @property {boolean} [includeMarkedContent] - When true include marked
+  *   content items in the items array of TextContent. The default is `false`.
++ * @property {boolean} [separateWords] - 保留横排英文单词的独立位置，默认关闭。
+  * @property {boolean} [disableNormalization] - When true the text is *not*
+  *   normalized in the worker-thread. The default is `false`.
+  */
+@@ -1737,6 +1738,7 @@
+   streamTextContent({
+     includeMarkedContent = false,
+     disableNormalization = false,
++    separateWords = false,
+   } = {}) {
+     const TEXT_CONTENT_CHUNK_SIZE = 100;
+ 
+@@ -1747,6 +1749,7 @@
+         pageIndex: this._pageIndex,
+         includeMarkedContent: includeMarkedContent === true,
+         disableNormalization: disableNormalization === true,
++        separateWords: separateWords === true,
+       },
+       {
+         highWaterMark: TEXT_CONTENT_CHUNK_SIZE,
+--- a/src/core/worker.js
++++ b/src/core/worker.js
+@@ -983,7 +983,7 @@
+     handler.on(
+       "GetTextContent",
+       function (
+-        { pageId, pageIndex, includeMarkedContent, disableNormalization },
++        { pageId, pageIndex, includeMarkedContent, disableNormalization, separateWords },
+         sink
+       ) {
+         pdfManager.getPage(pageId).then(function (page) {
+@@ -997,6 +997,7 @@
+               sink,
+               includeMarkedContent,
+               disableNormalization,
++              separateWords,
+             })
+             .then(
+               () => {
+--- a/src/core/document.js
++++ b/src/core/document.js
+@@ -676,6 +676,7 @@
+     task,
+     includeMarkedContent,
+     disableNormalization,
++    separateWords = false,
+     sink,
+     intersector = null,
+   }) {
+@@ -701,6 +702,7 @@
+       resources,
+       includeMarkedContent,
+       disableNormalization,
++      separateWords,
+       sink,
+       viewBox: this.view,
+       lang,
+--- a/src/core/evaluator.js
++++ b/src/core/evaluator.js
+@@ -2406,6 +2406,7 @@
+     viewBox,
+     lang = null,
+     disableNormalization = false,
++    separateWords = false,
+     keepWhiteSpace = false,
+     prevRefs = null,
+     intersector = null,
+@@ -3128,6 +3129,9 @@
+ 
+     function addFakeSpaces(width, transf, textOrientation) {
+       if (
++        // 保留英文词间的真实间距，不改变双向文字和竖排文字的合并顺序。
++        !(separateWords && !textContentItem.vertical &&
++          /^[\x20-\x7e]+$/.test(textContentItem.str.join(""))) &&
+         textOrientation * textContentItem.spaceInFlowMin <= width &&
+         width <= textOrientation * textContentItem.spaceInFlowMax
+       ) {
+@@ -3477,6 +3481,7 @@
+                     viewBox,
+                     lang,
+                     disableNormalization,
++                    separateWords,
+                     keepWhiteSpace,
+                     prevRefs: seenRefs,
+                   })

@@ -4,6 +4,7 @@ import {runInNewContext} from "node:vm";
 import {it} from "node:test";
 import * as assert from "node:assert/strict";
 import * as ts from "typescript";
+import {DATABASE_ROW_COMMANDS} from "../../command/databaseRowNavigation";
 
 it("does not consume the desktop tab menu binding on mobile", () => {
     const calls: string[] = [];
@@ -15,7 +16,9 @@ it("does not consume the desktop tab menu binding on mobile", () => {
         "../../boot/globalEvent/commonHotkey": {filterHotkey: () => false},
         "../../protyle/util/hotKey": {matchHotKey: () => true},
         "../../command/executor": {execByCommand: () => calls.push("native")},
-        "../editor": {getCurrentEditor: () => ({protyle: {toolbar: {}}})},
+        "../../command/databaseRowShortcut": {handleDatabaseRowShortcut: () => false},
+        "../../command/databaseRowNavigation": {DATABASE_ROW_COMMANDS},
+        "../editor": {getCurrentEditor: () => ({protyle: {toolbar: {}, element: {contains: () => false}}})},
         "../../command/shortcutRuntime": {dispatchPluginShortcut: () => calls.push("plugin")},
     };
     runInNewContext(source, {

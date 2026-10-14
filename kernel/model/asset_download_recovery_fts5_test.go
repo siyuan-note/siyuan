@@ -113,7 +113,7 @@ func TestAssetDownloadRecoveryUpdatesDocumentCache(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	scope, err := dejavu.ReadAssetDownloadScope(assetDownloadStatePath(), Conf.Repo.Key)
+	scope, err := dejavu.ReadAssetDownloadScope(assetDownloadStatePath(), Conf.Repo.Load().Key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func TestAssetDownloadRecoveryUpdatesDocumentCache(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	store, err := dejavu.NewStore(t.TempDir(), Conf.Repo.Key)
+	store, err := dejavu.NewStore(t.TempDir(), Conf.Repo.Load().Key)
 	if err != nil {
 		t.Fatal(err)
 	}

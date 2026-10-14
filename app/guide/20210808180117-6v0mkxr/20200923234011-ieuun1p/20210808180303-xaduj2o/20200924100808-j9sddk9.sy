@@ -6,7 +6,7 @@
 		"id": "20200924100808-j9sddk9",
 		"title": "Import and Export",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261002211013"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220317223639-oaxmz7d",
-				"updated": "20260803163440"
+				"updated": "20261002211013"
 			},
 			"Children": [
 				{
@@ -30,7 +30,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185728-as165rt",
-				"updated": "20260803163440"
+				"updated": "20261002211013"
 			},
 			"Children": [
 				{
@@ -50,6 +50,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "SiYuan supports importing Markdown files. So if you need to import data from other note-taking software, please convert the data into Markdown files first."
+				}
+			]
+		},
+		{
+			"ID": "20261002211013-n0y2i86",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002211013-n0y2i86",
+				"updated": "20261002211013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When importing Markdown, footnote definitions such as [^note]: become separate numbered list items, and references such as [^note] become superscript block references. Click a reference to open its definition, and use the definition’s backlinks to return to the referring blocks. Multiple paragraphs in a definition stay in the same list item. Undefined footnotes do not become block references. Code examples and escaped footnote syntax remain literal text."
 				}
 			]
 		},

@@ -410,6 +410,9 @@ func ConstructBroadcastChannel(channel string) *BroadcastChannel {
 		return util.IsSessionOriginAllowedRequest(r)
 	}
 	websocket.Config.MaxMessageSize = 1024 * 1024 * 128 // 128 MiB
+	websocket.HandleError(func(s *melody.Session, err error) {
+		util.LogWebSocketError(s, channel, err)
+	})
 
 	// broadcast string message to other session
 	websocket.HandleMessage(func(s *melody.Session, msg []byte) {

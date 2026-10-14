@@ -162,7 +162,14 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 	}
 
 	filePath := filepath.Join(util.DataDir, box.ID, p)
-	ret = filesys.DocIAL(filePath)
+	var readErr error
+	ret, readErr = filesys.DocIAL(filePath)
+	if readErr != nil && !errors.Is(readErr, filesys.ErrInvalidDocIAL) {
+		if !errors.Is(readErr, os.ErrNotExist) {
+			logging.LogWarnf("read document properties [%s] failed: %s", filePath, readErr)
+		}
+		return nil
+	}
 	if 1 > len(ret) {
 		// 目录枚举后文档可能已被删除，不将不存在的文件视为损坏。
 		if _, statErr := os.Stat(filePath); errors.Is(statErr, os.ErrNotExist) {
@@ -203,6 +210,8 @@ func (box *Box) moveCorruptedData(filePath string) {
 }
 
 func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[string]string) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	ret = []map[string]string{}
 	var results []searchDocResult
 
@@ -268,7 +277,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 		keywords := strings.Fields(keyword)
 		if 0 < len(keywords) {
 			for _, box := range boxes {
-				if containsSearchDocKeyword(box.Name, keywords, Conf.Search.CaseSensitive) {
+				if containsSearchDocKeyword(box.Name, keywords, confSearchSnapshot.CaseSensitive) {
 					data := map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon}
 					if flashcard {
 						newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
@@ -279,12 +288,12 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 						data["dueFlashcardCount"] = strconv.Itoa(dueFlashcardCount)
 						data["flashcardCount"] = strconv.Itoa(flashcardCount)
 					}
-					results = append(results, searchDocResult{data: data, exact: isExactSearchDocMatch(box.Name, keyword, Conf.Search.CaseSensitive)})
+					results = append(results, searchDocResult{data: data, exact: isExactSearchDocMatch(box.Name, keyword, confSearchSnapshot.CaseSensitive)})
 				}
 			}
 
-			condition, args := buildSearchDocsCondition(keywords, excludeIDs, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo)
-			rootBlocks = queryRootBlocks(condition, keyword, Conf.Search.Limit, args...)
+			condition, args := buildSearchDocsCondition(keywords, excludeIDs, confSearchSnapshot.Name, confSearchSnapshot.Alias, confSearchSnapshot.Memo)
+			rootBlocks = queryRootBlocks(condition, keyword, confSearchSnapshot.Limit, args...)
 		} else {
 			for _, box := range boxes {
 				data := map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon}
@@ -322,7 +331,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 			data["dueFlashcardCount"] = strconv.Itoa(dueFlashcardCount)
 			data["flashcardCount"] = strconv.Itoa(flashcardCount)
 		}
-		results = append(results, searchDocResult{data: data, exact: isExactSearchDocBlockMatch(rootBlock, keyword, Conf.Search.CaseSensitive)})
+		results = append(results, searchDocResult{data: data, exact: isExactSearchDocBlockMatch(rootBlock, keyword, confSearchSnapshot.CaseSensitive)})
 	}
 
 	sortSearchDocResults(results)
@@ -466,7 +475,7 @@ func ResolveDocTreeSortMode(boxID, listPath string) (sortMode int, err error) {
 		}
 	}
 
-	sortMode = Conf.FileTree.Sort
+	sortMode = Conf.FileTree.Load().Sort
 	boxConf := box.GetConf()
 	if util.SortModeFileTree != boxConf.SortMode {
 		sortMode = boxConf.SortMode
@@ -641,6 +650,8 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes, quer
 // 加密笔记本打开文档时传入 boxID，blocktree/content 查询走加密 db；boxID 为空时 fall-through 全局 db。
 func GetDocInBox(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo bool, boxID string) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxIDOut, docPath string, isBacklinkExpand bool, keywords []string, headingNumbers map[string]string, docInfo *BlockInfo, err error) {
+	confEditorSnapshot := Conf.LoadEditor()
+
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/GetDoc")
 	//pprof.StartCPUProfile(cpuProfile)
@@ -758,8 +769,8 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	blockCount = tree.DocBlockCount()
 	if shouldReturnHeadingNumbers(mode, isBacklink) {
 		headingNumbers = map[string]string{}
-		if headingNumberEnabled(tree, Conf.Editor.HeadingNumber) {
-			headingNumbers = headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat)
+		if headingNumberEnabled(tree, confEditorSnapshot.HeadingNumber) {
+			headingNumbers = headingNumberLabels(tree, confEditorSnapshot.HeadingNumberFormat)
 		}
 	}
 	if ast.NodeDocument == node.Type {
@@ -795,7 +806,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 			childCount += treenode.CountBlockNodes(n)
 		}
 
-		if childCount > Conf.Editor.DynamicLoadBlocks {
+		if childCount > Conf.Editor.Load().DynamicLoadBlocks {
 			scroll = true
 			return ast.WalkStop
 		}
@@ -928,7 +939,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 						if ast.NodeCodeBlockCode == n.Type && !treenode.IsChartCodeBlockCode(n) {
 							// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
 							code := string(n.Tokens)
-							markedCode, matched := search.EncloseHighlightingRaw(code, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.CaseSensitive, false)
+							markedCode, matched := search.EncloseHighlightingRaw(code, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.Load().CaseSensitive, false)
 							if matched {
 								n.Tokens = gulu.Str.ToBytes(markedCode)
 								return ast.WalkContinue
@@ -1022,7 +1033,7 @@ func loadNodesByStartEnd(tree *parse.Tree, startID, endID string) (nodes []*ast.
 			break
 		}
 
-		if len(nodes) >= Conf.Editor.DynamicLoadBlocks {
+		if len(nodes) >= Conf.Editor.Load().DynamicLoadBlocks {
 			// 如果加载到指定数量的块则停止加载
 			break
 		}
@@ -1363,7 +1374,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 		// 改进链滴剪藏 https://github.com/siyuan-note/siyuan/issues/13117
 		enableLuteInlineSyntax(luteEngine)
 	}
-	dom := luteEngine.Md2BlockDOM(md, false)
+	dom := markdownWithFootnotes2BlockDOM(luteEngine, md)
 	titleEmpty := false
 	if nil != arg {
 		if titleEmptyArg, ok := arg["titleEmpty"]; ok {
@@ -1372,7 +1383,6 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	}
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id, titleEmpty)
 
-	nameValues := map[string]string{}
 	tags = strings.TrimSpace(tags)
 	tags = strings.ReplaceAll(tags, "，", ",")
 	tagArray := strings.Split(tags, ",")
@@ -1381,8 +1391,9 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 		tmp = append(tmp, strings.TrimSpace(tag))
 	}
 	tags = strings.Join(tmp, ",")
-	nameValues["tags"] = tags
-	SetBlockAttrs(retID, nameValues)
+	if tags != "" {
+		SetBlockAttrs(retID, map[string]string{"tags": tags})
+	}
 
 	FlushTxQueue()
 
@@ -1415,14 +1426,16 @@ func applyRequestedDocCreateTemplate(arg map[string]any, markdown, docID string)
 
 // ResolveDocCreateSaveLocation 按笔记本配置和全局配置解析新建文档的存放位置。
 func ResolveDocCreateSaveLocation(currentBoxID string) (boxID, pathTemplate string) {
-	pathTemplate = Conf.FileTree.DocCreateSavePath
+	confFileTreeReadSnapshot := Conf.LoadFileTree()
+
+	pathTemplate = confFileTreeReadSnapshot.DocCreateSavePath
 	if box := Conf.Box(currentBoxID); nil != box {
 		boxConf := box.GetConf()
 		boxID = boxConf.DocCreateSaveBox
 		pathTemplate = boxConf.DocCreateSavePath
 	}
 	if "" == boxID && "" == pathTemplate {
-		boxID = Conf.FileTree.DocCreateSaveBox
+		boxID = confFileTreeReadSnapshot.DocCreateSaveBox
 	}
 	if "" != boxID && nil == Conf.Box(boxID) {
 		boxID = currentBoxID
@@ -1431,7 +1444,7 @@ func ResolveDocCreateSaveLocation(currentBoxID string) (boxID, pathTemplate stri
 		boxID = currentBoxID
 	}
 	if "" == pathTemplate {
-		pathTemplate = Conf.FileTree.DocCreateSavePath
+		pathTemplate = confFileTreeReadSnapshot.DocCreateSavePath
 	}
 	return
 }
@@ -1443,6 +1456,15 @@ const (
 )
 
 func CreateDailyNote(boxID string) (p string, existed bool, err error) {
+	return createDailyNoteAt(boxID, time.Now(), false)
+}
+
+// CreateDailyNoteAt 按指定日期创建日记，复用日期属性指向的现有文档。
+func CreateDailyNoteAt(boxID string, date time.Time) (p string, existed bool, err error) {
+	return createDailyNoteAt(boxID, date, true)
+}
+
+func createDailyNoteAt(boxID string, now time.Time, findByDate bool) (p string, existed bool, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1453,31 +1475,16 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	}
 
 	boxConf := box.GetConf()
-	if "" == boxConf.DailyNoteSavePath || "/" == boxConf.DailyNoteSavePath {
-		err = errors.New(Conf.Language(49))
-		return
-	}
-
-	hPath, err := RenderGoTemplateInBox(boxConf.DailyNoteSavePath, box.ID)
+	hPath, existTree, err := resolveDailyNote(box, now, findByDate)
 	if err != nil {
 		return
 	}
 
-	FlushTxQueue()
-
-	hPath = util.TrimSpaceInPath(hPath)
-	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
-	if nil != existRoot {
+	date := now.Format("20060102")
+	if existTree != nil {
 		existed = true
-		p = existRoot.Path
-
-		tree, loadErr := LoadTreeByBlockID(existRoot.RootID)
-		if nil != loadErr {
-			logging.LogWarnf("load tree by block id [%s] failed: %v", existRoot.RootID, loadErr)
-			return
-		}
+		tree := existTree
 		p = tree.Path
-		date := time.Now().Format("20060102")
 		if tree.Root.IALAttr(DailyNoteAttrPrefix+date) == "" {
 			tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
 			if err = indexWriteTreeUpsertQueue(tree); err != nil {
@@ -1494,7 +1501,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 
 	if "" != boxConf.DailyNoteTemplatePath {
 		sql.FlushQueue()
-		if renderErr := applyDocContentTemplate(boxConf.DailyNoteTemplatePath, id); nil != renderErr {
+		if renderErr := applyDocContentTemplateAt(boxConf.DailyNoteTemplatePath, id, &now); nil != renderErr {
 			logging.LogWarnf("render daily note template [%s] failed: %s", boxConf.DailyNoteTemplatePath, renderErr)
 		}
 	}
@@ -1508,7 +1515,6 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 	p = tree.Path
-	date := time.Now().Format("20060102")
 	tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
 	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return
@@ -1754,7 +1760,7 @@ func moveDocs(fromPaths []string, toBoxID, toPath string, callback any, placeByC
 	for _, fromPath := range fromPaths {
 		fromBox := pathsBoxes[fromPath]
 		childDepth := util.GetChildDocDepth(filepath.Join(util.DataDir, fromBox.ID, fromPath))
-		if depth := strings.Count(toPath, "/") + childDepth; 6 < depth && !Conf.FileTree.AllowCreateDeeper {
+		if depth := strings.Count(toPath, "/") + childDepth; 6 < depth && !Conf.FileTree.Load().AllowCreateDeeper {
 			err = errors.New(Conf.Language(118))
 			return
 		}
@@ -1786,6 +1792,8 @@ func moveDocs(fromPaths []string, toBoxID, toPath string, callback any, placeByC
 	refresh := newMoveDocsRefresh()
 	movedDocs := make([]moveDocResult, 0, len(fromPaths))
 	defer func() {
+		confFileTreeSnapshot := Conf.LoadFileTree()
+
 		if 0 < len(movedDocs) {
 			// 部分移动失败时也保存已完成文档的整组顺序，再通知前端刷新。
 			if placeByConf {
@@ -1794,7 +1802,7 @@ func moveDocs(fromPaths []string, toBoxID, toPath string, callback any, placeByC
 					ids = append(ids, util.GetTreeID(moved.NewPath))
 				}
 				position := "after"
-				if Conf.FileTree.CreateDocAtTop != nil && *Conf.FileTree.CreateDocAtTop {
+				if confFileTreeSnapshot.CreateDocAtTop != nil && *confFileTreeSnapshot.CreateDocAtTop {
 					position = "before"
 				}
 				if sortErr := toBox.placeDocsInSiblingOrder(strings.TrimSuffix(toPath, ".sy"), ids, "", position); sortErr != nil {
@@ -2078,10 +2086,13 @@ func RemoveDocs(paths []string) error {
 }
 
 func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	diagnostic := util.WatchOperation("remove document", "load document")
+	defer diagnostic.Finish()
 	ret, err = filesys.LoadTree(box.ID, p, luteEngine)
 	if err != nil || nil == ret {
 		return nil, ErrBlockNotFound
 	}
+	diagnostic.Stage("prepare local assets")
 	if !IsEncryptedBox(box.ID) {
 		assetParent := filepath.Dir(filepath.Join(util.DataDir, box.ID, p))
 		if err = EnsureAssetPrefixLocal(assetParent); err != nil {
@@ -2089,6 +2100,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		}
 	}
 
+	diagnostic.Stage("backup document history")
 	historyDir, err := getHistoryDir(HistoryOpDelete)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
@@ -2103,12 +2115,14 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	}
 
 	// 加密笔记本的 assets 不提升到全局
+	diagnostic.Stage("copy document assets")
 	if !IsEncryptedBox(box.ID) {
 		if err = copyDocAssetsToDataAssets(box.ID, p); err != nil {
 			return nil, err
 		}
 	}
 
+	diagnostic.Stage("collect child documents")
 	removeIDs := treenode.RootChildIDs(ret.ID)
 	dir := path.Dir(p)
 	childrenDir := path.Join(dir, ret.ID)
@@ -2121,6 +2135,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	}
 	existChildren := box.Exist(childrenDir)
 	if existChildren {
+		diagnostic.Stage("backup child document history")
 		absChildrenDir := filepath.Join(util.DataDir, ret.Box, childrenDir)
 		historyPath = filepath.Join(historyDir, ret.Box, childrenDir)
 		if err = filelock.Copy(absChildrenDir, historyPath); err != nil {
@@ -2128,10 +2143,12 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 			return
 		}
 	}
+	diagnostic.Stage("backup database bindings")
 	allRemoveRootIDs := []string{ret.ID}
 	allRemoveRootIDs = append(allRemoveRootIDs, removeIDs...)
 	allRemoveRootIDs = gulu.Str.RemoveDuplicatedElem(allRemoveRootIDs)
 	removeTrees := make([]*parse.Tree, 0, len(allRemoveRootIDs))
+	deletedBindings := map[string]map[string]struct{}{}
 	for _, rootID := range allRemoveRootIDs {
 		removeTree := ret
 		if rootID != ret.ID {
@@ -2145,13 +2162,33 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 			return
 		}
 		removeTrees = append(removeTrees, removeTree)
+		collectDeletedAttributeViewBlocks(removeTree.Root, true, deletedBindings)
 	}
+	boundDeletion := &Transaction{}
+	defer func() { boundDeletion.finishAttributeViewMutation(err != nil) }()
+	avBoxID := ""
+	if IsEncryptedBox(box.ID) {
+		avBoxID = box.ID
+	}
+	before, after, prepareErr := boundDeletion.prepareDeletedBoundAttributeViewBlocks(deletedBindings, avBoxID)
+	if prepareErr != nil {
+		return ret, prepareErr
+	}
+	diagnostic.Stage("index document history")
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+	diagnostic.Stage("remove database bindings")
+	if err = boundDeletion.saveAttributeViewFieldChanges(&attributeViewFieldsSnapshot{boxID: avBoxID}, before, after); err != nil {
+		return
+	}
+	var nonEditorTx *Transaction
 	for _, removeTree := range removeTrees {
 		removedRootPaths[removeTree.ID] = removeTree.Path
-		syncDelete2AvBlock(removeTree.Root, removeTree, true, nil)
+		for _, id := range nonEditorTx.syncDelete2Block(removeTree.Root, removeTree) {
+			ReloadAttrView(id)
+		}
 	}
 
+	diagnostic.Stage("remove document files")
 	if existChildren {
 		if err = box.Remove(childrenDir); err != nil {
 			logging.LogErrorf("remove children dir [%s%s] failed: %s", box.ID, childrenDir, err)
@@ -2164,12 +2201,15 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		return
 	}
 	logging.LogInfof("removed doc [%s%s]", box.ID, p)
+	boundDeletion.finishAttributeViewMutation(false)
 	removedPins := map[string]bool{}
 	for rootID := range removedRootPaths {
 		removedPins[rootID] = true
 	}
+	diagnostic.Stage("update pinned documents")
 	maintainPinnedDocs(removedPins, "", "")
 
+	diagnostic.Stage("update document order")
 	box.removeSort(removeIDs)
 	if "/" != dir {
 		others, err := os.ReadDir(filepath.Join(util.DataDir, box.ID, dir))
@@ -2178,6 +2218,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		}
 	}
 
+	diagnostic.Stage("invalidate document caches")
 	for rootID, treePath := range removedRootPaths {
 		cache.RemoveTreeData(rootID)
 		cache.RemoveDocIAL(treePath)
@@ -2185,9 +2226,12 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	for _, blockTree := range removedBlockTrees {
 		cache.RemoveBlockIAL(blockTree.ID)
 	}
+	diagnostic.Stage("remove block tree index")
 	treenode.RemoveBlockTreesByPathPrefix(box.ID, childrenDir)
+	diagnostic.Stage("queue database index deletion")
 	sql.RemoveTreePathQueue(ret.Box, childrenDir)
 
+	diagnostic.Stage("notify document deletion")
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]any{
 		"ids": removeIDs,
@@ -2236,10 +2280,26 @@ func renameDoc0(boxID, p, title string) (err error) {
 		return
 	}
 
+	titleChanged, emptyAttrUpdated, err := prepareDocRename(tree, title)
+	if err != nil {
+		return
+	}
+	if titleChanged || emptyAttrUpdated {
+		if err = renameWriteJSONQueue(tree); err != nil {
+			return
+		}
+	}
+	publishDocRename(tree, titleChanged, emptyAttrUpdated)
+	return
+}
+
+// 规范化标题及空标题标记，由调用方选择普通写入或基于扫描源的条件写入。
+func prepareDocRename(tree *parse.Tree, title string) (titleChanged, emptyAttrUpdated bool, err error) {
 	title = normalizeDocTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
-		return errors.New(Conf.Language(106))
+		err = errors.New(Conf.Language(106))
+		return
 	}
 
 	var isEmpty bool
@@ -2248,9 +2308,8 @@ func renameDoc0(boxID, p, title string) (err error) {
 		isEmpty = true
 	}
 	// 先规范化输入得到实际会存储的标题，再与旧标题比较
-	titleChanged := tree.Root.IALAttr("title") != title
+	titleChanged = tree.Root.IALAttr("title") != title
 
-	var emptyAttrUpdated bool
 	if titleChanged {
 		tree.HPath = path.Join(path.Dir(tree.HPath), title)
 		tree.Root.SetIALAttr("title", title)
@@ -2271,18 +2330,21 @@ func renameDoc0(boxID, p, title string) (err error) {
 
 	if titleChanged || emptyAttrUpdated {
 		tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-		if err = renameWriteJSONQueue(tree); err != nil {
-			return
-		}
+	}
+	return
+}
 
+// 在标题持久化成功后广播变更并刷新引用，避免失败的条件写入发布过期标题。
+func publishDocRename(tree *parse.Tree, titleChanged, emptyAttrUpdated bool) {
+	if titleChanged || emptyAttrUpdated {
 		refText := getNodeRefText(tree.Root)
 		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
 		evt.Data = map[string]any{
-			"box":     boxID,
+			"box":     tree.Box,
 			"id":      tree.Root.ID,
-			"path":    p,
-			"title":   title,
-			"empty":   isTitleEmpty,
+			"path":    tree.Path,
+			"title":   tree.Root.IALAttr("title"),
+			"empty":   tree.Root.IALAttr(NodeAttrTitleEmpty) == "true",
 			"refText": refText,
 		}
 		util.PushEvent(evt)
@@ -2358,7 +2420,7 @@ func validateCreateDoc(boxID, p, title string, titleEmpty bool) (ret *createDocV
 		hPath = path.Join(parentTree.HPath, title)
 	}
 
-	if depth := strings.Count(p, "/"); 7 < depth && !Conf.FileTree.AllowCreateDeeper {
+	if depth := strings.Count(p, "/"); 7 < depth && !Conf.FileTree.Load().AllowCreateDeeper {
 		return nil, errors.New(Conf.Language(118))
 	}
 	if box.Exist(p) {
@@ -2466,7 +2528,7 @@ func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
 		return
 	}
 	PerformTransactions(&[]*Transaction{transaction})
-	FlushTxQueue()
+	transaction.WaitForCommit()
 	return
 }
 
@@ -2481,26 +2543,49 @@ func normalizeDocTitle(title string) string {
 }
 
 func readSortConfMap(confPath string) (map[string]int, error) {
+	ret, _, err := readSortConfMapData(confPath)
+	return ret, err
+}
+
+func readSortConfMapData(confPath string) (map[string]int, []byte, error) {
+	sortConfRecoveryLock.Lock()
+	defer sortConfRecoveryLock.Unlock()
+	if err := recoverSortConfAppend(confPath); err != nil {
+		return nil, nil, err
+	}
+
 	if !filelock.IsExist(confPath) {
-		return map[string]int{}, nil
+		return map[string]int{}, nil, nil
 	}
 	data, err := filelock.ReadFile(confPath)
 	if err != nil {
 		logging.LogErrorf("read sort conf [%s] failed: %s", confPath, err)
-		return nil, err
+		return nil, nil, err
 	}
 	ret := map[string]int{}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogWarnf("unmarshal sort conf [%s] failed: %s", confPath, err)
-		return nil, err
+	err = gulu.JSON.UnmarshalJSON(data, &ret)
+	if err != nil || ret == nil {
+		logging.LogWarnf("unmarshal sort conf [%s] failed: %v", confPath, err)
+		_, err = recoverSortConfMap(confPath, data)
+		if err != nil {
+			return nil, nil, err
+		}
+		data, err = filelock.ReadFile(confPath)
+		if err != nil {
+			return nil, nil, err
+		}
+		ret = map[string]int{}
+		if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil || ret == nil {
+			return nil, nil, fmt.Errorf("read recovered sort conf [%s]: %v", confPath, err)
+		}
 	}
-	if ret == nil {
-		return nil, fmt.Errorf("invalid sort conf [%s]: expected an object", confPath)
-	}
-	return ret, nil
+	return ret, data, nil
 }
 
 func writeSortConfMap(confPath string, fullSortIDs map[string]int) error {
+	if err := recoverSortConfAppend(confPath); err != nil {
+		return err
+	}
 	data, err := gulu.JSON.MarshalJSON(fullSortIDs)
 	if err != nil {
 		logging.LogErrorf("marshal sort conf [%s] failed: %s", confPath, err)
@@ -3088,7 +3173,7 @@ func (box *Box) removeSort(ids []string) {
 }
 
 func (box *Box) setSortByConf(parentPath, id string) {
-	if *Conf.FileTree.CreateDocAtTop {
+	if *Conf.FileTree.Load().CreateDocAtTop {
 		box.addMinSort(parentPath, id)
 	} else {
 		box.addMaxSort(parentPath, id)
@@ -3119,7 +3204,7 @@ func (box *Box) placeDocsInSiblingOrder(parentPath string, ids []string, targetI
 		return fmt.Errorf("create conf dir failed: %w", err)
 	}
 	confPath := filepath.Join(confDir, "sort.json")
-	fullSortIDs, err := readSortConfMap(confPath)
+	fullSortIDs, sortData, err := readSortConfMapData(confPath)
 	if nil != err {
 		fileTreeSortLock.Unlock()
 		return err
@@ -3160,6 +3245,17 @@ func (box *Box) placeDocsInSiblingOrder(parentPath string, ids []string, targetI
 		}
 	}
 	orderedIDs = slices.Insert(orderedIDs, insertIndex, ids...)
+	if "" == targetID {
+		if additions, ok := newSiblingSortValues(currentIDs, ids, fullSortIDs, position); ok {
+			if err = appendSortConfMap(confPath, sortData, additions); err != nil {
+				fileTreeSortLock.Unlock()
+				return err
+			}
+			fileTreeSortLock.Unlock()
+			pushFiletreeSortChanged(additions)
+			return nil
+		}
+	}
 	sortIDs := make(map[string]int, len(orderedIDs))
 	for i, orderedID := range orderedIDs {
 		sortIDs[orderedID] = i + 1
@@ -3172,6 +3268,52 @@ func (box *Box) placeDocsInSiblingOrder(parentPath string, ids []string, targetI
 	fileTreeSortLock.Unlock()
 	pushFiletreeSortChanged(sortIDs)
 	return nil
+}
+
+// newSiblingSortValues 只为未配置排序值的新文档分配首尾位置，溢出时交由完整重排处理。
+func newSiblingSortValues(currentIDs, ids []string, fullSortIDs map[string]int, position string) (map[string]int, bool) {
+	if len(ids) == 0 || len(ids) > 512 {
+		return nil, false
+	}
+	moved := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		if _, exists := fullSortIDs[id]; exists || moved[id] {
+			return nil, false
+		}
+		moved[id] = true
+	}
+	minimum, maximum, found := 0, 0, false
+	for _, id := range currentIDs {
+		if moved[id] {
+			continue
+		}
+		value := fullSortIDs[id]
+		if !found {
+			minimum, maximum, found = value, value, true
+		} else {
+			minimum, maximum = min(minimum, value), max(maximum, value)
+		}
+	}
+	start := 1
+	if found {
+		maxInt := int(^uint(0) >> 1)
+		if "after" == position {
+			if maximum > maxInt-len(ids) {
+				return nil, false
+			}
+			start = maximum + 1
+		} else {
+			if minimum < -maxInt-1+len(ids) {
+				return nil, false
+			}
+			start = minimum - len(ids)
+		}
+	}
+	ret := make(map[string]int, len(ids))
+	for i, id := range ids {
+		ret[id] = start + i
+	}
+	return ret, true
 }
 
 func (box *Box) addSort(previousPath, id string) {

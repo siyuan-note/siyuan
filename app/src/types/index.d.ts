@@ -27,43 +27,9 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "common-menu-open" | "common-menu-closed"
 type TAVView = "table" | "list" | "gallery" | "kanban" | "calendar";
 type TAVAlign = "" | "left" | "center" | "right"
-type TAVDateFormat = "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"
-type TAVCol =
-    "text"
-    | "date"
-    | "number"
-    | "relation"
-    | "rollup"
-    | "select"
-    | "block"
-    | "mSelect"
-    | "url"
-    | "email"
-    | "phone"
-    | "mAsset"
-    | "template"
-    | "created"
-    | "updated"
-    | "checkbox"
-    | "lineNumber"
-type TAVFilterOperator =
-    "="
-    | "!="
-    | ">"
-    | ">="
-    | "<"
-    | "<="
-    | "Contains"
-    | "Does not contains"
-    | "Contains any item"
-    | "Does not contain any item"
-    | "Is empty"
-    | "Is not empty"
-    | "Starts with"
-    | "Ends with"
-    | "Is between"
-    | "Is true"
-    | "Is false"
+type TAVDateFormat = "" | "full" | "month-day-year" | "day-month-year" | "year-month-day" | "lunar"
+type TAVCol = import("./av").AVKeyType;
+type TAVFilterOperator = import("./av").AVFilterOperator;
 
 type TRecentDocsSort = "viewedAt" | "closedAt" | "openAt" | "created" | "updated"
 type TPublishAccessLevel = "public" | "protected" | "hidden" | "private" | "forbidden";
@@ -126,6 +92,7 @@ interface Window {
         };
         dispose(element: Element): void;
         getInstanceById(id: string): {
+            setTheme: (theme: string) => void
             resize: () => void
             clear: () => void
             getOption: () => { series: { type: string }[] }
@@ -137,13 +104,39 @@ interface Window {
         }): void;
     };
     MathJax: {
+        loader?: {
+            paths: {[key: string]: string}
+        }
+        output?: {
+            font: string
+            fontPath: string
+            linebreaks?: {
+                inline: boolean
+            }
+        }
+        options?: {
+            enableMenu: boolean
+            enableEnrichment: boolean
+            enableSpeech: boolean
+            enableBraille: boolean
+            enableExplorer: boolean
+            menuOptions?: {
+                settings: {
+                    enrich: boolean
+                    speech: boolean
+                    braille: boolean
+                }
+            }
+        }
         svg: {
             fontCache: string
         }
         startup?: {
-            promise: Promise<void>
+            promise?: Promise<void>
+            typeset?: boolean
         }
         tex2svg?(math: string, options: { display: boolean }): HTMLElement
+        tex2svgPromise?(math: string, options: { display: boolean }): Promise<HTMLElement>
     };
     hljs: {
         listLanguages(): string[];
@@ -162,7 +155,7 @@ interface Window {
             displayMode: boolean;
             output: string;
             macros: IObject;
-            trust: boolean;
+            trust: boolean | ((context: {command: string; url?: string; protocol?: string}) => boolean);
             strict: (errorCode: string) => "ignore" | "warn";
         }): string;
     };
@@ -170,7 +163,7 @@ interface Window {
     mermaidTidyTree: object[],
     mermaid: {
         initialize(options: any): void,
-        render(id: string, text: string): Promise<{ svg: string }>,
+        render(id: string, text: string, container?: HTMLElement): Promise<{ svg: string }>,
         registerExternalDiagrams(ex: object[]): Promise<void>,
         registerLayoutLoaders(layouts: object[]): void,
         registerIconPacks(options: {
@@ -185,6 +178,7 @@ interface Window {
     webkit: {
         nativeCallbacks: { [key: string]: (id: number) => void },
         messageHandlers: {
+            finishKeyboardComposition?: { postMessage: (data: string) => Promise<boolean> }
             saveExportFile: { postMessage: (url: string) => void }
             saveExportFileV2?: { postMessage: (data: {uri: string, requestID: string}) => void }
             openLink: { postMessage: (url: string) => void }
@@ -208,6 +202,7 @@ interface Window {
         }
     };
     htmlToImage: {
+        getFontEmbedCSS: (element: Element, options?: IHtmlToImageOptions) => Promise<string>
         toCanvas: (element: Element, options?: IHtmlToImageOptions) => Promise<HTMLCanvasElement>
         toBlob: (element: Element, options?: IHtmlToImageOptions) => Promise<Blob>
     };
@@ -216,6 +211,7 @@ interface Window {
     };
     siyuan: ISiyuan;
     JSAndroid: {
+        ready?: Promise<void>
         openAuthURL(url: string): void
         returnDesktop(): void
         openExternal(url: string): void
@@ -237,11 +233,14 @@ interface Window {
         getScreenWidthPx(): number
         exit(): void
         setWebViewFocusable(enable: boolean): void
+        getWordSelection?(text: string, start: number, end: number): string
+        prepareWordSelection?(word: string, startAdjust: number, endAdjust: number): boolean
         sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number
         cancelNotification(id: number): void
         logInputEvent?(details: string): void
     };
     JSHarmony: {
+        getSystemFonts?(): Promise<string>
         openAuthURL(url: string): void
         showKeyboard(): void
         hideKeyboard(): void
@@ -696,6 +695,12 @@ interface ISiyuan {
     isPublish?: boolean;
 }
 
+/**
+ * convertList 必须通过 /api/transactions 作为单笔、单操作事务提交，blockIDs 为选中的列表、列表项或文本块。
+ * data.type 为 heading、paragraph 或 remove；heading 的 level 为 1 至 6，其他类型忽略 level。
+ * data.recursively 仅展开同类型子列表；列表项绑定迁移到首块并保留行身份和字段，歧义绑定整批拒绝。
+ * 成功后 retData 返回 rootIDs、removedIDs 和 focusID；撤销状态由内核管理，无需提交 undoOperations。
+ */
 type IOperation = Exclude<import("./api").TransactionOperationRequest, {action: import("./api").UnknownTransactionAction}>;
 
 interface IAVFilterOperation {
@@ -752,6 +757,7 @@ interface ILayoutJSON extends ILayoutOptions {
     icon?: string
     rootId?: string
     databaseRowId?: string
+    databaseRow?: import("../protyle/render/av/openDatabaseRow").IDatabaseRowOpenData
     active?: boolean
     pin?: boolean
     isPreview?: boolean
@@ -791,6 +797,8 @@ interface ICommand {
 }
 
 interface IPluginData {
+    /** 内核已验证 plugin.json 的设置窗口运行声明；省略时不在设置窗口加载 */
+    settingsWindow?: boolean,
     displayName: string,
     name: string,
     js: string,
@@ -1138,6 +1146,7 @@ interface IAV {
     views: IAVView[];
     isMirror?: boolean;
     newItemTemplates?: IAVNewItemTemplate[];
+    /** 关联选择面板新建也使用此默认模板；名称不同时可选择模板名称或输入名称，其他模板配置均保留。 */
     defaultTemplateID?: string;
     customColors?: IAVCustomColor[];
     colorOrder?: string[];
@@ -1149,6 +1158,7 @@ interface IAV {
 
 interface IAVContextFilter {
     spec: 1;
+    /** 直接关联或目标为关联且显示原值/唯一值的汇总字段；汇总仅用于筛选，不回填新增条目 */
     keyID: string;
 }
 
@@ -1156,6 +1166,7 @@ interface IAVContextFilterField {
     id: string;
     name: string;
     icon: string;
+    /** 最终关联目标数据库的 ID；汇总字段返回关联目标，而非中间数据库 */
     targetAvID: string;
 }
 
@@ -1184,6 +1195,7 @@ interface IAVNewItemFieldValue {
 interface IAVNewItemTemplate {
     id: string;
     name: string;
+    /** 游离条目和文档条目均支持预设图标。 */
     icon?: string;
     targetType: TAVNewItemTarget;
     primaryKeyTemplate?: string;
@@ -1245,10 +1257,14 @@ interface IAVFieldView {
 interface IAVCalendarSettings {
     /**
      * 绑定一个 date、created 或 updated 字段；系统时间不支持通过日历拖动修改。
+     * date 字段设置显示模板时按模板结果排布，原始日期保持不变。
+     * 支持 YYYY-MM-DD、字段 dateFormat 指定的数字日期格式，以及当前语言的本地日期格式。
+     * 可附加 HH:mm[:ss]（以空格或 T 分隔），按日历请求时区解析，忽略首尾空白；斜杠日期不猜测日月顺序。
+     * 空值或无效结果不显示，也不进入待安排列表；计算日期不支持拖动、清空或按日期新建。
      * 空字符串表示未绑定；字段缺失或类型变化时保留绑定，日历返回空行，不自动改绑或回填日期。
      * createAttributeViewItem 的可选 calendarDate 是毫秒时间戳，仅支持绑定普通 date 字段的日历。
      * 指定时按全天日期覆盖模板中该字段的值，与模板其他字段及条目创建共用一个可撤销事务。
-     * 系统时间源拒绝指定 calendarDate；省略或传 null 时沿用常规创建流程。
+     * 系统时间源或带显示模板的日期字段拒绝指定 calendarDate；省略或传 null 时沿用常规创建流程。
      */
     dateKeyID: string;
     /** 可选单选字段，使用已有选项颜色；空字符串表示不使用字段颜色。 */
@@ -1377,6 +1393,7 @@ interface IAVSort {
 }
 
 interface IAVColumn {
+    attributePanelVisibility?: "" | "always" | "hide-empty" | "hide",
     width?: string,
     align?: TAVAlign,
     icon?: string,
@@ -1470,6 +1487,7 @@ interface IAVCellValue {
     block?: {
         content: string,
         id?: string,
+        /** 游离条目可独立设置图标；绑定条目与目标块共享图标，无图标的普通块在绑定时继承条目图标。 */
         icon?: string,
         refSubtype?: "s" | "d"
     }
@@ -1479,6 +1497,7 @@ interface IAVCellValue {
     phone?: {
         content: string
     }
+    location?: IAVCellLocationValue
     email?: {
         content: string
     }
@@ -1496,6 +1515,18 @@ interface IAVCellValue {
     date?: IAVCellDateValue
     created?: IAVCellDateValue
     updated?: IAVCellDateValue
+}
+
+/**
+ * 坐标统一使用 WGS84，不自动转换；界面按经度、纬度显示，规范复制与导出文本按纬度、经度排列。
+ * 位置字段的文本筛选条件使用 IAVCellValue.text.content，不把查询词解析成坐标。
+ */
+interface IAVCellLocationValue {
+    name?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    /** 原始坐标输入仅作为来源信息，不参与判空、筛选和排序。 */
+    originalInput?: string;
 }
 
 interface IAVCellRelationValue {
@@ -1664,14 +1695,14 @@ interface ISiYuanUriBlockInfo {
 
     /**
      * 是否聚焦该块
-     * 
+     *
      * @defaultValue false
      */
     focus: boolean;
 
     /**
      * 是否全屏显示该块
-     * 
+     *
      * @defaultValue false
      */
     fullscreen: boolean;

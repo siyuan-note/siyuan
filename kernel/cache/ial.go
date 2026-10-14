@@ -24,8 +24,8 @@ import (
 )
 
 var docIALCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 100000,
-	MaxCost:     1024 * 1024 * 200,
+	NumCounters: AdmissionCounters,
+	MaxCost:     DefaultMaxCostBytes,
 	BufferItems: 64,
 })
 var docIALCacheKeys = map[string]map[string]struct{}{}
@@ -35,9 +35,23 @@ func docIALCacheKey(p, boxID string) string {
 	return boxID + "\x00" + p
 }
 
+// ialCacheCost 保守估算映射、条目及字符串的驻留字节数，不依赖特定 Go 版本的映射布局。
+func ialCacheCost(key string, ial map[string]string) int64 {
+	cost := int64(256 + len(key))
+	for name, value := range ial {
+		cost += 128 + int64(len(name)) + int64(len(value))
+	}
+	return cost
+}
+
 func PutDocIALInBox(p, boxID string, ial map[string]string) {
 	key := docIALCacheKey(p, boxID)
-	docIALCache.Set(key, ial, 128)
+	cost := ialCacheCost(key, ial)
+	if cost >= docIALCache.MaxCost() {
+		RemoveDocIALInBox(p, boxID)
+		return
+	}
+	docIALCache.Set(key, maps.Clone(ial), cost)
 
 	docIALCacheKeysMu.Lock()
 	defer docIALCacheKeysMu.Unlock()
@@ -94,8 +108,8 @@ func ClearDocsIAL() {
 }
 
 var blockIALCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 100000,
-	MaxCost:     1024 * 1024 * 200,
+	NumCounters: AdmissionCounters,
+	MaxCost:     DefaultMaxCostBytes,
 	BufferItems: 64,
 })
 var blockIALCacheKeys = map[string]map[string]struct{}{}
@@ -111,7 +125,12 @@ func PutBlockIAL(id string, ial map[string]string) {
 
 func PutBlockIALInBox(id, boxID string, ial map[string]string) {
 	key := blockIALCacheKey(id, boxID)
-	blockIALCache.Set(key, ial, 128)
+	cost := ialCacheCost(key, ial)
+	if cost >= blockIALCache.MaxCost() {
+		RemoveBlockIALInBox(id, boxID)
+		return
+	}
+	blockIALCache.Set(key, maps.Clone(ial), cost)
 
 	blockIALCacheKeysMu.Lock()
 	defer blockIALCacheKeysMu.Unlock()
@@ -132,7 +151,7 @@ func GetBlockIALInBox(id, boxID string) (ret map[string]string) {
 	if nil == ial {
 		return
 	}
-	return ial.(map[string]string)
+	return maps.Clone(ial.(map[string]string))
 }
 
 // GetBlockIALWithBoxFallback 先查 box-aware key，未命中再回退到 bare key。

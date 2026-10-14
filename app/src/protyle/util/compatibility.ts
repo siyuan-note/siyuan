@@ -1,4 +1,5 @@
-import {focusByRange} from "./selection";
+import {fetchWithAppId} from "../../util/fetchWithAppId";
+import {focusByRange} from "./selectionOffsets";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER
@@ -15,6 +16,8 @@ import {buildWebClipboardHTML, getTextSiyuanFromTextHTML} from "./clipboardData"
 import {prepareExternalClipboardHTML} from "./richClipboard";
 import {isIOSPlatform, isIPadOSPlatform} from "./browserCompatibility";
 import {canOpenExternalURL, getHostCapabilities} from "../../util/hostCapabilities";
+import {createDefaultMobileBottomBarConfig} from "../../mobile/util/mobileBottomBarConfig";
+import {createDefaultMobileBarsConfig, MOBILE_BARS_CONFIG_KEY} from "../../mobile/util/mobileBarsConfig";
 
 export {encodeBase64, getTextSiyuanFromTextHTML} from "./clipboardData";
 
@@ -63,7 +66,7 @@ export const isPhablet = () => {
 };
 
 export const saveExportFile = async (uri: string, msgId?: string): Promise<TSaveExportFileResult> => {
-    if (!getHostCapabilities().importExport) {
+    if (!getHostCapabilities().documentImportExport) {
         if (msgId) {
             hideMessage(msgId);
         }
@@ -73,6 +76,23 @@ export const saveExportFile = async (uri: string, msgId?: string): Promise<TSave
         return {status: "error"};
     }
     /// #if !BROWSER
+    if (getHostCapabilities().remoteKernel) {
+        let result: TSaveExportFileResult;
+        try {
+            result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "saveRemoteExport", uri});
+        } catch (error) {
+            result = {status: "error"};
+        }
+        if (msgId) {
+            hideMessage(msgId);
+        }
+        if (result.status === "success") {
+            showMessage(window.siyuan.languages.exported);
+        } else if (result.status === "error") {
+            showMessage(window.siyuan.languages.exportFileSaveFailed, 0, "error");
+        }
+        return result;
+    }
     let saveErrorMsgId: string | undefined;
     try {
         const resolved = new URL(uri, `${location.origin}/`);
@@ -102,7 +122,7 @@ export const saveExportFile = async (uri: string, msgId?: string): Promise<TSave
                 }
                 return {status: "canceled"};
             }
-            const copyResponse = await (await fetch("/api/export/copyExportFile", {
+            const copyResponse = await (await fetchWithAppId("/api/export/copyExportFile", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
@@ -487,7 +507,7 @@ export const writeBlockDOMClipboard = async (lute: Lute, blockDOM: string) => {
 };
 
 export const copyPlainText = (text: string) => {
-    text = text.replace(new RegExp(Constants.ZWSP, "g"), ""); // `复制纯文本` 时移除所有零宽空格 https://github.com/siyuan-note/siyuan/issues/6674
+    text = text.replaceAll(Constants.ZWSP, ""); // `复制纯文本` 时移除所有零宽空格 https://github.com/siyuan-note/siyuan/issues/6674
     writeText(text);
 };
 
@@ -767,11 +787,10 @@ export const getLocalStorage = (cb: () => void) => {
             version: 1,
             tabs: [],
         };
-        defaultStorage["local-mobile-bars"] = {autoHide: true};
-        defaultStorage[Constants.LOCAL_MOBILE_BOTTOM_BAR] = {
-            version: 1,
-            actions: ["documents", "search", "newDoc", "tabs"],
-        };
+        // 仅未保存过移动端偏好时启用默认侧栏按钮。
+        defaultStorage[MOBILE_BARS_CONFIG_KEY] = typeof response.data[MOBILE_BARS_CONFIG_KEY] === "undefined" ?
+            createDefaultMobileBarsConfig() : {autoHide: true};
+        defaultStorage[Constants.LOCAL_MOBILE_BOTTOM_BAR] = createDefaultMobileBottomBarConfig();
         defaultStorage[Constants.LOCAL_MOBILE_SIDE_PANEL] = {
             version: 1,
             left: ["file", "bookmark", "tag", "inbox", "plugin"],
@@ -807,17 +826,18 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_MOVE_PATH] = {keys: [], k: ""};
         defaultStorage[Constants.LOCAL_RECENT_DOCS] = {type: "viewedAt"};   // TRecentDocsSort
         defaultStorage[Constants.LOCAL_AV_CALENDAR_MODES] = {};
+        defaultStorage[Constants.LOCAL_TABS_READING] = {};
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_EXPORTPATH, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_MOBILE_TABS,
-            Constants.LOCAL_MOBILE_BOTTOM_BAR, Constants.LOCAL_MOBILE_SIDE_PANEL, "local-mobile-bars",
+            Constants.LOCAL_MOBILE_BOTTOM_BAR, Constants.LOCAL_MOBILE_SIDE_PANEL, MOBILE_BARS_CONFIG_KEY,
             Constants.LOCAL_FONTSTYLES,
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS,
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
             Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
             Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH, Constants.LOCAL_RECENT_DOCS,
-            Constants.LOCAL_CLOSED_TABS, Constants.LOCAL_AV_CALENDAR_MODES].forEach((key) => {
+            Constants.LOCAL_CLOSED_TABS, Constants.LOCAL_AV_CALENDAR_MODES, Constants.LOCAL_TABS_READING].forEach((key) => {
             const value = response.data[key];
             if (typeof value === "string") {
                 try {
@@ -877,12 +897,13 @@ export const isSensitiveLayoutData = (data?: {
     type?: string,
     notebookId?: string,
     config?: Config.IUILayoutTabSearchConfig,
+    databaseRow?: {notebookID: string},
 }) => {
     if (!data) {
         return false;
     }
     if (data.instance === "Editor") {
-        return isEncryptedBox(data.notebookId);
+        return isEncryptedBox(data.notebookId) || isEncryptedBox(data.databaseRow?.notebookID);
     }
     if (data.instance === "Search") {
         return isSensitiveSearchConfig(data.config);

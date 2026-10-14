@@ -8,15 +8,17 @@ This document defines type declarations, compatibility requirements, generated a
 
 ## Endpoint maintenance
 
-1. Define or update transport types and endpoints in the contract package, specifying request bodies, error codes, null values, defaults, and historical input compatibility
-2. Bind business entry points through `contractHandler`, preserving route middleware order, authorization, and lease scope
+1. Define or update transport types and endpoints in the contract package, explicitly declaring public or authenticated access, administrator and write requirements, request bodies, error codes, null values, defaults, and historical input compatibility
+2. Bind business entry points through `contractHandler` and register their handlers with `contractRouteHandlers`, preserving route middleware order and lease scope
 3. Keep `legacy_routes.json` empty; when deleting an endpoint, remove both its route registration and contract definition
 4. Update actual-response, input-compatibility, and strict type tests; run generation and correct calls identified by the compiler
 5. Synchronize generated and related public declarations in `petal`; update API documentation for public endpoints
 
-Generation checks inspect actual route and handler declarations to verify methods, paths, handlers, and contract adapters. Prerelease CI compares the legacy list with the previous version tag reachable from the current commit's parent and prevents additional records. Do not bypass contract checks with `any`, type assertions, or changes to the legacy list.
+Generation checks inspect actual route and handler declarations to verify methods, paths, handlers, contract adapters, and authorization middleware. `define` requires an explicit authorization argument; public endpoints use `PublicAccess`, while authenticated endpoints may add `AdminAccess` and `WritableAccess`. Domain registration functions retain literal methods and paths, and `contractRouteHandlers` derives middleware from the bound endpoint. Generation rejects missing policies, mismatched endpoint bindings, and missing or reordered explicit middleware. Authorization metadata does not replace resource permissions or the global notebook lease middleware. Prerelease CI compares the legacy list with the previous version tag reachable from the current commit's parent and prevents additional records. Do not bypass contract checks with `any`, type assertions, or changes to the legacy list.
 
 ## Contracts and implementation
+
+For JSON routes subject to `ControlConcurrency`, requests pass authorization and admission checks, then `contractHandler` completes decoding and drains the remaining request body before acquiring the per-path business lock. This prevents queued bodies from exhausting an HTTP/2 connection's receive window. The outer middleware releases the lock after response handling and notebook lease cleanup. Preserve this ordering when adding adapters; raw streams and form uploads retain their existing concurrency paths.
 
 Module files under `kernel/apicontract/` define requests, responses, and endpoints; `contracts.go` collects them in the endpoint registry. The contract package is independent of kernel startup, databases, and persistence models, so the generator runs independently. API entry points bind endpoints through `contractHandler`; Go generic signatures constrain request parameters and successful return values. Constructors set response payloads rather than assigning directly to generic `ret.Data`. Existing helpers continue to validate business rules, and `contractFailure` preserves their error codes, messages, and supported error payloads.
 
@@ -192,6 +194,8 @@ Dynamic multipart endpoints use `MultipartFields` to retain every text value and
 
 ## Generation and verification
 
+The generator reads the leading comments on endpoint declarations in `kernel/apicontract/contracts.go` and emits them as JSDoc on the corresponding `APIGETRoutes` and `APIPOSTRoutes` entries in both the frontend and Petal declarations. Maintain endpoint behavior, defaults, constraints, and compatibility there; for a grouped `var` declaration, place the comment immediately before the individual endpoint. Group comments are not copied to every entry. Keep fetch helper comments focused on transport behavior and link to the route types for endpoint details; do not hand-edit generated declarations.
+
 `/api/block/migrateLegacyMindmaps` is an authenticated administrator write endpoint with read-only protection and an encrypted-notebook request lease. It requires a document `id` and `notebook`, converts complete legacy `mindmap` lists in one undoable transaction after saving history, and returns `converted` and canonical `blocks` (`id`, `dom`) for the document's mind maps. Repeated requests return the current block content without reconverting lists; incomplete sources remain unchanged. Regression coverage runs with `go test -tags "fts5 sqlcipher" ./model ./api ./apicontract/... -run 'Test(LegacyMindmap|MigrateLegacyMindmaps|APIContractHeadingTransactions|APIContractRouterCoverage|RouteCoverage)' -count=1` and the frontend `listMindmap/migrate.test.ts` and `listMindmap/model.test.ts` suites. These tests use the existing CI discovery paths.
 
 Run from `app/`:
@@ -205,6 +209,8 @@ pnpm test
 
 The generation command updates both this repository and `petal`; a separate generation run without `--petal` is unnecessary. The `--petal` path is relative to the generator's working directory, `kernel/`; the example refers to a sibling repository. CI checks only this repository's artifacts. Local synchronization across repositories uses this option to verify plugin declarations.
 
+The same generator also reads the field capability declarations in `kernel/av/capabilities.go` and writes `app/src/protyle/render/av/capabilities.generated.ts`, `app/src/types/av/index.d.ts`, and the corresponding `petal/types/av/index.d.ts`. Maintain field capabilities and the filter operator registry in the kernel, then regenerate these artifacts; do not hand-edit the generated field type or operator unions. Tests enumerate the typed Go constants to reject missing declarations and verify generated artifacts through the existing commands and full kernel suite.
+
 Run from `kernel/`:
 
 ```text
@@ -215,4 +221,4 @@ go test -tags "fts5 sqlcipher" ./... -count=1
 
 Import and static-file fixtures use `internal/testutil.PublicDataDir` to create and clean up explicitly validated non-sensitive directories independently of `TMPDIR` and `GOTMPDIR`. The helper tries the user home, current directory, and filesystem root, and reports a fixture setup failure if none is safe and writable. CI also reruns the affected path tests with `/tmp` as `TMPDIR` and a separate `GOTMPDIR` to cover environment overrides.
 
-The prerelease workflow `.github/workflows/cd.yml` runs language validation, contract and type checks, all kernel packages on Linux, and all frontend, Electron, and packaging-script tests on Windows. These checks run only for prerelease tag pushes (`*-alpha*`, `*-beta*`, `*-rc*`) or manual dispatch of this workflow; ordinary branch pushes and pull requests do not trigger them. Desktop and Android packaging require all three validation and test jobs to pass. Frontend discovery is restricted to `src/**/*.test.ts`, `tests/**/*.test.js`, `electron/**/*.test.js`, and `scripts/**/*.test.js`, so packaged copies under `app/build` are excluded. Test files run serially to avoid Electron process startup contention. New regression tests in these locations are included automatically; update the test command and this document when adding a new test location or filename convention. Keep `Contract` in Go contract regression test names so they remain easy to run separately.
+The prerelease workflow `.github/workflows/cd.yml` runs language validation, contract and type checks, all kernel packages on Linux, and all frontend, Electron, and packaging-script tests on Windows. These checks run only for prerelease tag pushes (`*-alpha*`, `*-beta*`, `*-rc*`) or manual dispatch of this workflow; ordinary branch pushes and pull requests do not trigger them. Desktop and Android packaging require all three validation and test jobs to pass. Frontend discovery is restricted to `src/**/*.test.ts`, `tests/**/*.test.js`, `electron/**/*.test.js`, and `scripts/**/*.test.js`, so packaged copies under `app/build` are excluded. Test files run in separate processes with concurrency selected from the available CPU cores, capped at four to limit Electron process startup contention. Use `pnpm test --test-concurrency=1` for serial execution. New regression tests in these locations are included automatically; update the test command and this document when adding a new test location or filename convention. Keep `Contract` in Go contract regression test names so they remain easy to run separately.

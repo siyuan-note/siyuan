@@ -16,8 +16,11 @@ describe("AI provider presets", () => {
         assert.equal(findProviderPreset("https://api.minimaxi.com/v1"), undefined);
     });
 
-    it("defaults only the OpenAI preset to Responses", () => {
+    it("defaults OpenAI and ChatGPT account presets to Responses", () => {
         assert.equal(getDefaultProviderProtocol("openai"), "openai-responses");
+        assert.equal(getDefaultProviderProtocol("chatgpt"), "openai-responses");
+        assert.equal(PROVIDER_PRESETS.find(item => item.id === "chatgpt")?.authType, "chatgpt");
+        assert.equal(findProviderPreset("https://api.openai.com/v1")?.id, "openai");
         assert.equal(getDefaultProviderProtocol("deepseek"), "openai");
         assert.equal(getDefaultProviderProtocol("custom"), "openai");
     });
@@ -54,6 +57,7 @@ describe("AI provider presets", () => {
             ["moonshot", "https://api.moonshot.cn/v1", "https://api.moonshot.cn/anthropic"],
             ["minimax", "https://api.minimax.io/v1", "https://api.minimax.io/anthropic"],
             ["minimax-cn", "https://api.minimax.cn/v1", "https://api.minimax.cn/anthropic"],
+            ["xiaomi-mimo", "https://api.xiaomimimo.com/v1", "https://api.xiaomimimo.com/anthropic"],
             ["aliyun", "https://dashscope.aliyuncs.com/compatible-mode/v1", "https://dashscope.aliyuncs.com/apps/anthropic"],
             ["aliyun-intl", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", "https://dashscope-intl.aliyuncs.com/apps/anthropic"],
         ]) {

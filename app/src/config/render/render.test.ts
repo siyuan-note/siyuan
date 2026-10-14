@@ -21,9 +21,7 @@ describe("genNumberInputHtml", () => {
 
 describe("genStackHtml", () => {
     it("disables spell checking for technical fields while preserving the editor preference for prose", () => {
-        if (typeof Lute === "undefined") {
-            require("../../../stage/protyle/js/lute/lute.min.js");
-        }
+        assert.equal(typeof Lute, "undefined");
         const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
         try {
             for (const enabled of [true, false]) {
@@ -53,9 +51,7 @@ describe("genStackHtml", () => {
     });
 
     it("escapes textarea closing tags and literal character references", () => {
-        if (typeof Lute === "undefined") {
-            require("../../../stage/protyle/js/lute/lute.min.js");
-        }
+        assert.equal(typeof Lute, "undefined");
         const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
         Object.defineProperty(globalThis, "window", {
             configurable: true,

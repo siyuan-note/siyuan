@@ -7,17 +7,24 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (sources: Record<string, string>, languages: Record<string, string>, narrow = false) => {
+const {parse} = require("ifdef-loader/preprocessor");
+
+const browserCases = async (sources: Record<string, string>, languages: Record<string, string>, narrow = false,
+                            mobileBuild = false) => {
     const check = (condition: unknown, message: string) => {
         if (!condition) {
             throw new Error(message);
         }
     };
     let mobile = true;
+    let settingsWindow = false;
+    const ownerSnapshot: Record<string, string[]> = {};
+    let ownerReads = 0;
+    const frequentPath = "editor.slash.menu.frequent";
     const cache: Record<string, Record<string, any>> = {};
     const noop = () => {};
     window.siyuan = {languages, mobile: {}, storage: {}, config: {editor: {codeTabSpaces: 4}, appearance: {
-        entryVisibility: {active: "custom", profiles: [{id: "custom", name: "Custom", entries: {}, orders: {}}]},
+        entryVisibility: {active: "custom", profiles: [{id: "custom", name: "Custom", entries: {[frequentPath]: true}, orders: {}}]},
     }}, layout: {}} as unknown as typeof window.siyuan;
     const load = (id: string): Record<string, any> => {
         if (cache[id]) {
@@ -25,9 +32,21 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         }
         if (id === "config/entryVisibility/runtime") {
             return {
-                ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple", ENTRY_VISIBILITY_VERSION: 1,
-                createEntryProfileSnapshot: () => ({"editor.slash.menu": !mobile}), createEntryOrderSnapshot: () => ({}),
+                ENTRY_PROFILE_FULL: "full", ENTRY_PROFILE_SIMPLE: "simple", ENTRY_VISIBILITY_VERSION: 7,
+                createEntryProfileSnapshot: (template: string) => ({"editor.slash.menu": !mobile,
+                    [frequentPath]: template === "full"}), createEntryOrderSnapshot: () => ({}),
                 getConfiguredEntryVisibility: () => true,
+                getActiveEntryProfile: () => window.siyuan.config.appearance.entryVisibility.profiles.find(profile =>
+                    profile.id === window.siyuan.config.appearance.entryVisibility.active),
+                getEntryProfileDefaultVisibility: (profile: Config.IEntryVisibilityProfile, path: string) => {
+                    const catalog = load("config/entryVisibility/catalog");
+                    if (!profile.defaults) {
+                        return catalog.getEntryCatalogCustomDefaultVisibility(path);
+                    }
+                    const node = catalog.getEntryCatalogNode(path);
+                    return load("config/entryVisibility/profile").getBuiltinProfileEntryVisibility(profile.defaults,
+                        node?.simple !== false, catalog.getEntryCatalogDefaultVisibility(path), node?.simpleDefaultVisible);
+                },
                 saveEntryVisibility: (config: Config.IEntryVisibility) => {
                     window.siyuan.config.appearance.entryVisibility = config;
                 },
@@ -41,6 +60,11 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
                 "dialog/confirmDialog": {confirmDialog: (_title: string, _text: string, callback: () => void) => callback()},
                 "dialog/message": {showMessage: noop},
                 "protyle/util/compatibility": {isInMobileApp: () => true},
+                "protyle/toolbar/catalogSnapshot": {getEditorToolbarCatalogSnapshot: (): [] => []},
+                "config/setting/windowContext": {isSettingsWindow: () => settingsWindow,
+                    getSettingsOwnerApp: () => window.siyuan.ws?.app,
+                    getSettingsWindowHost: () => ({getDockOrderSnapshot: () => { ownerReads++; return ownerSnapshot; },
+                        getEditorToolbarCatalogSnapshot: (): [] => []})},
             };
             check(id in mocks, `Missing module ${id}`);
             return mocks[id];
@@ -72,10 +96,93 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         ui.open(root, id);
         return document.querySelector<HTMLElement>(".config-entry-visibility__view");
     };
+    const checkMobileNavigation = (editor: HTMLElement, editable: boolean) => {
+        const browser = editor.querySelector<HTMLElement>("[data-type='entry-browser']");
+        check(!browser.querySelector("[data-action='back-entry']"), "Root column must not offer a parent navigation action");
+        const saved = JSON.stringify(config());
+        for (const context of ["mobile-input", "mobile-selection"]) {
+            const selector = `[data-entry-path-row='editor.toolbar.${context}']`;
+            browser.querySelector<HTMLElement>(selector).click();
+            const column = browser.querySelector<HTMLElement>("[data-entry-column]:last-child");
+            const back = column.querySelector<HTMLElement>("[data-action='back-entry']");
+            check(back, "Both mobile toolbar contexts must offer a return to their parent");
+            const rect = back.getBoundingClientRect();
+            const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            check(target && back.contains(target), "Return control must be reachable in the visible column");
+            const control = column.querySelector<HTMLInputElement>("input[data-entry-path]:not([disabled])");
+            const entryPath = control.dataset.entryPath;
+            const checked = control.checked;
+            if (editable) {
+                control.click();
+            }
+            browser.querySelector<HTMLElement>("[data-entry-column]:last-child [data-action='back-entry'] svg").dispatchEvent(
+                new MouseEvent("click", {bubbles: true}));
+            check(browser.querySelectorAll("[data-entry-column]").length === 1,
+                "Returning from a context must restore the root column");
+            check(browser.querySelector(selector).getBoundingClientRect().width > 0,
+                "Context choices must remain available after returning");
+            check(editor.classList.contains("config__view--show"), "Returning a level must keep the profile editor open");
+            browser.querySelector<HTMLElement>(selector).click();
+            const updated = browser.querySelector<HTMLInputElement>(`[data-entry-column]:last-child input[data-entry-path='${entryPath}']`);
+            check(updated.checked === (editable ? !checked : checked), "Returning must retain draft visibility changes");
+            if (editable) {
+                updated.click();
+            }
+            browser.querySelector<HTMLElement>("[data-entry-column]:last-child [data-action='back-entry']").click();
+        }
+        check(JSON.stringify(config()) === saved, "Navigating levels must preserve saved profiles and unknown order slots");
+    };
+    if (mobileBuild) {
+        root.innerHTML = ui.genEntryVisibilityHtml();
+        ui.mountEntryVisibility(root);
+        check(root.querySelectorAll("[data-profile-id]").length === 3,
+            "Mobile build must render built-in and saved profiles on first mount");
+        const saved = JSON.stringify(config());
+        root.querySelector<HTMLElement>("[data-action='create']").click();
+        check(document.querySelector("[data-profile-field='template']"), "Create must open the new profile editor");
+        document.querySelector<HTMLElement>(".config__view [data-action='cancel']").click();
+        check(JSON.stringify(config()) === saved, "Cancelling creation must preserve saved profiles");
+        for (const id of ["simple", "full", "custom"]) {
+            document.querySelectorAll(".config-entry-visibility__view").forEach(item => item.remove());
+            root.querySelector<HTMLElement>(`[data-profile-id='${id}'] .config-name`).click();
+            const editor = document.querySelector<HTMLElement>(".config__view--show");
+            check(editor?.querySelector("[data-type='entry-section']"), "Profile cards must open the mobile editor");
+            check(Boolean(editor.querySelector("[data-action='confirm']")) === (id === "custom"),
+                "Built-in profiles must remain read-only and custom profiles editable");
+            checkMobileNavigation(editor, id === "custom");
+            const section = editor.querySelector<HTMLSelectElement>("[data-type='entry-section']");
+            section.value = "editor.slash";
+            section.dispatchEvent(new Event("change", {bubbles: true}));
+            const frequent = editor.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']");
+            check(frequent && frequent.checked === (id !== "simple") && !frequent.disabled,
+                "Frequent defaults to off in Simple and on in Full and this custom profile");
+            check(frequent.hasAttribute("data-entry-readonly") === (id !== "custom"),
+                "Built-in frequent switches must be read-only");
+            frequent.click();
+            if (id !== "custom") {
+                check(frequent.checked === (id === "full"), "Clicking a built-in frequent switch must not change it");
+            } else {
+                check(!editor.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']").checked,
+                    "Custom frequent changes must update only the draft");
+            }
+            check(config().profiles[0].entries[frequentPath], "Viewing or editing must preserve saved frequent preference");
+            editor.querySelector<HTMLElement>("[data-action='cancel']").click();
+            check(config().profiles[0].entries[frequentPath], "Cancelling a custom draft preserves its saved frequent preference");
+        }
+        check(JSON.stringify(config()) === saved, "Viewing and cancelling profiles must preserve saved preferences");
+        root.querySelector<HTMLElement>("[data-profile-id='full'] [data-action='activate']").click();
+        check(config().active === "full", "Profile activation must work in the mobile build");
+        return "Mobile compiled settings passed";
+    }
     let view = open();
+    checkMobileNavigation(view, true);
     const selectSlash = () => {
         const select = view.querySelector<HTMLSelectElement>("[data-type='entry-section']");
-        check(select.options.length === 2, "Mobile must offer toolbar and slash categories");
+        select.value = "editor.image";
+        select.dispatchEvent(new Event("change", {bubbles: true}));
+        check(view.querySelector("[data-entry-path='editor.image.ocrText']"), "Mobile exposes image OCR visibility");
+        check(view.querySelector("[data-entry-path='editor.image.copyAsPNG']"), "Mobile exposes image copy visibility");
+        check(select.options.length === 3, "Mobile must offer toolbar, slash, and image categories");
         select.value = "editor.slash";
         select.dispatchEvent(new Event("change", {bubbles: true}));
     };
@@ -84,6 +191,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
             view = open(id);
             check(Boolean(view.querySelector("[data-profile-field='template']")) === !id,
                 "New profiles must include the template selector");
+            checkMobileNavigation(view, true);
             selectSlash();
             view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']").click();
             const list = view.querySelector<HTMLElement>(".config-entry-visibility__column-list");
@@ -92,6 +200,11 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
             const action = view.querySelector<HTMLElement>(".b3-dialog__action").getBoundingClientRect();
             check(action.bottom <= innerHeight && bounds.bottom <= action.top,
                 "List and actions must remain inside the viewport");
+            for (const button of view.querySelectorAll<HTMLElement>(".b3-dialog__action button")) {
+                const rect = button.getBoundingClientRect();
+                check(rect.left >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
+                    "Reset and save controls must remain reachable on narrow screens");
+            }
             const header = view.querySelector<HTMLElement>(".config-entry-visibility__mobile-header");
             for (const selector of ["[data-profile-field='name']", "[data-entry-path='editor.slash.menu']"]) {
                 const control = view.querySelector<HTMLElement>(selector);
@@ -115,12 +228,28 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         }
         view = open("");
         selectSlash();
+        const reset = view.querySelector<HTMLElement>("[data-action='reset-all-entry-orders']");
+        reset.querySelector("span").textContent = "Alle Reihenfolgen zurücksetzen";
+        const resetBounds = reset.getBoundingClientRect();
+        check(resetBounds.left >= 0 && resetBounds.right <= innerWidth,
+            "Long translated reset labels must fit the narrow editor");
         return "Narrow new and existing profiles passed";
     }
     selectSlash();
+    const frequent = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']");
+    check(frequent.checked, "Frequent slash defaults to on");
+    const frequentRow = frequent.closest("label");
+    check(frequentRow === frequentRow.parentElement.firstElementChild, "Frequent is the first compact slash row");
+    check(frequentRow.getAttribute("data-entry-path-row") === frequentPath &&
+        !frequentRow.querySelector(".config-entry-visibility__drag"),
+        "The frequent profile switch must stay pinned outside sorting");
+    frequent.click();
+    check(config().profiles[0].entries[frequentPath], "Custom frequent changes must remain staged until confirmed");
     let enabled = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
     check(!enabled.checked, "Mobile slash defaults to off");
     enabled.click();
+    check(!view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']").checked,
+        "Frequent switch draft must survive a list rerender");
     check(config().profiles[0].entries["editor.slash.menu"] !== true, "Total switch must remain a draft until confirmed");
     check(view.querySelectorAll("[data-type='entry-mobile-options'] input").length === 1, "Only one total switch is shown");
     check(!view.querySelector("[data-entry-move]"), "No arrow sort controls");
@@ -172,6 +301,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     send(browser, "pointerup", {clientX: -20, clientY: -20});
     check(!browser.querySelector(".config-entry-visibility__row--drop-after"), "Outside release clears drop target");
     view.querySelector<HTMLElement>("[data-action='confirm']").click();
+    check(config().profiles[0].entries[frequentPath] === false, "Confirm must save frequent in the custom profile");
     const order = config().profiles[0].orders["editor.slash.menu"];
     check(config().profiles[0].entries["editor.slash.menu"] === true, "Confirm saves total switch in the profile");
     check(order.includes("plugin:missing:item"), "Unavailable plugin slots must survive sorting");
@@ -180,7 +310,15 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     selectSlash();
     enabled = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
     check(enabled.checked, "Reopening must preserve profile setting");
+    check(!view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']").checked,
+        "Reopening must preserve the profile frequent setting");
+    view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']").click();
     const search = view.querySelector<HTMLInputElement>("[data-type='entry-search']");
+    search.value = languages.slashMenuFrequent;
+    search.dispatchEvent(new Event("input", {bubbles: true}));
+    check(view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']")?.checked,
+        "Searching the frequent label must reveal the pending profile switch");
+    check(!view.querySelector("[data-entry-key='template']"), "Frequent search must not include unrelated candidates");
     search.value = "heading1";
     search.dispatchEvent(new Event("input", {bubbles: true}));
     check(!view.querySelector(".config-entry-visibility__drag"), "Search results must not permit partial-list sorting");
@@ -192,19 +330,48 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     check(view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.heading1']").disabled,
         "Disabled menu must disable candidate controls");
     view.querySelector<HTMLElement>("[data-action='cancel']").click();
+    check(config().profiles[0].entries[frequentPath] === false, "Cancel must discard the staged frequent change");
     check(config().profiles[0].entries["editor.slash.menu"] === true, "Cancel must discard the total switch change");
     view = open("full");
     selectSlash();
     check(!view.querySelector(".config-entry-visibility__drag"), "Built-in profiles must remain read-only");
+    check(!view.querySelector("[data-action='reset-entry-order'], [data-action='reset-all-entry-orders']"),
+        "Built-in profiles must not offer resets");
     enabled = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu']");
     enabled.click();
     check(!enabled.checked, "Built-in total switch follows mobile default and remains read-only");
+    const fullFrequent = view.querySelector<HTMLInputElement>("[data-entry-path='editor.slash.menu.frequent']");
+    check(fullFrequent.checked && fullFrequent.hasAttribute("data-entry-readonly"), "Full frequent must be on and read-only");
+    fullFrequent.click();
+    check(fullFrequent.checked, "Full frequent remains enabled after clicking");
+    check(config().profiles[0].entries[frequentPath] === false, "Built-in views must not change custom profiles");
     view.querySelector<HTMLElement>("[data-action='cancel']").click();
     mobile = false;
     delete window.siyuan.mobile;
     view = open();
     check(!view.querySelector("[data-type='entry-section']"), "Desktop retains its location column");
     check(view.querySelector(".config-entry-visibility__column--locations"), "Desktop locations remain reachable");
+    const resetAllSelector = ".config-entry-visibility__column--locations .config-entry-visibility__column-title " +
+        "[data-action='reset-all-entry-orders']";
+    const desktopReset = view.querySelector<HTMLElement>(resetAllSelector);
+    check(desktopReset?.querySelector("use").getAttribute("xlink:href") === "#iconRefresh",
+        "Desktop reset all uses the shared refresh icon in the location title");
+    check(desktopReset.getAttribute("aria-label") === languages.entryResetAllOrders,
+        "Desktop reset all retains its distinct accessible label");
+    check(!view.querySelector(".b3-dialog__action [data-action='reset-all-entry-orders']"),
+        "Desktop footer must not duplicate reset all");
+    desktopReset.click();
+    check(config().profiles[0].orders["editor.slash.menu"], "Desktop reset all remains a draft");
+    view.querySelector<HTMLElement>("[data-action='cancel']").click();
+    check(config().profiles[0].orders["editor.slash.menu"], "Cancelling desktop reset preserves orders");
+    view = open();
+    view.querySelector<HTMLElement>(resetAllSelector).click();
+    view.querySelector<HTMLElement>("[data-action='confirm']").click();
+    check(Object.keys(config().profiles[0].orders).length === 0, "Confirming desktop reset clears all orders");
+    config().profiles[0].orders["editor.slash.menu"] = order;
+    view = open("full");
+    check(!view.querySelector("[data-action='reset-all-entry-orders']"), "Desktop built-in profiles do not offer resets");
+    view = open();
     view.querySelector<HTMLElement>("[data-entry-section='editor.slash']").click();
     const desktopBrowser = view.querySelector<HTMLElement>("[data-type='entry-browser']");
     const first = desktopBrowser.querySelector<HTMLElement>("[data-entry-key='heading1']");
@@ -217,14 +384,53 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     const desktopOrder = config().profiles[0].orders["editor.slash.menu"];
     check(desktopOrder.indexOf("heading1") < desktopOrder.indexOf("heading3"), "Desktop drag still updates order");
     check(catalog.getEntryCatalogChildren("editor.slash.menu").length > 20, "Exercise the actual slash catalog");
+    config().profiles[0].orders["dock.order.LeftTop"] = ["outline", "file"];
+    config().profiles[0].orders["dock.order.RightTop"] = ["graph"];
+    view = open();
+    view.querySelector<HTMLElement>("[data-entry-section='dock']").click();
+    check(view.querySelectorAll("[data-action='reset-entry-order']").length === 6,
+        "Dock groups must offer resets for the six actual order scopes");
+    view.querySelector<HTMLElement>("[data-action='reset-entry-order'][data-entry-parent='dock.order.LeftTop']").click();
+    view.querySelector<HTMLElement>("[data-action='confirm']").click();
+    check(!("dock.order.LeftTop" in config().profiles[0].orders), "Dock reset must remove its scope record");
+    check(config().profiles[0].orders["dock.order.RightTop"], "Dock reset must preserve the other scopes");
+    settingsWindow = true;
+    Object.assign(ownerSnapshot, load("config/entryVisibility/dockOrder").createDockEntryOrderSnapshot({
+        RightBottom: ["outline", "plugin:unavailable:dock", "file"], BottomLeft: ["graph"],
+    }));
+    config().profiles[0].orders["dock.order.RightBottom"] = ["outline", "plugin:unavailable:dock", "file"];
+    const savedOrders = JSON.stringify(config().profiles[0].orders);
+    view = open();
+    view.querySelector<HTMLElement>("[data-entry-section='dock']").click();
+    const ownerRows = () => view.querySelectorAll("[data-entry-row][data-entry-parent='dock.order.RightBottom']");
+    check(ownerRows().length === 2, "Detached settings must use the owner's live dock placement");
+    check(ownerRows()[0].getAttribute("data-entry-key") === "outline", "Saved dock order must take precedence");
+    const reads = ownerReads;
+    ownerSnapshot["dock.order.RightBottom"] = ["outline", "plugin:unavailable:dock"];
+    ownerSnapshot["dock.order.LeftBottom"] = ["file"];
+    const ownerSearch = view.querySelector<HTMLInputElement>("[data-type='entry-search']");
+    ownerSearch.dispatchEvent(new Event("input", {bubbles: true}));
+    check(ownerReads === reads && ownerRows().length === 2, "Rerendering a draft must retain its opening snapshot");
+    check(JSON.stringify(config().profiles[0].orders) === savedOrders, "Editing must not rewrite saved orders");
+    view.querySelector<HTMLElement>("[data-action='confirm']").click();
+    check(JSON.stringify(config().profiles[0].orders) === savedOrders, "Saving visibility must preserve unknown order slots");
+    view = open("full");
+    view.querySelector<HTMLElement>("[data-entry-section='dock']").click();
+    check(ownerReads === reads + 1, "A reopened editor must read the owner's current dock snapshot");
+    check(view.querySelector("[data-entry-key='file'][data-entry-parent='dock.order.LeftBottom']"),
+        "Built-in profiles must display the updated owner placement");
+    settingsWindow = false;
     mobile = true;
     window.siyuan.mobile = {} as typeof window.siyuan.mobile;
     view = open();
+    check(view.querySelectorAll("[data-entry-row]").length === 2, "Mobile toolbar exposes two context groups");
+    view.querySelector<HTMLElement>("[data-entry-path-row='editor.toolbar.mobile-input']").click();
     const toolbarBrowser = view.querySelector<HTMLElement>("[data-type='entry-browser']");
     toolbarBrowser.setPointerCapture = () => { captured = true; };
     toolbarBrowser.hasPointerCapture = () => captured;
     toolbarBrowser.releasePointerCapture = () => { captured = false; };
-    const toolbarRows = Array.from(toolbarBrowser.querySelectorAll<HTMLElement>("[data-entry-row]"));
+    const toolbarRows = Array.from(toolbarBrowser.querySelectorAll<HTMLElement>(
+        "[data-entry-row][data-entry-parent='editor.toolbar.mobile-input']"));
     const firstKey = toolbarRows[0].dataset.entryKey;
     const secondKey = toolbarRows[1].dataset.entryKey;
     const toolbarHandle = toolbarRows[0].querySelector(".config-entry-visibility__drag");
@@ -232,25 +438,47 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     send(toolbarBrowser, "pointermove", point(toolbarRows[1]));
     send(toolbarBrowser, "pointerup", point(toolbarRows[1]));
     view.querySelector<HTMLElement>("[data-action='confirm']").click();
-    const toolbarOrder = config().profiles[0].orders["editor.toolbar"];
+    const toolbarOrder = config().profiles[0].orders["editor.toolbar.mobile-input"];
     check(toolbarOrder.indexOf(secondKey) < toolbarOrder.indexOf(firstKey), "Toolbar touch sorting must persist");
+    view = open();
+    selectSlash();
+    const resetOrder = () => view.querySelector<HTMLElement>("[data-action='reset-entry-order']").click();
+    resetOrder();
+    check(config().profiles[0].orders["editor.slash.menu"], "Reset must remain a draft until confirmed");
+    view.querySelector<HTMLElement>("[data-action='cancel']").click();
+    check(config().profiles[0].orders["editor.slash.menu"], "Cancel must preserve saved order and plugin slots");
+    view = open();
+    selectSlash();
+    resetOrder();
+    view.querySelector<HTMLElement>("[data-action='confirm']").click();
+    check(!("editor.slash.menu" in config().profiles[0].orders), "Single reset must delete the order record");
+    check(config().profiles[0].orders["editor.toolbar.mobile-input"], "Single reset must preserve other levels");
+    check(config().profiles[0].entries["editor.slash.menu"] === true, "Reset must preserve visibility");
+    view = open();
+    view.querySelector<HTMLElement>("[data-action='reset-all-entry-orders']").click();
+    view.querySelector<HTMLElement>("[data-action='confirm']").click();
+    check(Object.keys(config().profiles[0].orders).length === 0, "Reset all must clear order records");
     view = open();
     selectSlash();
     return "Mobile entry settings passed";
 };
 
-test("mobile entry settings preserve preferences and support touch sorting without arrow controls", {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 45000,
-}, async () => {
+const runEntryUiCases = async (mobileBuild: boolean) => {
     const modules = ["config/entryVisibility/ui", "config/entryVisibility/catalog", "config/entryVisibility/order",
-        "config/entryVisibility/profile", "config/entryVisibility/dockOrder", "config/entryVisibility/touchOrder",
-        "protyle/toolbar/defaults", "protyle/wysiwyg/codeBlockUtil", "plugin/dockKey", "plugin/topBarKey", "util/escape"];
-    const sources = Object.fromEntries(modules.map(id => [id, transpileModule(
-        readFileSync(path.resolve(process.cwd(), "src", id + ".ts"), "utf8") +
-        (id.endsWith("/ui") ? "\nexports.open = openProfileEditor;" : ""),
-        {compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS}},
-    ).outputText]));
+        "config/entryVisibility/profile", "config/entryVisibility/mobileToolbarContext",
+        "config/entryVisibility/dockOrder", "config/entryVisibility/touchOrder",
+        "protyle/toolbar/defaults", "mobile/util/toolbarActions", "protyle/wysiwyg/codeBlockUtil", "protyle/gutter/turnIntoMenu",
+        "plugin/dockKey", "plugin/topBarKey", "util/escape", "menus/declarations/imageOCRMenu", "menus/declarations/menuDeclaration"];
+    if (mobileBuild) {
+        modules.push("config/setting/windowContext");
+    }
+    const sources = Object.fromEntries(modules.map(id => {
+        const source = readFileSync(path.resolve(process.cwd(), "src", id + ".ts"), "utf8");
+        const processed = mobileBuild ? parse(source, {MOBILE: true, BROWSER: true}, false, true) : source;
+        return [id, transpileModule(processed + (id.endsWith("/ui") ? "\nexports.open = openProfileEditor;" : ""), {
+            compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
+        }).outputText];
+    }));
     const languages = JSON.parse(readFileSync(path.resolve(process.cwd(), "appearance/langs/zh-CN.json"), "utf8"));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-entry-ui-test-"));
     const script = path.join(temporary, "run.cjs");
@@ -265,13 +493,13 @@ app.whenReady().then(async () => {
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(path.resolve("appearance/icons/litheness/icon.js"))}, "utf8"));
         await win.webContents.insertCSS(require(${JSON.stringify(require.resolve("sass"))}).compile(${JSON.stringify(path.resolve("src/assets/scss/mobile.scss"))}, {logger: {warn() {}}}).css);
         await win.webContents.insertCSS(".config__tab-container {position: relative; height: 100vh;} .config__view {transition: none;}");
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(languages) + ")")}));
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(languages) + ",false," + mobileBuild + ")")}));
         await win.webContents.insertCSS("body {font-size: 20px;}");
         win.setSize(320, 640);
         await new Promise(resolve => setTimeout(resolve, 300));
         await win.webContents.executeJavaScript("document.querySelector('.config__tab-container').remove()");
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify("(" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(languages) + ",true)")}));
-        if (process.env.SIYUAN_ENTRY_UI_SCREENSHOT) {
+        console.log(await win.webContents.executeJavaScript(${JSON.stringify("(" + browserCases.toString() + ")(" + JSON.stringify(sources) + "," + JSON.stringify(languages) + ",true," + mobileBuild + ")")}));
+        if (process.env.SIYUAN_ENTRY_UI_SCREENSHOT && !${mobileBuild}) {
             await new Promise(resolve => setTimeout(resolve, 300));
             require("node:fs").writeFileSync(process.env.SIYUAN_ENTRY_UI_SCREENSHOT, (await win.webContents.capturePage()).toPNG());
             await win.webContents.insertCSS(require("node:fs").readFileSync(${JSON.stringify(path.resolve("appearance/themes/midnight/theme.css"))}, "utf8"));
@@ -298,11 +526,19 @@ app.whenReady().then(async () => {
     try {
         const result = await promisify(execFile)(require("electron") as unknown as string, [script],
             {env, timeout: 40000, windowsHide: true});
-        assert.match(result.stdout, /Mobile entry settings passed/);
+        assert.match(result.stdout, mobileBuild ? /Mobile compiled settings passed/ : /Mobile entry settings passed/);
     } finally {
         if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) &&
             path.basename(temporary).startsWith("siyuan-entry-ui-test-")) {
             rmSync(temporary, {recursive: true, force: true});
         }
     }
-});
+};
+
+for (const mobileBuild of [false, true]) {
+    test(mobileBuild ? "mobile compiled entry settings mount profiles and bind editor actions" :
+        "mobile entry settings preserve preferences and support touch sorting without arrow controls", {
+        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+        timeout: 45000,
+    }, () => runEntryUiCases(mobileBuild));
+}

@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -45,9 +46,31 @@ func TestAPIContractSystemCompleteConfiguration(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		before, _ := json.Marshal(source)
-		after, _ := json.Marshal(payload)
-		if !bytes.Equal(before, after) {
+		before, err := json.Marshal(source)
+		if err != nil {
+			t.Fatal(err)
+		}
+		after, err := json.Marshal(payload)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// 配置字段顺序不属于 JSON 契约，递归比较字段和值。
+		var sourceJSON, payloadJSON any
+		decoder := json.NewDecoder(bytes.NewReader(before))
+		decoder.UseNumber()
+		if err := decoder.Decode(&sourceJSON); err != nil {
+			t.Fatal(err)
+		}
+		decoder = json.NewDecoder(bytes.NewReader(after))
+		decoder.UseNumber()
+		if err := decoder.Decode(&payloadJSON); err != nil {
+			t.Fatal(err)
+		}
+		delete(sourceJSON.(map[string]any), "confVersion")
+		if _, exposed := payloadJSON.(map[string]any)["confVersion"]; exposed {
+			t.Fatal("internal configuration version was exposed")
+		}
+		if !reflect.DeepEqual(sourceJSON, payloadJSON) {
 			t.Fatalf("complete configuration changed:\n%s\n%s", before, after)
 		}
 		body, err := json.Marshal(apicontract.Success(apicontract.SystemConfData{Conf: payload}))
@@ -110,20 +133,26 @@ func TestAPIContractSystemOIDCStructCompatibility(t *testing.T) {
 }
 
 func TestAPIContractSystemExitCompatibility(t *testing.T) {
-	previousClose, previousConf := closeSystem, model.Conf
+	previousClose, previousFinish, previousConf := closeSystem, finishSystemExit, model.Conf
 	model.Conf = model.NewAppConf()
-	t.Cleanup(func() { closeSystem, model.Conf = previousClose, previousConf })
+	t.Cleanup(func() { closeSystem, finishSystemExit, model.Conf = previousClose, previousFinish, previousConf })
 	for _, code := range []int{0, 1, 2} {
-		for _, body := range []string{`{}`, `{"force":true,"execInstallPkg":2.9,"setCurrentWorkspace":false}`} {
+		for _, body := range []string{`{}`, `{"recoverExit":null}`, `{"force":true,"execInstallPkg":2.9,"setCurrentWorkspace":false}`} {
 			called := false
+			finished := false
+			finishSystemExit = func() { finished = true }
 			closeSystem = func(force, current bool, install int) (int, string) {
 				called = true
-				if body == `{}` && (force || !current || install != 0) || body != `{}` && (!force || current || install != 2) {
+				defaults := body == `{}` || body == `{"recoverExit":null}`
+				if defaults && (force || !current || install != 0) || !defaults && (!force || current || install != 2) {
 					t.Fatalf("exit defaults or numeric truncation changed: %v %v %d", force, current, install)
 				}
 				return code, "installer"
 			}
 			recorder := systemContractRequest(t, "POST", "exit", exit, strings.NewReader(body))
+			if finished != (code == 0) {
+				t.Fatalf("server shutdown changed for exit code %d: %v", code, finished)
+			}
 			var result struct {
 				Code int                        `json:"code"`
 				Data apicontract.SystemExitData `json:"data"`
@@ -133,6 +162,74 @@ func TestAPIContractSystemExitCompatibility(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestAPIContractSystemExitRecovery(t *testing.T) {
+	previousClose, previousRecover, previousFinish, previousConf := closeSystem, recoverSystemExit, finishSystemExit, model.Conf
+	t.Cleanup(func() {
+		closeSystem, recoverSystemExit, finishSystemExit, model.Conf = previousClose, previousRecover, previousFinish, previousConf
+	})
+	model.Conf = model.NewAppConf()
+	closeSystem = func(bool, bool, int) (int, string) { t.Fatal("recovery bypassed guards"); return 0, "" }
+	for _, code := range []int{-1, 0, 1, 3} {
+		called := false
+		finished := false
+		finishSystemExit = func() { finished = true }
+		recoverSystemExit = func(pid int, startedAt int64) (int, string) {
+			called = true
+			if pid != 123 || startedAt != 456 {
+				t.Fatalf("wrong recovery identity: %d %d", pid, startedAt)
+			}
+			return code, ""
+		}
+		recorder := systemContractRequest(t, "POST", "exit", exit, strings.NewReader(`{"force":true,"execInstallPkg":2,"recoverExit":{"pid":123,"startedAt":456}}`))
+		var result struct {
+			Code int `json:"code"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || !called || result.Code != code {
+			t.Fatalf("unexpected recovery response: %s", recorder.Body.String())
+		}
+		requireAPIContract(t, "POST", "/api/system/exit", recorder)
+		if finished != (code == 0) {
+			t.Fatalf("server shutdown changed for recovery code %d: %v", code, finished)
+		}
+	}
+}
+
+func TestAPIContractSystemExitAfterCleanupAndWrite(t *testing.T) {
+	previousClose, previousFinish := closeSystem, finishSystemExit
+	t.Cleanup(func() { closeSystem, finishSystemExit = previousClose, previousFinish })
+	cleanupFinished := false
+	closeSystem = func(bool, bool, int) (int, string) {
+		defer func() {
+			// 覆盖退出末尾清理超过 500 毫秒的情况。
+			time.Sleep(650 * time.Millisecond)
+			cleanupFinished = true
+		}()
+		return 0, ""
+	}
+	recorder := httptest.NewRecorder()
+	finishCalls := 0
+	finishSystemExit = func() {
+		finishCalls++
+		if !cleanupFinished {
+			t.Fatal("server shutdown started before deferred cleanup finished")
+		}
+		var response struct {
+			Code int                        `json:"code"`
+			Data apicontract.SystemExitData `json:"data"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 {
+			t.Fatalf("server shutdown started before success response was written: %s (%v)", recorder.Body.String(), err)
+		}
+	}
+	router := gin.New()
+	router.POST("/api/system/exit", exit)
+	router.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/system/exit", strings.NewReader(`{}`)))
+	if finishCalls != 1 {
+		t.Fatalf("expected one server shutdown after response, got %d", finishCalls)
+	}
+	requireAPIContract(t, "POST", "/api/system/exit", recorder)
 }
 
 func TestAPIContractSystemAuthenticationAdmission(t *testing.T) {
@@ -199,7 +296,30 @@ func TestAPIContractSystemRawResponses(t *testing.T) {
 	requireAPIContract(t, "GET", "/api/system/bootProgressSSE", recorder)
 }
 
+func TestAPIContractUIProcessQueryParameters(t *testing.T) {
+	const pid = "2147483001"
+	util.UIProcessIDs.Delete(pid)
+	t.Cleanup(func() { util.UIProcessIDs.Delete(pid) })
+	engine := gin.New()
+	engine.POST("/api/system/uiproc", addUIProcess)
+	for _, query := range []string{"", "?pid=" + pid} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/system/uiproc"+query, strings.NewReader(`{"pid":"`+pid+`"}`)))
+		requireAPIContract(t, "POST", "/api/system/uiproc", recorder)
+		if recorder.Code != http.StatusOK || recorder.Body.Len() != 0 {
+			t.Fatalf("UI registration response changed: %d %s", recorder.Code, recorder.Body.String())
+		}
+		_, registered := util.UIProcessIDs.Load(pid)
+		if registered != (query != "") {
+			t.Fatalf("registration must use URL query parameters: query=%q registered=%v", query, registered)
+		}
+	}
+}
+
 func TestAPIContractSystemUploadErrors(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = model.NewAppConf()
+	t.Cleanup(func() { model.Conf = previousConf })
 	for _, test := range []struct {
 		route   string
 		handler gin.HandlerFunc

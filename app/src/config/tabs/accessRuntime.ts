@@ -1,3 +1,5 @@
+import {config as configApi} from "../util/configApi";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
 import {isMobile} from "../../util/functions";
 
@@ -43,15 +45,15 @@ export const savePublish = (
         authEnable?: boolean;
     },
 ) => {
-    fetchPost("/api/setting/setPublish", {
+    configApi.set("publish", {
         enable: overrides?.enable ?? window.siyuan.config.publish.enable,
         port: overrides?.port ?? window.siyuan.config.publish.port,
         auth: {
             enable: overrides?.authEnable ?? window.siyuan.config.publish.auth.enable,
             accounts: window.siyuan.config.publish.auth.accounts,
         },
-    }, (response: IWebSocketData) => {
-        updatePublishConfig(reloadAccounts, response);
+    }, () => {
+        fetchPost("/api/setting/getPublish", {}, response => updatePublishConfig(reloadAccounts, response));
     });
 };
 
@@ -83,24 +85,32 @@ export const updatePublishConfig = (
     }
 };
 
-export const renderPublishAuthAccounts = () => {
-    const publishAuthAccounts = accessTabElement?.querySelector("#publishAuthAccounts");
+export const renderPublishAuthAccounts = (root = accessTabElement) => {
+    const publishAuthAccounts = root?.querySelector("#publishAuthAccounts");
     if (!publishAuthAccounts) {
+        return;
+    }
+    const accounts = window.siyuan.config.publish.auth.accounts;
+    const empty = accounts.length === 0;
+    publishAuthAccounts.closest(".config-item")?.classList.toggle("fn__none", empty);
+    root.querySelector("#publishAuthAccountAdd")?.closest(".config-item")?.classList.toggle("b3-label--noborder", empty);
+    if (empty) {
+        publishAuthAccounts.innerHTML = "";
         return;
     }
     const removeButtonHtml = isMobile() ?
         `<button class="b3-button b3-button--outline fn__block" data-action="remove"><svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.delete}</button>`
         : '<span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconTrashcan"></use></svg></span>';
-    const listItemHtml = window.siyuan.config.publish.auth.accounts.map((account, index) => `
+    const listItemHtml = accounts.map((account, index) => `
 <li class="b3-label b3-label--inner fn__flex" data-index="${index}">
-    <input class="b3-text-field fn__block" data-name="username" value="${Lute.EscapeHTMLStr(account.username)}" placeholder="${window.siyuan.languages.userName}">
+    <input class="b3-text-field fn__block" data-name="username" value="${escapeHtmlTextAndAttr(account.username)}" placeholder="${window.siyuan.languages.userName}">
     <span class="fn__space"></span>
     <div class="b3-form__icona fn__block">
-        <input class="b3-text-field fn__block b3-form__icona-input" type="password" data-name="password" value="${Lute.EscapeHTMLStr(account.password)}" placeholder="${window.siyuan.languages.password}">
+        <input class="b3-text-field fn__block b3-form__icona-input" type="password" data-name="password" value="${escapeHtmlTextAndAttr(account.password)}" placeholder="${window.siyuan.languages.password}">
         <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__block" data-name="memo" value="${Lute.EscapeHTMLStr(account.memo)}" placeholder="${window.siyuan.languages.memo}">
+    <input class="b3-text-field fn__block" data-name="memo" value="${escapeHtmlTextAndAttr(account.memo)}" placeholder="${window.siyuan.languages.memo}">
     <span class="fn__space"></span>
     ${removeButtonHtml}
 </li>`).join("");
@@ -112,11 +122,11 @@ export const sendAccessSetting = (controlId: string, value: unknown) => {
     switch (controlId) {
         case "api.token": {
             const token = value as Config.IAPI["token"];
-            fetchPost("/api/system/setAPIToken", {token}, () => {
+            configApi.set("api.token", token, () => {
                 window.siyuan.config.api.token = token;
                 const tokenTipEl = accessTabElement?.querySelector(`#${CSS.escape("api.token")}`)?.closest(".config-item")?.querySelector(".b3-label__text");
                 if (tokenTipEl) {
-                    tokenTipEl.innerHTML = window.siyuan.languages.about14.replace("${token}", Lute.EscapeHTMLStr(token));
+                    tokenTipEl.innerHTML = window.siyuan.languages.about14.replace("${token}", escapeHtmlTextAndAttr(token));
                 }
             });
             break;

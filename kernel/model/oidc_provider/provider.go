@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -65,7 +66,7 @@ func New(ctx context.Context, config *conf.OIDC, redirectURL string) (*Provider,
 		return nil, fmt.Errorf("discover OIDC provider failed: %w", err)
 	}
 	scopes := append([]string{}, config.Scopes...)
-	if !contains(scopes, oidc.ScopeOpenID) {
+	if !slices.Contains(scopes, oidc.ScopeOpenID) {
 		scopes = append([]string{oidc.ScopeOpenID}, scopes...)
 	}
 	return &Provider{
@@ -126,10 +127,10 @@ func newGitHub(config *conf.OIDC, redirectURL string) *Provider {
 			}
 		}
 		scopes = filtered
-		if !contains(scopes, "read:user") {
+		if !slices.Contains(scopes, "read:user") {
 			scopes = append([]string{"read:user"}, scopes...)
 		}
-		if !contains(scopes, "user:email") {
+		if !slices.Contains(scopes, "user:email") {
 			scopes = append(scopes, "user:email")
 		}
 	}
@@ -152,7 +153,7 @@ func isDefaultOIDCScopes(scopes []string) bool {
 	if len(scopes) != 3 {
 		return false
 	}
-	return contains(scopes, oidc.ScopeOpenID) && contains(scopes, "profile") && contains(scopes, "email")
+	return slices.Contains(scopes, oidc.ScopeOpenID) && slices.Contains(scopes, "profile") && slices.Contains(scopes, "email")
 }
 
 func exchangeGitHubClaims(ctx context.Context, token *oauth2.Token) (map[string]any, error) {
@@ -206,13 +207,4 @@ func getGitHubJSON(ctx context.Context, client *http.Client, endpoint string, ta
 	decoder := json.NewDecoder(io.LimitReader(response.Body, 1024*1024))
 	decoder.UseNumber()
 	return decoder.Decode(target)
-}
-
-func contains(values []string, target string) bool {
-	for _, value := range values {
-		if value == target {
-			return true
-		}
-	}
-	return false
 }

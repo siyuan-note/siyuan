@@ -1,9 +1,10 @@
+import {toggleMenu} from "../menus/menuToggle";
 import * as path from "path";
 import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
-import {escapeAriaLabel, escapeHtml} from "./escape";
+import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "./escape";
 import {isMobile} from "./functions";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Constants} from "../constants";
 import {getFileTreeDefaultIconAttr, getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 /// #if !BROWSER
@@ -21,6 +22,7 @@ import {expandFileTree} from "../layout/dock/fileTreeAnimation";
 import {getHostCapabilities} from "./hostCapabilities";
 import {highlightSearchText} from "./searchHighlight";
 import {addClearButton} from "./addClearButton";
+import {normalizeSiYuanUri} from "./normalizeSiYuanUri";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     if (!getHostCapabilities().localFileSystem) {
@@ -61,10 +63,11 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
     try {
         if (uri == null) return null;
 
-        const uriObj = uri instanceof URL ? uri : new URL(uri);
-        if (!isSiYuanUriProtocol(uriObj)) {
+        const parsedURI = uri instanceof URL ? uri : new URL(uri);
+        if (!isSiYuanUriProtocol(parsedURI)) {
             return null;
         }
+        const uriObj = normalizeSiYuanUri(parsedURI);
         if (uriObj.hostname === "blocks" && /^\/\d{14}-\w{7}/.test(uriObj.pathname)) {
             const avItemID = uriObj.searchParams.get("avItemID") || undefined;
             const avViewID = uriObj.searchParams.get("avViewID") || undefined;
@@ -160,7 +163,7 @@ export const getDocDisplayName = (name: string, titleEmpty?: boolean, escape?: b
     }
     const displayName = getDisplayName(name, true, true);
     if (escape) {
-        return Lute.EscapeHTMLStr(displayName);
+        return escapeHtmlTextAndAttr(displayName);
     }
     return displayName;
 };
@@ -251,6 +254,7 @@ export const moveToPath = (fromPaths: string[], toNotebook: string, toPath: stri
 
 export const movePathTo = (options: {
     cb: (toPath: string[], toNotebook: string[]) => void,
+    validate?: (toPath: string[], toNotebook: string[]) => boolean,
     paths?: string[],
     range?: Range,
     restoreFocus?: () => void,
@@ -411,73 +415,79 @@ export const movePathTo = (options: {
         setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
     };
     const toggleMovePathHistory = () => {
-        const keys = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys;
-        if (!keys || keys.length === 0) {
-            return;
-        }
-        const menu = new Menu(Constants.MENU_MOVE_PATH_HISTORY);
-        if (menu.isOpen) {
-            return;
-        }
-        menu.element.classList.add("b3-menu--list");
-        menu.addItem({
-            iconHTML: "",
-            label: window.siyuan.languages.clearHistory,
-            click() {
-                window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = [];
-                setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
-            }
-        });
-        const separatorElement = menu.addSeparator(1);
-        let current = true;
-        keys.forEach((s: string) => {
-            if (s) {
-                const menuItem = menu.addItem({
+        toggleMenu({
+            target: inputElement.previousElementSibling,
+            build: (_menu, session) => {
+                const keys = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys;
+                if (!keys || keys.length === 0) {
+                    return;
+                }
+                const menu = new Menu(Constants.MENU_MOVE_PATH_HISTORY);
+                if (menu.isOpen) {
+                    return;
+                }
+                menu.element.classList.add("b3-menu--list");
+                menu.addItem({
                     iconHTML: "",
-                    label: escapeHtml(s),
-                    action: "iconCloseRound",
-                    bind(element) {
-                        element.addEventListener("click", (itemEvent) => {
-                            if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
-                                keys.find((item: string, index: number) => {
-                                    if (item === s) {
-                                        keys.splice(index, 1);
-                                        return true;
+                    label: window.siyuan.languages.clearHistory,
+                    click() {
+                        window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = [];
+                        setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
+                    }
+                });
+                const separatorElement = menu.addSeparator(1);
+                let current = true;
+                keys.forEach((s: string) => {
+                    if (s) {
+                        const menuItem = menu.addItem({
+                            iconHTML: "",
+                            label: escapeHtml(s),
+                            action: "iconCloseRound",
+                            bind(element) {
+                                element.addEventListener("click", (itemEvent) => {
+                                    if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
+                                        keys.find((item: string, index: number) => {
+                                            if (item === s) {
+                                                keys.splice(index, 1);
+                                                return true;
+                                            }
+                                        });
+                                        window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = keys;
+                                        setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
+                                        if (element.previousElementSibling?.classList.contains("b3-menu__separator") && !element.nextElementSibling) {
+                                            window.siyuan.menus.menu.remove();
+                                        } else {
+                                            element.remove();
+                                        }
+                                    } else {
+                                        inputElement.value = s;
+                                        inputElement.dispatchEvent(new Event("change"));
+                                        saveMovePathHistory();
+                                        inputEvent();
+                                        window.siyuan.menus.menu.remove();
                                     }
+                                    itemEvent.preventDefault();
+                                    itemEvent.stopPropagation();
                                 });
-                                window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = keys;
-                                setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
-                                if (element.previousElementSibling?.classList.contains("b3-menu__separator") && !element.nextElementSibling) {
-                                    window.siyuan.menus.menu.remove();
-                                } else {
-                                    element.remove();
-                                }
-                            } else {
-                                inputElement.value = s;
-                                inputElement.dispatchEvent(new Event("change"));
-                                saveMovePathHistory();
-                                inputEvent();
-                                window.siyuan.menus.menu.remove();
                             }
-                            itemEvent.preventDefault();
-                            itemEvent.stopPropagation();
                         });
+                        if (current) {
+                            menuItem.classList.add("b3-menu__item--current");
+                        }
+                        current = false;
                     }
                 });
                 if (current) {
-                    menuItem.classList.add("b3-menu__item--current");
+                    separatorElement.remove();
                 }
-                current = false;
-            }
-        });
-        if (current) {
-            separatorElement.remove();
-        }
-        const rect = inputElement.getBoundingClientRect();
-        menu.open({
-            x: rect.left,
-            y: rect.bottom,
-            h: rect.height
+                const rect = inputElement.getBoundingClientRect();
+                session.show(() => menu.open({
+                    x: rect.left,
+                    y: rect.bottom,
+                    h: rect.height
+                }));
+
+            },
         });
     };
     inputEvent();
@@ -659,8 +669,10 @@ export const movePathTo = (options: {
                 pathList.push(item.getAttribute("data-path"));
                 notebookIdList.push(item.getAttribute("data-box"));
             });
-            options.cb(pathList, notebookIdList);
-            dialog.destroy();
+            if (!options.validate || options.validate(pathList, notebookIdList)) {
+                options.cb(pathList, notebookIdList);
+                dialog.destroy();
+            }
             event.preventDefault();
         }
     });
@@ -689,8 +701,10 @@ export const movePathTo = (options: {
                     pathList.push(item.getAttribute("data-path"));
                     notebookIdList.push(item.getAttribute("data-box"));
                 });
-                options.cb(pathList, notebookIdList);
-                dialog.destroy();
+                if (!options.validate || options.validate(pathList, notebookIdList)) {
+                    options.cb(pathList, notebookIdList);
+                    dialog.destroy();
+                }
                 event.preventDefault();
                 event.stopPropagation();
                 break;

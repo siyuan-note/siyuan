@@ -1,3 +1,8 @@
+// 转义 HTML 文本和双引号属性值，保持 Lute.EscapeHTMLStr 的字符替换规则。
+export const escapeHtmlTextAndAttr = (html: unknown) => {
+    return String(html).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+};
+
 export const escapeHtml = (html: string) => {
     if (!html) {
         return html;

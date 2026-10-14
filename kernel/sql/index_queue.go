@@ -28,10 +28,12 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
+	"github.com/88250/lute/ast"
 	"github.com/gofrs/flock"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -138,6 +140,8 @@ func dbOpToIndexEntry(op *dbQueueOperation) *indexEntry {
 		return &indexEntry{Action: "delete_assets", Hashes: op.removeAssetHashes}
 	case "index_node":
 		return &indexEntry{Action: "index_node", ID: op.id, Box: op.box}
+	case "update_block_content":
+		return &indexEntry{Action: op.action, ID: op.block.ID, Box: op.block.Box}
 	default:
 		return nil
 	}
@@ -302,6 +306,24 @@ func indexEntryToOp(e indexEntry, luteEngine *lute.Lute, prefix string) (*dbQueu
 		return &dbQueueOperation{removeAssetHashes: e.Hashes, inQueueTime: time.Now(), action: "delete_assets"}, nil
 	case "index_node":
 		return &dbQueueOperation{id: e.ID, box: e.Box, inQueueTime: time.Now(), action: "index_node"}, nil
+	case "update_block_content":
+		bt := treenode.GetBlockTreeInBox(e.ID, e.Box)
+		if bt == nil || bt.BoxID != e.Box {
+			return nil, os.ErrNotExist
+		}
+		tree, err := filesys.LoadTree(e.Box, bt.Path, luteEngine)
+		if err != nil {
+			logIndexEntryLoadError(prefix, e.Action, e, err)
+			return nil, err
+		}
+		node := treenode.GetNodeInTree(tree, e.ID)
+		if node == nil || node.Type != ast.NodeBlockQueryEmbed {
+			return nil, os.ErrNotExist
+		}
+		block, _ := buildBlockFromNode(node, tree)
+		// 只持久化块定位信息；恢复时重新计算派生内容，不能把查询脚本当作搜索内容。
+		block.Content, _ = CalculateEmbedBlockContent(block)
+		return &dbQueueOperation{block: block, inQueueTime: time.Now(), action: e.Action}, nil
 	}
 	return nil, fmt.Errorf("unknown index queue action [%s]", e.Action)
 }

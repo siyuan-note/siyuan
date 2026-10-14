@@ -1,4 +1,4 @@
-import {focusByRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 
 declare global {
     interface Window {

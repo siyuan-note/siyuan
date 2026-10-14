@@ -1,6 +1,8 @@
+import {hasAVKeyGroup} from "../render/av/capabilities";
 import type {FileTreeGetDocRequestInput} from "../../types/api";
 import {cleanupDragIndicators, createListDragTarget} from "./listDragTarget";
-import {focusBlock, focusByRange, getRangeByPoint} from "./selection";
+import {focusBlock, getRangeByPoint} from "./selection";
+import {focusByRange} from "./selectionOffsets";
 import {
     getContenteditableElement,
     getNextBlockSibling,
@@ -2355,12 +2357,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (shouldCopyBlockDrag(event)) {
             action = window.siyuan.languages.duplicateCopy;
         } else if (isChild) {
-            action = window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText);
+            action = window.siyuan.languages.dragTipListItemChild;
         } else {
             const key = position === "bottom" ? "dragTipListItemAfter" : "dragTipListItemBefore";
-            action = window.siyuan.languages[key].replace("${x}", targetText);
+            action = window.siyuan.languages[key];
         }
-        showDragTip(window.siyuan.dragTitle || "", action, event.clientX, event.clientY);
+        showDragTip(window.siyuan.dragTitle || "", action, event.clientX, event.clientY, targetText);
     };
     // 缓存当前目标的文本和列布局判断，避免优化路径每次 dragover 重复计算
     let cachedTargetText = "";
@@ -2682,7 +2684,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 模板渲染结果及无法回填的字段作为分组方式时不允许跨分组拖拽
                     // https://github.com/siyuan-note/siyuan/issues/15553
                     const isTCU = getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
-                        ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                        hasAVKeyGroup(bodyElement.getAttribute("data-dtype"), "renderAutoFill");
                     gutterTypes[2].split(",").find(item => {
                         const sourceGroupID = item ? item.split("@")[1] : "";
                         if (sourceGroupID !== groupID && isTCU) {
@@ -2706,7 +2708,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 模板渲染结果及无法回填的字段作为分组方式时不允许跨分组拖拽
                     // https://github.com/siyuan-note/siyuan/issues/15553
                     const isTCU = getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
-                        ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                        hasAVKeyGroup(bodyElement.getAttribute("data-dtype"), "renderAutoFill");
                     gutterTypes[2].split(",").find(item => {
                         const sourceGroupID = item ? item.split("@")[1] : "";
                         if (sourceGroupID !== groupID && isTCU) {
@@ -2949,8 +2951,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const key = (isHorizontal || cachedIsCol)
                                 ? (isFront ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetBack)
                                 : (isFront ? window.siyuan.languages.dragTipMoveTargetAbove : window.siyuan.languages.dragTipMoveTargetBelow);
-                            showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", displayText),
-                                event.clientX, event.clientY);
+                            showDragTip(window.siyuan.dragTitle || "", key,
+                                event.clientX, event.clientY, displayText);
                         }
                     }
                 }
@@ -3015,8 +3017,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const key = isSbLeftEdge
                             ? window.siyuan.languages.dragTipMoveTargetFront
                             : window.siyuan.languages.dragTipMoveTargetBack;
-                        showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", sbText),
-                            event.clientX, event.clientY);
+                        showDragTip(window.siyuan.dragTitle || "", key,
+                            event.clientX, event.clientY, sbText);
                     }
                     return;
                 }
@@ -3032,8 +3034,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
                 if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                     showDragTip(window.siyuan.dragTitle || "",
-                        window.siyuan.languages.dragTipMoveTargetFront.replace("${x}", cachedTargetText),
-                        event.clientX, event.clientY);
+                        window.siyuan.languages.dragTipMoveTargetFront,
+                        event.clientX, event.clientY, cachedTargetText);
                 }
             } else if (event.clientX > nodeRect.right - 32 && event.clientX < nodeRect.right &&
                 !targetElement.classList.contains("av__row")) {
@@ -3042,8 +3044,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
                 if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                     showDragTip(window.siyuan.dragTitle || "",
-                        window.siyuan.languages.dragTipMoveTargetBack.replace("${x}", cachedTargetText),
-                        event.clientX, event.clientY);
+                        window.siyuan.languages.dragTipMoveTargetBack,
+                        event.clientX, event.clientY, cachedTargetText);
                 }
             } else if (targetElement.classList.contains("av__row--header")) {
                 targetElement.classList.add("dragover__bottom");
@@ -3054,8 +3056,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
                     if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                         showDragTip(window.siyuan.dragTitle || "",
-                            (cachedIsCol ? window.siyuan.languages.dragTipMoveTargetBack : window.siyuan.languages.dragTipMoveTargetBelow).replace("${x}", cachedTargetText),
-                            event.clientX, event.clientY);
+                            cachedIsCol ? window.siyuan.languages.dragTipMoveTargetBack : window.siyuan.languages.dragTipMoveTargetBelow,
+                            event.clientX, event.clientY, cachedTargetText);
                     }
                 } else if (disabledPosition !== "top") {
                     targetElement.classList.add("dragover__top");
@@ -3063,8 +3065,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
                     if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                         showDragTip(window.siyuan.dragTitle || "",
-                            (cachedIsCol ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetAbove).replace("${x}", cachedTargetText),
-                            event.clientX, event.clientY);
+                            cachedIsCol ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetAbove,
+                            event.clientX, event.clientY, cachedTargetText);
                     }
                 }
             }
@@ -3165,8 +3167,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const key = isCol
                     ? (isFront ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetBack)
                     : (isFront ? window.siyuan.languages.dragTipMoveTargetAbove : window.siyuan.languages.dragTipMoveTargetBelow);
-                showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", targetText),
-                    event.clientX, event.clientY);
+                showDragTip(window.siyuan.dragTitle || "", key,
+                    event.clientX, event.clientY, targetText);
             }
         }
     });

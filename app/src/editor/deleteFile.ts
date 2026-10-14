@@ -3,7 +3,7 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {getDisplayName, getNotebookName, isEncryptedBox} from "../util/pathName";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {hasTopClosestByTag} from "../protyle/util/hasClosest";
-import {escapeHtml} from "../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {Constants} from "../constants";
 import {checkBlockRef, getBlockRefWarningHTML} from "../util/checkBlockRef";
 import {getDocTreeDeleteTargets} from "../menus/navigationSelection";
@@ -99,7 +99,7 @@ export const deleteFiles = async (liElements: Element[]) => {
                 if (hasRef === undefined) {
                     return;
                 }
-                let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", Lute.EscapeHTMLStr(getNotebookName(itemNotebookId)))}
+                let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(getNotebookName(itemNotebookId)))}
 <div class="fn__hr"></div>
 <div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;
                 if (hasRef) {

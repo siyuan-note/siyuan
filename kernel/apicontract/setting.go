@@ -69,11 +69,20 @@ type SettingRerank struct {
 }
 
 type SettingDecision struct {
-	Enabled  bool   `json:"enabled" api:"optional,nullable"`
-	Endpoint string `json:"endpoint" api:"optional,nullable"`
-	APIKey   string `json:"apiKey" api:"optional,nullable"`
-	Name     string `json:"name" api:"optional,nullable"`
-	Timeout  int    `json:"timeout" api:"optional,nullable"`
+	Enabled  bool                               `json:"enabled" api:"optional,nullable"`
+	Provider string                             `json:"provider" api:"optional,nullable"`
+	Profiles map[string]*SettingDecisionProfile `json:"profiles" api:"optional,nullable"`
+	Endpoint string                             `json:"endpoint" api:"optional,nullable"`
+	APIKey   string                             `json:"apiKey" api:"optional,nullable"`
+	Name     string                             `json:"name" api:"optional,nullable"`
+	Timeout  int                                `json:"timeout" api:"optional,nullable"`
+}
+
+type SettingDecisionProfile struct {
+	Endpoint string `json:"endpoint"`
+	APIKey   string `json:"apiKey"`
+	Name     string `json:"name"`
+	Timeout  int    `json:"timeout"`
 }
 
 type SettingAgent struct {
@@ -102,6 +111,8 @@ type SettingCapabilityApproval struct {
 
 type SettingAgentSkills struct {
 	UserEnabled []string `json:"userEnabled" api:"optional,nullable"`
+	// BuiltinDisabled 保存稳定的官方技能 ID；省略时默认启用，未知 ID 在配置规范化时保留。
+	BuiltinDisabled []string `json:"builtinDisabled" api:"optional,nullable"`
 }
 
 type SettingEditing struct {
@@ -120,6 +131,9 @@ type SettingImageGeneration struct {
 }
 
 type SettingProvider struct {
+	// 套餐认证固定使用公开 Responses API；账户引用不包含令牌，省略时保留 API Key 认证。
+	AuthType       string            `json:"authType,omitempty" api:"optional,nullable"`
+	AccountID      string            `json:"accountID,omitempty" api:"optional,nullable"`
 	Headers        map[string]string `json:"headers,omitempty" api:"optional,nullable"`
 	ID             string            `json:"id" api:"optional,nullable"`
 	DisplayName    string            `json:"displayName,omitempty" api:"optional,nullable"`
@@ -174,6 +188,7 @@ type SettingFlashcard struct {
 	Weights          string  `json:"weights" api:"optional,nullable"`
 }
 
+// SettingEditor 描述编辑器配置。displayImgName 和 displayImgAlt 默认关闭，更新设置时省略这些字段保留当前值。
 type SettingEditor struct {
 	AllowSVGScript                  bool                 `json:"allowSVGScript" api:"optional,nullable"`
 	AllowHTMLBLockScript            bool                 `json:"allowHTMLBLockScript" api:"optional,nullable"`
@@ -191,6 +206,8 @@ type SettingEditor struct {
 	CodeLigatures                   bool                 `json:"codeLigatures" api:"optional,nullable"`
 	DisplayBookmarkIcon             bool                 `json:"displayBookmarkIcon" api:"optional,nullable"`
 	DisplayNetImgMark               bool                 `json:"displayNetImgMark" api:"optional,nullable"`
+	DisplayImgName                  bool                 `json:"displayImgName" api:"optional,nullable"`
+	DisplayImgAlt                   bool                 `json:"displayImgAlt" api:"optional,nullable"`
 	DatabaseAttrShow                *bool                `json:"databaseAttrShow" api:"optional,nullable"`
 	DatabaseAttrClickMode           int                  `json:"databaseAttrClickMode" api:"optional,nullable"`
 	DatabaseAttrViewMode            int                  `json:"databaseAttrViewMode" api:"optional,nullable"`
@@ -218,7 +235,8 @@ type SettingEditor struct {
 	DynamicLoadBlocks               int                  `json:"dynamicLoadBlocks" api:"optional,nullable"`
 	Justify                         bool                 `json:"justify" api:"optional,nullable"`
 	RTL                             bool                 `json:"rtl" api:"optional,nullable"`
-	// AutoDirection 默认关闭；启用后段落和标题按首个强方向字符排版，手动方向优先，不改变列表和表格布局。
+	// AutoDirection 默认关闭；段落和标题按首个强方向字符排版，列表项独立调整标记和缩进。
+	// 手动方向优先，表格列顺序不变。
 	AutoDirection           bool             `json:"autoDirection" api:"optional,nullable"`
 	Spellcheck              bool             `json:"spellcheck" api:"optional,nullable"`
 	SpellcheckLanguages     []string         `json:"spellcheckLanguages" api:"optional,nullable"`
@@ -295,11 +313,16 @@ type SettingExport struct {
 }
 
 type SettingFileTree struct {
-	AlwaysSelectOpenedFile   bool   `json:"alwaysSelectOpenedFile" api:"optional,nullable"`
-	OpenFilesUseCurrentTab   bool   `json:"openFilesUseCurrentTab" api:"optional,nullable"`
-	CloseTabOnDoubleClick    bool   `json:"closeTabOnDoubleClick" api:"optional,nullable"`
-	DocIconClickExpand       bool   `json:"docIconClickExpand" api:"optional,nullable"`
-	ParentDocClickExpand     bool   `json:"parentDocClickExpand" api:"optional,nullable"`
+	AlwaysSelectOpenedFile bool `json:"alwaysSelectOpenedFile" api:"optional,nullable"`
+	OpenFilesUseCurrentTab bool `json:"openFilesUseCurrentTab" api:"optional,nullable"`
+	CloseTabOnDoubleClick  bool `json:"closeTabOnDoubleClick" api:"optional,nullable"`
+	// 单击文档图标或笔记本图标的行为：0 修改图标，1 展开或折叠子文档。无子文档时，1 在有可打开文档时打开文档，否则修改图标。
+	// 超出取值范围的输入按 0 处理。已废弃的 docIconClickExpand 不再读取，旧配置升级后回到 0。
+	DocIconClickMode int `json:"docIconClickMode" api:"optional,nullable"`
+	// 点击父文档标题的行为：0 打开文档，1 展开或折叠子文档，2 单击展开或折叠子文档、双击打开父文档。
+	// 没有子文档时各取值均直接打开文档；取 2 时单击需等待约 300 毫秒以判断是否双击。超出取值范围的输入按 0 处理。
+	// 已废弃的 parentDocClickExpand 与 parentDocDoubleClickOpen 不再读取，旧配置升级后回到 0。
+	ParentDocTitleClickMode  int    `json:"parentDocTitleClickMode" api:"optional,nullable"`
 	BoxDocEnabled            *bool  `json:"boxDocEnabled" api:"optional,nullable"`
 	UseSVGDefaultIcon        *bool  `json:"useSVGDefaultIcon" api:"optional,nullable"`
 	RefCreateSaveBox         string `json:"refCreateSaveBox" api:"optional,nullable"`
@@ -440,10 +463,11 @@ type SettingEntryVisibility struct {
 }
 
 type SettingEntryVisibilityProfile struct {
-	ID      string              `json:"id" api:"optional,nullable"`
-	Name    string              `json:"name" api:"optional,nullable"`
-	Entries map[string]bool     `json:"entries" api:"optional,nullable"`
-	Orders  map[string][]string `json:"orders" api:"optional,nullable"`
+	ID       string              `json:"id" api:"optional,nullable"`
+	Name     string              `json:"name" api:"optional,nullable"`
+	Defaults string              `json:"defaults,omitempty" api:"optional,nullable,enum=simple|full"`
+	Entries  map[string]bool     `json:"entries" api:"optional,nullable"`
+	Orders   map[string][]string `json:"orders" api:"optional,nullable"`
 }
 
 type SettingPublish struct {

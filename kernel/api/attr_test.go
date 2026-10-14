@@ -49,7 +49,7 @@ func TestBlockAttrsRespectPublishAccess(t *testing.T) {
 	previousDataDir := util.DataDir
 	previousLangs := util.Langs
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	util.DataDir = t.TempDir()
 	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
 	util.Langs = map[string]map[int]string{

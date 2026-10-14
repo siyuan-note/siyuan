@@ -1,0 +1,77 @@
+import * as assert from "node:assert/strict";
+import {test} from "node:test";
+import {flushSettingSaves, settingSaveFailures, trackSettingRequest, trackSettingSave} from "./pending";
+import {createNamespacePatchQueue} from "../util/namespacePatchQueue";
+
+test("reset waits for queued settings that have not started their requests", async () => {
+    const saved: string[] = [];
+    let release: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const patch = createNamespacePatchQueue({
+        namespace: "editor", getConfig: () => ({}), submit: async () => ({}),
+        submitPatch: async (path) => {
+            await gate;
+            saved.push(path);
+            return {};
+        },
+    });
+    void patch("fontSize", 18);
+    void patch("fullWidth", true);
+    let flushed = false;
+    const flush = flushSettingSaves().then(() => { flushed = true; });
+    await Promise.resolve();
+    assert.equal(flushed, false);
+    release();
+    await flush;
+    assert.deepEqual(saved, ["fontSize", "fullWidth"]);
+});
+
+test("reset detects API failures even when normal settings UI consumes the error", async () => {
+    for (const path of ["/api/setting/patch", "/api/asset/setOCRConfig"]) {
+        for (const result of [Promise.resolve({code: -1}), Promise.reject(new Error("offline"))]) {
+            const before = settingSaveFailures();
+            await trackSettingRequest(path, result).catch(() => {});
+            await assert.rejects(flushSettingSaves(before));
+        }
+    }
+    await trackSettingSave(Promise.resolve());
+    await flushSettingSaves();
+});
+
+test("reset does not wait for its own acknowledgement or unrelated fetches", async () => {
+    for (const path of ["/api/setting/confirmSettingsReset", "/api/setting/resetSettings", "/api/search/fullTextSearchBlock"]) {
+        trackSettingRequest(path, new Promise(() => {}));
+    }
+    await flushSettingSaves();
+});
+
+test("reset waits for graph writes and rejects failed graph saves", async () => {
+    for (const name of ["setGraphConf", "resetGraph", "resetLocalGraph", "getGraph", "getLocalGraph"]) {
+        let release: (result: {code: number}) => void;
+        const before = settingSaveFailures();
+        trackSettingRequest("/api/graph/" + name, new Promise(resolve => { release = resolve; }));
+        let flushed = false;
+        const flush = flushSettingSaves(before).then(() => { flushed = true; });
+        await Promise.resolve();
+        await Promise.resolve();
+        assert.equal(flushed, false);
+        release({code: -1});
+        await assert.rejects(flush);
+    }
+});
+
+test("slash usage failures do not affect preference saves", async () => {
+    for (const result of [Promise.resolve({code: -1}), Promise.reject(new Error("offline"))]) {
+        const before = settingSaveFailures();
+        await trackSettingRequest("/api/storage/setLocalStorageVal", result, true).catch(() => {});
+        await flushSettingSaves(before);
+        assert.equal(settingSaveFailures(), before);
+    }
+    for (const path of ["/api/storage/setLocalStorage", "/api/storage/setLocalStorageVal", "/api/storage/removeLocalStorageVal", "/api/storage/removeLocalStorageVals"]) {
+        const before = settingSaveFailures();
+        await trackSettingRequest(path, Promise.resolve({code: -1}));
+        await assert.rejects(flushSettingSaves(before));
+    }
+    trackSettingRequest("/api/storage/setLocalStorageOther", new Promise(() => {}));
+    await flushSettingSaves();
+});

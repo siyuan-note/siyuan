@@ -16,7 +16,7 @@ type directJSONTestResult struct {
 func TestDirectJSONHTTPResponses(t *testing.T) {
 	previous := definitions
 	t.Cleanup(func() { definitions = previous })
-	endpoint := define[EmptyRequest, directJSONTestResult]("directJSONTest", "/test/direct-json", NoBody, ResponseOptions{Output: DirectJSONOutput, NoContent: true}, "POST")
+	endpoint := define[EmptyRequest, directJSONTestResult]("directJSONTest", "/test/direct-json", PublicAccess, NoBody, ResponseOptions{Output: DirectJSONOutput, NoContent: true}, "POST")
 	bundle, err := BuildBundle()
 	if err != nil {
 		t.Fatal(err)
@@ -56,7 +56,7 @@ func TestDirectJSONHTTPResponses(t *testing.T) {
 	if _, err := json.Marshal(SuccessNoContent[directJSONTestResult]()); err == nil {
 		t.Fatal("empty response was serialized")
 	}
-	declarations := string(bundle.TypeScript(nil))
+	declarations := string(bundle.TypeScript(nil, nil))
 	if !strings.Contains(declarations, `output: "directJSON"`) || !strings.Contains(declarations, "noContent: true") {
 		t.Fatal("direct JSON protocol metadata missing")
 	}

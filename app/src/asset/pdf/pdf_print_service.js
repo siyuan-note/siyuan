@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line max-len
-/** @typedef {import("./interfaces.js").IPDFPrintServiceFactory} IPDFPrintServiceFactory */
-
 import {
   AnnotationMode,
   PixelsPerInch,
   RenderingCancelledException,
   shadow,
 } from "./pdfjs";
-import { getXfaHtmlForPrinting } from "./print_utils.js";
+import {
+  BasePrintServiceFactory,
+  getXfaHtmlForPrinting,
+} from "./print_utils.js";
 
 let activeService = null;
 let dialog = null;
@@ -58,7 +58,7 @@ function renderPage(
     printAnnotationStoragePromise,
   ]).then(function ([pdfPage, printAnnotationStorage]) {
     const renderContext = {
-      canvasContext: ctx,
+      canvas: scratchCanvas,
       transform: [PRINT_UNITS, 0, 0, PRINT_UNITS, 0, 0],
       viewport: pdfPage.getViewport({ scale: 1, rotation: size.rotation }),
       intent: "print",
@@ -124,9 +124,9 @@ class PDFPrintService {
     // In browsers where @page + size is not supported, the next stylesheet
     // will be ignored and the user has to select the correct paper size in
     // the UI if wanted.
-    this.pageStyleSheet = document.createElement("style");
-    this.pageStyleSheet.textContent = `@page { size: ${width}pt ${height}pt;}`;
-    body.append(this.pageStyleSheet);
+    this.pageStyleSheet = new CSSStyleSheet();
+    this.pageStyleSheet.replaceSync(`@page { size: ${width}pt ${height}pt;}`);
+    document.adoptedStyleSheets.push(this.pageStyleSheet);
   }
 
   destroy() {
@@ -141,16 +141,22 @@ class PDFPrintService {
     body.removeAttribute("data-pdfjsprinting");
 
     if (this.pageStyleSheet) {
-      this.pageStyleSheet.remove();
+      document.adoptedStyleSheets = document.adoptedStyleSheets.filter(
+        styleSheet => styleSheet !== this.pageStyleSheet
+      );
       this.pageStyleSheet = null;
+    }
+    if (this._blobURLs) {
+      for (const url of this._blobURLs) {
+        URL.revokeObjectURL(url);
+      }
+      this._blobURLs = null;
     }
     this.scratchCanvas.width = this.scratchCanvas.height = 0;
     this.scratchCanvas = null;
     activeService = null;
     ensureOverlay().then(function () {
-      if (overlayManager.active === dialog) {
-        overlayManager.close(dialog);
-      }
+      overlayManager.closeIfActive(dialog);
     });
   }
 
@@ -191,7 +197,13 @@ class PDFPrintService {
     this.throwIfInactive();
     const img = document.createElement("img");
     this.scratchCanvas.toBlob(blob => {
-      img.src = URL.createObjectURL(blob);
+      const blobURL = URL.createObjectURL(blob);
+      img.src = blobURL;
+      // Defer revocation until after printing completes (in destroy()) to avoid
+      // broken print images in Firefox when a service worker is registered,
+      // since Firefox re-fetches blob URLs when rendering the print dialog.
+      // See https://github.com/mozilla/pdf.js/issues/19988
+      (this._blobURLs ??= []).push(blobURL);
     });
 
     const wrapper = document.createElement("div");
@@ -203,13 +215,9 @@ class PDFPrintService {
     img.onload = resolve;
     img.onerror = reject;
 
-    promise
-      .catch(() => {
-        // Avoid "Uncaught promise" messages in the console.
-      })
-      .then(() => {
-        URL.revokeObjectURL(img.src);
-      });
+    promise.catch(() => {
+      // Avoid "Uncaught promise" messages in the console.
+    });
     return promise;
   }
 
@@ -258,33 +266,33 @@ window.print = function () {
     dispatchEvent("beforeprint");
   } finally {
     if (!activeService) {
+      if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("TESTING")) {
+        // eslint-disable-next-line no-unsafe-finally
+        throw new Error("window.print() is not supported");
+      }
       console.error("Expected print service to be initialized.");
       ensureOverlay().then(function () {
-        if (overlayManager.active === dialog) {
-          overlayManager.close(dialog);
-        }
+        overlayManager.closeIfActive(dialog);
       });
-      return; // eslint-disable-line no-unsafe-finally
+    } else {
+      const activeServiceOnEntry = activeService;
+      activeService
+        .renderPages()
+        .then(() => activeServiceOnEntry.performPrint())
+        .catch(() => {
+          // Ignore any error messages.
+        })
+        .then(() => {
+          // aborts acts on the "active" print request, so we need to check
+          // whether the print request (activeServiceOnEntry) is still active.
+          // Without the check, an unrelated print request (created after
+          // aborting this print request while the pages were being generated)
+          // would be aborted.
+          if (activeServiceOnEntry.active) {
+            abort();
+          }
+        });
     }
-    const activeServiceOnEntry = activeService;
-    activeService
-      .renderPages()
-      .then(function () {
-        return activeServiceOnEntry.performPrint();
-      })
-      .catch(function () {
-        // Ignore any error messages.
-      })
-      .then(function () {
-        // aborts acts on the "active" print request, so we need to check
-        // whether the print request (activeServiceOnEntry) is still active.
-        // Without the check, an unrelated print request (created after aborting
-        // this print request while the pages were being generated) would be
-        // aborted.
-        if (activeServiceOnEntry.active) {
-          abort();
-        }
-      });
   }
 };
 
@@ -374,10 +382,7 @@ function ensureOverlay() {
   return overlayPromise;
 }
 
-/**
- * @implements {IPDFPrintServiceFactory}
- */
-class PDFPrintServiceFactory {
+class PDFPrintServiceFactory extends BasePrintServiceFactory {
   static initGlobals(app) {
     viewerApp = app;
   }

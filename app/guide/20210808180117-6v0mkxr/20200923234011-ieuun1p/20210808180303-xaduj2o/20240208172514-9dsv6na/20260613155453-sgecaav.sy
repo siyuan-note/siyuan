@@ -6,7 +6,7 @@
 		"id": "20260613155453-sgecaav",
 		"title": "Field Types",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-piff4he",
-				"updated": "20260613155453"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -45,7 +45,7 @@
 		{
 			"ID": "20260613155453-ga53qn2",
 			"Type": "NodeTable",
-			"Data": "| Field Type | Use Case | Sortable | Filterable | Aggregatable | Special Template Suffix |\n|---------|---------|--------|--------|--------|------------|\n| Text | Titles, descriptions, arbitrary text | √ | √ | × | — |\n| Number | Amounts, quantities, ratings | √ | √ | √ | — |\n| Date | Deadlines, birthdays, creation dates | √ | √ | × | `_end` |\n| Select | Status, category, priority | √ | √ | × | — |\n| Multi-Select | Tags, multi-category | √ | √ | × | `_str` |\n| URL | External links, references | × | √ | × | — |\n| Email | Contact email | × | √ | × | — |\n| Phone | Contact phone | × | √ | × | — |\n| Checkbox | Completed/not, enabled/disabled | √ | √ | × | — |\n| Primary Key (Block) | Unique record identifier, can bind to a content block | √ | √ | × | `_created` |\n| Asset | Attachments, images, files | × | × | × | — |\n| Relation | Cross-database record relations | × | √ | × | — |\n| Rollup | Statistical calculations based on relation fields | √ | √ | √ | — |\n| Template | Auto-fill default values | × | × | × | — |\n| Created Time | Record creation time (auto) | √ | √ | × | — |\n| Updated Time | Record last modified time (auto) | √ | √ | × | — |\n| Line Number | Auto-increment sequence number | √ | √ | × | — |",
+			"Data": "| Field Type | Use Case | Sortable | Filterable | Aggregatable | Special Template Suffix |\n|---------|---------|--------|--------|--------|------------|\n| Text | Titles, descriptions, arbitrary text | √ | √ | × | — |\n| Number | Amounts, quantities, ratings | √ | √ | √ | — |\n| Date | Deadlines, birthdays, creation dates | √ | √ | × | `_end` |\n| Select | Status, category, priority | √ | √ | × | — |\n| Multi-Select | Tags, multi-category | √ | √ | × | `_str` |\n| URL | External links, references | × | √ | × | — |\n| Email | Contact email | × | √ | × | — |\n| Phone | Contact phone | × | √ | × | — |\n| Checkbox | Completed/not, enabled/disabled | √ | √ | × | — |\n| Primary Key (Block) | Unique record identifier, can bind to a content block | √ | √ | × | `_created` |\n| Asset | Attachments, images, files | × | × | × | — |\n| Relation | Cross-database record relations | × | √ | × | — |\n| Rollup | Statistical calculations based on relation fields | √ | √ | √ | — |\n| Template | Auto-fill default values | × | × | × | — |\n| Created Time | Record creation time (auto) | √ | √ | × | — |\n| Updated Time | Record last modified time (auto) | √ | √ | × | — |\n| Line Number | Auto-increment sequence number | √ | √ | × | — |\n| Location | Place names and coordinates | √ | √ | √ | — |",
 			"TableAligns": [
 				0,
 				0,
@@ -56,7 +56,7 @@
 			],
 			"Properties": {
 				"id": "20260613155453-ga53qn2",
-				"updated": "20260613155453"
+				"updated": "20261012014859"
 			},
 			"Children": [
 				{
@@ -1264,6 +1264,73 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Location"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Place names and coordinates"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -1277,7 +1344,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e "
+					"Data": "> "
 				},
 				{
 					"ID": "20260613155453-ogc2pir",
@@ -2053,7 +2120,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-tvixbm7",
-				"updated": "20260613155453"
+				"updated": "20261009120841"
 			},
 			"Children": [
 				{
@@ -2071,12 +2138,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613155453-3tiq5c7",
-				"updated": "20260613155453"
+				"updated": "20261009120841"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Used for storing dates or date-times."
+					"Data": "Used for storing dates or date-times, with Gregorian and Chinese lunar calendar support."
 				}
 			]
 		},
@@ -5534,6 +5601,117 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-6kd9rk5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261009034010-6kd9rk5",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Location field"
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-0yhiv8g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-0yhiv8g",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Add a field of type Location, then click a cell to edit its optional name and WGS84 coordinates. Enter both longitude and latitude in decimal degrees. Longitude ranges from -180 to 180 and latitude from -90 to 90; zero is valid. Leave both coordinates blank to save only a name. Coordinates are not converted automatically."
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-h9vridq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-h9vridq",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enter longitude and latitude in their separate fields, for example longitude 116.4074 and latitude 39.9042. Source text stays unchanged when you only edit the name. Changing the coordinates clears that source text."
+				}
+			]
+		},
+		{
+			"ID": "20261009034010-dub50kq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261009034010-dub50kq",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Save"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to apply edits or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cancel"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to discard them. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Clear"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " removes the location value. Text filters and sorting use the combined name, coordinates, and fixed WGS84 label. The app displays longitude, latitude; plain-text copying and export use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Name; latitude, longitude [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", omitting the name and semicolon when no name is set. You can paste this text or a WGS84 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "latitude, longitude"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " pair into a Location cell. For example, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Beijing; 39.9042, 116.4074 [WGS84]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " includes both the name and coordinates. Structured database copying preserves the named latitude and longitude values."
 				}
 			]
 		},

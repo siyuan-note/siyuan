@@ -10,7 +10,8 @@ import {uploadFiles} from "../../../protyle/upload";
 import {previewImages} from "../../../protyle/preview/image";
 import {removeCompressURL} from "../../../util/image";
 import {mountProtyleLiteFragment} from "../../../protyle/lite/fragmentEditor";
-import {AGENT_SKILL_SELECTOR, expandAgentSkillSelection, normalizeAgentSkills} from "./agentSkill";
+import {AGENT_SKILL_SELECTOR, deleteAgentSkill, expandAgentSkillSelection, normalizeAgentSkills} from "./agentSkill";
+import {focusByRange} from "../../../protyle/util/selectionOffsets";
 
 export interface AgentComposerData {
     text: string;
@@ -112,7 +113,7 @@ const hintSkill = registerBuiltinSlashHint((key: string, protyle: IProtyle): IHi
             .map((s: Record<string, string>) => ({
                 value: '<span data-type="text" custom-agent-skill="true" contenteditable="false">' +
                     escapeHtml(s.name) + "</span> ",
-                html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic">' +
+                html: '<div class="b3-list-item__first" data-type="agent-skill"><svg class="b3-list-item__graphic">' +
                     '<use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">' +
                     escapeHtml(s.name) + "</span></div>" +
                     (s.description ? '<div class="b3-list-item__meta b3-list-item__showall">' + escapeHtml(s.description) + "</div>" : ""),
@@ -260,8 +261,29 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
             }
         }
     };
-    ["beforeinput", "cut", "paste"].forEach(type => {
+    let skillDeletionRange: Range;
+    const handleSkillDeletion = (event: InputEvent) => {
+        if (!deleteAgentSkill(p, event)) {
+            return false;
+        }
+        skillDeletionRange = getSelection().getRangeAt(0).cloneRange();
+        return true;
+    };
+    wysiwyg.element.addEventListener("beforeinput", (event: InputEvent) => {
+        if (!handleSkillDeletion(event)) {
+            prepareSkillSelection();
+        }
+    }, true);
+    ["cut", "paste"].forEach(type => {
         wysiwyg.element.addEventListener(type, prepareSkillSelection, true);
+    });
+    wysiwyg.element.addEventListener("keyup", (event: KeyboardEvent) => {
+        // Android 软键盘可能在退格后的 keyup 再次清空选区，恢复本次删除后的光标。
+        if (event.key === "Unidentified" && skillDeletionRange && getSelection().rangeCount === 0 &&
+            wysiwyg.element.contains(skillDeletionRange.startContainer)) {
+            focusByRange(skillDeletionRange);
+        }
+        skillDeletionRange = undefined;
     });
 
     // 智能体输入框没有文档 ID，直接预览输入框中的图片，避免走依赖文档资源列表的默认逻辑。
@@ -284,7 +306,15 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
 
     // capture 阶段拦截 hint 选择、发送快捷键、历史翻页；undo/redo 交给 protyle 的 keydown（调 LocalUndo）。
     wysiwyg.element.addEventListener("keydown", (event: KeyboardEvent) => {
+        skillDeletionRange = undefined;
         if (event.isComposing) {
+            return;
+        }
+        if (!event.ctrlKey && !event.metaKey && !event.altKey && ["Backspace", "Delete"].includes(event.key) &&
+            handleSkillDeletion(new InputEvent("beforeinput", {cancelable: true,
+                inputType: event.key === "Backspace" ? "deleteContentBackward" : "deleteContentForward"}))) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
             return;
         }
         prepareSkillSelection();
@@ -315,7 +345,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
 
         // ↑ 翻历史：仅在空输入或已处于历史浏览时触发
         if (enableHistory && event.key === "ArrowUp" && !event.shiftKey) {
-            const isEmpty = (wysiwyg.element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim() === "";
+            const isEmpty = (wysiwyg.element.textContent || "").replaceAll(Constants.ZWSP, "").trim() === "";
             if ((history.isBrowsing() || isEmpty) && history.has()) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -354,7 +384,50 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     };
 
     const getBlockHTML = (): string => {
-        return fragment.getBlockHTML(resetEmbedBlocks);
+        return fragment.getBlockHTML((element) => {
+            resetEmbedBlocks(element);
+            // 仅清理消息边界的段落空白，保留内部空行和非文本内容。
+            const trimBoundary = (fromStart: boolean) => {
+                const trimNode = (node: Node): boolean => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        const pattern = fromStart ? `^[\\s${Constants.ZWSP}]+` : `[\\s${Constants.ZWSP}]+$`;
+                        node.textContent = (node.textContent || "").replace(new RegExp(pattern), "");
+                        return !node.textContent;
+                    }
+                    if (!(node instanceof HTMLElement)) {
+                        return false;
+                    }
+                    if (node.tagName === "BR") {
+                        node.remove();
+                        return true;
+                    }
+                    const types = (node.getAttribute("data-type") || "").split(" ").filter(Boolean);
+                    if (node.tagName !== "SPAN" || types.some(type =>
+                        !["strong", "em", "s", "u", "mark", "sup", "sub", "text"].includes(type))) {
+                        return false;
+                    }
+                    return trimChildren(node);
+                };
+                const trimChildren = (parent: HTMLElement): boolean => {
+                    const nodes = Array.from(parent.childNodes);
+                    if (!fromStart) {
+                        nodes.reverse();
+                    }
+                    return nodes.every(trimNode);
+                };
+                let block = fromStart ? element.firstElementChild : element.lastElementChild;
+                while (block?.getAttribute("data-type") === "NodeParagraph") {
+                    const content = block.querySelector<HTMLElement>('[contenteditable="true"]');
+                    if (!content || !trimChildren(content)) {
+                        break;
+                    }
+                    block.remove();
+                    block = fromStart ? element.firstElementChild : element.lastElementChild;
+                }
+            };
+            trimBoundary(true);
+            trimBoundary(false);
+        });
     };
 
     return {

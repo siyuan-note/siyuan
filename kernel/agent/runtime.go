@@ -38,13 +38,14 @@ const (
 )
 
 type agentRuntime struct {
-	SchemaVersion  int                `json:"schemaVersion"`
-	Revision       int64              `json:"revision"`
-	SessionID      string             `json:"sessionID"`
-	PermissionMode string             `json:"permissionMode,omitempty"`
-	AlwaysAllow    bool               `json:"alwaysAllow,omitempty"`
-	ActiveTurn     *agentRuntimeTurn  `json:"activeTurn,omitempty"`
-	Compaction     *runtimeCompaction `json:"compaction,omitempty"`
+	SchemaVersion  int                  `json:"schemaVersion"`
+	Revision       int64                `json:"revision"`
+	SessionID      string               `json:"sessionID"`
+	PermissionMode string               `json:"permissionMode,omitempty"`
+	AlwaysAllow    bool                 `json:"alwaysAllow,omitempty"`
+	ActiveTurn     *agentRuntimeTurn    `json:"activeTurn,omitempty"`
+	Compaction     *runtimeCompaction   `json:"compaction,omitempty"`
+	PluginWorkflow *pluginWorkflowState `json:"pluginWorkflow,omitempty"`
 }
 
 type sessionPermissionController struct {
@@ -175,6 +176,10 @@ type agentRuntimeTurn struct {
 type runtimeCompaction struct {
 	Version              int               `json:"version"`
 	Protocol             string            `json:"protocol,omitempty"`
+	Model                string            `json:"model,omitempty"`
+	ScopeKey             string            `json:"scopeKey,omitempty"`
+	CoveredMessageCount  int               `json:"coveredMessageCount,omitempty"`
+	CoveredRoundID       string            `json:"coveredRoundID,omitempty"`
 	Summary              string            `json:"summary"`
 	ResponseOutput       []json.RawMessage `json:"responseOutput,omitempty"`
 	ResponseOutputTokens int               `json:"responseOutputTokens,omitempty"`
@@ -332,7 +337,7 @@ func saveRuntimeTurn(sessionID string, turn *agentRuntimeTurn) error {
 	return writeRuntimeLocked(sessionID, runtime)
 }
 
-func saveRuntimeCompaction(sessionID string, compaction *runtimeCompaction) error {
+func saveRuntimeCompaction(sessionID, turnID string, compaction *runtimeCompaction) error {
 	if sessionID == "" || compaction == nil {
 		return errContextCannotBeCompacted
 	}
@@ -345,6 +350,9 @@ func saveRuntimeCompaction(sessionID string, compaction *runtimeCompaction) erro
 	runtime, err := loadRuntimeLocked(sessionID)
 	if err != nil {
 		return err
+	}
+	if runtime.ActiveTurn == nil || runtime.ActiveTurn.TurnID != turnID {
+		return fmt.Errorf("agent runtime turn changed during compaction")
 	}
 	runtime.Compaction = cloneRuntimeCompaction(compaction)
 	return writeRuntimeLocked(sessionID, runtime)

@@ -162,14 +162,10 @@ func init() {
 			if err != nil {
 				return r, err
 			}
-			r.ID, err = legacyField[string](fields, "id", "String", true)
-			if err == nil {
-				r.ID = strings.TrimSpace(r.ID)
-				if r.ID == "" {
-					err = fmt.Errorf("Field [id] must not be empty")
-				}
+			if _, err = legacyField[string](fields, "id", "String", true); err != nil {
+				return r, err
 			}
-			return r, err
+			return fileTreeBind[FileTreeTrimIDRequest](fields)
 		}
 	}
 	RemoveDocByID.decodeRequest = trimIDDecoder(RemoveDocByID.definition.Path)
@@ -193,6 +189,13 @@ func init() {
 		}
 		value, err := fileTreeBind[FileTreeNotebookRequest](r.fields)
 		r.Notebook = value.Notebook
+		if err != nil {
+			return r, err
+		}
+		date, err := fileTreeBind[struct {
+			Date string `json:"date" api:"optional,nullable"`
+		}](r.fields)
+		r.Date = date.Date
 		return r, err
 	}
 	ListDocTree.decodeRequest = func(reader io.Reader) (r FileTreePathRequest, err error) {

@@ -1,26 +1,22 @@
 import {openSearchAV} from "./relation";
 import {transaction} from "../../wysiwyg/transaction";
-import {focusByRange} from "../../util/selection";
+import {focusByRange} from "../../util/selectionOffsets";
 import {hasClosestBlock} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
 import {getAVFilteredTipContext} from "./filteredTip";
 
 export const addFilesToDatabase = (fileLiElements: Element[]) => {
-    const srcs: IOperationSrcs[] = [];
-    fileLiElements.forEach(item => {
-        const id = item.getAttribute("data-node-id");
-        if (id) {
-            srcs.push({
-                itemID: Lute.NewNodeID(),
-                id,
-                isDetached: false
-            });
-        }
-    });
+    addBlocksToDatabase(fileLiElements.map(item => item.getAttribute("data-node-id")).filter(Boolean),
+        fileLiElements[0] as HTMLElement);
+};
+
+export const addBlocksToDatabase = (ids: string[], target: HTMLElement, position?: IPosition) => {
+    const srcs: IOperationSrcs[] = ids.map(id => ({itemID: Lute.NewNodeID(), id, isDetached: false}));
     if (srcs.length > 0) {
         openSearchAV({
             avID: "",
-            target: fileLiElements[0] as HTMLElement,
+            target,
+            position,
             purpose: "addToDatabase",
             callback: (listItemElement) => {
                 const avID = listItemElement.dataset.avId;

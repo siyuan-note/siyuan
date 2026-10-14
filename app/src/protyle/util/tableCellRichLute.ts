@@ -92,14 +92,17 @@ export const getTableCellEditorLute = (lute: Lute, enableFullWidthTaskList = fal
             }
             const protectedHTML = template.innerHTML;
             if (boundary) {
-                // 只尝试解析光标前最后一处换行，其他空行和软换行仍由占位符保护。
+                // 当前行前的连续换行一起参与解析，空行可分段，其他位置的软换行仍由占位符保护。
                 const protectedText = boundary.textContent;
                 const offset = protectedText.lastIndexOf(token);
-                boundary.textContent = protectedText.substring(0, offset) + "\n" +
+                const precedingBreaks = protectedText.substring(0, offset).match(new RegExp(`(?:${token}[ \\t]*)+$`))?.[0] || "";
+                const separatorStart = offset - precedingBreaks.length;
+                const separator = (precedingBreaks + token).split(token).join("\n");
+                boundary.textContent = protectedText.substring(0, separatorStart) + separator +
                     protectedText.substring(offset + token.length);
                 // 将当前行的快捷待办标记转为解析器语法，保留前文和标记后的行内内容。
                 const lineRange = document.createRange();
-                lineRange.setStart(boundary, offset + 1);
+                lineRange.setStart(boundary, separatorStart + separator.length);
                 lineRange.setEnd(editable, editable.childNodes.length);
                 const line = document.createElement("div");
                 line.appendChild(lineRange.cloneContents());
@@ -116,7 +119,11 @@ export const getTableCellEditorLute = (lute: Lute, enableFullWidthTaskList = fal
                 const parsed = document.createElement("template");
                 parsed.innerHTML = candidate;
                 const parsedMarker = parsed.content.querySelector("wbr");
-                if (parsedMarker && getBlockPath(parsedMarker) !== blockPath) {
+                const splitParagraph = /\n[ \t]*\n/.test(separator) &&
+                    editable.parentElement.getAttribute("data-type") === "NodeParagraph" &&
+                    parsed.content.querySelectorAll('[data-type="NodeParagraph"]').length >
+                    template.content.querySelectorAll('[data-type="NodeParagraph"]').length;
+                if (parsedMarker && (splitParagraph || getBlockPath(parsedMarker) !== blockPath)) {
                     return candidate.split(token).join("&#10;");
                 }
             }

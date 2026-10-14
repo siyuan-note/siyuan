@@ -433,24 +433,17 @@ Run `siyuan --help` for the full command tree. Use `-f json` (default is `-f tab
 
 The CLI binary is `<install-dir>/resources/kernel/SiYuan-Kernel`, invoked via the `siyuan` command.
 
-- **Windows**: the installer automatically adds the kernel directory to `PATH`, so `siyuan` works out of the box. The Microsoft Store edition runs in an MSIX sandbox and cannot modify `PATH`; deploy a `siyuan.cmd` shim once (survives Store updates):
+- **Windows**: the installer automatically adds the kernel directory to `PATH`, so `siyuan` works out of the box. The Microsoft Store edition (3.8.7+) registers the `siyuan.exe` app execution alias on Windows 10 1607 (build 14393) or later. After installing or updating, open a new terminal and run `siyuan --help`
   ```powershell
-  # Microsoft Store edition only — run once in PowerShell
-  $shimDir = "$env:LOCALAPPDATA\Microsoft\WindowsApps"   # already in PATH by default
-  @(
-      '@echo off'
-      'setlocal'
-      'set "ROOT="'
-      'for /f "delims=" %%i in (''powershell -NoProfile -Command "(Get-AppxPackage *SiYuan*).InstallLocation"'') do set "ROOT=%%i"'
-      'if not defined ROOT goto :noshim'
-      '"%ROOT%\app\resources\kernel\SiYuan-Kernel.exe" %*'
-      'exit /b %ERRORLEVEL%'
-      ':noshim'
-      '1>&2 echo siyuan: Microsoft Store edition not found'
-      'exit /b 1'
-  ) | Set-Content "$shimDir\siyuan.cmd"
+  siyuan --help
+
+  # Check which command is being used
+  Get-Command siyuan -All
+  where.exe siyuan
   ```
-  To remove on uninstall: `Remove-Item "$env:LOCALAPPDATA\Microsoft\WindowsApps\siyuan.cmd"`.
+  If the command is unavailable, check that the SiYuan app execution alias is enabled in Windows and `%LOCALAPPDATA%\Microsoft\WindowsApps` is in `PATH`. The commands above show command resolution; multiple SiYuan editions or `PATH` order may select another executable
+
+  If you created the old `siyuan.cmd` shim, first verify the Store alias directly with `& "$env:LOCALAPPDATA\Microsoft\WindowsApps\siyuan.exe" --help`, then optionally remove the shim: `Remove-Item "$env:LOCALAPPDATA\Microsoft\WindowsApps\siyuan.cmd"`
 - **macOS**: create a symlink after installing:
   ```bash
   ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan

@@ -92,17 +92,20 @@ const rendererSource = () => {
         extract("util/hasClosest", ["hasClosestBlock", "hasClosestByAttribute", "hasClosestByClassName",
             "hasClosestByTag", "isBlockElement"]) +
         extract("wysiwyg/getBlock", ["getContenteditableElement", "isContainerBlock", "isNotEditBlock", "hasPreviousSibling"]) +
-        extract("util/selection", ["getEditorRange", "focusByRange", "getSelectionOffset", "selectIsEditor",
-            "focusByOffset", "searchNode", "setLastNodeRange", "setInsertWbrHTML", "focusByWbr"])
+        (extract("util/selectionOffsets", ["focusByRange", "getSelectionOffset", "selectIsEditor", "searchNode", "setLastNodeRange", "createRangeByOffsets", "getDOMOffset"]) +
+        extract("util/selection", ["getEditorRange", "focusByOffset", "setInsertWbrHTML", "focusByWbr"]))
             .replace("export const getEditorRange =", "const readEditorRange =") +
         "const getEditorRange = (element) => { editorRangeReads++; return readEditorRange(element); };" +
         extract("wysiwyg/keydown", ["keydown"]) +
         extract("util/tableVirtualizationDOM", ["TABLE_VIRTUAL_ID"]) +
         extract("wysiwyg/transaction", ["updateTransaction"]) + `
-        export function checkMobileInput(event) {
+        export function checkMobileInput(event, editor) {
             let composing = true;
+            const scrollRequests = [];
+            const getCurrentEditor = () => editor;
+            const scrollKeyboardSelectionIntoView = force => scrollRequests.push(force);
             (${mobileInput})(event);
-            return composing;
+            return {composing, scrollRequests};
         }
         export function checkMobileSelection(composing) {
             const calls = [];
@@ -336,9 +339,19 @@ const runCases = async () => {
     }
     {
         const {checkMobileInput} = window.compositionCaret;
-        assert.equal(checkMobileInput({isComposing: false, inputType: "insertText"}), false);
-        assert.equal(checkMobileInput({isComposing: true, inputType: "insertText"}), true);
-        assert.equal(checkMobileInput({isComposing: false, inputType: "insertCompositionText"}), true);
+        assert.deepEqual(checkMobileInput({isComposing: false, inputType: "insertText"}),
+            {composing: false, scrollRequests: []});
+        assert.deepEqual(checkMobileInput({isComposing: true, inputType: "insertText"}),
+            {composing: true, scrollRequests: []});
+        assert.deepEqual(checkMobileInput({isComposing: false, inputType: "insertCompositionText"}),
+            {composing: true, scrollRequests: []});
+        const element = document.createElement("div");
+        const target = element.appendChild(document.createElement("span"));
+        const editor = {protyle: {wysiwyg: {element}}};
+        assert.deepEqual(checkMobileInput({isComposing: false, inputType: "insertText", target}, editor),
+            {composing: false, scrollRequests: [true]});
+        assert.deepEqual(checkMobileInput({isComposing: false, inputType: "insertText", target: document.body}, editor),
+            {composing: false, scrollRequests: []});
         assert.deepEqual(window.compositionCaret.checkMobileSelection(true), []);
         assert.deepEqual(window.compositionCaret.checkMobileSelection(false), ["remember", "preserve", "render"]);
         cases++;

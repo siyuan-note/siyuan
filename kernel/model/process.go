@@ -20,7 +20,6 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -34,7 +33,9 @@ func HandleSignal() {
 	signal.Notify(c, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
 	s := <-c
 	logging.LogInfof("received os signal [%s], exit kernel process now", s)
-	Close(false, true, 1)
+	if code, _ := Close(false, true, 1); code == 0 {
+		ExitKernel()
+	}
 }
 
 var (
@@ -69,19 +70,18 @@ func HookDesktopUIProcJob() {
 	if 0 < uiProcCount {
 		return
 	}
-	logging.LogWarnf("no active UI proc, continue to check from all processes after 15s")
+	logging.LogWarnf("no active UI proc, continue to check attached UI and launcher after 15s")
 	time.Sleep(15 * time.Second)
-	uiProcCount = getUIProcCount()
-	if 0 < uiProcCount {
-		logging.LogInfof("active UI proc count [%d]", uiProcCount)
+	// 宽限期间可能建立新会话，退出前重新检查工作空间的连接和注册进程。
+	if 0 < util.CountSessions() || 0 < getAttachedUIProcCount() || desktopUILauncherAlive(goPS.FindProcess) {
 		return
 	}
 
 	logging.LogWarnf("confirmed no active UI proc, exit kernel process now")
-	Close(false, true, 1)
+	if code, _ := Close(false, true, 1); code == 0 {
+		ExitKernel()
+	}
 }
-
-var uiProcNames = []string{"siyuan", "electron"}
 
 // getAttachedUIProcCount 获取已经附加的 UI 进程数。
 func getAttachedUIProcCount() (ret int) {
@@ -97,6 +97,8 @@ func getAttachedUIProcCount() (ret int) {
 		proc, err := goPS.FindProcess(uiProcID)
 		if err != nil {
 			logging.LogErrorf("find UI proc [%d] failed: %s", uiProcID, err)
+			// 查询失败不能证明界面已经关闭，保留内核供后续检查。
+			ret++
 			return true
 		}
 
@@ -106,40 +108,10 @@ func getAttachedUIProcCount() (ret int) {
 			return true
 		}
 
-		procName := strings.ToLower(proc.Executable())
-		uiProcOk := false
-		for _, name := range uiProcNames {
-			if uiProcOk = strings.Contains(procName, name); uiProcOk {
-				break
-			}
-		}
-		if uiProcOk {
+		if isDesktopUIProcess(proc.Executable()) {
 			ret++
 		}
 		return true
 	})
-	return
-}
-
-// getUIProcCount 获取 UI 进程数。
-func getUIProcCount() (ret int) {
-	pid := os.Getpid()
-	procs, _ := goPS.Processes()
-	for _, proc := range procs {
-		if proc.Pid() == pid {
-			continue
-		}
-
-		procName := strings.ToLower(proc.Executable())
-		uiProcOk := false
-		for _, name := range uiProcNames {
-			if uiProcOk = strings.Contains(procName, name); uiProcOk {
-				break
-			}
-		}
-		if uiProcOk {
-			ret++
-		}
-	}
 	return
 }

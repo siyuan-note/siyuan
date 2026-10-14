@@ -1,6 +1,7 @@
 import {Constants} from "../../constants";
 import {isBrowser, isMobile} from "../../util/functions";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
+import {CODE_TAB_SPACE_VALUES, getCodeTabSpacesLabel} from "../../protyle/wysiwyg/codeBlockUtil";
 import {editorConfigApi} from "./editorRuntime";
 import type {SettingTabBuilder} from "../setting/builder";
 import {controlSelect} from "../setting/control";
@@ -39,12 +40,10 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         afterMount: bindSpellcheckLanguagesChips,
     });
     /// #endif
-    group.range("editor.codeTabSpaces", {
+    group.select("editor.codeTabSpaces", {
         title: window.siyuan.languages.md29,
         desc: window.siyuan.languages.md30,
-        min: 0,
-        max: 8,
-        step: 2,
+        options: CODE_TAB_SPACE_VALUES.map((value) => ({value, label: getCodeTabSpacesLabel(value)})),
     });
     group.number("editor.cursorSurroundingLines", {
         title: window.siyuan.languages.cursorSurroundingLines,
@@ -189,6 +188,14 @@ const bindDatabaseAttrSettingsVisibility = (root: HTMLElement) => {
 
 const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("blockFeatures", window.siyuan.languages.configGroupBlockFeatures);
+    group.switch("editor.displayImgName", {
+        title: window.siyuan.languages.displayImgName,
+        desc: window.siyuan.languages.displayImgNameTip,
+    });
+    group.switch("editor.displayImgAlt", {
+        title: window.siyuan.languages.displayImgAlt,
+        desc: window.siyuan.languages.displayImgAltTip,
+    });
     group.switch("editor.displayNetImgMark", {
         title: window.siyuan.languages.md7,
         desc: window.siyuan.languages.md8,
@@ -200,6 +207,15 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     group.switch("editor.embedBlockBreadcrumb", {
         title: window.siyuan.languages.embedBlockBreadcrumb,
         desc: window.siyuan.languages.embedBlockBreadcrumbTip,
+    });
+    group.select("editor.headingEmbedMode", {
+        title: window.siyuan.languages.headingEmbedMode,
+        desc: window.siyuan.languages.headingEmbedModeTip,
+        options: [
+            {value: 0, label: window.siyuan.languages.showHeadingWithBlocks},
+            {value: 1, label: window.siyuan.languages.showHeadingOnlyTitle},
+            {value: 2, label: window.siyuan.languages.showHeadingOnlyBlocks},
+        ],
     });
     group.switch("editor.headingNumber", {
         title: window.siyuan.languages.headingNumber,
@@ -247,15 +263,6 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     group.switch("editor.databaseAttrUseTabs", {
         title: window.siyuan.languages.databaseAttrUseTabs,
         desc: window.siyuan.languages.databaseAttrUseTabsTip,
-    });
-    group.select("editor.headingEmbedMode", {
-        title: window.siyuan.languages.headingEmbedMode,
-        desc: window.siyuan.languages.headingEmbedModeTip,
-        options: [
-            {value: 0, label: window.siyuan.languages.showHeadingWithBlocks},
-            {value: 1, label: window.siyuan.languages.showHeadingOnlyTitle},
-            {value: 2, label: window.siyuan.languages.showHeadingOnlyBlocks},
-        ],
     });
     group.switch("editor.codeLineWrap", {
         title: window.siyuan.languages.md31,

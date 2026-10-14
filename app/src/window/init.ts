@@ -2,10 +2,10 @@ import {Constants} from "../constants";
 import {ipcRenderer, webFrame} from "electron";
 import {fetchPost} from "../util/fetch";
 import {adjustLayout, getInstanceById, JSONToCenter} from "../layout/util";
-import {newCenterEmptyTab, resizeTabs, setTabPosition} from "../layout/tabUtil";
+import {newCenterEmptyTab, resizeTabs} from "../layout/tabUtil";
 import {initStatus} from "../layout/status";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
-import {initAssets, setInlineStyle} from "../util/assets";
+import {enqueueAppearanceUpdate, initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
 import {getSearch} from "../util/functions";
 import {initDesktopHost, initWindow} from "../boot/onGetConfig";
@@ -75,23 +75,21 @@ export const init = async (app: App) => {
             });
             afterLayout(app);
             activateWindowWorkspace();
-            // 等待 dock 面板动画结束
-            setTimeout(() => {
-                setTabPosition();
-            }, Constants.TIMEOUT_TRANSITION);
             resolve();
         });
     });
     initStatus(true);
-    initWindow(app);
+    const windowReady = initWindow(app);
     initWindowOpenOverride(app);
     /// #if !BROWSER
     initNativeDialogOverride();
     /// #endif
     appearanceConfigApi.apply(window.siyuan.config.appearance);
-    initAssets();
-    setInlineStyle();
-    renderSnippet();
+    initAssets(true);
+    await enqueueAppearanceUpdate(async () => {
+        await setInlineStyle();
+    });
+    const snippetReady = renderSnippet(Constants.TIMEOUT_SNIPPET_LOAD);
     let resizeTimeout = 0;
     window.addEventListener("resize", () => {
         window.clearTimeout(resizeTimeout);
@@ -113,7 +111,7 @@ export const init = async (app: App) => {
             });
         }, Constants.TIMEOUT_RESIZE);
     });
-    return layoutReady;
+    await Promise.all([layoutReady, windowReady, snippetReady]);
 };
 
 const afterLayout = (app: App) => {

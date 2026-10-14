@@ -35,11 +35,11 @@ func TestExportAssetCopyFailureReturnsNoOutput(t *testing.T) {
 	originalWorkspaceDir := util.WorkspaceDir
 	util.WorkspaceDir = filepath.Dir(util.DataDir)
 	t.Cleanup(func() { util.WorkspaceDir = originalWorkspaceDir })
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
-	Conf.Appearance = conf.NewAppearance()
-	Conf.Search = conf.NewSearch()
-	Conf.System = conf.NewSystem()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
+	Conf.Appearance.Store(conf.NewAppearance())
+	Conf.Search.Store(conf.NewSearch())
+	Conf.System.Store(conf.NewSystem())
 	assetPath := "assets/export-20260905000000-abcdefg.html"
 	absPath := filepath.Join(util.DataDir, assetPath)
 	if err := os.MkdirAll(filepath.Dir(absPath), 0755); err != nil {
@@ -121,8 +121,8 @@ func TestResolveExportAssetPaths(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			originalConf := Conf
 			Conf = NewAppConf()
-			Conf.Export = conf.NewExport()
-			Conf.Export.RemoveAssetsID = test.removeID
+			Conf.Export.Store(conf.NewExport())
+			Conf.Export.Load().RemoveAssetsID = test.removeID
 			t.Cleanup(func() {
 				Conf = originalConf
 			})
@@ -136,7 +136,7 @@ func TestResolveExportAssetPaths(t *testing.T) {
 
 			assetsOldNew, assetsNewOld := map[string]string{}, map[string]string{}
 			tree := &parse.Tree{Root: root}
-			removeAssetsID(tree, assetsOldNew, assetsNewOld)
+			removeAssetsID(tree, assetsOldNew, assetsNewOld, Conf.Export.Load().RemoveAssetsID)
 
 			assets := getAssetsLinkDests(root, false)
 			if len(assets) != len(test.expected) {
@@ -169,11 +169,11 @@ func TestExportHTMLMultipleAssetReferences(t *testing.T) {
 	originalWorkspaceDir := util.WorkspaceDir
 	util.WorkspaceDir = filepath.Dir(util.DataDir)
 	t.Cleanup(func() { util.WorkspaceDir = originalWorkspaceDir })
-	Conf.Editor = conf.NewEditor()
-	Conf.Export = conf.NewExport()
-	Conf.Appearance = conf.NewAppearance()
-	Conf.Search = conf.NewSearch()
-	Conf.System = conf.NewSystem()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Export.Store(conf.NewExport())
+	Conf.Appearance.Store(conf.NewAppearance())
+	Conf.Search.Store(conf.NewSearch())
+	Conf.System.Store(conf.NewSystem())
 	assetsDir := filepath.Join(util.DataDir, "assets")
 	if err := os.MkdirAll(assetsDir, 0755); err != nil {
 		t.Fatal(err)
@@ -204,16 +204,16 @@ func TestExportAssetEntityRename(t *testing.T) {
 	originalConf := Conf
 	t.Cleanup(func() { Conf = originalConf })
 	Conf = NewAppConf()
-	Conf.Export = conf.NewExport()
+	Conf.Export.Store(conf.NewExport())
 	for _, removeID := range []bool{false, true} {
-		Conf.Export.RemoveAssetsID = removeID
+		Conf.Export.Load().RemoveAssetsID = removeID
 		for _, typ := range []ast.NodeType{ast.NodeHTMLBlock, ast.NodeInlineHTML, ast.NodeIFrame, ast.NodeAudio, ast.NodeVideo} {
 			markup := `<video src='assets/a&amp;b-20260724150608-42z1qwz.webm?x=1&#38;y=2#part' poster="assets/a&amp;amp;b-20260724150608-42z1qwz.png"><source src=assets/second-20260724150608-42z1qwz.webm></video>`
 			root := &ast.Node{Type: ast.NodeDocument}
 			node := &ast.Node{Type: typ, Tokens: []byte(markup)}
 			root.AppendChild(node)
 			oldNew, newOld := map[string]string{}, map[string]string{}
-			removeAssetsID(&parse.Tree{Root: root}, oldNew, newOld)
+			removeAssetsID(&parse.Tree{Root: root}, oldNew, newOld, Conf.Export.Load().RemoveAssetsID)
 			original := []string{"assets/a&b-20260724150608-42z1qwz.webm?x=1&y=2#part", "assets/a&amp;b-20260724150608-42z1qwz.png", "assets/second-20260724150608-42z1qwz.webm"}
 			want := append([]string(nil), original...)
 			if removeID {

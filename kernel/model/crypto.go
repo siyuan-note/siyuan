@@ -1322,11 +1322,10 @@ func deriveKEK(password string) ([]byte, error) {
 			zeroAndClear(kek)
 			return nil, errMasterPasswordMigrationPending
 		}
-		if err = saveNotebookCryptoBackup(kek); err != nil {
+		if err = finishMasterPasswordMigration(kek); err != nil {
 			zeroAndClear(kek)
 			return nil, fmt.Errorf("%w: %v", errMasterPasswordMigrationPending, err)
 		}
-		removeMasterPasswordMigration()
 	}
 	return kek, nil
 }
@@ -1720,7 +1719,7 @@ func ClearDEK(boxID string) {
 //	Phase 1: 写入 migration manifest
 //	Phase 2: 切换全局 verifier
 //	Phase 3: 写入各 box conf + backup
-//	Phase 4: 清除 manifest
+//	Phase 4: 持久化全局备份和配置，清除 manifest
 //
 // 注意：必须在所有加密笔记本都已 Unmount 的状态下调用（DEK 不在内存），否则新旧 KEK 切换会让缓存与磁盘不一致。
 func ChangeMasterPassword(oldPassword, newPassword string) error {
@@ -1861,13 +1860,40 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		}
 	}
 
-	// Phase 4: 先持久化全局备份，再清除 manifest，确保崩溃后可恢复
-	if err = saveNotebookCryptoBackup(newKEK); err != nil {
+	// Phase 4: 持久化全局备份和配置，再清除 manifest，确保崩溃后可恢复。
+	if err = finishMasterPasswordMigration(newKEK); err != nil {
 		return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
-			fmt.Sprintf(Conf.Language(320), "save notebook crypto backup failed: "+err.Error()))
+			fmt.Sprintf(Conf.Language(320), err.Error()))
+	}
+	IncSync()
+	return nil
+}
+
+// finishMasterPasswordMigration 在备份和配置均成功落盘后清除迁移清单，写入失败时保留恢复材料。
+func finishMasterPasswordMigration(kek []byte) error {
+	if util.ReadOnly {
+		return errors.New("cannot complete master password migration in read-only mode")
+	}
+	if err := saveNotebookCryptoBackup(kek); err != nil {
+		return err
+	}
+	err := func() error {
+		Conf.m.Lock()
+		defer Conf.m.Unlock()
+		data, err := Conf.marshalForSave()
+		if err != nil {
+			return err
+		}
+		if err = atomicWriteFile(filepath.Join(util.ConfDir, "conf.json"), data); err != nil {
+			return err
+		}
+		recordPersistedConf(data)
+		return nil
+	}()
+	if err != nil {
+		return fmt.Errorf("save notebook crypto configuration failed: %w", err)
 	}
 	removeMasterPasswordMigration()
-	IncSync()
 	return nil
 }
 
@@ -2229,7 +2255,7 @@ func ExtractBoxIDFromHistoryPath(absPath string) string {
 
 // EncryptFile 用 fileKey（DEK 派生子密钥）加密 .sy 文档字节，AAD 绑定 boxID + 稳定文件基名（不含父目录）。
 // relativePath 会先经 filesys.SyAAD 提取稳定文件基名（<rootID>.sy）并校验合法性，
-// 与 filesys.encryptData/decryptData 共用同一 AAD 构造入口，保证加解密一致。
+// 与文件系统读写共用同一 AAD 构造入口，保证加解密一致。
 func EncryptFile(boxID, relativePath string, dek, plaintext []byte) ([]byte, error) {
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
 	defer zeroAndClear(fileKey)

@@ -6,7 +6,7 @@ import {escapeHtml} from "../../util/escape";
 import {getFileRenameTarget, getFileTree} from "../../util/fileTree";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {isBrowser, isMobile} from "../../util/functions";
-import {canChangeSkillEntry, getSkillDirectory, SkillSourceState} from "./state";
+import {canChangeSkillEntry, getSkillDirectory, isValidSkillName, SkillSourceState} from "./state";
 import {createSkillManagerPage} from "./page";
 import type {AISkillFileData, AISkillFileEntry, AISkillFileRequestInput} from "../../types/api";
 /// #if !MOBILE
@@ -377,7 +377,7 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
                 const input = inputDialog.element.querySelector<HTMLInputElement>("input");
                 const name = value.trim();
                 const target = getFileRenameTarget(action === "rename" ? entry.path : "", name);
-                if (target === undefined) {
+                if (target === undefined || !isValidSkillName(name)) {
                     input.setCustomValidity(lang.agentSkillNameTip);
                     input.reportValidity();
                     return;

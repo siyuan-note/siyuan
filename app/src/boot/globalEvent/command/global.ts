@@ -55,7 +55,7 @@ const getSelectionText = (range?: Range) => {
     return selection?.rangeCount ? selection.getRangeAt(0).toString() : "";
 };
 
-export const globalCommand = (command: string, app: App, range?: Range) => {
+export const globalCommand = (command: string, app: App, range?: Range, openOnly = false) => {
     /// #if MOBILE
     switch (command) {
         case "fileTree":
@@ -74,7 +74,7 @@ export const globalCommand = (command: string, app: App, range?: Range) => {
             popMenu();
             return true;
         case "globalSearch":
-            popSearch(app);
+            popSearch(app, undefined, openOnly);
             return true;
         case "recentDocs":
             getRecentDocs(app);
@@ -109,6 +109,7 @@ export const globalCommand = (command: string, app: App, range?: Range) => {
             openSearch({
                 app,
                 hotkey: Constants.DIALOG_GLOBALSEARCH,
+                focusInput: openOnly,
                 key: getSelectionText(range)
             });
             return true;
@@ -159,11 +160,12 @@ export const globalCommand = (command: string, app: App, range?: Range) => {
             return true;
         case "mainMenu":
             if (!isWindow()) {
-                workspaceMenu(app, document.querySelector("#barWorkspace").getBoundingClientRect());
+                const target = document.querySelector("#barWorkspace");
+                workspaceMenu(app, target.getBoundingClientRect(), openOnly, target);
             }
             return true;
         case "recentDocs":
-            openRecentDocs();
+            openRecentDocs(openOnly);
             return true;
         case "recentClosed": {
             const closedTabsLength = window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length;
@@ -469,7 +471,7 @@ export const globalCommand = (command: string, app: App, range?: Range) => {
             newDailyNote(app);
             return true;
         case "dataHistory":
-            openHistory(app);
+            openHistory(app, "doc", openOnly);
             return true;
         case "editReadonly":
             editorConfigApi.patch("editor.readOnly", !window.siyuan.config.editor.readOnly);
@@ -481,7 +483,7 @@ export const globalCommand = (command: string, app: App, range?: Range) => {
             newFile(app);
             return true;
         case "riffCard":
-            openCard(app);
+            openCard(app, openOnly);
             return true;
         case "selectOpen1":
             selectOpenTab();

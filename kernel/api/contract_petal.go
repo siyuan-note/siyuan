@@ -23,7 +23,8 @@ func petalContract(value *model.Petal) (*apicontract.Petal, error) {
 		Name: value.Name, DisplayName: value.DisplayName, Version: value.Version,
 		Enabled: value.Enabled, Incompatible: value.Incompatible, DisabledInPublish: value.DisabledInPublish,
 		UserDisabledInPublish: value.UserDisabledInPublish, DisallowInstall: value.DisallowInstall,
-		JS: value.JS, CSS: value.CSS, I18n: i18n,
+		SettingsWindow: value.SettingsWindow,
+		JS:             value.JS, CSS: value.CSS, I18n: i18n,
 		Kernel: apicontract.KernelPetal{JS: value.Kernel.JS, Existed: value.Kernel.Existed, Incompatible: value.Kernel.Incompatible},
 	}, nil
 }

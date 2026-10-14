@@ -38,7 +38,6 @@ class TextAccessibilityManager {
   /**
    * Compare the positions of two elements, it must correspond to
    * the visual ordering.
-   *
    * @param {HTMLElement} e1
    * @param {HTMLElement} e2
    * @returns {number}
@@ -138,7 +137,7 @@ class TextAccessibilityManager {
     }
 
     const children = this.#textChildren;
-    if (!children || children.length === 0) {
+    if (!children?.length) {
       return;
     }
 
@@ -198,7 +197,7 @@ class TextAccessibilityManager {
     }
 
     const children = this.#textChildren;
-    if (!children || children.length === 0) {
+    if (!children?.length) {
       return null;
     }
 
@@ -219,7 +218,10 @@ class TextAccessibilityManager {
 
   /**
    * Move a div in the DOM in order to respect the visual order.
+   * @param {HTMLElement} container
    * @param {HTMLDivElement} element
+   * @param {HTMLElement} contentElement
+   * @param {boolean} isRemovable
    * @returns {string|null} The id in the struct tree if any.
    */
   moveElementInDOM(container, element, contentElement, isRemovable) {
@@ -238,14 +240,10 @@ class TextAccessibilityManager {
       return id;
     }
 
-    const elementToCompare = contentElement || element;
     const index = binarySearchFirstItem(
       children,
       node =>
-        TextAccessibilityManager.#compareElementPositions(
-          elementToCompare,
-          node
-        ) < 0
+        TextAccessibilityManager.#compareElementPositions(element, node) < 0
     );
 
     if (index === 0) {

@@ -38,10 +38,10 @@ func TestAgentChatPreservesUnindexedParallelGeminiToolCalls(t *testing.T) {
 	useTestDataDir(t)
 	originalConf := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()
-	kernelModel.Conf.AI = kernelConf.NewAI()
-	kernelModel.Conf.AI.MCP = nil
-	kernelModel.Conf.AI.Agent.MaxToolCallRounds = 1
-	kernelModel.Conf.Variables = kernelConf.NewVariables()
+	kernelModel.Conf.AI.Store(kernelConf.NewAI())
+	kernelModel.Conf.AI.Load().MCP = nil
+	kernelModel.Conf.AI.Load().Agent.MaxToolCallRounds = 1
+	kernelModel.Conf.Variables.Store(kernelConf.NewVariables())
 	t.Cleanup(func() { kernelModel.Conf = originalConf })
 
 	const (
@@ -85,7 +85,7 @@ func TestAgentChatPreservesUnindexedParallelGeminiToolCalls(t *testing.T) {
 		"updatedAt": int64(1),
 		"entries":   []any{map[string]any{"id": "user-1", "type": "user", "content": "use both tools"}},
 	}
-	if revision, err := SaveSession(marshalSession(t, session)); err != nil || revision != 1 {
+	if revision, _, err := SaveSessionState(marshalSession(t, session)); err != nil || revision != 1 {
 		t.Fatalf("save initial session failed: revision=%d, err=%v", revision, err)
 	}
 

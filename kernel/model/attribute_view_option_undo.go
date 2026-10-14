@@ -19,11 +19,11 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"slices"
 	"strings"
 
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // 删除和合并选项共用字段变化快照，恢复实际改变的值、筛选条件、模板默认值和分组状态。
@@ -301,7 +301,7 @@ func updateAttributeViewColumnOptionValues(attrView *av.AttributeView, operation
 					}
 				}
 				if 0 <= idx {
-					value.MSelect = util.RemoveElem(value.MSelect, idx)
+					value.MSelect = slices.Delete(value.MSelect, idx, idx+1)
 				}
 			} else {
 				for i, opt := range value.MSelect {

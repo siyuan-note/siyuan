@@ -66,18 +66,21 @@ func refreshAppearanceConfig() {
 
 	var reloadThemes, reloadIcons bool
 	Conf.m.Lock()
-	if !containTheme(Conf.Appearance.ThemeDark, Conf.Appearance.DarkThemes) {
-		Conf.Appearance.ThemeDark = "midnight"
-		reloadThemes = true
-	}
-	if !containTheme(Conf.Appearance.ThemeLight, Conf.Appearance.LightThemes) {
-		Conf.Appearance.ThemeLight = "daylight"
-		reloadThemes = true
-	}
-	if !containIcon(Conf.Appearance.Icon, Conf.Appearance.Icons) {
-		Conf.Appearance.Icon = "litheness"
-		reloadIcons = true
-	}
+	replaceConfSectionLocked(&Conf.Appearance, func(appearance *conf.Appearance) bool {
+		if !containTheme(appearance.ThemeDark, appearance.DarkThemes) {
+			appearance.ThemeDark = "midnight"
+			reloadThemes = true
+		}
+		if !containTheme(appearance.ThemeLight, appearance.LightThemes) {
+			appearance.ThemeLight = "daylight"
+			reloadThemes = true
+		}
+		if !containIcon(appearance.Icon, appearance.Icons) {
+			appearance.Icon = "litheness"
+			reloadIcons = true
+		}
+		return reloadThemes || reloadIcons
+	})
 	Conf.m.Unlock()
 	if reloadThemes {
 		LoadThemes()
@@ -92,49 +95,59 @@ func SetIcon(icon string) error {
 	Conf.m.Lock()
 	defer Conf.m.Unlock()
 
-	if !containIcon(icon, Conf.Appearance.Icons) {
+	if !containIcon(icon, Conf.Appearance.Load().Icons) {
 		return fmt.Errorf("icon [%s] not exists or not available", icon)
 	}
-	Conf.Appearance.Icon = icon
+	replaceConfSectionLocked(&Conf.Appearance, func(appearance *conf.Appearance) bool {
+		appearance.Icon = icon
+		return true
+	})
 	return nil
 }
 
-func SetTheme(theme string, modes []int, appearanceMode string) error {
+// SetTheme 校验全部参数后一次性替换外观配置段，任一参数无效时保持原配置不变。
+func SetTheme(theme string, modes []int, appearanceMode string) (err error) {
 	Conf.m.Lock()
 	defer Conf.m.Unlock()
 
-	if theme != "" {
-		for _, mode := range modes {
-			switch mode {
-			case 0:
-				if !containTheme(theme, Conf.Appearance.LightThemes) {
-					return fmt.Errorf("theme [%s] not exists or not available for light mode", theme)
+	replaceConfSectionLocked(&Conf.Appearance, func(appearance *conf.Appearance) bool {
+		if theme != "" {
+			for _, mode := range modes {
+				switch mode {
+				case 0:
+					if !containTheme(theme, appearance.LightThemes) {
+						err = fmt.Errorf("theme [%s] not exists or not available for light mode", theme)
+						return false
+					}
+					appearance.ThemeLight = theme
+				case 1:
+					if !containTheme(theme, appearance.DarkThemes) {
+						err = fmt.Errorf("theme [%s] not exists or not available for dark mode", theme)
+						return false
+					}
+					appearance.ThemeDark = theme
 				}
-				Conf.Appearance.ThemeLight = theme
-			case 1:
-				if !containTheme(theme, Conf.Appearance.DarkThemes) {
-					return fmt.Errorf("theme [%s] not exists or not available for dark mode", theme)
-				}
-				Conf.Appearance.ThemeDark = theme
 			}
 		}
-	}
 
-	if appearanceMode != "" {
-		switch appearanceMode {
-		case "light":
-			Conf.Appearance.ModeOS = false
-			Conf.Appearance.Mode = 0
-		case "dark":
-			Conf.Appearance.ModeOS = false
-			Conf.Appearance.Mode = 1
-		case "system":
-			Conf.Appearance.ModeOS = true
-		default:
-			return fmt.Errorf("invalid appearance mode: %s", appearanceMode)
+		if appearanceMode != "" {
+			switch appearanceMode {
+			case "light":
+				appearance.ModeOS = false
+				appearance.Mode = 0
+			case "dark":
+				appearance.ModeOS = false
+				appearance.Mode = 1
+			case "system":
+				appearance.ModeOS = true
+			default:
+				err = fmt.Errorf("invalid appearance mode: %s", appearanceMode)
+				return false
+			}
 		}
-	}
-	return nil
+		return true
+	})
+	return
 }
 
 func containTheme(name string, themes []*conf.AppearanceTheme) bool {
@@ -180,6 +193,8 @@ func appearancePackageNames(kind string) ([]string, error) {
 }
 
 func LoadThemes() {
+	confAppearanceSnapshot := Conf.LoadAppearance()
+
 	themeNames, err := appearancePackageNames("themes")
 	if err != nil {
 		logging.LogErrorf("read appearance themes folder failed: %s", err)
@@ -191,9 +206,9 @@ func LoadThemes() {
 	var daylightTheme, midnightTheme *conf.AppearanceTheme
 	var themeVer string
 	var themeJS bool
-	mode := Conf.Appearance.Mode
-	themeLight := Conf.Appearance.ThemeLight
-	themeDark := Conf.Appearance.ThemeDark
+	mode := confAppearanceSnapshot.Mode
+	themeLight := confAppearanceSnapshot.ThemeLight
+	themeDark := confAppearanceSnapshot.ThemeDark
 	for _, name := range themeNames {
 		themePath := util.AppearancePackagePath("themes", name)
 		themeConf, parseErr := bazaar.ParsePackageJSON(filepath.Join(themePath, "theme.json"))
@@ -259,10 +274,13 @@ func LoadThemes() {
 	}
 
 	Conf.m.Lock()
-	Conf.Appearance.DarkThemes = darkThemes
-	Conf.Appearance.LightThemes = lightThemes
-	Conf.Appearance.ThemeVer = themeVer
-	Conf.Appearance.ThemeJS = themeJS
+	replaceConfSectionLocked(&Conf.Appearance, func(appearance *conf.Appearance) bool {
+		appearance.DarkThemes = darkThemes
+		appearance.LightThemes = lightThemes
+		appearance.ThemeVer = themeVer
+		appearance.ThemeJS = themeJS
+		return true
+	})
 	Conf.m.Unlock()
 }
 
@@ -276,7 +294,7 @@ func LoadIcons() {
 
 	var icons []*conf.AppearanceIcon
 	var iconVer string
-	currentIcon := Conf.Appearance.Icon
+	currentIcon := Conf.Appearance.Load().Icon
 	for _, name := range iconNames {
 		iconPath := util.AppearancePackagePath("icons", name)
 		iconConf, err := bazaar.ParsePackageJSON(filepath.Join(iconPath, "icon.json"))
@@ -305,19 +323,24 @@ func LoadIcons() {
 		}
 	}
 	Conf.m.Lock()
-	Conf.Appearance.Icons = icons
-	Conf.Appearance.IconVer = iconVer
+	replaceConfSectionLocked(&Conf.Appearance, func(appearance *conf.Appearance) bool {
+		appearance.Icons = icons
+		appearance.IconVer = iconVer
+		return true
+	})
 	Conf.m.Unlock()
 }
 
 func isCurrentUseTheme(themePath string) string {
+	confAppearanceSnapshot := Conf.LoadAppearance()
+
 	themeName := filepath.Base(filepath.Dir(themePath))
-	if 0 == Conf.Appearance.Mode { // 明亮
-		if Conf.Appearance.ThemeLight == themeName {
+	if 0 == confAppearanceSnapshot.Mode { // 明亮
+		if confAppearanceSnapshot.ThemeLight == themeName {
 			return themeName
 		}
-	} else if 1 == Conf.Appearance.Mode { // 暗黑
-		if Conf.Appearance.ThemeDark == themeName {
+	} else if 1 == confAppearanceSnapshot.Mode { // 暗黑
+		if confAppearanceSnapshot.ThemeDark == themeName {
 			return themeName
 		}
 	}
@@ -325,22 +348,24 @@ func isCurrentUseTheme(themePath string) string {
 }
 
 func currentThemeDir() string {
+	confAppearanceReadSnapshot := Conf.LoadAppearance()
+
 	if nil == Conf {
 		return ""
 	}
 
 	Conf.m.RLock()
 	defer Conf.m.RUnlock()
-	if nil == Conf.Appearance {
+	if nil == confAppearanceReadSnapshot {
 		return ""
 	}
 
 	var themeName string
-	switch Conf.Appearance.Mode {
+	switch confAppearanceReadSnapshot.Mode {
 	case 0:
-		themeName = Conf.Appearance.ThemeLight
+		themeName = confAppearanceReadSnapshot.ThemeLight
 	case 1:
-		themeName = Conf.Appearance.ThemeDark
+		themeName = confAppearanceReadSnapshot.ThemeDark
 	default:
 		return ""
 	}

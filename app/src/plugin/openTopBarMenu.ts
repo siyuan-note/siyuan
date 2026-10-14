@@ -1,3 +1,4 @@
+import {toggleMenu} from "../menus/menuToggle";
 import type {App} from "../index";
 import {Menu} from "./Menu";
 import {setStorageVal} from "../protyle/util/compatibility";
@@ -7,127 +8,133 @@ import {hasPluginSetting} from "./index";
 import {isMobile} from "../util/functions";
 
 export const openTopBarMenu = (app: App, target?: Element) => {
-    const menu = new Menu(Constants.MENU_BAR_PLUGIN);
-    const manageElement = menu.addItem({
-        id: "manage",
-        icon: "iconSettings",
-        label: window.siyuan.languages.manage,
-        ignore: !isBazaarAvailable() || window.siyuan.config.readonly,
-        click() {
-            void import("../config").then(({openSetting}) => openSetting(app, "bazaar"));
-        }
-    });
-    const manageSeparatorElement = menu.addSeparator({
-        id: "separator_1",
-        ignore: !isBazaarAvailable() || window.siyuan.config.readonly,
-    });
-    let hasPlugin = false;
-    const settingItems: IMenu[] = [];
-    app.plugins.forEach((plugin) => {
-        const hasSetting = hasPluginSetting(plugin);
-        for (let i = 0; i < plugin.topBarIcons.length; i++) {
-            const item = plugin.topBarIcons[i];
-            const hasUnpin = isMobile() && window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
-            if (!document.contains(item) && !hasUnpin) {
-                plugin.topBarIcons.splice(i, 1);
-                i--;
-                continue;
-            }
-            const submenu: IMenu[] = [];
-            if (isMobile()) {
-                submenu.push({
-                    id: hasUnpin ? "pin" : "unpin",
-                    icon: hasUnpin ? "iconPin" : "iconUnpin",
-                    label: hasUnpin ? window.siyuan.languages.pin : window.siyuan.languages.unpin,
-                    click() {
-                        if (hasUnpin) {
-                            window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].splice(
-                                window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].indexOf(item.id), 1);
-                            item.classList.remove("fn__none");
-                            if (!document.contains(item)) {
-                                document.getElementById("menuPluginTopBar")?.after(item);
-                            }
-                        } else {
-                            window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].push(item.id);
-                            window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN] = Array.from(new Set(
-                                window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN]));
-                            item.classList.add("fn__none");
-                        }
-                        setStorageVal(Constants.LOCAL_PLUGINTOPUNPIN,
-                            window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN]);
-                    }
-                });
-            }
-            const itemLabel = target ? item.getAttribute("aria-label") : item.textContent.trim();
-            if (!target) {
-                submenu.push({
-                    id: "play",
-                    icon: "iconPlay",
-                    label: itemLabel,
-                    click() {
-                        item.dispatchEvent(new CustomEvent("click"));
-                        return true;
-                    },
-                });
-            }
-            const menuOption: IMenu = {
-                id: item.id,
-                icon: "iconInfo",
-                label: itemLabel,
-                click: target ? () => {
-                    item.dispatchEvent(new CustomEvent("click"));
-                } : undefined,
-            };
-            if (submenu.length > 0) {
-                menuOption.type = "submenu";
-                menuOption.submenu = submenu;
-            }
-            const customIconElement = item.querySelector(":scope > .b3-menu__icon--custom");
-            const sourceIconElement = customIconElement || item.querySelector("svg");
-            if (sourceIconElement) {
-                const iconElement = sourceIconElement.cloneNode(true) as HTMLElement;
-                iconElement.classList.add("b3-menu__icon");
-                menuOption.iconHTML = iconElement.outerHTML;
-            }
-            menu.addItem(menuOption);
-            hasPlugin = true;
-        }
-        if (hasSetting) {
-            settingItems.push({
-                id: plugin.name,
+    toggleMenu({
+        target: target,
+        build: (_menu, session) => {
+            const menu = new Menu(Constants.MENU_BAR_PLUGIN);
+            const manageElement = menu.addItem({
+                id: "manage",
                 icon: "iconSettings",
-                label: plugin.displayName,
+                label: window.siyuan.languages.manage,
+                ignore: !isBazaarAvailable() || window.siyuan.config.readonly,
                 click() {
-                    plugin.openSetting();
+                    void import("../config").then(({openSetting}) => openSetting(app, "bazaar"));
                 }
             });
-        }
-    });
-    if (settingItems.length > 0) {
-        if (hasPlugin) {
-            menu.addSeparator({id: "separator_settings"});
-        }
-        settingItems.forEach((item) => menu.addItem(item));
-        hasPlugin = true;
-    }
-    if (!hasPlugin) {
-        manageSeparatorElement?.remove();
-        if (!manageElement && !target) {
-            menu.addItem({
-                id: "emptyContent",
-                iconHTML: "",
-                type: "readonly",
-                label: window.siyuan.languages.emptyContent,
+            const manageSeparatorElement = menu.addSeparator({
+                id: "separator_1",
+                ignore: !isBazaarAvailable() || window.siyuan.config.readonly,
             });
-        }
-    }
-    if (target) {
-        let rect = target.getBoundingClientRect();
-        if (rect.width === 0) {
-            rect = document.querySelector("#barMore").getBoundingClientRect();
-        }
-        menu.open({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
-    } else {
-        menu.fullscreen();
-    }
+            let hasPlugin = false;
+            const settingItems: IMenu[] = [];
+            app.plugins.forEach((plugin) => {
+                const hasSetting = hasPluginSetting(plugin);
+                for (let i = 0; i < plugin.topBarIcons.length; i++) {
+                    const item = plugin.topBarIcons[i];
+                    const hasUnpin = isMobile() && window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
+                    if (!document.contains(item) && !hasUnpin) {
+                        plugin.topBarIcons.splice(i, 1);
+                        i--;
+                        continue;
+                    }
+                    const submenu: IMenu[] = [];
+                    if (isMobile()) {
+                        submenu.push({
+                            id: hasUnpin ? "pin" : "unpin",
+                            icon: hasUnpin ? "iconPin" : "iconUnpin",
+                            label: hasUnpin ? window.siyuan.languages.pin : window.siyuan.languages.unpin,
+                            click() {
+                                if (hasUnpin) {
+                                    window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].splice(
+                                        window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].indexOf(item.id), 1);
+                                    item.classList.remove("fn__none");
+                                    if (!document.contains(item)) {
+                                        document.getElementById("menuPluginTopBar")?.after(item);
+                                    }
+                                } else {
+                                    window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].push(item.id);
+                                    window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN] = Array.from(new Set(
+                                        window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN]));
+                                    item.classList.add("fn__none");
+                                }
+                                setStorageVal(Constants.LOCAL_PLUGINTOPUNPIN,
+                                    window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN]);
+                            }
+                        });
+                    }
+                    const itemLabel = target ? item.getAttribute("aria-label") : item.textContent.trim();
+                    if (!target) {
+                        submenu.push({
+                            id: "play",
+                            icon: "iconPlay",
+                            label: itemLabel,
+                            click() {
+                                item.dispatchEvent(new CustomEvent("click"));
+                                return true;
+                            },
+                        });
+                    }
+                    const menuOption: IMenu = {
+                        id: item.id,
+                        icon: "iconInfo",
+                        label: itemLabel,
+                        click: target ? () => {
+                            item.dispatchEvent(new CustomEvent("click"));
+                        } : undefined,
+                    };
+                    if (submenu.length > 0) {
+                        menuOption.type = "submenu";
+                        menuOption.submenu = submenu;
+                    }
+                    const customIconElement = item.querySelector(":scope > .b3-menu__icon--custom");
+                    const sourceIconElement = customIconElement || item.querySelector("svg");
+                    if (sourceIconElement) {
+                        const iconElement = sourceIconElement.cloneNode(true) as HTMLElement;
+                        iconElement.classList.add("b3-menu__icon");
+                        menuOption.iconHTML = iconElement.outerHTML;
+                    }
+                    menu.addItem(menuOption);
+                    hasPlugin = true;
+                }
+                if (hasSetting) {
+                    settingItems.push({
+                        id: plugin.name,
+                        icon: "iconSettings",
+                        label: plugin.displayName,
+                        click() {
+                            plugin.openSetting();
+                        }
+                    });
+                }
+            });
+            if (settingItems.length > 0) {
+                if (hasPlugin) {
+                    menu.addSeparator({id: "separator_settings"});
+                }
+                settingItems.forEach((item) => menu.addItem(item));
+                hasPlugin = true;
+            }
+            if (!hasPlugin) {
+                manageSeparatorElement?.remove();
+                if (!manageElement && !target) {
+                    menu.addItem({
+                        id: "emptyContent",
+                        iconHTML: "",
+                        type: "readonly",
+                        label: window.siyuan.languages.emptyContent,
+                    });
+                }
+            }
+            if (target) {
+                let rect = target.getBoundingClientRect();
+                if (rect.width === 0) {
+                    rect = document.querySelector("#barMore").getBoundingClientRect();
+                }
+                session.show(() => menu.open({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true}));
+            } else {
+                session.show(() => menu.fullscreen());
+            }
+
+        },
+    });
 };

@@ -1,3 +1,5 @@
+import {toggleMenu} from "../../menus/menuToggle";
+
 export const insertMobileMultiSelectMenu = (itemsElement: Element, menuItem: HTMLElement) => {
     const openInNewTab = Array.from(itemsElement.children).find(item => item.getAttribute("data-id") === "openInNewTab");
     if (openInNewTab) {
@@ -31,7 +33,7 @@ export const renderMultiSelectToolbar = (element: HTMLElement, count: number, on
         const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-type]");
         if (button && !button.disabled) {
             if (button.dataset.type === "menu") {
-                onMenu();
+                toggleMenu({target: button, build: onMenu});
             } else if (button.dataset.type === "exitMultiSelectMode") {
                 onExit();
             } else if (button.dataset.type === "selectAll") {

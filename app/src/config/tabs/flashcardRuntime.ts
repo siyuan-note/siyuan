@@ -7,5 +7,5 @@ export const flashcardConfigApi = createConfigNamespaceApi<Config.IFlashCard>({
     setConfig: (data) => {
         window.siyuan.config.flashcard = data;
     },
-    apiPath: "/api/setting/setFlashcard",
+
 });

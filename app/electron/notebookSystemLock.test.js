@@ -10,6 +10,33 @@ const workspace = (port, ownsKernel = true) => ({
 });
 const config = JSON.stringify({system: {encryptedNotebookFollowSystemLock: true}, api: {token: "secret"}});
 
+test("system lock uses the session when OIDC has no token or lock password", async () => {
+    for (const credentials of [
+        {api: {token: ""}, accessAuthCode: "", oidc: {enabled: true}},
+        {api: {token: "secret"}},
+        {api: {token: ""}, accessAuthCode: "password"},
+    ]) {
+        let requests = 0;
+        const controller = createNotebookSystemLock({
+            getWorkspaces: () => [workspace(6806)],
+            readFile: async () => JSON.stringify({...credentials, system: {encryptedNotebookFollowSystemLock: true}}),
+            fetch: async (_url, options) => {
+                requests++;
+                const authorization = credentials.api.token ? "Token secret" : credentials.accessAuthCode ?
+                    "Basic " + Buffer.from("workspace:password").toString("base64") : undefined;
+                assert.equal(options.headers.Authorization, authorization);
+                assert.equal(options.credentials, authorization ? "omit" : "include");
+                assert.equal(options.redirect, "error");
+                return {ok: true, json: async () => ({code: 0})};
+            },
+            writeLog: assert.fail,
+        });
+        await controller.lock();
+        await controller.retry();
+        assert.equal(requests, 1);
+    }
+});
+
 test("system lock submits pending edits before authenticated local requests without renderer windows", async () => {
     const events = [];
     const controller = createNotebookSystemLock({

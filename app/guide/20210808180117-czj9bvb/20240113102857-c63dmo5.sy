@@ -7,7 +7,7 @@
 		"id": "20240113102857-c63dmo5",
 		"title": "移动端 App",
 		"type": "doc",
-		"updated": "20260921210136"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113102857-aof1w7f",
-				"updated": "20260921210136"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -58,6 +58,21 @@
 			]
 		},
 		{
+			"ID": "20261012014537-ygn9gm0",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-ygn9gm0",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "界面导航"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
 			"ID": "20260921090531-bcyyegw",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -95,6 +110,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中调整功能顺序。"
+				}
+			]
+		},
+		{
+			"ID": "20261010114821-9zssb7v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010114821-9zssb7v",
+				"updated": "20261010114821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android 上使用桌面布局时，系统返回键会先关闭当前最上层的弹窗、菜单、编辑浮层、图片预览或浮动抽屉，每次只关闭一层并保留底层浏览状态。没有可关闭的浮层时，才执行原有的页面返回行为。"
 				}
 			]
 		},
@@ -823,7 +852,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174109-kf9rdvq",
-				"updated": "20260803163243"
+				"updated": "20261004052629"
 			},
 			"Children": [
 				{
@@ -852,7 +881,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174109-bccohoq",
-				"updated": "20260613174109"
+				"updated": "20261004052629"
 			},
 			"Children": [
 				{
@@ -935,6 +964,79 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261004052629-tczd7hi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261004052629-tczd7hi",
+				"updated": "20261004052629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新导入的闪念速记遵循 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中的 Markdown 语法开关。启用的行级语法、中点代码围栏（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "···"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）和全角任务快捷语法（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【X】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）会在导入时直接转换，无需再次编辑触发转换。"
+				}
+			]
+		},
+		{
+			"ID": "20261004052629-5dh5rgu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261004052629-5dh5rgu",
+				"updated": "20261004052629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "每条速记单独解析，未闭合的代码块不会影响下一条速记。已导入的文档不会重新解析。"
 				}
 			]
 		},

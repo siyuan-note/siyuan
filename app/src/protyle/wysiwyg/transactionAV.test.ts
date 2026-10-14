@@ -13,8 +13,8 @@ const compiled = transpileModule(readFileSync("src/protyle/wysiwyg/transaction.t
 const fixture = () => {
     const rendered: Element[] = [];
     const carriers = [
-        {isConnected: true, closest: (): Element => null, getAttribute: () => "NodeAttributeView"},
-        {isConnected: true, closest: (): Element => null, getAttribute: () => "NodeAttributeView"},
+        {isConnected: true, closest: (): Element => null, getAttribute: (name: string) => name === "data-av-type" ? "table" : "NodeAttributeView"},
+        {isConnected: true, closest: (): Element => null, getAttribute: (name: string) => name === "data-av-type" ? "table" : "NodeAttributeView"},
     ];
     let finish: (success: boolean) => void;
     const exports: any = {};

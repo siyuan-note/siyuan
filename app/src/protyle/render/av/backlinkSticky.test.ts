@@ -129,3 +129,71 @@ test("backlink scrolling clears fixed rows and their spacers without calculating
     });
     assert.equal(outer.scrollTop, 250);
 });
+
+test("sticky views preserve wrapping at fractional widths across scroll and resize", () => {
+    const naturalWidth = 228.45;
+    let availableWidth = 384;
+    let naturalTop = -10;
+    const classes = new Set<string>();
+    const makePlaceholder = () => ({
+        className: "",
+        classList: {contains(name: string) { return placeholder.className === name; }},
+        style: {} as Record<string, string>,
+        getBoundingClientRect: () => ({top: naturalTop, left: 20,
+            width: Math.min(parseFloat(placeholder.style.width), availableWidth)}),
+        remove: () => { views.nextElementSibling = undefined; },
+    });
+    let placeholder: ReturnType<typeof makePlaceholder>;
+    const views = {
+        classList: {
+            contains: (name: string) => classes.has(name),
+            add: (name: string) => classes.add(name),
+            remove: (name: string) => classes.delete(name),
+        },
+        style: {} as Record<string, string>,
+        nextElementSibling: undefined as ReturnType<typeof makePlaceholder> | undefined,
+        get offsetHeight() {
+            const width = classes.has("av__views--fixed") ? parseFloat(this.style.width) :
+                Math.min(naturalWidth, availableWidth);
+            return width < naturalWidth ? 68 : 40;
+        },
+        getBoundingClientRect() {
+            const top = classes.has("av__views--fixed") ? parseFloat(this.style.top) : naturalTop;
+            const width = classes.has("av__views--fixed") ? parseFloat(this.style.width) :
+                Math.min(naturalWidth, availableWidth);
+            return {top, bottom: top + this.offsetHeight, left: 20, right: 20 + width, width};
+        },
+        closest: (): HTMLElement | null => null,
+        insertAdjacentElement: (_position: string, element: ReturnType<typeof makePlaceholder>) => {
+            views.nextElementSibling = element;
+        },
+    };
+    const block = {
+        classList: {contains: () => false},
+        dataset: {avType: "table"},
+        querySelector: (selector: string) => selector === ".av__views" ? views : null,
+        querySelectorAll: (): HTMLElement[] => [],
+        getBoundingClientRect: () => ({bottom: 600}),
+    };
+    const scroll = {scrollTop: 200, getBoundingClientRect: () => ({top: 0, bottom: 800})};
+    const exports: {stickyRow?: (block: unknown, scroll: unknown, status: string) => void} = {};
+    runInNewContext(compiled, {
+        exports,
+        require: () => ({hasTopClosestByAttribute: () => false, updateFrozenColumns: () => {}}),
+        window: {innerHeight: 800},
+        document: {createElement: () => { placeholder = makePlaceholder(); return placeholder; }},
+    });
+    for (const width of [384, 200, 384]) {
+        availableWidth = width;
+        for (let frame = 0; frame < 3; frame++) {
+            exports.stickyRow(block, scroll, "top");
+            assert.equal(views.offsetHeight, width < naturalWidth ? 68 : 40);
+            assert.equal(parseFloat(placeholder.style.height), views.offsetHeight);
+        }
+    }
+    naturalTop = 100;
+    exports.stickyRow(block, scroll, "top");
+    assert.equal(views.offsetHeight, 40);
+    assert.equal(views.nextElementSibling, undefined);
+    assert.equal(classes.has("av__views--fixed"), false);
+});

@@ -70,8 +70,7 @@ var addMicrosoftDefenderExclusion = contractHandler(apicontract.AddMicrosoftDefe
 
 var ignoreAddMicrosoftDefenderExclusion = contractHandler(apicontract.IgnoreAddMicrosoftDefenderExclusion, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	if gulu.OS.IsWindows() {
-		model.Conf.System.MicrosoftDefenderExcluded = true
-		model.Conf.Save()
+		model.UpdateSystemConf(func(s *conf.System) { s.MicrosoftDefenderExcluded = true })
 	}
 	return apicontract.Success(apicontract.Null{})
 })
@@ -90,7 +89,7 @@ var getNetwork = contractHandler(apicontract.GetNetwork, func(c *gin.Context, re
 		return apicontract.Failure[apicontract.NetworkData](-1, "get conf failed: "+err.Error())
 	}
 	var proxy *apicontract.NetworkProxy
-	if value := maskedConf.System.NetworkProxy; value != nil {
+	if value := maskedConf.System.Load().NetworkProxy; value != nil {
 		proxy = &apicontract.NetworkProxy{Scheme: value.Scheme, Host: value.Host, Port: value.Port}
 	}
 	return apicontract.Success(apicontract.NetworkData{Proxy: proxy})
@@ -452,95 +451,100 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 		return
 	}
 
-	data, err := gulu.JSON.MarshalJSON(model.Conf)
+	clonedConf, err := model.GetMaskedConf()
 	if err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
 		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
 		return
 	}
-	clonedConf := &model.AppConf{}
-	if err = gulu.JSON.UnmarshalJSON(data, clonedConf); err != nil {
-		logging.LogErrorf("export conf failed: %s", err)
-		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
-		return
-	}
 
-	if nil != clonedConf.Appearance {
-		clonedConf.Appearance.DarkThemes = nil
-		clonedConf.Appearance.LightThemes = nil
-		clonedConf.Appearance.Icons = nil
-		fonts := make([]*conf.EditorFont, 0, len(clonedConf.Appearance.GlobalFontFamilies))
-		for _, font := range clonedConf.Appearance.GlobalFontFamilies {
+	if nil != clonedConf.Appearance.Load() {
+		clonedConf.Appearance.Load().DarkThemes = nil
+		clonedConf.Appearance.Load().LightThemes = nil
+		clonedConf.Appearance.Load().Icons = nil
+		fonts := make([]*conf.EditorFont, 0, len(clonedConf.Appearance.Load().GlobalFontFamilies))
+		for _, font := range clonedConf.Appearance.Load().GlobalFontFamilies {
 			if nil != font && !strings.HasPrefix(font.Family, util.CustomFontFamilyPrefix) {
 				fonts = append(fonts, font)
 			}
 		}
-		clonedConf.Appearance.GlobalFontFamilies = fonts
+		clonedConf.Appearance.Load().GlobalFontFamilies = fonts
 	}
-	if nil != clonedConf.Editor {
-		clonedConf.Editor.Emoji = []string{}
-		fonts := make([]*conf.EditorFont, 0, len(clonedConf.Editor.FontFamilies))
-		for _, font := range clonedConf.Editor.FontFamilies {
+	if nil != clonedConf.Editor.Load() {
+		clonedConf.Editor.Load().Emoji = []string{}
+		fonts := make([]*conf.EditorFont, 0, len(clonedConf.Editor.Load().FontFamilies))
+		for _, font := range clonedConf.Editor.Load().FontFamilies {
 			if nil != font && !strings.HasPrefix(font.Family, util.CustomFontFamilyPrefix) {
 				fonts = append(fonts, font)
 			}
 		}
-		clonedConf.Editor.FontFamilies = fonts
-		codeFonts := make([]*conf.EditorFont, 0, len(clonedConf.Editor.CodeFontFamilies))
-		for _, font := range clonedConf.Editor.CodeFontFamilies {
+		clonedConf.Editor.Load().FontFamilies = fonts
+		codeFonts := make([]*conf.EditorFont, 0, len(clonedConf.Editor.Load().CodeFontFamilies))
+		for _, font := range clonedConf.Editor.Load().CodeFontFamilies {
 			if nil != font && !strings.HasPrefix(font.Family, util.CustomFontFamilyPrefix) {
 				codeFonts = append(codeFonts, font)
 			}
 		}
-		clonedConf.Editor.CodeFontFamilies = codeFonts
-		clonedConf.Editor.FontFamily = ""
-		clonedConf.Editor.FontWeight = 400
-		clonedConf.Editor.FontFamilyDisplay = ""
-		clonedConf.Editor.NormalizeFontFamilies()
+		clonedConf.Editor.Load().CodeFontFamilies = codeFonts
+		clonedConf.Editor.Load().FontFamily = ""
+		clonedConf.Editor.Load().FontWeight = 400
+		clonedConf.Editor.Load().FontFamilyDisplay = ""
+		clonedConf.Editor.Load().NormalizeFontFamilies()
 	}
-	if nil != clonedConf.Export {
-		clonedConf.Export.PandocBin = ""
+	if nil != clonedConf.Export.Load() {
+		clonedConf.Export.Load().PandocBin = ""
 	}
 	clonedConf.UserData = ""
 	clonedConf.AccessAuthCode = ""
-	if nil != clonedConf.System {
-		clonedConf.System.NetworkProxy = &conf.NetworkProxy{}
-		clonedConf.System.ID = ""
-		clonedConf.System.Name = ""
-		clonedConf.System.OSPlatform = ""
-		clonedConf.System.Container = ""
-		clonedConf.System.IsMicrosoftStore = false
-		clonedConf.System.UpdateChannel = ""
-		clonedConf.System.MicrosoftDefenderExcluded = false
+	if nil != clonedConf.System.Load() {
+		clonedConf.System.Load().NetworkProxy = &conf.NetworkProxy{}
+		clonedConf.System.Load().ID = ""
+		clonedConf.System.Load().Name = ""
+		clonedConf.System.Load().OSPlatform = ""
+		clonedConf.System.Load().Container = ""
+		clonedConf.System.Load().IsMicrosoftStore = false
+		clonedConf.System.Load().UpdateChannel = ""
+		clonedConf.System.Load().MicrosoftDefenderExcluded = false
 	}
-	clonedConf.Sync = nil
-	clonedConf.Stat = nil
-	clonedConf.Api = nil
-	clonedConf.Repo = nil
-	clonedConf.Secrets = nil
+	clonedConf.Sync.Store(nil)
+	clonedConf.Stat.Store(nil)
+	clonedConf.Api.Store(nil)
+	clonedConf.Repo.Store(nil)
+	clonedConf.Secrets.Store(nil)
 	clonedConf.NotebookCrypto = nil
-	clonedConf.Onboarding = nil
-	clonedConf.Publish = nil
+	clonedConf.Onboarding.Store(nil)
+	clonedConf.Publish.Store(nil)
 	clonedConf.CookieKey = ""
 	clonedConf.MCPOAuth = ""
 	clonedConf.CloudRegion = 0
-	if nil != clonedConf.AI {
-		for _, provider := range clonedConf.AI.Providers {
+	if nil != clonedConf.OIDC {
+		clonedConf.OIDC.ClientSecret = ""
+	}
+	if nil != clonedConf.AI.Load() {
+		for _, provider := range clonedConf.AI.Load().Providers {
 			if nil != provider {
 				provider.APIKey = ""
 				provider.Headers = nil
 			}
 		}
-		if nil != clonedConf.AI.Embedding {
-			clonedConf.AI.Embedding.APIKey = ""
+		if nil != clonedConf.AI.Load().Embedding {
+			clonedConf.AI.Load().Embedding.APIKey = ""
 		}
-		if nil != clonedConf.AI.Rerank {
-			clonedConf.AI.Rerank.APIKey = ""
+		if nil != clonedConf.AI.Load().Rerank {
+			clonedConf.AI.Load().Rerank.APIKey = ""
 		}
-		clonedConf.AI.MCP = nil
+		if nil != clonedConf.AI.Load().Decision {
+			clonedConf.AI.Load().Decision.APIKey = ""
+			for _, profile := range clonedConf.AI.Load().Decision.Profiles {
+				if profile != nil {
+					profile.APIKey = ""
+				}
+			}
+		}
+		clonedConf.AI.Load().MCP = nil
 	}
 
-	data, err = gulu.JSON.MarshalIndentJSON(clonedConf, "", "  ")
+	data, err := gulu.JSON.MarshalIndentJSON(clonedConf, "", "  ")
 	if err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
 		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
@@ -581,6 +585,7 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 })
 
 var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Context, request apicontract.SystemImportConfRequest) (ret apicontract.Response[apicontract.Null]) {
+	defer beginSettingTask("importConf")()
 	ret = apicontract.Success(apicontract.Null{})
 
 	logging.LogInfof("importing conf...")
@@ -673,31 +678,37 @@ var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Conte
 		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
-	preserveImportedAISecrets(importedConf.AI, model.Conf.AI)
-	if err = validateAIProviderHeaders(importedConf.AI); err != nil {
+	// 导入的旧版配置与启动加载执行相同的格式迁移
+	model.ApplyImportedConfMigrations(importedConf, data)
+	preserveImportedAISecrets(importedConf.AI.Load(), model.Conf.AI.Load())
+	if err = validateAIProviderHeaders(importedConf.AI.Load()); err != nil {
 		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
-	if nil != importedConf.System && nil != model.Conf.System {
-		// 更新通道是应用级全局设置，导入工作空间配置时保持不变。
-		importedConf.System.UpdateChannel = model.Conf.System.UpdateChannel
+	if nil != importedConf.System.Load() && nil != model.Conf.System.Load(
+	// 更新通道是应用级全局设置，导入工作空间配置时保持不变。
+	) {
+
+		importedConf.System.Load().UpdateChannel = model.Conf.System.Load().UpdateChannel
 		// 网络代理依赖本机环境，导入设置时保持不变。
-		importedConf.System.NetworkProxy = model.Conf.System.NetworkProxy
+		importedConf.System.Load().NetworkProxy = model.Conf.System.Load().NetworkProxy
 	}
 
-	model.Conf.FileTree = importedConf.FileTree
-	model.Conf.Tag = importedConf.Tag
-	model.Conf.Editor = importedConf.Editor
-	model.Conf.Export = importedConf.Export
-	model.Conf.Graph = importedConf.Graph
-	model.Conf.UILayout = importedConf.UILayout
-	model.Conf.System = importedConf.System
-	model.Conf.Keymap = importedConf.Keymap
-	model.Conf.Search = importedConf.Search
-	model.Conf.Flashcard = importedConf.Flashcard
-	model.Conf.AI = importedConf.AI
-	model.Conf.Bazaar = importedConf.Bazaar
+	model.NormalizeAppConf(importedConf)
+	model.Conf.FileTree.Store(importedConf.FileTree.Load())
+	model.Conf.Tag.Store(importedConf.Tag.Load())
+	model.Conf.Editor.Store(importedConf.Editor.Load())
+	model.Conf.Export.Store(importedConf.Export.Load())
+	model.Conf.Graph.Store(importedConf.Graph.Load())
+	model.Conf.UILayout.Store(importedConf.UILayout.Load())
+	model.Conf.System.Store(importedConf.System.Load())
+	model.Conf.Keymap.Store(importedConf.Keymap.Load())
+	model.Conf.Search.Store(importedConf.Search.Load())
+	model.Conf.Flashcard.Store(importedConf.Flashcard.Load())
+	model.Conf.AI.Store(importedConf.AI.Load())
+	model.Conf.Bazaar.Store(importedConf.Bazaar.Load())
 	model.Conf.Save()
+	model.ApplyConfRuntime()
 
 	logging.LogInfof("imported conf")
 	return
@@ -752,8 +763,8 @@ var getConf = contractHandler(apicontract.SystemGetConf, func(c *gin.Context, re
 		return
 	}
 
-	if !maskedConf.Sync.Enabled || (0 == maskedConf.Sync.Provider && !model.IsSubscriber()) {
-		maskedConf.Sync.Stat = model.Conf.Language(53)
+	if !maskedConf.Sync.Load().Enabled || (0 == maskedConf.Sync.Load().Provider && !model.IsSubscriber()) {
+		maskedConf.Sync.Load().Stat = model.Conf.Language(53)
 	}
 
 	// REF: https://github.com/siyuan-note/siyuan/issues/11364
@@ -769,25 +780,26 @@ var getConf = contractHandler(apicontract.SystemGetConf, func(c *gin.Context, re
 	}
 
 	if model.IsReadOnlyRoleContext(c) {
-		maskedConf.UILayout = &conf.UILayout{}
+		maskedConf.UILayout.Store(&conf.UILayout{})
 	}
 
 	// 浏览器环境下不返回工作空间绝对路径，避免泄露用户名等敏感信息
 	// 原生客户端（桌面 Electron、移动端）UA 以 "SiYuan/" 开头，照常返回真实路径
 	// REF: https://github.com/siyuan-note/siyuan/issues/17410
 	if util.IsBrowserRequest(c) {
-		maskedConf.System.WorkspaceDir = ""
-		maskedConf.System.AppDir = ""
-		maskedConf.System.ConfDir = ""
-		maskedConf.System.DataDir = ""
-		maskedConf.System.HomeDir = ""
+		maskedConf.System.Load().WorkspaceDir = ""
+		maskedConf.System.Load().AppDir = ""
+		maskedConf.System.Load().ConfDir = ""
+		maskedConf.System.Load().DataDir = ""
+		maskedConf.System.Load().HomeDir = ""
 	}
 
 	config, err := systemConfPayload(maskedConf)
 	if err != nil {
 		return apicontract.Failure[apicontract.SystemConfData](-1, "get conf failed: "+err.Error())
 	}
-	ret = apicontract.Success(apicontract.SystemConfData{Conf: config, Start: !util.IsUILoaded.Load(), IsPublish: isPublish})
+	ret = apicontract.Success(apicontract.SystemConfData{Conf: config, Start: !util.IsUILoaded.Load(), IsPublish: isPublish,
+		SettingTasks: activeSettingTasks()})
 	return
 })
 
@@ -853,8 +865,7 @@ var setAPIToken = contractHandler(apicontract.SystemSetAPIToken, func(c *gin.Con
 		return
 	}
 
-	model.Conf.Api.Token = token
-	model.Conf.Save()
+	model.UpdateAPIConf(func(s *conf.API) { s.Token = token })
 	return
 })
 
@@ -951,8 +962,7 @@ var setOIDC = contractHandler(apicontract.SystemSetOIDC, func(c *gin.Context, re
 })
 
 var setFollowSystemLockScreen = contractHandler(apicontract.SetFollowSystemLockScreen, func(c *gin.Context, request apicontract.LockScreenRequest) apicontract.Response[apicontract.Null] {
-	model.Conf.System.LockScreenMode = int(request.LockScreenMode)
-	model.Conf.Save()
+	model.UpdateSystemConf(func(s *conf.System) { s.LockScreenMode = int(request.LockScreenMode) })
 	return apicontract.Success(apicontract.Null{})
 })
 
@@ -1038,40 +1048,36 @@ var removeCustomFont = contractHandler(apicontract.SystemRemoveCustomFont, func(
 
 	var editor *conf.Editor
 	var appearance *conf.Appearance
-	globalFonts := make([]*conf.EditorFont, 0, len(model.Conf.Appearance.GlobalFontFamilies))
-	for _, selectedFont := range model.Conf.Appearance.GlobalFontFamilies {
+	globalFonts := make([]*conf.EditorFont, 0, len(model.Conf.Appearance.Load().GlobalFontFamilies))
+	for _, selectedFont := range model.Conf.Appearance.Load().GlobalFontFamilies {
 		if nil != selectedFont && selectedFont.Family != font.Family {
 			globalFonts = append(globalFonts, selectedFont)
 		}
 	}
-	if len(globalFonts) != len(model.Conf.Appearance.GlobalFontFamilies) {
-		model.Conf.Appearance.GlobalFontFamilies = globalFonts
-		appearance = model.Conf.Appearance
+	if len(globalFonts) != len(model.Conf.Appearance.Load().GlobalFontFamilies) {
+		appearance = model.UpdateAppearanceConf(func(a *conf.Appearance) { a.GlobalFontFamilies = globalFonts })
 	}
-	fonts := make([]*conf.EditorFont, 0, len(model.Conf.Editor.FontFamilies))
-	for _, selectedFont := range model.Conf.Editor.FontFamilies {
+	fonts := make([]*conf.EditorFont, 0, len(model.Conf.Editor.Load().FontFamilies))
+	for _, selectedFont := range model.Conf.Editor.Load().FontFamilies {
 		if nil != selectedFont && selectedFont.Family != font.Family {
 			fonts = append(fonts, selectedFont)
 		}
 	}
-	codeFonts := make([]*conf.EditorFont, 0, len(model.Conf.Editor.CodeFontFamilies))
-	for _, selectedFont := range model.Conf.Editor.CodeFontFamilies {
+	codeFonts := make([]*conf.EditorFont, 0, len(model.Conf.Editor.Load().CodeFontFamilies))
+	for _, selectedFont := range model.Conf.Editor.Load().CodeFontFamilies {
 		if nil != selectedFont && selectedFont.Family != font.Family {
 			codeFonts = append(codeFonts, selectedFont)
 		}
 	}
-	if len(fonts) != len(model.Conf.Editor.FontFamilies) ||
-		len(codeFonts) != len(model.Conf.Editor.CodeFontFamilies) {
-		model.Conf.Editor.FontFamilies = fonts
-		model.Conf.Editor.CodeFontFamilies = codeFonts
-		model.Conf.Editor.FontFamily = ""
-		model.Conf.Editor.FontWeight = 400
-		model.Conf.Editor.FontFamilyDisplay = ""
-		model.Conf.Editor.NormalizeFontFamilies()
-		editor = model.Conf.Editor
-	}
-	if nil != editor || nil != appearance {
-		model.Conf.Save()
+	if len(fonts) != len(model.Conf.Editor.Load().FontFamilies) ||
+		len(codeFonts) != len(model.Conf.Editor.Load().CodeFontFamilies) {
+		editor = model.UpdateEditorConf(func(e *conf.Editor) {
+			e.FontFamilies = fonts
+			e.CodeFontFamilies = codeFonts
+			e.FontFamily = ""
+			e.FontWeight = 400
+			e.FontFamilyDisplay = ""
+		})
 	}
 	if nil != appearance {
 		util.BroadcastByType("main", "setAppearance", 0, "", appearance)
@@ -1162,26 +1168,24 @@ var setAppearanceMode = contractHandler(apicontract.SystemSetAppearanceMode, fun
 	ret = apicontract.Success(apicontract.SystemAppearanceData{})
 
 	mode := int(request.Mode)
-	model.Conf.Appearance.Mode = mode
+	model.UpdateAppearanceConf(func(s *conf.Appearance) { s.Mode = mode })
 	model.LoadThemes()
 	model.WatchThemes()
 	model.Conf.Save()
 
-	ret = apicontract.Success(apicontract.SystemAppearanceData{Appearance: settingAppearancePayload(model.Conf.Appearance)})
+	ret = apicontract.Success(apicontract.SystemAppearanceData{Appearance: settingAppearancePayload(model.Conf.Appearance.Load())})
 	return
 })
 
 var setNetworkServe = contractHandler(apicontract.SetNetworkServe, func(c *gin.Context, request apicontract.NetworkServeRequest) apicontract.Response[apicontract.Null] {
-	model.Conf.System.NetworkServe = request.NetworkServe
-	model.Conf.Save()
+	model.UpdateSystemConf(func(s *conf.System) { s.NetworkServe = request.NetworkServe })
 	util.PushMsg(model.Conf.Language(42), 1000*15)
 	time.Sleep(time.Second * 3)
 	return apicontract.Success(apicontract.Null{})
 })
 
 var setNetworkServeTLS = contractHandler(apicontract.SetNetworkServeTLS, func(c *gin.Context, request apicontract.NetworkServeTLSRequest) apicontract.Response[apicontract.Null] {
-	model.Conf.System.NetworkServeTLS = request.NetworkServeTLS
-	model.Conf.Save()
+	model.UpdateSystemConf(func(s *conf.System) { s.NetworkServeTLS = request.NetworkServeTLS })
 	util.PushMsg(model.Conf.Language(42), 1000*15)
 	time.Sleep(time.Second * 3)
 	return apicontract.Success(apicontract.Null{})
@@ -1314,14 +1318,18 @@ var importTLSCABundle = contractHandler(apicontract.SystemImportTLSCABundle, fun
 })
 
 var setAutoLaunch = contractHandler(apicontract.SetAutoLaunch, func(c *gin.Context, request apicontract.AutoLaunchRequest) apicontract.Response[apicontract.Null] {
-	model.Conf.System.AutoLaunch2 = int(request.AutoLaunch)
+	model.UpdateSystemConf(func(value *conf.System) { value.AutoLaunch2 = int(request.AutoLaunch) })
 	model.Conf.Save()
 	return apicontract.Success(apicontract.Null{})
 })
 
 var setDownloadInstallPkg = contractHandler(apicontract.SetDownloadInstallPkg, func(c *gin.Context, request apicontract.DownloadInstallPkgRequest) apicontract.Response[apicontract.Null] {
-	model.Conf.System.DownloadInstallPkg = request.DownloadInstallPkg
-	model.Conf.Save()
+	model.UpdateSystemConf(func(s *conf.System) { s.DownloadInstallPkg = request.DownloadInstallPkg })
+	return apicontract.Success(apicontract.Null{})
+})
+
+var setSettingsWindow = contractHandler(apicontract.SetSettingsWindow, func(c *gin.Context, request apicontract.SettingsWindowRequest) apicontract.Response[apicontract.Null] {
+	model.UpdateSystemConf(func(s *conf.System) { s.SettingsWindow = request.SettingsWindow })
 	return apicontract.Success(apicontract.Null{})
 })
 
@@ -1333,17 +1341,15 @@ var setUpdateChannel = contractHandler(apicontract.SetUpdateChannel, func(c *gin
 })
 
 var setNetworkProxy = contractHandler(apicontract.SetNetworkProxy, func(c *gin.Context, request apicontract.NetworkProxy) apicontract.Response[apicontract.Null] {
-	model.Conf.System.NetworkProxy = &conf.NetworkProxy{Scheme: request.Scheme, Host: request.Host, Port: request.Port}
-	model.Conf.Save()
-	proxyURL := model.Conf.System.NetworkProxy.String()
-	util.SetNetworkProxy(proxyURL, model.Conf.System.NetworkProxy.IsSystem())
+	model.UpdateSystemConf(func(s *conf.System) {
+		s.NetworkProxy = &conf.NetworkProxy{Scheme: request.Scheme, Host: request.Host, Port: request.Port}
+	})
 	util.PushMsg(model.Conf.Language(102), 3000)
 	return apicontract.Success(apicontract.Null{})
 })
 
-var addUIProcess = contractHandler(apicontract.SystemAddUIProcess, func(c *gin.Context, request apicontract.SystemUIProcessRequest) apicontract.Response[apicontract.Null] {
-	request.PID = c.Query("pid")
-	pidInt, err := strconv.Atoi(request.PID)
+var addUIProcess = contractHandler(apicontract.SystemAddUIProcess, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	pidInt, err := strconv.Atoi(c.Query("pid"))
 	if err != nil || 0 >= pidInt {
 		return apicontract.EmptyHTTPResponse[apicontract.Null](http.StatusOK)
 	}
@@ -1359,22 +1365,36 @@ var addUIProcess = contractHandler(apicontract.SystemAddUIProcess, func(c *gin.C
 var exit = contractHandler(apicontract.SystemExit, exitSystem)
 
 var closeSystem = model.Close
+var recoverSystemExit = model.RecoverWorkspaceExit
+var finishSystemExit = model.ExitKernel
 
 func exitSystem(c *gin.Context, request apicontract.SystemExitRequest) apicontract.Response[apicontract.SystemExitData] {
 	setCurrentWorkspace := true
 	if request.SetCurrentWorkspace != nil {
 		setCurrentWorkspace = *request.SetCurrentWorkspace
 	}
-	exitCode, installPkgPath := closeSystem(request.Force, setCurrentWorkspace, int(request.ExecInstallPkg))
+	var exitCode int
+	var installPkgPath string
+	if request.RecoverExit != nil {
+		exitCode, installPkgPath = recoverSystemExit(request.RecoverExit.PID, request.RecoverExit.StartedAt)
+	} else {
+		exitCode, installPkgPath = closeSystem(request.Force, setCurrentWorkspace, int(request.ExecInstallPkg))
+	}
 	data := apicontract.SystemExitData{CloseTimeout: 0, InstallPkgPath: installPkgPath}
 	switch exitCode {
 	case 0:
-		// Close 返回后同步和 defer 清理均已完成，此时再通知移动端宿主退出。
-		util.BroadcastByType("main", "exit", 0, "", nil)
+		// 清理和响应写入完成后通知宿主退出，再启动服务退出流程。
+		return apicontract.WithAfterWrite(apicontract.Success(data), func() {
+			util.BroadcastByType("main", "exit", 0, "", nil)
+			finishSystemExit()
+		})
 	case 1: // 同步执行失败
 		return apicontract.SystemExit.FailureWithData(1, model.Conf.Language(96)+"<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">"+model.Conf.Language(97)+"</button>", data)
 	case 2: // 提示新安装包
 		return apicontract.SystemExit.FailureWithData(2, model.Conf.Language(61), data)
+	case 3: // 仍有界面处理退出结果，宿主继续等待。
+		return apicontract.SystemExit.FailureWithData(3, "", data)
+	default:
+		return apicontract.SystemExit.FailureWithData(-1, "Workspace exit no longer matches", data)
 	}
-	return apicontract.Success(data)
 }

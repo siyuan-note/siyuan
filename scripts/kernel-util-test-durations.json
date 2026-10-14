@@ -1,0 +1,1390 @@
+{
+    "prefixLength": 32,
+    "defaultSeconds": 0.2,
+    "buckets": {
+        "TestAESGCMEnvelopeHeaderTamperin": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAESGCMHeaderlessCiphertextRe": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAESGCMHeaderlessCiphertextWi": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestAESGCMInvalidKeyLength": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAESGCMRoundTrip": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAESGCMSamePlaintextDifferent": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAESGCMTamperedCiphertext": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAESGCMWrongKey": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAIProviderHeadersRedirectAnd": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestAIProviderHeadersRequests": {
+            "seconds": 0.005,
+            "tests": 1
+        },
+        "TestAIProviderHeadersStreamingAn": {
+            "seconds": 0.004,
+            "tests": 1
+        },
+        "TestAddFontMergesAliases": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAddFontPrefersUprightStyle": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAgentInstructionsConcurrentS": {
+            "seconds": 0.03,
+            "tests": 1
+        },
+        "TestAgentInstructionsPreservesIn": {
+            "seconds": 0.008,
+            "tests": 1
+        },
+        "TestAgentInstructionsRejectsLink": {
+            "seconds": 0.005,
+            "tests": 1
+        },
+        "TestAgentInstructionsStorage": {
+            "seconds": 0.058,
+            "tests": 1
+        },
+        "TestAnthropicCancellationAndCred": {
+            "seconds": 0.102,
+            "tests": 1
+        },
+        "TestAnthropicContextWindowTrunca": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestAnthropicEndpointPrefixes": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAnthropicIncompleteStreams": {
+            "seconds": 0.01,
+            "tests": 1
+        },
+        "TestAnthropicMessagesImagesAndTh": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestAnthropicModelsPagination": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestAnthropicNativeVersionAndPro": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestAnthropicNonStreamingAndErro": {
+            "seconds": 0.005,
+            "tests": 1
+        },
+        "TestAnthropicProviderAuthenticat": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAnthropicProviderModelsEndpo": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestAnthropicRestoredToolArgumen": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestAnthropicStreamAndNativeHist": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestAppearanceIgnoreMigration": {
+            "seconds": 0.066,
+            "tests": 1
+        },
+        "TestAppearancePackagePaths": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestArgon2KDFConsistency": {
+            "seconds": 0.329,
+            "tests": 1
+        },
+        "TestArgon2KDFDifferentPasswords": {
+            "seconds": 0.319,
+            "tests": 1
+        },
+        "TestArgon2KDFMissingKeyLengthRej": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAssetRelinkBatchOCR": {
+            "seconds": 0.035,
+            "tests": 1
+        },
+        "TestAssetRelinkCompareWrite": {
+            "seconds": 0.029,
+            "tests": 1
+        },
+        "TestAssetRelinkOCRPreservesConfl": {
+            "seconds": 0.044,
+            "tests": 1
+        },
+        "TestAuthCodeEquals": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAuthThrottleBackoff": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestAuthThrottleExpiry": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAuthThrottleMaxEntries": {
+            "seconds": 0.005,
+            "tests": 1
+        },
+        "TestAuthThrottleReset": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAuthThrottleSaturation": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAuthThrottleSweep": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAuthThrottleSweepKeepsLocked": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAuthThrottleThreshold": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestAuthThrottleWindowReset": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestBootHomeDir": {
+            "seconds": 0.231,
+            "tests": 1
+        },
+        "TestBootHomeDirProcess": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestBootWorkingDir": {
+            "seconds": 0.916,
+            "tests": 1
+        },
+        "TestBroadcastSerializesOnceAndPr": {
+            "seconds": 0.027,
+            "tests": 1
+        },
+        "TestBuiltinSkillDisabledAndExact": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestBuiltinSkillDoesNotShadowOrd": {
+            "seconds": 0.023,
+            "tests": 1
+        },
+        "TestBuiltinSkillEnglishMarkdownK": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestBuiltinSkillMetadataAndResou": {
+            "seconds": 0.004,
+            "tests": 1
+        },
+        "TestBuiltinSkillTextBounds": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestChatGPTCompletionUsesStreamA": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestChatGPTCompletionWithStreame": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestChatGPTRequestCapabilitiesAn": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestChatGPTStreamedOutputPreserv": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestChatGPTTransportRejectsNonPu": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestChatMessagesToOpenAIResponse": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestCheckHostSSRF": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestCleanupLegacyFont": {
+            "seconds": 0.118,
+            "tests": 1
+        },
+        "TestCleanupLegacyFontsPreservesL": {
+            "seconds": 0.048,
+            "tests": 1
+        },
+        "TestCmuxDerivedListenerCloseClos": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestConfigureGeminiThoughtSummar": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestContextPushMsgIgnoresInvalid": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestCustomFontLifecycle": {
+            "seconds": 0.215,
+            "tests": 1
+        },
+        "TestDecisionCancellationLimitsAn": {
+            "seconds": 0.056,
+            "tests": 1
+        },
+        "TestDecisionOpenAIProtocol": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestDecisionOpenAIRefusalAndUnkn": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestDecisionOpenAIRejectsInvalid": {
+            "seconds": 0.027,
+            "tests": 1
+        },
+        "TestDecisionProtocol": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestDecisionQuestionLimits": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestDecisionRejectsInvalidAnswer": {
+            "seconds": 0.013,
+            "tests": 1
+        },
+        "TestDefaultWorkspacePath": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestDeviceNamespaceAliasRejected": {
+            "seconds": 0.028,
+            "tests": 1
+        },
+        "TestDiscoverSkillsUsesEnabledUse": {
+            "seconds": 0.019,
+            "tests": 1
+        },
+        "TestDiscoverUserSkillsFollowsDir": {
+            "seconds": 0.008,
+            "tests": 1
+        },
+        "TestDiscoverUserSkillsReportsSta": {
+            "seconds": 0.013,
+            "tests": 1
+        },
+        "TestEmbeddingConnectionRetry": {
+            "seconds": 0.408,
+            "tests": 1
+        },
+        "TestEmbeddingRetrySharesDeadline": {
+            "seconds": 1.001,
+            "tests": 1
+        },
+        "TestExistingEmojiFileNameCompati": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestExtraBodyForModel": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestExtraBodyTransport_ChatPostM": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestExtraBodyTransport_EmptyExtr": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestExtraBodyTransport_InvalidJS": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestExtraBodyTransport_NonChatPa": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestFileSysStatusCheckData": {
+            "seconds": 0.018,
+            "tests": 1
+        },
+        "TestFileSysStatusCheckMissingFil": {
+            "seconds": 5.35,
+            "tests": 2
+        },
+        "TestFileSysStatusCheckOtherError": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestFileSysStatusCheckProtection": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestFilterFileNamePortableUnicod": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestFilterIconValuePreservesSupp": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestFilterIconValueRejectsUnsupp": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestFilterIconValueSanitizesCust": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestFilterRecentIconValueRemoves": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestFilterRecentIconValuesCanoni": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestFilterRecentIconValuesReturn": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestFilterSelfChildDocsPreserves": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestFilterSelfChildDocsRemovesCh": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestFindSkillDirsCollectionNoWra": {
+            "seconds": 0.005,
+            "tests": 1
+        },
+        "TestFindSkillDirsDoesNotDescendI": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestFindSkillDirsNoneFound": {
+            "seconds": 0.004,
+            "tests": 1
+        },
+        "TestFindSkillDirsRootSkill": {
+            "seconds": 0.003,
+            "tests": 1
+        },
+        "TestFindSkillDirsSkipsVCSDirs": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestFindSkillDirsWrappedCollecti": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestFindSkillDirsWrappedSingle": {
+            "seconds": 0.004,
+            "tests": 1
+        },
+        "TestFirstLine": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestFirstLineTruncation": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestGeminiThinkingLevel": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestGeminiThoughtSignatureTransp": {
+            "seconds": 0.002,
+            "tests": 2
+        },
+        "TestGeminiThoughtSummariesAreOpt": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestGenerateSaltUnique": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestGeneratedImageDownloadSSRFGu": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestGetTreeID": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestHasUnclosedHTMLVoidElements": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestHumanizeRelTimeMinuteMagnitu": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestInferFontWeight": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestInitPandocDoesNotUseWorkspac": {
+            "seconds": 0.013,
+            "tests": 1
+        },
+        "TestInitPandocExtractsDevelopmen": {
+            "seconds": 0.01,
+            "tests": 1
+        },
+        "TestInstallCustomFontRejectsInva": {
+            "seconds": 0.005,
+            "tests": 1
+        },
+        "TestIsCrossSiteFetchSite": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestIsEmptyDirIgnoresDSStore": {
+            "seconds": 0.004,
+            "tests": 1
+        },
+        "TestIsForbiddenAbsPath": {
+            "seconds": 0.665,
+            "tests": 1
+        },
+        "TestIsForbiddenAbsPathCaseInsens": {
+            "seconds": 0.358,
+            "tests": 1
+        },
+        "TestIsForbiddenAbsPathSymlinkByp": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestIsForbiddenDataRelPath": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestIsForbiddenDataRelPathCaseIn": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestIsGoogleGeminiOpenAICompatib": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestIsMobileWorkspaceBaseDir": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestIsPossiblyImageWithQueryAndF": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestIsPrivateIP": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestIsPublishSession": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestIsSameOrSubPath": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestIsSecureRequest": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestIsSensitivePathCredentialDot": {
+            "seconds": 0.046,
+            "tests": 1
+        },
+        "TestIsSensitivePathDosDeviceAlia": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestIsSensitivePathHTMLAssets": {
+            "seconds": 0.081,
+            "tests": 1
+        },
+        "TestIsSensitivePathHTMLAssetsSym": {
+            "seconds": 0.005,
+            "tests": 1
+        },
+        "TestIsSensitivePathHTMLAssetsUni": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestIsSensitivePathHomeDirOverri": {
+            "seconds": 0.015,
+            "tests": 2
+        },
+        "TestIsSensitivePathNamespaceAlia": {
+            "seconds": 0.413,
+            "tests": 1
+        },
+        "TestIsSensitivePathPlatformHomeD": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestIsSensitivePathSymlinkBypass": {
+            "seconds": 0.008,
+            "tests": 1
+        },
+        "TestIsSensitivePathSymlinkWorksp": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestIsSensitivePathSystemTempExe": {
+            "seconds": 0.033,
+            "tests": 1
+        },
+        "TestIsSensitivePathWithHomeDirOv": {
+            "seconds": 0.003,
+            "tests": 1
+        },
+        "TestIsSensitivePathWorkspaceAsse": {
+            "seconds": 0.009,
+            "tests": 1
+        },
+        "TestIsSensitivePathWorkspaceFile": {
+            "seconds": 0.065,
+            "tests": 1
+        },
+        "TestIsSensitivePathWorkspacePref": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestIsSessionOriginAllowed": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestIsSessionOriginAllowedPWANav": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestIsSessionOriginAllowedReques": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestIsTLSRequestHonorsClientTLSH": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestIsValidRedirectHost": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestKeylessModelFallsBackToChatC": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestLegacyFontReplacementsExist": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestListAvailableModelsCompatibi": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestListAvailableModelsWithConte": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestLoadCustomFontsCleansAbandon": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestLoadDirectWriteFonts": {
+            "seconds": 0.091,
+            "tests": 1
+        },
+        "TestLoadSkillCapsManifestTravers": {
+            "seconds": 2.07,
+            "tests": 1
+        },
+        "TestLoadSkillCapsResourceManifes": {
+            "seconds": 0.241,
+            "tests": 1
+        },
+        "TestLoadSkillEnforcesResolvedSki": {
+            "seconds": 0.013,
+            "tests": 1
+        },
+        "TestLoadSkillListsAndReadsBundle": {
+            "seconds": 0.029,
+            "tests": 1
+        },
+        "TestLoadSkillReadsOnlyEnabledUse": {
+            "seconds": 0.012,
+            "tests": 1
+        },
+        "TestLoadSkillRejectsUnsafeOrUnsu": {
+            "seconds": 0.024,
+            "tests": 1
+        },
+        "TestLocalizedFontNamesAndAliases": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestLongestExistingPath": {
+            "seconds": 0.003,
+            "tests": 1
+        },
+        "TestLuteFactoriesEnableCustomBlo": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestLuteTextMarkEscapedContentRo": {
+            "seconds": 0.01,
+            "tests": 1
+        },
+        "TestLuteUnicode17Callout": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestMatchICloudRoot": {
+            "seconds": 0.019,
+            "tests": 1
+        },
+        "TestMatchICloudRootIgnoresNested": {
+            "seconds": 0.004,
+            "tests": 1
+        },
+        "TestMatchICloudRootRejectsBroadR": {
+            "seconds": 0.01,
+            "tests": 1
+        },
+        "TestMatchICloudRootResolvesWorks": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestMatchSystemICloudRootWithHom": {
+            "seconds": 0.013,
+            "tests": 1
+        },
+        "TestMetadataNamedDirectoryIsPres": {
+            "seconds": 0.003,
+            "tests": 1
+        },
+        "TestMigrateLegacyIOSWorkspaceMov": {
+            "seconds": 0.04,
+            "tests": 1
+        },
+        "TestMigrateLegacyIOSWorkspaceRej": {
+            "seconds": 0.012,
+            "tests": 1
+        },
+        "TestMigrateLegacyIOSWorkspaceSki": {
+            "seconds": 0.009,
+            "tests": 1
+        },
+        "TestMiniMaxImageAdapterProviderH": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestMiniMaxImageEndpoints": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestMiniMaxImageFailures": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestMiniMaxImageRequestAndRespon": {
+            "seconds": 0.005,
+            "tests": 1
+        },
+        "TestMmapChangedPageBudget": {
+            "seconds": 0.004,
+            "tests": 1
+        },
+        "TestModelChatSamplingAndBudgetUn": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestModelFallsBackToResponses": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestModelFallsBackWhenAvailableL": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestModelProbesResponsesWhenAvai": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestModelRejectsUnavailableSelec": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestModelResponsesSamplingAndMin": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestNativeEmojiCacheReplacementA": {
+            "seconds": 0.035,
+            "tests": 1
+        },
+        "TestNetworkProxyLogValueRemovesC": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestNewNotificationsEnablesForma": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestNormalizeReasoningFieldsPres": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestNormalizeReasoningJSONReject": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestNormalizeSkillURL": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestNormalizeSkillURLOwnerRepoBo": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestNormalizeSkillURLOwnerRepoVa": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestNormalizeStatusBarDefaults": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestNotificationAppScopeLifecycl": {
+            "seconds": 0.032,
+            "tests": 1
+        },
+        "TestNotificationConcurrentOperat": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestNotificationGlobalHelpersPre": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestOCRAssetKeyPreservesResource": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestOCRCleanupRetainsNotebookAss": {
+            "seconds": 0.003,
+            "tests": 1
+        },
+        "TestOCRCleanupUsesNotebookIdenti": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestOCRCorruptCachePreservesSour": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestOCRTextNotebookIsolation": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestOCRTextPreservesLegacyScoped": {
+            "seconds": 0.051,
+            "tests": 1
+        },
+        "TestOCRTextReferenceVariants": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestOmitUnsupportedResponseSampl": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestOpenAIImageAdapterGenerate": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestOpenAIReasoningResponseNorma": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestOpenAIReasoningStreamNormali": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestOpenAIResponsesConservativeR": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestOpenAIResponsesIncompleteCon": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestOpenAIResponsesNonStreamFail": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestOpenAIResponsesRequestOption": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestOpenAIResponsesSamplingCompa": {
+            "seconds": 0.017,
+            "tests": 1
+        },
+        "TestOpenAIResponsesSamplingDoesN": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestOpenAIResponsesSamplingRepea": {
+            "seconds": 0.003,
+            "tests": 1
+        },
+        "TestOpenAIResponsesStreamPreserv": {
+            "seconds": 0.003,
+            "tests": 1
+        },
+        "TestOpenAIResponsesStreamRejects": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestOpenAIResponsesStreamRequire": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestOpenAIResponsesStreamReturns": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestOperationStallSnapshotIsBoun": {
+            "seconds": 0.008,
+            "tests": 1
+        },
+        "TestOperationWatchdogCapturesBlo": {
+            "seconds": 0.021,
+            "tests": 1
+        },
+        "TestOperationWatchdogStopsAfterC": {
+            "seconds": 0.051,
+            "tests": 1
+        },
+        "TestPandocZipPath": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestParseBundledFontLocalizedNam": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestParseFontconfigFonts": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestParseFontconfigSpacing": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestParseFontconfigWeight": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestParseSkillFrontmatter": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestParseSystemNetworkProxy": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestParseSystemNetworkProxyRejec": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestPluginDevelopmentContextCann": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestPluginDevelopmentRawPathGuar": {
+            "seconds": 0.891,
+            "tests": 1
+        },
+        "TestPluginDevelopmentReadOnlyRec": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestPluginProjectCandidateExclud": {
+            "seconds": 0.099,
+            "tests": 1
+        },
+        "TestPluginProjectCheckpointFailu": {
+            "seconds": 0.009,
+            "tests": 1
+        },
+        "TestPluginProjectCrashTemporaryR": {
+            "seconds": 0.134,
+            "tests": 1
+        },
+        "TestPluginProjectCrashTemporaryU": {
+            "seconds": 0.099,
+            "tests": 1
+        },
+        "TestPluginProjectImportConflictH": {
+            "seconds": 0.009,
+            "tests": 1
+        },
+        "TestPluginProjectInterruptedPrep": {
+            "seconds": 0.17,
+            "tests": 1
+        },
+        "TestPluginProjectInterruptedRead": {
+            "seconds": 0.109,
+            "tests": 1
+        },
+        "TestPluginProjectInterruptedRepl": {
+            "seconds": 0.144,
+            "tests": 1
+        },
+        "TestPluginProjectLinkedCreationC": {
+            "seconds": 0.09,
+            "tests": 1
+        },
+        "TestPluginProjectLinkedCreationR": {
+            "seconds": 0.174,
+            "tests": 1
+        },
+        "TestPluginProjectMissingCheckpoi": {
+            "seconds": 0.093,
+            "tests": 1
+        },
+        "TestPluginProjectMutationRecover": {
+            "seconds": 0.216,
+            "tests": 1
+        },
+        "TestPluginProjectPreparePreserve": {
+            "seconds": 0.113,
+            "tests": 1
+        },
+        "TestPluginProjectRecoveryOnlyCan": {
+            "seconds": 0.132,
+            "tests": 1
+        },
+        "TestPluginProjectRecoveryOnlyRes": {
+            "seconds": 0.088,
+            "tests": 1
+        },
+        "TestPluginProjectRecoveryTailRem": {
+            "seconds": 0.295,
+            "tests": 1
+        },
+        "TestPluginProjectRenameJournalTr": {
+            "seconds": 0.226,
+            "tests": 1
+        },
+        "TestPluginProjectRepeatedMutatio": {
+            "seconds": 21.783,
+            "tests": 1
+        },
+        "TestPluginProjectRepeatedReplans": {
+            "seconds": 0.981,
+            "tests": 1
+        },
+        "TestPluginProjectReplanFailuresK": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestPluginProjectReplanPreserves": {
+            "seconds": 0.192,
+            "tests": 1
+        },
+        "TestPluginProjectRequiresTrusted": {
+            "seconds": 0.127,
+            "tests": 1
+        },
+        "TestPluginProjectUnsafeSnapshot": {
+            "seconds": 0.064,
+            "tests": 1
+        },
+        "TestPrepareModelImagePreservesAn": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestPublishFileBoundary": {
+            "seconds": 0.009,
+            "tests": 1
+        },
+        "TestPublishFileJunctionBoundary": {
+            "seconds": 0.064,
+            "tests": 1
+        },
+        "TestReasoningResponseTransportPa": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestReasoningSSEBodyHandlesReadB": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestReasoningSSEBodyNormalizesFi": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestRemoveEmptyDir": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestRemoveEmptyDirPreservesSymli": {
+            "seconds": 0.003,
+            "tests": 1
+        },
+        "TestRenameEmojiFilePreservesExis": {
+            "seconds": 0.012,
+            "tests": 1
+        },
+        "TestRenderOAuthCallbackPage": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestRenderOAuthRedirectPage": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestReplaceLegacyIOSWorkspacePat": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestRerankRequestFormats": {
+            "seconds": 0.005,
+            "tests": 1
+        },
+        "TestRerankTruncatesDocumentsByRu": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestResolveNamespaceAlias": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestRetryableEmbeddingError": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestRhyCacheSnapshotsAndConcurre": {
+            "seconds": 0.01,
+            "tests": 1
+        },
+        "TestSQLitePageCacheBudgetPerConn": {
+            "seconds": 0.204,
+            "tests": 1
+        },
+        "TestSSRFSafeClientRejectsPrivate": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestSSRFSafeClientUsesHTTPProxyA": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestSSRFSafeClientUsesLocalProxy": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestSSRFSafeClientUsesSOCKS5Prox": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestSSRFSafeClientUsesUpdatedPro": {
+            "seconds": 0.003,
+            "tests": 1
+        },
+        "TestSSRFSafeDialContext": {
+            "seconds": 0.029,
+            "tests": 1
+        },
+        "TestSSRFSafeDialerSafeMode": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestSanitizeSVGAllowsBenignDocty": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestSanitizeSVGAllowsUTF8BOM": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestSanitizeSVGFiltersUnsafeAttr": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestSanitizeSVGPreservesStaticSV": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestSanitizeSVGRejectsInvalidInp": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestSanitizeSVGRemovesActiveCont": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestSelectFontconfigNameKeepsChi": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestSensitivePathAliases": {
+            "seconds": 0.03,
+            "tests": 1
+        },
+        "TestServeMultiplexedRefreshesCer": {
+            "seconds": 0.048,
+            "tests": 1
+        },
+        "TestServeMultiplexed_CloseDropsA": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestServeMultiplexed_HTTPAndHTTP": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestServeMultiplexed_HTTPSMustNo": {
+            "seconds": 0.005,
+            "tests": 1
+        },
+        "TestServerCertificateAllowsClock": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestSessionsByTypeExcludesPublis": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestSetHomeDir": {
+            "seconds": 0.006,
+            "tests": 1
+        },
+        "TestSetHomeDirRejectsInvalidPath": {
+            "seconds": 0.003,
+            "tests": 1
+        },
+        "TestSetHomeDirRejectsReadOnlyDir": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestSetNetworkProxy": {
+            "seconds": 0.016,
+            "tests": 1
+        },
+        "TestShouldRedirectToTLS": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestSkillManagementCommitConflic": {
+            "seconds": 0.036,
+            "tests": 1
+        },
+        "TestSkillManagementLinks": {
+            "seconds": 0.019,
+            "tests": 1
+        },
+        "TestSkillManagementPathBoundarie": {
+            "seconds": 0.085,
+            "tests": 1
+        },
+        "TestSkillManagementRawFiles": {
+            "seconds": 0.113,
+            "tests": 1
+        },
+        "TestSkillManagementRevisionConfl": {
+            "seconds": 0.068,
+            "tests": 1
+        },
+        "TestSkillManagementTextFiles": {
+            "seconds": 0.26,
+            "tests": 1
+        },
+        "TestSkillManagementTextProtectio": {
+            "seconds": 0.333,
+            "tests": 1
+        },
+        "TestSplitFileAnnotationRef": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestTLSCertManagerRefreshesCerti": {
+            "seconds": 0.092,
+            "tests": 2
+        },
+        "TestTestRerankModelValidatesResu": {
+            "seconds": 0.008,
+            "tests": 1
+        },
+        "TestTextFileAfterCommitFailureRe": {
+            "seconds": 0.012,
+            "tests": 1
+        },
+        "TestTextFileAtomicIOFailuresPres": {
+            "seconds": 0.062,
+            "tests": 1
+        },
+        "TestTextFileCancellationWhileWai": {
+            "seconds": 0.003,
+            "tests": 1
+        },
+        "TestTextFileConcurrentConditiona": {
+            "seconds": 0.028,
+            "tests": 1
+        },
+        "TestTextFileConditionalCreateRep": {
+            "seconds": 0.014,
+            "tests": 1
+        },
+        "TestTextFileConditionalRenameDel": {
+            "seconds": 0.012,
+            "tests": 1
+        },
+        "TestTextFileEditPreservesBytesMo": {
+            "seconds": 0.027,
+            "tests": 1
+        },
+        "TestTextFileEditsRejectAllConfli": {
+            "seconds": 0.039,
+            "tests": 1
+        },
+        "TestTextFileFailuresPreserveTarg": {
+            "seconds": 0.067,
+            "tests": 1
+        },
+        "TestTextFileLargeBinaryAssetRena": {
+            "seconds": 0.442,
+            "tests": 1
+        },
+        "TestTextFileNameMutationCancella": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestTextFileParentReplacementRej": {
+            "seconds": 0.02,
+            "tests": 1
+        },
+        "TestTextFilePublishedCreateClean": {
+            "seconds": 0.013,
+            "tests": 1
+        },
+        "TestTextFileUnsafePathsAndEncodi": {
+            "seconds": 0.018,
+            "tests": 1
+        },
+        "TestUILoadedWaitsForMainSession": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestUserSkillsAreReadOnlyAndRequ": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestWebSearchResponseErrors": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestWebSearchResponseResults": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestWorkspaceDriveCache": {
+            "seconds": 0.001,
+            "tests": 1
+        },
+        "TestWorkspaceDriveCacheCancellat": {
+            "seconds": 0,
+            "tests": 1
+        },
+        "TestWorkspaceExitMarker": {
+            "seconds": 0.027,
+            "tests": 1
+        },
+        "TestWorkspaceStorageConcurrentRe": {
+            "seconds": 0.012,
+            "tests": 1
+        },
+        "TestWorkspaceStorageEmptyAndFail": {
+            "seconds": 0.011,
+            "tests": 1
+        },
+        "TestWorkspaceStorageLinks": {
+            "seconds": 0.007,
+            "tests": 1
+        },
+        "TestWorkspaceStorageLocalFiles": {
+            "seconds": 0.041,
+            "tests": 1
+        },
+        "TestWorkspaceStorageSharedScanCa": {
+            "seconds": 0.002,
+            "tests": 1
+        },
+        "TestWriteFileByMmapSizeTransitio": {
+            "seconds": 0.066,
+            "tests": 1
+        }
+    }
+}

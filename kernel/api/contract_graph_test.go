@@ -140,9 +140,9 @@ func TestAPIContractLocalGraphEncryptedNotebook(t *testing.T) {
 
 func testGraphQueryContracts(t *testing.T, id string) {
 	t.Helper()
-	previous := model.Conf.Graph
-	model.Conf.Graph = conf.NewGraph()
-	defer func() { model.Conf.Graph = previous }()
+	previous := model.Conf.Graph.Load()
+	model.Conf.Graph.Store(conf.NewGraph())
+	defer func() { model.Conf.Graph.Store(previous) }()
 	for _, role := range []model.Role{model.RoleAdministrator, model.RoleReader} {
 		engine := gin.New()
 		engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, role) })
@@ -171,11 +171,11 @@ func testGraphQueryContracts(t *testing.T, id string) {
 // testGraphResetContracts 使用契约测试进程的临时配置目录验证重置后的持久化状态。
 func testGraphResetContracts(t *testing.T) {
 	t.Helper()
-	previous := model.Conf.Graph
-	model.Conf.Graph = conf.NewGraph()
-	defer func() { model.Conf.Graph = previous }()
-	model.Conf.Graph.Global.MinRefs = 12
-	model.Conf.Graph.Local.DailyNote = true
+	previous := model.Conf.Graph.Load()
+	model.Conf.Graph.Store(conf.NewGraph())
+	defer func() { model.Conf.Graph.Store(previous) }()
+	model.Conf.Graph.Load().Global.MinRefs = 12
+	model.Conf.Graph.Load().Local.DailyNote = true
 	engine := gin.New()
 	engine.POST("/api/graph/resetGraph", resetGraph)
 	engine.POST("/api/graph/resetLocalGraph", resetLocalGraph)
@@ -200,7 +200,7 @@ func testGraphResetContracts(t *testing.T) {
 			t.Fatalf("graph reset changed: %s, %v", recorder.Body.String(), err)
 		}
 	}
-	if model.Conf.Graph.Global.MinRefs != 0 || model.Conf.Graph.Local.DailyNote {
+	if model.Conf.Graph.Load().Global.MinRefs != 0 || model.Conf.Graph.Load().Local.DailyNote {
 		t.Fatal("graph configuration was not reset")
 	}
 	data, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))

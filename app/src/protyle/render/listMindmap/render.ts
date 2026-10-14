@@ -5,7 +5,8 @@ import {ListMindmapView} from "./view";
 import {revealTabsForTarget} from "../tabsRender";
 
 const editorRoots = new WeakMap<Element, {refresh: () => void,
-    restoreFocus: (listID: string, candidateIDs: string[]) => void}>();
+    restoreFocus: (listID: string, candidateIDs: string[], selection?: Record<string, string>, source?: HTMLElement) => void,
+    replay?: (source: Element, html: string) => boolean}>();
 const previews = new WeakMap<HTMLElement, ListMindmapView>();
 const visibleViews = new WeakMap<HTMLElement, {view: ListMindmapView, host: HTMLElement}>();
 
@@ -22,7 +23,9 @@ export const registerListMindmapView = (list: HTMLElement, view: ListMindmapView
 export const resolveVisibleListMindmapBlock = (source: Element): {
     carrier: HTMLElement, scrollElement: HTMLElement, reveal: () => void, focus: () => void
 } | null | undefined => {
-    if (source.closest(".mindmap-view")) {
+    const view = source.closest(".mindmap-view");
+    const editor = source.closest(".protyle-wysiwyg");
+    if (view && (!editor || editor.contains(view))) {
         return undefined;
     }
     const list = source.closest<HTMLElement>('[data-mindmap-view-rendered="true"]');
@@ -68,15 +71,45 @@ export const resolveVisibleListMindmapBlock = (source: Element): {
 };
 
 export const registerListMindmapRoot = (root: Element, refresh: () => void,
-                                       restoreFocus: (listID: string, candidateIDs: string[]) => void) => {
-    editorRoots.set(root, {refresh, restoreFocus});
+                                       restoreFocus: (listID: string, candidateIDs: string[], selection?: Record<string, string>, source?: HTMLElement) => void,
+                                       replay?: (source: Element, html: string) => boolean) => {
+    editorRoots.set(root, {refresh, restoreFocus, replay});
     return () => editorRoots.delete(root);
 };
 
+export const readListMindmapSelection = (value: unknown): Record<string, string> | undefined => {
+    if (typeof value !== "string") {
+        return;
+    }
+    try {
+        const saved = JSON.parse(value);
+        if (!saved || typeof saved !== "object" || Array.isArray(saved) ||
+            !Object.values(saved).every(item => typeof item === "string") ||
+            !/^[\w-]+$/.test(saved.undoFocusId || "") ||
+            saved.undoFocusEndId !== undefined && !/^[\w-]+$/.test(saved.undoFocusEndId)) {
+            return;
+        }
+        for (const key of ["undoFocusStart", "undoFocusEnd", "undoFocusIndex", "undoFocusEndIndex", "undoFocusTableCell"]) {
+            if ((key === "undoFocusStart" || key === "undoFocusEnd" || saved[key] !== undefined) &&
+                (!/^\d+$/.test(saved[key]) || !Number.isSafeInteger(Number(saved[key])))) {
+                return;
+            }
+        }
+        for (const key of ["backward", "undoFocusStartAtEnd", "undoFocusIgnoreZWSP", "undoFocusCalloutTitle", "undoFocusCollapseToEnd"]) {
+            if (saved[key] !== undefined && !["true", "false"].includes(saved[key])) {
+                return;
+            }
+        }
+        return saved;
+    } catch (_error) {
+        // 不认识的选区仍退回节点选择，不影响正文回放。
+    }
+};
+
 // 撤销回放会替换源块，节点焦点交给编辑器在脑图重新挂载后恢复。
-export const restoreListMindmapFocus = (root: Element, source: Element) => {
+export const restoreListMindmapFocus = (root: Element, source: Element, context?: IOperation["context"]) => {
     const registered = editorRoots.get(root);
-    if (!registered || source.closest(".mindmap-view")) {
+    if (!registered || root.contains(source.closest(".mindmap-view"))) {
         return false;
     }
     const list = getListMindmapElements(root).find(item => item.contains(source));
@@ -90,9 +123,15 @@ export const restoreListMindmapFocus = (root: Element, source: Element) => {
             candidateIDs.push(id);
         }
     }
-    registered.restoreFocus(list.dataset.nodeId, candidateIDs);
+    const selection = readListMindmapSelection(context?.undoFocusMindmapSelection);
+    registered.restoreFocus(list.dataset.nodeId, candidateIDs, selection, list);
     return true;
 };
+
+// 仅脑图控制器生成的完整源快照可就地回放；旧历史和局部块更新仍走完整源补齐。
+export const replayListMindmap = (root: Element, source: Element, operation: Extract<IOperation, {action: "update"}>) =>
+    operation.context?.mindmapSnapshotId === operation.id && source.getAttribute("data-node-id") === operation.id &&
+    typeof operation.data === "string" && !!editorRoots.get(root)?.replay?.(source, operation.data);
 
 export const getListMindmapElements = (root: Element) => {
     const selector = `[data-type="NodeMindmap"], [data-type="NodeList"][${Constants.CUSTOM_SY_LIST_MINDMAP}="1"]`;
@@ -100,8 +139,10 @@ export const getListMindmapElements = (root: Element) => {
     if (root.matches(selector)) {
         lists.unshift(root as HTMLElement);
     }
-    return lists.filter(list => !list.closest(".mindmap-view") &&
-        !list.parentElement?.closest(selector));
+    return lists.filter(list => (!list.closest(".mindmap-view") ||
+        root.matches(".protyle-wysiwyg") && list.closest(".protyle-wysiwyg") === root &&
+        !root.contains(list.closest(".mindmap-view"))) &&
+        !root.contains(list.parentElement?.closest(selector)));
 };
 
 // 导出页面和只读预览共用节点布局，源列表始终保留在文档中。

@@ -26,6 +26,72 @@ func writeAnthropicEvents(w http.ResponseWriter, events ...string) {
 	}
 }
 
+func TestAnthropicContextWindowTruncation(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var request anthropicRequest
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			t.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if !request.Stream {
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprint(w, `{"id":"msg","model":"test","content":[{"type":"text","text":"partial answer"}],"stop_reason":"model_context_window_exceeded","usage":{"input_tokens":5,"output_tokens":2}}`)
+			return
+		}
+		writeAnthropicEvents(w,
+			`{"type":"message_start","message":{"id":"msg","model":"test","content":[],"usage":{"input_tokens":5}}}`,
+			`{"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}`,
+			`{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"partial answer"}}`,
+			`{"type":"content_block_stop","index":0}`,
+			`{"type":"message_delta","delta":{"stop_reason":"model_context_window_exceeded"},"usage":{"output_tokens":2}}`,
+			`{"type":"message_stop"}`)
+	}))
+	defer server.Close()
+	client := NewAIClientWithModel("key", server.URL, "test", nil)
+	request := openai.ChatCompletionRequest{Model: "test", Messages: []openai.ChatCompletionMessage{{Role: "user", Content: "hello"}}}
+	completion, err := createAnthropicCompletion(context.Background(), client, request)
+	if err != nil || len(completion.Choices) != 1 {
+		t.Fatalf("context truncation lost completion: %#v err=%v", completion, err)
+	}
+	if completion.Choices[0].Message.Content != "partial answer" || completion.Choices[0].FinishReason != openai.FinishReasonLength {
+		t.Fatalf("unexpected truncated completion: %#v", completion)
+	}
+	stream, err := createAnthropicStream(context.Background(), client, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer stream.Close()
+	var text string
+	var finish openai.FinishReason
+	for {
+		part, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, choice := range part.Choices {
+			text += choice.Delta.Content
+			if choice.FinishReason != "" {
+				finish = choice.FinishReason
+			}
+		}
+	}
+	if text != "partial answer" || finish != openai.FinishReasonLength || stream.NativeContent() == nil {
+		t.Fatalf("context truncation lost streamed content: text=%q finish=%q", text, finish)
+	}
+	for _, reason := range []string{"pause_turn", "future_reason"} {
+		if _, err := anthropicFinishReason(reason, false); err == nil {
+			t.Errorf("unsupported stop reason was silently accepted: %s", reason)
+		}
+	}
+	if _, err := anthropicFinishReason("model_context_window_exceeded", true); err == nil {
+		t.Error("incomplete tool calls were accepted after context truncation")
+	}
+}
+
 var anthropicToolEvents = []string{
 	`{"type":"message_start","message":{"id":"msg_1","model":"test","content":[],"usage":{"input_tokens":11,"output_tokens":1,"cache_creation_input_tokens":3,"cache_read_input_tokens":7}}}`,
 	`{"type":"ping"}`,

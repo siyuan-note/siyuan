@@ -1,11 +1,11 @@
+import {config as configApi} from "../util/configApi";
 /// #if MOBILE
 import {saveScroll} from "../../protyle/scroll/saveScroll";
 /// #else
 import {adjustDockPadding} from "../../layout/dock/util";
-import {exportLayout} from "../../layout/util";
+import {reloadUI as reloadDesktopUI} from "../../layout/util";
 import {syncHideToolbarLayout, updateBarModeIcon} from "../../layout/topBar";
 /// #endif
-import {fetchPost} from "../../util/fetch";
 import {
     enqueueAppearanceUpdate,
     invalidateAppearancePackages,
@@ -20,7 +20,10 @@ import {getFrontend} from "../../util/functions";
 import {getCurrentThemeName, isCurrentThemeSupported, shouldUnloadThemeScript} from "../../util/themeCompatibility";
 import {remountOpenSettingTab} from "../setting/mount";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
+import {createSectionRuntime} from "../util/sectionRuntime";
 import {syncBodyGradient} from "./bodyGradient";
+import {refreshDynamicIcons} from "../../emoji/dynamicIcon";
+import {closeSettingsWindow, isSettingsWindow} from "../setting/windowContext";
 
 /** 主题模式下拉框初值：合并 mode / modeOS */
 export const appearanceThemeModeValue = (): number =>
@@ -29,8 +32,7 @@ export const appearanceThemeModeValue = (): number =>
 /** 主题模式选择：合并 mode / modeOS 后提交 */
 export const saveThemeMode = (value: number) => {
     const OSThemeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? 1 : 0;
-    fetchPost("/api/setting/setAppearance", {
-        ...window.siyuan.config.appearance,
+    configApi.set("appearance", {
         mode: (value === 2 ? OSThemeMode : value) as Config.IAppearance["mode"],
         modeOS: value === 2,
     });
@@ -54,16 +56,15 @@ interface IAppearanceRefresh {
 
 const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppearanceRefresh) => {
     if (data.lang !== window.siyuan.config.appearance.lang) {
+        if (isSettingsWindow()) {
+            closeSettingsWindow();
+            return;
+        }
         markAppearanceReloadPending();
         /// #if MOBILE
         void reloadUI();
         /// #else
-        void exportLayout({
-            cb() {
-                window.location.reload();
-            },
-            errorExit: false,
-        });
+        void reloadDesktopUI();
         /// #endif
         return;
     }
@@ -85,41 +86,47 @@ const applyAppearanceConfig = async (data: Config.IAppearance, refresh?: IAppear
     }
     const unloadChangedTheme = themeChanged && prevAppearance.themeJS && isCurrentThemeSupported(prevAppearance, getFrontend());
     if ((unloadChangedTheme || shouldUnloadThemeScript(prevAppearance, data, getFrontend())) && !await unloadThemeScript()) {
+        if (closeSettingsWindow()) return;
         markAppearanceReloadPending();
         /// #if MOBILE
         void reloadUI();
         /// #else
-        void exportLayout({
-            errorExit: false,
-            cb() {
-                window.location.reload();
-            },
-        });
+        void reloadDesktopUI();
         /// #endif
         return;
     }
 
-    window.siyuan.config.appearance = data;
-
-    document.getElementById("status")?.classList.toggle("fn__none", data.hideStatusBar);
-    /// #if !MOBILE
-    if (data.hideStatusBar !== prevAppearance.hideStatusBar) {
-        adjustDockPadding();
-    }
-    if (data.hideToolbar !== prevAppearance.hideToolbar) {
-        syncHideToolbarLayout();
-    }
-    updateBarModeIcon();
-    /// #endif
-
-    await loadAssets(data);
-    if (JSON.stringify(data.globalFontFamilies) !== JSON.stringify(prevAppearance.globalFontFamilies)) {
-        await setInlineStyle();
-        refreshHeadingNumberMeasurements();
-    }
-    /// #if !MOBILE
-    void remountOpenSettingTab("appearance");
-    /// #endif
+    await createSectionRuntime<Config.IAppearance>({
+        namespace: "appearance",
+        get: () => prevAppearance,
+        set: next => { window.siyuan.config.appearance = next; },
+        reactions: [{
+            name: "bars",
+            changed: () => true,
+            apply: (old, next) => {
+                document.getElementById("status")?.classList.toggle("fn__none", next.hideStatusBar);
+                /// #if !MOBILE
+                if (!isSettingsWindow() && next.hideStatusBar !== old.hideStatusBar) adjustDockPadding();
+                if (!isSettingsWindow() && next.hideToolbar !== old.hideToolbar) syncHideToolbarLayout();
+                if (!isSettingsWindow()) updateBarModeIcon();
+                /// #endif
+            },
+        }, {
+            name: "appearance-resources",
+            changed: () => true,
+            apply: async (old, next) => {
+                await loadAssets(next);
+                if (JSON.stringify(next.globalFontFamilies) !== JSON.stringify(old.globalFontFamilies)) {
+                    await setInlineStyle();
+                    refreshHeadingNumberMeasurements();
+                    refreshDynamicIcons();
+                }
+                /// #if !MOBILE
+                void remountOpenSettingTab("appearance");
+                /// #endif
+            },
+        }],
+    }).apply(data);
 };
 
 export const refreshAppearance = (data: IAppearanceRefresh) =>
@@ -129,9 +136,6 @@ export const refreshAppearance = (data: IAppearanceRefresh) =>
 export const appearanceConfigApi = createConfigNamespaceApi<Config.IAppearance>({
     namespace: "appearance",
     getConfig: () => window.siyuan.config.appearance,
-    setConfig: (data) => {
-        void enqueueAppearanceUpdate(() => applyAppearanceConfig(data));
-    },
-    apiPath: "/api/setting/setAppearance",
-    applyFromResponse: false,
+    setConfig: data => enqueueAppearanceUpdate(() => applyAppearanceConfig(data)),
+
 });

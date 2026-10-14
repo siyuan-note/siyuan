@@ -1,7 +1,8 @@
 import type {FileTreeGetDocRequestInput} from "../types/api";
 import {hasClosestBlock, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
-import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/selection";
+import {focusByOffset} from "../protyle/util/selection";
+import {focusByRange, getSelectionOffset} from "../protyle/util/selectionOffsets";
 import {hideElements} from "../protyle/ui/hideElements";
 import {fetchPost, fetchSyncPost} from "./fetch";
 import {Constants} from "../constants";

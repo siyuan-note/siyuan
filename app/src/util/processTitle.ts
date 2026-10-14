@@ -38,11 +38,17 @@ export const setTitle = (title: string, showVersionTitle = false, iconElement?: 
             dragElement.setAttribute("title", title);
             dragElement.innerHTML = escapeHtml(title);
             if (iconElement) {
+                const content = document.createElement("span");
+                content.className = "toolbar__title-content";
+                const text = document.createElement("span");
+                text.className = "fn__ellipsis";
+                text.textContent = title;
                 const icon = document.createElement("span");
                 icon.className = "toolbar__title-icon";
                 icon.setAttribute("aria-hidden", "true");
                 iconElement.childNodes.forEach(node => icon.appendChild(node.cloneNode(true)));
-                dragElement.prepend(icon);
+                content.append(icon, text);
+                dragElement.replaceChildren(content);
             }
         }
     }

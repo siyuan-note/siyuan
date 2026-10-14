@@ -1,3 +1,4 @@
+import {toggleMenu} from "../menus/menuToggle";
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 import {setStorageVal} from "../protyle/util/compatibility";
@@ -136,67 +137,73 @@ ${getAttr(item)}
 };
 
 export const unRefMoreMenu = (target: Element, element: Element, edit: Protyle) => {
-    const menu = new Menu(Constants.MENU_SEARCH_UNREF_MORE);
-    if (menu.isOpen) {
-        return;
-    }
-    const localData = window.siyuan.storage[Constants.LOCAL_SEARCHUNREF];
-    /// #if !MOBILE
-    menu.addItem({
-        icon: "iconLayout",
-        label: window.siyuan.languages.layout,
-        type: "submenu",
-        submenu: [{
-            iconHTML: "",
-            label: window.siyuan.languages.topBottomLayout,
-            current: localData.layout === 0,
-            click() {
-                element.querySelector(".search__layout").classList.remove("search__layout--row");
-                edit.protyle.element.style.width = "";
-                if (localData.row) {
-                    edit.protyle.element.style.height = localData.row;
-                    edit.protyle.element.classList.remove("fn__flex-1");
-                } else {
-                    edit.protyle.element.classList.add("fn__flex-1");
-                }
-                resize(edit.protyle);
-                localData.layout = 0;
-                setStorageVal(Constants.LOCAL_SEARCHUNREF, window.siyuan.storage[Constants.LOCAL_SEARCHUNREF]);
+    toggleMenu({
+        target: target,
+        build: (_menu, session) => {
+            const menu = new Menu(Constants.MENU_SEARCH_UNREF_MORE);
+            if (menu.isOpen) {
+                return;
             }
-        }, {
-            iconHTML: "",
-            label: window.siyuan.languages.leftRightLayout,
-            current: localData.layout === 1,
-            click() {
-                element.querySelector(".search__layout").classList.add("search__layout--row");
-                edit.protyle.element.style.height = "";
-                if (localData.col) {
-                    edit.protyle.element.style.width = localData.col;
-                    edit.protyle.element.classList.remove("fn__flex-1");
-                } else {
-                    edit.protyle.element.classList.add("fn__flex-1");
-                }
-                resize(edit.protyle);
-                localData.layout = 1;
-                setStorageVal(Constants.LOCAL_SEARCHUNREF, window.siyuan.storage[Constants.LOCAL_SEARCHUNREF]);
-            }
-        }]
-    });
-    /// #endif
-    menu.addItem({
-        icon: "iconRefresh",
-        label: window.siyuan.languages.refresh,
-        click() {
-            const loadingElement =  element.parentElement.querySelector(".fn__loading") as HTMLElement;
-            loadingElement.classList.remove("fn__none");
-            loadingElement.style.top = "42px";
-            getUnRefList(element, edit);
+            const localData = window.siyuan.storage[Constants.LOCAL_SEARCHUNREF];
+            /// #if !MOBILE
+            menu.addItem({
+                icon: "iconLayout",
+                label: window.siyuan.languages.layout,
+                type: "submenu",
+                submenu: [{
+                    iconHTML: "",
+                    label: window.siyuan.languages.topBottomLayout,
+                    current: localData.layout === 0,
+                    click() {
+                        element.querySelector(".search__layout").classList.remove("search__layout--row");
+                        edit.protyle.element.style.width = "";
+                        if (localData.row) {
+                            edit.protyle.element.style.height = localData.row;
+                            edit.protyle.element.classList.remove("fn__flex-1");
+                        } else {
+                            edit.protyle.element.classList.add("fn__flex-1");
+                        }
+                        resize(edit.protyle);
+                        localData.layout = 0;
+                        setStorageVal(Constants.LOCAL_SEARCHUNREF, window.siyuan.storage[Constants.LOCAL_SEARCHUNREF]);
+                    }
+                }, {
+                    iconHTML: "",
+                    label: window.siyuan.languages.leftRightLayout,
+                    current: localData.layout === 1,
+                    click() {
+                        element.querySelector(".search__layout").classList.add("search__layout--row");
+                        edit.protyle.element.style.height = "";
+                        if (localData.col) {
+                            edit.protyle.element.style.width = localData.col;
+                            edit.protyle.element.classList.remove("fn__flex-1");
+                        } else {
+                            edit.protyle.element.classList.add("fn__flex-1");
+                        }
+                        resize(edit.protyle);
+                        localData.layout = 1;
+                        setStorageVal(Constants.LOCAL_SEARCHUNREF, window.siyuan.storage[Constants.LOCAL_SEARCHUNREF]);
+                    }
+                }]
+            });
+            /// #endif
+            menu.addItem({
+                icon: "iconRefresh",
+                label: window.siyuan.languages.refresh,
+                click() {
+                    const loadingElement = element.parentElement.querySelector(".fn__loading") as HTMLElement;
+                    loadingElement.classList.remove("fn__none");
+                    loadingElement.style.top = "42px";
+                    getUnRefList(element, edit);
+                },
+            });
+            /// #if MOBILE
+            session.show(() => menu.fullscreen());
+            /// #else
+            const rect = target.getBoundingClientRect();
+            session.show(() => menu.open({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true}));
+            /// #endif
+
         },
     });
-    /// #if MOBILE
-    menu.fullscreen();
-    /// #else
-    const rect = target.getBoundingClientRect();
-    menu.open({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
-    /// #endif
 };

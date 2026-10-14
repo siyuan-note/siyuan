@@ -1,3 +1,4 @@
+import {isSameOriginAPIRequest, SIYUAN_APP_ID_HEADER} from "../../util/fetchAppId";
 import {insertHTML} from "../util/insertHTML";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
@@ -217,7 +218,7 @@ interface IAssetUploadCallbacks {
             input: IAssetUploadInput,
             result: Omit<IAssetUploadResult, "requestId" | "input">): void | PromiseLike<void>;
     formatResponse?: (responseText: string, input: IAssetUploadInput) => string;
-    complete?: (succeeded: boolean) => void;
+    complete?: (succeeded: boolean, result?: Omit<IAssetUploadResult, "requestId" | "input">) => void;
     reset?: () => void;
 }
 
@@ -257,9 +258,10 @@ const getErrorMessage = (error: unknown) => {
     return typeof error === "string" ? error : "";
 };
 
-const finishCallbacks = (callbacks: IAssetUploadCallbacks, succeeded: boolean) => {
+const finishCallbacks = (callbacks: IAssetUploadCallbacks, succeeded: boolean,
+                         result?: Omit<IAssetUploadResult, "requestId" | "input">) => {
     try {
-        callbacks.complete?.(succeeded);
+        callbacks.complete?.(succeeded, result);
     } catch (error) {
         console.error(error);
     }
@@ -275,7 +277,7 @@ const finishUpload = (task: IAssetUploadTask | undefined, callbacks: IAssetUploa
     if (task && !task.complete(result)) {
         return;
     }
-    finishCallbacks(callbacks, result.status === "success");
+    finishCallbacks(callbacks, result.status === "success", result);
 };
 
 const finishSuccessfulUpload = (task: IAssetUploadTask | undefined, callbacks: IAssetUploadCallbacks,
@@ -310,7 +312,7 @@ const finishSuccessfulUpload = (task: IAssetUploadTask | undefined, callbacks: I
             console.error(messageError);
         }
     } finally {
-        finishCallbacks(callbacks, result.status === "success");
+        finishCallbacks(callbacks, result.status === "success", result);
     }
 };
 
@@ -478,6 +480,9 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
             }
             const xhr = new XMLHttpRequest();
             xhr.open("POST", protyle.options.upload.url);
+            if (isSameOriginAPIRequest(protyle.options.upload.url, document.baseURI, location.origin)) {
+                xhr.setRequestHeader(SIYUAN_APP_ID_HEADER, Constants.SIYUAN_APPID);
+            }
             if (protyle.options.upload.token) {
                 xhr.setRequestHeader("X-Upload-Token", protyle.options.upload.token);
             }
@@ -678,7 +683,7 @@ export const uploadStandaloneAssetFiles = async (files: File[], options: {
 export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUpload: boolean,
                                  options?: IUploadInsertOptions, successCB?: (response: IWebSocketData,
                                      result: Omit<IAssetUploadResult, "requestId" | "input">) => void,
-                                 completeCB?: (succeeded: boolean) => void) => {
+                                 completeCB?: IAssetUploadCallbacks["complete"]) => {
     if (isProtyleUploadDisabled(protyle)) {
         completeCB?.(false);
         return;

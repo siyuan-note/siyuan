@@ -74,6 +74,8 @@ type documentEmbedStatResolver struct {
 
 // GetDocumentStat 统计文档，并按需解析查询嵌入块。
 func GetDocumentStat(ctx context.Context, id, boxID string, includeEmbed bool, accessChecker EmbedBlockAccessChecker) (ret *DocumentStat) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	tree := loadDocumentStatTree(id, boxID)
 	if nil == tree {
 		return
@@ -95,8 +97,8 @@ func GetDocumentStat(ctx context.Context, id, boxID string, includeEmbed bool, a
 	}
 
 	queryLimit := 64
-	if nil != Conf && nil != Conf.Search && 0 < Conf.Search.Limit {
-		queryLimit = Conf.Search.Limit
+	if nil != Conf && nil != confSearchSnapshot && 0 < confSearchSnapshot.Limit {
+		queryLimit = confSearchSnapshot.Limit
 	}
 	resolver := &documentEmbedStatResolver{
 		ctx:           ctx,
@@ -300,13 +302,15 @@ func documentStatEmbedStatement(embed *ast.Node) (stmt string, ok bool) {
 }
 
 func documentStatHeadingMode(embed *ast.Node) (ret int) {
-	if nil != Conf && nil != Conf.Editor {
-		ret = Conf.Editor.HeadingEmbedMode
+	confEditorSnapshot := Conf.LoadEditor()
+
+	if nil != Conf && nil != confEditorSnapshot {
+		ret = confEditorSnapshot.HeadingEmbedMode
 	}
 	if nil == embed {
 		return
 	}
-	if customMode := embed.IALAttr("custom-heading-mode"); "" != customMode {
+	if customMode := embed.IALAttr(embedHeadingModeAttr); "" != customMode {
 		if mode, err := strconv.Atoi(customMode); nil == err && 0 <= mode && mode <= 2 {
 			ret = mode
 		}

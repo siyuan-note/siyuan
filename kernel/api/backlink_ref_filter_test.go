@@ -28,7 +28,7 @@ func TestParseBacklinkRefFilter(t *testing.T) {
 func TestPublishReaderBacklinkRefCandidates(t *testing.T) {
 	oldConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = conf.NewEditor()
+	model.Conf.Editor.Store(conf.NewEditor())
 	t.Cleanup(func() { model.Conf = oldConf })
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()

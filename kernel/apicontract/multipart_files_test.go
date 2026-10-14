@@ -14,7 +14,7 @@ type multiFileRequest struct {
 func TestMultipartFileListAndSuccessMessage(t *testing.T) {
 	previous := definitions
 	t.Cleanup(func() { definitions = previous })
-	endpoint := define[multiFileRequest, []string]("multiFiles", "/test/multi-files", MultipartBody, ResponseOptions{}, "POST")
+	endpoint := define[multiFileRequest, []string]("multiFiles", "/test/multi-files", PublicAccess, MultipartBody, ResponseOptions{}, "POST")
 	files := []*multipart.FileHeader{{Filename: "first.txt"}, {Filename: "second.txt"}}
 	request, err := endpoint.DecodeMultipart(&multipart.Form{File: map[string][]*multipart.FileHeader{"files": files}})
 	if err != nil || len(request.Files) != 2 || request.Files[0] != files[0] || request.Files[1] != files[1] {
@@ -27,7 +27,7 @@ func TestMultipartFileListAndSuccessMessage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(bundle.TypeScript(nil)), `"files": Array<Blob>`) {
+	if !strings.Contains(string(bundle.TypeScript(nil, nil)), `"files": Array<Blob>`) {
 		t.Fatal("file list declaration is missing")
 	}
 	payload, err := json.Marshal(SuccessWithMessage([]string{"first.txt"}, "second file failed"))

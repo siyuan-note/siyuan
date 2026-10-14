@@ -23,6 +23,28 @@ type SyncProviderRequest struct {
 	// 显式确认后补齐原来源的资源和历史快照，缺省时只检查完整性。
 	CompleteAssets bool `json:"completeAssets" api:"optional,nullable"`
 }
+
+type ClearSyncProviderConfigRequest struct {
+	Provider int `json:"provider"`
+}
+
+type SyncProviderConfigRulesRequest struct {
+	Provider int    `json:"provider"`
+	Endpoint string `json:"endpoint" api:"optional"`
+	Bucket   string `json:"bucket" api:"optional"`
+}
+
+type SyncProviderConfigRulesData struct {
+	RequiredFields        []string `json:"requiredFields" api:"nonnullable"`
+	EndpointBucketWarning bool     `json:"endpointBucketWarning"`
+}
+
+type ClearSyncProviderConfigData struct {
+	Enabled bool        `json:"enabled"`
+	S3      *SyncS3     `json:"s3,omitempty"`
+	WebDAV  *SyncWebDAV `json:"webdav,omitempty"`
+	Local   *SyncLocal  `json:"local,omitempty"`
+}
 type SyncNameRequest struct {
 	Name string `json:"name" api:"trim"`
 }

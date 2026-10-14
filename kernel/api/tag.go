@@ -19,6 +19,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -40,8 +41,7 @@ func tagContracts(tags model.Tags) []*apicontract.TagData {
 
 var getTag = contractHandler(apicontract.GetTag, func(c *gin.Context, request apicontract.GetTagRequest) apicontract.Response[[]*apicontract.TagData] {
 	if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
-		model.Conf.Tag.Sort = int(request.Sort)
-		model.Conf.Save()
+		model.UpdateTagConf(func(s *conf.Tag) { s.Sort = int(request.Sort) })
 	}
 	tags := model.BuildTags(request.IgnoreMaxListHint, request.App, int(request.Sort))
 	if model.IsReadOnlyRoleContext(c) {

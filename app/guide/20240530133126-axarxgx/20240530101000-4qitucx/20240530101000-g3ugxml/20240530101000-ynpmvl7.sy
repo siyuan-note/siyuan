@@ -8,7 +8,7 @@
 		"id": "20240530101000-ynpmvl7",
 		"title": "フラッシュカード",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261009153000"
 	},
 	"Children": [
 		{
@@ -61,7 +61,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194342-ubj6k3j",
-				"updated": "20260803163402"
+				"updated": "20261009153000"
 			},
 			"Children": [
 				{
@@ -90,7 +90,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260614194342-rtni63y",
-				"updated": "20260614194354"
+				"updated": "20261009153000"
 			},
 			"Children": [
 				{
@@ -181,6 +181,62 @@
 								{
 									"Type": "NodeText",
 									"Data": "リストまたはリスト項目をフラッシュカードとして設定すると、親リストが問題、子リストが答えとして認識されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261009153000-bea4p22",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261009153000-bea4p22",
+						"updated": "20261009153000"
+					},
+					"Children": [
+						{
+							"ID": "20261009153000-rh6gam1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261009153000-rh6gam1",
+								"updated": "20261009153000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "引用ブロックをフラッシュカードとして設定すると、最初の子ブロックが問題、残りの子ブロックが答えとして認識されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261009153000-ytrctks",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261009153000-ytrctks",
+						"updated": "20261009153000"
+					},
+					"Children": [
+						{
+							"ID": "20261009153000-jy1nivv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261009153000-jy1nivv",
+								"updated": "20261009153000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "コールアウトをフラッシュカードとして設定すると、タイトルが問題、内容が答えとして認識されます"
 								}
 							]
 						}

@@ -38,6 +38,12 @@ type History struct {
 
 func QueryHistory(stmt string) (ret []map[string]any, err error) {
 	ret = []map[string]any{}
+	// 历史查询语句由调用方拼接，执行前必须校验为单条只读语句
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-4hjx-84f6-gr7c
+	if err = CheckHistoryReadonlyStatement(stmt); nil != err {
+		logging.LogWarnf("sql query [%s] rejected as non-readonly: %s", stmt, err)
+		return
+	}
 	rows, err := queryHistory(stmt)
 	if err != nil {
 		logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
@@ -73,6 +79,12 @@ func QueryHistory(stmt string) (ret []map[string]any, err error) {
 
 func SelectHistoriesRawStmt(stmt string) (ret []*History) {
 	if nil == historyDB {
+		return
+	}
+	// 历史查询语句由调用方拼接，执行前必须校验为单条只读语句
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-4hjx-84f6-gr7c
+	if err := CheckHistoryReadonlyStatement(stmt); nil != err {
+		logging.LogWarnf("sql query [%s] rejected as non-readonly: %s", stmt, err)
 		return
 	}
 	rows, err := historyDB.Query(stmt)

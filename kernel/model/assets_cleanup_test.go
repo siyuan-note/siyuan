@@ -99,8 +99,8 @@ func setupUnusedAssetWorkspace(t *testing.T) (boxID, docPath string) {
 	t.Helper()
 	originalConf, originalData, originalWorkspace := Conf, util.DataDir, util.WorkspaceDir
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
-	Conf.Sync = conf.NewSync()
+	Conf.FileTree.Store(conf.NewFileTree())
+	Conf.Sync.Store(conf.NewSync())
 	util.WorkspaceDir = t.TempDir()
 	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
 	t.Cleanup(func() { Conf, util.DataDir, util.WorkspaceDir = originalConf, originalData, originalWorkspace })
@@ -152,6 +152,61 @@ func TestHTMLAssetLinkDests(t *testing.T) {
 	widget.SetIALAttr("custom-data-assets", "assets/widget/")
 	if got := getAssetsLinkDests(widget, false); !reflect.DeepEqual(got, []string{"assets/widget/"}) {
 		t.Fatalf("widget references: %v", got)
+	}
+}
+
+func TestUnusedAssetsTemplateReferences(t *testing.T) {
+	setupUnusedAssetWorkspace(t)
+	templateDir := filepath.Join(util.DataDir, "templates", "nested")
+	if err := os.MkdirAll(templateDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	content := "![template](../assets/space%20name.png?preview#image)\n\n[PDF](assets/file.pdf?page=2)\n\n<img src=\"/assets/html.png\">\n\n{{now | date \"2006\"}}\n"
+	if err := os.WriteFile(filepath.Join(templateDir, "example.md"), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"space name.png", "file.pdf", "file.pdf.sya", "html.png", "unused.png"} {
+		if err := os.WriteFile(filepath.Join(util.DataDir, "assets", name), []byte(name), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	items, err := UnusedAssets(false)
+	if err != nil || len(items) != 1 || items[0].Item != "assets/unused.png" {
+		t.Fatalf("template assets reported unused: %+v, %v", items, err)
+	}
+}
+
+func TestUnusedAssetsTemplatePaths(t *testing.T) {
+	for _, mode := range []string{"uppercase extension", "symlink root"} {
+		t.Run(mode, func(t *testing.T) {
+			setupUnusedAssetWorkspace(t)
+			Conf.Search.Store(conf.NewSearch())
+			templateDir := filepath.Join(util.DataDir, "templates")
+			name := "example.MD"
+			if mode == "symlink root" {
+				target := t.TempDir()
+				if err := os.Symlink(target, templateDir); err != nil {
+					t.Skipf("symlink unavailable: %v", err)
+				}
+				templateDir, name = target, "example.md"
+			}
+			if err := os.MkdirAll(templateDir, 0755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(templateDir, name), []byte("![image](assets/template.png)"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			if matches := SearchTemplate(""); len(matches) != 1 {
+				t.Fatalf("template manager did not expose the fixture: %v", matches)
+			}
+			if err := os.WriteFile(filepath.Join(util.DataDir, "assets", "template.png"), []byte("image"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			unused, err := UnusedAssets(false)
+			if err != nil || len(unused) != 0 {
+				t.Fatalf("supported template asset listed for deletion: %+v, %v", unused, err)
+			}
+		})
 	}
 }
 
@@ -239,5 +294,54 @@ func TestUnusedAssetsExcludesEncryptedNotebook(t *testing.T) {
 	items, err := UnusedAssets(false)
 	if err != nil || len(items) != 0 {
 		t.Fatalf("encrypted notebook must remain outside global cleanup: %v, %v", items, err)
+	}
+}
+
+func TestAndroidNotificationAssetDeletionPaths(t *testing.T) {
+	boxID, docPath := setupUnusedAssetWorkspace(t)
+	for _, name := range []string{"assets/android-notification-texts.txt", "assets/sub/android-notification-texts.txt", "assets/other-android-notification-texts.txt", boxID + "/assets/android-notification-texts.txt", "assets/ocr-texts.json"} {
+		p := filepath.Join(util.DataDir, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte("original"), 0644); err != nil {
+			t.Fatal(err)
+		}
+		if _, _, err := ResolveUnusedDataAssetPath(name); (err == nil) != (name == "assets/android-notification-texts.txt") {
+			t.Fatalf("unexpected deletion admission for %s: %v", name, err)
+		}
+	}
+	if err := os.WriteFile(docPath, []byte(`{"Type":"NodeDocument","Spec":"99"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := ResolveUnusedDataAssetPath("assets/android-notification-texts.txt"); err != nil {
+		t.Fatalf("explicit switch deletion must not depend on document scanning: %v", err)
+	}
+	for _, name := range []string{"../assets/android-notification-texts.txt", "/assets/android-notification-texts.txt", "assets/../../android-notification-texts.txt"} {
+		if _, _, err := ResolveUnusedDataAssetPath(name); err == nil {
+			t.Fatalf("invalid path admitted: %s", name)
+		}
+	}
+	p := filepath.Join(util.DataDir, "assets", "android-notification-texts.txt")
+	if err := os.Remove(p); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := ResolveUnusedDataAssetPath("assets/android-notification-texts.txt"); err == nil {
+		t.Fatal("missing switch admitted")
+	}
+	if err := os.Mkdir(p, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := ResolveUnusedDataAssetPath("assets/android-notification-texts.txt"); err == nil {
+		t.Fatal("directory admitted as notification switch")
+	}
+	if err := os.Remove(p); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(filepath.Join(util.DataDir, "assets", "ocr-texts.json"), p); err != nil {
+		t.Skipf("symlink unavailable: %v", err)
+	}
+	if _, _, err := ResolveUnusedDataAssetPath("assets/android-notification-texts.txt"); err == nil {
+		t.Fatal("symlink admitted as notification switch")
 	}
 }

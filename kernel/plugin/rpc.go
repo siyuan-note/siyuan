@@ -26,7 +26,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gin-gonic/gin"
 	"github.com/lxzan/gws"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -196,13 +195,6 @@ type JsonRpcError struct {
 	Data    any              `json:"data,omitempty"`
 }
 
-// JsonRpcRequestProcessingResults represents the results of parsing and validating JSON-RPC requests, including any global error and the individual results for each request in a batch.
-type JsonRpcRequestProcessingResults struct {
-	Batch       bool                  // Whether the original request was a batch (array) or single request
-	GlobalError *JsonRpcErrorResponse // If the entire request is invalid
-	Requests    []*JsonRpcProcessingRequest
-}
-
 // JsonRpcProcessingRequest represents the result of parsing and validating a single JSON-RPC request, including any error if the request is invalid.
 type JsonRpcProcessingRequest struct {
 	Request *JsonRpcRequest       // The parsed request, or nil if the request was invalid
@@ -216,91 +208,6 @@ type JsonRpcProcessingRequest struct {
 type JsonRpcProcessingResponse struct {
 	Response *JsonRpcRequestResponse // The success response, or nil if the request was a notification or the response is an error
 	Error    *JsonRpcErrorResponse   // The error response, or nil if the request was a notification or the response is a success
-}
-
-// JsonRpcResponse returns the appropriate response (either success or error) to be sent back to the client, or nil if this is a notification and no response should be sent.
-func (r *JsonRpcProcessingResponse) JsonRpcResponse() any {
-	if r.Response != nil {
-		return r.Response
-	}
-	if r.Error != nil {
-		return r.Error
-	}
-	return nil
-}
-
-// HandleRpcHttp handles POST /api/plugin/rpc/:name
-// Supports single call, batch call, and notification (no response for notification).
-func HandleRpcHttp(c *gin.Context) {
-	name := util.GetRequestUrlStringParam(c, "name")
-	p := resolveRunningPlugin(c, name, http.StatusOK)
-	if p == nil {
-		return
-	}
-
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		c.JSON(http.StatusOK, &JsonRpcErrorResponse{
-			JsonRpc: JsonRpcVersion,
-			Error: &JsonRpcError{
-				Code:    JsonRpcErrorCodeInternalError,
-				Message: JsonRpcErrorInternalError.Message,
-				Data:    fmt.Sprintf("Failed to read request body: %s", err),
-			},
-			ID: nil,
-		})
-		return
-	}
-
-	results := parseRpcRequests(body)
-	if results.GlobalError != nil {
-		c.JSON(http.StatusOK, results.GlobalError)
-		return
-	}
-
-	responses := p.dispatchRpcRequests(c.Request.Context(), results.Requests)
-
-	if !results.Batch {
-		// Single request - return single response (or empty for notification)
-		if len(responses) > 0 && responses[0] != nil {
-			response := responses[0]
-			if response.Response != nil {
-				c.JSON(http.StatusOK, response.Response)
-				return
-			} else if response.Error != nil {
-				c.JSON(http.StatusOK, response.Error)
-				return
-			}
-		}
-		c.Status(http.StatusNoContent)
-		return
-	}
-
-	// Batch request - filter out nil responses (notifications) and return array
-	filtered := filterRpcResponses(responses)
-
-	if len(filtered) > 0 {
-		c.JSON(http.StatusOK, filtered)
-	} else {
-		// All notifications in batch - send nothing per spec (MUST NOT return empty array)
-		c.Status(http.StatusNoContent)
-	}
-}
-
-// HandleRpcWebSocket handles GET /ws/plugin/rpc/:name
-// Supports single call, batch call, notification, and server push notifications.
-func HandleRpcWebSocket(c *gin.Context) {
-	name := util.GetRequestUrlStringParam(c, "name")
-	p := resolveRunningPlugin(c, name, http.StatusNotFound)
-	if p == nil {
-		return
-	}
-
-	if c.IsWebsocket() == false {
-		c.String(http.StatusBadRequest, "This endpoint only accepts WebSocket connections")
-		return
-	}
-	p.serveRPCWebSocket(c.Writer, c.Request)
 }
 
 func (p *KernelPlugin) serveRPCWebSocket(writer http.ResponseWriter, request *http.Request) {
@@ -379,121 +286,4 @@ func (p *KernelPlugin) serveRPCWebSocket(writer http.ResponseWriter, request *ht
 	defer doClose()
 	doOpen()
 	<-ctx.Done()
-}
-
-// resolveRunningPlugin looks up the plugin by name and writes an error response if it is
-// not found (-32001) or not running (-32002). Returns nil when the caller should abort.
-func resolveRunningPlugin(c *gin.Context, name string, errStatus int) *KernelPlugin {
-	p := GetManager().GetPlugin(name)
-	if p == nil {
-		c.JSON(errStatus, &JsonRpcErrorResponse{
-			JsonRpc: JsonRpcVersion,
-			Error:   JsonRpcErrorPluginNotLoaded,
-		})
-		return nil
-	}
-	if p.State() != PluginStateRunning {
-		c.JSON(errStatus, &JsonRpcErrorResponse{
-			JsonRpc: JsonRpcVersion,
-			Error:   JsonRpcErrorPluginNotRunning,
-		})
-		return nil
-	}
-	return p
-}
-
-// parseRpcRequest parses a single JSON-RPC request from the given body. The body must be a JSON object.
-func parseRpcRequest(body []byte) (parsedRequest JsonRpcProcessingRequest) {
-	var request JsonRpcRequest
-	if !json.Valid(body) {
-		// Invalid JSON
-		parsedRequest.Error = &JsonRpcErrorResponse{
-			JsonRpc: JsonRpcVersion,
-			Error: &JsonRpcError{
-				Code:    JsonRpcErrorCodeParseError,
-				Message: JsonRpcErrorParseError.Message,
-				Data:    "RPC request is not valid JSON",
-			},
-			ID: nil,
-		}
-		return
-	}
-	if err := json.Unmarshal(body, &request); err != nil {
-		// Invalid request structure
-		parsedRequest.Error = &JsonRpcErrorResponse{
-			JsonRpc: JsonRpcVersion,
-			Error: &JsonRpcError{
-				Code:    JsonRpcErrorCodeInvalidRequest,
-				Message: JsonRpcErrorInvalidRequest.Message,
-				Data:    fmt.Sprintf("RPC request is not a valid JSON-RPC object: %s", err),
-			},
-			ID: nil,
-		}
-		return
-	}
-	parsedRequest.Request = &request
-	return
-}
-
-// parseRpcRequests parses the given body into one or more JSON-RPC requests, handling both single and batch requests.
-func parseRpcRequests(body []byte) (results JsonRpcRequestProcessingResults) {
-	if !json.Valid(body) {
-		// Invalid JSON
-		results.GlobalError = &JsonRpcErrorResponse{
-			JsonRpc: JsonRpcVersion,
-			Error: &JsonRpcError{
-				Code:    JsonRpcErrorCodeParseError,
-				Message: JsonRpcErrorParseError.Message,
-				Data:    "RPC request is not valid JSON",
-			},
-			ID: nil,
-		}
-		return
-	}
-
-	var jsonArray []json.RawMessage
-	if err := json.Unmarshal(body, &jsonArray); err != nil {
-		// single request
-		request := parseRpcRequest(body)
-		results.Requests = append(results.Requests, &request)
-		return
-	} else {
-		// batch request
-		if len(jsonArray) == 0 {
-			// per spec, an empty array is invalid
-			results.GlobalError = &JsonRpcErrorResponse{
-				JsonRpc: JsonRpcVersion,
-				Error: &JsonRpcError{
-					Code:    JsonRpcErrorCodeInvalidRequest,
-					Message: JsonRpcErrorInvalidRequest.Message,
-					Data:    "RPC request is not allowed to be an empty array",
-				},
-				ID: nil,
-			}
-			return
-		}
-
-		results.Batch = true
-		results.Requests = make([]*JsonRpcProcessingRequest, len(jsonArray))
-		for i, raw := range jsonArray {
-			request := parseRpcRequest(raw)
-			results.Requests[i] = &request
-		}
-	}
-	return
-}
-
-// filterRpcResponses filters out nil responses (for notifications) and extracts the actual response objects for non-nil responses.
-func filterRpcResponses(responses []*JsonRpcProcessingResponse) []any {
-	filtered := make([]any, 0, len(responses))
-	for _, response := range responses {
-		if response != nil {
-			if response.Response != nil {
-				filtered = append(filtered, response.Response)
-			} else if response.Error != nil {
-				filtered = append(filtered, response.Error)
-			}
-		}
-	}
-	return filtered
 }

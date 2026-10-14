@@ -394,6 +394,26 @@ class DirectReleaseTests(unittest.TestCase):
         with self.assertRaisesRegex(release.VerificationError, "前端版本不匹配"):
             release.verify_package(self.package(), version="3.8.4")
 
+    def test_minified_export_class_version(self):
+        self.resources["stage/build/export/protyle-method.js"] = (
+            b'const gn="3.8.4",bn="production",me=class{};let u=me;u.SIYUAN_VERSION=gn,u.NODE_ENV=bn;')
+        result = release.verify_package(self.package(), version="3.8.4")
+        self.assertEqual(result["frontend_versions"]["stage/build/export/protyle-method.js"], ["3.8.4"])
+        self.resources["stage/build/export/protyle-method.js"] = (
+            self.resources["stage/build/export/protyle-method.js"].replace(b"3.8.4", b"3.8.3"))
+        with self.assertRaisesRegex(release.VerificationError, "导出前端版本不匹配"):
+            release.verify_package(self.package(), version="3.8.4")
+
+    def test_minified_export_rejects_unrelated_or_conflicting_version_bindings(self):
+        for text in (
+            b'const gn="3.8.4",me=class{};let u=other;u.SIYUAN_VERSION=gn;',
+            b'const gn="3.8.4";function f(){const gn="3.8.3";}const me=class{};let u=me;u.SIYUAN_VERSION=gn;',
+        ):
+            with self.subTest(text=text):
+                self.resources["stage/build/export/protyle-method.js"] = text
+                with self.assertRaisesRegex(release.VerificationError, "导出前端版本不匹配"):
+                    release.verify_package(self.package(), version="3.8.4")
+
     def test_unreferenced_current_bundle_cannot_hide_old_frontend(self):
         self.resources["stage/build/mobile/unused.js"] = self.resources["stage/build/mobile/main.js"]
         self.resources["stage/build/mobile/main.js"] = self.resources["stage/build/mobile/main.js"].replace(b"3.8.4", b"3.8.3")

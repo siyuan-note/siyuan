@@ -37,7 +37,7 @@ var DocumentTool = &Tool{
 			"id":       {Type: "string", Description: "Document block ID"},
 			"title":    {Type: "string", Description: "Document title (for create, rename)"},
 			"path":     {Type: "string", Description: "Document hPath, the human-readable path shown in the document tree (e.g. /folder/doc). Used for create, list, move."},
-			"markdown": {Type: "string", Description: "Initial markdown content (for create)"},
+			"markdown": {Type: "string", Description: "Initial markdown content (for create).\n\n" + markdownContentSyntax},
 			"keyword":  {Type: "string", Description: "Search keyword (for search_docs)"},
 			"notebook": {Type: "string", Description: "Notebook ID (required for create, list, move)"},
 		},

@@ -28,6 +28,7 @@
 }
 
 .xfaLayer {
+  color-scheme: only light;
   background-color: transparent;
 }
 
@@ -310,7 +311,8 @@
   flex: 1;
 }
 
-:is(.xfaNonInteractive, .xfaDisabled, .xfaReadOnly) :is(input, textarea) {
+:is(.xfaNonInteractive, .xfaDisabled, .xfaReadOnly) input,
+:is(.xfaNonInteractive, .xfaDisabled, .xfaReadOnly) textarea {
   background: initial;
 }
 

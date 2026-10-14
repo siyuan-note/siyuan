@@ -18,9 +18,10 @@
 import { AnnotationEditorType, shadow } from "./pdfjs";
 import { CursorTool, PresentationModeState } from "./ui_utils.js";
 import { GrabToPan } from "./grab_to_pan.js";
+import { internalOpt } from "./internal_evt.js";
 
 /**
- * @typedef {Object} PDFCursorToolsOptions
+ * @typedef {object} PDFCursorToolsOptions
  * @property {HTMLDivElement} container - The document container.
  * @property {EventBus} eventBus - The application event bus.
  * @property {number} [cursorToolOnLoad] - The cursor tool that will be enabled
@@ -120,16 +121,22 @@ class PDFCursorTools {
   }
 
   #addEventListeners() {
-    this.eventBus._on("switchcursortool", evt => {
-      if (!evt.reset) {
-        this.switchTool(evt.tool);
-      } else if (this.#prevActive !== null) {
-        annotationEditorMode = AnnotationEditorType.NONE;
-        presentationModeState = PresentationModeState.NORMAL;
+    const { eventBus } = this;
 
-        enableActive();
-      }
-    });
+    eventBus.on(
+      "switchcursortool",
+      evt => {
+        if (!evt.reset) {
+          this.switchTool(evt.tool);
+        } else if (this.#prevActive !== null) {
+          annotationEditorMode = AnnotationEditorType.NONE;
+          presentationModeState = PresentationModeState.NORMAL;
+
+          enableActive();
+        }
+      },
+      internalOpt
+    );
 
     let annotationEditorMode = AnnotationEditorType.NONE,
       presentationModeState = PresentationModeState.NORMAL;
@@ -149,25 +156,33 @@ class PDFCursorTools {
       }
     };
 
-    this.eventBus._on("annotationeditormodechanged", ({ mode }) => {
-      annotationEditorMode = mode;
+    eventBus.on(
+      "annotationeditormodechanged",
+      ({ mode }) => {
+        annotationEditorMode = mode;
 
-      if (mode === AnnotationEditorType.NONE) {
-        enableActive();
-      } else {
-        disableActive();
-      }
-    });
+        if (mode === AnnotationEditorType.NONE) {
+          enableActive();
+        } else {
+          disableActive();
+        }
+      },
+      internalOpt
+    );
 
-    this.eventBus._on("presentationmodechanged", ({ state }) => {
-      presentationModeState = state;
+    eventBus.on(
+      "presentationmodechanged",
+      ({ state }) => {
+        presentationModeState = state;
 
-      if (state === PresentationModeState.NORMAL) {
-        enableActive();
-      } else if (state === PresentationModeState.FULLSCREEN) {
-        disableActive();
-      }
-    });
+        if (state === PresentationModeState.NORMAL) {
+          enableActive();
+        } else if (state === PresentationModeState.FULLSCREEN) {
+          disableActive();
+        }
+      },
+      internalOpt
+    );
   }
 
   /**

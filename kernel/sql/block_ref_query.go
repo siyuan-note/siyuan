@@ -26,6 +26,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/search"
 )
 
@@ -100,28 +101,6 @@ func queryRefTexts(refSearchIgnoreLines []string, boxIDs ...string) (ret []strin
 	}
 	for _, refText := range set.Values() {
 		ret = append(ret, refText.(string))
-	}
-	return
-}
-
-func QueryRefCount(defIDs []string) (ret map[string]int) {
-	ret = map[string]int{}
-	ids := strings.Join(defIDs, "','")
-	ids = "('" + ids + "')"
-	rows, err := query("SELECT def_block_id, COUNT(*) AS ref_cnt FROM refs WHERE def_block_id IN " + ids + " GROUP BY def_block_id")
-	if err != nil {
-		logging.LogErrorf("sql query failed: %s", err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var id string
-		var cnt int
-		if err = rows.Scan(&id, &cnt); err != nil {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
-		}
-		ret[id] = cnt
 	}
 	return
 }
@@ -228,7 +207,8 @@ func QueryBoundBlockAVIDsInBox(blockIDs, rootIDs []string, boxID string) (ret ma
 			for _, id := range batch {
 				args = append(args, id)
 			}
-			rows, queryErr := queryForBox(boxID, "SELECT id, ial FROM blocks WHERE "+column+" IN ("+placeholders+") AND instr(ial, 'custom-avs=') > 0", args...)
+			args = append(args, av.NodeAttrNameAvs+"=")
+			rows, queryErr := queryForBox(boxID, "SELECT id, ial FROM blocks WHERE "+column+" IN ("+placeholders+") AND instr(ial, ?) > 0", args...)
 			if nil != queryErr {
 				return queryErr
 			}
@@ -244,7 +224,7 @@ func QueryBoundBlockAVIDsInBox(blockIDs, rootIDs []string, boxID string) (ret ma
 				ialContent = strings.TrimPrefix(ialContent, "{:")
 				ialContent = strings.TrimSuffix(ialContent, "}")
 				for _, kv := range parse.Tokens2IAL([]byte(ialContent)) {
-					if 2 > len(kv) || "custom-avs" != kv[0] {
+					if 2 > len(kv) || av.NodeAttrNameAvs != kv[0] {
 						continue
 					}
 					for avID := range strings.SplitSeq(kv[1], ",") {
@@ -313,26 +293,6 @@ func QueryBoundBlockAVIDs(blockIDs, rootIDs []string) (ret map[string][]string, 
 		if err = merge(boxID); nil != err {
 			return
 		}
-	}
-	return
-}
-
-func QueryRootChildrenRefCount(defRootID string) (ret map[string]int) {
-	ret = map[string]int{}
-	rows, err := query("SELECT def_block_id, COUNT(*) AS ref_cnt FROM refs WHERE def_block_root_id = ? GROUP BY def_block_id", defRootID)
-	if err != nil {
-		logging.LogErrorf("sql query failed: %s", err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var id string
-		var cnt int
-		if err = rows.Scan(&id, &cnt); err != nil {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
-		}
-		ret[id] = cnt
 	}
 	return
 }
@@ -474,7 +434,7 @@ func QueryBlockDefIDsByRefText(refText string) (ret []string) {
 
 func QueryBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
 	var q, arg string
-	if caseSensitive {
+	if caseSensitive.Load() {
 		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content = ?"
 		arg = refText
 	} else {
@@ -499,7 +459,7 @@ func QueryBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
 	escaped := escapeLikePattern(refText)
 	aliasArg := "%," + escaped + ",%"
 	var nameCond, docCond, exactArg string
-	if caseSensitive {
+	if caseSensitive.Load() {
 		nameCond = "name = ?"
 		docCond = "content = ?"
 		exactArg = refText
@@ -531,7 +491,7 @@ func QueryBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
 func queryDefIDsByDefText(keyword string) (ret []string) {
 	ret = []string{}
 	var q, arg string
-	if caseSensitive {
+	if caseSensitive.Load() {
 		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content = ?"
 		arg = keyword
 	} else {
@@ -560,7 +520,7 @@ func queryDefIDsByNameAliasAndDocTitle(keyword string) (ret []string) {
 	escaped := escapeLikePattern(keyword)
 	aliasArg := "%," + escaped + ",%"
 	var nameCond, docCond, exactArg string
-	if caseSensitive {
+	if caseSensitive.Load() {
 		nameCond = "name = ?"
 		docCond = "content = ?"
 		exactArg = keyword
@@ -588,29 +548,6 @@ func queryDefIDsByNameAliasAndDocTitle(keyword string) (ret []string) {
 			return
 		}
 		ret = append(ret, id)
-	}
-	return
-}
-
-func QueryChildRefDefIDsByRootDefID(rootDefID string) (ret map[string][]string) {
-	ret = map[string][]string{}
-	rows, err := query("SELECT block_id, def_block_id FROM refs WHERE def_block_root_id =  ?", rootDefID)
-	if err != nil {
-		logging.LogErrorf("sql query failed: %s", err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var defID, refID string
-		if err = rows.Scan(&defID, &refID); err != nil {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
-		}
-		if nil == ret[defID] {
-			ret[defID] = []string{refID}
-		} else {
-			ret[defID] = append(ret[defID], refID)
-		}
 	}
 	return
 }
@@ -659,34 +596,6 @@ func QueryRefIDsByDefID(defID string, containChildren bool) (refIDs []string) {
 	return
 }
 
-func QueryRefsRecent(onlyDoc bool, typeFilter string, ignoreLines []string) (ret []*Ref) {
-	stmt := "SELECT r.* FROM refs AS r, blocks AS b WHERE b.id = r.def_block_id AND b.type IN " + typeFilter
-	if onlyDoc {
-		stmt = "SELECT r.* FROM refs AS r, blocks AS b WHERE b.id = r.def_block_id AND b.type = 'd'"
-	}
-	if 0 < len(ignoreLines) {
-		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
-		buf := bytes.Buffer{}
-		for _, line := range ignoreLines {
-			buf.WriteString(" AND ")
-			buf.WriteString(line)
-		}
-		stmt += buf.String()
-	}
-	stmt += " GROUP BY r.def_block_id ORDER BY r.id DESC LIMIT 32"
-	rows, err := query(stmt)
-	if err != nil {
-		logging.LogErrorf("sql query failed: %s", err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		ref := scanRefRows(rows)
-		ret = append(ret, ref)
-	}
-	return
-}
-
 func QueryRefsByDefID(defBlockID string, containChildren bool) (ret []*Ref) {
 	var rows *sql.Rows
 	var err error
@@ -713,21 +622,6 @@ const queryRefsByDefIDWithChildren = `WITH RECURSIVE child_ids(id) AS (
 	SELECT blocks.id FROM blocks JOIN child_ids ON blocks.parent_id = child_ids.id
 )
 SELECT refs.* FROM refs JOIN child_ids ON refs.def_block_id = child_ids.id`
-
-func QueryRefsByDefIDRefID(defBlockID, refBlockID string) (ret []*Ref) {
-	stmt := "SELECT * FROM refs WHERE def_block_id = ? AND block_id = ?"
-	rows, err := query(stmt, defBlockID, refBlockID)
-	if err != nil {
-		logging.LogErrorf("sql query failed: %s", err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		ref := scanRefRows(rows)
-		ret = append(ret, ref)
-	}
-	return
-}
 
 func DefRefs(condition string, limit int) (ret []map[*Block]*Block) {
 	ret = []map[*Block]*Block{}

@@ -74,7 +74,7 @@ func (w *mcpOAuthChallengeWriter) WriteHeader(status int) {
 func CheckMCPAuth(c *gin.Context) {
 	header := strings.Fields(c.GetHeader("Authorization"))
 	isBearer := len(header) == 2 && strings.EqualFold(header[0], "Bearer")
-	if isBearer && util.AuthCodeEquals(Conf.Api.Token, header[1]) {
+	if isBearer && util.AuthCodeEquals(Conf.Api.Load().Token, header[1]) {
 		CheckAuth(c)
 		return
 	}

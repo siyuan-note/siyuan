@@ -9,6 +9,23 @@ import {
 const waitForRefresh = () => new Promise((resolve) => setTimeout(resolve, 150));
 
 describe("database row refresh", () => {
+    it("refreshes every open panel for a binding transaction and its undo", async () => {
+        const counts = [0, 0, 0];
+        const unregister = counts.map((_value, index) => registerDatabaseRowRefresh(`binding-${index}`, {
+            getAVID: () => index === 2 ? "other" : "database",
+            refresh: () => counts[index]++,
+        }));
+        for (const isDetached of [false, true]) {
+            counts.forEach((_value, index) => queueDatabaseRowRefreshForOperations(`binding-${index}`, [{
+                action: "replaceAttrViewBlock", avID: "database", previousID: "item",
+                nextID: isDetached ? "" : "document", isDetached,
+            }]));
+            await waitForRefresh();
+        }
+        assert.deepEqual(counts, [2, 2, 0]);
+        unregister.forEach(dispose => dispose());
+    });
+
     it("refreshes only the matching database and coalesces requests", async () => {
         let avID = "av-a";
         let refreshCount = 0;

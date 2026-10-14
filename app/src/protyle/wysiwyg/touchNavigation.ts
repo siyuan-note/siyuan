@@ -1,33 +1,36 @@
 import {Constants} from "../../constants";
 
 export const bindTouchNavigation = (element: HTMLElement,
-                                    onTap: (target: HTMLElement, point: {x: number, y: number}) => boolean | void) => {
+                                    onTap: (target: HTMLElement, point: {x: number, y: number}) => boolean | void,
+                                    canTapTarget = (target: HTMLElement) => !!target.closest('[contenteditable="true"]')) => {
     let start: {id: number, x: number, y: number, time: number, target: HTMLElement} | undefined;
-    element.addEventListener("touchstart", (event: TouchEvent) => {
+    // 触摸时长使用事件时间戳，不把键盘动画造成的事件投递延迟计入长按。
+    const eventTime = (event: TouchEvent) => Number.isFinite(event.timeStamp) ? event.timeStamp : Date.now();
+    const touchStart = (event: TouchEvent) => {
         start = undefined;
         const target = event.target as HTMLElement;
         if (event.defaultPrevented || event.touches.length !== 1 ||
-            !target.closest('[contenteditable="true"]')) {
+            !canTapTarget(target)) {
             return;
         }
         const touch = event.touches[0];
-        start = {id: touch.identifier, x: touch.clientX, y: touch.clientY, time: Date.now(), target};
-    }, {passive: true});
-    element.addEventListener("touchmove", (event: TouchEvent) => {
+        start = {id: touch.identifier, x: touch.clientX, y: touch.clientY, time: eventTime(event), target};
+    };
+    const touchMove = (event: TouchEvent) => {
         const touch = start && Array.from(event.touches).find(item => item.identifier === start.id);
         if (!touch || event.touches.length !== 1 ||
             Math.abs(touch.clientX - start.x) >= Constants.SIZE_DRAG_THRESHOLD ||
             Math.abs(touch.clientY - start.y) >= Constants.SIZE_DRAG_THRESHOLD) {
             start = undefined;
         }
-    }, {passive: true});
-    element.addEventListener("touchend", (event: TouchEvent) => {
+    };
+    const touchEnd = (event: TouchEvent) => {
         const tap = start;
         start = undefined;
         const touch = tap && Array.from(event.changedTouches).find(item => item.identifier === tap.id);
         // 原生触摸不一定合成点击事件，短按结束时直接记录；滚动、长按和多指手势不进入导航历史。
         if (!touch || event.defaultPrevented || event.touches.length > 0 ||
-            Date.now() - tap.time >= Constants.TIMEOUT_LONGPRESS ||
+            eventTime(event) - tap.time >= Constants.TIMEOUT_LONGPRESS ||
             Math.abs(touch.clientX - tap.x) >= Constants.SIZE_DRAG_THRESHOLD ||
             Math.abs(touch.clientY - tap.y) >= Constants.SIZE_DRAG_THRESHOLD) {
             return;
@@ -36,8 +39,19 @@ export const bindTouchNavigation = (element: HTMLElement,
             // 已处理链接导航，阻止浏览器随后合成点击而重复打开。
             event.preventDefault();
         }
-    }, {passive: false});
-    element.addEventListener("touchcancel", () => {
+    };
+    const touchCancel = () => {
         start = undefined;
-    }, {passive: true});
+    };
+    element.addEventListener("touchstart", touchStart, {passive: true});
+    element.addEventListener("touchmove", touchMove, {passive: true});
+    element.addEventListener("touchend", touchEnd, {passive: false});
+    element.addEventListener("touchcancel", touchCancel, {passive: true});
+    return () => {
+        start = undefined;
+        element.removeEventListener("touchstart", touchStart);
+        element.removeEventListener("touchmove", touchMove);
+        element.removeEventListener("touchend", touchEnd);
+        element.removeEventListener("touchcancel", touchCancel);
+    };
 };

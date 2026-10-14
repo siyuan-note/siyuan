@@ -7,10 +7,10 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string, desktopSource: string) => {
+const browserCases = async (source: string, desktopSource: string, reloadSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const Constants = {CB_GET_SCROLL: "scroll", CB_GET_HL: "highlight", CB_GET_FOCUS: "focus",
-        CB_GET_FOCUSFIRST: "focusFirst"};
+        CB_GET_FOCUSFIRST: "focusFirst", ATTRIBUTE_V_SCROLL: "data-v-scroll"};
     const focusElementById = new Function("Constants", "resolveVisibleListMindmapBlock", "isPhablet",
         "hasClosestByAttribute", source + "\nreturn focusElementById;")(
         Constants, (): undefined => undefined, () => false, (): null => null) as (
@@ -62,11 +62,91 @@ const browserCases = async (source: string, desktopSource: string) => {
     spacer.style.height = "804px";
     await new Promise(resolve => setTimeout(resolve, 150));
     check.equal(content.scrollTop, 0, "typing cancels desktop focus compensation");
+
+    const preserveReloadScroll = new Function("Constants", reloadSource + "\nreturn preserveReloadScroll;") as
+        (constants: typeof Constants) => (protyle: IProtyle, scrollTop: number) => {
+            beforeAVRender: () => void;
+            afterAVRender: () => Promise<void>;
+            isValid: () => boolean;
+            cancel: () => void;
+        };
+    const preserve = preserveReloadScroll(Constants);
+    protyle.scroll = {lastScrollTop: 0} as IProtyle["scroll"];
+    const database = (type: string, rendered: boolean) =>
+        `<div class="av" data-node-id="av-block" data-av-id="av-data" data-av-type="${type}" ` +
+        `data-render="${rendered}"${rendered ? ' data-v-scroll="true"' : ""}><div class="av__container">${rendered ?
+            '<div class="av__scroll" style="width: 250px; overflow: auto"><div style="width: 600px">' +
+            '<div class="av__body" data-page-size="100" data-group-id="group" style="height: 1000px">' +
+            '<div class="av__row" data-index="50">Resource</div></div>' +
+            '<div data-type="av-search">query</div></div></div>' : ""}</div></div>`;
+    const replaceDatabase = (type = "table") => {
+        wysiwyg.innerHTML = database(type, false);
+        content.scrollTop = 650;
+        check.equal(content.scrollTop, 0, "an empty database clamps the saved scroll position");
+    };
+    for (const type of ["table", "gallery", "kanban"]) {
+        wysiwyg.innerHTML = database(type, true);
+        wysiwyg.querySelector(".av__scroll").scrollLeft = 120;
+        content.scrollTop = 650;
+        const state = preserve(protyle, content.scrollTop);
+        check.equal(content.style.overflowAnchor, "none", "reload temporarily suppresses browser scroll anchoring");
+        replaceDatabase(type);
+        state.beforeAVRender();
+        check.equal(wysiwyg.querySelector(".av").getAttribute(Constants.ATTRIBUTE_V_SCROLL), "true");
+        check.equal(wysiwyg.querySelector<HTMLElement>(".av__body").dataset.pageSize, "100");
+        check.equal(wysiwyg.querySelector<HTMLElement>(".av__row").dataset.index, "50");
+        check.equal(wysiwyg.querySelector("[data-type='av-search']").textContent, "query");
+        check.equal(wysiwyg.querySelector(".av__scroll").scrollLeft, 120);
+        await Promise.resolve();
+        await state.afterAVRender();
+        check.equal(content.scrollTop, 650, `${type} restores the position after the database regains height`);
+        check.equal(protyle.scroll.lastScrollTop, 650);
+        check.equal(content.style.overflowAnchor, "", "reload releases its temporary anchoring override");
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        check.equal(content.scrollTop, 650, `${type} remains at the restored position after layout settles`);
+    }
+    for (const type of ["wheel", "touchstart", "pointerdown", "keydown", "beforeinput"]) {
+        wysiwyg.innerHTML = database("table", true);
+        const state = preserve(protyle, 650);
+        replaceDatabase();
+        state.beforeAVRender();
+        content.dispatchEvent(new Event(type, {bubbles: true}));
+        check.equal(content.style.overflowAnchor, "", `${type} releases the anchoring override`);
+        content.scrollTop = 123;
+        await state.afterAVRender();
+        check.equal(content.scrollTop, 123, `${type} cancels delayed restoration`);
+    }
+    wysiwyg.querySelector(".av").setAttribute("data-render", "true");
+    const stale = preserve(protyle, 650);
+    const current = preserve(protyle, 450);
+    check.equal(stale.isValid(), false, "a newer reload invalidates the pending response");
+    content.scrollTop = 123;
+    await stale.afterAVRender();
+    check.equal(content.scrollTop, 123);
+    current.cancel();
+    const navigation = preserve(protyle, 650);
+    protyle.block.rootID = "other-root";
+    await navigation.afterAVRender();
+    check.equal(content.scrollTop, 123, "navigation cancels restoration");
+    protyle.block.rootID = "root";
+    const zoom = preserve(protyle, 650);
+    wysiwyg.innerHTML = database("table", true);
+    content.scrollTop = 123;
+    await zoom.afterAVRender();
+    check.equal(content.scrollTop, 123, "replacing content in the same document cancels restoration");
+    const changedView = preserve(protyle, 650);
+    replaceDatabase("gallery");
+    changedView.beforeAVRender();
+    check.equal(wysiwyg.querySelector(".av__body"), null, "a changed view does not receive stale table content");
+    changedView.cancel();
+    const closed = preserve(protyle, 650);
     host.remove();
+    check.equal(closed.isValid(), false, "closing the editor invalidates the pending response");
+    await closed.afterAVRender();
     return "Positioning cancellation cases passed";
 };
 
-test("typing stops delayed document positioning", {
+test("delayed document positioning preserves database state and respects user interaction", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
@@ -85,6 +165,11 @@ test("typing stops delayed document positioning", {
     const desktopCompiled = transpileModule(desktopSource.slice(desktopStart, desktopEnd), {
         compilerOptions: {target: ScriptTarget.ES2021}
     }).outputText;
+    const reloadSource = readFileSync(path.join(__dirname, "reloadScroll.ts"), "utf8")
+        .replace('import {Constants} from "../../constants";', "").replace("export const", "const");
+    const reloadCompiled = transpileModule(reloadSource, {
+        compilerOptions: {target: ScriptTarget.ES2021}
+    }).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-onget-positioning-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -95,7 +180,8 @@ app.whenReady().then(async () => {
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + JSON.stringify(compiled) + "," + JSON.stringify(desktopCompiled) + ")")}));
+        browserCases.toString() + ")(" + JSON.stringify(compiled) + "," + JSON.stringify(desktopCompiled) + "," +
+        JSON.stringify(reloadCompiled) + ")")}));
         win.destroy();
         app.exit(0);
     } catch (error) {

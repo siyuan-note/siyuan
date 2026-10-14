@@ -18,8 +18,8 @@ func setupPluginPublishTest(t *testing.T) func(string) {
 	root := t.TempDir()
 	util.DataDir, util.ConfDir = filepath.Join(root, "data"), filepath.Join(root, "conf")
 	Conf = NewAppConf()
-	Conf.Sync = conf.NewSync()
-	Conf.Bazaar = &conf.Bazaar{Trust: true}
+	Conf.Sync.Store(conf.NewSync())
+	Conf.Bazaar.Store(&conf.Bazaar{Trust: true})
 	Conf.Lang = "en"
 	t.Cleanup(func() { util.DataDir, util.ConfDir, Conf = originalData, originalConfDir, originalConf })
 	write := func(declaration string) {
@@ -93,11 +93,11 @@ func TestPluginPublishDataLifecycle(t *testing.T) {
 	if _, err = SetPetalPublishEnabled("example", true); err != nil {
 		t.Fatal(err)
 	}
-	Conf.Bazaar.PetalDisabled = true
+	Conf.Bazaar.Load().PetalDisabled = true
 	if _, err = LoadPluginPublishData("example"); !errors.Is(err, ErrPluginPublishDenied) {
 		t.Fatalf("global disable read: %v", err)
 	}
-	Conf.Bazaar.PetalDisabled = false
+	Conf.Bazaar.Load().PetalDisabled = false
 	if _, err = SetPetalEnabled("example", false); err != nil {
 		t.Fatal(err)
 	}

@@ -8,6 +8,12 @@ interface IToolbarEntry {
     separator?: boolean;
 }
 
+export interface IToolbarCatalogEntry {
+    key: string;
+    label: string;
+    separator: boolean;
+}
+
 type TConfigurableToolbarItem = IMenuItem & {
     [toolbarEntryMetadata]?: {
         id: string;
@@ -18,6 +24,10 @@ type TConfigurableToolbarItem = IMenuItem & {
 export const TOOLBAR_ENTRY_ROOT_PATH = "editor.toolbar";
 
 export const DESKTOP_TOOLBAR_ENTRIES: IToolbarEntry[] = [{
+    key: "block-type",
+    name: "block-type",
+    lang: "turnInto",
+}, {
     key: "block-ref",
     name: "block-ref",
     lang: "ref",

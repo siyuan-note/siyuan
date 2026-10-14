@@ -65,7 +65,8 @@
       margin: 6px 4px;
     }
 
-    &__font {
+    &__font,
+    &__select {
       display: inline-flex;
       align-items: center;
       flex-shrink: 0;

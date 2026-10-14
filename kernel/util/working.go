@@ -18,7 +18,6 @@ package util
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"mime"
 	"net/http"
@@ -47,7 +46,7 @@ var Mode = "prod"
 // SystemTempDir 保存工作空间初始化重定向之前的系统临时目录。
 var SystemTempDir = os.TempDir()
 
-const Ver = "3.8.6"
+const Ver = "3.8.7"
 
 // IsReleaseVer 判断是否为正式版（不含 alpha、beta、rc 等预发布标识）。
 func IsReleaseVer(ver string) bool {
@@ -74,6 +73,7 @@ var (
 	bootProgress = atomic.Int32{} // 启动进度，从 0 到 100
 	bootDetails  string           // 启动细节描述
 	HttpServer   *http.Server     // HTTP 伺服器实例
+	HttpsServer  *http.Server     // HTTPS 伺服器实例
 	HttpServing  = false          // 是否 HTTP 伺服已经可用
 
 	SafeMode = false // 是否以安全模式启动：禁用代码片段、插件、自定义主题与图标
@@ -97,7 +97,12 @@ func InitWorkspace(workspacePath, wdPath string) {
 	initHttpClient()
 
 	if "" != wdPath {
-		WorkingDir = wdPath
+		absPath, err := filepath.Abs(wdPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "resolve --wd [%s] failed: %s\n", wdPath, err)
+			os.Exit(logging.ExitCodeInitWorkspaceErr)
+		}
+		WorkingDir = absPath
 	}
 
 	Container = ContainerStd
@@ -115,27 +120,7 @@ func InitWorkspace(workspacePath, wdPath string) {
 	LogPath = filepath.Join(TempDir, "siyuan.log")
 }
 
-func Boot() {
-	IncBootProgress(3, BootL10n(299, "Booting kernel..."))
-
-	// 由标准库 flag 解析 os.Args，再走统一的 BootWithFlags。
-	workspacePath := flag.String("workspace", "", "dir path of the workspace, default to ~/SiYuan/")
-	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
-	port := flag.String("port", "0", "port of the HTTP server")
-	readOnly := flag.String("readonly", "false", "read-only mode")
-	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
-	ssl := flag.Bool("ssl", false, "for https and wss")
-	attachUI := flag.Bool("attach-ui", false, "attach kernel lifecycle to desktop UI process (used by Electron)")
-	lang := flag.String("lang", "", "ar/de/en/es/fr/he/hi/id/it/ja/ko/nl/pl/pt-BR/ru/sk/sr/th/tr/uk/zh-CN/zh-TW")
-	mode := flag.String("mode", "prod", "dev/prod")
-	enablePprof := flag.Bool("enable-pprof", false, "enable unauthenticated /debug/pprof/ endpoints (dev only, never on a network-exposed instance)")
-	safeMode := flag.Bool("safe-mode", false, "boot in safe mode")
-	flag.Parse()
-
-	BootWithFlags(*workspacePath, *wdPath, *port, *readOnly, *accessAuthCode, *lang, *mode, *ssl, *attachUI, *safeMode, *enablePprof)
-}
-
-// BootWithFlags 接收已解析好的启动参数，完成环境变量回退、全局变量赋值、工作空间初始化与加锁等启动收尾工作。Boot()（标准库 flag 解析）和 serve 子命令（cobra 解析）都走这个统一入口。
+// BootWithFlags 接收已解析的启动参数，完成环境变量回退、全局变量赋值、工作空间初始化与加锁。
 func BootWithFlags(workspacePath, wdPath, port, readOnly, accessAuthCode, lang, mode string, ssl, attachUI, safeMode, enablePprof bool) {
 	SafeMode = safeMode
 	EnablePprof = enablePprof
@@ -247,8 +232,10 @@ func SetBooted() {
 }
 
 var (
-	HomeDir, _    = gulu.OS.Home()
-	WorkingDir, _ = os.Getwd()
+	systemHomeDir, _  = gulu.OS.Home()
+	HomeDir           = systemHomeDir
+	homeDirOverridden bool
+	WorkingDir, _     = os.Getwd()
 
 	WorkspaceDir       string        // 工作空间目录路径
 	WorkspaceName      string        // 工作空间名称
@@ -274,6 +261,35 @@ var (
 	UIProcessIDs = sync.Map{} // UI 进程 ID
 )
 
+// SetHomeDir 设置用户配置基路径，配置仍保存在其 .config/siyuan 子目录中。
+// 空参数保留默认目录；显式路径必须能创建配置目录，失败时不回退到系统用户主目录。
+func SetHomeDir(homeDir string) error {
+	if homeDir == "" {
+		return nil
+	}
+	absPath, err := filepath.Abs(homeDir)
+	if err != nil {
+		return fmt.Errorf("resolve --home-dir [%s] failed: %w", homeDir, err)
+	}
+	if err = os.MkdirAll(filepath.Join(absPath, ".config", "siyuan"), 0755); err != nil {
+		return fmt.Errorf("initialize --home-dir [%s] failed: %w", absPath, err)
+	}
+	HomeDir = absPath
+	homeDirOverridden = true
+	return nil
+}
+
+// defaultWorkspacePath 保留各平台默认布局，显式配置主目录时不再使用 Windows USERPROFILE。
+func defaultWorkspacePath(homeDir, goos, userProfile string, homeDirOverridden bool) string {
+	if goos == "windows" && !homeDirOverridden && userProfile != "" {
+		return filepath.Join(userProfile, "SiYuan")
+	}
+	if goos == "darwin" {
+		return filepath.Join(homeDir, "Library", "Application Support", "SiYuan")
+	}
+	return filepath.Join(homeDir, "SiYuan")
+}
+
 // MaxUIProcessCount UI 进程注册表条目数上限。
 const MaxUIProcessCount = 64
 
@@ -298,16 +314,7 @@ func initWorkspaceDir(workspaceArg string) {
 		}
 	}
 
-	defaultWorkspaceDir := filepath.Join(HomeDir, "SiYuan")
-	if gulu.OS.IsWindows() {
-		// 改进 Windows 端默认工作空间路径 https://github.com/siyuan-note/siyuan/issues/5622
-		if userProfile := os.Getenv("USERPROFILE"); "" != userProfile {
-			defaultWorkspaceDir = filepath.Join(userProfile, "SiYuan")
-		}
-	} else if gulu.OS.IsDarwin() {
-		// Change the initial workspace path to ~/Library/Application Support/SiYuan on macOS https://github.com/siyuan-note/siyuan/issues/17095
-		defaultWorkspaceDir = filepath.Join(HomeDir, "Library", "Application Support", "SiYuan")
-	}
+	defaultWorkspaceDir := defaultWorkspacePath(HomeDir, runtime.GOOS, os.Getenv("USERPROFILE"), homeDirOverridden)
 
 	var workspacePaths []string
 	if !gulu.File.IsExist(workspaceConf) {
@@ -612,6 +619,7 @@ func tryLockWorkspace() {
 	WorkspaceLock = flock.New(filepath.Join(WorkspaceDir, ".lock"))
 	ok, err := WorkspaceLock.TryLock()
 	if ok {
+		ClearWorkspaceExitMarker()
 		return
 	}
 	if err != nil {

@@ -34,8 +34,8 @@ func TestSpinBlockDOMAuthorization(t *testing.T) {
 
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = &conf.Editor{}
-	model.Conf.Export = &conf.Export{}
+	model.Conf.Editor.Store(&conf.Editor{})
+	model.Conf.Export.Store(&conf.Export{})
 	t.Cleanup(func() {
 		model.Conf = previousConf
 	})
@@ -93,8 +93,8 @@ func TestSpinBlockDOMInputSizeLimit(t *testing.T) {
 
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()
-	model.Conf.Editor = &conf.Editor{}
-	model.Conf.Export = &conf.Export{}
+	model.Conf.Editor.Store(&conf.Editor{})
+	model.Conf.Export.Store(&conf.Export{})
 	t.Cleanup(func() {
 		model.Conf = previousConf
 	})

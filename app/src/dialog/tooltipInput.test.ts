@@ -114,6 +114,30 @@ body {margin:0}.file-tree {position:absolute;top:40px;left:40px;width:232px}
     check.equal(tip.classList.contains("tooltip--interactive"), false, "plain content clears the interactive state");
     touch("pointermove", "touch");
     assertTouch();
+    for (const pointerType of ["touch", "mouse"]) {
+        touch("pointerover", pointerType);
+        for (const tooltipClass of [undefined, "memo", "error"]) {
+            for (const event of [undefined, new MouseEvent("mouseover")]) {
+                for (const interactive of [false, true]) {
+                    tooltip.hideTooltip();
+                    const showsBefore = pluginShows;
+                    const message = interactive ? '<a href="#test">Interactive</a>' : "Plain";
+                    const context = JSON.stringify({pointerType, tooltipClass, event: !!event, interactive});
+                    tooltip.showTooltip(message, more, tooltipClass, event);
+                    const suppressed = pointerType === "touch" && !!event && tooltipClass !== "error" && !interactive;
+                    check.equal(pluginShows - showsBefore, suppressed ? 0 : 1, context);
+                    check.equal(tip.classList.contains("fn__none"), suppressed, context);
+                    if (!suppressed) {
+                        check.equal(tip.innerHTML, message, context);
+                        check.equal(tip.classList.contains("tooltip--error"), tooltipClass === "error", context);
+                        check.equal(tip.classList.contains("tooltip--interactive"), interactive, context);
+                        check.equal(tip.classList.contains("tooltip--hover"),
+                            !!event && tooltipClass !== "error" && !interactive, context);
+                    }
+                }
+            }
+        }
+    }
     return "Touch hover input cases passed";
 };
 

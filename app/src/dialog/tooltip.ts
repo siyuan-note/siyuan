@@ -50,7 +50,8 @@ export const showTooltip = (
     if (isMobile() || !message) {
         return;
     }
-    if (isTouchHoverInput() && event && tooltipClass !== "error") {
+    const isHoverTooltip = !!event && tooltipClass !== "error";
+    if (isTouchHoverInput() && isHoverTooltip) {
         const content = document.createElement("div");
         content.innerHTML = window.DOMPurify.sanitize(message);
         if (!content.querySelector(INTERACTIVE_TOOLTIP_SELECTOR)) {
@@ -99,7 +100,7 @@ export const showTooltip = (
     messageElement.innerHTML = window.DOMPurify.sanitize(message);
     const interactive = Boolean(messageElement.querySelector(INTERACTIVE_TOOLTIP_SELECTOR));
     messageElement.classList.toggle("tooltip--interactive", interactive);
-    messageElement.classList.toggle("tooltip--hover", !!event && tooltipClass !== "error" && !interactive);
+    messageElement.classList.toggle("tooltip--hover", isHoverTooltip && !interactive);
     // 避免原本的 top 和 left 影响计算
     messageElement.removeAttribute("style");
     // 普通提示不拦截目标点击，包含链接或控件的提示仍可交互。

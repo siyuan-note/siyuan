@@ -125,6 +125,13 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 	if util.GetAssetText(path) != "editedocrkeyword" {
 		t.Fatal("failed recognition changed saved text")
 	}
+	if !HasOCRFailure(path + "#preview") {
+		t.Fatal("local provider failure was not recorded")
+	}
+	SetOCRAssetText(path, "editedocrkeyword")
+	if HasOCRFailure(path) {
+		t.Fatal("saving OCR text did not clear the failure")
+	}
 	provider.called = false
 	const notebookPath = "assets/notebook-image.png"
 	notebookImage := filepath.Join(util.DataDir, fixture.box.ID, filepath.FromSlash(notebookPath))

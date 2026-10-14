@@ -365,6 +365,9 @@ func NormalizeOCR(ocr *OCR) *OCR {
 	if ocr == nil {
 		ocr = NewOCR()
 	}
+	if ocr.ShowText == nil {
+		ocr.ShowText = new(true)
+	}
 	if "small" == ocr.Model {
 		// 内置模型统一为 Tiny，自行导入的模型仍保留内容摘要标识。
 		ocr.Model = "tiny"

@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "图片提示",
+	"ocrShowText": "显示 OCR 文本",
+	"ocrShowTextTip": "在图片悬浮提示中预览已有 OCR 文本",
+	"ocrShowEmpty": "无 OCR 文本时提示",
+	"ocrShowEmptyTip": "图片没有 OCR 文本时，在悬浮提示中显示提示",
+	"ocrShowError": "OCR 失败时提示",
+	"ocrShowErrorTip": "图片识别失败时，在悬浮提示中显示提示",
+	"ocrNoText": "无 OCR 文本",
+	"ocrFailed": "OCR 识别失败",
 	"autoCloseRefBrackets": "自动闭合 <code class='fn__code'>[[</code>",
 	"autoCloseRefBracketsTip": "输入 [[ 时自动补全 ]]，输入 ]] 时引用标题完全一致的文档，没有则新建文档",
 	"currentTime": "当前时间",

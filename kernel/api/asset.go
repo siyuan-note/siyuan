@@ -100,20 +100,20 @@ var fullReindexAssetContent = contractHandler(apicontract.FullReindexAssetConten
 	return apicontract.Success(apicontract.Null{})
 })
 
-var getImageOCRText = contractHandler(apicontract.GetImageOCRText, func(c *gin.Context, request apicontract.AssetOCRTextRequest) apicontract.Response[apicontract.AssetTextData] {
+var getImageOCRText = contractHandler(apicontract.GetImageOCRText, func(c *gin.Context, request apicontract.AssetOCRTextRequest) apicontract.Response[apicontract.ImageOCRTextData] {
 
 	if request.Path == nil {
-		return apicontract.Success(apicontract.AssetTextData{Text: ""})
+		return apicontract.Success(apicontract.ImageOCRTextData{Text: ""})
 	}
 	path := *request.Path
 
 	// 加密笔记本的资源不参与全局 OCR（OCR 文本存在全局 data/assets/ocr-texts.json）
 	if model.IsEncryptedOCRAsset(path) {
-		return apicontract.Success(apicontract.AssetTextData{Text: ""})
+		return apicontract.Success(apicontract.ImageOCRTextData{Text: ""})
 
 	}
 
-	return apicontract.Success(apicontract.AssetTextData{Text: util.GetAssetText(path)})
+	return apicontract.Success(apicontract.ImageOCRTextData{Text: util.GetAssetText(path), Failed: model.HasOCRFailure(path)})
 })
 
 var setImageOCRText = contractHandler(apicontract.SetImageOCRText, func(c *gin.Context, request apicontract.SetAssetOCRTextRequest) apicontract.Response[apicontract.Null] {

@@ -43,8 +43,11 @@ var getOCRConfig = contractHandler(apicontract.GetOCRConfig, func(c *gin.Context
 })
 
 func ocrConfigPayload(value conf.OCR) apicontract.SettingOCR {
+	if value.ShowText == nil {
+		value.ShowText = new(true)
+	}
 	thresholds := apicontract.OCRThresholds(value.Thresholds)
-	return apicontract.SettingOCR{Provider: value.Provider, Model: value.Model, Auto: value.Auto, Thresholds: &thresholds, AIModelID: &value.AIModelID, ReasoningEffort: &value.ReasoningEffort}
+	return apicontract.SettingOCR{Provider: value.Provider, Model: value.Model, Auto: value.Auto, Thresholds: &thresholds, AIModelID: &value.AIModelID, ReasoningEffort: &value.ReasoningEffort, ShowText: value.ShowText, ShowEmpty: &value.ShowEmpty, ShowError: &value.ShowError}
 }
 
 func ocrModelPayload(id string) apicontract.OCRModel {
@@ -62,6 +65,15 @@ var setOCRConfig = contractHandler(apicontract.SetOCRConfig, applyOCRSetting)
 func applyOCRSetting(c *gin.Context, request apicontract.SettingOCR) apicontract.Response[apicontract.SettingOCR] {
 	value := model.Conf.GetOCR()
 	value.Provider, value.Model, value.Auto = request.Provider, request.Model, request.Auto
+	if request.ShowText != nil {
+		value.ShowText = request.ShowText
+	}
+	if request.ShowEmpty != nil {
+		value.ShowEmpty = *request.ShowEmpty
+	}
+	if request.ShowError != nil {
+		value.ShowError = *request.ShowError
+	}
 	if request.AIModelID != nil {
 		value.AIModelID = *request.AIModelID
 	}

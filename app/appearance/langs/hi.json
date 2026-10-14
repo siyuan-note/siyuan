@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "चित्र टूलटिप",
+	"ocrShowText": "OCR पाठ दिखाएँ",
+	"ocrShowTextTip": "चित्र के टूलटिप में सहेजे गए OCR पाठ का पूर्वावलोकन दिखाएँ",
+	"ocrShowEmpty": "OCR पाठ न होने पर सूचना दें",
+	"ocrShowEmptyTip": "OCR पाठ न होने पर चित्र के टूलटिप में सूचना दिखाएँ",
+	"ocrShowError": "OCR विफल होने पर सूचना दें",
+	"ocrShowErrorTip": "पहचान विफल होने पर चित्र के टूलटिप में सूचना दिखाएँ",
+	"ocrNoText": "कोई OCR पाठ नहीं",
+	"ocrFailed": "OCR पहचान विफल हुई",
 	"autoCloseRefBrackets": "<code class='fn__code'>[[</code> स्वतः बंद करें",
 	"autoCloseRefBracketsTip": "[[ टाइप करने पर ]] स्वतः जुड़ जाता है; ]] टाइप करने पर बिल्कुल मेल खाते शीर्षक वाले दस्तावेज़ का संदर्भ पूरा होता है या नया दस्तावेज़ बनता है",
 	"currentTime": "वर्तमान समय",

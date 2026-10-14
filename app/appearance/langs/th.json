@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "คำแนะนำรูปภาพ",
+	"ocrShowText": "แสดงข้อความ OCR",
+	"ocrShowTextTip": "แสดงตัวอย่างข้อความ OCR ที่บันทึกไว้ในคำแนะนำรูปภาพ",
+	"ocrShowEmpty": "แจ้งเมื่อไม่มีข้อความ OCR",
+	"ocrShowEmptyTip": "แสดงการแจ้งเตือนในคำแนะนำรูปภาพเมื่อไม่มีข้อความ OCR",
+	"ocrShowError": "แจ้งเมื่อ OCR ล้มเหลว",
+	"ocrShowErrorTip": "แสดงการแจ้งเตือนในคำแนะนำรูปภาพเมื่อการรู้จำล้มเหลว",
+	"ocrNoText": "ไม่มีข้อความ OCR",
+	"ocrFailed": "การรู้จำ OCR ล้มเหลว",
 	"autoCloseRefBrackets": "ปิด <code class='fn__code'>[[</code> อัตโนมัติ",
 	"autoCloseRefBracketsTip": "เมื่อพิมพ์ [[ จะเติม ]] ให้อัตโนมัติ และเมื่อพิมพ์ ]] จะอ้างอิงเอกสารที่ชื่อตรงกันทุกตัวอักษร หรือสร้างเอกสารใหม่",
 	"currentTime": "เวลาปัจจุบัน",

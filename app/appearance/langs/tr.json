@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "Görsel araç ipuçları",
+	"ocrShowText": "OCR metnini göster",
+	"ocrShowTextTip": "Kaydedilmiş OCR metnini görsel araç ipuçlarında önizle",
+	"ocrShowEmpty": "OCR metni yoksa bildir",
+	"ocrShowEmptyTip": "OCR metni olmadığında görsel araç ipucunda bir bildirim göster",
+	"ocrShowError": "OCR hatalarını bildir",
+	"ocrShowErrorTip": "Tanıma başarısız olduğunda görsel araç ipucunda bir bildirim göster",
+	"ocrNoText": "OCR metni yok",
+	"ocrFailed": "OCR tanıma başarısız oldu",
 	"autoCloseRefBrackets": "<code class='fn__code'>[[</code> otomatik kapat",
 	"autoCloseRefBracketsTip": "[[ yazıldığında ]] otomatik eklenir; ]] yazmak, başlığı tam olarak eşleşen belgeye başvuruyu tamamlar veya yeni bir belge oluşturur",
 	"currentTime": "Geçerli Saat",

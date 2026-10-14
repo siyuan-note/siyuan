@@ -46,3 +46,20 @@ func TestOCRAIModelCompatibility(t *testing.T) {
 		t.Fatal("accepted numeric model ID")
 	}
 }
+
+func TestOCRTooltipSettingContract(t *testing.T) {
+	for _, key := range []string{"showText", "showEmpty", "showError"} {
+		for _, value := range []string{"true", "false", "null"} {
+			body := `{"provider":"paddleocr","model":"tiny","auto":false,"` + key + `":` + value + `}`
+			if _, err := SetOCRConfig.Decode(strings.NewReader(body)); err != nil {
+				t.Fatalf("rejected tooltip preference %s: %v", body, err)
+			}
+		}
+		for _, value := range []string{`"false"`, "1", "{}"} {
+			body := `{"provider":"paddleocr","model":"tiny","auto":false,"` + key + `":` + value + `}`
+			if _, err := SetOCRConfig.Decode(strings.NewReader(body)); err == nil {
+				t.Fatalf("accepted malformed tooltip preference: %s", body)
+			}
+		}
+	}
+}

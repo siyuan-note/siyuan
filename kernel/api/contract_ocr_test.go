@@ -56,9 +56,12 @@ func TestAPIContractOCREncryptedAssetAliases(t *testing.T) {
 			requireAPIContract(t, "POST", url, recorder)
 			var response struct {
 				Code int
-				Data struct{ Text string }
+				Data struct {
+					Text   string
+					Failed bool
+				}
 			}
-			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Data.Text != "" || (route == "ocr" && response.Code == 0) {
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Data.Text != "" || response.Data.Failed || (route == "ocr" && response.Code == 0) {
 				t.Fatalf("encrypted OCR alias: %s, %v", recorder.Body.String(), err)
 			}
 			if util.GetAssetText(path) != "ordinary text" {
@@ -485,6 +488,8 @@ func TestAPIContractOCRFailurePreservesText(t *testing.T) {
 	t.Cleanup(func() { util.RemoveAssetText(path) })
 	engine := gin.New()
 	engine.POST("/api/asset/ocr", ocr)
+	engine.POST("/api/asset/getImageOCRText", getImageOCRText)
+	engine.POST("/api/asset/setImageOCRText", setImageOCRText)
 	recorder := httptest.NewRecorder()
 	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/asset/ocr", strings.NewReader(`{"path":"assets/failure.png"}`)))
 	requireAPIContract(t, "POST", "/api/asset/ocr", recorder)
@@ -494,5 +499,20 @@ func TestAPIContractOCRFailurePreservesText(t *testing.T) {
 	}
 	if response.Code == 0 || util.GetAssetText(path) != "previous result" {
 		t.Fatalf("failed OCR replaced text: %s", recorder.Body.String())
+	}
+	var result apicontract.ImageOCRTextData
+	if requestOCRProvider(t, engine, "/api/asset/getImageOCRText", `{"path":"assets/failure.png#preview"}`, &result) != 0 ||
+		result.Text != "previous result" || !result.Failed {
+		t.Fatalf("recognition failure was not reported with saved text: %+v", result)
+	}
+	if requestOCRProvider(t, engine, "/api/asset/getImageOCRText", `{}`, &result) != 0 || result.Text != "" || result.Failed {
+		t.Fatalf("missing path inherited a failure: %+v", result)
+	}
+	if requestOCRProvider(t, engine, "/api/asset/setImageOCRText", `{"path":"assets/failure.png#preview","text":""}`, nil) != 0 {
+		t.Fatal("saving empty text failed")
+	}
+	if requestOCRProvider(t, engine, "/api/asset/getImageOCRText", `{"path":"assets/failure.png"}`, &result) != 0 ||
+		result.Text != "" || result.Failed {
+		t.Fatalf("empty saved text retained a recognition failure: %+v", result)
 	}
 }

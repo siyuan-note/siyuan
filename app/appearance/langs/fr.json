@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "Infobulles des images",
+	"ocrShowText": "Afficher le texte OCR",
+	"ocrShowTextTip": "Afficher un aperçu du texte OCR enregistré dans les infobulles des images",
+	"ocrShowEmpty": "Signaler l’absence de texte OCR",
+	"ocrShowEmptyTip": "Afficher une indication dans l’infobulle de l’image lorsqu’il n’y a pas de texte OCR",
+	"ocrShowError": "Signaler les échecs OCR",
+	"ocrShowErrorTip": "Afficher une indication dans l’infobulle de l’image lorsque la reconnaissance échoue",
+	"ocrNoText": "Aucun texte OCR",
+	"ocrFailed": "Échec de la reconnaissance OCR",
 	"autoCloseRefBrackets": "Fermeture automatique de <code class='fn__code'>[[</code>",
 	"autoCloseRefBracketsTip": "Saisir [[ insère automatiquement ]] ; saisir ]] complète la référence vers le document dont le titre correspond exactement ou crée un nouveau document",
 	"currentTime": "Heure actuelle",

@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "Dicas de imagens",
+	"ocrShowText": "Mostrar texto OCR",
+	"ocrShowTextTip": "Exibir uma prévia do texto OCR salvo nas dicas de imagens",
+	"ocrShowEmpty": "Avisar quando não houver texto OCR",
+	"ocrShowEmptyTip": "Mostrar um aviso na dica da imagem quando não houver texto OCR",
+	"ocrShowError": "Avisar sobre falhas de OCR",
+	"ocrShowErrorTip": "Mostrar um aviso na dica da imagem quando o reconhecimento falhar",
+	"ocrNoText": "Sem texto OCR",
+	"ocrFailed": "Falha no reconhecimento OCR",
 	"autoCloseRefBrackets": "Fechar <code class='fn__code'>[[</code> automaticamente",
 	"autoCloseRefBracketsTip": "Digitar [[ insere ]] automaticamente; digitar ]] completa a referência ao documento com título exatamente igual ou cria um novo documento",
 	"currentTime": "Hora atual",

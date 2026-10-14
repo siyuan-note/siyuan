@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "חלוניות מידע של תמונות",
+	"ocrShowText": "הצגת טקסט OCR",
+	"ocrShowTextTip": "הצגת תצוגה מקדימה של טקסט OCR שמור בחלוניות המידע של תמונות",
+	"ocrShowEmpty": "הודעה כשאין טקסט OCR",
+	"ocrShowEmptyTip": "הצגת הודעה בחלונית המידע של התמונה כשאין טקסט OCR",
+	"ocrShowError": "הודעה על כשל ב-OCR",
+	"ocrShowErrorTip": "הצגת הודעה בחלונית המידע של התמונה כשזיהוי הטקסט נכשל",
+	"ocrNoText": "אין טקסט OCR",
+	"ocrFailed": "זיהוי OCR נכשל",
 	"autoCloseRefBrackets": "סגירה אוטומטית של <code class='fn__code'>[[</code>",
 	"autoCloseRefBracketsTip": "הקלדת [[ מוסיפה ]] אוטומטית; הקלדת ]] משלימה את ההפניה למסמך שכותרתו תואמת בדיוק, או יוצרת מסמך חדש",
 	"currentTime": "השעה הנוכחית",

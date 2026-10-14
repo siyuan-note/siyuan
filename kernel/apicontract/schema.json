@@ -28908,6 +28908,22 @@
       ],
       "additionalProperties": false
     },
+    "ImageOCRTextData": {
+      "type": "object",
+      "properties": {
+        "failed": {
+          "type": "boolean"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "failed",
+        "text"
+      ],
+      "additionalProperties": false
+    },
     "ImportAutoDocument": {
       "type": "object",
       "properties": {
@@ -47345,6 +47361,15 @@
         "reasoningEffort": {
           "type": "string"
         },
+        "showEmpty": {
+          "type": "boolean"
+        },
+        "showError": {
+          "type": "boolean"
+        },
+        "showText": {
+          "type": "boolean"
+        },
         "thresholds": {
           "$ref": "#/$defs/OCRThresholds"
         }
@@ -47382,6 +47407,36 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "showEmpty": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "showError": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "showText": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -123548,7 +123603,7 @@
                 ]
               },
               "data": {
-                "$ref": "#/$defs/AssetTextData"
+                "$ref": "#/$defs/ImageOCRTextData"
               },
               "msg": {
                 "type": "string"

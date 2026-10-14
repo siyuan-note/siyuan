@@ -8,7 +8,7 @@ const loadCache = () => {
     let now = 1000;
     let requests = 0;
     let events = 0;
-    const pending: {resolve: (value: {code: number, data: {text: string}}) => void, reject: (error: Error) => void}[] = [];
+    const pending: {resolve: (value: {code: number, data: {text: string, failed?: boolean}}) => void, reject: (error: Error) => void}[] = [];
     const api = {} as typeof import("./imageOCRStatus");
     runInNewContext(transpileModule(readFileSync("src/asset/imageOCRStatus.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
@@ -21,7 +21,7 @@ const loadCache = () => {
             assert.equal(url, "/api/asset/getImageOCRText");
             assert.equal(process, false);
             requests++;
-            return new Promise<{code: number, data: {text: string}}>((resolve, reject) => pending.push({resolve, reject}));
+            return new Promise<{code: number, data: {text: string, failed?: boolean}}>((resolve, reject) => pending.push({resolve, reject}));
         }}),
     });
     return {api, pending, requests: () => requests, events: () => events, advance: () => now += 60001};
@@ -77,6 +77,25 @@ test("OCR changes invalidate only the resource and stale requests cannot replace
     assert.equal(await api.getImageOCRStatus("assets/image.png"), false);
     assert.equal(await api.getImageOCRStatus("assets/other.png"), true);
     assert.equal(requests(), 3);
+});
+
+test("OCR result cache retains recognition failures separately from saved text and read failures", async () => {
+    const {api, pending, requests} = loadCache();
+    const result = api.getImageOCRResult("assets/image.png");
+    const text = api.getImageOCRText("assets/image.png");
+    const presence = api.getImageOCRStatus("assets/image.png");
+    pending.shift().resolve({code: 0, data: {text: "saved", failed: true}});
+    assert.deepEqual(await result, {text: "saved", failed: true});
+    assert.equal(await text, "saved");
+    assert.equal(await presence, true);
+    assert.equal(requests(), 1);
+    api.invalidateImageOCRStatus("assets/image.png");
+    const updated = api.getImageOCRResult("assets/image.png");
+    pending.shift().resolve({code: 0, data: {text: "", failed: false}});
+    assert.deepEqual(await updated, {text: "", failed: false});
+    const unavailable = api.getImageOCRResult("assets/unavailable.png");
+    pending.shift().reject(new Error("network"));
+    assert.equal(await unavailable, undefined);
 });
 
 test("OCR presence cache is bounded", async () => {

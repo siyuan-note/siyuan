@@ -1272,6 +1272,8 @@ export type HistoryItemsRequestInput = { "created": string; "notebook"?: string 
 
 export type HistoryPathRequestInput = { "historyPath": string; };
 
+export type ImageOCRTextData = { "failed": boolean; "text": string; };
+
 export type ImportAutoDocument = { "token"?: string; "type": "document"; };
 
 export type ImportAutoNotebook = { "notebook": Notebook | null; "type": "notebook"; };
@@ -2054,9 +2056,9 @@ export type SettingNotifications = { "browserCompatibility": boolean; "docTreeMa
 
 export type SettingNotificationsInput = { "browserCompatibility"?: boolean | null; "docTreeMaxList"?: boolean | null; "formatPainterTip"?: boolean | null; "selectAllIncompleteTip"?: boolean | null; "selectAllTip"?: boolean | null; "tagMaxList"?: boolean | null; "workspaceNotSSD"?: boolean | null; };
 
-export type SettingOCR = { "aiModelId"?: string; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string; "thresholds"?: OCRThresholds; };
+export type SettingOCR = { "aiModelId"?: string; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string; "showEmpty"?: boolean; "showError"?: boolean; "showText"?: boolean; "thresholds"?: OCRThresholds; };
 
-export type SettingOCRInput = { "aiModelId"?: string | null; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string | null; "thresholds"?: OCRThresholdsInput | null; };
+export type SettingOCRInput = { "aiModelId"?: string | null; "auto": boolean; "model": string; "provider": string; "reasoningEffort"?: string | null; "showEmpty"?: boolean | null; "showError"?: boolean | null; "showText"?: boolean | null; "thresholds"?: OCRThresholdsInput | null; };
 
 export type SettingPatchData = { "issues": Array<SettingIssue> | null; };
 
@@ -3195,9 +3197,15 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 保留已有 text 字段；无文本、缺失 path 和加密资源返回空字符串。
+     * failed 来自实际识别失败，不由空文本推断；取消和不支持的图片不记为失败。
+     * 失败状态仅在当前内核运行期间保留最近 1024 个资源，成功识别或保存文本后清除，不写入 OCR 数据文件。
+     * 加密资源始终返回 failed=false；笔记本资源身份保留 box 参数，显示参数和片段不改变状态身份。
+     */
     "/api/asset/getImageOCRText": {
         request: AssetOCRTextRequestInput;
-        response: { "code": 0; "data": AssetTextData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": ImageOCRTextData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];

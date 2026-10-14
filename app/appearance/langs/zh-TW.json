@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "圖片提示",
+	"ocrShowText": "顯示 OCR 文字",
+	"ocrShowTextTip": "在圖片懸浮提示中預覽已有 OCR 文字",
+	"ocrShowEmpty": "無 OCR 文字時提示",
+	"ocrShowEmptyTip": "圖片沒有 OCR 文字時，在懸浮提示中顯示提示",
+	"ocrShowError": "OCR 失敗時提示",
+	"ocrShowErrorTip": "圖片辨識失敗時，在懸浮提示中顯示提示",
+	"ocrNoText": "無 OCR 文字",
+	"ocrFailed": "OCR 辨識失敗",
 	"autoCloseRefBrackets": "自動閉合 <code class='fn__code'>[[</code>",
 	"autoCloseRefBracketsTip": "輸入 [[ 時自動補上 ]]，輸入 ]] 時引用標題完全相同的文件，沒有則新建文件",
 	"currentTime": "目前時間",

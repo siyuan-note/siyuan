@@ -15,7 +15,8 @@ import {isTouchDevice} from "../util/functions";
 import {escapeAriaLabel, escapeHtml, escapeLessThans, escapeHtmlTextAndAttr} from "../util/escape";
 import {isListItemActionElement} from "../protyle/wysiwyg/listContext";
 import {getImageTooltip} from "../protyle/render/imageTooltip";
-import {getImageOCRText} from "../asset/imageOCRStatus";
+import {getImageOCRResult} from "../asset/imageOCRStatus";
+import type {ImageOCRTextData} from "../types/api";
 import {
     cancelPendingPopover,
     getPopoverGeneration,
@@ -194,16 +195,17 @@ export const initBlockPopover = (app: App) => {
                 tooltipAbortController = new AbortController();
                 const capturedController = tooltipAbortController;
                 let size: string;
-                let ocrText: string;
+                let ocrResult: ImageOCRTextData;
                 const updateImageTooltip = () => {
                     if (!capturedController.signal.aborted && image.isConnected &&
                         (image.getAttribute("data-src") || image.getAttribute("src")) === imagePath) {
-                        showTooltip(getImageTooltip(image, size, ocrText), image, undefined, event);
+                        showTooltip(getImageTooltip(image, size, ocrResult?.text, ocrResult?.failed), image, undefined, event);
                     }
                 };
-                if (imagePath.startsWith("assets/")) {
-                    getImageOCRText(imagePath).then(text => {
-                        ocrText = text;
+                const ocr = window.siyuan.config.ocr;
+                if (imagePath.startsWith("assets/") && (ocr?.showText !== false || ocr?.showEmpty || ocr?.showError)) {
+                    getImageOCRResult(imagePath).then(result => {
+                        ocrResult = result;
                         updateImageTooltip();
                     });
                 }

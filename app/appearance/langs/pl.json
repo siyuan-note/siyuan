@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "Podpowiedzi obrazów",
+	"ocrShowText": "Pokaż tekst OCR",
+	"ocrShowTextTip": "Wyświetl podgląd zapisanego tekstu OCR w podpowiedziach obrazów",
+	"ocrShowEmpty": "Informuj o braku tekstu OCR",
+	"ocrShowEmptyTip": "Wyświetl informację w podpowiedzi obrazu, gdy nie ma tekstu OCR",
+	"ocrShowError": "Informuj o błędach OCR",
+	"ocrShowErrorTip": "Wyświetl informację w podpowiedzi obrazu, gdy rozpoznawanie się nie powiedzie",
+	"ocrNoText": "Brak tekstu OCR",
+	"ocrFailed": "Rozpoznawanie OCR nie powiodło się",
 	"autoCloseRefBrackets": "Automatyczne zamykanie <code class='fn__code'>[[</code>",
 	"autoCloseRefBracketsTip": "Wpisanie [[ automatycznie dodaje ]]; wpisanie ]] kończy odwołanie do dokumentu o dokładnie pasującym tytule lub tworzy nowy dokument",
 	"currentTime": "Bieżąca godzina",

@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "Image tooltips",
+	"ocrShowText": "Show OCR text",
+	"ocrShowTextTip": "Preview saved OCR text in image tooltips",
+	"ocrShowEmpty": "Show a hint when OCR text is absent",
+	"ocrShowEmptyTip": "Show a hint in the image tooltip when there is no OCR text",
+	"ocrShowError": "Show OCR failure hints",
+	"ocrShowErrorTip": "Show a hint in the image tooltip when recognition fails",
+	"ocrNoText": "No OCR text",
+	"ocrFailed": "OCR recognition failed",
 	"autoCloseRefBrackets": "Auto-close <code class='fn__code'>[[</code>",
 	"autoCloseRefBracketsTip": "Typing [[ automatically inserts ]]; typing ]] completes the reference to the document with an exactly matching title, or creates a new document",
 	"currentTime": "Current Time",

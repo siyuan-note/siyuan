@@ -171,7 +171,14 @@ func OCRAsset(ctx context.Context, path string) (string, []map[string]string, er
 	return ocrAsset(ctx, path, Conf.GetOCR(), false)
 }
 
-func ocrAsset(ctx context.Context, path string, value conf.OCR, automatic bool) (string, []map[string]string, error) {
+func ocrAsset(ctx context.Context, path string, value conf.OCR, automatic bool) (_ string, _ []map[string]string, resultErr error) {
+	if value.Provider != "ai" {
+		defer func() {
+			if !automatic || automaticOCRMatches(value) {
+				recordOCRFailure(path, resultErr)
+			}
+		}()
+	}
 	if value.Provider == "ai" {
 		text, err := aiOCRAsset(ctx, path, value, automatic)
 		return text, []map[string]string{}, err
@@ -221,6 +228,7 @@ func SetOCRAssetText(path, text string) {
 	}
 	path = util.OCRAssetKey(path)
 	util.SetAssetText(path, text)
+	clearOCRFailure(path)
 	documents, err := sql.QueryOCRAssetDocuments(path)
 	if err != nil {
 		logging.LogErrorf("query OCR asset documents failed: %s", err)

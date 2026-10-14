@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261014140201"
 	},
 	"Children": [
 		{
@@ -1053,7 +1053,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117002036-vmc0mx4",
-				"updated": "20261012014930"
+				"updated": "20261014140201"
 			},
 			"Children": [
 				{
@@ -1553,7 +1553,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202710-a51lo76",
-				"updated": "20261012014930"
+				"updated": "20261014140201"
 			},
 			"Children": [
 				{
@@ -1680,7 +1680,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-qkecuzx",
-				"updated": "20261010140118"
+				"updated": "20261014140201"
 			},
 			"Children": [
 				{
@@ -1720,7 +1720,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "悬浮在本地图片上可查看 OCR 文字，无识别结果时会显示空内容提示。文字识别图标表示 OCR 操作，图片图标则将图片复制为 PNG，无 OCR 文字时也可复制图片。在自定义外观方案中，可通过 "
+					"Data": "悬浮在本地图片上可按设置查看 OCR 文本和识别提示。文字识别图标表示 OCR 操作，图片图标则将图片复制为 PNG，无 OCR 文字时也可复制图片。在自定义外观方案中，可通过 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1752,6 +1752,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "OCR 悬浮预览最多显示 200 个字符、6 行，超出部分用三个点标记。双击 OCR 图标可查看完整文字。"
+				}
+			]
+		},
+		{
+			"ID": "20261014140201-p3solxq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014140201-p3solxq",
+				"updated": "20261014140201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "图片提示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 分别控制图片悬浮提示中的 OCR 文本、无 OCR 文本提示和识别失败提示。默认显示文本预览，另外两项默认关闭。这些选择按设备保存，独立于自动 OCR 开关；隐藏提示不会删除文本或改变搜索结果。无 OCR 文本不一定表示识别失败。失败提示反映本次运行期间的识别失败，成功识别或保存文本后清除，重启内核后不保留。移动端不显示这类悬浮提示。"
 				}
 			]
 		}

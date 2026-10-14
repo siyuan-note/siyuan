@@ -88,6 +88,11 @@ type AssetTextData struct {
 	Text string `json:"text"`
 }
 
+type ImageOCRTextData struct {
+	Text   string `json:"text"`
+	Failed bool   `json:"failed"`
+}
+
 // AssetOCRData 的列名沿用 Tesseract TSV 表头，所有提供商的单元格均为文本。
 // AI 提供商仅返回原样 text，ocrJSON 为空数组，不生成坐标或置信度。
 type AssetOCRData struct {

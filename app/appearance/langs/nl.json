@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "Afbeeldingstooltips",
+	"ocrShowText": "OCR-tekst tonen",
+	"ocrShowTextTip": "Opgeslagen OCR-tekst bekijken in afbeeldingstooltips",
+	"ocrShowEmpty": "Melden wanneer OCR-tekst ontbreekt",
+	"ocrShowEmptyTip": "Een melding tonen in de afbeeldingstooltip wanneer er geen OCR-tekst is",
+	"ocrShowError": "OCR-fouten melden",
+	"ocrShowErrorTip": "Een melding tonen in de afbeeldingstooltip wanneer herkenning mislukt",
+	"ocrNoText": "Geen OCR-tekst",
+	"ocrFailed": "OCR-herkenning mislukt",
 	"autoCloseRefBrackets": "<code class='fn__code'>[[</code> automatisch sluiten",
 	"autoCloseRefBracketsTip": "Bij het typen van [[ wordt ]] automatisch ingevoegd; het typen van ]] voltooit de verwijzing naar het document met exact dezelfde titel of maakt een nieuw document aan",
 	"currentTime": "Huidige tijd",

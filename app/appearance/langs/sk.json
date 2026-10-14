@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "Tipy obrázkov",
+	"ocrShowText": "Zobraziť text OCR",
+	"ocrShowTextTip": "Zobraziť uložený text OCR v tipoch obrázkov",
+	"ocrShowEmpty": "Upozorniť na chýbajúci text OCR",
+	"ocrShowEmptyTip": "Zobraziť upozornenie v tipe obrázka, keď chýba text OCR",
+	"ocrShowError": "Upozorniť na zlyhanie OCR",
+	"ocrShowErrorTip": "Zobraziť upozornenie v tipe obrázka, keď rozpoznávanie zlyhá",
+	"ocrNoText": "Žiadny text OCR",
+	"ocrFailed": "Rozpoznávanie OCR zlyhalo",
 	"autoCloseRefBrackets": "Automaticky uzavrieť <code class='fn__code'>[[</code>",
 	"autoCloseRefBracketsTip": "Pri písaní [[ sa automaticky vloží ]]; napísanie ]] dokončí odkaz na dokument s presne zhodným názvom alebo vytvorí nový dokument",
 	"currentTime": "Aktuálny čas",

@@ -28,7 +28,12 @@ func AIOCRAsset(ctx context.Context, path string) (string, error) {
 	return aiOCRAsset(ctx, path, Conf.GetOCR(), false)
 }
 
-func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool) (string, error) {
+func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool) (_ string, resultErr error) {
+	defer func() {
+		if !automatic || automaticOCRMatches(value) {
+			recordOCRFailure(path, resultErr)
+		}
+	}()
 	confAISnapshot := Conf.LoadAI()
 
 	if util.IsDisabledFeature("ai") {

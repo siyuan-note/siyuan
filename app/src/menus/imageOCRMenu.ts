@@ -20,7 +20,7 @@ export const createImageOCRMenu = (image: HTMLElement, notebookID: string): IMen
         runAI: () => { void reImageAIOCR(image.getAttribute("data-src")); },
         runLocal: () => {
             const currentPath = image.getAttribute("data-src");
-            fetchPost("/api/asset/ocr", {path: currentPath}, () => invalidateImageOCRStatus(currentPath));
+            void fetchPost("/api/asset/ocr", {path: currentPath}).finally(() => invalidateImageOCRStatus(currentPath));
         },
     });
 };

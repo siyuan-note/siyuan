@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "이미지 툴팁",
+	"ocrShowText": "OCR 텍스트 표시",
+	"ocrShowTextTip": "이미지 툴팁에 저장된 OCR 텍스트 미리보기 표시",
+	"ocrShowEmpty": "OCR 텍스트가 없을 때 알림",
+	"ocrShowEmptyTip": "OCR 텍스트가 없는 이미지의 툴팁에 알림 표시",
+	"ocrShowError": "OCR 실패 시 알림",
+	"ocrShowErrorTip": "문자 인식에 실패한 이미지의 툴팁에 알림 표시",
+	"ocrNoText": "OCR 텍스트 없음",
+	"ocrFailed": "OCR 문자 인식 실패",
 	"autoCloseRefBrackets": "<code class='fn__code'>[[</code> 자동 닫기",
 	"autoCloseRefBracketsTip": "[[ 입력 시 ]]가 자동으로 삽입되며, ]] 입력 시 제목이 정확히 일치하는 문서로 참조를 완성하거나 새 문서를 만듭니다",
 	"currentTime": "현재 시간",

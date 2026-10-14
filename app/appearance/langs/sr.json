@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "Облачићи слике",
+	"ocrShowText": "Прикажи OCR текст",
+	"ocrShowTextTip": "Прикажи преглед сачуваног OCR текста у облачићима слике",
+	"ocrShowEmpty": "Обавести када нема OCR текста",
+	"ocrShowEmptyTip": "Прикажи обавештење у облачићу слике када нема OCR текста",
+	"ocrShowError": "Обавести о OCR грешци",
+	"ocrShowErrorTip": "Прикажи обавештење у облачићу слике када препознавање не успе",
+	"ocrNoText": "Нема OCR текста",
+	"ocrFailed": "OCR препознавање није успело",
 	"autoCloseRefBrackets": "Аутоматски затвори <code class='fn__code'>[[</code>",
 	"autoCloseRefBracketsTip": "Куцање [[ аутоматски додаје ]]; куцање ]] довршава референцу на документ са тачно истим насловом или прави нови документ",
 	"currentTime": "Тренутно време",

@@ -1,4 +1,13 @@
 {
+	"ocrTooltipSettings": "Tooltip gambar",
+	"ocrShowText": "Tampilkan teks OCR",
+	"ocrShowTextTip": "Pratinjau teks OCR tersimpan di tooltip gambar",
+	"ocrShowEmpty": "Beri tahu jika tidak ada teks OCR",
+	"ocrShowEmptyTip": "Tampilkan pemberitahuan di tooltip gambar jika tidak ada teks OCR",
+	"ocrShowError": "Beri tahu jika OCR gagal",
+	"ocrShowErrorTip": "Tampilkan pemberitahuan di tooltip gambar jika pengenalan gagal",
+	"ocrNoText": "Tidak ada teks OCR",
+	"ocrFailed": "Pengenalan OCR gagal",
 	"autoCloseRefBrackets": "Tutup <code class='fn__code'>[[</code> otomatis",
 	"autoCloseRefBracketsTip": "Mengetik [[ otomatis menyisipkan ]]; mengetik ]] melengkapi referensi ke dokumen dengan judul yang sama persis, atau membuat dokumen baru",
 	"currentTime": "Waktu Saat Ini",

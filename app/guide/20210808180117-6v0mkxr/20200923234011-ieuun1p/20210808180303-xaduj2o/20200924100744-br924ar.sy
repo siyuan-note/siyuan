@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261014140201"
 	},
 	"Children": [
 		{
@@ -1041,7 +1041,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003636-epvk98g",
-				"updated": "20261012014930"
+				"updated": "20261014140201"
 			},
 			"Children": [
 				{
@@ -1549,7 +1549,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202934-1h96or8",
-				"updated": "20261012014930"
+				"updated": "20261014140201"
 			},
 			"Children": [
 				{
@@ -1676,7 +1676,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930090802-3zn8sf9",
-				"updated": "20261010140118"
+				"updated": "20261014140201"
 			},
 			"Children": [
 				{
@@ -1716,7 +1716,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " Hover over a local image to view its OCR text; an empty result is shown explicitly. The text recognition icon identifies the OCR action, while the image icon copies the image as PNG, even when no OCR text is available. In a custom appearance profile, use "
+					"Data": " Hover over a local image to view OCR text and recognition hints according to your settings. The text recognition icon identifies the OCR action, while the image icon copies the image as PNG, even when no OCR text is available. In a custom appearance profile, use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1748,6 +1748,47 @@
 				{
 					"Type": "NodeText",
 					"Data": " Long OCR text is shortened to at most 200 characters and six lines, followed by three dots. Double-click the OCR icon to view the full text."
+				}
+			]
+		},
+		{
+			"ID": "20261014140201-g0z2wp6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014140201-g0z2wp6",
+				"updated": "20261014140201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Image tooltips"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " independently choose whether image tooltips show saved OCR text, a hint when no OCR text is available, and a recognition failure hint. Text previews are enabled by default; the other two hints are disabled. These choices are saved per device and work independently of automatic OCR. Hiding hints does not delete text or change search results. No OCR text does not necessarily mean recognition has failed. Failure hints reflect recognition failures during the current session; successful recognition or saving text clears them, and they are not retained after restarting the kernel. Mobile devices do not show these hover tooltips."
 				}
 			]
 		}

@@ -4,12 +4,56 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} from "typescript";
+import dayjs = require("dayjs");
+import {isBuiltinSlashHint, registerBuiltinSlashHint} from "./builtinSlash";
 import {shouldCaptureHintUndoFocus} from "./blockHintRange";
 
 const source = createSourceFile("index.ts", readFileSync(join(__dirname, "index.ts"), "utf8"), ScriptTarget.Latest);
 const declaration = source.statements.find(node => isClassDeclaration(node) && node.name.text === "Hint");
 assert.ok(declaration && isClassDeclaration(declaration));
 const fill = declaration.members.find(member => member.name?.getText(source) === "fill").getText(source);
+
+test("current time replaces the command through one insertion with its original undo context", () => {
+    const code = transpileModule(`class Hint { ${fill} } new Hint();`, {
+        compilerOptions: {target: ScriptTarget.ES2020},
+    }).outputText;
+    for (const lite of [false, true]) {
+        for (const splitChar of ["/", "、"]) {
+            let insertions = 0;
+            const block = {outerHTML: `prefix ${splitChar}time suffix`, getAttribute: () => "original"};
+            const range = {startContainer: block, startOffset: 12, endOffset: 12,
+                setStart: (_node: unknown, offset: number) => { range.startOffset = offset; },
+                deleteContents: () => { assert.fail("the insertion must retain the original command for undo"); }};
+            const context = {undoFocusId: "original", undoFocusStart: "12", undoFocusEnd: "12"};
+            const protyle = {lite, toolbar: {range}, wysiwyg: {element: {}},
+                options: {hint: {extend: [{key: "/", hint: registerBuiltinSlashHint(() => [])}]}}};
+            const hint = runInNewContext(code, {
+                Constants: {BLOCK_HINT_KEYS: ["(("], ZWSP: "\u200b"},
+                Lute: {Caret: "caret"}, hideElements() {}, isProtyleListItemFragment: () => false,
+                hasClosestBlock: () => block, shouldCaptureHintUndoFocus, focusByRange() {},
+                isBuiltinSlashHint, dayjs: () => dayjs("2026-10-14T00:07:00"),
+                getUndoFocusContext: () => { assert.equal(range.startOffset, 12); return context; },
+                insertHTML: (html: string, owner: unknown, isBlock: boolean, useProtyleRange: boolean,
+                             insertByCursor: boolean, position: unknown, undo: unknown) => {
+                    insertions++;
+                    assert.equal(html, "00:07");
+                    assert.equal(owner, protyle);
+                    assert.equal(isBlock, false);
+                    assert.equal(useProtyleRange, true);
+                    assert.equal(insertByCursor, false);
+                    assert.equal(position, undefined);
+                    assert.equal(undo, context);
+                    assert.equal(range.startOffset, 7);
+                    assert.equal(range.endOffset, 12);
+                    assert.equal(block.outerHTML, `prefix ${splitChar}time suffix`);
+                },
+            });
+            Object.assign(hint, {source: "hint", splitChar, lastIndex: 7});
+            hint.fill("\u200b7", protyle, false);
+            assert.equal(insertions, 1);
+        }
+    }
+});
 
 for (const scenario of ["replace", "insert", "empty-list-item", "list-item"]) {
     test(`slash undo retains the original caret for ${scenario}`, () => {

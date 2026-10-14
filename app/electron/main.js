@@ -90,7 +90,8 @@ const {
 } = require("./accessibility");
 
 const {
-    readLinuxInputMethodSetting, writeLinuxInputMethodSetting, getLinuxInputMethodOverride, configureLinuxInputMethod,
+    readLinuxInputMethodSetting, writeLinuxInputMethodSetting, readLinuxInputMethodArguments,
+    getLinuxInputMethodOverride, configureLinuxInputMethod,
 } = require("./linuxInputMethod");
 
 process.noAsar = true;
@@ -809,7 +810,8 @@ try {
 configureAccessibility(app.commandLine, accessibilityEnabled);
 
 // Linux 输入法兼容设置在窗口创建前应用，显式显示后端参数保持优先。
-const linuxInputMethodOverride = getLinuxInputMethodOverride(app.commandLine);
+let linuxInputMethodOverride = null;
+let linuxInputMethodArgumentsError = null;
 let linuxInputMethodEnabled = false;
 if (process.platform === "linux") {
     try {
@@ -817,7 +819,14 @@ if (process.platform === "linux") {
     } catch (error) {
         writeLog("read Linux input method setting failed: " + error.message);
     }
-    configureLinuxInputMethod(app.commandLine, linuxInputMethodEnabled, process.platform);
+    try {
+        const args = readLinuxInputMethodArguments();
+        linuxInputMethodOverride = getLinuxInputMethodOverride(args);
+        configureLinuxInputMethod(app.commandLine, linuxInputMethodEnabled, process.platform, args);
+    } catch (error) {
+        linuxInputMethodArgumentsError = error;
+        writeLog("read Linux process command line failed: " + error.message);
+    }
 }
 
 try {
@@ -3348,6 +3357,9 @@ app.whenReady().then(() => {
             if (process.platform !== "linux" || !initializedWindowIds.has(event.sender.id) ||
                 !getWindowKernelTarget(event.sender.id) || event.senderFrame !== event.sender.mainFrame) {
                 throw new Error("Linux input method setting is unavailable");
+            }
+            if (linuxInputMethodArgumentsError) {
+                throw linuxInputMethodArgumentsError;
             }
             if (data.cmd === "setLinuxInputMethodSetting") {
                 writeLinuxInputMethodSetting(linuxInputMethodSettingPath, data.enabled);

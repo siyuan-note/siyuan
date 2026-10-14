@@ -33,18 +33,44 @@ const writeLinuxInputMethodSetting = (file, enabled) => {
     }
 };
 
-// 显式显示后端参数优先于本机兼容设置。
-const getLinuxInputMethodOverride = (commandLine) => {
-    if (commandLine.hasSwitch("ozone-platform")) {
-        return commandLine.getSwitchValue("ozone-platform") === "x11";
+// 读取内核保存的启动参数，排除 Chromium 和本机设置在进程内追加的参数。
+const readLinuxInputMethodArguments = () => {
+    const content = fs.readFileSync("/proc/self/cmdline", "utf8");
+    if (!content || !content.endsWith("\0")) {
+        throw new Error("Invalid Linux process command line");
     }
-    return null;
+    return content.slice(0, -1).split("\0");
 };
 
-const configureLinuxInputMethod = (commandLine, enabled, platform) => {
-    if (platform === "linux" && enabled && getLinuxInputMethodOverride(commandLine) === null) {
-        commandLine.appendSwitch("ozone-platform", "x11");
+// 显式显示后端参数优先于本机兼容设置，重复参数采用最后一次指定的值。
+const getLinuxInputMethodBackend = (args) => {
+    let backend = null;
+    for (let i = 1; i < args.length && args[i] !== "--"; i++) {
+        if (args[i].startsWith("--ozone-platform=")) {
+            backend = args[i].slice("--ozone-platform=".length);
+        } else if (args[i] === "--ozone-platform") {
+            backend = args[i + 1] && !args[i + 1].startsWith("--") ? args[++i] : "";
+        }
+    }
+    return backend;
+};
+
+const getLinuxInputMethodOverride = (args) => {
+    const backend = getLinuxInputMethodBackend(args);
+    return backend === null ? null : backend === "x11";
+};
+
+const configureLinuxInputMethod = (commandLine, enabled, platform, args) => {
+    if (platform !== "linux") {
+        return;
+    }
+    const backend = getLinuxInputMethodBackend(args);
+    if (backend !== null || enabled) {
+        commandLine.appendSwitch("ozone-platform", backend ?? "x11");
     }
 };
 
-module.exports = {readLinuxInputMethodSetting, writeLinuxInputMethodSetting, getLinuxInputMethodOverride, configureLinuxInputMethod};
+module.exports = {
+    readLinuxInputMethodSetting, writeLinuxInputMethodSetting, readLinuxInputMethodArguments,
+    getLinuxInputMethodOverride, configureLinuxInputMethod,
+};

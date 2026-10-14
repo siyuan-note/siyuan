@@ -4,7 +4,8 @@ const os = require("node:os");
 const path = require("node:path");
 const {test} = require("node:test");
 const {
-    readLinuxInputMethodSetting, writeLinuxInputMethodSetting, getLinuxInputMethodOverride, configureLinuxInputMethod,
+    readLinuxInputMethodSetting, writeLinuxInputMethodSetting, readLinuxInputMethodArguments,
+    getLinuxInputMethodOverride, configureLinuxInputMethod,
 } = require("./linuxInputMethod");
 
 const commandLine = (platform) => {
@@ -24,7 +25,7 @@ test("compatibility mode persists across launches and can be disabled", (t) => {
     for (const enabled of [true, false]) {
         writeLinuxInputMethodSetting(file, enabled);
         const launch = commandLine();
-        configureLinuxInputMethod(launch, readLinuxInputMethodSetting(file), "linux");
+        configureLinuxInputMethod(launch, readLinuxInputMethodSetting(file), "linux", ["siyuan"]);
         assert.equal(launch.getSwitchValue("ozone-platform"), enabled ? "x11" : undefined);
     }
     assert.deepEqual(fs.readdirSync(path.dirname(file)), ["linux-input-method.json"]);
@@ -34,12 +35,59 @@ test("explicit display backend overrides either saved choice", () => {
     for (const backend of ["x11", "wayland", "auto", ""]) {
         for (const enabled of [false, true]) {
             const launch = commandLine(backend);
-            assert.equal(getLinuxInputMethodOverride(launch), backend === "x11");
-            configureLinuxInputMethod(launch, enabled, "linux");
+            const args = ["siyuan", "--ozone-platform=" + backend];
+            assert.equal(getLinuxInputMethodOverride(args), backend === "x11");
+            configureLinuxInputMethod(launch, enabled, "linux", args);
             assert.equal(launch.getSwitchValue("ozone-platform"), backend);
         }
     }
-    assert.equal(getLinuxInputMethodOverride(commandLine()), null);
+    assert.equal(getLinuxInputMethodOverride(["siyuan"]), null);
+});
+
+test("automatically selected backends do not lock the preference across launches", () => {
+    const args = ["siyuan"];
+    for (const backend of ["wayland", "x11"]) {
+        for (const enabled of [false, true]) {
+            const launch = commandLine(backend);
+            configureLinuxInputMethod(launch, enabled, "linux", args);
+            assert.equal(launch.getSwitchValue("ozone-platform"), enabled ? "x11" : backend);
+            assert.equal(getLinuxInputMethodOverride(args), null);
+        }
+    }
+});
+
+test("explicit backends support separate values, repeated switches and the argument terminator", () => {
+    for (const backend of ["wayland", "x11", "auto", ""]) {
+        const args = ["siyuan", "--ozone-platform", backend];
+        const launch = commandLine("");
+        configureLinuxInputMethod(launch, true, "linux", args);
+        assert.equal(getLinuxInputMethodOverride(args), backend === "x11");
+        assert.equal(launch.getSwitchValue("ozone-platform"), backend);
+    }
+    assert.equal(getLinuxInputMethodOverride(["siyuan", "--ozone-platform=x11", "--ozone-platform=wayland"]), false);
+    assert.equal(getLinuxInputMethodOverride(["siyuan", "--", "--ozone-platform=x11"]), null);
+    assert.equal(getLinuxInputMethodOverride(["siyuan", "--ozone-platform-hint=x11"]), null);
+    assert.equal(getLinuxInputMethodOverride(["siyuan", "--ozone-platform", "--other"]), false);
+});
+
+test("original process arguments exclude appended switches and preserve empty arguments", (t) => {
+    t.mock.method(fs, "readFileSync", (file, encoding) => {
+        assert.equal(file, "/proc/self/cmdline");
+        assert.equal(encoding, "utf8");
+        return "siyuan\0--workspace=/path with spaces\0\0";
+    });
+    const args = readLinuxInputMethodArguments();
+    assert.deepEqual(args, ["siyuan", "--workspace=/path with spaces", ""]);
+    assert.equal(getLinuxInputMethodOverride(args), null);
+});
+
+test("unavailable or invalid original arguments are reported instead of guessing an override", (t) => {
+    const read = t.mock.method(fs, "readFileSync", () => { throw new Error("Access denied"); });
+    assert.throws(() => readLinuxInputMethodArguments(), /Access denied/);
+    for (const content of ["", "siyuan"]) {
+        read.mock.mockImplementation(() => content);
+        assert.throws(() => readLinuxInputMethodArguments(), /Invalid Linux process command line/);
+    }
 });
 
 test("compatibility mode does not alter other platforms", () => {

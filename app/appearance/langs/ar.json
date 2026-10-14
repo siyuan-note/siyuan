@@ -851,7 +851,7 @@
 	"focusBreadcrumb": "التركيز على مسار التنقل",
 	"tableRectangleSelectionRequired": "يتطلب تحديدًا مستطيلاً",
 	"updateChannel": "قناة التحديث",
-	"updateChannelTip": "تتلقى قناة Beta الإصدارات المستقرة وRC وBeta، بينما تتلقى قناة Alpha جميع الإصدارات. تتطلب قنوات الاختبار إمكانية الوصول إلى GitHub",
+	"updateChannelTip": "تتلقى قناة Beta الإصدارات المستقرة وRC وBeta، بينما تتلقى قناة Alpha جميع الإصدارات. لا يزال التحقق من الإصدارات التجريبية يتطلب الوصول إلى GitHub؛ تُنزَّل حزم التثبيت أولاً من خوادم المرآة الرسمية، ثم من GitHub في حال فشلها",
 	"updateChannelStable": "مستقر",
 	"updateChannelBeta": "بيتا",
 	"updateChannelAlpha": "ألفا",

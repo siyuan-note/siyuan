@@ -116,8 +116,9 @@ func getStableUpdateRelease(force bool) (*updateRelease, error) {
 	if "" == checksum {
 		return release, nil
 	}
+	githubURL := "https://github.com/siyuan-note/siyuan/releases/download/v" + version + "/" + pkgName
 	release.Packages[pkgName] = &updatePackage{
-		URLs:     getStablePackageURLs(release.Version, pkgName),
+		URLs:     getUpdatePackageURLs(pkgName, githubURL),
 		Checksum: checksum,
 	}
 	return release, nil
@@ -149,15 +150,10 @@ func getStablePackageChecksum(result map[string]any, pkgName string) string {
 	return normalizeSHA256(checksum)
 }
 
-func getStablePackageURLs(version, pkgName string) []string {
+func getUpdatePackageURLs(pkgName, githubURL string) []string {
 	b3logURL := "https://release.b3log.org/siyuan/" + pkgName
 	liuyunURL := "https://release.liuyun.io/siyuan/" + pkgName
-	githubURL := "https://github.com/siyuan-note/siyuan/releases/download/v" + strings.TrimPrefix(version, "v") + "/" + pkgName
-	ghproxyURL := "https://ghfast.top/" + githubURL
-	if util.IsChinaCloud() {
-		return []string{b3logURL, liuyunURL, ghproxyURL, githubURL}
-	}
-	return []string{b3logURL, liuyunURL, githubURL, ghproxyURL}
+	return []string{b3logURL, liuyunURL, githubURL}
 }
 
 func getGitHubUpdateRelease(channel string, force bool) (*updateRelease, error) {
@@ -199,7 +195,7 @@ func getGitHubUpdateRelease(channel string, force bool) (*updateRelease, error) 
 		}
 	}
 	release.Packages[pkgName] = &updatePackage{
-		URLs:     []string{asset.BrowserDownloadURL},
+		URLs:     getUpdatePackageURLs(pkgName, asset.BrowserDownloadURL),
 		Checksum: checksum,
 	}
 	return release, nil

@@ -851,7 +851,7 @@
 	"focusBreadcrumb": "이동 경로에 포커스",
 	"tableRectangleSelectionRequired": "직사각형 선택 영역이 필요합니다",
 	"updateChannel": "업데이트 채널",
-	"updateChannelTip": "Beta 채널은 정식, RC 및 Beta 릴리스를 받고 Alpha 채널은 모든 릴리스를 받습니다. 테스트 채널을 사용하려면 GitHub에 접근할 수 있어야 합니다",
+	"updateChannelTip": "Beta 채널은 정식, RC 및 Beta 릴리스를 받고 Alpha 채널은 모든 릴리스를 받습니다. 테스트 릴리스 확인에는 여전히 GitHub 접근이 필요합니다. 설치 파일은 공식 미러에서 우선 다운로드하며, 실패하면 GitHub에서 다운로드합니다",
 	"updateChannelStable": "정식",
 	"updateChannelBeta": "Beta",
 	"updateChannelAlpha": "Alpha",

@@ -851,7 +851,7 @@
 	"focusBreadcrumb": "Перейти к навигационной цепочке",
 	"tableRectangleSelectionRequired": "Требуется прямоугольное выделение",
 	"updateChannel": "Канал обновлений",
-	"updateChannelTip": "Канал Beta получает стабильные, RC- и Beta-версии, а канал Alpha — все версии. Для тестовых каналов требуется доступ к GitHub",
+	"updateChannelTip": "Канал Beta получает стабильные, RC- и Beta-версии, а канал Alpha — все версии. Для проверки наличия тестовых версий по-прежнему требуется доступ к GitHub; установочные пакеты сначала загружаются с официальных зеркал, а при неудаче — с GitHub",
 	"updateChannelStable": "Стабильный",
 	"updateChannelBeta": "Бета",
 	"updateChannelAlpha": "Альфа",

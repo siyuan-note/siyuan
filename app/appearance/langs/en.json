@@ -851,7 +851,7 @@
 	"focusBreadcrumb": "Focus breadcrumb",
 	"tableRectangleSelectionRequired": "Requires a rectangular selection",
 	"updateChannel": "Update channel",
-	"updateChannelTip": "Beta receives stable, RC, and Beta releases; Alpha receives all releases. Test channels require access to GitHub",
+	"updateChannelTip": "Beta receives stable, RC, and Beta releases; Alpha receives all releases. Checking for test releases still requires access to GitHub; installers are downloaded from official mirrors first, falling back to GitHub if the mirrors fail",
 	"updateChannelStable": "Stable",
 	"updateChannelBeta": "Beta",
 	"updateChannelAlpha": "Alpha",

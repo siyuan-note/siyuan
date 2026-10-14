@@ -851,7 +851,7 @@
 	"focusBreadcrumb": "Breadcrumb focussen",
 	"tableRectangleSelectionRequired": "Vereist een rechthoekige selectie",
 	"updateChannel": "Updatekanaal",
-	"updateChannelTip": "Het Beta-kanaal ontvangt stabiele, RC- en Beta-versies; het Alpha-kanaal ontvangt alle versies. Testkanalen vereisen toegang tot GitHub",
+	"updateChannelTip": "Het Beta-kanaal ontvangt stabiele, RC- en Beta-versies; het Alpha-kanaal ontvangt alle versies. Het controleren op testversies vereist nog steeds toegang tot GitHub; installatiepakketten worden eerst van officiële mirrors gedownload en bij een mislukking van GitHub",
 	"updateChannelStable": "Stabiel",
 	"updateChannelBeta": "Beta",
 	"updateChannelAlpha": "Alpha",

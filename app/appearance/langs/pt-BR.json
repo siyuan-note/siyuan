@@ -851,7 +851,7 @@
 	"focusBreadcrumb": "Focar breadcrumb",
 	"tableRectangleSelectionRequired": "Requer uma seleção retangular",
 	"updateChannel": "Canal de atualização",
-	"updateChannelTip": "O canal Beta recebe versões estáveis, RC e Beta; o canal Alpha recebe todas as versões. Os canais de teste exigem acesso ao GitHub",
+	"updateChannelTip": "O canal Beta recebe versões estáveis, RC e Beta; o canal Alpha recebe todas as versões. A busca por versões de teste ainda exige acesso ao GitHub; os instaladores são baixados primeiro dos espelhos oficiais e, em caso de falha, do GitHub",
 	"updateChannelStable": "Estável",
 	"updateChannelBeta": "Beta",
 	"updateChannelAlpha": "Alpha",

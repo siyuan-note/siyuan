@@ -851,7 +851,7 @@
 	"focusBreadcrumb": "โฟกัสเส้นทางนำทาง",
 	"tableRectangleSelectionRequired": "ต้องเลือกเป็นรูปสี่เหลี่ยมผืนผ้า",
 	"updateChannel": "ช่องทางการอัปเดต",
-	"updateChannelTip": "ช่อง Beta จะได้รับรุ่นเสถียร รุ่น RC และรุ่น Beta ส่วนช่อง Alpha จะได้รับทุกรุ่น ช่องทดสอบจำเป็นต้องเข้าถึง GitHub",
+	"updateChannelTip": "ช่อง Beta จะได้รับรุ่นเสถียร รุ่น RC และรุ่น Beta ส่วนช่อง Alpha จะได้รับทุกรุ่น การตรวจสอบรุ่นทดสอบยังคงต้องเข้าถึง GitHub โดยจะดาวน์โหลดแพ็กเกจติดตั้งจากเซิร์ฟเวอร์มิเรอร์อย่างเป็นทางการก่อน หากไม่สำเร็จจะดาวน์โหลดจาก GitHub",
 	"updateChannelStable": "เสถียร",
 	"updateChannelBeta": "เบต้า",
 	"updateChannelAlpha": "อัลฟ่า",

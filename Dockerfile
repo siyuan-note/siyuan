@@ -1,4 +1,7 @@
-FROM --platform=$BUILDPLATFORM node:22 AS node-build
+ARG ALPINE_IMAGE=alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
+ARG GO_IMAGE=golang:1.26-alpine@sha256:3082400e369fa24d5fc60bca20edab3f6d604e0c5a690ec66b295eff4dd87ade
+
+FROM --platform=$BUILDPLATFORM node:22@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8 AS node-build
 
 ARG NPM_REGISTRY=
 
@@ -28,7 +31,7 @@ mv appearance stage guide /artifacts/
 if [ -d changelogs ]; then mv changelogs /artifacts/; fi
 EORUN
 
-FROM golang:1.26-alpine AS go-build
+FROM ${GO_IMAGE} AS go-source
 
 RUN <<EORUN
 #!/bin/sh -e
@@ -39,20 +42,26 @@ EORUN
 
 WORKDIR /kernel
 ADD kernel/go.* .
-RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/pkg \
-    go mod download
+RUN go mod download
 
 ADD kernel/ .
-RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/pkg \
+FROM go-source AS go-build
+RUN --mount=type=cache,target=/root/.cache/go-build \
     go build -tags "fts5 sqlcipher" -ldflags "-s -w"
 
-FROM go-build AS ocr-build
+FROM ${ALPINE_IMAGE} AS onnx-build
 ARG TARGETARCH
-# 容器保留 Alpine 基础镜像，使用 musl 构建原生运行时和识别辅助进程。
-RUN apk add --no-cache bash cmake make g++ git patch python3 py3-pip py3-packaging linux-headers
+ARG TARGETPLATFORM
+ARG ONNX_COMMIT=3a728b75062256951b6e19ce718907cf1a1d4cf0
+ARG ONNX_VERSION=1.24.3
+ARG ONNX_TOOLCHAIN_REV=1
+# ONNX 阶段只依赖 C++ 工具链和固定源码；更新工具链时递增修订号以刷新安装层。
+RUN echo "${TARGETPLATFORM} toolchain revision ${ONNX_TOOLCHAIN_REV}" \
+    && apk add --no-cache bash cmake make g++ git patch python3 py3-pip py3-packaging linux-headers \
+    && apk info -v | sort > /onnx-toolchain.txt
 RUN git clone --no-checkout https://github.com/microsoft/onnxruntime /onnxruntime \
     && cd /onnxruntime \
-    && git checkout 3a728b75062256951b6e19ce718907cf1a1d4cf0 \
+    && git checkout "${ONNX_COMMIT}" \
     && git submodule update --init --recursive
 # Release 构建不生成栈回溯，将 execinfo.h 限定为 Debug 构建所需的头文件。
 RUN <<EORUN
@@ -71,13 +80,22 @@ EOPATCH
 EORUN
 RUN python3 /onnxruntime/tools/ci_build/build.py --build_dir /onnxruntime/build \
     --config Release --update --build --parallel 2 --build_shared_lib \
-    --skip_tests --allow_running_as_root --compile_no_warning_as_error
-RUN mkdir -p /ocr/linux-${TARGETARCH} \
-    && cp /onnxruntime/build/Release/libonnxruntime.so.1.24.3 /ocr/linux-${TARGETARCH}/libonnxruntime.so \
-    && cp /onnxruntime/LICENSE /onnxruntime/ThirdPartyNotices.txt /ocr/linux-${TARGETARCH}/ \
-    && go build -trimpath -ldflags "-s -w" -o /ocr/linux-${TARGETARCH}/siyuan-ocr ./ocr/cmd/ocr-worker
+    --skip_tests --allow_running_as_root --compile_no_warning_as_error \
+    --cmake_extra_defines onnxruntime_BUILD_UNIT_TESTS=OFF \
+    && grep -q '^onnxruntime_BUILD_UNIT_TESTS:BOOL=OFF$' /onnxruntime/build/Release/CMakeCache.txt \
+    && mkdir -p /onnx-artifacts \
+    && cp "/onnxruntime/build/Release/libonnxruntime.so.${ONNX_VERSION}" /onnx-artifacts/libonnxruntime.so \
+    && cp /onnxruntime/LICENSE /onnxruntime/ThirdPartyNotices.txt /onnx-toolchain.txt /onnx-artifacts/ \
+    && rm -rf /onnxruntime/build
 
-FROM alpine:latest
+FROM go-source AS ocr-build
+ARG TARGETARCH
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    mkdir -p /ocr/linux-${TARGETARCH} \
+    && go build -trimpath -ldflags "-s -w" -o /ocr/linux-${TARGETARCH}/siyuan-ocr ./ocr/cmd/ocr-worker
+COPY --from=onnx-build /onnx-artifacts/ /ocr/linux-${TARGETARCH}/
+
+FROM ${ALPINE_IMAGE}
 LABEL maintainer="Liang Ding<845765@qq.com>"
 
 RUN apk add --no-cache ca-certificates tzdata su-exec libstdc++

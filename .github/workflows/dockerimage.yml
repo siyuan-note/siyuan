@@ -13,6 +13,15 @@ on:
         description: 'Stable version to build, without the v prefix'
         required: true
         type: string
+      verify_cache:
+        description: 'Run cold and warm ONNX cache acceptance (slow)'
+        default: false
+        type: boolean
+
+concurrency:
+  group: siyuan-docker-release
+  cancel-in-progress: false
+  queue: max
 
 env:
   package_json: "app/package.json"
@@ -41,12 +50,17 @@ jobs:
           submodules: recursive
 
       - name: Checkout Docker build configuration
-        if: ${{ github.event_name == 'workflow_dispatch' }}
         uses: actions/checkout@v6
         with:
           ref: ${{ github.sha }}
           path: docker-config
-          sparse-checkout: Dockerfile
+          sparse-checkout: |
+            Dockerfile
+            .dockerignore
+            scripts/verify-docker-release.py
+            scripts/check-docker-cache.py
+            scripts/test_docker_release.py
+            scripts/testdata/docker-ocr
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
@@ -79,13 +93,18 @@ jobs:
 
       - name: Apply Docker build configuration
         if: ${{ github.event_name == 'workflow_dispatch' }}
-        # 只复制工作流提交中的 Dockerfile，应用源码和资源保持正式版标签的内容。
-        run: cp ../docker-config/Dockerfile Dockerfile
+        # 只更新工作流提交中的构建配置，应用源码和资源保持正式版标签的内容。
+        run: |
+          cp ../docker-config/Dockerfile Dockerfile
+          cp ../docker-config/.dockerignore .dockerignore
 
       - name: Record source and build configuration
         run: |
           echo "Source commit: $(git rev-parse HEAD)"
-          sha256sum Dockerfile
+          sha256sum Dockerfile .dockerignore
+
+      - name: Test Docker release verification
+        run: python3 -m unittest discover -s ../docker-config/scripts -p test_docker_release.py
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
@@ -115,7 +134,61 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_PWD }}
 
-      - name: Build and push Docker image
-        # 走到这里的一定是 stable 版本，直接同时打 :latest 和具体版本号标签
+      - name: Build candidate image and export cache
+        id: build
+        shell: bash
+        env:
+          IMAGE_REPOSITORY: ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}
+          CACHE_IMAGE: ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:buildcache-release-v1
         run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ steps.version.outputs.value }} .
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 \
+            --cache-from "type=registry,ref=$CACHE_IMAGE" \
+            --cache-to "type=registry,ref=$CACHE_IMAGE,mode=max" \
+            --metadata-file "$RUNNER_TEMP/docker-metadata.json" --progress plain \
+            -t "$IMAGE_REPOSITORY:build-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" . \
+            2>&1 | tee "$RUNNER_TEMP/docker-build.log"
+          DIGEST=$(jq -r '."containerimage.digest"' "$RUNNER_TEMP/docker-metadata.json")
+          if [[ ! "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "Missing candidate image digest"
+            exit 1
+          fi
+          echo "image=$IMAGE_REPOSITORY@$DIGEST" >> "$GITHUB_OUTPUT"
+
+      - name: Verify all release platforms and OCR
+        env:
+          RELEASE_IMAGE: ${{ steps.build.outputs.image }}
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          python3 ../docker-config/scripts/verify-docker-release.py verify \
+            --image "$RELEASE_IMAGE" --version "$RELEASE_VERSION" \
+            --report "$RUNNER_TEMP/docker-verification.json"
+
+      - name: Verify ONNX cache reuse and invalidation
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.verify_cache }}
+        env:
+          CACHE_REPOSITORY: ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}
+        run: |
+          python3 ../docker-config/scripts/check-docker-cache.py \
+            --dockerfile Dockerfile --cache-repository "$CACHE_REPOSITORY" \
+            --records "$RUNNER_TEMP/docker-cache-acceptance"
+
+      - name: Publish verified release image
+        env:
+          RELEASE_IMAGE: ${{ steps.build.outputs.image }}
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          python3 ../docker-config/scripts/verify-docker-release.py promote \
+            --image "$RELEASE_IMAGE" --version "$RELEASE_VERSION" \
+            --report "$RUNNER_TEMP/docker-verification.json"
+
+      - name: Preserve build and verification records
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: docker-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/docker-build.log
+            ${{ runner.temp }}/docker-metadata.json
+            ${{ runner.temp }}/docker-verification.json
+            ${{ runner.temp }}/docker-cache-acceptance
+          if-no-files-found: ignore

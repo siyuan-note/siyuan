@@ -217,6 +217,14 @@ docker run -d \
 - `accessAuthCode`: ロック画面パスワード（**必ず変更してください**、そうしないと誰でもデータにアクセスできます）
   - また、`SIYUAN_ACCESS_AUTH_CODE` 環境変数を設定することでロック画面パスワードを指定することもできます。両方が設定されている場合、コマンドラインの値が優先されます
   - 環境変数 `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true` を設定することで、ロック画面パスワードを無効にすることができます
+- OIDC はロック画面パスワードの代わりに Docker アクセス認証として利用できます。`SIYUAN_OIDC_ENABLED=true`、`SIYUAN_OIDC_PROVIDER`（`custom`、`google`、`microsoft`、`github` のいずれか）、`SIYUAN_OIDC_CLIENT_ID`、および以下のプロバイダー固有の値を設定してください。GitHub は OAuth 2.0 ユーザー API アダプターを使用し、その他のプロバイダーは OpenID Connect ディスカバリーと ID Token 検証を使用します。ロック画面パスワードが利用できない状態で無効な構成を有効にすると、Docker の起動が中断されます
+  - `SIYUAN_OIDC_ISSUER_URL`：`custom` および `microsoft` プロバイダーに必要な Issuer URL。Microsoft は `https://login.microsoftonline.com/<tenant-id>/v2.0` のようなテナント固有の issuer を使用する必要があります
+  - `SIYUAN_OIDC_CLIENT_SECRET`：OpenID Connect プロバイダー向けの任意のクライアントシークレット。GitHub OAuth アダプターでは必須です。すべての認可コードフローで PKCE を使用します
+  - `SIYUAN_OIDC_SCOPES`：カンマまたはスペース区切りのスコープ。`openid` は常に含まれます
+  - `SIYUAN_OIDC_REDIRECT_URL`：`/api/system/oidc/callback` で終わる公開 HTTPS コールバック URL。リモートブラウザーアクセスに必須です
+  - `SIYUAN_OIDC_ALLOW_ALL`：プロバイダーで認証されたすべての ID に SiYuan 管理者アクセスを明示的に付与します
+  - `SIYUAN_OIDC_CLAIM_RULES`：allow-all が無効な場合に使用するクレームルールの JSON 配列。例：`[{"claim":"email","operator":"equals","values":["user@example.com"]},{"claim":"email_verified","operator":"equals","values":["true"]}]`。ルール内の値は OR、ルール間は AND で評価されます
+  - ネイティブモバイルアプリは固定のコールバック URI `siyuan:/oidc-callback` を使用します。記載どおりに登録してください。モバイル構成の検証は保存前にこのコールバックを使用します。カスタムプロバイダー、Microsoft、GitHub は、アプリ登録がこのコールバック URI を受け入れる場合にのみ使用できます。Google は Android クライアントタイプでこのプライベート URI を受け付けないため、Google ログインはブラウザーおよびデスクトップフローに限定されます
 - `SIYUAN_LANG`：インターフェース言語（オプション、Docker で未設定の場合はデフォルト `en`）。BCP 47 タグ（`zh-CN`/`zh-TW`/`en`/`ja`/`pt-BR` など）を受け付けます。従来のアンダースコア形式（`zh_CN`/`en_US` など）も互換性のため受け付けます。**設定**で選択した言語を再起動後も維持したい場合は、デプロイ時にこの変数を省略してください。設定した場合は起動のたびに適用され、保存済みの言語設定を上書きします
   - あるいは `--lang` コマンドライン引数でも設定できます。両方が設定されている場合、コマンドラインの値が優先されます
 

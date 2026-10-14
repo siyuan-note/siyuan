@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "OCR テキストを消去",
+	"clearOCRTextDone": "OCR テキストを消去しました",
 	"compactMode": "コンパクトモード",
 	"compactModeTip": "文字サイズを維持したまま画面の間隔を狭くします。コミュニティテーマでは効果が異なる場合があります",
 	"ocrTooltipSettings": "画像のツールチップ",

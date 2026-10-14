@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "OCR-tekst wissen",
+	"clearOCRTextDone": "OCR-tekst gewist",
 	"compactMode": "Compacte modus",
 	"compactModeTip": "Verklein de tussenruimte in de interface met behoud van de tekstgrootte; het effect kan per communitythema verschillen",
 	"ocrTooltipSettings": "Afbeeldingstooltips",

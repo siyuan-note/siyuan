@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261014140201"
+		"updated": "20261014150710"
 	},
 	"Children": [
 		{
@@ -1041,7 +1041,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117003636-epvk98g",
-				"updated": "20261014140201"
+				"updated": "20261014150710"
 			},
 			"Children": [
 				{
@@ -1549,7 +1549,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202934-1h96or8",
-				"updated": "20261014140201"
+				"updated": "20261014150710"
 			},
 			"Children": [
 				{
@@ -1668,6 +1668,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "Changes saved in the image result editor automatically update search indexes. After editing the JSON file outside SiYuan, rebuild the asset content index"
+				}
+			]
+		},
+		{
+			"ID": "20261014150710-z1vm4en",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014150710-z1vm4en",
+				"updated": "20261014150710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Image menu"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Clear OCR text"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to clear the asset’s OCR text in one click. This affects all images referencing the same asset and updates the search index. The empty result is retained, so automatic OCR skips the asset; rerun OCR manually from the image menu to restore text."
 				}
 			]
 		},

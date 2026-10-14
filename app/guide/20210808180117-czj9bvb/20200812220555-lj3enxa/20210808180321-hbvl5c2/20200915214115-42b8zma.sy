@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20261014140201"
+		"updated": "20261014150710"
 	},
 	"Children": [
 		{
@@ -1053,7 +1053,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230117002036-vmc0mx4",
-				"updated": "20261014140201"
+				"updated": "20261014150710"
 			},
 			"Children": [
 				{
@@ -1553,7 +1553,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230414202710-a51lo76",
-				"updated": "20261014140201"
+				"updated": "20261014150710"
 			},
 			"Children": [
 				{
@@ -1672,6 +1672,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "通过图片结果编辑窗口保存后会自动更新搜索索引；在思源外部修改 JSON 文件后，需手动重建资源文件索引"
+				}
+			]
+		},
+		{
+			"ID": "20261014150710-trk8l20",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014150710-trk8l20",
+				"updated": "20261014150710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "图片菜单"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清空 OCR 文本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 一键清空该资源的 OCR 文本，同时影响引用同一资源的所有图片并更新搜索索引。清空后保留空结果，自动 OCR 会跳过该资源；如需恢复，可从图片菜单手动重新识别。"
 				}
 			]
 		},

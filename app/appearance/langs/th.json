@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "ล้างข้อความ OCR",
+	"clearOCRTextDone": "ล้างข้อความ OCR แล้ว",
 	"compactMode": "โหมดกะทัดรัด",
 	"compactModeTip": "ลดระยะห่างในส่วนติดต่อโดยคงขนาดข้อความไว้ ผลลัพธ์อาจแตกต่างกันตามธีมของชุมชน",
 	"ocrTooltipSettings": "คำแนะนำรูปภาพ",

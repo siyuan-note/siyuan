@@ -2,7 +2,7 @@ import {IMAGE_OCR_MENU} from "../../menus/declarations/imageOCRMenu";
 import {createDeclaredMenu} from "../../menus/declarations/menuDeclaration";
 const imageOCRContext = {
     textAvailable: true, localAvailable: true, aiAvailable: true,
-    getStatus: async () => false, openResult: () => {}, copyText: () => {}, runLocal: () => {}, runAI: () => {},
+    getStatus: async () => false, openResult: () => {}, copyText: () => {}, clearText: () => {}, runLocal: () => {}, runAI: () => {},
 };
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
@@ -67,10 +67,12 @@ test("image OCR actions retain their configurable paths and order", t => {
     assert.equal(copyImage.sortable, false);
     assert.equal(getEntryParentPath("editor.image.copyAsPNG"), "editor.image");
     assert.deepEqual(getEntryCatalogChildren("inline.image.ocr").map(item => item.key), [
-        "ocrResult", "copyOCRText", "separator_reOCR", "reOCR", "reAIOCR",
+        "ocrResult", "copyOCRText", "clearOCRText", "separator_reOCR", "reOCR", "reAIOCR",
     ]);
     assert.equal(getEntryCatalogNode("inline.image.ocr.copyOCRText").simple, false);
     assert.equal(getEntryParentPath("inline.image.ocr.copyOCRText"), "inline.image.ocr");
+    assert.equal(getEntryCatalogNode("inline.image.ocr.clearOCRText").simple, false);
+    assert.equal(getEntryParentPath("inline.image.ocr.clearOCRText"), "inline.image.ocr");
     assert.equal(getEntryCatalogNode("inline.image.ocr.reAIOCR").simple, false);
     assert.equal(getEntryParentPath("inline.image.ocr.reAIOCR"), "inline.image.ocr");
     assert.deepEqual(createDeclaredMenu(IMAGE_OCR_MENU, imageOCRContext).submenu.map(item => item.id),

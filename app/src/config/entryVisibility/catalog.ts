@@ -981,6 +981,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("delete", lang("delete")),
             separator("separator_2"),
             node("rename", lang("rename")),
+            // OCR 子菜单的入口、默认顺序与清空操作共用声明。
             declaredMenuCatalog(IMAGE_OCR_MENU),
             node("alignCenter", lang("alignCenter")),
             node("alignLeft", lang("alignLeft")),

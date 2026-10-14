@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "OCR metnini temizle",
+	"clearOCRTextDone": "OCR metni temizlendi",
 	"compactMode": "Kompakt mod",
 	"compactModeTip": "Metin boyutunu koruyarak arayüz boşluklarını azaltır; etki topluluk temalarına göre değişebilir",
 	"ocrTooltipSettings": "Görsel araç ipuçları",

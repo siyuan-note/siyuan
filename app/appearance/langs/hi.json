@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "OCR पाठ साफ़ करें",
+	"clearOCRTextDone": "OCR पाठ साफ़ कर दिया गया",
 	"compactMode": "संक्षिप्त मोड",
 	"compactModeTip": "टेक्स्ट का आकार बनाए रखते हुए इंटरफ़ेस में खाली जगह कम करें; समुदाय की थीम के साथ प्रभाव अलग हो सकता है",
 	"ocrTooltipSettings": "चित्र टूलटिप",

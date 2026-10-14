@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "Cancella testo OCR",
+	"clearOCRTextDone": "Testo OCR cancellato",
 	"compactMode": "Modalità compatta",
 	"compactModeTip": "Riduce gli spazi dell’interfaccia mantenendo le dimensioni del testo; l’effetto può variare con i temi della community",
 	"ocrTooltipSettings": "Suggerimenti delle immagini",

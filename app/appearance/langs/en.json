@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "Clear OCR text",
+	"clearOCRTextDone": "OCR text cleared",
 	"compactMode": "Compact mode",
 	"compactModeTip": "Reduce interface spacing while keeping text size; the effect may vary with community themes",
 	"ocrTooltipSettings": "Image tooltips",

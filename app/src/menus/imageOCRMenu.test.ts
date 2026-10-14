@@ -36,3 +36,23 @@ test("shared local OCR menu refreshes tooltip state after successful and failed 
     await Promise.resolve();
     assert.deepEqual(invalidated, ["assets/image.png", "assets/another.png"]);
 });
+
+test("shared image menu clears the current resource with its notebook identity", () => {
+    const api = {} as typeof import("./imageOCRMenu");
+    let currentPath = "assets/image.png?box=first#preview";
+    const cleared: string[] = [];
+    runInNewContext(transpileModule(readFileSync("src/menus/imageOCRMenu.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText, {exports: api, window: {siyuan: {config: {ocr: {provider: "ai"}}}}, require: () => ({
+        getImageOCRAvailability: () => ({text: true, local: true, ai: true}),
+        isDisabledFeature: () => false,
+        createDeclaredMenu: (_declaration: unknown, context: unknown) => context,
+        clearImageOCRText: async (path: string) => { cleared.push(path); },
+    })});
+    const context = api.createImageOCRMenu({getAttribute: () => currentPath} as unknown as HTMLElement, "notebook") as unknown as {
+        clearText: () => void;
+    };
+    currentPath = "assets/image.png?box=second#preview";
+    context.clearText();
+    assert.deepEqual(cleared, [currentPath]);
+});

@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "Effacer le texte OCR",
+	"clearOCRTextDone": "Texte OCR effacé",
 	"compactMode": "Mode compact",
 	"compactModeTip": "Réduit les espacements de l’interface sans modifier la taille du texte ; l’effet peut varier selon les thèmes de la communauté",
 	"ocrTooltipSettings": "Infobulles des images",

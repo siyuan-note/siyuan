@@ -62,10 +62,10 @@ test("OCR presence caches text and empty results, merges requests, expires and r
     assert.equal(cache.requests(), 6);
 });
 
-test("OCR changes invalidate only the resource and stale requests cannot replace the new cache", async () => {
+test("OCR changes invalidate shared resource aliases and discard pending stale results", async () => {
     const {api, pending, requests, events} = loadCache();
     const old = api.getImageOCRStatus("assets/image.png");
-    const other = api.getImageOCRStatus("assets/other.png");
+    const other = api.getImageOCRStatus("assets/image.png?width=100#preview");
     api.invalidateImageOCRStatus("assets/image.png");
     assert.equal(events(), 1);
     const updated = api.getImageOCRStatus("assets/image.png");
@@ -73,10 +73,12 @@ test("OCR changes invalidate only the resource and stale requests cannot replace
     assert.equal(await updated, false);
     pending[0].resolve({code: 0, data: {text: "stale"}});
     pending[1].resolve({code: 0, data: {text: "other"}});
-    await Promise.all([old, other]);
+    assert.deepEqual(await Promise.all([old, other]), [undefined, undefined]);
     assert.equal(await api.getImageOCRStatus("assets/image.png"), false);
-    assert.equal(await api.getImageOCRStatus("assets/other.png"), true);
-    assert.equal(requests(), 3);
+    const alias = api.getImageOCRStatus("assets/image.png?width=100#preview");
+    pending[3].resolve({code: 0, data: {text: ""}});
+    assert.equal(await alias, false);
+    assert.equal(requests(), 4);
 });
 
 test("OCR result cache retains recognition failures separately from saved text and read failures", async () => {

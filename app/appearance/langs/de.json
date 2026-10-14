@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "OCR-Text löschen",
+	"clearOCRTextDone": "OCR-Text gelöscht",
 	"compactMode": "Kompaktmodus",
 	"compactModeTip": "Abstände der Oberfläche bei gleicher Textgröße verringern; die Wirkung kann je nach Community-Theme variieren",
 	"ocrTooltipSettings": "Bildhinweise",

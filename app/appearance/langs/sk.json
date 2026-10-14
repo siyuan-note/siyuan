@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "Vymazať text OCR",
+	"clearOCRTextDone": "Text OCR bol vymazaný",
 	"compactMode": "Kompaktný režim",
 	"compactModeTip": "Zmenší rozostupy v rozhraní pri zachovaní veľkosti textu; účinok sa môže líšiť pri témach komunity",
 	"ocrTooltipSettings": "Tipy obrázkov",

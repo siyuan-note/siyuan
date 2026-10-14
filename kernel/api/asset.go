@@ -145,10 +145,6 @@ var ocr = contractHandler(apicontract.AssetOCR, func(c *gin.Context, request api
 	if model.IsEncryptedAssetPath(absPath) {
 		return apicontract.FailureWithTimeout[apicontract.AssetOCRData](-1, model.Conf.Language(380), 3000)
 	}
-	if err = model.EnsureAssetLocal(absPath); err != nil {
-		return apicontract.Failure[apicontract.AssetOCRData](-1, err.Error())
-	}
-
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Minute)
 	defer cancel()
 	text, ocrJSON, err := model.OCRAsset(ctx, path)

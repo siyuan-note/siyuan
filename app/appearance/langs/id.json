@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "Hapus teks OCR",
+	"clearOCRTextDone": "Teks OCR dihapus",
 	"compactMode": "Mode ringkas",
 	"compactModeTip": "Kurangi jarak antarelemen antarmuka tanpa mengubah ukuran teks; efeknya dapat berbeda pada tema komunitas",
 	"ocrTooltipSettings": "Tooltip gambar",

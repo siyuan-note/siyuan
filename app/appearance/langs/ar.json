@@ -1,4 +1,6 @@
 {
+	"clearOCRText": "مسح نص OCR",
+	"clearOCRTextDone": "تم مسح نص OCR",
 	"compactMode": "الوضع المضغوط",
 	"compactModeTip": "تقليل المسافات في الواجهة مع الحفاظ على حجم النص؛ قد يختلف التأثير مع سمات المجتمع",
 	"ocrTooltipSettings": "تلميحات الصور",

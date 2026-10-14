@@ -7,6 +7,7 @@ export interface IImageOCRMenuContext {
     getStatus: () => Promise<boolean | undefined>;
     openResult: () => void;
     copyText: () => void;
+    clearText: () => void;
     runLocal: () => void;
     runAI: () => void;
 }
@@ -49,6 +50,13 @@ export const IMAGE_OCR_MENU: IMenuDeclaration<IImageOCRMenuContext> = {
         type: "entry",
         icon: "iconCopy",
         behavior: context => ({click: context.copyText}),
+    }, {
+        id: "clearOCRText",
+        label: () => window.siyuan.languages.clearOCRText,
+        simple: false,
+        type: "entry",
+        icon: "iconTrashcan",
+        behavior: context => ({click: context.clearText}),
     }, {
         id: "separator_reOCR",
         label: () => "",

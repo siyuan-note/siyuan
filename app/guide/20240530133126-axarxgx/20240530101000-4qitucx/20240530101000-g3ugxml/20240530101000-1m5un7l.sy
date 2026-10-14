@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20261014140201"
+		"updated": "20261014150710"
 	},
 	"Children": [
 		{
@@ -1079,7 +1079,7 @@
 			"Properties": {
 				"ID": "20240530101000-5bix8t1",
 				"id": "20240530101000-9evyuhr",
-				"updated": "20261014140201"
+				"updated": "20261014150710"
 			},
 			"Children": [
 				{
@@ -1588,7 +1588,7 @@
 			"Properties": {
 				"ID": "20240530101000-aefldsk",
 				"id": "20240530101000-cpod2qy",
-				"updated": "20261014140201"
+				"updated": "20261014150710"
 			},
 			"Children": [
 				{
@@ -1714,6 +1714,43 @@
 				{
 					"Type": "NodeText",
 					"Data": "画像の結果編集画面で保存すると検索インデックスが自動更新されます。SiYuan の外部で JSON ファイルを編集した場合は、アセットコンテンツインデックスを手動で再構築してください"
+				}
+			]
+		},
+		{
+			"ID": "20261014150710-r6p45ak",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261014150710-r6p45ak",
+				"updated": "20261014150710"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像メニュー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OCR テキストを消去"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、アセットの OCR テキストをワンクリックで消去できます。同じアセットを参照するすべての画像に反映され、検索インデックスも更新されます。空の結果が保持されるため、自動 OCR はそのアセットをスキップします。テキストを復元するには、画像メニューから手動で OCR を再実行してください。"
 				}
 			]
 		},

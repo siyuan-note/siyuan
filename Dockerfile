@@ -49,7 +49,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/g
 FROM go-build AS ocr-build
 ARG TARGETARCH
 # 容器保留 Alpine 基础镜像，使用 musl 构建原生运行时和识别辅助进程。
-RUN apk add --no-cache bash cmake make g++ git python3 py3-pip py3-packaging linux-headers
+RUN apk add --no-cache bash cmake make g++ git patch python3 py3-pip py3-packaging linux-headers
 RUN git clone --no-checkout https://github.com/microsoft/onnxruntime /onnxruntime \
     && cd /onnxruntime \
     && git checkout 3a728b75062256951b6e19ce718907cf1a1d4cf0 \

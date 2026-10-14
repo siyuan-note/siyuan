@@ -1,4 +1,6 @@
 {
+	"autoCloseRefBrackets": "<code class='fn__code'>[[</code> 자동 닫기",
+	"autoCloseRefBracketsTip": "[[ 입력 시 ]]가 자동으로 삽입되며, ]] 입력 시 제목이 정확히 일치하는 문서로 참조를 완성하거나 새 문서를 만듭니다",
 	"currentTime": "현재 시간",
 	"exitWaiting": "종료 중입니다. 잠시 기다려 주세요...",
 	"exitWaitFailed": "종료 완료 여부를 확인할 수 없습니다. 다시 시도하거나 이 대화 상자를 닫고 계속 기다려 주세요.",

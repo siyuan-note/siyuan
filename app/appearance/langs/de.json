@@ -1,4 +1,6 @@
 {
+	"autoCloseRefBrackets": "<code class='fn__code'>[[</code> automatisch schließen",
+	"autoCloseRefBracketsTip": "Beim Tippen von [[ wird ]] automatisch eingefügt; die Eingabe von ]] vervollständigt den Verweis auf das Dokument mit exakt passendem Titel oder erstellt ein neues Dokument",
 	"currentTime": "Aktuelle Uhrzeit",
 	"exitWaiting": "Wird beendet, bitte warten...",
 	"exitWaitFailed": "Der Abschluss des Beendens konnte nicht bestätigt werden. Versuchen Sie es erneut oder schließen Sie diesen Dialog und warten Sie weiter.",

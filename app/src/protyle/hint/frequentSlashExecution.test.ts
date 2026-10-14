@@ -11,7 +11,7 @@ const text = readFileSync("src/protyle/hint/index.ts", "utf8");
 const source = createSourceFile("index.ts", text, ScriptTarget.Latest);
 const declaration = source.statements.find(node => isClassDeclaration(node) && node.name.text === "Hint");
 assert.ok(declaration && isClassDeclaration(declaration));
-const methods = declaration.members.filter(member => ["fillCommand", "fill", "getHTMLByData"].includes(member.name?.getText(source)))
+const methods = declaration.members.filter(member => ["fillCommand", "fill", "getHTMLByData", "consumeRefBracketClose"].includes(member.name?.getText(source)))
     .map(member => member.getText(source)).join("\n");
 const code = transpileModule(`class Hint { ${methods} } new Hint();`, {
     compilerOptions: {target: ScriptTarget.ES2020},

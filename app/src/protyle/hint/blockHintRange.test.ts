@@ -5,6 +5,7 @@ import {
     getBlockHintTriggerOffset,
     getBlockRefStaticText,
     isBlockHintQueryAtCaret,
+    shouldAutoCloseRefBrackets,
     shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
     stripBlockHintCloseKey,
@@ -157,4 +158,15 @@ describe("endsWithMultiCharHintPrefix", () => {
         assert.equal(endsWithMultiCharHintPrefix("2级", hintKeys), false);
         assert.equal(endsWithMultiCharHintPrefix("2", hintKeys), false);
     });
+});
+
+describe("auto-closing reference brackets", () => {
+    it("inserts closing brackets only right after a new [[", () => {
+        assert.equal(shouldAutoCloseRefBrackets("note [[", ""), true);
+        assert.equal(shouldAutoCloseRefBrackets("[[", " tail"), true);
+        assert.equal(shouldAutoCloseRefBrackets("[[", "]]"), false);
+        assert.equal(shouldAutoCloseRefBrackets("[", ""), false);
+        assert.equal(shouldAutoCloseRefBrackets("[[Title", ""), false);
+    });
+
 });

@@ -94,6 +94,7 @@ type Editor struct {
 	SpellcheckLanguages             []string       `json:"spellcheckLanguages"`             // 拼写检查语言
 	HashTagSearch                   *bool          `json:"hashTagSearch"`                   // 输入 # 时是否进行标签搜索
 	OnlySearchForDoc                bool           `json:"onlySearchForDoc"`                // 是否启用 [[ 仅搜索文档块
+	AutoCloseRefBrackets            bool           `json:"autoCloseRefBrackets"`            // 输入 [[ 时自动补全 ]]，输入 ]] 时完成引用
 	BacklinkExpandCount             int            `json:"backlinkExpandCount"`             // 反向链接默认展开数量
 	BackmentionExpandCount          int            `json:"backmentionExpandCount"`          // 反链提及默认展开数量
 	BacklinkMentionExclude          string         `json:"backlinkMentionExclude"`          // 反链提及关键字排除列表
@@ -236,6 +237,7 @@ func NewEditor() *Editor {
 		Spellcheck:                      false,
 		SpellcheckLanguages:             []string{"en-US"},
 		HashTagSearch:                   new(true),
+		AutoCloseRefBrackets:            false,
 		BacklinkExpandCount:             8,
 		BackmentionExpandCount:          -1,
 		BacklinkContainChildren:         true,

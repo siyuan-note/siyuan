@@ -237,11 +237,13 @@ type SettingEditor struct {
 	RTL                             bool                 `json:"rtl" api:"optional,nullable"`
 	// AutoDirection 默认关闭；段落和标题按首个强方向字符排版，列表项独立调整标记和缩进。
 	// 手动方向优先，表格列顺序不变。
-	AutoDirection           bool             `json:"autoDirection" api:"optional,nullable"`
-	Spellcheck              bool             `json:"spellcheck" api:"optional,nullable"`
-	SpellcheckLanguages     []string         `json:"spellcheckLanguages" api:"optional,nullable"`
-	HashTagSearch           *bool            `json:"hashTagSearch" api:"optional,nullable"`
-	OnlySearchForDoc        bool             `json:"onlySearchForDoc" api:"optional,nullable"`
+	AutoDirection       bool     `json:"autoDirection" api:"optional,nullable"`
+	Spellcheck          bool     `json:"spellcheck" api:"optional,nullable"`
+	SpellcheckLanguages []string `json:"spellcheckLanguages" api:"optional,nullable"`
+	HashTagSearch       *bool    `json:"hashTagSearch" api:"optional,nullable"`
+	OnlySearchForDoc    bool     `json:"onlySearchForDoc" api:"optional,nullable"`
+	// AutoCloseRefBrackets 默认关闭；启用后输入 [[ 自动补全 ]]，输入 ]] 时引用同名文档、日记或新建文档。
+	AutoCloseRefBrackets    bool             `json:"autoCloseRefBrackets" api:"optional,nullable"`
 	BacklinkExpandCount     int              `json:"backlinkExpandCount" api:"optional,nullable"`
 	BackmentionExpandCount  int              `json:"backmentionExpandCount" api:"optional,nullable"`
 	BacklinkMentionExclude  string           `json:"backlinkMentionExclude" api:"optional,nullable"`

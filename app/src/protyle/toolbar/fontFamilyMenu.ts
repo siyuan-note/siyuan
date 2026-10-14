@@ -374,7 +374,6 @@ export const renderMobileFontFamilyMenu = async (element: HTMLElement, options: 
     }
     element.innerHTML = genFontPickerHTML(fonts, options, true);
     bindFontPicker(element, options);
-    element.querySelector<HTMLInputElement>('[data-type="font-family-search"]')?.focus();
 };
 
 export const getInlineFontFamilyLabel = (state: IInlineFontFamilyState) => state.mixed ?

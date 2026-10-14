@@ -853,7 +853,7 @@
 	"focusBreadcrumb": "パンくずリストにフォーカス",
 	"tableRectangleSelectionRequired": "矩形範囲の選択が必要です",
 	"updateChannel": "更新チャンネル",
-	"updateChannelTip": "Beta チャンネルでは正式版、RC、Beta 版を受信し、Alpha チャンネルではすべての版を受信します。テスト版の確認には引き続き GitHub へのアクセスが必要です",
+	"updateChannelTip": "Beta チャンネルでは正式版、RC、Beta 版を受信し、Alpha チャンネルではすべての版を受信します。テスト版の確認には GitHub へのアクセスが必要です",
 	"updateChannelStable": "正式版",
 	"updateChannelBeta": "Beta",
 	"updateChannelAlpha": "Alpha",

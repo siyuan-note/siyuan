@@ -853,7 +853,7 @@
 	"focusBreadcrumb": "Fokuskan breadcrumb",
 	"tableRectangleSelectionRequired": "Memerlukan pilihan persegi panjang",
 	"updateChannel": "Saluran pembaruan",
-	"updateChannelTip": "Kanal Beta menerima rilis stabil, RC, dan Beta; kanal Alpha menerima semua rilis. Pemeriksaan rilis pengujian tetap memerlukan akses ke GitHub",
+	"updateChannelTip": "Kanal Beta menerima rilis stabil, RC, dan Beta; kanal Alpha menerima semua rilis. Pemeriksaan rilis pengujian memerlukan akses ke GitHub",
 	"updateChannelStable": "Stabil",
 	"updateChannelBeta": "Beta",
 	"updateChannelAlpha": "Alpha",

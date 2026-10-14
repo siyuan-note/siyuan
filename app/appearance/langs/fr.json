@@ -853,7 +853,7 @@
 	"focusBreadcrumb": "Activer le fil d’Ariane",
 	"tableRectangleSelectionRequired": "Nécessite une sélection rectangulaire",
 	"updateChannel": "Canal de mise à jour",
-	"updateChannelTip": "Le canal Beta reçoit les versions stables, RC et bêta ; le canal Alpha reçoit toutes les versions. La recherche de versions de test nécessite toujours un accès à GitHub",
+	"updateChannelTip": "Le canal Beta reçoit les versions stables, RC et bêta ; le canal Alpha reçoit toutes les versions. La recherche de versions de test nécessite un accès à GitHub",
 	"updateChannelStable": "Stable",
 	"updateChannelBeta": "Bêta",
 	"updateChannelAlpha": "Alpha",

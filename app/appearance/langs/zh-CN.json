@@ -853,7 +853,7 @@
 	"focusBreadcrumb": "聚焦面包屑",
 	"tableRectangleSelectionRequired": "需要矩形选区",
 	"updateChannel": "更新通道",
-	"updateChannelTip": "Beta 通道接收正式版、RC 和 Beta，Alpha 通道接收全部版本。检查测试版本仍需访问 GitHub",
+	"updateChannelTip": "Beta 通道接收正式版、RC 和 Beta，Alpha 通道接收全部版本。检查测试版本需访问 GitHub",
 	"updateChannelStable": "正式版",
 	"updateChannelBeta": "Beta",
 	"updateChannelAlpha": "Alpha",

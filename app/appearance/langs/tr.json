@@ -853,7 +853,7 @@
 	"focusBreadcrumb": "İçerik haritasına odaklan",
 	"tableRectangleSelectionRequired": "Dikdörtgen bir seçim gerektirir",
 	"updateChannel": "Güncelleme kanalı",
-	"updateChannelTip": "Beta kanalı kararlı, RC ve Beta sürümlerini; Alpha kanalı ise tüm sürümleri alır. Test sürümlerini kontrol etmek hâlâ GitHub erişimi gerektirir",
+	"updateChannelTip": "Beta kanalı kararlı, RC ve Beta sürümlerini; Alpha kanalı ise tüm sürümleri alır. Test sürümlerini kontrol etmek GitHub erişimi gerektirir",
 	"updateChannelStable": "Kararlı",
 	"updateChannelBeta": "Beta",
 	"updateChannelAlpha": "Alpha",

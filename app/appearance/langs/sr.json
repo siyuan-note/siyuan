@@ -853,7 +853,7 @@
 	"focusBreadcrumb": "Fokusiraj traku putanje",
 	"tableRectangleSelectionRequired": "Potreban je pravougaoni izbor",
 	"updateChannel": "Kanal ažuriranja",
-	"updateChannelTip": "Beta kanal prima stabilna, RC i beta izdanja; alfa kanal prima sva izdanja. Provera dostupnosti test izdanja i dalje zahteva pristup GitHub-u",
+	"updateChannelTip": "Beta kanal prima stabilna, RC i beta izdanja; alfa kanal prima sva izdanja. Provera dostupnosti test izdanja zahteva pristup GitHub-u",
 	"updateChannelStable": "Stabilna",
 	"updateChannelBeta": "Beta",
 	"updateChannelAlpha": "Alfa",

@@ -853,7 +853,7 @@
 	"focusBreadcrumb": "Ustaw fokus na ścieżce nawigacji",
 	"tableRectangleSelectionRequired": "Wymaga prostokątnego zaznaczenia",
 	"updateChannel": "Kanał aktualizacji",
-	"updateChannelTip": "Kanał Beta otrzymuje wydania stabilne, RC i Beta, a kanał Alpha wszystkie wydania. Sprawdzanie dostępności wydań testowych nadal wymaga dostępu do GitHub",
+	"updateChannelTip": "Kanał Beta otrzymuje wydania stabilne, RC i Beta, a kanał Alpha wszystkie wydania. Sprawdzanie dostępności wydań testowych wymaga dostępu do GitHub",
 	"updateChannelStable": "Stabilny",
 	"updateChannelBeta": "Beta",
 	"updateChannelAlpha": "Alpha",

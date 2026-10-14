@@ -853,7 +853,7 @@
 	"focusBreadcrumb": "Zamerať navigačnú cestu",
 	"tableRectangleSelectionRequired": "Vyžaduje obdĺžnikový výber",
 	"updateChannel": "Aktualizačný kanál",
-	"updateChannelTip": "Kanál Beta prijíma stabilné vydania, RC a Beta; kanál Alpha prijíma všetky vydania. Kontrola dostupnosti testovacích vydaní naďalej vyžaduje prístup ku GitHubu",
+	"updateChannelTip": "Kanál Beta prijíma stabilné vydania, RC a Beta; kanál Alpha prijíma všetky vydania. Kontrola dostupnosti testovacích vydaní vyžaduje prístup ku GitHubu",
 	"updateChannelStable": "Stabilný",
 	"updateChannelBeta": "Beta",
 	"updateChannelAlpha": "Alpha",

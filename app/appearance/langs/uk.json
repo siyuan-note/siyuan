@@ -853,7 +853,7 @@
 	"focusBreadcrumb": "Перейти до навігаційного ланцюжка",
 	"tableRectangleSelectionRequired": "Потрібне прямокутне виділення",
 	"updateChannel": "Канал оновлень",
-	"updateChannelTip": "Канал Beta отримує стабільні, RC- та Beta-версії, а канал Alpha — усі версії. Для перевірки наявності тестових версій і надалі потрібен доступ до GitHub",
+	"updateChannelTip": "Канал Beta отримує стабільні, RC- та Beta-версії, а канал Alpha — усі версії. Для перевірки наявності тестових версій потрібен доступ до GitHub",
 	"updateChannelStable": "Стабільний",
 	"updateChannelBeta": "Бета",
 	"updateChannelAlpha": "Альфа",

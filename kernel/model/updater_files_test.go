@@ -129,6 +129,8 @@ func TestInstallPackagePreviewDoesNotLeakExitPreservation(t *testing.T) {
 	if err := <-done; err != nil {
 		t.Fatal(err)
 	}
+	assertInstallPackagePresent(t, dir, older)
+	clearInstallPackagesBefore(dir, "v99.0.1", "v99.0.1", "")
 	for _, suffix := range []string{"", ".json"} {
 		if _, err := os.Stat(filepath.Join(dir, older.FileName+suffix)); !os.IsNotExist(err) {
 			t.Fatalf("preview leaked a preserved old package or record: %v", err)
@@ -172,7 +174,7 @@ func TestInstallPackageCleanupBeforeFinalSelection(t *testing.T) {
 	dir := prepareInstallPackageTest(t)
 	older := installPackageFixture(t, dir, "99.0.0", conf.UpdateChannelStable, "win.exe")
 	newer := installPackageFixture(t, dir, "99.0.1", conf.UpdateChannelStable, "win.exe")
-	clearOldInstallPackagesLocked("v99.0.1", filepath.Join(dir, newer.FileName))
+	clearInstallPackagesBefore(dir, "v99.0.1", "v99.0.1", filepath.Join(dir, newer.FileName))
 	if got := selectTestInstallPackage(t, dir, true); got != filepath.Join(dir, newer.FileName) {
 		t.Fatalf("selection after completed cleanup returned %q", got)
 	}

@@ -51,7 +51,12 @@ func clearOldInstallPackagesLocked(beforeVersion, preservePath string) {
 			// 其他工作空间下载期间跳过清理，不能删除正在写入的临时包。
 			continue
 		}
-		clearInstallPackagesBefore(installDir, "v"+util.Ver, beforeVersion, preservePath)
+		cleanupBefore := beforeVersion
+		if installDir == sharedInstallPackageDir() {
+			// 共用缓存中的未来版本可能仍供其他通道或工作空间使用，升级后再清理。
+			cleanupBefore = "v" + util.Ver
+		}
+		clearInstallPackagesBefore(installDir, "v"+util.Ver, cleanupBefore, preservePath)
 		lock.Close()
 	}
 }

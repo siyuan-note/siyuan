@@ -81,13 +81,30 @@ func reuseInstallPackage(installDir string, metadata *installPackageMetadata, ke
 
 	path = verifiedInstallPackagePath(installDir, metadata)
 	if path != "" {
-		if path != installPackageFiles.preservedPath && !sharedInstallPackageReserved(path) {
+		recordInfo, statErr := os.Lstat(path + ".json")
+		stored, readErr := readInstallPackageMetadata(path+".json", key)
+		if path != installPackageFiles.preservedPath &&
+			(!sharedInstallPackageReserved(path) || statErr != nil || !recordInfo.Mode().IsRegular() ||
+				readErr != nil || stored.Checksum != metadata.Checksum) {
 			err = saveInstallPackageMetadata(installDir, metadata, key)
 		}
 		return
 	}
-	if path := filepath.Join(installDir, metadata.FileName); path == installPackageFiles.preservedPath || sharedInstallPackageReserved(path) {
+	pathToReplace := filepath.Join(installDir, metadata.FileName)
+	if pathToReplace == installPackageFiles.preservedPath {
 		err = errInstallPackagePreserved
+		return
+	}
+	if sharedInstallPackageReserved(pathToReplace) {
+		stored, readErr := readInstallPackageMetadata(pathToReplace+".json", key)
+		if readErr == nil && verifiedInstallPackagePath(installDir, stored) != "" {
+			// 完整的交付包仍受保护，不能以同名的另一份内容替换。
+			return "", errInstallPackagePreserved
+		}
+		// 损坏或缺失的包无法用于安装，清除交付标记后允许以已认证的校验信息恢复。
+		if err = os.Remove(pathToReplace + ".preserve"); os.IsNotExist(err) {
+			err = nil
+		}
 	}
 	return
 }

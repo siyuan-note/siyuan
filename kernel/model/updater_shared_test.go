@@ -160,6 +160,72 @@ func TestSharedInstallPackageReservationSurvivesKernelExit(t *testing.T) {
 	}
 }
 
+func TestSharedInstallPackageCleanupPreservesOtherChannels(t *testing.T) {
+	dir := prepareInstallPackageTest(t)
+	stable := installPackageFixture(t, dir, "99.0.0", conf.UpdateChannelStable, "win.exe")
+	beta := installPackageFixture(t, dir, "99.1.0-beta.1", conf.UpdateChannelBeta, "win.exe")
+	alpha := installPackageFixture(t, dir, "99.2.0-alpha.1", conf.UpdateChannelAlpha, "win.exe")
+	old := installPackageFixture(t, dir, "1.0.0", conf.UpdateChannelStable, "win.exe")
+	clearOldInstallPackagesLocked("v99.2.0-alpha.1", filepath.Join(dir, alpha.FileName))
+	for _, metadata := range []*installPackageMetadata{stable, beta, alpha} {
+		assertInstallPackagePresent(t, dir, metadata)
+	}
+	if got := findReadyInstallPackage(dir, "98.0.0", conf.UpdateChannelStable, "win.exe", installPackageTestKey); got != filepath.Join(dir, stable.FileName) {
+		t.Fatalf("alpha download removed the stable channel package: %s", got)
+	}
+	if _, err := os.Stat(filepath.Join(dir, old.FileName)); !os.IsNotExist(err) {
+		t.Fatalf("obsolete shared package was not removed: %v", err)
+	}
+}
+
+func TestSharedInstallPackageFailedHandoffCanRepairAfterRestart(t *testing.T) {
+	for _, damage := range []string{"corrupt-package", "missing-package", "corrupt-record", "missing-record"} {
+		t.Run(damage, func(t *testing.T) {
+			dir := prepareInstallPackageTest(t)
+			metadata := installPackageFixture(t, dir, "99.0.0", conf.UpdateChannelStable, "win.exe")
+			path := filepath.Join(dir, metadata.FileName)
+			if got := selectTestInstallPackage(t, dir, true); got != path {
+				t.Fatalf("initial final selection returned %q", got)
+			}
+			installPackageFiles.preservedPath = ""
+			var err error
+			switch damage {
+			case "corrupt-package":
+				err = os.WriteFile(path, []byte("corrupt"), 0600)
+			case "missing-package":
+				err = os.Remove(path)
+			case "corrupt-record":
+				err = os.WriteFile(path+".json", []byte("{"), 0600)
+			case "missing-record":
+				err = os.Remove(path + ".json")
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			var requests atomic.Int32
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				requests.Add(1)
+				fmt.Fprint(w, "complete package")
+			}))
+			defer server.Close()
+			if err = downloadInstallPkg(server.URL, metadata); err != nil {
+				t.Fatalf("failed handoff prevented repair after restart: %v", err)
+			}
+			assertInstallPackagePresent(t, dir, metadata)
+			wantRequests := int32(1)
+			if damage == "corrupt-record" || damage == "missing-record" {
+				wantRequests = 0
+			}
+			if requests.Load() != wantRequests {
+				t.Fatalf("repair download count %d, want %d", requests.Load(), wantRequests)
+			}
+			if got := selectTestInstallPackage(t, dir, true); got != path {
+				t.Fatalf("repaired package cannot be handed off: %s", got)
+			}
+		})
+	}
+}
+
 // TestSharedInstallPackageProcessHelper 在独立进程中模拟另一工作空间的下载或清理。
 func TestSharedInstallPackageProcessHelper(t *testing.T) {
 	mode := os.Getenv("SIYUAN_TEST_INSTALL_MODE")
@@ -170,7 +236,16 @@ func TestSharedInstallPackageProcessHelper(t *testing.T) {
 	Conf = NewAppConf()
 	Conf.CookieKey = installPackageTestKey
 	if mode == "cleanup" {
-		clearOldInstallPackagesLocked("v100.0.0", "")
+		lock, err := tryInstallPackageDownloadLock(sharedInstallPackageDir())
+		if errors.Is(err, errInstallPackageDownloadBusy) {
+			return
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer lock.Close()
+		// 模拟已升级的另一进程，其清理范围包含正在交付或下载的旧版本。
+		clearInstallPackagesBefore(sharedInstallPackageDir(), "v100.0.0", "v100.0.0", "")
 		return
 	}
 	metadata := &installPackageMetadata{}

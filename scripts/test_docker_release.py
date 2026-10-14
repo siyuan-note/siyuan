@@ -3,7 +3,9 @@
 import copy
 import importlib.util
 import json
+import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -173,6 +175,75 @@ class CacheTests(unittest.TestCase):
                     self.log(True).replace("RUN python3 /onnxruntime/tools/ci_build/build.py", "RUN apk add cmake")):
             with self.assertRaises(ValueError):
                 cache.onnx_steps(log)
+
+
+class SourceDownloadTests(unittest.TestCase):
+    def execute(self, fetch_failures=0, submodule_failures=0, actual_commit=None):
+        shell = shutil.which("sh")
+        if shell is None:
+            git = shutil.which("git")
+            candidate = Path(git).parents[1] / "bin/sh.exe" if git else None
+            shell = str(candidate) if candidate and candidate.is_file() else None
+        if shell is None:
+            self.skipTest("A POSIX shell is required for Docker source download tests")
+        dockerfile = Path(__file__).resolve().parents[1].joinpath("Dockerfile").read_text(encoding="utf-8")
+        stage = dockerfile.split("AS onnx-source\n", 1)[1].split("\nFROM ", 1)[0]
+        script = stage.split("RUN <<EORUN\n", 1)[1].split("\nEORUN", 1)[0]
+        commit = stage.split("ARG ONNX_COMMIT=", 1)[1].splitlines()[0]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            trace = root / "trace"
+            harness = r'''fetch_calls=0
+submodule_calls=0
+git() {
+    printf '%s\n' "$*" >> "$TRACE"
+    case "$1" in
+        init) mkdir -p "$2" ;;
+        fetch)
+            fetch_calls=$((fetch_calls + 1))
+            if [ "$fetch_calls" -le "$FETCH_FAILURES" ]; then return 1; fi ;;
+        rev-parse) printf '%s\n' "$ACTUAL_COMMIT" ;;
+        -c)
+            submodule_calls=$((submodule_calls + 1))
+            if [ "$submodule_calls" -le "$SUBMODULE_FAILURES" ]; then return 1; fi ;;
+    esac
+    return 0
+}
+sleep() { printf 'sleep %s\n' "$*" >> "$TRACE"; }
+'''
+            path = root / "download.sh"
+            source = root.joinpath("source").as_posix()
+            script = script.replace("git init /onnxruntime", 'git init "' + source + '"')
+            script = script.replace("cd /onnxruntime", 'cd "' + source + '"')
+            path.write_text(harness + script,
+                            encoding="utf-8", newline="\n")
+            env = dict(os.environ, TRACE=trace.as_posix(), FETCH_FAILURES=str(fetch_failures),
+                       SUBMODULE_FAILURES=str(submodule_failures), ONNX_COMMIT=commit,
+                       ACTUAL_COMMIT=actual_commit or commit)
+            result = subprocess.run([shell, "-e", str(path)], env=env, capture_output=True, text=True, timeout=20)
+            return result.returncode, trace.read_text(encoding="utf-8").splitlines(), commit
+
+    def test_network_failure_retries_only_the_locked_shallow_fetch(self):
+        code, trace, commit = self.execute(fetch_failures=2)
+        self.assertEqual(code, 0)
+        self.assertEqual(sum(line.startswith("init ") for line in trace), 1)
+        self.assertEqual(trace.count("fetch --depth=1 --no-tags origin " + commit), 3)
+        self.assertEqual([line for line in trace if line.startswith("sleep ")], ["sleep 10", "sleep 20"])
+        self.assertIn("checkout --detach FETCH_HEAD", trace)
+        self.assertIn("remote add origin https://github.com/microsoft/onnxruntime", trace)
+
+    def test_exhausted_fetch_or_wrong_commit_stops_before_submodules(self):
+        for options in ({"fetch_failures": 3}, {"actual_commit": "0" * 40}):
+            with self.subTest(options=options):
+                code, trace, _ = self.execute(**options)
+                self.assertNotEqual(code, 0)
+                self.assertFalse(any("submodule update" in line for line in trace))
+
+    def test_submodule_retry_preserves_the_downloaded_superproject(self):
+        code, trace, _ = self.execute(submodule_failures=2)
+        self.assertEqual(code, 0)
+        self.assertEqual(sum(line.startswith("fetch ") for line in trace), 1)
+        self.assertEqual(trace.count("-c http.version=HTTP/1.1 submodule update --init --recursive --depth=1"), 3)
 
 
 if __name__ == "__main__":

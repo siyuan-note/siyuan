@@ -49,20 +49,41 @@ FROM go-source AS go-build
 RUN --mount=type=cache,target=/root/.cache/go-build \
     go build -tags "fts5 sqlcipher" -ldflags "-s -w"
 
+FROM --platform=$BUILDPLATFORM ${ALPINE_IMAGE} AS onnx-source
+ARG ONNX_COMMIT=3a728b75062256951b6e19ce718907cf1a1d4cf0
+RUN apk add --no-cache git
+# 固定提交的源码在构建机上下载一次，网络中断时重试；子模块保持各自锁定的提交。
+RUN <<EORUN
+#!/bin/sh -e
+retry() {
+    attempt=1
+    until "$@"; do
+        if [ "$attempt" -ge 3 ]; then return 1; fi
+        echo "Source download failed; retry $attempt/2" >&2
+        sleep "$((attempt * 10))"
+        attempt="$((attempt + 1))"
+    done
+}
+git init /onnxruntime
+cd /onnxruntime
+git remote add origin https://github.com/microsoft/onnxruntime
+git config http.version HTTP/1.1
+retry git fetch --depth=1 --no-tags origin "${ONNX_COMMIT}"
+git checkout --detach FETCH_HEAD
+test "$(git rev-parse HEAD)" = "${ONNX_COMMIT}"
+retry git -c http.version=HTTP/1.1 submodule update --init --recursive --depth=1
+EORUN
+
 FROM ${ALPINE_IMAGE} AS onnx-build
 ARG TARGETARCH
 ARG TARGETPLATFORM
-ARG ONNX_COMMIT=3a728b75062256951b6e19ce718907cf1a1d4cf0
 ARG ONNX_VERSION=1.24.3
 ARG ONNX_TOOLCHAIN_REV=1
 # ONNX 阶段只依赖 C++ 工具链和固定源码；更新工具链时递增修订号以刷新安装层。
 RUN echo "${TARGETPLATFORM} toolchain revision ${ONNX_TOOLCHAIN_REV}" \
     && apk add --no-cache bash cmake make g++ git patch python3 py3-pip py3-packaging linux-headers \
     && apk info -v | sort > /onnx-toolchain.txt
-RUN git clone --no-checkout https://github.com/microsoft/onnxruntime /onnxruntime \
-    && cd /onnxruntime \
-    && git checkout "${ONNX_COMMIT}" \
-    && git submodule update --init --recursive
+COPY --from=onnx-source /onnxruntime /onnxruntime
 # Release 构建不生成栈回溯，将 execinfo.h 限定为 Debug 构建所需的头文件。
 RUN <<EORUN
 #!/bin/sh -e

@@ -39,6 +39,7 @@ interface IPanelHarness {
     touch?: {dragging: boolean};
     contextMenu(event: unknown): void;
     setDragImage(row: unknown, dataTransfer: unknown): void;
+    bindTouch(): void;
 }
 
 const loadPanel = (fetchCode = 0) => {
@@ -74,7 +75,7 @@ const loadPanel = (fetchCode = 0) => {
     runInNewContext(source, {
         exports,
         localStorage: {setItem: (key: string, value: string) => storage.set(key, value)},
-        window: {siyuan: runtime, setTimeout: (callback: () => void) => timers.push(callback)},
+        window: {siyuan: runtime, setTimeout: (callback: () => void) => timers.push(callback), clearTimeout: () => {}},
         document: {activeElement: null, body: {append: (ghost: unknown) => calls.push({kind: "ghost", args: [ghost]})},
             elementFromPoint: () => hitTest.target, createElement: (tagName: string) => ({
             tagName, style: {setProperty: () => {}},
@@ -84,6 +85,7 @@ const loadPanel = (fetchCode = 0) => {
             remove() { calls.push({kind: "removeGhost", args: [this]}); },
         })},
         require: (name: string) => {
+            if (name.endsWith("/constants")) { return {Constants: {TIMEOUT_LONGPRESS: 500}}; }
             if (name.endsWith("/menuToggle")) { return menuToggle; }
             if (name.endsWith("/menuClick")) { return {globalClickHideMenu: () => {}}; }
             if (name.endsWith("/dragTip")) { return {setDragTipGhost: record("dragTipGhost"),
@@ -119,6 +121,119 @@ const loadPanel = (fetchCode = 0) => {
     panel.sourceTree = {querySelectorAll: (): unknown[] => []};
     return {panel, calls, config, docs, storage, childData, hitTest, runtime, timers, tips};
 };
+
+const loadTouchPanel = () => {
+    const fixture = loadPanel();
+    const handlers = new Map<string, (event: unknown) => void>();
+    fixture.panel.element = {addEventListener: (type: string, handler: (event: unknown) => void) => handlers.set(type, handler)};
+    fixture.panel.bindTouch();
+    const dispatch = (type: string, row: unknown, x = 10, y = 20, count = 1) => {
+        const event = {
+            target: {closest: () => row},
+            touches: Array.from({length: count}, () => ({clientX: x, clientY: y})),
+            changedTouches: [{clientX: x, clientY: y}],
+            stopped: false, prevented: false,
+            stopPropagation() { this.stopped = true; },
+            preventDefault() { this.prevented = true; },
+        };
+        handlers.get(type)(event);
+        return event;
+    };
+    return {...fixture, dispatch};
+};
+
+test("pinned headings and document rows allow ordinary sidebar swipes and taps", () => {
+    for (const mode of ["heading", "document", "unavailable", "readonly"]) {
+        const {panel, config, dispatch, timers, calls} = loadTouchPanel();
+        config.readonly = mode === "readonly";
+        const row = mode === "heading" ? null : {dataset: {nodeId: "document", unavailable: String(mode === "unavailable")}};
+        const start = dispatch("touchstart", row);
+        assert.equal(start.stopped, false);
+        assert.equal(start.prevented, false);
+        const move = dispatch("touchmove", row, 60);
+        assert.equal(move.stopped, false);
+        assert.equal(move.prevented, false);
+        // 移动后取消长按，即使定时器已进入执行队列也不启动拖拽。
+        timers[0]?.();
+        assert.equal(calls.some(call => call.kind === "ghost"), false);
+        assert.equal(panel.touch, undefined);
+        const end = dispatch("touchend", row, 60);
+        assert.equal(end.stopped, false);
+        assert.equal(end.prevented, false);
+        dispatch("touchstart", row);
+        assert.equal(dispatch("touchend", row).stopped, false);
+        assert.equal(dispatch("touchcancel", row).stopped, false);
+    }
+});
+
+test("pinned long press drags consume moves and releases without closing the sidebar", () => {
+    for (const finish of ["touchend", "touchcancel", "multitouch"]) {
+        const {panel, dispatch, timers, calls} = loadTouchPanel();
+        const row = {dataset: {nodeId: "document"}, cloneNode: () => ({})};
+        const drops: unknown[][] = [];
+        const previews: unknown[][] = [];
+        panel.drop = async (...args) => { drops.push(args); };
+        panel.previewDrop = (...args) => { previews.push(args); };
+        dispatch("touchstart", row);
+        timers[0]();
+        assert.equal(panel.touch?.dragging, true);
+        const move = dispatch("touchmove", row, 60, 80);
+        assert.equal(move.stopped, true);
+        assert.equal(move.prevented, true);
+        assert.deepEqual(previews, [[60, 80, true]]);
+        const end = finish === "multitouch" ? dispatch("touchmove", row, 60, 80, 2) : dispatch(finish, row, 60, 80);
+        assert.equal(end.stopped, true);
+        assert.equal(end.prevented, finish === "touchend");
+        assert.deepEqual(JSON.parse(JSON.stringify(drops)), finish === "touchend" ? [[["document"], 60, 80, true]] : []);
+        assert.equal(panel.touch, undefined);
+        assert.equal(calls.some(call => call.kind === "removeGhost"), true);
+        assert.equal(dispatch("touchstart", row).stopped, false);
+        assert.equal(dispatch("touchcancel", row).stopped, false);
+    }
+});
+
+test("mobile source tree skips bubbled pinned touches and still starts ordinary document drags", () => {
+    const source = ts.createSourceFile("MobileFiles.ts", readFileSync(join(__dirname, "../../mobile/dock/MobileFiles.ts"), "utf8"),
+        ts.ScriptTarget.Latest, true);
+    let handler: ts.ArrowFunction;
+    const visit = (node: ts.Node) => {
+        if (ts.isCallExpression(node) && node.expression.getText(source) === "filesElement.addEventListener" &&
+            node.arguments[0].getText(source) === '"touchstart"' && ts.isArrowFunction(node.arguments[1]) &&
+            node.arguments[1].getText(source).includes("this.touchDragState =")) {
+            handler = node.arguments[1];
+        }
+        ts.forEachChild(node, visit);
+    };
+    visit(source);
+    assert.ok(handler);
+    const timers: (() => void)[] = [];
+    const callback = runInNewContext(ts.transpileModule(`const callback = function(event) ${handler.body.getText(source)}; callback;`, {
+        compilerOptions: {target: ts.ScriptTarget.ES2020},
+    }).outputText, {
+        window: {siyuan: {config: {readonly: false}}, setTimeout: (callback: () => void) => timers.push(callback)},
+        Constants: {TIMEOUT_LONGPRESS: 500}, isMousePointerTouchEvent: () => false,
+    }) as (event: unknown) => void;
+    for (const pinned of [true, false]) {
+        const starts: unknown[][] = [];
+        const panel = {
+            pinnedDocs: {element: {contains: () => pinned}},
+            touchDragState: undefined as {selectedElement: unknown},
+            startTouchDrag: (...args: unknown[]) => starts.push(args),
+        };
+        const row = {getAttribute: () => "navigation-file"};
+        callback.call(panel, {touches: [{target: {closest: () => row}, clientX: 10, clientY: 20}]});
+        if (pinned) {
+            assert.equal(panel.touchDragState, undefined);
+            assert.equal(timers.length, 0);
+        } else {
+            assert.equal(panel.touchDragState.selectedElement, row);
+            assert.equal(timers.length, 1);
+            timers[0]();
+            assert.equal(starts.length, 1);
+            assert.deepEqual(starts[0].slice(1), [10, 20, true]);
+        }
+    }
+});
 
 test("collapse clears descendant expansion and persists the closed section", async () => {
     const {panel, storage, calls} = loadPanel();

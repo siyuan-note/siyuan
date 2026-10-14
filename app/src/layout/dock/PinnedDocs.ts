@@ -639,7 +639,6 @@ export class PinnedDocs {
 
     private bindTouch() {
         this.element.addEventListener("touchstart", event => {
-            event.stopPropagation();
             this.cancelTouch();
             const row = (event.target as Element).closest<HTMLElement>("[data-pin-row]");
             if (!row || row.dataset.unavailable === "true" || window.siyuan.config.readonly || event.touches.length !== 1) { return; }
@@ -658,8 +657,8 @@ export class PinnedDocs {
             }, Constants.TIMEOUT_LONGPRESS);
         }, {passive: true});
         this.element.addEventListener("touchmove", event => {
-            event.stopPropagation();
             if (!this.touch) { return; }
+            if (this.touch.dragging) { event.stopPropagation(); }
             if (event.touches.length !== 1) { this.cancelTouch(); return; }
             const touch = event.touches[0];
             if (!this.touch.dragging) {
@@ -672,8 +671,8 @@ export class PinnedDocs {
             this.previewDrop(touch.clientX, touch.clientY, true);
         }, {passive: false});
         this.element.addEventListener("touchend", event => {
-            event.stopPropagation();
             if (this.touch?.dragging) {
+                event.stopPropagation();
                 event.preventDefault();
                 const touch = event.changedTouches[0];
                 this.drop([this.touch.id], touch.clientX, touch.clientY, true);
@@ -681,6 +680,9 @@ export class PinnedDocs {
             this.cancelTouch();
             window.setTimeout(() => { this.suppressClick = false; }, 300);
         });
-        this.element.addEventListener("touchcancel", () => this.cancelTouch());
+        this.element.addEventListener("touchcancel", event => {
+            if (this.touch?.dragging) { event.stopPropagation(); }
+            this.cancelTouch();
+        });
     }
 }

@@ -41,7 +41,8 @@ test("typing a slash in reference search does not run title replacement or show 
 });
 
 test("closing a reference resolves exact titles before daily notes or configured creation and rejects stale results", async () => {
-    for (const scenario of ["document", "daily", "create", "subdoc", "stale", "error", "ordinary"]) {
+    const scenarios = ["document", "daily", "create", "subdoc", "stale", "error", "ordinary"];
+    for (const [splitChar, scenario] of ["[[", "【【"].flatMap(split => scenarios.map(scenario => [split, scenario]))) {
         const block = {getAttribute: () => "block"};
         const closeContext = {range: "original"};
         const commits: string[] = [];
@@ -62,7 +63,7 @@ test("closing a reference resolves exact titles before daily notes or configured
         });
         const protyle = {notebookId: "box", element: {clientWidth: 320}, block: {rootID: "root"},
             wysiwyg: {element: {}}, hint: {
-                splitChar: "[[", closeKeyTyped: scenario !== "ordinary", genLoading() {},
+                splitChar, closeKeyTyped: scenario !== "ordinary", genLoading() {},
                 getRefCloseContext: () => closeContext,
                 isRefCloseContextCurrent: () => scenario !== "stale",
                 prepareCreateTarget: () => ({promise: Promise.resolve(scenario === "subdoc"), isCurrent: () => true}),

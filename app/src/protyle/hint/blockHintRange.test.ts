@@ -167,6 +167,11 @@ describe("auto-closing reference brackets", () => {
         assert.equal(shouldAutoCloseRefBrackets("[[", "]]"), false);
         assert.equal(shouldAutoCloseRefBrackets("[", ""), false);
         assert.equal(shouldAutoCloseRefBrackets("[[Title", ""), false);
+        assert.equal(shouldAutoCloseRefBrackets("note 【【", "", "【【"), true);
+        assert.equal(shouldAutoCloseRefBrackets("【【", "】】", "【【"), false);
+        assert.equal(shouldAutoCloseRefBrackets("【【", "】", "【【"), false);
+        assert.equal(shouldAutoCloseRefBrackets("【", "", "【【"), false);
+        assert.equal(shouldAutoCloseRefBrackets("【【标题", "", "【【"), false);
     });
 
 });

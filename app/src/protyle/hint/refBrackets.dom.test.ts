@@ -16,7 +16,7 @@ const browserCases = (source: string) => {
     window.siyuan = {config: {editor: {autoCloseRefBrackets: true, hashTagSearch: true}}} as any;
     const transactions: {before: string; after: string}[] = [];
     const dependencies = {
-        Constants: {BLOCK_HINT_KEYS: ["[[", "(("], BLOCK_HINT_CLOSE_KEYS: {"[[": "]]", "((": "))"}, SIZE_TITLE: 512},
+        Constants: {BLOCK_HINT_KEYS: ["[[", "((", "【【"], BLOCK_HINT_CLOSE_KEYS: {"[[": "]]", "((": "))", "【【": "】】"}, SIZE_TITLE: 512},
         hasClosestByAttribute: (node: Node, attribute: string, value: string) =>
             (node.nodeType === 3 ? node.parentElement : node as Element).closest(`[${attribute}~="${value}"]`),
         hasClosestBlock: (node: Node) => node.parentElement.closest("[data-node-id]"),
@@ -38,7 +38,7 @@ const browserCases = (source: string) => {
         renders++;
         const range = getSelection().getRangeAt(0);
         hint.getKey(range.startContainer.textContent.substring(0, range.startOffset),
-            range.startContainer.textContent.substring(range.startOffset), [{key: "[["}]);
+            range.startContainer.textContent.substring(range.startOffset), [{key: "[["}, {key: "【【"}]);
     };
     const reset = (text: string, offset: number, split = false) => {
         editable.replaceChildren(document.createTextNode(text));
@@ -54,7 +54,7 @@ const browserCases = (source: string) => {
         hint.refBracketRange = undefined;
         hint.refBracketOrigin = undefined;
         hint.refCloseContext = undefined;
-        hint.splitChar = "[[";
+        hint.splitChar = text.startsWith("【【") ? "【【" : "[[";
         hint.lastIndex = 0;
         hint.consumeCloseKey = true;
         return range;
@@ -121,17 +121,93 @@ const browserCases = (source: string) => {
     range = reset("[[Title]]", 7);
     check.equal(before("insertText", "]"), false);
     check.equal(hint.getRefCloseContext(protyle), undefined);
-    for (const type of ["code", "NodeCodeBlock", "inline-math"]) {
-        range = reset("[[", 2);
-        editable.setAttribute("data-type", type);
-        hint.autoCloseRefBrackets(protyle, range);
-        check.equal(editable.textContent, "[[");
-        editable.removeAttribute("data-type");
+    for (const open of ["[[", "【【"]) {
+        for (const type of ["code", "NodeCodeBlock", "inline-math"]) {
+            range = reset(open, 2);
+            editable.setAttribute("data-type", type);
+            hint.autoCloseRefBrackets(protyle, range);
+            check.equal(editable.textContent, open);
+            editable.removeAttribute("data-type");
+        }
     }
+    for (const closing of ["", "】", "】】"]) {
+        range = reset("【【" + closing + " tail", 2, true);
+        hint.handleRefBracketInput(protyle, range, closing ? "【】" : "【");
+        check.equal(editable.textContent, "【【】】 tail");
+        check.equal(range.startOffset, 2);
+        (range.startContainer as Text).insertData(2, "标题");
+        range.setStart(range.startContainer, 4);
+        range.collapse(true);
+        check.equal(before("insertText", "】"), true);
+        check.equal(before("insertText", "】"), true);
+        check.equal(hint.getRefCloseContext(protyle).text, "【【标题】】");
+        check.equal(editable.textContent, "【【标题】】 tail");
+    }
+    // 模拟输入法提交时重建文本节点，以及一次提交一个或两个闭合符。
+    for (const rebuild of [false, true]) {
+        for (const data of ["】", "】】"]) {
+            range = reset("【【", 2);
+            hint.handleRefBracketInput(protyle, range, "【【");
+            (range.startContainer as Text).insertData(2, "标题");
+            range.setStart(range.startContainer, 4);
+            range.collapse(true);
+            const commit = (text: string) => {
+                const offset = range.startOffset;
+                if (rebuild) {
+                    const value = editable.textContent;
+                    editable.replaceChildren(document.createTextNode(value.slice(0, offset) + text + value.slice(offset)));
+                    range = document.createRange();
+                } else {
+                    (range.startContainer as Text).insertData(offset, text);
+                }
+                range.setStart(editable.firstChild, offset + text.length);
+                range.collapse(true);
+                getSelection().removeAllRanges();
+                getSelection().addRange(range);
+                check.equal(hint.handleRefBracketInput(protyle, range, text), true);
+            };
+            commit(data);
+            if (data.length === 1) {
+                check.equal(hint.getRefCloseContext(protyle), undefined);
+                commit(data);
+            }
+            check.equal(editable.textContent, "【【标题】】");
+            check.equal(hint.getRefCloseContext(protyle).text, "【【标题】】");
+            check.equal(hint.handleRefBracketInput(protyle, range, data), true);
+            check.equal(editable.textContent, "【【标题】】");
+        }
+    }
+    range = reset("【【", 2);
+    hint.autoCloseRefBrackets(protyle, range);
+    const transactionCount = transactions.length;
+    check.equal(before("deleteContentBackward"), true);
+    check.equal(editable.textContent, "");
+    check.equal(transactions.length, transactionCount + 1);
+    check.ok(transactions.at(-1).before.includes("【【】】"));
+    for (const offset of [4, 5]) {
+        range = reset("【【", 2);
+        hint.autoCloseRefBrackets(protyle, range);
+        (range.startContainer as Text).insertData(2, "标题");
+        range.setStart(range.startContainer, offset);
+        range.setEnd(range.startContainer, offset);
+        range.setStart(range.startContainer, 0);
+        hint.consumeRefBracketClose(range);
+        check.equal(range.toString(), "【【标题】】");
+    }
+    range = reset("【【标题】】", 4);
+    check.equal(before("insertText", "】"), false);
+    range = reset("【【", 2);
+    hint.autoCloseRefBrackets(protyle, range);
+    check.equal(hint.handleRefBracketBeforeInput(protyle,
+        new InputEvent("beforeinput", {inputType: "insertCompositionText", data: "】", isComposing: true})), false);
+    check.equal(editable.textContent, "【【】】");
     range = reset("[[", 2);
     window.siyuan.config.editor.autoCloseRefBrackets = false;
     hint.autoCloseRefBrackets(protyle, range);
     check.equal(editable.textContent, "[[");
+    range = reset("【【", 2);
+    hint.handleRefBracketInput(protyle, range, "【");
+    check.equal(editable.textContent, "【【");
     return "Reference bracket cases passed";
 };
 
@@ -141,7 +217,7 @@ test("reference brackets preserve native ranges, close once, delete together and
 }, async () => {
     const file = createSourceFile("index.ts", readFileSync(path.join(__dirname, "index.ts"), "utf8"), ScriptTarget.Latest, true);
     const hint = file.statements.find(isClassDeclaration);
-    const names = ["autoCloseRefBrackets", "handleRefBracketBeforeInput", "getRefBracketContext", "canResumeBlockHint",
+    const names = ["autoCloseRefBrackets", "handleRefBracketInput", "handleRefBracketBeforeInput", "getRefBracketContext", "canResumeBlockHint",
         "getRefCloseContext", "isRefCloseContextCurrent", "consumeRefBracketClose", "getKey"];
     const methods = names.map(name => hint.members.find(member => member.name?.getText(file) === name).getText(file));
     const helpers = readFileSync(path.join(__dirname, "blockHintRange.ts"), "utf8").replaceAll("export ", "");

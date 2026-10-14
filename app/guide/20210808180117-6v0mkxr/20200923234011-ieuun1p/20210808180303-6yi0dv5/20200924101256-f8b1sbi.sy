@@ -6,7 +6,7 @@
 		"id": "20200924101256-f8b1sbi",
 		"title": "Ref Content Block",
 		"type": "doc",
-		"updated": "20261014130425"
+		"updated": "20261014223520"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200924101312-jj4e0v3",
-				"updated": "20261014130425"
+				"updated": "20261014223520"
 			},
 			"Children": [
 				{
@@ -102,7 +102,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261014130425-k3pzlyv",
-				"updated": "20261014130425"
+				"updated": "20261014223520"
 			},
 			"Children": [
 				{
@@ -139,11 +139,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Auto-close [["
+					"TextMarkTextContent": "Auto-close [[ / 【【"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". This option is off by default. When enabled, typing [[ inserts ]] after the caret; typing two ] characters steps over them and completes the reference. Selecting a suggestion with Enter also replaces the closing brackets. Backspace inside an empty [[]] deletes the entire bracket pair."
+					"Data": " enables automatic closing, which is off by default. When enabled, typing [[ or 【【 inserts the matching ]] or 】】 after the caret. Typing the two closing brackets skips them and completes the reference. Selecting a candidate with Enter also replaces the closing brackets; Backspace inside an empty [[]] or 【【】】 deletes the entire pair."
 				}
 			]
 		},
@@ -152,12 +152,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261014130425-jqqpiql",
-				"updated": "20261014130425"
+				"updated": "20261014223520"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Completing a reference with ]] first looks for a document with an exactly matching title, then a title matching without regard to case, then a matching daily note. If none match, a document is created at the configured location for reference creation. This does not apply in inline code, code blocks or inline math, and typing 【【 with an input method does not insert closing brackets."
+					"Data": "Completing a reference with ]] or 】】 first looks for a document with an exactly matching title, then a title matching without regard to case, then a matching daily note. If none match, a document is created at the configured location for reference creation. This does not apply in inline code, code blocks or inline math. Input method text is handled after it is committed, and closing brackets already supplied by the input method are preserved."
 				}
 			]
 		},

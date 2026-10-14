@@ -615,8 +615,8 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
     if (protyle.lite && isEncryptedBox(protyle.notebookId)) {
         refParam.notebook = protyle.notebookId;
     }
-    // 自动闭合时输入 ]] 直接完成引用
-    const closeContext = source === "hint" && !protyle.lite && protyle.hint.splitChar === "[[" && key.trim() !== "" &&
+    // 自动闭合时输入对应闭合符直接完成引用
+    const closeContext = source === "hint" && !protyle.lite && ["[[", "【【"].includes(protyle.hint.splitChar) && key.trim() !== "" &&
         protyle.hint.closeKeyTyped && window.siyuan.config.editor?.autoCloseRefBrackets &&
         protyle.hint.getRefCloseContext(protyle);
     if (closeContext) {

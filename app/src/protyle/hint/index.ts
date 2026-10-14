@@ -138,7 +138,7 @@ export class Hint {
     // 当前查询末尾是否包含完整闭合符（如 ]]）
     public closeKeyTyped = false;
     private refBracketRange?: Range;
-    private refBracketOrigin?: {notebookID: string; rootID: string; blockID: string; prefix: string};
+    private refBracketOrigin?: {notebookID: string; rootID: string; blockID: string; prefix: string; splitChar: string};
     private refCloseContext?: {range: Range; text: string; notebookID: string; rootID: string};
     // 选中候选项时是否一并替换光标后自动补全的闭合符
     private consumeCloseKey = false;
@@ -401,22 +401,56 @@ export class Hint {
         });
     }
 
-    // 输入 [[ 后在光标后补全 ]]，光标保持在括号内
+    // 输入引用触发符后补全对应闭合符，保留输入法已补全的括号，光标保持在括号内
     public autoCloseRefBrackets(protyle: IProtyle, range: Range) {
         const context = this.getRefBracketContext(protyle, range);
-        if (context && shouldAutoCloseRefBrackets(context.textBeforeCaret, context.textAfterCaret)) {
-            context.textNode.insertData(range.startOffset, "]]");
+        const splitChar = context && ["[[", "【【"].find(key => context.textBeforeCaret.endsWith(key));
+        if (splitChar && (shouldAutoCloseRefBrackets(context.textBeforeCaret, context.textAfterCaret, splitChar) ||
+            splitChar === "【【")) {
+            const closeKey = Constants.BLOCK_HINT_CLOSE_KEYS[splitChar];
+            const suppliedLength = splitChar === "【【" ?
+                (context.textAfterCaret.startsWith(closeKey) ? 2 : context.textAfterCaret.startsWith("】") ? 1 : 0) : 0;
+            context.textNode.insertData(range.startOffset, closeKey.substring(suppliedLength));
             this.refBracketRange = range.cloneRange();
             this.refBracketRange.setStart(context.textNode, range.startOffset - 2);
             this.refBracketRange.setEnd(context.textNode, range.startOffset + 2);
             this.refBracketOrigin = {notebookID: protyle.notebookId, rootID: protyle.block.rootID,
                 blockID: (hasClosestBlock(range.startContainer) || undefined)?.getAttribute("data-node-id"),
-                prefix: context.textBeforeCaret};
+                prefix: context.textBeforeCaret, splitChar};
             this.refCloseContext = undefined;
+            this.enableExtend = true;
         }
     }
 
-    // 输入 ] 时跳过已补全的闭合符，跳过第二个 ] 后完成引用；在空括号对之间退格时删除整个括号对
+    // 输入法提交闭合符后移除重复输入，并沿用跳过闭合符的流程，组合输入期间不修改候选文本
+    public handleRefBracketInput(protyle: IProtyle, range: Range, data: string) {
+        if (data && /^】{1,2}$/.test(data)) {
+            if (this.getRefCloseContext(protyle)) {
+                return true;
+            }
+            const context = this.getRefBracketContext(protyle, range, data.length);
+            const pair = this.refBracketRange;
+            const remaining = pair && pair.endOffset - range.startOffset;
+            if (context && pair?.startContainer === context.textNode && pair.endContainer === context.textNode &&
+                pair.toString().startsWith("【【") && pair.toString().endsWith("】】") &&
+                remaining >= data.length && remaining <= 2 && context.textBeforeCaret.endsWith(data) &&
+                this.splitChar === "【【" && this.canResumeBlockHint(protyle, range)) {
+                const offset = range.startOffset - data.length;
+                context.textNode.deleteData(offset, data.length);
+                range.setStart(context.textNode, offset);
+                range.collapse(true);
+                focusByRange(range);
+                return this.handleRefBracketBeforeInput(protyle,
+                    new InputEvent("beforeinput", {inputType: "insertText", data}));
+            }
+        }
+        if (data?.endsWith("[") || data?.endsWith("【") || data === "【】") {
+            this.autoCloseRefBrackets(protyle, range);
+        }
+        return false;
+    }
+
+    // 输入闭合符时跳过已补全的括号，全部跳过后完成引用；在空括号对之间退格时删除整个括号对
     // 返回 true 表示已处理并需要阻止默认输入
     public handleRefBracketBeforeInput(protyle: IProtyle, event: InputEvent) {
         if (event.isComposing || getSelection().rangeCount === 0) {
@@ -425,14 +459,17 @@ export class Hint {
         const range = getSelection().getRangeAt(0);
         const context = this.getRefBracketContext(protyle, range);
         const pair = this.refBracketRange;
+        const splitChar = this.refBracketOrigin?.splitChar;
+        const closeKey = Constants.BLOCK_HINT_CLOSE_KEYS[splitChar];
         if (!context || !pair || pair.startContainer !== context.textNode || pair.endContainer !== context.textNode ||
-            !pair.toString().startsWith("[[") || !pair.toString().endsWith("]]")) {
+            !splitChar || !pair.toString().startsWith(splitChar) || !pair.toString().endsWith(closeKey)) {
             return false;
         }
-        if (event.inputType === "insertText" && event.data === "]" && context.textAfterCaret.startsWith("]") &&
-            range.startOffset >= pair.endOffset - 2 && range.startOffset < pair.endOffset &&
-            this.splitChar === "[[" && this.canResumeBlockHint(protyle, range)) {
-            range.setStart(context.textNode, range.startOffset + 1);
+        if (["insertText", "insertReplacementText"].includes(event.inputType) && event.data &&
+            (event.data === closeKey || event.data === closeKey[0]) && context.textAfterCaret.startsWith(event.data) &&
+            range.startOffset >= pair.endOffset - 2 && range.startOffset + event.data.length <= pair.endOffset &&
+            this.splitChar === splitChar && this.canResumeBlockHint(protyle, range)) {
+            range.setStart(context.textNode, range.startOffset + event.data.length);
             range.collapse(true);
             focusByRange(range);
             if (range.startOffset === pair.endOffset) {
@@ -443,7 +480,7 @@ export class Hint {
             }
             return true;
         }
-        if (event.inputType === "deleteContentBackward" && pair.toString() === "[[]]" &&
+        if (event.inputType === "deleteContentBackward" && pair.toString() === splitChar + closeKey &&
             range.startOffset === pair.startOffset + 2) {
             const block = hasClosestBlock(range.startContainer);
             if (!block) {
@@ -501,8 +538,8 @@ export class Hint {
             range.endContainer.parentNode?.normalize();
             if (range.endContainer.nodeType === 3 && range.endContainer.textContent.startsWith(closeKey, range.endOffset)) {
                 range.setEnd(range.endContainer, range.endOffset + closeKey.length);
-            } else if (this.splitChar === "[[" && this.refBracketRange?.endContainer === range.endContainer &&
-                this.refBracketRange.toString().endsWith("]]") &&
+            } else if (["[[", "【【"].includes(this.splitChar) && this.refBracketRange?.endContainer === range.endContainer &&
+                this.refBracketRange.toString().endsWith(closeKey) &&
                 range.endOffset === this.refBracketRange.endOffset - 1) {
                 range.setEnd(range.endContainer, this.refBracketRange.endOffset);
             }
@@ -512,7 +549,7 @@ export class Hint {
         this.refCloseContext = undefined;
     }
 
-    private getRefBracketContext(protyle: IProtyle, range: Range) {
+    private getRefBracketContext(protyle: IProtyle, range: Range, insertedCloseLength = 0) {
         if (!window.siyuan.config.editor?.autoCloseRefBrackets || protyle.disabled ||
             window.siyuan.config.readonly || window.siyuan.isPublish || !range.collapsed ||
             range.startContainer.nodeType !== 3 || !protyle.wysiwyg.element.contains(range.startContainer) ||
@@ -533,11 +570,13 @@ export class Hint {
             protyle.notebookId === origin.notebookID && protyle.block.rootID === origin.rootID &&
             (hasClosestBlock(textNode) || undefined)?.getAttribute("data-node-id") === origin.blockID &&
             textNode.data.startsWith(origin.prefix)) {
-            const end = textNode.data.indexOf("]]", origin.prefix.length);
-            if (end > -1 && range.startOffset >= origin.prefix.length && range.startOffset <= end + 2) {
+            const end = textNode.data.indexOf(Constants.BLOCK_HINT_CLOSE_KEYS[origin.splitChar], origin.prefix.length);
+            const pairEnd = end + 2 + insertedCloseLength;
+            if (end > -1 && pairEnd <= textNode.length && range.startOffset >= origin.prefix.length &&
+                range.startOffset <= pairEnd) {
                 this.refBracketRange = range.cloneRange();
                 this.refBracketRange.setStart(textNode, origin.prefix.length - 2);
-                this.refBracketRange.setEnd(textNode, end + 2);
+                this.refBracketRange.setEnd(textNode, pairEnd);
             }
         }
         return {

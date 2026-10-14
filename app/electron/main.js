@@ -1791,11 +1791,17 @@ const validateUpdateInstallPackage = (request, requestedInstallPkgPath) => {
     }
 
     try {
-        const installDir = fs.realpathSync(path.join(request.workspaceDir, "temp", "install"));
         const installPkgPath = fs.realpathSync(requestedInstallPkgPath);
-        const relativePkgPath = path.relative(installDir, installPkgPath);
-        if (!relativePkgPath || path.isAbsolute(relativePkgPath) || path.dirname(relativePkgPath) !== ".") {
-            writeLog("rejected update install package outside the workspace install directory [path=" + installPkgPath + "]");
+        const installDirs = [path.join(confDir, "install"), path.join(request.workspaceDir, "temp", "install")];
+        const contained = installDirs.some((directory) => {
+            if (!fs.existsSync(directory)) {
+                return false;
+            }
+            const relativePkgPath = path.relative(fs.realpathSync(directory), installPkgPath);
+            return relativePkgPath && !path.isAbsolute(relativePkgPath) && path.dirname(relativePkgPath) === ".";
+        });
+        if (!contained) {
+            writeLog("rejected update install package outside the install directories [path=" + installPkgPath + "]");
             return;
         }
 

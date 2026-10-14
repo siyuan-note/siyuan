@@ -38,7 +38,7 @@ func blockedInstallPackageDownload(t *testing.T, metadata *installPackageMetadat
 		defer close(finished)
 		err := downloadInstallPkg(server.URL, metadata)
 		if err == nil && cleanup {
-			path := filepath.Join(util.TempDir, "install", metadata.FileName)
+			path := filepath.Join(sharedInstallPackageDir(), metadata.FileName)
 			clearOldInstallPackagesLocked(installPackageVersion(metadata.FileName), path)
 		}
 		result <- err
@@ -158,7 +158,7 @@ func TestFinalExitInstallPackageBlocksSameNameReplacement(t *testing.T) {
 	}
 	assertInstallPackagePresent(t, dir, metadata)
 	entries, err := os.ReadDir(dir)
-	if err != nil || len(entries) != 2 {
+	if err != nil || len(entries) != 3 {
 		t.Fatalf("temporary download was not removed: %v, %v", entries, err)
 	}
 	// 已保留同名包时，下一次下载也必须在访问网络前拒绝替换。

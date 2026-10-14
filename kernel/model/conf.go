@@ -514,6 +514,7 @@ func InitConf() {
 		}
 		writeCookieKey(Conf.CookieKey)
 	}
+	initSharedInstallPackages()
 
 	if util.ContainerDocker == util.Container && Conf.AccessAuthCode == "" && !util.SiYuanAccessAuthCodeBypass {
 		if err := ValidateOIDCConfigurationChange(context.Background(), Conf.OIDC, true, false, false); err != nil {

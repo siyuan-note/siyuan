@@ -138,7 +138,7 @@ func TestReadyInstallPackageRejectsTamperingAndPreservesFiles(t *testing.T) {
 
 func prepareInstallPackageTest(t *testing.T) string {
 	t.Helper()
-	oldConf, oldTemp, oldSkip, oldExiting := Conf, util.TempDir, skipInstallPkgPlatformCached, util.IsExiting.Load()
+	oldConf, oldTemp, oldHome, oldSkip, oldExiting := Conf, util.TempDir, util.HomeDir, skipInstallPkgPlatformCached, util.IsExiting.Load()
 	installPackageFiles.Lock()
 	oldPreserved := installPackageFiles.preservedPath
 	installPackageFiles.preservedPath = ""
@@ -149,16 +149,17 @@ func prepareInstallPackageTest(t *testing.T) string {
 	Conf.System.Load().DownloadInstallPkg = true
 	Conf.System.Load().UpdateChannel = conf.UpdateChannelStable
 	util.TempDir = t.TempDir()
+	util.HomeDir = t.TempDir()
 	skipInstallPkgPlatformCached = 0
 	util.IsExiting.Store(false)
 	t.Cleanup(func() {
-		Conf, util.TempDir, skipInstallPkgPlatformCached = oldConf, oldTemp, oldSkip
+		Conf, util.TempDir, util.HomeDir, skipInstallPkgPlatformCached = oldConf, oldTemp, oldHome, oldSkip
 		util.IsExiting.Store(oldExiting)
 		installPackageFiles.Lock()
 		installPackageFiles.preservedPath = oldPreserved
 		installPackageFiles.Unlock()
 	})
-	dir := filepath.Join(util.TempDir, "install")
+	dir := sharedInstallPackageDir()
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		t.Fatal(err)
 	}
@@ -316,37 +317,11 @@ func TestDownloadInstallPackageRemainsUnreadableUntilComplete(t *testing.T) {
 	}
 	dir := prepareInstallPackageTest(t)
 	Conf.System.Load().UpdateChannel = conf.UpdateChannelAlpha
-	started, releaseDownload, done := make(chan struct{}), make(chan struct{}), make(chan struct{})
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Length", "16")
-		fmt.Fprint(w, "complete ")
-		w.(http.Flusher).Flush()
-		close(started)
-		<-releaseDownload
-		fmt.Fprint(w, "package")
-	}))
-	defer server.Close()
 	name := currentInstallPackageName("99.0.0-alpha.1")
-	githubReleasesLock.Lock()
-	oldReleases, oldCacheTime := cachedGitHubReleases, githubReleasesCacheTime
-	cachedGitHubReleases = []*githubRelease{{TagName: "v99.0.0-alpha.1", Assets: []*githubReleaseAsset{{
-		Name: name, State: "uploaded", BrowserDownloadURL: server.URL + "/" + name,
-		Digest: "sha256:" + fmt.Sprintf("%x", sha256.Sum256([]byte("complete package"))),
-	}}}}
-	githubReleasesCacheTime = time.Now().Unix()
-	githubReleasesLock.Unlock()
-	t.Cleanup(func() {
-		githubReleasesLock.Lock()
-		cachedGitHubReleases, githubReleasesCacheTime = oldReleases, oldCacheTime
-		githubReleasesLock.Unlock()
-	})
-	go func() { checkDownloadInstallPkg(false); close(done) }()
-	defer func() { close(releaseDownload); <-done }()
-	select {
-	case <-started:
-	case <-time.After(5 * time.Second):
-		t.Fatal("download did not start")
-	}
+	metadata := &installPackageMetadata{FormatVersion: installPackageMetadataVersion,
+		Version: "99.0.0-alpha.1", Channel: conf.UpdateChannelAlpha, FileName: name,
+		Checksum: fmt.Sprintf("%x", sha256.Sum256([]byte("complete package")))}
+	release, done := blockedInstallPackageDownload(t, metadata, "complete package", false)
 	if _, err := os.Stat(filepath.Join(dir, name+".json")); !os.IsNotExist(err) {
 		t.Fatalf("unfinished download has a ready record: %v", err)
 	}
@@ -359,6 +334,10 @@ func TestDownloadInstallPackageRemainsUnreadableUntilComplete(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("exit check waited for the active download")
+	}
+	release()
+	if err := <-done; err != nil {
+		t.Fatal(err)
 	}
 }
 

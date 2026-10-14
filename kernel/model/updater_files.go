@@ -21,6 +21,15 @@ var errInstallPackagePreserved = errors.New("install package is reserved for ker
 func readyInstallPackagePath(installDir, currentVersion, channel, suffix, key string, preserve bool) string {
 	installPackageFiles.Lock()
 	defer installPackageFiles.Unlock()
+	if _, err := os.Stat(installDir); os.IsNotExist(err) {
+		return ""
+	}
+	lock, err := lockInstallPackageFiles(installDir)
+	if err != nil {
+		logging.LogWarnf("lock ready install packages failed: %s", err)
+		return ""
+	}
+	defer lock.Close()
 
 	if preserve && installPackageFiles.preservedPath != "" {
 		// 宿主重试退出请求时仍使用首次交付的包，保留状态直到内核进程退出。
@@ -51,6 +60,10 @@ func readyInstallPackagePath(installDir, currentVersion, channel, suffix, key st
 
 	path := findReadyInstallPackage(installDir, currentVersion, channel, suffix, key)
 	if preserve && path != "" {
+		if err := reserveSharedInstallPackage(path); err != nil {
+			logging.LogWarnf("reserve shared install package failed: %s", err)
+			return ""
+		}
 		installPackageFiles.preservedPath = path
 	}
 	return path
@@ -60,15 +73,20 @@ func readyInstallPackagePath(installDir, currentVersion, channel, suffix, key st
 func reuseInstallPackage(installDir string, metadata *installPackageMetadata, key string) (path string, err error) {
 	installPackageFiles.Lock()
 	defer installPackageFiles.Unlock()
+	lock, err := lockInstallPackageFiles(installDir)
+	if err != nil {
+		return "", err
+	}
+	defer lock.Close()
 
 	path = verifiedInstallPackagePath(installDir, metadata)
 	if path != "" {
-		if path != installPackageFiles.preservedPath {
+		if path != installPackageFiles.preservedPath && !sharedInstallPackageReserved(path) {
 			err = saveInstallPackageMetadata(installDir, metadata, key)
 		}
 		return
 	}
-	if filepath.Join(installDir, metadata.FileName) == installPackageFiles.preservedPath {
+	if path := filepath.Join(installDir, metadata.FileName); path == installPackageFiles.preservedPath || sharedInstallPackageReserved(path) {
 		err = errInstallPackagePreserved
 	}
 	return
@@ -78,9 +96,14 @@ func reuseInstallPackage(installDir string, metadata *installPackageMetadata, ke
 func publishInstallPackage(temporaryPath, installDir string, metadata *installPackageMetadata, key string) error {
 	installPackageFiles.Lock()
 	defer installPackageFiles.Unlock()
+	lock, err := lockInstallPackageFiles(installDir)
+	if err != nil {
+		return err
+	}
+	defer lock.Close()
 
 	path := filepath.Join(installDir, metadata.FileName)
-	if path == installPackageFiles.preservedPath {
+	if path == installPackageFiles.preservedPath || sharedInstallPackageReserved(path) {
 		return errInstallPackagePreserved
 	}
 	if err := os.Rename(temporaryPath, path); err != nil {

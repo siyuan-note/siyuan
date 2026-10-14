@@ -14,6 +14,8 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 ### Requirement evaluation
 
+重大特性在技术设计前，先核查适用的合规要求、授权条款、隐私风险和成本。
+
 Before implementing a requirement, evaluate its premise and approach with effort proportional to its complexity and risk
 
 1. **Check the premise and existing capabilities:** Inspect the relevant implementation, settings, shortcuts, APIs, or plugin capabilities, and reproduce reported behavior when feasible. Check applicable repository rules, encrypted notebook compatibility, the `.sy` format, and API contracts. Distinguish the user's goal and acceptance criteria from a suggested implementation; evaluate whether that implementation addresses the underlying problem. State any limits to verification

@@ -222,6 +222,14 @@ docker run -d \
 - `accessAuthCode`：锁屏密码，请**务必修改**，否则任何人都可以读写你的数据
   - 另外，也可以通过 `SIYUAN_ACCESS_AUTH_CODE` 环境变量设置锁屏密码。如果两者都设置了，命令行的值将优先
   - 可通过设置环境变量 `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true` 禁用锁屏密码
+- OIDC 可替代锁屏密码作为 Docker 访问鉴权。设置 `SIYUAN_OIDC_ENABLED=true`、`SIYUAN_OIDC_PROVIDER`（`custom`、`google`、`microsoft` 或 `github`）、`SIYUAN_OIDC_CLIENT_ID` 以及下方的提供商相关配置。GitHub 使用其 OAuth 2.0 用户 API 适配器；其余提供商使用 OpenID Connect 发现与 ID Token 校验。在已启用 OIDC 且配置无效、又没有锁屏密码可用时，Docker 启动会直接终止
+  - `SIYUAN_OIDC_ISSUER_URL`：`custom` 和 `microsoft` 提供商所需的 Issuer URL；Microsoft 必须使用租户专属的 issuer，例如 `https://login.microsoftonline.com/<tenant-id>/v2.0`
+  - `SIYUAN_OIDC_CLIENT_SECRET`：OpenID Connect 提供商可选的客户端密钥；GitHub OAuth 适配器必须提供。所有授权码流程均使用 PKCE
+  - `SIYUAN_OIDC_SCOPES`：逗号或空格分隔的 scopes；始终包含 `openid`
+  - `SIYUAN_OIDC_REDIRECT_URL`：以 `/api/system/oidc/callback` 结尾的公网 HTTPS 回调 URL，远程浏览器访问时必填
+  - `SIYUAN_OIDC_ALLOW_ALL`：明确授予提供商认证的所有身份 SiYuan 管理员权限
+  - `SIYUAN_OIDC_CLAIM_RULES`：禁用 allow-all 时使用的声明规则 JSON 数组，例如 `[{"claim":"email","operator":"equals","values":["user@example.com"]},{"claim":"email_verified","operator":"equals","values":["true"]}]`；规则内取值为 OR，规则之间为 AND
+  - 原生移动应用使用固定的回调 URI `siyuan:/oidc-callback`；请按原样注册。移动端配置在保存前会使用该回调进行校验。自定义提供商、Microsoft 和 GitHub 仅在其应用注册接受该回调 URI 时可用；Google 的 Android 客户端类型不接受该私有 URI，因此 Google 登录仅限浏览器和桌面端流程
 - `SIYUAN_LANG`：界面语言（可选，Docker 下未设置时默认为 `en`）。接受 BCP 47 标签如 `zh-CN`/`zh-TW`/`en`/`ja`/`pt-BR`；旧下划线值如 `zh_CN`/`en_US` 也兼容。若希望**设置**中选择的语言在重启后仍生效，部署时请去掉该变量；若设置了，每次启动都会应用该值并覆盖已保存的语言设置
   - 也可通过 `--lang` 命令行参数设置。如果两者都设置了，命令行的值将优先
 

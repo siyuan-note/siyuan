@@ -664,9 +664,10 @@ func loadLangs() (ret []*conf.Lang) {
 
 var exitLock = sync.Mutex{}
 var exitFinished bool                             // 由 exitLock 保护，防止排队的重试请求再次关闭数据库。
+var exitServersStarted bool                       // 由 exitLock 保护，服务退出只启动一次。
 var pendingWorkspaceExit *util.WorkspaceExitState // 由 exitLock 保护，绑定可接管的退出批次。
 
-// Close 退出内核进程.
+// Close 完成退出清理，调用方处理退出结果后通过 ExitKernel 结束服务及进程。
 //
 // force：是否不执行同步过程而直接退出
 //
@@ -801,7 +802,7 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 	// 退出前关闭已打开的加密笔记本并推送 closeBox，让前端关闭对应的明文文档标签页，避免重启后泄密。
 	// 走 Unmount：落盘 Closed=true + 生成历史 + 锁定清 DEK + 广播 closeBox。
 	// 排除用户指南：Unmount 对用户指南会触发 RemoveBox（mount.go:208-214）。
-	// 放在 BroadcastByType("exit")（第 933 行）之前推送，随后的 time.Sleep(500ms) 留给前端处理事件。
+	// 在退出确认之前推送，随后的等待留给前端处理笔记本关闭事件。
 	for _, box := range Conf.GetOpenedBoxes() {
 		if IsEncryptedBox(box.ID) && !IsUserGuide(box.ID) {
 			diagnostic.Stage("unmount encrypted notebook " + box.ID)
@@ -844,29 +845,40 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 	diagnostic.Stage("close sync websocket")
 	closeSyncWebSocket()
 	exitFinished = true
+	return
+}
+
+// ExitKernel 在退出清理完成后结束服务，移动端保留确认通道直到原生宿主退出。
+func ExitKernel() {
+	exitLock.Lock()
+	if !exitFinished || exitServersStarted {
+		exitLock.Unlock()
+		return
+	}
+	exitServersStarted = true
+	exitLock.Unlock()
+
+	if util.IsMobileContainer() {
+		logging.LogInfof("exited kernel, waiting for mobile host to quit")
+		return
+	}
 
 	go func() {
-		diagnostic := util.WatchOperationWithTiming("exit kernel servers", "wait for exit response")
+		diagnostic := util.WatchOperationWithTiming("exit kernel servers", "wait for frontend exit event")
 		time.Sleep(500 * time.Millisecond)
-		logging.LogInfof("exited kernel")
+		diagnostic.Stage("close HTTP servers")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		util.ShutdownHTTPServers(ctx, util.HttpServer, util.HttpsServer)
+		cancel()
 		if nil != util.WebSocketServer {
 			diagnostic.Stage("close frontend websockets")
 			util.WebSocketServer.Close()
 		}
-		if nil != util.HttpServer {
-			diagnostic.Stage("close HTTP server")
-			util.HttpServer.Close()
-		}
 		util.HttpServing = false
 		diagnostic.Finish()
-
-		if util.IsMobileContainer() {
-			return
-		}
-
+		logging.LogInfof("exited kernel")
 		os.Exit(logging.ExitCodeOk)
 	}()
-	return
 }
 
 var customEmojis = sync.Map{}

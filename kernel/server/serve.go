@@ -303,8 +303,9 @@ func Serve(fastMode bool, cookieKey string) {
 	}
 
 	if "" != certPath {
-		if _, _, err = util.ServeMultiplexed(ln, httpHandler, certPath, keyPath, util.HttpServer, nil); err != nil {
-			// 退出时 model.Close() 调 util.HttpServer.Close() 会通过 cmux 派生 listener 关掉 root，
+		util.HttpsServer = &http.Server{Handler: httpHandler}
+		if _, _, err = util.ServeMultiplexed(ln, httpHandler, certPath, keyPath, util.HttpServer, util.HttpsServer); err != nil {
+			// 服务退出时通过 cmux 派生 listener 关掉 root，
 			// m.Serve() 随后返回 *net.OpError("use of closed network connection")；
 			// net.ErrClosed 即该错误的哨兵，须一并视为正常退出，否则会被误判为致命错误并 os.Exit(21)
 			if errors.Is(err, http.ErrServerClosed) || errors.Is(err, cmux.ErrListenerClosed) || errors.Is(err, net.ErrClosed) {

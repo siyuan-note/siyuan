@@ -1366,6 +1366,7 @@ var exit = contractHandler(apicontract.SystemExit, exitSystem)
 
 var closeSystem = model.Close
 var recoverSystemExit = model.RecoverWorkspaceExit
+var finishSystemExit = model.ExitKernel
 
 func exitSystem(c *gin.Context, request apicontract.SystemExitRequest) apicontract.Response[apicontract.SystemExitData] {
 	setCurrentWorkspace := true
@@ -1382,8 +1383,11 @@ func exitSystem(c *gin.Context, request apicontract.SystemExitRequest) apicontra
 	data := apicontract.SystemExitData{CloseTimeout: 0, InstallPkgPath: installPkgPath}
 	switch exitCode {
 	case 0:
-		// Close 返回后同步和 defer 清理均已完成，此时再通知移动端宿主退出。
-		util.BroadcastByType("main", "exit", 0, "", nil)
+		// 清理和响应写入完成后通知宿主退出，再启动服务退出流程。
+		return apicontract.WithAfterWrite(apicontract.Success(data), func() {
+			util.BroadcastByType("main", "exit", 0, "", nil)
+			finishSystemExit()
+		})
 	case 1: // 同步执行失败
 		return apicontract.SystemExit.FailureWithData(1, model.Conf.Language(96)+"<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">"+model.Conf.Language(97)+"</button>", data)
 	case 2: // 提示新安装包
@@ -1393,5 +1397,4 @@ func exitSystem(c *gin.Context, request apicontract.SystemExitRequest) apicontra
 	default:
 		return apicontract.SystemExit.FailureWithData(-1, "Workspace exit no longer matches", data)
 	}
-	return apicontract.Success(data)
 }

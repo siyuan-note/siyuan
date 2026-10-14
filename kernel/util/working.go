@@ -73,6 +73,7 @@ var (
 	bootProgress = atomic.Int32{} // 启动进度，从 0 到 100
 	bootDetails  string           // 启动细节描述
 	HttpServer   *http.Server     // HTTP 伺服器实例
+	HttpsServer  *http.Server     // HTTPS 伺服器实例
 	HttpServing  = false          // 是否 HTTP 伺服已经可用
 
 	SafeMode = false // 是否以安全模式启动：禁用代码片段、插件、自定义主题与图标

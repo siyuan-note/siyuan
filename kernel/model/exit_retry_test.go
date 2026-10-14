@@ -1,11 +1,15 @@
 package model
 
 import (
-	"github.com/olahol/melody"
-	"github.com/siyuan-note/siyuan/kernel/util"
+	"io"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
+
+	"github.com/olahol/melody"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestWorkspaceExitRecoveryGuards(t *testing.T) {
@@ -44,6 +48,45 @@ func TestWorkspaceExitRecoveryGuards(t *testing.T) {
 	}
 }
 
+func TestExitKernelPreservesMobileConfirmation(t *testing.T) {
+	previousFinished, previousStarted := exitFinished, exitServersStarted
+	previousContainer, previousHTTP, previousHTTPS := util.Container, util.HttpServer, util.HttpsServer
+	t.Cleanup(func() {
+		exitFinished, exitServersStarted = previousFinished, previousStarted
+		util.Container, util.HttpServer, util.HttpsServer = previousContainer, previousHTTP, previousHTTPS
+	})
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "exit confirmation")
+	}))
+	t.Cleanup(server.Close)
+	util.HttpServer, util.HttpsServer = server.Config, nil
+	for _, container := range []string{util.ContainerAndroid, util.ContainerIOS, util.ContainerHarmony} {
+		util.Container = container
+		exitFinished, exitServersStarted = false, false
+		ExitKernel()
+		if exitServersStarted {
+			t.Fatal("server shutdown started before cleanup completed")
+		}
+		exitFinished = true
+		ExitKernel()
+		ExitKernel()
+		if !exitServersStarted {
+			t.Fatal("completed exit was not recorded")
+		}
+	}
+	// 原生宿主尚未退出时，即使超过事件等待时间，也能重试退出确认请求。
+	time.Sleep(650 * time.Millisecond)
+	response, err := server.Client().Get(server.URL)
+	if err != nil {
+		t.Fatalf("mobile exit confirmation channel was closed: %v", err)
+	}
+	defer response.Body.Close()
+	body, err := io.ReadAll(response.Body)
+	if err != nil || string(body) != "exit confirmation" {
+		t.Fatalf("mobile exit confirmation was lost: %q (%v)", body, err)
+	}
+}
+
 func TestCompletedExitRetry(t *testing.T) {
 	exitLock.Lock()
 	previous := exitFinished
@@ -58,5 +101,40 @@ func TestCompletedExitRetry(t *testing.T) {
 	code, installPackage := Close(false, true, 0)
 	if code != 0 || installPackage != "" {
 		t.Fatalf("unexpected completed exit response: %d %q", code, installPackage)
+	}
+}
+
+func TestExitKernelWaitsForDeferredCleanup(t *testing.T) {
+	previousFinished, previousStarted, previousContainer := exitFinished, exitServersStarted, util.Container
+	t.Cleanup(func() {
+		exitFinished, exitServersStarted, util.Container = previousFinished, previousStarted, previousContainer
+	})
+	util.Container = util.ContainerAndroid
+	exitFinished, exitServersStarted = true, false
+	exitLock.Lock()
+	finished := make(chan struct{})
+	go func() {
+		ExitKernel()
+		close(finished)
+	}()
+	// 退出锁覆盖所有 defer 清理，服务退出必须等待锁释放。
+	select {
+	case <-finished:
+		exitLock.Unlock()
+		t.Fatal("server shutdown bypassed deferred cleanup")
+	case <-time.After(650 * time.Millisecond):
+	}
+	if exitServersStarted {
+		exitLock.Unlock()
+		t.Fatal("server shutdown started while cleanup held the exit lock")
+	}
+	exitLock.Unlock()
+	select {
+	case <-finished:
+	case <-time.After(5 * time.Second):
+		t.Fatal("completed cleanup did not allow server shutdown")
+	}
+	if !exitServersStarted {
+		t.Fatal("completed cleanup did not record the exit")
 	}
 }

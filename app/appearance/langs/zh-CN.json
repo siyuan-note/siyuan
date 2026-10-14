@@ -1,4 +1,6 @@
 {
+	"compactMode": "紧凑模式",
+	"compactModeTip": "缩小界面间距并保持文字大小，社区主题下的效果可能有所不同",
 	"ocrTooltipSettings": "图片提示",
 	"ocrShowText": "显示 OCR 文本",
 	"ocrShowTextTip": "在图片悬浮提示中预览已有 OCR 文本",

@@ -1,4 +1,6 @@
 {
+	"compactMode": "الوضع المضغوط",
+	"compactModeTip": "تقليل المسافات في الواجهة مع الحفاظ على حجم النص؛ قد يختلف التأثير مع سمات المجتمع",
 	"ocrTooltipSettings": "تلميحات الصور",
 	"ocrShowText": "عرض نص OCR",
 	"ocrShowTextTip": "معاينة نص OCR المحفوظ في تلميحات الصور",

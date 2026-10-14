@@ -159,7 +159,9 @@ Unambiguous mechanical edits with no behavioral or compatibility impact need no 
    - When reviewing control-style changes, check consistency with shared controls, theme overrides through shared classes, light/dark themes, narrow layouts, and large editor fonts. Preserve necessary layout and touch-target constraints; do not remove all feature styles indiscriminately
 7. **CSS positioning and scrolling:** When changing `position`, `transform`, `contain`, or `overflow` on a shared container, check the effects on descendant positioning reference frames, overlay coverage, and clipping. Prefer a dedicated container when a local control needs a positioning reference. For settings dialog changes, verify detail overlays, the top drag area, and scrollbar placement at different window widths
 
-8. **Built-in custom attributes:** Use the `custom-sy-` prefix for custom attributes owned by built-in features
+8. **Custom attributes:**
+   - HTML custom attributes used only for DOM/UI state must use the `data-` prefix without an extra `sy` namespace, for example `data-ui-density`
+   - Custom attributes owned by built-in features and persisted in notebook, document, or block data must use the `custom-sy-` prefix. Preserve existing persisted attribute names and their compatibility; DOM/UI naming changes must not rename these data attributes
    - Define custom attribute name constants in `app/src/constants.ts`, alongside similar constants in `Constants`, rather than in individual feature modules
 
 9. **Frontend preference storage:** Do not use browser `localStorage` directly, including `window.localStorage` and `globalThis.localStorage`

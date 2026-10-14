@@ -1,4 +1,6 @@
 {
+	"compactMode": "Kompaktmodus",
+	"compactModeTip": "Abstände der Oberfläche bei gleicher Textgröße verringern; die Wirkung kann je nach Community-Theme variieren",
 	"ocrTooltipSettings": "Bildhinweise",
 	"ocrShowText": "OCR-Text anzeigen",
 	"ocrShowTextTip": "Gespeicherten OCR-Text im Bildhinweis anzeigen",

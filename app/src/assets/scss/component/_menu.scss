@@ -7,7 +7,7 @@
   box-shadow: var(--b3-dialog-shadow);
   border: 1px solid var(--b3-theme-surface-lighter);
   background-color: var(--b3-menu-background);
-  padding: 8px 0;
+  padding: var(--b3-ui-menu-padding, 8px 0);
   box-sizing: border-box;
   font-size: var(--b3-font-size);
 
@@ -378,11 +378,11 @@
   }
 
   &__item {
-    padding: 0 8px;
+    padding: var(--b3-ui-menu-item-padding, 0 8px);
     border-radius: var(--b3-border-radius);
     user-select: none;
     display: flex;
-    line-height: 28px;
+    line-height: var(--b3-ui-menu-height, 28px);
     cursor: pointer;
     white-space: nowrap;
     border: 0;

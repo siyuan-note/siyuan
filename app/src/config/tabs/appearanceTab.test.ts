@@ -24,7 +24,11 @@ for (const mobile of [true, false]) {
         runInNewContext(code, {
             exports: moduleExports,
             window: {siyuan: {languages: new Proxy({}, {get: (_, key) => String(key)}), config: {langs: []}}},
-            require: (name: string) => name === "../entryVisibility/ui" ? toolbarSettings :
+            require: (name: string) => name === "./compactMode" ? {
+                isCompactModeAvailable: () => !mobile,
+                isCompactModeEnabled: () => false,
+                setCompactModeEnabled: () => {},
+            } : name === "../entryVisibility/ui" ? toolbarSettings :
                 new Proxy({}, {get: () => () => ({})}),
         });
         const groups: string[] = [];
@@ -57,6 +61,7 @@ for (const mobile of [true, false]) {
         assert.equal(pageScrollSwitch.spec.title, "showPageScrollButtons");
         assert.equal(typeof pageScrollSwitch.spec.readConfig, "function");
         assert.equal(typeof pageScrollSwitch.spec.save, "function");
+        assert.equal(switches.some(item => item.id === "compactMode"), !mobile);
     });
 }
 

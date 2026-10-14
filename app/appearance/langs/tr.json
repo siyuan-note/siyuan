@@ -1,4 +1,6 @@
 {
+	"compactMode": "Kompakt mod",
+	"compactModeTip": "Metin boyutunu koruyarak arayüz boşluklarını azaltır; etki topluluk temalarına göre değişebilir",
 	"ocrTooltipSettings": "Görsel araç ipuçları",
 	"ocrShowText": "OCR metnini göster",
 	"ocrShowTextTip": "Kaydedilmiş OCR metnini görsel araç ipuçlarında önizle",

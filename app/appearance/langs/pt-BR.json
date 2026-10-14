@@ -1,4 +1,6 @@
 {
+	"compactMode": "Modo compacto",
+	"compactModeTip": "Reduz o espaçamento da interface sem alterar o tamanho do texto; o efeito pode variar com os temas da comunidade",
 	"ocrTooltipSettings": "Dicas de imagens",
 	"ocrShowText": "Mostrar texto OCR",
 	"ocrShowTextTip": "Exibir uma prévia do texto OCR salvo nas dicas de imagens",

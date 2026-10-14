@@ -1,4 +1,6 @@
 {
+	"compactMode": "간결한 모드",
+	"compactModeTip": "텍스트 크기를 유지하면서 인터페이스 간격을 줄입니다. 커뮤니티 테마에 따라 효과가 다를 수 있습니다",
 	"ocrTooltipSettings": "이미지 툴팁",
 	"ocrShowText": "OCR 텍스트 표시",
 	"ocrShowTextTip": "이미지 툴팁에 저장된 OCR 텍스트 미리보기 표시",

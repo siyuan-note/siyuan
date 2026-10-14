@@ -1,4 +1,6 @@
 {
+	"compactMode": "コンパクトモード",
+	"compactModeTip": "文字サイズを維持したまま画面の間隔を狭くします。コミュニティテーマでは効果が異なる場合があります",
 	"ocrTooltipSettings": "画像のツールチップ",
 	"ocrShowText": "OCR テキストを表示",
 	"ocrShowTextTip": "画像のツールチップに保存済みの OCR テキストを表示",

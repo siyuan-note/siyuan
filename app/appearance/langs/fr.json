@@ -1,4 +1,6 @@
 {
+	"compactMode": "Mode compact",
+	"compactModeTip": "Réduit les espacements de l’interface sans modifier la taille du texte ; l’effet peut varier selon les thèmes de la communauté",
 	"ocrTooltipSettings": "Infobulles des images",
 	"ocrShowText": "Afficher le texte OCR",
 	"ocrShowTextTip": "Afficher un aperçu du texte OCR enregistré dans les infobulles des images",

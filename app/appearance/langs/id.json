@@ -1,4 +1,6 @@
 {
+	"compactMode": "Mode ringkas",
+	"compactModeTip": "Kurangi jarak antarelemen antarmuka tanpa mengubah ukuran teks; efeknya dapat berbeda pada tema komunitas",
 	"ocrTooltipSettings": "Tooltip gambar",
 	"ocrShowText": "Tampilkan teks OCR",
 	"ocrShowTextTip": "Pratinjau teks OCR tersimpan di tooltip gambar",

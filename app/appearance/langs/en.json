@@ -1,4 +1,6 @@
 {
+	"compactMode": "Compact mode",
+	"compactModeTip": "Reduce interface spacing while keeping text size; the effect may vary with community themes",
 	"ocrTooltipSettings": "Image tooltips",
 	"ocrShowText": "Show OCR text",
 	"ocrShowTextTip": "Preview saved OCR text in image tooltips",

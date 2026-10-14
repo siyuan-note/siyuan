@@ -1,4 +1,4 @@
-import {escapeHtml} from "../../../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {processSiYuanUri} from "../../../util/uri";
 import {highlightRender} from "../../../protyle/render/highlightRender";
 import {mathRender} from "../../../protyle/render/mathRender";
@@ -50,24 +50,27 @@ export const renderTodoList = (result: string): string => {
 };
 
 // hasModel=false 时渲染"未配置模型"提示块替代示例，避免用户点击示例后卡死。
-export const renderWelcomeHTML = (hasModel = true): string => {
+export const renderWelcomeHTML = (hasModel = true, greetingKey = ""): string => {
     const L = window.siyuan.languages;
+    const greeting = escapeHtmlTextAndAttr(L[greetingKey] || L.agentWelcomeGreeting || "Hello, I am SiYuan Agent");
     if (!hasModel) {
         return '<div class="agent-welcome">' +
-            '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + "</div>" +
+            '<div class="agent-welcome__greeting">' + greeting + "</div>" +
             '<div class="agent-welcome__no-model">' +
             '<div class="agent-welcome__no-model-title">' + (L.agentNoModel || "No model configured") + "</div>" +
             '<div class="agent-welcome__no-model-tip">' + L.agentNoModelTip + "</div>" +
             '<button class="b3-button agent-welcome__go-setting" data-type="go-ai-setting">' + (L.agentGoToSetting || "Go to Settings") + "</button>" +
+            '<div class="fn__hr"></div><button class="b3-button b3-button--outline" data-type="go-chatgpt">' + L.chatGPTConnect + "</button>" +
             "</div>" +
             "</div>";
     }
     return '<div class="agent-welcome">' +
-        '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + "</div>" +
+        '<div class="agent-welcome__greeting">' + greeting + "</div>" +
         '<div class="agent-welcome__examples">' +
         '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample1 || "") + '">' + (L.agentExample1 || "") + "</div>" +
         '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample2 || "") + '">' + (L.agentExample2 || "") + "</div>" +
         '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample3 || "") + '">' + (L.agentExample3 || "") + "</div>" +
+        '<div class="agent-welcome__example" data-text="' + escapeHtmlTextAndAttr(L.agentExample4 || "") + '">' + escapeHtmlTextAndAttr(L.agentExample4 || "") + "</div>" +
         "</div>" +
         "</div>";
 };

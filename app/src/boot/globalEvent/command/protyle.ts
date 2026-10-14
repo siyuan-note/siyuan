@@ -8,7 +8,7 @@ import {checkFold} from "../../../util/noRelyPCFunction";
 import {updateReadonly} from "../../../protyle/breadcrumb/action";
 import {Constants} from "../../../constants";
 import {fetchPost} from "../../../util/fetch";
-import {getSelectionOffset} from "../../../protyle/util/selection";
+import {getSelectionOffset} from "../../../protyle/util/selectionOffsets";
 
 export const onlyProtyleCommand = (options: {
     command: string,

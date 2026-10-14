@@ -24,7 +24,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -51,42 +50,44 @@ var Conf *AppConf
 
 // AppConf 维护应用元数据，保存在 ~/.siyuan/conf.json。
 type AppConf struct {
-	LogLevel       string               `json:"logLevel"`       // 日志级别：off, trace, debug, info, warn, error, fatal
-	Appearance     *conf.Appearance     `json:"appearance"`     // 外观
-	Langs          []*conf.Lang         `json:"langs"`          // 界面语言列表
-	Lang           string               `json:"lang"`           // 选择的界面语言，同 Appearance.Lang
-	FileTree       *conf.FileTree       `json:"fileTree"`       // 文档面板
-	Tag            *conf.Tag            `json:"tag"`            // 标签面板
-	Editor         *conf.Editor         `json:"editor"`         // 编辑器配置
-	Export         *conf.Export         `json:"export"`         // 导出配置
-	Graph          *conf.Graph          `json:"graph"`          // 关系图配置
-	UILayout       *conf.UILayout       `json:"uiLayout"`       // 界面布局。不要直接使用，使用 GetUILayout() 和 SetUILayout() 方法
-	UserData       string               `json:"userData"`       // 社区用户信息，对 User 加密存储
-	User           *conf.User           `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
-	ReadOnly       bool                 `json:"readonly"`       // 是否是以只读模式运行
-	ServerAddrs    []string             `json:"serverAddrs"`    // 本地服务器地址列表
-	AccessAuthCode string               `json:"accessAuthCode"` // 锁屏密码
-	OIDC           *conf.OIDC           `json:"oidc"`           // OpenID Connect 登录
-	System         *conf.System         `json:"system"`         // 系统配置
-	Keymap         *conf.Keymap         `json:"keymap"`         // 快捷键配置
-	Sync           *conf.Sync           `json:"sync"`           // 同步配置
-	Search         *conf.Search         `json:"search"`         // 搜索配置
-	Flashcard      *conf.Flashcard      `json:"flashcard"`      // 闪卡配置
-	AI             *conf.AI             `json:"ai"`             // 人工智能配置
-	Secrets        *conf.Secrets        `json:"secrets"`        // 全局密钥库
-	Variables      *conf.Variables      `json:"variables"`      // 全局变量库
-	Bazaar         *conf.Bazaar         `json:"bazaar"`         // 集市配置
-	Stat           *conf.Stat           `json:"stat"`           // 统计
-	Api            *conf.API            `json:"api"`            // API
-	Repo           *conf.Repo           `json:"repo"`           // 数据仓库
-	NotebookCrypto *conf.NotebookCrypto `json:"notebookCrypto"` // 加密笔记本密钥管理
-	Publish        *conf.Publish        `json:"publish"`        // 发布服务
-	Onboarding     *conf.Onboarding     `json:"onboarding"`     // 首次使用引导
-	ShowChangelog  bool                 `json:"showChangelog"`  // 是否显示版本更新日志
-	CloudRegion    int                  `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
-	Snippet        *conf.Snpt           `json:"snippet"`        // 代码片段
-	DataIndexState int                  `json:"dataIndexState"` // 数据索引状态，0：已索引，1：未索引
-	CookieKey      string               `json:"cookieKey"`      // 用于加密 Cookie 的密钥
+	LogLevel       string                       `json:"logLevel"`       // 日志级别：off, trace, debug, info, warn, error, fatal
+	Appearance     ConfSection[conf.Appearance] `json:"appearance"`     // 外观
+	Langs          []*conf.Lang                 `json:"langs"`          // 界面语言列表
+	Lang           string                       `json:"lang"`           // 选择的界面语言，同 Appearance.Lang
+	FileTree       ConfSection[conf.FileTree]   `json:"fileTree"`       // 文档面板
+	Tag            ConfSection[conf.Tag]        `json:"tag"`            // 标签面板
+	Editor         ConfSection[conf.Editor]     `json:"editor"`         // 编辑器配置
+	Export         ConfSection[conf.Export]     `json:"export"`         // 导出配置
+	Graph          ConfSection[conf.Graph]      `json:"graph"`          // 关系图配置
+	UILayout       ConfSection[conf.UILayout]   `json:"uiLayout"`       // 界面布局，通过 SetUILayout 更新
+	UserData       string                       `json:"userData"`       // 社区用户信息，对 User 加密存储
+	User           *conf.User                   `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
+	ReadOnly       bool                         `json:"readonly"`       // 是否是以只读模式运行
+	ServerAddrs    []string                     `json:"serverAddrs"`    // 本地服务器地址列表
+	AccessAuthCode string                       `json:"accessAuthCode"` // 锁屏密码
+	OIDC           *conf.OIDC                   `json:"oidc"`           // OpenID Connect 登录
+	System         ConfSection[conf.System]     `json:"system"`         // 系统配置
+	Keymap         ConfSection[conf.Keymap]     `json:"keymap"`         // 快捷键配置
+	Sync           ConfSection[conf.Sync]       `json:"sync"`           // 同步配置
+	Search         ConfSection[conf.Search]     `json:"search"`         // 搜索配置
+	Flashcard      ConfSection[conf.Flashcard]  `json:"flashcard"`      // 闪卡配置
+	AI             ConfSection[conf.AI]         `json:"ai"`             // 人工智能配置
+	OCR            ConfSection[conf.OCR]        `json:"ocr"`            // 本地图片文字识别
+	Secrets        ConfSection[conf.Secrets]    `json:"secrets"`        // 全局密钥库
+	Variables      ConfSection[conf.Variables]  `json:"variables"`      // 全局变量库
+	Bazaar         ConfSection[conf.Bazaar]     `json:"bazaar"`         // 集市配置
+	Stat           ConfSection[conf.Stat]       `json:"stat"`           // 统计
+	Api            ConfSection[conf.API]        `json:"api"`            // API
+	Repo           ConfSection[conf.Repo]       `json:"repo"`           // 数据仓库
+	NotebookCrypto *conf.NotebookCrypto         `json:"notebookCrypto"` // 加密笔记本密钥管理
+	Publish        ConfSection[conf.Publish]    `json:"publish"`        // 发布服务
+	Onboarding     ConfSection[conf.Onboarding] `json:"onboarding"`     // 首次使用引导
+	ShowChangelog  bool                         `json:"showChangelog"`  // 是否显示版本更新日志
+	CloudRegion    int                          `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
+	Snippet        ConfSection[conf.Snpt]       `json:"snippet"`        // 代码片段
+	DataIndexState int                          `json:"dataIndexState"` // 数据索引状态，0：已索引，1：未索引
+	CookieKey      string                       `json:"cookieKey"`      // 用于加密 Cookie 的密钥
+	ConfVersion    int                          `json:"confVersion"`    // 配置格式版本，用于判定需要执行的迁移
 
 	MCPOAuth string `json:"mcpOAuth"` // MCP OAuth 凭据密文
 
@@ -96,10 +97,33 @@ type AppConf struct {
 
 func NewAppConf() *AppConf {
 	return &AppConf{
-		LogLevel: "debug",
-		OIDC:     conf.NewOIDC(),
-		m:        &sync.RWMutex{},
-		userLock: &sync.RWMutex{},
+		LogLevel:   "debug",
+		Appearance: NewConfSection[conf.Appearance](nil),
+		FileTree:   NewConfSection[conf.FileTree](nil),
+		Tag:        NewConfSection[conf.Tag](nil),
+		Editor:     NewConfSection[conf.Editor](nil),
+		Export:     NewConfSection[conf.Export](nil),
+		Graph:      NewConfSection[conf.Graph](nil),
+		UILayout:   NewConfSection[conf.UILayout](nil),
+		System:     NewConfSection[conf.System](nil),
+		Keymap:     NewConfSection[conf.Keymap](nil),
+		Sync:       NewConfSection[conf.Sync](nil),
+		Search:     NewConfSection[conf.Search](nil),
+		Flashcard:  NewConfSection[conf.Flashcard](nil),
+		AI:         NewConfSection[conf.AI](nil),
+		OCR:        NewConfSection[conf.OCR](nil),
+		Secrets:    NewConfSection[conf.Secrets](nil),
+		Variables:  NewConfSection[conf.Variables](nil),
+		Bazaar:     NewConfSection[conf.Bazaar](nil),
+		Stat:       NewConfSection[conf.Stat](nil),
+		Api:        NewConfSection[conf.API](nil),
+		Repo:       NewConfSection[conf.Repo](nil),
+		Publish:    NewConfSection[conf.Publish](nil),
+		Onboarding: NewConfSection[conf.Onboarding](nil),
+		Snippet:    NewConfSection[conf.Snpt](nil),
+		OIDC:       conf.NewOIDC(),
+		m:          &sync.RWMutex{},
+		userLock:   &sync.RWMutex{},
 	}
 }
 
@@ -207,21 +231,15 @@ func (appConf *AppConf) CompareAndSetOIDC(expectedVersion string, config *conf.O
 
 func (conf *AppConf) SetAI(ai *conf.AI) {
 	conf.m.Lock()
-	conf.AI = ai
+	conf.AI.Store(ai)
 	conf.m.Unlock()
 	conf.Save()
-}
-
-func (conf *AppConf) GetUILayout() *conf.UILayout {
-	conf.m.Lock()
-	defer conf.m.Unlock()
-	return conf.UILayout
 }
 
 func (conf *AppConf) SetUILayout(uiLayout *conf.UILayout) {
 	conf.m.Lock()
 	defer conf.m.Unlock()
-	conf.UILayout = uiLayout
+	conf.UILayout.Store(uiLayout)
 }
 
 func (conf *AppConf) GetUser() *conf.User {
@@ -238,22 +256,33 @@ func (conf *AppConf) SetUser(user *conf.User) {
 
 func InitConf() {
 	initLang()
+	if err := recoverSettingsReset(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover settings reset failed: %s", err)
+		return
+	}
 
 	Conf = NewAppConf()
 	// 先回滚未提交的目录移动，即使配置文件丢失也必须在挂载和同步之前恢复。
 	if err := recoverNotebookArchiveOperations(); err != nil {
 		logging.LogErrorf("recover notebook archive operations failed: %s", err)
 	}
+	if err := recoverSortConfAppends(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover incremental sort conf failed: %s", err)
+		return
+	}
 	clearEncryptedExportTempOnBoot()
 	clearOldInstallPackages("")
+	if err := CleanupRetiredInstallResources(); err != nil {
+		logging.LogWarnf("clean up retired install resources failed: %s", err)
+	}
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	confFileExists := gulu.File.IsExist(confPath)
-	entryVisibilityConfigured := false
+	var confData []byte
 	if confFileExists {
 		if data, err := os.ReadFile(confPath); err != nil {
 			logging.LogErrorf("load conf [%s] failed: %s", confPath, err)
 		} else {
-			entryVisibilityConfigured = bytes.Contains(data, []byte(`"entryVisibility"`))
+			recordPersistedConf(data)
 			// 解析失败时保留已成功写入的字段；未导出字段（m、userLock）与未触及的导出字段保持 NewAppConf() 初值。
 			if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
 				logging.LogWarnf("parse conf failed, parsed fields retained: %s", err)
@@ -263,12 +292,7 @@ func InitConf() {
 
 			// 启动时检测并完成中断的改密迁移
 			recoverMasterPasswordMigration()
-
-			if conf.NeedsAIMigration(data) {
-				Conf.AI = conf.MigrateAI(data)
-				Conf.Save()
-				logging.LogInfof("migrated AI config [%s]", confPath)
-			}
+			confData = data
 		}
 	}
 
@@ -335,17 +359,56 @@ func InitConf() {
 	}
 
 	Conf.Langs = loadLangs()
-	if nil == Conf.Appearance {
-		Conf.Appearance = conf.NewAppearance()
-	}
-	entryVisibilityFallback := conf.EntryVisibilityProfileSimple
 	if confFileExists {
-		entryVisibilityFallback = conf.EntryVisibilityProfileFull
+		applyConfMigrations(Conf, confData)
+	} else {
+		// 新工作空间直接使用当前格式，无需迁移
+		Conf.ConfVersion = CurrentConfVersion
 	}
-	if confFileExists && !entryVisibilityConfigured {
-		Conf.Appearance.EntryVisibility = nil
+	// 已有工作空间缺失的配置段按升级前的行为补全，其余规则由 normalizeAppConf 统一处理。
+	Conf.FileTree.Store(normalizeFileTreeDefaultIcon(Conf.FileTree.Load(), confFileExists))
+	Conf.OCR.Store(normalizeOCRConfig(Conf.OCR.Load(), confFileExists))
+	isNewWorkspace := nil == Conf.System.Load()
+	if Conf.Api.Load() == nil {
+		api := conf.NewAPI()
+		api.Token = gulu.Rand.String(16)
+		Conf.Api.Store(api)
 	}
-	Conf.Appearance.EntryVisibility = conf.NormalizeEntryVisibility(Conf.Appearance.EntryVisibility, entryVisibilityFallback)
+	if Conf.AI.Load() == nil {
+		ai := conf.NewAI()
+		conf.ApplyAIEnvironment(ai)
+		Conf.AI.Store(ai)
+	}
+	if nil != Conf.AI.Load() {
+		Conf.AI.Load().DecryptAPIKeys()
+	}
+	if nil == Conf.OIDC {
+		Conf.OIDC = conf.NewOIDC()
+	} else {
+		Conf.OIDC.DecryptClientSecret()
+	}
+	applyOIDCEnvironment(Conf.OIDC)
+	if nil != Conf.Secrets.Load() {
+		Conf.Secrets.Load().Decrypt()
+	}
+	if timingEnv := os.Getenv("SIYUAN_SYNC_INDEX_TIMING"); "" != timingEnv {
+		if val, err := strconv.Atoi(timingEnv); err == nil {
+			if nil == Conf.Repo.Load() {
+				Conf.Repo.Store(conf.NewRepo())
+			}
+			Conf.Repo.Load().SyncIndexTiming = int64(val)
+		}
+	}
+
+	flashcardWarning := normalizeAppConf(Conf)
+	if flashcardWarning != "" {
+		logging.LogWarnf("%s, reset to default weights [%s]", flashcardWarning, Conf.Flashcard.Load().Weights)
+		go func() {
+			util.WaitForUILoaded()
+			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, flashcardWarning, 15000)
+		}()
+	}
+
 	var langOK bool
 	for _, l := range Conf.Langs {
 		if Conf.Lang == l.Name {
@@ -357,346 +420,35 @@ func InitConf() {
 		Conf.Lang = "en"
 		util.Lang = Conf.Lang
 	}
-	Conf.Appearance.Lang = Conf.Lang
-
-	// 历史下划线命名的 i18n 文件（zh_CN.json 等）已重命名为 BCP 47（zh-CN.json 等），
-	// 清理 ConfDir/appearance/langs/ 下的旧名残留，避免僵尸文件。
-	if langsDir := filepath.Join(util.AppearancePath, "langs"); gulu.File.IsDir(langsDir) {
-		if entries, err := os.ReadDir(langsDir); err == nil {
-			for _, entry := range entries {
-				name := entry.Name()
-				if entry.IsDir() || !strings.HasSuffix(name, ".json") {
-					continue
-				}
-				stem := strings.TrimSuffix(name, ".json")
-				if _, ok := util.LangLegacyToBCP47[stem]; !ok {
-					continue
-				}
-				os.RemoveAll(filepath.Join(langsDir, name))
-			}
-		}
-	}
-	if "ant" == Conf.Appearance.Icon || "material" == Conf.Appearance.Icon {
-		// v3.7.0 移除了 ant/material 图标包，如果用户之前选择了这两个其中之一，升级后改为 litheness 图标包，避免图标显示异常 https://github.com/siyuan-note/siyuan/issues/7976
-		Conf.Appearance.Icon = "litheness"
-	}
-	os.RemoveAll(filepath.Join(util.AppearancePath, "icons", "ant"))
-	os.RemoveAll(filepath.Join(util.AppearancePath, "icons", "material"))
-	if nil == Conf.UILayout {
-		Conf.UILayout = &conf.UILayout{}
-	}
-	if nil == Conf.Keymap {
-		Conf.Keymap = &conf.Keymap{}
-	}
-	if "" == Conf.Appearance.CodeBlockThemeDark {
-		Conf.Appearance.CodeBlockThemeDark = "dracula"
-	}
-	if "" == Conf.Appearance.CodeBlockThemeLight {
-		Conf.Appearance.CodeBlockThemeLight = "github"
-	}
-	Conf.Appearance.StatusBar = util.NormalizeStatusBar(Conf.Appearance.StatusBar, util.IsMobileContainer())
-	util.StatusBarCfg = Conf.Appearance.StatusBar
-	if nil == Conf.Appearance.Notifications {
-		Conf.Appearance.Notifications = util.NewNotifications()
-	}
-	util.NotificationsCfg = Conf.Appearance.Notifications
-	Conf.FileTree = normalizeFileTreeDefaultIcon(Conf.FileTree, confFileExists)
-	if 1 > Conf.FileTree.MaxListCount {
-		Conf.FileTree.MaxListCount = 512
-	}
-	if 1 > Conf.FileTree.MaxOpenTabCount {
-		Conf.FileTree.MaxOpenTabCount = 8
-	}
-	if 32 < Conf.FileTree.MaxOpenTabCount {
-		Conf.FileTree.MaxOpenTabCount = 32
-	}
-	if nil == Conf.FileTree.TabStartupMode {
-		Conf.FileTree.TabStartupMode = new(int)
-		if Conf.FileTree.CloseTabsOnStart {
-			*Conf.FileTree.TabStartupMode = 2
-		}
-	}
-	if 0 > *Conf.FileTree.TabStartupMode || 2 < *Conf.FileTree.TabStartupMode {
-		*Conf.FileTree.TabStartupMode = 0
-	}
-	Conf.FileTree.CloseTabsOnStart = 2 == *Conf.FileTree.TabStartupMode
-	Conf.FileTree.DocCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.DocCreateSavePath)
-	Conf.FileTree.DocCreateTemplatePath = util.NormalizeTemplatePath(Conf.FileTree.DocCreateTemplatePath)
-	Conf.FileTree.RefCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.RefCreateSavePath)
-	Conf.FileTree.ShorthandSavePath = util.TrimSpaceInPath(Conf.FileTree.ShorthandSavePath)
-	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
-	if 2 > Conf.FileTree.LargeFileWarningSize {
-		Conf.FileTree.LargeFileWarningSize = 8
-	}
-	util.LargeFileWarningSize = Conf.FileTree.LargeFileWarningSize
-	if nil == Conf.FileTree.CreateDocAtTop { // v3.4.0 之前的版本没有该字段，设置默认值为 true，即在顶部创建新文档，不改变用户习惯
-		Conf.FileTree.CreateDocAtTop = new(true)
-	}
-	if nil == Conf.FileTree.BoxDocEnabled {
-		// 配置缺失时默认关闭顶层笔记本文档。
-		Conf.FileTree.BoxDocEnabled = new(bool)
-	}
-
-	if conf.MinFileTreeRecentDocsListCount > Conf.FileTree.RecentDocsMaxListCount {
-		Conf.FileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount
-	}
-	if conf.MaxFileTreeRecentDocsListCount < Conf.FileTree.RecentDocsMaxListCount {
-		Conf.FileTree.RecentDocsMaxListCount = conf.MaxFileTreeRecentDocsListCount
-	}
+	Conf.Appearance.Load().Lang = Conf.Lang
 
 	util.CurrentCloudRegion = Conf.CloudRegion
 
-	if nil == Conf.Tag {
-		Conf.Tag = conf.NewTag()
-	}
-
-	defaultEditor := conf.NewEditor()
-	if nil == Conf.Editor {
-		Conf.Editor = defaultEditor
-	}
-
-	// 新增字段的默认值，使用指针类型来区分字段不存在（nil）和用户设置为 0（非 nil）
-	if nil == Conf.Editor.BacklinkSort {
-		Conf.Editor.BacklinkSort = defaultEditor.BacklinkSort
-	}
-	if nil == Conf.Editor.BackmentionSort {
-		Conf.Editor.BackmentionSort = defaultEditor.BackmentionSort
-	}
-	if nil == Conf.Editor.DatabaseAttrShow {
-		Conf.Editor.DatabaseAttrShow = defaultEditor.DatabaseAttrShow
-	}
-	if nil == Conf.Editor.DatabaseAttrUseTabs {
-		Conf.Editor.DatabaseAttrUseTabs = defaultEditor.DatabaseAttrUseTabs
-	}
-	if nil == Conf.Editor.CheckBlockRef {
-		Conf.Editor.CheckBlockRef = defaultEditor.CheckBlockRef
-	}
-	if nil == Conf.Editor.HashTagSearch {
-		Conf.Editor.HashTagSearch = defaultEditor.HashTagSearch
-	}
-	Conf.Editor.AssetOpen = conf.NormalizeAssetOpen(Conf.Editor.AssetOpen)
-	Conf.Editor.NormalizeFontFamilies()
-	Conf.Appearance.NormalizeGlobalFontFamilies()
-	Conf.Editor.Emoji = util.FilterRecentIconValues(Conf.Editor.Emoji)
-	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
-		Conf.Editor.FontSize = 16
-	}
-	if "" == Conf.Editor.PlantUMLServePath {
-		Conf.Editor.PlantUMLServePath = "https://www.plantuml.com/plantuml/svg/~1"
-	}
-	if 1 > Conf.Editor.BlockRefDynamicAnchorTextMaxLen {
-		Conf.Editor.BlockRefDynamicAnchorTextMaxLen = 64
-	}
-	if 5120 < Conf.Editor.BlockRefDynamicAnchorTextMaxLen {
-		Conf.Editor.BlockRefDynamicAnchorTextMaxLen = 5120
-	}
-	if 1440 < Conf.Editor.GenerateHistoryInterval {
-		Conf.Editor.GenerateHistoryInterval = 1440
-	}
-	if 1 > Conf.Editor.HistoryRetentionDays {
-		Conf.Editor.HistoryRetentionDays = 30
-	}
-	if 3650 < Conf.Editor.HistoryRetentionDays {
-		Conf.Editor.HistoryRetentionDays = 3650
-	}
-	if nil == Conf.Editor.FloatWindowDelay {
-		Conf.Editor.FloatWindowDelay = new(620)
-	} else {
-		*Conf.Editor.FloatWindowDelay = max(0, min(2000, *Conf.Editor.FloatWindowDelay))
-	}
-	Conf.Editor.CursorSurroundingLines = conf.NormalizeCursorSurroundingLines(Conf.Editor.CursorSurroundingLines)
-	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
-		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
-	}
-	if 1 > len(Conf.Editor.SpellcheckLanguages) {
-		Conf.Editor.SpellcheckLanguages = []string{"en-US"}
-	}
-	Conf.Editor.BacklinkExpandCount = conf.NormalizeBacklinkExpandCount(Conf.Editor.BacklinkExpandCount)
-	Conf.Editor.BackmentionExpandCount = conf.NormalizeBacklinkExpandCount(Conf.Editor.BackmentionExpandCount)
-	if "" == Conf.Editor.HeadingNumberFormat {
-		Conf.Editor.HeadingNumberFormat = conf.DefaultHeadingNumberFormat
-	}
-	if nil == Conf.Editor.Markdown {
-		Conf.Editor.Markdown = &util.Markdown{}
-	}
-	if nil == Conf.Editor.Markdown.CodeBlockMiddleDot {
-		Conf.Editor.Markdown.CodeBlockMiddleDot = defaultEditor.Markdown.CodeBlockMiddleDot
-	}
-	if nil == Conf.Editor.Markdown.BlockFullWidthTaskList {
-		Conf.Editor.Markdown.BlockFullWidthTaskList = defaultEditor.Markdown.BlockFullWidthTaskList
-	}
-	util.MarkdownSettings = Conf.Editor.Markdown
-
-	if nil == Conf.Export {
-		Conf.Export = conf.NewExport()
-	}
-	if 0 == Conf.Export.BlockRefMode || 1 == Conf.Export.BlockRefMode || 5 == Conf.Export.BlockRefMode {
-		// 废弃导出选项引用块转换为原始块和引述块 https://github.com/siyuan-note/siyuan/issues/3155
-		// 锚点哈希模式和脚注模式合并 https://github.com/siyuan-note/siyuan/issues/13331
-		Conf.Export.BlockRefMode = 4 // 改为脚注+锚点哈希
-	}
-	if nil == Conf.Graph || nil == Conf.Graph.Local || nil == Conf.Graph.Global {
-		Conf.Graph = conf.NewGraph()
-	} else {
-		Conf.Graph.NormalizeMaxBlocks()
-	}
-
-	isNewWorkspace := nil == Conf.System
-	if isNewWorkspace {
-		Conf.System = conf.NewSystem()
-	} else {
-		cmp := semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion)
+	if !isNewWorkspace {
+		cmp := semver.Compare("v"+util.Ver, "v"+Conf.System.Load().KernelVersion)
 		if 0 < cmp {
-			logging.LogInfof("upgraded from version [%s] to [%s]", Conf.System.KernelVersion, util.Ver)
+			logging.LogInfof("upgraded from version [%s] to [%s]", Conf.System.Load().KernelVersion, util.Ver)
 			Conf.ShowChangelog = true
 		} else if 0 > cmp {
-			logging.LogInfof("downgraded from version [%s] to [%s]", Conf.System.KernelVersion, util.Ver)
+			logging.LogInfof("downgraded from version [%s] to [%s]", Conf.System.Load().KernelVersion, util.Ver)
 		}
-
-		Conf.System.KernelVersion = util.Ver
+		Conf.System.Load().KernelVersion = util.Ver
 	}
-	Conf.System.UpdateChannel = loadGlobalUpdateChannel()
-	if nil == Conf.Onboarding {
-		Conf.Onboarding = &conf.Onboarding{State: conf.OnboardingCompleted}
-	}
-	if nil == Conf.System.NetworkProxy {
-		Conf.System.NetworkProxy = &conf.NetworkProxy{}
-	}
-	if "" == Conf.System.ID {
-		Conf.System.ID = util.GetDeviceID()
-	}
-	if "" == Conf.System.Name {
-		Conf.System.Name = util.GetDeviceName()
-	}
-	if util.ContainerStd == util.Container {
-		Conf.System.ID = util.GetDeviceID()
-		Conf.System.Name = util.GetDeviceName()
-	}
-	Conf.System.DisabledFeatures = util.DisabledFeatures
-	if 1 > len(Conf.System.DisabledFeatures) {
-		Conf.System.DisabledFeatures = []string{}
-	}
-
-	Conf.System.AppDir = util.WorkingDir
-	Conf.System.ConfDir = util.ConfDir
-	Conf.System.HomeDir = util.HomeDir
-	Conf.System.WorkspaceDir = util.WorkspaceDir
-	Conf.System.DataDir = util.DataDir
-	Conf.System.Container = util.Container
-	Conf.System.IsMicrosoftStore = util.ISMicrosoftStore
-	if util.ISMicrosoftStore {
-		logging.LogInfof("using Microsoft Store edition")
-	}
-	Conf.System.OS = runtime.GOOS
-	Conf.System.OSPlatform = util.GetOSPlatform()
-
-	docxTemplate := util.RemoveInvalid(Conf.Export.DocxTemplate)
-	if "" != docxTemplate {
-		params := util.RemoveInvalid(Conf.Export.PandocParams)
-		if gulu.File.IsExist(docxTemplate) && !strings.Contains(params, "--reference-doc") && !Conf.System.IsMicrosoftStore {
-			if !strings.HasPrefix(docxTemplate, "\"") {
-				docxTemplate = "\"" + docxTemplate + "\""
-			}
-			params += " --reference-doc " + docxTemplate
-			Conf.Export.PandocParams = strings.TrimSpace(params)
-		}
-		Conf.Export.DocxTemplate = ""
-		Conf.Save()
-	}
-	if migratePandocConfig(Conf.Export) {
-		Conf.Save()
-	}
-
-	if nil == Conf.Snippet {
-		Conf.Snippet = conf.NewSnpt()
-	}
+	projectSystemEnvironment(Conf.System.Load())
 
 	if "" != Conf.UserData {
 		Conf.SetUser(loadUserFromConf())
 	}
 
-	if nil == Conf.Sync {
-		Conf.Sync = conf.NewSync()
-	}
-	if 0 == Conf.Sync.Mode {
-		Conf.Sync.Mode = 1
-	}
-	if 30 > Conf.Sync.Interval {
-		Conf.Sync.Interval = 30
-	}
-	if 60*60*12 < Conf.Sync.Interval {
-		Conf.Sync.Interval = 60 * 60 * 12
-	}
-	if nil == Conf.Sync.S3 {
-		Conf.Sync.S3 = &conf.S3{PathStyle: true, SkipTlsVerify: true}
-	}
-	Conf.Sync.S3.Endpoint = util.NormalizeEndpoint(Conf.Sync.S3.Endpoint)
-	Conf.Sync.S3.Timeout = util.NormalizeTimeout(Conf.Sync.S3.Timeout)
-	Conf.Sync.S3.ConcurrentReqs = util.NormalizeConcurrentReqs(Conf.Sync.S3.ConcurrentReqs, conf.ProviderS3)
-	if nil == Conf.Sync.WebDAV {
-		Conf.Sync.WebDAV = &conf.WebDAV{SkipTlsVerify: true}
-	}
-	Conf.Sync.WebDAV.Endpoint = util.NormalizeEndpoint(Conf.Sync.WebDAV.Endpoint)
-	Conf.Sync.WebDAV.Timeout = util.NormalizeTimeout(Conf.Sync.WebDAV.Timeout)
-	Conf.Sync.WebDAV.ConcurrentReqs = util.NormalizeConcurrentReqs(Conf.Sync.WebDAV.ConcurrentReqs, conf.ProviderWebDAV)
-	if nil == Conf.Sync.Local {
-		Conf.Sync.Local = &conf.Local{}
-	}
-	Conf.Sync.Local.Endpoint = util.NormalizeLocalPath(Conf.Sync.Local.Endpoint)
-	Conf.Sync.Local.Timeout = util.NormalizeTimeout(Conf.Sync.Local.Timeout)
-	Conf.Sync.Local.ConcurrentReqs = util.NormalizeConcurrentReqs(Conf.Sync.Local.ConcurrentReqs, conf.ProviderLocal)
-	if nil == Conf.Sync.LAN {
-		Conf.Sync.LAN = &conf.LANSync{MaxConcurrentReqs: 16}
-	}
-	if 1 > Conf.Sync.LAN.MaxConcurrentReqs {
-		Conf.Sync.LAN.MaxConcurrentReqs = 16
-	}
-	if 128 < Conf.Sync.LAN.MaxConcurrentReqs {
-		Conf.Sync.LAN.MaxConcurrentReqs = 128
-	}
-
 	if util.ContainerDocker == util.Container {
-		Conf.Sync.Perception = false
+		Conf.Sync.Load().Perception = false
 	}
 	if boxes, listErr := ListNotebooks(); listErr == nil {
-		prepareOnboardingForEmptyWorkspace(Conf.Onboarding, util.ReadOnly, len(boxes))
+		prepareOnboardingForEmptyWorkspace(Conf.Onboarding.Load(), util.ReadOnly, len(boxes))
 	}
 
-	if nil == Conf.Api {
-		Conf.Api = conf.NewAPI()
-	}
-
-	if nil == Conf.Bazaar {
-		Conf.Bazaar = conf.NewBazaar()
-	}
-
-	if nil == Conf.Publish {
-		Conf.Publish = conf.NewPublish()
-	}
-	if nil == Conf.Repo {
-		Conf.Repo = conf.NewRepo()
-	}
-	if timingEnv := os.Getenv("SIYUAN_SYNC_INDEX_TIMING"); "" != timingEnv {
-		val, err := strconv.Atoi(timingEnv)
-		if err == nil {
-			Conf.Repo.SyncIndexTiming = int64(val)
-		}
-	}
-	if 12000 > Conf.Repo.SyncIndexTiming {
-		Conf.Repo.SyncIndexTiming = 12 * 1000
-	}
-	if 1 > Conf.Repo.IndexRetentionDays {
-		Conf.Repo.IndexRetentionDays = 180
-	}
-	if 1 > Conf.Repo.RetentionIndexesDaily {
-		Conf.Repo.RetentionIndexesDaily = 2
-	}
-	if 0 < len(Conf.Repo.Key) {
-		logging.LogInfof("repo key [%x]", sha1.Sum(Conf.Repo.Key))
-	}
-
-	if nil == Conf.NotebookCrypto {
-		Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	if 0 < len(Conf.Repo.Load().Key) {
+		logging.LogInfof("repo key [%x]", sha1.Sum(Conf.Repo.Load().Key))
 	}
 
 	// 注意：此处不在启动时为已启用但备份缺失的情形回填密钥备份。无 KEK 生成的备份 KEKMAC 必为空，
@@ -705,109 +457,9 @@ func InitConf() {
 	// Enabled=true 但备份缺失/无效属配置不完整，解锁时由 deriveKEK 返回恢复提示（Language 315），
 	// 引导用户导入匹配的备份文件后重新验证主密码。
 
-	if nil == Conf.Search {
-		Conf.Search = conf.NewSearch()
-	}
-	if nil == Conf.Search.CustomBlock {
-		Conf.Search.CustomBlock = new(true)
-	}
-	if nil == Conf.Search.Mindmap {
-		Conf.Search.Mindmap = new(true)
-	}
-	if nil == Conf.Search.MindmapItem {
-		Conf.Search.MindmapItem = new(false)
-	}
-	if 1 > Conf.Search.Limit {
-		Conf.Search.Limit = 64
-	}
-	if 32 > Conf.Search.Limit {
-		Conf.Search.Limit = 32
-	}
-	if 1 > Conf.Search.BacklinkMentionKeywordsLimit {
-		Conf.Search.BacklinkMentionKeywordsLimit = 512
-	}
-	if nil == Conf.Search.HanSensitive {
-		Conf.Search.SetHanSensitive(true)
-	}
-	sql.SetHanSensitive(Conf.Search.HanSensitiveVal())
+	applyConfRuntime()
 
-	if nil == Conf.Stat {
-		Conf.Stat = conf.NewStat()
-	}
-
-	if nil == Conf.Flashcard {
-		Conf.Flashcard = conf.NewFlashcard()
-	}
-	if 0 > Conf.Flashcard.NewCardLimit {
-		Conf.Flashcard.NewCardLimit = 20
-	}
-	if 0 > Conf.Flashcard.ReviewCardLimit {
-		Conf.Flashcard.ReviewCardLimit = 200
-	}
-	if 0 >= Conf.Flashcard.RequestRetention || 1 <= Conf.Flashcard.RequestRetention {
-		Conf.Flashcard.RequestRetention = conf.NewFlashcard().RequestRetention
-	}
-	if 0 >= Conf.Flashcard.MaximumInterval || 36500 <= Conf.Flashcard.MaximumInterval {
-		Conf.Flashcard.MaximumInterval = conf.NewFlashcard().MaximumInterval
-	}
-	if "" == Conf.Flashcard.Weights {
-		Conf.Flashcard.Weights = conf.NewFlashcard().Weights
-	}
-	if 19 != len(strings.Split(Conf.Flashcard.Weights, ",")) {
-		defaultWeights := conf.DefaultFSRSWeights()
-		msg := "fsrs store weights length must be [19]"
-		logging.LogWarnf("%s , given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
-		Conf.Flashcard.Weights = defaultWeights
-		go func() {
-			util.WaitForUILoaded()
-			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
-		}()
-	}
-	isInvalidFlashcardWeights := false
-	for w := range strings.SplitSeq(Conf.Flashcard.Weights, ",") {
-		if _, err := strconv.ParseFloat(strings.TrimSpace(w), 64); err != nil {
-			isInvalidFlashcardWeights = true
-			break
-		}
-	}
-	if isInvalidFlashcardWeights {
-		defaultWeights := conf.DefaultFSRSWeights()
-		msg := "fsrs store weights contain invalid number"
-		logging.LogWarnf("%s, given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
-		Conf.Flashcard.Weights = defaultWeights
-		go func() {
-			util.WaitForUILoaded()
-			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
-		}()
-	}
-
-	if nil == Conf.AI {
-		Conf.AI = conf.NewAI()
-	} else {
-		Conf.AI.DecryptAPIKeys()
-	}
-	Conf.AI.Normalize()
-	Conf.AI.ReconcileModelIDs()
-
-	if nil == Conf.OIDC {
-		Conf.OIDC = conf.NewOIDC()
-	} else {
-		Conf.OIDC.DecryptClientSecret()
-	}
-	applyOIDCEnvironment(Conf.OIDC)
-	Conf.OIDC.Normalize()
-
-	if nil == Conf.Secrets {
-		Conf.Secrets = conf.NewSecrets()
-	} else {
-		Conf.Secrets.Decrypt()
-	}
-
-	if nil == Conf.Variables {
-		Conf.Variables = conf.NewVariables()
-	}
-
-	for _, p := range Conf.AI.Providers {
+	for _, p := range Conf.AI.Load().Providers {
 		if p == nil || !p.Enabled {
 			continue
 		}
@@ -825,18 +477,18 @@ func InitConf() {
 				p.BaseURL,
 				p.RequestTimeout,
 				m.Name,
-				Conf.AI.Editing.MaxCompletionTokens,
-				Conf.AI.Editing.Temperature,
-				Conf.AI.Editing.MaxHistoryMessages)
+				Conf.AI.Load().Editing.MaxCompletionTokens,
+				Conf.AI.Load().Editing.Temperature,
+				Conf.AI.Load().Editing.MaxHistoryMessages)
 		}
 	}
 
-	if Conf.AI.Embedding != nil && len(Conf.AI.Embedding.APIKey) > 0 {
+	if Conf.AI.Load().Embedding != nil && len(Conf.AI.Load().Embedding.APIKey) > 0 {
 		logging.LogInfof("embedding API enabled\n"+
 			"    baseURL=%s\n"+
 			"    model=%s",
-			Conf.AI.Embedding.BaseURL,
-			Conf.AI.Embedding.Name)
+			Conf.AI.Load().Embedding.BaseURL,
+			Conf.AI.Load().Embedding.Name)
 	}
 
 	Conf.ReadOnly = util.ReadOnly
@@ -876,17 +528,17 @@ func InitConf() {
 
 	// 安全模式：渲染进程崩溃恢复后由桌面端主进程通过 --safe-mode 注入。
 	// safeMode 是纯运行时状态，不随 conf.json 持久化（Save 时会被排除），故每次启动都按 util.SafeMode 重新赋值。
-	Conf.System.SafeMode = util.SafeMode
+	Conf.System.Load().SafeMode = util.SafeMode
 	if util.SafeMode {
 		// 直接覆盖外观、集市、代码片段相关配置并持久化，禁用代码片段、插件、自定义主题与图标，以排除扩展导致再次崩溃的可能。
 		// 注意：这是破坏性操作，会覆盖用户原有配置，后续不会自动恢复。
-		Conf.Appearance.ThemeLight = "daylight"
-		Conf.Appearance.ThemeDark = "midnight"
-		Conf.Appearance.Icon = "litheness"
-		Conf.Appearance.ThemeJS = false
-		Conf.Bazaar.PetalDisabled = true
-		Conf.Snippet.EnabledCSS = false
-		Conf.Snippet.EnabledJS = false
+		Conf.Appearance.Load().ThemeLight = "daylight"
+		Conf.Appearance.Load().ThemeDark = "midnight"
+		Conf.Appearance.Load().Icon = "litheness"
+		Conf.Appearance.Load().ThemeJS = false
+		Conf.Bazaar.Load().PetalDisabled = true
+		Conf.Snippet.Load().EnabledCSS = false
+		Conf.Snippet.Load().EnabledJS = false
 		Conf.Save()
 		logging.LogInfof("booted in safe mode")
 	}
@@ -897,10 +549,11 @@ func InitConf() {
 		logging.SetLogLevel(Conf.LogLevel)
 	}
 
-	util.SetNetworkProxy(Conf.System.NetworkProxy.String(), Conf.System.NetworkProxy.IsSystem())
+	util.SetNetworkProxy(Conf.System.Load().NetworkProxy.String(), Conf.System.Load().NetworkProxy.IsSystem())
 
-	go util.InitPandoc(Conf.Export.PandocBin)
+	go util.InitPandoc(Conf.Export.Load().PandocBin)
 	go util.InitTesseract()
+	InitOCR()
 }
 
 func normalizeFileTreeDefaultIcon(fileTree *conf.FileTree, confFileExists bool) *conf.FileTree {
@@ -1010,8 +663,11 @@ func loadLangs() (ret []*conf.Lang) {
 }
 
 var exitLock = sync.Mutex{}
+var exitFinished bool                             // 由 exitLock 保护，防止排队的重试请求再次关闭数据库。
+var exitServersStarted bool                       // 由 exitLock 保护，服务退出只启动一次。
+var pendingWorkspaceExit *util.WorkspaceExitState // 由 exitLock 保护，绑定可接管的退出批次。
 
-// Close 退出内核进程.
+// Close 完成退出清理，调用方处理退出结果后通过 ExitKernel 结束服务及进程。
 //
 // force：是否不执行同步过程而直接退出
 //
@@ -1032,46 +688,103 @@ var exitLock = sync.Mutex{}
 // 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且新版本安装包已经准备就绪时，将安装包路径返回给桌面宿主
 // https://github.com/siyuan-note/siyuan/issues/10288
 func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, installPkgPath string) {
+	return closeKernel(force, setCurrentWorkspace, execInstallPkg, nil)
+}
+
+// RecoverWorkspaceExit 仅接管指定批次且没有活动会话的桌面退出，不跳过同步或触发安装更新。
+func RecoverWorkspaceExit(pid int, startedAt int64) (int, string) {
+	return closeKernel(false, false, 1, &util.WorkspaceExitState{PID: pid, StartedAt: startedAt})
+}
+
+func workspaceExitRecoveryCode(expected *util.WorkspaceExitState) int {
+	if util.Container != util.ContainerStd || !util.AttachUI || expected.PID != os.Getpid() ||
+		pendingWorkspaceExit == nil || expected.StartedAt != pendingWorkspaceExit.StartedAt {
+		return -1
+	}
+	if !exitFinished && util.CountSessions() > 0 {
+		return 3
+	}
+	return 0
+}
+
+func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *util.WorkspaceExitState) (exitCode int, installPkgPath string) {
+	diagnostic := util.WatchOperationWithTiming("exit kernel", "wait for exit lock")
+	defer diagnostic.Finish()
 	exitLock.Lock()
 	defer exitLock.Unlock()
+	if recovery != nil {
+		if code := workspaceExitRecoveryCode(recovery); code != 0 {
+			return code, ""
+		}
+	}
+	if exitFinished {
+		return
+	}
+	confSyncSnapshot := Conf.LoadSync()
+	if recovery == nil {
+		pendingWorkspaceExit = util.MarkWorkspaceExiting()
+	} else {
+		pendingWorkspaceExit.SetPhase("exiting")
+	}
+	defer func() {
+		if exitCode == 1 || exitCode == 2 || exitCode == 3 {
+			pendingWorkspaceExit.SetPhase("waiting")
+		}
+	}()
 
 	logging.LogInfof("exiting kernel [force=%v, setCurrentWorkspace=%v, execInstallPkg=%d]", force, setCurrentWorkspace, execInstallPkg)
-	defer stopLANSyncManager()
+	defer func() {
+		diagnostic.Stage("stop LAN sync manager")
+		stopLANSyncManager()
+	}()
 
+	diagnostic.Stage("flush editing transactions")
 	util.PushMsg(Conf.Language(95), 10000*60)
 	FlushTxQueue()
 
+	diagnostic.Stage("cancel purge")
 	cancelPurge()
 
 	if !force {
 		if OnKernelPluginsStop != nil {
+			diagnostic.Stage("stop kernel plugins")
 			OnKernelPluginsStop()
 		}
 
-		if Conf.Sync.Enabled && 3 != Conf.Sync.Mode &&
-			((IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider) || conf.ProviderSiYuan != Conf.Sync.Provider) {
+		if confSyncSnapshot.Enabled && 3 != confSyncSnapshot.Mode &&
+			((IsSubscriber() && conf.ProviderSiYuan == confSyncSnapshot.Provider) || conf.ProviderSiYuan != confSyncSnapshot.Provider) {
+			diagnostic.Stage("exit sync")
 			syncData(true, false)
 			if 0 != ExitSyncSucc {
 				exitCode = 1
 				if 1 != execInstallPkg && !skipNewVerInstallPkg() {
-					installPkgPath = getNewVerInstallPkgPath()
+					installPkgPath = getNewVerInstallPkgPath(false)
 				}
 				return
 			}
 		}
 	}
 
+	// 同步期间可能重新连接界面；在关闭数据前再次确认，交还给仍可操作的窗口。
+	if recovery != nil && util.CountSessions() > 0 {
+		return 3, ""
+	}
+
 	// Close the user guide when exiting https://github.com/siyuan-note/siyuan/issues/10322
+	diagnostic.Stage("close user guide")
 	closeUserGuide()
 
 	// Improve indexing completeness when exiting https://github.com/siyuan-note/siyuan/issues/12039
+	diagnostic.Stage("flush database index")
 	sql.FlushQueue()
 
 	util.IsExiting.Store(true)
 	// 等待正在执行的路径批次退出，未完成任务保留在配置目录供下次启动恢复。
+	diagnostic.Stage("wait for path refresh")
 	hpathRefresh.Lock()
 	hpathRefresh.Unlock()
-	newVerInstallPkgPath := getNewVerInstallPkgPath()
+	diagnostic.Stage("check install package")
+	newVerInstallPkgPath := getNewVerInstallPkgPath(2 == execInstallPkg || (force && 0 == execInstallPkg))
 	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {
 		if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 将新版本安装包交给桌面宿主执行
 			installPkgPath = newVerInstallPkgPath
@@ -1084,24 +797,33 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 		}
 	}
 
+	diagnostic.Stage("save configuration")
 	Conf.Close()
 	// 退出前关闭已打开的加密笔记本并推送 closeBox，让前端关闭对应的明文文档标签页，避免重启后泄密。
 	// 走 Unmount：落盘 Closed=true + 生成历史 + 锁定清 DEK + 广播 closeBox。
 	// 排除用户指南：Unmount 对用户指南会触发 RemoveBox（mount.go:208-214）。
-	// 放在 BroadcastByType("exit")（第 933 行）之前推送，随后的 time.Sleep(500ms) 留给前端处理事件。
+	// 在退出确认之前推送，随后的等待留给前端处理笔记本关闭事件。
 	for _, box := range Conf.GetOpenedBoxes() {
 		if IsEncryptedBox(box.ID) && !IsUserGuide(box.ID) {
+			diagnostic.Stage("unmount encrypted notebook " + box.ID)
 			Unmount(box.ID)
 		}
 	}
+	diagnostic.Stage("close databases")
 	sql.CloseDatabase()
+	diagnostic.Stage("close push queue")
 	closePushQueue()
+	diagnostic.Stage("save asset texts")
 	util.SaveAssetsTexts()
+	diagnostic.Stage("clear workspace temp")
 	clearWorkspaceTemp(installPkgPath)
+	diagnostic.Stage("clear corrupted notebooks")
 	clearCorruptedNotebooks()
+	diagnostic.Stage("clear port file")
 	clearPortJSON()
 
 	if setCurrentWorkspace {
+		diagnostic.Stage("save workspace paths")
 		// 将当前工作空间放到工作空间列表的最后一个
 		// Open the last workspace by default https://github.com/siyuan-note/siyuan/issues/10570
 		workspacePaths, err := util.ReadWorkspacePaths()
@@ -1114,29 +836,49 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 		}
 	}
 
+	diagnostic.Stage("unlock workspace")
+	util.ClearWorkspaceExitMarker()
 	util.UnlockWorkspace()
 
+	diagnostic.Stage("wait for frontend events")
 	time.Sleep(500 * time.Millisecond)
+	diagnostic.Stage("close sync websocket")
 	closeSyncWebSocket()
+	exitFinished = true
+	return
+}
+
+// ExitKernel 在退出清理完成后结束服务，移动端保留确认通道直到原生宿主退出。
+func ExitKernel() {
+	exitLock.Lock()
+	if !exitFinished || exitServersStarted {
+		exitLock.Unlock()
+		return
+	}
+	exitServersStarted = true
+	exitLock.Unlock()
+
+	if util.IsMobileContainer() {
+		logging.LogInfof("exited kernel, waiting for mobile host to quit")
+		return
+	}
 
 	go func() {
+		diagnostic := util.WatchOperationWithTiming("exit kernel servers", "wait for frontend exit event")
 		time.Sleep(500 * time.Millisecond)
-		logging.LogInfof("exited kernel")
+		diagnostic.Stage("close HTTP servers")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		util.ShutdownHTTPServers(ctx, util.HttpServer, util.HttpsServer)
+		cancel()
 		if nil != util.WebSocketServer {
+			diagnostic.Stage("close frontend websockets")
 			util.WebSocketServer.Close()
 		}
-		if nil != util.HttpServer {
-			util.HttpServer.Close()
-		}
 		util.HttpServing = false
-
-		if util.IsMobileContainer() {
-			return
-		}
-
+		diagnostic.Finish()
+		logging.LogInfof("exited kernel")
 		os.Exit(logging.ExitCodeOk)
 	}()
-	return
 }
 
 var customEmojis = sync.Map{}
@@ -1150,11 +892,13 @@ func ClearCustomEmojis() {
 }
 
 func NewLute() (ret *lute.Lute) {
+	confEditorSnapshot := Conf.LoadEditor()
+
 	ret = util.NewLute()
-	ret.SetCodeSyntaxHighlightLineNum(Conf.Editor.CodeSyntaxHighlightLineNum)
-	ret.SetChineseParagraphBeginningSpace(Conf.Export.ParagraphBeginningSpace)
-	ret.SetProtyleMarkNetImg(Conf.Editor.DisplayNetImgMark)
-	ret.SetSpellcheck(Conf.Editor.Spellcheck)
+	ret.SetCodeSyntaxHighlightLineNum(confEditorSnapshot.CodeSyntaxHighlightLineNum)
+	ret.SetChineseParagraphBeginningSpace(Conf.Export.Load().ParagraphBeginningSpace)
+	ret.SetProtyleMarkNetImg(confEditorSnapshot.DisplayNetImgMark)
+	ret.SetSpellcheck(confEditorSnapshot.Spellcheck)
 
 	customEmojiMap := map[string]string{}
 	customEmojis.Range(func(key, value any) bool {
@@ -1183,49 +927,80 @@ func (conf *AppConf) Save() {
 	conf.m.Lock()
 	defer conf.m.Unlock()
 
-	plainData, err := gulu.JSON.MarshalJSON(conf)
+	conf.saveLocked()
+}
+
+// SaveGraphQueryConf 仅在查询携带的图配置变化时更新并保存，比较、赋值和序列化共用配置锁。
+func (appConf *AppConf) SaveGraphQueryConf(global *conf.GlobalGraph, local *conf.LocalGraph) {
+	mutate := func(graph *conf.Graph) bool {
+		changed := false
+		if global != nil && !reflect.DeepEqual(graph.Global, global) {
+			graph.Global = cloneConfSection(global)
+			changed = true
+		}
+		if local != nil && !reflect.DeepEqual(graph.Local, local) {
+			graph.Local = cloneConfSection(local)
+			changed = true
+		}
+		return changed
+	}
+	if appConf == Conf {
+		UpdateGraphConf(mutate)
+		return
+	}
+	spec := newSectionSpecFor(appConf, "graph", &appConf.Graph, conf.NormalizeGraph)
+	spec.WriteLock.Lock()
+	defer spec.WriteLock.Unlock()
+	next := cloneConfSection(spec.Load())
+	if mutate(next) {
+		_, _ = applySectionLocked(spec, next)
+	}
+}
+
+func (conf *AppConf) saveLocked() {
+	applyConfRuntime(conf)
+	newData, err := conf.marshalForSave()
 	if err != nil {
 		logging.LogErrorf("marshal conf failed: %s", err)
 		return
 	}
-	snapshot := NewAppConf()
-	if err = gulu.JSON.UnmarshalJSON(plainData, snapshot); err != nil {
-		logging.LogErrorf("copy conf failed: %s", err)
+	recordPersistedConf(newData)
+	confPath := filepath.Join(util.ConfDir, "conf.json")
+	oldData, err := filelock.ReadFile(confPath)
+	if err == nil && bytes.Equal(newData, oldData) {
+		recordPersistedConf(oldData)
 		return
 	}
-	if snapshot.AI != nil {
-		snapshot.AI.EncryptAPIKeys()
+	conf.save0(newData)
+}
+
+// marshalForSave 生成持久化副本，调用方持有配置锁，凭据仅在副本中加密。
+func (conf *AppConf) marshalForSave() ([]byte, error) {
+	plainData, err := gulu.JSON.MarshalJSON(conf)
+	if err != nil {
+		return nil, err
+	}
+	snapshot := NewAppConf()
+	if err = gulu.JSON.UnmarshalJSON(plainData, snapshot); err != nil {
+		return nil, err
+	}
+	if snapshot.AI.Load() != nil {
+		snapshot.AI.Load().EncryptAPIKeys()
 	}
 	if snapshot.OIDC != nil {
 		snapshot.OIDC.EncryptClientSecret()
 	}
-	if snapshot.Secrets != nil {
-		snapshot.Secrets.Encrypt()
+	if snapshot.Secrets.Load() != nil {
+		snapshot.Secrets.Load().Encrypt()
 	}
 	// safeMode 是纯运行时状态（由 --safe-mode 注入），不随 conf.json 持久化，避免跨启动残留。
-	if snapshot.System != nil {
-		snapshot.System.SafeMode = false
+	if snapshot.System.Load() != nil {
+		snapshot.System.Load().SafeMode = false
 		// 更新通道由用户目录下的全局配置持久化，不写入工作空间配置。
-		snapshot.System.UpdateChannel = ""
+		snapshot.System.Load().UpdateChannel = ""
 	}
 
-	newData, err := gulu.JSON.MarshalIndentJSON(snapshot, "", "  ")
-	if err != nil {
-		logging.LogErrorf("marshal conf snapshot failed: %s", err)
-		return
-	}
-	confPath := filepath.Join(util.ConfDir, "conf.json")
-	oldData, err := filelock.ReadFile(confPath)
-	if err != nil {
-		conf.save0(newData)
-		return
-	}
-
-	if bytes.Equal(newData, oldData) {
-		return
-	}
-
-	conf.save0(newData)
+	return gulu.JSON.MarshalIndentJSON(snapshot, "", "  ")
 }
 
 func (conf *AppConf) save0(data []byte) {
@@ -1235,6 +1010,7 @@ func (conf *AppConf) save0(data []byte) {
 		util.ReportFileSysFatalError(err)
 		return
 	}
+	recordPersistedConf(data)
 }
 
 func (conf *AppConf) Close() {
@@ -1419,21 +1195,21 @@ func UpdateServerAddrs(serverAddrs []string) bool {
 // HideConfSecret 隐藏设置中的秘密信息
 // REF: https://github.com/siyuan-note/siyuan/issues/11364
 func HideConfSecret(c *AppConf) {
-	c.AI = &conf.AI{}
+	c.AI.Store(&conf.AI{})
 	c.OIDC = &conf.OIDC{}
 	c.MCPOAuth = ""
 	c.CookieKey = ""
-	c.Api = &conf.API{}
-	if nil != c.Export {
-		c.Export.PandocBin = ""
+	c.Api.Store(&conf.API{})
+	if nil != c.Export.Load() {
+		c.Export.Load().PandocBin = ""
 	}
-	c.Flashcard = &conf.Flashcard{}
+	c.Flashcard.Store(&conf.Flashcard{})
 	c.ServerAddrs = []string{}
-	c.Publish = &conf.Publish{}
-	c.Repo = &conf.Repo{}
-	c.Sync = &conf.Sync{}
-	c.Secrets = &conf.Secrets{}
-	c.Variables = &conf.Variables{}
+	c.Publish.Store(&conf.Publish{})
+	c.Repo.Store(&conf.Repo{})
+	c.Sync.Store(&conf.Sync{})
+	c.Secrets.Store(&conf.Secrets{})
+	c.Variables.Store(&conf.Variables{})
 	if nil != c.NotebookCrypto {
 		enabled := c.NotebookCrypto.Enabled && notebookCryptoConfigurationComplete(c.NotebookCrypto)
 		c.NotebookCrypto = &conf.NotebookCrypto{
@@ -1441,13 +1217,13 @@ func HideConfSecret(c *AppConf) {
 			AutoLockMinutes: c.NotebookCrypto.AutoLockMinutes,
 		}
 	}
-	c.System.AppDir = ""
-	c.System.ConfDir = ""
-	c.System.DataDir = ""
-	c.System.HomeDir = ""
-	c.System.WorkspaceDir = ""
-	c.System.Name = ""
-	c.System.NetworkProxy = &conf.NetworkProxy{}
+	c.System.Load().AppDir = ""
+	c.System.Load().ConfDir = ""
+	c.System.Load().DataDir = ""
+	c.System.Load().HomeDir = ""
+	c.System.Load().WorkspaceDir = ""
+	c.System.Load().Name = ""
+	c.System.Load().NetworkProxy = &conf.NetworkProxy{}
 }
 
 // HideBoxConfSecret 隐藏笔记本配置中的密钥材料。

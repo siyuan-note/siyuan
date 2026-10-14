@@ -5,6 +5,8 @@ import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {withFetchTimeout} from "./fetchTimeout";
+import {flushSettingSaves, settingSaveFailures, trackSettingRequest} from "../config/setting/pending";
+import {trackEditorSaveRequest} from "../protyle/util/editorSave";
 
 const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() => {}),
                        processResponse: (response: IWebSocketData) => boolean = () => true) => {
@@ -21,10 +23,13 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
         exports,
         require: (name: string) => {
             switch (name) {
+                case "./fetchWithAppId": return {fetchWithAppId: fetchImplementation};
                 case "../constants": return {Constants: {SIYUAN_QUIT: "quit"}};
                 case "electron": return {ipcRenderer: {send: (...args: unknown[]) => sends.push(args)}};
                 case "./processMessage": return {processMessage: processResponse};
                 case "./kernelFault": return {kernelError: () => assert.fail("unexpected kernel error")};
+                case "../config/setting/pending": return {trackSettingRequest};
+                case "../protyle/util/editorSave": return {trackEditorSaveRequest};
                 case "./fetchTimeout": return {
                     withFetchTimeout: (request: (signal?: AbortSignal) => Promise<unknown>, signal: AbortSignal, timeout: number) => {
                         timeouts.push(timeout);
@@ -113,11 +118,31 @@ it("preserves FormData request bodies for upload endpoints", async () => {
     await fetchPost("/api/file/putFile", body);
 });
 
-it("falls back to desktop quit when exit or closing layout requests stall", async () => {
-    for (const url of ["/api/system/exit", "/api/system/setUILayout", "/api/system/setWorkspaceDir"]) {
+it("keeps the desktop alive when an exit request stalls", async () => {
+    const {fetchPost, sends} = loadFetchPost();
+    await fetchPost("/api/system/exit", {}, () => assert.fail("unexpected success"));
+    assert.deepEqual(sends, []);
+});
+
+it("retains the existing fallback for closing layout and workspace requests", async () => {
+    for (const url of ["/api/system/setUILayout", "/api/system/setWorkspaceDir"]) {
         const {fetchPost, sends, timeouts} = loadFetchPost();
         await fetchPost(url, {errorExit: true}, () => assert.fail("unexpected success"));
         assert.deepEqual(timeouts, [30000]);
         assert.deepEqual(sends, [["quit", "6806"]]);
+    }
+});
+
+it("reports consumed settings errors to reset without changing fetch callbacks", async () => {
+    for (const response of ["business", "network"]) {
+        const before = settingSaveFailures();
+        const {fetchPost} = loadFetchPost(async () => {
+            if (response === "network") throw new Error("offline");
+            return new Response(JSON.stringify({code: -1, msg: "failed", data: null}), {
+                headers: {"Content-Type": "application/json"},
+            });
+        }, () => false);
+        await fetchPost("/api/setting/patch", {});
+        await assert.rejects(flushSettingSaves(before));
     }
 });

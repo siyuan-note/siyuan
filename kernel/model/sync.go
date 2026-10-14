@@ -67,14 +67,14 @@ func syncDataDownloadLocked() (err error) {
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
 	now := util.CurrentTimeMillis()
-	Conf.Sync.Synced = now
+	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
 	err = syncRepoDownloadWithDNSRetry()
 	code := 1
 	if err != nil {
 		code = 2
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
+	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
 	if 1 == code {
 		consumeShorthands()
@@ -137,14 +137,14 @@ func SyncDataUpload() (err error) {
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
 	now := util.CurrentTimeMillis()
-	Conf.Sync.Synced = now
+	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
 	err = syncRepoUploadWithDNSRetry()
 	code := 1
 	if err != nil {
 		code = 2
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
+	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
 	return
 }
@@ -181,7 +181,7 @@ func BootSyncData() {
 	defer logging.Recover()
 	refreshLANSyncManager()
 
-	if Conf.Sync.Perception {
+	if Conf.Sync.Load().Perception {
 		connectSyncWebSocket()
 	}
 
@@ -204,7 +204,7 @@ func BootSyncData() {
 	}
 
 	now := util.CurrentTimeMillis()
-	Conf.Sync.Synced = now
+	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 	revision := pendingSync.begin()
 	if iosAfterBoot {
 		// 本地界面已可编辑，保持同步入口可见直到云端合并成功。
@@ -224,15 +224,14 @@ func BootSyncData() {
 		BootSyncSucc.Store(1)
 		if iosAfterBoot {
 			msg := formatSyncRepoErrorMsg(err)
-			Conf.Sync.Stat = msg
-			Conf.Save()
+			UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 			pushSyncStatusBar(msg)
 			util.PushErrMsg(msg, 0)
 		}
 	} else {
 		BootSyncSucc.Store(0)
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
+	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
 	if 1 == code {
 		// 启动同步成功后消费本地速记临时文件，避免移动端开启云同步时需手动触发同步才能刷新闪念速记
@@ -251,10 +250,12 @@ func SyncData(byHand bool) {
 // SyncDataBeforeEnableEncryptedNotebook 在启用加密笔记本前执行一次完整同步。
 // 未启用数据同步时直接返回；已启用数据同步时，任何同步失败都会阻止继续创建新的密钥体系。
 func SyncDataBeforeEnableEncryptedNotebook() error {
-	if !Conf.Sync.Enabled {
+	confSyncSnapshot := Conf.LoadSync()
+
+	if !confSyncSnapshot.Enabled {
 		return nil
 	}
-	if conf.ProviderS3 != Conf.Sync.Provider && !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+	if conf.ProviderS3 != confSyncSnapshot.Provider && !cloud.IsValidCloudDirName(confSyncSnapshot.CloudName) {
 		return errors.New(Conf.Language(123))
 	}
 	if !checkSync(false, false, true) {
@@ -265,8 +266,8 @@ func SyncDataBeforeEnableEncryptedNotebook() error {
 	lockSync()
 	defer unlockSync()
 	if err := syncDataLocked(false, true); err != nil {
-		if Conf.Sync.Stat != "" {
-			return errors.New(Conf.Sync.Stat)
+		if confSyncSnapshot.Stat != "" {
+			return errors.New(confSyncSnapshot.Stat)
 		}
 		return err
 	}
@@ -338,7 +339,7 @@ func syncDataLocked(exit, byHand bool) error {
 	}
 
 	now := util.CurrentTimeMillis()
-	Conf.Sync.Synced = now
+	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
 	cloudPublished, err := syncRepoWithDNSRetry(exit, byHand)
 	code := 1
@@ -347,7 +348,7 @@ func syncDataLocked(exit, byHand bool) error {
 	} else {
 		BootSyncSucc.Store(0)
 	}
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
+	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
 	pendingSync.finish(revision, err == nil, notifySyncPending)
 
 	if !exit && 1 == code {
@@ -360,16 +361,18 @@ func syncDataLocked(exit, byHand bool) error {
 
 // completeSyncPerception 恢复感知连接，并在自动同步成功发布新版本后通知其他设备。
 func completeSyncPerception(cloudPublished bool, err error) {
-	if nil == webSocketConn && Conf.Sync.Perception {
+	confSyncSnapshot := Conf.LoadSync()
+
+	if nil == webSocketConn && confSyncSnapshot.Perception {
 		// 如果 websocket 连接已经断开，则重新连接
 		connectSyncWebSocket()
 	}
 
-	if nil == err && cloudPublished && 1 == Conf.Sync.Mode && nil != webSocketConn && Conf.Sync.Perception {
+	if nil == err && cloudPublished && 1 == confSyncSnapshot.Mode && nil != webSocketConn && confSyncSnapshot.Perception {
 		// 自动同步成功发布新云端版本后通知其他设备，纯下载不发送同步信号。
 		request := map[string]any{
 			"cmd":    "synced",
-			"synced": Conf.Sync.Synced,
+			"synced": confSyncSnapshot.Synced,
 		}
 		if writeErr := webSocketConn.WriteJSON(request); nil != writeErr {
 			logging.LogErrorf("write websocket message failed: %v", writeErr)
@@ -378,22 +381,24 @@ func completeSyncPerception(cloudPublished bool, err error) {
 }
 
 func checkSync(boot, exit, byHand bool) bool {
-	if 2 == Conf.Sync.Mode && !boot && !exit && !byHand { // 手动模式下只有启动和退出进行同步
+	confSyncReadSnapshot := Conf.LoadSync()
+
+	if 2 == confSyncReadSnapshot.Mode && !boot && !exit && !byHand { // 手动模式下只有启动和退出进行同步
 		return false
 	}
 
-	if 3 == Conf.Sync.Mode && !byHand { // 完全手动模式下只有手动进行同步
+	if 3 == confSyncReadSnapshot.Mode && !byHand { // 完全手动模式下只有手动进行同步
 		return false
 	}
 
-	if !Conf.Sync.Enabled {
+	if !confSyncReadSnapshot.Enabled {
 		if byHand {
 			util.PushMsg(Conf.Language(124), 5000)
 		}
 		return false
 	}
 
-	if conf.ProviderS3 != Conf.Sync.Provider && !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+	if conf.ProviderS3 != confSyncReadSnapshot.Provider && !cloud.IsValidCloudDirName(confSyncReadSnapshot.CloudName) {
 		if byHand {
 			util.PushMsg(Conf.Language(123), 5000)
 		}
@@ -403,17 +408,15 @@ func checkSync(boot, exit, byHand bool) bool {
 		return false
 	}
 
-	switch Conf.Sync.Provider {
+	switch confSyncReadSnapshot.Provider {
 	case conf.ProviderSiYuan:
 		if !IsSubscriber() {
-			Conf.Sync.Enabled = false
-			Conf.Save()
+			UpdateSyncConf(func(s *conf.Sync) { s.Enabled = false })
 			return false
 		}
 	case conf.ProviderWebDAV, conf.ProviderS3, conf.ProviderLocal:
 		if !IsPaidUser() {
-			Conf.Sync.Enabled = false
-			Conf.Save()
+			UpdateSyncConf(func(s *conf.Sync) { s.Enabled = false })
 			return false
 		}
 	}
@@ -560,34 +563,31 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 func SetCloudSyncDir(name string) error {
 	release := lockAssetSourceChange()
 	defer release()
-	if conf.ProviderS3 == Conf.Sync.Provider {
+	if conf.ProviderS3 == Conf.Sync.Load().Provider {
 		return errors.New(Conf.Language(131))
 	}
 	if !cloud.IsValidCloudDirName(name) {
 		return errors.New(Conf.Language(37))
 	}
 
-	if Conf.Sync.CloudName == name {
+	if Conf.Sync.Load().CloudName == name {
 		return nil
 	}
 	if err := requireCompleteAssetDownloads(); err != nil {
 		return err
 	}
 
-	Conf.Sync.CloudName = name
-	Conf.Save()
+	UpdateSyncConf(func(s *conf.Sync) { s.CloudName = name })
 	refreshLANSyncManager()
 	return nil
 }
 
 func SetSyncGenerateConflictDoc(b bool) {
-	Conf.Sync.GenerateConflictDoc = b
-	Conf.Save()
+	UpdateSyncConf(func(s *conf.Sync) { s.GenerateConflictDoc = b })
 }
 
 func SetSyncEnable(b bool) {
-	Conf.Sync.Enabled = b
-	Conf.Save()
+	UpdateSyncConf(func(s *conf.Sync) { s.Enabled = b })
 	refreshLANSyncManager()
 }
 
@@ -599,8 +599,7 @@ func SetSyncInterval(interval int) {
 		interval = 43200
 	}
 
-	Conf.Sync.Interval = interval
-	Conf.Save()
+	UpdateSyncConf(func(s *conf.Sync) { s.Interval = interval })
 	planSyncAfter(time.Duration(interval) * time.Second)
 }
 
@@ -609,8 +608,7 @@ func SetSyncPerception(enabled bool) {
 		enabled = false
 	}
 
-	Conf.Sync.Perception = enabled
-	Conf.Save()
+	UpdateSyncConf(func(s *conf.Sync) { s.Perception = enabled })
 
 	if enabled {
 		connectSyncWebSocket()
@@ -621,20 +619,19 @@ func SetSyncPerception(enabled bool) {
 }
 
 func SetSyncMode(mode int) {
-	Conf.Sync.Mode = mode
-	Conf.Save()
+	UpdateSyncConf(func(s *conf.Sync) { s.Mode = mode })
 }
 
 func SetSyncProvider(provider int, completeAssets bool) (err error) {
 	release := lockAssetSourceChange()
 	defer release()
-	if provider != Conf.Sync.Provider {
+	if provider != Conf.Sync.Load().Provider {
 		if completeAssets {
 			util.PushEndlessProgress(Conf.Language(398))
 			defer util.ClearPushProgress(100)
 			err = ensureCompleteSyncAssets(func() { util.PushEndlessProgress(Conf.Language(399)) })
 			if err != nil {
-				logging.LogWarnf("complete data before switching sync provider [%d -> %d] failed: %s", Conf.Sync.Provider, provider, err)
+				logging.LogWarnf("complete data before switching sync provider [%d -> %d] failed: %s", Conf.Sync.Load().Provider, provider, err)
 				err = fmt.Errorf(Conf.Language(400), err)
 			}
 		} else {
@@ -644,8 +641,7 @@ func SetSyncProvider(provider int, completeAssets bool) (err error) {
 			return
 		}
 	}
-	Conf.Sync.Provider = provider
-	Conf.Save()
+	UpdateSyncConf(func(s *conf.Sync) { s.Provider = provider })
 	refreshLANSyncManager()
 	return
 }
@@ -656,6 +652,7 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	if err = validateSyncS3(s3); err != nil {
 		return
 	}
+	s3 = cloneConfSection(s3)
 	s3.Endpoint = strings.TrimSpace(s3.Endpoint)
 	s3.Endpoint = util.NormalizeEndpoint(s3.Endpoint)
 	s3.AccessKey = strings.TrimSpace(s3.AccessKey)
@@ -664,29 +661,36 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	s3.Region = strings.TrimSpace(s3.Region)
 	s3.Timeout = util.NormalizeTimeout(s3.Timeout)
 	s3.ConcurrentReqs = util.NormalizeConcurrentReqs(s3.ConcurrentReqs, conf.ProviderS3)
-	if Conf.Sync.Provider == conf.ProviderS3 && (Conf.Sync.S3 == nil ||
-		Conf.Sync.S3.Endpoint != s3.Endpoint || Conf.Sync.S3.Bucket != s3.Bucket) {
+	if Conf.Sync.Load().Provider == conf.ProviderS3 && (Conf.Sync.Load().S3 == nil ||
+		Conf.Sync.Load().S3.Endpoint != s3.Endpoint || Conf.Sync.Load().S3.Bucket != s3.Bucket) {
 		if err = requireCompleteAssetDownloads(); err != nil {
 			return
 		}
 	}
 
-	Conf.Sync.S3 = s3
-	Conf.Save()
+	UpdateSyncConf(func(value *conf.Sync) { value.S3 = cloneConfSection(s3) })
 	refreshLANSyncManager()
 	return
 }
 
 func validateSyncS3(s3 *conf.S3) error {
 	if s3 == nil {
-		return errors.New(Conf.Language(249))
+		return errors.New(Conf.Language(142))
 	}
-	for _, value := range []string{s3.Endpoint, s3.AccessKey, s3.SecretKey, s3.Bucket, s3.Region} {
-		if strings.TrimSpace(value) == "" {
-			return errors.New(Conf.Language(249))
-		}
+	if conf.MissingSyncProviderField(conf.ProviderS3, map[string]string{
+		"endpoint": s3.Endpoint, "accessKey": s3.AccessKey, "secretKey": s3.SecretKey, "bucket": s3.Bucket, "region": s3.Region,
+	}) {
+		return errors.New(Conf.Language(142))
 	}
-	rawEndpoint := strings.TrimSpace(s3.Endpoint)
+	return validateSyncHTTPEndpoint(s3.Endpoint)
+}
+
+// validateSyncHTTPEndpoint 在归一化前拒绝空地址，保留省略协议和协议占位符的兼容写法。
+func validateSyncHTTPEndpoint(value string) error {
+	rawEndpoint := strings.TrimSpace(value)
+	if rawEndpoint == "" {
+		return errors.New(Conf.Language(142))
+	}
 	rawEndpoint = strings.Replace(rawEndpoint, "http://http(s)://", "https://", 1)
 	rawEndpoint = strings.Replace(rawEndpoint, "http(s)://", "https://", 1)
 	if strings.Contains(rawEndpoint, "://") && !strings.HasPrefix(rawEndpoint, "http://") && !strings.HasPrefix(rawEndpoint, "https://") {
@@ -699,9 +703,27 @@ func validateSyncS3(s3 *conf.S3) error {
 	return nil
 }
 
+func validateSyncWebDAV(webdav *conf.WebDAV) error {
+	if webdav == nil || conf.MissingSyncProviderField(conf.ProviderWebDAV, map[string]string{"endpoint": webdav.Endpoint}) {
+		return errors.New(Conf.Language(142))
+	}
+	return validateSyncHTTPEndpoint(webdav.Endpoint)
+}
+
+func validateSyncLocal(local *conf.Local) error {
+	if local == nil || conf.MissingSyncProviderField(conf.ProviderLocal, map[string]string{"endpoint": local.Endpoint}) {
+		return errors.New(Conf.Language(142))
+	}
+	return nil
+}
+
 func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	release := lockAssetSourceChange()
 	defer release()
+	if err = validateSyncWebDAV(webdav); err != nil {
+		return
+	}
+	webdav = cloneConfSection(webdav)
 	webdav.Endpoint = strings.TrimSpace(webdav.Endpoint)
 	webdav.Endpoint = util.NormalizeEndpoint(webdav.Endpoint)
 
@@ -715,15 +737,14 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	webdav.Password = strings.TrimSpace(webdav.Password)
 	webdav.Timeout = util.NormalizeTimeout(webdav.Timeout)
 	webdav.ConcurrentReqs = util.NormalizeConcurrentReqs(webdav.ConcurrentReqs, conf.ProviderWebDAV)
-	if Conf.Sync.Provider == conf.ProviderWebDAV && (Conf.Sync.WebDAV == nil ||
-		Conf.Sync.WebDAV.Endpoint != webdav.Endpoint || Conf.Sync.WebDAV.Username != webdav.Username) {
+	if Conf.Sync.Load().Provider == conf.ProviderWebDAV && (Conf.Sync.Load().WebDAV == nil ||
+		Conf.Sync.Load().WebDAV.Endpoint != webdav.Endpoint || Conf.Sync.Load().WebDAV.Username != webdav.Username) {
 		if err = requireCompleteAssetDownloads(); err != nil {
 			return
 		}
 	}
 
-	Conf.Sync.WebDAV = webdav
-	Conf.Save()
+	UpdateSyncConf(func(s *conf.Sync) { s.WebDAV = webdav })
 	refreshLANSyncManager()
 	return
 }
@@ -731,47 +752,23 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 func SetSyncProviderLocal(local *conf.Local) (err error) {
 	release := lockAssetSourceChange()
 	defer release()
+	if err = validateSyncLocalPath(local); err != nil {
+		return
+	}
+	local = cloneConfSection(local)
 	local.Endpoint = strings.TrimSpace(local.Endpoint)
 	local.Endpoint = util.NormalizeLocalPath(local.Endpoint)
 
-	absPath, err := filepath.Abs(local.Endpoint)
-	if nil != err {
-		msg := fmt.Sprintf("get endpoint [%s] abs path failed: %s", local.Endpoint, err)
-		logging.LogError(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
-		return
-	}
-	if !gulu.File.IsExist(absPath) {
-		msg := fmt.Sprintf("endpoint [%s] not exist", local.Endpoint)
-		logging.LogError(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
-		return
-	}
-	if util.IsAbsPathInWorkspace(absPath) || filepath.Clean(absPath) == filepath.Clean(util.WorkspaceDir) {
-		msg := fmt.Sprintf("endpoint [%s] is in workspace", local.Endpoint)
-		logging.LogError(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
-		return
-	}
-
-	if gulu.File.IsSubPath(absPath, util.WorkspaceDir) {
-		msg := fmt.Sprintf("endpoint [%s] is parent of workspace", local.Endpoint)
-		logging.LogError(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
-		return
-	}
-
 	local.Timeout = util.NormalizeTimeout(local.Timeout)
 	local.ConcurrentReqs = util.NormalizeConcurrentReqs(local.ConcurrentReqs, conf.ProviderLocal)
-	if Conf.Sync.Provider == conf.ProviderLocal && (Conf.Sync.Local == nil ||
-		filepath.Clean(Conf.Sync.Local.Endpoint) != filepath.Clean(local.Endpoint)) {
+	if Conf.Sync.Load().Provider == conf.ProviderLocal && (Conf.Sync.Load().Local == nil ||
+		filepath.Clean(Conf.Sync.Load().Local.Endpoint) != filepath.Clean(local.Endpoint)) {
 		if err = requireCompleteAssetDownloads(); err != nil {
 			return
 		}
 	}
 
-	Conf.Sync.Local = local
-	Conf.Save()
+	UpdateSyncConf(func(s *conf.Sync) { s.Local = local })
 	refreshLANSyncManager()
 	return
 }
@@ -789,7 +786,7 @@ var (
 func CreateCloudSyncDir(name string) (err error) {
 	assetDownloadSourceMu.RLock()
 	defer assetDownloadSourceMu.RUnlock()
-	switch Conf.Sync.Provider {
+	switch Conf.Sync.Load().Provider {
 	case conf.ProviderSiYuan, conf.ProviderLocal:
 		break
 	default:
@@ -821,12 +818,12 @@ func CreateCloudSyncDir(name string) (err error) {
 func RemoveCloudSyncDir(name string) (err error) {
 	release := lockAssetSourceChange()
 	defer release()
-	if name == Conf.Sync.CloudName {
+	if name == Conf.Sync.Load().CloudName {
 		if err = requireCompleteAssetDownloads(); err != nil {
 			return
 		}
 	}
-	switch Conf.Sync.Provider {
+	switch Conf.Sync.Load().Provider {
 	case conf.ProviderSiYuan, conf.ProviderLocal:
 		break
 	default:
@@ -852,15 +849,16 @@ func RemoveCloudSyncDir(name string) (err error) {
 
 	util.PushClearMsg(msgId)
 	time.Sleep(500 * time.Millisecond)
-	if Conf.Sync.CloudName == name {
-		Conf.Sync.CloudName = "main"
-		Conf.Save()
+	if Conf.Sync.Load().CloudName == name {
+		UpdateSyncConf(func(s *conf.Sync) { s.CloudName = "main" })
 		util.PushMsg(Conf.Language(155), 5000)
 	}
 	return
 }
 
 func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
+	confSyncSnapshot := Conf.LoadSync()
+
 	assetDownloadSourceMu.RLock()
 	defer assetDownloadSourceMu.RUnlock()
 	syncDirs = []*Sync{}
@@ -880,7 +878,7 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 		err = errors.New(formatRepoErrorMsg(err))
 		return
 	}
-	if 1 > len(dirs) && conf.ProviderS3 != Conf.Sync.Provider {
+	if 1 > len(dirs) && conf.ProviderS3 != confSyncSnapshot.Provider {
 		dirs = append(dirs, &cloud.Repo{
 			Name:    "main",
 			Size:    0,
@@ -896,13 +894,13 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 			Updated:   d.Updated,
 			CloudName: d.Name,
 		}
-		if conf.ProviderSiYuan == Conf.Sync.Provider {
+		if conf.ProviderSiYuan == confSyncSnapshot.Provider {
 			sync.HSize = humanize.BytesCustomCeil(uint64(dirSize), 2)
 		}
 		syncDirs = append(syncDirs, sync)
 	}
 	hSize = "-"
-	if conf.ProviderSiYuan == Conf.Sync.Provider {
+	if conf.ProviderSiYuan == confSyncSnapshot.Provider {
 		hSize = humanize.BytesCustomCeil(uint64(size), 2)
 	}
 	return
@@ -945,7 +943,7 @@ func formatRepoErrorMsg(err error) string {
 		msgLowerCase := strings.ToLower(msg)
 		if strings.Contains(msgLowerCase, "illegal byte sequence") {
 			msg = fmt.Sprintf(Conf.Language(397), msg)
-		} else if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {
+		} else if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msgLowerCase, "access is denied") {
 			msg = Conf.Language(33)
 		} else if strings.Contains(msgLowerCase, "region was not a valid") {
 			msg = Conf.language(254)
@@ -961,7 +959,7 @@ func formatRepoErrorMsg(err error) string {
 			msg = Conf.Language(28)
 		}
 	}
-	msg += " (Provider: " + conf.ProviderToStr(Conf.Sync.Provider) + ")"
+	msg += " (Provider: " + conf.ProviderToStr(Conf.Sync.Load().Provider) + ")"
 	return msg
 }
 
@@ -1091,7 +1089,7 @@ func loadSyncIgnoreLines() (ret []string, err error) {
 
 func IncSync() {
 	syncSameCount.Store(0)
-	planSyncAfter(time.Duration(Conf.Sync.Interval) * time.Second)
+	planSyncAfter(time.Duration(Conf.Sync.Load().Interval) * time.Second)
 	pendingSync.change(notifySyncPending)
 }
 
@@ -1155,9 +1153,11 @@ func closeSyncWebSocket() {
 }
 
 func connectSyncWebSocket() {
+	confSyncReadSnapshot := Conf.LoadSync()
+
 	defer logging.Recover()
 
-	if !Conf.Sync.Enabled || !IsSubscriber() || conf.ProviderSiYuan != Conf.Sync.Provider {
+	if !confSyncReadSnapshot.Enabled || !IsSubscriber() || conf.ProviderSiYuan != confSyncReadSnapshot.Provider {
 		return
 	}
 
@@ -1260,7 +1260,7 @@ func dialSyncWebSocket() (c *websocket.Conn, err error) {
 		"x-siyuan-ver":      []string{util.Ver},
 		"x-siyuan-os":       []string{runtime.GOOS},
 		"x-siyuan-hostname": []string{util.GetDeviceName()},
-		"x-siyuan-repo":     []string{Conf.Sync.CloudName},
+		"x-siyuan-repo":     []string{Conf.Sync.Load().CloudName},
 	}
 	c, _, err = websocket.DefaultDialer.Dial(endpoint, header)
 	if err == nil {

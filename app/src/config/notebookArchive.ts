@@ -5,6 +5,9 @@ import {ContractFormData} from "../util/contractFormData";
 import {saveExportFile} from "../protyle/util/compatibility";
 import {escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
+/// #if !MOBILE
+import {reloadUI} from "../layout/util";
+/// #endif
 
 export const openNotebookArchiveDialog = async (refresh: () => void) => {
     const response = await fetchSyncPost("/api/notebook/getNotebookArchiveCandidates", {});
@@ -144,7 +147,11 @@ export const openNotebookArchiveImportDialog = (refresh: () => void) => {
             showMessage(lang.imported);
             refresh();
             // 导入保留锁定状态，刷新导航即可显示新恢复的笔记本。
+            /// #if MOBILE
             window.location.reload();
+            /// #else
+            void reloadUI();
+            /// #endif
         } finally {
             button.disabled = false;
         }

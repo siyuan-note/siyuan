@@ -192,6 +192,7 @@ const ensureAgentCapabilityView = (root: HTMLElement) => {
 
 const closeAgentCapabilityView = (view: HTMLElement) => {
     view.classList.remove("config__view--show");
+    view.dispatchEvent(new CustomEvent("siyuan-setting-detail-closed", {bubbles: true}));
 };
 
 const showAgentCapabilityLoading = (root: HTMLElement) => {

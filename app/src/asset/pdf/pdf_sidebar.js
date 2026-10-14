@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import {internalOpt} from "./internal_evt.js";
+
 /** @typedef {import("./event_utils.js").EventBus} EventBus */
 /** @typedef {import("./interfaces.js").IL10n} IL10n */
 
@@ -62,6 +64,7 @@ const UI_NOTIFICATION_CLASS = "pdfSidebarNotification";
  *   the attachments are placed.
  * @property {HTMLDivElement} layersView - The container in which
  *   the layers are placed.
+ * @property {HTMLDivElement} outlineOptionsContainer - 大纲视图的操作按钮容器。
  * @property {HTMLButtonElement} currentOutlineItemButton - The button used to
  *   find the current outline item.
  */
@@ -106,6 +109,7 @@ class PDFSidebar {
     this.attachmentsView = elements.attachmentsView;
     this.layersView = elements.layersView;
 
+    this._outlineOptionsContainer = elements.outlineOptionsContainer;
     this._currentOutlineItemButton = elements.currentOutlineItemButton;
 
     this.eventBus = eventBus;
@@ -285,6 +289,9 @@ class PDFSidebar {
   }
 
   #dispatchEvent() {
+    this._outlineOptionsContainer.classList.toggle(
+      "fn__none", this.visibleView !== SidebarView.OUTLINE
+    );
     if (this.isInitialViewSet) {
       this.isInitialEventDispatched ||= true;
     }
@@ -383,7 +390,7 @@ class PDFSidebar {
       }
     };
 
-    eventBus._on("outlineloaded", evt => {
+    eventBus.on("outlineloaded", evt => {
       onTreeLoaded(evt.outlineCount, this.outlineButton, SidebarView.OUTLINE);
 
       evt.currentOutlineItemPromise.then(enabled => {
@@ -392,29 +399,29 @@ class PDFSidebar {
         }
         this._currentOutlineItemButton.disabled = !enabled;
       });
-    });
+    }, internalOpt);
 
-    eventBus._on("attachmentsloaded", evt => {
+    eventBus.on("attachmentsloaded", evt => {
       onTreeLoaded(
         evt.attachmentsCount,
         this.attachmentsButton,
         SidebarView.ATTACHMENTS
       );
-    });
+    }, internalOpt);
 
-    eventBus._on("layersloaded", evt => {
+    eventBus.on("layersloaded", evt => {
       onTreeLoaded(evt.layersCount, this.layersButton, SidebarView.LAYERS);
-    });
+    }, internalOpt);
 
     // Update the thumbnailViewer, if visible, when exiting presentation mode.
-    eventBus._on("presentationmodechanged", evt => {
+    eventBus.on("presentationmodechanged", evt => {
       if (
         evt.state === PresentationModeState.NORMAL &&
         this.visibleView === SidebarView.THUMBS
       ) {
         this.onUpdateThumbnails();
       }
-    });
+    }, internalOpt);
 
     // Handle resizing of the sidebar.
     this.resizer.addEventListener("mousedown", evt => {
@@ -433,7 +440,7 @@ class PDFSidebar {
       window.addEventListener("blur", this.#mouseUp.bind(this), opts);
     });
 
-    eventBus._on("resize", evt => {
+    eventBus.on("resize", evt => {
       // When the *entire* viewer is resized, such that it becomes narrower,
       // ensure that the sidebar doesn't end up being too wide.
       if (evt.source !== window) {
@@ -463,7 +470,7 @@ class PDFSidebar {
           eventBus.dispatch("resize", { source: this });
         }
       });
-    });
+    }, internalOpt);
   }
 
   /**

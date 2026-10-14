@@ -41,6 +41,7 @@ export type TMobileMainMenuSlot = "settingTabs" | "pluginTopBar" | "pluginDocks"
 export type TMobileMainMenuEntry = IMobileMainMenuItem | TMobileMainMenuSlot;
 
 export interface IMobileMainMenuGroup {
+    id: string;
     title: () => string;
     hidden?: () => boolean;
     entries: TMobileMainMenuEntry[];
@@ -63,6 +64,7 @@ const dockItem = (id: string, dockType: string, icon: string, label: () => strin
 });
 
 export const MOBILE_MAIN_MENU_GROUPS: IMobileMainMenuGroup[] = [{
+    id: "navigation",
     title: lang("mobileMenuNavigation"),
     entries: [
         dockItem("menuDocuments", "file", "iconFiles", lang("fileTree")),
@@ -157,6 +159,7 @@ export const MOBILE_MAIN_MENU_GROUPS: IMobileMainMenuGroup[] = [{
         },
     ],
 }, {
+    id: "create",
     title: lang("mobileMenuCreate"),
     hidden: isReadonly,
     entries: [{
@@ -194,6 +197,7 @@ export const MOBILE_MAIN_MENU_GROUPS: IMobileMainMenuGroup[] = [{
         },
     }],
 }, {
+    id: "data",
     title: lang("mobileMenuDataManagement"),
     hidden: isReadonly,
     entries: [{
@@ -220,6 +224,7 @@ export const MOBILE_MAIN_MENU_GROUPS: IMobileMainMenuGroup[] = [{
         },
     }],
 }, {
+    id: "extensions",
     title: lang("extensions"),
     entries: [{
         id: "menuPlugin",
@@ -230,6 +235,7 @@ export const MOBILE_MAIN_MENU_GROUPS: IMobileMainMenuGroup[] = [{
         },
     }, "pluginTopBar", "pluginDocks"],
 }, {
+    id: "settings",
     title: lang("mobileMenuSettingsAndHelp"),
     entries: ["settingTabs", {
         id: "menuHelp",
@@ -302,17 +308,19 @@ const renderMobileMainMenuEntryHTML = (entry: TMobileMainMenuEntry) => {
 };
 
 const renderMobileMainMenuGroupHTML = (group: IMobileMainMenuGroup) =>
-    `<div class="b3-menu__group${group.hidden?.() ? " fn__none" : ""}">
-        <div class="b3-menu__group-title">${group.title()}</div>
-        <div class="b3-menu__group-items">${group.entries.map(renderMobileMainMenuEntryHTML).join("")}</div>
+    `<div class="b3-menu__group${group.hidden?.() ? " fn__none" : ""}" data-menu-group="${group.id}">
+        <div class="b3-menu__group-title fn__flex"><span class="fn__flex-1 fn__flex-center">${group.title()}</span>
+            <button type="button" class="block__icon block__icon--show block__icon--tap mobile-main-menu__collapse" data-type="toggle-menu-group" aria-expanded="true" aria-controls="mobile-menu-group-${group.id}" aria-label="${escapeAttr(window.siyuan.languages.collapse + " - " + group.title())}"><svg><use xlink:href="#iconDown"></use></svg></button>
+        </div>
+        <div id="mobile-menu-group-${group.id}" class="b3-menu__group-items">${group.entries.map(renderMobileMainMenuEntryHTML).join("")}</div>
     </div>`;
 
 /** 生成主菜单容器 `#menu` 的内容，分组与条目均由 `MOBILE_MAIN_MENU_GROUPS` 推导 */
-export const renderMobileMainMenuHTML = () => `<div class="toolbar toolbar--border" data-type="close-menu">
-    <svg class="toolbar__icon" role="img" aria-label="${escapeAttr(window.siyuan.languages.returnLabel)}"><use xlink:href="#iconLeft"></use></svg>
-</div>
-<div class="mobile-main-menu__search" data-prevent-swipe>
-    <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__block" autocomplete="off" autocorrect="off" spellcheck="false">
+export const renderMobileMainMenuHTML = () => `<div class="toolbar toolbar--border">
+    <svg class="toolbar__icon" data-type="close-menu" role="img" aria-label="${escapeAttr(window.siyuan.languages.returnLabel)}"><use xlink:href="#iconLeft"></use></svg>
+    <div class="mobile-main-menu__search" data-prevent-swipe>
+        <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__block" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
 </div>
 <div class="b3-menu__items b3-menu__groups mobile-main-menu__groups">
     ${MOBILE_MAIN_MENU_GROUPS.map(renderMobileMainMenuGroupHTML).join("")}

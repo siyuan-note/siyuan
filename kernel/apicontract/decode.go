@@ -37,6 +37,7 @@ func (e Endpoint[Request, Data]) Decode(reader io.Reader) (request Request, err 
 		if errors.Is(err, io.EOF) {
 			err = errors.New("the request body is empty or truncated (EOF)")
 		}
+		err = legacyJSONObjectError(err)
 		return request, fmt.Errorf("Parses request [%s] failed: %s", e.definition.Path, err)
 	}
 	value := reflect.ValueOf(&request).Elem()
@@ -45,6 +46,18 @@ func (e Endpoint[Request, Data]) Decode(reader io.Reader) (request Request, err 
 	}
 	err = decodeRequestFields(value, fields)
 	return request, err
+}
+
+// 原始字段映射的类型错误沿用历史解析目标，避免内部原始值类型进入接口文案。
+func legacyJSONObjectError(err error) error {
+	var typeError *json.UnmarshalTypeError
+	if errors.As(err, &typeError) && typeError.Type.Kind() == reflect.Map &&
+		typeError.Type.Key().Kind() == reflect.String && typeError.Type.Elem() == reflect.TypeFor[json.RawMessage]() {
+		legacyError := *typeError
+		legacyError.Type = reflect.TypeFor[map[string]any]()
+		return &legacyError
+	}
+	return err
 }
 
 func decodeRequestFields(value reflect.Value, fields map[string]json.RawMessage) error {

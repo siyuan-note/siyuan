@@ -21,7 +21,7 @@ func setupSyncMutationTest(t *testing.T) {
 	oldPlan := syncPlanTime
 	syncPlanTimeLock.Unlock()
 	Conf, util.DataDir = NewAppConf(), t.TempDir()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	util.SnippetsPath = filepath.Join(util.DataDir, "snippets")
 	t.Cleanup(func() {
 		pendingSync.mu.Lock()
@@ -61,7 +61,7 @@ func assertSyncMutation(t *testing.T, want bool, mutate func() error) {
 	syncPlanTimeLock.Lock()
 	delay := time.Until(syncPlanTime)
 	syncPlanTimeLock.Unlock()
-	if want && (syncSameCount.Load() != 0 || delay > time.Duration(Conf.Sync.Interval)*time.Second) {
+	if want && (syncSameCount.Load() != 0 || delay > time.Duration(Conf.Sync.Load().Interval)*time.Second) {
 		t.Fatalf("mutation did not reset backoff: count=%d, delay=%v", syncSameCount.Load(), delay)
 	}
 	if !want && (syncSameCount.Load() != 10 || delay < 1000*time.Minute) {
@@ -167,7 +167,7 @@ func TestPackageRemovalSyncMutation(t *testing.T) {
 
 func TestFlashcardDeckSyncMutation(t *testing.T) {
 	setupSyncMutationTest(t)
-	Conf.Flashcard = conf.NewFlashcard()
+	Conf.Flashcard.Store(conf.NewFlashcard())
 	oldDecks := Decks
 	Decks = map[string]*riff.Deck{}
 	t.Cleanup(func() { Decks = oldDecks })
@@ -185,7 +185,7 @@ func TestFlashcardDeckSyncMutation(t *testing.T) {
 
 func TestFlashcardReviewSyncAfterLogFailure(t *testing.T) {
 	setupSyncMutationTest(t)
-	Conf.Flashcard = conf.NewFlashcard()
+	Conf.Flashcard.Store(conf.NewFlashcard())
 	oldDecks, oldReviews, oldSkipped := Decks, reviewCardCache, skipCardCache
 	Decks, reviewCardCache, skipCardCache = map[string]*riff.Deck{}, map[string]riff.Card{}, map[string]riff.Card{}
 	oldDBPath := util.BlockTreeDBPath
@@ -217,7 +217,7 @@ func TestFlashcardReviewSyncAfterLogFailure(t *testing.T) {
 		}
 		return nil
 	})
-	loaded, err := riff.LoadDeck(getRiffDir(), deck.ID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
+	loaded, err := riff.LoadDeck(getRiffDir(), deck.ID, Conf.Flashcard.Load().RequestRetention, Conf.Flashcard.Load().MaximumInterval, Conf.Flashcard.Load().Weights)
 	if err != nil {
 		t.Fatal(err)
 	}

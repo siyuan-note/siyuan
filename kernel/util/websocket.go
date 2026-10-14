@@ -17,6 +17,7 @@
 package util
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 	"sync"
@@ -28,6 +29,18 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 )
+
+// LogWebSocketError 记录发送缓冲区满导致的消息丢弃，其他连接错误保留在调试日志中。
+func LogWebSocketError(session *melody.Session, channel string, err error) {
+	app, _ := session.Get("app")
+	id, _ := session.Get("id")
+	typ, _ := session.Get("type")
+	if errors.Is(err, melody.ErrMessageBufferFull) {
+		logging.LogWarnf("websocket message dropped [channel=%q, app=%v, id=%v, type=%v]: %s", channel, app, id, typ, err)
+		return
+	}
+	logging.LogDebugf("websocket failed [channel=%q, app=%v, id=%v, type=%v]: %s", channel, app, id, typ, err)
+}
 
 var (
 	WebSocketServer *melody.Melody
@@ -42,6 +55,7 @@ var (
 )
 
 func BroadcastByTypeAndExcludeApp(excludeApp, typ, cmd string, code int, msg string, data any) {
+	payload := broadcastPayload(cmd, code, msg, data)
 	sessions.Range(func(key, value any) bool {
 		appSessions := value.(*sync.Map)
 		if key == excludeApp {
@@ -54,12 +68,7 @@ func BroadcastByTypeAndExcludeApp(excludeApp, typ, cmd string, code int, msg str
 				return true
 			}
 			if t, ok := session.Get("type"); ok && typ == t {
-				event := NewResult()
-				event.Cmd = cmd
-				event.Code = code
-				event.Msg = msg
-				event.Data = data
-				session.Write(event.Bytes())
+				session.Write(payload())
 			}
 			return true
 		})
@@ -72,6 +81,7 @@ func BroadcastByTypeAndApp(typ, app, cmd string, code int, msg string, data any)
 	if !ok {
 		return
 	}
+	payload := broadcastPayload(cmd, code, msg, data)
 
 	appSessions.(*sync.Map).Range(func(key, value any) bool {
 		session := value.(*melody.Session)
@@ -79,12 +89,7 @@ func BroadcastByTypeAndApp(typ, app, cmd string, code int, msg string, data any)
 			return true
 		}
 		if t, ok := session.Get("type"); ok && typ == t {
-			event := NewResult()
-			event.Cmd = cmd
-			event.Code = code
-			event.Msg = msg
-			event.Data = data
-			session.Write(event.Bytes())
+			session.Write(payload())
 		}
 		return true
 	})
@@ -93,14 +98,19 @@ func BroadcastByTypeAndApp(typ, app, cmd string, code int, msg string, data any)
 // BroadcastByType 广播所有实例上 typ 类型的会话。
 func BroadcastByType(typ, cmd string, code int, msg string, data any) {
 	typeSessions := SessionsByType(typ)
+	payload := broadcastPayload(cmd, code, msg, data)
 	for _, sess := range typeSessions {
-		event := NewResult()
-		event.Cmd = cmd
-		event.Code = code
-		event.Msg = msg
-		event.Data = data
-		sess.Write(event.Bytes())
+		sess.Write(payload())
 	}
+}
+
+// broadcastPayload 仅在找到目标会话时序列化，同一次广播共享结果。
+func broadcastPayload(cmd string, code int, msg string, data any) func() []byte {
+	return sync.OnceValue(func() []byte {
+		event := NewResult()
+		event.Cmd, event.Code, event.Msg, event.Data = cmd, code, msg, data
+		return event.Bytes()
+	})
 }
 
 func SessionsByType(typ string) (ret []*melody.Session) {
@@ -284,29 +294,41 @@ func PushTxErr(msg string, code int, data any) {
 }
 
 func PushUpdateMsg(msgId string, msg string, timeout int) {
-	BroadcastByType("main", "msg", 0, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
+	PushUpdateMsgWithApp("", msgId, msg, timeout)
+}
+
+// PushUpdateMsgWithApp 在指定实例更新提示；未指定实例时广播，实例离线时丢弃。
+func PushUpdateMsgWithApp(app, msgId, msg string, timeout int) {
+	pushNotificationWithApp(app, "msg", 0, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
 }
 
 func PushMsg(msg string, timeout int) (msgId string) {
-	msgId = gulu.Rand.String(7)
-	BroadcastByType("main", "msg", 0, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
-	return
+	return PushMsgWithApp("", msg, timeout)
 }
 
 func PushMsgWithApp(app, msg string, timeout int) (msgId string) {
 	msgId = gulu.Rand.String(7)
-	if "" == app {
-		BroadcastByType("main", "msg", 0, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
-		return
-	}
-	BroadcastByTypeAndApp("main", app, "msg", 0, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
+	PushUpdateMsgWithApp(app, msgId, msg, timeout)
 	return
 }
 
 func PushErrMsg(msg string, timeout int) (msgId string) {
+	return PushErrMsgWithApp("", msg, timeout)
+}
+
+// PushErrMsgWithApp 在指定实例显示错误；未指定实例时广播，实例离线时丢弃。
+func PushErrMsgWithApp(app, msg string, timeout int) (msgId string) {
 	msgId = gulu.Rand.String(7)
-	BroadcastByType("main", "msg", -1, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
+	pushNotificationWithApp(app, "msg", -1, msg, map[string]any{"id": msgId, "closeTimeout": timeout})
 	return
+}
+
+func pushNotificationWithApp(app, cmd string, code int, msg string, data any) {
+	if "" == app {
+		BroadcastByType("main", cmd, code, msg, data)
+		return
+	}
+	BroadcastByTypeAndApp("main", app, cmd, code, msg, data)
 }
 
 func PushStatusBar(msg string) {
@@ -386,6 +408,14 @@ func PushProgress(code, current, total int, msg string) {
 // PushClearMsg 会清空指定消息。
 func PushClearMsg(msgId string) {
 	BroadcastByType("main", "cmsg", 0, "", map[string]any{"id": msgId})
+}
+
+// PushClearMsgWithApp 清除指定实例的单条提示；空消息 ID 不执行清除，避免影响其他任务。
+func PushClearMsgWithApp(app, msgId string) {
+	if "" == msgId {
+		return
+	}
+	pushNotificationWithApp(app, "cmsg", 0, "", map[string]any{"id": msgId})
 }
 
 // PushClearProgress 取消进度遮罩。

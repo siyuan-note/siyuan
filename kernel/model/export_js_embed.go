@@ -32,7 +32,7 @@ func preserveExportJSEmbeds(tree *parse.Tree) {
 			`" data-content="` + html.EscapeString(html.EscapeString(content)) + `" data-notebook="` + html.EscapeString(tree.Box) +
 			`" data-root-id="` + html.EscapeString(tree.ID) +
 			`" data-query-notebook="` + html.EscapeString(queryNotebook) +
-			`" custom-heading-mode="` + html.EscapeString(node.IALAttr("custom-heading-mode")) + `"></div>`
+			`" ` + embedHeadingModeAttr + `="` + html.EscapeString(node.IALAttr(embedHeadingModeAttr)) + `"></div>`
 		replacement := &ast.Node{Type: ast.NodeHTMLBlock, ID: node.ID, Tokens: []byte(placeholder), KramdownIAL: node.KramdownIAL}
 		replacement.SetIALAttr("data-export-js-embed", "true")
 		originals = append(originals, node)

@@ -7,7 +7,7 @@
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
 		"type": "doc",
-		"updated": "20260921210136"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110513-8s7tp6d",
-				"updated": "20260921210136"
+				"updated": "20261012014930"
 			},
 			"Children": [
 				{
@@ -58,6 +58,21 @@
 			]
 		},
 		{
+			"ID": "20261012014537-f76dj41",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261012014537-f76dj41",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "介面導覽"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
 			"ID": "20260921090531-u48uhj6",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -95,6 +110,20 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中調整功能順序。"
+				}
+			]
+		},
+		{
+			"ID": "20261010114821-z8mdm4l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010114821-z8mdm4l",
+				"updated": "20261010114821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android 上使用桌面佈局時，系統返回鍵會先關閉目前最上層的對話框、選單、編輯浮層、圖片預覽或浮動抽屜，每次只關閉一層並保留底層瀏覽狀態。沒有可關閉的浮層時，才執行原有的頁面返回行為。"
 				}
 			]
 		},
@@ -824,7 +853,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174315-dz9gat0",
-				"updated": "20260803163243"
+				"updated": "20261004052629"
 			},
 			"Children": [
 				{
@@ -853,7 +882,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174315-symmh66",
-				"updated": "20260613174315"
+				"updated": "20261004052629"
 			},
 			"Children": [
 				{
@@ -936,6 +965,79 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261004052629-xrvlusr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261004052629-xrvlusr",
+				"updated": "20261004052629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新匯入的速記遵循 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中的 Markdown 語法開關。啟用的行級語法、中點程式碼圍欄（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "···"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）和全形任務快捷語法（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【X】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）會在匯入時直接轉換，無需再次編輯觸發轉換。"
+				}
+			]
+		},
+		{
+			"ID": "20261004052629-5f4fen7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261004052629-5f4fen7",
+				"updated": "20261004052629"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "每條速記單獨解析，未閉合的程式碼區塊不會影響下一條速記。已匯入的文件不會重新解析。"
 				}
 			]
 		},

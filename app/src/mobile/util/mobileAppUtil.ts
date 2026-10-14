@@ -28,8 +28,8 @@ export const canInput = (element: Element) => {
     if ((
         element.tagName === "TEXTAREA" ||
         (element.tagName === "INPUT" && ["email", "number", "password", "search", "tel", "text", "url", "", null].includes(element.getAttribute("type")))
-    ) && element.getAttribute("readonly") !== "readonly") {
-        return element;
+    )) {
+        return !element.hasAttribute("readonly") && !element.hasAttribute("disabled") && element;
     }
     const wysiwygElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
     if (wysiwygElement && wysiwygElement.getAttribute("data-readonly") === "false") {

@@ -145,6 +145,8 @@ func prepareExportAssets(boxID string, docPaths []string, includeFootnotes ...bo
 
 // prepareExportAssetsInScope 在单块导出时按块范围收集依赖，文档导出仍按文档路径收集。
 func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnotes bool, blockID string) error {
+	confExportSnapshot := Conf.LoadExport()
+
 	if boxID != "" && IsEncryptedBox(boxID) && !IsBoxUnlocked(boxID) {
 		return errors.New(Conf.Language(314))
 	}
@@ -187,7 +189,7 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			}
 			trees[blockID] = selectExportTree(tree, block)
 		} else {
-			exportRefTrees(tree, &[]string{}, trees)
+			exportRefTreesWithConfig(tree, &[]string{}, trees, resolveExportOptions(nil))
 		}
 	}
 	// 查询嵌入的资源属于导出依赖，按笔记本边界展开并去重，避免循环嵌入反复读取。
@@ -214,14 +216,14 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			}
 			defer treenode.MaterializeTabTitles(tree.Root)()
 		}
-		if includeFootnotes && Conf.Export.BlockRefMode == 4 && tree.Root.Type == ast.NodeDocument {
+		if includeFootnotes && confExportSnapshot.BlockRefMode == 4 && tree.Root.Type == ast.NodeDocument {
 			// 按单文件导出的脚注展开规则收集资源，不受是否另行导出关联文档影响
 			order := []string{}
 			footnotes := map[string]*refAsFootnotes{}
 			depth := 0
-			collectFootnotesDefs0(tree, tree.Root, &order, footnotes, &depth)
+			collectFootnotesDefs0(tree, tree.Root, &order, footnotes, &depth, nil)
 			defs, defsErr := resolveFootnotesDefs(&order, footnotes, tree, map[string]bool{},
-				Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight, false)
+				confExportSnapshot.BlockRefTextLeft, confExportSnapshot.BlockRefTextRight, false)
 			if defsErr != nil {
 				return defsErr
 			}
@@ -233,15 +235,17 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 			}
 		}
 		treenode.WalkWithTabTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+			confSearchSnapshot := Conf.LoadSearch()
+
 			if !entering || node.Type != ast.NodeBlockQueryEmbedScript {
 				return ast.WalkContinue
 			}
 			stmt := strings.ReplaceAll(html.UnescapeString(node.TokensStr()), editor.IALValEscNewLine, "\n")
 			var blocks []*sql.Block
 			if IsEncryptedBox(tree.Box) {
-				blocks = sql.SelectBlocksRawStmtInBox(stmt, 1, Conf.Search.Limit, tree.Box)
+				blocks = sql.SelectBlocksRawStmtInBox(stmt, 1, confSearchSnapshot.Limit, tree.Box)
 			} else {
-				blocks = sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+				blocks = sql.SelectBlocksRawStmt(stmt, 1, confSearchSnapshot.Limit)
 			}
 			for _, block := range blocks {
 				if embedded, loadErr := loadExportRelatedTree(block.ID, tree.Box); loadErr == nil {
@@ -254,7 +258,7 @@ func prepareExportAssetsInScope(boxID string, docPaths []string, includeFootnote
 							trees[block.ID] = selectExportTree(embedded, bt)
 						}
 					} else {
-						exportRefTrees(embedded, &[]string{}, trees)
+						exportRefTreesWithConfig(embedded, &[]string{}, trees, resolveExportOptions(nil))
 					}
 				}
 			}

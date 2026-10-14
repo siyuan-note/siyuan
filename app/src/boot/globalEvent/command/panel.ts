@@ -6,7 +6,7 @@ import {setStorageVal, updateHotkeyTip} from "../../../protyle/util/compatibilit
 import {isMobile} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {hasClosestByClassName} from "../../../protyle/util/hasClosest";
-import {focusByRange} from "../../../protyle/util/selection";
+import {focusByRange} from "../../../protyle/util/selectionOffsets";
 import {matchHotKey} from "../../../protyle/util/hotKey";
 import {captureCommandContext} from "../../../command/context";
 import {ensureCommandSystem, executeCommandById} from "../../../command/executor";
@@ -61,16 +61,21 @@ export const commandPanel = (app: App, options: {
     protyle?: IProtyle;
     range?: Range;
     restoreKeyboard?: () => void;
+    openOnly?: boolean;
 } = {}) => {
     const menu = window.siyuan.menus.menu;
     if (isMobile() && menu.element.getAttribute("data-name") === Constants.DIALOG_COMMANDPANEL) {
-        menu.closeSheet();
+        if (!options.openOnly) {
+            menu.closeSheet();
+        }
         return;
     }
     const openCommandPanelDialog = window.siyuan.dialogs.find(item =>
         item.element.getAttribute("data-key") === Constants.DIALOG_COMMANDPANEL);
     if (openCommandPanelDialog) {
-        openCommandPanelDialog.destroy();
+        if (!options.openOnly) {
+            openCommandPanelDialog.destroy();
+        }
         return;
     }
     const context = captureCommandContext({app, source: "commandPanel", protyle: options.protyle, range: options.range});
@@ -175,8 +180,7 @@ export const commandPanel = (app: App, options: {
         if (event.isComposing) {
             return;
         }
-        if (!event.repeat && matchHotKey(window.siyuan.config.keymap.general.commandPanel, event)) {
-            close();
+        if (matchHotKey(window.siyuan.config.keymap.general.commandPanel, event)) {
             event.preventDefault();
             return;
         }

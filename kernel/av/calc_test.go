@@ -2,6 +2,57 @@ package av
 
 import "testing"
 
+func TestGroupCalcUsesMatchedColumn(t *testing.T) {
+	for _, layout := range []string{"table", "list", "calendar"} {
+		t.Run(layout, func(t *testing.T) {
+			table := &Table{
+				BaseInstance: &BaseInstance{GroupCalc: &GroupCalc{
+					Field: "amount", FieldCalc: &FieldCalc{Operator: CalcOperatorSum},
+				}},
+				Columns: []*TableColumn{
+					{BaseInstanceField: &BaseInstanceField{ID: "first", Type: KeyTypeNumber}},
+					{BaseInstanceField: &BaseInstanceField{ID: "amount", Type: KeyTypeNumber}},
+				},
+			}
+			for _, amount := range []float64{3, 7} {
+				table.Rows = append(table.Rows, &TableRow{Cells: []*TableCell{
+					{BaseValue: &BaseValue{Value: &Value{Type: KeyTypeNumber, Number: &ValueNumber{Content: 100, IsNotEmpty: true}}}},
+					{BaseValue: &BaseValue{Value: &Value{Type: KeyTypeNumber, Number: &ValueNumber{Content: amount, IsNotEmpty: true}}}},
+				}})
+			}
+			var view Viewable = table
+			switch layout {
+			case "list":
+				view = &List{Table: table}
+			case "calendar":
+				view = &Calendar{Table: table}
+			}
+			collection := view.(Collection)
+			for index, id := range []string{"first", "amount"} {
+				field, actual := collection.GetField(id)
+				if field != table.Columns[index] || actual != index {
+					t.Fatalf("GetField(%q) = %v, %d; want column %d", id, field, actual, index)
+				}
+			}
+			if field, index := collection.GetField("missing"); field != nil || index != -1 {
+				t.Fatalf("missing field = %v, %d; want nil, -1", field, index)
+			}
+			attrView := &AttributeView{KeyValues: []*KeyValues{
+				{Key: &Key{ID: "first", Type: KeyTypeNumber}},
+				{Key: &Key{ID: "amount", Type: KeyTypeNumber}},
+			}}
+			Calc(view, attrView)
+			result := view.GetGroupCalc().FieldCalc.Result
+			if result == nil || result.Number == nil || result.Number.Content != 10 {
+				t.Fatalf("group calculation used a different column: %+v", result)
+			}
+			if table.Columns[1].Calc != nil {
+				t.Fatal("temporary column calculation was retained")
+			}
+		})
+	}
+}
+
 func TestCalcRelationAndRollupCounts(t *testing.T) {
 	for _, keyType := range []KeyType{KeyTypeRelation, KeyTypeRollup} {
 		t.Run(string(keyType), func(t *testing.T) {

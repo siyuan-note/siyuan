@@ -27,6 +27,7 @@ import {
 } from "./panelRemoval";
 import {getBlockPanelLoadPlan} from "./panelLoad";
 import {positionBlockPanel} from "./panelPosition";
+import {isBlockPanelTargetAvailable, registerBlockPanelOwner} from "./panelOwnership";
 
 const BLOCK_PANEL_EDITOR_MIN_HEIGHT = 155;
 
@@ -48,6 +49,7 @@ export class BlockPanel {
     private refDefEditors = new Map<IRefDefs, Protyle>();
     private refDefInfos = new Map<IRefDefs, IBlockPanelItemInfo>();
     private destroying = false;
+    private canShow: () => boolean;
 
     // x,y 和 targetElement 二选一必传
     constructor(options: {
@@ -58,6 +60,7 @@ export class BlockPanel {
         originalRefBlockIDs?: Record<string, string>,  // isBacklink 为 true 时有效
         x?: number,
         y?: number,
+        canShow?: () => boolean,
     }) {
         this.id = genUUID();
         this.targetElement = options.targetElement;
@@ -67,9 +70,11 @@ export class BlockPanel {
         this.y = options.y;
         this.isBacklink = options.isBacklink;
         this.originalRefBlockIDs = options.originalRefBlockIDs;
+        this.canShow = options.canShow;
 
         this.element = document.createElement("div");
         this.element.classList.add("block__popover");
+        registerBlockPanelOwner(this.element, this.targetElement);
 
         const parentElement = hasClosestByClassName(this.targetElement, "block__popover", true);
         let level = 1;
@@ -456,6 +461,9 @@ export class BlockPanel {
                     }
                     if (afterCB) {
                         afterCB();
+                        if (!this.element) {
+                            return;
+                        }
                     }
                     if (isInitialRender) {
                         isInitialRender = false;
@@ -483,7 +491,7 @@ export class BlockPanel {
         });
     }
 
-    public destroy() {
+    public destroy(removeMenu = true) {
         if (!this.element || this.destroying) {
             return;
         }
@@ -514,7 +522,7 @@ export class BlockPanel {
         this.targetElement = undefined;
         // 移除弹出上使用右键菜单
         const menuLevel = parseInt(window.siyuan.menus.menu.element.dataset.from);
-        if (menuLevel && menuLevel >= level && window.siyuan.menus.menu.element.dataset.from?.includes("popover")) {
+        if (removeMenu && menuLevel && menuLevel >= level && window.siyuan.menus.menu.element.dataset.from?.includes("popover")) {
             // https://github.com/siyuan-note/siyuan/issues/9854 右键菜单不是从浮窗中弹出的则不进行移除
             window.siyuan.menus.menu.remove();
         }
@@ -589,6 +597,14 @@ export class BlockPanel {
                     if (!document.contains(this.element)) {
                         return;
                     }
+                    if ((this.canShow && !this.canShow()) ||
+                        (!this.element.classList.contains("block__popover--open") && this.targetElement &&
+                            !isBlockPanelTargetAvailable(this.targetElement))) {
+                        // 尚未展示的浮窗不能关闭其他浮窗上的菜单。
+                        this.destroy(false);
+                        return;
+                    }
+                    this.canShow = undefined;
                     let targetRect;
                     if (this.targetElement && this.targetElement.classList.contains("protyle-wysiwyg__embed")) {
                         targetRect = this.targetElement.getBoundingClientRect();

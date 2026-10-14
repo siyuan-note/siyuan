@@ -52,7 +52,7 @@ type AVValue struct {
 	ID              string           `json:"id,omitempty" api:"optional,nullable"`
 	KeyID           string           `json:"keyID,omitempty" api:"optional,nullable"`
 	BlockID         string           `json:"blockID,omitempty" api:"optional,nullable"`
-	Type            string           `json:"type,omitempty" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
+	Type            string           `json:"type,omitempty" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|location|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
 	IsDetached      bool             `json:"isDetached,omitempty" api:"optional,nullable"`
 	CreatedAt       int64            `json:"createdAt,omitempty" api:"optional,nullable"`
 	UpdatedAt       int64            `json:"updatedAt,omitempty" api:"optional,nullable"`
@@ -64,6 +64,7 @@ type AVValue struct {
 	URL             *AVValueURL      `json:"url,omitempty" api:"optional,nullable"`
 	Email           *AVValueEmail    `json:"email,omitempty" api:"optional,nullable"`
 	Phone           *AVValuePhone    `json:"phone,omitempty" api:"optional,nullable"`
+	Location        *AVValueLocation `json:"location,omitempty" api:"optional,nullable"`
 	MAsset          []*AVValueAsset  `json:"mAsset,omitempty" api:"optional,nullable"`
 	Template        *AVValueTemplate `json:"template,omitempty" api:"optional,nullable"`
 	Created         *AVValueCreated  `json:"created,omitempty" api:"optional,nullable"`
@@ -78,7 +79,8 @@ type AVValue struct {
 }
 
 type AVValueBlock struct {
-	ID         string `json:"id,omitempty" api:"optional,nullable"`
+	ID string `json:"id,omitempty" api:"optional,nullable"`
+	// 游离条目可独立设置图标；绑定条目与目标块共享图标，无图标的普通块在绑定时继承条目图标。
 	Icon       string `json:"icon,omitempty" api:"optional,nullable"`
 	Content    string `json:"content" api:"optional,nullable"`
 	RefSubtype string `json:"refSubtype,omitempty" api:"optional,nullable,enum=s|d"`
@@ -140,6 +142,21 @@ type AVValueEmail struct {
 
 type AVValuePhone struct {
 	Content string `json:"content" api:"optional,nullable"`
+}
+
+// AVValueLocation 保存单个位置的 WGS84 坐标，不执行坐标系转换。
+// API 使用具名成员，不接受无标签的坐标数组。
+// 界面按经度、纬度显示并使用具名字段输入；规范文本复制与导出保留纬度、经度顺序。
+// 纬度和经度必须同时为空或同时提供，范围分别为 [-90,90] 和 [-180,180]，零是有效坐标。
+// 更新时省略成员保留原值，显式 null 同时清空两个坐标；名称可以独立存在。
+// 位置值拒绝坐标系及其他额外字段，字段不提供默认坐标系设置。
+// 位置字段的文本筛选条件放在 AVValue.Text.Content，不将搜索词解析成坐标。
+type AVValueLocation struct {
+	Name      string   `json:"name,omitempty" api:"optional,nullable"`
+	Latitude  *float64 `json:"latitude,omitempty" api:"optional,nullable"`
+	Longitude *float64 `json:"longitude,omitempty" api:"optional,nullable"`
+	// 来源文本不参与判空、筛选和排序。仅修改名称时保留；修改坐标时若省略则清空。
+	OriginalInput string `json:"originalInput,omitempty" api:"optional,nullable"`
 }
 
 type AVValueAsset struct {
@@ -210,21 +227,25 @@ type AVGroupRange struct {
 }
 
 type AVKey struct {
-	ID             string            `json:"id" api:"optional,nullable"`
-	Name           string            `json:"name" api:"optional,nullable"`
-	Type           string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
-	Icon           string            `json:"icon" api:"optional,nullable"`
-	Desc           string            `json:"desc" api:"optional,nullable"`
-	Options        []*AVSelectOption `json:"options,omitempty" api:"optional,nullable"`
-	NumberFormat   string            `json:"numberFormat" api:"optional,nullable"`
-	DateFormat     string            `json:"dateFormat,omitempty" api:"optional,nullable,enum=|full|month-day-year|day-month-year|year-month-day"`
-	Template       string            `json:"template" api:"optional,nullable"`
-	RenderTemplate string            `json:"renderTemplate,omitempty" api:"optional,nullable"`
-	Relation       *AVRelation       `json:"relation,omitempty" api:"optional,nullable"`
-	Rollup         *AVRollup         `json:"rollup,omitempty" api:"optional,nullable"`
-	Date           *AVDate           `json:"date,omitempty" api:"optional,nullable"`
-	Created        *AVCreated        `json:"created,omitempty" api:"optional,nullable"`
-	Updated        *AVUpdated        `json:"updated,omitempty" api:"optional,nullable"`
+	// 属性面板字段可见性：空值沿用全局设置，always 始终显示，hide-empty 空白时隐藏，hide 始终隐藏。
+	AttributePanelVisibility string            `json:"attributePanelVisibility,omitempty" api:"optional,nullable,enum=|always|hide-empty|hide"`
+	ID                       string            `json:"id" api:"optional,nullable"`
+	Name                     string            `json:"name" api:"optional,nullable"`
+	Type                     string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|location|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
+	Icon                     string            `json:"icon" api:"optional,nullable"`
+	Desc                     string            `json:"desc" api:"optional,nullable"`
+	Options                  []*AVSelectOption `json:"options,omitempty" api:"optional,nullable"`
+	NumberFormat             string            `json:"numberFormat" api:"optional,nullable"`
+	// lunar 为日期字段的整列农历录入与显示设置，时间戳保持不变，旧格式及空值仍使用公历。
+	// 离线对照表覆盖公历 1901-02-19 至 2100-12-31，范围外的旧值保留并显示范围提示。
+	DateFormat     string      `json:"dateFormat,omitempty" api:"optional,nullable,enum=|full|month-day-year|day-month-year|year-month-day|lunar"`
+	Template       string      `json:"template" api:"optional,nullable"`
+	RenderTemplate string      `json:"renderTemplate,omitempty" api:"optional,nullable"`
+	Relation       *AVRelation `json:"relation,omitempty" api:"optional,nullable"`
+	Rollup         *AVRollup   `json:"rollup,omitempty" api:"optional,nullable"`
+	Date           *AVDate     `json:"date,omitempty" api:"optional,nullable"`
+	Created        *AVCreated  `json:"created,omitempty" api:"optional,nullable"`
+	Updated        *AVUpdated  `json:"updated,omitempty" api:"optional,nullable"`
 }
 
 type AVSelectOption struct {
@@ -285,24 +306,25 @@ type AVTableColumn struct {
 }
 
 type AVBaseInstanceField struct {
-	ID             string            `json:"id" api:"optional,nullable"`
-	Name           string            `json:"name" api:"optional,nullable"`
-	Type           string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
-	Icon           string            `json:"icon" api:"optional,nullable"`
-	Wrap           bool              `json:"wrap" api:"optional,nullable"`
-	Hidden         bool              `json:"hidden" api:"optional,nullable"`
-	Desc           string            `json:"desc" api:"optional,nullable"`
-	Calc           *AVFieldCalc      `json:"calc" api:"optional,nullable"`
-	Options        []*AVSelectOption `json:"options,omitempty" api:"optional,nullable"`
-	NumberFormat   string            `json:"numberFormat" api:"optional,nullable"`
-	DateFormat     string            `json:"dateFormat,omitempty" api:"optional,nullable,enum=|full|month-day-year|day-month-year|year-month-day"`
-	Template       string            `json:"template" api:"optional,nullable"`
-	RenderTemplate string            `json:"renderTemplate,omitempty" api:"optional,nullable"`
-	Relation       *AVRelation       `json:"relation,omitempty" api:"optional,nullable"`
-	Rollup         *AVRollup         `json:"rollup,omitempty" api:"optional,nullable"`
-	Date           *AVDate           `json:"date,omitempty" api:"optional,nullable"`
-	Created        *AVCreated        `json:"created,omitempty" api:"optional,nullable"`
-	Updated        *AVUpdated        `json:"updated,omitempty" api:"optional,nullable"`
+	ID           string            `json:"id" api:"optional,nullable"`
+	Name         string            `json:"name" api:"optional,nullable"`
+	Type         string            `json:"type" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|location|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
+	Icon         string            `json:"icon" api:"optional,nullable"`
+	Wrap         bool              `json:"wrap" api:"optional,nullable"`
+	Hidden       bool              `json:"hidden" api:"optional,nullable"`
+	Desc         string            `json:"desc" api:"optional,nullable"`
+	Calc         *AVFieldCalc      `json:"calc" api:"optional,nullable"`
+	Options      []*AVSelectOption `json:"options,omitempty" api:"optional,nullable"`
+	NumberFormat string            `json:"numberFormat" api:"optional,nullable"`
+	// lunar 按字段启用农历，单元格继续返回原始毫秒时间戳；范围与兼容语义见 AVKey.DateFormat。
+	DateFormat     string      `json:"dateFormat,omitempty" api:"optional,nullable,enum=|full|month-day-year|day-month-year|year-month-day|lunar"`
+	Template       string      `json:"template" api:"optional,nullable"`
+	RenderTemplate string      `json:"renderTemplate,omitempty" api:"optional,nullable"`
+	Relation       *AVRelation `json:"relation,omitempty" api:"optional,nullable"`
+	Rollup         *AVRollup   `json:"rollup,omitempty" api:"optional,nullable"`
+	Date           *AVDate     `json:"date,omitempty" api:"optional,nullable"`
+	Created        *AVCreated  `json:"created,omitempty" api:"optional,nullable"`
+	Updated        *AVUpdated  `json:"updated,omitempty" api:"optional,nullable"`
 }
 
 type AVTableRow struct {
@@ -320,7 +342,7 @@ type AVTableCell struct {
 type AVBaseValue struct {
 	ID        string   `json:"id" api:"optional,nullable"`
 	Value     *AVValue `json:"value" api:"optional,nullable"`
-	ValueType string   `json:"valueType" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
+	ValueType string   `json:"valueType" api:"optional,nullable,enum=block|text|number|date|select|mSelect|url|email|phone|location|mAsset|template|created|updated|checkbox|relation|rollup|lineNumber"`
 }
 
 type AVGallery struct {
@@ -416,8 +438,9 @@ type AVViewData struct {
 }
 
 type AVNewItemTemplate struct {
-	ID                  string                          `json:"id" api:"optional,nullable"`
-	Name                string                          `json:"name" api:"optional,nullable"`
+	ID   string `json:"id" api:"optional,nullable"`
+	Name string `json:"name" api:"optional,nullable"`
+	// 游离条目和文档条目均支持预设图标；省略或为空时使用相应的默认图标。
 	Icon                string                          `json:"icon,omitempty" api:"optional,nullable"`
 	TargetType          string                          `json:"targetType" api:"optional,nullable,enum=detached|document"`
 	PrimaryKeyTemplate  string                          `json:"primaryKeyTemplate,omitempty" api:"optional,nullable"`
@@ -460,6 +483,7 @@ type AVAttributeViewData struct {
 	Views              []*AVView                                  `json:"views" api:"optional,nullable"`
 	NewItemTemplates   []*AVNewItemTemplate                       `json:"newItemTemplates,omitempty" api:"optional,nullable"`
 	DefaultTemplateID  string                                     `json:"defaultTemplateID,omitempty" api:"optional,nullable"`
+	Automations        *AVAutomationConfig                        `json:"automations,omitempty" api:"optional"`
 	CardCoverPositions map[string]map[string]*AVCardCoverPosition `json:"cardCoverPositions,omitempty" api:"optional,nullable"`
 }
 

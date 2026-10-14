@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import test from "node:test";
 import {getEntryCatalogChildren} from "./catalog";
 import {
+    isValidEntryOrder,
     mergeEntryOrder,
     mergeEntryOrderPreservingUnknown,
     moveEntryOrder,
@@ -9,6 +10,45 @@ import {
     resolveEntryOrder,
     resolveEntryOrderWithBoundaryDefaults,
 } from "./order";
+
+test("AI OCR merges into saved image menus while retaining plugin slots and valid separators", () => {
+    const entries = getEntryCatalogChildren("inline.image.ocr");
+    const defaults = entries.map(item => item.key);
+    const saved = ["copyOCRText", "plugin:example:item", "ocrResult", "separator_reOCR", "reOCR"];
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved, undefined, separators);
+    assert.deepEqual(merged, [...saved, "reAIOCR"]);
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+    assert.equal(isValidEntryOrder(merged, separators), true);
+});
+
+test("super block creation merges into saved menu orders and preserves plugin slots", () => {
+    const groups: Array<[string, string[]]> = [
+        ["gutter.single.superBlock", ["prependSuperBlockColumn", "prependSuperBlockChild", "appendSuperBlockColumn", "appendSuperBlockChild"]],
+        ["gutter.single", ["createSuperBlockLeft", "createSuperBlockRight"]],
+        ["editor.slash.menu", ["horizontalSuperBlock", "verticalSuperBlock"]],
+    ];
+    groups.forEach(([path, added]) => {
+        const entries = getEntryCatalogChildren(path);
+        const defaults = entries.map(item => item.key);
+        const saved = defaults.filter(key => !added.includes(key)).reverse();
+        saved.splice(1, 0, "plugin:example:item");
+        const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+        assert.deepEqual(merged.filter(key => !added.includes(key)), saved);
+        added.forEach(key => {
+            assert.equal(merged.filter(item => item === key).length, 1);
+            assert.equal(entries.find(item => item.key === key).simple, true);
+        });
+        const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+        const resolved = resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators);
+        assert.equal(resolved.includes("plugin:example:item"), true);
+        assert.equal(separators.has(resolved[0]), false);
+        assert.equal(separators.has(resolved[resolved.length - 1]), false);
+        resolved.forEach((key, index) => {
+            assert.equal(separators.has(key) && separators.has(resolved[index + 1]), false);
+        });
+    });
+});
 
 test("document tree duplication merges into saved orders and retains plugin slots", () => {
     const entries = getEntryCatalogChildren("docTree.document.copy");
@@ -57,6 +97,18 @@ test("database list view merges into saved slash orders and preserves plugin slo
         ["databaseTableView", "databaseListView"]);
 });
 
+test("retired database map entry stays hidden without changing saved slash or plugin order", () => {
+    const entries = getEntryCatalogChildren("editor.slash.menu");
+    const defaults = entries.map(item => item.key);
+    const saved = [...defaults];
+    saved.splice(saved.indexOf("databaseCalendarView") + 1, 0, "databaseMapView", "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    assert.equal(defaults.includes("databaseMapView"), false);
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators),
+        saved.filter(key => key !== "databaseMapView"));
+});
+
 test("custom task status merges into saved list menus without moving existing entries", () => {
     const entries = getEntryCatalogChildren("gutter.single.listBlock");
     const defaults = entries.map(item => item.key);
@@ -78,10 +130,10 @@ test("remove list merges into saved conversion menus and preserves plugin slots"
         saved.splice(1, 0, "plugin:example:item");
         const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
         assert.deepEqual(merged.filter(key => key !== "removeList"), saved);
-        assert.equal(merged[merged.indexOf("list") - 1], "removeList");
+        assert.equal(merged[merged.indexOf("heading6") + 1], "removeList");
         const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
         assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
-        assert.deepEqual(resolveEntryOrder(["paragraph", "removeList"], merged, separators), ["paragraph", "removeList"]);
+        assert.deepEqual(resolveEntryOrder(["paragraph", "removeList"], merged, separators), ["removeList", "paragraph"]);
     }
 });
 
@@ -245,7 +297,7 @@ test("tab conversion merges into saved block menus without moving plugin slots",
     const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
     assert.deepEqual(merged.filter(key => key !== "tabs"), saved);
     assert.equal(merged[1], "plugin:example:item");
-    assert.equal(merged[merged.indexOf("tabs") + 1], "heading1");
+    assert.equal(merged[merged.indexOf("tabs") + 1], "superBlock");
 });
 
 test("document tree profiles merge sibling creation while preserving custom order and plugin slots", () => {

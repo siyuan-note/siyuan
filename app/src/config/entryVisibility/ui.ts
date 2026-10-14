@@ -5,9 +5,7 @@ import {genUUID} from "../../util/genID";
 import {
     entryCatalog,
     getEntryCatalogChildren,
-    getEntryCatalogCustomDefaultVisibility,
     getEntryCatalogPathChain,
-    getEntryPaths,
     IEntryCatalogNode,
     IEntryCatalogSection,
     isEntryCatalogNodeConfigurable,
@@ -15,6 +13,8 @@ import {
     refreshDockCatalog,
     refreshSlashMenuCatalog,
     refreshTopBarCatalog,
+    refreshToolbarCatalogEntries,
+    SLASH_MENU_FREQUENT_PATH,
     TOP_BAR_ROOT_PATH,
     STATUS_BAR_ROOT_PATH,
 } from "./catalog";
@@ -24,7 +24,8 @@ import {
     ENTRY_PROFILE_FULL,
     ENTRY_PROFILE_SIMPLE,
     ENTRY_VISIBILITY_VERSION,
-    getConfiguredEntryVisibility as isEntryVisible,
+    getActiveEntryProfile,
+    getEntryProfileDefaultVisibility,
     saveEntryVisibility,
     TEntryVisibilityTemplate,
 } from "./runtime";
@@ -36,19 +37,28 @@ import {
 } from "./order";
 import {
     getProfileEntryVisibility,
+    getSavedEntryOrder,
     isEntryVisibilityImportVersionSupported,
     normalizeEntryVisibilityImportProfile,
+    resetEntryProfileOrder,
     TEntryVisibilityImportProfile,
 } from "./profile";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {isMobile} from "../../util/functions";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {bindTouchOrder} from "./touchOrder";
-import {MOBILE_TOOLBAR_NAMES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
+import {getSettingsOwnerApp} from "../setting/windowContext";
+/// #if !MOBILE
+import {getSettingsWindowHost, isSettingsWindow} from "../setting/windowContext";
+import {getEditorToolbarCatalogSnapshot} from "../../protyle/toolbar/catalogSnapshot";
+/// #endif
 import {
     DOCK_ORDER_SCOPES,
     DOCK_ORDER_SCOPES_BY_SIDE,
     getDockEntryOrderSnapshot,
+    getDefaultDockEntryOrderSnapshot,
     getDockOrderScopeLabelKey,
     isDockOrderScope,
     mergeDockEntryOrderSnapshot,
@@ -58,9 +68,10 @@ import {
 } from "./dockOrder";
 
 const getVisibleEntryCatalog = () => isMobile() ? entryCatalog.filter(item =>
-    item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "editor.slash")
-    .map(item => item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, children: item.children.filter(child =>
-        child.type === "separator" || MOBILE_TOOLBAR_NAMES.includes(child.key) || child.key.startsWith("plugin:"))} : item) : entryCatalog.map(item =>
+    item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "editor.slash" || item.key === "editor.image")
+    .map(item => item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, sortable: false,
+        children: item.children.filter(child => MOBILE_TOOLBAR_CONTEXT_KEYS.includes(child.key))} : item) : entryCatalog.map(item =>
+    item.key === TOOLBAR_ENTRY_ROOT_PATH ? {...item, children: item.children.filter(child => !child.key.startsWith("mobile-"))} :
     item.key === TOP_BAR_ROOT_PATH && !isInMobileApp() ?
         {...item, children: item.children.filter(child => child.key !== "barExit")} : item);
 
@@ -124,13 +135,15 @@ const createProfile = (template: TEntryVisibilityTemplate, current = false, name
     const profile: Config.IEntryVisibilityProfile = {
         id: genUUID(),
         name: uniqueName(name || window.siyuan.languages.entryCustomProfile),
-        entries: createEntryProfileSnapshot(template),
+        defaults: template,
+        entries: {},
         orders: createEntryOrderSnapshot(current),
     };
     if (current) {
-        getEntryPaths().forEach((path) => {
-            profile.entries[path] = isEntryVisible(path);
-        });
+        const active = getActiveEntryProfile();
+        profile.defaults = active?.defaults || (active ? undefined :
+            window.siyuan.config.appearance.entryVisibility.active === ENTRY_PROFILE_SIMPLE ? ENTRY_PROFILE_SIMPLE : ENTRY_PROFILE_FULL);
+        profile.entries = {...active?.entries};
     }
     return profile;
 };
@@ -152,13 +165,20 @@ const getEntryViews = (root: HTMLElement) => Array.from(getEntryViewHost(root).c
 const removeEntryView = (root: HTMLElement, view?: HTMLElement) => {
     const views = view ? [view] : getEntryViews(root);
     views.forEach((item) => {
+        const remove = () => {
+            if (!item.parentElement) {
+                return;
+            }
+            item.remove();
+            root.dispatchEvent(new CustomEvent("siyuan-entry-profile-closed", {bubbles: true}));
+        };
         item.classList.remove("config__view--show");
         item.addEventListener("transitionend", (event) => {
             if (event.propertyName === "opacity") {
-                item.remove();
+                remove();
             }
         });
-        window.setTimeout(() => item.remove(), 300);
+        window.setTimeout(remove, 300);
     });
 };
 
@@ -227,7 +247,7 @@ const resolveProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, paren
     if (parentPath === STATUS_BAR_ROOT_PATH) {
         return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile.orders?.[parentPath], "spacer", separatorKeys);
     }
-    return resolveEntryOrder(defaultOrder, profile.orders?.[parentPath], separatorKeys);
+    return resolveEntryOrder(defaultOrder, getSavedEntryOrder(profile, parentPath, defaultOrder), separatorKeys);
 };
 
 const getProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, parentPath: string,
@@ -251,7 +271,7 @@ const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string
     return `<input class="b3-switch" type="checkbox"
     aria-label="${escapeAttr(label)}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
     ${!parentEnabled && !readOnly ? " disabled" : ""}${getProfileEntryVisibility(profile, path,
-        getEntryCatalogCustomDefaultVisibility(path)) ? " checked" : ""}>`;
+        getEntryProfileDefaultVisibility(profile, path)) ? " checked" : ""}>`;
 };
 
 const renderEntryRows = (profile: Config.IEntryVisibilityProfile, prefix: string,
@@ -300,12 +320,26 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
                            getItemPath = (item: IEntryCatalogNode) => `${prefix}.${item.key}`) => `<section class="config-entry-visibility__column"
     data-entry-column data-entry-depth="${depth}">
     <div class="config-entry-visibility__column-title">
+        ${isMobile() && depth > 0 ? `<button class="block__icon block__icon--show" data-action="back-entry"
+            data-entry-parent="${escapeAttr(prefix)}" aria-label="${escapeAttr(window.siyuan.languages.back)}">
+            <svg><use xlink:href="#iconLeft"></use></svg>
+        </button>` : ""}
         <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
+        ${sortable ? renderOrderReset(prefix) : ""}
     </div>
     <div class="config-entry-visibility__column-list">
-        ${renderEntryRows(profile, prefix, nodes, depth, selectedPaths, parentEnabled, readOnly, sortable, getItemPath)}
+        ${renderEntryRows(profile, prefix, nodes.filter(item => `${prefix}.${item.key}` === SLASH_MENU_FREQUENT_PATH),
+            depth, selectedPaths, true, readOnly, false, getItemPath)}
+        ${renderEntryRows(profile, prefix, nodes.filter(item => `${prefix}.${item.key}` !== SLASH_MENU_FREQUENT_PATH),
+            depth, selectedPaths, parentEnabled, readOnly, sortable, getItemPath)}
     </div>
 </section>`;
+
+const renderOrderReset = (prefix?: string) => `<button class="block__icon block__icon--show ariaLabel"
+    data-action="${prefix ? "reset-entry-order" : "reset-all-entry-orders"}"${prefix ? ` data-entry-parent="${escapeAttr(prefix)}"` : ""} data-position="north"
+    aria-label="${escapeAttr(window.siyuan.languages[prefix ? "entryResetOrder" : "entryResetAllOrders"])}">
+    <svg><use xlink:href="#iconRefresh"></use></svg>
+</button>`;
 
 const getDirectDisplayRoot = (section: IEntryCatalogSection) => section.children.length === 1 &&
     section.children[0].displayChildrenDirectly
@@ -398,7 +432,10 @@ const renderDockColumns = (
                 ? nodes.filter((item) => visiblePaths.has(`${DOCK_SECTION_KEY}.${item.key}`))
                 : nodes;
             return `<section class="config-entry-visibility__dock-group" data-entry-drop-scope="${scope}">
-                <div class="config-entry-visibility__dock-group-title" title="${escapeAttr(scopeLabel)}">${escapeHtml(scopeLabel)}</div>
+                <div class="config-entry-visibility__dock-group-title">
+                    <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(scopeLabel)}">${escapeHtml(scopeLabel)}</span>
+                    ${!visiblePaths && !readOnly ? renderOrderReset(scope) : ""}
+                </div>
                 <div class="config-entry-visibility__dock-list" data-entry-drop-scope="${scope}">
                     ${renderEntryRows(
         profile,
@@ -437,7 +474,10 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
         : catalog;
     const section = sections.find((item) => item.key === sectionKey) || sections[0] || catalog[0];
     const locationColumn = `<section class="config-entry-visibility__column config-entry-visibility__column--locations" data-entry-column>
-    <div class="config-entry-visibility__column-title">${window.siyuan.languages.position}</div>
+    <div class="config-entry-visibility__column-title">
+        <span class="fn__ellipsis fn__flex-1">${window.siyuan.languages.position}</span>
+        ${readOnly ? "" : renderOrderReset()}
+    </div>
     <div class="config-entry-visibility__column-list">
         ${sections.map((item) => renderEntryLocation(profile, item, item.key === section.key, readOnly)).join("")}
     </div>
@@ -457,7 +497,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     let title = directDisplayRoot?.label() || section.label();
     let parentEnabled = directDisplayRoot
         ? getProfileEntryVisibility(profile, directDisplayRootPath,
-            getEntryCatalogCustomDefaultVisibility(directDisplayRootPath))
+            getEntryProfileDefaultVisibility(profile, directDisplayRootPath))
         : true;
     let depth = 0;
     while (nodes.length > 0) {
@@ -476,7 +516,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
             break;
         }
         parentEnabled = parentEnabled && getProfileEntryVisibility(profile, selectedPath,
-            getEntryCatalogCustomDefaultVisibility(selectedPath));
+            getEntryProfileDefaultVisibility(profile, selectedPath));
         nodes = selectedNode.children;
         prefix = selectedPath;
         title = selectedNode.label();
@@ -509,7 +549,9 @@ const getEntrySearchResults = (query: string) => {
             }
         });
     };
-    getVisibleEntryCatalog().forEach((section) => visit(section, section.key, section.children, [section.label()]));
+    getVisibleEntryCatalog().forEach((section) => {
+        visit(section, section.key, section.children, [section.label()]);
+    });
     return results;
 };
 
@@ -524,13 +566,48 @@ const getEntrySearchFilter = (query: string) => {
     return {results, visiblePaths, visibleSectionKeys};
 };
 
+const getProfileDockOrderSnapshot = (builtin: boolean) => {
+    let snapshot: TDockOrderSnapshot;
+    /// #if !MOBILE
+    if (isSettingsWindow()) {
+        try {
+            const ownerSnapshot = getSettingsWindowHost()?.getDockOrderSnapshot();
+            const seen = new Set<string>();
+            if (ownerSnapshot && DOCK_ORDER_SCOPES.every(scope => Array.isArray(ownerSnapshot[scope]) &&
+                ownerSnapshot[scope].every(key => {
+                    if (typeof key !== "string" || !key || seen.has(key)) {
+                        return false;
+                    }
+                    seen.add(key);
+                    return true;
+                }))) {
+                snapshot = Object.fromEntries(DOCK_ORDER_SCOPES.map(scope => [scope, [...ownerSnapshot[scope]]])) as
+                    TDockOrderSnapshot;
+            }
+        } catch (error) {
+            console.warn("Could not read settings owner dock order", error);
+        }
+    }
+    /// #endif
+    snapshot ||= getDockEntryOrderSnapshot();
+    return builtin ? snapshot : getDefaultDockEntryOrderSnapshot(snapshot);
+};
+
+const refreshEditorToolbarCatalog = (plugins: NonNullable<ReturnType<typeof getSettingsOwnerApp>>["plugins"]) => {
+    /// #if !MOBILE
+    refreshToolbarCatalogEntries(getSettingsWindowHost()?.getEditorToolbarCatalogSnapshot() ||
+        getEditorToolbarCatalogSnapshot(plugins));
+    /// #endif
+};
+
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
-    const plugins = window.siyuan.ws?.app?.plugins || [];
+    const plugins = getSettingsOwnerApp()?.plugins || [];
+    refreshEditorToolbarCatalog(plugins);
     refreshTopBarCatalog(plugins);
     refreshDockCatalog(plugins);
     refreshSlashMenuCatalog(plugins);
-    const dockOrderSnapshot = getDockEntryOrderSnapshot();
     const builtin = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL;
+    const dockOrderSnapshot = getProfileDockOrderSnapshot(builtin);
     let selectedTemplate: TEntryVisibilityTemplate | "current" = ENTRY_PROFILE_SIMPLE;
     const existing = profileID
         ? window.siyuan.config.appearance.entryVisibility.profiles.find((item) => item.id === profileID)
@@ -584,6 +661,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     <div class="config-entry-visibility__browser" data-type="entry-browser"></div>
 </div>
 <div class="b3-dialog__action">
+    ${builtin || !isMobile() ? "" : `<button class="b3-button b3-button--outline config-entry-visibility__reset-orders ariaLabel" data-action="reset-all-entry-orders" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.entryResetAllOrders)}"><span class="fn__ellipsis">${window.siyuan.languages.entryResetAllOrders}</span></button><span class="fn__space fn__flex-1"></span>`}
     ${builtin ? `<button class="b3-button b3-button--text" data-action="cancel">${window.siyuan.languages.close}</button>` : `<button class="b3-button b3-button--cancel" data-action="cancel">${window.siyuan.languages.cancel}</button>
     <span class="fn__space"></span>
     <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>`}
@@ -732,7 +810,8 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             }
             return;
         }
-        if (!row || row.dataset.entryParent !== dragging.parentPath || !row.dataset.entryKey) {
+        if (!row || row.dataset.entryParent !== dragging.parentPath || !row.dataset.entryKey ||
+            `${row.dataset.entryParent}.${row.dataset.entryKey}` === SLASH_MENU_FREQUENT_PATH) {
             clearDropTarget();
             dragging.order = undefined;
             return;
@@ -772,8 +851,8 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             return;
         }
         draft.orders ||= {};
-        const savedOrder = draft.orders[dragging.parentPath];
         const context = getEntryOrderContext(dragging.parentPath, dockOrderSnapshot);
+        const savedOrder = getSavedEntryOrder(draft, dragging.parentPath, dragging.defaultOrder);
         const separatorKeys = new Set([
             ...context.separatorKeys,
             ...(savedOrder || []).filter((key) =>
@@ -853,15 +932,11 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             return;
         }
         selectedTemplate = target.value as TEntryVisibilityTemplate | "current";
-        draft.entries = createEntryProfileSnapshot(selectedTemplate === "current"
-            ? ENTRY_PROFILE_FULL
-            : selectedTemplate);
-        draft.orders = createEntryOrderSnapshot(selectedTemplate === "current");
-        if (selectedTemplate === "current") {
-            getEntryPaths().forEach((path) => {
-                draft.entries[path] = isEntryVisible(path);
-            });
-        }
+        const template = createProfile(selectedTemplate === "current" ? ENTRY_PROFILE_FULL : selectedTemplate,
+            selectedTemplate === "current");
+        draft.defaults = template.defaults;
+        draft.entries = template.entries;
+        draft.orders = template.orders;
         renderBrowser();
     });
     view.addEventListener("click", (event) => {
@@ -879,7 +954,11 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         }
         const actionElement = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
         const action = actionElement?.dataset.action;
-        if (action === "back" || action === "cancel") {
+        if (!builtin && (action === "reset-entry-order" || action === "reset-all-entry-orders")) {
+            cancelDrag();
+            resetEntryProfileOrder(draft, action === "reset-entry-order" ? actionElement.dataset.entryParent : undefined);
+            renderBrowser();
+        } else if (action === "back" || action === "cancel") {
             closeEditor();
         } else if (action === "select-entry-section") {
             selectedSectionKey = actionElement.dataset.entrySection;
@@ -889,6 +968,9 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             const depth = Number(actionElement.dataset.entryDepth);
             selectedPaths = selectedPaths.slice(0, depth);
             selectedPaths[depth] = actionElement.dataset.entryPath;
+            renderBrowser(true);
+        } else if (action === "back-entry") {
+            selectedPaths = getEntryCatalogPathChain(selectedSectionKey, actionElement.dataset.entryParent).slice(0, -1);
             renderBrowser(true);
         } else if (!builtin && action === "confirm") {
             const nameInput = view.querySelector<HTMLInputElement>("[data-profile-field='name']");
@@ -975,7 +1057,7 @@ export const genEntryVisibilityHtml = () => `<div class="b3-label config-item" d
 </div>`;
 
 export const mountEntryVisibility = (root: HTMLElement) => {
-    const plugins = window.siyuan.ws?.app?.plugins || [];
+    const plugins = getSettingsOwnerApp()?.plugins || [];
     refreshDockCatalog(plugins);
     refreshSlashMenuCatalog(plugins);
     renderProfileCards(root);

@@ -63,7 +63,7 @@ func TestMoveLocalShorthandsIndexesInlineTags(t *testing.T) {
 		}
 	}
 	Conf.Lang = "en"
-	Conf.Search = conf.NewSearch()
+	Conf.Search.Store(conf.NewSearch())
 	util.WorkingDir = filepath.Clean(filepath.Join("..", "..", "app"))
 	initLang()
 	sql.InitDatabase(true)
@@ -89,8 +89,8 @@ func TestMoveLocalShorthandsIndexesInlineTags(t *testing.T) {
 		{name: "disabled", hPath: "/Source"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			Conf.FileTree.ShorthandSavePath = tc.hPath
-			util.MarkdownSettings.InlineTag = tc.enabled
+			Conf.FileTree.Load().ShorthandSavePath = tc.hPath
+			util.MarkdownSettings.Load().InlineTag = tc.enabled
 			created := time.Date(2026, 9, 8, 8, i, 0, 0, time.Local)
 			label := "shorthand-" + tc.name
 			md := "**bold** [link](https://example.com)\n\n测试#" + label + "#" + tc.suffix

@@ -18,7 +18,7 @@ import (
 func TestGlobalBacklinkPagination(t *testing.T) {
 	fixture := setupStructureTransactionTest(t)
 	setupFoldTransactionDatabase(t, fixture)
-	Conf.Search = conf.NewSearch()
+	Conf.Search.Store(conf.NewSearch())
 	t.Cleanup(func() { ClearGlobalBacklinkSnapshots("") })
 	ids := map[int]string{}
 	for index, rootID := range []string{fixture.sourceID, fixture.targetID} {
@@ -122,7 +122,7 @@ func TestGlobalBacklinkPagination(t *testing.T) {
 func TestGlobalBacklinkTransitiveContextsAndContentSort(t *testing.T) {
 	fixture := setupStructureTransactionTest(t)
 	setupFoldTransactionDatabase(t, fixture)
-	Conf.Search = conf.NewSearch()
+	Conf.Search.Store(conf.NewSearch())
 	t.Cleanup(func() { ClearGlobalBacklinkSnapshots("") })
 	definition, err := LoadTreeByBlockID(fixture.sourceID)
 	if err != nil {
@@ -246,7 +246,7 @@ func TestGlobalBacklinkSnapshotBounds(t *testing.T) {
 func TestGlobalBacklinkLargeDataset(t *testing.T) {
 	fixture := setupStructureTransactionTest(t)
 	setupFoldTransactionDatabase(t, fixture)
-	Conf.Search = conf.NewSearch()
+	Conf.Search.Store(conf.NewSearch())
 	t.Cleanup(func() { ClearGlobalBacklinkSnapshots("") })
 	const documents, perDocument = 100, 100
 	definition, err := LoadTreeByBlockID(fixture.sourceID)

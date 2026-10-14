@@ -38,7 +38,7 @@ func TestInsertLocalAssetsWithoutBlockID(t *testing.T) {
 	util.WorkspaceDir = workspaceDir
 	util.DataDir = filepath.Join(workspaceDir, "data")
 	model.Conf = model.NewAppConf()
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() {
 		model.Conf = originalConf
 		util.WorkspaceDir = originalWorkspaceDir

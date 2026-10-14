@@ -186,8 +186,8 @@ func TestSyncPerceptionDelayedNotificationPreservesLocalEdit(t *testing.T) {
 	a.index()
 
 	prepareSyncDirectoryTest(t)
-	Conf.Sync.Provider, Conf.Sync.CloudName, Conf.Sync.Enabled = conf.ProviderLocal, "main", true
-	Conf.Sync.Local = &conf.Local{Endpoint: "perception-test"}
+	Conf.Sync.Load().Provider, Conf.Sync.Load().CloudName, Conf.Sync.Load().Enabled = conf.ProviderLocal, "main", true
+	Conf.Sync.Load().Local = &conf.Local{Endpoint: "perception-test"}
 	Conf.User = &conf.User{UserId: "perception-test", UserSiYuanOneTimePayStatus: 1}
 	util.RepoDir = a.repo.Path
 	previousRequests := syncRemoteRequests
@@ -195,20 +195,20 @@ func TestSyncPerceptionDelayedNotificationPreservesLocalEdit(t *testing.T) {
 	syncRemoteRequests = newSyncRemoteDeduper(time.Minute)
 	scope := lanSyncScope()
 	for _, mode := range []int{2, 3} {
-		Conf.Sync.Mode = mode
+		Conf.Sync.Load().Mode = mode
 		syncDataFromRemote(scope, latest.ID)
 		if syncRemoteRequests.isCompleted(scope, latest.ID) {
 			t.Fatal("skipped automatic sync was recorded as completed")
 		}
 	}
-	Conf.Sync.Mode = 1
+	Conf.Sync.Load().Mode = 1
 	for range 2 {
 		// 丢弃内存缓存模拟进程重启，仍需通过持久化同步点识别延迟及重复通知。
 		syncRemoteRequests = newSyncRemoteDeduper(time.Minute)
 		for range 2 {
 			syncDataFromRemote(lanSyncScope(), latest.ID)
 			a.assertContent("doc.txt", "still editing locally")
-			if Conf.Sync.Synced != 0 {
+			if Conf.Sync.Load().Synced != 0 {
 				t.Fatal("already applied cloud version started another sync")
 			}
 		}

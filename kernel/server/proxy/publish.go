@@ -50,22 +50,24 @@ var (
 )
 
 func InitPublishService() (uint16, error) {
+	confPublishSnapshot := model.Conf.LoadPublish()
+
 	model.InitPublishAccounts()
 
 	if listener != nil {
-		if !model.Conf.Publish.Enable {
+		if !confPublishSnapshot.Enable {
 			closePublishListener()
 			return 0, nil
 		}
 
 		if port, err := util.ParsePort(Port); err != nil {
 			return 0, err
-		} else if port != model.Conf.Publish.Port {
+		} else if port != confPublishSnapshot.Port {
 			closePublishListener()
 			initPublishService()
 		}
 	} else {
-		if !model.Conf.Publish.Enable {
+		if !confPublishSnapshot.Enable {
 			return 0, nil
 		}
 
@@ -82,7 +84,7 @@ func initPublishService() {
 }
 
 func initPublishListener() (err error) {
-	listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", Host, model.Conf.Publish.Port))
+	listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", Host, model.Conf.Publish.Load().Port))
 	if err != nil {
 		logging.LogErrorf("start listener failed: %s", err)
 		return
@@ -133,10 +135,15 @@ func closePublishListener() {
 func startPublishReverseProxyService() {
 	logging.LogInfof("publish service [%s:%s] is running", Host, Port)
 
-	handler := newPublishReverseProxy(util.ServerURL, transport)
+	reverseProxy := newPublishReverseProxy(util.ServerURL, transport)
+	handler := http.Handler(reverseProxy)
 
 	certPath, keyPath, certErr := util.GetOrCreateTLSCert()
 	if certErr == nil && "" != certPath {
+		// 双栈监听下仍需按开关强制加密，否则发布页面的明文入口会继续可用
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hpj5-f7cj-vvwr
+		handler = util.TLSRedirectHandler(handler)
+
 		// 提前创建 HTTP/HTTPS 各自的 *http.Server 并传入，这样在服务运行期间就能持有它们的引用，
 		// closePublishListener 调用其 Shutdown/Close 时才能关闭已建立的活跃连接（含 HTTP/2 长连接），
 		// 避免切换工作空间后旧连接仍被旧内核接管。
@@ -191,7 +198,7 @@ func publishAuthRejectResponse(request *http.Request, statusCode, retryAfter int
 }
 
 func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.Response, err error) {
-	if model.Conf.Publish.Auth.Enable {
+	if model.Conf.Publish.Load().Auth.Enable {
 		// Session Auth
 		sessionIdCookie, cookieErr := request.Cookie(model.SessionIdCookieName)
 		if cookieErr == nil {
@@ -240,9 +247,9 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 			Value:    sessionID,
 			Path:     "/",
 			HttpOnly: true,
-			// 只有直连 TLS 的连接才标记 Secure，不信任调用方可伪造的 X-Forwarded-Proto，
+			// 只有客户端连接确实使用 TLS 时才标记 Secure，不信任调用方可伪造的 X-Forwarded-Proto，
 			// 避免明文连接上的会话标识被浏览器带到其他连接上 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-7j37-4gq6-wm7m
-			Secure: nil != request.TLS,
+			Secure: util.IsTLSRequest(request),
 			// 阻止跨站请求携带会话 Cookie，与内核其他会话 Cookie 保持一致
 			SameSite: http.SameSiteLaxMode,
 		}

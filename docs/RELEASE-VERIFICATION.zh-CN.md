@@ -1,6 +1,6 @@
 # 发布流程、构建与安装包校验
 
-<!-- release-version: 3.8.6 -->
+<!-- release-version: 3.8.7 -->
 
 > **使用范围：`scripts/build-release.py` 是思源官方打包脚本，仅供官方发布环境使用，其他环境请勿使用。脚本依赖官方构建机器的目录结构、工具链、WSL 配置和签名环境，不是通用打包工具。**
 
@@ -13,7 +13,7 @@
 
 ## 开发版发布步骤
 
-alpha、beta、rc 使用语义化预发布版本号，例如 `3.8.6-alpha.1`、`3.8.6-beta.1`、`3.8.6-rc.1`。以下以 `3.8.6-beta.1` 为例，执行时替换为本次版本。自动发布由 [CD 工作流](../.github/workflows/cd.yml) 执行，无需运行本地四平台构建脚本。
+alpha、beta、rc 使用语义化预发布版本号，例如 `3.8.7-alpha.1`、`3.8.7-beta.1`、`3.8.7-rc.1`。以下以 `3.8.7-beta.1` 为例，执行时替换为本次版本。自动发布由 [CD 工作流](../.github/workflows/cd.yml) 执行，无需运行本地四平台构建脚本。
 
 ### 1. 准备版本并同步代码
 
@@ -28,8 +28,8 @@ alpha、beta、rc 使用语义化预发布版本号，例如 `3.8.6-alpha.1`、`
 在主仓库根目录执行，仅推送本次标签：
 
 ```powershell
-git tag v3.8.6-beta.1
-git push origin v3.8.6-beta.1
+git tag v3.8.7-beta.1
+git push origin v3.8.7-beta.1
 ```
 
 推送包含 `-alpha`、`-beta` 或 `-rc` 的标签会触发 `CD For SiYuan`。标签去掉开头的 `v` 后必须与 `app/package.json` 版本完全一致，Android 版本也必须匹配，否则准备阶段会失败。
@@ -67,22 +67,22 @@ git push origin v3.8.6-beta.1
 在主仓库根目录指定本次正式版版本，先查看准备计划：
 
 ```powershell
-python -X utf8 scripts/prepare-release.py 3.8.6
+python -X utf8 scripts/prepare-release.py 3.8.7
 ```
 
-脚本更新本文版本示例（包括下载地址）、内核、前端、Appx、Android、鸿蒙和 `b3log-index` 官网版本。版本准备阶段即需准备好 `b3log-index`。检查计划中的版本和路径后，选择以下一种方式执行。
+脚本更新本文版本示例（包括下载地址）、内核、前端、Appx、Android、鸿蒙和 `b3log-index` 官网版本。本地须已有 `b3log-index` 仓库，默认放在主仓库同级目录。检查计划中的版本和路径后，选择以下一种方式执行。
 
 仅修改文件，留待人工检查和提交：
 
 ```powershell
-python -X utf8 scripts/prepare-release.py 3.8.6 --execute
+python -X utf8 scripts/prepare-release.py 3.8.7 --execute
 ```
 
-确认主仓库、Android、鸿蒙已跟踪的改动均需发布，并准备好 `b3log-index` 后，查看提交推送计划，再执行：
+确认主仓库、Android、鸿蒙已跟踪的改动均需发布，且 `b3log-index` 分支正确、无冲突或无关改动后，查看提交推送计划，再执行：
 
 ```powershell
-python -X utf8 scripts/prepare-release.py 3.8.6 --publish
-python -X utf8 scripts/prepare-release.py 3.8.6 --publish --execute
+python -X utf8 scripts/prepare-release.py 3.8.7 --publish
+python -X utf8 scripts/prepare-release.py 3.8.7 --publish --execute
 ```
 
 `--publish --execute` 会先完成版本准备，再提交并推送主仓库、Android、鸿蒙的全部已跟踪改动，创建并推送 Android 标签，并构建、校验、提交和推送官网。执行前处理未跟踪文件并确认各仓库分支；官网服务器在安装包发布并验证后部署。参数及失败处理见[发布准备脚本说明](#发布准备脚本说明)。
@@ -90,7 +90,7 @@ python -X utf8 scripts/prepare-release.py 3.8.6 --publish --execute
 如果各仓库已手动提交并推送，可仅在 Android 当前提交版本匹配且工作区干净时创建本地标签，然后自行推送：
 
 ```powershell
-python -X utf8 scripts/prepare-release.py 3.8.6 --tag-android --execute
+python -X utf8 scripts/prepare-release.py 3.8.7 --tag-android --execute
 ```
 
 准备脚本默认使用主仓库同级的 `siyuan-android`、`siyuan-harmony`、`b3log-index`，可用 `--android-dir`、`--harmony-dir`、`--index-dir` 指定路径。主仓库正式版标签在 GitHub 发布 Release 时创建，iOS 仓库仍需手动准备和同步。
@@ -106,8 +106,9 @@ WSL 同步安排在环境检查和签名证书检查之前。如果 SSH 需要�
 ### 3. 准备构建环境
 
 - 准备 Go、Node、pnpm、Windows 双架构编译器、gomobile、Android SDK/NDK、DevEco Studio 和 7-Zip；Appx 还需 `electron-windows-store`
+- OCR 运行库归档缓存位于项目的 `.cache/ocr/`；手动下载时保留原文件名，不解压，脚本校验摘要后复用
 - 停止正在运行的前端开发构建
-- 插好 YubiKey，签名时按系统提示输入 PIN
+- 插好 YubiKey，执行构建时隐藏输入一次签名 PIN
 - 确认 Android、鸿蒙签名配置可用
 - 桌面 `siyuan` 文件夹不要留有旧版本或同名安装包；分批构建时保留本次版本已验证的其他平台产物
 
@@ -129,6 +130,8 @@ python -X utf8 scripts/build-release.py --appx --execute
 
 各平台按 Windows、Linux、Android、鸿蒙的顺序串行构建，中途失败会停止后续步骤。
 
+包含 Windows 时，先隐藏输入一次签名 PIN；预检验证通过后自动完成后续签名。仅查看计划或构建其他平台时不询问 PIN。WSL 的 SSH 认证仍在预检阶段完成，预检通过后再离开电脑。
+
 补充：需要单独构建某个平台或排查构建问题时，可选择对应命令：
 
 ```powershell
@@ -138,9 +141,9 @@ python -X utf8 scripts/build-release.py --platforms android --execute
 python -X utf8 scripts/build-release.py --platforms harmony --execute
 ```
 
-脚本自动构建、复制移动端内核和资源，各平台产物生成后立即收集到桌面 `siyuan` 文件夹，不等待全部平台完成；所有选定平台构建结束后只提示手动校验命令，不自动调用安装包校验器。后续平台构建失败时，已收集的包仍保留；构建成功不代表安装包已校验通过。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.6.apk`。已有同名安装包不会覆盖。脚本不生成或更新 `SHA256SUMS.txt`，也不调用 `checksum.exe`。
+脚本自动构建、复制移动端内核和资源，各平台产物生成后立即收集到桌面 `siyuan` 文件夹，不等待全部平台完成；所有选定平台构建结束后只提示手动校验命令，不自动调用安装包校验器。后续平台构建失败时，已收集的包仍保留；构建成功不代表安装包已校验通过。Android 官方版命名为 `siyuan-版本号.apk`，例如 `siyuan-3.8.7.apk`。已有同名安装包不会覆盖。脚本不生成或更新 `SHA256SUMS.txt`，也不调用 `checksum.exe`。
 
-实际执行时，脚本在主仓库同级的 `release-records/版本号/时间-随机后缀/` 保存本次记录，例如 `D:\88250\release-records\3.8.6\20260929-093000-xxxxxxxx\`。启动和结束时都会打印完整目录，构建失败后也会保留。可用 `--records-dir` 指定记录根目录；记录须与源码仓库、安装包目录及系统临时目录分开。仅预览计划不会创建记录。
+实际执行时，脚本在主仓库同级的 `release-records/版本号/时间-随机后缀/` 保存本次记录，例如 `D:\88250\release-records\3.8.7\20260929-093000-xxxxxxxx\`。启动和结束时都会打印完整目录，构建失败后也会保留。可用 `--records-dir` 指定记录根目录；记录须与源码仓库、安装包目录及系统临时目录分开。仅预览计划不会创建记录。
 
 | 文件 | 内容 |
 | --- | --- |
@@ -173,7 +176,7 @@ macOS、iOS 在对应构建机器上完成构建和签名。macOS 完成公证�
 核对版本、平台和架构后，在仓库根目录执行：
 
 ```powershell
-python -X utf8 scripts/verify-release.py check --version 3.8.6
+python -X utf8 scripts/verify-release.py check --version 3.8.7
 ```
 
 校验器已检查必需前端入口，整套前端漏打包会报错。当前架构检查并不完整，也不检查此次应发布的平台是否齐全，因此不能代替上面的人工核对；校验器不验证 `SHA256SUMS.txt`。
@@ -186,7 +189,7 @@ python -X utf8 scripts/verify-release.py check --version 3.8.6
 
 将发布代码合并并推送到 `master`，确认其构建输入与已验证安装包对应的发布提交一致。
 
-在 GitHub 创建 Release 时输入新标签 `v3.8.6`，选择创建新标签，目标分支选择 `master`，核对目标提交。发布 Release 时由 GitHub 创建标签，无需在本地手动打标签或推送标签。已有同名标签时先核对其指向，不覆盖或重复创建。
+在 GitHub 创建 Release 时输入新标签 `v3.8.7`，选择创建新标签，目标分支选择 `master`，核对目标提交。发布 Release 时由 GitHub 创建标签，无需在本地手动打标签或推送标签。已有同名标签时先核对其指向，不覆盖或重复创建。
 
 - 将公开分发的安装包和最终的 `SHA256SUMS.txt` 上传至 `siyuan-note/siyuan` 的 GitHub Release，核对版本、目标提交和文件名后公开正式版
 - 确认正式版标签已创建，并检查 [Release Docker Image](../.github/workflows/dockerimage.yml) 的运行状态；该工作流监听正式版标签的推送事件，仅合并分支不会触发
@@ -201,8 +204,8 @@ python -X utf8 scripts/verify-release.py check --version 3.8.6
 `release.liuyun.io` 通过 Cloudflare Worker `siyuan-release` 从正式版安装包文件名提取版本号，代理 GitHub Release 下载：
 
 ```text
-公开下载地址：https://release.liuyun.io/siyuan/siyuan-3.8.6-win.exe
-GitHub 源地址：https://github.com/siyuan-note/siyuan/releases/download/v3.8.6/siyuan-3.8.6-win.exe
+公开下载地址：https://release.liuyun.io/siyuan/siyuan-3.8.7-win.exe
+GitHub 源地址：https://github.com/siyuan-note/siyuan/releases/download/v3.8.7/siyuan-3.8.7-win.exe
 ```
 
 预发布安装包及 `SHA256SUMS.txt` 使用 GitHub Release 地址。
@@ -234,7 +237,7 @@ python -X utf8 scripts/clean-release.py
 python -X utf8 scripts/clean-release.py --execute
 ```
 
-脚本清理发布脚本留下的系统临时构建目录、本地及 WSL 的 `app/build`、Linux 内核目录、鸿蒙生成的内核及头文件，以及 Android、鸿蒙工程中的构建输出和复制进去的内核、资源包。桌面 `siyuan` 始终保留；受 Git 管理的文件（包括鸿蒙公共头文件）、源码、签名配置、依赖和工具缓存、开发前端 `app/stage/build` 均保留。清理后再次打包需要重新生成内核和移动端资源包。
+脚本清理发布脚本留下的系统临时构建目录、本地及 WSL 的 `app/build`、Linux 内核目录，以及 Android、鸿蒙工程中的构建输出。保留 Android 工程中的 `app/libs/kernel.aar`、`app/src/main/assets/app.zip`，保留鸿蒙工程中的 `entry/libs/` 内核库及头文件、`entry/src/main/cpp/include/` 公共头文件和 `entry/src/main/resources/rawfile/app.zip`，同时保留本地及 WSL 的 `kernel/harmony/` 内核库及头文件。桌面 `siyuan`、受 Git 管理的文件、源码、签名配置、依赖和工具缓存、开发前端 `app/stage/build` 均保留。系统临时构建目录中的副本仍随临时目录清理，不影响移动端工程中已复制的文件。
 
 自定义过构建参数时，清理时传入相同的 `--android-dir`、`--harmony-dir`、`--wsl-distro`、`--wsl-user`、`--wsl-repo`；使用自定义收集目录时，必须同时传入 `--output` 保护该目录，使用自定义记录目录时传入相同的 `--records-dir`。默认的 `release-records` 发布记录始终保留。`--skip-wsl` 可只清理 Windows 本地。脚本拒绝越界路径、与保留目录重叠的目标以及自身或上级为链接的清理入口；构建目录内部的符号链接和目录联接只删除链接本身，不清理其指向的目录。不会清理其他电脑上的 macOS 或 iOS 构建产物。
 
@@ -267,8 +270,8 @@ python -X utf8 scripts/verify-release.py check
 默认从包名推断发布版本。版本混杂、包名不含版本，或希望明确检查目标时指定版本：
 
 ```text
-python -X utf8 scripts/verify-release.py check --version 3.8.6
-python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.6 --report D:/releases/verification.json
+python -X utf8 scripts/verify-release.py check --version 3.8.7
+python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.7 --report D:/releases/verification.json
 ```
 
 报告路径必须是尚不存在的 `.json` 文件。退出码 `0` 表示所有包通过当前检查，`1` 表示失败或无法验证。检查不会运行安装器、内核或包内 JavaScript，不修改安装包；每个包使用独立临时目录，检查后清理。
@@ -301,6 +304,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - `--platforms` 接受逗号分隔的平台名称，可选 `windows`、`linux`、`android`、`harmony`；默认构建四个平台，Appx 需额外指定 `--appx`
 - `--output` 可指定产物收集目录，默认桌面 `siyuan`；脚本不覆盖已有同名安装包
 - `--records-dir` 可指定持久化记录根目录，默认主仓库同级 `release-records`；每次执行创建独立目录，保存日志和阶段进度，清理发布产物时保留
+- Windows 默认在预检前隐藏输入一次签名 PIN；自动执行环境可通过进程环境变量 `SIYUAN_SIGNING_PIN` 提供，脚本读取后移出父进程环境，不写入命令行参数、配置文件或发布记录；`--signing-ui` 可沿用系统 PIN 弹窗
 - 脚本保留现有 Android 与鸿蒙签名配置，不读取或输出这些配置里的密码
 - WSL 默认用户 `d`、仓库 `/home/d/88250/siyuan`，可通过 `--wsl-user`、`--wsl-repo`、`--wsl-distro` 调整；Linux 或鸿蒙构建预检时自动同步到 Windows 的确切提交，受检查的构建输入须一致，自动同步条件见步骤 2
 - Android、鸿蒙仓库默认在思源仓库同级，可用 `--android-dir`、`--harmony-dir` 调整；构建工具路径可用 `--arm64-cc`、`--deveco` 调整；`--sevenzip` 仅传入完成后提示的手动校验命令，构建时不检查或调用该工具
@@ -310,7 +314,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - 本地前端生产构建一次，Linux 前端在 WSL 中构建
 - Windows 在全新目录构建两个架构内核，生成临时 Electron Builder 配置启用证书签名，不修改仓库 YAML，不复用开发内核目录；默认生成两个 NSIS 包并检查 Authenticode 签名
 - Linux 调用现有 `scripts/linux-build.sh --target=all`，收集双架构 TAR、AppImage、DEB、RPM 共八个包
-- Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.6.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
+- Android 在本次临时目录生成新 AAR，确认内核版本和架构后复制到工程；生成并复制新 `app.zip`，再运行 `gradlew clean buildReleaseTask` 生成四个渠道包；官方版收集为 `siyuan-版本号.apk`（例如 `siyuan-3.8.7.apk`），不带 `official` 或 `release` 后缀，其他渠道保持原文件名
 - 鸿蒙先构建并复制 ARM64 内核，再构建并复制 x86_64 内核，避免同名 `libkernel.so` 被覆盖后拷错；使用同一份新 `app.zip`，通过 Hvigor release 模式执行 `assembleApp`，对应 DevEco Studio 的“构建 - 编译 Hap(s)/APP(s) - 编译 APP(s)”，只收集 `build/outputs/default/siyuan-harmony-default-signed.app`，缺少签名产物时失败，不收集 `unsigned.app` 或单独的 HAP
 - 每条命令失败立即停止，产物必须是本次生成，复制时再次核对摘要
 - 鸿蒙各架构的 `entry/libs/<ABI>/` 只接收 `libkernel.so`，头文件仅从 ARM64 构建目录同步到 `entry/src/main/cpp/include/`；`libkernel.h` 必须为本次生成，`lan_sync_bridge.h` 若由构建目录提供则同步，否则保留工程中维护的版本，缺少必需头文件时停止构建
@@ -319,7 +323,9 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 
 ### YubiKey PIN
 
-沿用 Windows 智能卡驱动和 Electron Builder 的 SignTool 签名链路，按系统提示输入 PIN。提示次数取决于驱动、密钥策略和签名会话，不能保证只有一次。脚本不存储 PIN、不模拟输入，也不改变 PIN 或触摸策略。
+默认通过 Windows 智能卡驱动和 Authenticode 接口自动签名，支持 CNG 的 RSA、ECDSA 签名密钥。启动时隐藏输入一次 PIN，预检先验证密钥可用，再进行耗时构建；PIN 仅在进程内存中暂存，经签名子进程的标准输入传递，不写入文件或日志。每个文件使用 SHA256 签名，并检查证书、签名和时间戳；仅设备通信中断自动重试一次，PIN 错误立即停止。
+
+自动执行时可由启动程序通过进程环境变量 `SIYUAN_SIGNING_PIN` 提供 PIN，无需把密码写进命令或脚本。仍需保持签名设备连接；脚本不改变 PIN 或触摸策略，需要触摸的密钥不能完全无人值守。若驱动不支持自动认证，可添加 `--signing-ui` 沿用系统弹窗。
 
 默认按现有证书主题选择有效代码签名证书；多张证书时用 `--certificate-sha1` 指定 40 位公开指纹，它不是密码。SignTool 的 `/p` 是证书文件密码选项，不能当成通用 YubiKey PIN 参数。参见 [Yubico 驱动说明](https://www.yubico.com/support/download/smart-card-drivers-tools/) 和 [SignTool 文档](https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool)。
 
@@ -330,12 +336,12 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 以 Android 为例，先从本次构建日志取得“本次构建目录”，替换下面的 `$releaseWork`。新构建的 AAR 位于该目录的 `android/kernel.aar`，用于打包的资源归档位于 `mobile/app.zip`。不要使用主仓库的 `kernel/kernel.aar` 或未筛选的 `app/`，它们可能是旧产物或包含未打包的历史更新日志。
 
 ```powershell
-$releaseWork = "C:\Users\DL882\AppData\Local\Temp\siyuan-release-3.8.6-实际目录后缀"
+$releaseWork = "C:\Users\DL882\AppData\Local\Temp\siyuan-release-3.8.7-实际目录后缀"
 $resources = Join-Path $releaseWork "baseline-resources"
 $baseline = Join-Path $releaseWork "android-arm64.release-baseline.json"
 Expand-Archive -LiteralPath (Join-Path $releaseWork "mobile/app.zip") -DestinationPath $resources
-python -X utf8 scripts/verify-release.py baseline --version 3.8.6 --target android-arm64 --kernel (Join-Path $releaseWork "android/kernel.aar") --resources $resources --output $baseline
-python -X utf8 scripts/verify-release.py check ../siyuan-android/app/build-release/siyuan-3.8.6-all --version 3.8.6 --baseline $baseline
+python -X utf8 scripts/verify-release.py baseline --version 3.8.7 --target android-arm64 --kernel (Join-Path $releaseWork "android/kernel.aar") --resources $resources --output $baseline
+python -X utf8 scripts/verify-release.py check ../siyuan-android/app/build-release/siyuan-3.8.7-all --version 3.8.7 --baseline $baseline
 ```
 
 上述资源解压目录和基准文件应使用尚不存在的路径，Android 检查目录须与本次工程路径和版本一致。此示例只检查 Android 四渠道包；检查混合平台目录时，须重复传入 `--baseline` 提供各平台所需基准。

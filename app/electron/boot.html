@@ -160,7 +160,7 @@
 <div id="progressWrap">
     <div id="progressTrack"></div>
     <div id="progress"></div>
-    <div id="details"></div>
+    <div id="details" role="status" aria-live="polite"></div>
 </div>
 <script>
     const getSearch = (key) => {
@@ -317,6 +317,9 @@
         const requestID = ++bootAppearanceRequestID;
         const serverURL = "http://127.0.0.1:" + normalizedPort;
         const request = async () => {
+            if (requestID !== bootAppearanceRequestID) {
+                return;
+            }
             try {
                 const response = await fetch(serverURL + "/api/system/getBootAppearance", {cache: "no-store"});
                 if (!response.ok) {
@@ -442,8 +445,12 @@
         const serverURL = remoteOrigin || 'http://127.0.0.1:' + port
         const progressEl = document.getElementById('progress')
         const detailsEl = document.getElementById('details')
-        detailsEl.textContent = "v" + v + (remoteOrigin ? ' Connecting to remote kernel...' : ' Booting kernel...')
-        loadBootAppearance(port, "desktop");
+        const bootDetails = "v" + v + (remoteOrigin ? " Connecting to remote kernel..." : " Booting kernel...");
+        let previousExitWaiting = getSearch("previousExitWaiting");
+        detailsEl.textContent = previousExitWaiting || bootDetails;
+        if (!previousExitWaiting) {
+            loadBootAppearance(port, "desktop");
+        }
 
         // 随机起始基数（15~25），等待内核进度时先平滑填充到此值
         const baseProgress = 15 + Math.random() * 10
@@ -517,9 +524,18 @@
         })
 
         let progressing = false
+        let progressSource;
+        let progressRetry;
         const subscribe = () => {
+            if (previousExitWaiting || remoteOrigin || progressing) {
+                return;
+            }
             const es = new EventSource(serverURL + '/api/system/bootProgressSSE')
+            progressSource = es;
             es.onmessage = (event) => {
+                if (previousExitWaiting || progressSource !== es) {
+                    return;
+                }
                 const progressData = JSON.parse(event.data)
                 // 内核进度按比例映射到 baseProgress~100 区间，从当前显示值继续递增
                 const display = baseProgress + progressData.progress * (100 - baseProgress) / 100
@@ -549,11 +565,24 @@
                 es.close()
                 // 内核启动早期 HTTP 服务可能尚未就绪，EventSource 原生重连间隔较长（约 3s），
                 // 这里主动短延迟重连，保持与原轮询一致的快速重试语义
-                if (!progressing) {
-                    setTimeout(subscribe, 100)
+                if (!progressing && !previousExitWaiting && progressSource === es) {
+                    progressRetry = setTimeout(subscribe, 100);
                 }
             }
         }
+        // 等待上次退出时保留启动页和动画，暂停依赖新内核的请求，结束后在原页继续启动。
+        window.setPreviousExitWaiting = (message) => {
+            previousExitWaiting = message;
+            detailsEl.textContent = message || bootDetails;
+            clearTimeout(progressRetry);
+            progressSource?.close();
+            progressSource = undefined;
+            bootAppearanceRequestID++;
+            if (!message) {
+                loadBootAppearance(port, "desktop");
+                subscribe();
+            }
+        };
         if (!remoteOrigin) {
             subscribe()
         }

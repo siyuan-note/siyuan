@@ -38,7 +38,7 @@ func TestAgentLogToolReadsSearchesAndRedacts(t *testing.T) {
 	util.ConfDir = filepath.Join(workspace, "conf")
 	util.LogPath = filepath.Join(workspace, "temp", "siyuan.log")
 	model.Conf = model.NewAppConf()
-	model.Conf.Api = &kernelConf.API{Token: "api-token-123456"}
+	model.Conf.Api.Store(&kernelConf.API{Token: "api-token-123456"})
 	t.Cleanup(func() {
 		util.WorkspaceDir, util.DataDir, util.ConfDir, util.LogPath =
 			originalWorkspace, originalData, originalConfDir, originalLogPath

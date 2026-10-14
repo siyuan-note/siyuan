@@ -1,4 +1,5 @@
 import {transformSemanticInlineMarkers} from "../util/inlineElementMarker";
+import {getImageTitle} from "../render/imageTitle";
 
 const NBSP = "\u00A0";
 const ZERO_WIDTH_REGEXP = /\u200B|\u200C|\u200D|\uFEFF/g;
@@ -443,7 +444,7 @@ const convertZhihuImages = (root: HTMLElement) => {
         }
         const clonedImage = image.cloneNode(true) as HTMLImageElement;
         const title = imageWrapper.querySelector<HTMLElement>(".protyle-action__title span")?.textContent?.trim() ||
-            image.getAttribute("title")?.trim();
+            getImageTitle(image).trim();
         if (!title) {
             applyImageLayout(imageWrapper, image, clonedImage);
             imageWrapper.replaceWith(clonedImage);

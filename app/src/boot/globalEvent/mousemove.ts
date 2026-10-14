@@ -2,6 +2,7 @@ import {getAllEditor, getAllModels} from "../../layout/getAll";
 import {isWindow} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../../protyle/util/hasClosest";
 import {getColIndex} from "../../protyle/util/table";
+import {isContainerGutterBridge} from "../../protyle/gutter/container";
 
 export const getTableResizeBounds = (tableElement: HTMLTableElement) => {
     const captionElement = tableElement.querySelector("caption");
@@ -141,20 +142,29 @@ export const windowMouseMove = (event: MouseEvent) => {
 
     // gutter
     const eventPath0 = event.composedPath()[0] as HTMLElement;
-    if (eventPath0 && eventPath0.nodeType !== 3 && eventPath0.classList.contains("protyle-wysiwyg") && eventPath0.style.paddingLeft) {
+    if (eventPath0 && eventPath0.nodeType !== 3 && eventPath0.classList.contains("protyle-wysiwyg")) {
         // 光标在编辑器右边也需要进行显示
-        const mouseElement = document.elementFromPoint(eventPath0.getBoundingClientRect().left + parseInt(eventPath0.style.paddingLeft) + 13, event.clientY);
+        // 平板布局的边距可能来自样式表，按实际内容边界寻找鼠标所在行的块。
+        const paddingLeft = parseFloat(getComputedStyle(eventPath0).paddingLeft) || 0;
+        const mouseElement = document.elementFromPoint(eventPath0.getBoundingClientRect().left + paddingLeft + 13, event.clientY);
         const blockElement = hasClosestBlock(mouseElement);
         if (blockElement) {
             const targetBlockElement = getRightBlock(blockElement, blockElement.getBoundingClientRect().left + 1, event.clientY);
             if (!targetBlockElement) {
                 return;
             }
+            const renderGutter = (protyle: IProtyle) => {
+                // 鼠标经过编辑器留白移向子块块标时，使用实际坐标保留当前块标。
+                if (!isContainerGutterBridge(protyle.gutter.element, targetBlockElement, eventPath0,
+                    event.clientX, event.clientY, button => protyle.gutter.getNodeElement(protyle, button))) {
+                    protyle.gutter.render(protyle, targetBlockElement, mouseElement);
+                }
+            };
             const allModels = getAllModels();
             let findNode = false;
             allModels.editor.find(item => {
                 if (item.editor.protyle.wysiwyg.element === eventPath0) {
-                    item.editor.protyle.gutter.render(item.editor.protyle, targetBlockElement, mouseElement);
+                    renderGutter(item.editor.protyle);
                     findNode = true;
                     return true;
                 }
@@ -163,7 +173,7 @@ export const windowMouseMove = (event: MouseEvent) => {
                 window.siyuan.blockPanels.find(item => {
                     item.editors.find(eItem => {
                         if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                            eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, mouseElement);
+                            renderGutter(eItem.protyle);
                             findNode = true;
                             return true;
                         }
@@ -177,7 +187,7 @@ export const windowMouseMove = (event: MouseEvent) => {
                 allModels.backlink.find(item => {
                     item.editors.find(eItem => {
                         if (eItem.protyle.wysiwyg.element === eventPath0) {
-                            eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, mouseElement);
+                            renderGutter(eItem.protyle);
                             findNode = true;
                             return true;
                         }
@@ -200,11 +210,19 @@ export const windowMouseMove = (event: MouseEvent) => {
         if (!targetBlockElement) {
             return;
         }
+        const listElement = hasClosestBlock(eventPath0);
+        const renderGutter = (protyle: IProtyle) => {
+            // 经过列表序标或留白移向块标时，保留当前子块的操作入口。
+            if (!listElement || !isContainerGutterBridge(protyle.gutter.element, listElement, eventPath0,
+                event.clientX, event.clientY, button => protyle.gutter.getNodeElement(protyle, button))) {
+                protyle.gutter.render(protyle, targetBlockElement);
+            }
+        };
         const allModels = getAllModels();
         let findNode = false;
         allModels.editor.find(item => {
             if (item.editor.protyle.wysiwyg.element.contains(eventPath0)) {
-                item.editor.protyle.gutter.render(item.editor.protyle, targetBlockElement);
+                renderGutter(item.editor.protyle);
                 findNode = true;
                 return true;
             }
@@ -213,7 +231,7 @@ export const windowMouseMove = (event: MouseEvent) => {
             window.siyuan.blockPanels.find(item => {
                 item.editors.find(eItem => {
                     if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                        eItem.protyle.gutter.render(eItem.protyle, targetBlockElement);
+                        renderGutter(eItem.protyle);
                         findNode = true;
                         return true;
                     }
@@ -227,7 +245,7 @@ export const windowMouseMove = (event: MouseEvent) => {
             allModels.backlink.find(item => {
                 item.editors.find(eItem => {
                     if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                        eItem.protyle.gutter.render(eItem.protyle, targetBlockElement);
+                        renderGutter(eItem.protyle);
                         findNode = true;
                         return true;
                     }

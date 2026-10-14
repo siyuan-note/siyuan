@@ -19,6 +19,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin/formdata"
+	"github.com/siyuan-note/siyuan/kernel/plugin/streams"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -51,6 +53,8 @@ func newServiceTestPlugin(t *testing.T, script string) (*KernelPlugin, context.C
 	var runErr error
 	loop.Run(func(rt *goja.Runtime) {
 		rt.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
+		p.formDataHost = formdata.Enable(rt)
+		p.streamsHost = streams.Enable(rt)
 		_, runErr = rt.RunString(script)
 	})
 	if runErr != nil {
@@ -96,7 +100,7 @@ func TestPluginServiceHTTPBranches(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			engine := gin.New()
 			engine.GET("/plugin/private/:name/*path", func(c *gin.Context) {
-				serviceTestWrite(c, pluginServiceHTTPResponse(c, "test", &HttpResponse{StatusCode: 200, Headers: map[string][]string{"X-Value": {"first", "last"}}, Cookies: []*http.Cookie{{Name: "a", Value: "1"}, {Name: "b", Value: "2"}}, Body: tt.body}))
+				serviceTestWrite(c, pluginServiceHTTPResponse(nil, c, "test", &HttpResponse{StatusCode: 200, Headers: map[string][]string{"X-Value": {"first", "last"}}, Cookies: []*http.Cookie{{Name: "a", Value: "1"}, {Name: "b", Value: "2"}}, Body: tt.body}))
 			})
 			recorder := httptest.NewRecorder()
 			engine.ServeHTTP(recorder, httptest.NewRequest("GET", "/plugin/private/test/value?callback=callback", nil))
@@ -177,7 +181,7 @@ func TestPluginServiceProxyAndFiles(t *testing.T) {
 	defer upstream.Close()
 	engine := gin.New()
 	engine.Any("/plugin/private/:name/*path", func(c *gin.Context) {
-		serviceTestWrite(c, pluginServiceHTTPResponse(c, "test", &HttpResponse{StatusCode: 202, Body: &ResponseBody{Proxy: &ResponseProxy{URL: upstream.URL}}}))
+		serviceTestWrite(c, pluginServiceHTTPResponse(nil, c, "test", &HttpResponse{StatusCode: 202, Body: &ResponseBody{Proxy: &ResponseProxy{URL: upstream.URL}}}))
 	})
 	for _, method := range []string{"GET", "HEAD", "POST"} {
 		recorder := httptest.NewRecorder()
@@ -218,7 +222,7 @@ func TestPluginServiceFileRangesRedirectAndPriority(t *testing.T) {
 			status = 200
 			body = &ResponseBody{Data: &ResponseSerializedData{Type: SerializedTypeJSON, Data: 1}, Raw: &ResponseRawData{Data: []byte("ignored")}}
 		}
-		serviceTestWrite(c, pluginServiceHTTPResponse(c, "test", &HttpResponse{StatusCode: status, Body: body}))
+		serviceTestWrite(c, pluginServiceHTTPResponse(nil, c, "test", &HttpResponse{StatusCode: status, Body: body}))
 	})
 	request := httptest.NewRequest("GET", "/plugin/private/test/range", nil)
 	request.Header.Set("Range", "bytes=2-4")
@@ -294,6 +298,243 @@ func TestPluginServiceStreamingLifecycle(t *testing.T) {
 	}
 }
 
+// TestPluginServiceStreamResponse 验证 response.body.stream：第一块数据到达时响应已经在传输（没有等整个流
+// 读完才一次性写出），第二块要等插件自己（通过一个暴露给脚本的 Promise）决定产出才会出现。
+func TestPluginServiceStreamResponse(t *testing.T) {
+	p, cancel := newServiceTestPlugin(t, `globalThis.siyuan={server:{private:{http:{handler:(r)=>{
+		let pulled = false;
+		const stream = new ReadableStream({
+			start(controller) { controller.enqueue(new Uint8Array([102,105,114,115,116,45])); },
+			pull(controller) {
+				if (!pulled) { pulled = true; return; }
+				return __secondChunkReady().then(() => {
+					controller.enqueue(new Uint8Array([115,101,99,111,110,100]));
+					controller.close();
+				});
+			},
+		});
+		return {statusCode: 200, headers: {"X-Stream": ["yes"]}, body: {stream: {contentType: "text/plain", stream}}};
+	}}}}};`)
+	defer cancel()
+
+	var resolveSecondChunk func(any) error
+	if _, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
+		return nil, rt.Set("__secondChunkReady", func(goja.FunctionCall) goja.Value {
+			promise, resolve, _ := rt.NewPromise()
+			resolveSecondChunk = resolve
+			return rt.ToValue(promise)
+		})
+	}); err != nil {
+		t.Fatalf("expose __secondChunkReady: %v", err)
+	}
+
+	engine := gin.New()
+	engine.Any("/plugin/private/:name/*path", serviceTestHandler)
+	server := httptest.NewServer(engine)
+	defer server.Close()
+
+	response, err := http.Get(server.URL + "/plugin/private/" + p.Name + "/chunks")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != 200 || response.Header.Get("X-Stream") != "yes" || response.Header.Get("Content-Type") != "text/plain" {
+		t.Fatalf("stream response headers changed: %d %v", response.StatusCode, response.Header)
+	}
+
+	first := make([]byte, 6)
+	if _, err = io.ReadFull(response.Body, first); err != nil || string(first) != "first-" {
+		t.Fatalf("first chunk changed: %q %v", first, err)
+	}
+
+	// 这时候第二块还没有被放行；用一个短超时确认连接仍然卡在第一块之后，证明不是整体缓冲后一次性写出的。
+	readSecond := make(chan []byte, 1)
+	go func() {
+		buf := make([]byte, 6)
+		if _, readErr := io.ReadFull(response.Body, buf); readErr == nil {
+			readSecond <- buf
+		}
+	}()
+	select {
+	case <-readSecond:
+		t.Fatal("second chunk arrived before the plugin produced it")
+	case <-time.After(100 * time.Millisecond):
+	}
+
+	if _, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
+		return nil, resolveSecondChunk(goja.Undefined())
+	}); err != nil {
+		t.Fatalf("resolve __secondChunkReady: %v", err)
+	}
+
+	select {
+	case second := <-readSecond:
+		if string(second) != "second" {
+			t.Fatalf("second chunk changed: %q", second)
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("timed out waiting for the second chunk after it was produced")
+	}
+
+	rest, err := io.ReadAll(response.Body)
+	if err != nil || len(rest) != 0 {
+		t.Fatalf("stream response did not end after close(): %q %v", rest, err)
+	}
+}
+
+// serviceTestEval 在插件的事件循环上求值 script 并导出结果；3 秒内没有完成说明事件循环被阻塞。
+func serviceTestEval(t *testing.T, p *KernelPlugin, script string) any {
+	t.Helper()
+	result := make(chan any, 1)
+	go func() {
+		value, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
+			value, err := rt.RunString(script)
+			if err != nil {
+				return nil, err
+			}
+			return value.Export(), nil
+		})
+		if err != nil {
+			value = err
+		}
+		result <- value
+	}()
+	select {
+	case value := <-result:
+		if err, ok := value.(error); ok {
+			t.Fatalf("evaluate %q: %v", script, err)
+		}
+		return value
+	case <-time.After(3 * time.Second):
+		t.Fatalf("plugin event loop did not respond while evaluating %q", script)
+	}
+	return nil
+}
+
+// TestPluginServiceStreamResponseQueuedChunksAndStatus 验证插件在 start() 中一次性入队多块数据时，响应既不会卡住
+// 请求，也不会卡住插件的事件循环，并且使用插件指定的状态码，没有任何数据块的空流也不例外。
+func TestPluginServiceStreamResponseQueuedChunksAndStatus(t *testing.T) {
+	p, cancel := newServiceTestPlugin(t, `globalThis.siyuan={server:{private:{http:{handler:(r)=>{
+		const count = Number(r.context.path.slice(1));
+		const stream = new ReadableStream({
+			start(controller) {
+				for (let i = 0; i < count; i++) controller.enqueue(new Uint8Array([48 + i]));
+				controller.close();
+			},
+		});
+		return {statusCode: 201, body: {stream: {contentType: "text/plain", stream}}};
+	}}}}};`)
+	defer cancel()
+
+	engine := gin.New()
+	engine.Any("/plugin/private/:name/*path", serviceTestHandler)
+	server := httptest.NewServer(engine)
+	defer server.Close()
+	client := &http.Client{Timeout: 5 * time.Second}
+
+	for _, tt := range []struct{ path, want string }{{"/8", "01234567"}, {"/0", ""}} {
+		response, err := client.Get(server.URL + "/plugin/private/" + p.Name + tt.path)
+		if err != nil {
+			t.Fatalf("GET %s: %v", tt.path, err)
+		}
+		data, err := io.ReadAll(response.Body)
+		response.Body.Close()
+		if err != nil || response.StatusCode != http.StatusCreated || string(data) != tt.want {
+			t.Fatalf("GET %s = %d %q %v, want %d %q", tt.path, response.StatusCode, data, err, http.StatusCreated, tt.want)
+		}
+		serviceTestEval(t, p, "0")
+	}
+}
+
+// TestPluginServiceStreamResponseBackpressure 验证客户端不读取响应体时，内核只按写出进度向流拉取数据，插件的
+// 事件循环保持可用；客户端断开连接后流被取消。每块 1 MiB，写满连接缓冲区后写出被阻塞，拉取次数随之停止增长。
+func TestPluginServiceStreamResponseBackpressure(t *testing.T) {
+	p, cancel := newServiceTestPlugin(t, `globalThis.__pulls = 0; globalThis.__cancelled = false;
+	globalThis.siyuan={server:{private:{http:{handler:()=>({statusCode: 200, body: {stream: {stream: new ReadableStream({
+		pull(controller) { globalThis.__pulls++; controller.enqueue(new Uint8Array(1 << 20)); },
+		cancel() { globalThis.__cancelled = true; },
+	})}}})}}}};`)
+	defer cancel()
+
+	engine := gin.New()
+	engine.Any("/plugin/private/:name/*path", serviceTestHandler)
+	server := httptest.NewServer(engine)
+	defer server.Close()
+	client := &http.Client{Timeout: 5 * time.Second}
+
+	response, err := client.Get(server.URL + "/plugin/private/" + p.Name + "/endless")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pulls := func() int64 { return serviceTestEval(t, p, "globalThis.__pulls").(int64) }
+	deadline := time.Now().Add(3 * time.Second)
+	previous := pulls()
+	for {
+		time.Sleep(200 * time.Millisecond)
+		current := pulls()
+		if current == previous {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("stream kept being pulled while the client was not reading: %d pulls", current)
+		}
+		previous = current
+	}
+	if previous > 64 {
+		t.Fatalf("stream was pulled far ahead of the client: %d pulls", previous)
+	}
+
+	response.Body.Close()
+	for !serviceTestEval(t, p, "globalThis.__cancelled").(bool) {
+		if time.Now().After(deadline.Add(3 * time.Second)) {
+			t.Fatal("stream was not cancelled after the client disconnected")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+}
+
+// 插件上下文取消后，等待下一块数据的流式请求必须退出，不依赖客户端断开连接。
+func TestPluginServiceStreamResponsePluginStopped(t *testing.T) {
+	p, cancel := newServiceTestPlugin(t, `globalThis.siyuan={server:{private:{http:{handler:()=>({
+		statusCode: 200,
+		body: {stream: {stream: new ReadableStream({
+			start(c) { c.enqueue("ready"); },
+			pull() { return new Promise(() => {}); },
+		}, {highWaterMark: 0})}},
+	})}}}};`)
+	defer cancel()
+
+	engine := gin.New()
+	engine.Any("/plugin/private/:name/*path", serviceTestHandler)
+	server := httptest.NewServer(engine)
+	defer server.Close()
+	client := &http.Client{Timeout: 5 * time.Second}
+	response, err := client.Get(server.URL + "/plugin/private/" + p.Name + "/pending")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	first := make([]byte, 5)
+	if _, err = io.ReadFull(response.Body, first); err != nil || string(first) != "ready" {
+		t.Fatalf("initial chunk = %q %v", first, err)
+	}
+	finished := make(chan error, 1)
+	go func() {
+		_, readErr := io.Copy(io.Discard, response.Body)
+		finished <- readErr
+	}()
+	cancel()
+	select {
+	case err = <-finished:
+		if err != nil {
+			t.Fatalf("response did not end cleanly: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("response remained open after the plugin stopped")
+	}
+}
+
 // TestPluginServiceFileConfinedToWorkspace 校验插件私有服务只能服务工作空间内的文件。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phmw-4rgv-r4xv
 func TestPluginServiceFileConfinedToWorkspace(t *testing.T) {
@@ -313,7 +554,7 @@ func TestPluginServiceFileConfinedToWorkspace(t *testing.T) {
 	request := func(path string) *httptest.ResponseRecorder {
 		engine := gin.New()
 		engine.Any("/plugin/private/:name/*path", func(c *gin.Context) {
-			serviceTestWrite(c, pluginServiceHTTPResponse(c, "test", &HttpResponse{
+			serviceTestWrite(c, pluginServiceHTTPResponse(nil, c, "test", &HttpResponse{
 				StatusCode: 200,
 				Body:       &ResponseBody{File: &ResponseFile{Path: path}},
 			}))

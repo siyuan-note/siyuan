@@ -73,6 +73,49 @@ func TestAPIContractFileTreeMissingDocuments(t *testing.T) {
 	}
 }
 
+func TestAPIContractFileTreeDailyNoteDate(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = model.NewAppConf()
+	t.Cleanup(func() { model.Conf = previousConf })
+	engine := gin.New()
+	const path = "/api/filetree/createDailyNote"
+	engine.POST(path, createDailyNote)
+	engine.POST("/api/filetree/getDailyNoteInfo", getDailyNoteInfo)
+	for _, entry := range []struct {
+		body string
+		code int
+	}{
+		{`{"notebook":"missing"}`, 1},
+		{`{"notebook":"missing","date":null}`, 1},
+		{`{"notebook":"missing","date":""}`, 1},
+		{`{"notebook":"missing","date":"2024-02-29"}`, 1},
+		{`{"notebook":"missing","date":"2026-02-29"}`, -1},
+		{`{"notebook":"missing","date":"2026-9-25"}`, -1},
+		{`{"notebook":"missing","date":"0000-01-01"}`, -1},
+		{`{"notebook":"missing","date":"03/04"}`, -1},
+		{`{"notebook":"missing","date":false}`, -1},
+	} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("POST", path, strings.NewReader(entry.body)))
+		requireAPIContract(t, "POST", path, recorder)
+		var response struct {
+			Code int `json:"code"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+			t.Fatal(err)
+		}
+		if response.Code != entry.code {
+			t.Fatalf("unexpected daily note response for %s: %s", entry.body, recorder.Body.String())
+		}
+		preview := httptest.NewRecorder()
+		engine.ServeHTTP(preview, httptest.NewRequest("POST", "/api/filetree/getDailyNoteInfo", strings.NewReader(entry.body)))
+		requireAPIContract(t, "POST", "/api/filetree/getDailyNoteInfo", preview)
+		if err := json.Unmarshal(preview.Body.Bytes(), &response); err != nil || response.Code != entry.code {
+			t.Fatalf("unexpected preview response for %s: %s %v", entry.body, preview.Body.String(), err)
+		}
+	}
+}
+
 func TestAPIContractFileTreePayloadConversions(t *testing.T) {
 	compare := func(before, after []byte) {
 		t.Helper()
@@ -167,7 +210,7 @@ func TestAPIContractFileTreeEncryptedAdmission(t *testing.T) {
 	util.WorkspaceDir = t.TempDir()
 	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
 	model.Conf = model.NewAppConf()
-	model.Conf.FileTree = conf.NewFileTree()
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	t.Cleanup(func() { model.Conf, util.DataDir, util.WorkspaceDir = previousConf, previousData, previousWorkspace })
 	boxConf := conf.NewBoxConf()

@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
+import {internalOpt} from "./internal_evt.js";
+
 /** @typedef {import("./event_utils").EventBus} EventBus */
 
-import { apiPageLayoutToViewerModes, RenderingStates } from "./ui_utils.js";
+import {apiPageLayoutToViewerModes} from "./ui_utils.js";
+import {RenderingStates} from "./renderable_view.js";
 import { shadow } from "./pdfjs";
 
 /**
@@ -115,24 +118,24 @@ class PDFScriptingManager {
     this.#eventAbortController = new AbortController();
     const { signal } = this.#eventAbortController;
 
-    eventBus._on(
+    eventBus.on(
       "updatefromsandbox",
       event => {
         if (event?.source === window) {
           this.#updateFromSandbox(event.detail);
         }
       },
-      { signal }
+      {signal, ...internalOpt}
     );
-    eventBus._on(
+    eventBus.on(
       "dispatcheventinsandbox",
       event => {
         this.#scripting?.dispatchEventInSandbox(event.detail);
       },
-      { signal }
+      {signal, ...internalOpt}
     );
 
-    eventBus._on(
+    eventBus.on(
       "pagechanging",
       ({ pageNumber, previous }) => {
         if (pageNumber === previous) {
@@ -141,9 +144,9 @@ class PDFScriptingManager {
         this.#dispatchPageClose(previous);
         this.#dispatchPageOpen(pageNumber);
       },
-      { signal }
+      {signal, ...internalOpt}
     );
-    eventBus._on(
+    eventBus.on(
       "pagerendered",
       ({ pageNumber }) => {
         if (!this._pageOpenPending.has(pageNumber)) {
@@ -154,9 +157,9 @@ class PDFScriptingManager {
         }
         this.#dispatchPageOpen(pageNumber);
       },
-      { signal }
+      {signal, ...internalOpt}
     );
-    eventBus._on(
+    eventBus.on(
       "pagesdestroy",
       async () => {
         await this.#dispatchPageClose(this.#pdfViewer.currentPageNumber);
@@ -168,7 +171,7 @@ class PDFScriptingManager {
 
         this.#closeCapability?.resolve();
       },
-      { signal }
+      {signal, ...internalOpt}
     );
 
     try {

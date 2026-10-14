@@ -64,7 +64,9 @@ const sources = () => {
             extract("protyle/render/tabsState.ts", ["resolveTabID", "tabKeyboardTarget"]) +
             extract("protyle/render/tabsAttributes.ts", ["clearTabsAttributes", "renderTabsAttributes"]),
         menu: extract("protyle/wysiwyg/taskStatusDialog.ts", ["getTaskStatusItems"]),
-        tabMenu: extract("protyle/wysiwyg/tabs.ts", ["canEdit", "openTabsMenu"]),
+        menuToggle: extract("menus/menuToggle.ts", ["sessions", "toggleMenu"]),
+        tabMenu: extract("protyle/wysiwyg/tabsFocus.ts", ["canFocusTabItem"]) +
+            extract("protyle/wysiwyg/tabs.ts", ["canEdit", "openTabsMenu"]),
         normalizeSeparators: extract("config/entryVisibility/runtime.ts", ["normalizeSeparators"]),
         css: require("sass").compile(path.join(__dirname, "../src/assets/scss/protyle/_wysiwyg.scss")).css +
             require("sass").compile(path.join(__dirname, "../src/assets/scss/component/_typography.scss")).css,
@@ -108,11 +110,12 @@ const cases = async source => {
     const root = document.createElement("div");
     root.className = "protyle-wysiwyg";
     document.body.append(root);
-    const protyle = {lute, disabled: false, options: {action: []}, block: {rootID: "doc"}, wysiwyg: {element: root}};
+    const protyle = {lute, element: root, disabled: false, options: {action: []}, block: {rootID: "doc"}, wysiwyg: {element: root}};
     const taskStyle = document.createElement("style");
     taskStyle.textContent = source.css;
     document.head.append(taskStyle);
-    window.siyuan = {languages: {}};
+    window.siyuan = {languages: {}, menus: {menu: {element: document.createElement("div"), remove() { this.data = undefined; }}}};
+    const toggleMenu = new Function(source.menuToggle + "; return toggleMenu;")();
     let customMarker;
     const getMenu = new Function("openTaskStatusDialog", source.menu + "; return getTaskStatusItems;")(
         marker => { customMarker = marker; });
@@ -145,11 +148,13 @@ const cases = async source => {
         addSeparator(item) { this.items.push({...item, type: "separator"}); }
         open() {}
     }
-    const openTabMenu = new Function("Menu", "Constants", "getTabTask", "getTaskStatusItems", "setTabTask", "copySubMenu",
+    let focusedTab;
+    const openTabMenu = new Function("toggleMenu", "Menu", "Constants", "getTabTask", "getTaskStatusItems", "setTabTask", "copySubMenu", "zoomOut",
         source.tabMenu + "; return openTabsMenu;")(
-        TestMenu, {CB_GET_HISTORY: "history"}, api.getTabTask, getMenu, api.setTabTask, () => []);
+        toggleMenu, TestMenu, {CB_GET_HISTORY: "history"}, api.getTabTask, getMenu, api.setTabTask, () => [],
+        options => { focusedTab = options; });
     const menuFixture = reset();
-    openTabMenu(protyle, menuFixture.from, menuFixture.item, menuFixture.item);
+    openTabMenu(protyle, menuFixture.from, menuFixture.item, menuFixture.item, false);
     const expectedStates = ["taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "taskStatusCanceled", "customTaskStatus"];
     check.deepEqual(openedMenu.items.filter(item => expectedStates.includes(item.id)).map(item => item.id), expectedStates);
     check.equal(openedMenu.items.filter(item => item.id === "customTaskStatus").length, 1);
@@ -186,8 +191,11 @@ const cases = async source => {
     openedMenu.items.find(item => item.id === "taskStatusInProgress").click();
     check.equal(api.getTabTask(menuFixture.item), "/");
     protyle.disabled = true;
-    openTabMenu(protyle, menuFixture.from, menuFixture.item, menuFixture.item);
-    check.deepEqual(openedMenu.items.map(item => item.icon), ["iconCopy"]);
+    openTabMenu(protyle, menuFixture.from, menuFixture.item, menuFixture.item, false);
+    check.deepEqual(openedMenu.items.map(item => item.icon), ["iconCopy", "iconEnter"]);
+    openedMenu.items.find(item => item.icon === "iconEnter").click();
+    check.equal(focusedTab.protyle, protyle);
+    check.equal(focusedTab.id, menuFixture.item.dataset.nodeId);
     protyle.disabled = false;
     const apply = operations => operations.forEach(operation => {
         const item = find(operation.id);

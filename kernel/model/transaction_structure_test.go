@@ -108,6 +108,33 @@ func TestInsertMissingTargetReturnsTransactionError(t *testing.T) {
 	requireStructureTransactionError(t, PerformTxSync(tx))
 }
 
+func TestInsertRejectsDocumentSiblingAnchor(t *testing.T) {
+	for _, field := range []string{"previousID", "nextID"} {
+		t.Run(field, func(t *testing.T) {
+			fixture := setupStructureTransactionTest(t)
+			dom := util.NewLute().Md2BlockDOM("inserted", false)
+			operation := &Operation{Action: "insert", Data: dom}
+			if field == "previousID" {
+				operation.PreviousID = fixture.sourceID
+			} else {
+				operation.NextID = fixture.sourceID
+			}
+			err := PerformTxSync(&Transaction{DoOperations: []*Operation{operation}})
+			requireStructureTransactionError(t, err)
+			if err.Error() != "`"+field+"` cannot be the ID of a document" {
+				t.Fatalf("expected explicit document anchor error, got %v", err)
+			}
+			tree, err := LoadTreeByBlockID(fixture.sourceID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if tree.Root.FirstChild.ID != fixture.childID || tree.Root.FirstChild != tree.Root.LastChild {
+				t.Fatal("rejected anchor changed the document")
+			}
+		})
+	}
+}
+
 func TestMoveRejectsParagraphDirectlyUnderList(t *testing.T) {
 	tests := []struct {
 		name      string

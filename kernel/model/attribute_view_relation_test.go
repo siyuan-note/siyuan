@@ -9,11 +9,86 @@
 package model
 
 import (
+	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestRelationCandidateUntitledSearch(t *testing.T) {
+	oldLang, oldWorkingDir, oldCaseSensitive := util.Lang, util.WorkingDir, util.SearchCaseSensitive.Load()
+	util.WorkingDir = "../../app"
+	t.Cleanup(func() {
+		util.Lang, util.WorkingDir = oldLang, oldWorkingDir
+		util.SearchCaseSensitive.Store(oldCaseSensitive)
+	})
+	for _, language := range []struct{ lang, keyword string }{{"en", "unt"}, {"zh-CN", "未命"}, {"de", "unbet"}} {
+		data, err := os.ReadFile("../../app/appearance/langs/" + language.lang + ".json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		var labels struct {
+			Untitled string `json:"untitled"`
+		}
+		if err = json.Unmarshal(data, &labels); err != nil {
+			t.Fatal(err)
+		}
+		if labels.Untitled == "" {
+			t.Fatal("frontend untitled label must be available")
+		}
+		util.Lang = language.lang
+		util.SearchCaseSensitive.Store(false)
+		attrView, alphaID, betaID := newRelationCandidateTestAttributeView()
+		table := renderAttributeViewRelationCandidates(attrView)
+		for _, row := range table.Rows {
+			row.GetBlockValue().Block.Content = ""
+		}
+		for page, id := range []string{betaID, alphaID} {
+			rows, total := filterSortPageRelationCandidates(table, attrView, language.keyword, page+1, 1, nil)
+			if total != 2 || len(rows) != 1 || rows[0].ID != id {
+				t.Fatalf("%s page %d: total=%d rows=%+v", language.lang, page+1, total, rows)
+			}
+		}
+		row := table.Rows[0]
+		value := row.GetBlockValue()
+		if value.Block.Content != "" {
+			t.Fatal("search must preserve the stored empty value")
+		}
+		value.HasRenderTemplate = true
+		if relationCandidateMatches(row, language.keyword, labels.Untitled, table.Columns...) {
+			t.Fatal("an empty template result must not match the placeholder")
+		}
+		value.HasRenderTemplate = false
+		value.RenderedContent = "custom"
+		if relationCandidateMatches(row, language.keyword, labels.Untitled, table.Columns...) {
+			t.Fatal("a rendered template must not match the placeholder")
+		}
+		value.RenderedContent = ""
+		table.Columns[0].RenderTemplate = "{{.name}}"
+		if relationCandidateMatches(row, language.keyword, labels.Untitled, table.Columns...) {
+			t.Fatal("a configured template must not match the placeholder")
+		}
+		table.Columns[0].RenderTemplate = ""
+		value.Block.Content = " "
+		if relationCandidateMatches(row, language.keyword, labels.Untitled, table.Columns...) {
+			t.Fatal("whitespace that is not displayed as untitled must not match")
+		}
+		value.Block.Content = "named"
+		if relationCandidateMatches(row, language.keyword, labels.Untitled, table.Columns...) {
+			t.Fatal("empty non-primary fields must not match the placeholder")
+		}
+		value.Block.Content = ""
+		if language.lang == "en" {
+			util.SearchCaseSensitive.Store(true)
+			if relationCandidateMatches(row, "unt", labels.Untitled, table.Columns...) || !relationCandidateMatches(row, "Unt", labels.Untitled, table.Columns...) {
+				t.Fatal("placeholder search must respect case sensitivity")
+			}
+		}
+	}
+}
 
 func TestRenderAttributeViewRelationCandidates(t *testing.T) {
 	attrView, alphaID, betaID := newRelationCandidateTestAttributeView()
@@ -34,7 +109,7 @@ func TestRenderAttributeViewRelationCandidates(t *testing.T) {
 		if row.ID == betaID {
 			selectedRows = append(selectedRows, row)
 		}
-		if relationCandidateMatches(row, "alpha red") {
+		if relationCandidateMatches(row, "alpha red", "") {
 			rows = append(rows, row)
 		}
 	}

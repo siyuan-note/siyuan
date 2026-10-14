@@ -131,6 +131,7 @@ func (av *AttributeView) visitPersistedValues(visit func(*Value)) {
 			}
 		}
 	}
+	av.visitAutomationValues(visitValue)
 }
 
 func visitKeyValues(key *Key, visitValue func(*Value)) {
@@ -165,6 +166,11 @@ func visitViewValues(view *View, visitValue func(*Value)) {
 	visitKeyValues(view.GroupKey, visitValue)
 	visitValue(view.GroupVal)
 	visitFilterValues(view.Filters, visitValue)
+	for _, rule := range view.ConditionalColors {
+		if nil != rule {
+			visitFilterValues([]*ViewFilter{rule.Filter}, visitValue)
+		}
+	}
 	if nil != view.GroupCalc && nil != view.GroupCalc.FieldCalc {
 		visitValue(view.GroupCalc.FieldCalc.Result)
 	}

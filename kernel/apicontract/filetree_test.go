@@ -6,6 +6,36 @@ import (
 	"testing"
 )
 
+func TestFileTreeTrimIDContract(t *testing.T) {
+	decoders := map[string]func(string) (FileTreeTrimIDRequest, error){
+		"getPathByID": func(body string) (FileTreeTrimIDRequest, error) {
+			return GetPathByID.Decode(strings.NewReader(body))
+		},
+		"removeDocByID": func(body string) (FileTreeTrimIDRequest, error) {
+			return RemoveDocByID.Decode(strings.NewReader(body))
+		},
+	}
+	for name, decode := range decoders {
+		t.Run(name, func(t *testing.T) {
+			request, err := decode(`{"id":" \t20260913000000-abcdefg\n "}`)
+			if err != nil || request.ID != "20260913000000-abcdefg" {
+				t.Fatalf("ID trimming changed: %+v %v", request, err)
+			}
+			for _, tc := range []struct{ body, message string }{
+				{`{}`, "Field [id] is required"},
+				{`{"id":null}`, "Field [id] is required"},
+				{`{"id":false}`, "Field [id] should be of type [String]"},
+				{`{"id":""}`, "Field [id] must not be empty"},
+				{`{"id":" \t\n "}`, "Field [id] must not be empty"},
+			} {
+				if _, err := decode(tc.body); err == nil || err.Error() != tc.message {
+					t.Fatalf("input %s: expected %q, got %v", tc.body, tc.message, err)
+				}
+			}
+		})
+	}
+}
+
 func TestDuplicateDocTreeContract(t *testing.T) {
 	const id = "20260919020000-source1"
 	request, err := DuplicateDocTree.Decode(strings.NewReader(`{"id":"` + id + `"}`))
@@ -122,6 +152,27 @@ func TestFileTreeHintAndDailyNoteConditions(t *testing.T) {
 	}
 	if _, err := daily.AppID(); err == nil {
 		t.Fatal("invalid created-note app accepted")
+	}
+}
+
+func TestDailyNoteDateContract(t *testing.T) {
+	for _, body := range []string{`{"notebook":"box"}`, `{"notebook":"box","date":null}`, `{"notebook":"box","date":""}`} {
+		request, err := CreateDailyNote.Decode(strings.NewReader(body))
+		if err != nil || request.Date != "" {
+			t.Fatalf("default date changed: %#v %v", request, err)
+		}
+	}
+	request, err := CreateDailyNote.Decode(strings.NewReader(`{"notebook":"box","date":"2026-09-25","app":false}`))
+	if err != nil || request.Date != "2026-09-25" {
+		t.Fatalf("explicit date not decoded: %#v %v", request, err)
+	}
+	if _, err := request.AppID(); err == nil {
+		t.Fatal("conditional app decoding changed")
+	}
+	for _, body := range []string{`{"notebook":"box","date":false}`, `{"notebook":"box","date":20260925}`} {
+		if _, err := CreateDailyNote.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("non-string date accepted: %s", body)
+		}
 	}
 }
 

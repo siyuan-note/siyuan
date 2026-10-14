@@ -12,6 +12,7 @@ import sys
 import tempfile
 import time
 import unittest
+import warnings
 from unittest.mock import patch
 import zipfile
 
@@ -47,11 +48,72 @@ class BuildTests(unittest.TestCase):
         path.write_bytes(content)
         return path
 
+    def test_signing_pin_uses_hidden_input_or_supplied_value(self):
+        with patch.object(build.getpass, "getpass", return_value="hidden-pin") as prompt:
+            self.assertEqual(build.read_signing_pin(), "hidden-pin")
+            self.assertEqual(build.read_signing_pin("environment-pin"), "environment-pin")
+        prompt.assert_called_once()
+
+    def test_signing_pin_rejects_echo_fallback_and_invalid_values(self):
+        def unsafe_prompt(*args):
+            warnings.warn("hidden input unavailable", build.getpass.GetPassWarning)
+
+        with patch.object(build.getpass, "getpass", side_effect=unsafe_prompt), self.assertRaises(build.BuildError):
+            build.read_signing_pin()
+        for value in ("", "pin\n", "pin\r", "pin\0"):
+            with self.subTest(value=value), self.assertRaises(build.BuildError):
+                build.read_signing_pin(value)
+
+    def test_signing_preflight_keeps_pin_out_of_arguments_and_environment(self):
+        result = subprocess.CompletedProcess([], 0, stdout="", stderr="")
+        with patch.dict(build.os.environ, {"SIYUAN_SIGNING_PIN": "secret", "PSModulePath": "foreign"}), \
+                patch.object(build.subprocess, "run", return_value=result) as run:
+            build.check_signing_pin("secret", "A" * 40)
+        command = run.call_args.args[0]
+        self.assertNotIn("secret", " ".join(command))
+        self.assertEqual(json.loads(run.call_args.kwargs["input"]),
+                         {"pin": "secret", "thumbprint": "A" * 40, "files": []})
+        self.assertNotIn("SIYUAN_SIGNING_PIN", run.call_args.kwargs["env"])
+        self.assertNotIn("PSModulePath", run.call_args.kwargs["env"])
+
+    def test_signing_preflight_retries_only_device_communication(self):
+        for codes in ((20, 0), (20, 20), (1,)):
+            results = [subprocess.CompletedProcess([], code, stdout="secret", stderr="secret") for code in codes]
+            with self.subTest(codes=codes), patch.object(build.subprocess, "run", side_effect=results) as run, \
+                    patch.object(build.time, "sleep"):
+                if codes[-1] == 0:
+                    build.check_signing_pin("secret", "A" * 40)
+                else:
+                    with self.assertRaises(build.BuildError) as error:
+                        build.check_signing_pin("secret", "A" * 40)
+                    self.assertNotIn("secret", str(error.exception))
+            self.assertEqual(run.call_count, len(codes))
+
+    @unittest.skipUnless(sys.platform == "win32", "需要 Windows 批处理")
+    def test_batch_restores_missing_windows_environment_marker(self):
+        batch = self.write(self.root / "environment.bat",
+                           b'@echo off\r\nif "%OS%"=="Windows_NT" (echo Windows_NT) else (exit /b 7)\r\n')
+        with patch.dict(build.os.environ):
+            build.os.environ.pop("OS", None)
+            self.assertEqual(build.run([batch], self.root, capture=True), "Windows_NT")
+
     def test_copy_rejects_destination_escape(self):
         source = self.write(self.root / "input", b"new")
         with self.assertRaises(build.BuildError):
             build.copy_verified(source, self.root / "outside", self.root / "allowed")
         self.assertFalse((self.root / "outside").exists())
+
+    def test_mobile_assets_exclude_ocr_runtime(self):
+        kept = {"stage/build/mobile/index.html", "stage/map-icons/pin.svg", "appearance/theme.css",
+                "guide/document.sy", "LICENSE", "THIRD_PARTY_NOTICES.md"}
+        removed = {"stage/ocr/runtime/library"}
+        for name in kept | removed:
+            self.write(self.root / (name if name in {"LICENSE", "THIRD_PARTY_NOTICES.md"} else "app/" + name))
+        destination = self.root / "mobile/app.zip"
+        with patch.object(build, "ROOT", self.root), patch.object(build, "run"):
+            build.create_mobile_assets(destination, "3.8.7-alpha.8")
+        with zipfile.ZipFile(destination) as archive:
+            self.assertEqual(set(archive.namelist()), kept)
 
     def test_wsl_sync_skips_matching_commit(self):
         with patch.object(self.builder, "wsl", return_value="target") as wsl, patch.object(build, "run") as run:
@@ -164,7 +226,7 @@ class BuildTests(unittest.TestCase):
             if command[:2] == ["go", "build"]:
                 self.write(command[command.index("-o") + 1])
             if command[0] == "node":
-                Path(command[-1]).write_text(json.dumps({
+                Path(command[6]).write_text(json.dumps({
                     "forceCodeSigning": True, "directories": {"output": command[4]},
                     "win": {"extraResources": [{"from": command[3], "to": "kernel"}],
                             "signtoolOptions": {"certificateSha1": command[5]}},
@@ -187,6 +249,34 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(signatures.call_count, 2)
         self.assertFalse((root / "app/kernel").exists())
 
+    def test_windows_passes_pin_only_to_builder_and_references_public_signing_hook(self):
+        root = self.root / "repository"
+        self.write(root / "app/elevator/elevator-amd64.exe")
+        self.builder.thumbprint = "A" * 40
+        self.builder.signing_pin = "private-pin"
+        commands = []
+
+        def fake_run(command, cwd, env=None, capture=False):
+            command = [str(value) for value in command]
+            commands.append((command, env))
+            if command[0] == "node":
+                self.assertEqual(command[-1], str(root / "scripts/release-sign-windows.cjs"))
+                Path(command[6]).write_text(json.dumps({"win": {"signtoolOptions": {"sign": command[-1]}}}),
+                                          encoding="utf-8")
+            if command[:3] == ["pnpm", "exec", "electron-builder"]:
+                self.assertEqual(env["SIYUAN_RELEASE_SIGN_PIN"], "private-pin")
+                self.assertTrue(env["ELECTRON_MIRROR"])
+            else:
+                self.assertNotIn("SIYUAN_RELEASE_SIGN_PIN", env or {})
+            self.assertNotIn("private-pin", " ".join(command))
+            return ""
+
+        with patch.object(build, "ROOT", root), patch.object(build, "run", side_effect=fake_run), \
+                patch.object(build, "copy_verified"), patch.object(self.builder, "check_kernel"), \
+                patch.object(build, "verify_signature"), patch.object(self.builder, "collect"):
+            self.builder.windows_arch("amd64", "electron-builder.yml")
+        self.assertNotIn("private-pin", (self.builder.work / "windows-amd64.json").read_text(encoding="utf-8"))
+
     @unittest.skipUnless(shutil.which("node") and (build.ROOT / "app/node_modules/electron-builder").exists(),
                          "需要已安装的 Electron Builder，仅加载配置，不执行构建")
     def test_installed_builder_configuration_excludes_old_kernel(self):
@@ -202,10 +292,25 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(config["win"]["signtoolOptions"]["signingHashAlgorithms"], ["sha256"])
         self.assertTrue(any(entry.get("to") == "stage" for entry in config["extraResources"]))
 
+    @unittest.skipUnless(shutil.which("node") and (build.ROOT / "app/node_modules/electron-builder").exists(),
+                         "需要已安装的 Electron Builder")
+    def test_installed_builder_configuration_accepts_hardware_signing_hook(self):
+        destination = self.root / "hardware-windows.json"
+        hook = build.ROOT / "scripts/release-sign-windows.cjs"
+        with contextlib.redirect_stdout(io.StringIO()):
+            build.run(["node", build.ROOT / "scripts/release-windows-config.cjs",
+                       build.ROOT / "app/electron-builder.yml", self.root / "kernel", self.root / "build",
+                       "A" * 40, destination, hook], build.ROOT / "app", capture=True)
+        config = json.loads(destination.read_text(encoding="utf-8"))
+        self.assertEqual(config["win"]["signtoolOptions"]["sign"], str(hook))
+        self.assertEqual(config["win"]["signtoolOptions"]["signingHashAlgorithms"], ["sha256"])
+
     def test_harmony_copies_each_architecture_before_next_build(self):
         remote = self.root / "wsl"
         self.builder.wsl_root = remote
         assets = self.write(self.root / "app.zip", b"current assets")
+        stale_kernel = self.write(self.args.harmony_dir / "entry/build/default/intermediates/cmake/libkernel.so",
+                                  b"stale kernel")
 
         def fake_wsl(command, directory=None, capture=False):
             architecture = "arm64" if command[-1] == "build.sh" else "amd64"
@@ -214,7 +319,11 @@ class BuildTests(unittest.TestCase):
             self.write(remote / "kernel/harmony/lan_sync_bridge.h", b"bridge")
 
         def fake_run(command, cwd, env=None, capture=False):
+            if command[-1] == "clean" and "module=entry@default" in command:
+                self.assertEqual(command[command.index("--mode") + 1], "module")
+                stale_kernel.unlink()
             if command[-1] == "assembleApp":
+                self.assertFalse(stale_kernel.exists())
                 self.assertIn("buildMode=release", command)
                 self.write(self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-unsigned.app")
                 self.write(self.args.harmony_dir / "build/outputs/default/siyuan-harmony-default-signed.app", b"signed app")
@@ -441,6 +550,15 @@ class RecordTests(unittest.TestCase):
             content = (self.directory / filename).read_text(encoding="utf-8")
             self.assertNotIn("private capture", content)
             self.assertNotIn("private environment", content)
+
+    def test_signing_authentication_failure_does_not_record_pin_or_helper_output(self):
+        result = subprocess.CompletedProcess([], 1, stdout="private-pin", stderr="private-pin")
+        with contextlib.redirect_stdout(io.StringIO()), self.assertRaises(build.BuildError), \
+                patch.object(build.subprocess, "run", return_value=result):
+            with self.record.session(), self.record.stage("preflight"):
+                build.check_signing_pin("private-pin", "A" * 40)
+        for filename in ("build.log", "progress.json"):
+            self.assertNotIn("private-pin", (self.directory / filename).read_text(encoding="utf-8"))
 
     def test_atomic_progress_write_preserves_previous_snapshot_on_failure(self):
         self.record.save()

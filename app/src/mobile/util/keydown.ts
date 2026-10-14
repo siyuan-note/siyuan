@@ -4,10 +4,20 @@ import {matchHotKey} from "../../protyle/util/hotKey";
 import {getCurrentEditor} from "../editor";
 import {filterHotkey} from "../../boot/globalEvent/commonHotkey";
 import {captureShortcutContext, dispatchPluginShortcut} from "../../command/shortcutRuntime";
+import {handleDocumentBoundaryHotkey} from "../../protyle/util/documentBoundaryHotkey";
+import {handleDatabaseRowShortcut} from "../../command/databaseRowShortcut";
+import {DATABASE_ROW_COMMANDS} from "../../command/databaseRowNavigation";
 
 export const mobileKeydown = (app: App, event: KeyboardEvent) => {
     // 移动端输入框默认填充无 event.key
     if (!event.key || event.defaultPrevented || filterHotkey(event, app)) {
+        return;
+    }
+    if (handleDatabaseRowShortcut(app, event)) {
+        return;
+    }
+    const editor = getCurrentEditor();
+    if (editor?.protyle.element.contains(event.target as Node) && handleDocumentBoundaryHotkey(editor.protyle, event)) {
         return;
     }
     const matchGeneral = Object.keys(window.siyuan.config.keymap.general).sort().find((key) => {
@@ -15,8 +25,8 @@ export const mobileKeydown = (app: App, event: KeyboardEvent) => {
         if (key === "openContextMenu") {
             return false;
         }
-        // 桌面页签菜单不拦截移动端的键盘输入。
-        if (key === "switchTab") {
+        // 跳过桌面页签菜单和已由预览上下文处理的条目导航。
+        if (key === "switchTab" || DATABASE_ROW_COMMANDS.some(command => command === key)) {
             return false;
         }
         if (matchHotKey(window.siyuan.config.keymap.general[key], event)) {

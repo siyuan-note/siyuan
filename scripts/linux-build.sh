@@ -46,6 +46,14 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+echo 'Checking OCR worker toolchains (glibc)'
+if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
+    python3 "$PROJECT_ROOT/scripts/prepare-ocr.py" --runtime linux-amd64 --build-worker --check-only
+fi
+if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
+    python3 "$PROJECT_ROOT/scripts/prepare-ocr.py" --runtime linux-arm64 --build-worker --check-only
+fi
+
 echo 'Cleaning Builds'
 rm -rf "$PROJECT_ROOT/app/build" 2>/dev/null || true
 rm -rf "$PROJECT_ROOT/app/kernel-linux" 2>/dev/null || true

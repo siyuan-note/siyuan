@@ -105,7 +105,7 @@ func TestGenerateImageDoesNotRequireDocument(t *testing.T) {
 	}}
 	ai.ImageGeneration.ModelID = modelID
 	Conf = NewAppConf()
-	Conf.AI = ai
+	Conf.AI.Store(ai)
 
 	result, err := GenerateImage(context.Background(), GenerateImageRequest{Prompt: "draw", OutputFormat: "png"})
 	if err != nil {
@@ -132,7 +132,7 @@ func TestImageGenerationProviderErrorsPreventAutomaticRetry(t *testing.T) {
 	}}
 	ai.ImageGeneration.ModelID = generationModelID
 	Conf = NewAppConf()
-	Conf.AI = ai
+	Conf.AI.Store(ai)
 
 	if _, err := GenerateImage(context.Background(), GenerateImageRequest{Prompt: "draw", OutputFormat: "png"}); !IsImageExecutionUnknown(err) {
 		t.Fatalf("image provider error should prevent automatic retry: %v", err)
@@ -253,7 +253,7 @@ func TestUnusedAssetsExcludesAgentSessionImages(t *testing.T) {
 	util.WorkspaceDir = workspaceDir
 	util.DataDir = filepath.Join(workspaceDir, "data")
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	assetsDir := filepath.Join(util.DataDir, "assets")
 	if err := os.MkdirAll(assetsDir, 0755); err != nil {
 		t.Fatal(err)
@@ -660,7 +660,7 @@ func TestAllAssetAbsPathsWithAssetsInWorkspacePath(t *testing.T) {
 
 	util.DataDir = filepath.Join(t.TempDir(), "assets", "workspace", "data")
 	Conf = NewAppConf()
-	Conf.FileTree = conf.NewFileTree()
+	Conf.FileTree.Store(conf.NewFileTree())
 	globalAssetPath := filepath.Join(util.DataDir, "assets", "nested", "assets", "image.png")
 	if err := os.MkdirAll(filepath.Dir(globalAssetPath), 0755); err != nil {
 		t.Fatal(err)

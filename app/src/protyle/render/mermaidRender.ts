@@ -1,4 +1,5 @@
 import {addScript} from "../util/addScript";
+import {isFoldedRenderContent} from "./foldedContent";
 import {Constants} from "../../constants";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
@@ -48,10 +49,11 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
     } else {
         mermaidElements = Array.from(element.querySelectorAll('[data-subtype="mermaid"]:not([data-render="true"])'));
     }
+    mermaidElements = mermaidElements.filter(item => !isFoldedRenderContent(item));
     if (mermaidElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=11.16.1`, "protyleMermaidScript").then(async () => {
+    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=12.1.0`, "protyleMermaidScript").then(async () => {
         await registerMermaidExternalDiagrams(mermaidElements, cdn);
         await registerMermaidLayouts(mermaidElements, cdn);
         window.mermaid.registerIconPacks([
@@ -62,6 +64,7 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
             },
         ]);
         const config: any = {
+            theme: window.siyuan.config.appearance.mode === 1 ? "dark" : "default",
             // 升级后无 https://github.com/siyuan-note/siyuan/issues/3587，可使用 loose
             securityLevel: getHostCapabilities().remoteKernel ? "strict" : "loose",
             altFontFamily: "sans-serif",
@@ -83,9 +86,6 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 rightPadding: 20
             }
         };
-        if (window.siyuan.config.appearance.mode === 1) {
-            config.theme = "dark";
-        }
         window.mermaid.initialize(config);
         const hideElements: Element[] = [];
         const normalElements: Element[] = [];
@@ -117,7 +117,19 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
     });
 };
 
+export const refreshMermaidTheme = (element: Element) => {
+    const elements = element.matches('[data-subtype="mermaid"]') ? [element] :
+        element.querySelectorAll('[data-subtype="mermaid"]');
+    elements.forEach(item => {
+        item.removeAttribute("data-render");
+    });
+    mermaidRender(element);
+};
+
 const initMermaid = (mermaidElements: Element[]) => {
+    if (!mermaidElements.length) {
+        return;
+    }
     const wysiswgElement = hasClosestByClassName(mermaidElements[0], "protyle-wysiwyg", true);
     mermaidElements.forEach(async (item: HTMLElement) => {
         if (item.getAttribute("data-render") === "true") {
@@ -133,23 +145,36 @@ const initMermaid = (mermaidElements: Element[]) => {
             return;
         }
         const id = "mermaid" + Lute.NewNodeID();
+        const container = document.createElement("div");
+        // 在屏幕外测量图形，避免临时节点参与主界面布局。
+        container.style.cssText = `position: fixed;left: -100000px;top: 0;width: ${document.body.clientWidth}px;pointer-events: none;`;
+        let diagramElement: Element;
         try {
-            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"><span id="${id}"></span></div>`;
+            document.body.appendChild(container);
+            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"></div>`;
+            diagramElement = renderElement.lastElementChild;
             const content = applyMermaidLayout(
                 Lute.UnEscapeHTMLStr(item.getAttribute("data-content")),
                 getMermaidLayout(item.getAttribute(MERMAID_LAYOUT_ATTR))
             );
-            const mermaidData = await window.mermaid.render(id, content);
+            const mermaidData = await window.mermaid.render(id, content, container);
+            if (renderElement.lastElementChild !== diagramElement) {
+                return;
+            }
             let svg = mermaidData.svg.replace(/(href|src|xlink:href)\s*=\s*["']\\\\/gi, (match, p1) => `${p1}="about:blank"`);
             svg = window.DOMPurify.sanitize(svg, MERMAID_SANITIZE_OPTIONS);
-            renderElement.lastElementChild.innerHTML = svg;
+            diagramElement.innerHTML = svg;
         } catch (e) {
-            const errorElement = document.querySelector("#" + id);
+            if (renderElement.lastElementChild !== diagramElement) {
+                return;
+            }
+            const errorElement = container.querySelector("#" + id);
             const errorDiagram = errorElement ?
                 window.DOMPurify.sanitize(errorElement.outerHTML, MERMAID_SANITIZE_OPTIONS) : "";
             const errorMessage = escapeHtml(e instanceof Error ? e.message : String(e)).replace(/\n/g, "<br>");
             renderElement.lastElementChild.innerHTML = `${errorDiagram}<div class="fn__hr"></div><div class="ft__error">${errorMessage}</div>`;
-            errorElement?.parentElement?.remove();
+        } finally {
+            container.remove();
         }
     });
 };

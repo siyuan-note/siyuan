@@ -20,14 +20,9 @@
 // eslint-disable-next-line max-len
 /** @typedef {import("./pdf_rendering_queue").PDFRenderingQueue} PDFRenderingQueue */
 
-import {
-  getVisibleElements,
-  isValidRotation,
-  RenderingStates,
-  scrollIntoView,
-  watchScroll,
-} from "./ui_utils.js";
-import { PDFThumbnailView, TempImageFactory } from "./pdf_thumbnail_view.js";
+import {getVisibleElements, isValidRotation, scrollIntoView, watchScroll} from "./ui_utils.js";
+import {RenderingStates} from "./renderable_view.js";
+import { PDFThumbnailView } from "./pdf_thumbnail_view.js";
 
 const THUMBNAIL_SCROLL_MARGIN = -19;
 const THUMBNAIL_SELECTED_CLASS = "selected";
@@ -52,6 +47,7 @@ const THUMBNAIL_SELECTED_CLASS = "selected";
  * Viewer control to display thumbnails for pages in a PDF document.
  */
 class PDFThumbnailViewer {
+  #abortSignal = null;
   /**
    * @param {PDFThumbnailViewerOptions} options
    */
@@ -70,6 +66,7 @@ class PDFThumbnailViewer {
     this.renderingQueue = renderingQueue;
     this.pageColors = pageColors || null;
     this.enableHWA = enableHWA || false;
+    this.#abortSignal = abortSignal || null;
 
     this.scroll = watchScroll(
       this.container,
@@ -164,7 +161,6 @@ class PDFThumbnailViewer {
         thumbnail.reset();
       }
     }
-    TempImageFactory.destroyCanvas();
   }
 
   #resetView() {
@@ -230,7 +226,7 @@ class PDFThumbnailViewer {
 
   #cancelRendering() {
     for (const thumbnail of this._thumbnails) {
-      thumbnail.cancelRendering();
+      thumbnail.destroy();
     }
   }
 
@@ -262,16 +258,26 @@ class PDFThumbnailViewer {
    * @returns {Promise<PDFPageProxy | null>}
    */
   async #ensurePdfPageLoaded(thumbView) {
+    const pdfDocument = this.pdfDocument;
+    if (!pdfDocument || this.#abortSignal?.aborted) {
+      return null;
+    }
     if (thumbView.pdfPage) {
       return thumbView.pdfPage;
     }
     try {
-      const pdfPage = await this.pdfDocument.getPage(thumbView.id);
+      const pdfPage = await pdfDocument.getPage(thumbView.id);
+      if (pdfDocument !== this.pdfDocument || this.#abortSignal?.aborted) {
+        return null;
+      }
       if (!thumbView.pdfPage) {
         thumbView.setPdfPage(pdfPage);
       }
       return pdfPage;
     } catch (reason) {
+      if (pdfDocument !== this.pdfDocument || this.#abortSignal?.aborted) {
+        return null;
+      }
       console.error("Unable to get page for thumb view", reason);
       return null; // Page error -- there is nothing that can be done.
     }
@@ -287,6 +293,10 @@ class PDFThumbnailViewer {
   }
 
   forceRendering() {
+    const pdfDocument = this.pdfDocument;
+    if (!pdfDocument || this.#abortSignal?.aborted) {
+      return false;
+    }
     const visibleThumbs = this.#getVisibleThumbs();
     const scrollAhead = this.#getScrollAhead(visibleThumbs);
     const thumbView = this.renderingQueue.getHighestPriority(
@@ -295,8 +305,10 @@ class PDFThumbnailViewer {
       scrollAhead
     );
     if (thumbView) {
-      this.#ensurePdfPageLoaded(thumbView).then(() => {
-        this.renderingQueue.renderView(thumbView);
+      this.#ensurePdfPageLoaded(thumbView).then(pdfPage => {
+        if (pdfPage && pdfDocument === this.pdfDocument && !this.#abortSignal?.aborted) {
+          this.renderingQueue.renderView(thumbView);
+        }
       });
       return true;
     }

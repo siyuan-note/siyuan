@@ -3,13 +3,13 @@ import {setPosition} from "../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {readText, setStorageVal, writeText} from "../protyle/util/compatibility";
 import {getAllModels} from "../layout/getAll";
-import {focusByRange} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Constants} from "../constants";
 import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {escapeAttr, escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {filesize} from "filesize";
 import md5 from "blueimp-md5";
 import {getRectImageName, hideRectResizeHandles, moveRectBounds, resizeRectBounds} from "./rectAnnotationResize";
@@ -34,6 +34,8 @@ import {
 } from "./annoRuntime";
 import {appendPdfAnnotationId} from "../editor/pdfAssetLink";
 import {isPdfRectAnnotation, mergePdfTextAnnotationRects} from "./pdfTextAnnotation";
+import {pdfRectToViewport} from "./pdfCoordinates";
+import {getPdfSelectionText} from "./pdfSelectionText";
 
 export {destroyAnno, registerPdfInstance, unregisterPdfInstance} from "./annoRuntime";
 
@@ -184,6 +186,18 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                             pdf.appConfig.file.replace(location.origin, "").substr(8).replace(/-\d{14}-\w{7}.pdf$/, ""), pdf);
                     }
                 });
+                if (rectElement) {
+                    if (typeof selectionToolbarTimer !== "undefined") {
+                        window.clearTimeout(selectionToolbarTimer);
+                        selectionToolbarTimer = undefined;
+                    }
+                    showToolbar(element, undefined, rectElement);
+                    // 框选结束产生的点击不应立即关闭刚显示的菜单。
+                    ignoreRectClick = true;
+                    window.setTimeout(() => {
+                        ignoreRectClick = false;
+                    });
+                }
             } else {
                 rectElement = null;
             }
@@ -436,17 +450,8 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 processed = true;
                 break;
             } else if (type === "remove") {
-                const urlPath = pdf.appConfig.file.replace(location.origin, "").substr(1);
-                const config = getConfig(pdf);
                 const id = rectElement.getAttribute("data-node-id");
-                delete config[id];
-                getRectElementsByNodeId(element, id).forEach(item => {
-                    item.remove();
-                });
-                fetchPost("/api/asset/setFileAnnotation", {
-                    path: urlPath + ".sya",
-                    data: JSON.stringify(config),
-                });
+                removeAnno(pdf, element, id);
                 hideToolbar(element);
                 event.preventDefault();
                 event.stopPropagation();
@@ -707,25 +712,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
         return;
     }
     const endIndex = parseInt(endPageElement.getAttribute("data-page-number")) - 1;
-    // https://github.com/siyuan-note/siyuan/issues/5213
-    const rangeContents = range.cloneContents();
-    Array.from(rangeContents.children).forEach(item => {
-        if (item.tagName === "BR" && item.previousElementSibling && item.nextElementSibling) {
-            const previousText = item.previousElementSibling.textContent;
-            const nextText = item.nextElementSibling.textContent;
-            if (/^[A-Za-z]$/.test(previousText.substring(previousText.length - 2, previousText.length - 1)) &&
-                /^[A-Za-z]$/.test(nextText.substring(0, 1))) {
-                if (previousText.endsWith("-")) {
-                    item.previousElementSibling.textContent = previousText.substring(0, previousText.length - 1);
-                } else {
-                    // 中文情况不能添加 https://github.com/siyuan-note/siyuan/issues/8152
-                    item.insertAdjacentText("afterend", " ");
-                }
-            }
-        }
-    });
-    // eslint-disable-next-line no-control-regex
-    const content = Lute.EscapeHTMLStr(rangeContents.textContent.replace(/[\x00]|\n/g, ""));
+    const content = escapeHtmlTextAndAttr(getPdfSelectionText(range));
     const startPage = pdf.pdfViewer.getPageView(startIndex);
     const startPageRect = startPage.canvas.getClientRects()[0];
     const startViewport = startPage.viewport;
@@ -892,7 +879,8 @@ export const getPdfInstance = (element: HTMLElement) => {
 
 export const getHighlight = (element: HTMLElement) => {
     const pdfInstance: any = getPdfInstance(element);
-    if (!pdfInstance) {
+    // 未引用资源预览仍注册实例以支持键盘操作，但不访问批注文件。
+    if (!pdfInstance || pdfInstance.appConfig.previewOnly) {
         return;
     }
     element.parentElement.querySelector(":scope > .pdf__rects")?.remove();
@@ -984,7 +972,7 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
 };
 
 const setRectPosition = (element: HTMLElement, page: any, rect: number[], viewport = page.viewport.clone({rotation: 0})) => {
-    const bounds = viewport.convertToViewportRectangle(rect);
+    const bounds = pdfRectToViewport(viewport, rect);
     const width = Math.abs(bounds[0] - bounds[2]);
     if (width <= 0) {
         return false;
@@ -1022,13 +1010,20 @@ export const hlPDFRect = (element: HTMLElement, id: string) => {
 const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement = rectElement, automatic = false) => {
     const request = {};
     rectCopyRequests.set(annotationElement, request);
+    const pdfDocument = pdf.pdfDocument;
+    // 复制过程跨越计时器和异步截图，关闭或替换阅读器后不再访问页面及写入剪贴板。
+    const isActive = () => !pdf._destroyed && pdf.pdfDocument === pdfDocument &&
+        annotationElement.isConnected && rectCopyRequests.get(annotationElement) === request;
     const canCopy = async () => {
+        if (!isActive()) {
+            return false;
+        }
         if (!automatic) {
             return true;
         }
         try {
             const text = await readText(true);
-            return rectCopyRequests.get(annotationElement) === request && annotationElement.isConnected &&
+            return isActive() &&
                 typeof text === "string" && text.startsWith(`<<${idPath} `);
         } catch (error) {
             return false;
@@ -1053,7 +1048,10 @@ const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement 
             if (!position || pageIndex < 0) {
                 return;
             }
-            getRectImgData(pdf, pageIndex + 1, position).then((imageData) => {
+            getRectImgData(pdf, pageIndex + 1, position).then(async (imageData) => {
+                if (!await canCopy()) {
+                    return;
+                }
                 let msg = "";
                 if (!automatic && Constants.SIZE_UPLOAD_TIP_SIZE <= imageData.blob.size) {
                     msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", content + ".png")
@@ -1088,7 +1086,9 @@ const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement 
                     });
                 });
             }).catch((error) => {
-                console.error(error);
+                if (isActive()) {
+                    console.error(error);
+                }
             });
         } else {
             writeText(`<<${idPath} "${content}">>`);
@@ -1108,14 +1108,14 @@ async function getRectImgData(pdfObj: any, pageNumber: number, position: number[
         scale: PDF_RECT_CAPTURE_SCALE,
         rotation: totalRotation,
     });
-    const targetRect = targetViewport.convertToViewportRectangle(position);
+    const targetRect = pdfRectToViewport(targetViewport, position);
     const captureScale = getLimitedCaptureScale(targetRect);
     if (captureScale <= 0) {
         throw new Error("PDF rectangle annotation has invalid coordinates");
     }
 
     const viewport = pdfPage.getViewport({scale: captureScale, rotation: totalRotation});
-    const captureBounds = getCaptureCanvasBounds(viewport.convertToViewportRectangle(position));
+    const captureBounds = getCaptureCanvasBounds(pdfRectToViewport(viewport, position));
     const captureViewport = pdfPage.getViewport({
         scale: captureScale,
         rotation: totalRotation,
@@ -1137,7 +1137,7 @@ async function getRectImgData(pdfObj: any, pageNumber: number, position: number[
 
     const displayViewport = pdfPage.getViewport({scale: PDF_RECT_DISPLAY_SCALE, rotation: totalRotation});
     const displayWidth = Math.min(
-        getCaptureDisplayWidth(displayViewport.convertToViewportRectangle(position)),
+        getCaptureDisplayWidth(pdfRectToViewport(displayViewport, position)),
         captureBounds.width,
     );
     const blob = await new Promise<Blob>((resolve, reject) => {
@@ -1151,6 +1151,45 @@ async function getRectImgData(pdfObj: any, pageNumber: number, position: number[
     });
     return {blob, rotation: totalRotation, displayWidth};
 }
+
+const removeAnno = (pdf: any, element: HTMLElement, id: string) => {
+    const file = pdf.appConfig.file;
+    const urlPath = file.replace(location.origin, "").substr(1);
+    const isCurrent = () => element.isConnected && getRegisteredPdfInstance(element) === pdf && pdf.appConfig.file === file;
+    const remove = () => {
+        if (!isCurrent()) {
+            return;
+        }
+        const config = getConfig(pdf);
+        if (!config?.[id]) {
+            return;
+        }
+        delete config[id];
+        getRectElementsByNodeId(element, id).forEach(item => {
+            item.remove();
+        });
+        fetchPost("/api/asset/setFileAnnotation", {
+            path: urlPath + ".sya",
+            data: JSON.stringify(config),
+        });
+    };
+    fetchPost("/api/block/getRefIDsByFileAnnotationID", {
+        id,
+        notebook: new URL(file, location.origin).searchParams.get("box") || "",
+    }, (response) => {
+        if (response.code !== 0 || !isCurrent()) {
+            return;
+        }
+        const count = response.data.refDefs.length;
+        if (count > 0) {
+            confirmDialog(window.siyuan.languages.deleteOpConfirm,
+                window.siyuan.languages.pdfAnnotationDeleteRefConfirm.replace("${x}", count.toString()), remove,
+                undefined, true);
+        } else {
+            remove();
+        }
+    });
+};
 
 const setConfig = (pdf: any, id: string, data: IPdfAnno) => {
     const config = getConfig(pdf);

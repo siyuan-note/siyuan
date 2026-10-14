@@ -65,7 +65,7 @@ func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 	tree.Root.RemoveIALAttr("scroll")
 	p := path.Join(path.Dir(tree.Path), tree.ID) + ".sy"
 	tree.Path = p
-	tree.HPath = tree.HPath + " " + titleSuffix
+	tree.HPath = tree.HPath + titleSuffix
 
 	// 重置块 ID
 	blockIDs := map[string]string{oldRootID: tree.ID}

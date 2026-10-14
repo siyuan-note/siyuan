@@ -11,6 +11,7 @@ import {openDock} from "../dock/util";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {processSync} from "../../dialog/processSystem";
 import {afterLayoutReady} from "../../plugin/loader";
+import {syncMainMenuGroupCollapse, toggleMainMenuGroup} from "./mainMenuCollapse";
 
 let mobileMenuReturnCallback: (() => void) | undefined;
 
@@ -68,6 +69,10 @@ const renderMobilePluginDockMenu = (app: App, menuElement: HTMLElement) => {
 /** 分发单层元素的点击：handled 表示已响应，ignored 表示继续向上查找，abort 表示终止本次事件处理 */
 const dispatchMobileMainMenuClick = (app: App, target: HTMLElement, search: IMainMenuSearch):
     "handled" | "ignored" | "abort" => {
+    if (target.dataset.type === "toggle-menu-group") {
+        toggleMainMenuGroup(target);
+        return "handled";
+    }
     if (target.dataset.type === "close-menu") {
         closePanel();
         return "handled";
@@ -101,6 +106,7 @@ const dispatchMobileMainMenuClick = (app: App, target: HTMLElement, search: IMai
 export const initRightMenu = (app: App) => {
     const menuElement = document.getElementById("menu");
     menuElement.innerHTML = renderMobileMainMenuHTML();
+    syncMainMenuGroupCollapse(menuElement, false);
     renderMobilePluginDockMenu(app, menuElement);
     window.addEventListener(MOBILE_PLUGIN_DOCKS_CHANGE_EVENT, () => {
         renderMobilePluginDockMenu(app, menuElement);

@@ -22,6 +22,16 @@ const createElement = (options: {
 };
 
 describe("mobile input detection", () => {
+    it("rejects readonly and disabled text fields without requesting input", () => {
+        for (const tagName of ["INPUT", "TEXTAREA"]) {
+            for (const attributes of [{readonly: ""}, {readonly: "readonly"}, {disabled: ""}]) {
+                assert.equal(canInput(createElement({tagName, attributes})), false);
+            }
+            const input = createElement({tagName});
+            assert.equal(canInput(input), input);
+        }
+    });
+
     const createEditableRoot = () => createElement({
         classNames: ["protyle-wysiwyg"],
         attributes: {contenteditable: "true", "data-readonly": "false"},

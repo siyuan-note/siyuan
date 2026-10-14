@@ -14,6 +14,7 @@ type ImportDataRequest struct {
 	File *multipart.FileHeader `json:"file" api:"optional"`
 }
 
+// ImportSYRequest 导入 .sy.zip，同名同内容的自定义表情复用；同名不同内容返回错误并保留已有文件。
 type ImportSYRequest struct {
 	File     *multipart.FileHeader `json:"file" api:"optional"`
 	Notebook string                `json:"notebook" api:"optional"`

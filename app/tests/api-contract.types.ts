@@ -6,6 +6,11 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+// @ts-expect-error 地图未定位条目接口已移除。
+fetchPost("/api/av/getAttributeViewMapUnplaced", {id: "database", viewID: "retired-view"});
+// @ts-expect-error 在线地图运行时接口已移除。
+fetchPost("/api/map/getRuntime", {});
+
 fetchPost("/api/ai/agent/manageSkills", {action: "list"}, response => {
     if (response.code === 0) {
         const entries: {path: string, isDir: boolean, editable: boolean}[] | null | undefined = response.data.entries;

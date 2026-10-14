@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-/** @typedef {import("./interfaces").IRenderableView} IRenderableView */
 /** @typedef {import("./pdf_viewer").PDFViewer} PDFViewer */
 // eslint-disable-next-line max-len
 /** @typedef {import("./pdf_thumbnail_viewer").PDFThumbnailViewer} PDFThumbnailViewer */
+/** @typedef {import("./renderable_view").RenderableView} RenderableView */
 
 import { RenderingCancelledException } from "./pdfjs";
-import { RenderingStates } from "./ui_utils.js";
+import { RenderingStates } from "./renderable_view.js";
 
 const CLEANUP_TIMEOUT = 30000;
 
@@ -27,19 +27,24 @@ const CLEANUP_TIMEOUT = 30000;
  * Controls rendering of the views for pages and thumbnails.
  */
 class PDFRenderingQueue {
-  constructor() {
-    this.pdfViewer = null;
-    this.pdfThumbnailViewer = null;
-    this.onIdle = null;
-    this.highestPriorityPage = null;
-    /** @type {number} */
-    this.idleTimeout = null;
-    this.printing = false;
-    this.isThumbnailViewEnabled = false;
+  #highestPriorityPage = null;
 
+  #idleTimeout = null;
+
+  #pdfThumbnailViewer = null;
+
+  #pdfViewer = null;
+
+  isThumbnailViewEnabled = false;
+
+  onIdle = null;
+
+  printing = false;
+
+  constructor() {
     if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
       Object.defineProperty(this, "hasViewer", {
-        value: () => !!this.pdfViewer,
+        value: () => !!this.#pdfViewer,
       });
     }
   }
@@ -48,41 +53,41 @@ class PDFRenderingQueue {
    * @param {PDFViewer} pdfViewer
    */
   setViewer(pdfViewer) {
-    this.pdfViewer = pdfViewer;
+    this.#pdfViewer = pdfViewer;
   }
 
   /**
    * @param {PDFThumbnailViewer} pdfThumbnailViewer
    */
   setThumbnailViewer(pdfThumbnailViewer) {
-    this.pdfThumbnailViewer = pdfThumbnailViewer;
+    this.#pdfThumbnailViewer = pdfThumbnailViewer;
   }
 
   /**
-   * @param {IRenderableView} view
+   * @param {RenderableView} view
    * @returns {boolean}
    */
   isHighestPriority(view) {
-    return this.highestPriorityPage === view.renderingId;
+    return this.#highestPriorityPage === view.renderingId;
   }
 
   /**
-   * @param {Object} currentlyVisiblePages
+   * @param {object} currentlyVisiblePages
    */
   renderHighestPriority(currentlyVisiblePages) {
-    if (this.idleTimeout) {
-      clearTimeout(this.idleTimeout);
-      this.idleTimeout = null;
+    if (this.#idleTimeout) {
+      clearTimeout(this.#idleTimeout);
+      this.#idleTimeout = null;
     }
 
     // Pages have a higher priority than thumbnails, so check them first.
-    if (this.pdfViewer.forceRendering(currentlyVisiblePages)) {
+    if (this.#pdfViewer.forceRendering(currentlyVisiblePages)) {
       return;
     }
     // No pages needed rendering, so check thumbnails.
     if (
       this.isThumbnailViewEnabled &&
-      this.pdfThumbnailViewer?.forceRendering()
+      this.#pdfThumbnailViewer?.forceRendering()
     ) {
       return;
     }
@@ -93,24 +98,32 @@ class PDFRenderingQueue {
     }
 
     if (this.onIdle) {
-      this.idleTimeout = setTimeout(this.onIdle.bind(this), CLEANUP_TIMEOUT);
+      this.#idleTimeout = setTimeout(this.onIdle.bind(this), CLEANUP_TIMEOUT);
     }
   }
 
   /**
-   * @param {Object} visible
+   * @param {object} visible
    * @param {Array} views
    * @param {boolean} scrolledDown
    * @param {boolean} [preRenderExtra]
+   * @param {boolean} [ignoreDetailViews]
    */
-  getHighestPriority(visible, views, scrolledDown, preRenderExtra = false) {
+  getHighestPriority(
+    visible,
+    views,
+    scrolledDown,
+    preRenderExtra = false,
+    ignoreDetailViews = false
+  ) {
     /**
      * The state has changed. Figure out which page has the highest priority to
      * render next (if any).
      *
      * Priority:
      * 1. visible pages
-     * 2. if last scrolled down, the page after the visible pages, or
+     * 2. zoomed-in partial views of visible pages, unless `ignoreDetailViews`
+     * 3. if last scrolled down, the page after the visible pages, or
      *    if last scrolled up, the page before the visible pages
      */
     const visibleViews = visible.views,
@@ -125,6 +138,16 @@ class PDFRenderingQueue {
         return view;
       }
     }
+
+    if (!ignoreDetailViews) {
+      for (let i = 0; i < numVisible; i++) {
+        const { detailView } = visibleViews[i].view;
+        if (detailView && !this.isViewFinished(detailView)) {
+          return detailView;
+        }
+      }
+    }
+
     const firstId = visible.first.id,
       lastId = visible.last.id;
 
@@ -165,7 +188,7 @@ class PDFRenderingQueue {
   }
 
   /**
-   * @param {IRenderableView} view
+   * @param {RenderableView} view
    * @returns {boolean}
    */
   isViewFinished(view) {
@@ -176,22 +199,21 @@ class PDFRenderingQueue {
    * Render a page or thumbnail view. This calls the appropriate function
    * based on the views state. If the view is already rendered it will return
    * `false`.
-   *
-   * @param {IRenderableView} view
+   * @param {RenderableView} view
    */
   renderView(view) {
     switch (view.renderingState) {
       case RenderingStates.FINISHED:
         return false;
       case RenderingStates.PAUSED:
-        this.highestPriorityPage = view.renderingId;
+        this.#highestPriorityPage = view.renderingId;
         view.resume();
         break;
       case RenderingStates.RUNNING:
-        this.highestPriorityPage = view.renderingId;
+        this.#highestPriorityPage = view.renderingId;
         break;
       case RenderingStates.INITIAL:
-        this.highestPriorityPage = view.renderingId;
+        this.#highestPriorityPage = view.renderingId;
         view
           .draw()
           .finally(() => {
@@ -201,7 +223,7 @@ class PDFRenderingQueue {
             if (reason instanceof RenderingCancelledException) {
               return;
             }
-            console.error(`renderView: "${reason}"`);
+            console.error("renderView:", reason);
           });
         break;
     }

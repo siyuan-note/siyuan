@@ -80,6 +80,9 @@ func initDatabase(forceRebuild bool) {
 		if _, err := db.Exec("CREATE INDEX IF NOT EXISTS idx_blocktrees_box_id ON blocktrees(box_id)"); err != nil {
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create blocktree box index failed: %s", err)
 		}
+		if err := ensureBlockTreeTypeIndex(db); err != nil {
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create blocktree type index failed: %s", err)
+		}
 		if err := cleanupInvalidBlockTrees(db); err != nil {
 			logging.LogErrorf("cleanup invalid blocktrees failed: %s", err)
 		}
@@ -119,6 +122,14 @@ func initDBTables() {
 	if err = ensureHPathIndexes(db); err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create hpath indexes failed: %s", err)
 	}
+	if err = ensureBlockTreeTypeIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create blocktree type index failed: %s", err)
+	}
+}
+
+func ensureBlockTreeTypeIndex(database *sql.DB) (err error) {
+	_, err = database.Exec("CREATE INDEX IF NOT EXISTS idx_blocktrees_type ON blocktrees(type)")
+	return
 }
 
 func cleanupInvalidBlockTrees(database *sql.DB) (err error) {
@@ -132,13 +143,10 @@ func initDBConnection() {
 	util.LogDatabaseSize(util.BlockTreeDBPath)
 	dsn := util.BlockTreeDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
-		"&_mmap_size=4294967296" +
 		"&_secure_delete=OFF" +
-		"&_cache_size=-128000" +
-		"&_page_size=32768" +
+		util.SQLitePageCacheDSN() +
 		"&_busy_timeout=7000" +
 		"&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY" +
 		"&_case_sensitive_like=OFF"
 	var err error
 	db, err = sql.Open("sqlite3_extended", dsn)
@@ -207,25 +215,6 @@ func GetBlockTreesByTypeInBox(typ, boxID string) (ret []*BlockTree) {
 			return
 		}
 		ret = append(ret, &block)
-	}
-	return
-}
-
-func GetBlockTreeByBoxPath(boxID, path string) (ret *BlockTree) {
-	ret = &BlockTree{}
-	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND path = ?"
-	row := queryRowForBox(boxID, sqlStmt, boxID, path)
-	if row == nil {
-		return
-	}
-	err := row.Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
-	if err != nil {
-		ret = nil
-		if errors.Is(err, sql.ErrNoRows) {
-			return
-		}
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
 	}
 	return
 }
@@ -504,7 +493,7 @@ func GetBlockTree(id string) (ret *BlockTree) {
 // 入参 abbrType 对应 BlockTree.Type（如 "d"/"h"/"p"），由 TypeAbbr 写入。
 func IsContainerType(abbrType string) bool {
 	switch abbrType {
-	case "d", "b", "l", "i", "s", "callout", "tab", "mindmap", "mindmap_item":
+	case "d", "b", "l", "i", "s", "callout", "tabs", "tab", "mindmap", "mindmap_item":
 		return true
 	}
 	return false
@@ -557,22 +546,6 @@ func RemoveBlockTreesByRootID(boxID, rootID string) {
 		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
 		return
 	}
-}
-
-func CountBlockTreesByPathPrefix(boxID, pathPrefix string) (ret int) {
-	sqlStmt := "SELECT COUNT(*) FROM blocktrees WHERE path LIKE ? AND box_id = ?"
-	row := queryRowForBox(boxID, sqlStmt, pathPrefix+"%", boxID)
-	if row == nil {
-		return
-	}
-	err := row.Scan(&ret)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return 0
-		}
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-	}
-	return
 }
 
 func GetBlockTreesByPathPrefix(boxID, pathPrefix string) (ret []*BlockTree) {
@@ -766,10 +739,16 @@ func UpsertBlockTree(tree *parse.Tree) {
 			if oldBt.Updated != n.IALAttr("updated") || oldBt.Type != TypeAbbr(n.Type.String()) || oldBt.Path != tree.Path || oldBt.BoxID != tree.Box || oldBt.HPath != tree.HPath {
 				children := ChildBlockNodes(n) // 需要考虑子块，因为一些操作（比如移动块）后需要同时更新子块
 				changedNodes = append(changedNodes, children...)
+				if n.IsContainerBlock() && n.Type != ast.NodeDocument {
+					return ast.WalkSkipChildren
+				}
 			}
 		} else {
 			children := ChildBlockNodes(n)
 			changedNodes = append(changedNodes, children...)
+			if n.IsContainerBlock() && n.Type != ast.NodeDocument {
+				return ast.WalkSkipChildren
+			}
 		}
 		return ast.WalkContinue
 	})
@@ -958,9 +937,9 @@ func OpenEncryptedBlockTreeDB(boxID string, dek []byte) (err error) {
 	dbPath := util.EncryptedBlockTreeDBPath(boxID)
 	blocktreeKey := util.DeriveSubKey(dek, "siyuan/sqlcipher/blocktree")
 	defer clear(blocktreeKey)
-	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_mmap_size=4294967296&_secure_delete=OFF" +
-		"&_cache_size=-128000&_page_size=32768&_busy_timeout=7000&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(blocktreeKey) + "'"
+	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_secure_delete=OFF" +
+		util.SQLitePageCacheDSN() + "&_busy_timeout=7000&_ignore_check_constraints=ON" +
+		"&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(blocktreeKey) + "'"
 	boxDB, err := sql.Open("sqlite3_extended", dsn)
 	if err != nil {
 		return err
@@ -1045,6 +1024,9 @@ func initEncryptedBlockTreeTables(boxDB *sql.DB) (err error) {
 		}
 	}
 	if err = ensureHPathIndexes(boxDB); err != nil {
+		return
+	}
+	if err = ensureBlockTreeTypeIndex(boxDB); err != nil {
 		return
 	}
 	if err = cleanupInvalidBlockTrees(boxDB); err != nil {

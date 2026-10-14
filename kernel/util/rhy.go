@@ -32,7 +32,7 @@ var (
 
 	cachedRhyResult    = map[string]any{}
 	rhyResultCacheTime int64
-	rhyResultLock      = sync.Mutex{}
+	rhyResultLock      = sync.RWMutex{}
 	rhyResultFlight    singleflight.Group
 
 	rhyBazaarHash     string
@@ -51,17 +51,22 @@ func RefreshRhyResultJob() {
 }
 
 func GetRhyResult(ctx context.Context, force bool) (map[string]any, error) {
+	cacheDuration := RhyCacheDuration
 	if ContainerDocker == Container {
-		RhyCacheDuration = int64(3600 * 24)
+		cacheDuration = int64(3600 * 24)
 	}
 
-	if RhyCacheDuration >= time.Now().Unix()-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
-		return cachedRhyResult, nil
+	rhyResultLock.RLock()
+	cached := cachedRhyResult
+	valid := cacheDuration >= time.Now().Unix()-rhyResultCacheTime && len(cached) > 0
+	rhyResultLock.RUnlock()
+	if !force && valid {
+		return cached, nil
 	}
 
 	// 并发调用只执行一次实际请求
 	v, err, _ := rhyResultFlight.Do("rhyResult", func() (any, error) {
-		return getRhyResult0(ctx)
+		return getRhyResult0(ctx, GetCloudServer())
 	})
 	if err != nil {
 		return nil, err
@@ -71,12 +76,11 @@ func GetRhyResult(ctx context.Context, force bool) (map[string]any, error) {
 	return ret, nil
 }
 
-func getRhyResult0(ctx context.Context) (map[string]any, error) {
-	rhyResultLock.Lock()
-	defer rhyResultLock.Unlock()
-
+func getRhyResult0(ctx context.Context, serverURL string) (map[string]any, error) {
+	// 响应使用独立对象解析，已发布的缓存只读，刷新不会改写调用方正在使用的结果。
+	var result map[string]any
 	request := httpclient.NewCloudRequest30s()
-	resp, err := request.SetContext(ctx).SetSuccessResult(&cachedRhyResult).Get(GetCloudServer() + "/apis/siyuan/version?ver=" + Ver)
+	resp, err := request.SetContext(ctx).SetSuccessResult(&result).Get(serverURL + "/apis/siyuan/version?ver=" + Ver)
 	if err != nil {
 		logging.LogErrorf("get version info failed: %s", err)
 		return nil, err
@@ -85,8 +89,11 @@ func getRhyResult0(ctx context.Context) (map[string]any, error) {
 		logging.LogErrorf("get rhy result failed: %d", resp.StatusCode)
 		return nil, fmt.Errorf("get rhy result failed: %d", resp.StatusCode)
 	}
+	rhyResultLock.Lock()
+	cachedRhyResult = result
 	rhyResultCacheTime = time.Now().Unix()
-	return cachedRhyResult, nil
+	rhyResultLock.Unlock()
+	return result, nil
 }
 
 func syncRhyBazaarHashFromResult(m map[string]any) {

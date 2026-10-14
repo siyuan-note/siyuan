@@ -7,7 +7,7 @@ import {Constants} from "../../constants";
 import {getContenteditableElement, getEmbedGutterOperationContext, getLastBlock} from "../wysiwyg/getBlock";
 import {genEmptyElement, genHeadingElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
-import {focusByRange} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 /// #if !MOBILE
 import {moveResize} from "../../dialog/moveResize";
 /// #endif
@@ -250,7 +250,8 @@ export const initUI = (protyle: IProtyle) => {
         }
         const tabsHeader = hasClosestByClassName(event.target, "tabs-header");
         const nodeElement = tabsHeader ? hasClosestBlock(tabsHeader.parentElement) : hasClosestBlock(event.target);
-        if (!tabsHeader && nodeElement && nodeElement.getAttribute("data-type") === "NodeTabItem") {
+        if (!tabsHeader && nodeElement && nodeElement.getAttribute("data-type") === "NodeTabItem" &&
+            nodeElement.parentElement.classList.contains("tabs")) {
             hideElements(["gutter"], protyle);
             return;
         }
@@ -378,6 +379,10 @@ export const setPadding = (protyle: IProtyle) => {
     const responsivePadding = protyle.contentElement.dataset.paddingMode === "responsive";
     let paddingLeft = protyle.options.backlinkData ? 24 : padding.left;
     let paddingRight = protyle.options.backlinkData ? 16 : padding.right;
+    if (protyle.element.classList.contains("protyle--page-scroll")) {
+        paddingRight = Math.max(paddingRight, parseFloat(getComputedStyle(protyle.element)
+            .getPropertyValue("--b3-protyle-page-scroll-gutter")) || 0);
+    }
     const backlinkBottomElement = protyle.contentElement.querySelector(".sy__backlink--bottom") as HTMLElement;
     const backlinkBottomVisible = backlinkBottomElement &&
         !backlinkBottomElement.classList.contains("fn__none") &&

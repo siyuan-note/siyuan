@@ -1,4 +1,6 @@
+import {isAVSelectType} from "./capabilities";
 import {renderCalendar} from "./calendar/render";
+import {isFoldedRenderContent} from "../foldedContent";
 import {getCalendarRequestRange} from "./calendar/state";
 import {isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
@@ -13,7 +15,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {getRowHTML, stickyRow, updateAVSelectionStatus, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
-import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {isInMobileApp} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
 import {renderGallery} from "./gallery/render";
@@ -38,6 +40,7 @@ import {
 } from "./locate";
 import {setGroupFoldedStates, updateGroupFoldedStates} from "./groupFold";
 import {getPublishAVView} from "./publishState";
+import {getReadonlyAVView} from "./readonlyState";
 import {updateHotkeyTip} from "../../util/compatibility";
 import {inspectAVInsertedItem} from "./filteredTip";
 import {
@@ -65,6 +68,7 @@ import {getContextFilterKeyID} from "./contextFilterState";
 import {isAVCellPanelForBlock} from "./panelTarget";
 import {replaceAVContainer} from "./container";
 import {updateFrozenColumns} from "./frozenColumns";
+import {updateAVTableColumnWidths} from "./columnWidth";
 
 interface IIds {
     groupId: string,
@@ -135,7 +139,8 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
     });
     const defaultTemplate = data.newItemTemplates?.find(item => item.id === data.defaultTemplateID);
     const defaultTemplateID = defaultTemplate && (defaultTemplate.targetType !== "detached" ||
-        defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
+        defaultTemplate.icon || defaultTemplate.primaryKeyTemplate ||
+        Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
     const editingState = getAVHeaderEditingState(editable, includeEditingControls);
     return `<div class="av__header" data-default-template-id="${defaultTemplateID}" data-current-view-id="${escapeAttr(data.viewID)}" data-view-count="${data.views.length}" data-view-ids="${data.views.map((view) => view.id).join(",")}" data-view-pages="${escapeAttr(serializeAVViewPageSizes(data.views))}">
         <div class="fn__flex av__views${isMobile() ? " av__views--mobile" : ""}${showSearch ? " av__views--show av__views--search" : ""}">
@@ -195,7 +200,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             <div class="fn__space"></div>
             ${editingState.newItemHTML}
         </div>
-        <div contenteditable="${editingState.contenteditable}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${Lute.EscapeHTMLStr(data.name || "")}" data-tip="${window.siyuan.languages._kernel[267]}">${Lute.EscapeHTMLStr(data.name || "")}</div>
+        <div contenteditable="${editingState.contenteditable}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${escapeHtmlTextAndAttr(data.name || "")}" data-tip="${window.siyuan.languages._kernel[267]}">${escapeHtmlTextAndAttr(data.name || "")}</div>
     </div>`;
 };
 
@@ -299,7 +304,7 @@ style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || 
 
 export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     let nameHTML = "";
-    if (["mSelect", "select"].includes(group.groupValue.type)) {
+    if (isAVSelectType(group.groupValue.type)) {
         group.groupValue.mSelect.forEach((item) => {
             nameHTML += `<span class="b3-chip" style="${getAVColorStyle(item)}">${escapeHtml(item.content)}</span>`;
         });
@@ -340,11 +345,11 @@ const renderGroupTable = (options: ITableOptions) => {
             const virtualData = plan.virtualData[group.id];
             const renderBody = !group.groupFolded || virtualData?.locate;
             avBodyHTML += `${getGroupTitleHTML(group, group.rowCount)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}"${virtualData?.locate ? ' data-av-locate-window="true"' : ""} style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${renderBody ? getTableHTMLs(group, options.blockElement, virtualData, true) : ""}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${escapeHtmlTextAndAttr(group.groupValue.text?.content || "")}"${virtualData?.locate ? ' data-av-locate-window="true"' : ""} style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${renderBody ? getTableHTMLs(group, options.blockElement, virtualData, true) : ""}</div>`;
         }
     });
     if (options.renderAll) {
-        replaceAVContainer(options.blockElement, `<div class="av__container">
+        replaceAVContainer(options.blockElement, `<div class="av__container av__container--grouped">
     ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled, options.blockElement)}
     <div class="av__scroll">
         ${avBodyHTML}
@@ -569,7 +574,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
     }
     for (let i = 0; i < avElements.length; i++) {
         const e = avElements[i] as HTMLElement;
-        if (e.closest(".mindmap-view__preview-block")) {
+        if (e.closest(".mindmap-view__preview-block") || isFoldedRenderContent(e)) {
             continue;
         }
         e.removeAttribute("data-rendering");
@@ -685,7 +690,8 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 calendarRange: getCalendarRequestRange(e, locateParams?.viewID || undefined),
                 id: e.getAttribute("data-av-id"),
                 blockID: standalone ? "" : e.getAttribute("data-node-id"),
-                viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(e) : ""),
+                viewID: locateParams?.viewID || (window.siyuan.isPublish ? getPublishAVView(e) :
+                    protyle.disabled ? getReadonlyAVView(e) : ""),
             };
             const paging = {
                 pageSize: avPageSize.unGroupPageSize,
@@ -880,6 +886,21 @@ const waitForAddingCellPosition = async (options: {
 };
 
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
+    if (operation.action === "setAttrViewBlockView" && operation.blockID) {
+        getAVElements(protyle, operation.avID).forEach(item => {
+            if (item.dataset.nodeId !== operation.blockID) return;
+            const pageSize = getAVViewPageSize(
+                item.querySelector(".av__header")?.getAttribute("data-view-pages"), operation.id
+            );
+            item.querySelectorAll<HTMLElement>(".av__body").forEach(body => {
+                if (pageSize) body.dataset.pageSize = pageSize;
+                else body.removeAttribute("data-page-size");
+            });
+            item.removeAttribute("data-render");
+            void avRender(item, protyle);
+        });
+        return;
+    }
     if (operation.action === "insertAttrViewBlock") {
         inspectAVInsertedItem(protyle, operation);
     }
@@ -926,26 +947,17 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         });
         return;
     }
-    if (operation.action === "setAttrViewColWidth") {
+    if (operation.action === "setAttrViewColWidth" || operation.action === "setAttrViewColsWidth") {
+        const widths = operation.action === "setAttrViewColWidth" ?
+            {[operation.id]: operation.data} : operation.data as Record<string, string>;
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
-            if (!cellElement || cellElement.style.width === operation.data) {
-                return;
+            const data = getAVData(item);
+            if (data && isTableLikeView(data.viewType)) {
+                // 折叠分组和虚拟滚动从缓存创建单元格，列宽需同步更新到全部分组。
+                updateAVTableColumnWidths(data.view as IAVTable, widths);
             }
             item.querySelectorAll(".av__row, .av__row--footer").forEach(rowItem => {
-                const columnElement = rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement;
-                if (columnElement) {
-                    columnElement.style.width = operation.data;
-                }
-            });
-            updateFrozenColumns(item);
-        });
-        return;
-    }
-    if (operation.action === "setAttrViewColsWidth") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            item.querySelectorAll(".av__row, .av__row--footer").forEach(rowItem => {
-                Object.entries(operation.data as Record<string, string>).forEach(([columnID, width]) => {
+                Object.entries(widths).forEach(([columnID, width]) => {
                     const columnElement = rowItem.querySelector(`[data-col-id="${columnID}"]`) as HTMLElement;
                     if (columnElement) {
                         columnElement.style.width = width;

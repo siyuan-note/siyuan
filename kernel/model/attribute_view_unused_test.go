@@ -4,6 +4,7 @@ package model
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -111,8 +112,8 @@ func TestRemoveUnusedAttributeView(t *testing.T) {
 		t.Fatal(err)
 	}
 	GlobalUndoLog.Record(history)
-	if removed := RemoveUnusedAttributeViews(); len(removed) != 1 {
-		t.Fatalf("unexpected batch cleanup result: %v", removed)
+	if removed, removeErr := RemoveUnusedAttributeViews(); removeErr != nil || len(removed) != 1 {
+		t.Fatalf("unexpected batch cleanup result: %v %v", removed, removeErr)
 	}
 	if GlobalUndoLog.Peek(tree.ID) != nil {
 		t.Fatal("batch database cleanup left stale undo history")
@@ -130,5 +131,67 @@ func TestRemoveUnusedAttributeView(t *testing.T) {
 	}
 	if data, readErr := os.ReadFile(encryptedPath); readErr != nil || string(data) != "ciphertext" {
 		t.Fatalf("notebook database changed: %v", readErr)
+	}
+}
+
+func TestUnusedAttributeViewsAbortUnreadableDocument(t *testing.T) {
+	for _, test := range []struct{ name, data string }{
+		{"new spec", `{"Type":"NodeDocument","Spec":"99"}`},
+		{"invalid spec", `{"Type":"NodeDocument","Spec":"invalid"}`},
+		{"corrupt JSON", `{"Type":`},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			_, docPath := setupUnusedAssetWorkspace(t)
+			setupAttributeViewRefI18n(t)
+			if err := os.WriteFile(docPath, []byte(test.data), 0644); err != nil {
+				t.Fatal(err)
+			}
+			const id = "20260913000000-unused1"
+			if err := av.SaveAttributeView(av.NewAttributeView(id)); err != nil {
+				t.Fatal(err)
+			}
+			source := filepath.Join(util.DataDir, "storage", "av", id+".json")
+			original, err := os.ReadFile(source)
+			if err != nil {
+				t.Fatal(err)
+			}
+			items, err := UnusedAttributeViews(false)
+			if err == nil || len(items) != 0 {
+				t.Fatalf("incomplete scan returned candidates: %v %v", items, err)
+			}
+			if test.name == "new spec" && !errors.Is(err, treenode.ErrSpecTooNew) {
+				t.Fatalf("lost spec error: %v", err)
+			}
+			if err = RemoveUnusedAttributeView(id); err == nil {
+				t.Fatal("single database cleanup accepted an incomplete scan")
+			}
+			if removed, removeErr := RemoveUnusedAttributeViews(); removeErr == nil || len(removed) != 0 {
+				t.Fatalf("batch cleanup accepted an incomplete scan: %v %v", removed, removeErr)
+			}
+			if data, readErr := os.ReadFile(source); readErr != nil || !bytes.Equal(data, original) {
+				t.Fatalf("database changed: %v", readErr)
+			}
+			if _, statErr := os.Stat(filepath.Join(util.WorkspaceDir, "history")); !os.IsNotExist(statErr) {
+				t.Fatalf("failed scan created cleanup history: %v", statErr)
+			}
+		})
+	}
+}
+
+func TestUnusedAttributeViewsExcludesEncryptedNotebook(t *testing.T) {
+	boxID, docPath := setupUnusedAssetWorkspace(t)
+	setupAttributeViewRefI18n(t)
+	markRuntimeEncryptedBox(boxID)
+	t.Cleanup(func() { forgetRuntimeEncryptedBox(boxID) })
+	if err := os.WriteFile(docPath, []byte("opaque encrypted document"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	const id = "20260913000000-unused1"
+	if err := av.SaveAttributeView(av.NewAttributeView(id)); err != nil {
+		t.Fatal(err)
+	}
+	items, err := UnusedAttributeViews(false)
+	if err != nil || len(items) != 1 || items[0].Item != id {
+		t.Fatalf("encrypted document prevented scanning ordinary databases: %v %v", items, err)
 	}
 }

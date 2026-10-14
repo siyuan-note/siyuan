@@ -44,6 +44,7 @@ func TestSearchSQLQueries(t *testing.T) {
 		isError          bool
 	}{
 		{"projection", "SELECT id, type FROM blocks ORDER BY id LIMIT 3", "| row-1 | p |", false},
+		{"line comments", "-- first comment\nWITH selected AS (SELECT * FROM blocks)\nSELECT * FROM selected -- preserve newline\nWHERE id='row-1'", "row-1", false},
 		{"all columns", "SELECT * FROM blocks LIMIT 3", "row-1", false},
 		{"aggregate", "SELECT count(*) AS total FROM blocks", "| 3 |", false},
 		{"literal", "SELECT id FROM blocks WHERE hpath = '/中文ABC'", "| row-1 |", false},
@@ -70,6 +71,19 @@ func TestSearchSQLQueries(t *testing.T) {
 				t.Fatalf("unexpected result: %+v", got)
 			}
 		})
+	}
+	const blockID = "20261010120000-sqltest"
+	if err := sql.Exec("INSERT INTO blocks VALUES ('" + blockID + "', '', '" + blockID + "', '', '', '', '', '', '', '', '', 'inline|text', '', '', 11, 'p', '', '', 0, '', '')"); err != nil {
+		t.Fatal(err)
+	}
+	result, err := sqlHandler(map[string]any{"action": "query", "stmt": "SELECT id, content FROM blocks WHERE id='" + blockID + "'"})
+	if err != nil || result.IsError || !result.HasStructuredContent() ||
+		!strings.Contains(result.Content[0].Text, "siyuan://blocks/"+blockID) {
+		t.Fatalf("SQL block links: %+v, %v", result, err)
+	}
+	output := result.StructuredContent.(map[string]any)
+	if output["rowCount"] != 1 || output["rows"].([]map[string]any)[0]["content"] != "inline|text" {
+		t.Fatalf("SQL structured rows: %+v", output)
 	}
 	const boxID = "20260915000000-mcpsql1"
 	boxDir := filepath.Join(util.DataDir, boxID, ".siyuan")

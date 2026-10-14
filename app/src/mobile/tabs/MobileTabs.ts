@@ -1,3 +1,4 @@
+import {toggleMenu} from "../../menus/menuToggle";
 import {Constants} from "../../constants";
 import {getDocumentIconHTML} from "../../emoji/fileTreeIcon";
 import type {App} from "../../index";
@@ -13,6 +14,7 @@ import {loadMobileFileById, updateRecentDocSwitchTime} from "../editor";
 import {openModel} from "../menu/model";
 import {closeModel} from "../util/closePanel";
 import {setEmpty} from "../util/setEmpty";
+import {saveMobileStorage} from "../util/saveLayout";
 import {canCloseTab, moveTab, orderTabsForOverview, toggleTabPin, trimTabsToLimit} from "./mobileTabsState";
 
 const MAX_HISTORY = 32;
@@ -60,6 +62,8 @@ type OpenOptions = {
     tabID?: string;
     recentPreviousRootID?: string;
     recordActivation?: boolean;
+    keepPanels?: boolean;
+    waitForDatabaseAttributes?: boolean;
 };
 
 type MobileTabOpenResult = "success" | "cancelled" | "invalid" | "failed";
@@ -121,11 +125,12 @@ const getPinIcon = (pinned: boolean) => pinned ? "iconUnpin" : "iconPin";
 
 export class MobileTabs {
     private state: MobileTabsState;
+    private hasStoredTabs: boolean;
     private navigationEpoch = 0;
+    private renderedEntry?: MobileTabEntry;
     private abortController?: AbortController;
     private activationBackStack: string[] = [];
     private activationForwardStack: string[] = [];
-    private overviewElement?: HTMLElement;
     private overviewLongPressTimer?: number;
     private overviewLongPressTabID?: string;
     private overviewLongPressTriggered = false;
@@ -135,7 +140,8 @@ export class MobileTabs {
 
     constructor(private readonly app: App) {
         const stored = window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] as MobileTabsState | undefined;
-        const tabs = stored?.version === 1 && Array.isArray(stored.tabs) ?
+        this.hasStoredTabs = stored?.version === 1 && Array.isArray(stored.tabs);
+        const tabs = this.hasStoredTabs ?
             stored.tabs.map(normalizeTab).filter((item): item is MobileTab => !!item).map(sanitizeTab) : [];
         this.state = {
             version: 1,
@@ -148,7 +154,12 @@ export class MobileTabs {
         this.activationForwardStack = Array.isArray(stored?.activationForwardStack) ?
             stored.activationForwardStack.filter((tabID) => typeof tabID === "string" && tabIDs.has(tabID)).slice(-MAX_HISTORY) : [];
         this.trimTabs();
-        this.persist();
+        // 旧版文档记录完成恢复前不写入空页签，避免中途退出后失去迁移依据。
+        if (this.hasStoredTabs) {
+            this.persist();
+        } else {
+            this.updateNavigationButtons();
+        }
         this.updateCounter();
     }
 
@@ -191,6 +202,7 @@ export class MobileTabs {
     }
 
     private persist() {
+        this.hasStoredTabs = true;
         const persistedState: MobileTabsState = {
             version: 1,
             activeTabID: this.state.activeTabID,
@@ -199,8 +211,9 @@ export class MobileTabs {
             activationForwardStack: this.activationForwardStack,
         };
         window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] = persistedState;
-        setStorageVal(Constants.LOCAL_MOBILE_TABS, persistedState);
+        const saved = saveMobileStorage(Constants.LOCAL_MOBILE_TABS, persistedState);
         this.updateNavigationButtons();
+        return saved;
     }
 
     private updateCounter() {
@@ -222,12 +235,16 @@ export class MobileTabs {
     }
 
     private snapshot(tab = this.activeTab) {
-        if (!tab?.current || !window.siyuan.mobile.editor?.protyle) {
+        if (!tab?.current || tab.current !== this.renderedEntry || !window.siyuan.mobile.editor?.protyle) {
             return;
         }
         const protyle = window.siyuan.mobile.editor.protyle;
-        if (protyle.block.rootID === tab.current.rootID) {
-            tab.current.scroll = saveScroll(protyle, true) as IScrollAttr | undefined;
+        if (protyle.block.rootID === tab.current.rootID && protyle.notebookId === tab.current.notebookID) {
+            const scroll = saveScroll(protyle, true) as IScrollAttr | undefined;
+            if (!scroll) {
+                return;
+            }
+            tab.current.scroll = scroll;
             tab.current.title = (document.getElementById("toolbarName") as HTMLInputElement)?.value || tab.current.title;
             tab.current.id = protyle.block.showAll ? protyle.block.id : protyle.block.rootID;
             tab.current.notebookID = protyle.notebookId;
@@ -408,6 +425,10 @@ export class MobileTabs {
             };
             abortController.signal.addEventListener("abort", () => finish("cancelled"), {once: true});
             // 过期响应由 epoch 和 isValid 丢弃，不向 fetch 传递 signal。
+            // 共享编辑器加载期间不属于任何页签，不能把中间状态保存到原页签。
+            const renderedEntry = this.renderedEntry;
+            const renderedProtyle = window.siyuan.mobile.editor?.protyle;
+            this.renderedEntry = undefined;
             loadMobileFileById(this.app, loadID, loadAction, options.scrollPosition, info.box, (protyle) => {
                 if (epoch !== this.navigationEpoch) {
                     finish("cancelled");
@@ -425,6 +446,7 @@ export class MobileTabs {
                     this.state.tabs.push(tab);
                 }
                 tab.current = this.entryFromProtyle(loadID, loadAction, protyle);
+                this.renderedEntry = tab.current;
                 tab.activeAt = Date.now();
                 if (options.recordActivation !== false && activeBefore?.id !== tab.id) {
                     this.recordActivation(activeBefore?.id);
@@ -450,9 +472,14 @@ export class MobileTabs {
                 }
                 finish("success");
                 options.afterOpen?.(protyle);
-            }, options.forceReload, () => epoch === this.navigationEpoch, undefined, loadScroll, false, (invalid) => {
+            }, options.forceReload, () => epoch === this.navigationEpoch, undefined, loadScroll, false, (invalid, editorUnchanged) => {
+                // 加载尚未修改编辑器时恢复原页签归属，允许用户继续阅读和保存。
+                if (editorUnchanged && epoch === this.navigationEpoch && this.activeTab?.current === renderedEntry &&
+                    window.siyuan.mobile.editor?.protyle === renderedProtyle) {
+                    this.renderedEntry = renderedEntry;
+                }
                 finish(abortController.signal.aborted ? "cancelled" : (invalid ? "invalid" : "failed"));
-            });
+            }, options.keepPanels, options.waitForDatabaseAttributes);
         });
     }
 
@@ -460,11 +487,16 @@ export class MobileTabs {
         return this.open(id, {...options, newTab: true});
     }
 
-    async restore(): Promise<boolean> {
+    canRestoreLegacyDocument() {
+        // 已保存的空状态同样有效，用户开始新的导航后也不再恢复旧文档。
+        return !this.hasStoredTabs && this.navigationEpoch === 0;
+    }
+
+    async restore(keepPanels = false): Promise<boolean> {
         const tab = this.activeTab;
         if (!tab) {
             setEmpty(this.app);
-            return false;
+            return !this.canRestoreLegacyDocument();
         }
         tab.activeAt = Date.now();
         if (!tab.current) {
@@ -480,13 +512,14 @@ export class MobileTabs {
             replace: true,
             scroll: tab.current.scroll,
             tabID: tab.id,
+            keepPanels,
         });
         if (result === "invalid") {
             this.state.tabs = this.state.tabs.filter((item) => item.id !== tab.id);
             this.state.activeTabID = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0]?.id;
             this.persist();
             this.updateCounter();
-            return this.restore();
+            return this.restore(keepPanels);
         }
         if (result === "failed") {
             setEmpty(this.app);
@@ -770,7 +803,7 @@ export class MobileTabs {
             this.cancelNavigation();
             this.state.activeTabID = [...this.state.tabs].sort((a, b) => b.activeAt - a.activeAt)[0]?.id;
             if (this.state.activeTabID) {
-                void this.restore();
+                void this.restore(true);
             } else {
                 setEmpty(this.app);
             }
@@ -779,9 +812,13 @@ export class MobileTabs {
         this.updateCounter();
     }
 
-    save() {
+    async save(): Promise<boolean> {
         this.snapshot();
-        this.persist();
+        // 尚未迁移成功的临时空状态不能在关闭页面时覆盖旧版恢复记录。
+        if (!this.hasStoredTabs && this.state.tabs.length === 0) {
+            return true;
+        }
+        return this.persist();
     }
 
     pushCurrent() {
@@ -795,48 +832,55 @@ export class MobileTabs {
         this.persist();
     }
 
-    private openTabMenu(tabID: string) {
-        const tab = this.state.tabs.find((item) => item.id === tabID);
-        if (!tab) {
-            return;
-        }
-        const pinned = !!tab.pin;
-        window.siyuan.menus.menu.remove();
-        window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_MOBILE_TABS);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "close",
-            icon: "iconClose",
-            label: window.siyuan.languages.close,
-            click: () => {
-                void this.close(tabID);
+    private openTabMenu(tabID: string, target?: Element) {
+        toggleMenu({
+            target,
+            toggle: false,
+            build: (_menu, session) => {
+                const tab = this.state.tabs.find((item) => item.id === tabID);
+                if (!tab) {
+                    return;
+                }
+                const pinned = !!tab.pin;
+
+                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_MOBILE_TABS);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "close",
+                    icon: "iconClose",
+                    label: window.siyuan.languages.close,
+                    click: () => {
+                        void this.close(tabID);
+                    },
+                }).element);
+                if (this.state.tabs.length > 1) {
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        id: "closeOthers",
+                        label: window.siyuan.languages.closeOthers,
+                        click: () => {
+                            this.closeOthers(tabID);
+                        },
+                    }).element);
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        id: "closeAll",
+                        label: window.siyuan.languages.closeAll,
+                        click: () => {
+                            this.closeAll();
+                        },
+                    }).element);
+                }
+                window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: pinned ? "unpin" : "pin",
+                    icon: getPinIcon(pinned),
+                    label: pinned ? window.siyuan.languages.unpin : window.siyuan.languages.pin,
+                    click: () => {
+                        this.togglePin(tabID);
+                    },
+                }).element);
+                session.show(() => window.siyuan.menus.menu.fullscreen("bottom"));
+
             },
-        }).element);
-        if (this.state.tabs.length > 1) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "closeOthers",
-                label: window.siyuan.languages.closeOthers,
-                click: () => {
-                    this.closeOthers(tabID);
-                },
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "closeAll",
-                label: window.siyuan.languages.closeAll,
-                click: () => {
-                    this.closeAll();
-                },
-            }).element);
-        }
-        window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: pinned ? "unpin" : "pin",
-            icon: getPinIcon(pinned),
-            label: pinned ? window.siyuan.languages.unpin : window.siyuan.languages.pin,
-            click: () => {
-                this.togglePin(tabID);
-            },
-        }).element);
-        window.siyuan.menus.menu.fullscreen("bottom");
+        });
     }
 
     private togglePin(tabID: string) {
@@ -880,11 +924,7 @@ export class MobileTabs {
     </div>
 </div>`,
             bindEvent: (element) => {
-                if (element !== this.overviewElement) {
-                    // 每次渲染都会替换内容，事件绑定在固定的容器上
-                    this.overviewElement = element;
-                    this.bindOverviewEvents(element);
-                }
+                this.bindOverviewEvents(element.firstElementChild as HTMLElement);
             },
             destroyCallback: () => {
                 this.cancelOverviewLongPress();
@@ -1020,7 +1060,7 @@ export class MobileTabs {
                 }
                 this.overviewLongPressTriggered = true;
                 this.suppressOverviewClickUntil = Date.now() + Constants.TIMEOUT_LONGPRESS;
-                this.openTabMenu(tabID);
+                this.openTabMenu(tabID, itemElement);
             }, Constants.TIMEOUT_LONGPRESS);
         });
         element.addEventListener("pointermove", processPointerMove);

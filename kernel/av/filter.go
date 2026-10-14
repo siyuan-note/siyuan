@@ -172,6 +172,9 @@ func filterByContext(collection Collection, attrView *AttributeView,
 			},
 		},
 	}
+	if KeyTypeRollup == keyValues.Key.Type {
+		filter.Value = &Value{Type: KeyTypeRollup, Rollup: &ValueRollup{Contents: []*Value{filter.Value}}}
+	}
 	valuesByItemID := make(map[string]*Value, len(keyValues.Values))
 	for _, value := range keyValues.Values {
 		if nil == value {
@@ -184,6 +187,9 @@ func filterByContext(collection Collection, attrView *AttributeView,
 	var items []Item
 	for _, item := range collection.GetItems() {
 		value := valuesByItemID[item.GetID()]
+		if nil == value && KeyTypeRollup == keyValues.Key.Type {
+			value = &Value{KeyID: context.KeyID, BlockID: item.GetID(), Type: KeyTypeRollup, Rollup: &ValueRollup{}}
+		}
 		if nil != value && value.Filter(filter, attrView, item.GetID(), rollupFurtherCollections, cachedAttrViews) {
 			items = append(items, item)
 		}
@@ -320,6 +326,9 @@ func resolveFilterValueSource(filter *ViewFilter) *ViewFilter {
 
 	ret := *filter
 	content := filter.Value.String(false)
+	if KeyTypeLocation == filter.Value.Type && nil != filter.Value.Text {
+		content = filter.Value.Text.Content
+	}
 	if KeyTypeNumber == filter.Value.Type && nil != filter.Value.Number && filter.Value.Number.IsNotEmpty {
 		content = strconv.FormatFloat(filter.Value.Number.Content, 'f', -1, 64)
 	}
@@ -337,8 +346,13 @@ func evalMissingLeaf(filter *ViewFilter) bool {
 	case FilterOperatorIsNotEmpty:
 		return false
 	case FilterOperatorContainsAnyItem, FilterOperatorDoesNotContainAnyItem:
-		if !isExactRelationFilter(filter) || nil == filter.Value.Relation ||
-			1 > len(filter.Value.Relation.BlockIDs) {
+		comparison := filter
+		if nil != filter.Value && KeyTypeRollup == filter.Value.Type && nil != filter.Value.Rollup &&
+			0 < len(filter.Value.Rollup.Contents) {
+			comparison = &ViewFilter{Operator: filter.Operator, Value: filter.Value.Rollup.Contents[0]}
+		}
+		if !isExactRelationFilter(comparison) || nil == comparison.Value.Relation ||
+			1 > len(comparison.Value.Relation.BlockIDs) {
 			return true
 		}
 		return FilterOperatorDoesNotContainAnyItem == filter.Operator
@@ -663,25 +677,24 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 	// 单独处理汇总
 	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter.Value && KeyTypeRollup == filter.Value.Type && nil != filter.Value.Rollup {
 		key, _ := attrView.GetKey(value.KeyID)
-		if nil == key {
+		if nil == key || nil == key.Rollup {
 			return false
 		}
 
 		relKey, _ := attrView.GetKey(key.Rollup.RelationKeyID)
-		if nil == relKey {
+		if !isConfiguredRelationKey(relKey) {
 			return false
 		}
 
 		relVal := attrView.GetValue(relKey.ID, itemID)
-		if nil == relVal || nil == relVal.Relation {
-			return false
-		}
 
 		destAv := cachedAttrViews[relKey.Relation.AvID]
 		if nil == destAv {
 			destAv, _ = ParseAttributeView(relKey.Relation.AvID)
 			if nil != destAv {
-				cachedAttrViews[relKey.Relation.AvID] = destAv
+				if nil != cachedAttrViews {
+					cachedAttrViews[relKey.Relation.AvID] = destAv
+				}
 			}
 		}
 		if nil == destAv {
@@ -693,8 +706,27 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		if nil == destKey {
 			return false
 		}
+		var comparison *ViewFilter
+		if 0 < len(filter.Value.Rollup.Contents) {
+			candidate := &ViewFilter{Operator: filter.Operator, Value: filter.Value.Rollup.Contents[0]}
+			if isExactRelationFilter(candidate) {
+				if !isRollupValueList(key) || !isConfiguredRelationKey(destKey) {
+					return false
+				}
+				comparison = candidate
+			}
+		}
+		if nil == relVal || nil == relVal.Relation {
+			return nil != comparison && filterRelationRollupItems(nil, comparison)
+		}
 
 		rollupContext := rollupFurtherCollections[key.ID]
+		if nil != comparison {
+			// 精确筛选按条目 ID 匹配，不能让显示值按名称去重后丢失同名条目。
+			contents := &ValueRollup{}
+			contents.BuildContents(destAv, destKey, relVal, nil, rollupContext)
+			return filterRelationRollupItems(contents.Contents, comparison)
+		}
 		value.Rollup.BuildContents(destAv, destKey, relVal, key.Rollup.Calc, rollupContext)
 		relationContentCount := len(relVal.Relation.Contents)
 		if nil != rollupContext && nil != rollupContext.EligibleItemIDs {
@@ -718,7 +750,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil == v || reflect.ValueOf(v).IsNil() {
+					if isRollupStoredValueEmpty(c) {
 						return true
 					}
 				}
@@ -729,7 +761,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil != v && !reflect.ValueOf(v).IsNil() {
+					if !isRollupStoredValueEmpty(c) {
 						return true
 					}
 				}
@@ -760,7 +792,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil != v && !reflect.ValueOf(v).IsNil() {
+					if !isRollupStoredValueEmpty(c) {
 						return false
 					}
 				}
@@ -775,7 +807,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil == v || reflect.ValueOf(v).IsNil() {
+					if isRollupStoredValueEmpty(c) {
 						return false
 					}
 				}
@@ -807,7 +839,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil == v || reflect.ValueOf(v).IsNil() {
+					if isRollupStoredValueEmpty(c) {
 						return false
 					}
 				}
@@ -818,7 +850,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, c := range value.Rollup.Contents {
-					if v := c.GetValByType(c.Type); nil != v && !reflect.ValueOf(v).IsNil() {
+					if !isRollupStoredValueEmpty(c) {
 						return false
 					}
 				}
@@ -1045,10 +1077,21 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 }
 
 // isRollupFilterValueEmpty 判断汇总筛选是否缺少比较值，相对日期仅依赖相对时间配置。
+func isRollupStoredValueEmpty(value *Value) bool {
+	if nil == value || KeyTypeLocation == value.Type {
+		return value.IsEmpty()
+	}
+	v := value.GetValByType(value.Type)
+	return nil == v || reflect.ValueOf(v).IsNil()
+}
+
 func isRollupFilterValueEmpty(filter *ViewFilter) bool {
 	valueType := filter.Value.Rollup.Contents[0].Type
-	if nil != filter.RelativeDate && (KeyTypeDate == valueType || KeyTypeCreated == valueType || KeyTypeUpdated == valueType) {
+	if nil != filter.RelativeDate && (IsDateKeyType(valueType)) {
 		return false
+	}
+	if KeyTypeLocation == valueType {
+		return nil == filter.Value.Rollup.Contents[0].Text
 	}
 	v := filter.Value.GetValByType(valueType)
 	return nil == v || reflect.ValueOf(v).IsNil()
@@ -1201,6 +1244,10 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		if nil != value.Email && nil != other && nil != other.Email {
 			return filterTextContent(operator, value.Email.Content, other.Email.Content)
 		}
+	case KeyTypeLocation:
+		if nil != other && nil != other.Text {
+			return filterTextContent(operator, value.String(false), other.Text.Content)
+		}
 	case KeyTypePhone:
 		if nil != value.Phone && nil != other && nil != other.Phone {
 			return filterTextContent(operator, value.Phone.Content, other.Phone.Content)
@@ -1320,7 +1367,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return valueContent == otherValueContent
 		}
 		return strings.EqualFold(valueContent, otherValueContent)
@@ -1328,7 +1375,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return valueContent != otherValueContent
 		}
 		return !strings.EqualFold(valueContent, otherValueContent)
@@ -1336,7 +1383,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return strings.Contains(valueContent, otherValueContent)
 		}
 		return strings.Contains(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
@@ -1344,7 +1391,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return !strings.Contains(valueContent, otherValueContent)
 		}
 		return !strings.Contains(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
@@ -1352,7 +1399,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return strings.HasPrefix(valueContent, otherValueContent)
 		}
 		return strings.HasPrefix(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
@@ -1360,7 +1407,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		if util.SearchCaseSensitive {
+		if util.SearchCaseSensitive.Load() {
 			return strings.HasSuffix(valueContent, otherValueContent)
 		}
 		return strings.HasSuffix(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
@@ -1602,6 +1649,9 @@ func (filter *ViewFilter) IsValid() bool {
 	}
 
 	if FilterOperatorIsEmpty != filter.Operator && FilterOperatorIsNotEmpty != filter.Operator {
+		if KeyTypeLocation == filter.Value.Type {
+			return nil != filter.Value.Text && "" != strings.TrimSpace(filter.Value.Text.Content)
+		}
 		if KeyTypeRelation == filter.Value.Type {
 			return nil != filter.Value.Relation &&
 				(0 < len(filter.Value.Relation.BlockIDs) || 0 < len(filter.Value.Relation.Contents))
@@ -1615,7 +1665,7 @@ func (filter *ViewFilter) IsValid() bool {
 
 func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *Value, allowNearItem bool) {
 	if nil != filter.Value {
-		if KeyTypeTemplate == filter.Value.Type || KeyTypeRollup == filter.Value.Type || KeyTypeUpdated == filter.Value.Type || KeyTypeCreated == filter.Value.Type {
+		if HasKeyGroup(filter.Value.Type, KeyGroupNoFilterDefault) {
 			// 所有生成的数据都不设置默认值
 			return nil, false
 		}

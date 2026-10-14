@@ -70,4 +70,20 @@ describe("block menu clipboard selection", () => {
         assert.equal(state.focused(), false);
         assert.equal(state.current(), state.savedRange);
     });
+
+    for (const platform of ["Win32", "Linux armv8l", "iPhone"]) {
+        it(`copies a database through its cursor instead of its hidden title on ${platform}`, () => {
+            const state = setup(platform, platform === "Win32" ? 0 : 5);
+            const cursor = {focus: () => {}};
+            const hiddenTitle = {focus: () => assert.fail("hidden title must not receive focus")};
+            state.element.matches = selector => selector === '[data-type="NodeAttributeView"]';
+            state.element.querySelector = <T extends Element>(selector: string) =>
+                (selector === ".av__cursor" ? cursor : hiddenTitle) as unknown as T;
+            copyBlockSelection(state.element, () => {
+                assert.equal(state.selected(), cursor);
+                assert.equal(state.current(), state.copyRange);
+            });
+            assert.equal(state.current(), state.savedRange);
+        });
+    }
 });

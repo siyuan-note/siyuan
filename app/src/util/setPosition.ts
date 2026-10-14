@@ -33,12 +33,13 @@ export const setPosition = (element: HTMLElement, left: number, top: number, tar
                 element.style.top = top + "px";
             } else {
                 // 下方放不下：向上撑开，锁定底部边缘
-                const newTop = parseFloat(lockedBottom) - rect.height;
+                const newTop = Math.min(parseFloat(lockedBottom), window.innerHeight) - rect.height;
                 element.style.top = (newTop >= topBarHeight ? newTop : topBarHeight) + "px";
             }
         }
         if (sameAnchor && lockedX !== undefined) {
-            element.style.left = lockedX + "px";
+            element.style.left = Math.max(0, Math.min(parseFloat(lockedX),
+                window.innerWidth - rect.width - targetLeft)) + "px";
         }
 
         // 水平溢出修正（仅在未锁定时做）

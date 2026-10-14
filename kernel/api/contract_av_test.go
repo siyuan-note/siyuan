@@ -2,21 +2,189 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestUnusedAttributeViewScanFailureContract(t *testing.T) {
+	setupAssetContractWorkspace(t)
+	previousLang, previousLangs := util.Lang, util.AttrViewLangs
+	util.Lang = "en"
+	util.AttrViewLangs = map[string]map[string]any{"en": {"key": "Key", "select": "Select", "table": "Table"}}
+	t.Cleanup(func() { util.Lang, util.AttrViewLangs = previousLang, previousLangs })
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	box := &model.Box{ID: "20260918000000-abcdefg"}
+	if err := box.SaveConf(conf.NewBoxConf()); err != nil {
+		t.Fatal(err)
+	}
+	const id = "20260913000000-unused1"
+	if err := av.SaveAttributeView(av.NewAttributeView(id)); err != nil {
+		t.Fatal(err)
+	}
+	docPath := filepath.Join(util.DataDir, box.ID, "20260918000001-abcdefg.sy")
+	avPath := filepath.Join(util.DataDir, "storage", "av", id+".json")
+	original, err := os.ReadFile(avPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine := gin.New()
+	engine.POST("/api/av/getUnusedAttributeViews", getUnusedAttributeViews)
+	engine.POST("/api/av/removeUnusedAttributeViews", removeUnusedAttributeViews)
+	engine.POST("/api/av/removeUnusedAttributeView", removeUnusedAttributeView)
+	for _, data := range []string{`{"Type":"NodeDocument","Spec":"99"}`, `{"Type":"NodeDocument","Spec":"invalid"}`, `{"Type":`} {
+		if err = os.WriteFile(docPath, []byte(data), 0644); err != nil {
+			t.Fatal(err)
+		}
+		for _, endpoint := range []string{"getUnusedAttributeViews", "removeUnusedAttributeViews", "removeUnusedAttributeView"} {
+			url := "/api/av/" + endpoint
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", url, strings.NewReader(`{"id":"`+id+`"}`)))
+			requireAPIContract(t, "POST", url, recorder)
+			var response struct {
+				Code int
+				Msg  string
+				Data json.RawMessage
+			}
+			if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != -1 || !strings.Contains(response.Msg, filepath.Base(docPath)) || string(response.Data) != "null" {
+				t.Fatalf("%s must report scan failure: %s %v", endpoint, recorder.Body.String(), err)
+			}
+			if stored, readErr := os.ReadFile(avPath); readErr != nil || !bytes.Equal(stored, original) {
+				t.Fatalf("%s changed the database: %v", endpoint, readErr)
+			}
+		}
+	}
+	if err = os.Remove(docPath); err != nil {
+		t.Fatal(err)
+	}
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/av/getUnusedAttributeViews", nil))
+	requireAPIContract(t, "POST", "/api/av/getUnusedAttributeViews", recorder)
+	var response struct {
+		Code int
+		Data []apicontract.AssetUnusedItem
+	}
+	if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || len(response.Data) != 1 || response.Data[0].Item != id {
+		t.Fatalf("successful scan changed response shape: %s %v", recorder.Body.String(), err)
+	}
+}
+
+func TestAVContractDetachedItemIcon(t *testing.T) {
+	if os.Getenv("SIYUAN_TEST_AV_ICON_CONTRACT") != "1" {
+		// 数据库索引和队列有进程级状态，使用独立进程验证实际写入路径。
+		ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+		defer cancel()
+		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestAVContractDetachedItemIcon$", "-test.v")
+		command.Env = append(os.Environ(), "SIYUAN_TEST_AV_ICON_CONTRACT=1")
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("icon contract subprocess failed: %v\n%s", err, output)
+		}
+		return
+	}
+	fixture := setupAttributeViewContextFilterAPITest(t)
+	util.TempDir, util.ConfDir, util.HistoryDir = t.TempDir(), t.TempDir(), t.TempDir()
+	languageData, err := os.ReadFile("../../app/appearance/langs/en.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var language struct {
+		Time map[string]any `json:"_time"`
+	}
+	if err = json.Unmarshal(languageData, &language); err != nil {
+		t.Fatal(err)
+	}
+	util.TimeLangs["en"] = language.Time
+	{
+		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+		model.Conf.Search.Store(confSectionValue0)
+		model.Conf.Editor.Store(confSectionValue1)
+		model.Conf.Export.Store(confSectionValue2)
+	}
+	tree, err := model.LoadTreeByBlockID(fixture.databaseID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	util.QueueDir = t.TempDir()
+	util.DBPath = filepath.Join(t.TempDir(), util.DBName)
+	util.HistoryDBPath = filepath.Join(t.TempDir(), "history.db")
+	util.AssetContentDBPath = filepath.Join(t.TempDir(), "asset_content.db")
+	sql.InitDatabase(true)
+	sql.InitHistoryDatabase(true)
+	sql.InitAssetContentDatabase(true)
+	treenode.UpsertBlockTree(tree)
+	defer func() {
+		time.Sleep(700 * time.Millisecond)
+		sql.FlushQueue()
+		sql.CloseDatabase()
+	}()
+	database := fixture.attrView
+	primary := database.GetBlockKeyValues()
+	itemID := ast.NewNodeID()
+	primary.Values = append(primary.Values, &av.Value{ID: ast.NewNodeID(), KeyID: primary.Key.ID,
+		BlockID: itemID, Type: av.KeyTypeBlock, IsDetached: true, Block: &av.ValueBlock{Content: "Entry", Icon: "1f600"}})
+	database.Views[0].ItemIDs = append(database.Views[0].ItemIDs, itemID)
+	database.NewItemTemplates = []*av.NewItemTemplate{{ID: ast.NewNodeID(), Name: "Detached",
+		TargetType: av.NewItemTargetDetached, Icon: "1f600"}}
+	if err := av.SaveAttributeView(database); err != nil {
+		t.Fatal(err)
+	}
+	path := "/api/av/setAttributeViewBlockAttr"
+	response := callAttributeViewContextFilterAPI(t, path, map[string]any{
+		"avID": database.ID, "keyID": primary.Key.ID, "itemID": itemID,
+		"value": map[string]any{"block": map[string]any{"icon": "1f680"}},
+	}, setAttributeViewBlockAttr)
+	requireAPIContract(t, http.MethodPost, path, response)
+	var result struct {
+		Code int
+		Data struct{ Value *av.Value }
+	}
+	decodeAttributeViewContextFilterAPIResponse(t, response, &result)
+	if result.Code != 0 || result.Data.Value.Block.Icon != "1f680" || result.Data.Value.Block.Content != "Entry" {
+		t.Fatalf("partial icon update lost primary text: %s", response.Body.String())
+	}
+	tree, err = model.LoadTreeByBlockID(fixture.databaseID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	heading := &ast.Node{Type: ast.NodeHeading, ID: ast.NewNodeID(), HeadingLevel: 2}
+	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Heading")})
+	tree.Root.AppendChild(heading)
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	path = "/api/av/batchReplaceAttributeViewBlocks"
+	response = callAttributeViewContextFilterAPI(t, path, map[string]any{
+		"avID": database.ID, "isDetached": false, "oldNew": []map[string]string{{itemID: heading.ID}},
+	}, batchReplaceAttributeViewBlocks)
+	requireAPIContract(t, http.MethodPost, path, response)
+	var boundResult struct{ Code int }
+	decodeAttributeViewContextFilterAPIResponse(t, response, &boundResult)
+	stored, err := av.ParseAttributeView(database.ID)
+	if err != nil || boundResult.Code != 0 || stored.GetBlockValue(itemID).Block.Icon != "1f680" {
+		t.Fatalf("binding lost inherited icon: %s, %v", response.Body.String(), err)
+	}
+}
 
 func TestAVContractRemoveReferencedDatabase(t *testing.T) {
 	fixture := setupAttributeViewContextFilterAPITest(t)
@@ -76,6 +244,10 @@ func assertAVContractJSONEqual(t *testing.T, want, got any) {
 }
 
 func TestAVContractTransportMapping(t *testing.T) {
+	for _, visibility := range []string{"", "always", "hide-empty", "hide"} {
+		key := &av.Key{ID: "key", Type: av.KeyTypeText, AttributePanelVisibility: visibility}
+		assertAVContractJSONEqual(t, key, toContractAVKey(key))
+	}
 	base := &av.BaseInstance{ID: "view", Filters: []*av.ViewFilter{}, Sorts: nil, PageSize: 50, Group: &av.ViewGroup{Field: "key"}}
 	value := &av.Value{ID: "value", Type: av.KeyTypeText, Text: &av.ValueText{Content: "content"}, Relation: &av.ValueRelation{BlockIDs: []string{}}}
 	for _, view := range []av.Viewable{
@@ -95,6 +267,13 @@ func TestAVContractTransportMapping(t *testing.T) {
 	}
 	assertAVContractJSONEqual(t, &av.ViewTableColumn{BaseField: &av.BaseField{ID: "key", Calc: &av.FieldCalc{}}, Calc: nil}, toContractAVViewTableColumn(&av.ViewTableColumn{BaseField: &av.BaseField{ID: "key", Calc: &av.FieldCalc{}}, Calc: nil}))
 	fixture := setupAttributeViewContextFilterAPITest(t)
+	fixture.attrView.Automations = &av.AutomationConfig{Spec: 1, Rules: []*av.AutomationRule{{
+		ID: ast.NewNodeID(), Name: "Automation", Enabled: true, Trigger: "changed", KeyID: fixture.textKeyID,
+		Conditions: []*av.ViewFilter{{Column: fixture.textKeyID, Operator: av.FilterOperatorIsNotEmpty, Value: &av.Value{Type: av.KeyTypeText}}},
+		Actions: []*av.AutomationAction{{Type: "edit", Target: "current", Fields: map[string]*av.AutomationValue{
+			fixture.textKeyID: {Mode: "source", KeyID: fixture.attrView.GetBlockKeyValues().Key.ID},
+		}}},
+	}}}
 	assertAVContractJSONEqual(t, model.NewAttributeViewData(fixture.attrView), toContractAVAttributeViewData(model.NewAttributeViewData(fixture.attrView)))
 }
 

@@ -36,13 +36,14 @@ const fixture = () => {
     const protyle = {
         notebookId: "source", path: "/source.sy", block: {rootID: "sourceDoc"},
         wysiwyg: {element: {contains: node => node === text}}, toolbar: {range},
-        element: {clientWidth: 800},
+        element: {clientWidth: 800}, options: {},
     };
     const requests = [];
     const inserted = [];
     const focused = [];
     let picker;
     const deps = {
+        "./dailyNote": {getDailyNoteHints: async () => []},
         hasClosestBlock: node => node.block,
         Constants: {ZWSP: "\u200b", BLOCK_HINT_KEYS: ["((", "[[", "（（", "【【"]},
         fetchPost: (url, data, cb) => requests.push({url, data, cb}),
@@ -188,13 +189,13 @@ test("typed and searched reference suggestions offer location selection includin
             const extend = load("protyle/hint/extend", f.deps, f.window, f.Lute);
             extend.hintRef("New title", f.protyle, source);
             f.requests[0].cb({data: {newDoc: true, k: "New title", blocks: []}});
-            await Promise.resolve();
+            await new Promise(resolve => setImmediate(resolve));
             assert.equal(f.hint.items.some(item => item.value.startsWith("((newFileAtPath ")), true);
             assert.equal(f.hint.items.some(item => item.value.startsWith("((newFile ")), !hideConfigured);
             assert.equal(f.hint.items.some(item => item.value.startsWith("((newSubDoc ")), true);
             f.hint.genSearchHTML(f.protyle, {value: "New title"}, false, "Original anchor", source);
             f.requests[1].cb({data: {newDoc: true, k: "New title", blocks: []}});
-            await Promise.resolve();
+            await new Promise(resolve => setImmediate(resolve));
             assert.equal(f.hint.element.lastElementChild.innerHTML.includes("newFileAtPath"), true);
         }
     }
@@ -202,7 +203,8 @@ test("typed and searched reference suggestions offer location selection includin
 
 const databaseFixture = (view = "table", isDetached = true) => {
     const f = fixture();
-    const cell = {isConnected: true};
+    const cell = {isConnected: true, hasAttribute: () => false};
+    f.text.parentElement = {closest: () => cell};
     const row = {dataset: {id: "original-item"}, contains: node => node === cell};
     let currentValue = {type: "block", isDetached, block: {id: isDetached ? "" : "old-doc", content: "Original"}};
     Object.assign(f.block, {
@@ -217,6 +219,7 @@ const databaseFixture = (view = "table", isDetached = true) => {
     const operations = [];
     const animations = [];
     Object.assign(f.deps, load("protyle/render/av/binding", f.deps, f.window, f.Lute),
+        load("protyle/render/av/bindCreatedDocument", f.deps, f.window, f.Lute),
         load("protyle/render/av/viewType", f.deps, f.window, f.Lute), {
         hasClosestByClassName: (node, name) => {
             if (name === "av__cell") {
@@ -237,7 +240,7 @@ const databaseFixture = (view = "table", isDetached = true) => {
     });
 };
 
-test("database creation binds only after success and preserves item identity and undo", () => {
+test("database creation binds only after success and preserves item identity and undo", async () => {
     for (const view of ["table", "list", "gallery", "kanban"]) {
         for (const isDetached of [false, true]) {
             const f = databaseFixture(view, isDetached);
@@ -247,6 +250,7 @@ test("database creation binds only after success and preserves item identity and
             assert.equal(f.animations.length, 0);
             assert.equal(f.requests[0].data.path, "/chosen-parent/20260927120000-newdoc1.sy");
             f.requests[0].cb({code: 0});
+            await Promise.resolve();
             assert.equal(f.operations.length, 1);
             const {doOperations, undoOperations} = f.operations[0];
             assert.equal(doOperations[0].previousID, "original-item");
@@ -273,7 +277,7 @@ test("canceling database location selection leaves the original binding and disp
     assert.equal(f.focused.length, 1);
 });
 
-test("database context changes before confirmation or after creation starts cannot replace another binding", () => {
+test("database context changes before confirmation or after creation starts cannot replace another binding", async () => {
     const changes = [
         f => { f.cell.isConnected = false; },
         f => { f.block.isConnected = false; },
@@ -295,6 +299,7 @@ test("database context changes before confirmation or after creation starts cann
             change(f);
             if (afterCreate) {
                 f.requests[0].cb({code: 0});
+                await Promise.resolve();
             } else {
                 f.picker.cb(["/"], ["other"]);
                 assert.equal(f.requests.length, 0);

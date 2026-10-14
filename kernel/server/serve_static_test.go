@@ -488,8 +488,8 @@ func TestPluginPublishAccess(t *testing.T) {
 	originalConf := model.Conf
 	util.DataDir = testutil.PublicDataDir(t)
 	model.Conf = model.NewAppConf()
-	model.Conf.Bazaar = &conf.Bazaar{Trust: true}
-	model.Conf.Sync = conf.NewSync()
+	model.Conf.Bazaar.Store(&conf.Bazaar{Trust: true})
+	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() {
 		util.DataDir = originalDataDir
 		model.Conf = originalConf

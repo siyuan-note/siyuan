@@ -336,11 +336,13 @@ func SearchEmbedBlockForPublish(embedBlockID, stmt string, excludeIDs []string, 
 
 func searchEmbedBlockInBox(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool, boxID string,
 	updateIndex bool) (ret []*EmbedBlock) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	var sqlBlocks []*sql.Block
 	if "" != boxID {
-		sqlBlocks = sql.SelectBlocksRawStmtNoParseInBox(stmt, Conf.Search.Limit, boxID)
+		sqlBlocks = sql.SelectBlocksRawStmtNoParseInBox(stmt, confSearchSnapshot.Limit, boxID)
 	} else {
-		sqlBlocks = sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
+		sqlBlocks = sql.SelectBlocksRawStmtNoParse(stmt, confSearchSnapshot.Limit)
 	}
 	ret = buildEmbedBlock(embedBlockID, excludeIDs, headingMode, breadcrumb, treenode.GetEmbedBlockRefID(stmt), sqlBlocks, updateIndex, boxID)
 	return
@@ -420,6 +422,8 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 // SearchRefBlockInBox 与 SearchRefBlock 一致，但按 boxID 路由到加密 db 或全局 db。
 // 加密笔记本内搜索块引目标时传入 boxID，只搜该 box 自己的加密 db，避免跨加密边界引用。
 func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrackets, isDatabase bool, boxID string) (ret []*Block, newDoc bool) {
+	confEditorSnapshot := Conf.LoadEditor()
+
 	cachedTrees := map[string]*parse.Tree{}
 	nodeTrees := map[string]*parse.Tree{}
 	var nodeIDs []string
@@ -427,13 +431,13 @@ func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrac
 
 	onlyDoc := false
 	if isSquareBrackets {
-		onlyDoc = Conf.Editor.OnlySearchForDoc
+		onlyDoc = confEditorSnapshot.OnlySearchForDoc
 	}
 
 	if "" == keyword {
 		// 查询为空时默认的块引排序规则按最近引用优先 https://github.com/siyuan-note/siyuan/issues/3218
 
-		typeFilter := Conf.Search.TypeFilter()
+		typeFilter := Conf.Search.Load().TypeFilter()
 		ignoreLines := getRefSearchIgnoreLines()
 		refUsed := GetRefUsed()
 		refs := sql.QueryRefsRecentInBox(onlyDoc, typeFilter, ignoreLines, sortedRefUsedIDs(refUsed), boxID)
@@ -491,7 +495,7 @@ func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrac
 
 			block := fromSQLBlock(sqlBlock, "", 0)
 			block.RefText = getNodeRefText(node)
-			block.RefText = maxContent(block.RefText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
+			block.RefText = maxContent(block.RefText, confEditorSnapshot.BlockRefDynamicAnchorTextMaxLen)
 			block.RefCount = refCount[node.ID]
 			ret = append(ret, block)
 		}
@@ -631,8 +635,13 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 // FindReplaceInBox 与 FindReplace 一致，但按 boxID 路由到加密 db 或全局 db。
 func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types, subTypes map[string]bool, method int, boxID string) (err error) {
-	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
-	if 2 == method {
+	return findReplaceInBox(keyword, replacement, replaceTypes, ids, paths, boxes, types, subTypes, method, boxID, nil)
+}
+
+func findReplaceInBox(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types, subTypes map[string]bool, method int, boxID string, beforeCommit func()) (err error) {
+	// method：0：文本，1：查询语法，2：SQL，3：正则表达式，4：语义搜索。
+	// SQL 和语义搜索不支持替换，必须在查询目标和生成历史前拒绝。
+	if 2 == method || 4 == method {
 		err = errors.New(Conf.Language(132))
 		return
 	}
@@ -649,13 +658,14 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	}
 
 	r, _ := regexp.Compile(keyword)
+	tagReplacement := strings.TrimSuffix(strings.TrimPrefix(replacement, "#"), "#")
 	escapedKey := util.EscapeHTML(keyword)
 	escapedKey = strings.ReplaceAll(escapedKey, "&#34;", "&quot;")
 	escapedKey = strings.ReplaceAll(escapedKey, "&#39;", "'")
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
-	var renameRoots []*ast.Node
 	renameRootTitles := map[string]string{}
 	cachedTrees := map[string]*parse.Tree{}
+	originals := map[string][]byte{}
 
 	historyDir, err := getHistoryDir(HistoryOpReplace)
 	if err != nil {
@@ -666,7 +676,20 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 		// `Replace All` is no longer affected by pagination https://github.com/siyuan-note/siyuan/issues/8265
 		// 替换目标始终使用未分组的块级结果，分组仅影响搜索结果展示
 		// https://github.com/siyuan-note/siyuan/issues/10825
-		blocks, _, _, _, _ := FullTextSearchBlockInBoxWithHPath(keyword, boxes, paths, types, subTypes, method, 0, 0, 1, math.MaxInt, boxID, false)
+		blocks, _, _, _, _ := FullTextSearchBlock(BlockSearchOptions{
+			Query:       keyword,
+			Boxes:       boxes,
+			Paths:       paths,
+			Types:       types,
+			SubTypes:    subTypes,
+			Method:      method,
+			OrderBy:     0,
+			GroupBy:     0,
+			Page:        1,
+			PageSize:    math.MaxInt,
+			BoxID:       boxID,
+			SearchHPath: new(false),
+		})
 		for _, block := range blocks {
 			ids = append(ids, block.ID)
 		}
@@ -683,9 +706,9 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			continue
 		}
 
-		tree, _ = LoadTreeByBlockID(id)
-		if nil == tree {
-			continue
+		tree, originals[bt.RootID], err = filesys.LoadTreeSnapshot(bt.BoxID, bt.Path, util.NewLute())
+		if err != nil {
+			return
 		}
 
 		generateTreeHistory(tree, historyDir)
@@ -697,6 +720,18 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 	luteEngine := util.NewLute()
 	var reloadTreeIDs []string
 	updateNodes := map[string]*ast.Node{}
+	pendingNodes := map[string]map[string]*ast.Node{}
+	var changedRoots []string
+	seenRoots := map[string]bool{}
+	defer func() {
+		sql.FlushQueue()
+		for _, rootID := range reloadTreeIDs {
+			ReloadProtyle(rootID)
+		}
+		updateAttributeViewBlockText(updateNodes)
+		sql.FlushQueue()
+		util.PushClearProgress()
+	}()
 	for i, id := range ids {
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
@@ -713,7 +748,6 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			continue
 		}
 
-		reloadTreeIDs = append(reloadTreeIDs, tree.ID)
 		if ast.NodeDocument == node.Type {
 			if !replaceTypes["docTitle"] {
 				continue
@@ -722,16 +756,12 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			title := node.IALAttr("title")
 			tags := node.IALAttr("tags")
 			if 0 == method {
-				if strings.Contains(title, keyword) {
-					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
-					renameRootTitles[node.ID] = strings.ReplaceAll(title, keyword, docTitleReplacement)
-					renameRoots = append(renameRoots, node)
+				if newTitle, matched := replaceSearchText(title, method, keyword, strings.ReplaceAll(replacement, "/", "／"), r); matched {
+					renameRootTitles[node.ID] = newTitle
 				}
 
-				if strings.Contains(tags, keyword) {
-					replacement = strings.TrimPrefix(replacement, "#")
-					replacement = strings.TrimSuffix(replacement, "#")
-					tags = strings.ReplaceAll(tags, keyword, replacement)
+				if newTags, matched := replaceSearchText(tags, method, keyword, tagReplacement, r); matched {
+					tags = newTags
 					tags = strings.ReplaceAll(tags, editor.Zwsp, "")
 					node.SetIALAttr("tags", tags)
 					ReloadTag()
@@ -740,13 +770,10 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 				if nil != r && r.MatchString(title) {
 					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
 					renameRootTitles[node.ID] = r.ReplaceAllString(title, docTitleReplacement)
-					renameRoots = append(renameRoots, node)
 				}
 
 				if nil != r && r.MatchString(tags) {
-					replacement = strings.TrimPrefix(replacement, "#")
-					replacement = strings.TrimSuffix(replacement, "#")
-					tags = r.ReplaceAllString(tags, replacement)
+					tags = r.ReplaceAllString(tags, tagReplacement)
 					tags = strings.ReplaceAll(tags, editor.Zwsp, "")
 					node.SetIALAttr("tags", tags)
 					ReloadTag()
@@ -842,10 +869,10 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 						if replaceTypes["aTitle"] {
 							if 0 == method {
 								title := util.UnescapeHTML(n.TextMarkATitle)
-								if strings.Contains(title, escapedKey) {
-									n.TextMarkATitle = strings.ReplaceAll(title, escapedKey, replacement)
-								} else if strings.Contains(n.TextMarkATitle, keyword) {
-									n.TextMarkATitle = strings.ReplaceAll(title, keyword, replacement)
+								if content, matched := replaceSearchText(title, method, escapedKey, replacement, r); matched {
+									n.TextMarkATitle = content
+								} else if content, matched = replaceSearchText(title, method, keyword, replacement, r); matched {
+									n.TextMarkATitle = content
 								}
 							} else if 3 == method {
 								if nil != r && r.MatchString(n.TextMarkATitle) {
@@ -857,10 +884,10 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 						if replaceTypes["aHref"] {
 							if 0 == method {
 								href := util.UnescapeHTML(n.TextMarkAHref)
-								if strings.Contains(href, escapedKey) {
-									n.TextMarkAHref = strings.ReplaceAll(href, escapedKey, util.EscapeHTML(replacement))
-								} else if strings.Contains(href, keyword) {
-									n.TextMarkAHref = strings.ReplaceAll(href, keyword, strings.TrimSpace(replacement))
+								if content, matched := replaceSearchText(href, method, escapedKey, util.EscapeHTML(replacement), r); matched {
+									n.TextMarkAHref = content
+								} else if content, matched = replaceSearchText(href, method, keyword, strings.TrimSpace(replacement), r); matched {
+									n.TextMarkAHref = content
 								}
 							} else if 3 == method {
 								if nil != r && r.MatchString(n.TextMarkAHref) {
@@ -971,15 +998,7 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 							return ast.WalkContinue
 						}
 
-						if 0 == method {
-							if strings.Contains(n.TextMarkInlineMathContent, keyword) {
-								n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, keyword, replacement)
-							}
-						} else if 3 == method {
-							if nil != r && r.MatchString(n.TextMarkInlineMathContent) {
-								n.TextMarkInlineMathContent = r.ReplaceAllString(n.TextMarkInlineMathContent, replacement)
-							}
-						}
+						n.TextMarkInlineMathContent, _ = replaceSearchText(n.TextMarkInlineMathContent, method, keyword, replacement, r)
 
 						if "" == n.TextMarkInlineMathContent {
 							unlinks = append(unlinks, n)
@@ -989,16 +1008,9 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 							return ast.WalkContinue
 						}
 
-						if 0 == method {
-							if strings.Contains(n.TextMarkInlineMemoContent, keyword) {
-								n.TextMarkInlineMemoContent = strings.ReplaceAll(n.TextMarkInlineMemoContent, keyword, replacement)
-								n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
-							}
-						} else if 3 == method {
-							if nil != r && r.MatchString(n.TextMarkInlineMemoContent) {
-								n.TextMarkInlineMemoContent = r.ReplaceAllString(n.TextMarkInlineMemoContent, replacement)
-								n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
-							}
+						if content, matched := replaceSearchText(n.TextMarkInlineMemoContent, method, keyword, replacement, r); matched {
+							n.TextMarkInlineMemoContent = content
+							n.TextMarkTextContent, _ = replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 						}
 
 						if "" == n.TextMarkTextContent {
@@ -1047,32 +1059,76 @@ func FindReplaceInBox(keyword, replacement string, replaceTypes map[string]bool,
 			}
 		}
 
-		if err = writeTreeUpsertQueue(tree); err != nil {
-			return
+		if !seenRoots[tree.ID] {
+			changedRoots = append(changedRoots, tree.ID)
+			seenRoots[tree.ID] = true
 		}
-		updateNodes[id] = node
+		if pendingNodes[tree.ID] == nil {
+			pendingNodes[tree.ID] = map[string]*ast.Node{}
+		}
+		pendingNodes[tree.ID][id] = node
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(206), i+1, len(ids)))
 	}
 
-	for i, renameRoot := range renameRoots {
-		newTitle := renameRootTitles[renameRoot.ID]
-		RenameDoc(renameRoot.Box, renameRoot.Path, newTitle)
-
-		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(207), i+1, len(renameRoots)))
+	if beforeCommit != nil {
+		beforeCommit()
 	}
-
-	sql.FlushQueue()
-
-	reloadTreeIDs = gulu.Str.RemoveDuplicatedElem(reloadTreeIDs)
-	for _, id := range reloadTreeIDs {
-		ReloadProtyle(id)
+	for _, rootID := range changedRoots {
+		tree := cachedTrees[rootID]
+		title, rename := renameRootTitles[rootID]
+		if err = writeReplacementTree(tree, originals[rootID], title, rename); err != nil {
+			return
+		}
+		reloadTreeIDs = append(reloadTreeIDs, rootID)
+		for id, node := range pendingNodes[rootID] {
+			updateNodes[id] = node
+		}
 	}
-
-	updateAttributeViewBlockText(updateNodes)
-
-	sql.FlushQueue()
-	util.PushClearProgress()
 	return
+}
+
+// 每个文档只提交一次；文件、缓存、索引及撤销失效与编辑器事务串行，标题也使用同一份扫描基线。
+func writeReplacementTree(tree *parse.Tree, original []byte, title string, rename bool) error {
+	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
+	var size uint64
+	var err error
+	var titleChanged, emptyAttrUpdated bool
+	if rename {
+		if IsBoxDocPath(tree.Box, tree.Path) {
+			title = normalizeBoxName(title)
+		}
+		if titleChanged, emptyAttrUpdated, err = prepareDocRename(tree, title); err != nil {
+			return err
+		}
+	}
+	if titleChanged || emptyAttrUpdated {
+		size, err = writeRenameDocIfUnchanged(tree, original)
+	} else {
+		size, err = filesys.WriteTreeIfUnchanged(tree, original)
+	}
+	if err != nil {
+		return err
+	}
+	sql.UpsertTreeQueue(tree)
+	refreshDocInfoWithSize(tree, size)
+	invalidateDocumentHistory(tree.ID)
+	publishDocRename(tree, titleChanged, emptyAttrUpdated)
+	if rename && IsBoxDocPath(tree.Box, tree.Path) {
+		box := Conf.Box(tree.Box)
+		boxConf := box.GetConf()
+		boxConf.Name = tree.Root.IALAttr("title")
+		if err = box.SaveConf(boxConf); err != nil {
+			return err
+		}
+		box.Name = boxConf.Name
+		event := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
+		event.Data = map[string]any{"box": box.ID, "name": box.Name}
+		util.PushEvent(event)
+		IncSync()
+	}
+	return nil
 }
 
 func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey string, replacement string, r *regexp.Regexp, typ string, luteEngine *lute.Lute) {
@@ -1085,15 +1141,15 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 			if strings.HasPrefix(replacement, "#") && strings.HasSuffix(replacement, "#") {
 				replacement = strings.TrimPrefix(replacement, "#")
 				replacement = strings.TrimSuffix(replacement, "#")
-			} else if n.TextMarkTextContent == keyword || n.TextMarkTextContent == escapedKey {
+			} else if equalSearchText(n.TextMarkTextContent, keyword) || equalSearchText(n.TextMarkTextContent, escapedKey) {
 				// 将标签转换为纯文本
 
 				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时直接转换
 					content := n.TextMarkTextContent
-					if strings.Contains(content, escapedKey) {
-						content = strings.ReplaceAll(content, escapedKey, replacement)
-					} else if strings.Contains(content, keyword) {
-						content = strings.ReplaceAll(content, keyword, replacement)
+					if replaced, matched := replaceSearchText(content, method, escapedKey, replacement, r); matched {
+						content = replaced
+					} else {
+						content, _ = replaceSearchText(content, method, keyword, replacement, r)
 					}
 					content = strings.ReplaceAll(content, editor.Zwsp, "")
 
@@ -1121,7 +1177,7 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 				// 存在其他类型时仅移除标签类型
 				n.TextMarkType = strings.ReplaceAll(n.TextMarkType, "tag", "")
 				n.TextMarkType = strings.TrimSpace(n.TextMarkType)
-			} else if strings.Contains(n.TextMarkTextContent, keyword) || strings.Contains(n.TextMarkTextContent, escapedKey) { // 标签包含了部分关键字的情况
+			} else { // 标签包含部分关键字时保留标签类型。
 				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时保持标签类型不变，仅替换标签部分内容
 					content, _ := replaceEscapedTextMarkContent(n.TextMarkTextContent, method, keyword, replacement, r)
 					content = strings.ReplaceAll(content, editor.Zwsp, "")
@@ -1142,13 +1198,39 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 // replaceEscapedTextMarkContent 在正文上匹配和展开捕获组，写回时统一转义，避免替换结果变成 HTML 标签。
 func replaceEscapedTextMarkContent(content string, method int, keyword, replacement string, r *regexp.Regexp) (string, bool) {
 	text := util.UnescapeHTML(content)
-	if 0 == method && strings.Contains(text, keyword) {
-		return util.EscapeHTML(strings.ReplaceAll(text, keyword, replacement)), true
-	}
-	if 3 == method && nil != r && r.MatchString(text) {
-		return util.EscapeHTML(r.ReplaceAllString(text, replacement)), true
+	if replaced, matched := replaceSearchText(text, method, keyword, replacement, r); matched {
+		return util.EscapeHTML(replaced), true
 	}
 	return content, false
+}
+
+// replaceSearchText 的文本匹配遵循大小写设置并按字面量替换，正则模式保持捕获组展开语义。
+func replaceSearchText(input string, method int, keyword, replacement string, r *regexp.Regexp) (string, bool) {
+	if method == 0 {
+		if !Conf.Search.Load().CaseSensitive {
+			return replaceCaseInsensitiveText(input, keyword, replacement)
+		}
+		if strings.Contains(input, keyword) {
+			return strings.ReplaceAll(input, keyword, replacement), true
+		}
+	} else if method == 3 && r != nil && r.MatchString(input) {
+		return r.ReplaceAllString(input, replacement), true
+	}
+	return input, false
+}
+
+func replaceSearchTokens(input []byte, method int, keyword, replacement string, r *regexp.Regexp) ([]byte, bool) {
+	if content, matched := replaceSearchText(string(input), method, keyword, replacement, r); matched {
+		return []byte(content), true
+	}
+	return input, false
+}
+
+func equalSearchText(input, keyword string) bool {
+	if Conf.Search.Load().CaseSensitive {
+		return input == keyword
+	}
+	return strings.EqualFold(input, keyword)
 }
 
 type replaceTextFragment struct {
@@ -1293,7 +1375,7 @@ func findReplaceTextMatchIndexes(content string, method int, keyword string, r *
 	}
 
 	exp := regexp.QuoteMeta(keyword)
-	if !Conf.Search.CaseSensitive {
+	if !Conf.Search.Load().CaseSensitive {
 		exp = "(?i:" + exp + ")"
 	}
 	matcher, err := regexp.Compile(exp)
@@ -1488,30 +1570,7 @@ func applyReplaceTextRunOutput(run *replaceTextRun, output []*ast.Node, skipNode
 // Supports replacing text elements with other elements https://github.com/siyuan-note/siyuan/issues/11058
 func replaceTextNode(text *ast.Node, method int, keyword string, replacement string, r *regexp.Regexp, luteEngine *lute.Lute) bool {
 	if 0 == method {
-		newContent := text.Tokens
-		if Conf.Search.CaseSensitive {
-			if bytes.Contains(text.Tokens, []byte(keyword)) {
-				newContent = bytes.ReplaceAll(text.Tokens, []byte(keyword), []byte(replacement))
-			}
-		} else {
-			if "" != strings.TrimSpace(keyword) {
-				// 当搜索结果中的文本元素包含大小写混合时替换失败
-				// Replace fails when search results contain mixed case in text elements https://github.com/siyuan-note/siyuan/issues/9171
-				keywords := strings.Split(keyword, " ")
-				// keyword 可能是 "foo Foo" 使用空格分隔的大小写命中情况，这里统一转换小写后去重
-				if 0 < len(keywords) {
-					var lowerKeywords []string
-					for _, k := range keywords {
-						lowerKeywords = append(lowerKeywords, strings.ToLower(k))
-					}
-					keyword = strings.Join(lowerKeywords, " ")
-				}
-			}
-
-			if bytes.Contains(bytes.ToLower(text.Tokens), []byte(keyword)) {
-				newContent = replaceCaseInsensitive(text.Tokens, []byte(keyword), []byte(replacement))
-			}
-		}
+		newContent, _ := replaceSearchTokens(text.Tokens, method, keyword, replacement, r)
 		if !bytes.Equal(newContent, text.Tokens) {
 			tree := parse.Inline("", newContent, luteEngine.ParseOptions)
 			if nil == tree.Root.FirstChild {
@@ -1556,15 +1615,7 @@ func replaceTextNode(text *ast.Node, method int, keyword string, replacement str
 }
 
 func replaceNodeTokens(n *ast.Node, method int, keyword string, replacement string, r *regexp.Regexp) {
-	if 0 == method {
-		if bytes.Contains(n.Tokens, []byte(keyword)) {
-			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(keyword), []byte(replacement))
-		}
-	} else if 3 == method {
-		if nil != r && r.MatchString(string(n.Tokens)) {
-			n.Tokens = []byte(r.ReplaceAllString(string(n.Tokens), replacement))
-		}
-	}
+	n.Tokens, _ = replaceSearchTokens(n.Tokens, method, keyword, replacement, r)
 }
 
 func mergeSamePreNext(n *ast.Node) {
@@ -1595,38 +1646,56 @@ func mergeSamePreNext(n *ast.Node) {
 	}
 }
 
-// FullTextSearchBlock 搜索内容块。
-//
-// method：0：关键字，1：查询语法，2：SQL，3：正则表达式
-// orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
-// groupBy：0：不分组，1：按文档分组
-func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
-	return FullTextSearchBlockWithHPath(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, true)
+// BlockSearchOptions 汇总内容块搜索条件；未指定上下文时使用后台上下文，SearchHPath 缺省为 true。
+// BoxID 决定普通或加密笔记本的数据库路由，访问排除条件仍由调用方按请求权限提供。
+type BlockSearchOptions struct {
+	Context       context.Context
+	Query         string
+	Boxes         []string
+	Paths         []string
+	Types         map[string]bool
+	SubTypes      map[string]bool
+	Method        int
+	OrderBy       int
+	GroupBy       int
+	Page          int
+	PageSize      int
+	BoxID         string
+	SearchHPath   *bool
+	ExcludeBoxIDs []string
+	ExcludeDocIDs []string
 }
 
-// FullTextSearchBlockWithHPath 搜索内容块，并可控制是否搜索文档层级路径。
-func FullTextSearchBlockWithHPath(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
-	return FullTextSearchBlockInBoxWithHPath(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, "", searchHPath)
-}
+// FullTextSearchBlock 按同一组命名条件搜索内容块。
+// Method：0 为关键字，1 为查询语法，2 为 SQL，3 为正则表达式；GroupBy：0 不分组，1 按文档分组。
+// OrderBy：0 按块类型，1/2 按创建时间升/降序，3/4 按更新时间升/降序，5 按文档内内容顺序，6/7 按相关度升/降序。
+func FullTextSearchBlock(options BlockSearchOptions) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
+	ctx := options.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	query := options.Query
+	boxes := options.Boxes
+	paths := options.Paths
+	types := options.Types
+	subTypes := options.SubTypes
+	method := options.Method
+	orderBy := options.OrderBy
+	groupBy := options.GroupBy
+	page := options.Page
+	pageSize := options.PageSize
+	boxID := options.BoxID
+	searchHPath := options.SearchHPath == nil || *options.SearchHPath
+	excludeBoxIDs, excludeDocIDs := options.ExcludeBoxIDs, options.ExcludeDocIDs
 
-// FullTextSearchBlockInBox 与 FullTextSearchBlock 一致，但按 boxID 路由到加密 db 或全局 db。
-// 加密笔记本内搜索时传入 boxID，所有 sql/treenode 查询走加密 db；boxID 为空时 fall-through 全局 db。
-func FullTextSearchBlockInBox(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
-	return FullTextSearchBlockInBoxWithHPath(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, boxID, true)
-}
-
-// FullTextSearchBlockInBoxWithHPath 与 FullTextSearchBlockInBox 一致，并可控制是否搜索文档层级路径。
-func FullTextSearchBlockInBoxWithHPath(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
-	return FullTextSearchBlockInBoxWithHPathContext(context.Background(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, boxID, searchHPath, nil, nil)
-}
-
-func FullTextSearchBlockInBoxWithHPathContext(ctx context.Context, query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string, searchHPath bool, excludeBoxIDs, excludeDocIDs []string) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
 	ret = []*Block{}
 	if "" == query {
 		return
 	}
 
-	query = filterQueryInvisibleChars(query)
+	if method != 2 {
+		query = filterQueryInvisibleChars(query)
+	}
 	if 2 != method && 3 != method && ast.IsNodeIDPattern(query) && isHiddenBoxDocBlock(query, boxID) {
 		return
 	}
@@ -1699,6 +1768,9 @@ func FullTextSearchBlockInBoxWithHPathContext(ctx context.Context, query string,
 		}
 	}
 	pageCount = (matchedBlockCount + pageSize - 1) / pageSize
+	if 2 != method {
+		compactAttributeViewSearchResults(blocks)
+	}
 
 	switch groupBy {
 	case 0: // 不分组
@@ -2003,10 +2075,10 @@ func buildOrderBy(query string, method, orderBy int) string {
 
 func buildExactSearchOrderCondition(field, query string) string {
 	escapedQuery := strings.ReplaceAll(query, "'", "''")
-	if Conf.Search.CaseSensitive {
+	if Conf.Search.Load().CaseSensitive {
 		return field + " = '" + escapedQuery + "'"
 	}
-	escapedQuery = strings.NewReplacer("\\", "\\\\", "%", "\\%", "_", "\\_").Replace(escapedQuery)
+	escapedQuery = conf.EscapeSearchLikePattern(query)
 	return field + " LIKE '" + escapedQuery + "' ESCAPE '\\'"
 }
 
@@ -2016,21 +2088,23 @@ func buildExactAliasSearchOrderCondition(field, query string) string {
 	}
 
 	escapedQuery := strings.ReplaceAll(query, "'", "''")
-	if Conf.Search.CaseSensitive {
+	if Conf.Search.Load().CaseSensitive {
 		return "instr(',' || " + field + " || ',', '," + escapedQuery + ",') > 0"
 	}
-	escapedQuery = strings.NewReplacer("\\", "\\\\", "%", "\\%", "_", "\\_").Replace(escapedQuery)
+	escapedQuery = conf.EscapeSearchLikePattern(query)
 	return "(',' || " + field + " || ',') LIKE '%," + escapedQuery + ",%' ESCAPE '\\'"
 }
 
 // buildTypeFilter 按父类型独立限制子类型，组内为空时仅按父类型筛选。
 func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	prefix := ""
 	if 0 < len(alias) && "" != alias[0] {
 		prefix = alias[0]
 	}
 	s := conf.NewSearch()
-	if err := copier.Copy(s, Conf.Search); err != nil {
+	if err := copier.Copy(s, confSearchSnapshot); err != nil {
 		logging.LogErrorf("copy search conf failed: %s", err)
 	}
 	if nil != types {
@@ -2058,26 +2132,26 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		s.TabItem = types["tabItem"]
 		s.CustomBlock = new(types["customBlock"])
 	} else {
-		s.Document = Conf.Search.Document
-		s.Heading = Conf.Search.Heading
-		s.List = Conf.Search.List
-		s.ListItem = Conf.Search.ListItem
-		s.CodeBlock = Conf.Search.CodeBlock
-		s.MathBlock = Conf.Search.MathBlock
-		s.Table = Conf.Search.Table
-		s.Blockquote = Conf.Search.Blockquote
-		s.SuperBlock = Conf.Search.SuperBlock
-		s.Paragraph = Conf.Search.Paragraph
-		s.HTMLBlock = Conf.Search.HTMLBlock
-		s.EmbedBlock = Conf.Search.EmbedBlock
-		s.DatabaseBlock = Conf.Search.DatabaseBlock
-		s.AudioBlock = Conf.Search.AudioBlock
-		s.VideoBlock = Conf.Search.VideoBlock
-		s.IFrameBlock = Conf.Search.IFrameBlock
-		s.WidgetBlock = Conf.Search.WidgetBlock
-		s.Callout = Conf.Search.Callout
-		s.Tabs = Conf.Search.Tabs
-		s.TabItem = Conf.Search.TabItem
+		s.Document = confSearchSnapshot.Document
+		s.Heading = confSearchSnapshot.Heading
+		s.List = confSearchSnapshot.List
+		s.ListItem = confSearchSnapshot.ListItem
+		s.CodeBlock = confSearchSnapshot.CodeBlock
+		s.MathBlock = confSearchSnapshot.MathBlock
+		s.Table = confSearchSnapshot.Table
+		s.Blockquote = confSearchSnapshot.Blockquote
+		s.SuperBlock = confSearchSnapshot.SuperBlock
+		s.Paragraph = confSearchSnapshot.Paragraph
+		s.HTMLBlock = confSearchSnapshot.HTMLBlock
+		s.EmbedBlock = confSearchSnapshot.EmbedBlock
+		s.DatabaseBlock = confSearchSnapshot.DatabaseBlock
+		s.AudioBlock = confSearchSnapshot.AudioBlock
+		s.VideoBlock = confSearchSnapshot.VideoBlock
+		s.IFrameBlock = confSearchSnapshot.IFrameBlock
+		s.WidgetBlock = confSearchSnapshot.WidgetBlock
+		s.Callout = confSearchSnapshot.Callout
+		s.Tabs = confSearchSnapshot.Tabs
+		s.TabItem = confSearchSnapshot.TabItem
 	}
 
 	var simpleTypes []string
@@ -2136,6 +2210,10 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		}
 	}
 
+	if len(simpleTypes) == 1 && simpleTypes[0] == "d" && len(clauses) == 0 {
+		// 文档类型的等值条件与文档部分索引的筛选条件保持一致。
+		return "(" + prefix + "type = 'd')"
+	}
 	if 0 < len(simpleTypes) {
 		clauses = append([]string{prefix + "type IN (" + sqlQuoteJoin(simpleTypes) + ")"}, clauses...)
 	}
@@ -2150,7 +2228,7 @@ func isDocumentSearchEnabled(types map[string]bool) bool {
 	if nil != types {
 		return types["document"]
 	}
-	return Conf.Search.Document
+	return Conf.Search.Load().Document
 }
 
 func sqlQuoteJoin(items []string) string {
@@ -2159,10 +2237,6 @@ func sqlQuoteJoin(items []string) string {
 		quoted[i] = "'" + item + "'"
 	}
 	return strings.Join(quoted, ",")
-}
-
-func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	return searchBySQLInBox(stmt, beforeLen, page, pageSize, "")
 }
 
 // isTreeExcludedByPublishAccess 判断文档树是否命中发布访问排除的文档 ID。
@@ -2176,7 +2250,7 @@ func isTreeExcludedByPublishAccess(tree *parse.Tree, excludeDocIDs []string) boo
 	return false
 }
 
-// searchBySQLInBox 与 searchBySQL 一致，但按 boxID 路由到加密 db 或全局 db。
+// searchBySQLInBox 按 boxID 选择加密或全局数据库，执行分页查询并统计匹配数量。
 func searchBySQLInBox(stmt string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	return searchBySQLInBoxContext(context.Background(), stmt, beforeLen, page, pageSize, boxID)
 }
@@ -2193,13 +2267,15 @@ func searchBySQLInBoxContext(ctx context.Context, stmt string, beforeLen, page, 
 		return
 	}
 
-	stmt = strings.ToLower(stmt)
-	stdQuery := !strings.Contains(stmt, "with recursive") && !strings.Contains(stmt, "union")
+	// 仅改写已知投影的前缀，保留条件中的大小写、注释和完整块查询的别名。
+	lowerStmt := strings.ToLower(stmt)
+	stdQuery := !strings.Contains(lowerStmt, "union") &&
+		(strings.HasPrefix(lowerStmt, "select * ") || strings.HasPrefix(lowerStmt, "select a.* "))
 	if stdQuery {
-		if strings.HasPrefix(stmt, "select a.* ") { // 多个搜索关键字匹配文档 https://github.com/siyuan-note/siyuan/issues/7350
-			stmt = strings.ReplaceAll(stmt, "select a.* ", "select COUNT(a.id) AS `matches`, COUNT(DISTINCT(a.root_id)) AS `docs` ")
+		if strings.HasPrefix(lowerStmt, "select a.* ") {
+			stmt = "SELECT COUNT(a.id) AS `matches`, COUNT(DISTINCT(a.root_id)) AS `docs` " + stmt[len("select a.* "):]
 		} else {
-			stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` ")
+			stmt = "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` " + stmt[len("select * "):]
 		}
 	}
 	stmt = removeLimitClause(stmt)
@@ -2214,8 +2290,13 @@ func searchBySQLInBoxContext(ctx context.Context, stmt string, beforeLen, page, 
 	if !stdQuery {
 		var rootIDs, blockIDs []string
 		for _, queryResult := range result {
-			rootIDs = append(rootIDs, queryResult["root_id"].(string))
-			blockIDs = append(blockIDs, queryResult["id"].(string))
+			rootID, hasRoot := queryResult["root_id"].(string)
+			blockID, hasID := queryResult["id"].(string)
+			if !hasRoot || !hasID {
+				return ret, 0, 0
+			}
+			rootIDs = append(rootIDs, rootID)
+			blockIDs = append(blockIDs, blockID)
 		}
 		rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
 		blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
@@ -2245,12 +2326,10 @@ func removeLimitClause(stmt string) string {
 	return stmt
 }
 
-func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []*Block) {
-	return fullTextSearchRefBlockInBox(keyword, beforeLen, onlyDoc, "")
-}
-
-// fullTextSearchRefBlockInBox 与 fullTextSearchRefBlock 一致，但按 boxID 路由到加密 db 或全局 db。
+// fullTextSearchRefBlockInBox 在指定笔记本内搜索可引用块，空 boxID 使用全局数据库。
 func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, boxID string) (ret []*Block) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	keyword = filterQueryInvisibleChars(keyword)
 
 	if id := extractID(keyword); "" != id {
@@ -2273,7 +2352,7 @@ func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, bo
 	if onlyDoc {
 		stmt += " = 'd'"
 	} else {
-		stmt += " IN " + Conf.Search.TypeFilter()
+		stmt += " IN " + confSearchSnapshot.TypeFilter()
 	}
 
 	if ignoreLines := getRefSearchIgnoreLines(); 0 < len(ignoreLines) {
@@ -2302,8 +2381,8 @@ func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, bo
              WHEN content LIKE '%${keyword}%' and type != 'i' and type != 'l' THEN 100
              ELSE 65535 END ASC, sort ASC, length ASC`
 	orderBy = strings.ReplaceAll(orderBy, "${keyword}", strings.ReplaceAll(keyword, "'", "''"))
-	stmt += orderBy + " LIMIT " + strconv.Itoa(Conf.Search.Limit)
-	blocks := sql.SelectBlocksRawStmtNoParseInBox(stmt, Conf.Search.Limit, boxID)
+	stmt += orderBy + " LIMIT " + strconv.Itoa(confSearchSnapshot.Limit)
+	blocks := sql.SelectBlocksRawStmtNoParseInBox(stmt, confSearchSnapshot.Limit, boxID)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -2374,11 +2453,9 @@ func extractID(content string) (ret string) {
 	return
 }
 
-func fullTextSearchByRegexp(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	return fullTextSearchByRegexpInBox(exp, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, "")
-}
-
 func fullTextSearchByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter + " " + orderBy
@@ -2390,7 +2467,7 @@ func fullTextSearchByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs, pat
 
 	// box/path 过滤值通过绑定参数传递，避免 SQL 拼接注入
 	args := append(append([]any{}, boxArgs...), pathArgs...)
-	blocks := sql.SelectBlocksRegexArgsInBox(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, page, pageSize, boxID, args...)
+	blocks := sql.SelectBlocksRegexArgsInBox(stmt, regex, confSearchSnapshot.Name, confSearchSnapshot.Alias, confSearchSnapshot.Memo, confSearchSnapshot.IAL, page, pageSize, boxID, args...)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -2398,10 +2475,6 @@ func fullTextSearchByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs, pat
 
 	matchedBlockCount, matchedRootCount = fullTextSearchCountByRegexpInBox(exp, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, boxID)
 	return
-}
-
-func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
-	return fullTextSearchCountByRegexpInBox(exp, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, "")
 }
 
 func fullTextSearchCountByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, boxID string) (matchedBlockCount, matchedRootCount int) {
@@ -2416,10 +2489,6 @@ func fullTextSearchCountByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs
 	matchedBlockCount = int(result[0]["matches"].(int64))
 	matchedRootCount = int(result[0]["docs"].(int64))
 	return
-}
-
-func fullTextSearchByFTS(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	return fullTextSearchByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, "")
 }
 
 func fullTextSearchByFTSInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
@@ -2628,20 +2697,24 @@ func buildFTSAndHPathMatchesCTE(rawQuery, query, boxFilter, pathFilter string, b
 }
 
 func buildHPathContainsCondition(query string) (condition, arg string) {
-	if Conf.Search.CaseSensitive && Conf.Search.HanSensitiveVal() {
+	confSearchSnapshot := Conf.LoadSearch()
+
+	if confSearchSnapshot.CaseSensitive && confSearchSnapshot.HanSensitiveVal() {
 		return "instr(hpath, ?) > 0", query
 	}
 	caseSensitive, hanSensitive := searchNormalizationFlags()
 	condition = "instr(search_normalize(hpath, " + strconv.Itoa(caseSensitive) + ", " + strconv.Itoa(hanSensitive) + "), ?) > 0"
-	arg = search.NormalizeSearchText(query, Conf.Search.CaseSensitive, Conf.Search.HanSensitiveVal())
+	arg = search.NormalizeSearchText(query, confSearchSnapshot.CaseSensitive, confSearchSnapshot.HanSensitiveVal())
 	return
 }
 
 func searchNormalizationFlags() (caseSensitive, hanSensitive int) {
-	if Conf.Search.CaseSensitive {
+	confSearchSnapshot := Conf.LoadSearch()
+
+	if confSearchSnapshot.CaseSensitive {
 		caseSensitive = 1
 	}
-	if Conf.Search.HanSensitiveVal() {
+	if confSearchSnapshot.HanSensitiveVal() {
 		hanSensitive = 1
 	}
 	return
@@ -2699,10 +2772,6 @@ func hPathOnlyOrderBy() string {
 		"CASE WHEN matches.match_source = 1 THEN b.hpath END ASC"
 }
 
-func fullTextSearchCountByFTS(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
-	return fullTextSearchCountByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, "")
-}
-
 func fullTextSearchCountByFTSInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, boxID string) (matchedBlockCount, matchedRootCount int) {
 	table := "blocks_fts"
 
@@ -2720,10 +2789,6 @@ func fullTextSearchCountByFTSInBox(query, boxFilter, pathFilter string, boxArgs,
 	matchedBlockCount = int(result[0]["matches"].(int64))
 	matchedRootCount = int(result[0]["docs"].(int64))
 	return
-}
-
-func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string, orderBy, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	return fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, "", true)
 }
 
 func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string, orderBy, beforeLen, page, pageSize int, boxID string, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount int) {
@@ -2859,9 +2924,11 @@ func buildSearchDocumentLikeFilter(field string, keywords []string) string {
 }
 
 func buildSearchDocumentLikeFilterWithHPath(contentField, hPathField string, keywords []string) string {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	var ret strings.Builder
 	for i, keyword := range keywords {
-		normalizedKeyword := search.NormalizeSearchText(keyword, Conf.Search.CaseSensitive, Conf.Search.HanSensitiveVal())
+		normalizedKeyword := search.NormalizeSearchText(keyword, confSearchSnapshot.CaseSensitive, confSearchSnapshot.HanSensitiveVal())
 		ret.WriteString("(")
 		ret.WriteString(contentField)
 		ret.WriteString(" LIKE '%")
@@ -2878,11 +2945,7 @@ func buildSearchDocumentLikeFilterWithHPath(contentField, hPathField string, key
 	return ret.String()
 }
 
-func highlightByFTS(query, typeFilter, id string) (ret []string) {
-	return highlightByFTSInBox(query, typeFilter, id, "")
-}
-
-// highlightByFTSInBox 与 highlightByFTS 一致，但按 boxID 路由到加密 db 或全局 db。
+// highlightByFTSInBox 按 boxID 选择加密或全局数据库，获取全文检索高亮片段。
 func highlightByFTSInBox(query, typeFilter, id, boxID string) (ret []string) {
 	query = strings.ReplaceAll(query, " ", " OR ")
 	const limit = 256
@@ -2937,12 +3000,10 @@ func highlightByFTSInBox(query, typeFilter, id, boxID string) (ret []string) {
 	return
 }
 
-func highlightByRegexp(query, typeFilter, id string) (ret []string) {
-	return highlightByRegexpInBox(query, typeFilter, id, "")
-}
-
-// highlightByRegexpInBox 与 highlightByRegexp 一致，但按 boxID 路由到加密 db 或全局 db。
+// highlightByRegexpInBox 按 boxID 选择加密或全局数据库，获取正则检索高亮片段。
 func highlightByRegexpInBox(query, typeFilter, id, boxID string) (ret []string) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	fieldFilter := fieldRegexp(query)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter
 	stmt += " AND root_id = '" + id + "'"
@@ -2950,7 +3011,7 @@ func highlightByRegexpInBox(query, typeFilter, id, boxID string) (ret []string) 
 	if nil == regex {
 		return
 	}
-	sqlBlocks := sql.SelectBlocksRegexInBox(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, 1, 256, boxID)
+	sqlBlocks := sql.SelectBlocksRegexInBox(stmt, regex, confSearchSnapshot.Name, confSearchSnapshot.Alias, confSearchSnapshot.Memo, confSearchSnapshot.IAL, 1, 256, boxID)
 	for _, block := range sqlBlocks {
 		keyword := gulu.Str.SubstringsBetween(block.HPath, search.SearchMarkLeft, search.SearchMarkRight)
 		if 0 < len(keyword) {
@@ -2982,6 +3043,8 @@ func highlightByRegexpInBox(query, typeFilter, id, boxID string) (ret []string) 
 }
 
 func markSearch(text string, keyword string, beforeLen int) (marked string, score float64) {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	if 0 == len(keyword) {
 		if strings.Contains(text, search.SearchMarkLeft) { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
 			marked = util.EscapeHTML(text)
@@ -2995,12 +3058,12 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 		keyword = strings.Join(keywords, search.TermSep)
 		marked = strings.ReplaceAll(text, search.SearchMarkLeft, "")
 		marked = strings.ReplaceAll(marked, search.SearchMarkRight, "")
-		_, marked = search.MarkText(marked, keyword, beforeLen, Conf.Search.CaseSensitive)
+		_, marked = search.MarkText(marked, keyword, beforeLen, confSearchSnapshot.CaseSensitive)
 		marked = util.EscapeHTML(marked)
 		return
 	}
 
-	pos, marked := search.MarkText(text, keyword, beforeLen, Conf.Search.CaseSensitive)
+	pos, marked := search.MarkText(text, keyword, beforeLen, confSearchSnapshot.CaseSensitive)
 	if -1 < pos {
 		if 0 == pos {
 			score = 1
@@ -3016,7 +3079,7 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 func partitionSearchTerms(text, terms string) (matched, unmatched string) {
 	var matchedTerms, unmatchedTerms []string
 	for _, term := range search.SplitKeyword(terms) {
-		pos, _ := search.MarkText(text, term, -1, Conf.Search.CaseSensitive)
+		pos, _ := search.MarkText(text, term, -1, Conf.Search.Load().CaseSensitive)
 		if -1 < pos {
 			matchedTerms = append(matchedTerms, term)
 		} else {
@@ -3126,17 +3189,14 @@ func fromHPathSearchSQLBlockWithContentTerms(sqlBlock *sql.Block, hPathTerms, co
 func maxContent(content string, maxLen int) string {
 	idx := strings.Index(content, "<mark>")
 	if 128 < maxLen && maxLen <= idx {
-		head := bytes.Buffer{}
-		for range 512 {
-			r, size := utf8.DecodeLastRuneInString(content[:idx])
-			head.WriteRune(r)
+		const matchContextBytes = 64
+		matchIdx := idx
+		for idx > 0 && matchIdx-idx <= matchContextBytes {
+			_, size := utf8.DecodeLastRuneInString(content[:idx])
 			idx -= size
-			if 64 < head.Len() {
-				break
-			}
 		}
 
-		content = util.Reverse(head.String()) + content[idx:]
+		content = content[idx:]
 	}
 
 	if maxLen < utf8.RuneCountInString(content) {
@@ -3146,28 +3206,30 @@ func maxContent(content string, maxLen int) string {
 }
 
 func fieldRegexp(regexp string) string {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	regexp = strings.ReplaceAll(regexp, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
 	buf := bytes.Buffer{}
 	buf.WriteString("(")
 	buf.WriteString("content REGEXP '")
 	buf.WriteString(regexp)
 	buf.WriteString("'")
-	if Conf.Search.Name {
+	if confSearchSnapshot.Name {
 		buf.WriteString(" OR name REGEXP '")
 		buf.WriteString(regexp)
 		buf.WriteString("'")
 	}
-	if Conf.Search.Alias {
+	if confSearchSnapshot.Alias {
 		buf.WriteString(" OR alias REGEXP '")
 		buf.WriteString(regexp)
 		buf.WriteString("'")
 	}
-	if Conf.Search.Memo {
+	if confSearchSnapshot.Memo {
 		buf.WriteString(" OR memo REGEXP '")
 		buf.WriteString(regexp)
 		buf.WriteString("'")
 	}
-	if Conf.Search.IAL {
+	if confSearchSnapshot.IAL {
 		buf.WriteString(" OR ial REGEXP '")
 		buf.WriteString(regexp)
 		buf.WriteString("'")
@@ -3179,18 +3241,20 @@ func fieldRegexp(regexp string) string {
 }
 
 func columnFilter() string {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	buf := bytes.Buffer{}
 	buf.WriteString("{content")
-	if Conf.Search.Name {
+	if confSearchSnapshot.Name {
 		buf.WriteString(" name")
 	}
-	if Conf.Search.Alias {
+	if confSearchSnapshot.Alias {
 		buf.WriteString(" alias")
 	}
-	if Conf.Search.Memo {
+	if confSearchSnapshot.Memo {
 		buf.WriteString(" memo")
 	}
-	if Conf.Search.IAL {
+	if confSearchSnapshot.IAL {
 		buf.WriteString(" ial")
 	}
 	buf.WriteString(" tag}")
@@ -3198,18 +3262,20 @@ func columnFilter() string {
 }
 
 func columnConcat() string {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	buf := bytes.Buffer{}
 	buf.WriteString("content")
-	if Conf.Search.Name {
+	if confSearchSnapshot.Name {
 		buf.WriteString("||name")
 	}
-	if Conf.Search.Alias {
+	if confSearchSnapshot.Alias {
 		buf.WriteString("||alias")
 	}
-	if Conf.Search.Memo {
+	if confSearchSnapshot.Memo {
 		buf.WriteString("||memo")
 	}
-	if Conf.Search.IAL {
+	if confSearchSnapshot.IAL {
 		buf.WriteString("||ial")
 	}
 	buf.WriteString("||tag")
@@ -3245,9 +3311,11 @@ func stringQuery(query string) string {
 
 // markReplaceSpan 用于处理搜索高亮。
 func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markSpanDataType string, luteEngine *lute.Lute) bool {
+	confSearchSnapshot := Conf.LoadSearch()
+
 	if ast.NodeText == n.Type {
 		text := n.Content()
-		text, matched := search.EncloseHighlightingRaw(text, keywords, search.GetMarkSpanStart(markSpanDataType), search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
+		text, matched := search.EncloseHighlightingRaw(text, keywords, search.GetMarkSpanStart(markSpanDataType), search.GetMarkSpanEnd(), confSearchSnapshot.CaseSensitive, false)
 		if !matched {
 			return false
 		}
@@ -3273,7 +3341,7 @@ func markReplaceSpan(n *ast.Node, unlinks *[]*ast.Node, keywords []string, markS
 
 		text := n.Content()
 		startTag := search.GetMarkSpanStart(markSpanDataType)
-		text, matched := search.EncloseHighlightingRaw(text, keywords, startTag, search.GetMarkSpanEnd(), Conf.Search.CaseSensitive, false)
+		text, matched := search.EncloseHighlightingRaw(text, keywords, startTag, search.GetMarkSpanEnd(), confSearchSnapshot.CaseSensitive, false)
 		if matched {
 			dataType := search.GetMarkSpanStart(n.TextMarkType + " " + search.MarkDataType)
 			text = strings.ReplaceAll(text, startTag, dataType)
@@ -3326,7 +3394,7 @@ func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, 
 	// 虚拟引用和反链提及关键字按最长匹配优先 https://github.com/siyuan-note/siyuan/issues/7465
 	sort.Slice(keywords, func(i, j int) bool { return len(keywords[i]) > len(keywords[j]) })
 
-	tmp, matched := search.EncloseHighlightingRaw(text, keywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive, true)
+	tmp, matched := search.EncloseHighlightingRaw(text, keywords, replacementStart, replacementEnd, Conf.Search.Load().CaseSensitive, true)
 	if !matched {
 		ret = tmp
 		return
@@ -3480,6 +3548,14 @@ func filterQueryInvisibleChars(query string) string {
 }
 
 func replaceCaseInsensitive(input, old, new []byte) []byte {
-	re := regexp.MustCompile("(?i)" + regexp.QuoteMeta(string(old)))
-	return []byte(re.ReplaceAllString(string(input), string(new)))
+	content, _ := replaceCaseInsensitiveText(string(input), string(old), string(new))
+	return []byte(content)
+}
+
+func replaceCaseInsensitiveText(input, keyword, replacement string) (string, bool) {
+	r := regexp.MustCompile("(?i)" + regexp.QuoteMeta(keyword))
+	if !r.MatchString(input) {
+		return input, false
+	}
+	return r.ReplaceAllStringFunc(input, func(string) string { return replacement }), true
 }

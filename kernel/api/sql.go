@@ -57,7 +57,7 @@ var SQL = contractHandler(apicontract.QuerySQL, func(c *gin.Context, request api
 		return apicontract.Failure[apicontract.SQLRows](-1, "unknown [mode]")
 	}
 
-	result, info, err := sql.QueryWithLimitInfo(stmt, model.Conf.Search.Limit)
+	result, info, err := sql.QueryWithLimitInfo(stmt, model.Conf.Search.Load().Limit)
 	if err != nil {
 		return apicontract.Failure[apicontract.SQLRows](1, err.Error())
 	}

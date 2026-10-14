@@ -9,9 +9,11 @@ extraMetadata:
   main: "electron/main.js"
 directories:
   output: "build"
+  buildResources: "nsis-resources"
 files:
   - "electron"
 afterPack: "./scripts/afterPack.js"
+beforePack: "./scripts/beforePack.js"
 extraFiles:
   - from: "../LICENSE"
     to: "LICENSE"
@@ -50,6 +52,9 @@ extraResources:
     to: "changelogs"
   - from: "stage"
     to: "stage"
+    filter: ["**/*", "!ocr/runtime/**/*"]
+  - from: "stage/ocr/runtime/windows-arm64"
+    to: "stage/ocr/runtime/windows-arm64"
   - from: "guide"
     to: "guide"
     filter: "!**/{.DS_Store,.git,.gitignore,.idea}"

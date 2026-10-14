@@ -392,6 +392,14 @@ test("remote mode recognizes Chromium switches that weaken renderer security", (
     assert.equal(getUnsafeRemoteChromiumSwitchName("--disable-gpu"), undefined);
 });
 
+test("remote mode recognizes isolation features with field trial suffixes", () => {
+    for (const feature of ["IsolateOrigins", "site-per-process", "SitePerProcess"]) {
+        assert.equal(getUnsafeRemoteChromiumSwitchName(
+            `--disable-features=CacheCertVerification, ${feature}<ExampleTrial`), "disable-features");
+    }
+    assert.equal(getUnsafeRemoteChromiumSwitchName("--disable-features=CacheCertVerification<ExampleTrial"), undefined);
+});
+
 test("remote mode only opens web URLs through the operating system", () => {
     assert.equal(isAllowedRemoteExternalURL("https://example.com/path"), true);
     assert.equal(isAllowedRemoteExternalURL("http://example.com/path"), true);

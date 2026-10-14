@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20260926163337"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -1136,6 +1136,91 @@
 			]
 		},
 		{
+			"ID": "20261010113646-aewwqju",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261010113646-aewwqju",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SQL queries, search and dynamic embeds"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261010113646-f4xjowe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010113646-f4xjowe",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ask the agent to query notes by block type, inline formatting, ancestry or combined conditions, and summarize the results."
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-3btkysw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-3btkysw",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example: “Count the tasks updated in the past week” or “Find unfinished task items in the project documents.”"
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-6q4hhil",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-6q4hhil",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ask to show results in the search window to inspect and locate them, or create a dynamic SQL embed to keep displaying matching blocks in a document. Statistical results can be used in an answer but cannot be displayed directly as embedded blocks."
+				}
+			]
+		},
+		{
+			"ID": "20261010172554-kw579hi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010172554-kw579hi",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When changing an existing embed, describe the query changes and ask to keep the existing block and display settings."
+				}
+			]
+		},
+		{
+			"ID": "20261010173100-8r4pamm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261010173100-8r4pamm",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Unlock an encrypted notebook before querying it and specify which notebook to use. Its embeds can query only content in that notebook."
+				}
+			]
+		},
+		{
 			"ID": "20260804170109-sbl6g5j",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -1175,6 +1260,77 @@
 				{
 					"Type": "NodeText",
 					"Data": "The snapshot covers workspace data, but not changes made to external systems by external MCP services or plugins. Regenerating an answer, stopping a task, or deleting a session also does not automatically undo completed write operations."
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-pkk1ilo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261008115720-pkk1ilo",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "CSS/JS snippets"
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-m2rknxh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008115720-m2rknxh",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ask the AI agent to list, read, create, update, enable, disable, or delete CSS/JS snippets. For example: “Create a disabled CSS snippet that increases the interface font size so I can review it.”"
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-p1ri8ae",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008115720-p1ri8ae",
+				"updated": "20261008115720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Every snippet change requires confirmation, even when session-wide or automatic approval is enabled. Review the proposed code and the current snippet shown in the confirmation card. New snippets are disabled and excluded from publishing by default. The agent preserves the global CSS/JS switches and existing publishing settings."
+				}
+			]
+		},
+		{
+			"ID": "20261008115720-7g8jtun",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008115720-7g8jtun",
+				"updated": "20261008115720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enabling JavaScript or updating an enabled JavaScript snippet can execute code in connected windows. Disabling or deleting a snippet does not undo code that has already run; restarting the frontend may be necessary. If a snippet changes while you are reviewing it, the operation is rejected and the agent must read it again before requesting confirmation."
+				}
+			]
+		},
+		{
+			"ID": "20261008125238-rndmbrz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261008125238-rndmbrz",
+				"updated": "20261012014859"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can search snippet names and code, rename snippets, or request changes to part of a snippet. If snippets change while the management dialog is open, saving is rejected and your draft is retained; copy your edits, reopen the dialog, and merge them with the latest snippets."
 				}
 			]
 		},

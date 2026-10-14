@@ -668,7 +668,7 @@ func setupInlineStylesTest(t *testing.T) {
 	t.Helper()
 	oldDataDir, oldConf := util.DataDir, Conf
 	util.DataDir, Conf = t.TempDir(), NewAppConf()
-	Conf.Sync = conf.NewSync()
+	Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() {
 		util.DataDir, Conf = oldDataDir, oldConf
 	})

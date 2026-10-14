@@ -1,6 +1,6 @@
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
-import {progressLoading} from "../dialog/processSystem";
+import {progressLoading} from "../dialog/progress";
 import {waitForPendingTransactions} from "../protyle/util/transactionQueue";
 import {fetchSyncPost} from "./fetch";
 

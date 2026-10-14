@@ -23,10 +23,10 @@ import (
 )
 
 func TestMarkTextMatchesRawText(t *testing.T) {
-	old := util.SearchHanSensitive
-	util.SearchHanSensitive = true
+	old := util.SearchHanSensitive.Load()
+	util.SearchHanSensitive.Store(true)
 	t.Cleanup(func() {
-		util.SearchHanSensitive = old
+		util.SearchHanSensitive.Store(old)
 	})
 
 	tests := []struct {
@@ -85,10 +85,10 @@ func TestMarkTextMatchesRawText(t *testing.T) {
 }
 
 func TestEncloseHighlightingRaw(t *testing.T) {
-	old := util.SearchHanSensitive
-	util.SearchHanSensitive = true
+	old := util.SearchHanSensitive.Load()
+	util.SearchHanSensitive.Store(true)
 	t.Cleanup(func() {
-		util.SearchHanSensitive = old
+		util.SearchHanSensitive.Store(old)
 	})
 
 	start := GetMarkSpanStart(VirtualBlockRefDataType)
@@ -179,10 +179,10 @@ func TestEncloseHighlightingRaw(t *testing.T) {
 }
 
 func TestEncloseHighlightingRawHanInsensitive(t *testing.T) {
-	old := util.SearchHanSensitive
-	util.SearchHanSensitive = false
+	old := util.SearchHanSensitive.Load()
+	util.SearchHanSensitive.Store(false)
 	t.Cleanup(func() {
-		util.SearchHanSensitive = old
+		util.SearchHanSensitive.Store(old)
 	})
 
 	got, matched := EncloseHighlightingRaw("詩經研究", []string{"诗经"}, "<mark>", "</mark>", false, false)

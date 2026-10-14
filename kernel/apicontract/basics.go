@@ -40,6 +40,11 @@ type DownloadInstallPkgRequest struct {
 	DownloadInstallPkg bool `json:"downloadInstallPkg"`
 }
 
+// SettingsWindowRequest 更新工作空间的独立设置窗口开关，仅桌面 Electron 客户端使用。
+type SettingsWindowRequest struct {
+	SettingsWindow bool `json:"settingsWindow"`
+}
+
 type UpdateChannelRequest struct {
 	UpdateChannel string `json:"updateChannel"`
 }

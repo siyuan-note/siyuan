@@ -77,10 +77,11 @@ export const collectHTMLLocalAssets = (root: ParentNode) => {
 };
 
 export const applyHTMLLocalAssetPaths = (assets: IHTMLLocalAsset[], paths: Array<string | undefined>) => {
-    paths.forEach((path, index) => {
-        const asset = assets[index];
-        if (asset && path) {
-            asset.element.setAttribute(asset.attribute, path);
+    assets.forEach((asset, index) => {
+        if (paths[index]) {
+            asset.element.setAttribute(asset.attribute, paths[index]);
+        } else {
+            asset.element.removeAttribute(asset.attribute);
         }
     });
 };

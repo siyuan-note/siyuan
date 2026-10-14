@@ -1,3 +1,5 @@
+import {internalOpt} from "./internal_evt.js";
+
 export interface PDFNavigationEntry {
     dest?: string | unknown[];
     hash?: string;
@@ -14,8 +16,8 @@ interface PDFNavigationLocation {
 }
 
 interface PDFNavigationEventBus {
-    _on(eventName: string, listener: (event: {location: PDFNavigationLocation}) => void,
-        options?: {signal?: AbortSignal}): void;
+    on(eventName: string, listener: (event: {location: PDFNavigationLocation}) => void,
+        options?: {signal?: AbortSignal; internal?: string}): void;
     dispatch(eventName: string, data: unknown): void;
 }
 
@@ -156,8 +158,9 @@ export class PDFNavigationHistory {
         this.reset();
         this.initialized = true;
         this.eventAbortController = new AbortController();
-        this.eventBus._on("updateviewarea", this.updateViewarea.bind(this), {
+        this.eventBus.on("updateviewarea", this.updateViewarea.bind(this), {
             signal: this.eventAbortController.signal,
+            ...internalOpt,
         });
         this.dispatchState();
     }

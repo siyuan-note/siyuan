@@ -7,7 +7,7 @@
 		"id": "20240530101000-txrc7z1",
 		"title": "データ履歴",
 		"type": "doc",
-		"updated": "20260927191121"
+		"updated": "20261011203418"
 	},
 	"Children": [
 		{
@@ -1983,7 +1983,7 @@
 			"Properties": {
 				"ID": "20240530101000-aprvh1j",
 				"id": "20240530101000-s265xty",
-				"updated": "20260914102430"
+				"updated": "20261011203418"
 			},
 			"Children": [
 				{
@@ -1999,7 +1999,7 @@
 			"Properties": {
 				"ID": "20240530101000-vbtv1hd",
 				"id": "20240530101000-bbjxq5g",
-				"updated": "20260914102430"
+				"updated": "20261011203418"
 			},
 			"Children": [
 				{
@@ -2012,7 +2012,7 @@
 					"Properties": {
 						"ID": "20240530101000-mjgjc3f",
 						"id": "20240530101000-vs81otl",
-						"updated": "20260914101605"
+						"updated": "20261011203418"
 					},
 					"Children": [
 						{
@@ -2021,7 +2021,7 @@
 							"Properties": {
 								"ID": "20240530101000-a89jrx4",
 								"id": "20240530101000-gxszmrm",
-								"updated": "20260914101605"
+								"updated": "20261011203418"
 							},
 							"Children": [
 								{
@@ -2045,7 +2045,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "データリポジトリのクリーンアップ"
+									"TextMarkTextContent": "ローカルデータリポジトリのクリーンアップ"
 								},
 								{
 									"Type": "NodeText",
@@ -2072,7 +2072,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "データリポジトリのクリーンアップ"
+									"TextMarkTextContent": "ローカルデータリポジトリのクリーンアップ"
 								},
 								{
 									"Type": "NodeText",

@@ -2,10 +2,9 @@ import {fetchAIEditorSSE, IAIEditorMessage, TAIEditorSSEEvent} from "./editorSSE
 import {genUUID} from "../util/genID";
 import {
     focusByOffset,
-    getBlockRanges,
-    getSelectionOffset,
-    setLastNodeRange
+    getBlockRanges
 } from "../protyle/util/selection";
+import {getSelectionOffset, setLastNodeRange} from "../protyle/util/selectionOffsets";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {hasClosestByAttribute, hasClosestByTag, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {insertHTML} from "../protyle/util/insertHTML";
@@ -161,7 +160,7 @@ const isMarkdownInlineElement = (element: Element) => {
 };
 
 const sourcePartMarkdown = (protyle: IProtyle, range: Range, editableElement: Element) => {
-    const text = range.toString().replace(new RegExp(Constants.ZWSP, "g"), "");
+    const text = range.toString().replaceAll(Constants.ZWSP, "");
     let fragment: Node = range.cloneContents();
     let ancestor = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE ?
         range.commonAncestorContainer as Element : range.commonAncestorContainer.parentElement;
@@ -558,6 +557,7 @@ const startTaskStream = (task: IAIEditorTask) => {
             return;
         }
         task.status = "error";
+        finishTaskReasoning(task);
         task.notice = error instanceof Error ? error.message : String(error);
         task.stopButton.classList.add("fn__none");
         task.actionsElement.classList.remove("fn__none");

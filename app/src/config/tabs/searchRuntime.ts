@@ -7,5 +7,5 @@ export const searchConfigApi = createConfigNamespaceApi<Config.ISearch>({
     setConfig: (data) => {
         window.siyuan.config.search = data;
     },
-    apiPath: "/api/setting/setSearch",
+
 });

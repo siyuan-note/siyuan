@@ -5,13 +5,30 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
     <title>SiYuan</title>
+    <script>
+        (() => {
+            const appearance = new URLSearchParams(location.search);
+            const dark = appearance.get("windowThemeMode") === "dark";
+            document.documentElement.setAttribute("data-theme-mode", dark ? "dark" : "light");
+            const color = (name, fallback) => /^#[\da-f]{6}$/i.test(appearance.get(name)) ? appearance.get(name) : fallback;
+            const background = color("windowBackground", dark ? "#1e1e1e" : "#ffffff");
+            const foreground = color("windowForeground", dark ? "#d4d4d4" : "#222222");
+            const style = document.createElement("style");
+            style.id = "windowAppearanceStyle";
+            style.textContent = `:root{--b3-theme-background:${background};--b3-body-background:${background};--b3-theme-on-background:${foreground};--b3-theme-on-surface:${foreground};}`;
+            document.head.appendChild(style);
+        })();
+    </script>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="../../icon.png">
-    <link id="protyleKatexStyle" rel="stylesheet" href="../../protyle/js/katex/katex.min.css?v=0.16.9">
-    <script src="../../protyle/js/pdf/pdf.min.mjs?v=4.8.69" type="module"></script>
+    <link id="protyleKatexStyle" rel="stylesheet" href="../../protyle/js/katex/katex.min.css?v=0.19.0">
+    <script src="../../protyle/js/pdf/pdf.min.mjs?v=6.4.299-siyuan.1" type="module"></script>
 </head>
-<body class="fn__flex-column body--window">
+<body class="fn__flex-column body--window" aria-busy="true">
+<div id="loading" class="fn__loading window-loading" role="status">
+    <img width="48" src="../../loading-pure.svg" alt="">
+</div>
 <div class="fn__flex-1 fn__flex">
     <div id="layouts" class="layout fn__flex-1"></div>
 </div>

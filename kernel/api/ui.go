@@ -64,7 +64,7 @@ var reloadUI = contractHandler(apicontract.ReloadUI, func(c *gin.Context, reques
 var reloadIcon = contractHandler(apicontract.ReloadIcon, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 
 	model.LoadIcons()
-	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
+	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance.Load())
 
 	return apicontract.Success(apicontract.Null{})
 })
@@ -72,7 +72,7 @@ var reloadIcon = contractHandler(apicontract.ReloadIcon, func(c *gin.Context, re
 var reloadTheme = contractHandler(apicontract.ReloadTheme, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 
 	model.LoadThemes()
-	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
+	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance.Load())
 
 	return apicontract.Success(apicontract.Null{})
 })

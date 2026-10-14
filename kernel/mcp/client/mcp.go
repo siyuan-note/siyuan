@@ -199,22 +199,9 @@ func (h *headerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 		// 对每个 header 值里的 {{secrets.NAME}}、{{vars.NAME}} 占位符插值，
 		// 使 MCP 服务的 Authorization 等头部可引用密钥/变量而无需明文存储。
 		// 密钥插值限定目标主机为该 MCP 服务的出站地址，防止密钥被转发到其他主机。
-		clone.Header.Set(k, conf.ResolveSecretsVarsForHost(model.Conf.Secrets, model.Conf.Variables, req.URL.Hostname(), v))
+		clone.Header.Set(k, conf.ResolveSecretsVarsForHost(model.Conf.Secrets.Load(), model.Conf.Variables.Load(), req.URL.Hostname(), v))
 	}
 	return h.base.RoundTrip(clone)
-}
-
-func DisconnectMCP() {
-	mcpMu.Lock()
-	defer mcpMu.Unlock()
-	if mcpConnectCancel != nil {
-		mcpConnectCancel()
-		mcpConnectCancel = nil
-	}
-	mcpGeneration++
-	mcpConnecting = false
-	closeConnections(mcpConns)
-	mcpConns = nil
 }
 
 func connectServers(ctx context.Context, servers []conf.MCPServer, interactive map[string]bool, connected func(Connection) bool) {
@@ -315,7 +302,7 @@ func connectOneServer(ctx context.Context, server conf.MCPServer, interactive bo
 		}
 
 		readOnlyHint := trustedReadOnlyHint(server, tool)
-		handler := mcpToolContextHandler(server.Name, tool.Name, serverTimeout(server), tool.OutputSchema != nil)
+		handler := mcpToolContextHandler(server.ID, tool.Name, serverTimeout(server), tool.OutputSchema != nil)
 		var outputSchema *tools.ToolSchema
 		if tool.OutputSchema != nil {
 			converted := convertMCPSchema(tool.OutputSchema)
@@ -482,7 +469,7 @@ func connectStdio(ctx context.Context, client *mcp.Client, server conf.MCPServer
 		if model.Conf == nil {
 			return value
 		}
-		return conf.ResolveSecretsVars(model.Conf.Secrets, model.Conf.Variables, value)
+		return conf.ResolveSecretsVars(model.Conf.Secrets.Load(), model.Conf.Variables.Load(), value)
 	}, runtime.GOOS)
 	if err != nil {
 		return nil, nil, fmt.Errorf("environment: %w", err)
@@ -692,14 +679,14 @@ func hasAuthorizationHeader(headers map[string]string) bool {
 	return false
 }
 
-func mcpToolContextHandler(serverName, toolName string, timeout time.Duration,
+func mcpToolContextHandler(serverID, toolName string, timeout time.Duration,
 	structuredContentExpected bool) func(context.Context, map[string]any) (tools.CallToolResult, error) {
 	return func(ctx context.Context, args map[string]any) (tools.CallToolResult, error) {
 		result := callMCPToolOnce(func() (*mcp.CallToolResult, error) {
-			connection := getMCPConnection(serverName)
+			connection := getMCPConnection(serverID)
 			result, rejected, err := callMCPTool(ctx, connection, toolName, timeout, args)
 			if rejected && errors.Is(err, mcp.ErrSessionMissing) && ctx.Err() == nil {
-				logging.LogWarnf("mcp: server [%s] tool [%s] session expired, reconnecting", serverName, toolName)
+				logging.LogWarnf("mcp: server [%s] tool [%s] session expired, reconnecting", serverID, toolName)
 				recoveryCtx, cancel := context.WithTimeout(ctx, timeout)
 				reconnected := reconnectMCPAndWait(recoveryCtx, connection)
 				cancel()
@@ -707,27 +694,27 @@ func mcpToolContextHandler(serverName, toolName string, timeout time.Duration,
 					result, rejected, err = callMCPTool(ctx, reconnected, toolName, timeout, args)
 					if rejected && errors.Is(err, mcp.ErrSessionMissing) {
 						err = errors.New("mcp session expired again after reconnect")
-						go reconnectMCP(serverName)
+						go reconnectMCP(serverID)
 					}
 				} else {
 					err = errors.New("mcp session expired and reconnect failed")
 				}
 			}
-			updateMCPRuntimeAfterToolCall(serverName, err)
+			updateMCPRuntimeAfterToolCall(serverID, err)
 			return result, err
 		}, func(err error) {
-			logging.LogWarnf("mcp: server [%s] tool [%s] disconnected (%s), reconnecting", serverName, toolName, err)
-			go reconnectMCP(serverName)
+			logging.LogWarnf("mcp: server [%s] tool [%s] disconnected (%s), reconnecting", serverID, toolName, err)
+			go reconnectMCP(serverID)
 		}, structuredContentExpected)
 		return result, nil
 	}
 }
 
-func updateMCPRuntimeAfterToolCall(serverName string, callErr error) {
+func updateMCPRuntimeAfterToolCall(serverID string, callErr error) {
 	mcpMu.Lock()
 	connectionIndex := -1
 	for i := range mcpConns {
-		if mcpConns[i].ServerName == serverName {
+		if mcpConns[i].ServerID == serverID {
 			connectionIndex = i
 			break
 		}
@@ -861,11 +848,11 @@ func callMCPTool(parentCtx context.Context, connection *Connection, toolName str
 	return result, rejected.Load(), err
 }
 
-func getMCPConnection(serverName string) *Connection {
+func getMCPConnection(serverID string) *Connection {
 	mcpMu.Lock()
 	defer mcpMu.Unlock()
 	for _, conn := range mcpConns {
-		if conn.ServerName == serverName {
+		if conn.ServerID == serverID {
 			return &conn
 		}
 	}
@@ -938,22 +925,22 @@ func waitMCPReconnect(ctx context.Context, done <-chan struct{}) bool {
 }
 
 // reconnectMCP 关闭现有连接并重新注册工具。
-func reconnectMCP(serverName string) bool {
+func reconnectMCP(serverID string) bool {
 	mcpMu.Lock()
 	if mcpConnecting {
 		mcpMu.Unlock()
 		return false
 	}
 	servers := append([]conf.MCPServer(nil), mcpServers...)
-	serverID := ""
+	found := false
 	for _, server := range servers {
-		if server.Name == serverName {
-			serverID = server.ID
+		if server.ID == serverID {
+			found = true
 			break
 		}
 	}
 	mcpMu.Unlock()
-	if serverID == "" {
+	if !found {
 		return false
 	}
 	ReconnectMCPAsync(servers, []string{serverID}, nil)

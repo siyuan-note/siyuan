@@ -7,9 +7,116 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261002224424"
 	},
 	"Children": [
+		{
+			"ID": "20261002224424-1kkgs4r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261002224424-1kkgs4r",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How do I reset settings?"
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-q0ksmo0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-q0ksmo0",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "App"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Maintenance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Reset settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to restore ordinary preferences, built-in shortcuts, menu and mobile toolbar preferences, and the current window layout in this workspace."
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-0zfiohz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-0zfiohz",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Notes, assets, history, snapshots, flashcard progress and the current history retention period are preserved. Accounts, authentication, sync and encryption keys, AI/MCP connections, secrets, variables, language and network configuration are also preserved."
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-p60g1r1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-p60g1r1",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Installed themes and icons remain installed, while the default appearance is selected. Plugins and code snippets, including their enabled states, plugin shortcuts and saved layouts are preserved. App-wide settings such as the update channel, accessibility, Linux input method and launch at login remain unchanged."
+				}
+			]
+		},
+		{
+			"ID": "20261002224424-veqlmu5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261002224424-veqlmu5",
+				"updated": "20261002224424"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "All clients connected to this workspace must finish saving before the reset; if saving fails, the reset is cancelled. The clients then reload. When started from the local desktop app, the app exits after reloading; restart it to continue. Mobile and browser clients only reload."
+				}
+			]
+		},
 		{
 			"ID": "20210428222532-nfvnq4d",
 			"Type": "NodeHeading",

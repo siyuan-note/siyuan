@@ -92,11 +92,9 @@ func exportNotebooksSYBundle(ids []string) (zipPath string) {
 		boxes = append(boxes, box)
 	}
 
-	originalIncludeRelatedDocs := Conf.Export.IncludeRelatedDocs
-	Conf.Export.IncludeRelatedDocs = false
-	defer func() {
-		Conf.Export.IncludeRelatedDocs = originalIncludeRelatedDocs
-	}()
+	// 笔记本包只包含所选笔记本，关联文档由各笔记本自身导出
+	config := resolveExportOptions(nil)
+	config.IncludeRelatedDocs = false
 
 	workDir := filepath.Join(util.TempDir, "export", "notebooks-"+gulu.Rand.String(7))
 	if err := os.MkdirAll(workDir, 0755); nil != err {
@@ -109,7 +107,7 @@ func exportNotebooksSYBundle(ids []string) (zipPath string) {
 	manifest := &syNotebookBundleManifest{Spec: syNotebookBundleSpec}
 	innerArchives := map[string]string{}
 	for _, box := range boxes {
-		innerURI := exportBoxSYZip(box.ID)
+		innerURI := exportBoxSYZip(box.ID, config)
 		innerPath, err := exportedFilePath(innerURI)
 		if nil != err {
 			logging.LogErrorf("resolve exported notebook archive failed: %s", err)

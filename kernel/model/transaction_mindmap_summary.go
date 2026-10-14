@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"slices"
+	"sort"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -13,7 +14,7 @@ type listMindmapSummaryContext struct {
 	moved    map[string]bool
 }
 
-func validListMindmapSummaries(value any) bool {
+func validListMindmapSummaries(value any, nested bool) bool {
 	summaries, ok := value.([]any)
 	if !ok {
 		return false
@@ -45,12 +46,33 @@ func validListMindmapSummaries(value any) bool {
 		if !ok || len(nodes) == 0 {
 			return false
 		}
+		local := map[string]bool{}
 		for _, value := range nodes {
 			id, ok = value.(string)
-			if !ok || id == "" || id == parent || members[id] {
+			if !ok || id == "" || id == parent || local[id] || (!nested && members[id]) {
 				return false
 			}
 			members[id] = true
+			local[id] = true
+		}
+	}
+	if nested {
+		for i, value := range summaries {
+			a := value.(map[string]any)
+			for _, value := range summaries[i+1:] {
+				b := value.(map[string]any)
+				if a["parentId"] == b["parentId"] {
+					common := 0
+					for _, id := range a["nodeIds"].([]any) {
+						if slices.Contains(b["nodeIds"].([]any), id) {
+							common++
+						}
+					}
+					if common > 0 && common < len(a["nodeIds"].([]any)) && common < len(b["nodeIds"].([]any)) {
+						return false
+					}
+				}
+			}
 		}
 	}
 	return true
@@ -110,7 +132,7 @@ func (tx *Transaction) captureListMindmapSummarySiblings(tree *parse.Tree) {
 
 // 仅改写概要成员，未知字段保留原始 JSON 精度，范围消失时随事务删除概要。
 func normalizeListMindmapSummaries(raw json.RawMessage, siblings map[string][]string,
-	context *listMindmapSummaryContext) (json.RawMessage, bool) {
+	context *listMindmapSummaryContext, nested bool) (json.RawMessage, bool) {
 	var summaries []map[string]json.RawMessage
 	if json.Unmarshal(raw, &summaries) != nil {
 		return raw, false
@@ -125,6 +147,14 @@ func normalizeListMindmapSummaries(raw json.RawMessage, siblings map[string][]st
 	kept := make([]map[string]json.RawMessage, 0, len(summaries))
 	claimed := map[string]bool{}
 	changed := false
+	type normalizedRange struct {
+		summary  map[string]json.RawMessage
+		id       string
+		parent   string
+		original []string
+		members  []string
+	}
+	var ranges []*normalizedRange
 	for _, summary := range summaries {
 		var parent string
 		var members []string
@@ -161,7 +191,7 @@ func normalizeListMindmapSummaries(raw json.RawMessage, siblings map[string][]st
 			group = nil
 		}
 		for _, id := range siblings[parent] {
-			if !claimed[id] && (memberSet[id] || !old[id]) {
+			if (nested || !claimed[id]) && (memberSet[id] || !old[id]) {
 				group = append(group, id)
 			} else {
 				finish()
@@ -180,6 +210,38 @@ func normalizeListMindmapSummaries(raw json.RawMessage, siblings map[string][]st
 			changed = true
 		}
 		kept = append(kept, summary)
+		var id string
+		_ = json.Unmarshal(summary["id"], &id)
+		ranges = append(ranges, &normalizedRange{summary: summary, id: id, parent: parent, original: members, members: best})
+	}
+	if nested {
+		sort.Slice(ranges, func(i, j int) bool {
+			if len(ranges[i].original) != len(ranges[j].original) {
+				return len(ranges[i].original) > len(ranges[j].original)
+			}
+			return ranges[i].id < ranges[j].id
+		})
+		// 结构编辑造成交叉时，内层范围保留与原外层的交集，范围完全分离时各自保留。
+		for i, outer := range ranges {
+			for _, inner := range ranges[i+1:] {
+				if outer.parent != inner.parent || slices.ContainsFunc(inner.original, func(id string) bool {
+					return !slices.Contains(outer.original, id)
+				}) {
+					continue
+				}
+				var common []string
+				for _, id := range inner.members {
+					if slices.Contains(outer.members, id) {
+						common = append(common, id)
+					}
+				}
+				if len(common) > 0 && len(common) < len(inner.members) && len(common) < len(outer.members) {
+					inner.members = common
+					inner.summary["nodeIds"], _ = json.Marshal(common)
+					changed = true
+				}
+			}
+		}
 	}
 	if !changed {
 		return raw, false

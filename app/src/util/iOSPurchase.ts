@@ -1,7 +1,7 @@
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "./fetch";
 import {genUUID} from "./genID";
-import {progressLoading} from "../dialog/processSystem";
+import {progressLoading} from "../dialog/progress";
 
 export const processIOSPurchaseResponse = (code: number) => {
     progressLoading({

@@ -1,6 +1,7 @@
 import {isInEmbedBlock} from "../util/hasClosest";
 import {isDocumentBoundaryLoaded} from "../util/documentRange";
-import {focusBlock, focusByRange} from "../util/selection";
+import {focusBlock} from "../util/selection";
+import {focusByRange} from "../util/selectionOffsets";
 import {scrollCenter} from "../../util/highlightById";
 import {getContenteditableElement} from "./getBlock";
 import {focusEditableAtGoalX, getCaretGoalX, TVerticalDirection} from "./verticalCaret";
@@ -156,7 +157,10 @@ const resolveBlockVerticalNavigationTarget = (editorElement: HTMLElement, elemen
     if (editable?.tagName === "TABLE") {
         editable = getTableBoundaryCell(editable as HTMLTableElement, direction, goalX);
     }
-    return editable ? {type: "text", owner: element, editable, scope} :
+    const revealTitle = !!editable && editable === region?.title && !isVerticalNavigationElementVisible(editable);
+    return editable ? {type: "text", owner: element, editable, scope,
+        reveal: revealTitle ? () => !!region.setTitleEditing?.(true) : undefined,
+        rollbackReveal: revealTitle ? () => region.setTitleEditing?.(false) : undefined} :
         {type: "atomic", owner: element, scope};
 };
 

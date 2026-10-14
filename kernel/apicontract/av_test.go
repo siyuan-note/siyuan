@@ -31,8 +31,29 @@ func TestAVRequestCompatibility(t *testing.T) {
 	}
 }
 
+func TestAVRelationItemNameChoiceCompatibility(t *testing.T) {
+	base := `"avID":"av","blockID":"block","keyID":"key","keyword":"Input","cells":[],"preview":{"templateID":"template","primaryKey":"Template","createdAt":123}`
+	for _, test := range []struct {
+		field string
+		want  bool
+	}{
+		{"", false}, {`,"useInputName":false`, false}, {`,"useInputName":null`, false}, {`,"useInputName":true`, true},
+	} {
+		request, err := CreateAttributeViewRelationItem.Decode(strings.NewReader(`{` + base + test.field + `}`))
+		if err != nil || request.UseInputName != test.want {
+			t.Fatalf("name choice compatibility: %+v %v", request, err)
+		}
+	}
+	if _, err := CreateAttributeViewRelationItem.Decode(strings.NewReader(`{` + base + `,"useInputName":"true"}`)); err == nil {
+		t.Fatal("invalid name choice accepted")
+	}
+}
+
 func TestAVValuePatchPresence(t *testing.T) {
-	for _, patch := range []string{`{}`, `{"text":{}}`, `{"text":{"content":""}}`, `{"text":null}`, `{"TEXT":{"CONTENT":"x"},"unknown":{"keep":true}}`} {
+	for _, patch := range []string{`{}`, `{"text":{}}`, `{"text":{"content":""}}`, `{"text":null}`, `{"TEXT":{"CONTENT":"x"},"unknown":{"keep":true}}`,
+		`{"location":{}}`, `{"location":null}`, `{"location":{"name":"Home"}}`,
+		`{"location":{"latitude":null,"longitude":null}}`,
+		`{"location":{"latitude":0,"longitude":0,"originalInput":" 0.0, +0 "}}`} {
 		request, err := SetAttributeViewBlockAttr.Decode(strings.NewReader(`{"avID":"av","keyID":"key","itemID":"item","value":` + patch + `}`))
 		if err != nil {
 			t.Fatal(err)
@@ -65,6 +86,89 @@ func TestAVValuePatchPresence(t *testing.T) {
 	}
 }
 
+func TestAVLocationContract(t *testing.T) {
+	for _, patch := range []string{
+		`{"location":{"latitude":"0","longitude":0}}`,
+		`{"location":{"latitude":0,"longitude":false}}`,
+		`{"location":{"originalInput":123}}`,
+		`{"location":{"latitude":0,"longitude":0,"coordinateSystem":"wgs84"}}`,
+		`{"location":{"latitude":0,"longitude":0,"coordinateSystem":"gcj02"}}`,
+		`{"location":{"latitude":0,"longitude":0,"coordinateSystem":"unknown"}}`,
+		`{"location":{"name":"Home","unknown":true}}`,
+	} {
+		if _, err := SetAttributeViewBlockAttr.Decode(strings.NewReader(`{"avID":"av","keyID":"key","value":` + patch + `}`)); err == nil {
+			t.Fatalf("invalid location structure accepted: %s", patch)
+		}
+	}
+	filters, err := SetAttrViewFilters.Decode(strings.NewReader(`{"avID":"av","blockID":"block","data":[{"column":"key","operator":"Contains","value":{"type":"location","text":{"content":"Home"}}}]}`))
+	if err != nil || len(filters.Data) != 1 || filters.Data[0].Value.Text.Content != "Home" {
+		t.Fatalf("location text filter: %+v %v", filters, err)
+	}
+	bundle, err := BuildBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, value := range []string{
+		`{"type":"location","location":{"name":"Home","latitude":0,"longitude":0,"originalInput":"0,0"}}`,
+		`{"type":"location","location":{"name":"Home"}}`,
+		`{"type":"location"}`,
+		`{"type":"rollup","rollup":{"contents":[{"type":"location","location":{"latitude":-90,"longitude":180}}]}}`,
+	} {
+		body := []byte(`{"code":0,"msg":"","data":{"values":{"key":` + value + `}}}`)
+		if err := bundle.ValidateResponse("POST", "/api/av/getAttributeViewAddingBlockDefaultValues", body); err != nil {
+			t.Fatalf("location response rejected: %s %v", value, err)
+		}
+	}
+	keyData, err := json.Marshal(map[string]any{"code": 0, "msg": "", "data": []*AVKey{{
+		ID: "location-key", Type: "location",
+	}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := bundle.ValidateResponse("POST", "/api/av/getAttributeViewKeysByID", keyData); err != nil {
+		t.Fatalf("location field rejected: %v", err)
+	}
+	for _, location := range []string{
+		`{"latitude":0,"longitude":0,"coordinateSystem":"wgs84"}`,
+		`{"latitude":0,"longitude":0,"coordinateSystem":"gcj02"}`,
+		`{"latitude":0,"longitude":0,"coordinateSystem":"unknown"}`,
+	} {
+		body := []byte(`{"code":0,"msg":"","data":{"values":{"key":{"type":"location","location":` + location + `}}}}`)
+		if err := bundle.ValidateResponse("POST", "/api/av/getAttributeViewAddingBlockDefaultValues", body); err == nil {
+			t.Fatalf("removed location coordinate system accepted: %s", location)
+		}
+	}
+	legacyKey := []byte(`{"code":0,"msg":"","data":[{"id":"location-key","type":"location","location":{"defaultCoordinateSystem":"wgs84"}}]}`)
+	if err := bundle.ValidateResponse("POST", "/api/av/getAttributeViewKeysByID", legacyKey); err == nil {
+		t.Fatal("removed location field defaults accepted")
+	}
+}
+
+func TestAVLocationSchemaSeparatesInputNulls(t *testing.T) {
+	for _, inputFirst := range []bool{false, true} {
+		builder := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
+		for _, input := range []bool{inputFirst, !inputFirst} {
+			if _, err := builder.schema(reflect.TypeFor[AVValueLocation](), input); err != nil {
+				t.Fatal(err)
+			}
+		}
+		bundle := &Bundle{Definitions: builder.definitions}
+		input, output := builder.definitions["AVValueLocationInput"], builder.definitions["AVValueLocation"]
+		for _, field := range []string{"name", "latitude", "longitude", "originalInput"} {
+			value := map[string]any{field: nil}
+			if err := bundle.validate(input, value, "$"); err != nil {
+				t.Fatalf("location input cannot clear %s: %v", field, err)
+			}
+			if err := bundle.validate(output, value, "$"); err == nil {
+				t.Fatalf("location output accepted omitted field %s as null", field)
+			}
+		}
+		if err := bundle.validate(input, map[string]any{"coordinateSystem": "gcj02"}, "$"); err == nil {
+			t.Fatal("location schema accepted an explicit coordinate system")
+		}
+	}
+}
+
 func TestAVResponseSchemas(t *testing.T) {
 	bundle, err := BuildBundle()
 	if err != nil {
@@ -75,6 +179,7 @@ func TestAVResponseSchemas(t *testing.T) {
 		{"/api/av/getAttributeViewAddingBlockDefaultValues", `{"code":0,"msg":"","data":{"values":null}}`},
 		{"/api/av/renderAttributeView", `{"code":-1,"msg":"missing","data":{"error":"viewNotFound"}}`},
 		{"/api/av/createAttributeViewItem", `{"code":1,"msg":"","data":{"unavailableNotebook":true}}`},
+		{"/api/av/createAttributeViewRelationItem", `{"code":1,"msg":"","data":{"unavailableNotebook":true}}`},
 		{"/api/av/createAttributeViewItemDocs", `{"code":1,"msg":"","data":{"unavailableNotebook":true}}`},
 		{"/api/av/getAttributeViewRowSort", `{"code":0,"msg":"","data":{"conflict":false,"doOperations":[],"undoOperations":[]}}`},
 	} {
@@ -84,6 +189,23 @@ func TestAVResponseSchemas(t *testing.T) {
 	}
 	if err = bundle.ValidateResponse("POST", "/api/av/getAttributeViewAddingBlockDefaultValues", []byte(`{"code":0,"msg":"","data":{"values":[]}}`)); err == nil {
 		t.Fatal("incorrect default values array accepted")
+	}
+}
+
+func TestAVRelationItemInputContract(t *testing.T) {
+	valid := `{"avID":" av ","blockID":"block","keyID":"key","cells":[{"itemID":"item","relatedItemIDs":[]}],"preview":{"templateID":"","primaryKey":"Task","createdAt":123}}`
+	request, err := CreateAttributeViewRelationItem.Decode(strings.NewReader(valid))
+	if err != nil || request.AvID != "av" || request.Keyword != "" || request.Preview.PrimaryKey != "Task" {
+		t.Fatalf("relation creation input: %+v %v", request, err)
+	}
+	for _, invalid := range []string{
+		strings.Replace(valid, `"createdAt":123`, `"createdAt":"123"`, 1),
+		strings.Replace(valid, `"relatedItemIDs":[]`, `"relatedItemIDs":[null]`, 1),
+		strings.Replace(valid, `"cells":[{"itemID":"item","relatedItemIDs":[]}]`, `"cells":null`, 1),
+	} {
+		if _, err = CreateAttributeViewRelationItem.Decode(strings.NewReader(invalid)); err == nil {
+			t.Fatalf("invalid relation input accepted: %s", invalid)
+		}
 	}
 }
 

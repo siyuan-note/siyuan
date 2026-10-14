@@ -8,11 +8,12 @@ import {afterExport} from "./util";
 /// #endif
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {getThemeMode, setInlineStyle} from "../../util/assets";
+import {getCustomFontStyle} from "../../util/customFont";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
 import {getScreenWidth, isInMobileApp, saveExportFile, setStorageVal} from "../util/compatibility";
-import {getFrontend} from "../../util/functions";
+import {getFrontend, isBrowser} from "../../util/functions";
 import {isEncryptedBox} from "../../util/pathName";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getLastExportPath, setLastExportPath} from "./path";
@@ -49,30 +50,28 @@ const getIconScript = (servePath: string) => {
 };
 
 export const saveExport = (option: IExportOptions) => {
-    if (!getHostCapabilities().importExport) {
+    if (!getHostCapabilities().documentImportExport) {
         return;
     }
-    /// #if BROWSER
-    if (["html", "htmlmd"].includes(option.type)) {
+    if ((isBrowser() || getHostCapabilities().remoteKernel) && ["html", "htmlmd"].includes(option.type)) {
         const startExport = () => {
-        const msgId = showMessage(window.siyuan.languages.exporting, -1);
-        // 浏览器环境：先调用 API 生成资源文件，再在前端生成完整的 HTML
-        const onExportHTML = async (exportResponse: APICallbackResponse<APIPOSTRoutes["/api/export/exportHTML"]["response"]>) => {
-            const html = await onExport(exportResponse, undefined, "", option);
-            fetchPost("/api/export/exportBrowserHTML", {
-                folder: exportResponse.data.folder,
-                html: html,
-                name: exportResponse.data.name
-            }, zipResponse => {
-                // 与导出 .sy.zip/markdown.zip/图片一致，统一走 saveExportFile，以便移动端原生 App 调用 JSAndroid.saveExportFile 等接口保存到本地
-                saveExportFile(zipResponse.data.zip, msgId);
-            });
-        };
-        if (option.type === "htmlmd") {
-            fetchPost("/api/export/exportMdHTML", {id: option.id, savePath: ""}, onExportHTML);
-        } else {
-            fetchPost("/api/export/exportHTML", {id: option.id, pdf: false, merge: true, savePath: ""}, onExportHTML);
-        }
+            const msgId = showMessage(window.siyuan.languages.exporting, -1);
+            // 浏览器和远程连接先生成资源与完整 HTML，再下载服务器打包的导出物。
+            const onExportHTML = async (exportResponse: APICallbackResponse<APIPOSTRoutes["/api/export/exportHTML"]["response"]>) => {
+                const html = await onExport(exportResponse, undefined, "", option);
+                fetchPost("/api/export/exportBrowserHTML", {
+                    folder: exportResponse.data.folder,
+                    html: html,
+                    name: exportResponse.data.name
+                }, zipResponse => {
+                    saveExportFile(zipResponse.data.zip, msgId);
+                });
+            };
+            if (option.type === "htmlmd") {
+                fetchPost("/api/export/exportMdHTML", {id: option.id, savePath: ""}, onExportHTML);
+            } else {
+                fetchPost("/api/export/exportHTML", {id: option.id, pdf: false, merge: true, savePath: ""}, onExportHTML);
+            }
         };
         fetchPost("/api/block/getBlockInfo", {id: option.id}, (response) => {
             if (response.code === 0 && isEncryptedBox(response.data.box)) {
@@ -83,7 +82,10 @@ export const saveExport = (option: IExportOptions) => {
         });
         return;
     }
-    /// #else
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
+    /// #if !BROWSER
     if (option.type === "pdf") {
         if (window.siyuan.config.appearance.mode === 1) {
             confirmDialog(window.siyuan.languages.pdfTip, window.siyuan.languages.pdfConfirm, () => {
@@ -211,7 +213,7 @@ const renderPDF = async (id: string) => {
     // 导出预览临时页可能由不同于主窗口的内核端口提供，使用相对路径可确保资源和接口保持同源。
     const servePathWithoutTrailingSlash = "";
     const servePath = "/";
-    const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
+    const isDefault = window.siyuan.config.appearance.themeLight === "daylight";
     let themeStyle = "";
     if (!isDefault) {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}appearance/themes/${window.siyuan.config.appearance.themeLight}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
@@ -260,6 +262,10 @@ const renderPDF = async (id: string) => {
         
         .b3-switch {
             margin-left: 14px;
+        }
+
+        #action .b3-select:focus {
+            outline: none;
         }
         
         #previewContainer {
@@ -355,6 +361,7 @@ const renderPDF = async (id: string) => {
             visibility: hidden;
         }
         ${await setInlineStyle(false, servePath)}
+        ${getHostCapabilities().customAppearance ? await getCustomFontStyle() : ""}
         ${await getPluginStyle()}
     </style>
     ${getSnippetCSS()}
@@ -1118,11 +1125,11 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
     if (!isDefault) {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
-    const screenWidth = getScreenWidth();
     const isInMobile = isInMobileApp();
     const mobileHtml = isInMobile ? {
-        js: `document.body.style.minWidth = "${screenWidth}px";`,
-        css: `@page { size: A4; margin: 10mm 0 10mm 0; background-color: var(--b3-theme-background); }
+        js: exportOption.type === "pdf" ? "" : `document.body.style.minWidth = "${getScreenWidth()}px";`,
+        css: `@page { size: A4; margin: 10mm; background-color: var(--b3-theme-background); }
+@media print { body { margin: 0; } }
 .protyle-wysiwyg {padding: 0; margin: 0;}`
     } : {js: "", css: ""};
     const html = `<!DOCTYPE html>
@@ -1142,7 +1149,7 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
     <!-- Exported by SiYuan v${Constants.SIYUAN_VERSION} -->
     <style>
         body {font-family: var(--b3-font-family);background-color: var(--b3-theme-background);color: var(--b3-theme-on-background)}
-        ${await setInlineStyle(false, servePath)}
+        ${await setInlineStyle(false, servePath, data.data.content)}
         ${await getPluginStyle()}
         ${mobileHtml.css}
     </style>

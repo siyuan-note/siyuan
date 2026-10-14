@@ -82,6 +82,7 @@ export abstract class Constants {
     public static readonly CUSTOM_REMINDER_WECHAT: string = "custom-reminder-wechat";
     public static readonly CUSTOM_RIFF_DECKS: string = "custom-riff-decks";
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
+    public static readonly CUSTOM_SY_SUBDOC_SORT_MODE: string = "custom-sy-subdoc-sort-mode";
     public static readonly CUSTOM_SY_FULLWIDTH: string = "custom-sy-fullwidth";
     public static readonly CUSTOM_SY_HEADING_NUMBER: string = "custom-sy-heading-number";
     public static readonly CUSTOM_SY_AV_VIEW: string = "custom-sy-av-view";
@@ -90,6 +91,10 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_LIST_MINDMAP_DATA: string = "custom-sy-list-mindmap-data";
     public static readonly CUSTOM_SY_TITLE_EMPTY: string = "custom-sy-title-empty";
     public static readonly CUSTOM_SY_CODE_TAB_SPACES: string = "custom-sy-code-tab-spaces";
+    public static readonly CUSTOM_SY_TABLE_RICH: string = "custom-sy-table-rich";
+    public static readonly CUSTOM_SY_TABLE_HEADER_ROW: string = "custom-sy-table-header-row";
+    public static readonly CUSTOM_SY_TABLE_HEADER_COLUMN: string = "custom-sy-table-header-column";
+    public static readonly CUSTOM_SY_AV_STATIC_TEXT: string = "custom-sy-av-s-text-";
 
     // 临时标记 DOM 属性以辅助完成其功能
     public static readonly ATTRIBUTE_EDITING = "data-editing";
@@ -183,9 +188,12 @@ export abstract class Constants {
     public static readonly LOCAL_MOBILE_TABS = "local-mobile-tabs"; // only mobile
     public static readonly LOCAL_MOBILE_BOTTOM_BAR = "local-mobile-bottom-bar"; // only mobile
     public static readonly LOCAL_MOBILE_SIDE_PANEL = "local-mobile-side-panel"; // only mobile
+    public static readonly LOCAL_MOBILE_MENU_COLLAPSED = "local-mobile-menu-collapsed";
     public static readonly LOCAL_DAILYNOTEID = "local-dailynoteid"; // string
     public static readonly LOCAL_HISTORY = "local-history";
     public static readonly LOCAL_CODELANG = "local-codelang"; // string
+    public static readonly LOCAL_SLASH_FREQUENT_ENABLED = "local-slash-frequent-enabled";
+    public static readonly LOCAL_SLASH_USAGE = "local-slash-usage";
     public static readonly LOCAL_FONTSTYLES = "local-fontstyles";
     public static readonly LOCAL_EXPORTPDF = "local-exportpdf";
     public static readonly LOCAL_EXPORTWORD = "local-exportword";
@@ -209,6 +217,8 @@ export abstract class Constants {
     public static readonly LOCAL_RECENT_DOCS = "local-recent-docs";
     public static readonly LOCAL_CLOSED_TABS = "local-closed-tabs";
     public static readonly LOCAL_AV_CALENDAR_MODES = "local-av-calendar-modes";
+    public static readonly LOCAL_TABS_READING = "local-tabs-reading";
+    public static readonly LOCAL_PAGE_SCROLL_BUTTONS = "local-page-scroll-buttons";
 
     // dialog
     public static readonly DIALOG_CONFIRM = "dialog-confirm";
@@ -489,6 +499,8 @@ export abstract class Constants {
     // "⌥↩" 写死，但可自定义
     public static readonly SIYUAN_KEYMAP: Config.IKeymap = {
         general: {
+            previousDatabaseRow: {default: "", custom: ""},
+            nextDatabaseRow: {default: "", custom: ""},
             openContextMenu: {default: "⌘/", custom: "⌘/"},
             mainMenu: {default: "⌥\\", custom: "⌥\\"},
             commandPanel: {default: "⌥⇧P", custom: "⌥⇧P"},
@@ -608,6 +620,8 @@ export abstract class Constants {
                 jumpToParent: {default: "⇧⌘J", custom: "⇧⌘J"},
                 moveToUp: {default: "⇧⌘↑", custom: "⇧⌘↑"},
                 moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"},
+                goToDocumentStart: {default: "⌘Home", custom: "⌘Home"},
+                goToDocumentEnd: {default: "⌘End", custom: "⌘End"},
                 selectToPageStart: {default: "⇧Home", custom: "⇧Home"},
                 selectToPageEnd: {default: "⇧End", custom: "⇧End"},
                 scrollPageUpWithoutMovingCaret: {default: "⌥PageUp", custom: "⌥PageUp"},
@@ -654,6 +668,7 @@ export abstract class Constants {
                 check: {default: "⌘L", custom: "⌘L"},
                 "ordered-list": {default: "", custom: ""},
                 list: {default: "", custom: ""},
+                mindmap: {default: "", custom: ""},
                 table: {default: "⌘O", custom: "⌘O"},
                 code: {default: "⇧⌘K", custom: "⇧⌘K"},
                 quote: {default: "", custom: ""},

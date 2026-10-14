@@ -220,8 +220,8 @@ func documentStatTestResolver(tree *parse.Tree, stat *util.BlockStatResult, info
 func setDocumentStatTestConf(t *testing.T) {
 	previousConf := Conf
 	Conf = NewAppConf()
-	Conf.Editor = conf.NewEditor()
-	Conf.Search = conf.NewSearch()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.Search.Store(conf.NewSearch())
 	t.Cleanup(func() {
 		Conf = previousConf
 	})

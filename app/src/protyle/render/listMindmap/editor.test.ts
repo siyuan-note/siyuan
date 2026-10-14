@@ -7,8 +7,12 @@ import test from "node:test";
 import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (sourceCode: string, css: string) => {
+const browserCases = async (sourceCode: string, css: string, cleanupSource: string, tabsSource: string) => {
     const check = require("node:assert/strict");
+    const {tabsRender, destroyTabsRender} = new Function(tabsSource + "; return {tabsRender, destroyTabsRender};")();
+    const baseStyle = document.createElement("style");
+    baseStyle.textContent = css;
+    document.head.append(baseStyle);
     const noop = (): void => undefined;
     const settle = async () => {
         await new Promise<void>(resolve => setTimeout(resolve, 0));
@@ -49,6 +53,7 @@ const browserCases = async (sourceCode: string, css: string) => {
         host.style.width = "120px";
         host.style.minWidth = "36px";
         const wysiwyg = document.createElement("div");
+        wysiwyg.className = "protyle-wysiwyg";
         const hintElement = document.createElement("div");
         const toolbarElement = document.createElement("div");
         const subElement = document.createElement("div");
@@ -56,6 +61,7 @@ const browserCases = async (sourceCode: string, css: string) => {
         container.append(element, host, hintElement, toolbarElement, subElement);
         document.body.append(container);
         const state = {
+            focusedText: "",
             flushed: 0,
             destroyed: 0,
             finished: 0,
@@ -65,15 +71,18 @@ const browserCases = async (sourceCode: string, css: string) => {
             accept: true,
             flush: async (): Promise<void> => undefined,
             saveBarrier: undefined as Promise<void> | undefined,
+            finishNested: async (): Promise<boolean> => true,
+            uploads: [] as File[][],
         };
         const protyle = {
             block: {rootID: ""},
+            upload: {isUploading: false},
             undo: {clear: noop},
             wysiwyg: {lastHTMLs: {} as Record<string, string>, flushPendingInput: async () => {
                 state.flushed++;
                 await state.flush();
             }},
-            toolbar: {element: toolbarElement, subElement},
+            toolbar: {element: toolbarElement, subElement, range: undefined as Range | undefined},
         };
         const dependencies = {
             genEmptyElement: () => {
@@ -108,16 +117,29 @@ const browserCases = async (sourceCode: string, css: string) => {
                 observer.observe(wysiwyg, {subtree: true, childList: true, characterData: true});
                 return {
                     protyle, wysiwyg, hintElement,
-                    focus: noop,
+                    focus: () => {
+                        const target = Array.from(wysiwyg.querySelectorAll<HTMLElement>('[contenteditable="true"]'))
+                            .reverse().find(item => item.getBoundingClientRect().width > 0);
+                        state.focusedText = target?.textContent || "";
+                    },
                     getBlockHTML: () => wysiwyg.innerHTML,
                     getMarkdown: () => wysiwyg.textContent,
                     destroy: () => {
+                        destroyTabsRender(wysiwyg);
                         observer.disconnect();
                         state.destroyed++;
                     },
                 };
             },
             bindLiteCodeActions: noop,
+            uploadFiles: (target: typeof protyle, files: File[], _element: unknown, _success: unknown,
+                          _complete: unknown, options: {source: string}) => {
+                check.equal(target, protyle);
+                check.equal(options.source, "paste");
+                check.equal(target.block.rootID, "document");
+                check.equal(target.toolbar.range, undefined);
+                state.uploads.push(files);
+            },
             setMobileToolbarUndo: noop,
             getDefaultToolbar: (): unknown[] => [],
             hideElements: noop,
@@ -142,11 +164,15 @@ const browserCases = async (sourceCode: string, css: string) => {
                     event.altKey === binding.includes("⌥");
             },
             processRender: noop,
+            initEditorTabs: () => tabsRender(wysiwyg, {readonly: () => false}),
             setCustomBlockRootReady: noop,
             avRender: noop,
             blockRender: noop,
             highlightRender: noop,
-            cleanListMindmapHTML: (html: string) => html,
+            getUndoFocusContext: (): undefined => undefined,
+            restoreFocusContext: () => false,
+            finishListMindmaps: () => state.finishNested(),
+            cleanListMindmapHTML: new Function(cleanupSource + "; return cleanListMindmapHTML;")(),
         };
         const open = new Function(...Object.keys(dependencies), sourceCode + "; return openListMindmapEditor;")(
             ...Object.values(dependencies));
@@ -201,6 +227,46 @@ const browserCases = async (sourceCode: string, css: string) => {
     // 直接键入只替换首个段落，保留其余内容块。
     const paragraph = (id: string, html: string) =>
         `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true">${html}</div></div>`;
+    // 粘贴到选中节点时保留原正文，在当前可见正文末尾启动上传；上传结束前保留编辑器。
+    const imageEditor = create(paragraph("body", "Keep text"));
+    const images = [new File(["image"], "image.png", {type: "image/png"})];
+    imageEditor.editor.pasteImages(images);
+    check.equal(imageEditor.state.focusedText, "Keep text");
+    check.deepEqual(imageEditor.state.uploads, [images]);
+    check.equal(imageEditor.wysiwyg.textContent, "Keep text");
+    imageEditor.protyle.upload.isUploading = true;
+    check.equal(await imageEditor.editor.finish(), false);
+    check.equal(imageEditor.state.destroyed, 0);
+    const image = document.createElement("img");
+    image.src = "assets/image.png";
+    imageEditor.wysiwyg.querySelector('[contenteditable="true"]').append(image);
+    imageEditor.protyle.upload.isUploading = false;
+    check.equal(await imageEditor.editor.finish(), true);
+    check.equal(imageEditor.element.querySelector("img").getAttribute("src"), "assets/image.png");
+    imageEditor.editor.pasteImages(images);
+    check.equal(imageEditor.state.uploads.length, 1, "closed editors do not accept another upload");
+    await imageEditor.remove();
+    // 关闭等待内层编辑结束时启动上传，也不能提前销毁外层编辑器。
+    const uploadingEditor = create();
+    const nestedGate = gate();
+    uploadingEditor.state.finishNested = () => nestedGate.promise.then(() => true);
+    const finishBeforeUpload = uploadingEditor.editor.finish();
+    uploadingEditor.protyle.upload.isUploading = true;
+    nestedGate.release();
+    check.equal(await finishBeforeUpload, false);
+    check.equal(uploadingEditor.state.destroyed, 0);
+    uploadingEditor.protyle.upload.isUploading = false;
+    check.equal(await uploadingEditor.editor.finish(), true);
+    await uploadingEditor.remove();
+    for (const active of ["first", "second"]) {
+        const tabs = create(`<div class="tabs" data-type="NodeTabs" data-node-id="tabs" tabs-active-id="${active}">
+            ${["first", "second"].map(id => `<div class="tab-item" data-type="NodeTabItem" data-node-id="${id}">
+                <div class="tab-item-info"><div class="tab-item-title">${id}</div></div>
+                <div class="tab-item-content">${paragraph(id + "-body", id)}</div></div>`).join("")}</div>`);
+        check.equal(tabs.state.focusedText, active, "opening an editor focuses the active tab instead of the last tab");
+        check.equal(tabs.wysiwyg.querySelector(".tabs").getAttribute("tabs-active-id"), active);
+        await tabs.remove();
+    }
     let typed = create(paragraph("first", "Old <strong>rich</strong>") +
         paragraph("second", "Keep") + '<div data-type="NodeThematicBreak" data-node-id="special"></div>', "N");
     check.equal(typed.wysiwyg.querySelector('[data-node-id="first"] > [contenteditable="true"]').textContent, "N");
@@ -238,6 +304,53 @@ const browserCases = async (sourceCode: string, css: string) => {
         check.equal(current.state.messages.length, 0, type);
         await current.remove();
     }
+
+    // 页签重新渲染和切换编辑状态不会伪造正文冲突，隐藏页签的内容仍参与冲突检测。
+    const tabsHTML = '<div data-type="NodeTabs" data-node-id="tabs" class="tabs" tabs-position="top">' +
+        '<div data-type="NodeTabItem" data-node-id="tab" class="tab-item"><div class="tab-item-info">Title</div>' +
+        '<div class="tab-item-content">' + textHTML("Body") + "</div></div></div>";
+    const tabsEditor = create(tabsHTML);
+    tabsEditor.element.firstElementChild.insertAdjacentHTML("afterbegin", '<div class="tabs-header">Navigation</div>');
+    tabsEditor.element.querySelector(".tab-item-content").setAttribute("id", "siyuan-tabs-1-panel-0");
+    tabsEditor.wysiwyg.querySelector(".tab-item-content").setAttribute("id", "siyuan-tabs-2-panel-0");
+    tabsEditor.wysiwyg.querySelector(".tab-item").setAttribute("data-tabs-editing", "true");
+    tabsEditor.wysiwyg.querySelector('[data-node-id="paragraph"]').textContent = "Edited body";
+    await settle();
+    check.equal(await tabsEditor.editor.finish(), true);
+    check.equal(tabsEditor.state.messages.length, 0);
+    check.equal(tabsEditor.element.querySelector('[data-node-id="paragraph"]').textContent, "Edited body");
+    check.equal(tabsEditor.element.querySelector(".tabs").getAttribute("tabs-position"), "top");
+    await tabsEditor.remove();
+    const nestedEditor = create(tabsHTML);
+    nestedEditor.state.finishNested = async () => false;
+    check.equal(await nestedEditor.editor.finish(), false);
+    check.equal(nestedEditor.state.destroyed, 0, "failed nested saves keep the outer editor open");
+    nestedEditor.state.finishNested = async () => {
+        nestedEditor.wysiwyg.querySelector('[data-node-id="paragraph"]').textContent = "Nested edit";
+        return true;
+    };
+    check.equal(await nestedEditor.editor.finish(), true);
+    check.equal(nestedEditor.element.querySelector('[data-node-id="paragraph"]').textContent, "Nested edit");
+    await nestedEditor.remove();
+
+    const nestedKeys = create(tabsHTML);
+    const nestedView = document.createElement("div");
+    nestedView.className = "mindmap-view";
+    nestedView.tabIndex = 0;
+    nestedKeys.wysiwyg.append(nestedView);
+    nestedView.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+    nestedView.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", ctrlKey: true, bubbles: true}));
+    await settle();
+    check.equal(nestedKeys.state.finished, 0, "nested shortcuts must not finish the outer editor");
+    check.deepEqual(nestedKeys.state.additions, []);
+    await nestedKeys.remove();
+    const conflictingTabs = create(tabsHTML);
+    conflictingTabs.element.querySelector('[data-node-id="paragraph"]').textContent = "External change";
+    conflictingTabs.wysiwyg.querySelector('[data-node-id="paragraph"]').textContent = "Local change";
+    await settle();
+    check.equal(await conflictingTabs.editor.finish(), false);
+    check.equal(conflictingTabs.state.saves.length, 0);
+    await conflictingTabs.remove();
 
     // 数据库和嵌入结果在编辑期间重新渲染，不会挡住普通文字保存或覆盖新的独立块状态。
     for (const type of ["NodeAttributeView", "NodeBlockQueryEmbed"]) {
@@ -623,6 +736,15 @@ test("list mindmap editor flushes pending input and preserves text across finish
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/base.scss"), {
         logger: require("sass").Logger.silent,
     }).css;
+    const modelSource = readFileSync(path.join(__dirname, "model.ts"), "utf8");
+    const cleanupSource = transpileModule(modelSource.slice(modelSource.indexOf("const cleanListMindmapDOM ="),
+        modelSource.indexOf("// 转换前将思维导图块还原为列表结构"))
+        .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const tabsSource = ["../../../util/escape.ts", "../tabsState.ts", "../tabsDrag.ts", "../tabsAttributes.ts", "../tabsRender.ts"]
+        .map(file => transpileModule(readFileSync(path.join(__dirname, file), "utf8")
+            .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
+            compilerOptions: {target: ScriptTarget.ES2021},
+        }).outputText).join("\n");
     const code = `const {app, BrowserWindow, ipcMain} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
@@ -634,7 +756,7 @@ app.whenReady().then(async () => {
     try {
         await win.loadURL("data:text/html,<html><body></body></html>");
         const result = await win.webContents.executeJavaScript(${JSON.stringify(
-        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)})`)});
+        `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(css)}, ${JSON.stringify(cleanupSource)}, ${JSON.stringify(tabsSource)})`)});
         console.log(result);
         win.destroy();
         app.exit(0);

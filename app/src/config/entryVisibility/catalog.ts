@@ -1,17 +1,24 @@
-import {CODE_TAB_SPACE_VALUES} from "../../protyle/wysiwyg/codeBlockUtil";
+import {IMAGE_OCR_MENU} from "../../menus/declarations/imageOCRMenu";
+import {declaredMenuCatalog} from "../../menus/declarations/menuDeclaration";
+import {CODE_TAB_SPACE_VALUES, getCodeTabSpacesLabel} from "../../protyle/wysiwyg/codeBlockUtil";
+import {orderGutterTurnIntoItems} from "../../protyle/gutter/turnIntoMenu";
 import {
     DESKTOP_TOOLBAR_ENTRIES,
     getToolbarEntryId,
     getToolbarEntryLabel,
+    IToolbarCatalogEntry,
+    MOBILE_TOOLBAR_NAMES,
     TOOLBAR_ENTRY_ROOT_PATH,
 } from "../../protyle/toolbar/defaults";
 import {mergeEntryOrderPreservingUnknown} from "./order";
+import {getMobileToolbarActionKey, MOBILE_TOOLBAR_ACTIONS, MOBILE_TOOLBAR_INSERTS} from "../../mobile/util/toolbarActions";
 import {getPluginDockEntryKey} from "../../plugin/dockKey";
 import {
     getLegacyPluginTopBarEntryKey,
     getPluginTopBarEntryKey,
     isPluginTopBarEntryKey,
 } from "../../plugin/topBarKey";
+import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
 
 export {getPluginDockEntryKey} from "../../plugin/dockKey";
 export {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "../../plugin/topBarKey";
@@ -61,8 +68,8 @@ const fixed = (key: string, label: () => string): IEntryCatalogNode =>
     node(key, label, true, undefined, undefined, {fixed: true});
 
 const codeTabSpacesChildren = () => [
-    node("default", () => `${window.siyuan.languages.default} (${window.siyuan.config.editor.codeTabSpaces})`),
-    ...CODE_TAB_SPACE_VALUES.map((value) => node(`tabSpaces${value}`, literal(value.toString()))),
+    node("default", () => `${window.siyuan.languages.default} (${getCodeTabSpacesLabel(window.siyuan.config.editor.codeTabSpaces)})`),
+    ...CODE_TAB_SPACE_VALUES.map((value) => node(`tabSpaces${value}`, () => getCodeTabSpacesLabel(value))),
 ];
 
 const copyChildren = () => [
@@ -211,7 +218,7 @@ const gutterCopyChildren = (single = false) => [
     ] : []),
 ];
 
-const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), true, [
+const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), true, orderGutterTurnIntoItems([
         node("removeList", lang("removeList")),
         node("list", lang("list")),
         node("orderedList", lang("ordered-list")),
@@ -234,7 +241,6 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("calloutCaution", location(lang("callout"), literal("Caution"))),
         node("calloutCustom", location(lang("callout"), () => `${window.siyuan.languages.custom}...`)),
         ...(!multi ? [node("tabs", lang("tabs"))] : []),
-        // 列表及列表项复用段落和标题入口，保持单选、多选的配置标识和默认顺序一致。
         node("heading1", lang("heading1")),
         node("heading2", lang("heading2")),
         node("heading3", lang("heading3")),
@@ -246,7 +252,7 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("table", lang("tableBlock")),
         node("line", lang("line")),
         node("math", lang("math")),
-    ]);
+    ], item => item.key));
 
 const gutterHeadingTransform = () => node("tWithSubtitle", lang("tWithSubtitle"), true, [
     node("heading1", lang("heading1")),
@@ -398,6 +404,10 @@ const gutterSingle = () => [
         node("cancelSuperBlock", () => `${window.siyuan.languages.cancel} ${window.siyuan.languages.superBlock}`),
         node("turnIntoVLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.vLayout}`),
         node("turnIntoHLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.hLayout}`),
+        node("prependSuperBlockColumn", lang("prependSuperBlockColumn")),
+        node("prependSuperBlockChild", lang("prependSuperBlockChild")),
+        node("appendSuperBlockColumn", lang("appendSuperBlockColumn")),
+        node("appendSuperBlockChild", lang("appendSuperBlockChild")),
     ]),
     separator("separator_code"),
     node("code", lang("code"), true, [
@@ -468,6 +478,8 @@ const gutterSingle = () => [
     node("insertAfter", lang("insertAfter")),
     node("insertSuperBlockLeft", lang("insertSuperBlockLeft")),
     node("insertSuperBlockRight", lang("insertSuperBlockRight")),
+    node("createSuperBlockLeft", lang("createSuperBlockLeft")),
+    node("createSuperBlockRight", lang("createSuperBlockRight")),
     node("jumpTo", lang("jumpTo"), false, [
         node("jumpToParentPrev", lang("jumpToParentPrev"), false),
         node("jumpToParentNext", lang("jumpToParentNext"), false),
@@ -493,22 +505,43 @@ const gutterSingle = () => [
 ];
 
 export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
+export const SLASH_MENU_FREQUENT_PATH = `${SLASH_MENU_ROOT_PATH}.frequent`;
 
-// 共享工具栏声明决定目录默认顺序，字体和字号位于外观之前。
-const toolbarBuiltinChildren = DESKTOP_TOOLBAR_ENTRIES.map((item) => {
-    if (item.separator) {
-        return separator(item.key);
-    }
-    const fontControl = ["font-family", "font-size"].includes(item.key);
-    return node(item.key, lang(item.lang), !fontControl, undefined, undefined,
-        fontControl ? {
-            defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
-            customDefaultVisible: false,
-        } : undefined);
-});
+// 共享工具栏声明决定目录默认顺序，块类型位于首位，字体和字号位于外观之前。
+// 移动端操作按钮复用统一声明，复制和剪切由悬浮工具栏提供，显隐和排序使用已有配置标识。
+const toolbarBuiltinChildren = [
+    ...MOBILE_TOOLBAR_ACTIONS.map(item => node(getMobileToolbarActionKey(item.name), lang(item.lang), true)),
+    separator("mobile-separator"),
+    ...DESKTOP_TOOLBAR_ENTRIES.map((item) => {
+        if (item.separator) {
+            return separator(item.key);
+        }
+        const fontControl = ["font-family", "font-size"].includes(item.key);
+        const advancedFormat = ["sup", "sub", "kbd", "inline-math"].includes(item.key);
+        return node(item.key, lang(item.lang), !fontControl && !advancedFormat, undefined, undefined,
+            fontControl ? {
+                defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
+                customDefaultVisible: false,
+            } : undefined);
+    }),
+    ...MOBILE_TOOLBAR_INSERTS.map(item => node(getMobileToolbarActionKey(item.name), lang(item.lang), false,
+        undefined, undefined, {defaultVisible: () => false, customDefaultVisible: false})),
+];
 const toolbarBuiltinNodeMap = new Map(toolbarBuiltinChildren.map((item) => [item.key, item]));
 
+const mobileToolbarContexts = (children: IEntryCatalogNode[]) => MOBILE_TOOLBAR_CONTEXT_KEYS.map((key) => {
+    const selection = key === "mobile-selection";
+    const entries = children.filter(item => item.type === "separator" || item.key.startsWith("plugin:") ||
+        (selection ? MOBILE_TOOLBAR_NAMES.includes(item.key) && item.key !== "block-type" :
+            item.key.startsWith("mobile-") || ["block-type", "block-ref"].includes(item.key)))
+        .map(item => !selection && item.key === "block-ref" ? {...item,
+            defaultVisible: () => false, customDefaultVisible: false} : item);
+    return node(key, lang(selection ? "mobileToolbarTextSelection" : "mobileToolbarNoSelection"), true,
+        normalizeToolbarCatalogSeparators(entries), true, {fixed: true});
+});
+
 const slashMenuBuiltinChildren = [
+    node("frequent", lang("slashMenuFrequent"), false),
     node("template", lang("template")),
     node("widget", lang("widget")),
     node("assets", lang("assets")),
@@ -529,6 +562,8 @@ const slashMenuBuiltinChildren = [
     node("orderedList", lang("ordered-list")),
     node("check", lang("check")),
     node("quote", lang("quote")),
+    node("horizontalSuperBlock", lang("horizontalSuperBlock")),
+    node("verticalSuperBlock", lang("verticalSuperBlock")),
     node("tabs", lang("tabs")),
     node("mindmap", lang("mindmap")),
     node("calloutNote", location(lang("callout"), literal("Note"))),
@@ -591,7 +626,7 @@ const slashMenuRoot = {
 const toolbarCatalogSection: IEntryCatalogSection = {
     key: TOOLBAR_ENTRY_ROOT_PATH,
     label: location(lang("editor"), lang("entryToolbar")),
-    children: toolbarBuiltinChildren,
+    children: [...toolbarBuiltinChildren, ...mobileToolbarContexts(toolbarBuiltinChildren)],
 };
 
 export const TOP_BAR_ROOT_PATH = "topBar";
@@ -614,12 +649,12 @@ const statusBarCatalogSection: IEntryCatalogSection = {
 const topBarBuiltinChildren = [
     node("barSync", lang("syncNow")),
     node("barDailyNote", lang("dailyNote"), true, undefined, undefined, {
-        defaultVisible: () => false,
+        defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
         simpleDefaultVisible: true,
         customDefaultVisible: false,
     }),
     node("barRiffCard", lang("riffCard"), true, undefined, undefined, {
-        defaultVisible: () => false,
+        defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
         simpleDefaultVisible: true,
         customDefaultVisible: false,
     }),
@@ -695,7 +730,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
         label: lang("entryWindowTopBar"),
         children: [
             node("windowWorkspace", lang("layout")),
-            node("pinWindow", lang("pin")),
+            node("pinWindow", lang("pinWindow")),
         ],
     },
     statusBarCatalogSection,
@@ -864,6 +899,15 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     toolbarCatalogSection,
     {
+        key: "editor.image",
+        label: location(lang("editor"), lang("image")),
+        sortable: false,
+        children: [
+            node("ocrText", lang("ocrResult"), false, undefined, false),
+            node("copyAsPNG", lang("copyAsPNG"), false, undefined, false),
+        ],
+    },
+    {
         key: "editor.slash",
         label: location(lang("editor"), lang("entrySlashMenu")),
         sortable: false,
@@ -936,11 +980,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("delete", lang("delete")),
             separator("separator_2"),
             node("rename", lang("rename")),
-            node("ocr", literal("OCR"), false, [
-                node("ocrResult", lang("ocrResult"), false),
-                separator("separator_reOCR"),
-                node("reOCR", lang("reOCR"), false),
-            ]),
+            declaredMenuCatalog(IMAGE_OCR_MENU),
             node("alignCenter", lang("alignCenter")),
             node("alignLeft", lang("alignLeft")),
             node("width", lang("width"), true, [
@@ -1024,6 +1064,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("cut", lang("cut")),
             node("remove", lang("remove")),
             node("rename", lang("rename")),
+            node("embedHTMLFileBelow", lang("embedHTMLFileBelow")),
             node("turnIntoRef", lang("ref")),
             node("turnIntoText", lang("text")),
             separator("separator_2"),
@@ -1253,7 +1294,7 @@ export const refreshDockCatalog = (plugins: IDockCatalogPlugin[]) => {
     rebuildCatalogIndexes();
 };
 
-const normalizeToolbarCatalogSeparators = (nodes: IEntryCatalogNode[]) => {
+function normalizeToolbarCatalogSeparators(nodes: IEntryCatalogNode[]) {
     const result: IEntryCatalogNode[] = [];
     nodes.forEach((item) => {
         if (item.type === "separator" && (result.length === 0 || result[result.length - 1].type === "separator")) {
@@ -1265,7 +1306,7 @@ const normalizeToolbarCatalogSeparators = (nodes: IEntryCatalogNode[]) => {
         result.pop();
     }
     return result;
-};
+}
 
 const toolbarCatalogNodeSignature = (item: IEntryCatalogNode, pluginLabels: Map<string, string>) => [
     item.key,
@@ -1276,13 +1317,12 @@ const toolbarCatalogNodeSignature = (item: IEntryCatalogNode, pluginLabels: Map<
 let toolbarCatalogSignature = JSON.stringify(toolbarBuiltinChildren.map((item) =>
     toolbarCatalogNodeSignature(item, new Map())));
 
-export const refreshToolbarCatalog = (items: Array<string | IMenuItem>) => {
+export const refreshToolbarCatalogEntries = (items: IToolbarCatalogEntry[]) => {
     const nodes = new Map(toolbarBuiltinNodeMap);
     const pluginLabels = new Map<string, string>();
     const actualOrder: string[] = [];
     items.forEach((item) => {
-        const menuItem = typeof item === "string" ? {name: item} : item;
-        const key = getToolbarEntryId(menuItem);
+        const key = item.key;
         if (!key || actualOrder.includes(key)) {
             return;
         }
@@ -1290,19 +1330,31 @@ export const refreshToolbarCatalog = (items: Array<string | IMenuItem>) => {
         if (nodes.has(key)) {
             return;
         }
-        const label = getToolbarEntryLabel(menuItem) || menuItem.tip || menuItem.name;
+        const label = item.label;
         pluginLabels.set(key, label);
-        nodes.set(key, menuItem.name === "|" ? separator(key) : node(key, literal(label)));
+        nodes.set(key, item.separator ? separator(key) : node(key, literal(label)));
     });
-    const order = mergeEntryOrderPreservingUnknown(toolbarBuiltinChildren.map((item) => item.key), actualOrder);
-    const children = normalizeToolbarCatalogSeparators(order.flatMap((key) => nodes.get(key) || []));
+    const order = mergeEntryOrderPreservingUnknown(DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key), actualOrder);
+    const children = normalizeToolbarCatalogSeparators([
+        ...toolbarBuiltinChildren.filter(item => item.key.startsWith("mobile-") && item.simple),
+        ...order.flatMap((key) => nodes.get(key) || []),
+        ...toolbarBuiltinChildren.filter(item => item.key.startsWith("mobile-") && !item.simple),
+    ]);
     const signature = JSON.stringify(children.map((item) => toolbarCatalogNodeSignature(item, pluginLabels)));
     if (signature === toolbarCatalogSignature) {
         return;
     }
-    toolbarCatalogSection.children = children;
+    toolbarCatalogSection.children = [...children, ...mobileToolbarContexts(children)];
     toolbarCatalogSignature = signature;
     rebuildCatalogIndexes();
+};
+
+export const refreshToolbarCatalog = (items: Array<string | IMenuItem>) => {
+    refreshToolbarCatalogEntries(items.map((item) => {
+        const menuItem = typeof item === "string" ? {name: item} : item;
+        return {key: getToolbarEntryId(menuItem), label: getToolbarEntryLabel(menuItem) || menuItem.tip || menuItem.name,
+            separator: menuItem.name === "|"};
+    }));
 };
 
 interface ISlashMenuCatalogPlugin {

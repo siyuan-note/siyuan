@@ -2,9 +2,13 @@ import * as dayjs from "dayjs";
 import {genCellValueByElement, updateCellsValue} from "./cell";
 import {getFieldsByData} from "./view";
 import {shouldSubmitDateEdit} from "./dateSubmit";
+import {bindLunarDateEvent, getLunarDateHTML} from "./lunarDate";
 
-export const getDateHTML = (cellElements: HTMLElement[]) => {
+export const getDateHTML = (cellElements: HTMLElement[], format?: TAVDateFormat) => {
     const cellValue = genCellValueByElement("date", cellElements[0]).date;
+    if ((format ?? cellElements[0].dataset.dateFormat) === "lunar") {
+        return getLunarDateHTML(cellValue);
+    }
     const isNotTime = cellValue.isNotTime;
     let value = "";
     const currentDate = Date.now();
@@ -58,7 +62,11 @@ export const bindDateEvent = (options: {
     blockElement: Element,
     cellElements: HTMLElement[],
     requireExplicitChange?: boolean,
+    format?: TAVDateFormat,
 }) => {
+    if ((options.format ?? options.cellElements?.[0]?.dataset.dateFormat) === "lunar") {
+        return bindLunarDateEvent(options);
+    }
     const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll("input");
     let dirty = false;
 

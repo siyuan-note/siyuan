@@ -16,7 +16,7 @@ func TestSnapshotAPIErrors(t *testing.T) {
 	original := model.Conf
 	t.Cleanup(func() { model.Conf = original })
 	model.Conf = model.NewAppConf()
-	model.Conf.Repo = conf.NewRepo()
+	model.Conf.Repo.Store(conf.NewRepo())
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()
 	engine.POST("/api/repo/createSnapshot", createSnapshot)

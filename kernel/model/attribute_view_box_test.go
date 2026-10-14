@@ -60,6 +60,12 @@ func TestAttributeViewCarrierUsesExactCryptoBoundary(t *testing.T) {
 	if _, err = avParseView(foreignAvID, carrierBlockID); !errors.Is(err, av.ErrViewNotFound) {
 		t.Fatalf("ordinary carrier should not parse an encrypted attribute view through fallback: %v", err)
 	}
+	if _, _, err = GetAttributeViewViewTarget(foreignAvID, carrierBlockID, fixture.tableView.ID); !errors.Is(err, av.ErrViewNotFound) {
+		t.Fatalf("view configuration should preserve the carrier crypto boundary: %v", err)
+	}
+	if _, err = AddAttributeViewView(foreignAvID, carrierBlockID, "Wrong box", av.LayoutTypeTable); !errors.Is(err, av.ErrViewNotFound) {
+		t.Fatalf("view creation should preserve the carrier crypto boundary: %v", err)
+	}
 	if _, err = avParseView(fixture.attrView.ID, "20260904120002-missing"); nil == err ||
 		!strings.Contains(err.Error(), "carrier") {
 		t.Fatalf("a supplied but missing carrier should fail closed: %v", err)
@@ -99,6 +105,27 @@ func TestAttributeViewCarrierUsesExactCryptoBoundary(t *testing.T) {
 	if nil != contextErr || nil == context || relationKey.ID != context.KeyID ||
 		0 != len(context.CurrentDocumentItemIDs) {
 		t.Fatalf("cross-boundary context target should fail closed with no matched items: %#v, %v", context, contextErr)
+	}
+
+	rollupKey := &av.Key{ID: "foreign-rollup", Type: av.KeyTypeRollup,
+		Rollup: &av.Rollup{RelationKeyID: relationKey.ID, KeyID: "foreign-staff"}}
+	fixture.attrView.KeyValues = append(fixture.attrView.KeyValues, &av.KeyValues{Key: rollupKey})
+	rollupContext := &av.AttributeViewContextFilter{Spec: av.AttributeViewContextFilterSpec, KeyID: rollupKey.ID}
+	if _, err = resolveAttributeViewContextFilterTarget(fixture.attrView, rollupContext, fixture.tree.Box); nil == err {
+		t.Fatal("rollup must not load an intermediate database across the carrier crypto boundary")
+	}
+	for _, field := range GetAttributeViewContextFilterFields(fixture.attrView, carrierBlockID) {
+		if field.ID == rollupKey.ID {
+			t.Fatal("rollup metadata must not expose an inaccessible intermediate database")
+		}
+	}
+
+	localRelation := &av.Key{ID: "local-relation", Type: av.KeyTypeRelation,
+		Relation: &av.Relation{AvID: fixture.attrView.ID}}
+	fixture.attrView.KeyValues = append(fixture.attrView.KeyValues, &av.KeyValues{Key: localRelation})
+	rollupKey.Rollup.RelationKeyID, rollupKey.Rollup.KeyID = localRelation.ID, relationKey.ID
+	if _, err = resolveAttributeViewContextFilterTarget(fixture.attrView, rollupContext, fixture.tree.Box); nil == err {
+		t.Fatal("rollup must not load the final relation database across the carrier crypto boundary")
 	}
 }
 
@@ -173,5 +200,67 @@ func TestTwoWayRelationWriteUsesCarrierCryptoBoundary(t *testing.T) {
 	}
 	if foreignData != string(data) {
 		t.Fatalf("foreign same-ID attribute view was overwritten: %q", data)
+	}
+}
+
+func TestAttributeViewMetadataTransactionsUseCarrierCryptoBoundary(t *testing.T) {
+	fixture := setupDatabaseBlockTransactionTest(t, true)
+	const carrierBlockID = "20260803091003-avblock"
+	const foreignBoxID = "20261008150000-boxenc0"
+	const foreignData = "foreign encrypted attribute view"
+	avID := fixture.attrView.ID
+	foreignPath := filepath.Join(util.DataDir, foreignBoxID, "storage", "av", avID+".json")
+	if err := os.MkdirAll(filepath.Dir(foreignPath), 0755); nil != err {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(foreignPath, []byte(foreignData), 0644); nil != err {
+		t.Fatal(err)
+	}
+	oldEncryptedBoxIDs := av.AVEncryptedBoxIDs
+	av.AVEncryptedBoxIDs = func() []string { return []string{foreignBoxID} }
+	t.Cleanup(func() {
+		av.AVEncryptedBoxIDs = oldEncryptedBoxIDs
+		av.SetAVBoxID(avID, "")
+	})
+
+	tx := &Transaction{}
+	for _, operation := range []*Operation{
+		{Action: "setAttrViewViewName", AvID: avID, BlockID: carrierBlockID, ID: fixture.tableView.ID, Data: "Updated name"},
+		{Action: "setAttrViewViewIcon", AvID: avID, BlockID: carrierBlockID, ID: fixture.tableView.ID, Data: "1f4c5"},
+		{Action: "setAttrViewViewDesc", AvID: avID, BlockID: carrierBlockID, ID: fixture.tableView.ID, Data: "Updated description"},
+		{Action: "sortAttrViewView", AvID: avID, BlockID: carrierBlockID, ID: fixture.galleryView.ID},
+	} {
+		av.SetAVBoxID(avID, foreignBoxID)
+		var txErr *TxErr
+		switch operation.Action {
+		case "setAttrViewViewName":
+			txErr = tx.doSetAttrViewViewName(operation)
+		case "setAttrViewViewIcon":
+			txErr = tx.doSetAttrViewViewIcon(operation)
+		case "setAttrViewViewDesc":
+			txErr = tx.doSetAttrViewViewDesc(operation)
+		case "sortAttrViewView":
+			txErr = tx.doSortAttrViewView(operation)
+		}
+		if nil != txErr {
+			t.Fatalf("%s did not use the carrier's database: %+v", operation.Action, txErr)
+		}
+	}
+	av.SetAVBoxID(avID, foreignBoxID)
+	if err := SetDatabaseBlockVisibleViews(carrierBlockID, avID, []string{"missing-view"}); nil == err ||
+		!strings.Contains(err.Error(), "view [missing-view] not found") {
+		t.Fatalf("visibility validation did not use the carrier's database: %v", err)
+	}
+	stored, err := av.ParseAttributeViewInBox(avID, "")
+	if nil != err {
+		t.Fatal(err)
+	}
+	view := stored.GetView(fixture.tableView.ID)
+	if view.Name != "Updated name" || view.Icon != "1f4c5" || view.Desc != "Updated description" || stored.Views[0].ID != fixture.galleryView.ID {
+		t.Fatalf("ordinary database metadata or order was not updated: %+v", view)
+	}
+	data, err := os.ReadFile(foreignPath)
+	if nil != err || string(data) != foreignData {
+		t.Fatalf("foreign same-ID database was changed: %q, %v", data, err)
 	}
 }

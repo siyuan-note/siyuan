@@ -11,7 +11,7 @@ import (
 func TestCustomBlockSearchTypeFilter(t *testing.T) {
 	previous := Conf
 	Conf = NewAppConf()
-	Conf.Search = conf.NewSearch()
+	Conf.Search.Store(conf.NewSearch())
 	t.Cleanup(func() { Conf = previous })
 	for _, tc := range []struct {
 		types map[string]bool
@@ -21,7 +21,7 @@ func TestCustomBlockSearchTypeFilter(t *testing.T) {
 			t.Fatalf("unexpected filter for %v: %s", tc.types, got)
 		}
 	}
-	Conf.Search.CustomBlock = new(false)
+	Conf.Search.Load().CustomBlock = new(false)
 	if strings.Contains(buildTypeFilter(nil, nil), "'custom'") {
 		t.Fatal("disabled custom blocks included")
 	}

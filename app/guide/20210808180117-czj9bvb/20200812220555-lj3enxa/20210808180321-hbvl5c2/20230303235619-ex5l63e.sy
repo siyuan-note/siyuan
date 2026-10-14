@@ -6,7 +6,7 @@
 		"id": "20230303235619-ex5l63e",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20260920123707"
+		"updated": "20261007020517"
 	},
 	"Children": [
 		{
@@ -336,7 +336,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260920123707-u8b0czt",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
@@ -351,12 +351,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260920123707-h982ktj",
-				"updated": "20260920123707"
+				"updated": "20261007020517"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "智能体可以使用 TypeSafe System One（Jev）完成分类、筛选和评分。配置和使用方式请参阅 "
+					"Data": "智能体可以使用 TypeSafe System One（Jev）或 OpenAI Decisions API（Beta）完成分类、筛选和评分。配置和使用方式请参阅 "
 				},
 				{
 					"Type": "NodeTextMark",

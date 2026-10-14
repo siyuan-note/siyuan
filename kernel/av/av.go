@@ -49,6 +49,7 @@ type AttributeView struct {
 	Views             []*View            `json:"views"`                       // 视图
 	NewItemTemplates  []*NewItemTemplate `json:"newItemTemplates,omitempty"`  // 新增条目模板
 	DefaultTemplateID string             `json:"defaultTemplateID,omitempty"` // 默认新增条目模板 ID
+	Automations       *AutomationConfig  `json:"automations,omitempty"`
 	// CustomColorRenderContext 保存只读渲染期间的关联数据库调色板上下文。
 	CustomColorRenderContext *CustomColorRenderContext `json:"-"`
 	// 卡片封面位置，条目 ID -> 封面来源 -> 位置
@@ -165,6 +166,7 @@ const (
 	KeyTypeURL        KeyType = "url"        // URL
 	KeyTypeEmail      KeyType = "email"      // Email
 	KeyTypePhone      KeyType = "phone"      // 电话
+	KeyTypeLocation   KeyType = "location"   // 位置
 	KeyTypeMAsset     KeyType = "mAsset"     // 资源
 	KeyTypeTemplate   KeyType = "template"   // 模板
 	KeyTypeCreated    KeyType = "created"    // 创建时间
@@ -177,11 +179,12 @@ const (
 
 // Key 描述了属性视图属性字段的基础结构。
 type Key struct {
-	ID   string  `json:"id"`   // 字段 ID
-	Name string  `json:"name"` // 字段名
-	Type KeyType `json:"type"` // 字段类型
-	Icon string  `json:"icon"` // 字段图标
-	Desc string  `json:"desc"` // 字段描述
+	ID                       string  `json:"id"`                                 // 字段 ID
+	Name                     string  `json:"name"`                               // 字段名
+	Type                     KeyType `json:"type"`                               // 字段类型
+	Icon                     string  `json:"icon"`                               // 字段图标
+	Desc                     string  `json:"desc"`                               // 字段描述
+	AttributePanelVisibility string  `json:"attributePanelVisibility,omitempty"` // 属性面板可见性，空值沿用全局设置
 
 	// 以下是某些列类型的特有属性
 
@@ -314,6 +317,7 @@ type View struct {
 	PageSize          int                     `json:"pageSize"`          // 每页条目数
 	LayoutType        LayoutType              `json:"type"`              // 当前布局类型
 	Table             *LayoutTable            `json:"table,omitempty"`   // 表格布局
+	LegacyMap         json.RawMessage         `json:"map,omitempty"`     // 仅保留旧地图配置，不参与渲染或修改
 	Calendar          *LayoutCalendar         `json:"calendar,omitempty"`
 	List              *LayoutList             `json:"list,omitempty"`    // 列表布局
 	Gallery           *LayoutGallery          `json:"gallery,omitempty"` // 卡片布局
@@ -330,6 +334,8 @@ type View struct {
 	GroupFolded  bool       `json:"groupFolded"`         // 分组是否折叠
 	GroupHidden  int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
 	GroupSort    int        `json:"groupSort"`           // 分组排序值，用于手动排序
+
+	legacyMapFallback bool
 }
 
 // ViewData 用于序列化视图数据到前端。
@@ -565,11 +571,6 @@ func getAttributeViewNameByPathInBox(avJSONPath, boxID string) (ret string, err 
 	return
 }
 
-// GetAttributeViewNameByPath 从指定路径读取 AV 名称（不加密，普通 box 兼容入口）。
-func GetAttributeViewNameByPath(avJSONPath string) (ret string, err error) {
-	return getAttributeViewNameByPathInBox(avJSONPath, "")
-}
-
 // GetAttributeViewNameInBox 获取指定笔记本中的数据库名称。
 func GetAttributeViewNameInBox(avID, boxID string) (ret string, err error) {
 	avJSONPath, _ := FindAttributeViewPathInBox(avID, boxID)
@@ -618,6 +619,11 @@ func parseAttributeViewSearchInfo(data []byte) (ret *AttributeViewSearchInfo, er
 	ret = &AttributeViewSearchInfo{}
 	if err = json.Unmarshal(data, ret); err != nil {
 		return
+	}
+	for _, view := range ret.Views {
+		if view != nil && view.LayoutType == "map" {
+			view.LayoutType = LayoutTypeTable
+		}
 	}
 	err = CheckSpec(&AttributeView{Spec: ret.Spec})
 	return
@@ -867,7 +873,16 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 		dataVersion = cache.SetAVDataWithVersionInBox(avID, boxID, data)
 	}
 
-	ret, err = ParseAttributeViewData(avID, data)
+	if normalized, ok := cache.GetAVNormalizedDataInBox(avID, boxID, dataVersion); ok {
+		ret, err = parseAttributeViewData(avID, normalized, false)
+	} else {
+		ret, err = ParseAttributeViewData(avID, data)
+		if err == nil {
+			if normalized, marshalErr := json.Marshal(ret); marshalErr == nil {
+				cache.SetAVNormalizedDataInBox(avID, boxID, dataVersion, data, normalized)
+			}
+		}
+	}
 	if nil == err {
 		if resolveColors {
 			ret.ResolveDirectColors()
@@ -879,6 +894,10 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 
 // ParseAttributeViewData 解析已经完成解密认证的数据库数据，复用现有格式兼容与规范化处理。
 func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err error) {
+	return parseAttributeViewData(avID, data, true)
+}
+
+func parseAttributeViewData(avID string, data []byte, normalizeRichText bool) (ret *AttributeView, err error) {
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
 	if err = json.Unmarshal(data, ret); err != nil {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
@@ -939,11 +958,17 @@ func ParseAttributeViewData(avID string, data []byte) (ret *AttributeView, err e
 	if nil == err {
 		err = CheckSpec(ret)
 	}
-	if nil == err {
-		err = ret.ValidateListLayouts()
+	if err == nil && ret.Automations != nil && ret.Automations.Spec != 1 {
+		err = fmt.Errorf("unsupported database automation specification [%d]", ret.Automations.Spec)
 	}
 	if nil == err {
+		err = ret.ValidateLayouts()
+	}
+	if nil == err && normalizeRichText {
 		err = ret.NormalizeRichText()
+	}
+	if nil == err {
+		err = ret.NormalizeLocations()
 	}
 	return
 }
@@ -961,6 +986,9 @@ func SaveAttributeViewIfUnchanged(av *AttributeView, original []byte) error {
 }
 
 func saveAttributeView(av *AttributeView, original []byte) (err error) {
+	if av.Spec > CurrentSpec {
+		return ErrSpecTooNew
+	}
 	if !ast.IsNodeIDPattern(av.ID) {
 		err = ErrInvalidAttributeViewID
 		logging.LogErrorf("save attribute view failed: %s", err)
@@ -972,7 +1000,10 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		}
 	}()
 
-	if err = av.ValidateListLayouts(); nil != err {
+	if err = av.NormalizeLocations(); nil != err {
+		return
+	}
+	if err = av.ValidateLayouts(); nil != err {
 		return
 	}
 	if err = av.NormalizeRichText(); nil != err {
@@ -1027,7 +1058,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	var data []byte
 	restoreRenderedContents := av.suspendRenderedContents()
 	restoreResolvedColors := av.suspendResolvedColors()
-	if util.UseSingleLineSave {
+	if util.UseSingleLineSave.Load() {
 		data, err = gulu.JSON.MarshalJSON(av)
 	} else {
 		data, err = gulu.JSON.MarshalIndentJSON(av, "", "\t")
@@ -1092,7 +1123,13 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		logging.LogErrorf("create attribute view dir [%s] failed: %s", filepath.Dir(avJSONPath), err)
 		return
 	}
-	if err = util.WriteFileByMmap(avJSONPath, writeData); nil != err {
+	if avBoxID != "" {
+		// 密文通过临时文件原子替换，避免原址覆写中断后丢失可认证的旧数据。
+		if err = filelock.WriteFile(avJSONPath, writeData); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
+			return
+		}
+	} else if err = util.WriteFileByMmap(avJSONPath, writeData); nil != err {
 		if err = filelock.WriteFile(avJSONPath, writeData); nil != err {
 			logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
 			return
@@ -1105,7 +1142,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	}
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
-		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize)
+		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize.Load())
 		util.PushErrMsg(msg, 7000)
 	}
 	return
@@ -1320,6 +1357,7 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 		}
 	}
 
+	ret.remapAutomationKeys(av.ID, keyIDMap)
 	oldKeyIDs = gulu.Str.RemoveDuplicatedElem(oldKeyIDs)
 	sorts := map[string]int{}
 	for i, k := range ret.KeyIDs {
@@ -1419,6 +1457,7 @@ var (
 	ErrInvalidColumnAlign     = errors.New("invalid column align")
 	ErrSpecTooNew             = errors.New("attribute view spec is too new")
 	ErrRichTextSpecMismatch   = errors.New("attribute view rich text requires storage spec 9")
+	ErrLocationSpecMismatch   = errors.New("attribute view location requires storage spec 13")
 	ErrFilterTooDeep          = errors.New("filter nesting depth exceeds the maximum allowed")
 )
 

@@ -426,7 +426,7 @@ var lsNotebooks = contractHandler(apicontract.ListNotebooks, func(c *gin.Context
 				}
 			}
 		}
-		sortNotebooksBySubFileCount(notebooks, model.Conf.FileTree.Sort)
+		sortNotebooksBySubFileCount(notebooks, model.Conf.FileTree.Load().Sort)
 	}
 
 	var values []*apicontract.Notebook

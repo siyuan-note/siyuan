@@ -33,9 +33,9 @@ import (
 
 func TestSetAIRejectsInvalidProviderHeaders(t *testing.T) {
 	previousConf := model.Conf
-	model.Conf = &model.AppConf{AI: &conf.AI{}}
+	model.Conf = &model.AppConf{AI: model.NewConfSection(&conf.AI{})}
 	t.Cleanup(func() { model.Conf = previousConf })
-	initialAI := model.Conf.AI
+	initialAI := model.Conf.AI.Load()
 	for _, headers := range []string{
 		`{"Bad Name":"private-value"}`, `{"X-Key":"private-value\r\ninjected: yes"}`, `{"X-Key":"a","x-key":"b"}`,
 	} {
@@ -51,7 +51,7 @@ func TestSetAIRejectsInvalidProviderHeaders(t *testing.T) {
 		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
 			t.Fatal(err)
 		}
-		if result.Code != -1 || model.Conf.AI != initialAI || strings.Contains(recorder.Body.String(), "private-value") {
+		if result.Code != -1 || model.Conf.AI.Load() != initialAI || strings.Contains(recorder.Body.String(), "private-value") {
 			t.Fatal("invalid provider headers must be rejected without changing configuration or exposing values")
 		}
 	}
@@ -67,13 +67,13 @@ func TestSetBazaarPetalDisabledSerializesTransitions(t *testing.T) {
 	util.ReadOnly = true
 	util.DataDir = t.TempDir()
 	model.Conf = model.NewAppConf()
-	model.Conf.Bazaar = &conf.Bazaar{Trust: true}
+	model.Conf.Bazaar.Store(&conf.Bazaar{Trust: true})
 	bazaarPetalStateMu.Lock()
-	bazaarPetalStateRevision = 0
+	model.BazaarPetalStateRevision.Store(0)
 	bazaarPetalStateMu.Unlock()
 	t.Cleanup(func() {
 		bazaarPetalStateMu.Lock()
-		bazaarPetalStateRevision = 0
+		model.BazaarPetalStateRevision.Store(0)
 		bazaarPetalStateMu.Unlock()
 		model.Conf = previousConf
 		util.ReadOnly = previousReadOnly
@@ -153,7 +153,7 @@ func TestSetBazaarPetalDisabledSerializesTransitions(t *testing.T) {
 		enabled.Data.Revision != 2 {
 		t.Fatalf("unexpected enabled response: %#v", enabled)
 	}
-	if model.Conf.Bazaar.PetalDisabled {
+	if model.Conf.Bazaar.Load().PetalDisabled {
 		t.Fatal("final bazaar plugin state is disabled")
 	}
 	_, unchanged := request(`{"petalDisabled":false}`)
@@ -189,8 +189,8 @@ func TestSetFiletreePreservesUseSVGDefaultIconWhenMissing(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			model.Conf = model.NewAppConf()
-			model.Conf.FileTree = conf.NewFileTree()
-			model.Conf.FileTree.UseSVGDefaultIcon = new(test.enabled)
+			model.Conf.FileTree.Store(conf.NewFileTree())
+			model.Conf.FileTree.Load().UseSVGDefaultIcon = new(test.enabled)
 
 			recorder := httptest.NewRecorder()
 			request := httptest.NewRequest(http.MethodPost, "/api/setting/setFiletree", strings.NewReader(`{}`))
@@ -206,9 +206,9 @@ func TestSetFiletreePreservesUseSVGDefaultIconWhenMissing(t *testing.T) {
 			if 0 != response.Code {
 				t.Fatalf("setFiletree failed: %s", recorder.Body.String())
 			}
-			if nil == model.Conf.FileTree.UseSVGDefaultIcon ||
-				test.enabled != *model.Conf.FileTree.UseSVGDefaultIcon {
-				t.Fatalf("missing setting changed the current value: %#v", model.Conf.FileTree.UseSVGDefaultIcon)
+			if nil == model.Conf.FileTree.Load().UseSVGDefaultIcon ||
+				test.enabled != *model.Conf.FileTree.Load().UseSVGDefaultIcon {
+				t.Fatalf("missing setting changed the current value: %#v", model.Conf.FileTree.Load().UseSVGDefaultIcon)
 			}
 		})
 	}

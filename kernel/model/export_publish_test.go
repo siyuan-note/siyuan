@@ -70,16 +70,16 @@ func setupExportPublishTest(t *testing.T) {
 	sql.InitHistoryDatabase(true)
 	sql.InitAssetContentDatabase(true)
 	Conf = NewAppConf()
-	Conf.Editor = conf.NewEditor()
-	Conf.FileTree = conf.NewFileTree()
-	Conf.Search = conf.NewSearch()
-	Conf.Export = conf.NewExport()
+	Conf.Editor.Store(conf.NewEditor())
+	Conf.FileTree.Store(conf.NewFileTree())
+	Conf.Search.Store(conf.NewSearch())
+	Conf.Export.Store(conf.NewExport())
 	treenode.InitBlockTree(true)
 	invalidateEncryptedPublishAccessCache()
 
 	t.Cleanup(func() {
+		closeModelTestDatabases()
 		treenode.CloseDatabase()
-		sql.CloseDatabase()
 		Conf = oldConf
 		util.WorkspaceDir = oldWorkspaceDir
 		util.ConfDir = oldConfDir
@@ -147,7 +147,16 @@ func TestExportEmbedFilteredByPublishAccess(t *testing.T) {
 		return checkBlockTreeAccessableByPublishAccess(c, publishAccess, bt)
 	}
 
-	markdown := ExportStdMarkdown(publicID, false, false, false, false, nil, accessChecker)
+	markdown := ExportStdMarkdown(publicID, &ExportOptions{
+		Render: ExportRenderOptions{
+			AssetsDestSpace2Underscore: false,
+			FillCSSVar:                 false,
+			AdjustHeadingLevel:         false,
+			ImgTag:                     false,
+			AVPublishFilter:            nil,
+			AccessCheckers:             []EmbedBlockAccessChecker{accessChecker},
+		},
+	})
 	if strings.Contains(markdown, canary) {
 		t.Fatalf("publish reader received private embed content: %s", markdown)
 	}
@@ -156,7 +165,15 @@ func TestExportEmbedFilteredByPublishAccess(t *testing.T) {
 		t.Fatalf("publish reader received private embed content in preview: %s", stdHTML)
 	}
 
-	adminMarkdown := ExportStdMarkdown(publicID, false, false, false, false, nil)
+	adminMarkdown := ExportStdMarkdown(publicID, &ExportOptions{
+		Render: ExportRenderOptions{
+			AssetsDestSpace2Underscore: false,
+			FillCSSVar:                 false,
+			AdjustHeadingLevel:         false,
+			ImgTag:                     false,
+			AVPublishFilter:            nil,
+		},
+	})
 	if !strings.Contains(adminMarkdown, canary) {
 		t.Fatalf("administrator export should include embed content: %s", adminMarkdown)
 	}

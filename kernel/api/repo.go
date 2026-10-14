@@ -30,6 +30,7 @@ import (
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -41,8 +42,7 @@ var setRepoIndexRetentionDays = contractHandler(apicontract.SetRepoIndexRetentio
 		daysInt = 180
 	}
 
-	model.Conf.Repo.IndexRetentionDays = daysInt
-	model.Conf.Save()
+	model.UpdateRepoConf(func(s *conf.Repo) { s.IndexRetentionDays = daysInt })
 
 	return apicontract.Success(apicontract.Null{})
 })
@@ -53,8 +53,7 @@ var setRetentionIndexesDaily = contractHandler(apicontract.SetRetentionIndexesDa
 		indexesInt = 180
 	}
 
-	model.Conf.Repo.RetentionIndexesDaily = indexesInt
-	model.Conf.Save()
+	model.UpdateRepoConf(func(s *conf.Repo) { s.RetentionIndexesDaily = indexesInt })
 
 	return apicontract.Success(apicontract.Null{})
 })
@@ -169,8 +168,21 @@ var getRepoSnapshots = contractHandler(apicontract.GetRepoSnapshots, func(c *gin
 	var err error
 	if request.ID != "" || request.IncludeFiles {
 		snapshots, pageCount, totalCount, err = model.SearchRepoSnapshot(request.ID, request.IncludeFiles)
+		if err == nil && (request.StartTime != 0 || request.EndTime != 0) {
+			filtered := make([]*model.Snapshot, 0, len(snapshots))
+			for _, snapshot := range snapshots {
+				if model.SnapshotCreatedInRange(snapshot.Created, request.StartTime, request.EndTime) {
+					filtered = append(filtered, snapshot)
+				}
+			}
+			snapshots, totalCount = filtered, len(filtered)
+			pageCount = 0
+			if totalCount > 0 {
+				pageCount = 1
+			}
+		}
 	} else {
-		snapshots, pageCount, totalCount, err = model.GetRepoSnapshots(int(request.Page))
+		snapshots, pageCount, totalCount, err = model.GetRepoSnapshotsByTime(int(request.Page), request.StartTime, request.EndTime)
 	}
 	if err != nil {
 		return apicontract.Failure[apicontract.RepoSnapshotsData](-1, err.Error())
@@ -242,7 +254,7 @@ func holdRepoFileRequest(c *gin.Context, id string, ret *gulu.Result) bool {
 }
 
 var getCloudRepoSnapshots = contractHandler(apicontract.GetCloudRepoSnapshots, func(c *gin.Context, request apicontract.GetCloudRepoSnapshotsRequest) apicontract.Response[apicontract.RepoCloudSnapshotsData] {
-	snapshots, pageCount, totalCount, err := model.GetCloudRepoSnapshots(int(request.Page))
+	snapshots, pageCount, totalCount, err := model.GetCloudRepoSnapshotsByTime(int(request.Page), request.StartTime, request.EndTime)
 	if err != nil {
 		return apicontract.Failure[apicontract.RepoCloudSnapshotsData](-1, err.Error())
 	}
@@ -331,7 +343,7 @@ var initRepoKeyFromPassphrase = contractHandler(apicontract.InitRepoKeyFromPassp
 		return apicontract.FailureWithTimeout[apicontract.RepoKeyData](-1, fmt.Sprintf(model.Conf.Language(137), err), 5000)
 	}
 
-	return apicontract.Success(apicontract.RepoKeyData{Key: base64.StdEncoding.EncodeToString(model.Conf.Repo.Key)})
+	return apicontract.Success(apicontract.RepoKeyData{Key: base64.StdEncoding.EncodeToString(model.Conf.Repo.Load().Key)})
 })
 
 var initRepoKey = contractHandler(apicontract.InitRepoKey, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.RepoKeyData] {
@@ -339,7 +351,7 @@ var initRepoKey = contractHandler(apicontract.InitRepoKey, func(c *gin.Context, 
 		return apicontract.FailureWithTimeout[apicontract.RepoKeyData](-1, fmt.Sprintf(model.Conf.Language(137), err), 5000)
 	}
 
-	return apicontract.Success(apicontract.RepoKeyData{Key: base64.StdEncoding.EncodeToString(model.Conf.Repo.Key)})
+	return apicontract.Success(apicontract.RepoKeyData{Key: base64.StdEncoding.EncodeToString(model.Conf.Repo.Load().Key)})
 })
 
 var resetRepo = contractHandler(apicontract.ResetRepo, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {

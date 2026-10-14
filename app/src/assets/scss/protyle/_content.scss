@@ -8,7 +8,7 @@
   flex-direction: column;
 
   &.rtl {
-    .protyle-title__input,
+    .protyle-title__input:not([dir]),
     .protyle-wysiwyg .p,
     .protyle-wysiwyg .table table,
     .protyle-wysiwyg .render-node protyle-html,
@@ -17,18 +17,18 @@
       direction: rtl
     }
 
-    .protyle-wysiwyg [data-node-id].li > .protyle-action {
+    .protyle-wysiwyg [data-node-id].li:not([data-auto-direction]) > .protyle-action {
       right: 0;
       left: auto;
       direction: rtl;
     }
 
-    .protyle-wysiwyg [data-node-id].li > [data-node-id] {
+    .protyle-wysiwyg [data-node-id].li:not([data-auto-direction]) > [data-node-id] {
       margin-right: 34px;
       margin-left: 0;
     }
 
-    .protyle-wysiwyg [data-node-id].li::before {
+    .protyle-wysiwyg [data-node-id].li:not([data-auto-direction])::before {
       right: 17px;
       left: auto;
     }

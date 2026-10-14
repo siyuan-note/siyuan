@@ -7,7 +7,7 @@
 		"id": "20240530101000-7yv4y5z",
 		"title": "ウィンドウとタブ",
 		"type": "doc",
-		"updated": "20260925230000"
+		"updated": "20261007101500"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-5b80d49",
-				"updated": "20260925230000"
+				"updated": "20261007101500"
 			},
 			"Children": [
 				{
@@ -794,7 +794,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260922155242-vua2yiz",
-				"updated": "20260925230000"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -808,7 +808,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-d7ab3nk",
-				"updated": "20260925230000"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -853,7 +853,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " でレイアウトボタンと最前面表示ボタンの表示・非表示と順序を設定できます。"
+					"Data": " でレイアウトボタンと「ウィンドウを最前面に表示」ボタンの表示・非表示と順序を設定できます。"
 				}
 			]
 		},
@@ -862,12 +862,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-30pjomk",
-				"updated": "20260923114823"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "作成：新しいウィンドウでタブを配置し、ピン留めボタンの横にある "
+					"Data": "作成：新しいウィンドウでタブを配置し、「ウィンドウを最前面に表示」ボタンの横にある "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -917,7 +917,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260922155242-hc8rau9",
-				"updated": "20260923114823"
+				"updated": "20260930224728"
 			},
 			"Children": [
 				{
@@ -994,7 +994,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " があり、前者は選択したレイアウトを読み込み、後者は現在のメインウィンドウをその項目に保存します。新しいウィンドウのレイアウトは自動的に保存されます。どちらもサブメニューの末尾に最終保存日時が表示されます。ピン留めボタンの横にあるレイアウトアイコンからも名前を変更できます。名前変更ダイアログのタイトルはそれぞれ "
+					"Data": " があり、前者は選択したレイアウトを読み込み、後者は現在のメインウィンドウをその項目に保存します。新しいウィンドウのレイアウトは自動的に保存されます。どちらもサブメニューの末尾に最終保存日時が表示されます。「ウィンドウを最前面に表示」ボタンの横にあるレイアウトアイコンからも名前を変更できます。名前変更ダイアログのタイトルはそれぞれ "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1233,6 +1233,84 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260930192450-sbtyvdc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260930192450-sbtyvdc",
+				"updated": "20261007101500"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "設定ウィンドウ"
+				}
+			]
+		},
+		{
+			"ID": "20260930192450-wdavx3g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260930192450-wdavx3g",
+				"updated": "20261007101500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップクライアントでは、設定は既定でメインウィンドウ内で開きます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アプリ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定画面を独立したウィンドウで開く"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をオンにすると、設定は独立したウィンドウで開き、移動、サイズ変更、最小化ができます。変更は次回設定画面を開くときに適用されます。独立したドキュメントウィンドウからも、設定済みのショートカットで設定を開けます。設定を開いたまま、ドキュメントのスクロール、切り替え、編集ができます。設定を再度開くと、既存のウィンドウにフォーカスします。設定の変更は同じワークスペースのほかのウィンドウにも反映されます。未参照の添付ファイルやデータベースの一括削除、設定のインポート中は操作が一時的にブロックされます。ブラウザー版では設定ダイアログ、モバイル版では設定ページを使用します。従来のプラグイン設定は元のウィンドウで開き、そのウィンドウを最前面に表示します。独立した設定ウィンドウに対応したプラグインは、新しいウィンドウで開きます。独立した設定ウィンドウでは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（Windows/Linux）または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Option+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS）で開発者ツールを切り替えられます。"
 				}
 			]
 		},

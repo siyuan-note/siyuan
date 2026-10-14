@@ -52,7 +52,7 @@ func TestTreeIOPreservesNonDocumentFiles(t *testing.T) {
 					return err
 				},
 				"repair": func() error {
-					_, _, err := fixTreeJSONData(box, p, original, luteEngine, nil, false)
+					_, _, err := fixTreeJSONData(box, p, original, luteEngine, nil, false, true)
 					return err
 				},
 				"write": func() error {

@@ -1,0 +1,19 @@
+.counter {
+  margin-left: 4px;
+  line-height: 22px;
+  padding: 0 8px;
+  color: var(--b3-theme-on-surface-light);
+  border-radius: var(--b3-border-radius);
+  font-size: 12px;
+  user-select: none;
+  height: 22px;
+
+  &--right {
+    width: 32px;
+    text-align: right;
+  }
+
+  &--bg {
+    background-color: var(--b3-theme-surface);
+  }
+}

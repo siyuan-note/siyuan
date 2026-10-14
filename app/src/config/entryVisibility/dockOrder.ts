@@ -303,6 +303,14 @@ export const getDockEntryOrderSnapshot = (
     return snapshot;
 };
 
+// 保留停靠栏入口的位置，在各槽位内使用目录顺序作为未自定义排序的默认值。
+export const getDefaultDockEntryOrderSnapshot = (current = getDockEntryOrderSnapshot()) => {
+    const order = (getEntryCatalogChildren("dock") || []).map(item => item.key);
+    return Object.fromEntries(DOCK_ORDER_SCOPES.map(scope => [
+        scope, reorderEntrySlots(current[scope], order, key => key),
+    ])) as TDockOrderSnapshot;
+};
+
 export const applyDockEntryOrderSnapshot = (
     snapshot: TDockOrderSnapshot,
     layout: IDockOrderLayout = window.siyuan.layout,

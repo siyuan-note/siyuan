@@ -54,7 +54,7 @@ func TestSearchRepoSnapshot(t *testing.T) {
 			t.Fatalf("invalid ID accepted: %q", id)
 		}
 	}
-	store, err := dejavu.NewStore(util.RepoDir, Conf.Repo.Key)
+	store, err := dejavu.NewStore(util.RepoDir, Conf.Repo.Load().Key)
 	if err != nil {
 		t.Fatal(err)
 	}

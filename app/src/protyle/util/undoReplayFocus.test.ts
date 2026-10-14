@@ -67,7 +67,7 @@ const browserCases = async (source: string) => {
     };
     const api = new Function(...Object.keys(dependencies), source.replace('import("../render/tableCellRichEditor")',
         "loadRichCellEditor()") +
-        "return {TableCutControl, getUndoFocusContext, restoreUndoFocus, focusByRange, focusByWbr, updateBlock, registerListMindmapRoot};")(...Object.values(dependencies));
+        "return {TableCutControl, getUndoFocusContext, restoreFocusContext, restoreUndoFocus, focusByRange, focusByWbr, updateBlock, registerListMindmapRoot};")(...Object.values(dependencies));
     const editor = document.createElement("div");
     editor.className = "protyle-wysiwyg";
     editor.contentEditable = "true";
@@ -230,6 +230,43 @@ const browserCases = async (source: string) => {
         check.deepEqual(pendingFocus.pop(), {listID: "map", ids: ["text", "child", "map"]});
     }
     unregisterMindmap();
+    // 脑图保存的文本选区在新建节点编辑器内按原块身份恢复，包含中文、富文本和 UTF-16 emoji 偏移。
+    editor.innerHTML = '<div data-type="NodeMindmap" data-node-id="map"><div data-type="NodeMindmapItem" data-node-id="child">' +
+        paragraph("first", "A😀BC") + paragraph("second", '<span data-type="strong">中文</span>tail') + "</div></div>";
+    const map = editor.firstElementChild;
+    const item = map.firstElementChild;
+    const range = document.createRange();
+    range.setStart(item.firstElementChild.firstElementChild.firstChild, 3);
+    range.setEnd(item.lastElementChild.firstElementChild.firstChild.firstChild, 1);
+    getSelection().removeAllRanges();
+    getSelection().addRange(range);
+    const mindmapSaved = api.getUndoFocusContext(editor, range, true);
+    check.equal(mindmapSaved.undoFocusStart, "3");
+    check.equal(mindmapSaved.undoFocusEnd, "1");
+    const fragmentRoot = document.createElement("div");
+    fragmentRoot.className = "protyle-wysiwyg";
+    // 桌面片段编辑器使用统一编辑根，否则 Chromium 会把文本选区截在第一个独立编辑宿主内。
+    fragmentRoot.contentEditable = "true";
+    document.body.append(fragmentRoot);
+    const unregisterText = api.registerListMindmapRoot(editor, noop,
+        (_id: string, ids: string[], selection: Record<string, string>, source: Element) => {
+            check.equal(source, map);
+            check.equal(ids[0], "child");
+            fragmentRoot.innerHTML = item.innerHTML;
+            check.equal(api.restoreFocusContext({wysiwyg: {element: fragmentRoot}}, selection), true);
+        });
+    check.equal(api.restoreUndoFocus(protyle, [{context: {undoFocusId: "child", undoFocusStart: "0", undoFocusEnd: "0",
+        undoFocusMindmapSelection: JSON.stringify(mindmapSaved)}}]), true);
+    const restoredRange = getSelection().getRangeAt(0);
+    // Range 的正文序列不包含 Selection 按渲染块边界附加的换行。
+    check.equal(restoredRange.toString(), "BC中");
+    check.equal(restoredRange.startContainer, fragmentRoot.firstElementChild.firstElementChild.firstChild);
+    check.equal(restoredRange.startOffset, 3);
+    check.equal(restoredRange.endContainer, fragmentRoot.lastElementChild.firstElementChild.firstChild.firstChild);
+    check.equal(restoredRange.endOffset, 1);
+    check.ok(fragmentRoot.contains(getSelection().anchorNode));
+    unregisterText();
+    fragmentRoot.remove();
     editor.remove();
     return "Undo replay focus cases passed";
 };
@@ -256,13 +293,13 @@ test("undo replay restores recorded carets across paragraphs, table cells and em
         extract("tableCellRichValue.ts", ["TABLE_CELL_RICH_ATTRIBUTE"]) +
         extract("selectionFocus.ts", ["getUndoFocusElement"]) +
         extract("../render/listMindmap/render.ts", ["editorRoots", "registerListMindmapRoot",
-            "restoreListMindmapFocus", "getListMindmapElements"]) +
+            "restoreListMindmapFocus", "getListMindmapElements", "readListMindmapSelection", "replayListMindmap"]) +
         extract("../wysiwyg/getBlock.ts", ["getContenteditableElement", "isEndOfBlock", "hasNextSibling",
             "isNotEditBlock", "isContainerBlock", "hasPreviousSibling"]) +
         extract("../wysiwyg/transaction.ts", ["updateBlock"]) +
         extract("../wysiwyg/transactionUpdate.ts", ["shouldDeferCodeBlockCaretRestore"]) +
-        extract("selection.ts", ["getSelectionOffset", "getUndoFocusContext", "restoreFocusContext", "restoreUndoFocus",
-            "focusByOffset", "focusByRange", "focusByWbr", "searchNode", "getDOMOffset", "setLastNodeRange"]);
+        extract("selectionOffsets.ts", ["getSelectionOffset", "focusByRange", "searchNode", "getDOMOffset", "setLastNodeRange", "createRangeByOffsets"]) +
+        extract("selection.ts", ["getUndoFocusContext", "restoreFocusContext", "restoreUndoFocus", "focusByOffset", "focusByWbr"]);
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cut-undo-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");

@@ -110,6 +110,16 @@ func isRegularDirectoryEntry(entry os.DirEntry) (bool, error) {
 }
 
 func removeEmptyDirectoryTree(dirPath string) (removed bool, err error) {
+	info, err := os.Lstat(dirPath)
+	if errors.Is(err, os.ErrNotExist) {
+		return true, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+		return false, nil
+	}
 	entries, err := os.ReadDir(dirPath)
 	if errors.Is(err, os.ErrNotExist) {
 		return true, nil
@@ -117,12 +127,17 @@ func removeEmptyDirectoryTree(dirPath string) (removed bool, err error) {
 	if err != nil {
 		return false, err
 	}
+	var metadataPaths []string
 	for _, entry := range entries {
 		isDir, infoErr := isRegularDirectoryEntry(entry)
 		if infoErr != nil {
 			return false, infoErr
 		}
 		if !isDir {
+			if entry.Type().IsRegular() && util.IsSystemMetadataFile(entry.Name()) {
+				metadataPaths = append(metadataPaths, filepath.Join(dirPath, entry.Name()))
+				continue
+			}
 			return false, nil
 		}
 		childRemoved, removeErr := removeEmptyDirectoryTree(filepath.Join(dirPath, entry.Name()))
@@ -131,6 +146,12 @@ func removeEmptyDirectoryTree(dirPath string) (removed bool, err error) {
 		}
 		if !childRemoved {
 			return false, nil
+		}
+	}
+	// 目录仅剩系统元数据文件时，先删除它们再删除目录
+	for _, metadataPath := range metadataPaths {
+		if err = os.Remove(metadataPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return false, err
 		}
 	}
 	if err = os.Remove(dirPath); errors.Is(err, os.ErrNotExist) {

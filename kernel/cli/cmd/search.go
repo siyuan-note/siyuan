@@ -72,7 +72,18 @@ var searchCmd = &cobra.Command{
 				model.SemanticSearchBlock(query, notebooks, paths, types, subTypes, page, pageSize, nil, nil)
 		} else {
 			blocks, matchedBlockCount, matchedRootCount, pageCount, docMode =
-				model.FullTextSearchBlock(query, notebooks, paths, types, subTypes, method, orderBy, groupBy, page, pageSize)
+				model.FullTextSearchBlock(model.BlockSearchOptions{
+					Query:    query,
+					Boxes:    notebooks,
+					Paths:    paths,
+					Types:    types,
+					SubTypes: subTypes,
+					Method:   method,
+					OrderBy:  orderBy,
+					GroupBy:  groupBy,
+					Page:     page,
+					PageSize: pageSize,
+				})
 		}
 
 		switch outputFormat {

@@ -38,7 +38,7 @@ func setupAppearancePackagesTest(t *testing.T) {
 	util.ThemesPath, util.IconsPath = filepath.Join(root, "data", "themes"), filepath.Join(root, "data", "icons")
 	util.Mode = "prod"
 	Conf = NewAppConf()
-	Conf.Appearance = conf.NewAppearance()
+	Conf.Appearance.Store(conf.NewAppearance())
 	for _, name := range []string{"daylight", "midnight", "custom"} {
 		writeAppearanceTestPackage(t, "themes", name, "1.0.0", "")
 	}
@@ -87,28 +87,28 @@ func TestLoadAppearancePackagesPreservesBuiltInsAndChecksVersion(t *testing.T) {
 	writeAppearanceTestPackage(t, "icons", "future", "2.0.0", "999.0.0")
 	writeAppearanceTestFile(t, filepath.Join(util.ThemesPath, "daylight", "theme.json"), `{"name":"daylight","version":"99.0.0"}`)
 	writeAppearanceTestFile(t, filepath.Join(util.IconsPath, "litheness", "icon.json"), `{"name":"litheness","version":"99.0.0"}`)
-	Conf.Appearance.ThemeLight, Conf.Appearance.Icon = "custom", "custom"
+	Conf.Appearance.Load().ThemeLight, Conf.Appearance.Load().Icon = "custom", "custom"
 	LoadThemes()
 	LoadIcons()
-	if !containTheme("daylight", Conf.Appearance.LightThemes) || !containTheme("midnight", Conf.Appearance.DarkThemes) ||
-		!containIcon("litheness", Conf.Appearance.Icons) {
+	if !containTheme("daylight", Conf.Appearance.Load().LightThemes) || !containTheme("midnight", Conf.Appearance.Load().DarkThemes) ||
+		!containIcon("litheness", Conf.Appearance.Load().Icons) {
 		t.Fatal("built-in packages were not retained")
 	}
-	if !containTheme("custom", Conf.Appearance.LightThemes) || !containIcon("custom", Conf.Appearance.Icons) {
+	if !containTheme("custom", Conf.Appearance.Load().LightThemes) || !containIcon("custom", Conf.Appearance.Load().Icons) {
 		t.Fatal("data packages were not loaded")
 	}
-	if containTheme("future", Conf.Appearance.LightThemes) || containIcon("future", Conf.Appearance.Icons) {
+	if containTheme("future", Conf.Appearance.Load().LightThemes) || containIcon("future", Conf.Appearance.Load().Icons) {
 		t.Fatal("packages requiring a newer application were loaded")
 	}
-	if Conf.Appearance.ThemeLight != "custom" || Conf.Appearance.Icon != "custom" ||
-		Conf.Appearance.ThemeVer != "1.0.0" || Conf.Appearance.IconVer != "1.0.0" {
+	if Conf.Appearance.Load().ThemeLight != "custom" || Conf.Appearance.Load().Icon != "custom" ||
+		Conf.Appearance.Load().ThemeVer != "1.0.0" || Conf.Appearance.Load().IconVer != "1.0.0" {
 		t.Fatal("local selection or package version changed unexpectedly")
 	}
 	if err := os.Remove(filepath.Join(util.IconsPath, "custom", "icon.js")); err != nil {
 		t.Fatal(err)
 	}
 	LoadIcons()
-	if containIcon("custom", Conf.Appearance.Icons) {
+	if containIcon("custom", Conf.Appearance.Load().Icons) {
 		t.Fatal("incomplete icon package was loaded")
 	}
 }
@@ -162,10 +162,10 @@ func TestExportAppearanceReportsMissingEmojiFont(t *testing.T) {
 func TestRefreshAppearanceConfigFallsBackAfterRemoval(t *testing.T) {
 	setupAppearancePackagesTest(t)
 	writeAppearanceTestFile(t, filepath.Join(util.ThemesPath, "custom", "theme.js"), "script")
-	Conf.Appearance.ThemeLight, Conf.Appearance.Icon = "custom", "custom"
-	Conf.Appearance.ThemeDark = "missing"
+	Conf.Appearance.Load().ThemeLight, Conf.Appearance.Load().Icon = "custom", "custom"
+	Conf.Appearance.Load().ThemeDark = "missing"
 	refreshAppearanceConfig()
-	if !Conf.Appearance.ThemeJS || Conf.Appearance.ThemeLight != "custom" || Conf.Appearance.ThemeDark != "midnight" {
+	if !Conf.Appearance.Load().ThemeJS || Conf.Appearance.Load().ThemeLight != "custom" || Conf.Appearance.Load().ThemeDark != "midnight" {
 		t.Fatal("fallback for an unused mode changed the current theme script")
 	}
 	if err := os.Remove(filepath.Join(util.ThemesPath, "custom", "theme.json")); err != nil {
@@ -173,8 +173,92 @@ func TestRefreshAppearanceConfigFallsBackAfterRemoval(t *testing.T) {
 	}
 	writeAppearanceTestPackage(t, "icons", "custom", "2.0.0", "999.0.0")
 	refreshAppearanceConfig()
-	if Conf.Appearance.ThemeLight != "daylight" || Conf.Appearance.Icon != "litheness" || Conf.Appearance.ThemeJS ||
-		Conf.Appearance.ThemeVer != "1.0.0" || Conf.Appearance.IconVer != "1.0.0" {
-		t.Fatalf("appearance fallback retained stale package state: %+v", Conf.Appearance)
+	if Conf.Appearance.Load().ThemeLight != "daylight" || Conf.Appearance.Load().Icon != "litheness" || Conf.Appearance.Load().ThemeJS ||
+		Conf.Appearance.Load().ThemeVer != "1.0.0" || Conf.Appearance.Load().IconVer != "1.0.0" {
+		t.Fatalf("appearance fallback retained stale package state: %+v", Conf.Appearance.Load())
+	}
+}
+
+func TestApplyAppearanceRefreshesUnchangedPackageSelection(t *testing.T) {
+	for _, change := range []string{"remove-theme", "remove-icon", "incompatible-packages", "update-versions", "remove-script"} {
+		t.Run(change, func(t *testing.T) {
+			prepareConfConsistencyTest(t)
+			setupAppearancePackagesTest(t)
+			oldWorkingDir := util.WorkingDir
+			util.WorkingDir = t.TempDir()
+			t.Cleanup(func() {
+				CloseWatchThemes()
+				util.WorkingDir = oldWorkingDir
+			})
+			writeAppearanceTestFile(t, filepath.Join(util.WorkingDir, "appearance", "emojis", "conf.json"), "[]")
+			writeAppearanceTestFile(t, filepath.Join(util.ThemesPath, "custom", "theme.js"), "script")
+			selected := cloneConfSection(Conf.Appearance.Load())
+			selected.ThemeLight, selected.ThemeDark, selected.Icon = "custom", "custom", "custom"
+			Conf.Appearance.Store(selected)
+			refreshAppearanceConfig()
+			held := Conf.Appearance.Load()
+			before, err := json.Marshal(held)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !held.ThemeJS || held.ThemeVer != "1.0.0" || held.IconVer != "1.0.0" {
+				t.Fatalf("initial packages were not loaded: %+v", held)
+			}
+			light, dark, icon, version, script := "custom", "custom", "custom", "1.0.0", true
+			switch change {
+			case "remove-theme":
+				err = os.RemoveAll(filepath.Join(util.ThemesPath, "custom"))
+				light, dark, script = "daylight", "midnight", false
+			case "remove-icon":
+				err = os.RemoveAll(filepath.Join(util.IconsPath, "custom"))
+				icon = "litheness"
+			case "incompatible-packages":
+				writeAppearanceTestPackage(t, "themes", "custom", "2.0.0", "999.0.0")
+				writeAppearanceTestPackage(t, "icons", "custom", "2.0.0", "999.0.0")
+				light, dark, icon, script = "daylight", "midnight", "litheness", false
+			case "update-versions":
+				writeAppearanceTestPackage(t, "themes", "custom", "2.0.0", "")
+				writeAppearanceTestPackage(t, "icons", "custom", "2.0.0", "")
+				version = "2.0.0"
+			case "remove-script":
+				err = os.Remove(filepath.Join(util.ThemesPath, "custom", "theme.js"))
+				script = false
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			// 包文件变化不改变设置请求，提交仍应刷新资源及可用包列表。
+			if _, err = ApplyAppearanceSetting(held); err != nil {
+				t.Fatal(err)
+			}
+			actual := Conf.Appearance.Load()
+			if actual.ThemeLight != light || actual.ThemeDark != dark || actual.Icon != icon ||
+				actual.ThemeVer != version || actual.IconVer != version || actual.ThemeJS != script {
+				t.Fatalf("unchanged selection retained stale package state: %+v", actual)
+			}
+			if containTheme("custom", actual.LightThemes) != (light == "custom") ||
+				containTheme("custom", actual.DarkThemes) != (dark == "custom") ||
+				containIcon("custom", actual.Icons) != (icon == "custom") {
+				t.Fatal("package availability was not refreshed")
+			}
+			after, err := json.Marshal(held)
+			if err != nil || string(before) != string(after) {
+				t.Fatal("resource refresh mutated the submitted snapshot")
+			}
+			data, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			var saved struct {
+				Appearance conf.Appearance `json:"appearance"`
+			}
+			if err = json.Unmarshal(data, &saved); err != nil {
+				t.Fatal(err)
+			}
+			if saved.Appearance.ThemeLight != light || saved.Appearance.ThemeDark != dark || saved.Appearance.Icon != icon ||
+				saved.Appearance.ThemeVer != version || saved.Appearance.IconVer != version || saved.Appearance.ThemeJS != script {
+				t.Fatalf("refreshed selection was not persisted: %+v", saved.Appearance)
+			}
+		})
 	}
 }

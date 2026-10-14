@@ -133,6 +133,54 @@ func TestModernProtocolClient(t *testing.T) {
 	}
 }
 
+func TestContentToolDescriptionsReachMCPClients(t *testing.T) {
+	server, httpServer := newTestHTTPServer(t)
+	contentTools := map[string]struct {
+		tool     *tools.Tool
+		property string
+	}{
+		"block": {tools.BlockTool, "data"}, "document": {tools.DocumentTool, "markdown"},
+		"dailynote": {tools.DailynoteTool, "data"}, "template": {tools.TemplateTool, "content"},
+	}
+	for name, tc := range contentTools {
+		syncTool(server, name, tc.tool)
+	}
+	client := mcpsdk.NewClient(&mcpsdk.Implementation{Name: "content-description-test", Version: "1.0.0"}, nil)
+	session, err := client.Connect(t.Context(), &mcpsdk.StreamableClientTransport{Endpoint: httpServer.URL}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { session.Close() })
+	result, err := session.ListTools(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tool := range result.Tools {
+		tc, ok := contentTools[tool.Name]
+		if !ok {
+			continue
+		}
+		if tool.Description != tc.tool.Description {
+			t.Fatalf("MCP client did not receive the shared %s rules", tool.Name)
+		}
+		data, err := json.Marshal(tool.InputSchema)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var schema tools.ToolSchema
+		if err = json.Unmarshal(data, &schema); err != nil {
+			t.Fatal(err)
+		}
+		if schema.Properties[tc.property].Description != tc.tool.InputSchema.Properties[tc.property].Description {
+			t.Fatalf("MCP client did not receive the %s content syntax", tool.Name)
+		}
+		delete(contentTools, tool.Name)
+	}
+	if len(contentTools) != 0 {
+		t.Fatalf("content tools were not listed: %v", contentTools)
+	}
+}
+
 func TestToolProjectionPolicyAndExecutionRecheck(t *testing.T) {
 	server := newServer()
 	allowed := true

@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20260922175505"
+		"updated": "20261012014930"
 	},
 	"Children": [
 		{
@@ -1813,6 +1813,205 @@
 					"Data": "ドキュメントをテンプレートとして保存するとき、「テンプレート内のデータベース」で、そのドキュメントにあるすべてのデータベースブロックへ同じモードを適用します。「完全なコピーを作成」がデフォルトです。テンプレートを使用するたびに独立したデータベースが作成され、元のデータベースとは同期せず、ブロック単位のコンテキストフィルターは削除されます。「ミラーのコピーを作成」は既存のデータベース参照とコンテキストフィルターを保持し、挿入されたデータベースブロックは元のデータベースとデータおよびビュー設定を共有します。参照モードでは、対象ドキュメントが同じ暗号化境界内で元のデータベースにアクセスできる必要があります。アクセスできない場合、テンプレートの挿入は失敗します。参照した共有タスクデータベースと、データベースブロックの「コンテキストフィルター」で「プロジェクト」関連フィールドを組み合わせると（いずれかを含む - 現在の文書）、同じプロジェクトテンプレートを使いながら、各プロジェクト文書に関連するタスクだけを表示できます。"
 				}
 			]
+		},
+		{
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サブドキュメントツリーの作成"
+				}
+			],
+			"ID": "20261012014537-2ursx4t",
+			"Properties": {
+				"id": "20261012014537-2ursx4t",
+				"updated": "20261012014859"
+			}
+		},
+		{
+			"Type": "NodeParagraph",
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "createDocTree"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は、エディターでテンプレートを手動で挿入した場合にのみ実行されます。テンプレートのレンダリング後、SiYuan は作成予定のサブドキュメントツリー全体を表示し、確認後に作成します。キャンセルすると、テンプレートの挿入もドキュメントの作成も行われません。同じ親ドキュメントの下に同名のドキュメントがあっても常に新規作成され、既存のドキュメントは再利用も上書きもされません。1 回の元に戻す操作で、挿入したテンプレートの内容と、その挿入で作成したすべてのサブドキュメントが削除されます。1 回の作成計画では最大 128 件のドキュメントを作成でき、指定するサブドキュメントツリーの深さは最大 16 階層です。実際のファイルツリー全体の深さには、「7レベルより深いサブドキュメントの作成を許可」の設定による制限も適用されます。"
+				}
+			],
+			"ID": "20261012014537-x0gt42s",
+			"Properties": {
+				"id": "20261012014537-x0gt42s",
+				"updated": "20261012014859"
+			}
+		},
+		{
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{define \"child-review\"}\n## 振り返り\n.action{end}\n\n.action{createDocTree (list\n  (dict \"title\" \"資料\" \"template\" \"children/material.md\"\n    \"children\" (list (dict \"title\" \"抜粋\")))\n  (dict \"title\" \"振り返り\" \"define\" \"child-review\")\n)}\n\n.action{range $doc := renderDocRef \"children\" .id}\n- ((.action{$doc.RootID} \".action{$doc.HPath}\"))\n.action{end}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			],
+			"ID": "20261012014537-9zcms5z",
+			"Properties": {
+				"id": "20261012014537-9zcms5z",
+				"updated": "20261012014859"
+			}
+		},
+		{
+			"Type": "NodeParagraph",
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "各サブドキュメントのコンテンツテンプレートは、そのサブドキュメントをコンテキストとしてレンダリングされ、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".title"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".id"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".parentID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".rootID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".hPath"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用できます。"
+				}
+			],
+			"ID": "20261012014537-lw2s7uo",
+			"Properties": {
+				"id": "20261012014537-lw2s7uo",
+				"updated": "20261012014859"
+			}
+		},
+		{
+			"Type": "NodeParagraph",
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"children\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は作成計画に含まれるサブドキュメントの情報を静的なリストとして返し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"path\" <hPath>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は作成予定のドキュメントを指す静的なブロック参照テキストを返します。"
+				}
+			],
+			"ID": "20261012014537-eegumh4",
+			"Properties": {
+				"id": "20261012014537-eegumh4",
+				"updated": "20261012014859"
+			}
+		},
+		{
+			"Type": "NodeParagraph",
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "各ノードでは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "define"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で現在のテンプレートファイル内の名前付きテンプレートを指定するか、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で現在のテンプレートパッケージからの相対パスを使って外部テンプレートを参照できます。外部テンプレートが 1 つでも見つからないか解析できない場合、操作全体がキャンセルされ、コンテンツの挿入やサブドキュメントの一部だけの作成は行われません。"
+				}
+			],
+			"ID": "20261012014537-4unmxo1",
+			"Properties": {
+				"id": "20261012014537-4unmxo1",
+				"updated": "20261012014859"
+			}
+		},
+		{
+			"Type": "NodeParagraph",
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "createDocTree"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は、ドキュメント、デイリーノート、データベース項目の新規作成時などに自動適用されるコンテンツテンプレートでは実行されません。このリリースでは、データベースやアセットのパッケージ化、およびドキュメントのサブツリー全体をテンプレートとしてエクスポートする機能には対応していません。"
+				}
+			],
+			"ID": "20261012014537-w9qbm3j",
+			"Properties": {
+				"id": "20261012014537-w9qbm3j",
+				"updated": "20261012014859"
+			}
 		},
 		{
 			"ID": "20240530101000-3jhyboz",

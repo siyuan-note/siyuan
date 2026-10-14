@@ -13,9 +13,27 @@
  * limitations under the License.
  */
 
-import { getXfaPageViewport, PixelsPerInch } from "./pdfjs";
+import { PixelsPerInch, XfaLayer } from "./pdfjs";
 import { SimpleLinkService } from "./pdf_link_service.js";
 import { XfaLayerBuilder } from "./xfa_layer_builder.js";
+
+class BasePrintServiceFactory {
+  constructor() {
+    if (typeof PDFJSDev === "undefined" || PDFJSDev.test("TESTING")) {
+      throw new Error("Cannot initialize BasePrintServiceFactory.");
+    }
+  }
+
+  static initGlobals(app) {}
+
+  static get supportsPrinting() {
+    throw new Error("Not implemented: supportsPrinting");
+  }
+
+  static createPrintService(params) {
+    throw new Error("Not implemented: createPrintService");
+  }
+}
 
 function getXfaHtmlForPrinting(printContainer, pdfDocument) {
   const xfaHtml = pdfDocument.allXfaHtml;
@@ -33,11 +51,11 @@ function getXfaHtmlForPrinting(printContainer, pdfDocument) {
       linkService,
       xfaHtml: xfaPage,
     });
-    const viewport = getXfaPageViewport(xfaPage, { scale });
+    const viewport = XfaLayer.getPageViewport(xfaPage, { scale });
 
-    builder.render(viewport, "print");
+    builder.render({ viewport, intent: "print" });
     page.append(builder.div);
   }
 }
 
-export { getXfaHtmlForPrinting };
+export { BasePrintServiceFactory, getXfaHtmlForPrinting };

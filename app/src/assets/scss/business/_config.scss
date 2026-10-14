@@ -1,3 +1,25 @@
+.config-chatgpt__actions,
+.config-chatgpt__account {
+  gap: 8px;
+}
+
+.config-chatgpt__account {
+  align-items: center;
+}
+
+:root[data-theme-mode="dark"] .config-ai-decision__icon {
+  filter: invert(1);
+}
+
+.config-chatgpt__info {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.config-chatgpt__picker {
+  max-width: 100%;
+}
+
 .workspace-storage {
   &__header {
     flex-wrap: wrap;
@@ -140,6 +162,31 @@
   output {
     min-width: 4ch;
     text-align: end;
+  }
+}
+
+.config-sync-field {
+  flex-wrap: wrap;
+
+  > .fn__flex-1 {
+    min-width: 0;
+  }
+}
+
+.config-sync-form {
+  min-height: 0;
+}
+
+.config-sync-dialog {
+  max-height: 90vh;
+  max-height: 90dvh;
+}
+
+@media screen and (max-width: 750px) {
+  .config-sync-field > .fn__flex-1 {
+    flex: none;
+    width: 100%;
+    margin-top: 8px;
   }
 }
 
@@ -385,6 +432,7 @@
       .config__tab-scroll {
         flex: 1;
         min-height: 0;
+        outline: none;
         overflow-y: auto;
         margin: 0 -12px 0 0;
         padding-right: 2px;
@@ -545,6 +593,7 @@
     &__list {
       overflow: auto;
       flex: 1;
+      position: relative;
     }
 
     &__preview {
@@ -556,6 +605,22 @@
       flex: 1;
       padding: 0 8px;
       margin-top: 8px;
+      border-top: 1px solid var(--b3-border-color);
+    }
+
+    &__document,
+    &__pdf {
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      flex-shrink: 0;
+      overflow: auto;
+    }
+
+    &__pdf {
+      position: relative;
+      overflow: hidden;
     }
   }
 
@@ -737,6 +802,7 @@
       align-items: center;
       gap: 4px;
       vertical-align: middle;
+      white-space: nowrap;
     }
 
     &__panel {
@@ -849,6 +915,40 @@
 
       > [data-bazaar-index] {
         cursor: default;
+      }
+    }
+
+    // 桌面端已下载卡片：图标右侧分为上下两块，名称/描述在上、操作按钮在下，按钮不跨到图标下方
+    &__panel[data-type="downloaded"] .config-bazaar__content .b3-card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+
+      // 图标跨两行并垂直居中；同时去掉上下外边距，否则它会把第一行撑高、在描述下方留下空白
+      // 行是隐式的，跨行只能用 span 指定
+      > .b3-card__img {
+        align-self: center;
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        margin: 0 0 0 16px;
+      }
+
+      > .fn__flex-1 {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      > .b3-card__actions--right {
+        grid-column: 2;
+        grid-row: 2;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        min-width: 0;
+        row-gap: 4px;
+        padding: 0 16px 16px;
+
+        > .config-bazaar__publish-controls {
+          margin-right: auto;
+        }
       }
     }
 
@@ -1174,6 +1274,7 @@
 
               .b3-chip {
                 margin: 2px 0 2px 4px;
+                text-align: start;
               }
             }
           }
@@ -1201,6 +1302,21 @@
           }
         }
 
+        &__resource {
+          gap: 4px;
+          // 显式行高保持文字行框一致，大字号时随字号增大。
+          line-height: max(16px, 1em);
+
+          &-list {
+            gap: 8px 16px;
+          }
+        }
+
+        &__desc {
+          // 无预览图时与右侧信息栏顶部（.item__header + .fn__flex-1）对齐：8px 上外边距 + 21px 头部高度 + 16px 下外边距
+          margin-top: 45px;
+        }
+
         &__preview {
           width: 100%;
           height: 50%;
@@ -1223,6 +1339,11 @@
             cursor: zoom-out;
           }
         }
+      }
+
+      // 有预览图时由预览图的下外边距提供与描述之间的间距
+      .item__preview + .item__desc {
+        margin-top: 0;
       }
     }
   }
@@ -1322,6 +1443,10 @@
   }
 
   &-entry-visibility {
+    &__reset-orders {
+      max-width: 100%;
+    }
+
     &__view--mobile {
       .config-entry-visibility__search {
         margin: 0 8px;

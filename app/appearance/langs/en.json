@@ -1,4 +1,5 @@
 {
+	"currentTime": "Current Time",
 	"exitWaiting": "Exiting, please wait...",
 	"exitWaitFailed": "Could not confirm that shutdown has completed. You can retry or close this dialog and continue waiting.",
 	"previousExitWaiting": "Waiting for the previous shutdown to finish...",

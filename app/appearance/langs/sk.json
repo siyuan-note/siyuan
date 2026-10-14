@@ -1,4 +1,5 @@
 {
+	"currentTime": "Aktuálny čas",
 	"exitWaiting": "Ukončovanie, čakajte...",
 	"exitWaitFailed": "Nepodarilo sa potvrdiť dokončenie ukončovania. Môžete to skúsiť znova alebo zavrieť toto dialógové okno a ďalej čakať.",
 	"previousExitWaiting": "Čaká sa na dokončenie predchádzajúceho ukončovania...",

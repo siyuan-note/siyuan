@@ -1,4 +1,5 @@
 {
+	"currentTime": "当前时间",
 	"exitWaiting": "正在退出，请稍候...",
 	"exitWaitFailed": "暂时无法确认退出是否完成。可以重试，或关闭此提示继续等待。",
 	"previousExitWaiting": "正在等待上次退出完成...",

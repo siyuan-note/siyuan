@@ -1,4 +1,5 @@
 {
+	"currentTime": "Waktu Saat Ini",
 	"exitWaiting": "Menutup aplikasi, harap tunggu...",
 	"exitWaitFailed": "Tidak dapat memastikan bahwa proses penutupan telah selesai. Anda dapat mencoba lagi atau menutup dialog ini dan terus menunggu.",
 	"previousExitWaiting": "Menunggu proses penutupan sebelumnya selesai...",

@@ -1,4 +1,5 @@
 {
+	"currentTime": "Aktuelle Uhrzeit",
 	"exitWaiting": "Wird beendet, bitte warten...",
 	"exitWaitFailed": "Der Abschluss des Beendens konnte nicht bestätigt werden. Versuchen Sie es erneut oder schließen Sie diesen Dialog und warten Sie weiter.",
 	"previousExitWaiting": "Warten, bis der vorherige Beendigungsvorgang abgeschlossen ist...",

@@ -27,7 +27,7 @@ const LITE_SLASH_IDS = new Set([
     "list", "orderedList", "check", "quote", "horizontalSuperBlock", "verticalSuperBlock", "tabs", "calloutNote", "calloutTip", "calloutImportant",
     "calloutWarning", "calloutCaution", "code", "table", "line", "math", "html",
     "emoji", "link", "bold", "italic", "underline", "strike", "mark", "sup", "sub", "inlineCode",
-    "kbd", "tag", "inlineMath", "insertIframeURL", "insertImgURL", "insertVideoURL", "insertAudioURL",
+    "kbd", "tag", "inlineMath", "currentTime", "insertIframeURL", "insertImgURL", "insertVideoURL", "insertAudioURL",
     "staff", "chart", "flowChart", "graph", "mermaid", "mindmap", "UML",
     "infoStyle", "successStyle", "warningStyle", "errorStyle", "clearFontStyle",
 ]);

@@ -1,4 +1,5 @@
 {
+	"currentTime": "Bieżąca godzina",
 	"exitWaiting": "Zamykanie, proszę czekać...",
 	"exitWaitFailed": "Nie można potwierdzić zakończenia zamykania. Możesz spróbować ponownie lub zamknąć to okno dialogowe i nadal czekać.",
 	"previousExitWaiting": "Oczekiwanie na zakończenie poprzedniego zamykania...",

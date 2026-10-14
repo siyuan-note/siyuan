@@ -18,6 +18,11 @@ export const isBlockHintQueryAtCaret = (textBeforeCaret: string, textAfterCaret:
     return query.trimStart() === query && query.length < maxLength;
 };
 
+// 自动闭合：光标前刚输入 [[ 且光标后没有闭合符时补全 ]]
+export const shouldAutoCloseRefBrackets = (textBeforeCaret: string, textAfterCaret: string) => {
+    return textBeforeCaret.endsWith("[[") && !textAfterCaret.startsWith("]");
+};
+
 // 手动输入的闭合标记（如 [[标题]] 中的 ]]）不属于查询内容，选中候选项时随触发符一起被替换
 export const stripBlockHintCloseKey = (query: string, endSplit: string) => {
     return endSplit && query.endsWith(endSplit) ? query.substring(0, query.length - endSplit.length) : query;

@@ -615,10 +615,20 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
     if (protyle.lite && isEncryptedBox(protyle.notebookId)) {
         refParam.notebook = protyle.notebookId;
     }
+    // 自动闭合时输入 ]] 直接完成引用
+    const closeContext = source === "hint" && !protyle.lite && protyle.hint.splitChar === "[[" && key.trim() !== "" &&
+        protyle.hint.closeKeyTyped && window.siyuan.config.editor?.autoCloseRefBrackets &&
+        protyle.hint.getRefCloseContext(protyle);
+    if (closeContext) {
+        refParam.exactDocTitle = true;
+    }
     const dailyNotes = source === "hint" ? getDailyNoteHints(key, protyle).catch((): IHintData[] => []) : Promise.resolve([] as IHintData[]);
     fetchPost("/api/search/searchRefBlock", refParam, (response) => {
         Promise.all([createTarget.promise, dailyNotes]).then(([hideConfiguredCreate, dateHints]) => {
             if (!createTarget.isCurrent()) {
+                return;
+            }
+            if (response.code !== 0 || (closeContext && !protyle.hint.isRefCloseContextCurrent(protyle, closeContext))) {
                 return;
             }
             const dataList: IHintData[] = [];
@@ -665,6 +675,15 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
                     html: genHintItemHTML(item),
                 });
             });
+            if (closeContext) {
+                // 依次选择标题完全一致的文档、日记、新建文档
+                const commitItem = response.data.blocks.length > 0 ? dataList[createItemCount] :
+                    (createItemCount > 0 ? dataList[0] : undefined);
+                if (commitItem) {
+                    protyle.hint.fillRefClose(commitItem.value, protyle, closeContext);
+                    return;
+                }
+            }
             if (source === "search") {
                 protyle.hint.splitChar = "((";
                 protyle.hint.lastIndex = -1;

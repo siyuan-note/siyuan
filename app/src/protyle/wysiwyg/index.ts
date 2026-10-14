@@ -4363,6 +4363,11 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            if (!isComposition && protyle.hint.handleRefBracketBeforeInput(protyle, event)) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             if (event.target === this.element &&
                 (event.inputType === "historyUndo" || event.inputType === "historyRedo")) {
                 event.preventDefault();
@@ -4542,6 +4547,9 @@ export class WYSIWYG {
                 return;
             }
             this.escapeInline(protyle, range, event);
+            if (event.data === "[") {
+                protyle.hint.autoCloseRefBrackets(protyle, range);
+            }
 
             // 原生输入结束后立即恢复各段折行，避免延迟解析前绘制出临时的整段换行。
             normalizeInlineElementBoundaries(this.element);

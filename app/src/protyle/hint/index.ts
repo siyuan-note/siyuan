@@ -86,6 +86,7 @@ import {
     isBlockHintQueryAtCaret,
     shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
+    shouldAutoCloseRefBrackets,
     stripBlockHintCloseKey,
 } from "./blockHintRange";
 import {getMobileHintPosition} from "./mobileHintPosition";
@@ -134,6 +135,13 @@ export class Hint {
     private enableEmoji = true;
     public enableExtend = false;
     public splitChar = "";
+    // 当前查询末尾是否包含完整闭合符（如 ]]）
+    public closeKeyTyped = false;
+    private refBracketRange?: Range;
+    private refBracketOrigin?: {notebookID: string; rootID: string; blockID: string; prefix: string};
+    private refCloseContext?: {range: Range; text: string; notebookID: string; rootID: string};
+    // 选中候选项时是否一并替换光标后自动补全的闭合符
+    private consumeCloseKey = false;
     public lastIndex = -1;
     public hashTagSearchElement?: HTMLElement;
     private source: THintSource;
@@ -391,6 +399,152 @@ export class Hint {
                 }, protyle.options.hint.delay);
             }
         });
+    }
+
+    // 输入 [[ 后在光标后补全 ]]，光标保持在括号内
+    public autoCloseRefBrackets(protyle: IProtyle, range: Range) {
+        const context = this.getRefBracketContext(protyle, range);
+        if (context && shouldAutoCloseRefBrackets(context.textBeforeCaret, context.textAfterCaret)) {
+            context.textNode.insertData(range.startOffset, "]]");
+            this.refBracketRange = range.cloneRange();
+            this.refBracketRange.setStart(context.textNode, range.startOffset - 2);
+            this.refBracketRange.setEnd(context.textNode, range.startOffset + 2);
+            this.refBracketOrigin = {notebookID: protyle.notebookId, rootID: protyle.block.rootID,
+                blockID: (hasClosestBlock(range.startContainer) || undefined)?.getAttribute("data-node-id"),
+                prefix: context.textBeforeCaret};
+            this.refCloseContext = undefined;
+        }
+    }
+
+    // 输入 ] 时跳过已补全的闭合符，跳过第二个 ] 后完成引用；在空括号对之间退格时删除整个括号对
+    // 返回 true 表示已处理并需要阻止默认输入
+    public handleRefBracketBeforeInput(protyle: IProtyle, event: InputEvent) {
+        if (event.isComposing || getSelection().rangeCount === 0) {
+            return false;
+        }
+        const range = getSelection().getRangeAt(0);
+        const context = this.getRefBracketContext(protyle, range);
+        const pair = this.refBracketRange;
+        if (!context || !pair || pair.startContainer !== context.textNode || pair.endContainer !== context.textNode ||
+            !pair.toString().startsWith("[[") || !pair.toString().endsWith("]]")) {
+            return false;
+        }
+        if (event.inputType === "insertText" && event.data === "]" && context.textAfterCaret.startsWith("]") &&
+            range.startOffset >= pair.endOffset - 2 && range.startOffset < pair.endOffset &&
+            this.splitChar === "[[" && this.canResumeBlockHint(protyle, range)) {
+            range.setStart(context.textNode, range.startOffset + 1);
+            range.collapse(true);
+            focusByRange(range);
+            if (range.startOffset === pair.endOffset) {
+                this.refCloseContext = {range: pair.cloneRange(), text: pair.toString(),
+                    notebookID: protyle.notebookId, rootID: protyle.block.rootID};
+                this.enableExtend = true;
+                this.render(protyle);
+            }
+            return true;
+        }
+        if (event.inputType === "deleteContentBackward" && pair.toString() === "[[]]" &&
+            range.startOffset === pair.startOffset + 2) {
+            const block = hasClosestBlock(range.startContainer);
+            if (!block) {
+                return false;
+            }
+            const html = block.outerHTML;
+            const undoContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);
+            const offset = pair.startOffset;
+            pair.deleteContents();
+            range.setStart(context.textNode, offset);
+            range.collapse(true);
+            focusByRange(range);
+            this.refBracketRange = undefined;
+            this.refBracketOrigin = undefined;
+            this.refCloseContext = undefined;
+            hideElements(["hint"], protyle);
+            updateTransaction(protyle, block, html, undoContext);
+            protyle.wysiwyg.preventKeyup = true;
+            return true;
+        }
+        return false;
+    }
+
+    public getRefCloseContext(protyle: IProtyle) {
+        return this.refCloseContext && this.isRefCloseContextCurrent(protyle, this.refCloseContext) ?
+            this.refCloseContext : undefined;
+    }
+
+    public isRefCloseContextCurrent(protyle: IProtyle, context: typeof this.refCloseContext) {
+        if (!context || !window.siyuan.config.editor.autoCloseRefBrackets || protyle.disabled ||
+            window.siyuan.config.readonly || window.siyuan.isPublish ||
+            protyle.notebookId !== context.notebookID || protyle.block.rootID !== context.rootID ||
+            !protyle.wysiwyg.element.contains(context.range.startContainer) ||
+            !protyle.wysiwyg.element.contains(context.range.endContainer) ||
+            context.range.toString() !== context.text || getSelection().rangeCount === 0) {
+            return false;
+        }
+        const range = getSelection().getRangeAt(0);
+        return range.collapsed && range.startContainer === context.range.endContainer &&
+            range.startOffset === context.range.endOffset;
+    }
+
+    public fillRefClose(value: string, protyle: IProtyle, context: typeof this.refCloseContext) {
+        if (!this.isRefCloseContextCurrent(protyle, context)) {
+            return;
+        }
+        protyle.toolbar.range = context.range.cloneRange();
+        this.lastIndex = context.range.startOffset;
+        this.fill(value, protyle, false);
+    }
+
+    private consumeRefBracketClose(range: Range) {
+        if (this.consumeCloseKey && Constants.BLOCK_HINT_KEYS.includes(this.splitChar)) {
+            const closeKey = Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar];
+            range.endContainer.parentNode?.normalize();
+            if (range.endContainer.nodeType === 3 && range.endContainer.textContent.startsWith(closeKey, range.endOffset)) {
+                range.setEnd(range.endContainer, range.endOffset + closeKey.length);
+            } else if (this.splitChar === "[[" && this.refBracketRange?.endContainer === range.endContainer &&
+                this.refBracketRange.toString().endsWith("]]") &&
+                range.endOffset === this.refBracketRange.endOffset - 1) {
+                range.setEnd(range.endContainer, this.refBracketRange.endOffset);
+            }
+        }
+        this.refBracketRange = undefined;
+        this.refBracketOrigin = undefined;
+        this.refCloseContext = undefined;
+    }
+
+    private getRefBracketContext(protyle: IProtyle, range: Range) {
+        if (!window.siyuan.config.editor?.autoCloseRefBrackets || protyle.disabled ||
+            window.siyuan.config.readonly || window.siyuan.isPublish || !range.collapsed ||
+            range.startContainer.nodeType !== 3 || !protyle.wysiwyg.element.contains(range.startContainer) ||
+            hasClosestByAttribute(range.startContainer, "data-type", "code") ||
+            hasClosestByAttribute(range.startContainer, "data-type", "inline-math") ||
+            hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
+            return undefined;
+        }
+        // 输入过程中文本可能被拆分为多个相邻文本节点，合并后才能判断光标前后的括号
+        range.startContainer.parentNode?.normalize();
+        if (range.startContainer.nodeType !== 3) {
+            return undefined;
+        }
+        const textNode = range.startContainer as Text;
+        const origin = this.refBracketOrigin;
+        // 块重绘后按原块和触发符前缀恢复括号范围，不将其他位置的括号视为自动补全。
+        if (origin && this.refBracketRange?.startContainer !== textNode &&
+            protyle.notebookId === origin.notebookID && protyle.block.rootID === origin.rootID &&
+            (hasClosestBlock(textNode) || undefined)?.getAttribute("data-node-id") === origin.blockID &&
+            textNode.data.startsWith(origin.prefix)) {
+            const end = textNode.data.indexOf("]]", origin.prefix.length);
+            if (end > -1 && range.startOffset >= origin.prefix.length && range.startOffset <= end + 2) {
+                this.refBracketRange = range.cloneRange();
+                this.refBracketRange.setStart(textNode, origin.prefix.length - 2);
+                this.refBracketRange.setEnd(textNode, end + 2);
+            }
+        }
+        return {
+            textNode,
+            textBeforeCaret: textNode.data.substring(0, range.startOffset),
+            textAfterCaret: textNode.data.substring(range.startOffset),
+        };
     }
 
     public canResumeBlockHint(protyle: IProtyle, range: Range) {
@@ -959,10 +1113,15 @@ ${genHintItemHTML(item)}
         const undoContext = shouldCaptureHintUndoFocus(this.splitChar, Constants.BLOCK_HINT_KEYS, value) ?
             getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
         // 自顶向下法新建文档后光标定位问题 https://github.com/siyuan-note/siyuan/issues/299
+        if (this.consumeCloseKey && range.collapsed) {
+            this.getRefBracketContext(protyle, range);
+        }
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
             focusByRange(range);
         }
+        // 自动闭合时，光标后的闭合符随查询一起被替换
+        this.consumeRefBracketClose(range);
         if (["[[", "【【"].includes(this.splitChar) && /^daily-note:\d{4}-\d{2}-\d{2}:[a-z0-9-]*$/.test(value)) {
             const [, date, notebookID] = value.split(":");
             const target = captureDailyNoteSelection(protyle, range);
@@ -1500,6 +1659,8 @@ ${genHintItemHTML(item)}
         const prevLastIndex = this.lastIndex;
         this.lastIndex = -1;
         this.splitChar = "";
+        this.closeKeyTyped = false;
+        this.consumeCloseKey = false;
         const disableHashTagSearch = window.siyuan.config.editor.hashTagSearch === false;
         extend.forEach((item) => {
             // 关闭标签搜索后 # 不再作为触发符，避免影响 / 等后续提示
@@ -1545,7 +1706,10 @@ ${genHintItemHTML(item)}
                 return "";
             }
             if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar)) {
-                return stripBlockHintCloseKey(lastItem, Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar]);
+                const query = stripBlockHintCloseKey(lastItem, Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar]);
+                this.closeKeyTyped = query !== lastItem;
+                this.consumeCloseKey = !!window.siyuan.config.editor.autoCloseRefBrackets;
+                return query;
             }
             return lastItem;
         }

@@ -398,6 +398,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.SpellcheckLanguages = value.SpellcheckLanguages
 	result.HashTagSearch = value.HashTagSearch
 	result.OnlySearchForDoc = value.OnlySearchForDoc
+	result.AutoCloseRefBrackets = value.AutoCloseRefBrackets
 	result.BacklinkExpandCount = value.BacklinkExpandCount
 	result.BackmentionExpandCount = value.BackmentionExpandCount
 	result.BacklinkMentionExclude = value.BacklinkMentionExclude

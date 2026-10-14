@@ -11,7 +11,8 @@ import {shouldCaptureHintUndoFocus} from "./blockHintRange";
 const source = createSourceFile("index.ts", readFileSync(join(__dirname, "index.ts"), "utf8"), ScriptTarget.Latest);
 const declaration = source.statements.find(node => isClassDeclaration(node) && node.name.text === "Hint");
 assert.ok(declaration && isClassDeclaration(declaration));
-const fill = declaration.members.find(member => member.name?.getText(source) === "fill").getText(source);
+const fill = declaration.members.filter(member => ["fill", "consumeRefBracketClose"].includes(member.name?.getText(source)))
+    .map(member => member.getText(source)).join("\n");
 
 test("current time replaces the command through one insertion with its original undo context", () => {
     const code = transpileModule(`class Hint { ${fill} } new Hint();`, {

@@ -774,6 +774,10 @@ declare namespace Config {
          */
         onlySearchForDoc: boolean;
         /**
+         * Whether typing `[[` auto-inserts `]]` and typing `]]` completes the block reference
+         */
+        autoCloseRefBrackets: boolean;
+        /**
          * PlantUML rendering service address
          */
         plantUMLServePath: string;

@@ -754,6 +754,10 @@ var SemanticSearchBlock = define[SearchBlockRequest, SearchBlocksData]("semantic
 // SQL 模式保留换行、注释与字面量大小写，支持带别名的完整块投影。
 var FullTextSearchBlock = define[FullTextSearchBlockRequest, *FullTextSearchBlockData]("fullTextSearchBlock", "/api/search/fullTextSearchBlock", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
+// SearchRefBlock 的 exactDocTitle 默认关闭，保留候选搜索行为；启用后仅匹配完整文档标题，
+// 先区分大小写，再忽略大小写，同级匹配按 ID 升序取一个，排除 id 和 rootID。
+// 精确匹配不受全文搜索字段、类型、忽略规则或结果上限影响；未匹配时 newDoc 为 true。
+// 保留发布权限、加密笔记本租约和原有响应变体，查询或文档读取失败时返回错误。
 var SearchRefBlock = define[SearchRefBlockRequest, SearchRefData]("searchRefBlock", "/api/search/searchRefBlock", AuthenticatedAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 
 var ListLoadedPlugins = define[EmptyRequest, []*LoadedPlugin]("listLoadedPlugins", "/api/plugin/listLoadedPlugins", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")

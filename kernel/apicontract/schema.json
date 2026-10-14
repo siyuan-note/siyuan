@@ -38803,6 +38803,16 @@
         "beforeLen": {
           "type": "number"
         },
+        "exactDocTitle": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "anyOf": [
             {
@@ -39909,6 +39919,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingAssetOpenInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "autoCloseRefBrackets": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -44070,6 +44090,9 @@
             }
           ]
         },
+        "autoCloseRefBrackets": {
+          "type": "boolean"
+        },
         "autoDirection": {
           "type": "boolean"
         },
@@ -44374,6 +44397,7 @@
         "allowHTMLBLockScript",
         "allowSVGScript",
         "assetOpen",
+        "autoCloseRefBrackets",
         "autoDirection",
         "backlinkBlockSort",
         "backlinkContainChildren",
@@ -44523,6 +44547,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/SettingAssetOpenInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "autoCloseRefBrackets": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

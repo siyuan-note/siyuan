@@ -108,7 +108,7 @@ WSL 同步安排在环境检查和签名证书检查之前。如果 SSH 需要�
 - 准备 Go、Node、pnpm、Windows 双架构编译器、gomobile、Android SDK/NDK、DevEco Studio 和 7-Zip；Appx 还需 `electron-windows-store`
 - OCR 运行库归档缓存位于项目的 `.cache/ocr/`；手动下载时保留原文件名，不解压，脚本校验摘要后复用
 - 停止正在运行的前端开发构建
-- 插好 YubiKey，签名时按系统提示输入 PIN
+- 插好 YubiKey，执行构建时隐藏输入一次签名 PIN
 - 确认 Android、鸿蒙签名配置可用
 - 桌面 `siyuan` 文件夹不要留有旧版本或同名安装包；分批构建时保留本次版本已验证的其他平台产物
 
@@ -129,6 +129,8 @@ python -X utf8 scripts/build-release.py --appx --execute
 ```
 
 各平台按 Windows、Linux、Android、鸿蒙的顺序串行构建，中途失败会停止后续步骤。
+
+包含 Windows 时，先隐藏输入一次签名 PIN；预检验证通过后自动完成后续签名。仅查看计划或构建其他平台时不询问 PIN。WSL 的 SSH 认证仍在预检阶段完成，预检通过后再离开电脑。
 
 补充：需要单独构建某个平台或排查构建问题时，可选择对应命令：
 
@@ -302,6 +304,7 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 - `--platforms` 接受逗号分隔的平台名称，可选 `windows`、`linux`、`android`、`harmony`；默认构建四个平台，Appx 需额外指定 `--appx`
 - `--output` 可指定产物收集目录，默认桌面 `siyuan`；脚本不覆盖已有同名安装包
 - `--records-dir` 可指定持久化记录根目录，默认主仓库同级 `release-records`；每次执行创建独立目录，保存日志和阶段进度，清理发布产物时保留
+- Windows 默认在预检前隐藏输入一次签名 PIN；自动执行环境可通过进程环境变量 `SIYUAN_SIGNING_PIN` 提供，脚本读取后移出父进程环境，不写入命令行参数、配置文件或发布记录；`--signing-ui` 可沿用系统 PIN 弹窗
 - 脚本保留现有 Android 与鸿蒙签名配置，不读取或输出这些配置里的密码
 - WSL 默认用户 `d`、仓库 `/home/d/88250/siyuan`，可通过 `--wsl-user`、`--wsl-repo`、`--wsl-distro` 调整；Linux 或鸿蒙构建预检时自动同步到 Windows 的确切提交，受检查的构建输入须一致，自动同步条件见步骤 2
 - Android、鸿蒙仓库默认在思源仓库同级，可用 `--android-dir`、`--harmony-dir` 调整；构建工具路径可用 `--arm64-cc`、`--deveco` 调整；`--sevenzip` 仅传入完成后提示的手动校验命令，构建时不检查或调用该工具
@@ -320,7 +323,9 @@ python -X utf8 scripts/verify-release.py check D:/releases/siyuan --version 3.8.
 
 ### YubiKey PIN
 
-沿用 Windows 智能卡驱动和 Electron Builder 的 SignTool 签名链路，按系统提示输入 PIN。提示次数取决于驱动、密钥策略和签名会话，不能保证只有一次。脚本不存储 PIN、不模拟输入，也不改变 PIN 或触摸策略。
+默认通过 Windows 智能卡驱动和 Authenticode 接口自动签名，支持 CNG 的 RSA、ECDSA 签名密钥。启动时隐藏输入一次 PIN，预检先验证密钥可用，再进行耗时构建；PIN 仅在进程内存中暂存，经签名子进程的标准输入传递，不写入文件或日志。每个文件使用 SHA256 签名，并检查证书、签名和时间戳；仅设备通信中断自动重试一次，PIN 错误立即停止。
+
+自动执行时可由启动程序通过进程环境变量 `SIYUAN_SIGNING_PIN` 提供 PIN，无需把密码写进命令或脚本。仍需保持签名设备连接；脚本不改变 PIN 或触摸策略，需要触摸的密钥不能完全无人值守。若驱动不支持自动认证，可添加 `--signing-ui` 沿用系统弹窗。
 
 默认按现有证书主题选择有效代码签名证书；多张证书时用 `--certificate-sha1` 指定 40 位公开指纹，它不是密码。SignTool 的 `/p` 是证书文件密码选项，不能当成通用 YubiKey PIN 参数。参见 [Yubico 驱动说明](https://www.yubico.com/support/download/smart-card-drivers-tools/) 和 [SignTool 文档](https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool)。
 

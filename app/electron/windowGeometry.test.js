@@ -105,6 +105,7 @@ const openWindow = (windowGeometry, appearance = {}, mode = "local") => {
     const start = source.indexOf('ipcMain.on("siyuan-open-window",');
     const end = source.indexOf('ipcMain.on("siyuan-open-workspace",', start);
     const calls = [];
+    const timers = new Set();
     const ipcMain = new EventEmitter();
     const initializedWindowIds = new Set();
     let options;
@@ -152,6 +153,8 @@ const openWindow = (windowGeometry, appearance = {}, mode = "local") => {
         windowNavigate: () => {},
         showWindow: () => calls.push("show"), getWindowPathname: () => pathname, writeLog: () => {},
         markExpectedRendererExit: () => calls.push("expected-exit"),
+        setTimeout: callback => { timers.add(callback); return callback; },
+        clearTimeout: timer => timers.delete(timer),
     });
     const open = () => ipcMain.emit("siyuan-open-window", {sender: {id: 1}}, {
         url: "http://127.0.0.1:6806/stage/build/app/window.html?windowWorkspace=20260924100000-abcdefg",
@@ -160,7 +163,7 @@ const openWindow = (windowGeometry, appearance = {}, mode = "local") => {
     });
     open();
     const win = windows[0];
-    return {options, calls, workArea, win, ipcMain, initializedWindowIds, url, open,
+    return {options, calls, workArea, win, ipcMain, initializedWindowIds, url, open, timers,
         navigate: value => { pathname = value; },
         close: () => win.emit("close", {preventDefault: () => calls.push("prevent-close")}),
     };
@@ -169,7 +172,13 @@ const openWindow = (windowGeometry, appearance = {}, mode = "local") => {
 test("新窗口创建时使用保存边界，不被鼠标所在显示器覆盖", () => {
     const f = openWindow(state({maximized: true}));
     assert.deepEqual([f.options.x, f.options.y, f.options.width, f.options.height], [100, 80, 900, 700]);
-    assert.deepEqual(f.calls, ["maximize"]);
+    // 首帧绘制（或短延迟）前不显示窗口，最大化也在那时才应用
+    assert.equal(f.options.show, false);
+    assert.deepEqual(f.calls, []);
+    f.win.emit("ready-to-show");
+    assert.deepEqual(f.calls, ["maximize", "show"]);
+    f.win.emit("ready-to-show");
+    assert.deepEqual(f.calls, ["maximize", "show"]);
 });
 
 test("旧窗口布局继续使用默认窗口位置", () => {
@@ -177,18 +186,36 @@ test("旧窗口布局继续使用默认窗口位置", () => {
     assert.deepEqual(f.calls, ["center", f.workArea]);
 });
 
-test("新窗口立即显示，重复打开激活已有窗口", () => {
+test("新窗口首帧后显示，定时器先到也显示，重复打开激活已有窗口", () => {
     const f = openWindow(state());
-    assert.equal(f.options.show, true);
+    assert.equal(f.options.show, false);
     assert.equal(f.options.webPreferences.backgroundThrottling, undefined);
     assert.equal(f.ipcMain.listenerCount("siyuan-window-ready"), 0);
-    f.open();
+    assert.deepEqual(f.calls, []);
+    f.win.emit("ready-to-show");
     assert.deepEqual(f.calls, ["show"]);
+    assert.equal(f.timers.size, 1, "ready-to-show 已显示，只保留兜底超时");
+    f.open();
+    assert.deepEqual(f.calls, ["show", "show"]);
+
+    // 首帧迟迟不来时由短延迟定时器显示，且不会重复显示
+    const timer = openWindow(state());
+    assert.equal(timer.timers.size, 2);
+    assert.ok([...timer.timers].some(fn => {
+        if (fn.name !== "revealWindow") return false;
+        fn();
+        return true;
+    }), "存在短延迟显示定时器");
+    assert.deepEqual(timer.calls, ["show"]);
+    timer.win.emit("ready-to-show");
+    assert.deepEqual(timer.calls, ["show"]);
 });
 
-test("全屏窗口立即恢复状态", () => {
+test("全屏窗口首帧后恢复状态", () => {
     const f = openWindow(state({fullscreen: true}));
-    assert.deepEqual(f.calls, ["fullscreen"]);
+    assert.deepEqual(f.calls, []);
+    f.win.emit("ready-to-show");
+    assert.deepEqual(f.calls, ["fullscreen", "show"]);
 });
 
 test("原生窗口和页面使用同一实际主题颜色，非法颜色使用安全默认值", () => {

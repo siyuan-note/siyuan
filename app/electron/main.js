@@ -4042,7 +4042,9 @@ app.whenReady().then(() => {
         const geometry = workspaceID ? normalizeWindowGeometry(data.windowGeometry, screen) : undefined;
         const win = new BrowserWindow({
             title: "SiYuan",
-            show: true,
+            // 先在隐藏状态完成定位和加载，等画面就绪或短暂延迟后再显示，
+            // 避免窗口映射早于首帧提交时出现系统填充的近白色占位帧。
+            show: false,
             backgroundColor,
             trafficLightPosition: {x: 8, y: 13},
             width: Math.floor(data.width || mainScreen.size.width * 0.7),
@@ -4073,13 +4075,6 @@ app.whenReady().then(() => {
             windowWorkspaces.associate(win, kernelTarget.origin, workspaceID);
         }
 
-        if (geometry && data.windowGeometry.maximized) {
-            win.maximize();
-        }
-        if (geometry && data.windowGeometry.fullscreen) {
-            win.setFullScreen(true);
-        }
-
         if (!geometry && data.position) {
             win.setPosition(data.position.x, data.position.y);
         } else if (!geometry) {
@@ -4088,6 +4083,40 @@ app.whenReady().then(() => {
         win.setAlwaysOnTop(data.alwaysOnTop, "win32" === process.platform ? "pop-up-menu" : "floating");
         win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
         win.webContents.session.setSpellCheckerLanguages(["en-US"]);
+        // 显示时机：首帧（ready-to-show）或短延迟，谁先到用谁。
+        // ready-to-show 在本应用里可能晚到 1 秒以上，定时器保证窗口及时出现；
+        // 两者都晚于创建，因此首帧直接是主题背景，不会闪白。
+        const revealDelay = 150;
+        let revealed = false;
+        let revealTimer;
+        const revealWindow = () => {
+            if (revealed || win.isDestroyed()) {
+                return;
+            }
+            revealed = true;
+            clearTimeout(revealTimer);
+            // 隐藏窗口上最大化或进入全屏会直接映射窗口，因此和显示一起执行。
+            if (geometry && data.windowGeometry.maximized) {
+                win.maximize();
+            }
+            if (geometry && data.windowGeometry.fullscreen) {
+                win.setFullScreen(true);
+            }
+            showWindow(win);
+        };
+        win.once("ready-to-show", revealWindow);
+        revealTimer = setTimeout(revealWindow, revealDelay);
+        // 渲染异常时仍显示窗口，避免留下无法访问的隐藏窗口。
+        const forceRevealTimer = setTimeout(() => {
+            if (!revealed) {
+                writeLog("detached window ready-to-show timeout, show it anyway");
+                revealWindow();
+            }
+        }, 60000);
+        win.once("closed", () => {
+            clearTimeout(revealTimer);
+            clearTimeout(forceRevealTimer);
+        });
         win.loadURL(windowURL.href);
         windowNavigate(win, "window", kernelTarget.origin, kernelTarget.mode === "remote");
         win.on("close", (event) => {

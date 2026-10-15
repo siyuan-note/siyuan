@@ -1,4 +1,8 @@
 {
+	"aiClaudeCodeEnv": "CLI-Umgebungsvariablen",
+	"aiClaudeCodeEnvTip": "Wird in die Umgebung der claude-Befehlszeile eingefügt; Werte unterstützen ${VAR} zum Lesen einer Systemumgebungsvariablen oder eines SiYuan-Geheimnisses",
+	"aiClaudeCodeEnvInvalid": "Ungültiges JSON für Umgebungsvariablen",
+	"testConnectionSuccessMsg": "Test erfolgreich: ${msg}",
 	"aiProtocolClaudeCode": "Claude Code (lokale CLI)",
 	"aiClaudeCodeCLIPath": "CLI-Pfad",
 	"aiClaudeCodeCLIPathTip": "Leer lassen, um die ausführbare Datei claude an gängigen Installationsorten zu ermitteln",
@@ -3014,7 +3018,8 @@
 		"409": "Die Netzwerkverbindung wurde unterbrochen oder konnte nicht hergestellt werden. Bitte prüfen Sie Ihre Netzwerk-, Proxy- oder Firewall-Einstellungen",
 		"410": "Wenn Sie ein GLM Coding Plan-Abonnement nutzen, stellen Sie die API-Adresse auf https://open.bigmodel.cn/api/coding/paas/v4 ein",
 		"411": "Die Claude Code CLI wurde nicht gefunden, bitte legen Sie den Pfad zur ausführbaren Datei claude in den Anbietereinstellungen fest",
-		"412": "Claude Code CLI erkannt",
-		"413": "Die verfügbaren Modelle werden von der CLI verwaltet, geben Sie einen Modellnamen direkt ein, z. B. sonnet oder opus"
+		"413": "Die verfügbaren Modelle werden von der CLI verwaltet, geben Sie einen Modellnamen direkt ein, z. B. sonnet oder opus",
+		"414": "Die Umgebungsvariable %s ist nicht festgelegt, bitte hinterlegen Sie die Anmeldedaten in den Anbietereinstellungen oder legen Sie zuerst diese Umgebungsvariable fest",
+		"415": "Die lokale Claude Code-Befehlszeile hat längere Zeit keine Ausgabe erzeugt, bitte prüfen Sie Anmeldedaten, Netzwerkproxy und Konfiguration der Befehlszeile"
 	}
 }

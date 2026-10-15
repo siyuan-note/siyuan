@@ -1,4 +1,8 @@
 {
+	"aiClaudeCodeEnv": "CLI ortam değişkenleri",
+	"aiClaudeCodeEnvTip": "claude komut satırı ortamına eklenir; değerler sistem ortam değişkenini veya SiYuan gizli anahtarını okumak için ${VAR} destekler",
+	"aiClaudeCodeEnvInvalid": "Ortam değişkenleri JSON’u geçersiz",
+	"testConnectionSuccessMsg": "Test başarılı: ${msg}",
 	"aiProtocolClaudeCode": "Claude Code (yerel CLI)",
 	"aiClaudeCodeCLIPath": "CLI yolu",
 	"aiClaudeCodeCLIPathTip": "Yaygın kurulum konumlarından claude yürütülebilir dosyasını algılamak için boş bırakın",
@@ -3014,7 +3018,8 @@
 		"409": "Ağ bağlantısı kesildi veya kurulamadı. Ağ, vekil sunucu veya güvenlik duvarı ayarlarınızı kontrol edin",
 		"410": "GLM Coding Plan aboneliği kullanıyorsanız API adresini https://open.bigmodel.cn/api/coding/paas/v4 olarak ayarlayın",
 		"411": "Claude Code CLI bulunamadı, lütfen sağlayıcı ayarlarında claude yürütülebilir dosyasının yolunu ayarlayın",
-		"412": "Claude Code CLI algılandı",
-		"413": "Kullanılabilir modeller CLI tarafından yönetilir; doğrudan bir model adı girin, örneğin sonnet veya opus"
+		"413": "Kullanılabilir modeller CLI tarafından yönetilir; doğrudan bir model adı girin, örneğin sonnet veya opus",
+		"414": "%s ortam değişkeni ayarlanmamış, sağlayıcı ayarlarından kimlik bilgisini girin veya önce bu ortam değişkenini ayarlayın",
+		"415": "Yerel Claude Code komut satırı uzun süre çıktı vermedi, kimlik bilgilerini, ağ proxy’sini ve komut satırı yapılandırmasını kontrol edin"
 	}
 }

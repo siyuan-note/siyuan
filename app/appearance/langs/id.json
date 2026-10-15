@@ -1,4 +1,8 @@
 {
+	"aiClaudeCodeEnv": "Variabel lingkungan CLI",
+	"aiClaudeCodeEnvTip": "Disuntikkan ke lingkungan baris perintah claude; nilai mendukung ${VAR} untuk membaca variabel lingkungan sistem atau rahasia SiYuan",
+	"aiClaudeCodeEnvInvalid": "JSON variabel lingkungan tidak valid",
+	"testConnectionSuccessMsg": "Pengujian berhasil: ${msg}",
 	"aiProtocolClaudeCode": "Claude Code (CLI lokal)",
 	"aiClaudeCodeCLIPath": "Jalur CLI",
 	"aiClaudeCodeCLIPathTip": "Kosongkan untuk mendeteksi berkas claude yang dapat dieksekusi dari lokasi instalasi umum",
@@ -3014,7 +3018,8 @@
 		"409": "Koneksi jaringan terputus atau tidak dapat dibuat. Periksa pengaturan jaringan, proksi, atau firewall",
 		"410": "Jika Anda menggunakan langganan GLM Coding Plan, setel alamat API ke https://open.bigmodel.cn/api/coding/paas/v4",
 		"411": "Claude Code CLI tidak ditemukan, setel jalur berkas claude yang dapat dieksekusi di pengaturan penyedia",
-		"412": "Claude Code CLI terdeteksi",
-		"413": "Model yang tersedia dikelola oleh CLI; masukkan nama model secara langsung, misalnya sonnet atau opus"
+		"413": "Model yang tersedia dikelola oleh CLI; masukkan nama model secara langsung, misalnya sonnet atau opus",
+		"414": "Variabel lingkungan %s belum ditetapkan, isi kredensial di pengaturan penyedia atau tetapkan variabel lingkungan ini terlebih dahulu",
+		"415": "Baris perintah Claude Code lokal tidak menghasilkan keluaran untuk waktu yang lama, periksa kredensial, proxy jaringan, dan konfigurasi baris perintah"
 	}
 }

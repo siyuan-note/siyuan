@@ -1,4 +1,8 @@
 {
+	"aiClaudeCodeEnv": "Zmienne środowiskowe CLI",
+	"aiClaudeCodeEnvTip": "Wstrzykiwane do środowiska wiersza poleceń claude; wartości obsługują ${VAR} do odczytu zmiennej środowiskowej systemu lub sekretu SiYuan",
+	"aiClaudeCodeEnvInvalid": "Nieprawidłowy JSON zmiennych środowiskowych",
+	"testConnectionSuccessMsg": "Test zakończony pomyślnie: ${msg}",
 	"aiProtocolClaudeCode": "Claude Code (lokalne CLI)",
 	"aiClaudeCodeCLIPath": "Ścieżka CLI",
 	"aiClaudeCodeCLIPathTip": "Pozostaw puste, aby wykryć plik wykonywalny claude w typowych lokalizacjach instalacji",
@@ -3014,7 +3018,8 @@
 		"409": "Połączenie sieciowe zostało przerwane lub nie można go nawiązać. Sprawdź ustawienia sieci, serwera proxy lub zapory",
 		"410": "Jeśli używasz subskrypcji GLM Coding Plan, ustaw adres API na https://open.bigmodel.cn/api/coding/paas/v4",
 		"411": "Nie znaleziono Claude Code CLI. Ustaw ścieżkę pliku wykonywalnego claude w ustawieniach dostawcy",
-		"412": "Wykryto Claude Code CLI",
-		"413": "Dostępne modele są zarządzane przez CLI. Wpisz nazwę modelu bezpośrednio, na przykład sonnet lub opus"
+		"413": "Dostępne modele są zarządzane przez CLI. Wpisz nazwę modelu bezpośrednio, na przykład sonnet lub opus",
+		"414": "Zmienna środowiskowa %s nie jest ustawiona, podaj dane logowania w ustawieniach dostawcy lub najpierw ustaw tę zmienną środowiskową",
+		"415": "Lokalny wiersz poleceń Claude Code przez długi czas nie zwracał danych wyjściowych, sprawdź dane logowania, proxy sieciowe i konfigurację wiersza poleceń"
 	}
 }

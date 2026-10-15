@@ -36,31 +36,49 @@ func NewAIClientForProvider(provider *conf.Provider, model *conf.Model) *util.AI
 
 // claudeCodeRuntime 组装本机命令行运行期配置，含工作空间 MCP 服务凭据与只读标记。
 func claudeCodeRuntime(provider *conf.Provider, model *conf.Model) util.ClaudeCodeRuntime {
-	runtime := util.ClaudeCodeRuntime{
-		Model:  model.Name,
-		APIKey: provider.APIKey,
-	}
-	permissionMode := util.ClaudeCodePermissionReadOnly
-	if nil != provider.ClaudeCode {
-		runtime.CLIPath = provider.ClaudeCode.CLIPath
-		permissionMode = provider.ClaudeCode.PermissionMode
-	}
-	runtime.PermissionMode = permissionMode
-	runtime.MCPServers = claudeCodeMCPServers(permissionMode)
-	if util.ClaudeCodePermissionFull == permissionMode {
+	runtime := claudeCodeBaseRuntime(provider, util.ClaudeCodePermissionReadOnly)
+	runtime.Model = model.Name
+	runtime.MCPServers = claudeCodeMCPServers(runtime.PermissionMode)
+	if util.ClaudeCodePermissionFull == runtime.PermissionMode {
 		// 完全放行模式下允许命令行直接处理工作空间文件
 		runtime.WorkingDir = util.WorkspaceDir
 	}
 	return runtime
 }
 
-// ClaudeCodeCLIStatus 返回本机 Claude Code 命令行的路径与版本，供设置页的连通性测试使用。
-func ClaudeCodeCLIStatus(provider *conf.Provider) (path, version string, err error) {
-	cliPath := ""
-	if nil != provider && nil != provider.ClaudeCode {
-		cliPath = provider.ClaudeCode.CLIPath
+// ClaudeCodeTestRuntime 组装设置页测试模型所需的运行期配置，不挂载 MCP 服务器也不指定工作空间。
+func ClaudeCodeTestRuntime(provider *conf.Provider) util.ClaudeCodeRuntime {
+	return claudeCodeBaseRuntime(provider, util.ClaudeCodePermissionReadOnly)
+}
+
+// claudeCodeBaseRuntime 读取提供方配置的路径、工具权限与注入命令行的环境变量。
+func claudeCodeBaseRuntime(provider *conf.Provider, defaultPermissionMode string) util.ClaudeCodeRuntime {
+	runtime := util.ClaudeCodeRuntime{PermissionMode: defaultPermissionMode}
+	if nil == provider {
+		return runtime
 	}
-	return util.ResolveClaudeCodeCLI(cliPath)
+	config := provider.ClaudeCode
+	if nil == config {
+		return runtime
+	}
+	runtime.CLIPath = config.CLIPath
+	if "" != config.PermissionMode {
+		runtime.PermissionMode = config.PermissionMode
+	}
+	runtime.Env = ResolveClaudeCodeEnv(config.Env)
+	return runtime
+}
+
+// ResolveClaudeCodeEnv 解析命令行环境变量值中的密钥与变量引用，与请求头使用同一套占位符。
+func ResolveClaudeCodeEnv(env map[string]string) map[string]string {
+	if 0 == len(env) || nil == Conf {
+		return env
+	}
+	resolved := make(map[string]string, len(env))
+	for name, value := range env {
+		resolved[name] = conf.ResolveSecretsVars(Conf.Secrets, Conf.Variables, value)
+	}
+	return resolved
 }
 
 // claudeCodeMCPServers 生成命令行挂载的 MCP 服务器配置。

@@ -1,4 +1,8 @@
 {
+	"aiClaudeCodeEnv": "命令列環境變數",
+	"aiClaudeCodeEnvTip": "注入 claude 命令列的環境變數，值支援 ${變數名稱} 引用系統環境變數或 SiYuan 密鑰",
+	"aiClaudeCodeEnvInvalid": "環境變數 JSON 格式不正確",
+	"testConnectionSuccessMsg": "測試成功：${msg}",
 	"aiProtocolClaudeCode": "Claude Code（本機命令列）",
 	"aiClaudeCodeCLIPath": "命令列路徑",
 	"aiClaudeCodeCLIPathTip": "留空以從常見安裝位置自動偵測 claude 執行檔",
@@ -3014,7 +3018,8 @@
 		"409": "網路連線中斷或無法建立，請檢查網路、代理或防火牆設定",
 		"410": "若使用 GLM Coding Plan 編碼套餐，請將 API 位址設定為 https://open.bigmodel.cn/api/coding/paas/v4",
 		"411": "找不到 Claude Code 命令列，請在提供商設定中設定 claude 執行檔路徑",
-		"412": "已偵測到 Claude Code 命令列",
-		"413": "可用的模型由命令列管理，請直接填寫模型名稱，例如 sonnet 或 opus"
+		"413": "可用的模型由命令列管理，請直接填寫模型名稱，例如 sonnet 或 opus",
+		"414": "環境變數 %s 未設定，請在提供方設定中填寫憑證或先設定該環境變數",
+		"415": "本機 Claude Code 命令列長時間沒有輸出，請檢查憑證、網路代理和命令列設定"
 	}
 }

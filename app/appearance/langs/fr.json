@@ -1,4 +1,8 @@
 {
+	"aiClaudeCodeEnv": "Variables d’environnement de la CLI",
+	"aiClaudeCodeEnvTip": "Injecté dans l’environnement de la ligne de commande claude ; les valeurs acceptent ${VAR} pour lire une variable d’environnement système ou un secret SiYuan",
+	"aiClaudeCodeEnvInvalid": "JSON des variables d’environnement non valide",
+	"testConnectionSuccessMsg": "Test réussi : ${msg}",
 	"aiProtocolClaudeCode": "Claude Code (CLI locale)",
 	"aiClaudeCodeCLIPath": "Chemin de la CLI",
 	"aiClaudeCodeCLIPathTip": "Laisser vide pour détecter l’exécutable claude dans les emplacements d’installation courants",
@@ -3014,7 +3018,8 @@
 		"409": "La connexion réseau a été interrompue ou n’a pas pu être établie. Vérifiez les paramètres du réseau, du proxy ou du pare-feu",
 		"410": "Si vous utilisez un abonnement GLM Coding Plan, définissez l'adresse de l'API sur https://open.bigmodel.cn/api/coding/paas/v4",
 		"411": "La CLI Claude Code est introuvable, veuillez définir le chemin de l’exécutable claude dans les paramètres du fournisseur",
-		"412": "CLI Claude Code détectée",
-		"413": "Les modèles disponibles sont gérés par la CLI, saisissez directement un nom de modèle, par exemple sonnet ou opus"
+		"413": "Les modèles disponibles sont gérés par la CLI, saisissez directement un nom de modèle, par exemple sonnet ou opus",
+		"414": "La variable d’environnement %s n’est pas définie, renseignez les identifiants dans les paramètres du fournisseur ou définissez d’abord cette variable d’environnement",
+		"415": "La ligne de commande Claude Code locale n’a produit aucune sortie pendant longtemps, vérifiez les identifiants, le proxy réseau et la configuration de la ligne de commande"
 	}
 }

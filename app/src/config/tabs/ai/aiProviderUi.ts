@@ -8,9 +8,11 @@ import {Menu} from "../../../plugin/Menu";
 import {upDownHint} from "../../../util/upDownHint";
 import {moveModelItem} from "./aiModelOrder";
 import {hasProviderHeaderAuth, parseProviderHeaders} from "./aiProviderHeaders";
+import {parseClaudeCodeEnv, stringifyClaudeCodeEnv} from "./aiProviderEnv";
 import {resolveProviderTestResult} from "./aiProviderTestResult";
 import {isMobile} from "../../../util/functions";
 import {
+    CLAUDE_CODE_BASE_URL,
     findProviderPreset,
     getDefaultProviderProtocol,
     getProviderProtocolBaseURL,
@@ -354,7 +356,14 @@ const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[]) 
 const showTestResult = (data: AIModelTestData) => {
     const result = resolveProviderTestResult(data);
     if (result.success) {
-        showMessage(window.siyuan.languages.testConnectionSuccess, undefined, "info");
+        // 服务端给出测试细节时一并展示，便于确认实际生效的模型
+        showMessage(
+            result.message
+                ? window.siyuan.languages.testConnectionSuccessMsg.replace("${msg}", escapeHTML(result.message))
+                : window.siyuan.languages.testConnectionSuccess,
+            undefined,
+            "info",
+        );
         return;
     }
     if (result.modelNotFound) {
@@ -392,6 +401,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         draft.claudeCode = {...defaultClaudeCodeConfig(), ...draft.claudeCode};
     }
     const initialHeadersText = Object.keys(draft.headers || {}).length ? JSON.stringify(draft.headers, null, 2) : "";
+    const initialEnvText = stringifyClaudeCodeEnv(draft.claudeCode?.env);
     const initialJSON = JSON.stringify(draft);
     const openedFromCatalog = !existing && !!preset;
     const view = createProviderView(
@@ -439,12 +449,17 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     <option value="full"${draft.claudeCode?.permissionMode === "full" ? " selected" : ""}>${window.siyuan.languages.aiClaudeCodePermissionFull}</option>
                 </select>
             </label>
+            <div class="b3-label config-item fn__none" data-type="claudeCodeEnv">
+                ${genConfigItemMainHtml(window.siyuan.languages.aiClaudeCodeEnv, window.siyuan.languages.aiClaudeCodeEnvTip)}
+                <div class="fn__hr"></div>
+                <textarea class="b3-text-field fn__block" data-type="claudeCodeEnvInput" rows="3" spellcheck="false" style="resize: vertical;" placeholder='{"ANTHROPIC_BASE_URL":"https://api.deepseek.com/anthropic","ANTHROPIC_AUTH_TOKEN":"\${MY_ANTHROPIC_TOKEN}"}'>${escapeHTML(initialEnvText)}</textarea>
+            </div>
             <label class="fn__flex b3-label config-item">
                 ${genConfigItemMainHtml(window.siyuan.languages.apiTimeout)}
                 <span class="fn__space"></span>
                 <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="requestTimeout" type="number" min="1" max="600" value="${draft.requestTimeout}">
             </label>
-            <label class="fn__flex b3-label config-item">
+            <label class="fn__flex b3-label config-item" data-type="providerApiKey">
                 ${genConfigItemMainHtml(window.siyuan.languages.apiKey)}
                 <span class="fn__space"></span>
                 <div class="b3-form__icona fn__size200">
@@ -484,6 +499,25 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>
 </div>`;
     bindPasswordIconaToggle(view, "aiProviderDetailApiKey");
+    const envInput = view.querySelector<HTMLTextAreaElement>("[data-type='claudeCodeEnvInput']");
+    const validateClaudeCodeEnv = () => {
+        if (!isClaudeCodeProtocol(draft.protocol)) {
+            return true;
+        }
+        const env = parseClaudeCodeEnv(envInput.value);
+        if (env === null) {
+            envInput.focus();
+            showMessage(window.siyuan.languages.aiClaudeCodeEnvInvalid, undefined, "error");
+            return false;
+        }
+        draft.claudeCode = {...defaultClaudeCodeConfig(), ...draft.claudeCode};
+        if (Object.keys(env).length > 0) {
+            draft.claudeCode.env = env;
+        } else {
+            delete draft.claudeCode.env;
+        }
+        return true;
+    };
     const headersInput = view.querySelector<HTMLTextAreaElement>("[data-type='providerHeaders']");
     const validateHeaders = () => {
         const headers = parseProviderHeaders(headersInput.value);
@@ -522,7 +556,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             : window.siyuan.languages.experimentalFeature;
     };
     const validateAPIKey = () => {
-        if (!validateHeaders()) {
+        if (!validateHeaders() || !validateClaudeCodeEnv()) {
             return false;
         }
         if (!requiresAPIKey(draft) || draft.apiKey.trim() !== "" || hasProviderHeaderAuth(draft.headers)) {
@@ -544,12 +578,14 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         ? window.siyuan.languages.aiClaudeCodeModelTip
         : undefined;
 
-    // 本机命令行提供方不使用 HTTP 端点，隐藏地址与请求头并显示命令行配置
+    // 本机命令行提供方不使用 HTTP 端点与 API Key，隐藏这些配置并显示命令行配置
     const updateClaudeCodeFields = () => {
         const claudeCode = isClaudeCodeProtocol(draft.protocol);
-        view.querySelectorAll<HTMLElement>("[data-type='claudeCodeCLIPath'], [data-type='claudeCodePermission']")
-            .forEach((element) => element.classList.toggle("fn__none", !claudeCode));
+        view.querySelectorAll<HTMLElement>(
+            "[data-type='claudeCodeCLIPath'], [data-type='claudeCodePermission'], [data-type='claudeCodeEnv']",
+        ).forEach((element) => element.classList.toggle("fn__none", !claudeCode));
         view.querySelector<HTMLElement>("[data-type='providerBaseURL']")?.classList.toggle("fn__none", claudeCode);
+        view.querySelector<HTMLElement>("[data-type='providerApiKey']")?.classList.toggle("fn__none", claudeCode);
         view.querySelector<HTMLElement>("[data-type='providerHeadersItem']")?.classList.toggle("fn__none", claudeCode);
         fetchModelsButton.classList.toggle("fn__none", claudeCode);
         // 命令行执行时间可能远长于单次 HTTP 请求，放宽超时上限
@@ -771,7 +807,8 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     };
 
     const closeDetail = () => {
-        if (JSON.stringify(draft) !== initialJSON || headersInput.value !== initialHeadersText) {
+        if (JSON.stringify(draft) !== initialJSON || headersInput.value !== initialHeadersText ||
+            envInput.value !== initialEnvText) {
             confirmDialog(
                 window.siyuan.languages.confirm,
                 window.siyuan.languages.discardUnsavedChanges,
@@ -846,10 +883,14 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         if (target.dataset.providerField === "protocol") {
             draft.protocol = target.value;
             draft.baseURL = getProviderProtocolBaseURL(draft.baseURL, draft.protocol);
-            view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']").value = draft.baseURL;
             if (isClaudeCodeProtocol(draft.protocol)) {
                 draft.claudeCode = {...defaultClaudeCodeConfig(), ...draft.claudeCode};
+                // 命令行提供方不使用 HTTP 端点，地址留空会导致无法保存，回填标识地址
+                if (!draft.baseURL.trim()) {
+                    draft.baseURL = CLAUDE_CODE_BASE_URL;
+                }
             }
+            view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']").value = draft.baseURL;
             updateModelActionButtons();
             updateResponsesCompatibility();
             updateClaudeCodeFields();
@@ -917,7 +958,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         }
         if (action === "testModel" && draft.models[modelIndex]) {
             const model = draft.models[modelIndex];
-            if (!draft.baseURL.trim()) {
+            if (!draft.baseURL.trim() && !isClaudeCodeProtocol(draft.protocol)) {
                 view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();
                 showMessage(window.siyuan.languages.apiBaseURLTip, undefined, "error");
                 return;
@@ -946,11 +987,11 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         if (action === "confirm") {
-            if (!validateHeaders()) {
+            if (!validateHeaders() || !validateClaudeCodeEnv()) {
                 return;
             }
             const emptyModel = draft.models.find((model) => !model.name.trim());
-            if (!draft.baseURL.trim()) {
+            if (!draft.baseURL.trim() && !isClaudeCodeProtocol(draft.protocol)) {
                 view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();
                 return;
             }

@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -168,6 +169,42 @@ type ClaudeCodeProviderConfig struct {
 	CLIPath string `json:"cliPath"`
 	// PermissionMode 限定命令行可执行的工具范围，取值见 util.ClaudeCodePermission* 常量
 	PermissionMode string `json:"permissionMode"`
+	// Env 是注入命令行的环境变量，用于配置凭据、网关地址与代理，
+	// 值支持使用 ${变量名} 引用内核进程的环境变量
+	Env map[string]string `json:"env,omitempty"`
+}
+
+// claudeCodeEnvNamePattern 限定可注入的环境变量名，避免写入非法字符导致命令行启动失败。
+var claudeCodeEnvNamePattern = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
+
+// MaxClaudeCodeEnvEntries 是单个命令行提供方可注入的环境变量数量上限。
+const MaxClaudeCodeEnvEntries = 64
+
+// normalizeClaudeCodeEnv 清理注入命令行的环境变量，丢弃非法变量名与空值。
+func normalizeClaudeCodeEnv(env map[string]string) map[string]string {
+	if 0 == len(env) {
+		return nil
+	}
+	normalized := make(map[string]string, len(env))
+	for name, value := range env {
+		name = strings.TrimSpace(name)
+		if !claudeCodeEnvNamePattern.MatchString(name) {
+			continue
+		}
+		// 换行等控制字符会被命令行拒绝，直接丢弃对应变量
+		value = strings.TrimSpace(value)
+		if "" == value || strings.ContainsAny(value, "\r\n\x00") {
+			continue
+		}
+		normalized[name] = value
+		if MaxClaudeCodeEnvEntries <= len(normalized) {
+			break
+		}
+	}
+	if 0 == len(normalized) {
+		return nil
+	}
+	return normalized
 }
 
 const (
@@ -225,6 +262,7 @@ func normalizeClaudeCodeProvider(provider *Provider, claudeCode bool) {
 	default:
 		provider.ClaudeCode.PermissionMode = util.ClaudeCodePermissionReadOnly
 	}
+	provider.ClaudeCode.Env = normalizeClaudeCodeEnv(provider.ClaudeCode.Env)
 }
 
 func defaultEmbedding() *Embedding {

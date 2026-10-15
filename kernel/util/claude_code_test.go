@@ -163,11 +163,103 @@ func TestClaudeCodeEventsDetectMissingResult(t *testing.T) {
 		if errors.Is(err, io.EOF) {
 			t.Fatal("missing result event was reported as a clean end of stream")
 		}
-		var resultErr claudeCodeResultError
-		if !errors.As(err, &resultErr) {
+		var runErr claudeCodeRunError
+		if !errors.As(err, &runErr) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 		return
+	}
+}
+
+// TestClaudeCodeEventsSilentLimit 命令行长时间无任何事件输出时终止生成，避免一直停留在思考中。
+func TestClaudeCodeEventsSilentLimit(t *testing.T) {
+	heartbeat, silentLimit := claudeCodeHeartbeat, claudeCodeSilentLimit
+	claudeCodeHeartbeat, claudeCodeSilentLimit = 10*time.Millisecond, 30*time.Millisecond
+	defer func() {
+		claudeCodeHeartbeat, claudeCodeSilentLimit = heartbeat, silentLimit
+	}()
+
+	reader, writer := io.Pipe()
+	defer writer.Close()
+	events := newClaudeCodeEvents(reader)
+
+	for i := 0; i < 10; i++ {
+		_, err := events.recv()
+		if nil == err {
+			continue
+		}
+		var runErr claudeCodeRunError
+		if !errors.As(err, &runErr) {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !strings.Contains(runErr.Error(), "no output") {
+			t.Fatalf("unexpected silent error: %q", runErr.Error())
+		}
+		return
+	}
+	t.Fatal("silent command line was not terminated")
+}
+
+// TestClaudeCodeEventsSessionAndFailure 覆盖 init 事件上报与 result 事件错误文本。
+func TestClaudeCodeEventsSessionAndFailure(t *testing.T) {
+	fixture := `{"type":"system","subtype":"init","model":"claude-sonnet-4-5","claude_code_version":"2.1.300","session_id":"s1"}
+{"type":"result","subtype":"success","is_error":true,"result":"API Error: 400 The supported API model names are a, b, but you passed bogus.","session_id":"s1"}`
+	events := newClaudeCodeEvents(strings.NewReader(fixture))
+
+	_, err := events.recv()
+	if nil != err {
+		t.Fatalf("init event must not fail the stream: %v", err)
+	}
+	version, sessionModel := events.session()
+	if "2.1.300" != version || "claude-sonnet-4-5" != sessionModel {
+		t.Fatalf("unexpected session info: %q %q", version, sessionModel)
+	}
+
+	_, err = events.recv()
+	var runErr claudeCodeRunError
+	if !errors.As(err, &runErr) {
+		t.Fatalf("expected a run error, got %v", err)
+	}
+	if !strings.Contains(runErr.Error(), "API Error: 400 The supported API model names") {
+		t.Fatalf("unexpected error message: %q", runErr.Error())
+	}
+	if "Claude Code failed: success" != claudeCodeResultMessage("", "success") {
+		t.Fatal("result message must fall back to the subtype")
+	}
+}
+
+// TestResolveClaudeCodeEnv 环境变量注入：引用当前进程环境变量，引用不到时直接报错。
+func TestResolveClaudeCodeEnv(t *testing.T) {
+	t.Setenv("SIYUAN_TEST_CLAUDE_TOKEN", "token-value")
+
+	env, err := resolveClaudeCodeEnv(map[string]string{
+		"ANTHROPIC_BASE_URL":   "https://example.com/anthropic",
+		"ANTHROPIC_AUTH_TOKEN": "${SIYUAN_TEST_CLAUDE_TOKEN}",
+		"ANTHROPIC_MODEL":      "prefix-${SIYUAN_TEST_CLAUDE_TOKEN}",
+	})
+	if nil != err {
+		t.Fatal(err)
+	}
+	expected := []string{
+		"ANTHROPIC_AUTH_TOKEN=token-value",
+		"ANTHROPIC_BASE_URL=https://example.com/anthropic",
+		"ANTHROPIC_MODEL=prefix-token-value",
+	}
+	if 3 != len(env) {
+		t.Fatalf("unexpected environment: %#v", env)
+	}
+	for i, item := range expected {
+		if item != env[i] {
+			t.Fatalf("unexpected environment item %d: %q", i, env[i])
+		}
+	}
+
+	if empty, emptyErr := resolveClaudeCodeEnv(nil); nil != emptyErr || 0 != len(empty) {
+		t.Fatalf("empty environment must not inject anything: %#v %v", empty, emptyErr)
+	}
+	_, err = resolveClaudeCodeEnv(map[string]string{"ANTHROPIC_AUTH_TOKEN": "${SIYUAN_TEST_CLAUDE_MISSING}"})
+	if nil == err || !strings.Contains(err.Error(), "SIYUAN_TEST_CLAUDE_MISSING") {
+		t.Fatalf("missing environment variable must fail: %v", err)
 	}
 }
 

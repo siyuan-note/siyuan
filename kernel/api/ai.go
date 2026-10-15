@@ -20,6 +20,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -237,7 +238,7 @@ func testModelContract(c *gin.Context, req apicontract.AIModelRequest) apicontra
 	}
 
 	if util.IsClaudeCodeProtocol(provider.Protocol) {
-		return testClaudeCodeModel(provider)
+		return testClaudeCodeModel(provider, req.Model)
 	}
 
 	available, matched, err := util.TestModel(
@@ -258,21 +259,36 @@ func testModelContract(c *gin.Context, req apicontract.AIModelRequest) apicontra
 	return apicontract.Success(result)
 }
 
-// testClaudeCodeModel 检测本机 Claude Code 命令行是否可用，作为该提供方的连接测试。
-func testClaudeCodeModel(provider *conf.Provider) apicontract.Response[apicontract.AIModelTestData] {
+// testClaudeCodeModel 以极简提示词执行一次本机 Claude Code 命令行生成，校验指定模型是否可用。
+// 命令行按模型名请求模型服务，模型名无效或凭据失效时会把错误文本放进 result 事件，因此以该结果判定成败。
+func testClaudeCodeModel(provider *conf.Provider, modelName string) apicontract.Response[apicontract.AIModelTestData] {
 	result := apicontract.AIModelTestData{}
-	path, version, err := model.ClaudeCodeCLIStatus(provider)
+	// 模型名留空时不传 --model，测试命令行默认模型是否可用
+	modelName = strings.TrimSpace(modelName)
+
+	probe, err := util.TestClaudeCodeModel(model.ClaudeCodeTestRuntime(provider), modelName)
 	if nil != err {
 		message := err.Error()
 		result.Msg = &message
-		logging.LogErrorf("test claude code provider failed: %s", err)
+		logging.LogErrorf("test claude code model [%s] failed: %s", modelName, err)
 		return apicontract.Success(result)
 	}
 	result.Matched = true
-	message := version + " (" + path + ")"
-	if detected := model.Conf.Language(412); "" != detected {
-		message = detected + ": " + message
+	message := modelName
+	if "" == message {
+		// 未指定模型时展示命令行默认模型
+		message = probe.ResolvedModel
 	}
+	details := make([]string, 0, 3)
+	if "" != modelName && "" != probe.ResolvedModel && probe.ResolvedModel != modelName {
+		// 命令行把别名映射到了实际模型，一并展示便于核对
+		details = append(details, probe.ResolvedModel)
+	}
+	details = append(details, probe.Latency.Round(100*time.Millisecond).String())
+	if "" != probe.Version {
+		details = append(details, "Claude Code "+probe.Version)
+	}
+	message += " (" + strings.Join(details, ", ") + ")"
 	result.Msg = &message
 	return apicontract.Success(result)
 }

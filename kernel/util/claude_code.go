@@ -27,6 +27,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -88,8 +89,8 @@ type ClaudeCodeRuntime struct {
 	Model string
 	// PermissionMode 取值见 conf.ClaudeCodePermission* 常量
 	PermissionMode string
-	// APIKey 非空时以 ANTHROPIC_API_KEY 覆盖本机登录凭据
-	APIKey string
+	// Env 是注入命令行的环境变量，值中的 ${变量名} 从当前进程的环境变量读取
+	Env map[string]string
 	// MCPServers 是 --mcp-config 的 JSON 文本，为空时不挂载任何 MCP 服务器
 	MCPServers string
 	// WorkingDir 是命令行工作目录，为空时使用临时目录
@@ -103,6 +104,16 @@ func IsClaudeCodeProtocol(protocol string) bool {
 
 // claudeCodeHeartbeat 是命令行长时间无输出时的心跳间隔，需小于上层空闲超时时间。
 var claudeCodeHeartbeat = 15 * time.Second
+
+// claudeCodeSilentLimit 是命令行无任何事件输出的容忍时长。
+// 心跳会重置上层的空闲计时器，因此需要单独判定静默时长：凭据缺失或网络不通时命令行不会立即退出。
+var claudeCodeSilentLimit = 5 * time.Minute
+
+// claudeCodeProbeTimeout 是设置页测试模型可用性的单次执行上限。
+const claudeCodeProbeTimeout = 90 * time.Second
+
+// claudeCodeProbePrompt 是测试模型可用性时发送的极简提示词。
+const claudeCodeProbePrompt = "Reply with the single word: ok"
 
 type claudeCodeCLI struct {
 	path    string
@@ -306,6 +317,12 @@ type claudeCodeEvents struct {
 	mapper anthropicStream
 	done   bool
 
+	// lastEventAt 记录最近一次收到事件的时间，长时间无输出时终止本次生成
+	lastEventAt time.Time
+	// 命令行 init 事件上报的版本与模型名，供连通性测试展示
+	sessionVersion string
+	sessionModel   string
+
 	// 后台读取协程的结束状态，长时间无输出时由心跳重置上层空闲计时器
 	readMutex sync.Mutex
 	readErr   error
@@ -314,11 +331,17 @@ type claudeCodeEvents struct {
 // newClaudeCodeEvents 基于事件流创建解析器。
 func newClaudeCodeEvents(reader io.Reader) *claudeCodeEvents {
 	events := &claudeCodeEvents{
-		lines:  make(chan []byte, 256),
-		closed: make(chan struct{}),
+		lines:       make(chan []byte, 256),
+		closed:      make(chan struct{}),
+		lastEventAt: time.Now(),
 	}
 	go events.readLines(reader)
 	return events
+}
+
+// session 返回命令行 init 事件上报的版本与模型名。
+func (e *claudeCodeEvents) session() (version, model string) {
+	return e.sessionVersion, e.sessionModel
 }
 
 func (e *claudeCodeEvents) readLines(reader io.Reader) {
@@ -394,10 +417,14 @@ func createClaudeCodeStream(ctx context.Context, client *AIClient, request opena
 		return nil, err
 	}
 
+	env, err := claudeCodeEnvironment(runtime)
+	if nil != err {
+		return nil, err
+	}
 	invocation := buildClaudeCodeInvocation(*runtime, request)
 	cmd := exec.CommandContext(ctx, binPath, invocation.Args...)
 	cmd.Dir = claudeCodeWorkingDir(runtime.WorkingDir)
-	cmd.Env = claudeCodeEnvironment(runtime.APIKey)
+	cmd.Env = env
 	gulu.CmdAttr(cmd)
 
 	stdin, err := cmd.StdinPipe()
@@ -446,13 +473,61 @@ func claudeCodeWorkingDir(workingDir string) string {
 	return dir
 }
 
-// claudeCodeEnvironment 继承本机环境以复用命令行登录态，指定 API Key 时覆盖凭据。
-func claudeCodeEnvironment(apiKey string) []string {
+// claudeCodeEnvironment 继承本机环境以复用命令行登录态，再叠加提供方配置的环境变量。
+// 桌面端内核由启动器拉起，环境变量往往不含终端里配置的凭据与网关地址，因此允许在提供方设置中补充。
+func claudeCodeEnvironment(runtime *ClaudeCodeRuntime) ([]string, error) {
 	env := os.Environ()
-	if "" != apiKey {
-		env = append(env, "ANTHROPIC_API_KEY="+apiKey)
+	injected, err := resolveClaudeCodeEnv(runtime.Env)
+	if nil != err {
+		return nil, err
 	}
-	return env
+	return append(env, injected...), nil
+}
+
+// claudeCodeEnvRefPattern 匹配环境变量值中对当前进程环境变量的引用。
+var claudeCodeEnvRefPattern = regexp.MustCompile(`\$\{([A-Za-z_][A-Za-z0-9_]*)\}`)
+
+// resolveClaudeCodeEnv 解析注入命令行的环境变量，变量名排序后输出以保证结果稳定。
+// 引用不到的环境变量直接报错，避免命令行拿到空凭据后长时间无响应。
+func resolveClaudeCodeEnv(env map[string]string) ([]string, error) {
+	if 0 == len(env) {
+		return nil, nil
+	}
+	names := make([]string, 0, len(env))
+	for name := range env {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	ret := make([]string, 0, len(names))
+	for _, name := range names {
+		value, err := resolveClaudeCodeEnvValue(env[name])
+		if nil != err {
+			return nil, err
+		}
+		ret = append(ret, name+"="+value)
+	}
+	return ret, nil
+}
+
+// resolveClaudeCodeEnvValue 替换环境变量值中的引用，多处引用未设置时报告首个变量名。
+func resolveClaudeCodeEnvValue(value string) (string, error) {
+	missing := ""
+	resolved := claudeCodeEnvRefPattern.ReplaceAllStringFunc(value, func(match string) string {
+		name := claudeCodeEnvRefPattern.FindStringSubmatch(match)[1]
+		if referenced := os.Getenv(name); "" != referenced {
+			return referenced
+		}
+		if "" == missing {
+			missing = name
+		}
+		return match
+	})
+	if "" != missing {
+		return "", fmt.Errorf(BootL10n(414,
+			"Environment variable %s is not set, please fill in the credential in the provider settings or set the environment variable first"), missing)
+	}
+	return resolved, nil
 }
 
 // recv 读取事件流中的下一个分片，事件流结束后返回 io.EOF。
@@ -464,9 +539,16 @@ func (e *claudeCodeEvents) recv() (openai.ChatCompletionStreamResponse, error) {
 	for {
 		raw, ok, timeout := e.nextLine()
 		if timeout {
-			// 长时间无输出时返回空分片，重置上层空闲计时器
+			// 命令行长时间没有任何事件输出时终止本次生成，避免界面一直停留在思考中
+			if claudeCodeSilentLimit <= time.Since(e.lastEventAt) {
+				return ret, claudeCodeRunError{attachStderr: true, message: fmt.Sprintf("%s (%s)",
+					BootL10n(415, "The local Claude Code command line produced no output for a long time, please check the credentials, network proxy and command line configuration"),
+					time.Since(e.lastEventAt).Round(time.Second))}
+			}
+			// 其余情况返回空分片，重置上层空闲计时器
 			return ret, nil
 		}
+		e.lastEventAt = time.Now()
 		if !ok {
 			e.readMutex.Lock()
 			err := e.readErr
@@ -474,7 +556,7 @@ func (e *claudeCodeEvents) recv() (openai.ChatCompletionStreamResponse, error) {
 			if nil != err {
 				return ret, err
 			}
-			return ret, claudeCodeResultError{message: "Claude Code exited without a result event"}
+			return ret, claudeCodeRunError{attachStderr: true, message: "Claude Code exited without a result event"}
 		}
 		line := bytes.TrimSpace(raw)
 		if 0 == len(line) || '{' != line[0] {
@@ -486,6 +568,9 @@ func (e *claudeCodeEvents) recv() (openai.ChatCompletionStreamResponse, error) {
 			Subtype    string          `json:"subtype"`
 			StopReason string          `json:"stop_reason"`
 			IsError    bool            `json:"is_error"`
+			Result     string          `json:"result"`
+			Model      string          `json:"model"`
+			Version    string          `json:"claude_code_version"`
 			Usage      json.RawMessage `json:"usage"`
 			Event      json.RawMessage `json:"event"`
 		}
@@ -522,10 +607,17 @@ func (e *claudeCodeEvents) recv() (openai.ChatCompletionStreamResponse, error) {
 		case "result":
 			e.done = true
 			if event.IsError {
-				return ret, claudeCodeResultError{message: "Claude Code failed: " + event.Subtype}
+				// 命令行把模型与鉴权错误放在 result 文本里，直接透出便于定位
+				return ret, claudeCodeRunError{message: claudeCodeResultMessage(event.Result, event.Subtype)}
 			}
 			ret.Usage = claudeCodeUsage(event.Usage)
 			ret.Choices = []openai.ChatCompletionStreamChoice{{Index: 0, FinishReason: claudeCodeFinishReason(event.StopReason)}}
+			return ret, nil
+		case "system":
+			if "init" == event.Subtype {
+				e.sessionVersion, e.sessionModel = event.Version, event.Model
+			}
+			// 其余进度事件只用于重置上层空闲计时器
 			return ret, nil
 		default:
 			// 进度事件只用于重置上层空闲计时器
@@ -534,13 +626,23 @@ func (e *claudeCodeEvents) recv() (openai.ChatCompletionStreamResponse, error) {
 	}
 }
 
-// claudeCodeResultError 表示命令行本次执行未正常完成，附加标准错误输出后返回上层。
-type claudeCodeResultError struct {
-	message string
+// claudeCodeRunError 表示命令行本次执行未正常完成，附加标准错误输出后返回上层。
+// attachStderr 仅在错误信息本身缺少细节时打开，避免命令行启动时的提示信息盖住真实原因。
+type claudeCodeRunError struct {
+	message      string
+	attachStderr bool
 }
 
-func (err claudeCodeResultError) Error() string {
+func (err claudeCodeRunError) Error() string {
 	return err.message
+}
+
+// claudeCodeResultMessage 组装命令行执行失败的提示，优先使用 result 事件中的错误文本。
+func claudeCodeResultMessage(result, subtype string) string {
+	if detail := strings.TrimSpace(result); "" != detail {
+		return detail
+	}
+	return "Claude Code failed: " + subtype
 }
 
 // recv 读取分片，把命令行的工具调用改写为思考进度，并在失败时补充标准错误输出。
@@ -550,8 +652,8 @@ func (s *claudeCodeStream) recv() (openai.ChatCompletionStreamResponse, error) {
 		return claudeCodeProgress(chunk), nil
 	}
 	s.close()
-	var resultErr claudeCodeResultError
-	if !errors.As(err, &resultErr) {
+	var runErr claudeCodeRunError
+	if !errors.As(err, &runErr) || !runErr.attachStderr {
 		return chunk, err
 	}
 	// 未正常收尾：补充命令行的标准错误输出与退出状态，便于定位
@@ -562,7 +664,7 @@ func (s *claudeCodeStream) recv() (openai.ChatCompletionStreamResponse, error) {
 	if "" == detail {
 		return chunk, err
 	}
-	return chunk, fmt.Errorf("%s: %s", resultErr.Error(), detail)
+	return chunk, fmt.Errorf("%s: %s", runErr.Error(), detail)
 }
 
 // claudeCodeProgress 把命令行的工具调用改写为思考进度。
@@ -622,6 +724,65 @@ func createClaudeCodeCompletion(ctx context.Context, client *AIClient, request o
 	return openai.ChatCompletionResponse{Object: "chat.completion",
 		Choices: []openai.ChatCompletionChoice{{Index: 0, Message: message, FinishReason: finish}},
 		Usage:   usage}, nil
+}
+
+// ClaudeCodeProbe 描述一次命令行模型连通性测试的结果。
+type ClaudeCodeProbe struct {
+	// Model 是调用方指定的模型名
+	Model string
+	// ResolvedModel 是命令行上报的实际模型名，与 Model 不同说明命令行做了模型别名映射
+	ResolvedModel string
+	// Version 是命令行版本
+	Version string
+	// Latency 是从启动到返回结果的耗时
+	Latency time.Duration
+}
+
+// TestClaudeCodeModel 以极简提示词执行一次命令行生成，供设置页校验指定模型是否可用。
+// 不挂载 MCP 服务器，避免测试过程影响工作空间；结果以命令行的 result 事件为准，
+// 模型名无效或凭据失效时命令行会把错误文本放进该事件。
+func TestClaudeCodeModel(runtime ClaudeCodeRuntime, model string) (*ClaudeCodeProbe, error) {
+	runtime.Model = model
+	runtime.MCPServers = ""
+	runtime.WorkingDir = ""
+	client := NewClaudeCodeAIClient(runtime)
+	request := openai.ChatCompletionRequest{
+		Model: model,
+		Messages: []openai.ChatCompletionMessage{
+			{Role: openai.ChatMessageRoleUser, Content: claudeCodeProbePrompt},
+		},
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), claudeCodeProbeTimeout)
+	defer cancel()
+
+	start := time.Now()
+	stream, err := createClaudeCodeStream(ctx, client, request)
+	if nil != err {
+		return nil, err
+	}
+	defer stream.Close()
+
+	probe := &ClaudeCodeProbe{Model: model}
+	for {
+		_, recvErr := stream.Recv()
+		if nil != recvErr {
+			if errors.Is(recvErr, io.EOF) {
+				break
+			}
+			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+				return nil, fmt.Errorf("%s (%s)", BootL10n(415,
+					"The local Claude Code command line produced no output for a long time, please check the credentials, network proxy and command line configuration"),
+					claudeCodeProbeTimeout)
+			}
+			return nil, recvErr
+		}
+	}
+	probe.Latency = time.Since(start)
+	if nil != stream.claudeCode {
+		probe.Version, probe.ResolvedModel = stream.claudeCode.events.session()
+	}
+	return probe, nil
 }
 
 // claudeCodeFinishReason 把命令行的结束原因映射为对话结束原因。

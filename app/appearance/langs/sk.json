@@ -1,4 +1,8 @@
 {
+	"aiClaudeCodeEnv": "Premenné prostredia CLI",
+	"aiClaudeCodeEnvTip": "Vstrekuje sa do prostredia príkazového riadka claude; hodnoty podporujú ${VAR} na čítanie systémovej premennej prostredia alebo tajomstva SiYuan",
+	"aiClaudeCodeEnvInvalid": "Neplatný JSON premenných prostredia",
+	"testConnectionSuccessMsg": "Test bol úspešný: ${msg}",
 	"aiProtocolClaudeCode": "Claude Code (lokálne CLI)",
 	"aiClaudeCodeCLIPath": "Cesta k CLI",
 	"aiClaudeCodeCLIPathTip": "Ponechajte prázdne, aby sa spustiteľný súbor claude vyhľadal v bežných umiestneniach inštalácie",
@@ -3014,7 +3018,8 @@
 		"409": "Sieťové pripojenie bolo prerušené alebo sa ho nepodarilo nadviazať. Skontrolujte nastavenia siete, proxy alebo brány firewall",
 		"410": "Ak používate predplatné GLM Coding Plan, nastavte adresu API na https://open.bigmodel.cn/api/coding/paas/v4",
 		"411": "Claude Code CLI sa nenašiel. Nastavte cestu k spustiteľnému súboru claude v nastaveniach poskytovateľa",
-		"412": "Claude Code CLI bol zistený",
-		"413": "Dostupné modely spravuje CLI. Zadajte názov modelu priamo, napríklad sonnet alebo opus"
+		"413": "Dostupné modely spravuje CLI. Zadajte názov modelu priamo, napríklad sonnet alebo opus",
+		"414": "Premenná prostredia %s nie je nastavená, zadajte prihlasovacie údaje v nastaveniach poskytovateľa alebo najprv nastavte túto premennú prostredia",
+		"415": "Miestny príkazový riadok Claude Code dlho neposkytoval výstup, skontrolujte prihlasovacie údaje, sieťovú proxy a nastavenia príkazového riadka"
 	}
 }

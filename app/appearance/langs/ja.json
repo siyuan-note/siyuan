@@ -1,4 +1,8 @@
 {
+	"aiClaudeCodeEnv": "CLI 環境変数",
+	"aiClaudeCodeEnvTip": "claude コマンドラインの環境変数に注入されます。値では ${VAR} でシステム環境変数や SiYuan シークレットを参照できます",
+	"aiClaudeCodeEnvInvalid": "環境変数の JSON 形式が正しくありません",
+	"testConnectionSuccessMsg": "テストに成功しました：${msg}",
 	"aiProtocolClaudeCode": "Claude Code（ローカル CLI）",
 	"aiClaudeCodeCLIPath": "CLI パス",
 	"aiClaudeCodeCLIPathTip": "空欄の場合は一般的なインストール先から claude 実行ファイルを自動検出します",
@@ -3014,7 +3018,8 @@
 		"409": "ネットワーク接続が切断されたか、確立できませんでした。ネットワーク、プロキシ、またはファイアウォールの設定を確認してください",
 		"410": "GLM Coding Plan をご利用の場合は、API アドレスを https://open.bigmodel.cn/api/coding/paas/v4 に設定してください",
 		"411": "Claude Code CLI が見つかりません。プロバイダー設定で claude 実行ファイルのパスを設定してください",
-		"412": "Claude Code CLI を検出しました",
-		"413": "利用可能なモデルは CLI が管理しているため、sonnet や opus などモデル名を直接入力してください"
+		"413": "利用可能なモデルは CLI が管理しているため、sonnet や opus などモデル名を直接入力してください",
+		"414": "環境変数 %s が設定されていません。提供元の設定で認証情報を入力するか、先にこの環境変数を設定してください",
+		"415": "ローカルの Claude Code コマンドラインが長時間出力していません。認証情報、ネットワークプロキシ、コマンドライン設定を確認してください"
 	}
 }

@@ -41692,6 +41692,12 @@
         "cliPath": {
           "type": "string"
         },
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "permissionMode": {
           "type": "string"
         }
@@ -41709,6 +41715,19 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "env": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             },
             {
               "type": "null"

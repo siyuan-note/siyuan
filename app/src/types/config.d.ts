@@ -256,6 +256,8 @@ declare namespace Config {
         cliPath: string;
         /** 工具权限：readonly 只读、notebook 读写笔记本、full 完全放行 */
         permissionMode: string;
+        /** 注入命令行的环境变量，值中的 ${变量名} 引用系统环境变量或 SiYuan 密钥 */
+        env?: Record<string, string>;
     }
 
     /**

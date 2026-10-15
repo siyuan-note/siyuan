@@ -1,4 +1,8 @@
 {
+	"aiClaudeCodeEnv": "命令行环境变量",
+	"aiClaudeCodeEnvTip": "注入 claude 命令行的环境变量，值支持 ${变量名} 引用系统环境变量或 SiYuan 密钥",
+	"aiClaudeCodeEnvInvalid": "环境变量 JSON 格式不正确",
+	"testConnectionSuccessMsg": "测试成功：${msg}",
 	"aiProtocolClaudeCode": "Claude Code（本机命令行）",
 	"aiClaudeCodeCLIPath": "命令行路径",
 	"aiClaudeCodeCLIPathTip": "留空时自动探测常见安装位置中的 claude 可执行文件",
@@ -3014,7 +3018,8 @@
 		"409": "网络连接中断或无法建立，请检查网络、代理或防火墙设置",
 		"410": "若使用 GLM Coding Plan 编码套餐，请将 API 地址设置为 https://open.bigmodel.cn/api/coding/paas/v4",
 		"411": "未找到本机 Claude Code 命令行，请在提供方设置中填写 claude 可执行文件路径",
-		"412": "已检测到本机 Claude Code 命令行",
-		"413": "可用模型由命令行管理，请直接填写模型名，例如 sonnet 或 opus"
+		"413": "可用模型由命令行管理，请直接填写模型名，例如 sonnet 或 opus",
+		"414": "环境变量 %s 未设置，请在提供方设置中填写凭据或先设置该环境变量",
+		"415": "本机 Claude Code 命令行长时间没有输出，请检查凭据、网络代理和命令行配置"
 	}
 }

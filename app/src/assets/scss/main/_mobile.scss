@@ -1331,14 +1331,21 @@ body.mobile-topbar--merged {
       align-self: center;
     }
 
-    // 搜索框与返回按钮同处顶栏，占满返回按钮右侧的剩余宽度
+    &__title {
+      min-width: 0;
+    }
+
+    // 标题与搜索框共用顶栏剩余空间，输入框可以在窄屏下收缩。
     &__search {
       display: flex;
       flex: 1;
       min-width: 0;
-      padding-right: 11px;
       -webkit-user-select: text;
       user-select: text;
+
+      input {
+        min-width: 0;
+      }
     }
 
     &__groups {

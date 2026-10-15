@@ -37,6 +37,7 @@ import {ProtyleMethod} from "./ProtyleMethod";
 import {openEmojiPanel} from "../emoji";
 import {openAssetPicker} from "../asset/picker";
 import {adjustEditorFontSize, setEditorFontSize} from "../util/editorFontSize";
+import {insertEditorContent, IInsertContentOptions} from "./insertContent";
 /// #if !MOBILE
 import {isDockPanelVisible, toggleDockPanel} from "../layout/dock/panel";
 /// #endif
@@ -286,6 +287,19 @@ const getActiveEditor = (wndActive = true) => {
     return editor;
 };
 
+const insertContent = (options: IInsertContentOptions) => {
+    if (options?.editor) {
+        return insertEditorContent(options, []);
+    }
+    let editors: Protyle[];
+    /// #if MOBILE
+    editors = [window.siyuan.mobile.popEditor, window.siyuan.mobile.editor].filter(Boolean);
+    /// #else
+    editors = getAllModels().editor.map(model => model.editor);
+    /// #endif
+    return insertEditorContent(options, editors);
+};
+
 export const expandDocTree = async (options: {
     id: string,
     isSetCurrent?: boolean
@@ -428,6 +442,7 @@ const createAPI = () => ({
     getAllTabs,
     /// #endif
     getActiveEditor,
+    insertContent,
     platformUtils,
     openSetting: openPluginSetting,
     openAttributePanel,

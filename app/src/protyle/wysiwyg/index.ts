@@ -1,4 +1,5 @@
 import {toggleMenu} from "../../menus/menuToggle";
+import {bindEditorFocusMemory} from "../util/editorFocusMemory";
 import {recordReplacementUndo} from "./replacementInput";
 import {expandAndroidWordSelection, isAndroidWordSelectionPending} from "../../mobile/util/wordSelection";
 import {bindBoundedBlockDragSelect} from "./boundedBlockDragSelect";
@@ -413,6 +414,7 @@ export class WYSIWYG {
     private largeListVirtualizer?: LargeListVirtualizer;
     private largeTableVirtualizer?: LargeTableVirtualizer;
     private disposeSpellcheckFocus?: () => void;
+    private disposeFocusMemory?: () => void;
     private disposeEmbedToolbarVisibility?: () => void;
     private disposeHeadingFoldIndicators?: () => void;
     private disposeBoundedBlockDragSelect?: () => void;
@@ -536,6 +538,7 @@ export class WYSIWYG {
         this.protyle = protyle;
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
+        this.disposeFocusMemory = bindEditorFocusMemory(this.element);
         this.element.setAttribute("spellcheck", window.siyuan.config.editor.spellcheck.toString());
         // Android 和 iPhone 的原生编辑限于正文节点，避免输入法修改列表等结构容器。
         this.element.setAttribute("contenteditable", (isIPhone() || isAndroid()) ? "false" : "true");
@@ -593,6 +596,7 @@ export class WYSIWYG {
     }
 
     public destroy() {
+        this.disposeFocusMemory?.();
         this.imageTitleEditor?.destroy();
         this.persistComposition?.();
         this.persistComposition = undefined;

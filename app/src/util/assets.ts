@@ -33,6 +33,7 @@ import {refreshChartTheme} from "../protyle/render/chartRender";
 import {getHostCapabilities} from "./hostCapabilities";
 import {initSelectionStyle} from "./selectionStyle";
 import {applyCompactMode} from "../config/tabs/compactMode";
+import {isIOSPlatform} from "../protyle/util/browserCompatibility";
 
 let headingNumberMeasurementRefreshTimer: number;
 let appearanceUpdate = Promise.resolve();
@@ -153,6 +154,7 @@ export const loadAssets = async (appearance: Config.IAppearance) => {
     applyCompactMode();
     htmlElement.setAttribute("data-frontend", getFrontend()); // https://github.com/siyuan-note/siyuan/issues/12549
     htmlElement.setAttribute("data-backend", getBackend());
+    htmlElement.toggleAttribute(Constants.ATTRIBUTE_IOS, isIOSPlatform(window.navigator));
     htmlElement.setAttribute("data-theme-mode", themeMode);
     htmlElement.setAttribute("data-light-theme", data.themeLight);
     htmlElement.setAttribute("data-dark-theme", data.themeDark);

@@ -20,7 +20,7 @@ html {
 
 // iOS 使用固定蓝色光标，改善系统与应用明暗模式不同组合下的输入法候选字对比度。
 // https://github.com/siyuan-note/siyuan/issues/20005
-:root[data-backend="ios"]:is([data-frontend="desktop"], [data-frontend="mobile"]) {
+:root[data-ios] {
   caret-color: #3575f0;
 }
 

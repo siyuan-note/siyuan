@@ -103,6 +103,7 @@ export abstract class Constants {
     public static readonly ATTRIBUTE_MENU_KEYMAP = "data-menu-keymap";
     // 界面密度标记仅用于根元素，不写入笔记内容。
     public static readonly ATTRIBUTE_UI_DENSITY = "data-ui-density";
+    public static readonly ATTRIBUTE_IOS = "data-ios";
 
     // size
     public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;

@@ -2334,8 +2334,6 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
                 if (!preserveRemoteDocumentCSP) {
                     delete details.responseHeaders[key];
                 }
-            } else if ("access-control-allow-origin" === key.toLowerCase()) {
-                delete details.responseHeaders[key];
             }
         }
         cb({responseHeaders: details.responseHeaders});

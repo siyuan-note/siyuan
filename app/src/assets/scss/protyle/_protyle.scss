@@ -66,7 +66,6 @@
   &__up {
     transition: var(--b3-transition);
     position: absolute;
-    opacity: 0;
     cursor: pointer;
     color: var(--b3-border-color);
 
@@ -81,13 +80,6 @@
 
   &__down {
     bottom: calc(50% - var(--b3-dynamicscroll-width) / 2 - 20px);
-  }
-
-  &:hover {
-    .protyle-scroll__down,
-    .protyle-scroll__up {
-      opacity: 1;
-    }
   }
 
   &__bar {
@@ -116,11 +108,6 @@
   }
 
   @media (hover: none) {
-    &__down,
-    &__up {
-      opacity: 1;
-    }
-
     &__bar {
       top: calc(50% - 22px);
 

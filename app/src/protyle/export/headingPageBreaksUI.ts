@@ -17,7 +17,7 @@ export const openHeadingPageBreakDialog = (onConfirm: () => void) => {
         title: window.siyuan.languages.print,
         content: `<div class="b3-dialog__content">
     <div>${window.siyuan.languages.pdfHeadingPageBreaks}</div>
-    <div class="b3-label__text">${window.siyuan.languages.pdfHeadingPageBreaksTip}</div>
+    <div class="ft__smaller ft__on-surface">${window.siyuan.languages.pdfHeadingPageBreaksTip}</div>
     <div class="fn__hr"></div>
     <div data-heading-page-breaks>${headingPageBreakControls(localData.headingPageBreakLevels)}</div>
 </div>

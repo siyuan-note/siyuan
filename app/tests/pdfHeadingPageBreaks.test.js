@@ -69,6 +69,9 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         throw new Error(name);
     });
     ui.openHeadingPageBreakDialog(() => confirmed++);
+    check.ok(parseFloat(getComputedStyle(activeDialog.element.querySelector(".ft__smaller")).fontSize) <
+        parseFloat(getComputedStyle(activeDialog.element.querySelector(".b3-dialog__content > div")).fontSize),
+        "Mobile print descriptions use a smaller font than their titles");
     check.equal(activeDialog.element.querySelector('input[value="2"]').checked, true);
     activeDialog.element.querySelector('input[value="6"]').checked = true;
     activeDialog.element.querySelector(".b3-button--cancel").click();
@@ -93,6 +96,11 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         "getPluginStyle", "fetchPost", "headingPageBreakControls", desktopSource + ";return renderPDF;")(
         Constants, {invoke: async () => 0}, async () => "", () => ({}), () => "", () => "", () => "", () => "{}",
         async () => "", async () => "", async () => "", (_url, data) => html = data.content, ui.headingPageBreakControls);
+    window.siyuan.storage.pdf.paged = false;
+    await renderPDF("root");
+    check.ok(new DOMParser().parseFromString(html, "text/html").getElementById("headingPageBreakOptions")
+        .classList.contains("fn__none"), "Unpaged preferences hide heading options before initialization");
+    window.siyuan.storage.pdf.paged = true;
     await renderPDF("root");
     check.ok(html.includes('id="headingPageBreaks"'));
     const inline = html.match(/<script>\s*const previewElement[\s\S]*?<\/script>/)[0]
@@ -108,12 +116,21 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     check.deepEqual(Array.from(preview.querySelectorAll("[data-export-heading-page-break]"))
         .map(element => element.getAttribute("data-node-id")), ["child-title", "deep-title"]);
     const paged = document.getElementById("paged");
+    const options = document.getElementById("headingPageBreakOptions");
+    check.notEqual(getComputedStyle(options).display, "none");
+    check.ok(parseFloat(getComputedStyle(options.querySelector(".ft__smaller")).fontSize) <
+        parseFloat(getComputedStyle(options.firstElementChild).fontSize),
+        "Desktop export descriptions use a smaller font than their titles");
     paged.checked = false;
     paged.dispatchEvent(new Event("change"));
+    check.equal(getComputedStyle(options).display, "none");
     check.equal(preview.querySelectorAll("[data-export-heading-page-break]").length, 0);
     check.ok(Array.from(document.querySelectorAll("#headingPageBreaks input")).every(input => input.disabled));
     paged.checked = true;
     paged.dispatchEvent(new Event("change"));
+    check.notEqual(getComputedStyle(options).display, "none");
+    check.deepEqual(Array.from(options.querySelectorAll("input:checked")).map(input => Number(input.value)), [2, 6],
+        "Showing the heading options preserves selected levels");
     check.equal(preview.querySelectorAll("[data-export-heading-page-break]").length, 2);
     document.querySelector('#headingPageBreaks input[value="2"]').click();
     check.equal(preview.querySelectorAll("[data-export-heading-page-break]").length, 1);

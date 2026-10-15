@@ -517,9 +517,9 @@ const renderPDF = async (id: string) => {
             <span class="fn__hr"></span>
             <input id="paged" class="b3-switch" type="checkbox" ${localData.paged ? "checked" : ""}>
         </label>
-        <div class="b3-label">
+        <div id="headingPageBreakOptions" class="b3-label${localData.paged ? "" : " fn__none"}">
             <div>${window.siyuan.languages.pdfHeadingPageBreaks}</div>
-            <div class="b3-label__text">${window.siyuan.languages.pdfHeadingPageBreaksTip}</div>
+            <div class="ft__smaller ft__on-surface">${window.siyuan.languages.pdfHeadingPageBreaksTip}</div>
             <div class="fn__hr"></div>
             <div id="headingPageBreaks">${headingPageBreakControls(localData.headingPageBreakLevels)}</div>
         </div>
@@ -545,6 +545,7 @@ ${getIconScript(servePath)}
         .map(input => Number(input.value));
     const updateHeadingPageBreaks = () => {
         const enabled = document.getElementById("paged").checked;
+        document.getElementById("headingPageBreakOptions").classList.toggle("fn__none", !enabled);
         document.querySelectorAll("#headingPageBreaks input").forEach(input => {
             input.disabled = !enabled;
         });

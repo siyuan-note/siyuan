@@ -32,7 +32,8 @@ const runCase = async (sources, options) => {
     const getAllWnds = (_layout, wnds) => { if (wnd) wnds.push(wnd); };
     const functions = {isWindow: () => false, setToolbarLeftMac() {}};
     const tabs = load(sources.tabs, {"../util/functions": functions, "./getAll": {getAllWnds}});
-    const compatibility = {isMac: () => false, isWindows: () => true, initWindowOpenOverride() {}, initNativeDialogOverride() {}};
+    const compatibility = {isMac: () => false, isWindows: () => true, applyPlatformClasses() {},
+        initWindowOpenOverride() {}, initNativeDialogOverride() {}};
     const electron = {ipcRenderer: {send() {}, on() {}, invoke: async (channel, data) => {
         if (channel === "init") return {};
         return data.cmd === "isFullScreen" ? state.promise : false;

@@ -32,6 +32,7 @@ const rendererModules = (sources) => {
         electron: {ipcRenderer}, "../constants": {Constants: {SIYUAN_CMD: "siyuan-cmd", LOCAL_ZOOM: "zoom"}},
         "../util/functions": {setToolbarLeftMac() {}},
     });
+    document.body.classList.toggle("body--windows", process.platform !== "darwin");
     document.body.classList.toggle("body--win32", process.platform !== "darwin");
     const fit = loadRendererModule(sources.fit, {
         "../../boot/windowControls": controls, "../../protyle/util/compatibility": {isMac: () => process.platform === "darwin"},

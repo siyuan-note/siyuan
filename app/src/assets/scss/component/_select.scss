@@ -32,8 +32,9 @@
     }
   }
 
-  // 仅 Windows 桌面端与浏览器启用 base-select 统一样式
-  .body--win32 &, .body--win32-browser & {
+  // Windows 与 Linux 启用 base-select 统一样式，具体能力由 @supports 判定
+  .body--windows &,
+  .body--linux & {
     @supports (appearance: base-select) {
       appearance: base-select;
       white-space: nowrap;

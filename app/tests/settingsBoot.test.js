@@ -78,7 +78,8 @@ const createBoot = (plugin = false, failed = "", waitForStyles = false) => {
         "../../util/pathName": {addBaseURL() {}, setNoteBook: () => wait("notebooks")},
         "../../protyle/util/compatibility": {getLocalStorage: callback => {
             void wait("storage").then(() => { window.siyuan.storage = {zoom: 1}; callback(); });
-        }, isWindows: () => true, isMac: () => false, initNativeDialogOverride() {}, initWindowOpenOverride() {}},
+        }, isWindows: () => true, isMac: () => false, applyPlatformClasses() {},
+            initNativeDialogOverride() {}, initWindowOpenOverride() {}},
         "../../protyle/util/addScript": {addScriptSync: async (_path, id) => {
             assert.equal(id, "protyleWcHtmlScript");
             await wait("html");

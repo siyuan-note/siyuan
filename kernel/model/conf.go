@@ -692,9 +692,9 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	return closeKernel(force, setCurrentWorkspace, execInstallPkg, nil)
 }
 
-// RecoverWorkspaceExit 仅接管指定批次且没有活动会话的桌面退出，不跳过同步或触发安装更新。
-func RecoverWorkspaceExit(pid int, startedAt int64) (int, string) {
-	return closeKernel(false, false, 1, &util.WorkspaceExitState{PID: pid, StartedAt: startedAt})
+// RecoverWorkspaceExit 仅接管指定批次且没有活动会话的桌面退出，允许用户确认后跳过同步，不触发安装更新。
+func RecoverWorkspaceExit(pid int, startedAt int64, force bool) (int, string) {
+	return closeKernel(force, false, 1, &util.WorkspaceExitState{PID: pid, StartedAt: startedAt})
 }
 
 func workspaceExitRecoveryCode(expected *util.WorkspaceExitState) int {
@@ -706,6 +706,14 @@ func workspaceExitRecoveryCode(expected *util.WorkspaceExitState) int {
 		return 3
 	}
 	return 0
+}
+
+func markPendingWorkspaceExit() {
+	if pendingWorkspaceExit == nil {
+		pendingWorkspaceExit = util.MarkWorkspaceExiting()
+	} else {
+		pendingWorkspaceExit.SetPhase("exiting")
+	}
 }
 
 func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *util.WorkspaceExitState) (exitCode int, installPkgPath string) {
@@ -722,11 +730,7 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 		return
 	}
 	confSyncSnapshot := Conf.LoadSync()
-	if recovery == nil {
-		pendingWorkspaceExit = util.MarkWorkspaceExiting()
-	} else {
-		pendingWorkspaceExit.SetPhase("exiting")
-	}
+	markPendingWorkspaceExit()
 	defer func() {
 		if exitCode == 1 || exitCode == 2 || exitCode == 3 {
 			pendingWorkspaceExit.SetPhase("waiting")
@@ -755,8 +759,7 @@ func closeKernel(force, setCurrentWorkspace bool, execInstallPkg int, recovery *
 		if confSyncSnapshot.Enabled && 3 != confSyncSnapshot.Mode &&
 			((IsSubscriber() && conf.ProviderSiYuan == confSyncSnapshot.Provider) || conf.ProviderSiYuan != confSyncSnapshot.Provider) {
 			diagnostic.Stage("exit sync")
-			syncData(true, false)
-			if 0 != ExitSyncSucc {
+			if err := syncData(true, false); err != nil {
 				exitCode = 1
 				if 1 != execInstallPkg && !skipNewVerInstallPkg() {
 					installPkgPath = getNewVerInstallPkgPath(false)

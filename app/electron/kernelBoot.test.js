@@ -73,8 +73,8 @@ const setup = (progress, options = {}) => {
         createBootWindow: () => events.push("create-boot"), showLocalBootWindow: () => events.push("show-boot"),
         showAppleSiliconWarning: async () => true,
         waitForPreviousWorkspaceExit: options.previousExit || (async () => true),
-        requestWorkspaceExitRecovery: async (workspace, marker, signal) => {
-            events.push(["recover-exit", workspace, marker.pid, signal]);
+        requestWorkspaceExitRecovery: async (workspace, marker, signal, _fetch, _readFile, force) => {
+            events.push(["recover-exit", workspace, marker.pid, signal, force]);
             return 1;
         },
         dialog: {showMessageBox: async (_window, message) => {
@@ -348,10 +348,31 @@ test("boot recovery reports sync failure and cancel closes only the waiting wind
     assert.ok(state.events.some(event => Array.isArray(event) && event[0] === "recover-exit" && event[3] === signal));
     const prompt = state.events.find(event => Array.isArray(event) && event[0] === "recovery-dialog")[1];
     assert.match(prompt.message, /Synchronization failed/);
-    assert.deepEqual(Array.from(prompt.buttons), ["Retry", "Cancel"]);
+    assert.deepEqual(Array.from(prompt.buttons), ["Retry", "Cancel", "Force exit"]);
     assert.equal(state.window.destroyed, true);
     assert.equal(state.versionRequests(), 0);
     assert.equal(exits(state).length, 0);
+});
+
+test("boot recovery forwards an explicit forced exit before starting a replacement kernel", async () => {
+    const signal = new AbortController().signal;
+    const state = setup(() => 100, {recoveryResponse: 2, previousExit: async (_workspace, options) => {
+        assert.equal(await options.onRecoveryFailed(true), "force");
+        await options.recover({pid: 123}, signal, true);
+        return true;
+    }});
+    assert.equal(await state.run(), 6806);
+    const recovered = state.events.findIndex(event => Array.isArray(event) && event[0] === "recover-exit" && event[4] === true);
+    const spawned = state.events.findIndex(event => Array.isArray(event) && event[0] === "spawn-args");
+    assert.ok(recovered >= 0 && spawned > recovered);
+    assert.equal(state.window.destroyed, false);
+});
+
+test("boot recovery offers only retry and cancel after a transport failure", async () => {
+    const state = setup(() => 100, {previousExit: async (_workspace, options) => options.onRecoveryFailed(false)});
+    assert.equal(await state.run(), false);
+    const prompt = state.events.find(event => Array.isArray(event) && event[0] === "recovery-dialog")[1];
+    assert.deepEqual(Array.from(prompt.buttons), ["Retry", "Cancel"]);
 });
 
 test("boot progress recovers from certificate and network changes without exiting the kernel", async () => {

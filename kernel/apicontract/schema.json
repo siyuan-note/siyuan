@@ -52152,6 +52152,16 @@
     "SystemRecoverExitInput": {
       "type": "object",
       "properties": {
+        "force": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "pid": {
           "type": "integer"
         },

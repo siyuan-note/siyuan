@@ -124,6 +124,7 @@ type SystemExitRequest struct {
 type SystemRecoverExit struct {
 	PID       int   `json:"pid"`
 	StartedAt int64 `json:"startedAt"`
+	Force     bool  `json:"force" api:"optional,nullable"`
 }
 type SystemExitData struct {
 	CloseTimeout   int    `json:"closeTimeout"`

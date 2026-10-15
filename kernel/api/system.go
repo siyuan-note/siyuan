@@ -1376,7 +1376,7 @@ func exitSystem(c *gin.Context, request apicontract.SystemExitRequest) apicontra
 	var exitCode int
 	var installPkgPath string
 	if request.RecoverExit != nil {
-		exitCode, installPkgPath = recoverSystemExit(request.RecoverExit.PID, request.RecoverExit.StartedAt)
+		exitCode, installPkgPath = recoverSystemExit(request.RecoverExit.PID, request.RecoverExit.StartedAt, request.RecoverExit.Force)
 	} else {
 		exitCode, installPkgPath = closeSystem(request.Force, setCurrentWorkspace, int(request.ExecInstallPkg))
 	}

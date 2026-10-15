@@ -160,6 +160,67 @@ test("a stalled recovery is aborted when startup is closed or times out", async 
     }
 });
 
+test("forced recovery requires a sync failure and an explicit choice for the same batch", async () => {
+    for (const changed of [false, true]) {
+        const state = recoveryFixture();
+        const calls = [];
+        let batch = 1000;
+        state.options.readFile = () => JSON.stringify({version: 2, pid: 123, startedAt: batch, phase: "waiting", port: "6806"});
+        state.options.recover = async (_marker, _signal, force) => {
+            calls.push(force);
+            if (calls.length === 1) return 1;
+            state.stop();
+            return 0;
+        };
+        state.options.onRecoveryFailed = async syncFailed => {
+            assert.equal(syncFailed, true);
+            if (changed) batch++;
+            return "force";
+        };
+        assert.equal(await state.run(), true);
+        assert.deepEqual(calls, [false, !changed]);
+    }
+});
+
+test("transport failures cannot authorize skipping exit sync", async () => {
+    const state = recoveryFixture();
+    let calls = 0;
+    state.options.recover = async (_marker, _signal, force) => {
+        assert.equal(force, false);
+        if (++calls === 1) throw new Error("offline");
+        state.stop();
+        return 0;
+    };
+    state.options.onRecoveryFailed = async () => "force";
+    assert.equal(await state.run(), true);
+    assert.equal(calls, 2);
+});
+
+test("retry after a failed forced request restores normal sync recovery", async () => {
+    const state = recoveryFixture();
+    const calls = [];
+    state.options.recover = async (_marker, _signal, force) => {
+        calls.push(force);
+        if (calls.length === 1) return 1;
+        if (calls.length === 2) throw new Error("offline");
+        state.stop();
+        return 0;
+    };
+    state.options.onRecoveryFailed = async syncFailed => syncFailed ? "force" : true;
+    assert.equal(await state.run(), true);
+    assert.deepEqual(calls, [false, true, false]);
+});
+
+test("forced recovery sends its choice inside the guarded exit request", async () => {
+    const marker = {version: 2, pid: 123, startedAt: 1000, port: "6806"};
+    const result = await requestWorkspaceExitRecovery("workspace", marker, new AbortController().signal,
+        async (_url, options) => {
+            assert.deepEqual(JSON.parse(options.body), {recoverExit: {pid: 123, startedAt: 1000, force: true}});
+            return {ok: true, json: async () => ({code: 0})};
+        }, () => "{}", true);
+    assert.equal(result, 0);
+});
+
 test("recovery does not repeat a successful exit while the process finishes", async () => {
     const state = recoveryFixture();
     let calls = 0;

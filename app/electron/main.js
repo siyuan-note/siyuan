@@ -2726,17 +2726,20 @@ const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startu
                     canceled: bootCanceled,
                     hasActiveWindow: () => workspaces.some(item => item.workspaceDir === currentWorkspace &&
                         item.browserWindow && !item.browserWindow.isDestroyed()),
-                    recover: (marker, signal) => requestWorkspaceExitRecovery(currentWorkspace, marker, signal, net.fetch),
+                    recover: (marker, signal, force) => requestWorkspaceExitRecovery(currentWorkspace, marker, signal, net.fetch,
+                        undefined, force),
                     onRecoveryFailed: async syncFailed => {
                         if (bootCanceled()) return false;
                         const {response} = await dialog.showMessageBox(currentBootWindow, {
                             type: "warning",
                             message: syncFailed ? languages._kernel[96] : languages.previousExitWaitFailed,
-                            buttons: [languages.retry, languages.cancel],
+                            buttons: syncFailed ? [languages.retry, languages.cancel, languages._kernel[97]] :
+                                [languages.retry, languages.cancel],
                             defaultId: 0,
                             cancelId: 1,
                         });
-                        return response === 0 && !bootCanceled();
+                        if (bootCanceled()) return false;
+                        return response === 2 && syncFailed ? "force" : response === 0;
                     },
                     onWaiting: async () => {
                         waiting = true;

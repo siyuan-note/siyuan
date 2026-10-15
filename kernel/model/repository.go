@@ -2348,9 +2348,6 @@ func syncRepo(exit, byHand bool) (cloudPublished bool, err error) {
 		if 1 > autoSyncErrCount || byHand {
 			util.PushErrMsg(msg, 0)
 		}
-		if exit {
-			ExitSyncSucc = 1
-		}
 		return
 	}
 
@@ -2385,9 +2382,6 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, start time.Time, inde
 		pushSyncStatusBar(msg)
 		if 1 > autoSyncErrCount || byHand {
 			util.PushErrMsg(msg, 0)
-		}
-		if exit {
-			ExitSyncSucc = 1
 		}
 		return
 	}

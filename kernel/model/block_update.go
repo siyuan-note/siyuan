@@ -73,7 +73,7 @@ func performBlockUpdates(inputs []BlockUpdateInput, build blockUpdateOperationsB
 		return nil, nil, err
 	}
 
-	transaction := &Transaction{DoOperations: operations}
+	transaction := &Transaction{DoOperations: operations, fromAPI: true}
 	if err = performTxSyncLocked(transaction); err != nil {
 		return nil, nil, err
 	}

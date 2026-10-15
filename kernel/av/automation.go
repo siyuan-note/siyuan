@@ -13,17 +13,33 @@ type AutomationConfig struct {
 }
 
 type AutomationRule struct {
-	ID         string              `json:"id"`
-	Name       string              `json:"name"`
-	Enabled    bool                `json:"enabled"`
-	Trigger    string              `json:"trigger"` // added 或 changed
-	KeyID      string              `json:"keyID,omitempty"`
-	Conditions []*ViewFilter       `json:"conditions,omitempty"`
-	Actions    []*AutomationAction `json:"actions"`
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Enabled     bool                   `json:"enabled"`
+	Trigger     string                 `json:"trigger"` // added、changed 或 block
+	KeyID       string                 `json:"keyID,omitempty"`
+	Conditions  []*ViewFilter          `json:"conditions,omitempty"`
+	Actions     []*AutomationAction    `json:"actions"`
+	BlockSource *AutomationBlockSource `json:"blockSource,omitempty"`
+}
+
+// AutomationBlockSource 的范围取并集，各类条件取交集；文档范围包含其子文档。
+type AutomationBlockSource struct {
+	NotebookIDs []string                    `json:"notebookIDs,omitempty"`
+	DocumentIDs []string                    `json:"documentIDs,omitempty"`
+	Types       []string                    `json:"types,omitempty"`
+	Tags        []string                    `json:"tags,omitempty"`
+	Attributes  []*AutomationBlockAttribute `json:"attributes,omitempty"`
+}
+
+type AutomationBlockAttribute struct {
+	Name     string `json:"name"`
+	Operator string `json:"operator"`
+	Value    string `json:"value,omitempty"`
 }
 
 type AutomationAction struct {
-	Type          string                      `json:"type"`   // edit 或 add
+	Type          string                      `json:"type"`   // edit、add 或 collect
 	Target        string                      `json:"target"` // current、related 或 filtered
 	AvID          string                      `json:"avID,omitempty"`
 	RelationKeyID string                      `json:"relationKeyID,omitempty"`
@@ -219,6 +235,11 @@ func NormalizeAutomationValue(value *Value) *Value {
 
 // 复制数据库时保留规则供用户调整，并暂停执行，避免副本继续修改原数据库的关联记录。
 func (view *AttributeView) remapAutomationKeys(originalID string, keyIDs map[string]string) {
+	for _, row := range view.GetBlockKeyValues().Values {
+		if row.Block != nil {
+			row.Block.CollectionRuleID = ""
+		}
+	}
 	if view.Automations == nil {
 		return
 	}
@@ -252,6 +273,9 @@ func (view *AttributeView) remapAutomationKeys(originalID string, keyIDs map[str
 			}
 			if action.Target == "current" || action.Target == "filtered" && action.AvID == originalID {
 				action.AvID = view.ID
+				if action.Type == "collect" {
+					action.AvID = ""
+				}
 				remapFilters(action.Filters)
 				fields := map[string]*AutomationValue{}
 				for id, value := range action.Fields {

@@ -6,6 +6,8 @@ import (
 	"fmt"
 )
 
+// BlockTransaction 保持块 API 原有的块操作响应结构，不返回内部生成的数据库自动操作。
+// 普通块写入会判断启用的收集规则，自动增删条目与源修改一同提交或失败回滚。
 type BlockTransaction struct {
 	Timestamp             int64             `json:"timestamp"`
 	DoOperations          []*BlockOperation `json:"doOperations"`

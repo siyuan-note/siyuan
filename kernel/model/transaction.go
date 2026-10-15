@@ -370,6 +370,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewNewItemTemplates(op)
 			case "setAttrViewAutomations":
 				ret = tx.doSetAttrViewAutomations(op)
+			case "collectAttrViewBlocks":
+				ret = tx.doCollectAttrViewBlocks(op)
 			case "setAttrViewFilters":
 				ret = tx.doSetAttrViewFilters(op)
 			case "setAttrViewContextFilter":
@@ -2564,19 +2566,20 @@ type Operation struct {
 	BlockIDs   []string `json:"blockIDs"` // move/append 时为随折叠标题移动的顶层块，闪卡操作时为目标块
 	BlockID    string   `json:"blockID"`
 
-	DeckID                   string      `json:"deckID"` // 用于添加/删除闪卡
-	Tree                     *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
-	templateDocTreeRootID    string
-	blockSwapState           *blockSwapState
-	blockSwapUndo            bool
-	listConversion           *listConversionState
-	listConversionUndo       bool
-	attributeViewItems       *attributeViewItemsSnapshot
-	attributeViewFields      *attributeViewFieldsSnapshot
-	attributeViewFieldUndo   bool
-	attributeViewAutomation  bool
-	attributeViewBinding     *attributeViewBindingSnapshot
-	attributeViewBindingUndo bool
+	DeckID                        string      `json:"deckID"` // 用于添加/删除闪卡
+	Tree                          *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
+	templateDocTreeRootID         string
+	blockSwapState                *blockSwapState
+	blockSwapUndo                 bool
+	listConversion                *listConversionState
+	listConversionUndo            bool
+	attributeViewItems            *attributeViewItemsSnapshot
+	attributeViewFields           *attributeViewFieldsSnapshot
+	attributeViewFieldUndo        bool
+	attributeViewAutomation       bool
+	attributeViewCollectionRuleID string
+	attributeViewBinding          *attributeViewBindingSnapshot
+	attributeViewBindingUndo      bool
 
 	LockType bool `json:"-"` // 外部块更新是否禁止改变主类型
 
@@ -2748,6 +2751,7 @@ type Transaction struct {
 	blockSwapOriginalTrees       []*parse.Tree
 	attributeViewRollback        *attributeViewRollback
 	attributeViewAutomations     *attributeViewAutomationState
+	attributeViewCollections     *attributeViewCollectionState
 	attributeViewItemCreation    bool
 	invalidatedAvHistory         map[string]bool
 
@@ -3079,11 +3083,13 @@ func (tx *Transaction) releaseCommittedResources() {
 	tx.removeCreatedDoc, tx.writeTransactionTree = nil, nil
 	tx.luteEngine = nil
 	tx.attributeViewAutomations = nil
+	tx.attributeViewCollections = nil
 	tx.attributeViewItemCreation = false
 }
 
 func (tx *Transaction) rollback() {
 	tx.mindmapSummarySiblings = nil
+	tx.rollbackCollectionCreatedTrees()
 	tx.finishAttributeViewMutation(true)
 	for _, tree := range tx.blockSwapOriginalTrees {
 		treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
@@ -3198,6 +3204,9 @@ func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.T
 		return nil, err
 	}
 	tx.trees[bt.RootID] = ret
+	if err = tx.captureCollectionTree(ret); err != nil {
+		return nil, err
+	}
 	tx.captureListMindmapSummarySiblings(ret)
 	return
 }
@@ -3234,12 +3243,18 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 		return nil, err
 	}
 	tx.trees[rootID] = ret
+	if err = tx.captureCollectionTree(ret); err != nil {
+		return nil, err
+	}
 	tx.captureListMindmapSummarySiblings(ret)
 	return
 }
 
 func (tx *Transaction) writeTree(tree *parse.Tree) {
 	tx.trees[tree.ID] = tree
+	if err := tx.captureCollectionTree(tree); err != nil {
+		tx.collectionState().err = err
+	}
 	treenode.UpsertBlockTree(tree)
 	return
 }

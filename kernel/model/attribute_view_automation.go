@@ -21,6 +21,11 @@ import (
 
 const maxAutomationOperations = 1000
 
+// IsAutomaticAttributeViewOperation 供块 API 保持仅返回原始块操作的响应格式。
+func (operation *Operation) IsAutomaticAttributeViewOperation() bool {
+	return operation != nil && operation.attributeViewAutomation
+}
+
 type attributeViewAutomationSource struct {
 	before  *av.AttributeView
 	blockID string
@@ -185,6 +190,12 @@ func (tx *Transaction) rememberAutomationTree(tree *parse.Tree) error {
 }
 
 func (tx *Transaction) runAttributeViewAutomations() error {
+	if tx.attributeViewCollections != nil && tx.attributeViewCollections.err != nil {
+		return tx.attributeViewCollections.err
+	}
+	if tx.attributeViewCollections != nil {
+		tx.attributeViewCollections.running = true
+	}
 	state := tx.attributeViewAutomations
 	if state == nil || tx.isReplay {
 		return nil
@@ -215,7 +226,7 @@ func (tx *Transaction) runAttributeViewAutomations() error {
 		relationValues := tx.automationRelationValues(source.boxID, state.current)
 		paused := false
 		for _, rule := range current.Automations.Rules {
-			if rule == nil || !rule.Enabled {
+			if rule == nil || !rule.Enabled || rule.Trigger == "block" {
 				continue
 			}
 			validationErr := tx.validateAutomationRule(current, rule, source.boxID)
@@ -254,6 +265,9 @@ func (tx *Transaction) runAttributeViewAutomations() error {
 			}
 			ReloadAttrView(current.ID)
 		}
+	}
+	if err := tx.runAttributeViewCollections(); err != nil {
+		return err
 	}
 	// 先确定全部触发条件，关联关键词也不会读到前一自动动作修改后的标题。
 	for _, entry := range triggered {
@@ -449,6 +463,9 @@ func (tx *Transaction) validateAutomationFilters(view *av.AttributeView, filters
 }
 
 func (tx *Transaction) validateAutomationRule(source *av.AttributeView, rule *av.AutomationRule, boxID string) error {
+	if rule.Trigger == "block" {
+		return tx.validateBlockCollectionRule(source, rule, boxID)
+	}
 	if rule.Trigger != "added" && rule.Trigger != "changed" || len(rule.Actions) == 0 || len(rule.Actions) > 20 {
 		return fmt.Errorf("invalid automation trigger or actions")
 	}
@@ -697,6 +714,8 @@ func (tx *Transaction) applyAutomationOperation(op, inverse *Operation) error {
 		err = tx.doInsertAttrViewBlock(op)
 	case "updateAttrViewCell":
 		err = tx.doUpdateAttrViewCell(op)
+	case "removeAttrViewBlock":
+		err = tx.doRemoveAttrViewBlock(op)
 	}
 	if err != nil {
 		return err

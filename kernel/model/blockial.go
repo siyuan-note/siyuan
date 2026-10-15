@@ -140,6 +140,9 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 	}
 
 	FlushTxQueue()
+	if handled, collectionErr := performCollectionAttributeOperations(blockAttrs, true); handled || collectionErr != nil {
+		return collectionErr
+	}
 
 	var blockIDs []string
 	for _, blockAttr := range blockAttrs {
@@ -226,6 +229,9 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	}
 
 	FlushTxQueue()
+	if handled, collectionErr := performCollectionAttributeOperations([]map[string]any{{"id": id, "attrs": nameValues}}, false); handled || collectionErr != nil {
+		return collectionErr
+	}
 
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {

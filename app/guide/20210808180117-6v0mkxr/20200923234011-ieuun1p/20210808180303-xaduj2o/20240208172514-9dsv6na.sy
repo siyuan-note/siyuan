@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261012014930"
+		"updated": "20261015141042"
 	},
 	"Children": [
 		{
@@ -3806,7 +3806,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261002224707-n5wvv5s",
-				"updated": "20261010222552"
+				"updated": "20261015141042"
 			},
 			"Children": [
 				{
@@ -3932,6 +3932,105 @@
 				{
 					"Type": "NodeText",
 					"Data": "Encrypted databases can only act on databases in the same encrypted notebook. Unlock the notebook first. If a target database or field is unavailable, correct or pause the rule. Copying a database preserves its rules in a paused state; check their targets and relation fields before enabling them"
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-fm4qoja",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261015141042-fm4qoja",
+				"updated": "20261015141042"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Collect ordinary blocks"
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-nrq3k5z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-nrq3k5z",
+				"updated": "20261015141042"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose the “Block matches conditions” trigger, select notebooks or documents under “Watch scope (includes subdocuments)”, and optionally filter by block types, tags, and custom attributes. Notebook and document scopes are combined; document scopes include subdocuments. A block may have any selected type, but must match every tag and attribute condition. Custom attributes support exact equality, contains, exists, and does not exist"
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-dmlyxmz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-dmlyxmz",
+				"updated": "20261015141042"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tags match the block itself, without collecting all ancestor containers. A list item uses the tags in its first paragraph; that paragraph is collected separately only when paragraph blocks are explicitly selected. Collection binds the original block to this database without copying or moving it. Initial fields support fixed values and the trigger time for date fields; the primary field retains its original block binding"
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-4gexoxe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-4gexoxe",
+				"updated": "20261015141042"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a block first matches, a new entry is added. Repeated matches preserve the entry and its field values. When it stops matching, an automatically collected entry is removed, while the source block remains. Manually added entries are preserved, as are entries still matching another enabled collection rule. Disabling or deleting the rule that created an entry leaves that entry in place"
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-u9c28d4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-u9c28d4",
+				"updated": "20261015141042"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Adding a removed tag again creates a new entry and initializes its fields; it does not recover the removed entry’s field values. Undo and redo restore the exact original transaction, including entry IDs and field values. If collection or removal fails, the triggering source edit also fails and previously saved content is retained"
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-1ymbtr0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-1ymbtr0",
+				"updated": "20261015141042"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enabling or editing a rule does not collect existing blocks. Enable the completed rule and open “Preview matching blocks” to inspect the source documents and existing bindings. “Collect matches on this page” collects the displayed matches that are not already bound. Use the page controls to review further results; each page contains at most 100 blocks and may be smaller when many fields are initialized"
+				}
+			]
+		},
+		{
+			"ID": "20261015141042-cael6rr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015141042-cael6rr",
+				"updated": "20261015141042"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Collection is evaluated after block creation, content or attribute edits, and block moves. Moving an entire document in the document tree, imports, sync, and history restoration do not backfill matches; use the preview to collect existing content. Automatic actions do not chain into other rules. Sources and the target database must remain within the same encryption boundary; unlock an encrypted notebook before previewing or editing its rules"
 				}
 			]
 		},

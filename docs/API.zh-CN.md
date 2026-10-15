@@ -2218,6 +2218,8 @@ if (response.code === 0 && response.data) {
 
     * `data.av`: 完整的 `AttributeView` 定义——字段（`keyValues`）、字段顺序（`keyIDs`，可能为 `null`），以及所有视图的原始布局配置（`table`/`list`/`gallery`/`kanban`）和条目顺序（`itemIds`）。兼容字段 `viewID` 动态取第一个可用视图，不会持久化。返回值不含渲染后的行或分页；需要计算后的行数据请使用 [渲染](#渲染)
 
+    * `data.av.automations` 可选，保存数据库共享的规则（`spec: 1`）。`block` 触发器通过 `blockSource` 指定笔记本/文档范围、块类型、标签和自定义属性，`collect` 动作将符合条件的原块绑定到当前数据库。自动创建的主键值可能包含由内核维护的 `block.collectionRuleID`。已有手动条目不受影响；移出后再次匹配会创建新条目并初始化字段，撤销则恢复原条目及字段
+
 ### 获取主键值
 
 * `/api/av/getAttributeViewPrimaryKeyValues`

@@ -82,13 +82,16 @@ func blockOperationsContract(operations []*model.Operation) ([]*apicontract.Bloc
 	if operations == nil {
 		return nil, nil
 	}
-	ret := make([]*apicontract.BlockOperation, len(operations))
-	for i, operation := range operations {
+	ret := make([]*apicontract.BlockOperation, 0, len(operations))
+	for _, operation := range operations {
+		if operation.IsAutomaticAttributeViewOperation() {
+			continue
+		}
 		converted, err := blockOperationContract(operation)
 		if err != nil {
 			return nil, err
 		}
-		ret[i] = converted
+		ret = append(ret, converted)
 	}
 	return ret, nil
 }

@@ -495,12 +495,13 @@ func (subtype BlockRefSubtype) IsValid() bool {
 }
 
 type ValueBlock struct {
-	ID         string          `json:"id,omitempty"` // 绑定的块 ID，非绑定块时为空
-	Icon       string          `json:"icon,omitempty"`
-	Content    string          `json:"content"`
-	RefSubtype BlockRefSubtype `json:"refSubtype,omitempty"`
-	Created    int64           `json:"created,omitempty"`
-	Updated    int64           `json:"updated,omitempty"`
+	CollectionRuleID string          `json:"collectionRuleID,omitempty"` // 创建条目的收集规则；缺省表示手动条目
+	ID               string          `json:"id,omitempty"`               // 绑定的块 ID，非绑定块时为空
+	Icon             string          `json:"icon,omitempty"`
+	Content          string          `json:"content"`
+	RefSubtype       BlockRefSubtype `json:"refSubtype,omitempty"`
+	Created          int64           `json:"created,omitempty"`
+	Updated          int64           `json:"updated,omitempty"`
 }
 
 func (value *Value) NormalizeBlockRefSubtype(avID string, attrs map[string]string) (changed bool) {

@@ -611,6 +611,7 @@ func newAttributeViewSearchInfo(attrView *AttributeView) *AttributeViewSearchInf
 }
 
 func cacheAttributeViewData(attrView *AttributeView, boxID string, data []byte) {
+	rememberCollectionView(attrView, boxID)
 	version := cache.SetAVDataWithVersionInBox(attrView.ID, boxID, data)
 	cache.SetAVSearchDataInBox(attrView.ID, boxID, version, newAttributeViewSearchInfo(attrView))
 }

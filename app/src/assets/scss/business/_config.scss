@@ -1136,6 +1136,11 @@
           line-height: 20px;
         }
 
+        &-type {
+          color: var(--b3-theme-on-surface);
+          margin-left: 4px;
+        }
+
         &-list {
           display: flex;
           flex-wrap: wrap;

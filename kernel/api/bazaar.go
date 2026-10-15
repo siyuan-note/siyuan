@@ -519,7 +519,12 @@ func bazaarPackage(value *bazaar.Package) *apicontract.BazaarPackage {
 	ret.Keywords = value.Keywords
 	ret.Deprecated = value.Deprecated
 	ret.DeprecatedReason = apicontract.BazaarLocaleStrings(value.DeprecatedReason)
-	ret.Alternatives = value.Alternatives
+	if value.Choices != nil {
+		ret.Choices = make([]apicontract.BazaarPackageChoice, len(value.Choices))
+		for i, choice := range value.Choices {
+			ret.Choices[i] = apicontract.BazaarPackageChoice{PackageType: choice.PackageType, Name: choice.Name}
+		}
+	}
 	ret.PreferredFunding = value.PreferredFunding
 	ret.PreferredName = value.PreferredName
 	ret.PreferredDesc = value.PreferredDesc

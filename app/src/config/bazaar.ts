@@ -22,6 +22,7 @@ import {
     getBazaarBackendSystemLabels,
     getBazaarCompatibilityData,
     getBazaarCompatibilityFieldVisibility,
+    getBazaarDeprecationChoices,
     getBazaarDeprecationData,
     getBazaarFrontendLabels,
     getBazaarFundingItems,
@@ -429,15 +430,19 @@ export const bazaar = {
             return "";
         }
         const reason = item.preferredDeprecatedReason || window.siyuan.languages.bazaarDeprecatedTip;
-        const alternatives = Array.isArray(item.alternatives) ? item.alternatives.filter((name) =>
-            typeof name === "string" && name.length > 0) : [];
-        const alternativesHTML = alternatives.map((name) => `<button type="button" data-type="bazaar-alternative" data-package-type="${bazaarType}" data-package-name="${escapeAttr(name)}" class="b3-chip b3-chip--small b3-chip--pointer config-bazaar__deprecated-button">${escapeHtml(name)}</button>`).join("");
+        const choices = getBazaarDeprecationChoices(item);
+        // 跨类型替代包需标明目标类型，同类型在同类标签页中不必重复
+        const choicesHTML = choices.map((choice) => {
+            const typeLabel = choice.packageType === bazaarType ? "" :
+                `<span class="config-bazaar__deprecated-type">${escapeHtml(window.siyuan.languages[BAZAAR_PACKAGE_CONFIG[choice.packageType].languageKey])}</span>`;
+            return `<button type="button" data-type="bazaar-alternative" data-package-type="${choice.packageType}" data-package-name="${escapeAttr(choice.name)}" class="b3-chip b3-chip--small b3-chip--pointer config-bazaar__deprecated-button">${escapeHtml(choice.name)}${typeLabel}</button>`;
+        }).join("");
         return `<section class="config-bazaar__deprecated">
     <div class="config-bazaar__deprecated-title">${escapeHtml(window.siyuan.languages.bazaarDeprecated)}</div>
     <div class="config-bazaar__deprecated-reason">${escapeHtml(reason)}</div>
-    ${alternativesHTML ? `<div class="config-bazaar__deprecated-alternatives">
+    ${choicesHTML ? `<div class="config-bazaar__deprecated-alternatives">
         <span class="config-bazaar__deprecated-label">${window.siyuan.languages.bazaarAlternatives}</span>
-        <div class="config-bazaar__deprecated-list">${alternativesHTML}</div>
+        <div class="config-bazaar__deprecated-list">${choicesHTML}</div>
     </div>` : ""}
 </section>`;
     },

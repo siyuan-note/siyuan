@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (lokale CLI)",
+	"aiClaudeCodeCLIPath": "CLI-pad",
+	"aiClaudeCodeCLIPathTip": "Laat leeg om het uitvoerbare bestand claude op gebruikelijke installatielocaties te detecteren",
+	"aiClaudeCodePermission": "Toestemming voor hulpmiddelen",
+	"aiClaudeCodePermissionTip": "Bepaalt welke hulpmiddelen de lokale CLI mag uitvoeren; alleen-lezen wordt aanbevolen",
+	"aiClaudeCodePermissionReadOnly": "Alleen-lezen",
+	"aiClaudeCodePermissionNotebook": "Notitieboek lezen en schrijven",
+	"aiClaudeCodePermissionFull": "Volledige toegang",
+	"aiClaudeCodeModelTip": "Voer een door de CLI ondersteunde modelnaam in, bijvoorbeeld sonnet, opus of een volledige modelnaam",
 	"mindmapItem": "Mindmap-itemblok",
 	"listMindmapLock": "Weergave vergrendelen",
 	"listMindmapUnlock": "Weergave ontgrendelen",
@@ -3003,6 +3012,9 @@
 		"407": "Archiveer alle herstelgegevens van versleutelde notitieboeken voordat u versleuteling uitschakelt",
 		"408": "DNS-resolutie mislukt. Controleer uw netwerk-, DNS- of proxyinstellingen",
 		"409": "De netwerkverbinding is onderbroken of kon niet tot stand worden gebracht. Controleer uw netwerk-, proxy- of firewallinstellingen",
-		"410": "Als je een GLM Coding Plan-abonnement gebruikt, stel dan het API-adres in op https://open.bigmodel.cn/api/coding/paas/v4"
+		"410": "Als je een GLM Coding Plan-abonnement gebruikt, stel dan het API-adres in op https://open.bigmodel.cn/api/coding/paas/v4",
+		"411": "De CLI van Claude Code is niet gevonden, stel het pad naar het uitvoerbare bestand claude in bij de providerinstellingen",
+		"412": "CLI van Claude Code gedetecteerd",
+		"413": "De beschikbare modellen worden beheerd door de CLI, voer rechtstreeks een modelnaam in, bijvoorbeeld sonnet of opus"
 	}
 }

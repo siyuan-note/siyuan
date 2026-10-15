@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code（本機命令列）",
+	"aiClaudeCodeCLIPath": "命令列路徑",
+	"aiClaudeCodeCLIPathTip": "留空以從常見安裝位置自動偵測 claude 執行檔",
+	"aiClaudeCodePermission": "工具權限",
+	"aiClaudeCodePermissionTip": "控制本機命令列可執行哪些工具，建議使用唯讀",
+	"aiClaudeCodePermissionReadOnly": "唯讀",
+	"aiClaudeCodePermissionNotebook": "讀寫筆記本",
+	"aiClaudeCodePermissionFull": "完整存取",
+	"aiClaudeCodeModelTip": "請填寫命令列支援的模型名稱，例如 sonnet、opus 或完整模型名稱",
 	"mindmapItem": "心智圖項目區塊",
 	"listMindmapLock": "鎖定視圖",
 	"listMindmapUnlock": "解鎖視圖",
@@ -3003,6 +3012,9 @@
 		"407": "請先封存全部加密筆記本復原相依資料，再關閉加密功能",
 		"408": "DNS 解析失敗，請檢查網路、DNS 或代理設定",
 		"409": "網路連線中斷或無法建立，請檢查網路、代理或防火牆設定",
-		"410": "若使用 GLM Coding Plan 編碼套餐，請將 API 位址設定為 https://open.bigmodel.cn/api/coding/paas/v4"
+		"410": "若使用 GLM Coding Plan 編碼套餐，請將 API 位址設定為 https://open.bigmodel.cn/api/coding/paas/v4",
+		"411": "找不到 Claude Code 命令列，請在提供商設定中設定 claude 執行檔路徑",
+		"412": "已偵測到 Claude Code 命令列",
+		"413": "可用的模型由命令列管理，請直接填寫模型名稱，例如 sonnet 或 opus"
 	}
 }

@@ -41686,6 +41686,48 @@
       },
       "additionalProperties": false
     },
+    "SettingClaudeCodeProvider": {
+      "type": "object",
+      "properties": {
+        "cliPath": {
+          "type": "string"
+        },
+        "permissionMode": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cliPath",
+        "permissionMode"
+      ],
+      "additionalProperties": false
+    },
+    "SettingClaudeCodeProviderInput": {
+      "type": "object",
+      "properties": {
+        "cliPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "permissionMode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SettingCloudUserRequestInput": {
       "type": "object",
       "properties": {
@@ -43833,6 +43875,9 @@
         "baseURL": {
           "type": "string"
         },
+        "claudeCode": {
+          "$ref": "#/$defs/SettingClaudeCodeProvider"
+        },
         "displayName": {
           "type": "string"
         },
@@ -43902,6 +43947,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "claudeCode": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingClaudeCodeProviderInput"
             },
             {
               "type": "null"

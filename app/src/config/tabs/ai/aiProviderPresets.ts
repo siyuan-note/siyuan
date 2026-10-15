@@ -52,6 +52,7 @@ export const PROVIDER_PRESETS: IProviderPreset[] = [
     {id: "siliconflow", name: "SiliconFlow", baseURL: "https://api.siliconflow.cn/v1", category: "aggregator", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/siliconflow.svg"},
     {id: "openrouter", name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", category: "aggregator", responsesSupport: "supported", icon: "/stage/images/ai-providers/openrouter.svg"},
     {id: "groq", name: "Groq", baseURL: "https://api.groq.com/openai/v1", category: "aggregator", responsesSupport: "experimental", icon: "/stage/images/ai-providers/groq.svg"},
+    {id: "claude-code", name: "Claude Code", baseURL: "claude-code://local", category: "local", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/anthropic.svg"},
     {id: "ollama", name: "Ollama", baseURL: "http://localhost:11434/v1", category: "local", responsesSupport: "supported", icon: "/stage/images/ai-providers/ollama.svg"},
     {id: "lmstudio", name: "LM Studio", baseURL: "http://localhost:1234/v1", category: "local", responsesSupport: "supported", icon: "/stage/images/ai-providers/lmstudio.svg"},
     {id: "custom", name: "", baseURL: "", category: "custom", responsesSupport: "experimental"},
@@ -80,4 +81,8 @@ export const getResponsesSupport = (baseURL: string): AIResponsesSupport =>
     findProviderPreset(baseURL)?.responsesSupport || "experimental";
 
 export const getDefaultProviderProtocol = (presetId: string) =>
-    presetId === "anthropic" ? "anthropic-messages" : presetId === "openai" ? "openai-responses" : "openai";
+    presetId === "anthropic" ? "anthropic-messages" : presetId === "openai" ? "openai-responses" :
+        presetId === "claude-code" ? "claude-code" : "openai";
+
+// 本机命令行协议由本机 Claude Code 可执行文件提供服务，移动端内核没有对应可执行文件。
+export const isClaudeCodeProtocol = (protocol?: string) => protocol === "claude-code";

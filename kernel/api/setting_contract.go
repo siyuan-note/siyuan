@@ -230,6 +230,12 @@ func settingProviderPayload(value *conf.Provider) *apicontract.SettingProvider {
 			result.Models[i] = settingModelPayload(item)
 		}
 	}
+	if value.ClaudeCode != nil {
+		result.ClaudeCode = &apicontract.SettingClaudeCodeProvider{
+			CLIPath:        value.ClaudeCode.CLIPath,
+			PermissionMode: value.ClaudeCode.PermissionMode,
+		}
+	}
 	return result
 }
 

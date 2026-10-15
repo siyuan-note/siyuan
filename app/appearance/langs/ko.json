@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (로컬 CLI)",
+	"aiClaudeCodeCLIPath": "CLI 경로",
+	"aiClaudeCodeCLIPathTip": "비워 두면 일반적인 설치 위치에서 claude 실행 파일을 자동으로 감지합니다",
+	"aiClaudeCodePermission": "도구 권한",
+	"aiClaudeCodePermissionTip": "로컬 CLI가 실행할 수 있는 도구를 제어합니다. 읽기 전용을 권장합니다",
+	"aiClaudeCodePermissionReadOnly": "읽기 전용",
+	"aiClaudeCodePermissionNotebook": "노트북 읽기 및 쓰기",
+	"aiClaudeCodePermissionFull": "전체 액세스",
+	"aiClaudeCodeModelTip": "CLI가 지원하는 모델 이름(예: sonnet, opus 또는 전체 모델 이름)을 입력하세요",
 	"mindmapItem": "마인드맵 항목 블록",
 	"listMindmapLock": "보기 잠금",
 	"listMindmapUnlock": "보기 잠금 해제",
@@ -3003,6 +3012,9 @@
 		"407": "암호화를 끄기 전에 모든 암호화 노트북 복구 데이터를 보관하세요",
 		"408": "DNS 이름 확인에 실패했습니다. 네트워크, DNS 또는 프록시 설정을 확인하세요",
 		"409": "네트워크 연결이 끊어졌거나 연결할 수 없습니다. 네트워크, 프록시 또는 방화벽 설정을 확인하세요",
-		"410": "GLM Coding Plan을 사용하는 경우 API 주소를 https://open.bigmodel.cn/api/coding/paas/v4(으)로 설정하세요"
+		"410": "GLM Coding Plan을 사용하는 경우 API 주소를 https://open.bigmodel.cn/api/coding/paas/v4(으)로 설정하세요",
+		"411": "Claude Code CLI를 찾을 수 없습니다. 제공자 설정에서 claude 실행 파일 경로를 설정하세요",
+		"412": "Claude Code CLI가 감지되었습니다",
+		"413": "사용 가능한 모델은 CLI가 관리하므로 sonnet, opus 등 모델 이름을 직접 입력하세요"
 	}
 }

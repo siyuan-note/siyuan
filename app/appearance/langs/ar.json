@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (CLI محلي)",
+	"aiClaudeCodeCLIPath": "مسار CLI",
+	"aiClaudeCodeCLIPathTip": "اتركه فارغًا للكشف عن ملف claude القابل للتنفيذ من مواقع التثبيت الشائعة",
+	"aiClaudeCodePermission": "أذونات الأدوات",
+	"aiClaudeCodePermissionTip": "يتحكم في الأدوات التي يمكن لـ CLI المحلي تشغيلها، ويُوصى بالقراءة فقط",
+	"aiClaudeCodePermissionReadOnly": "للقراءة فقط",
+	"aiClaudeCodePermissionNotebook": "قراءة وكتابة دفتر الملاحظات",
+	"aiClaudeCodePermissionFull": "وصول كامل",
+	"aiClaudeCodeModelTip": "أدخل اسم نموذج يدعمه CLI، مثل sonnet أو opus أو اسم النموذج الكامل",
 	"mindmapItem": "كتلة عنصر خريطة ذهنية",
 	"listMindmapLock": "قفل العرض",
 	"listMindmapUnlock": "إلغاء قفل العرض",
@@ -3003,6 +3012,9 @@
 		"407": "أرشف جميع بيانات استعادة دفاتر الملاحظات المشفرة قبل تعطيل التشفير",
 		"408": "فشل تحليل اسم DNS، يرجى التحقق من إعدادات الشبكة أو DNS أو الوكيل",
 		"409": "انقطع اتصال الشبكة أو تعذر إنشاؤه، يرجى التحقق من إعدادات الشبكة أو الوكيل أو جدار الحماية",
-		"410": "إذا كنت تستخدم اشتراك GLM Coding Plan، فاضبط عنوان API على https://open.bigmodel.cn/api/coding/paas/v4"
+		"410": "إذا كنت تستخدم اشتراك GLM Coding Plan، فاضبط عنوان API على https://open.bigmodel.cn/api/coding/paas/v4",
+		"411": "لم يتم العثور على Claude Code CLI، يرجى تعيين مسار ملف claude القابل للتنفيذ في إعدادات المزود",
+		"412": "تم اكتشاف Claude Code CLI",
+		"413": "تتم إدارة النماذج المتاحة بواسطة CLI، أدخل اسم النموذج مباشرة، مثل sonnet أو opus"
 	}
 }

@@ -1661,34 +1661,6 @@ func titleFallback(userMsg string) string {
 	return userMsg
 }
 
-// safeActions 按 action 字符串全局匹配，命中即免 UI 确认。
-// 契约：此处列出的 action 名必须代表纯只读操作。
-// 新增工具时，写操作的 action 切勿与此表冲突，否则将静默豁免确认。
-var safeActions = map[string]bool{
-	"get": true, "get_kramdown": true, "get_children": true, "breadcrumb": true,
-	"tree_stat": true, "dom": true, "batch_get": true, "batch_kramdown": true,
-	"list": true, "read": true, "search_docs": true, "fulltext": true, "semantic": true, "search": true,
-	"backlinks": true, "mentions": true, "refresh": true,
-	"labels": true, "status": true, "version": true,
-	"current_time": true, "workspace": true, "info": true,
-	"grep": true, "find": true, "stat": true, "unused": true,
-	"keys": true, "render": true, "diff": true,
-	"file_get": true, "file_open": true, "file_export": true,
-	"open": true, "close": true, "batch-get": true,
-	"md": true, "query": true,
-}
-
-var safeWholeTools = map[string]bool{
-	"question": true, "todo_write": true, "web_fetch": true, "web_search": true,
-	"search": true, "sql": true,
-}
-
-var safeNativeToolActions = map[string]map[string]bool{
-	"export": {
-		"html": true, "preview": true,
-	},
-}
-
 func capabilityEffects(registration *capabilityRegistration, action string) mcptools.ToolEffects {
 	if registration == nil {
 		return mcptools.ToolEffects{}
@@ -1759,22 +1731,22 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 		// 可能在外部服务中产生写入。仅工具明确声明只读时免确认，未知能力按写操作处理。
 		return !tool.ReadOnlyHint
 	}
-	if safeNativeToolActions[toolName][action] {
+	if mcptools.SafeToolActions[toolName][action] {
 		return false
 	}
 	if toolName == "http_request" && action == "" {
 		action = "get"
 	}
-	if safeWholeTools[toolName] {
+	if mcptools.SafeWholeTools[toolName] {
 		return false
 	}
 	if action == "" {
 		return true
 	}
-	if toolName == "import" && action == "md" {
+	if mcptools.SafeWriteActions[toolName][action] {
 		return true
 	}
-	if safeActions[action] {
+	if mcptools.SafeActions[action] {
 		return false
 	}
 	if toolName == "sync" && action == "status" {
@@ -1791,14 +1763,14 @@ func needsLocalSnapshot(toolName, action string) bool {
 	if toolName == "http_request" && action == "" {
 		action = "get"
 	}
-	if safeNativeToolActions[toolName][action] {
+	if mcptools.SafeToolActions[toolName][action] {
 		return false
 	}
-	actionSafe := safeActions[action]
-	if toolName == "import" && action == "md" {
+	actionSafe := mcptools.SafeActions[action]
+	if mcptools.SafeWriteActions[toolName][action] {
 		actionSafe = false
 	}
-	if safeWholeTools[toolName] || actionSafe || (toolName == "repo" && action == "create") {
+	if mcptools.SafeWholeTools[toolName] || actionSafe || (toolName == "repo" && action == "create") {
 		return false
 	}
 	if tool == nil {

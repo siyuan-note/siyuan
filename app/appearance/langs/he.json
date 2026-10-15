@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (CLI מקומי)",
+	"aiClaudeCodeCLIPath": "נתיב CLI",
+	"aiClaudeCodeCLIPathTip": "יש להשאיר ריק כדי לאתר את קובץ ההפעלה claude במיקומי ההתקנה הנפוצים",
+	"aiClaudeCodePermission": "הרשאת כלים",
+	"aiClaudeCodePermissionTip": "קובע אילו כלים ה-CLI המקומי רשאי להפעיל; מומלץ מצב קריאה בלבד",
+	"aiClaudeCodePermissionReadOnly": "קריאה בלבד",
+	"aiClaudeCodePermissionNotebook": "קריאה וכתיבה במחברת",
+	"aiClaudeCodePermissionFull": "גישה מלאה",
+	"aiClaudeCodeModelTip": "יש להזין שם מודל שה-CLI תומך בו, לדוגמה sonnet, opus או שם מודל מלא",
 	"mindmapItem": "בלוק פריט במפת חשיבה",
 	"listMindmapLock": "נעילת התצוגה",
 	"listMindmapUnlock": "ביטול נעילת התצוגה",
@@ -3003,6 +3012,9 @@
 		"407": "יש לארכב את כל נתוני השחזור של המחברות המוצפנות לפני השבתת ההצפנה",
 		"408": "פענוח שם DNS נכשל. יש לבדוק את הגדרות הרשת, ה-DNS או שרת ה-Proxy",
 		"409": "חיבור הרשת נותק או שלא ניתן היה ליצור אותו. יש לבדוק את הגדרות הרשת, שרת ה-Proxy או חומת האש",
-		"410": "אם אתה משתמש במינוי GLM Coding Plan, הגדר את כתובת ה-API כ-https://open.bigmodel.cn/api/coding/paas/v4"
+		"410": "אם אתה משתמש במינוי GLM Coding Plan, הגדר את כתובת ה-API כ-https://open.bigmodel.cn/api/coding/paas/v4",
+		"411": "Claude Code CLI לא נמצא. יש להגדיר את נתיב קובץ ההפעלה claude בהגדרות הספק",
+		"412": "Claude Code CLI זוהה",
+		"413": "המודלים הזמינים מנוהלים על ידי ה-CLI. יש להזין שם מודל ישירות, לדוגמה sonnet או opus"
 	}
 }

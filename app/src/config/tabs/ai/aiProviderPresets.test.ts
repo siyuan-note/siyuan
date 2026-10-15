@@ -5,6 +5,7 @@ import {
     getDefaultProviderProtocol,
     getProviderProtocolBaseURL,
     getResponsesSupport,
+    isClaudeCodeProtocol,
     PROVIDER_PRESETS,
 } from "./aiProviderPresets";
 
@@ -28,6 +29,22 @@ describe("AI provider presets", () => {
         assert.equal(getResponsesSupport("https://api.anthropic.com/v1"), "unsupported");
         assert.equal(getDefaultProviderProtocol("custom"), "openai");
         assert.equal(getDefaultProviderProtocol("openai"), "openai-responses");
+    });
+
+    it("registers the local Claude Code CLI preset with its own protocol", () => {
+        const preset = PROVIDER_PRESETS.find((item) => item.id === "claude-code");
+        assert.equal(preset?.baseURL, "claude-code://local");
+        assert.equal(preset?.category, "local");
+        assert.equal(preset?.responsesSupport, "unsupported");
+        // 本机命令行地址仅用于标识预设，不能匹配到其它提供方
+        assert.equal(findProviderPreset("claude-code://local")?.id, "claude-code");
+        assert.equal(getDefaultProviderProtocol("claude-code"), "claude-code");
+        assert.equal(getDefaultProviderProtocol("custom"), "openai");
+        assert.ok(isClaudeCodeProtocol("claude-code"));
+        assert.ok(!isClaudeCodeProtocol("openai"));
+        assert.ok(!isClaudeCodeProtocol(undefined));
+        // 命令行协议不切换地址，草稿地址保持原值
+        assert.equal(getProviderProtocolBaseURL("claude-code://local", "claude-code"), "claude-code://local");
     });
 
     it("reports known and custom Responses compatibility", () => {

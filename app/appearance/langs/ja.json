@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code（ローカル CLI）",
+	"aiClaudeCodeCLIPath": "CLI パス",
+	"aiClaudeCodeCLIPathTip": "空欄の場合は一般的なインストール先から claude 実行ファイルを自動検出します",
+	"aiClaudeCodePermission": "ツールの権限",
+	"aiClaudeCodePermissionTip": "ローカル CLI が実行できるツールを制御します。読み取り専用を推奨します",
+	"aiClaudeCodePermissionReadOnly": "読み取り専用",
+	"aiClaudeCodePermissionNotebook": "ノートブックの読み書き",
+	"aiClaudeCodePermissionFull": "フルアクセス",
+	"aiClaudeCodeModelTip": "CLI がサポートするモデル名（例：sonnet、opus、または完全なモデル名）を入力してください",
 	"mindmapItem": "マインドマップ項目ブロック",
 	"listMindmapLock": "表示をロック",
 	"listMindmapUnlock": "表示のロックを解除",
@@ -3003,6 +3012,9 @@
 		"407": "暗号化を無効にする前に、暗号化ノートブックの復元に必要なデータをすべてアーカイブしてください",
 		"408": "DNS 名前解決に失敗しました。ネットワーク、DNS、またはプロキシの設定を確認してください",
 		"409": "ネットワーク接続が切断されたか、確立できませんでした。ネットワーク、プロキシ、またはファイアウォールの設定を確認してください",
-		"410": "GLM Coding Plan をご利用の場合は、API アドレスを https://open.bigmodel.cn/api/coding/paas/v4 に設定してください"
+		"410": "GLM Coding Plan をご利用の場合は、API アドレスを https://open.bigmodel.cn/api/coding/paas/v4 に設定してください",
+		"411": "Claude Code CLI が見つかりません。プロバイダー設定で claude 実行ファイルのパスを設定してください",
+		"412": "Claude Code CLI を検出しました",
+		"413": "利用可能なモデルは CLI が管理しているため、sonnet や opus などモデル名を直接入力してください"
 	}
 }

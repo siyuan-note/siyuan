@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (CLI ภายในเครื่อง)",
+	"aiClaudeCodeCLIPath": "พาธ CLI",
+	"aiClaudeCodeCLIPathTip": "เว้นว่างไว้เพื่อตรวจหาไฟล์เรียกทำงาน claude จากตำแหน่งติดตั้งทั่วไป",
+	"aiClaudeCodePermission": "สิทธิ์ของเครื่องมือ",
+	"aiClaudeCodePermissionTip": "ควบคุมว่า CLI ภายในเครื่องสามารถเรียกใช้เครื่องมือใดได้ แนะนำให้ใช้แบบอ่านอย่างเดียว",
+	"aiClaudeCodePermissionReadOnly": "อ่านอย่างเดียว",
+	"aiClaudeCodePermissionNotebook": "อ่านและเขียนสมุดบันทึก",
+	"aiClaudeCodePermissionFull": "การเข้าถึงเต็มรูปแบบ",
+	"aiClaudeCodeModelTip": "ป้อนชื่อโมเดลที่ CLI รองรับ เช่น sonnet, opus หรือชื่อโมเดลเต็ม",
 	"mindmapItem": "บล็อกรายการแผนผังความคิด",
 	"listMindmapLock": "ล็อกมุมมอง",
 	"listMindmapUnlock": "ปลดล็อกมุมมอง",
@@ -3003,6 +3012,9 @@
 		"407": "โปรดเก็บข้อมูลกู้คืนของสมุดบันทึกที่เข้ารหัสทั้งหมดก่อนปิดการเข้ารหัส",
 		"408": "การแปลงชื่อ DNS ล้มเหลว โปรดตรวจสอบการตั้งค่าเครือข่าย DNS หรือพร็อกซี",
 		"409": "การเชื่อมต่อเครือข่ายถูกตัดหรือไม่สามารถเชื่อมต่อได้ โปรดตรวจสอบการตั้งค่าเครือข่าย พร็อกซี หรือไฟร์วอลล์",
-		"410": "หากคุณใช้การสมัครสมาชิก GLM Coding Plan ให้ตั้งค่าที่อยู่ API เป็น https://open.bigmodel.cn/api/coding/paas/v4"
+		"410": "หากคุณใช้การสมัครสมาชิก GLM Coding Plan ให้ตั้งค่าที่อยู่ API เป็น https://open.bigmodel.cn/api/coding/paas/v4",
+		"411": "ไม่พบ Claude Code CLI โปรดตั้งค่าพาธไฟล์เรียกทำงาน claude ในการตั้งค่าผู้ให้บริการ",
+		"412": "ตรวจพบ Claude Code CLI",
+		"413": "โมเดลที่ใช้ได้จัดการโดย CLI โปรดป้อนชื่อโมเดลโดยตรง เช่น sonnet หรือ opus"
 	}
 }

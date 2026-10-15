@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (CLI locale)",
+	"aiClaudeCodeCLIPath": "Chemin de la CLI",
+	"aiClaudeCodeCLIPathTip": "Laisser vide pour détecter l’exécutable claude dans les emplacements d’installation courants",
+	"aiClaudeCodePermission": "Autorisation des outils",
+	"aiClaudeCodePermissionTip": "Contrôle les outils que la CLI locale peut exécuter ; la lecture seule est recommandée",
+	"aiClaudeCodePermissionReadOnly": "Lecture seule",
+	"aiClaudeCodePermissionNotebook": "Lecture et écriture du carnet",
+	"aiClaudeCodePermissionFull": "Accès complet",
+	"aiClaudeCodeModelTip": "Saisissez un nom de modèle pris en charge par la CLI, par exemple sonnet, opus ou un nom de modèle complet",
 	"mindmapItem": "Bloc d’élément de carte mentale",
 	"listMindmapLock": "Verrouiller la vue",
 	"listMindmapUnlock": "Déverrouiller la vue",
@@ -3003,6 +3012,9 @@
 		"407": "Archivez toutes les données de récupération des carnets chiffrés avant de désactiver le chiffrement",
 		"408": "La résolution DNS a échoué. Vérifiez les paramètres du réseau, du DNS ou du proxy",
 		"409": "La connexion réseau a été interrompue ou n’a pas pu être établie. Vérifiez les paramètres du réseau, du proxy ou du pare-feu",
-		"410": "Si vous utilisez un abonnement GLM Coding Plan, définissez l'adresse de l'API sur https://open.bigmodel.cn/api/coding/paas/v4"
+		"410": "Si vous utilisez un abonnement GLM Coding Plan, définissez l'adresse de l'API sur https://open.bigmodel.cn/api/coding/paas/v4",
+		"411": "La CLI Claude Code est introuvable, veuillez définir le chemin de l’exécutable claude dans les paramètres du fournisseur",
+		"412": "CLI Claude Code détectée",
+		"413": "Les modèles disponibles sont gérés par la CLI, saisissez directement un nom de modèle, par exemple sonnet ou opus"
 	}
 }

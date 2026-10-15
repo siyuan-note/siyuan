@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (локални CLI)",
+	"aiClaudeCodeCLIPath": "Путања до CLI",
+	"aiClaudeCodeCLIPathTip": "Оставите празно да се извршна датотека claude пронађе на уобичајеним местима инсталације",
+	"aiClaudeCodePermission": "Дозвола за алате",
+	"aiClaudeCodePermissionTip": "Одређује које алате локални CLI сме да покрене; препоручује се режим само за читање",
+	"aiClaudeCodePermissionReadOnly": "Само за читање",
+	"aiClaudeCodePermissionNotebook": "Читање и писање бележнице",
+	"aiClaudeCodePermissionFull": "Пун приступ",
+	"aiClaudeCodeModelTip": "Унесите назив модела који CLI подржава, на пример sonnet, opus или пун назив модела",
 	"mindmapItem": "Blok stavke mape uma",
 	"listMindmapLock": "Закључај приказ",
 	"listMindmapUnlock": "Откључај приказ",
@@ -3003,6 +3012,9 @@
 		"407": "Пре искључивања шифровања архивирајте све податке за опоравак шифрованих бележница",
 		"408": "Разрешавање DNS имена није успело. Проверите подешавања мреже, DNS-а или проксија",
 		"409": "Мрежна веза је прекинута или се не може успоставити. Проверите подешавања мреже, проксија или заштитног зида",
-		"410": "Ако користите претплату GLM Coding Plan, подесите адресу API на https://open.bigmodel.cn/api/coding/paas/v4"
+		"410": "Ако користите претплату GLM Coding Plan, подесите адресу API на https://open.bigmodel.cn/api/coding/paas/v4",
+		"411": "Claude Code CLI није пронађен. Подесите путању до извршне датотеке claude у подешавањима провајдера",
+		"412": "Claude Code CLI је откривен",
+		"413": "Доступним моделима управља CLI. Унесите назив модела директно, на пример sonnet или opus"
 	}
 }

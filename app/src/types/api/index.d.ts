@@ -1890,6 +1890,10 @@ export type SettingCapabilityPolicy = { "default": string; "overrides": Record<s
 
 export type SettingCapabilityPolicyInput = { "default"?: string | null; "overrides"?: Record<string, string> | null; };
 
+export type SettingClaudeCodeProvider = { "cliPath": string; "permissionMode": string; };
+
+export type SettingClaudeCodeProviderInput = { "cliPath"?: string | null; "permissionMode"?: string | null; };
+
 export type SettingCloudUserRequestInput = { "cached"?: boolean; "token"?: string | null; };
 
 export type SettingDecision = { "apiKey": string; "enabled": boolean; "endpoint": string; "name": string; "timeout": number; };
@@ -1960,9 +1964,9 @@ export type SettingPetalDisabledData = { "dataChangePlugins": Array<string> | nu
 
 export type SettingPetalDisabledRequestInput = { "petalDisabled": boolean; };
 
-export type SettingProvider = { "apiKey": string; "baseURL": string; "displayName"?: string; "enabled": boolean; "headers"?: Record<string, string>; "id": string; "models": Array<SettingModel | null> | null; "protocol"?: string; "requestTimeout": number; };
+export type SettingProvider = { "apiKey": string; "baseURL": string; "claudeCode"?: SettingClaudeCodeProvider; "displayName"?: string; "enabled": boolean; "headers"?: Record<string, string>; "id": string; "models": Array<SettingModel | null> | null; "protocol"?: string; "requestTimeout": number; };
 
-export type SettingProviderInput = { "apiKey"?: string | null; "baseURL"?: string | null; "displayName"?: string | null; "enabled"?: boolean | null; "headers"?: Record<string, string> | null; "id"?: string | null; "models"?: Array<SettingModelInput | null> | null; "protocol"?: string | null; "requestTimeout"?: number | null; };
+export type SettingProviderInput = { "apiKey"?: string | null; "baseURL"?: string | null; "claudeCode"?: SettingClaudeCodeProviderInput | null; "displayName"?: string | null; "enabled"?: boolean | null; "headers"?: Record<string, string> | null; "id"?: string | null; "models"?: Array<SettingModelInput | null> | null; "protocol"?: string | null; "requestTimeout"?: number | null; };
 
 export type SettingPublish = { "auth": SettingBasicAuth | null; "enable": boolean; "port": number; };
 

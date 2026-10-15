@@ -241,11 +241,21 @@ declare namespace Config {
         enabled: boolean;
         displayName?: string;
         baseURL: string;
-        /** 生成协议：openai、openai-responses 或 anthropic-messages；省略时使用 openai */
+        /** 生成协议：openai、openai-responses、anthropic-messages 或 claude-code；省略时使用 openai */
         protocol?: string;
         apiKey: string;
         requestTimeout: number;
         models: IModel[];
+        /** 本机 Claude Code 命令行提供方的执行配置，仅在 protocol 为 claude-code 时生效 */
+        claudeCode?: IClaudeCodeProvider;
+    }
+
+    /** 本机 Claude Code 命令行提供方的执行配置 */
+    export interface IClaudeCodeProvider {
+        /** claude 可执行文件路径，留空时自动探测 */
+        cliPath: string;
+        /** 工具权限：readonly 只读、notebook 读写笔记本、full 完全放行 */
+        permissionMode: string;
     }
 
     /**

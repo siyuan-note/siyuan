@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (lokale CLI)",
+	"aiClaudeCodeCLIPath": "CLI-Pfad",
+	"aiClaudeCodeCLIPathTip": "Leer lassen, um die ausführbare Datei claude an gängigen Installationsorten zu ermitteln",
+	"aiClaudeCodePermission": "Werkzeugberechtigung",
+	"aiClaudeCodePermissionTip": "Legt fest, welche Werkzeuge die lokale CLI ausführen darf; der Nur-Lese-Modus wird empfohlen",
+	"aiClaudeCodePermissionReadOnly": "Nur Lesen",
+	"aiClaudeCodePermissionNotebook": "Notizbuch lesen und schreiben",
+	"aiClaudeCodePermissionFull": "Vollzugriff",
+	"aiClaudeCodeModelTip": "Geben Sie einen von der CLI unterstützten Modellnamen ein, z. B. sonnet, opus oder einen vollständigen Modellnamen",
 	"mindmapItem": "Mindmap-Eintragsblock",
 	"listMindmapLock": "Ansicht sperren",
 	"listMindmapUnlock": "Ansicht entsperren",
@@ -3003,6 +3012,9 @@
 		"407": "Vor dem Deaktivieren der Verschlüsselung alle Wiederherstellungsdaten verschlüsselter Notizbücher archivieren",
 		"408": "DNS-Auflösung fehlgeschlagen. Bitte prüfen Sie Ihre Netzwerk-, DNS- oder Proxy-Einstellungen",
 		"409": "Die Netzwerkverbindung wurde unterbrochen oder konnte nicht hergestellt werden. Bitte prüfen Sie Ihre Netzwerk-, Proxy- oder Firewall-Einstellungen",
-		"410": "Wenn Sie ein GLM Coding Plan-Abonnement nutzen, stellen Sie die API-Adresse auf https://open.bigmodel.cn/api/coding/paas/v4 ein"
+		"410": "Wenn Sie ein GLM Coding Plan-Abonnement nutzen, stellen Sie die API-Adresse auf https://open.bigmodel.cn/api/coding/paas/v4 ein",
+		"411": "Die Claude Code CLI wurde nicht gefunden, bitte legen Sie den Pfad zur ausführbaren Datei claude in den Anbietereinstellungen fest",
+		"412": "Claude Code CLI erkannt",
+		"413": "Die verfügbaren Modelle werden von der CLI verwaltet, geben Sie einen Modellnamen direkt ein, z. B. sonnet oder opus"
 	}
 }

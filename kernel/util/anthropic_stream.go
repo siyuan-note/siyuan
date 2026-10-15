@@ -76,6 +76,27 @@ func (s *anthropicStream) recv() (openai.ChatCompletionStreamResponse, error) {
 	if err != nil || len(data) == 0 {
 		return ret, err
 	}
+	return s.processEvent(data)
+}
+
+// reset 清空消息映射状态，用于一次调用内出现多轮助手消息的场景。
+func (s *anthropicStream) reset() {
+	s.response = anthropicResponse{}
+	s.block = nil
+	s.blockType = ""
+	s.blockIndex = 0
+	s.arguments.Reset()
+	s.text.Reset()
+	s.thinking.Reset()
+	s.signature.Reset()
+	s.started = false
+	s.done = false
+	s.content = nil
+}
+
+// processEvent 把单个 Anthropic 事件映射为 OpenAI 流式分片，供 SSE 与命令行传输共用。
+func (s *anthropicStream) processEvent(data []byte) (openai.ChatCompletionStreamResponse, error) {
+	ret := openai.ChatCompletionStreamResponse{Object: "chat.completion.chunk", ID: s.response.ID, Model: s.response.Model}
 	var event struct {
 		Type         string                     `json:"type"`
 		Index        int                        `json:"index"`
@@ -91,7 +112,7 @@ func (s *anthropicStream) recv() (openai.ChatCompletionStreamResponse, error) {
 		} `json:"delta"`
 		Usage json.RawMessage `json:"usage"`
 	}
-	if err = json.Unmarshal(data, &event); err != nil {
+	if err := json.Unmarshal(data, &event); err != nil {
 		return ret, fmt.Errorf("invalid Anthropic stream event: %w", err)
 	}
 	delta := openai.ChatCompletionStreamChoiceDelta{}
@@ -203,7 +224,7 @@ func (s *anthropicStream) recv() (openai.ChatCompletionStreamResponse, error) {
 		}
 		if len(event.Usage) > 0 && string(event.Usage) != "null" {
 			// 用量字段为累计值，未出现的字段保留 message_start 中的值。
-			if err = json.Unmarshal(event.Usage, &s.response.Usage); err != nil {
+			if err := json.Unmarshal(event.Usage, &s.response.Usage); err != nil {
 				return ret, err
 			}
 		}

@@ -120,15 +120,24 @@ type SettingImageGeneration struct {
 }
 
 type SettingProvider struct {
-	Headers        map[string]string `json:"headers,omitempty" api:"optional,nullable"`
-	ID             string            `json:"id" api:"optional,nullable"`
-	DisplayName    string            `json:"displayName,omitempty" api:"optional,nullable"`
-	Enabled        bool              `json:"enabled" api:"optional,nullable"`
-	APIKey         string            `json:"apiKey" api:"optional,nullable"`
-	BaseURL        string            `json:"baseURL" api:"optional,nullable"`
-	Protocol       string            `json:"protocol,omitempty" api:"optional,nullable"`
-	RequestTimeout int               `json:"requestTimeout" api:"optional,nullable"`
-	Models         []*SettingModel   `json:"models" api:"optional,nullable"`
+	Headers        map[string]string          `json:"headers,omitempty" api:"optional,nullable"`
+	ID             string                     `json:"id" api:"optional,nullable"`
+	DisplayName    string                     `json:"displayName,omitempty" api:"optional,nullable"`
+	Enabled        bool                       `json:"enabled" api:"optional,nullable"`
+	APIKey         string                     `json:"apiKey" api:"optional,nullable"`
+	BaseURL        string                     `json:"baseURL" api:"optional,nullable"`
+	Protocol       string                     `json:"protocol,omitempty" api:"optional,nullable"`
+	RequestTimeout int                        `json:"requestTimeout" api:"optional,nullable"`
+	Models         []*SettingModel            `json:"models" api:"optional,nullable"`
+	ClaudeCode     *SettingClaudeCodeProvider `json:"claudeCode,omitempty" api:"optional,nullable"`
+}
+
+// SettingClaudeCodeProvider 描述本机 Claude Code 命令行提供方的执行配置，仅在 protocol 为 claude-code 时生效。
+// cliPath 留空时由内核按常见安装位置探测；permissionMode 取 readonly（默认）、notebook 或 full，
+// readonly 由内核的 MCP 服务拒绝写入动作，full 会放行命令行内置工具。
+type SettingClaudeCodeProvider struct {
+	CLIPath        string `json:"cliPath" api:"optional,nullable"`
+	PermissionMode string `json:"permissionMode" api:"optional,nullable"`
 }
 
 type SettingModel struct {

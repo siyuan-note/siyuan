@@ -94,6 +94,7 @@ type OpenAICompletionStream struct {
 	anthropic         *anthropicStream
 	chat              *openai.ChatCompletionStream
 	responses         *openai.ResponseStream
+	claudeCode        *claudeCodeStream
 	pending           []openai.ChatCompletionStreamResponse
 	responseOutput    []json.RawMessage
 	responseContent   strings.Builder
@@ -103,6 +104,9 @@ type OpenAICompletionStream struct {
 
 func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protocol string,
 	request openai.ChatCompletionRequest, responseInput []any) (*OpenAICompletionStream, error) {
+	if IsClaudeCodeProtocol(protocol) {
+		return createClaudeCodeStream(ctx, client, request)
+	}
 	if IsAnthropicMessagesProtocol(protocol) {
 		return createAnthropicStream(ctx, client, request)
 	}
@@ -126,6 +130,9 @@ func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protoco
 
 func CreateOpenAICompletion(ctx context.Context, client *AIClient, protocol string,
 	request openai.ChatCompletionRequest, responseInput []any) (openai.ChatCompletionResponse, error) {
+	if IsClaudeCodeProtocol(protocol) {
+		return createClaudeCodeCompletion(ctx, client, request)
+	}
 	if IsAnthropicMessagesProtocol(protocol) {
 		return createAnthropicCompletion(ctx, client, request)
 	}
@@ -446,6 +453,9 @@ func responseUsageToChat(usage *openai.ResponseUsage) openai.Usage {
 }
 
 func (stream *OpenAICompletionStream) Recv() (openai.ChatCompletionStreamResponse, error) {
+	if stream.claudeCode != nil {
+		return stream.claudeCode.recv()
+	}
 	if stream.anthropic != nil {
 		return stream.anthropic.recv()
 	}
@@ -722,6 +732,9 @@ func (stream *OpenAICompletionStream) ResponseOutput() []json.RawMessage {
 }
 
 func (stream *OpenAICompletionStream) Close() {
+	if stream.claudeCode != nil {
+		stream.claudeCode.close()
+	}
 	if stream.anthropic != nil {
 		stream.anthropic.body.Close()
 	}

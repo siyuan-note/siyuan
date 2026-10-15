@@ -9,11 +9,13 @@ import {upDownHint} from "../../../util/upDownHint";
 import {moveModelItem} from "./aiModelOrder";
 import {hasProviderHeaderAuth, parseProviderHeaders} from "./aiProviderHeaders";
 import {resolveProviderTestResult} from "./aiProviderTestResult";
+import {isMobile} from "../../../util/functions";
 import {
     findProviderPreset,
     getDefaultProviderProtocol,
     getProviderProtocolBaseURL,
     getResponsesSupport,
+    isClaudeCodeProtocol,
     IProviderPreset,
     PROVIDER_PRESETS,
 } from "./aiProviderPresets";
@@ -39,6 +41,9 @@ const cloneProvider = (provider: Config.IProvider): Config.IProvider =>
     JSON.parse(JSON.stringify(provider)) as Config.IProvider;
 
 const findPreset = (provider: Config.IProvider) => findProviderPreset(provider.baseURL);
+
+// 本机命令行提供方的默认执行配置：自动探测 claude 路径，默认只读
+const defaultClaudeCodeConfig = (): Config.IClaudeCodeProvider => ({cliPath: "", permissionMode: "readonly"});
 
 const requiresAPIKey = (provider: Config.IProvider) => {
     const preset = findPreset(provider);
@@ -190,7 +195,9 @@ const openProviderCatalog = (root: HTMLElement) => {
     const view = createProviderView(root, window.siyuan.languages.apiProvider);
     const body = view.querySelector<HTMLElement>(".b3-dialog__body");
     body.innerHTML = `<div class="b3-dialog__content" style="padding: 0">${PROVIDER_CATEGORIES.map((category) => {
-        const cards = PROVIDER_PRESETS.filter((preset) => preset.category === category).map((preset) => {
+        const cards = PROVIDER_PRESETS.filter((preset) =>
+            preset.category === category && (!isClaudeCodeProtocol(getDefaultProviderProtocol(preset.id)) || !isMobile()))
+            .map((preset) => {
             const provider: Config.IProvider = {
                 id: "",
                 enabled: true,
@@ -236,9 +243,9 @@ const openProviderCatalog = (root: HTMLElement) => {
     });
 };
 
-const renderDraftModels = (container: HTMLElement, models: Config.IModel[], availableModels: string[]) => {
+const renderDraftModels = (container: HTMLElement, models: Config.IModel[], availableModels: string[], emptyTip?: string) => {
     if (models.length === 0) {
-        container.innerHTML = `<div class="b3-label config-item b3-card__desc">${window.siyuan.languages.noModelConfigured}</div>`;
+        container.innerHTML = `<div class="b3-label config-item b3-card__desc">${emptyTip || window.siyuan.languages.noModelConfigured}</div>`;
         return;
     }
     const modelInputAction = availableModels.length > 0 ? ' data-action="selectModel" data-menu="true"' : "";
@@ -381,6 +388,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         models: [],
     };
     draft.protocol ||= "openai";
+    if (isClaudeCodeProtocol(draft.protocol)) {
+        draft.claudeCode = {...defaultClaudeCodeConfig(), ...draft.claudeCode};
+    }
     const initialHeadersText = Object.keys(draft.headers || {}).length ? JSON.stringify(draft.headers, null, 2) : "";
     const initialJSON = JSON.stringify(draft);
     const openedFromCatalog = !existing && !!preset;
@@ -399,7 +409,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 <span class="fn__space"></span>
                 <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="displayName" type="text" spellcheck="false" value="${escapeHTML(draft.displayName || "")}">
             </label>
-            <label class="fn__flex b3-label config-item">
+            <label class="fn__flex b3-label config-item" data-type="providerBaseURL">
                 ${genConfigItemMainHtml(window.siyuan.languages.apiBaseURL)}
                 <span class="fn__space"></span>
                 <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="baseURL" type="text" spellcheck="false" value="${escapeHTML(draft.baseURL)}">
@@ -412,6 +422,21 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     <option value="openai"${draft.protocol === "openai" ? " selected" : ""}>Chat Completions</option>
                     <option value="openai-responses"${draft.protocol === "openai-responses" ? " selected" : ""}>Responses</option>
                     <option value="anthropic-messages"${draft.protocol === "anthropic-messages" ? " selected" : ""}>Anthropic Messages</option>
+                    <option value="claude-code"${draft.protocol === "claude-code" ? " selected" : ""}>${window.siyuan.languages.aiProtocolClaudeCode}</option>
+                </select>
+            </label>
+            <label class="fn__flex b3-label config-item fn__none" data-type="claudeCodeCLIPath">
+                ${genConfigItemMainHtml(window.siyuan.languages.aiClaudeCodeCLIPath, window.siyuan.languages.aiClaudeCodeCLIPathTip)}
+                <span class="fn__space"></span>
+                <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="claudeCodeCLIPath" type="text" spellcheck="false" placeholder="claude" value="${escapeHTML(draft.claudeCode?.cliPath || "")}">
+            </label>
+            <label class="fn__flex b3-label config-item fn__none" data-type="claudeCodePermission">
+                ${genConfigItemMainHtml(window.siyuan.languages.aiClaudeCodePermission, window.siyuan.languages.aiClaudeCodePermissionTip)}
+                <span class="fn__space"></span>
+                <select class="b3-select fn__flex-center fn__size200" data-provider-field="claudeCodePermission">
+                    <option value="readonly"${draft.claudeCode?.permissionMode === "notebook" || draft.claudeCode?.permissionMode === "full" ? "" : " selected"}>${window.siyuan.languages.aiClaudeCodePermissionReadOnly}</option>
+                    <option value="notebook"${draft.claudeCode?.permissionMode === "notebook" ? " selected" : ""}>${window.siyuan.languages.aiClaudeCodePermissionNotebook}</option>
+                    <option value="full"${draft.claudeCode?.permissionMode === "full" ? " selected" : ""}>${window.siyuan.languages.aiClaudeCodePermissionFull}</option>
                 </select>
             </label>
             <label class="fn__flex b3-label config-item">
@@ -427,7 +452,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
                 </div>
             </label>
-            <div class="b3-label config-item">
+            <div class="b3-label config-item" data-type="providerHeadersItem">
                 ${genConfigItemMainHtml(window.siyuan.languages.aiMcpHttpHeaders, window.siyuan.languages.aiProviderHeadersTip)}
                 <div class="fn__hr"></div>
                 <textarea class="b3-text-field fn__block" data-type="providerHeaders" rows="3" spellcheck="false" style="resize: vertical;" placeholder='{"Authorization":"Bearer {{secrets.API_KEY}}"}'>${escapeHTML(initialHeadersText)}</textarea>
@@ -514,9 +539,29 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         addModelButton.disabled = disabled;
         fetchModelsButton.disabled = disabled;
     };
+    // 命令行提供方的模型清单由命令行管理，给出填写提示
+    const modelEmptyTip = () => isClaudeCodeProtocol(draft.protocol)
+        ? window.siyuan.languages.aiClaudeCodeModelTip
+        : undefined;
+
+    // 本机命令行提供方不使用 HTTP 端点，隐藏地址与请求头并显示命令行配置
+    const updateClaudeCodeFields = () => {
+        const claudeCode = isClaudeCodeProtocol(draft.protocol);
+        view.querySelectorAll<HTMLElement>("[data-type='claudeCodeCLIPath'], [data-type='claudeCodePermission']")
+            .forEach((element) => element.classList.toggle("fn__none", !claudeCode));
+        view.querySelector<HTMLElement>("[data-type='providerBaseURL']")?.classList.toggle("fn__none", claudeCode);
+        view.querySelector<HTMLElement>("[data-type='providerHeadersItem']")?.classList.toggle("fn__none", claudeCode);
+        fetchModelsButton.classList.toggle("fn__none", claudeCode);
+        // 命令行执行时间可能远长于单次 HTTP 请求，放宽超时上限
+        const timeoutInput = view.querySelector<HTMLInputElement>("[data-provider-field='requestTimeout']");
+        if (timeoutInput) {
+            timeoutInput.max = claudeCode ? "3600" : "600";
+        }
+    };
     updateModelActionButtons();
     updateResponsesCompatibility();
-    renderDraftModels(modelsContainer, draft.models, availableModels);
+    updateClaudeCodeFields();
+    renderDraftModels(modelsContainer, draft.models, availableModels, modelEmptyTip());
 
     const clearModelDropTarget = () => {
         modelsContainer.querySelectorAll(".config-ai-provider__model--drop-before, .config-ai-provider__model--drop-after")
@@ -531,7 +576,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return false;
         }
         draft.models = models;
-        renderDraftModels(modelsContainer, draft.models, availableModels);
+        renderDraftModels(modelsContainer, draft.models, availableModels, modelEmptyTip());
         const movedIndex = draft.models.indexOf(movedModel);
         modelsContainer.querySelector<HTMLElement>(
             `[data-model-index="${movedIndex}"] [data-action="sortModel"]`,
@@ -619,7 +664,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
 
     const addDraftModel = () => {
         draft.models.push({id: "", enabled: true, name: "", displayName: ""});
-        renderDraftModels(modelsContainer, draft.models, availableModels);
+        renderDraftModels(modelsContainer, draft.models, availableModels, modelEmptyTip());
         const modelInput = modelsContainer.querySelector<HTMLInputElement>(
             "[data-model-index]:last-child [data-model-field='name']",
         );
@@ -702,7 +747,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 }
                 draft.models.push(model);
             }
-            renderDraftModels(modelsContainer, draft.models, availableModels);
+            renderDraftModels(modelsContainer, draft.models, availableModels, modelEmptyTip());
             showMessage(
                 window.siyuan.languages.fetchAvailableModelsSuccess
                     .replace("${x}", String(availableModels.length)),
@@ -737,8 +782,26 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         leaveDetail();
     };
 
+    // 命令行路径与工具权限存放于嵌套配置，单独处理
+    const applyClaudeCodeField = (target: HTMLInputElement) => {
+        const providerField = target.dataset.providerField;
+        if (providerField !== "claudeCodeCLIPath" && providerField !== "claudeCodePermission") {
+            return false;
+        }
+        draft.claudeCode = {...defaultClaudeCodeConfig(), ...draft.claudeCode};
+        if (providerField === "claudeCodeCLIPath") {
+            draft.claudeCode.cliPath = target.value;
+        } else {
+            draft.claudeCode.permissionMode = target.value;
+        }
+        return true;
+    };
+
     view.addEventListener("input", (event) => {
         const target = event.target as HTMLInputElement;
+        if (applyClaudeCodeField(target)) {
+            return;
+        }
         const providerField = target.dataset.providerField as
             "displayName" | "baseURL" | "apiKey" | "protocol" | "requestTimeout";
         if (providerField) {
@@ -777,12 +840,19 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
 
     view.addEventListener("change", (event) => {
         const target = event.target as HTMLInputElement;
+        if (applyClaudeCodeField(target)) {
+            return;
+        }
         if (target.dataset.providerField === "protocol") {
             draft.protocol = target.value;
             draft.baseURL = getProviderProtocolBaseURL(draft.baseURL, draft.protocol);
             view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']").value = draft.baseURL;
+            if (isClaudeCodeProtocol(draft.protocol)) {
+                draft.claudeCode = {...defaultClaudeCodeConfig(), ...draft.claudeCode};
+            }
             updateModelActionButtons();
             updateResponsesCompatibility();
+            updateClaudeCodeFields();
             return;
         }
         if (target.dataset.modelField !== "enabled") {
@@ -818,7 +888,8 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             if (!validateAPIKey()) {
                 return;
             }
-            if (!hasFetchedModels) {
+            // 命令行提供方不提供模型清单，直接新增一行由用户填写
+            if (!isClaudeCodeProtocol(draft.protocol) && !hasFetchedModels) {
                 const modelCount = draft.models.length;
                 fetchModels(() => {
                     if (draft.models.length === modelCount) {
@@ -837,7 +908,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         }
         if (action === "deleteModel" && draft.models[modelIndex]) {
             draft.models.splice(modelIndex, 1);
-            renderDraftModels(modelsContainer, draft.models, availableModels);
+            renderDraftModels(modelsContainer, draft.models, availableModels, modelEmptyTip());
             return;
         }
         if (action === "fetchModels") {
@@ -940,27 +1011,29 @@ export const mountProviderCards = (root: HTMLElement) => {
     });
 };
 
-const getEnabledModelGroups = () => window.siyuan.config.ai.providers
+// 本机命令行不提供图片生成能力，图片生成场景不列出其模型
+const getEnabledModelGroups = (group?: ModelPickerGroup) => window.siyuan.config.ai.providers
     .filter((provider) => provider.enabled)
+    .filter((provider) => group !== "imageGeneration" || !isClaudeCodeProtocol(provider.protocol))
     .map((provider) => ({
         provider,
         models: provider.models.filter((model) => model.enabled),
     }))
-    .filter((group) => group.models.length > 0);
+    .filter((item) => item.models.length > 0);
 
-const getFirstEnabledModelId = () => getEnabledModelGroups()[0]?.models[0]?.id || "";
+const getFirstEnabledModelId = (group: ModelPickerGroup) => getEnabledModelGroups(group)[0]?.models[0]?.id || "";
 
 const getSelectedModelId = (group: ModelPickerGroup) => {
     const savedModelId = window.siyuan.config.ai[group].modelId;
-    const valid = getEnabledModelGroups().some((item) => item.models.some((model) => model.id === savedModelId));
+    const valid = getEnabledModelGroups(group).some((item) => item.models.some((model) => model.id === savedModelId));
     if (valid || group === "imageGeneration") {
         return valid ? savedModelId : "";
     }
-    return getFirstEnabledModelId();
+    return getFirstEnabledModelId(group);
 };
 
-const getModelPickerLabel = (modelId: string) => {
-    for (const {models} of getEnabledModelGroups()) {
+const getModelPickerLabel = (modelId: string, group: ModelPickerGroup) => {
+    for (const {models} of getEnabledModelGroups(group)) {
         const model = models.find((item) => item.id === modelId);
         if (model) {
             return model.displayName || model.name;
@@ -982,10 +1055,10 @@ const setGroupedModelPickerLabel = (element: GroupedModelPickerElement, label: s
     }
 };
 
-const updateGroupedModelPicker = (element: GroupedModelPickerElement, selectedModelId: string) => {
+const updateGroupedModelPicker = (element: GroupedModelPickerElement, selectedModelId: string, group: ModelPickerGroup) => {
     element.dataset.modelId = selectedModelId;
-    setGroupedModelPickerLabel(element, getModelPickerLabel(selectedModelId));
-    element.disabled = getEnabledModelGroups().length === 0;
+    setGroupedModelPickerLabel(element, getModelPickerLabel(selectedModelId, group));
+    element.disabled = getEnabledModelGroups(group).length === 0;
 };
 
 const getGroupedModelMenuId = (group: ModelPickerGroup, options?: IGroupedModelPickerOptions) =>
@@ -1007,7 +1080,7 @@ const openGroupedModelMenu = (
     if (element.disabled) {
         return;
     }
-    const modelGroups = getEnabledModelGroups();
+    const modelGroups = getEnabledModelGroups(group);
     const selectedModelId = options.getSelectedModelId ? options.getSelectedModelId() : getSelectedModelId(group);
     const menu = new Menu(getGroupedModelMenuId(group, options));
     if (menu.isOpen) {
@@ -1066,7 +1139,7 @@ const syncGroupedModelPickers = (root: HTMLElement) => {
         if (!input) {
             return;
         }
-        updateGroupedModelPicker(input, getSelectedModelId(group));
+        updateGroupedModelPicker(input, getSelectedModelId(group), group);
     });
 };
 
@@ -1080,8 +1153,8 @@ export const genGroupedModelPickerHtml = (group: ModelPickerGroup): string => {
         desc = window.siyuan.languages.aiImageGenerationTip;
     }
     const selectedModelId = getSelectedModelId(group);
-    const disabled = getEnabledModelGroups().length === 0 ? " disabled" : "";
-    const modelLabel = getModelPickerLabel(selectedModelId);
+    const disabled = getEnabledModelGroups(group).length === 0 ? " disabled" : "";
+    const modelLabel = getModelPickerLabel(selectedModelId, group);
     return `<div class="fn__flex b3-label config-item" id="aiModelPickerBlock-${group}" data-type="aiModelPicker" data-name="${group}">
     ${genConfigItemMainHtml(window.siyuan.languages.defaultModel, desc)}
     <span class="fn__space"></span>
@@ -1102,6 +1175,7 @@ export const mountGroupedModelPicker = (
     const update = () => updateGroupedModelPicker(
         element,
         options.getSelectedModelId ? options.getSelectedModelId() : getSelectedModelId(group),
+        group,
     );
     const openMenu = () => openGroupedModelMenu(root, element, group, options, update);
     update();

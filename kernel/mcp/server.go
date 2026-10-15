@@ -272,6 +272,9 @@ func syncGuardedTool(server *mcpsdk.Server, name string, tool *tools.Tool, allow
 		if err := validator.ValidateInputContext(ctx, arguments); err != nil {
 			return toolErrorResult(fmt.Sprintf("invalid tool arguments: %v", err)), nil
 		}
+		if denial, denied := readOnlyDenial(tool, request, arguments); denied {
+			return toolErrorResult(denial), nil
+		}
 		releaseBoxLeases := func() {}
 		if tool.BoxLeaseResolver != nil {
 			leaseContext, contextErr := requestOperationContext(ctx, request)

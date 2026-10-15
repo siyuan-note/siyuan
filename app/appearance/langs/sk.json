@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (lokálne CLI)",
+	"aiClaudeCodeCLIPath": "Cesta k CLI",
+	"aiClaudeCodeCLIPathTip": "Ponechajte prázdne, aby sa spustiteľný súbor claude vyhľadal v bežných umiestneniach inštalácie",
+	"aiClaudeCodePermission": "Povolenie nástrojov",
+	"aiClaudeCodePermissionTip": "Určuje, ktoré nástroje môže lokálne CLI spúšťať; odporúča sa režim len na čítanie",
+	"aiClaudeCodePermissionReadOnly": "Len na čítanie",
+	"aiClaudeCodePermissionNotebook": "Čítanie a zápis v zápisníku",
+	"aiClaudeCodePermissionFull": "Plný prístup",
+	"aiClaudeCodeModelTip": "Zadajte názov modelu, ktorý CLI podporuje, napríklad sonnet, opus alebo úplný názov modelu",
 	"mindmapItem": "Blok položky myšlienkovej mapy",
 	"listMindmapLock": "Zamknúť zobrazenie",
 	"listMindmapUnlock": "Odomknúť zobrazenie",
@@ -3003,6 +3012,9 @@
 		"407": "Pred vypnutím šifrovania archivujte všetky údaje na obnovu šifrovaných poznámkových blokov",
 		"408": "Preklad názvu DNS zlyhal. Skontrolujte nastavenia siete, DNS alebo proxy",
 		"409": "Sieťové pripojenie bolo prerušené alebo sa ho nepodarilo nadviazať. Skontrolujte nastavenia siete, proxy alebo brány firewall",
-		"410": "Ak používate predplatné GLM Coding Plan, nastavte adresu API na https://open.bigmodel.cn/api/coding/paas/v4"
+		"410": "Ak používate predplatné GLM Coding Plan, nastavte adresu API na https://open.bigmodel.cn/api/coding/paas/v4",
+		"411": "Claude Code CLI sa nenašiel. Nastavte cestu k spustiteľnému súboru claude v nastaveniach poskytovateľa",
+		"412": "Claude Code CLI bol zistený",
+		"413": "Dostupné modely spravuje CLI. Zadajte názov modelu priamo, napríklad sonnet alebo opus"
 	}
 }

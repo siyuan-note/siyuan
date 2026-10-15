@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code（本机命令行）",
+	"aiClaudeCodeCLIPath": "命令行路径",
+	"aiClaudeCodeCLIPathTip": "留空时自动探测常见安装位置中的 claude 可执行文件",
+	"aiClaudeCodePermission": "工具权限",
+	"aiClaudeCodePermissionTip": "控制本机命令行可执行的工具范围，推荐使用只读",
+	"aiClaudeCodePermissionReadOnly": "只读",
+	"aiClaudeCodePermissionNotebook": "读写笔记本",
+	"aiClaudeCodePermissionFull": "完全放行",
+	"aiClaudeCodeModelTip": "填写命令行支持的模型名，例如 sonnet、opus 或完整模型名",
 	"mindmapItem": "思维导图项块",
 	"listMindmapLock": "锁定视图",
 	"listMindmapUnlock": "解锁视图",
@@ -3003,6 +3012,9 @@
 		"407": "请先归档全部加密笔记本恢复依赖，再关闭加密功能",
 		"408": "DNS 解析失败，请检查网络、DNS 或代理设置",
 		"409": "网络连接中断或无法建立，请检查网络、代理或防火墙设置",
-		"410": "若使用 GLM Coding Plan 编码套餐，请将 API 地址设置为 https://open.bigmodel.cn/api/coding/paas/v4"
+		"410": "若使用 GLM Coding Plan 编码套餐，请将 API 地址设置为 https://open.bigmodel.cn/api/coding/paas/v4",
+		"411": "未找到本机 Claude Code 命令行，请在提供方设置中填写 claude 可执行文件路径",
+		"412": "已检测到本机 Claude Code 命令行",
+		"413": "可用模型由命令行管理，请直接填写模型名，例如 sonnet 或 opus"
 	}
 }

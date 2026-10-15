@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (CLI local)",
+	"aiClaudeCodeCLIPath": "Caminho da CLI",
+	"aiClaudeCodeCLIPathTip": "Deixe vazio para detectar o executável claude nos locais de instalação comuns",
+	"aiClaudeCodePermission": "Permissão de ferramentas",
+	"aiClaudeCodePermissionTip": "Controla quais ferramentas a CLI local pode executar; recomendamos o modo somente leitura",
+	"aiClaudeCodePermissionReadOnly": "Somente leitura",
+	"aiClaudeCodePermissionNotebook": "Leitura e gravação do caderno",
+	"aiClaudeCodePermissionFull": "Acesso total",
+	"aiClaudeCodeModelTip": "Insira um nome de modelo compatível com a CLI, por exemplo sonnet, opus ou um nome de modelo completo",
 	"mindmapItem": "Bloco de item do mapa mental",
 	"listMindmapLock": "Bloquear visualização",
 	"listMindmapUnlock": "Desbloquear visualização",
@@ -3003,6 +3012,9 @@
 		"407": "Arquive todos os dados de recuperação dos cadernos criptografados antes de desativar a criptografia",
 		"408": "Falha na resolução de DNS. Verifique as configurações de rede, DNS ou proxy",
 		"409": "A conexão de rede foi interrompida ou não pôde ser estabelecida. Verifique as configurações de rede, proxy ou firewall",
-		"410": "Se você usa uma assinatura GLM Coding Plan, defina o endereço da API como https://open.bigmodel.cn/api/coding/paas/v4"
+		"410": "Se você usa uma assinatura GLM Coding Plan, defina o endereço da API como https://open.bigmodel.cn/api/coding/paas/v4",
+		"411": "A CLI do Claude Code não foi encontrada, defina o caminho do executável claude nas configurações do provedor",
+		"412": "CLI do Claude Code detectada",
+		"413": "Os modelos disponíveis são gerenciados pela CLI, insira um nome de modelo diretamente, por exemplo sonnet ou opus"
 	}
 }

@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (स्थानीय CLI)",
+	"aiClaudeCodeCLIPath": "CLI पथ",
+	"aiClaudeCodeCLIPathTip": "सामान्य इंस्टॉलेशन स्थानों से claude निष्पादन योग्य फ़ाइल का पता लगाने के लिए खाली छोड़ें",
+	"aiClaudeCodePermission": "टूल अनुमति",
+	"aiClaudeCodePermissionTip": "नियंत्रित करता है कि स्थानीय CLI कौन-से टूल चला सकता है; केवल पढ़ने योग्य की सिफ़ारिश की जाती है",
+	"aiClaudeCodePermissionReadOnly": "केवल पढ़ने योग्य",
+	"aiClaudeCodePermissionNotebook": "नोटबुक पढ़ें और लिखें",
+	"aiClaudeCodePermissionFull": "पूर्ण एक्सेस",
+	"aiClaudeCodeModelTip": "CLI द्वारा समर्थित मॉडल नाम दर्ज करें, उदाहरण के लिए sonnet, opus या पूरा मॉडल नाम",
 	"mindmapItem": "माइंड मैप आइटम ब्लॉक",
 	"listMindmapLock": "दृश्य लॉक करें",
 	"listMindmapUnlock": "दृश्य अनलॉक करें",
@@ -3003,6 +3012,9 @@
 		"407": "एन्क्रिप्शन बंद करने से पहले सभी एन्क्रिप्टेड नोटबुक का पुनर्प्राप्ति डेटा संग्रहित करें",
 		"408": "DNS नाम का समाधान विफल हुआ। अपनी नेटवर्क, DNS या प्रॉक्सी सेटिंग जाँचें",
 		"409": "नेटवर्क कनेक्शन टूट गया या स्थापित नहीं हो सका। अपनी नेटवर्क, प्रॉक्सी या फ़ायरवॉल सेटिंग जाँचें",
-		"410": "यदि आप GLM Coding Plan सदस्यता का उपयोग करते हैं, तो API पता https://open.bigmodel.cn/api/coding/paas/v4 पर सेट करें"
+		"410": "यदि आप GLM Coding Plan सदस्यता का उपयोग करते हैं, तो API पता https://open.bigmodel.cn/api/coding/paas/v4 पर सेट करें",
+		"411": "Claude Code CLI नहीं मिला, कृपया प्रदाता सेटिंग्स में claude निष्पादन योग्य फ़ाइल का पथ सेट करें",
+		"412": "Claude Code CLI का पता चला",
+		"413": "उपलब्ध मॉडल CLI द्वारा प्रबंधित होते हैं, सीधे मॉडल नाम दर्ज करें, उदाहरण के लिए sonnet या opus"
 	}
 }

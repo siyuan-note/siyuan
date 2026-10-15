@@ -16,6 +16,13 @@ type AIClient struct {
 	*openai.Client
 	baseURL       string
 	anthropicHTTP *http.Client
+	claudeCode    *ClaudeCodeRuntime
+}
+
+// NewClaudeCodeAIClient 创建本机 Claude Code 命令行客户端，请求不再经过 HTTP 端点。
+func NewClaudeCodeAIClient(runtime ClaudeCodeRuntime) *AIClient {
+	config := openai.DefaultConfig("claude-code")
+	return &AIClient{Client: openai.NewClientWithConfig(config), claudeCode: &runtime}
 }
 
 // AIMessageContent 保存供应商原生内容，显示文本与恢复上下文分别使用各自的表示。

@@ -65,7 +65,8 @@ func resolveAIProvider(request apicontract.AIProviderRequest) (*conf.Provider, e
 		if err = gulu.JSON.UnmarshalJSON(data, provider); err != nil {
 			return nil, err
 		}
-		if strings.TrimSpace(provider.BaseURL) == "" {
+		if strings.TrimSpace(provider.BaseURL) == "" && !util.IsClaudeCodeProtocol(provider.Protocol) {
+			// 本机命令行提供方不使用 HTTP 端点，允许地址为空
 			return nil, errors.New("provider base URL is required")
 		}
 		if err = util.ValidateAIProviderHeaders(provider.Headers); err != nil {
@@ -235,6 +236,10 @@ func testModelContract(c *gin.Context, req apicontract.AIModelRequest) apicontra
 		return contractFailure[apicontract.AIModelTestData](ret)
 	}
 
+	if util.IsClaudeCodeProtocol(provider.Protocol) {
+		return testClaudeCodeModel(provider)
+	}
+
 	available, matched, err := util.TestModel(
 		provider.APIKey, provider.BaseURL, provider.Protocol, req.Model, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
 	// 可用模型清单裁剪到前 50 条，避免响应体过大
@@ -250,6 +255,25 @@ func testModelContract(c *gin.Context, req apicontract.AIModelRequest) apicontra
 		result.Msg = &message
 		logging.LogErrorf("test model [%s] failed: %s", req.Model, err)
 	}
+	return apicontract.Success(result)
+}
+
+// testClaudeCodeModel 检测本机 Claude Code 命令行是否可用，作为该提供方的连接测试。
+func testClaudeCodeModel(provider *conf.Provider) apicontract.Response[apicontract.AIModelTestData] {
+	result := apicontract.AIModelTestData{}
+	path, version, err := model.ClaudeCodeCLIStatus(provider)
+	if nil != err {
+		message := err.Error()
+		result.Msg = &message
+		logging.LogErrorf("test claude code provider failed: %s", err)
+		return apicontract.Success(result)
+	}
+	result.Matched = true
+	message := version + " (" + path + ")"
+	if detected := model.Conf.Language(412); "" != detected {
+		message = detected + ": " + message
+	}
+	result.Msg = &message
 	return apicontract.Success(result)
 }
 
@@ -336,6 +360,12 @@ func listModelsContract(c *gin.Context, req apicontract.AIProviderRequest) apico
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return contractFailure[apicontract.AIModelsData](ret)
+	}
+
+	if util.IsClaudeCodeProtocol(provider.Protocol) {
+		// 本机命令行的可用模型由命令行自身管理，不提供服务端清单
+		message := model.Conf.Language(413)
+		return apicontract.Success(apicontract.AIModelsData{Models: []string{}, ContextLengths: map[string]int{}, Msg: &message})
 	}
 
 	metadata, err := util.ListProviderModels(provider.APIKey, provider.BaseURL, provider.Protocol, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))

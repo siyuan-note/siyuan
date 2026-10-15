@@ -158,7 +158,24 @@ type Provider struct {
 	Protocol       string            `json:"protocol,omitempty"`
 	RequestTimeout int               `json:"requestTimeout"`
 	Models         []*Model          `json:"models"`
+	// ClaudeCode 仅在 protocol 为 claude-code 时生效，描述本机命令行提供方的执行范围。
+	ClaudeCode *ClaudeCodeProviderConfig `json:"claudeCode,omitempty"`
 }
+
+// ClaudeCodeProviderConfig 配置本机 Claude Code 命令行提供方。
+type ClaudeCodeProviderConfig struct {
+	// CLIPath 是 claude 命令行路径，留空时按常见安装位置自动探测
+	CLIPath string `json:"cliPath"`
+	// PermissionMode 限定命令行可执行的工具范围，取值见 util.ClaudeCodePermission* 常量
+	PermissionMode string `json:"permissionMode"`
+}
+
+const (
+	// DefaultClaudeCodeRequestTimeout 是本机命令行提供方的默认单次请求超时时间（秒）
+	DefaultClaudeCodeRequestTimeout = 600
+	// MaxClaudeCodeRequestTimeout 是本机命令行提供方的单次请求超时时间上限（秒）
+	MaxClaudeCodeRequestTimeout = 3600
+)
 
 // Model is the provider-scoped model registry entry. MaxTokens/Temperature/
 // MaxContexts remain the persisted UI-facing config (the settings page still
@@ -190,6 +207,24 @@ type MCPServer struct {
 	Timeout              int               `json:"timeout"`
 	DisableStandaloneSSE bool              `json:"disableStandaloneSSE"`
 	TrustToolAnnotations bool              `json:"trustToolAnnotations"`
+}
+
+// normalizeClaudeCodeProvider 归一化本机命令行提供方的执行范围，非该协议的提供方不保留相关配置。
+func normalizeClaudeCodeProvider(provider *Provider, claudeCode bool) {
+	if !claudeCode {
+		provider.ClaudeCode = nil
+		return
+	}
+	if nil == provider.ClaudeCode {
+		provider.ClaudeCode = &ClaudeCodeProviderConfig{}
+	}
+	provider.ClaudeCode.CLIPath = strings.TrimSpace(provider.ClaudeCode.CLIPath)
+	provider.ClaudeCode.PermissionMode = strings.ToLower(strings.TrimSpace(provider.ClaudeCode.PermissionMode))
+	switch provider.ClaudeCode.PermissionMode {
+	case util.ClaudeCodePermissionReadOnly, util.ClaudeCodePermissionNotebook, util.ClaudeCodePermissionFull:
+	default:
+		provider.ClaudeCode.PermissionMode = util.ClaudeCodePermissionReadOnly
+	}
 }
 
 func defaultEmbedding() *Embedding {
@@ -621,7 +656,8 @@ func (ai *AI) Normalize() {
 			continue
 		}
 		p.BaseURL = strings.TrimSpace(p.BaseURL)
-		if "" == p.BaseURL {
+		claudeCode := util.IsClaudeCodeProtocol(p.Protocol)
+		if "" == p.BaseURL && !claudeCode {
 			p.BaseURL = "https://api.openai.com/v1"
 			if util.IsAnthropicMessagesProtocol(p.Protocol) {
 				p.BaseURL = "https://api.anthropic.com/v1"
@@ -633,11 +669,19 @@ func (ai *AI) Normalize() {
 		if p.Protocol == "" {
 			p.Protocol = util.OpenAIProtocolChatCompletions
 		}
+		maxRequestTimeout := 600
+		if claudeCode {
+			maxRequestTimeout = MaxClaudeCodeRequestTimeout
+		}
 		if 1 > p.RequestTimeout {
 			p.RequestTimeout = 120
-		} else if 600 < p.RequestTimeout {
-			p.RequestTimeout = 600
+			if claudeCode {
+				p.RequestTimeout = DefaultClaudeCodeRequestTimeout
+			}
+		} else if maxRequestTimeout < p.RequestTimeout {
+			p.RequestTimeout = maxRequestTimeout
 		}
+		normalizeClaudeCodeProvider(p, claudeCode)
 		if !ast.IsNodeIDPattern(p.ID) {
 			p.ID = ast.NewNodeID()
 		}

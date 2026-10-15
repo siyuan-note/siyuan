@@ -1,4 +1,13 @@
 {
+	"aiProtocolClaudeCode": "Claude Code (CLI lokal)",
+	"aiClaudeCodeCLIPath": "Jalur CLI",
+	"aiClaudeCodeCLIPathTip": "Kosongkan untuk mendeteksi berkas claude yang dapat dieksekusi dari lokasi instalasi umum",
+	"aiClaudeCodePermission": "Izin alat",
+	"aiClaudeCodePermissionTip": "Mengontrol alat mana yang dapat dijalankan CLI lokal; hanya-baca disarankan",
+	"aiClaudeCodePermissionReadOnly": "Hanya baca",
+	"aiClaudeCodePermissionNotebook": "Baca dan tulis buku catatan",
+	"aiClaudeCodePermissionFull": "Akses penuh",
+	"aiClaudeCodeModelTip": "Masukkan nama model yang didukung CLI, misalnya sonnet, opus, atau nama model lengkap",
 	"mindmapItem": "Blok item peta pikiran",
 	"listMindmapLock": "Kunci tampilan",
 	"listMindmapUnlock": "Buka kunci tampilan",
@@ -3003,6 +3012,9 @@
 		"407": "Arsipkan semua data pemulihan buku catatan terenkripsi sebelum menonaktifkan enkripsi",
 		"408": "Resolusi DNS gagal. Periksa pengaturan jaringan, DNS, atau proksi",
 		"409": "Koneksi jaringan terputus atau tidak dapat dibuat. Periksa pengaturan jaringan, proksi, atau firewall",
-		"410": "Jika Anda menggunakan langganan GLM Coding Plan, setel alamat API ke https://open.bigmodel.cn/api/coding/paas/v4"
+		"410": "Jika Anda menggunakan langganan GLM Coding Plan, setel alamat API ke https://open.bigmodel.cn/api/coding/paas/v4",
+		"411": "Claude Code CLI tidak ditemukan, setel jalur berkas claude yang dapat dieksekusi di pengaturan penyedia",
+		"412": "Claude Code CLI terdeteksi",
+		"413": "Model yang tersedia dikelola oleh CLI; masukkan nama model secara langsung, misalnya sonnet atau opus"
 	}
 }

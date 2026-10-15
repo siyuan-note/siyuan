@@ -140,7 +140,7 @@ export const convertTabsList = (source: Element, type: TTabsListConversion, lute
                 titleBlock.removeAttribute("tabs-title");
                 titleBlock.querySelector(".tab-item-title").classList.remove("tab-item-title", "callout-title");
                 blocks.unshift(titleBlock);
-            } else if (title?.innerHTML) {
+            } else if (title) {
                 const titleBlock = newParagraph(lute);
                 titleBlock.querySelector("[contenteditable]").innerHTML = title.innerHTML;
                 titleBlock.querySelectorAll("wbr").forEach(caret => caret.remove());

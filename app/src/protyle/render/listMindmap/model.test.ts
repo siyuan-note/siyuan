@@ -816,6 +816,26 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         directMindmap.textContent.includes("Beta"));
     check.equal(lute.BlockDOM2Md(directMindmap.outerHTML).includes("Nested"), true);
     check.equal(convertedTabs.outerHTML, tabsBefore, "direct conversion preserves the undo source");
+    // 空标题与首段正文分别保留，持久化后的往返转换也不能将正文提升为标题。
+    for (const title of ["", "**Title**"]) {
+        for (const conversion of ["Tabs2Mindmap", "Tabs2UL", "Tabs2OL", "Tabs2TL"] as const) {
+            const original = reset(`::: tabs\n@tab ${title}\n\nFirst paragraph\n\nSecond paragraph\n\n:::\n`);
+            const originalHTML = original.outerHTML;
+            const bodyIDs = ids(original);
+            const converted = api.convertTabsList(original, conversion, lute);
+            const persisted = document.createElement("div");
+            persisted.innerHTML = lute.SpinBlockDOM(converted.outerHTML);
+            const restored = api.convertTabsList(api.listMindmapConversionSource(persisted.firstElementChild), "List2Tabs", lute);
+            const titleBlock = restored.querySelector('.tab-item-info > [tabs-title="true"]');
+            check.equal(titleBlock.textContent.replace(/\u200b/g, ""), title ? "Title" : "", `${conversion} preserves the title`);
+            check.equal(!!titleBlock.querySelector('[data-type="strong"]'), !!title);
+            const body = restored.querySelector(".tab-item-content") as HTMLElement;
+            check.deepEqual(ids(body), bodyIDs.slice(1), `${conversion} preserves body block IDs`);
+            check.deepEqual(Array.from(body.querySelectorAll(':scope > [data-type="NodeParagraph"]'))
+                .map(block => block.textContent.replace(/\u200b/g, "")), ["First paragraph", "Second paragraph"]);
+            check.equal(original.outerHTML, originalHTML, "conversion preserves the undo source");
+        }
+    }
     check.equal(typedList.outerHTML, typedBefore);
     check.equal(cleaned.includes("Derived editor"), false);
     check.equal(cleaned.includes("data-mindmap-view-rendered"), false);

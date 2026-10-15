@@ -104,9 +104,12 @@ func (s *geminiInteractionsStream) recv() (ret openai.ChatCompletionStreamRespon
 	delta := openai.ChatCompletionStreamChoiceDelta{}
 	switch event.Type {
 	case "interaction.created":
-		if s.started || json.Unmarshal(event.Interaction, &s.response) != nil || s.response.ID == "" || len(s.response.Steps) != 0 {
+		var created *geminiInteraction
+		if s.started || json.Unmarshal(event.Interaction, &created) != nil || created == nil || len(created.Steps) != 0 {
 			return ret, errors.New("invalid Gemini interaction.created")
 		}
+		// store=false 的响应可能没有交互 ID，通过当前流及步骤顺序关联后续事件。
+		s.response = *created
 		s.started = true
 	case "step.start", "step.delta", "step.stop":
 		s.size += len(data)
@@ -212,9 +215,13 @@ func (s *geminiInteractionsStream) recv() (ret openai.ChatCompletionStreamRespon
 			return ret, fmt.Errorf("unsupported Gemini delta %q", event.Delta.Type)
 		}
 	case "interaction.completed":
-		var completed geminiInteraction
-		if json.Unmarshal(event.Interaction, &completed) != nil || completed.ID != s.response.ID {
+		var completed *geminiInteraction
+		if json.Unmarshal(event.Interaction, &completed) != nil || completed == nil ||
+			(completed.ID != "" && s.response.ID != "" && completed.ID != s.response.ID) {
 			return ret, errors.New("invalid Gemini interaction.completed")
+		}
+		if s.response.ID == "" {
+			s.response.ID = completed.ID
 		}
 		for _, step := range s.steps {
 			if !step.stopped {
@@ -241,6 +248,7 @@ func (s *geminiInteractionsStream) recv() (ret openai.ChatCompletionStreamRespon
 		s.content = &AIMessageContent{Protocol: GeminiProtocolInteractions, Version: geminiContentVersion,
 			Blocks: CloneOpenAIResponseOutput(s.response.Steps)}
 		// 只有完整且成功的终止事件才能向 Agent 交付工具调用。
+		ret.ID = s.response.ID
 		ret.Usage = &completion.Usage
 		ret.Choices = []openai.ChatCompletionStreamChoice{{Index: 0, FinishReason: completion.Choices[0].FinishReason,
 			Delta: openai.ChatCompletionStreamChoiceDelta{ToolCalls: completion.Choices[0].Message.ToolCalls}}}

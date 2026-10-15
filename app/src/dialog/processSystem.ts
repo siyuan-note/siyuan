@@ -238,17 +238,18 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
     }
     await requestSystemExit({force: false, setCurrentWorkspace}, (response) => {
         if (response.code === 1) { // 同步执行失败
-            const msgId = showMessage(response.msg, response.data.closeTimeout, "error");
-            const buttonElement = document.querySelector(`#message [data-id="${msgId}"] button`);
-            if (buttonElement) {
-                buttonElement.addEventListener("click", () => {
+            confirmDialog(window.siyuan.languages.sync, escapeHtml(window.siyuan.languages._kernel[96]), () => {
+                void exitSiYuan(setCurrentWorkspace);
+            }, undefined, false, {
+                label: window.siyuan.languages._kernel[97],
+                callback: () => {
                     if (response.data.installPkgPath) {
                         installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
                         return;
                     }
                     void requestSystemExit({force: true, setCurrentWorkspace}, forceQuit);
-                });
-            }
+                }
+            }, window.siyuan.languages.retry);
         } else if (response.code === 2) { // 提示新安装包
             hideMessage();
 

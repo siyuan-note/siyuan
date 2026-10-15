@@ -1,4 +1,6 @@
 {
+	"editOCRText": "Edit OCR text",
+	"copyOCRText": "Copy OCR text",
 	"exportTitleImage": "Export title image",
 	"automationCollectBlocks": "Block matches conditions",
 	"automationCollectionScope": "Watch scope (includes subdocuments)",

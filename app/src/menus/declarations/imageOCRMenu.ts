@@ -38,14 +38,14 @@ export const IMAGE_OCR_MENU: IMenuDeclaration<IImageOCRMenuContext> = {
     }),
     children: [{
         id: "ocrResult",
-        label: () => window.siyuan.languages.ocrResult,
+        label: () => window.siyuan.languages.editOCRText,
         simple: false,
         type: "entry",
         icon: "iconEdit",
         behavior: context => ({click: context.openResult}),
     }, {
         id: "copyOCRText",
-        label: () => `${window.siyuan.languages.copy} OCR`,
+        label: () => window.siyuan.languages.copyOCRText,
         simple: false,
         type: "entry",
         icon: "iconCopy",

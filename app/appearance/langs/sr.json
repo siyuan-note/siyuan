@@ -1,4 +1,6 @@
 {
+	"editOCRText": "Уреди OCR текст",
+	"copyOCRText": "Копирај OCR текст",
 	"exportTitleImage": "Извези насловну слику",
 	"automationCollectBlocks": "Блок испуњава услове",
 	"automationCollectionScope": "Опсег праћења (укључује поддокументе)",

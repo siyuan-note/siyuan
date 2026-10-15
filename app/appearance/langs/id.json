@@ -1,4 +1,6 @@
 {
+	"editOCRText": "Edit teks OCR",
+	"copyOCRText": "Salin teks OCR",
 	"exportTitleImage": "Ekspor gambar judul",
 	"automationCollectBlocks": "Blok memenuhi kondisi",
 	"automationCollectionScope": "Cakupan pemantauan (termasuk subdokumen)",

@@ -1,4 +1,6 @@
 {
+	"editOCRText": "Upraviť text OCR",
+	"copyOCRText": "Kopírovať text OCR",
 	"exportTitleImage": "Exportovať titulný obrázok",
 	"automationCollectBlocks": "Blok spĺňa podmienky",
 	"automationCollectionScope": "Rozsah sledovania (vrátane poddokumentov)",

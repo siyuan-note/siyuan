@@ -1,4 +1,6 @@
 {
+	"editOCRText": "تحرير نص OCR",
+	"copyOCRText": "نسخ نص OCR",
 	"exportTitleImage": "تصدير صورة العنوان",
 	"automationCollectBlocks": "الكتلة تطابق الشروط",
 	"automationCollectionScope": "نطاق المراقبة (يشمل المستندات الفرعية)",

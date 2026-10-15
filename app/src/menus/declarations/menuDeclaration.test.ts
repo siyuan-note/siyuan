@@ -33,7 +33,7 @@ test("OCR declarations drive catalog order, defaults and complete menu actions",
     }));
     assert.equal(menu.icon, "iconOCR");
     assert.deepEqual(menu.submenu.map(item => [item.id, item.label, item.icon, item.type]), [
-        ["ocrResult", "ocrResult", "iconEdit", undefined], ["copyOCRText", "copy OCR", "iconCopy", undefined],
+        ["ocrResult", "editOCRText", "iconEdit", undefined], ["copyOCRText", "copyOCRText", "iconCopy", undefined],
         ["clearOCRText", "clearOCRText", "iconTrashcan", undefined],
         ["separator_reOCR", "", undefined, "separator"], ["reOCR", "performOCR", "iconOCR", undefined],
         ["reAIOCR", "performAIOCR", "iconSparkles", undefined],
@@ -42,6 +42,7 @@ test("OCR declarations drive catalog order, defaults and complete menu actions",
     assert.equal(catalog.key, "ocr");
     assert.equal(catalog.simple, false);
     assert.deepEqual(catalog.children.map(item => item.key), menu.submenu.map(item => item.id));
+    assert.deepEqual(catalog.children.map(item => item.label()), menu.submenu.map(item => item.label));
     assert.deepEqual(catalog.children.map(item => item.simple), [false, false, false, true, false, false]);
     menu.submenu.forEach(item => item.click?.(undefined, undefined));
     assert.deepEqual(clicked, ["result", "copy", "clear", "local", "ai"]);

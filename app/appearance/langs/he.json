@@ -1,4 +1,6 @@
 {
+	"editOCRText": "עריכת טקסט OCR",
+	"copyOCRText": "העתקת טקסט OCR",
 	"exportTitleImage": "ייצוא תמונת כותרת",
 	"automationCollectBlocks": "בלוק תואם לתנאים",
 	"automationCollectionScope": "טווח מעקב (כולל מסמכי משנה)",

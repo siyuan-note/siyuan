@@ -1,4 +1,6 @@
 {
+	"editOCRText": "OCR 텍스트 편집",
+	"copyOCRText": "OCR 텍스트 복사",
 	"exportTitleImage": "제목 이미지 내보내기",
 	"automationCollectBlocks": "일반 블록이 조건과 일치",
 	"automationCollectionScope": "감시 범위(하위 문서 포함)",

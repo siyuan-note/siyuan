@@ -1,4 +1,6 @@
 {
+	"editOCRText": "แก้ไขข้อความ OCR",
+	"copyOCRText": "คัดลอกข้อความ OCR",
 	"exportTitleImage": "ส่งออกรูปภาพส่วนหัว",
 	"automationCollectBlocks": "บล็อกตรงตามเงื่อนไข",
 	"automationCollectionScope": "ขอบเขตการติดตาม (รวมเอกสารย่อย)",

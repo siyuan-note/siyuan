@@ -1,4 +1,6 @@
 {
+	"editOCRText": "Editar texto OCR",
+	"copyOCRText": "Copiar texto OCR",
 	"exportTitleImage": "Exportar imagen de título",
 	"automationCollectBlocks": "Un bloque cumple las condiciones",
 	"automationCollectionScope": "Ámbito de seguimiento (incluye subdocumentos)",

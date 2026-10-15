@@ -1,4 +1,6 @@
 {
+	"editOCRText": "OCR-tekst bewerken",
+	"copyOCRText": "OCR-tekst kopiëren",
 	"exportTitleImage": "Titelafbeelding exporteren",
 	"automationCollectBlocks": "Blok voldoet aan voorwaarden",
 	"automationCollectionScope": "Volgbereik (inclusief subdocumenten)",

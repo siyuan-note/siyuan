@@ -1,4 +1,6 @@
 {
+	"editOCRText": "Редактировать текст OCR",
+	"copyOCRText": "Копировать текст OCR",
 	"exportTitleImage": "Экспортировать заглавное изображение",
 	"automationCollectBlocks": "Блок соответствует условиям",
 	"automationCollectionScope": "Область отслеживания (с дочерними документами)",

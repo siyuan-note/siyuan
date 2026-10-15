@@ -1,4 +1,6 @@
 {
+	"editOCRText": "编辑 OCR 文本",
+	"copyOCRText": "复制 OCR 文本",
 	"exportTitleImage": "导出题头图",
 	"automationCollectBlocks": "普通块符合条件",
 	"automationCollectionScope": "监听范围（包含子文档）",

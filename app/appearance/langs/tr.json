@@ -1,4 +1,6 @@
 {
+	"editOCRText": "OCR metnini düzenle",
+	"copyOCRText": "OCR metnini kopyala",
 	"exportTitleImage": "Başlık görselini dışa aktar",
 	"automationCollectBlocks": "Blok koşulları karşılıyor",
 	"automationCollectionScope": "İzleme kapsamı (alt belgeler dahil)",

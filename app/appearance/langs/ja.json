@@ -1,4 +1,6 @@
 {
+	"editOCRText": "OCR テキストを編集",
+	"copyOCRText": "OCR テキストをコピー",
 	"exportTitleImage": "題頭画像をエクスポート",
 	"automationCollectBlocks": "通常ブロックが条件に一致",
 	"automationCollectionScope": "監視範囲（子文書を含む）",

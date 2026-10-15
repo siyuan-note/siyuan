@@ -1,4 +1,6 @@
 {
+	"editOCRText": "編輯 OCR 文字",
+	"copyOCRText": "複製 OCR 文字",
 	"exportTitleImage": "匯出題頭圖",
 	"automationCollectBlocks": "一般區塊符合條件",
 	"automationCollectionScope": "監聽範圍（包含子文件）",

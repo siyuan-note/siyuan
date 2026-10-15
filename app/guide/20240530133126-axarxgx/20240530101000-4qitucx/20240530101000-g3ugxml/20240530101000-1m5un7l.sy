@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20261014150710"
+		"updated": "20261016013311"
 	},
 	"Children": [
 		{
@@ -107,7 +107,7 @@
 			"Properties": {
 				"ID": "20240530101000-o6et1uc",
 				"id": "20240530101000-m11xu1w",
-				"updated": "20261012014930"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -369,7 +369,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930092043-zd8vt2u",
-				"updated": "20260930092043"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -385,6 +385,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像"
 				},
 				{
 					"Type": "NodeText",
@@ -406,7 +415,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930092955-e9bzngv",
-				"updated": "20260930092955"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -422,6 +431,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像"
 				},
 				{
 					"Type": "NodeText",

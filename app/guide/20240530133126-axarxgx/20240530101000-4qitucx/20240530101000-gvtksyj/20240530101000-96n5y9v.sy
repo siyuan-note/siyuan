@@ -7,7 +7,7 @@
 		"id": "20240530101000-96n5y9v",
 		"title": "コンテンツブロックの紹介",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016013311"
 	},
 	"Children": [
 		{
@@ -215,7 +215,7 @@
 			"Properties": {
 				"ID": "20240530101000-8pqai5f",
 				"id": "20240530101000-48s3dyy",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -257,7 +257,7 @@
 			"Properties": {
 				"ID": "20240530101000-vh9kuvt",
 				"id": "20240530101000-m064mpu",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -277,6 +277,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "動作"
 				},
 				{
 					"Type": "NodeText",

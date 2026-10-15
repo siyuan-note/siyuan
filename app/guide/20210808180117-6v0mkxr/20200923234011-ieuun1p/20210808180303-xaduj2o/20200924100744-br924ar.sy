@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261014150710"
+		"updated": "20261016013311"
 	},
 	"Children": [
 		{
@@ -107,7 +107,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-v2rmiaq",
-				"updated": "20261012014930"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -362,7 +362,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930092043-7z9onxu",
-				"updated": "20260930092043"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -382,6 +382,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Images"
 				},
 				{
 					"Type": "NodeText",
@@ -403,7 +412,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930092955-wsw0tvh",
-				"updated": "20260930092955"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -423,6 +432,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Images"
 				},
 				{
 					"Type": "NodeText",

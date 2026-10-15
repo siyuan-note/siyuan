@@ -6,7 +6,7 @@
 		"id": "20211226120055-9mityht",
 		"title": "什麼是內容區塊",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20261016013311"
 	},
 	"Children": [
 		{
@@ -200,7 +200,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120120-a9g5s86",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -240,7 +240,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120120-tk670g9",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -260,6 +260,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行為"
 				},
 				{
 					"Type": "NodeText",

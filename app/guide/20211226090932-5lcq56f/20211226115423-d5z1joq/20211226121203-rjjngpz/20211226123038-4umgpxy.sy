@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261014150710"
+		"updated": "20261016013311"
 	},
 	"Children": [
 		{
@@ -103,7 +103,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-ddr3yub",
-				"updated": "20261012014930"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -358,7 +358,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930092043-i4ib04g",
-				"updated": "20260930092043"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -378,6 +378,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "圖片"
 				},
 				{
 					"Type": "NodeText",
@@ -399,7 +408,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260930092955-yhn9ixh",
-				"updated": "20260930092955"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -419,6 +428,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "圖片"
 				},
 				{
 					"Type": "NodeText",

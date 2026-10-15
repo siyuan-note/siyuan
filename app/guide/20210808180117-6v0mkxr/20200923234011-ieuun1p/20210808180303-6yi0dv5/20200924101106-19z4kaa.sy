@@ -6,7 +6,7 @@
 		"id": "20200924101106-19z4kaa",
 		"title": "What is a Content Block",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20261016013311"
 	},
 	"Children": [
 		{
@@ -208,7 +208,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210118104710-tmyyac4",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -247,7 +247,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118104710-2sb91b3",
-				"updated": "20260809232000"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -267,6 +267,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Behavior"
 				},
 				{
 					"Type": "NodeText",

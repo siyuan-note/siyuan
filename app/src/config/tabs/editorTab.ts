@@ -46,13 +46,14 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         min: 0,
         max: 20,
     });
-    group.switch("editor.listLogicalOutdent", {
-        title: window.siyuan.languages.outlineOutdent,
-        desc: window.siyuan.languages.outlineOutdentTip,
+    group.switch("editor.displayBookmarkIcon", {
+        title: window.siyuan.languages.md12,
+        desc: window.siyuan.languages.md16,
     });
-    group.switch("editor.listItemDotNumberClickFocus", {
-        title: window.siyuan.languages.listItemDotNumberClickFocus,
-        desc: window.siyuan.languages.listItemDotNumberClickFocusTip,
+    group.select("editor.codeTabSpaces", {
+        title: window.siyuan.languages.md29,
+        desc: window.siyuan.languages.md30,
+        options: CODE_TAB_SPACE_VALUES.map((value) => ({value, label: getCodeTabSpacesLabel(value)})),
     });
     group.switch("editor.hashTagSearch", {
         title: window.siyuan.languages.hashTagSearch,
@@ -181,15 +182,15 @@ const bindDatabaseAttrSettingsVisibility = (root: HTMLElement) => {
     toggle();
 };
 
-const registerEditorBadgesGroup = (tab: SettingTabBuilder) => {
-    const group = tab.group("badges", window.siyuan.languages.configGroupBadges);
-    group.switch("editor.displayBookmarkIcon", {
-        title: window.siyuan.languages.md12,
-        desc: window.siyuan.languages.md16,
+const registerEditorListsGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("lists", window.siyuan.languages.configGroupListBlocks);
+    group.switch("editor.listLogicalOutdent", {
+        title: window.siyuan.languages.outlineOutdent,
+        desc: window.siyuan.languages.outlineOutdentTip,
     });
-    group.switch("editor.displayNetImgMark", {
-        title: window.siyuan.languages.md7,
-        desc: window.siyuan.languages.md8,
+    group.switch("editor.listItemDotNumberClickFocus", {
+        title: window.siyuan.languages.listItemDotNumberClickFocus,
+        desc: window.siyuan.languages.listItemDotNumberClickFocusTip,
     });
 };
 
@@ -242,6 +243,10 @@ const registerEditorImagesGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.displayImgAlt,
         desc: window.siyuan.languages.displayImgAltTip,
     });
+    group.switch("editor.displayNetImgMark", {
+        title: window.siyuan.languages.md7,
+        desc: window.siyuan.languages.md8,
+    });
 };
 
 const registerEditorDatabaseGroup = (tab: SettingTabBuilder) => {
@@ -279,11 +284,6 @@ const registerEditorDatabaseGroup = (tab: SettingTabBuilder) => {
 
 const registerEditorCodeGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("code", window.siyuan.languages.replaceTypes.codeBlock);
-    group.select("editor.codeTabSpaces", {
-        title: window.siyuan.languages.md29,
-        desc: window.siyuan.languages.md30,
-        options: CODE_TAB_SPACE_VALUES.map((value) => ({value, label: getCodeTabSpacesLabel(value)})),
-    });
     group.switch("editor.codeLineWrap", {
         title: window.siyuan.languages.md31,
         desc: window.siyuan.languages.md32,
@@ -448,7 +448,7 @@ const registerEditorAdvancedGroup = (tab: SettingTabBuilder) => {
 
 export const registerEditorTab = (tab: SettingTabBuilder) => {
     registerEditorBehaviorGroup(tab);
-    registerEditorBadgesGroup(tab);
+    registerEditorListsGroup(tab);
     registerEditorHeadingsGroup(tab);
     registerEditorEmbedsGroup(tab);
     registerEditorImagesGroup(tab);

@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20261015193140"
+		"updated": "20261016013311"
 	},
 	"Children": [
 		{
@@ -4357,7 +4357,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20261012014930"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -14554,7 +14554,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250423105322-jc65ji5",
-				"updated": "20261002230606"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -14785,7 +14785,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261002230606-18ff032",
-				"updated": "20261002230606"
+				"updated": "20261016013311"
 			},
 			"Children": [
 				{
@@ -14799,7 +14799,43 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 時，執行縮排或反縮排會從至少兩行非空程式碼中辨識一致的縮排，並儲存為該區塊的設定。支援辨識定位字元，或以 2、4、6、8 個空格為最小寬度且其他縮排為其整數倍的空格縮排。混合縮排或依據不足時沿用全域設定。明確指定的區塊設定優先。辨識不會重新格式化既有程式碼。"
+					"Data": " 時，執行縮排或反縮排會從至少兩行非空程式碼中辨識一致的縮排，並儲存為該區塊的設定。支援辨識定位字元，或以 2、4、6、8 個空格為最小寬度且其他縮排為其整數倍的空格縮排。混合縮排或依據不足時沿用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab 空格數"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。明確指定的區塊設定優先。辨識不會重新格式化既有程式碼。"
 				}
 			]
 		},

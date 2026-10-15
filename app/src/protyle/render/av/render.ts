@@ -158,12 +158,6 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                     <svg><use xlink:href="#iconMore"></use></svg>
                 </button>
             </div>
-            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${visibleViewIDs.length < data.views.length ? " block__icon--show" : " av__views-switcher--all"}${data.views.length > 0 ? "" : " fn__none"}">
-                <svg><use xlink:href="#iconEye"></use></svg>
-                <span class="fn__space"></span>
-                <small>${visibleViewIDs.length}/${data.views.length}</small>
-            </span>
-            <div class="fn__space"></div>
             <div class="layout-tab-bar fn__flex">
                 ${tabHTML}
             </div>
@@ -172,6 +166,12 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__flex-1"></div>
+            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${visibleViewIDs.length < data.views.length ? " block__icon--show" : " av__views-switcher--all"}${data.views.length > 0 ? "" : " fn__none"}">
+                <svg><use xlink:href="#iconEye"></use></svg>
+                <span class="fn__space"></span>
+                <small>${visibleViewIDs.length}/${data.views.length}</small>
+            </span>
+            <div class="fn__space"></div>
             <span data-type="av-filter" aria-label="${window.siyuan.languages.filter}" data-position="8south" class="ariaLabel block__icon${hasFilter ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>

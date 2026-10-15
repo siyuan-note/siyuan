@@ -83,11 +83,12 @@ body {
     }
   }
 
-  // 非 macOS 平台不预留 macOS 窗口按钮空间
+  // 非 macOS 平台不预留 macOS 窗口按钮空间，浏览器端工具栏的标题栏避让由 .toolbar--browser 处理
   &.body--windows,
   &.body--linux {
     --b3-toolbar-left-mac: 8px;
-    .toolbar {
+
+    .toolbar:not(.toolbar--browser) {
       padding: 0 0 0 5px;
     }
 

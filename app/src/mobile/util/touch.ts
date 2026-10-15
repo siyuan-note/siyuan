@@ -607,7 +607,7 @@ export const handleTouchMove = (event: TouchEvent) => {
             return;
         }
         if (getTargetSidebar(target) || hasClosestByClassName(target, "agent-chat__messages", true) ||
-            hasClosestByClassName(target, "protyle-db-attr__tabs", true)) {
+            hasClosestByClassName(target, "protyle-db-attr__tabs", true) || hasClosestByClassName(target, "av", true)) {
             // 内容可沿手势方向横向滚动时，本次手势持续交给内容，抵达边缘后可再次滑动操作侧栏。
             if (scrollBlock || isHorizontalScrollable(target, xDiff)) {
                 scrollBlock = true;

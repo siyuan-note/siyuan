@@ -6,7 +6,7 @@
 		"id": "20230303235619-ex5l63e",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20261007020517"
+		"updated": "20261015225720"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170000-jvxb09n",
-				"updated": "20260804180000"
+				"updated": "20261015225720"
 			},
 			"Children": [
 				{
@@ -35,6 +35,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "思源提供 AI 编辑、AI 智能体和语义搜索功能。使用这些功能前，需要根据实际用途配置相应的 API 提供商和模型。"
+				}
+			]
+		},
+		{
+			"ID": "20261015225720-x7zbbw0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015225720-x7zbbw0",
+				"updated": "20261015225720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 ChatGPT 账号时，在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中打开 ChatGPT 服务商配置，为当前设备的工作空间选择账号并保存。登录凭证和账号绑定保存在本机，不随 conf.json 或设置导出文件保存。每台设备需分别登录并选择一次账号；之后复制配置时，已有服务商仍使用目标设备自己的账号绑定。新增服务商或移动工作空间目录后，需要重新选择账号。升级后也需要重新选择一次，已有登录凭证会保留。"
 				}
 			]
 		},

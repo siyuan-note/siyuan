@@ -229,11 +229,32 @@ func (appConf *AppConf) CompareAndSetOIDC(expectedVersion string, config *conf.O
 	return changed, true
 }
 
-func (conf *AppConf) SetAI(ai *conf.AI) {
+func (conf *AppConf) SetAI(ctx context.Context, ai *conf.AI) error {
 	conf.m.Lock()
+	defer conf.m.Unlock()
+	bindings := chatGPTAccountBindingIDs(ai)
+	if reflect.DeepEqual(bindings, chatGPTAccountBindingIDs(conf.AI.Load())) || util.ReadOnly {
+		conf.AI.Store(ai)
+		if !util.ReadOnly {
+			conf.saveLocked()
+		}
+		return nil
+	}
+	next := conf.cloneSettings()
+	next.AI.Store(ai)
+	data, err := next.marshalForSave()
+	if err != nil {
+		return err
+	}
+	if err = util.ChatGPTService().UpdateBindings(ctx, util.WorkspaceDir, bindings, func(path string, bindingsData []byte) error {
+		return writeChatGPTBindingConfiguration(path, bindingsData, data, writeChatGPTBindingFile)
+	}); err != nil {
+		return err
+	}
 	conf.AI.Store(ai)
-	conf.m.Unlock()
-	conf.Save()
+	applyConfRuntime(conf)
+	recordPersistedConf(data)
+	return nil
 }
 
 func (conf *AppConf) SetUILayout(uiLayout *conf.UILayout) {
@@ -258,6 +279,10 @@ func InitConf() {
 	initLang()
 	if err := recoverSettingsReset(); err != nil {
 		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover settings reset failed: %s", err)
+		return
+	}
+	if err := recoverChatGPTAccountBindings(); err != nil {
+		logging.LogFatalf(logging.ExitCodeFileSysErr, "recover ChatGPT account bindings failed: %s", err)
 		return
 	}
 
@@ -401,6 +426,9 @@ func InitConf() {
 	}
 
 	flashcardWarning := normalizeAppConf(Conf)
+	if err := LoadChatGPTAccountBindings(Conf.AI.Load()); err != nil {
+		logging.LogErrorf("load local ChatGPT account bindings failed: %s", err)
+	}
 	if flashcardWarning != "" {
 		logging.LogWarnf("%s, reset to default weights [%s]", flashcardWarning, Conf.Flashcard.Load().Weights)
 		go func() {
@@ -989,6 +1017,7 @@ func (conf *AppConf) marshalForSave() ([]byte, error) {
 		return nil, err
 	}
 	if snapshot.AI.Load() != nil {
+		snapshot.AI.Load().ClearChatGPTAccountIDs()
 		snapshot.AI.Load().EncryptAPIKeys()
 	}
 	if snapshot.OIDC != nil {

@@ -6,7 +6,7 @@
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
 		"type": "doc",
-		"updated": "20261007020517"
+		"updated": "20261015225720"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170000-qss2syl",
-				"updated": "20260804180000"
+				"updated": "20261015225720"
 			},
 			"Children": [
 				{
@@ -35,6 +35,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "SiYuan provides AI editing, an AI agent, and semantic search. Before using them, configure the API providers and models required for your use case."
+				}
+			]
+		},
+		{
+			"ID": "20261015225720-okoj5kh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015225720-okoj5kh",
+				"updated": "20261015225720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To use a ChatGPT account, open its provider configuration in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and select and save an account for this workspace on the current device. Credentials and account bindings stay on this device and are excluded from conf.json and settings exports. Sign in and select an account separately on each device. Copying configuration then preserves the destination device’s bindings for existing providers. Select an account again after adding a provider or moving the workspace directory. After upgrading, select an account once more; existing sign-in credentials are retained."
 				}
 			]
 		},

@@ -6681,6 +6681,7 @@ export interface APIPOSTRoutes {
     /**
      * 使用共享规范化规则；智能体确认超时负数回退 600 秒，0 保留无限等待语义。
      * 工具调用轮数和输出 token 上限的负数归零；温度超出 0–2 回退 1。
+     * ChatGPT 账户绑定变化时与主配置一起可恢复提交，失败时回滚且不发布新配置；未变化时不访问绑定存储。
      */
     "/api/setting/setAI": {
         request: SetAIRequestInput;
@@ -7475,6 +7476,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 导入前按启动和设置接口的相同规则规范化编辑器、导出、文档树、搜索和闪卡偏好，并同步保存。
+     * ChatGPT 账户引用从本机工作空间绑定加载，忽略导入文件中的引用；本机绑定读取失败时中止导入。
      */
     "/api/system/importConf": {
         request: SystemImportConfRequestInput;

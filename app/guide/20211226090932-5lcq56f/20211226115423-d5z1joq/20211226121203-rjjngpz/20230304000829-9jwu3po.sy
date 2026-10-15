@@ -6,7 +6,7 @@
 		"id": "20230304000829-9jwu3po",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20261007020517"
+		"updated": "20261015225720"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170000-wwy3fg7",
-				"updated": "20260804180000"
+				"updated": "20261015225720"
 			},
 			"Children": [
 				{
@@ -35,6 +35,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "思源提供 AI 編輯、AI 智能體和語意搜尋功能。使用這些功能前，需要依照實際用途設定相應的 API 提供商和模型。"
+				}
+			]
+		},
+		{
+			"ID": "20261015225720-wuiykps",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261015225720-wuiykps",
+				"updated": "20261015225720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 ChatGPT 帳號時，在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中開啟 ChatGPT 服務商設定，為目前裝置的工作空間選擇帳號並儲存。登入憑證與帳號綁定儲存在本機，不隨 conf.json 或設定匯出檔案儲存。每台裝置需分別登入並選擇一次帳號；之後複製設定時，既有服務商仍使用目標裝置自己的帳號綁定。新增服務商或移動工作空間目錄後，需要重新選擇帳號。升級後也需要重新選擇一次，既有登入憑證會保留。"
 				}
 			]
 		},

@@ -267,7 +267,8 @@ type Rerank struct {
 }
 
 type Provider struct {
-	AuthType       string            `json:"authType,omitempty"`
+	AuthType string `json:"authType,omitempty"`
+	// AccountID 是本机绑定的运行时投影；工作空间配置持久化和设置导出时排除。
 	AccountID      string            `json:"accountID,omitempty"`
 	Headers        map[string]string `json:"headers,omitempty"`
 	ID             string            `json:"id"`
@@ -278,6 +279,15 @@ type Provider struct {
 	Protocol       string            `json:"protocol,omitempty"`
 	RequestTimeout int               `json:"requestTimeout"`
 	Models         []*Model          `json:"models"`
+}
+
+// ClearChatGPTAccountIDs 清除可复制配置中的本机账户引用，不修改登录凭证。
+func (ai *AI) ClearChatGPTAccountIDs() {
+	for _, provider := range ai.Providers {
+		if provider != nil {
+			provider.AccountID = ""
+		}
+	}
 }
 
 // Model is the provider-scoped model registry entry. MaxTokens/Temperature/

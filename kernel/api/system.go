@@ -470,6 +470,9 @@ var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Conte
 		}
 		clonedConf.Appearance.Load().GlobalFontFamilies = fonts
 	}
+	if clonedConf.AI.Load() != nil {
+		clonedConf.AI.Load().ClearChatGPTAccountIDs()
+	}
 	if nil != clonedConf.Editor.Load() {
 		clonedConf.Editor.Load().Emoji = []string{}
 		fonts := make([]*conf.EditorFont, 0, len(clonedConf.Editor.Load().FontFamilies))
@@ -695,6 +698,9 @@ var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Conte
 	}
 
 	model.NormalizeAppConf(importedConf)
+	if err = model.LoadChatGPTAccountBindings(importedConf.AI.Load()); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
 	model.Conf.FileTree.Store(importedConf.FileTree.Load())
 	model.Conf.Tag.Store(importedConf.Tag.Load())
 	model.Conf.Editor.Store(importedConf.Editor.Load())

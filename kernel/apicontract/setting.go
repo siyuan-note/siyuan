@@ -132,7 +132,9 @@ type SettingImageGeneration struct {
 
 type SettingProvider struct {
 	// 套餐认证固定使用公开 Responses API；账户引用不包含令牌，省略时保留 API Key 认证。
-	AuthType    string            `json:"authType,omitempty" api:"optional,nullable"`
+	AuthType string `json:"authType,omitempty" api:"optional,nullable"`
+	// AccountID 读写本机按工作空间路径和服务商 ID 保存的绑定，不随 conf.json 或设置导出保存。
+	// 清空或省略时解除该服务商的本机绑定；旧配置中的账户引用不迁移，各设备需重新选择。
 	AccountID   string            `json:"accountID,omitempty" api:"optional,nullable"`
 	Headers     map[string]string `json:"headers,omitempty" api:"optional,nullable"`
 	ID          string            `json:"id" api:"optional,nullable"`

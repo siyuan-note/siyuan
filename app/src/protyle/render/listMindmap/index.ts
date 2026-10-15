@@ -161,7 +161,7 @@ class ListMindmapController {
         this.owner = owner;
         this.list = list;
         this.model = readListMindmap(list);
-        list.querySelector(":scope > .mindmap-view")?.remove();
+        list.querySelectorAll(":scope > .mindmap-view").forEach(host => host.remove());
         this.host = document.createElement("div");
         this.host.className = "mindmap-view";
         syncListMindmapHeight(list, this.host);
@@ -899,6 +899,7 @@ export const initListMindmaps = (owner: IProtyle) => {
                 return;
             }
             // 在浏览器绘制正文前占位，补齐源块期间沿用脑图的尺寸和公共加载动画。
+            list.querySelectorAll(":scope > .mindmap-view").forEach(host => host.remove());
             const host = document.createElement("div");
             host.className = "mindmap-view";
             host.contentEditable = "false";

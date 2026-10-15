@@ -235,6 +235,8 @@ func aiAgentSSEOptions() ResponseOptions {
 }
 
 // AINativeContent 保留供应商定义的原生内容块，协议和版本用于选择兼容的上下文读取方式。
+// gemini-interactions 版本 1 保存完整原生步骤及思考签名，按原顺序随本地历史发送，始终使用 store=false。
+// 未知版本在生成前报错并保留原始会话；切换协议时仅投影视图内容，不发送其他协议的原生块。
 type AINativeContent struct {
 	Protocol string      `json:"protocol"`
 	Version  int         `json:"version"`

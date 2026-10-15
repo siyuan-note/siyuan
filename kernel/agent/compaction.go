@@ -113,6 +113,9 @@ func runtimeCompactionMatchesProtocol(compaction *runtimeCompaction, protocol st
 	if compaction == nil {
 		return false
 	}
+	if util.IsGeminiInteractionsProtocol(compaction.Protocol) || util.IsGeminiInteractionsProtocol(protocol) {
+		return util.IsGeminiInteractionsProtocol(compaction.Protocol) && util.IsGeminiInteractionsProtocol(protocol)
+	}
 	if util.IsAnthropicMessagesProtocol(compaction.Protocol) || util.IsAnthropicMessagesProtocol(protocol) {
 		return util.IsAnthropicMessagesProtocol(compaction.Protocol) && util.IsAnthropicMessagesProtocol(protocol)
 	}

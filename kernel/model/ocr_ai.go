@@ -52,7 +52,7 @@ func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool
 	}
 	protocol := strings.ToLower(strings.TrimSpace(provider.Protocol))
 	if protocol != "" && protocol != util.OpenAIProtocolChatCompletions &&
-		protocol != util.OpenAIProtocolResponses && protocol != util.AnthropicProtocolMessages {
+		protocol != util.OpenAIProtocolResponses && protocol != util.AnthropicProtocolMessages && protocol != util.GeminiProtocolInteractions {
 		return "", fmt.Errorf("unsupported OCR provider protocol: %s", provider.Protocol)
 	}
 	absPath, err := GetAssetAbsPathInBox(path, "")

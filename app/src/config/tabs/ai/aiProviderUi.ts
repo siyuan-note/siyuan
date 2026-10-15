@@ -445,6 +445,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     <option value="openai"${draft.protocol === "openai" ? " selected" : ""}>Chat Completions</option>
                     <option value="openai-responses"${draft.protocol === "openai-responses" ? " selected" : ""}>Responses</option>
                     <option value="anthropic-messages"${draft.protocol === "anthropic-messages" ? " selected" : ""}>Anthropic Messages</option>
+                    <option value="gemini-interactions"${draft.protocol === "gemini-interactions" ? " selected" : ""}>Gemini Interactions</option>
                 </select>
             </label>
             <label class="fn__flex b3-label config-item">

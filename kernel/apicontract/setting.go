@@ -132,17 +132,19 @@ type SettingImageGeneration struct {
 
 type SettingProvider struct {
 	// 套餐认证固定使用公开 Responses API；账户引用不包含令牌，省略时保留 API Key 认证。
-	AuthType       string            `json:"authType,omitempty" api:"optional,nullable"`
-	AccountID      string            `json:"accountID,omitempty" api:"optional,nullable"`
-	Headers        map[string]string `json:"headers,omitempty" api:"optional,nullable"`
-	ID             string            `json:"id" api:"optional,nullable"`
-	DisplayName    string            `json:"displayName,omitempty" api:"optional,nullable"`
-	Enabled        bool              `json:"enabled" api:"optional,nullable"`
-	APIKey         string            `json:"apiKey" api:"optional,nullable"`
-	BaseURL        string            `json:"baseURL" api:"optional,nullable"`
-	Protocol       string            `json:"protocol,omitempty" api:"optional,nullable"`
-	RequestTimeout int               `json:"requestTimeout" api:"optional,nullable"`
-	Models         []*SettingModel   `json:"models" api:"optional,nullable"`
+	AuthType    string            `json:"authType,omitempty" api:"optional,nullable"`
+	AccountID   string            `json:"accountID,omitempty" api:"optional,nullable"`
+	Headers     map[string]string `json:"headers,omitempty" api:"optional,nullable"`
+	ID          string            `json:"id" api:"optional,nullable"`
+	DisplayName string            `json:"displayName,omitempty" api:"optional,nullable"`
+	Enabled     bool              `json:"enabled" api:"optional,nullable"`
+	APIKey      string            `json:"apiKey" api:"optional,nullable"`
+	BaseURL     string            `json:"baseURL" api:"optional,nullable"`
+	// Protocol 支持 openai、openai-responses、anthropic-messages 和 gemini-interactions，省略时保持 openai。
+	// Gemini Interactions 使用原生 /v1beta 或 /v1 基础地址，空地址默认为 Google 官方 /v1beta。
+	Protocol       string          `json:"protocol,omitempty" api:"optional,nullable"`
+	RequestTimeout int             `json:"requestTimeout" api:"optional,nullable"`
+	Models         []*SettingModel `json:"models" api:"optional,nullable"`
 }
 
 type SettingModel struct {

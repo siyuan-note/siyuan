@@ -778,6 +778,9 @@ func (ai *AI) Normalize() {
 			if util.IsAnthropicMessagesProtocol(p.Protocol) {
 				p.BaseURL = "https://api.anthropic.com/v1"
 			}
+			if util.IsGeminiInteractionsProtocol(p.Protocol) {
+				p.BaseURL = "https://generativelanguage.googleapis.com/v1beta"
+			}
 		}
 		p.DisplayName = strings.TrimSpace(p.DisplayName)
 		p.APIKey = strings.TrimSpace(p.APIKey)

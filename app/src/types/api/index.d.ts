@@ -2766,6 +2766,10 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
         additionalErrorStatuses: [409];
     };
+    /**
+     * gemini-interactions 使用 store=false 和本地会话历史，nativeContent 版本 1 保留完整原生步骤及思考签名。
+     * 未知原生版本保留原会话并报错；缺失终止事件、失败或不完整的响应不会执行工具调用。
+     */
     "/api/ai/agent/chat": {
         request: AIAgentChatRequestInput;
         response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3046,6 +3050,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 按提供商协议读取模型及上下文上限；gemini-interactions 使用原生模型清单并去除 models/ 前缀。
+     */
     "/api/ai/listModels": {
         request: AIProviderRequestInput;
         response: { "code": 0; "data": AIModelsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3134,6 +3141,11 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 按提供商协议验证实际生成能力，模型清单命中本身不代表测试通过。
+     * gemini-interactions 使用原生端点、store=false 和有限输出预算，必须收到已校验的流式终止事件。
+     * 测试允许无上游错误且不含工具调用的 incomplete 响应，避免思考耗尽测试预算导致误判；正常生成仍报错。
+     */
     "/api/ai/testModel": {
         request: AIModelRequestInput;
         response: { "code": 0; "data": AIModelTestData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

@@ -92,6 +92,7 @@ func IsOpenAIResponsesProtocol(protocol string) bool {
 // OpenAICompletionStream 将各生成协议的流式输出统一为 Chat 增量，
 // 让现有上层渲染、重试和工具执行逻辑保持一致。
 type OpenAICompletionStream struct {
+	gemini            *geminiInteractionsStream
 	anthropic         *anthropicStream
 	chat              *openai.ChatCompletionStream
 	responses         *openai.ResponseStream
@@ -106,6 +107,9 @@ type OpenAICompletionStream struct {
 
 func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protocol string,
 	request openai.ChatCompletionRequest, responseInput []any) (*OpenAICompletionStream, error) {
+	if IsGeminiInteractionsProtocol(protocol) {
+		return createGeminiInteractionsStream(ctx, client, request)
+	}
 	if IsAnthropicMessagesProtocol(protocol) {
 		return createAnthropicStream(ctx, client, request)
 	}
@@ -140,6 +144,9 @@ func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protoco
 
 func CreateOpenAICompletion(ctx context.Context, client *AIClient, protocol string,
 	request openai.ChatCompletionRequest, responseInput []any) (openai.ChatCompletionResponse, error) {
+	if IsGeminiInteractionsProtocol(protocol) {
+		return createGeminiInteractionCompletion(ctx, client, request)
+	}
 	if client.ChatGPT {
 		stream, err := CreateOpenAICompletionStream(ctx, client, protocol, request, responseInput)
 		if err != nil {
@@ -519,6 +526,9 @@ func responseUsageToChat(usage *openai.ResponseUsage) openai.Usage {
 }
 
 func (stream *OpenAICompletionStream) Recv() (openai.ChatCompletionStreamResponse, error) {
+	if stream.gemini != nil {
+		return stream.gemini.recv()
+	}
 	if stream.anthropic != nil {
 		return stream.anthropic.recv()
 	}
@@ -821,6 +831,9 @@ func (stream *OpenAICompletionStream) ResponseOutput() []json.RawMessage {
 }
 
 func (stream *OpenAICompletionStream) Close() {
+	if stream.gemini != nil {
+		stream.gemini.body.Close()
+	}
 	if stream.anthropic != nil {
 		stream.anthropic.body.Close()
 	}
@@ -833,6 +846,9 @@ func (stream *OpenAICompletionStream) Close() {
 }
 
 func (stream *OpenAICompletionStream) NativeContent() *AIMessageContent {
+	if stream.gemini != nil {
+		return CloneAIMessageContent(stream.gemini.content)
+	}
 	if stream.anthropic == nil {
 		return nil
 	}

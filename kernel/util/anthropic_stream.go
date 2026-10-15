@@ -188,7 +188,7 @@ func (s *anthropicStream) recv() (openai.ChatCompletionStreamResponse, error) {
 				delta.ToolCalls = []openai.ToolCall{{Index: &event.Index,
 					Function: openai.FunctionCall{Arguments: string(s.block["input"])}}}
 			}
-			if !validAnthropicToolInput(s.block["input"]) {
+			if !validAIToolArguments(s.block["input"]) {
 				return ret, errors.New("Anthropic tool input is not a complete JSON object")
 			}
 		}

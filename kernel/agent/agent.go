@@ -2634,7 +2634,8 @@ func createProtocolStreamWithRetry(ctx context.Context, client *util.AIClient, p
 		if err == nil {
 			for {
 				firstResp, firstErr := recvStreamWithIdleTimeout(stream, streamIdleTimeout, streamCancel)
-				if firstErr != nil || (!util.IsOpenAIResponsesProtocol(protocol) && !util.IsAnthropicMessagesProtocol(protocol)) || len(firstResp.Choices) > 0 ||
+				if firstErr != nil || (!util.IsOpenAIResponsesProtocol(protocol) && !util.IsAnthropicMessagesProtocol(protocol) &&
+					!util.IsGeminiInteractionsProtocol(protocol)) || len(firstResp.Choices) > 0 ||
 					firstResp.Usage != nil {
 					if firstErr == nil || errors.Is(firstErr, io.EOF) {
 						return stream, firstResp, streamCancel, nil

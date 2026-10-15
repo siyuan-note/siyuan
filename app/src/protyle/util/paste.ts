@@ -35,7 +35,7 @@ import {getAVRichTextSafeURL} from "../render/av/richTextValue";
 import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {remapTabsDOMIDs, wrapPastedTabItems} from "./tabsCopy";
-import {remapListMindmapIDs} from "../render/listMindmap/model";
+import {cleanListMindmapHTML, remapListMindmapIDs} from "../render/listMindmap/model";
 import {getTabItems, getTabTitle} from "../render/tabsRender";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL, showBase64ImageSizeLimit} from "../upload/base64";
@@ -214,6 +214,11 @@ export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
 };
 
 export const getPlainText = (blockElement: HTMLElement, isNested = false): string => {
+    if (!isNested && blockElement.querySelector(".mindmap-view, .list-mindmap")) {
+        const template = document.createElement("template");
+        template.innerHTML = cleanListMindmapHTML(blockElement.outerHTML);
+        return getPlainText(template.content.firstElementChild as HTMLElement);
+    }
     const dataType = blockElement.dataset.type;
     if (dataType === "NodeBlockQueryEmbed" || blockElement.classList.contains("protyle-wysiwyg__embed") ||
         (!isNested && blockElement.querySelector('[data-type="NodeBlockQueryEmbed"], .protyle-wysiwyg__embed'))) {
@@ -260,7 +265,8 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false): strin
         text = text.slice(0, -1);
     } else if (dataType === "NodeTabItem" && isNested) {
         text += getTabTitle(blockElement)?.textContent || "";
-    } else if (!isNested && ["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock", "NodeListItem", "NodeTabs", "NodeTabItem"].includes(dataType)) {
+    } else if (!isNested && ["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock", "NodeListItem", "NodeTabs", "NodeTabItem",
+        "NodeMindmap", "NodeMindmapItem"].includes(dataType)) {
         if (dataType === "NodeCallout") {
             text += `${getCalloutInfo(blockElement)}\n`;
         } else if (dataType === "NodeTabItem") {

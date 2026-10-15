@@ -1,6 +1,6 @@
 import {stopScrollAnimation} from "../boot/globalEvent/dragover";
 import {Constants} from "../constants";
-import {isInAndroid} from "../plugin/platformUtils";
+import {isInAndroid, isInHarmony} from "../protyle/util/compatibility";
 import {isMobile} from "./functions";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -1202,7 +1202,7 @@ export const initTouchDragBridge = () => {
     document.addEventListener("pointerover", updateResizePointerInput, {capture: true, passive: true});
     document.addEventListener("pointermove", updateResizePointerInput, {capture: true, passive: true});
 
-    let enablePointerBridge = !!isInAndroid();
+    let enablePointerBridge = !!(isInAndroid() || isInHarmony());
     /// #if !BROWSER
     enablePointerBridge = true;
     ipcRenderer.on(Constants.SIYUAN_BLOCK_DRAG, (event, message: BlockDragRelayMessage) => {
@@ -1210,7 +1210,7 @@ export const initTouchDragBridge = () => {
     });
     /// #endif
     if (enablePointerBridge) {
-        // Android 外接鼠标、桌面普通块标和文档树由 Pointer 路径驱动，避免原生 dragstart 取消事件流。
+        // Android 外接鼠标、鸿蒙和桌面普通块标及文档树由 Pointer 路径驱动，保留实时修饰键和事件流。
         document.addEventListener("pointerdown", handlePointerDown, {capture: true, passive: true});
         document.addEventListener("pointermove", handlePointerMove, {capture: true, passive: false});
         document.addEventListener("pointerup", handlePointerUp, {capture: true, passive: false});

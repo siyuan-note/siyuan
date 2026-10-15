@@ -17,6 +17,13 @@
 // 开发环境下隐藏 Electron 安全清单控制台提示 https://www.electronjs.org/docs/latest/tutorial/security
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
 
+// 桌面启动器关闭输出管道后，终端日志失败不应中断文件日志或应用启动。
+const console = new (require("console").Console)({
+    stdout: process.stdout,
+    stderr: process.stderr,
+    ignoreErrors: true,
+});
+
 const {
     net,
     app,

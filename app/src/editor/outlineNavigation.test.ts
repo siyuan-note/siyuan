@@ -88,7 +88,8 @@ const setupNavigation = (loaded: boolean, action: "focus" | "highlight") => {
     const rows = [old, clicked].map((node, index) => ({
         id: node.id, clientHeight: 20, classList: classList(index === 1 ? ["b3-list-item--focus"] : []),
         getAttribute: (name: string) => name === "data-node-id" ? node.id : null,
-        getBoundingClientRect: () => ({top: (index ? 900 : 100) - panel.scrollTop, height: 20}),
+        getBoundingClientRect: () => ({top: (index ? 900 : 100) - panel.scrollTop,
+            bottom: (index ? 920 : 120) - panel.scrollTop, height: 20}),
     }));
     const context: any = {
         Constants: {CB_GET_FOCUS: "focus", CB_GET_HL: "highlight", CB_GET_OUTLINE: "outline",
@@ -230,8 +231,8 @@ test("ordinary editor panel updates still follow and reveal the caret heading", 
     const fixture = setupNavigation(true, "focus");
     fixture.syncPanel();
     assert.equal(fixture.highlight(), "old-heading");
-    assert.equal(fixture.panel.scrollTop, 60);
-    assert.deepEqual(fixture.scrollWrites, [60]);
+    assert.equal(fixture.panel.scrollTop, 70);
+    assert.deepEqual(fixture.scrollWrites, [70]);
 });
 
 for (const action of ["focus", "highlight"] as const) {

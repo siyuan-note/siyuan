@@ -686,7 +686,7 @@ export class Outline extends Model {
             if (scroll) {
                 const elementRect = this.element.getBoundingClientRect();
                 const currentRect = currentElement.getBoundingClientRect();
-                this.element.scrollTop += currentRect.top + currentRect.height / 2 -
+                this.element.scrollTop += currentRect.bottom -
                     (elementRect.top + elementRect.height / 2);
             }
         }

@@ -527,7 +527,7 @@ export class MobileOutline extends Model {
             currentElement.classList.add("b3-list-item--focus");
             const elementRect = this.tree.element.getBoundingClientRect();
             const currentRect = currentElement.getBoundingClientRect();
-            this.tree.element.scrollTop += currentRect.top + currentRect.height / 2 -
+            this.tree.element.scrollTop += currentRect.bottom -
                 (elementRect.top + elementRect.height / 2);
         }
     }

@@ -1,4 +1,5 @@
 {
+	"workspaceLockWaiting": "Робочий простір використовується. Очікування повторної спроби...",
 	"clearOCRText": "Очистити текст OCR",
 	"clearOCRTextDone": "Текст OCR очищено",
 	"compactMode": "Компактний режим",

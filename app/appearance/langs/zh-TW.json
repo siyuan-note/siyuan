@@ -1,4 +1,5 @@
 {
+	"workspaceLockWaiting": "工作空間正在被使用，等待重試...",
 	"clearOCRText": "清空 OCR 文字",
 	"clearOCRTextDone": "已清空 OCR 文字",
 	"compactMode": "緊湊模式",

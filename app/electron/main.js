@@ -2601,17 +2601,75 @@ const showLocalBootWindow = () => {
     }
 };
 
-const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
+const initKernel = async (workspace, port, lang, safeMode, preparedBoot) => {
+    // 每次尝试保留独立的退出状态，避免上一轮未完成的请求干扰新内核。
+    const startup = {};
+    const cancelStartup = () => {
+        startup.canceled = true;
+        // 其他工作空间可能阻止应用退出，主动关闭本次启动页，避免留下无法继续的等待窗口。
+        if (startup.window && bootWindow === startup.window && !startup.window.isDestroyed()) {
+            startup.window.destroy();
+        }
+    };
+    app.on("before-quit", cancelStartup);
+    let retryDeadline;
+    try {
+        for (;;) {
+            const result = await initKernelAttempt(startup.window ? startup.workspace : workspace,
+                port, lang, safeMode, preparedBoot, startup);
+            if (result !== "workspace-locked") {
+                return result;
+            }
+            const currentBootWindow = startup.window;
+            const canceled = () => startup.canceled || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow;
+            if (canceled()) return false;
+            // 只限制锁冲突的自动重试；已进入正常退出的同步恢复仍使用原有等待期限。
+            retryDeadline ??= Date.now() + 90000;
+            const failLocked = () => {
+                exitApp(startup.port, showWorkspaceLocked());
+                if (!currentBootWindow.isDestroyed()) currentBootWindow.destroy();
+                return false;
+            };
+            if (Date.now() >= retryDeadline) return failLocked();
+            try {
+                const languages = loadAppMenuLanguages(lang || resolveAppLanguage(app.getPreferredSystemLanguages()));
+                currentBootWindow.previousExitWaiting = languages.workspaceLockWaiting;
+                await currentBootWindow.webContents.executeJavaScript(
+                    `window.setPreviousExitWaiting(${JSON.stringify(languages.workspaceLockWaiting)})`);
+                writeLog("workspace is locked, waiting to retry kernel startup");
+                for (let elapsed = 0; elapsed < 1000 && !canceled(); elapsed += 100) {
+                    await sleep(100);
+                }
+                if (canceled()) return false;
+                if (Date.now() >= retryDeadline) return failLocked();
+            } catch (error) {
+                writeLog("wait to retry kernel startup failed: " + error);
+                return canceled() ? false : failLocked();
+            }
+        }
+    } finally {
+        app.removeListener("before-quit", cancelStartup);
+    }
+};
+
+const showWorkspaceLocked = () => {
+    if (workspaces && 0 < workspaces.length) {
+        showWindow(workspaces[0].browserWindow);
+    }
+    return showErrorWindow("工作空间已被锁定", "The workspace is locked", "<div>该工作空间正在被使用，请尝试在任务管理器中结束 SiYuan-Kernel 进程或者重启操作系统后再启动思源。</div><div>The workspace is being used, please try to end the SiYuan-Kernel process in the task manager or restart the operating system and then start SiYuan.</div>");
+};
+
+const initKernelAttempt = (workspace, port, lang, safeMode, preparedBoot, startup) => {
     return new Promise(async (resolve) => {
         const currentWorkspace = [workspace, process.env.SIYUAN_WORKSPACE_PATH, lastWorkspacePath]
             .find(item => typeof item === "string" && item);
         const workspaceLogPath = currentWorkspace ? path.resolve(currentWorkspace, "temp", "siyuan.log") : "";
         const kernelLogPath = path.join(confDir, "kernel.log");
         // 必须在首次异步等待前创建窗口，避免工作空间选择窗口关闭后因无窗口触发应用退出。
-        if (!preparedBoot) {
+        if (!startup.window && !preparedBoot) {
             createBootWindow();
         }
-        if (!await showAppleSiliconWarning(lang)) {
+        if (!startup.window && !await showAppleSiliconWarning(lang)) {
             bootWindow.destroy();
             app.quit();
             resolve(false);
@@ -2626,7 +2684,13 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             return;
         }
 
-        if (preparedBoot) {
+        if (startup.window) {
+            if (startup.canceled || startup.window.isDestroyed() || bootWindow !== startup.window) {
+                resolve(false);
+                return;
+            }
+            kernelPort = startup.port;
+        } else if (preparedBoot) {
             kernelPort = await preparedBoot.ready;
         } else {
             await getAvailablePort(port);
@@ -2637,15 +2701,19 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             resolve(false);
             return;
         }
-        if (!preparedBoot) {
+        if (!startup.window && !preparedBoot) {
             showLocalBootWindow();
         }
         const currentKernelPort = kernelPort;
         const currentBootWindow = bootWindow;
+        startup.window = currentBootWindow;
+        startup.port = currentKernelPort;
+        startup.workspace = currentWorkspace;
         let kernelExited = false;
-        const bootCanceled = () => kernelExited || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow;
+        let kernelStarted = false;
+        const bootCanceled = () => startup.canceled || kernelExited || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow;
         if (!isDevEnv || workspaces.length > 0) {
-            let waiting = false;
+            let waiting = !!currentBootWindow.previousExitWaiting;
             const language = lang || resolveAppLanguage(app.getPreferredSystemLanguages());
             const languages = loadAppMenuLanguages(language);
             try {
@@ -2729,6 +2797,11 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                 }
                 const expectedExit = expectedKernelExitPorts.delete(kernelPortKey);
                 writeLog(`kernel [pid=${kernelProcess.pid}, port=${currentKernelPort}] exited with code [${code}], signal [${signal}], expected [${expectedExit}]`);
+                if (code === 24 && !expectedExit && !kernelStarted) {
+                    resolve(startup.canceled || currentBootWindow.isDestroyed() || bootWindow !== currentBootWindow
+                        ? false : "workspace-locked");
+                    return;
+                }
                 if (0 !== code && !expectedExit) {
                     let errorWindowId;
                     switch (code) {
@@ -2739,11 +2812,7 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
                             errorWindowId = showErrorWindow("监听端口 " + currentKernelPort + " 失败", "Failed to listen to port " + currentKernelPort, "<div>监听 " + currentKernelPort + " 端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to listen to port " + currentKernelPort + ", please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>");
                             break;
                         case 24: // 工作空间已被锁定，尝试切换到第一个打开的工作空间
-                            if (workspaces && 0 < workspaces.length) {
-                                showWindow(workspaces[0].browserWindow);
-                            }
-
-                            errorWindowId = showErrorWindow("工作空间已被锁定", "The workspace is locked", "<div>该工作空间正在被使用，请尝试在任务管理器中结束 SiYuan-Kernel 进程或者重启操作系统后再启动思源。</div><div>The workspace is being used, please try to end the SiYuan-Kernel process in the task manager or restart the operating system and then start SiYuan.</div>");
+                            errorWindowId = showWorkspaceLocked();
                             break;
                         case 25:
                             errorWindowId = showErrorWindow("初始化工作空间失败", "Failed to create workspace directory", "<div>工作空间文件夹权限不足，请查看 <a href=\"#\" data-log-path>~/.config/siyuan/kernel.log</a> 获取详细报错信息</div><div>Insufficient permissions for the workspace folder. Please check <a href=\"#\" data-log-path>~/.config/siyuan/kernel.log</a> for detailed error information.</div>", "⚠️", kernelLogPath);
@@ -2806,6 +2875,7 @@ const initKernel = (workspace, port, lang, safeMode, preparedBoot) => {
             return;
         }
         if (0 === apiData.code) {
+            kernelStarted = true;
             writeLog("got kernel version [" + apiData.data + "]");
             if (!isDevEnv && apiData.data !== appVer) {
                 writeLog(`kernel [${apiData.data}] is running, shutdown it now and then start kernel [${appVer}]`);

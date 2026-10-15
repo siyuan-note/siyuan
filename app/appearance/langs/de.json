@@ -1,4 +1,5 @@
 {
+	"workspaceLockWaiting": "Der Arbeitsbereich wird verwendet. Warten auf erneuten Versuch...",
 	"clearOCRText": "OCR-Text löschen",
 	"clearOCRTextDone": "OCR-Text gelöscht",
 	"compactMode": "Kompaktmodus",

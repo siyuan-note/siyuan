@@ -139,7 +139,8 @@ import {closeSubElement} from "../toolbar/subElementLifecycle";
 import {canShowGutterInsert, genGutterBlockButtonHTML} from "./button";
 import {getViewFoldOccurrenceID, hasViewFoldContext} from "../util/viewFold";
 import {exportImage} from "../export/util";
-import {CALLOUT_PRESETS, updateCalloutType, updateCustomCalloutType} from "../wysiwyg/callout";
+import {updateCalloutType, updateCustomCalloutType} from "../wysiwyg/callout";
+import {CALLOUT_PRESETS} from "../wysiwyg/calloutType";
 import {setTabsPosition, toggleTabsTasks, unwrapTabs} from "../wysiwyg/tabs";
 import {getTaskStatusItems} from "../wysiwyg/taskStatusDialog";
 import {hasTabsTasks} from "../render/tabsRender";
@@ -1990,14 +1991,7 @@ export class Gutter {
                 nodeElement,
                 type: "CancelBlockquote"
             }));
-            turnIntoSubmenu.push(this.turnsOneInto({
-                id,
-                icon: "iconCallout",
-                label: window.siyuan.languages.callout,
-                protyle,
-                nodeElement,
-                type: "Blockquote2Callout"
-            }));
+            turnIntoSubmenu.push(...this.calloutTypeMenus(protyle, [nodeElement as HTMLElement]));
         } else if (type === "NodeCallout" && allowStructuralMutation) {
             turnIntoSubmenu.push(this.turnsOneInto({
                 menuId: "paragraph",

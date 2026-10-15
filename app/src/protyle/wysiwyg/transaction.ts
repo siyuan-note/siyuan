@@ -92,6 +92,7 @@ import type {TransactionListConversionResult} from "../../types/api";
 import {getProtyleTransactionOwner} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {preserveTabTask} from "../util/tabsCopy";
+import type {ICalloutPreset} from "./calloutType";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {replayListMindmap} from "../render/listMindmap/render";
 import {
@@ -2318,6 +2319,7 @@ export const turnsOneInto = async (options: {
     id: string,
     type: string,
     level?: number,
+    callout?: Pick<ICalloutPreset, "type" | "title" | "icon">,
     undoElement?: {
         id: string,
         html: string,
@@ -2413,6 +2415,15 @@ export const turnsOneInto = async (options: {
             listMindmapConversionSource(options.nodeElement).outerHTML : cleanListMindmapHTML(options.nodeElement.outerHTML);
         // @ts-ignore
         newHTML = listHTML ?? options.protyle.lute[options.type](sourceHTML, options.level);
+    }
+    if (options.type === "Blockquote2Callout" && options.callout) {
+        const template = document.createElement("template");
+        template.innerHTML = newHTML;
+        const calloutElement = template.content.firstElementChild as HTMLElement;
+        calloutElement.dataset.subtype = options.callout.type;
+        calloutElement.querySelector(".callout-title").textContent = options.callout.title;
+        calloutElement.querySelector(".callout-icon").textContent = options.callout.icon;
+        newHTML = calloutElement.outerHTML;
     }
     const cancelListOperations = options.type === "CancelList" &&
         options.nodeElement.getAttribute("data-type") === "NodeList" ? buildCancelListOperations(options.nodeElement, {

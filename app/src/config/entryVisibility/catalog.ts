@@ -2,6 +2,7 @@ import {IMAGE_OCR_MENU} from "../../menus/declarations/imageOCRMenu";
 import {declaredMenuCatalog} from "../../menus/declarations/menuDeclaration";
 import {CODE_TAB_SPACE_VALUES, getCodeTabSpacesLabel} from "../../protyle/wysiwyg/codeBlockUtil";
 import {orderGutterTurnIntoItems} from "../../protyle/gutter/turnIntoMenu";
+import {CALLOUT_PRESETS} from "../../protyle/wysiwyg/calloutType";
 import {
     DESKTOP_TOOLBAR_ENTRIES,
     getToolbarEntryId,
@@ -234,11 +235,7 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("paragraph", lang("paragraph")),
         node("quote", lang("quote")),
         node("callout", lang("callout")),
-        node("calloutNote", location(lang("callout"), literal("Note"))),
-        node("calloutTip", location(lang("callout"), literal("Tip"))),
-        node("calloutImportant", location(lang("callout"), literal("Important"))),
-        node("calloutWarning", location(lang("callout"), literal("Warning"))),
-        node("calloutCaution", location(lang("callout"), literal("Caution"))),
+        ...CALLOUT_PRESETS.map(item => node(item.id, location(lang("callout"), literal(item.title)))),
         node("calloutCustom", location(lang("callout"), () => `${window.siyuan.languages.custom}...`)),
         ...(!multi ? [node("tabs", lang("tabs"))] : []),
         node("heading1", lang("heading1")),
